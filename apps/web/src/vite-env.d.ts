@@ -5,3 +5,8 @@ declare const __COMMIT_SHA__: string | null;
 
 /** A hash of the shapes documents are checked by (vite.config.ts). */
 declare const __SHAPES_RULESET__: string;
+
+interface ImportMetaEnv {
+  /** The deck library's index (main.tsx); the library pod's when unset. */
+  readonly VITE_LIBRARY_INDEX_URL?: string;
+}

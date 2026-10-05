@@ -27,15 +27,14 @@ const LAYERS: Record<string, string[]> = {
   shacl: ["domain", "vocab", "turtle"],
   solid: ["application", "domain", "vocab", "shacl"],
   browser: ["application", "domain"],
-  "deck-library": ["vocab", "shacl", "turtle"],
-  web: ["application", "domain", "vocab", "solid", "browser", "deck-library"],
+  web: ["application", "domain", "vocab", "solid", "browser"],
   "e2e-pod": ["application", "domain", "vocab", "solid"],
 };
 
 /** Within a package, files that alone may use some of its allowed packages. */
 const ONLY_FROM: Record<string, Record<string, RegExp>> = {
   // The UI talks to use cases; only the composition root knows the adapters.
-  web: { solid: /^src\/main\.tsx$/, browser: /^src\/main\.tsx$/, "deck-library": /^vite\.config\.ts$/ },
+  web: { solid: /^src\/main\.tsx$/, browser: /^src\/main\.tsx$/ },
   // The browser-side engine never needs the node tooling.
   shacl: { turtle: /^node\// },
 };

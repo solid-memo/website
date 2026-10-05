@@ -23,7 +23,6 @@
     "pod:clean": "npm run pod:clean -w @solid-memo/e2e-pod",
     "generate": "npm run generate -w @solid-memo/vocab",
     "generate:check": "turbo run generate:check",
-    "deck:release": "npm run release -w @solid-memo/deck-library --",
     "format:turtle": "turbo run format:turtle",
     "format:turtle:check": "turbo run format:turtle:check"
   },

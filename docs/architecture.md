@@ -11,14 +11,13 @@ where the layers meet.
 
 | Package | Folder | Responsibility |
 |---|---|---|
-| `@solid-memo/web` | `apps/web/` | The site: Preact UI (`src/ui/`), the composition root (`src/main.tsx`), the Vite build that also publishes the vocabulary, shapes and deck library. |
+| `@solid-memo/web` | `apps/web/` | The site: Preact UI (`src/ui/`), the composition root (`src/main.tsx`), the Vite build that also publishes the vocabulary and shapes. The deck library is published by its own repository, [solid-memo/decks](https://github.com/solid-memo/decks) ([deck-library.md](deck-library.md)). |
 | `@solid-memo/application` | `packages/application/` | Use cases (what the app does) and ports (what the app needs). |
 | `@solid-memo/domain` | `packages/domain/` | Pure types and pure functions: the app's vocabulary, SRS, migrations. |
 | `@solid-memo/vocab` | `packages/vocab/` | The data contract: the RDF vocabulary (`vocab/`), SHACL shapes (`shapes/`), vendored profiles (`vendor/`), fixtures, and the TypeScript generated from them (`src/*.generated.ts`), with the generator (`tooling/`). |
 | `@solid-memo/solid` | `packages/solid/` | Adapters for Solid pods (Inrupt): repositories, the type index, the instance copier, the write fence, the pod-reading shape validator, and the guest's pod kept in the browser ([guest-mode.md](guest-mode.md)). |
 | `@solid-memo/shacl` | `packages/shacl/` | The SHACL engine (rdf-validate-shacl, loaded lazily), profiles and shape loading (`src/`); build-time validation of Turtle files (`node/`). |
 | `@solid-memo/browser` | `packages/browser/` | Adapters for browser storage: the update journal, the language, the guest's pod's store (IndexedDB). |
-| `@solid-memo/deck-library` | `packages/deck-library/` | The public deck library: sources (`decks/`), frozen releases (`releases/`), the lockfile, the release tool and the Vite plugin that publishes the library. |
 | `@solid-memo/turtle` | `packages/turtle/` | Node-only Turtle tooling (n3): parsing and the house-style formatter. |
 | `@solid-memo/e2e-pod` | `e2e/pod/` | End-to-end tests of the app's use cases and Solid adapters against a real Community Solid Server. |
 
@@ -32,14 +31,12 @@ owns the interfaces, adapters conform to them.
 graph TD
     web["apps/web<br/>UI + main.tsx"] --> application
     web -. main.tsx only .-> solid & browser
-    web -. vite.config.ts only .-> library["deck-library"]
     application --> domain --> vocab["vocab<br/>the data contract"]
     solid -. implements ports .-> application
     solid --> domain & vocab & shacl
     browser -. implements ports .-> application
     shacl --> domain & vocab
     shacl -. node/ only .-> turtle
-    library --> shacl & vocab & turtle
     vocab -. tooling/ only .-> turtle
     e2e["e2e/pod"] --> application & solid
 ```

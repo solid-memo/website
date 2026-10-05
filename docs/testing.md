@@ -128,8 +128,8 @@ git hook in place; 5.8.8 does too. The image installs without install
 scripts. node-solid-server prints every request it handles (`solid:*`),
 so its log runs to tens of megabytes.
 
-The published library and vocabulary are also cross-checked by pySHACL
-in CI, after the build (`python3 scripts/shacl_crosscheck.py`; see
+The vocabulary and the pod catalog fixtures are also cross-checked by
+pySHACL in CI (`python3 scripts/shacl_crosscheck.py`; see
 [validation.md](validation.md#the-ci-cross-check)).
 
 ## Coverage policy
@@ -179,9 +179,8 @@ graph LR
   ([boundaries.md](boundaries.md)); `packages/shacl/src/testing/turtle.ts` parses Turtle
   through `@inrupt/solid-client` for the SHACL tests.
 - Node tooling tests may read the vocab package's `vocab/`, `shapes/`,
-  `vendor/` and `fixtures/` (through `VOCAB_ROOT`) and the deck
-  library's `decks/` and `releases/` (through `DECK_LIBRARY_ROOT`):
-  they are the fixtures.
+  `vendor/` and `fixtures/` (through `VOCAB_ROOT`): they are the
+  fixtures.
 - Preact-compat note: `@tanstack/react-query` must be inlined in the vitest
   server deps so the `react → preact/compat` alias applies (see
   `apps/web/vite.config.ts`).

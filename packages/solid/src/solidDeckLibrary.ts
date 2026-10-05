@@ -5,9 +5,9 @@ import { toLibraryDeckContent, toLibraryDecks } from "./mappers/libraryMapper";
 
 export interface SolidDeckLibraryDeps {
   /**
-   * Plain fetch: the library is static, public Turtle published next to
-   * the app (docs/deck-library.md), not a Solid resource, so no
-   * authentication is involved.
+   * Plain fetch: the library is public Turtle in the library pod
+   * (docs/deck-library.md), readable by anyone, so no authentication is
+   * involved.
    */
   fetch: typeof globalThis.fetch;
   /** URL of the library's index document. */
@@ -15,7 +15,7 @@ export interface SolidDeckLibraryDeps {
 }
 
 /**
- * Reads the deck library through its index. The build always publishes
+ * Reads the deck library through its index. The library always publishes
  * an index (empty when there are no decks), so a failed read is an error
  * worth showing, not an empty library.
  */

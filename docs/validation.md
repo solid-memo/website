@@ -54,7 +54,7 @@ flowchart LR
   listed so strays are visible). A document that does not exist is
   `missing`, which is normal, not a problem.
 - The shapes are fetched from the site's own `packages/vocab/shapes/` folder
-  (`new URL("shapes/", document.baseURI)`, like the deck library), not
+  (`new URL("shapes/", document.baseURI)`), not
   bundled: they are published anyway, the dev server serves the
   repository's folder, and the document the browser checks against is
   the one CI validated. Each shape document is fetched once per session.
@@ -163,14 +163,15 @@ instance is checked again.
 
 ## The CI cross-check
 
-After the build, CI checks what Solid Memo publishes again with an
+CI checks what Solid Memo publishes again with an
 independent SHACL engine, pySHACL (pinned in
 `scripts/requirements-ci.txt`), which also runs SPARQL-based constraints:
 [scripts/shacl_crosscheck.py](../scripts/shacl_crosscheck.py) holds the
-built library's index and every release, and the pod catalog documents
+pod catalog documents
 of the deck format 4, 5 and 6 fixtures (format 5 titles a deck in any
 language, English or not; format 6 tags its keywords), to DCAT-AP, and the vocabulary's concept schemes to
 SkoHub's SKOS shapes, best practice included. A disagreement between the
-engines, or a constraint the browser's engine cannot run, fails CI.
+engines, or a constraint the browser's engine cannot run, fails CI. The
+decks repository runs the same cross-check over the built library.
 Locally: `pip install -r scripts/requirements-ci.txt`, then `npm run
 build && python3 scripts/shacl_crosscheck.py`.

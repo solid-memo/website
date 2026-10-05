@@ -1,31 +1,29 @@
 #!/usr/bin/env python3
 """Cross-check what Solid Memo publishes with an independent SHACL engine.
 
-The build validates the deck library and the tests validate the
-vocabulary with rdf-validate-shacl (SHACL Core). This script checks the
-same published documents with pySHACL, a separate implementation that
+The tests validate the vocabulary and the pod fixtures with
+rdf-validate-shacl (SHACL Core). This script checks the same documents with pySHACL, a separate implementation that
 also runs SPARQL-based constraints (SkoHub's SKOS best practice has
 some), so a disagreement between the engines, or a constraint the
 browser's engine cannot run, fails CI (see docs/validation.md):
 
-- DCAT-AP 3 over the built library: apps/web/dist/decks/index.ttl and
-  every release apps/web/dist/decks/<name>/<n>.ttl, each with the index
-  and the reference data (vocab/external.ttl, vocab/topics.ttl of the
-  vocab package) beside it;
 - DCAT-AP 3 over pod catalog documents as the app writes them (the
   valid pod fixtures of deck formats 4, 5 and 6 under
   packages/vocab/fixtures/deck/: format 5 titles and describes a deck in
   any language, English or not, and format 6 tags its keywords with
-  their language, several per language). A cards document has no DCAT
-  subjects, so DCAT-AP has nothing to say about it;
+  their language, several per language), with the reference data
+  (vocab/external.ttl, vocab/topics.ttl of the vocab package) beside
+  them. A cards document has no DCAT subjects, so DCAT-AP has nothing to
+  say about it;
 - SkoHub's SKOS shapes, best practice included, over vocab/v1.ttl and
   vocab/topics.ttl, where warnings fail too.
 
 Solid Memo's own shapes are not run here: they have no targets (the app
 picks a subject's shape by its class and format version), which is what
-the build and the tests check them with.
+the tests check them with. The deck library is checked the same way in
+its own repository, https://github.com/solid-memo/decks.
 
-Run after `npm run build`:  python3 scripts/shacl_crosscheck.py
+Run:  python3 scripts/shacl_crosscheck.py
 """
 
 from __future__ import annotations
@@ -70,20 +68,11 @@ def check(label: str, data: Graph, shapes: Graph, *, warnings_fail: bool) -> boo
 
 
 def main() -> int:
-    dist = ROOT / "apps" / "web" / "dist" / "decks"
-    if not (dist / "index.ttl").exists():
-        print("apps/web/dist/decks/index.ttl is missing: run `npm run build` first.")
-        return 1
     dcat_ap = graph(site("vendor/dcat-ap/3.0.1/dcat-ap-SHACL.ttl"))
     skos = graph(site("vendor/skohub/skos.shacl.ttl"), site("vendor/skohub/skos.bestPractice.shacl.ttl"))
     reference = [site("vocab/external.ttl"), site("vocab/topics.ttl")]
-    index = (dist / "index.ttl", SITE + "decks/index.ttl")
 
-    results = [check("decks/index.ttl (DCAT-AP)", graph(index, *reference), dcat_ap, warnings_fail=False)]
-    for release in sorted(dist.glob("*/*.ttl")):
-        name = release.relative_to(dist).as_posix()
-        data = graph((release, f"{SITE}decks/{name}"), index, *reference)
-        results.append(check(f"decks/{name} (DCAT-AP)", data, dcat_ap, warnings_fail=False))
+    results: list[bool] = []
     pods = [
         VOCAB / "fixtures/deck/v4/valid/pod.ttl",
         *sorted((VOCAB / "fixtures/deck/v5/valid").glob("pod*.ttl")),

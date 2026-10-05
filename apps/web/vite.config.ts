@@ -4,7 +4,6 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { defineConfig } from "vitest/config";
 import preact from "@preact/preset-vite";
-import { deckLibraryPlugin } from "@solid-memo/deck-library/deckLibrary";
 import { topicsPage, turtleDirectoryPlugin, vocabPage } from "@solid-memo/vocab/tooling/publishTurtle";
 import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
 
@@ -51,7 +50,6 @@ export default defineConfig({
   base: "./",
   plugins: [
     preact(),
-    deckLibraryPlugin(),
     turtleDirectoryPlugin({ dir: `${VOCAB_ROOT}vocab`, publicPath: "vocab", pages: [vocabPage(), topicsPage()] }),
     turtleDirectoryPlugin({ dir: `${VOCAB_ROOT}shapes`, publicPath: "shapes" }),
     turtleDirectoryPlugin({ dir: `${VOCAB_ROOT}vendor`, publicPath: "vendor" }),

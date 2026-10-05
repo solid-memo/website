@@ -33,8 +33,7 @@ configs may also use the shared test tooling of the root `package.json`.
 | `shacl` | `domain`, `vocab`, `turtle` | `turtle`: `node/` only |
 | `solid` | `application`, `domain`, `vocab`, `shacl` | |
 | `browser` | `application`, `domain` | |
-| `deck-library` | `vocab`, `shacl`, `turtle` | |
-| `web` | `application`, `domain`, `vocab`, `solid`, `browser`, `deck-library` | `solid`, `browser`: `src/main.tsx` only; `deck-library`: `vite.config.ts` only |
+| `web` | `application`, `domain`, `vocab`, `solid`, `browser` | `solid`, `browser`: `src/main.tsx` only |
 | `e2e-pod` | `application`, `domain`, `vocab`, `solid` | |
 
 Browser code: `src/` of `domain`, `application`, `shacl`, `solid`,
@@ -51,7 +50,7 @@ nowhere else):
 | `@tanstack/react-query`, `preact` | `web` | UI and `main.tsx` |
 | `@fontsource/*`, `@fontsource-variable/*` | `web` | `src/style.css` only |
 | `rdf-validate-shacl` | `shacl` | `src/engine.ts` only, loaded lazily |
-| `n3` | `turtle`, and the node tooling of `shacl` and `deck-library` | never in the browser |
+| `n3` | `turtle`, and the node tooling of `shacl` | never in the browser |
 | `@solid/community-server` | `e2e-pod` | the local pod the end-to-end tests run against |
 | `fake-indexeddb` | `browser` | tests only: IndexedDB in node, for the guest's pod's store |
 

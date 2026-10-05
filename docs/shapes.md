@@ -176,11 +176,10 @@ proves it for every version and every migration step.
 
 ## Where the shapes are checked
 
-- **Build**: every file in `packages/deck-library/decks/` is validated as a library document
-  (`npm run build` fails with the violations; see [deck-library.md](deck-library.md)).
 - **Tests**: the fixtures in `packages/vocab/fixtures/<class>/v<N>/{valid,invalid}/`
-  pass and fail as expected; the conformance test above; every library
-  deck passes.
+  pass and fail as expected; the conformance test above.
+- **The deck library**: every release and the index, by the decks
+  repository's own checks ([deck-library.md](deck-library.md)).
 - **Browser**: the developer tool described in [validation.md](validation.md).
 
 ## Adding a version

@@ -30,7 +30,7 @@ jobs:
       # Turtle formatting in step with their sources; then the boundaries.
       - run: npm run check
       - run: npm run build
-      # The published library and vocabulary, checked again by an
+      # The vocabulary and pod catalog documents, checked again by an
       # independent SHACL engine (pySHACL), SPARQL constraints included.
       - uses: actions/setup-python@v7
         with:
@@ -39,9 +39,6 @@ jobs:
           cache-dependency-path: scripts/requirements-ci.txt
       - run: pip install -r scripts/requirements-ci.txt
       - run: python scripts/shacl_crosscheck.py
-      # Each authored deck and its provenance report are what its dossier
-      # builds to (docs/deck-library.md#authored-decks).
-      - run: python packages/deck-library/scripts/authored_decks.py sync --all
 
   # The app's use cases and Solid adapters against real Solid servers,
   # one job per server (e2e/pod/servers.ts): each pulls or builds only its
