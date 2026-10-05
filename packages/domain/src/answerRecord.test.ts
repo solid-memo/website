@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { Answer } from "./answer";
 import { answerFromRecord, answerToRecord } from "./answerRecord";
 
-const SM = "https://solid-memo.com/vocab/v1#";
+const SM = "https://pod.solid-memo.com/vocab/v1#";
 const first: Answer = {
   id: "answer-1",
   deckUrl: "https://pod.example/i/catalog.ttl#deck-1",

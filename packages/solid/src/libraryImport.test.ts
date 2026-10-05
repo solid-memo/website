@@ -10,6 +10,7 @@
 import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/pod";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import { createUseCases } from "@solid-memo/application/useCases";
 import type { ResourceStore } from "@solid-memo/application/ports";
@@ -31,7 +32,7 @@ const RELEASE = `${SITE}decks/capitals/2.ttl`;
 /** A release of library deck format 5: its keywords tagged with their language. */
 const TAGGED_RELEASE = `${SITE}decks/capitals/3.ttl`;
 const KEYWORD = "http://www.w3.org/ns/dcat#keyword";
-const SM_NS = "https://solid-memo.com/vocab/v1#";
+const SM_NS = "https://pod.solid-memo.com/vocab/v1#";
 const DCTERMS = "http://purl.org/dc/terms/";
 
 /**
@@ -83,7 +84,7 @@ async function everyTriple(store: ResourceStore): Promise<string[]> {
   return lines;
 }
 
-/** A file of the site: the release, or a shape document read from this repository. */
+/** A document the app reads: a library release (a fixture), or a shape document as the shapes' pod has it. */
 const siteFetch: typeof fetch = async (input) => {
   const url = String(input instanceof Request ? input.url : input);
   const body =
@@ -91,7 +92,8 @@ const siteFetch: typeof fetch = async (input) => {
       ? `${await readFile(`${VOCAB_ROOT}fixtures/deck/v4/valid/library-release.ttl`, "utf8")}${CARDS}`
       : url === TAGGED_RELEASE
         ? `${await readFile(`${VOCAB_ROOT}fixtures/library-deck/v5/valid/library-release.ttl`, "utf8")}${CARDS}`
-        : await readFile(`${VOCAB_ROOT}${new URL(url).pathname.slice(1)}`, "utf8");
+        : undefined;
+  if (body === undefined) return shapesFetch(url);
   const response = new Response(body, { headers: { "content-type": "text/turtle" } });
   Object.defineProperty(response, "url", { value: url });
   return response;
@@ -105,7 +107,7 @@ async function app() {
     headers: { "Content-Type": "text/turtle" },
     body: `<#me> <http://xmlns.com/foaf/0.1/name> "Alice" ; <http://www.w3.org/ns/pim/space#storage> <${POD}> .`,
   });
-  const shapeValidator = createShaclShapeValidator({ fetch: podFetch, shapesFetch: siteFetch, shapesBaseUrl: `${SITE}shapes/` });
+  const shapeValidator = createShaclShapeValidator({ fetch: podFetch, shapesFetch: siteFetch, ...SHAPE_SOURCES });
   const checkWrite = shapeValidator.checkSubjects;
   const ids = { now: () => new Date(), randomId: () => crypto.randomUUID() };
   const useCases = createUseCases({

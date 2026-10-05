@@ -53,11 +53,9 @@ flowchart LR
   does not know: skipped, reported) or `untyped` (no Solid Memo class:
   listed so strays are visible). A document that does not exist is
   `missing`, which is normal, not a problem.
-- The shapes are fetched from the site's own `packages/vocab/shapes/` folder
-  (`new URL("shapes/", document.baseURI)`), not
-  bundled: they are published anyway, the dev server serves the
-  repository's folder, and the document the browser checks against is
-  the one CI validated. Each shape document is fetched once per session.
+- The shapes are fetched from their pod, https://pod.solid-memo.com/shapes/
+  (`SHAPES_POD`), not bundled: it is where they are published, and
+  their only copy. Each shape document is fetched once per session.
 - The SHACL engine ([engine.ts](../packages/shacl/src/engine.ts),
   the only module that imports `rdf-validate-shacl`) is loaded with a
   dynamic import, so the library is a separate chunk fetched only when a
@@ -74,7 +72,7 @@ checks) and published with the site at `/vendor/`:
 | Profile | Shapes | Applies to |
 |---|---|---|
 | `dcat-ap` | DCAT-AP 3.0.1 (SEMIC) | catalogues, decks and deck releases, distributions, agents |
-| `skos` | SkoHub `skos.shacl.ttl` + `skos.bestPractice.shacl.ttl` | the concept schemes under `packages/vocab/vocab/` |
+| `skos` | SkoHub `skos.shacl.ttl` + `skos.bestPractice.shacl.ttl` | the concept schemes on the vocabulary's pod |
 
 - [profiles.ts](../packages/shacl/src/profiles.ts) names each
   profile's files. Their shapes pick their own targets
@@ -86,7 +84,7 @@ checks) and published with the site at `/vendor/`:
 - DCAT-AP's class checks (`dcat:theme` must be a `skos:Concept`,
   `dcterms:language` a `dcterms:LinguisticSystem`, …) look for the
   value's type in the data graph, so the reference data in
-  [packages/vocab/vocab/external.ttl](../packages/vocab/vocab/external.ttl) (the EU authority-table
+  [the vocabulary pod's `external`](https://pod.solid-memo.com/vocab/external) (the EU authority-table
   entries and media types Solid Memo uses) is loaded next to the data
   being checked. Add a term there before data uses it.
 - At build time `validateProfile` ([packages/shacl/node/shacl.ts](../packages/shacl/node/shacl.ts))

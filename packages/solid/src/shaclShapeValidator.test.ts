@@ -1,5 +1,4 @@
-import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
-import { readFile } from "node:fs/promises";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/pod";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildThing,
@@ -62,7 +61,7 @@ function makeValidator() {
   const validator = createShaclShapeValidator({
     fetch: vi.fn() as unknown as typeof fetch,
     shapesFetch: vi.fn() as unknown as typeof fetch,
-    shapesBaseUrl: "https://app.example/shapes/",
+    ...SHAPE_SOURCES,
     loadEngine: async () => ({ createEngine, mergeDatasets: (...parts) => parts.flatMap((p) => [...p]) as never }),
     loader,
   });
@@ -74,19 +73,12 @@ beforeEach(() => {
 });
 
 describe("createShaclShapeValidator", () => {
-  it("loads the engine and the site's shapes itself by default", async () => {
+  it("loads the engine and the shapes from the shapes' pod itself by default", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalog());
-    const shapesFetch: typeof fetch = async (input) => {
-      const url = String(input);
-      const body = await readFile(`${VOCAB_ROOT}${url.slice("https://app.example/".length)}`, "utf8");
-      const response = new Response(body, { status: 200, headers: { "Content-Type": "text/turtle" } });
-      Object.defineProperty(response, "url", { value: url });
-      return response;
-    };
     const validator = createShaclShapeValidator({
       fetch: vi.fn() as unknown as typeof fetch,
       shapesFetch,
-      shapesBaseUrl: "https://app.example/shapes/",
+      ...SHAPE_SOURCES,
     });
     const report = await validator.validateDocument(DOC);
     expect(report.subjects[0]).toMatchObject({
@@ -135,7 +127,7 @@ describe("createShaclShapeValidator", () => {
     expect(validateNode).toHaveBeenCalledExactlyOnceWith(
       expect.anything(),
       `${DOC}#deck-1`,
-      "https://solid-memo.com/shapes/deck/v2.ttl#inPod",
+      "https://pod.solid-memo.com/shapes/deck/v2#inPod",
     );
     expect(loader.load).toHaveBeenCalledOnce();
     await validator.validateDocument(DOC);
@@ -187,17 +179,10 @@ describe("createShaclShapeValidator", () => {
           .build(),
       ),
     );
-    const shapesFetch: typeof fetch = async (input) => {
-      const url = String(input);
-      const body = await readFile(`${VOCAB_ROOT}${url.slice("https://app.example/".length)}`, "utf8");
-      const response = new Response(body, { status: 200, headers: { "Content-Type": "text/turtle" } });
-      Object.defineProperty(response, "url", { value: url });
-      return response;
-    };
     const validator = createShaclShapeValidator({
       fetch: vi.fn() as unknown as typeof fetch,
       shapesFetch,
-      shapesBaseUrl: "https://app.example/shapes/",
+      ...SHAPE_SOURCES,
     });
     const report = await validator.validateDocument(DOC);
     const deck = report.subjects[0] as { violations: { path?: string; profile?: string }[] };
@@ -234,17 +219,10 @@ describe("createShaclShapeValidator", () => {
   });
 
   describe("checkSubjects", () => {
-    const shapesFetch: typeof fetch = async (input) => {
-      const url = String(input);
-      const body = await readFile(`${VOCAB_ROOT}${url.slice("https://app.example/".length)}`, "utf8");
-      const response = new Response(body, { status: 200, headers: { "Content-Type": "text/turtle" } });
-      Object.defineProperty(response, "url", { value: url });
-      return response;
-    };
     const validator = createShaclShapeValidator({
       fetch: vi.fn() as unknown as typeof fetch,
       shapesFetch,
-      shapesBaseUrl: "https://app.example/shapes/",
+      ...SHAPE_SOURCES,
     });
     type Builder = ThingBuilder<ThingPersisted>;
     const deck = (build: (t: Builder) => Builder) =>

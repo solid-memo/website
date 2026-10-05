@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { Deck } from "./deck";
 import { parseKeywords, topicsOfDeck, withAbout } from "./deckAbout";
 
-const TOPIC = "https://solid-memo.com/vocab/topics#";
+const TOPIC = "https://pod.solid-memo.com/vocab/topics#";
 const EDUC = "http://publications.europa.eu/resource/authority/data-theme/EDUC";
 const deck: Deck = {
   id: "deck-1",

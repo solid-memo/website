@@ -2,13 +2,20 @@
 
 Solid Memo's own RDF terms, where they are defined, how they are
 versioned and how the app's constants are produced from them. The
-namespace is `https://solid-memo.com/vocab/v1#` — declared as
+namespace is `https://pod.solid-memo.com/vocab/v1#` — declared as
 `solid-memo:` in the Turtle files, abbreviated to `sm:` in these docs;
 no existing vocabulary covers spaced repetition.
 
 ## Source of truth
 
-[`packages/vocab/vocab/v1.ttl`](../packages/vocab/vocab/v1.ttl) is an RDFS/OWL ontology: the
+The vocabulary lives on its own pod, https://pod.solid-memo.com/vocab/
+([pods.ts](../packages/vocab/src/pods.ts)), and nowhere else: this
+repository keeps no copy. Its documents are `v1` (the ontology),
+`topics` (the topics scheme) and `external` (reference data), each at
+an address without an extension that is also its IRI, so every term
+IRI is a fragment of the document that defines it.
+
+[`v1`](https://pod.solid-memo.com/vocab/v1) is an RDFS/OWL ontology: the
 `owl:Ontology` subject carries `owl:versionInfo` and a `skos:changeNote`
 per release, and every term is an `owl:Class`, `owl:DatatypeProperty`
 (literal-valued, with an `xsd:` range) or `owl:ObjectProperty`
@@ -18,9 +25,9 @@ has one class, `rdfs:range`, `rdfs:isDefinedBy` and a
 
 ```mermaid
 flowchart LR
-    ttl["vocab/v1.ttl"] -->|npm run generate| ts["src/vocab.generated.ts<br/>SM constants"]
-    ttl -->|npm run build| dist["dist/vocab/v1.ttl<br/>dist/vocab/v1/index.html"]
+    pod["pod.solid-memo.com/vocab/v1"] -->|npm run generate| ts["src/vocab.generated.ts<br/>SM constants"]
     ts --> app["mappers, tooling"]
+    pod -->|read at runtime| refs["reference data<br/>(profile checks)"]
 ```
 
 `SM` in [vocab.ts](../packages/solid/src/vocab.ts) is a re-export
@@ -36,10 +43,10 @@ string, so other applications can look up what it means:
 
 | Scheme | Where | Concepts | Used by |
 |---|---|---|---|
-| `sm:StudyDirections` | `packages/vocab/vocab/v1.ttl` | `sm:frontToBack`, `sm:backToFront`, `sm:bidirectional` | `sm:studyDirection` on a deck |
-| `sm:InvalidDataPolicies` | `packages/vocab/vocab/v1.ttl` | `sm:blockInstance` (default), `sm:blockSubject`, `sm:warnOnly` | `sm:invalidDataPolicy` in preferences |
-| `sm:Themes` | `packages/vocab/vocab/v1.ttl` | `sm:systemTheme` (default), `sm:lightTheme`, `sm:darkTheme` | `sm:theme` in preferences ([theme.md](theme.md)) |
-| Topics (`https://solid-memo.com/vocab/topics`) | [`packages/vocab/vocab/topics.ttl`](../packages/vocab/vocab/topics.ttl) | languages (swedish), geography, computing, science (chemistry), art, labour-market | `dcat:theme` on a deck, next to the EU data theme `EDUC` |
+| `sm:StudyDirections` | [`v1`](https://pod.solid-memo.com/vocab/v1) | `sm:frontToBack`, `sm:backToFront`, `sm:bidirectional` | `sm:studyDirection` on a deck |
+| `sm:InvalidDataPolicies` | [`v1`](https://pod.solid-memo.com/vocab/v1) | `sm:blockInstance` (default), `sm:blockSubject`, `sm:warnOnly` | `sm:invalidDataPolicy` in preferences |
+| `sm:Themes` | [`v1`](https://pod.solid-memo.com/vocab/v1) | `sm:systemTheme` (default), `sm:lightTheme`, `sm:darkTheme` | `sm:theme` in preferences ([theme.md](theme.md)) |
+| Topics (`https://pod.solid-memo.com/vocab/topics`) | [`topics`](https://pod.solid-memo.com/vocab/topics) | languages (swedish), geography, computing, science (chemistry), art, labour-market | `dcat:theme` on a deck, next to the EU data theme `EDUC` |
 
 - Every scheme has a `dcterms:title` and a `skos:definition`; every
   concept a `skos:prefLabel` and `skos:definition` in each language the
@@ -110,21 +117,21 @@ authority-table languages and cannot tell a card's front from its back.
 
 | IRI | What is served |
 |---|---|
-| `https://solid-memo.com/vocab/v1#Deck` (any term) | `vocab/v1/index.html`: an HTML table with one row per term, `id`ed by local name, so the fragment lands on the term. GitHub Pages redirects `/vocab/v1` to `/vocab/v1/`. The page links the Turtle with `<link rel="alternate" type="text/turtle">`. |
-| `https://solid-memo.com/vocab/v1.ttl` | The ontology itself (`rdfs:seeAlso` on the ontology points here). |
-| `https://solid-memo.com/vocab/external.ttl` | Reference data, not terms of ours: the external terms (EU authority-table entries, media types) Solid Memo data points at, typed so [profile validation](validation.md#profiles-dcat-ap-and-skos) can check them. |
+| `https://pod.solid-memo.com/vocab/v1#Deck` (any term) | The ontology, `…/vocab/v1`, as Turtle (or JSON-LD, which the Solid server converts it to on request): the term is a subject of it. |
+| `https://pod.solid-memo.com/vocab/topics#geography` (any topic) | The topics scheme, `…/vocab/topics`. |
+| `https://pod.solid-memo.com/vocab/external` | Reference data, not terms of ours: the external terms (EU authority-table entries, media types) Solid Memo data points at, typed so [profile validation](validation.md#profiles-dcat-ap-and-skos) can check them. |
 
-A file without an extension would be served by the static host as
-`application/octet-stream`, which is why the Turtle has one and the
-namespace IRI lands on a page instead. Both are emitted by the
-`turtleDirectoryPlugin` in [packages/vocab/tooling/publishTurtle.ts](../packages/vocab/tooling/publishTurtle.ts),
-which also serves them in dev.
+Each is public on the pod, which serves it with CORS, so the browser
+reads it directly. The site publishes none of them.
 
 ## Adding a term
 
-1. Add it to `packages/vocab/vocab/v1.ttl` with every annotation; bump the version and
-   the change note.
-2. `npm run generate` (CI runs `npm run generate:check` and fails on
-   drift; the drift test in `packages/vocab/tooling/generate.test.ts` does too).
+1. Add it to `https://pod.solid-memo.com/vocab/v1`, as the vocabulary
+   pod's owner, with every annotation; bump the version and the change
+   note.
+2. `npm run generate`, which reads the pod (CI runs `npm run
+   generate:check` and fails on drift; the drift test in
+   `packages/vocab/tooling/generate.test.ts` does too, and so does any
+   change on the pod the generated code has not caught up with).
 3. Use it in a [shape](shapes.md) — the fixture test checks that every
    `sm:` predicate a shape uses is declared here.

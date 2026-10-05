@@ -42,7 +42,7 @@ vi.mock("./datasets", async (importOriginal) => ({
 const FROM = "https://pod.example/solid-memo/main/";
 const TO = "https://pod.example/solid-memo/main-0f3a/";
 const MOVE = { from: FROM, to: TO };
-const SM = "https://solid-memo.com/vocab/v1#";
+const SM = "https://pod.solid-memo.com/vocab/v1#";
 const LDP_CONTAINS = "http://www.w3.org/ns/ldp#contains";
 
 /** A fetch that answers HEAD and GET requests from a table of URL → response parts. */

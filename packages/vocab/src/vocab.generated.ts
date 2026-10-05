@@ -1,7 +1,7 @@
-/* Generated from vocab/v1.ttl by `npm run generate`. Do not edit: change the source and regenerate. */
+/* Generated from https://pod.solid-memo.com/vocab/v1 by `npm run generate`. Do not edit: change the source and regenerate. */
 
 /** Solid Memo's own vocabulary, version 1.12 (see docs/vocab.md). */
-export const SM_NS = "https://solid-memo.com/vocab/v1#";
+export const SM_NS = "https://pod.solid-memo.com/vocab/v1#";
 
 export const SM = {
   /** One Solid Memo data location: a container in a pod holding decks, cards, review state and preferences. Described by the container's meta document. (Since 1.0.) */

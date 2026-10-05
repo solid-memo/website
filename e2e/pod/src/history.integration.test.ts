@@ -7,23 +7,17 @@
  * removes that deck's answers of the day. Runs against each server
  * globalSetup.ts starts.
  */
-import { readFile } from "node:fs/promises";
 import { describe, expect, inject, it } from "vitest";
 import type { Answer } from "@solid-memo/domain/answer";
-import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/pod";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
 import { createSolidAnswerLog } from "@solid-memo/solid/solidAnswerLog";
 
 const SERVERS = inject("solidServers");
-const SITE = "https://solid-memo.test/";
 
 /** The answer log as main.tsx wires it: every answer checked against its shape before it is added. */
 function answerLog() {
-  const shapesFetch: typeof fetch = async (input) =>
-    new Response(await readFile(`${VOCAB_ROOT}${new URL(String(input)).pathname.slice(1)}`, "utf8"), {
-      headers: { "content-type": "text/turtle" },
-    });
-  const shapeValidator = createShaclShapeValidator({ fetch, shapesFetch, shapesBaseUrl: `${SITE}shapes/` });
+  const shapeValidator = createShaclShapeValidator({ fetch, shapesFetch, ...SHAPE_SOURCES });
   return createSolidAnswerLog({ fetch, checkWrite: shapeValidator.checkSubjects });
 }
 

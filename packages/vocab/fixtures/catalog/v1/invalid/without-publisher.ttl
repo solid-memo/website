@@ -1,4 +1,4 @@
-@prefix solid-memo: <https://solid-memo.com/vocab/v1#> .
+@prefix solid-memo: <https://pod.solid-memo.com/vocab/v1#> .
 @prefix dcterms:    <http://purl.org/dc/terms/> .
 @prefix dcat:       <http://www.w3.org/ns/dcat#> .
 @prefix foaf:       <http://xmlns.com/foaf/0.1/> .
@@ -10,7 +10,7 @@
     a dcat:Catalog ;
     dcterms:title "Main" ;
     dcterms:description "My decks." ;
-    dcat:themeTaxonomy <https://solid-memo.com/vocab/topics> ;
+    dcat:themeTaxonomy <https://pod.solid-memo.com/vocab/topics> ;
     dcat:dataset <#deck-1> .
 
 <https://pod.example/profile/card#me>

@@ -1,13 +1,14 @@
 import { RDF_TYPE, localName, objectsOf, parseTurtle, subjectsOfType } from "@solid-memo/turtle/rdf";
+import { VOCAB_POD } from "../src/pods.ts";
 
 /**
- * The vocabulary document (vocab/v1.ttl) as the generators see it: the
+ * The vocabulary document (VOCAB_IRI, on the vocabulary's pod) as the generators see it: the
  * ontology's version and change note, and every term with its
  * annotations, in document order. Terms are classes and properties, and
  * the SKOS concept schemes of the vocabulary with their concepts.
  */
 
-export const VOCAB_IRI = "https://solid-memo.com/vocab/v1";
+export const VOCAB_IRI = `${VOCAB_POD}v1`;
 export const SM_NS = `${VOCAB_IRI}#`;
 const OWL = "http://www.w3.org/2002/07/owl#";
 const RDFS = "http://www.w3.org/2000/01/rdf-schema#";
@@ -114,7 +115,7 @@ export const GENERATED_HEADER = (source: string): string =>
 /** The TypeScript module of `SM` constants the app reads and writes with. */
 export function renderVocabConstants(vocab: Vocab): string {
   const lines = [
-    GENERATED_HEADER("vocab/v1.ttl"),
+    GENERATED_HEADER(VOCAB_IRI),
     `/** Solid Memo's own vocabulary, version ${vocab.version} (see docs/vocab.md). */`,
     `export const SM_NS = ${JSON.stringify(SM_NS)};`,
     "",
@@ -130,54 +131,4 @@ export function renderVocabConstants(vocab: Vocab): string {
   }
   lines.push("} as const;", "");
   return lines.join("\n");
-}
-
-export function escapeHtml(text: string): string {
-  return text
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
-}
-
-/**
- * The HTML page published at the namespace IRI (vocab/v1/), so that a
- * term IRI such as …/vocab/v1#Deck lands on its row; it links to the
- * Turtle as the machine-readable form.
- */
-export function renderVocabPage(vocab: Vocab): string {
-  const rows = vocab.terms
-    .map((term) => {
-      const facts = [
-        term.kind === "property" ? `property, range ${localName(term.range!)}` : term.kind,
-        ...(term.domain === undefined ? [] : [`domain ${localName(term.domain)}`]),
-        ...(term.deprecated === undefined
-          ? []
-          : [`deprecated${term.replacedBy === undefined ? "" : `, use ${localName(term.replacedBy)}`}`]),
-      ];
-      return `<tr id="${escapeHtml(term.name)}"><td><code>sm:${escapeHtml(term.name)}</code></td><td>${escapeHtml(term.label)}</td><td>${escapeHtml(term.comment)} <em>${escapeHtml(term.history)}</em></td><td>${escapeHtml(facts.join(", "))}</td></tr>`;
-    })
-    .join("\n");
-  return `<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<title>${escapeHtml(vocab.title)}</title>
-<link rel="alternate" type="text/turtle" href="../v1.ttl">
-<style>body{font:16px/1.5 system-ui,sans-serif;max-width:60rem;margin:2rem auto;padding:0 1rem}table{border-collapse:collapse}td,th{border:1px solid #ccc;padding:.4rem .6rem;vertical-align:top}code{white-space:nowrap}</style>
-</head>
-<body>
-<h1>${escapeHtml(vocab.title)}</h1>
-<p>${escapeHtml(vocab.description)}</p>
-<p>Namespace <code>${escapeHtml(SM_NS)}</code>, version ${escapeHtml(vocab.version)}. Machine-readable form: <a href="../v1.ttl">v1.ttl</a>.</p>
-<p>${escapeHtml(vocab.changeNote)}</p>
-<table>
-<thead><tr><th>Term</th><th>Label</th><th>Meaning</th><th>Facts</th></tr></thead>
-<tbody>
-${rows}
-</tbody>
-</table>
-</body>
-</html>
-`;
 }

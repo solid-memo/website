@@ -194,7 +194,7 @@ describe("the deck's texts in an upgrade", () => {
     title: { en: "World flags", sv: "Världens flaggor" },
     description: { en: "Flags.", sv: "Flaggor." },
     keywords: { en: ["flags"], sv: ["flaggor"] },
-    themes: ["https://solid-memo.com/vocab/topics#geography"],
+    themes: ["https://pod.solid-memo.com/vocab/topics#geography"],
   });
   const copy: Deck = { ...deck, title: { en: "World flags" }, description: { en: "Flags." }, themes: [] };
   const plan = (mine: Deck, to = v2) => planLibraryUpgrade({ deck: mine, cards: [], from: v1, to, releases });
@@ -204,7 +204,7 @@ describe("the deck's texts in an upgrade", () => {
       title: { en: "World flags", sv: "Världens flaggor" },
       description: { en: "Flags.", sv: "Flaggor." },
       keywords: { en: ["flags"], sv: ["flaggor"] },
-      themes: ["https://solid-memo.com/vocab/topics#geography"],
+      themes: ["https://pod.solid-memo.com/vocab/topics#geography"],
     });
     expect(applyLibraryUpgrade(copy, plan(copy)!)).toMatchObject({
       title: { en: "World flags", sv: "Världens flaggor" },
@@ -236,7 +236,7 @@ describe("the deck's texts in an upgrade", () => {
     const own = plan({ ...copy, keywords: { en: ["mine"] }, themes: undefined, description: undefined })!;
     expect(own).not.toHaveProperty("keywords");
     expect(own).not.toHaveProperty("description");
-    expect(own.themes).toEqual(["https://solid-memo.com/vocab/topics#geography"]);
+    expect(own.themes).toEqual(["https://pod.solid-memo.com/vocab/topics#geography"]);
     const silent = plan(copy, { ...v2, description: undefined })!;
     expect(silent).not.toHaveProperty("description");
     expect(plan(copy, { ...v1, version: "2" })).toBeNull();

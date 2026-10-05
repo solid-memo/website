@@ -2,10 +2,10 @@
 
 Published SHACL shapes, copied verbatim from the projects that
 maintain them, which Solid Memo validates its data against **in
-addition to** its own shapes under `packages/vocab/shapes/` (see
-`docs/validation.md`). They are published with the site at `/vendor/`,
-so the app can fetch them at runtime, the same way it fetches
-`/shapes/`.
+addition to** its own shapes, which are on their own pod,
+https://pod.solid-memo.com/shapes/ (see `docs/validation.md`). These
+are published with the site at `/vendor/`, so the app can fetch them at
+runtime, the same way it fetches its shapes from their pod.
 
 These files are not ours: never edit or reformat them. To update one,
 replace it with the upstream file byte for byte, then update its entry

@@ -59,8 +59,8 @@ nowhere else):
 - UI components never import ports or adapters. They receive `UseCases`
   as a prop.
 - Generated files (`packages/vocab/src/*.generated.ts`) are never edited
-  by hand: change `packages/vocab/vocab/` or `packages/vocab/shapes/`
-  and run `npm run generate` ([shapes.md](shapes.md)).
+  by hand: change the vocabulary or the shapes on their pods and run
+  `npm run generate` ([shapes.md](shapes.md), [vocab.md](vocab.md)).
 - Modules reachable from `vite.config.ts` spell out `.ts` on relative
   imports: Vite can load the config with Node's own loader, which needs
   them. Imports between packages go through `exports` and carry no

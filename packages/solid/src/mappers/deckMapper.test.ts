@@ -85,7 +85,7 @@ describe("toDeck", () => {
         .addIri(SM.studyDirection, SM.backToFront)
         .addIri(DCTERMS.creator, `${CATALOG}#agent-anton`)
         .addIri(DCTERMS.creator, `${CATALOG}#agent-gone`)
-        .addIri("http://www.w3.org/ns/dcat#theme", "https://solid-memo.com/vocab/topics#geography")
+        .addIri("http://www.w3.org/ns/dcat#theme", "https://pod.solid-memo.com/vocab/topics#geography")
         .addStringNoLocale("http://www.w3.org/ns/dcat#keyword", "capitals")
         .addIri(SM.cardsDocument, CARDS_DOC)
         .addIri(SM.reviewsDocument, REVIEWS_DOC)
@@ -101,7 +101,7 @@ describe("toDeck", () => {
       expect.objectContaining({
         direction: "back-to-front",
         authors: ["Anton <anton@example.com>", `${CATALOG}#agent-gone`],
-        themes: ["https://solid-memo.com/vocab/topics#geography"],
+        themes: ["https://pod.solid-memo.com/vocab/topics#geography"],
         keywords: { "": ["capitals"] },
         formatVersion: 3,
       }),

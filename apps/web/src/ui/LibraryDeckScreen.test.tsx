@@ -71,8 +71,8 @@ describe("LibraryDeckScreen", () => {
         ],
         themes: [
           "http://publications.europa.eu/resource/authority/data-theme/EDUC",
-          "https://solid-memo.com/vocab/topics#geography",
-          "https://solid-memo.com/vocab/topics#languages",
+          "https://pod.solid-memo.com/vocab/topics#geography",
+          "https://pod.solid-memo.com/vocab/topics#languages",
         ],
         keywords: { en: ["capitals", "countries"], sv: ["huvudstäder", "länder"] },
       },
@@ -110,7 +110,7 @@ describe("LibraryDeckScreen", () => {
   });
 
   it("uses the singular for one topic", () => {
-    renderScreen({ deck: { ...capitals, themes: ["https://solid-memo.com/vocab/topics#geography"] } });
+    renderScreen({ deck: { ...capitals, themes: ["https://pod.solid-memo.com/vocab/topics#geography"] } });
     expect(fact("Topic")).toHaveTextContent("Geography");
   });
 

@@ -18,9 +18,8 @@ describe("coreOnly", () => {
 });
 
 describe("PROFILES", () => {
-  it("names vendored files and the reference data under the site root", () => {
-    for (const path of [...Object.values(PROFILES).flat(), ...REFERENCE_DATA]) {
-      expect(path).toMatch(/^(vendor|vocab)\/[\w./-]+\.ttl$/);
-    }
+  it("names vendored files under the site's vendor/, and the reference data as documents of the vocabulary's pod", () => {
+    for (const path of Object.values(PROFILES).flat()) expect(path).toMatch(/^[\w-]+\/[\w./-]+\.ttl$/);
+    for (const path of REFERENCE_DATA) expect(path).toMatch(/^[a-z0-9-]+$/);
   });
 });

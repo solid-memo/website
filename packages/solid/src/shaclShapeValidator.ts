@@ -25,9 +25,14 @@ import { shown } from "@solid-memo/domain/langText";
 export interface ShaclShapeValidatorDeps {
   /** Fetches pod documents (authenticated). */
   fetch: typeof globalThis.fetch;
-  /** Fetches the site's own shape documents (plain). */
+  /** Fetches the shape documents, the reference data and the profiles, all public (plain). */
   shapesFetch: typeof globalThis.fetch;
+  /** The shapes' pod (SHAPES_POD). */
   shapesBaseUrl: string;
+  /** The vocabulary's pod (VOCAB_POD), where the reference data is. */
+  vocabBaseUrl: string;
+  /** Where the site publishes the vendored profiles. */
+  vendorBaseUrl: string;
   /**
    * Loads the engine module. A dynamic import by default, so the SHACL
    * library ships in its own chunk and is fetched only when a validation
@@ -60,8 +65,10 @@ export function createShaclShapeValidator({
   fetch,
   shapesFetch,
   shapesBaseUrl,
+  vocabBaseUrl,
+  vendorBaseUrl,
   loadEngine = () => import("@solid-memo/shacl/engine"),
-  loader = createShapeLoader({ fetch: shapesFetch, shapesBaseUrl }),
+  loader = createShapeLoader({ fetch: shapesFetch, shapesBaseUrl, vocabBaseUrl, vendorBaseUrl }),
 }: ShaclShapeValidatorDeps): ShapeValidator & { checkSubjects: WriteCheck } {
   const engines = new Map<string, Promise<ShapeEngine>>();
 

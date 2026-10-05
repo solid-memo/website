@@ -5,6 +5,7 @@ import { authFetch } from "@solid-memo/solid/authFetch";
 import { createWriteFence } from "@solid-memo/solid/writeFence";
 import { createSolidSessionGateway } from "@solid-memo/solid/solidSessionGateway";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
+import { SHAPES_POD, VOCAB_POD } from "@solid-memo/vocab/pods";
 import { createSolidDeckLibrary } from "@solid-memo/solid/solidDeckLibrary";
 import { createSolidDeckRepository } from "@solid-memo/solid/solidDeckRepository";
 import { createSolidDigestRepository } from "@solid-memo/solid/solidDigestRepository";
@@ -50,7 +51,10 @@ const podFetch = writeFence.fetch;
 const shapeValidator = createShaclShapeValidator({
   fetch: podFetch,
   shapesFetch: (input, init) => globalThis.fetch(input, init),
-  shapesBaseUrl: new URL("shapes/", document.baseURI).href,
+  // Solid Memo's shapes and vocabulary are on their own pods; the vendored profiles are published with the site.
+  shapesBaseUrl: SHAPES_POD,
+  vocabBaseUrl: VOCAB_POD,
+  vendorBaseUrl: new URL("vendor/", document.baseURI).href,
 });
 /** Every write is checked against the shapes before it reaches the pod (docs/validation.md). */
 const checkWrite = shapeValidator.checkSubjects;

@@ -8,9 +8,8 @@
  * The cards hold text beyond ASCII, which a PATCH would leave cut short
  * on Community Solid Server's in-memory store: the write is one PUT.
  */
-import { readFile } from "node:fs/promises";
 import { beforeAll, describe, expect, inject, it } from "vitest";
-import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/pod";
 import { createUseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
@@ -26,8 +25,7 @@ import { createWriteFence } from "@solid-memo/solid/writeFence";
 import { ETAG_OUTLIVES_EDITS, etagMarksEveryEdit, preconditionsOf } from "./serverTraits";
 
 const SERVERS = inject("solidServers");
-const SITE = "https://solid-memo.test/";
-const SM = "https://solid-memo.com/vocab/v1#";
+const SM = "https://pod.solid-memo.com/vocab/v1#";
 
 /** A page of the app as main.tsx wires it; `beforeWrite` runs before each write it makes. */
 function page(beforeWrite: (url: string) => Promise<void> = async () => undefined) {
@@ -38,11 +36,7 @@ function page(beforeWrite: (url: string) => Promise<void> = async () => undefine
   };
   const writeFence = createWriteFence(watching);
   const podFetch = writeFence.fetch;
-  const shapesFetch: typeof fetch = async (input) =>
-    new Response(await readFile(`${VOCAB_ROOT}${new URL(String(input)).pathname.slice(1)}`, "utf8"), {
-      headers: { "content-type": "text/turtle" },
-    });
-  const shapeValidator = createShaclShapeValidator({ fetch: podFetch, shapesFetch, shapesBaseUrl: `${SITE}shapes/` });
+  const shapeValidator = createShaclShapeValidator({ fetch: podFetch, shapesFetch, ...SHAPE_SOURCES });
   const checkWrite = shapeValidator.checkSubjects;
   const deps = { fetch: podFetch, checkWrite, now: () => new Date(), randomId: () => crypto.randomUUID() };
   return createUseCases({

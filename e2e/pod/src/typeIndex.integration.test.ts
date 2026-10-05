@@ -8,25 +8,19 @@
  * names. Runs against each server globalSetup.ts starts. Every run here
  * shares the storage's one type index; a file's tests run one at a time.
  */
-import { readFile } from "node:fs/promises";
 import { Parser, Writer } from "n3";
 import { describe, expect, inject, it } from "vitest";
-import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/pod";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
 import { createSolidInstanceRepository } from "@solid-memo/solid/solidInstanceRepository";
 import { aclOf, storageOf } from "./serverTraits";
 
 const SERVERS = inject("solidServers");
-const SITE = "https://solid-memo.test/";
 const PRIVATE_TYPE_INDEX = "http://www.w3.org/ns/solid/terms#privateTypeIndex";
 
 /** The instance repository as main.tsx wires it. */
 function instances() {
-  const shapesFetch: typeof fetch = async (input) =>
-    new Response(await readFile(`${VOCAB_ROOT}${new URL(String(input)).pathname.slice(1)}`, "utf8"), {
-      headers: { "content-type": "text/turtle" },
-    });
-  const shapeValidator = createShaclShapeValidator({ fetch, shapesFetch, shapesBaseUrl: `${SITE}shapes/` });
+  const shapeValidator = createShaclShapeValidator({ fetch, shapesFetch, ...SHAPE_SOURCES });
   return createSolidInstanceRepository({ fetch, checkWrite: shapeValidator.checkSubjects, now: () => new Date(), randomId: () => crypto.randomUUID() });
 }
 

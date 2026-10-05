@@ -1,9 +1,9 @@
 import { RDF_TYPE, localName, objectsOf, parseTurtle, subjectsOfType } from "@solid-memo/turtle/rdf";
-import { escapeHtml, GENERATED_HEADER } from "./vocab.ts";
+import { GENERATED_HEADER } from "./vocab.ts";
 
 /**
  * Solid Memo's SKOS concept schemes (the study directions and invalid
- * data policies in vocab/v1.ttl, the topics in vocab/topics.ttl) as the
+ * data policies in the vocabulary, the topics in its topics document) as the
  * generator sees them, and the domain module rendered from them: each
  * scheme as a constant the app can list, label and map to and from
  * (see docs/vocab.md).
@@ -164,49 +164,4 @@ function renderText(text: LangTextModel): string {
     ([tag, value]) => `${/^[a-z]+$/.test(tag) ? tag : JSON.stringify(tag)}: ${JSON.stringify(value)}`,
   );
   return `{ ${entries.join(", ")} }`;
-}
-
-/** Text in each of its languages, one line each, tagged with the language. */
-function textCell(text: LangTextModel): string {
-  return Object.entries(text)
-    .map(([tag, value]) => `<span lang="${escapeHtml(tag)}">${escapeHtml(value)}</span>`)
-    .join("<br>");
-}
-
-/**
- * The HTML page published at a scheme's IRI (e.g. vocab/topics/), so a
- * concept IRI such as …/vocab/topics#geography lands on its row; it
- * links to the Turtle as the machine-readable form.
- */
-export function renderSchemePage(scheme: SchemeModel, turtleHref: string): string {
-  const labelOf = new Map(scheme.concepts.map((c) => [c.iri, c.label.en]));
-  const rows = scheme.concepts
-    .map((concept) => {
-      const id = concept.iri.slice(concept.iri.lastIndexOf("#") + 1);
-      const broader =
-        concept.broader === undefined ? "" : (labelOf.get(concept.broader) ?? concept.broader);
-      return `<tr id="${escapeHtml(id)}"><td><code>${escapeHtml(id)}</code></td><td>${textCell(concept.label)}</td><td>${textCell(concept.definition)}</td><td>${escapeHtml(broader)}</td></tr>`;
-    })
-    .join("\n");
-  return `<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<title>${escapeHtml(scheme.title)}</title>
-<link rel="alternate" type="text/turtle" href="${escapeHtml(turtleHref)}">
-<style>body{font:16px/1.5 system-ui,sans-serif;max-width:60rem;margin:2rem auto;padding:0 1rem}table{border-collapse:collapse}td,th{border:1px solid #ccc;padding:.4rem .6rem;vertical-align:top}code{white-space:nowrap}</style>
-</head>
-<body>
-<h1>${escapeHtml(scheme.title)}</h1>
-<p>${escapeHtml(scheme.definition)}</p>
-<p>SKOS concept scheme <code>${escapeHtml(scheme.iri)}</code>. Machine-readable form: <a href="${escapeHtml(turtleHref)}">Turtle</a>.</p>
-<table>
-<thead><tr><th>Concept</th><th>Label</th><th>Definition</th><th>Broader</th></tr></thead>
-<tbody>
-${rows}
-</tbody>
-</table>
-</body>
-</html>
-`;
 }

@@ -2,33 +2,10 @@ import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { topicsPage, turtleDirectoryPlugin, vocabPage, type PublishedPage } from "./publishTurtle.ts";
-
-describe("vocabPage", () => {
-  it("renders the repository's vocabulary", async () => {
-    const page = vocabPage(process.cwd());
-    expect(page.path).toBe("v1/index.html");
-    expect(await page.body()).toContain("<title>Solid Memo vocabulary, v1</title>");
-  });
-});
-
-describe("topicsPage", () => {
-  it("renders the repository's topics", async () => {
-    const page = topicsPage(process.cwd());
-    expect(page.path).toBe("topics/index.html");
-    const body = await page.body();
-    expect(body).toContain("<title>Solid Memo topics</title>");
-    expect(body).toContain('<tr id="swedish"><td><code>swedish</code></td><td><span lang="en">Swedish</span><br><span lang="sv">Svenska</span></td>');
-  });
-});
+import { turtleDirectoryPlugin } from "./publishTurtle.ts";
 
 describe("turtleDirectoryPlugin", () => {
   let dir: string;
-  const page: PublishedPage = {
-    path: "v1/index.html",
-    contentType: "text/html",
-    body: async () => "<h1>v1</h1>",
-  };
 
   beforeEach(async () => {
     dir = await mkdtemp(join(tmpdir(), "solid-memo-publish-"));
@@ -44,7 +21,7 @@ describe("turtleDirectoryPlugin", () => {
     next: ReturnType<typeof vi.fn>,
   ) => Promise<void>;
 
-  function devHandler(options: { dir: string; publicPath?: string; pages?: PublishedPage[] }): Handler {
+  function devHandler(options: { dir: string; publicPath?: string }): Handler {
     const plugin = turtleDirectoryPlugin(options);
     let handler: Handler | undefined;
     const server = { middlewares: { use: (h: Handler) => (handler = h) } };
@@ -52,7 +29,7 @@ describe("turtleDirectoryPlugin", () => {
     return handler!;
   }
 
-  async function request(url: string | undefined, options = { dir, publicPath: "vocab", pages: [page] }) {
+  async function request(url: string | undefined, options: { dir: string; publicPath?: string } = { dir, publicPath: "vendor" }) {
     const res = { setHeader: vi.fn(), end: vi.fn() };
     const next = vi.fn();
     await devHandler(options)({ url }, res, next);
@@ -60,31 +37,22 @@ describe("turtleDirectoryPlugin", () => {
   }
 
   it("serves Turtle files, nested ones too, as text/turtle", async () => {
-    const top = await request("/vocab/v1.ttl?t=1");
+    const top = await request("/vendor/v1.ttl?t=1");
     expect(top.res.setHeader).toHaveBeenCalledWith("Content-Type", "text/turtle; charset=utf-8");
     expect(top.res.end).toHaveBeenCalledWith("top");
-    const nested = await request("/vocab/deck/v2.ttl");
+    const nested = await request("/vendor/deck/v2.ttl");
     expect(nested.res.end).toHaveBeenCalledWith("nested");
     expect(nested.next).not.toHaveBeenCalled();
-  });
-
-  it("serves a page by its path, its folder, or its folder without a slash", async () => {
-    for (const url of ["/vocab/v1/index.html", "/vocab/v1/", "/vocab/v1"]) {
-      const { res, next } = await request(url);
-      expect(res.setHeader).toHaveBeenCalledWith("Content-Type", "text/html");
-      expect(res.end).toHaveBeenCalledWith("<h1>v1</h1>");
-      expect(next).not.toHaveBeenCalled();
-    }
   });
 
   it("passes other requests on", async () => {
     for (const url of [
       "/index.html",
-      "/vocab/missing.ttl",
-      "/vocab/notes.md",
-      "/vocab/../package.json",
-      "/vocab/.hidden.ttl",
-      "/vocab/deck//v2.ttl",
+      "/vendor/missing.ttl",
+      "/vendor/notes.md",
+      "/vendor/../package.json",
+      "/vendor/.hidden.ttl",
+      "/vendor/deck//v2.ttl",
       undefined,
     ]) {
       const { res, next } = await request(url);
@@ -94,25 +62,24 @@ describe("turtleDirectoryPlugin", () => {
   });
 
   it("uses the folder name as the public path by default", async () => {
-    const { res } = await request(`/${dir.split("/").at(-1)}/v1.ttl`, { dir: `${dir}`, pages: [] } as never);
+    const { res } = await request(`/${dir.split("/").at(-1)}/v1.ttl`, { dir });
     expect(res.end).not.toHaveBeenCalled();
   });
 
   it("reports a folder that cannot be read to the dev server", async () => {
-    const { next } = await request("/vocab/v1.ttl", { dir: join(dir, "missing"), publicPath: "vocab", pages: [] });
+    const { next } = await request("/vendor/v1.ttl", { dir: join(dir, "missing"), publicPath: "vendor" });
     expect(next).toHaveBeenCalledWith(expect.any(Error));
   });
 
-  it("emits the Turtle files and the pages into the build", async () => {
-    const plugin = turtleDirectoryPlugin({ dir, publicPath: "vocab", pages: [page] });
+  it("emits the Turtle files into the build", async () => {
+    const plugin = turtleDirectoryPlugin({ dir, publicPath: "vendor" });
     const emitFile = vi.fn();
     await (
       plugin.generateBundle as unknown as (this: { emitFile: typeof emitFile }) => Promise<void>
     ).call({ emitFile });
     expect(emitFile.mock.calls.map((c) => [c[0].fileName, c[0].source])).toEqual([
-      ["vocab/deck/v2.ttl", "nested"],
-      ["vocab/v1.ttl", "top"],
-      ["vocab/v1/index.html", "<h1>v1</h1>"],
+      ["vendor/deck/v2.ttl", "nested"],
+      ["vendor/v1.ttl", "top"],
     ]);
   });
 });

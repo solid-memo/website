@@ -14,7 +14,7 @@ const INSTANCE = "https://pod.example/solid-memo/main/";
 const CARDS = `${INSTANCE}decks/deck-1.ttl`;
 const REVIEWS = `${INSTANCE}reviews/deck-1.ttl`;
 const DIGEST = `${INSTANCE}digest.ttl`;
-const SM = "https://solid-memo.com/vocab/v1#";
+const SM = "https://pod.solid-memo.com/vocab/v1#";
 const PREFIXES = `@prefix sm: <${SM}> . @prefix dcterms: <http://purl.org/dc/terms/> . @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n`;
 
 const deck = {
@@ -132,7 +132,9 @@ describe("cards, review states and checks since a version", () => {
     const validator = createShaclShapeValidator({
       fetch: pod.fetch,
       shapesFetch: () => Promise.reject(new Error("no shapes needed")),
-      shapesBaseUrl: "https://solid-memo.com/shapes/",
+      shapesBaseUrl: "https://shapes.example/",
+      vocabBaseUrl: "https://vocab.example/",
+      vendorBaseUrl: "https://app.example/vendor/",
       loader: { load: async () => createSolidDataset() as never, loadProfile: async () => [], loadReferenceData: async () => [] },
       loadEngine: async () => ({ createEngine: () => ({ validateNode: async () => [], validate: async () => [] }), mergeDatasets: () => ({}) as never }),
     });

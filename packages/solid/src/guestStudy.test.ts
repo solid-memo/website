@@ -4,9 +4,8 @@
  * the pod kept on their device, then logs in and keeps it. Their pod is a
  * second local pod here; e2e/pod moves a guest's study into real servers.
  */
-import { readFile } from "node:fs/promises";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/pod";
 import { createUseCases } from "@solid-memo/application/useCases";
 import type { ResourceStore } from "@solid-memo/application/ports";
 import { GUEST_ORIGIN, GUEST_SESSION } from "@solid-memo/domain/guest";
@@ -30,7 +29,6 @@ import { createWriteFence } from "./writeFence";
 const ALICE_POD = "https://alice.example/";
 const ALICE = { webId: `${ALICE_POD}profile/card#me` };
 const TARGET = `${ALICE_POD}solid-memo/main/`;
-const SITE = "https://solid-memo.test/";
 
 /** Every RDF document of a store, as N-Triples lines. */
 async function everyTriple(store: ResourceStore): Promise<string[]> {
@@ -42,7 +40,7 @@ async function everyTriple(store: ResourceStore): Promise<string[]> {
   return lines;
 }
 
-const SM_NS = "https://solid-memo.com/vocab/v1#";
+const SM_NS = "https://pod.solid-memo.com/vocab/v1#";
 const XSD_INTEGER = "http://www.w3.org/2001/XMLSchema#integer";
 
 /** A subject's stated format set back to `version`, in place, as an app of that format left it. */
@@ -94,11 +92,8 @@ async function app() {
   const podFetch = writeFence.fetch;
   const shapeValidator = createShaclShapeValidator({
     fetch: podFetch,
-    shapesFetch: async (input) =>
-      new Response(await readFile(`${VOCAB_ROOT}${new URL(String(input)).pathname.slice(1)}`, "utf8"), {
-        headers: { "content-type": "text/turtle" },
-      }),
-    shapesBaseUrl: `${SITE}shapes/`,
+    shapesFetch,
+    ...SHAPE_SOURCES,
   });
   const checkWrite = shapeValidator.checkSubjects;
   const ids = { now: () => new Date(), randomId: () => crypto.randomUUID() };

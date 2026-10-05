@@ -14,8 +14,8 @@ describe("preferences records", () => {
     };
     expect(preferencesToRecord(preferences)).toEqual({
       ...preferences,
-      invalidDataPolicy: "https://solid-memo.com/vocab/v1#warnOnly",
-      theme: "https://solid-memo.com/vocab/v1#darkTheme",
+      invalidDataPolicy: "https://pod.solid-memo.com/vocab/v1#warnOnly",
+      theme: "https://pod.solid-memo.com/vocab/v1#darkTheme",
     });
     expect(preferencesFromRecord(preferencesToRecord(preferences))).toEqual(preferences);
   });

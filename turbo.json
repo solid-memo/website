@@ -40,6 +40,7 @@
       ]
     },
     "generate:check": {
+      "cache": false,
       "dependsOn": [
         "transit"
       ]

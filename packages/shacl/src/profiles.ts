@@ -5,13 +5,13 @@ import type { Quad } from "@rdfjs/types";
  * its own shapes (see docs/validation.md): DCAT-AP for catalogues, decks
  * and their releases, and SKOS for the concept schemes in the
  * vocabulary. The files are vendored verbatim under vendor/ and
- * published with the site; the paths here are relative to the site root.
+ * published with the site; the paths here are relative to its vendor/.
  * Their shapes pick their own targets (sh:targetClass), so a profile
  * checks a whole graph, not one subject.
  */
 export const PROFILES = {
-  "dcat-ap": ["vendor/dcat-ap/3.0.1/dcat-ap-SHACL.ttl"],
-  skos: ["vendor/skohub/skos.shacl.ttl", "vendor/skohub/skos.bestPractice.shacl.ttl"],
+  "dcat-ap": ["dcat-ap/3.0.1/dcat-ap-SHACL.ttl"],
+  skos: ["skohub/skos.shacl.ttl", "skohub/skos.bestPractice.shacl.ttl"],
 } as const satisfies Record<string, readonly string[]>;
 
 export type ProfileName = keyof typeof PROFILES;
@@ -21,9 +21,10 @@ export type ProfileName = keyof typeof PROFILES;
  * table entries and media types, and Solid Memo's own topics), loaded
  * into the data graph next to the data being checked: a profile's
  * `sh:class` checks look for the type of a value in the data graph, as
- * DCAT-AP expects of its controlled vocabularies.
+ * DCAT-AP expects of its controlled vocabularies. Documents of the
+ * vocabulary's pod, relative to it.
  */
-export const REFERENCE_DATA = ["vocab/external.ttl", "vocab/topics.ttl"] as const;
+export const REFERENCE_DATA = ["external", "topics"] as const;
 
 const SH_SPARQL = "http://www.w3.org/ns/shacl#sparql";
 

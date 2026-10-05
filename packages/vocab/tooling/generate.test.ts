@@ -29,7 +29,8 @@ function fakeIo(committed: Record<string, string>): GenerateIo & { written: Reco
     writeFile: async (path: string, text: string) => {
       io.written[path] = text;
     },
-    readTurtleTree: real.readTurtleTree,
+    readPod: real.readPod,
+    readShapeTree: real.readShapeTree,
     log: (message: string) => io.logs.push(message),
   };
   return io;

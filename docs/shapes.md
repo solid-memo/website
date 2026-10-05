@@ -1,31 +1,36 @@
 # Shapes
 
 What a valid Solid Memo subject looks like, version by version, as
-SHACL; and how those shapes drive the code. One shape file per class per
-format version under [`packages/vocab/shapes/`](../packages/vocab/shapes/), published with the site.
+SHACL; and how those shapes drive the code. One shape document per
+class per format version on the shapes' own pod,
+https://pod.solid-memo.com/shapes/ ([pods.ts](../packages/vocab/src/pods.ts)),
+their only copy: this repository keeps none.
 
-## Files and IRIs
+## Documents and IRIs
 
 ```
-shapes/instance/v1.ttl        https://solid-memo.com/shapes/instance/v1.ttl#shape
-shapes/deck/v1.ttl, v2.ttl    …/deck/v2.ttl#inPod  and  …/deck/v2.ttl#inLibrary
-shapes/library-deck/v5.ttl    …/library-deck/v5.ttl#inLibrary  (library deck 5 on)
-shapes/deck-series/v1.ttl … v3.ttl
-shapes/card/v1.ttl, v2.ttl
-shapes/review-state/v1.ttl, v2.ttl
-shapes/preferences/v1.ttl … v4.ttl
-shapes/document-receipt/v1.ttl, shapes/deck-schedule/v1.ttl   (the digest)
+instance/v1, v2               https://pod.solid-memo.com/shapes/instance/v1#shape
+deck/v1 … v6                  …/deck/v2#inPod  and  …/deck/v2#inLibrary
+library-deck/v5               …/library-deck/v5#inLibrary  (library deck 5 on)
+deck-series/v1 … v3
+card/v1 … v5
+review-state/v1, v2
+preferences/v1 … v4
+document-receipt/v1, deck-schedule/v1   (the digest)
 ```
 
-The shape IRIs include `.ttl` on purpose: they dereference on a static
-host without any redirect trick. A deck is shaped two ways because it
-lives in two places: `<#inPod>` (a catalog entry, with the links to its
-two documents) and `<#inLibrary>` (a [deck library](deck-library.md)
-document, which has no pod documents and may list its sources). Up to
-format 4 both share one file and its named property shapes; library
-deck 5, a version the pod's deck does not share, has a self-contained
-file of its own (`shapes/library-deck/`), since a shape's `sh:name`
-version must match its file's.
+Each document's address is its IRI, without an extension: the Solid
+server says what format it is in and converts it on request, so a shape
+IRI names the shape whatever format it is read in. Every folder is
+public and listed, which is how `npm run generate` finds every version
+([pod.ts](../packages/vocab/tooling/pod.ts)). A deck is shaped two ways
+because it lives in two places: `<#inPod>` (a catalog entry, with the
+links to its two documents) and `<#inLibrary>` (a [deck
+library](deck-library.md) document, which has no pod documents and may
+list its sources). Up to format 4 both share one document and its named
+property shapes; library deck 5, a version the pod's deck does not
+share, has a self-contained document of its own (`library-deck/`),
+since a shape's `sh:name` version must match its document's.
 
 ## Conventions
 
@@ -82,7 +87,7 @@ version must match its file's.
 | Deck 4 | Deck 3, but `dcterms:title` and `dcterms:description` are language-tagged text (`rdf:langString`): one or more values, at most one per language (`sh:uniqueLang`), exactly one of them English (`sh:qualifiedValueShape [ sh:languageIn ("en") ]`, `sh:qualifiedMinCount 1`, `sh:qualifiedMaxCount 1`). The app shows the text in the reader's language (the browser's preferred languages), else the English; it edits the text in the page's language, else the English, and keeps the other languages. Text typed on a page in another language than English is written in that language and, since English is required, as the English too while it has no translation of its own (renaming then replaces both) |
 | Deck 5 | Deck 4 in a pod (`<#inPod>`, `DeckV5` only), but `dcterms:title` and `dcterms:description` are language-tagged text in any language: one or more values, at most one per language (`sh:uniqueLang`), English no longer required. A deck titled only in Swedish or Japanese is a whole deck. A library release stays library deck 4 (`LibraryDeckV4`, English required): English first is the library's curation policy, not a rule of the data. The app edits each language's text under the tag the user states and no longer writes an identical English copy; a title deck 4 tagged English though it is in another language stays so until the user retags it, and one saved the same in English and another language is accepted as text in each language and left untouched. The step from deck 4 changes nothing: every format-4 deck is a format-5 deck |
 | Deck 6 | Deck 5 in a pod (`DeckV6` only), but `dcat:keyword` 0..n is language-tagged text in any language, several values per language (no `sh:uniqueLang`). Untagged keywords (`sh:or` of `xsd:string` and `rdf:langString`), their language unknown, are accepted only as kept from older formats: the app writes every keyword under the language the user states. The app shows the keywords in the reader's language (any tag with its primary subtag) and those in no stated language (untagged and `zxx`), with no fallback to another language. The step from deck 5 keeps the keywords untagged |
-| Library deck 5 | Library deck 4 (`LibraryDeckV5`, in `shapes/library-deck/v5.ttl`), but `dcat:keyword` 0..n is language-tagged text, several values per language; untagged keywords are invalid. The step from library deck 4 keeps a frozen release's keywords untagged |
+| Library deck 5 | Library deck 4 (`LibraryDeckV5`, in `library-deck/v5`), but `dcat:keyword` 0..n is language-tagged text, several values per language; untagged keywords are invalid. The step from library deck 4 keeps a frozen release's keywords untagged |
 | Preferences 3 | Preferences 2 + `sm:invalidDataPolicy` 1..1, a concept of `sm:InvalidDataPolicies` |
 | Preferences 4 | Preferences 3 + `sm:theme` 1..1, a concept of `sm:Themes` (see [theme.md](theme.md)) |
 | Library deck series 1 | The deck across its releases in the library index: a `dcat:DatasetSeries` and `dcat:Dataset`; title, description, publisher 1..1; `dcat:first`, `dcat:last`, `dcat:hasCurrentVersion` 1..1; `dcat:hasVersion` 1..n; themes and keywords 0..n |
@@ -110,7 +115,7 @@ Why each version moved is in [migrations.md](migrations.md).
 
 ```mermaid
 flowchart LR
-    shapes["shapes/*/v*.ttl"] -->|npm run generate| types["src/types.generated.ts<br/>CardV2, DeckRecord, LATEST_VERSION…"]
+    shapes["pod.solid-memo.com/shapes/*/v*"] -->|npm run generate| types["src/types.generated.ts<br/>CardV2, DeckRecord, LATEST_VERSION…"]
     shapes -->|npm run generate| desc["src/descriptors.generated.ts<br/>CARD_V2, SHAPES, ALL_SHAPES"]
     types --> migrations["domain: shapes/migrations<br/>record → next record"]
     types --> records["domain: *Record.ts<br/>record ↔ model"]
@@ -177,7 +182,8 @@ proves it for every version and every migration step.
 ## Where the shapes are checked
 
 - **Tests**: the fixtures in `packages/vocab/fixtures/<class>/v<N>/{valid,invalid}/`
-  pass and fail as expected; the conformance test above.
+  pass and fail as expected against the shapes read from their pod; the
+  conformance test above. The tests need the network for it.
 - **The deck library**: every release and the index, by the decks
   repository's own checks ([deck-library.md](deck-library.md)).
 - **Browser**: the developer tool described in [validation.md](validation.md).

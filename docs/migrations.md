@@ -385,13 +385,14 @@ flowchart TD
 
 ## Adding a format version
 
-1. Write `shapes/<class>/v<N+1>.ttl` (copy `v<N>.ttl`, change the version
-   assertion to `sh:hasValue N+1`, add or change the properties). Add any
-   new terms to the [vocabulary](vocab.md). A shape's `sh:name` version
-   must match its file's, with no gaps, so a class whose shape shares a
-   file with another's moves to a folder of its own when only one of them
-   gets a new version: library deck 5 is `shapes/library-deck/v5.ttl`, a
-   self-contained copy of `LibraryDeckV4` from `shapes/deck/v4.ttl`.
+1. Put `<class>/v<N+1>` on the shapes' pod, as its owner (copy `v<N>`,
+   change the `@base`, the version assertion to `sh:hasValue N+1`, add
+   or change the properties), public like the others. Add any new terms
+   to the [vocabulary](vocab.md). A shape's `sh:name` version must match
+   its document's, with no gaps, so a class whose shape shares a document
+   with another's moves to a folder of its own when only one of them gets
+   a new version: library deck 5 is `library-deck/v5`, a self-contained
+   copy of `LibraryDeckV4` from `deck/v4`.
 2. `npm run generate`: the new record type, descriptor and
    `LATEST_VERSION` appear.
 3. Add `packages/domain/src/shapes/migrations/<class>/<N>-to-<N+1>.ts` and register

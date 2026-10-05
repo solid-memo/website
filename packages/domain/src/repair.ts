@@ -9,7 +9,7 @@ import { shown } from "./langText";
  */
 
 const DCTERMS = "http://purl.org/dc/terms/";
-const SM = "https://solid-memo.com/vocab/v1#";
+const SM = "https://pod.solid-memo.com/vocab/v1#";
 const FOAF = "http://xmlns.com/foaf/0.1/";
 
 export type RepairKind =

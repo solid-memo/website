@@ -4,7 +4,9 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { defineConfig } from "vitest/config";
 import preact from "@preact/preset-vite";
-import { topicsPage, turtleDirectoryPlugin, vocabPage } from "@solid-memo/vocab/tooling/publishTurtle";
+import { ALL_SHAPES } from "@solid-memo/vocab/descriptors.generated";
+import { readPodTurtle, SHAPES_POD } from "@solid-memo/vocab/tooling/pod";
+import { turtleDirectoryPlugin } from "@solid-memo/vocab/tooling/publishTurtle";
 import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
 
 /**
@@ -25,11 +27,17 @@ function commitSha(): string | null {
 
 /**
  * Names the rules pod documents are checked by: a hash of every shape
- * and vendored profile file. A check receipt in an instance's digest
- * counts only under the same rules.
+ * the app knows, as the shapes' pod has it now, and of every vendored
+ * profile file. A check receipt in an instance's digest counts only
+ * under the same rules. A shape changes only by a new version, which
+ * the app learns of by being built again (npm run generate), so the
+ * hash taken when it is built holds for as long as it runs.
  */
-function shapesRuleset(): string {
+async function shapesRuleset(): Promise<string> {
   const hash = createHash("sha256");
+  for (const path of [...new Set(ALL_SHAPES.map((d) => d.shapeDocument))].sort()) {
+    hash.update(path).update(await readPodTurtle(`${SHAPES_POD}${path}`));
+  }
   const visit = (dir: string) => {
     for (const entry of readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
       const path = join(dir, entry.name);
@@ -37,21 +45,20 @@ function shapesRuleset(): string {
       else hash.update(path.slice(VOCAB_ROOT.length)).update(readFileSync(path));
     }
   };
-  visit(`${VOCAB_ROOT}shapes`);
   visit(`${VOCAB_ROOT}vendor`);
   return hash.digest("hex").slice(0, 16);
 }
 
-export default defineConfig({
+export default defineConfig(async ({ mode }) => ({
   define: {
     __COMMIT_SHA__: JSON.stringify(commitSha()),
-    __SHAPES_RULESET__: JSON.stringify(shapesRuleset()),
+    // The unit tests check no pod documents: they need no ruleset, nor the network to make one.
+    __SHAPES_RULESET__: JSON.stringify(mode === "test" ? "test" : await shapesRuleset()),
   },
   base: "./",
   plugins: [
     preact(),
-    turtleDirectoryPlugin({ dir: `${VOCAB_ROOT}vocab`, publicPath: "vocab", pages: [vocabPage(), topicsPage()] }),
-    turtleDirectoryPlugin({ dir: `${VOCAB_ROOT}shapes`, publicPath: "shapes" }),
+    // Solid Memo's own vocabulary and shapes are on their pods (@solid-memo/vocab/pods); only the vendored profiles are the site's.
     turtleDirectoryPlugin({ dir: `${VOCAB_ROOT}vendor`, publicPath: "vendor" }),
   ],
   resolve: {
@@ -70,7 +77,7 @@ export default defineConfig({
     },
     setupFiles: ["./src/test/setup.ts"],
     coverage: {
-      provider: "v8",
+      provider: "v8" as const,
       include: ["src/**/*.{ts,tsx}"],
       exclude: ["src/main.tsx", "src/vite-env.d.ts", "src/test/**"],
       thresholds: {
@@ -81,4 +88,4 @@ export default defineConfig({
       },
     },
   },
-});
+}));

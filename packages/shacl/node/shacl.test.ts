@@ -11,9 +11,10 @@ import {
   validateTurtleDocument,
 } from "./shacl.ts";
 import { parseTurtle, readTurtleTree } from "@solid-memo/turtle/rdf";
+import { readPodTurtle, VOCAB_POD } from "@solid-memo/vocab/tooling/pod";
+import { SM_NS as SM } from "@solid-memo/vocab/vocab.generated";
 
 const ROOT = VOCAB_ROOT;
-const SM = "https://solid-memo.com/vocab/v1#";
 const DC = "http://purl.org/dc/terms/";
 
 /** What each invalid fixture must be rejected for. */
@@ -89,7 +90,7 @@ const contextOf = (path: string) =>
   path.includes("/library-") ? ("library" as const) : ("pod" as const);
 
 describe("the shapes over the fixtures", async () => {
-  const engine = await loadEngine(ROOT);
+  const engine = await loadEngine();
   const fixtures = (await readTurtleTree(`${ROOT}fixtures`)).filter(
     (f) => !f.path.startsWith("profile/"),
   );
@@ -133,7 +134,7 @@ describe("the shapes over the fixtures", async () => {
   });
 
   it("reject a subject typed with a Solid Memo term that is no class", async () => {
-    const quads = parseTurtle(`<#x> a <https://solid-memo.com/vocab/v1#front> .`, base("x.ttl"));
+    const quads = parseTurtle(`<#x> a <https://pod.solid-memo.com/vocab/v1#front> .`, base("x.ttl"));
     await expect(validateTurtleDocument("x.ttl", quads, engine, "pod")).rejects.toThrow(
       "x.ttl:\n  <https://pod.example/x.ttl#x> is typed with a Solid Memo term that names no class.",
     );
@@ -149,8 +150,8 @@ describe("the shapes over the fixtures", async () => {
 });
 
 describe("loadShapesGraph", () => {
-  it("merges every shape file into one graph", async () => {
-    const graph = await loadShapesGraph(ROOT);
+  it("merges every shape the app knows, from the shapes' pod, into one graph", async () => {
+    const graph = await loadShapesGraph();
     expect(graph.size).toBeGreaterThan(500);
   });
 });
@@ -179,7 +180,7 @@ const PROFILE_EXPECTED: Record<string, { path: string; message: string }> = {
 };
 
 describe("the vendored profiles over their fixtures", async () => {
-  const reference = await loadReferenceData(ROOT);
+  const reference = await loadReferenceData();
   const engines = {
     "dcat-ap": await loadProfileEngine(ROOT, "dcat-ap"),
     skos: await loadProfileEngine(ROOT, "skos"),
@@ -286,14 +287,15 @@ describe("the vendored profiles over their fixtures", async () => {
   });
 });
 
-describe("vocab/", async () => {
+describe("the vocabulary's pod", async () => {
   it("holds every concept scheme to SKOS, best practice included", async () => {
     const engine = await loadProfileEngine(ROOT, "skos");
-    for (const { path, turtle } of await readTurtleTree(`${ROOT}vocab`)) {
+    for (const path of ["v1", "topics", "external"]) {
+      const url = `${VOCAB_POD}${path}`;
       await expect(
         validateProfile(
-          `vocab/${path}`,
-          parseTurtle(turtle, `https://solid-memo.com/vocab/${path}`),
+          url,
+          parseTurtle(await readPodTurtle(url), url),
           engine,
           [],
           "warning",

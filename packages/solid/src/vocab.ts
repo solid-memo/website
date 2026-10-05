@@ -1,6 +1,6 @@
 /**
- * Solid Memo's own vocabulary is generated from vocab/v1.ttl (see
- * docs/vocab.md); the external vocabularies below are not ours to
+ * Solid Memo's own vocabulary is generated from its pod's v1 document
+ * (see docs/vocab.md); the external vocabularies below are not ours to
  * publish and stay hand-written.
  */
 export { SM, SM_NS } from "@solid-memo/vocab/vocab.generated";

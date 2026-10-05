@@ -38,7 +38,7 @@ describe("review state mapping", () => {
       predicates: {
         ...thing.predicates,
         "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": {
-          namedNodes: ["https://solid-memo.com/vocab/v1#Card"],
+          namedNodes: ["https://pod.solid-memo.com/vocab/v1#Card"],
         },
       },
     };
@@ -59,7 +59,7 @@ describe("review state mapping", () => {
       predicates: Object.fromEntries(
         Object.entries(thing.predicates).filter(
           ([predicate]) =>
-            predicate !== `https://solid-memo.com/vocab/v1#${field}`,
+            predicate !== `https://pod.solid-memo.com/vocab/v1#${field}`,
         ),
       ),
     };
@@ -101,7 +101,7 @@ describe("review state mapping", () => {
       predicates: Object.fromEntries(
         Object.entries(thing.predicates).filter(
           ([predicate]) =>
-            predicate !== `https://solid-memo.com/vocab/v1#${field}`,
+            predicate !== `https://pod.solid-memo.com/vocab/v1#${field}`,
         ),
       ),
     };

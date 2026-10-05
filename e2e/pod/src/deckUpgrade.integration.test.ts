@@ -6,9 +6,8 @@
  * checks them and switches the deck's catalog entry over; the deck's own
  * documents are never written, only deleted once the deck has moved.
  */
-import { readFile } from "node:fs/promises";
 import { beforeAll, describe, expect, inject, it } from "vitest";
-import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/pod";
 import { createUseCases, type UseCases } from "@solid-memo/application/useCases";
 import type { DeckLibrary } from "@solid-memo/application/ports";
 import type { Deck } from "@solid-memo/domain/deck";
@@ -27,7 +26,6 @@ import { createWriteFence } from "@solid-memo/solid/writeFence";
 import { aclOf, ETAG_OUTLIVES_EDITS, etagMarksEveryEdit } from "./serverTraits";
 
 const SERVERS = inject("solidServers");
-const SITE = "https://solid-memo.test/";
 const LIBRARY = "https://solid-memo.test/decks/capitals/";
 const READS = new Set(["GET", "HEAD", "OPTIONS"]);
 const FRIEND = "https://bob.example/profile/card#me";
@@ -121,11 +119,7 @@ function app(options: { failOn?: (request: Recorded) => boolean; onRequest?: (re
     recorded.status = response.status;
     return response;
   };
-  const shapesFetch: typeof fetch = async (input) =>
-    new Response(await readFile(`${VOCAB_ROOT}${new URL(String(input)).pathname.slice(1)}`, "utf8"), {
-      headers: { "content-type": "text/turtle" },
-    });
-  const shapeValidator = createShaclShapeValidator({ fetch: podFetch, shapesFetch, shapesBaseUrl: `${SITE}shapes/` });
+  const shapeValidator = createShaclShapeValidator({ fetch: podFetch, shapesFetch, ...SHAPE_SOURCES });
   const checkWrite = shapeValidator.checkSubjects;
   const deps = { fetch: podFetch, checkWrite, now: () => new Date(), randomId: () => crypto.randomUUID() };
   const deckRepository = createSolidDeckRepository(deps);

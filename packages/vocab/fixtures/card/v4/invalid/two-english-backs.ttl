@@ -1,4 +1,4 @@
-@prefix solid-memo: <https://solid-memo.com/vocab/v1#> .
+@prefix solid-memo: <https://pod.solid-memo.com/vocab/v1#> .
 
 <#se>
     a solid-memo:Card ;

@@ -1,4 +1,4 @@
-/* Generated from shapes/<class>/v<N>.ttl by `npm run generate`. Do not edit: change the source and regenerate. */
+/* Generated from https://pod.solid-memo.com/shapes/<class>/v<N> by `npm run generate`. Do not edit: change the source and regenerate. */
 
 /**
  * A text in one or more languages (rdf:langString values): language tag,
@@ -46,7 +46,7 @@ export interface AgentV1 {
 export interface AnswerV1 {
   readonly deck: string;
   readonly card: string;
-  readonly direction: "https://solid-memo.com/vocab/v1#frontToBack" | "https://solid-memo.com/vocab/v1#backToFront";
+  readonly direction: "https://pod.solid-memo.com/vocab/v1#frontToBack" | "https://pod.solid-memo.com/vocab/v1#backToFront";
   readonly grade: number;
   readonly answeredAt: string;
   readonly studyDay: string;
@@ -158,7 +158,7 @@ export interface DeckV3 {
   readonly modified?: string;
   readonly creator: readonly string[];
   readonly license?: string;
-  readonly studyDirection: "https://solid-memo.com/vocab/v1#frontToBack" | "https://solid-memo.com/vocab/v1#backToFront" | "https://solid-memo.com/vocab/v1#bidirectional";
+  readonly studyDirection: "https://pod.solid-memo.com/vocab/v1#frontToBack" | "https://pod.solid-memo.com/vocab/v1#backToFront" | "https://pod.solid-memo.com/vocab/v1#bidirectional";
   readonly theme: readonly string[];
   readonly keyword: readonly string[];
   readonly distribution: readonly string[];
@@ -177,7 +177,7 @@ export interface DeckV4 {
   readonly modified?: string;
   readonly creator: readonly string[];
   readonly license?: string;
-  readonly studyDirection: "https://solid-memo.com/vocab/v1#frontToBack" | "https://solid-memo.com/vocab/v1#backToFront" | "https://solid-memo.com/vocab/v1#bidirectional";
+  readonly studyDirection: "https://pod.solid-memo.com/vocab/v1#frontToBack" | "https://pod.solid-memo.com/vocab/v1#backToFront" | "https://pod.solid-memo.com/vocab/v1#bidirectional";
   readonly theme: readonly string[];
   readonly keyword: readonly string[];
   readonly distribution: readonly string[];
@@ -196,7 +196,7 @@ export interface DeckV5 {
   readonly modified?: string;
   readonly creator: readonly string[];
   readonly license?: string;
-  readonly studyDirection: "https://solid-memo.com/vocab/v1#frontToBack" | "https://solid-memo.com/vocab/v1#backToFront" | "https://solid-memo.com/vocab/v1#bidirectional";
+  readonly studyDirection: "https://pod.solid-memo.com/vocab/v1#frontToBack" | "https://pod.solid-memo.com/vocab/v1#backToFront" | "https://pod.solid-memo.com/vocab/v1#bidirectional";
   readonly theme: readonly string[];
   readonly keyword: readonly string[];
   readonly distribution: readonly string[];
@@ -215,7 +215,7 @@ export interface DeckV6 {
   readonly modified?: string;
   readonly creator: readonly string[];
   readonly license?: string;
-  readonly studyDirection: "https://solid-memo.com/vocab/v1#frontToBack" | "https://solid-memo.com/vocab/v1#backToFront" | "https://solid-memo.com/vocab/v1#bidirectional";
+  readonly studyDirection: "https://pod.solid-memo.com/vocab/v1#frontToBack" | "https://pod.solid-memo.com/vocab/v1#backToFront" | "https://pod.solid-memo.com/vocab/v1#bidirectional";
   readonly theme: readonly string[];
   readonly keyword: LangTexts;
   readonly distribution: readonly string[];
@@ -231,7 +231,7 @@ export interface DeckScheduleV1 {
   readonly deck: string;
   readonly cardsVersion: string;
   readonly reviewsVersion: string;
-  readonly direction: "https://solid-memo.com/vocab/v1#frontToBack" | "https://solid-memo.com/vocab/v1#backToFront" | "https://solid-memo.com/vocab/v1#bidirectional";
+  readonly direction: "https://pod.solid-memo.com/vocab/v1#frontToBack" | "https://pod.solid-memo.com/vocab/v1#backToFront" | "https://pod.solid-memo.com/vocab/v1#bidirectional";
   readonly dayBoundaryHour: number;
   readonly studyDay: string;
   readonly dueOnDay: readonly string[];
@@ -302,7 +302,7 @@ export interface LibraryDeckV3 {
   readonly creator: readonly string[];
   readonly publisher: string;
   readonly license?: string;
-  readonly studyDirection: "https://solid-memo.com/vocab/v1#frontToBack" | "https://solid-memo.com/vocab/v1#backToFront" | "https://solid-memo.com/vocab/v1#bidirectional";
+  readonly studyDirection: "https://pod.solid-memo.com/vocab/v1#frontToBack" | "https://pod.solid-memo.com/vocab/v1#backToFront" | "https://pod.solid-memo.com/vocab/v1#bidirectional";
   readonly theme: readonly string[];
   readonly keyword: readonly string[];
   readonly language: readonly string[];
@@ -326,7 +326,7 @@ export interface LibraryDeckV4 {
   readonly creator: readonly string[];
   readonly publisher: string;
   readonly license?: string;
-  readonly studyDirection: "https://solid-memo.com/vocab/v1#frontToBack" | "https://solid-memo.com/vocab/v1#backToFront" | "https://solid-memo.com/vocab/v1#bidirectional";
+  readonly studyDirection: "https://pod.solid-memo.com/vocab/v1#frontToBack" | "https://pod.solid-memo.com/vocab/v1#backToFront" | "https://pod.solid-memo.com/vocab/v1#bidirectional";
   readonly theme: readonly string[];
   readonly keyword: readonly string[];
   readonly language: readonly string[];
@@ -350,7 +350,7 @@ export interface LibraryDeckV5 {
   readonly creator: readonly string[];
   readonly publisher: string;
   readonly license?: string;
-  readonly studyDirection: "https://solid-memo.com/vocab/v1#frontToBack" | "https://solid-memo.com/vocab/v1#backToFront" | "https://solid-memo.com/vocab/v1#bidirectional";
+  readonly studyDirection: "https://pod.solid-memo.com/vocab/v1#frontToBack" | "https://pod.solid-memo.com/vocab/v1#backToFront" | "https://pod.solid-memo.com/vocab/v1#bidirectional";
   readonly theme: readonly string[];
   readonly keyword: LangTexts;
   readonly language: readonly string[];
@@ -428,7 +428,7 @@ export interface PreferencesV3 {
   readonly dayBoundaryHour: number;
   readonly answerScale: "sm2" | "minimal";
   readonly developerMode: boolean;
-  readonly invalidDataPolicy: "https://solid-memo.com/vocab/v1#blockInstance" | "https://solid-memo.com/vocab/v1#blockSubject" | "https://solid-memo.com/vocab/v1#warnOnly";
+  readonly invalidDataPolicy: "https://pod.solid-memo.com/vocab/v1#blockInstance" | "https://pod.solid-memo.com/vocab/v1#blockSubject" | "https://pod.solid-memo.com/vocab/v1#warnOnly";
 }
 
 /** Preferences format 4: every field required, the theme among them. */
@@ -438,8 +438,8 @@ export interface PreferencesV4 {
   readonly dayBoundaryHour: number;
   readonly answerScale: "sm2" | "minimal";
   readonly developerMode: boolean;
-  readonly invalidDataPolicy: "https://solid-memo.com/vocab/v1#blockInstance" | "https://solid-memo.com/vocab/v1#blockSubject" | "https://solid-memo.com/vocab/v1#warnOnly";
-  readonly theme: "https://solid-memo.com/vocab/v1#systemTheme" | "https://solid-memo.com/vocab/v1#lightTheme" | "https://solid-memo.com/vocab/v1#darkTheme";
+  readonly invalidDataPolicy: "https://pod.solid-memo.com/vocab/v1#blockInstance" | "https://pod.solid-memo.com/vocab/v1#blockSubject" | "https://pod.solid-memo.com/vocab/v1#warnOnly";
+  readonly theme: "https://pod.solid-memo.com/vocab/v1#systemTheme" | "https://pod.solid-memo.com/vocab/v1#lightTheme" | "https://pod.solid-memo.com/vocab/v1#darkTheme";
 }
 
 /** Review-state format 1: the SM-2 fields; the previous* snapshot is admitted. */

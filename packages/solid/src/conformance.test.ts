@@ -12,6 +12,7 @@ import type { Deck } from "@solid-memo/domain/deck";
 import { createShapeLoader } from "@solid-memo/shacl/shapeLoader";
 import { SHAPES } from "@solid-memo/vocab/descriptors.generated";
 import { RDF, SM, SM_NS } from "./vocab";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/pod";
 import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
 
 const EDUC = "http://publications.europa.eu/resource/authority/data-theme/EDUC";
@@ -20,24 +21,15 @@ const EDUC = "http://publications.europa.eu/resource/authority/data-theme/EDUC";
  * The shapes, the descriptors and the migrations agree: for every shape
  * version, a record written through its descriptor conforms to the
  * shape, and every migration step's output conforms to the shape it
- * moves to. Shape documents are read from the repository the way the
- * browser reads them from the site.
+ * moves to. Shape documents are read from the shapes' pod, as the
+ * browser reads them.
  */
 
+/** Where the fixtures are: this repository, unlike the shapes. */
 const ROOT = VOCAB_ROOT;
-const BASE = "https://solid-memo.com/shapes/";
 const URL_ = "https://pod.example/solid-memo/a/doc.ttl#it";
 
-const loader = createShapeLoader({
-  fetch: async (input) => {
-    const url = String(input);
-    const body = await readFile(`${ROOT}shapes/${url.slice(BASE.length)}`, "utf8");
-    const response = new Response(body, { status: 200, headers: { "Content-Type": "text/turtle" } });
-    Object.defineProperty(response, "url", { value: url });
-    return response;
-  },
-  shapesBaseUrl: BASE,
-});
+const loader = createShapeLoader({ fetch: shapesFetch, ...SHAPE_SOURCES });
 
 /** A record of each kind and version that is valid for that version. */
 const FIXTURES: Record<ShapeName, Record<number, object>> = {
@@ -48,10 +40,10 @@ const FIXTURES: Record<ShapeName, Record<number, object>> = {
   deck: {
     1: { title: "Own", creator: [], cardsDocument: "https://pod.example/d.ttl", reviewsDocument: "https://pod.example/r.ttl" },
     2: { title: "Own", creator: ["Anton"], direction: "bidirectional", cardsDocument: "https://pod.example/d.ttl", reviewsDocument: "https://pod.example/r.ttl", source: "https://solid-memo.com/decks/x.ttl" },
-    3: { title: "Own", description: "Mine.", creator: ["https://pod.example/c.ttl#agent-anton"], studyDirection: `${SM_NS}bidirectional`, theme: ["https://solid-memo.com/vocab/topics#geography"], keyword: ["capitals"], distribution: ["https://pod.example/c.ttl#deck-1-cards"], cardsDocument: "https://pod.example/d.ttl", reviewsDocument: "https://pod.example/r.ttl", source: "https://solid-memo.com/decks/x/1.ttl" },
-    4: { title: { en: "Own", sv: "Egen" }, description: { en: "Mine.", sv: "Min." }, creator: ["https://pod.example/c.ttl#agent-anton"], studyDirection: `${SM_NS}bidirectional`, theme: ["https://solid-memo.com/vocab/topics#geography"], keyword: ["capitals"], distribution: ["https://pod.example/c.ttl#deck-1-cards"], cardsDocument: "https://pod.example/d.ttl", reviewsDocument: "https://pod.example/r.ttl", source: "https://solid-memo.com/decks/x/1.ttl" },
-    5: { title: { sv: "Egen", ja: "自分の" }, description: { sv: "Min." }, creator: ["https://pod.example/c.ttl#agent-anton"], studyDirection: `${SM_NS}bidirectional`, theme: ["https://solid-memo.com/vocab/topics#geography"], keyword: ["capitals"], distribution: ["https://pod.example/c.ttl#deck-1-cards"], cardsDocument: "https://pod.example/d.ttl", reviewsDocument: "https://pod.example/r.ttl", source: "https://solid-memo.com/decks/x/1.ttl" },
-    6: { title: { sv: "Egen" }, description: { sv: "Min." }, creator: ["https://pod.example/c.ttl#agent-anton"], studyDirection: `${SM_NS}bidirectional`, theme: ["https://solid-memo.com/vocab/topics#geography"], keyword: { en: ["capitals", "countries"], sv: ["huvudstäder"], "sv-fi": ["städer"], zxx: ["ISO 3166"], "": ["legacy"] }, distribution: ["https://pod.example/c.ttl#deck-1-cards"], cardsDocument: "https://pod.example/d.ttl", reviewsDocument: "https://pod.example/r.ttl", source: "https://solid-memo.com/decks/x/1.ttl" },
+    3: { title: "Own", description: "Mine.", creator: ["https://pod.example/c.ttl#agent-anton"], studyDirection: `${SM_NS}bidirectional`, theme: ["https://pod.solid-memo.com/vocab/topics#geography"], keyword: ["capitals"], distribution: ["https://pod.example/c.ttl#deck-1-cards"], cardsDocument: "https://pod.example/d.ttl", reviewsDocument: "https://pod.example/r.ttl", source: "https://solid-memo.com/decks/x/1.ttl" },
+    4: { title: { en: "Own", sv: "Egen" }, description: { en: "Mine.", sv: "Min." }, creator: ["https://pod.example/c.ttl#agent-anton"], studyDirection: `${SM_NS}bidirectional`, theme: ["https://pod.solid-memo.com/vocab/topics#geography"], keyword: ["capitals"], distribution: ["https://pod.example/c.ttl#deck-1-cards"], cardsDocument: "https://pod.example/d.ttl", reviewsDocument: "https://pod.example/r.ttl", source: "https://solid-memo.com/decks/x/1.ttl" },
+    5: { title: { sv: "Egen", ja: "自分の" }, description: { sv: "Min." }, creator: ["https://pod.example/c.ttl#agent-anton"], studyDirection: `${SM_NS}bidirectional`, theme: ["https://pod.solid-memo.com/vocab/topics#geography"], keyword: ["capitals"], distribution: ["https://pod.example/c.ttl#deck-1-cards"], cardsDocument: "https://pod.example/d.ttl", reviewsDocument: "https://pod.example/r.ttl", source: "https://solid-memo.com/decks/x/1.ttl" },
+    6: { title: { sv: "Egen" }, description: { sv: "Min." }, creator: ["https://pod.example/c.ttl#agent-anton"], studyDirection: `${SM_NS}bidirectional`, theme: ["https://pod.solid-memo.com/vocab/topics#geography"], keyword: { en: ["capitals", "countries"], sv: ["huvudstäder"], "sv-fi": ["städer"], zxx: ["ISO 3166"], "": ["legacy"] }, distribution: ["https://pod.example/c.ttl#deck-1-cards"], cardsDocument: "https://pod.example/d.ttl", reviewsDocument: "https://pod.example/r.ttl", source: "https://solid-memo.com/decks/x/1.ttl" },
   },
   libraryDeck: {
     1: { title: "Capitals", creator: [], source: [] },
@@ -66,7 +58,7 @@ const FIXTURES: Record<ShapeName, Record<number, object>> = {
     3: { title: { en: "Capitals", sv: "Huvudstäder" }, description: { en: "Capitals.", sv: "Huvudstäder." }, publisher: "https://solid-memo.com/decks/index.ttl#solid-memo", theme: [EDUC], keyword: { en: ["capitals"], sv: ["huvudstäder", "länder"], "": ["legacy"] }, first: "https://solid-memo.com/decks/x/1.ttl", last: "https://solid-memo.com/decks/x/3.ttl", hasVersion: ["https://solid-memo.com/decks/x/1.ttl", "https://solid-memo.com/decks/x/2.ttl", "https://solid-memo.com/decks/x/3.ttl"], hasCurrentVersion: "https://solid-memo.com/decks/x/3.ttl" },
   },
   catalog: {
-    1: { title: "Main", description: "My decks.", publisher: "https://pod.example/profile/card#me", themeTaxonomy: ["https://solid-memo.com/vocab/topics"], dataset: ["https://pod.example/c.ttl#deck-1"] },
+    1: { title: "Main", description: "My decks.", publisher: "https://pod.example/profile/card#me", themeTaxonomy: ["https://pod.solid-memo.com/vocab/topics"], dataset: ["https://pod.example/c.ttl#deck-1"] },
   },
   agent: {
     1: { name: "Anton", mbox: "mailto:anton@example.com" },
@@ -123,7 +115,8 @@ async function violationsOf(shape: ShapeName, version: number, record: object) {
 }
 
 describe("shapes, descriptors and migrations", () => {
-  it("agree: a record written through each descriptor conforms to its shape", async () => {
+  // Every shape is read from the shapes' pod: more than the default five seconds on a slow network.
+  it("agree: a record written through each descriptor conforms to its shape", { timeout: 30_000 }, async () => {
     for (const shape of Object.keys(LATEST_VERSION) as ShapeName[]) {
       for (let version = 1; version <= LATEST_VERSION[shape]; version += 1) {
         expect(FIXTURES[shape][version], `${shape} v${version} fixture`).toBeDefined();
@@ -217,14 +210,14 @@ describe("deck format 6 over the format-5 fixtures", () => {
   });
 });
 
-/** A site file (vendored profile, reference data) as an RDF/JS dataset. */
-async function siteDataset(path: string) {
-  return datasetFromTurtle(await readFile(`${ROOT}${path}`, "utf8"), `https://solid-memo.com/${path}`);
+/** A document the profile check loads, from where the app reads it, as an RDF/JS dataset. */
+async function sourceDataset(url: string) {
+  return datasetFromTurtle(await (await shapesFetch(url)).text(), url);
 }
 
 describe("what the app writes, under DCAT-AP", () => {
   it("conforms: a catalog document with its catalogue, a deck, its creators and its distribution", async () => {
-    const shapes = await Promise.all(PROFILES["dcat-ap"].map(siteDataset));
+    const shapes = await Promise.all(PROFILES["dcat-ap"].map((path) => sourceDataset(`${SHAPE_SOURCES.vendorBaseUrl}${path}`)));
     const engine = createEngine(mergeDatasets(coreOnly(shapes.flatMap((d) => [...d]))));
     const CATALOG = "https://pod.example/solid-memo/a/catalog.ttl";
     const deck: Deck = {
@@ -239,7 +232,7 @@ describe("what the app writes, under DCAT-AP", () => {
       authors: ["Anton Wiklund <anton@example.com>", "A friend"],
       license: "https://creativecommons.org/publicdomain/zero/1.0/",
       sourceUrl: "https://solid-memo.com/decks/capitals/1.ttl",
-      themes: ["https://solid-memo.com/vocab/topics#geography"],
+      themes: ["https://pod.solid-memo.com/vocab/topics#geography"],
       keywords: { en: ["capitals", "countries"], sv: ["huvudstäder"] },
     };
     const written = toRdfJsDataset(
@@ -249,7 +242,7 @@ describe("what the app writes, under DCAT-AP", () => {
         publisher: { webId: "https://alice.example/profile/card#me", name: "Alice" },
       }),
     );
-    const reference = await Promise.all(REFERENCE_DATA.map(siteDataset));
+    const reference = await Promise.all(REFERENCE_DATA.map((path) => sourceDataset(`${SHAPE_SOURCES.vocabBaseUrl}${path}`)));
     const licence = await datasetFromTurtle(
       "<https://creativecommons.org/publicdomain/zero/1.0/> a <http://purl.org/dc/terms/LicenseDocument> .",
       CATALOG,

@@ -39,7 +39,7 @@ const WIKIDATA = "https://www.wikidata.org/wiki/Property:P36";
 
 /** A library index, as the build writes it: relative to the index. */
 const INDEX_TURTLE = `
-@prefix sm: <https://solid-memo.com/vocab/v1#> .
+@prefix sm: <https://pod.solid-memo.com/vocab/v1#> .
 @prefix dcat: <http://www.w3.org/ns/dcat#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix adms: <http://www.w3.org/ns/adms#> .
@@ -60,7 +60,7 @@ const INDEX_TURTLE = `
    dcterms:created "2026-09-22T09:49:00.236Z"^^xsd:dateTime ; dcterms:modified "2026-09-27T20:12:13Z"^^xsd:dateTime ;
    dcterms:issued "2026-09-22T10:00:00Z"^^xsd:dateTime ;
    dcterms:publisher <#solid-memo> ; sm:studyDirection sm:bidirectional ;
-   dcat:theme <${EDUC}>, <https://solid-memo.com/vocab/topics#geography> ; dcat:keyword "capitals" ;
+   dcat:theme <${EDUC}>, <https://pod.solid-memo.com/vocab/topics#geography> ; dcat:keyword "capitals" ;
    dcat:version "2" ; adms:versionNotes "Added Norway." ;
    dcat:inSeries <#capitals> ; dcat:isVersionOf <#capitals> ; dcat:distribution <capitals/2.ttl#turtle> ;
    prov:wasDerivedFrom <${WIKIPEDIA}>, <https://iupac.org/>, <${WIKIDATA}> .
@@ -99,7 +99,7 @@ describe("toLibraryDecks", () => {
         direction: "bidirectional",
         createdAt: "2026-09-22T09:49:00.236Z",
         modifiedAt: "2026-09-27T20:12:13.000Z",
-        themes: [EDUC, "https://solid-memo.com/vocab/topics#geography"],
+        themes: [EDUC, "https://pod.solid-memo.com/vocab/topics#geography"],
         keywords: { "": ["capitals"] },
         sources: [
           { url: WIKIPEDIA, title: "List of national capitals", authors: ["Wikipedia contributors"], license: BY_SA },
@@ -112,7 +112,7 @@ describe("toLibraryDecks", () => {
 
   it("reads a library deck 5 release's keywords per language, as its series states them", async () => {
     const index = await datasetFromIndex(`
-@prefix sm: <https://solid-memo.com/vocab/v1#> .
+@prefix sm: <https://pod.solid-memo.com/vocab/v1#> .
 @prefix dcat: <http://www.w3.org/ns/dcat#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 <> a dcat:Catalog ; dcterms:title "Library" ; dcterms:description "Decks." ; dcterms:publisher <#solid-memo> ; dcat:dataset <#capitals> .
@@ -133,7 +133,7 @@ describe("toLibraryDecks", () => {
 
   it("keeps the title and description of a deck of format 4 in every language", async () => {
     const index = await datasetFromIndex(`
-@prefix sm: <https://solid-memo.com/vocab/v1#> .
+@prefix sm: <https://pod.solid-memo.com/vocab/v1#> .
 @prefix dcat: <http://www.w3.org/ns/dcat#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 <> a dcat:Catalog ; dcterms:title "Library" ; dcterms:description "Decks." ; dcterms:publisher <#solid-memo> ; dcat:dataset <#capitals> .

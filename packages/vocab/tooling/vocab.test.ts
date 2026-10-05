@@ -2,12 +2,11 @@ import { describe, expect, it } from "vitest";
 import {
   parseVocab,
   renderVocabConstants,
-  renderVocabPage,
   SM_NS,
 } from "./vocab.ts";
 
 const HEAD = `
-@prefix sm:      <https://solid-memo.com/vocab/v1#> .
+@prefix sm:      <https://pod.solid-memo.com/vocab/v1#> .
 @prefix owl:     <http://www.w3.org/2002/07/owl#> .
 @prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
@@ -42,13 +41,13 @@ describe("parseVocab", () => {
   it("rejects a term without its annotations", () => {
     expect(() =>
       parseVocab(`${HEAD}${ONTOLOGY} sm:x a owl:Class ; rdfs:label "x" ; rdfs:comment "x" .`),
-    ).toThrow("vocab: <https://solid-memo.com/vocab/v1#x> has no historyNote.");
+    ).toThrow("vocab: <https://pod.solid-memo.com/vocab/v1#x> has no historyNote.");
   });
 
   it("requires a range on every property", () => {
     expect(() =>
       parseVocab(`${HEAD}${ONTOLOGY} sm:x a owl:DatatypeProperty ; rdfs:label "x" ; rdfs:comment "x" ; skos:historyNote "x" .`),
-    ).toThrow("vocab: <https://solid-memo.com/vocab/v1#x> has no range.");
+    ).toThrow("vocab: <https://pod.solid-memo.com/vocab/v1#x> has no range.");
   });
 
   it("rejects a term outside the namespace", () => {
@@ -59,7 +58,7 @@ describe("parseVocab", () => {
 
   it("requires the ontology subject", () => {
     expect(() => parseVocab(`${HEAD}${TERMS}`)).toThrow(
-      "vocab: expected <https://solid-memo.com/vocab/v1> to be the owl:Ontology.",
+      "vocab: expected <https://pod.solid-memo.com/vocab/v1> to be the owl:Ontology.",
     );
   });
 });
@@ -89,25 +88,20 @@ describe("parseVocab with concept schemes and deprecations", () => {
     expect(vocab.terms[3]).not.toHaveProperty("replacedBy");
   });
 
-  it("carries deprecation into the constants and the page", () => {
+  it("carries deprecation into the constants", () => {
     const constants = renderVocabConstants(vocab);
     expect(constants).toContain("/** A colour. (Since 1.0.) @deprecated Use tint. */");
     expect(constants).toContain("/** A hue. (Since 1.0.) @deprecated */");
-    const page = renderVocabPage(vocab);
-    expect(page).toContain("<td>scheme</td>");
-    expect(page).toContain("<td>concept</td>");
-    expect(page).toContain("<td>property, range string, deprecated, use tint</td>");
-    expect(page).toContain("<td>property, range string, deprecated</td>");
   });
 });
 
 describe("renderVocabConstants", () => {
   it("renders one constant per term with its comment and history", () => {
     expect(renderVocabConstants(parseVocab(`${HEAD}${ONTOLOGY}${TERMS}`))).toBe(
-      `/* Generated from vocab/v1.ttl by \`npm run generate\`. Do not edit: change the source and regenerate. */
+      `/* Generated from https://pod.solid-memo.com/vocab/v1 by \`npm run generate\`. Do not edit: change the source and regenerate. */
 
 /** Solid Memo's own vocabulary, version 1.1 (see docs/vocab.md). */
-export const SM_NS = "https://solid-memo.com/vocab/v1#";
+export const SM_NS = "https://pod.solid-memo.com/vocab/v1#";
 
 export const SM = {
   /** A deck. (Since 1.0.) */
@@ -119,21 +113,5 @@ export const SM = {
 } as const;
 `,
     );
-  });
-});
-
-describe("renderVocabPage", () => {
-  const page = renderVocabPage(parseVocab(`${HEAD}${ONTOLOGY}${TERMS}`));
-
-  it("anchors every term and links the Turtle", () => {
-    expect(page).toContain('<link rel="alternate" type="text/turtle" href="../v1.ttl">');
-    expect(page).toContain('<tr id="Deck"><td><code>sm:Deck</code></td><td>Deck</td><td>A deck. <em>Since 1.0.</em></td><td>class</td></tr>');
-    expect(page).toContain("<td>property, range string, domain Deck</td>");
-    expect(page).toContain("<td>property, range Resource</td>");
-  });
-
-  it("escapes HTML in the text", () => {
-    expect(page).toContain("<title>Test &lt;vocab&gt;</title>");
-    expect(page).toContain("Front &quot;text&quot;.");
   });
 });

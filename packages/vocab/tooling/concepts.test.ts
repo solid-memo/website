@@ -3,7 +3,6 @@ import {
   checkEveryConceptInAScheme,
   parseConceptSchemes,
   renderConcepts,
-  renderSchemePage,
 } from "./concepts.ts";
 
 const BASE = "https://example.com/vocab/colours";
@@ -98,25 +97,5 @@ export const COLOURS = {
 } as const satisfies ConceptScheme;
 `,
     );
-  });
-});
-
-describe("renderSchemePage", () => {
-  it("anchors every concept, names its broader concept and escapes HTML", () => {
-    const [scheme] = parseConceptSchemes(SCHEME, BASE);
-    const page = renderSchemePage(scheme, "../colours.ttl");
-    expect(page).toContain('<link rel="alternate" type="text/turtle" href="../colours.ttl">');
-    expect(page).toContain('<tr id="red"><td><code>red</code></td><td><span lang="en">Red</span><br><span lang="sv">Röd</span></td><td><span lang="en">Blood.</span><br><span lang="sv">Blod.</span></td><td></td></tr>');
-    expect(page).toContain('<td><span lang="en">Dark red.</span><br><span lang="sv">Mörkröd.</span></td><td>Red</td></tr>');
-    expect(page).toContain("Colours &lt;&amp;&gt; &quot;hues&quot;.");
-  });
-
-  it("names a broader concept outside the scheme by its IRI", () => {
-    const [scheme] = parseConceptSchemes(SCHEME, BASE);
-    const page = renderSchemePage(
-      { ...scheme, concepts: [{ ...scheme.concepts[1], broader: "https://other.example/#x" }] },
-      "x.ttl",
-    );
-    expect(page).toContain("<td>https://other.example/#x</td>");
   });
 });

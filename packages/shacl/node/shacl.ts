@@ -11,35 +11,32 @@ import {
 import { pickShape } from "../src/registry.ts";
 import { ALL_SHAPES } from "@solid-memo/vocab/descriptors.generated";
 import type { ShapeContext } from "@solid-memo/vocab/shapeDescriptor";
-import { RDF_TYPE, parseTurtle, readTurtleTree } from "@solid-memo/turtle/rdf";
+import { RDF_TYPE, parseTurtle } from "@solid-memo/turtle/rdf";
 import { SM_NS } from "@solid-memo/vocab/tooling/vocab";
-import { SHAPES_BASE } from "@solid-memo/vocab/tooling/shapes";
+import { readPodTurtle, SHAPES_POD, SITE_VENDOR, VOCAB_POD } from "@solid-memo/vocab/tooling/pod";
 import { shown } from "@solid-memo/domain/langText";
 
 /**
- * Build-time SHACL validation: the shapes under shapes/ applied to a
- * Turtle document, one subject at a time, with the shape chosen by class
- * and format version exactly as the app chooses it; and the vendored
- * profiles (DCAT-AP, SKOS) applied to a whole document.
+ * SHACL validation in node (tests and tools): Solid Memo's shapes,
+ * read from their pod, applied to a Turtle document one subject at a
+ * time, with the shape chosen by class and format version exactly as
+ * the app chooses it; and the vendored profiles (DCAT-AP, SKOS) applied
+ * to a whole document.
  */
 
-/** Where a file under the repository root is published. */
-const SITE = "https://solid-memo.com/";
-
-async function readSiteTurtle(root: string, path: string): Promise<Quad[]> {
-  return parseTurtle(await readFile(join(root, path), "utf8"), `${SITE}${path}`);
+/** A document of the vocabulary's or the shapes' pod, parsed. */
+async function readPodQuads(url: string): Promise<Quad[]> {
+  return parseTurtle(await readPodTurtle(url), url);
 }
 
-/** Every shape file under `<root>/shapes`, parsed into one graph. */
-export async function loadShapesGraph(root: string): Promise<Store> {
-  const files = await readTurtleTree(`${root}/shapes`);
-  return new Store(
-    files.flatMap((file) => parseTurtle(file.turtle, `${SHAPES_BASE}${file.path}`)),
-  );
+/** Every shape the app knows (ALL_SHAPES), read from the shapes' pod, in one graph. */
+export async function loadShapesGraph(): Promise<Store> {
+  const documents = [...new Set(ALL_SHAPES.map((d) => `${SHAPES_POD}${d.shapeDocument}`))];
+  return new Store((await Promise.all(documents.map(readPodQuads))).flat());
 }
 
-export async function loadEngine(root: string): Promise<ShapeEngine> {
-  return createEngine(await loadShapesGraph(root));
+export async function loadEngine(): Promise<ShapeEngine> {
+  return createEngine(await loadShapesGraph());
 }
 
 /** The classes Solid Memo's shapes are picked by: its own, and the DCAT and FOAF ones it writes. */
@@ -106,18 +103,22 @@ export async function validateTurtleDocument(
   }
 }
 
-/** An engine for one vendored profile, its SPARQL constraints left out. */
+/** An engine for one vendored profile (`<root>vendor/…`), its SPARQL constraints left out. */
 export async function loadProfileEngine(
   root: string,
   profile: ProfileName,
 ): Promise<ShapeEngine> {
-  const quads = await Promise.all(PROFILES[profile].map((path) => readSiteTurtle(root, path)));
+  const quads = await Promise.all(
+    PROFILES[profile].map(async (path) =>
+      parseTurtle(await readFile(join(root, "vendor", path), "utf8"), `${SITE_VENDOR}${path}`),
+    ),
+  );
   return createEngine(new Store(coreOnly(quads.flat())));
 }
 
-/** The reference data a profile check loads next to a document. */
-export async function loadReferenceData(root: string): Promise<Quad[]> {
-  return (await Promise.all(REFERENCE_DATA.map((path) => readSiteTurtle(root, path)))).flat();
+/** The reference data a profile check loads next to a document, from the vocabulary's pod. */
+export async function loadReferenceData(): Promise<Quad[]> {
+  return (await Promise.all(REFERENCE_DATA.map((path) => readPodQuads(`${VOCAB_POD}${path}`)))).flat();
 }
 
 /**

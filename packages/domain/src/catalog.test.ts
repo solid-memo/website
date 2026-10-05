@@ -21,7 +21,7 @@ describe("catalog records", () => {
       description: "My decks.",
       publisher: catalog.publisher.webId,
       themeTaxonomy: [
-        "https://solid-memo.com/vocab/topics",
+        "https://pod.solid-memo.com/vocab/topics",
         "http://publications.europa.eu/resource/authority/data-theme",
       ],
       dataset: ["https://pod.example/c.ttl#deck-1"],

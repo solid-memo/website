@@ -7,10 +7,9 @@
  * guest's pod or the server by URL. Runs against each server globalSetup.ts
  * starts.
  */
-import { readFile } from "node:fs/promises";
 import { describe, expect, inject, it } from "vitest";
 import { Parser, Writer } from "n3";
-import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/pod";
 import { createUseCases } from "@solid-memo/application/useCases";
 import { GUEST_ORIGIN, GUEST_SESSION } from "@solid-memo/domain/guest";
 import { createLocalGuestPod } from "@solid-memo/solid/localGuestPod";
@@ -31,7 +30,6 @@ import { createSolidWebIdDocumentRepository } from "@solid-memo/solid/solidWebId
 import { createWriteFence } from "@solid-memo/solid/writeFence";
 
 const SERVERS = inject("solidServers");
-const SITE = "https://solid-memo.test/";
 
 /**
  * A user's empty pod in a fresh folder of the server: a profile naming its
@@ -69,11 +67,8 @@ function app() {
   const podFetch = writeFence.fetch;
   const shapeValidator = createShaclShapeValidator({
     fetch: podFetch,
-    shapesFetch: async (input) =>
-      new Response(await readFile(`${VOCAB_ROOT}${new URL(String(input)).pathname.slice(1)}`, "utf8"), {
-        headers: { "content-type": "text/turtle" },
-      }),
-    shapesBaseUrl: `${SITE}shapes/`,
+    shapesFetch,
+    ...SHAPE_SOURCES,
   });
   const checkWrite = shapeValidator.checkSubjects;
   const ids = { now: () => new Date(), randomId: () => crypto.randomUUID() };
