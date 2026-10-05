@@ -128,7 +128,7 @@ describe("migrate", () => {
     ).toMatchObject({
       description: { en: "Mine." },
       studyDirection: `${SM}bidirectional`,
-      source: "https://solid-memo.com/decks/capitals/1.ttl",
+      source: "https://solid-memo.com/decks/capitals/v1",
     });
     const LIBRARY = "https://solid-memo.com/decks/capitals.ttl";
     expect(
@@ -141,14 +141,14 @@ describe("migrate", () => {
       title: { en: "L" },
       description: { en: "Capitals." },
       creator: [],
-      publisher: "https://solid-memo.com/decks/index.ttl#solid-memo",
+      publisher: "https://solid-memo.com/decks/index#solid-memo",
       studyDirection: `${SM}frontToBack`,
       theme: [EDUC],
       keyword: {},
       language: [],
       version: "1",
-      inSeries: "https://solid-memo.com/decks/index.ttl#capitals",
-      isVersionOf: "https://solid-memo.com/decks/index.ttl#capitals",
+      inSeries: "https://solid-memo.com/decks/index#capitals",
+      isVersionOf: "https://solid-memo.com/decks/index#capitals",
       distribution: [`${LIBRARY}#turtle`],
       wasDerivedFrom: ["https://en.wikipedia.org/"],
     });

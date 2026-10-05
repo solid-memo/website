@@ -13,11 +13,11 @@ import { getSolidDataset } from "@inrupt/solid-client";
 import { turtleFetch } from "@solid-memo/shacl/testing/turtle";
 import { DCTERMS, RDF, SM } from "../vocab";
 
-const INDEX = "https://solid-memo.com/decks/index.ttl";
+const INDEX = "https://solid-memo.com/decks/index";
 const DOC = "https://solid-memo.com/decks/capitals.ttl";
 const CANONICAL = "https://solid-memo.com/decks/capitals";
 const CC0 = "https://creativecommons.org/publicdomain/zero/1.0/";
-const SERIES = "https://solid-memo.com/decks/index.ttl#capitals";
+const SERIES = "https://solid-memo.com/decks/index#capitals";
 const EDUC = "http://publications.europa.eu/resource/authority/data-theme/EDUC";
 const FLAG = "https://flagcdn.com/af.svg";
 

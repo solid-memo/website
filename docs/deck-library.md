@@ -9,9 +9,13 @@ says how), whose sync workflow publishes them in the library pod:
 
 | Path under `https://pod.solid-memo.com/library/decks/` | What |
 |---|---|
-| `index.ttl` | The catalogue the app lists: a `dcat:Catalog`, each deck a `dcat:DatasetSeries` (`index.ttl#<name>`) of its releases, the current release described in full but for its cards. |
-| `<name>/<n>.ttl` | Each release of a deck, frozen: a `dcat:Dataset` with its cards. |
-| `deck-releases.lock.ttl` | Every release with its sha256. |
+| `index` | The catalogue the app lists: a `dcat:Catalog`, each deck a `dcat:DatasetSeries` (`index#<name>`) of its releases, the current release described in full but for its cards. |
+| `<name>/v<n>` | Each release of a deck, frozen: a `dcat:Dataset` with its cards. |
+| `deck-releases.lock` | Every release with its sha256. |
+
+The documents have no extension, like the vocabulary's and the shapes'.
+A deck copied from a release named the old way (`<name>/<n>.ttl`, in
+`index.ttl#<name>`) is still recognised as a copy of its series.
 
 It is public, so the app reads it with a plain `fetch`, without logging
 in. [main.tsx](../apps/web/src/main.tsx) names the index;
@@ -37,8 +41,8 @@ flowchart LR
     page["LibraryDeckContainer / LibraryDeckScreen<br/>#/library-deck?instance=…&deck=&lt;series&gt;"] --> uc
     uc --> lib["DeckLibrary port<br/>(solidDeckLibrary.ts)"]
     uc --> repo["DeckRepository.importDeck<br/>(solidDeckRepository.ts)"]
-    lib -->|plain fetch| idx["library pod: index.ttl"]
-    lib -->|plain fetch| doc["library pod: name/n.ttl"]
+    lib -->|plain fetch| idx["library pod: index"]
+    lib -->|plain fetch| doc["library pod: name/vn"]
     repo -->|authenticated| pod["catalog.ttl + decks/deck-id.ttl"]
 ```
 
@@ -64,7 +68,7 @@ flowchart LR
   the release (version, date, notes), authors, licence, dates and
   sources, an import button and "Browse cards" (a read-only, paged list
   fetched from the release document).
-- A deck's page is addressed by its **series** (`&deck=…/index.ttl#name`),
+- A deck's page is addressed by its **series** (`&deck=…/index#name`),
   which outlives releases; an address of one of its releases still finds
   it. A deck the library does not have falls back to the library
   ([routing.md](routing.md)).
@@ -73,7 +77,7 @@ flowchart LR
   single PUT), then one write of the catalog, and carries over the
   description, authors (as agents), licence, topics, keywords and
   direction. The copy says which release it came from with
-  `prov:wasDerivedFrom <…/decks/name/n.ttl>` (`Deck.sourceUrl`). Cards
+  `prov:wasDerivedFrom <…/decks/name/vn>` (`Deck.sourceUrl`). Cards
   keep their library fragment ids (`#sweden`).
 - A pod deck is a copy of a library deck when its source is any release
   of the deck's series — or, for a deck imported before releases, the

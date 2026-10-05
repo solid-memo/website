@@ -283,7 +283,7 @@ documents and switch the deck over to them
 ## Catching up with the library
 
 A deck imported from the [deck library](deck-library.md) says which
-release it came from (`prov:wasDerivedFrom <…/decks/name/n.ttl>`; a deck
+release it came from (`prov:wasDerivedFrom <…/decks/name/vn>`; a deck
 imported before releases came from what became release 1). When the
 library publishes a newer release, the deck page offers to bring the
 copy up to it (`planLibraryUpgrade` in

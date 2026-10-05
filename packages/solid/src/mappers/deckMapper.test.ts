@@ -72,7 +72,7 @@ describe("toDeck", () => {
       authors: ["Anton Wiklund", "A friend"],
       license: "https://creativecommons.org/publicdomain/zero/1.0/",
       description: { en: "Capitals, from Wikipedia." },
-      sourceUrl: "https://solid-memo.com/decks/capitals/1.ttl",
+      sourceUrl: "https://solid-memo.com/decks/capitals/v1",
     });
   });
 

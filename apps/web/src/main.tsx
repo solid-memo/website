@@ -82,7 +82,7 @@ const useCases = createUseCases({
     // The library is published in the library pod by the decks repository
     // (docs/deck-library.md); VITE_LIBRARY_INDEX_URL points a build at
     // another copy, such as that repository's `npm run serve`.
-    indexUrl: import.meta.env.VITE_LIBRARY_INDEX_URL ?? "https://pod.solid-memo.com/library/decks/index.ttl",
+    indexUrl: import.meta.env.VITE_LIBRARY_INDEX_URL ?? "https://pod.solid-memo.com/library/decks/index",
   }),
   preferencesRepository: createSolidPreferencesRepository({
     fetch: podFetch,

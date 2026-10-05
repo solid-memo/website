@@ -12,10 +12,10 @@ const TOPIC = "https://pod.solid-memo.com/vocab/topics#";
 const EDUC = "http://publications.europa.eu/resource/authority/data-theme/EDUC";
 
 function libraryDeck(name: string, themes: string[], extra: Partial<LibraryDeck> = {}): LibraryDeck {
-  const url = `https://solid-memo.com/decks/${name}/2.ttl`;
+  const url = `https://pod.solid-memo.com/library/decks/${name}/v2`;
   return {
     url,
-    seriesUrl: `https://solid-memo.com/decks/index.ttl#${name}`,
+    seriesUrl: `https://pod.solid-memo.com/library/decks/index#${name}`,
     version: "2",
     releases: [],
     title: { en: name },
@@ -34,11 +34,12 @@ const nouns = libraryDeck("swedish-nouns", [`${TOPIC}swedish`], { keywords: { en
 const http = libraryDeck("http", [`${TOPIC}computing`]);
 
 describe("isCopyOf", () => {
-  const deck = { sourceUrl: "https://solid-memo.com/decks/capitals/1.ttl" } as Deck;
+  const deck = { sourceUrl: "https://pod.solid-memo.com/library/decks/capitals/v1" } as Deck;
 
   it("matches a copy of any release of the deck, or of its document from before releases", () => {
     expect(isCopyOf(deck, capitals)).toBe(true);
-    expect(isCopyOf({ sourceUrl: "https://solid-memo.com/decks/capitals.ttl" } as Deck, capitals)).toBe(true);
+    expect(isCopyOf({ sourceUrl: "https://pod.solid-memo.com/library/decks/capitals/1.ttl" } as Deck, capitals)).toBe(true);
+    expect(isCopyOf({ sourceUrl: "https://pod.solid-memo.com/library/decks/capitals.ttl" } as Deck, capitals)).toBe(true);
     expect(isCopyOf(deck, http)).toBe(false);
     expect(isCopyOf({} as Deck, capitals)).toBe(false);
   });
