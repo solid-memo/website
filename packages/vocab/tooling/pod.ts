@@ -104,14 +104,13 @@ const SHAPE_PATH = /^[a-z][a-z0-9-]*\/v[1-9][0-9]*$/;
  */
 export async function readShapeTree(fetch?: typeof globalThis.fetch): Promise<TurtleFile[]> {
   const folders = (await membersOf(SHAPES_POD, fetch)).filter((m) => m.container && m.url !== `${SHAPES_POD}profile/`);
-  const paths: string[] = [];
-  for (const folder of folders) {
-    for (const member of await membersOf(folder.url, fetch)) {
-      const path = member.url.slice(SHAPES_POD.length);
-      if (!member.container && SHAPE_PATH.test(path)) paths.push(path);
-    }
-  }
-  paths.sort();
+  const listings = await Promise.all(folders.map((folder) => membersOf(folder.url, fetch)));
+  const paths = listings
+    .flat()
+    .filter((member) => !member.container)
+    .map((member) => member.url.slice(SHAPES_POD.length))
+    .filter((path) => SHAPE_PATH.test(path))
+    .sort();
   return Promise.all(paths.map(async (path) => ({ path, turtle: await readPodTurtle(`${SHAPES_POD}${path}`, fetch) })));
 }
 

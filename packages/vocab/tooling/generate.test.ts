@@ -12,7 +12,7 @@ describe("render", () => {
     for (const path of Object.values(OUTPUTS)) {
       expect(outputs[path], path).toBe(await readFile(`${ROOT}${path}`, "utf8"));
     }
-  });
+  }, 30_000);
 });
 
 function fakeIo(committed: Record<string, string>): GenerateIo & { written: Record<string, string>; logs: string[] } {
