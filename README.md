@@ -1,6 +1,6 @@
 # Solid Memo
 
-[![Solid Memo](apps/web/public/og-image.png)](https://solid-memo.com/)
+[![Solid Memo](apps/web/public/social-preview.png)](https://solid-memo.com/)
 
 Spaced-repetition flashcards that live in your own Solid Pod.
 
