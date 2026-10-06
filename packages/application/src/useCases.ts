@@ -598,6 +598,12 @@ export function createUseCases({
     if (deck.sourceUrl === undefined) return null;
     const series = (await deckLibrary.listLibraryDecks()).find((libraryDeck) => isCopyOf(deck, libraryDeck));
     if (series === undefined) return null;
+    // The index tells a copy of the current release, or of no older one,
+    // without reading a release (thousands of cards) or the copy's cards.
+    const copied = series.releases.find((release) => release.url === deck.sourceUrl);
+    if (series.url === deck.sourceUrl || (copied !== undefined && Number(series.version) <= Number(copied.version))) {
+      return null;
+    }
     const [from, to, copy] = await Promise.all([
       deckLibrary.fetchLibraryDeck(deck.sourceUrl),
       deckLibrary.fetchLibraryDeck(series.url),
