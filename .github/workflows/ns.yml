@@ -18,6 +18,9 @@ on:
       - packages/vocab/**
       - packages/shacl/**
       - packages/turtle/**
+      - packages/domain/**
+      - package.json
+      - package-lock.json
       - scripts/shacl_crosscheck.py
       - scripts/requirements-ci.txt
       - .github/workflows/ns.yml
@@ -28,6 +31,9 @@ on:
       - packages/vocab/**
       - packages/shacl/**
       - packages/turtle/**
+      - packages/domain/**
+      - package.json
+      - package-lock.json
       - scripts/shacl_crosscheck.py
       - scripts/requirements-ci.txt
       - .github/workflows/ns.yml
@@ -63,13 +69,16 @@ jobs:
       - run: npm ci
       - run: npm run format:turtle:check
       # A published version (decks/<name>/v<N>.ttl) is never edited or
-      # removed: compare with the pull request's base branch, or with the
-      # commit the push moved the branch from. A new branch has no such
-      # commit (all zeros), and one a force push left behind may not have
-      # been fetched; both compare with the default branch instead.
+      # removed: compare with the pull request's base branch; on a push to
+      # the default branch, with the commit the push moved it from; on a
+      # push to any other branch, with where it left the default branch,
+      # so a version not merged yet can still be fixed there. A push that
+      # created the default branch (all zeros), or one whose earlier commit
+      # a force push left unfetched, compares with the default branch.
       - name: npm run library:check -- --base <base>
         env:
           EVENT: ${{ github.event_name }}
+          REF: ${{ github.ref }}
           BASE_REF: ${{ github.base_ref }}
           BEFORE: ${{ github.event.before }}
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
@@ -77,11 +86,11 @@ jobs:
           if [ "$EVENT" = pull_request ]; then
             git fetch --no-tags origin "+refs/heads/$BASE_REF:refs/remotes/origin/$BASE_REF"
             base="origin/$BASE_REF"
-          elif [ "$EVENT" = push ] && [ -n "$BEFORE" ] && ! [[ "$BEFORE" =~ ^0+$ ]] && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+          elif [ "$EVENT" = push ] && [ "$REF" = "refs/heads/$DEFAULT_BRANCH" ] && [ -n "$BEFORE" ] && ! [[ "$BEFORE" =~ ^0+$ ]] && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
             base="$BEFORE"
           else
             git fetch --no-tags origin "+refs/heads/$DEFAULT_BRANCH:refs/remotes/origin/$DEFAULT_BRANCH"
-            base="origin/$DEFAULT_BRANCH"
+            base="$(git merge-base HEAD "origin/$DEFAULT_BRANCH")"
           fi
           echo "Comparing the library with $base"
           npm run library:check -- --base "$base"
