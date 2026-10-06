@@ -35,12 +35,15 @@ const LAYERS: Record<string, string[]> = {
 const ONLY_FROM: Record<string, Record<string, RegExp>> = {
   // The UI talks to use cases; only the composition root knows the adapters.
   web: { solid: /^src\/main\.tsx$/, browser: /^src\/main\.tsx$/ },
+  // The generators read Turtle; the vocabulary the browser loads never does.
+  vocab: { turtle: /^tooling\// },
   // The browser-side engine never needs the node tooling.
   shacl: { turtle: /^node\// },
 };
 
 /** Code that ends up in the browser bundle (tests aside). */
 const BROWSER: Record<string, RegExp> = {
+  vocab: /^src\//,
   domain: /^src\//,
   application: /^src\//,
   shacl: /^src\//,

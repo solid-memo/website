@@ -1,7 +1,9 @@
 # Testing
 
-Unit tests with [Vitest](https://vitest.dev/), `happy-dom`, and
-`@testing-library/preact`, in every package. Coverage is enforced at
+Unit tests with [Vitest](https://vitest.dev/) in every package, in node
+unless the package runs in the browser: `apps/web`, `solid` and `browser`
+run in `happy-dom`, and the UI's tests use `@testing-library/preact`
+([vitest.shared.ts](../vitest.shared.ts)). Coverage is enforced at
 **100%** (statements, branches, functions, lines) per package: each
 package's own tests cover its own code — `npm test` fails below that.
 
@@ -10,7 +12,10 @@ package's own tests cover its own code — `npm test` fails below that.
 ```sh
 npm test          # every package's tests, with coverage thresholds (turbo)
 npm run check     # the same, plus typecheck, drift, formatting, boundaries
-npx vitest        # watch mode, inside one package's folder
+npm run test:unit -- apps/web/src/ui/App.test.tsx   # some files, or all with none, without coverage (root vitest.config.ts)
+npm run test:watch # watch mode, every package's tests
+npm run test:unit -w @solid-memo/domain -- account.test.ts   # one package's (test:watch too)
+npm run crosscheck # the pySHACL cross-check, as CI runs it (needs scripts/requirements-ci.txt)
 npm run test:pod  # the end-to-end tests, against the Solid servers they start in Docker
 npm run servers -w @solid-memo/e2e-pod   # pull or build those servers' images ahead (`-- css-6` for one)
 npm run pod       # a Community Solid Server at http://127.0.0.1:3999/, in memory, to poke at by hand
@@ -129,7 +134,7 @@ scripts. node-solid-server prints every request it handles (`solid:*`),
 so its log runs to tens of megabytes.
 
 The vocabulary, the deck library and the pod catalog fixtures are also
-cross-checked by pySHACL in CI (`python3 scripts/shacl_crosscheck.py`;
+cross-checked by pySHACL in CI (`npm run crosscheck`;
 see [validation.md](validation.md#the-ci-cross-check)).
 
 Apart from the end-to-end tests' Docker images, nothing needs the

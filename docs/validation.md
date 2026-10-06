@@ -165,7 +165,7 @@ instance is checked again.
 
 ## The CI cross-check
 
-CI (and the [ns workflow](../.github/workflows/ns.yml)) checks what
+CI checks what
 Solid Memo publishes again with an independent SHACL engine, pySHACL
 (pinned in `scripts/requirements-ci.txt`), which also runs SPARQL-based
 constraints: [scripts/shacl_crosscheck.py](../scripts/shacl_crosscheck.py)
@@ -175,6 +175,8 @@ language, English or not; format 6 tags its keywords), to DCAT-AP, and the vocab
 SkoHub's SKOS shapes, best practice included. A disagreement between the
 engines, or a constraint the browser's engine cannot run, fails CI. It
 reads `ns/` and `decks/` from the repository, each file at the IRI the
-site publishes it under, and needs neither a build nor the network.
-Locally: `pip install -r scripts/requirements-ci.txt`, then `python3
-scripts/shacl_crosscheck.py`.
+site publishes it under, and needs neither a build nor the network, so
+it runs as its own job beside the build. Locally: `pip install -r
+scripts/requirements-ci.txt`, then `npm run crosscheck` (which runs
+`python3 scripts/shacl_crosscheck.py`, and says what to install if
+pySHACL is missing).

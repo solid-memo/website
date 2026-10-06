@@ -10,7 +10,10 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit -p .",
-    "test": "vitest run --coverage"
+    "test": "vitest run --coverage",
+    "test:unit": "vitest run",
+    "test:watch": "vitest",
+    "library:check": "node -e \"import('./node/deckLibrary.ts').then((m) => m.run(process))\" -- --check"
   },
   "dependencies": {
     "@inrupt/solid-client": "^4.0.0",

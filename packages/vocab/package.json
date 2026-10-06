@@ -11,6 +11,8 @@
   "scripts": {
     "typecheck": "tsc --noEmit -p .",
     "test": "vitest run --coverage",
+    "test:unit": "vitest run",
+    "test:watch": "vitest",
     "generate": "node -e \"import('./tooling/generate.ts').then((m) => m.run(process))\"",
     "generate:check": "node -e \"import('./tooling/generate.ts').then((m) => m.run(process))\" -- --check",
     "format:turtle": "node -e \"import('@solid-memo/turtle/formatTurtle').then((m) => m.run(process))\" -- fixtures ../../ns ../../decks",

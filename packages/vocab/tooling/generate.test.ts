@@ -3,8 +3,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { OUTPUTS, defaultIo, main, render, run, type GenerateIo } from "./generate.ts";
+import { VOCAB_ROOT } from "./root.ts";
 
-const ROOT = `${process.cwd()}/`;
+/** This package's folder, not the working directory: the root's vitest.config.ts runs these tests from the repository's root. */
+const ROOT = VOCAB_ROOT;
 
 describe("render", () => {
   it("matches the committed generated files (run `npm run generate` otherwise)", async () => {

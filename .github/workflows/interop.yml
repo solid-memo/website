@@ -17,6 +17,7 @@ on:
       - decks/**
       - package.json
       - package-lock.json
+      - .nvmrc
       - .github/workflows/interop.yml
   schedule:
     - cron: "17 4 * * 1"
@@ -44,7 +45,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@v7
         with:
-          node-version: 24
+          node-version-file: .nvmrc
           cache: npm
       - run: npm ci
       - run: npm run servers -w @solid-memo/e2e-pod -- ${{ matrix.server }}

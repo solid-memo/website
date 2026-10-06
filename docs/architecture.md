@@ -19,7 +19,7 @@ where the layers meet.
 | `@solid-memo/shacl` | `packages/shacl/` | The SHACL engine (rdf-validate-shacl, loaded lazily), profiles and shape loading (`src/`); node-side validation of Turtle files and the deck library's index and checks (`node/`, `npm run library`). |
 | `@solid-memo/browser` | `packages/browser/` | Adapters for browser storage: the update journal, the language, the guest's pod's store (IndexedDB). |
 | `@solid-memo/turtle` | `packages/turtle/` | Node-only Turtle tooling (n3): parsing and the house-style formatter. |
-| `@solid-memo/e2e-pod` | `e2e/pod/` | End-to-end tests of the app's use cases and Solid adapters against a real Community Solid Server. |
+| `@solid-memo/e2e-pod` | `e2e/pod/` | End-to-end tests of the app's use cases and Solid adapters against real Solid servers, started in Docker ([testing.md](testing.md)). |
 
 ## Dependency rule
 
@@ -48,14 +48,26 @@ build step between packages, and Vite bundles the app from source.
 ## Tasks
 
 `turbo.json` runs each package's `typecheck`, `test`, `generate:check`,
-`format:turtle:check` and `build` in dependency order, cached by input.
+`format:turtle:check`, `library:check` and `build` in dependency order,
+cached by input. A task's inputs are its package's files and those of the
+packages it depends on; the few that also read `ns/` or `decks/` add them
+in their package's own `turbo.json` (`vocab`, `shacl`, `solid` and
+`apps/web`), so a deck edit reruns only the tasks that read the library.
 
 ```sh
-npm run check     # every package: typecheck, tests (100% coverage), drift, formatting; then boundaries
+npm run check     # every package: typecheck, tests (100% coverage), drift, formatting, the deck library; then boundaries
 npm run build     # the site, into apps/web/dist/
 npm run dev       # the site, from source
 npm start         # the site as deployed: built, then served at http://localhost:4173
-npm run test:pod  # e2e/pod against `npm run pod` (a local Community Solid Server)
+npm run test:unit # every package's tests in one run, without coverage (a file or two: `-- <path>`)
+npm run test:watch # the same, in watch mode
+npm run test:pod  # e2e/pod against the Solid servers it starts in Docker (testing.md)
+npm run pod       # a Community Solid Server at http://127.0.0.1:3999/, to poke at by hand
+npm run pod:clean # take down the servers an interrupted run left
+npm run generate  # the vocab package's generated TypeScript, from ns/
+npm run format:turtle  # every Turtle file in the house style
+npm run library   # the deck library's index, decks/index.ttl
+npm run crosscheck # the pySHACL cross-check CI runs (Python, scripts/requirements-ci.txt)
 ```
 
 ## Key objects
@@ -76,7 +88,7 @@ npm run test:pod  # e2e/pod against `npm run pod` (a local Community Solid Serve
 
 - Vendor code stays swappable and upgradeable in isolation (see
   [vendor-code.md](vendor-code.md)): each vendor library is a dependency
-  of exactly one package.
+  of as few packages as can use it, most of them only one.
 - A boundary is a package's `package.json`, not a convention, and a
   script checks it.
 - Every seam is injectable, which is what makes 100% unit coverage per
