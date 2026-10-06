@@ -12,12 +12,18 @@
 # Swedish, the app's languages). Concepts are only ever added; a
 # concept that should go is deprecated, never removed, since decks
 # point at it. So a topic's IRI never changes and carries no version:
-# each addition bumps owl:versionInfo and appends to the change note,
+# each addition bumps owl:versionInfo and adds a change note,
 # and every concept says in its history note when it arrived.
 <>
     a skos:ConceptScheme ;
     owl:versionInfo "1.6" ;
-    skos:changeNote "1.0: languages, swedish, geography, computing, science, chemistry. 1.1: art. 1.2: labour-market. 1.3: every topic named and defined in Swedish as well as English. 1.4: history, literature, music, mythology, mathematics, sports, economics, astronomy, biology, physics, greek, latin, spanish (for the authored decks). 1.5: french, german. 1.6: film, finnish, italian, portuguese." ;
+    skos:changeNote "1.0: languages, swedish, geography, computing, science, chemistry." ,
+                    "1.1: art." ,
+                    "1.2: labour-market." ,
+                    "1.3: every topic named and defined in Swedish as well as English." ,
+                    "1.4: history, literature, music, mythology, mathematics, sports, economics, astronomy, biology, physics, greek, latin, spanish (for the authored decks)." ,
+                    "1.5: french, german." ,
+                    "1.6: film, finnish, italian, portuguese." ;
     dcterms:title "Solid Memo topics"@en ,
                   "Solid Memo-ämnen"@sv ;
     skos:definition "What a deck of flashcards is about."@en ,
