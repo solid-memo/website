@@ -107,12 +107,12 @@ function weekdayOf(studyDay: string): number {
 /**
  * The last `weeks` weeks, a column a week from Monday down to Sunday, a
  * cell a day in the step of green its answers give it; days after today
- * are left out.
+ * are left out. The columns share the figure's width, so a year fills it.
  */
 export function ActivityCalendar({
   days,
   today,
-  weeks = 26,
+  weeks = 52,
 }: {
   days: readonly DayActivity[];
   today: string;
@@ -128,12 +128,17 @@ export function ActivityCalendar({
   return (
     <figure class="activity-calendar">
       <figcaption>{t("statistics.activity", { weeks })}</figcaption>
-      <div class="calendar-grid" role="img" aria-label={t("statistics.activityLabel", { weeks })}>
-        {shown.map((day) => (
+      <div
+        class="calendar-grid"
+        role="img"
+        aria-label={t("statistics.activityLabel", { weeks })}
+        style={{ "--weeks": weeks }}
+      >
+        {shown.map((day, i) => (
           <span
             key={day}
             class={`calendar-day level-${levelOf(byDay.get(day)?.answers ?? 0, most)}${day === pointed ? " pointed" : ""}`}
-            style={{ gridRow: weekdayOf(day) + 1 }}
+            style={{ gridRow: weekdayOf(day) + 1, gridColumn: Math.floor(i / 7) + 1 }}
             data-day={day}
             onPointerEnter={() => setPointed(day)}
             onClick={() => setPointed(day)}
