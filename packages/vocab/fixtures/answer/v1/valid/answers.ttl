@@ -1,4 +1,4 @@
-@prefix solid-memo: <https://pod.solid-memo.com/vocab/v1#> .
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
 @prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
 
 <#answer-20261003T081530123Z-k3f9qa>

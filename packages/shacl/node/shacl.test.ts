@@ -1,4 +1,4 @@
-import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
+import { NS_ROOT, VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
@@ -11,7 +11,7 @@ import {
   validateTurtleDocument,
 } from "./shacl.ts";
 import { parseTurtle, readTurtleTree } from "@solid-memo/turtle/rdf";
-import { readPodTurtle, VOCAB_POD } from "@solid-memo/vocab/tooling/pod";
+import { VOCAB_BASE } from "@solid-memo/vocab/tooling/sources";
 import { SM_NS as SM } from "@solid-memo/vocab/vocab.generated";
 
 const ROOT = VOCAB_ROOT;
@@ -134,7 +134,7 @@ describe("the shapes over the fixtures", async () => {
   });
 
   it("reject a subject typed with a Solid Memo term that is no class", async () => {
-    const quads = parseTurtle(`<#x> a <https://pod.solid-memo.com/vocab/v1#front> .`, base("x.ttl"));
+    const quads = parseTurtle(`<#x> a <https://solid-memo.com/ns/vocab/v1.ttl#front> .`, base("x.ttl"));
     await expect(validateTurtleDocument("x.ttl", quads, engine, "pod")).rejects.toThrow(
       "x.ttl:\n  <https://pod.example/x.ttl#x> is typed with a Solid Memo term that names no class.",
     );
@@ -150,7 +150,7 @@ describe("the shapes over the fixtures", async () => {
 });
 
 describe("loadShapesGraph", () => {
-  it("merges every shape the app knows, from the shapes' pod, into one graph", async () => {
+  it("merges every shape the app knows into one graph", async () => {
     const graph = await loadShapesGraph();
     expect(graph.size).toBeGreaterThan(500);
   });
@@ -287,15 +287,14 @@ describe("the vendored profiles over their fixtures", async () => {
   });
 });
 
-describe("the vocabulary's pod", async () => {
+describe("ns/vocab/", async () => {
   it("holds every concept scheme to SKOS, best practice included", async () => {
     const engine = await loadProfileEngine(ROOT, "skos");
-    for (const path of ["v1", "topics", "external"]) {
-      const url = `${VOCAB_POD}${path}`;
+    for (const { path, turtle } of await readTurtleTree(`${NS_ROOT}vocab`)) {
       await expect(
         validateProfile(
-          url,
-          parseTurtle(await readPodTurtle(url), url),
+          `ns/vocab/${path}`,
+          parseTurtle(turtle, `${VOCAB_BASE}${path}`),
           engine,
           [],
           "warning",

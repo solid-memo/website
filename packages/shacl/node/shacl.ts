@@ -13,26 +13,26 @@ import { ALL_SHAPES } from "@solid-memo/vocab/descriptors.generated";
 import type { ShapeContext } from "@solid-memo/vocab/shapeDescriptor";
 import { RDF_TYPE, parseTurtle } from "@solid-memo/turtle/rdf";
 import { SM_NS } from "@solid-memo/vocab/tooling/vocab";
-import { readPodTurtle, SHAPES_POD, SITE_VENDOR, VOCAB_POD } from "@solid-memo/vocab/tooling/pod";
+import { readSiteTurtle, SHAPES_BASE, SITE_VENDOR, VOCAB_BASE } from "@solid-memo/vocab/tooling/sources";
 import { shown } from "@solid-memo/domain/langText";
 
 /**
  * SHACL validation in node (tests and tools): Solid Memo's shapes,
- * read from their pod, applied to a Turtle document one subject at a
- * time, with the shape chosen by class and format version exactly as
+ * read from the repository's ns/, applied to a Turtle document one
+ * subject at a time, with the shape chosen by class and format version exactly as
  * the app chooses it; and the vendored profiles (DCAT-AP, SKOS) applied
  * to a whole document.
  */
 
-/** A document of the vocabulary's or the shapes' pod, parsed. */
-async function readPodQuads(url: string): Promise<Quad[]> {
-  return parseTurtle(await readPodTurtle(url), url);
+/** A document the site publishes from this repository, parsed at its own address. */
+async function readSiteQuads(url: string): Promise<Quad[]> {
+  return parseTurtle(await readSiteTurtle(url), url);
 }
 
-/** Every shape the app knows (ALL_SHAPES), read from the shapes' pod, in one graph. */
+/** Every shape the app knows (ALL_SHAPES), in one graph. */
 export async function loadShapesGraph(): Promise<Store> {
-  const documents = [...new Set(ALL_SHAPES.map((d) => `${SHAPES_POD}${d.shapeDocument}`))];
-  return new Store((await Promise.all(documents.map(readPodQuads))).flat());
+  const documents = [...new Set(ALL_SHAPES.map((d) => `${SHAPES_BASE}${d.shapeDocument}`))];
+  return new Store((await Promise.all(documents.map(readSiteQuads))).flat());
 }
 
 export async function loadEngine(): Promise<ShapeEngine> {
@@ -116,9 +116,9 @@ export async function loadProfileEngine(
   return createEngine(new Store(coreOnly(quads.flat())));
 }
 
-/** The reference data a profile check loads next to a document, from the vocabulary's pod. */
+/** The reference data a profile check loads next to a document, from ns/vocab/. */
 export async function loadReferenceData(): Promise<Quad[]> {
-  return (await Promise.all(REFERENCE_DATA.map((path) => readPodQuads(`${VOCAB_POD}${path}`)))).flat();
+  return (await Promise.all(REFERENCE_DATA.map((path) => readSiteQuads(`${VOCAB_BASE}${path}`)))).flat();
 }
 
 /**

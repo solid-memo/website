@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { receiptFromRecord, receiptToRecord, scheduleFromRecord, scheduleToRecord } from "./digestRecord";
 import type { DocumentReceipt, StoredSchedule } from "./studyDigest";
 
-const SM = "https://pod.solid-memo.com/vocab/v1#";
+const SM = "https://solid-memo.com/ns/vocab/v1.ttl#";
 
 describe("the digest's records", () => {
   it("keeps a receipt as it is, with or without what it may say", () => {

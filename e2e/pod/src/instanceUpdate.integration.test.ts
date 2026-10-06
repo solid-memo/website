@@ -12,7 +12,7 @@
  */
 import { beforeAll, describe, expect, inject, it } from "vitest";
 import { Parser, Writer, type Quad } from "n3";
-import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/pod";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/sources";
 import { createUseCases, type UseCases } from "@solid-memo/application/useCases";
 import type { Instance } from "@solid-memo/domain/instance";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
@@ -28,7 +28,7 @@ import { aclOf, changeElsewhere, ETAG_OUTLIVES_EDITS, etagMarksEveryEdit, precon
 
 const SERVERS = inject("solidServers");
 const READS = new Set(["GET", "HEAD", "OPTIONS"]);
-const PREFIXES = `@prefix sm: <https://pod.solid-memo.com/vocab/v1#> .
+const PREFIXES = `@prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix acl: <http://www.w3.org/ns/auth/acl#> .
@@ -163,7 +163,7 @@ async function seedOldPod(server: string, format: 4 | 5): Promise<Pod> {
   await put(
     `${source}catalog.ttl`,
     `${prefixes}<#catalog> a dcat:Catalog ; dcterms:title "Main" ; dcterms:description "My decks." ;
-    dcterms:publisher <${webId}> ; dcat:themeTaxonomy <https://pod.solid-memo.com/vocab/topics> ;
+    dcterms:publisher <${webId}> ; dcat:themeTaxonomy <https://solid-memo.com/ns/vocab/topics.ttl> ;
     dcat:dataset <#deck-1>, <#deck-2> .
 <${webId}> a foaf:Agent ; foaf:name "Alice" .
 ${deck("deck-1", `dcterms:title "Spanska glosor"@en, "Spanska glosor"@sv ;
@@ -171,7 +171,7 @@ ${deck("deck-1", `dcterms:title "Spanska glosor"@en, "Spanska glosor"@sv ;
 ${deck("deck-2", `dcterms:title "Huvudstader i Europa"@en ;
     dcterms:description "Capitals of Europe."@en, "Europas huvudstader."@sv ;
     dcterms:creator <#agent-anton> ;
-    dcat:theme <https://pod.solid-memo.com/vocab/topics#geography> ;
+    dcat:theme <https://solid-memo.com/ns/vocab/topics.ttl#geography> ;
     dcat:keyword "capitals", "europe" ;
     prov:wasDerivedFrom <${RELEASE}>`)}
 <#agent-anton> a foaf:Agent ; foaf:name "Anton" .`,
@@ -202,7 +202,7 @@ ${deck("deck-2", `dcterms:title "Huvudstader i Europa"@en ;
 const TEXT = new Set(
   ["http://purl.org/dc/terms/title", "http://purl.org/dc/terms/description", "http://www.w3.org/ns/dcat#keyword"].concat(
     ["front", "back", "frontNote", "backLabel", "backNote", "frontImageDescription", "backImageDescription"].map(
-      (name) => `https://pod.solid-memo.com/vocab/v1#${name}`,
+      (name) => `https://solid-memo.com/ns/vocab/v1.ttl#${name}`,
     ),
   ),
 );
@@ -232,7 +232,7 @@ async function textOf(container: string, urls: string[]): Promise<string[]> {
 async function statedFormats(container: string, urls: string[]): Promise<Record<string, string>> {
   return Object.fromEntries(
     (await quadsOf(urls))
-      .filter((quad) => quad.predicate.value === "https://pod.solid-memo.com/vocab/v1#formatVersion")
+      .filter((quad) => quad.predicate.value === "https://solid-memo.com/ns/vocab/v1.ttl#formatVersion")
       .map((quad) => [quad.subject.value.replace(container, "<instance>/"), quad.object.value]),
   );
 }
@@ -466,10 +466,10 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
           '<instance>/catalog.ttl#deck-2 http://purl.org/dc/terms/title "Huvudstader i Europa"@en',
           '<instance>/catalog.ttl#deck-2 http://www.w3.org/ns/dcat#keyword "capitals"@',
           '<instance>/catalog.ttl#deck-2 http://www.w3.org/ns/dcat#keyword "europe"@',
-          '<instance>/decks/deck-1.ttl#sol https://pod.solid-memo.com/vocab/v1#frontNote "Masculine."@en',
-          '<instance>/decks/deck-1.ttl#sol https://pod.solid-memo.com/vocab/v1#frontNote "Masculine."@sv',
-          '<instance>/decks/deck-1.ttl#luna https://pod.solid-memo.com/vocab/v1#front "la luna"@',
-          '<instance>/decks/deck-2.ttl#no https://pod.solid-memo.com/vocab/v1#back "Oslo"@',
+          '<instance>/decks/deck-1.ttl#sol https://solid-memo.com/ns/vocab/v1.ttl#frontNote "Masculine."@en',
+          '<instance>/decks/deck-1.ttl#sol https://solid-memo.com/ns/vocab/v1.ttl#frontNote "Masculine."@sv',
+          '<instance>/decks/deck-1.ttl#luna https://solid-memo.com/ns/vocab/v1.ttl#front "la luna"@',
+          '<instance>/decks/deck-2.ttl#no https://solid-memo.com/ns/vocab/v1.ttl#back "Oslo"@',
         ]),
       );
       // The library copy still names its release, which later releases are compared with.
@@ -539,7 +539,7 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
         // this tab's fence knows nothing of, to a document the update has copied already.
         if (changed || !(isWrite(request) && /main-[0-9a-f-]{36}\/reviews\/deck-1\.ttl$/.test(request.url))) return;
         changed = true;
-        await changeElsewhere(`${pod.source}decks/deck-1.ttl`, `<#se> <https://pod.solid-memo.com/vocab/v1#note> "studied in another tab" .`);
+        await changeElsewhere(`${pod.source}decks/deck-1.ttl`, `<#se> <https://solid-memo.com/ns/vocab/v1.ttl#note> "studied in another tab" .`);
       },
     });
     const outcome = await useCases.updateInstance(session, pod.instance);
@@ -608,7 +608,7 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
         if (interfered || request.method !== "PATCH" || request.url !== `${pod.source}preferences.ttl`) return;
         interfered = true;
         // Another tab saves the preferences first.
-        await changeElsewhere(`${pod.source}preferences.ttl`, `<#it> <https://pod.solid-memo.com/vocab/v1#note> "saved in another tab" .`);
+        await changeElsewhere(`${pod.source}preferences.ttl`, `<#it> <https://solid-memo.com/ns/vocab/v1.ttl#note> "saved in another tab" .`);
       },
     });
     const preferences = await useCases.getPreferences(pod.source);

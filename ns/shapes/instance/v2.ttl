@@ -1,0 +1,60 @@
+@base <https://solid-memo.com/ns/shapes/instance/v2.ttl> .
+
+@prefix sh:         <http://www.w3.org/ns/shacl#> .
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+
+# Instance format 2: format 1, and — for an instance made by a format
+# update, which copies the instance before changing anything — the
+# instance it replaces (kept as a backup) and when it replaced it.
+<#shape>
+    a sh:NodeShape ;
+    sh:name "InstanceV2" ;
+    rdfs:comment "Instance format 2: a title, a creation time and, for an updated copy, the instance it replaces." ;
+    sh:nodeKind sh:IRI ;
+    sh:class solid-memo:Instance ;
+    sh:property <#formatVersion> ,
+                <#title> ,
+                <#created> ,
+                <#replaces> ,
+                <#modified> .
+
+<#formatVersion>
+    a sh:PropertyShape ;
+    sh:path solid-memo:formatVersion ;
+    sh:datatype xsd:integer ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:hasValue 2 ;
+    sh:message "Instance format 2 states its format version, 2."@en ,
+               "Instansformat 2 anger sin formatversion, 2."@sv .
+
+<#title>
+    a sh:PropertyShape ;
+    sh:path dcterms:title ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 .
+
+<#created>
+    a sh:PropertyShape ;
+    sh:path dcterms:created ;
+    sh:datatype xsd:dateTime ;
+    sh:minCount 1 ;
+    sh:maxCount 1 .
+
+<#replaces>
+    a sh:PropertyShape ;
+    sh:path dcterms:replaces ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+    sh:message "An updated instance names the one instance container it replaces."@en ,
+               "En uppdaterad instans anger den enda instanscontainer som den ersätter."@sv .
+
+<#modified>
+    a sh:PropertyShape ;
+    sh:path dcterms:modified ;
+    sh:datatype xsd:dateTime ;
+    sh:maxCount 1 .

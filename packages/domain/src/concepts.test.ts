@@ -14,11 +14,11 @@ import { INVALID_DATA_POLICIES } from "./invalidDataPolicy";
 import { THEME_CHOICES } from "./theme";
 import { DECK_DIRECTIONS } from "./deck";
 
-const SM = "https://pod.solid-memo.com/vocab/v1#";
+const SM = "https://solid-memo.com/ns/vocab/v1.ttl#";
 
 describe("conceptByIri and conceptByNotation", () => {
   it("find a concept of a scheme, or nothing", () => {
-    expect(conceptByIri(TOPICS, "https://pod.solid-memo.com/vocab/topics#swedish")?.label).toEqual({ en: "Swedish", sv: "Svenska" });
+    expect(conceptByIri(TOPICS, "https://solid-memo.com/ns/vocab/topics.ttl#swedish")?.label).toEqual({ en: "Swedish", sv: "Svenska" });
     expect(conceptByIri(TOPICS, `${SM}frontToBack`)).toBeUndefined();
     expect(conceptByNotation(STUDY_DIRECTIONS, "bidirectional")?.iri).toBe(`${SM}bidirectional`);
     expect(conceptByNotation(STUDY_DIRECTIONS, "sideways")).toBeUndefined();
@@ -34,7 +34,7 @@ describe("study directions as concepts", () => {
   });
 
   it("name no direction for a concept outside the scheme", () => {
-    expect(directionOfConcept("https://pod.solid-memo.com/vocab/topics#swedish")).toBeUndefined();
+    expect(directionOfConcept("https://solid-memo.com/ns/vocab/topics.ttl#swedish")).toBeUndefined();
   });
 
   it("name no direction for a concept whose notation the app does not know", () => {

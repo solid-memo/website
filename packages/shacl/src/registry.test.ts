@@ -33,7 +33,7 @@ describe("pickShape", () => {
   it("picks deck format 6 in a pod and library deck format 5 in the library, from separate shape documents", () => {
     expect(pickShape([SM.Deck], 6, "pod")).toEqual({ kind: "shape", descriptor: DECK_V6 });
     expect(pickShape([SM.Deck], 5, "library")).toEqual({ kind: "shape", descriptor: LIBRARY_DECK_V5 });
-    expect(LIBRARY_DECK_V5.shapeDocument).toBe("library-deck/v5");
+    expect(LIBRARY_DECK_V5.shapeDocument).toBe("library-deck/v5.ttl");
     expect(pickShape([SM.Deck], 6, "library")).toEqual({
       kind: "unknown-version",
       shape: "libraryDeck",

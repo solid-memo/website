@@ -1,4 +1,4 @@
-import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/pod";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/sources";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildThing,
@@ -73,7 +73,7 @@ beforeEach(() => {
 });
 
 describe("createShaclShapeValidator", () => {
-  it("loads the engine and the shapes from the shapes' pod itself by default", async () => {
+  it("loads the engine and the published shapes itself by default", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalog());
     const validator = createShaclShapeValidator({
       fetch: vi.fn() as unknown as typeof fetch,
@@ -127,7 +127,7 @@ describe("createShaclShapeValidator", () => {
     expect(validateNode).toHaveBeenCalledExactlyOnceWith(
       expect.anything(),
       `${DOC}#deck-1`,
-      "https://pod.solid-memo.com/shapes/deck/v2#inPod",
+      "https://solid-memo.com/ns/shapes/deck/v2.ttl#inPod",
     );
     expect(loader.load).toHaveBeenCalledOnce();
     await validator.validateDocument(DOC);

@@ -1,0 +1,45 @@
+@base <https://solid-memo.com/ns/shapes/agent/v1.ttl> .
+
+@prefix sh:         <http://www.w3.org/ns/shacl#> .
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+
+# Someone who made or published something: a deck's creator, a
+# catalogue's publisher. Written beside what it made (<#agent-…> in the
+# same document), or a WebID described just enough in the catalogue.
+<#shape>
+    a sh:NodeShape ;
+    sh:name "AgentV1" ;
+    rdfs:comment "A creator or publisher: a foaf:Agent with a name." ;
+    sh:nodeKind sh:IRI ;
+    sh:class foaf:Agent ;
+    sh:property <#formatVersion> ,
+                <#name> ,
+                <#mbox> .
+
+<#formatVersion>
+    a sh:PropertyShape ;
+    sh:path solid-memo:formatVersion ;
+    sh:datatype xsd:integer ;
+    sh:maxCount 1 ;
+    sh:in ( 1 ) .
+
+<#name>
+    a sh:PropertyShape ;
+    sh:path foaf:name ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "An agent has a name."@en ,
+               "En agent har ett namn."@sv .
+
+<#mbox>
+    a sh:PropertyShape ;
+    sh:path foaf:mbox ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+    sh:pattern "^mailto:" ;
+    sh:message "An agent's mailbox is a mailto: IRI."@en ,
+               "En agents e-postadress är en mailto:-IRI."@sv .

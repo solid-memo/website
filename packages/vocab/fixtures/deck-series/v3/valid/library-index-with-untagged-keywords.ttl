@@ -1,6 +1,6 @@
 @base <https://solid-memo.com/decks/index.ttl> .
 
-@prefix solid-memo: <https://pod.solid-memo.com/vocab/v1#> .
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
 @prefix dcterms:    <http://purl.org/dc/terms/> .
 @prefix dcat:       <http://www.w3.org/ns/dcat#> .
 @prefix foaf:       <http://xmlns.com/foaf/0.1/> .
@@ -17,7 +17,7 @@
     dcterms:description "Capitals of the world."@en ,
                         "Världens huvudstäder."@sv ;
     dcterms:publisher <#solid-memo> ;
-    dcat:theme <https://pod.solid-memo.com/vocab/topics#geography> ;
+    dcat:theme <https://solid-memo.com/ns/vocab/topics.ttl#geography> ;
     dcat:keyword "capitals" ,
                  "huvudstäder" ;
     dcat:first <https://solid-memo.com/decks/capitals/1.ttl> ;

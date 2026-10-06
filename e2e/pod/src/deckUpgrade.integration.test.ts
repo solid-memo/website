@@ -7,7 +7,7 @@
  * documents are never written, only deleted once the deck has moved.
  */
 import { beforeAll, describe, expect, inject, it } from "vitest";
-import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/pod";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/sources";
 import { createUseCases, type UseCases } from "@solid-memo/application/useCases";
 import type { DeckLibrary } from "@solid-memo/application/ports";
 import type { Deck } from "@solid-memo/domain/deck";

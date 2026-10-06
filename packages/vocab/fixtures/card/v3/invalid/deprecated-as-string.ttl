@@ -1,4 +1,4 @@
-@prefix solid-memo: <https://pod.solid-memo.com/vocab/v1#> .
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
 @prefix owl:        <http://www.w3.org/2002/07/owl#> .
 
 <#yu>

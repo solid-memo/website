@@ -296,7 +296,7 @@ describe("importDeck", () => {
     direction: "bidirectional",
     version: "1",
     seriesUrl: "https://solid-memo.com/decks/index.ttl#capitals",
-    themes: ["https://pod.solid-memo.com/vocab/topics#geography"],
+    themes: ["https://solid-memo.com/ns/vocab/topics.ttl#geography"],
     keywords: { en: ["capitals", "countries"], sv: ["huvudstäder"], "": ["legacy"] },
     cards: [
       { id: "sweden", front: { "": "Sweden" }, back: { "": "Stockholm" }, formatVersion: 1 },

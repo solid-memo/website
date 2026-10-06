@@ -1,0 +1,79 @@
+@base <https://solid-memo.com/ns/shapes/catalog/v1.ttl> .
+
+@prefix sh:         <http://www.w3.org/ns/shacl#> .
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+
+# A catalogue of decks: an instance's catalog document in a pod (the
+# subject <catalog.ttl#catalog>) or the deck library's index (the
+# document itself). Its datasets are the decks; the topic schemes decks
+# are classified with are its theme taxonomies.
+<#shape>
+    a sh:NodeShape ;
+    sh:name "CatalogV1" ;
+    rdfs:comment "A catalogue of decks: a dcat:Catalog." ;
+    sh:nodeKind sh:IRI ;
+    sh:class dcat:Catalog ;
+    sh:property <#formatVersion> ,
+                <#title> ,
+                <#description> ,
+                <#publisher> ,
+                <#license> ,
+                <#modified> ,
+                <#themeTaxonomies> ,
+                <#datasets> .
+
+<#formatVersion>
+    a sh:PropertyShape ;
+    sh:path solid-memo:formatVersion ;
+    sh:datatype xsd:integer ;
+    sh:maxCount 1 ;
+    sh:in ( 1 ) .
+
+<#title>
+    a sh:PropertyShape ;
+    sh:path dcterms:title ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 .
+
+<#description>
+    a sh:PropertyShape ;
+    sh:path dcterms:description ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 .
+
+<#publisher>
+    a sh:PropertyShape ;
+    sh:path dcterms:publisher ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "A catalogue names its publisher, a foaf:Agent: in a pod, the owner's WebID."@en ,
+               "En katalog anger sin utgivare, en foaf:Agent: i en Pod ägarens WebID."@sv .
+
+<#license>
+    a sh:PropertyShape ;
+    sh:path dcterms:license ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 .
+
+<#modified>
+    a sh:PropertyShape ;
+    sh:path dcterms:modified ;
+    sh:datatype xsd:dateTime ;
+    sh:maxCount 1 .
+
+<#themeTaxonomies>
+    a sh:PropertyShape ;
+    sh:path dcat:themeTaxonomy ;
+    sh:nodeKind sh:IRI .
+
+<#datasets>
+    a sh:PropertyShape ;
+    sh:path dcat:dataset ;
+    sh:nodeKind sh:IRI .

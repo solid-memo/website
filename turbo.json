@@ -9,7 +9,9 @@
     "typecheck": {
       "inputs": [
         "$TURBO_DEFAULT$",
-        "$TURBO_ROOT$/tsconfig.base.json"
+        "$TURBO_ROOT$/tsconfig.base.json",
+        "$TURBO_ROOT$/ns/**",
+        "$TURBO_ROOT$/decks/**"
       ],
       "dependsOn": [
         "transit"
@@ -21,7 +23,9 @@
       ],
       "inputs": [
         "$TURBO_DEFAULT$",
-        "$TURBO_ROOT$/vitest.shared.ts"
+        "$TURBO_ROOT$/vitest.shared.ts",
+        "$TURBO_ROOT$/ns/**",
+        "$TURBO_ROOT$/decks/**"
       ],
       "dependsOn": [
         "transit"
@@ -32,6 +36,11 @@
         "transit",
         "^generate:check"
       ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/ns/**",
+        "$TURBO_ROOT$/decks/**"
+      ],
       "outputs": [
         "dist/**"
       ],
@@ -40,9 +49,13 @@
       ]
     },
     "generate:check": {
-      "cache": false,
       "dependsOn": [
         "transit"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/ns/**",
+        "$TURBO_ROOT$/decks/**"
       ]
     },
     "format:turtle": {
@@ -51,6 +64,11 @@
     "format:turtle:check": {
       "dependsOn": [
         "transit"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/ns/**",
+        "$TURBO_ROOT$/decks/**"
       ]
     },
     "test:pod": {

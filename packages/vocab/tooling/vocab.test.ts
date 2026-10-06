@@ -6,7 +6,7 @@ import {
 } from "./vocab.ts";
 
 const HEAD = `
-@prefix sm:      <https://pod.solid-memo.com/vocab/v1#> .
+@prefix sm:      <https://solid-memo.com/ns/vocab/v1.ttl#> .
 @prefix owl:     <http://www.w3.org/2002/07/owl#> .
 @prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
@@ -41,13 +41,13 @@ describe("parseVocab", () => {
   it("rejects a term without its annotations", () => {
     expect(() =>
       parseVocab(`${HEAD}${ONTOLOGY} sm:x a owl:Class ; rdfs:label "x" ; rdfs:comment "x" .`),
-    ).toThrow("vocab: <https://pod.solid-memo.com/vocab/v1#x> has no historyNote.");
+    ).toThrow("vocab: <https://solid-memo.com/ns/vocab/v1.ttl#x> has no historyNote.");
   });
 
   it("requires a range on every property", () => {
     expect(() =>
       parseVocab(`${HEAD}${ONTOLOGY} sm:x a owl:DatatypeProperty ; rdfs:label "x" ; rdfs:comment "x" ; skos:historyNote "x" .`),
-    ).toThrow("vocab: <https://pod.solid-memo.com/vocab/v1#x> has no range.");
+    ).toThrow("vocab: <https://solid-memo.com/ns/vocab/v1.ttl#x> has no range.");
   });
 
   it("rejects a term outside the namespace", () => {
@@ -58,7 +58,7 @@ describe("parseVocab", () => {
 
   it("requires the ontology subject", () => {
     expect(() => parseVocab(`${HEAD}${TERMS}`)).toThrow(
-      "vocab: expected <https://pod.solid-memo.com/vocab/v1> to be the owl:Ontology.",
+      "vocab: expected <https://solid-memo.com/ns/vocab/v1.ttl> to be the owl:Ontology.",
     );
   });
 });
@@ -98,10 +98,10 @@ describe("parseVocab with concept schemes and deprecations", () => {
 describe("renderVocabConstants", () => {
   it("renders one constant per term with its comment and history", () => {
     expect(renderVocabConstants(parseVocab(`${HEAD}${ONTOLOGY}${TERMS}`))).toBe(
-      `/* Generated from https://pod.solid-memo.com/vocab/v1 by \`npm run generate\`. Do not edit: change the source and regenerate. */
+      `/* Generated from ns/vocab/v1.ttl by \`npm run generate\`. Do not edit: change the source and regenerate. */
 
 /** Solid Memo's own vocabulary, version 1.1 (see docs/vocab.md). */
-export const SM_NS = "https://pod.solid-memo.com/vocab/v1#";
+export const SM_NS = "https://solid-memo.com/ns/vocab/v1.ttl#";
 
 export const SM = {
   /** A deck. (Since 1.0.) */

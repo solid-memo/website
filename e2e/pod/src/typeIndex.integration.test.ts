@@ -10,7 +10,7 @@
  */
 import { Parser, Writer } from "n3";
 import { describe, expect, inject, it } from "vitest";
-import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/pod";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/sources";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
 import { createSolidInstanceRepository } from "@solid-memo/solid/solidInstanceRepository";
 import { aclOf, storageOf } from "./serverTraits";

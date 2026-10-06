@@ -62,7 +62,7 @@ describe("BrowserScreen deck editing", () => {
       deck: {
         ...deck,
         description: { en: "Kanji of the N5 level." },
-        themes: ["https://pod.solid-memo.com/vocab/topics#languages"],
+        themes: ["https://solid-memo.com/ns/vocab/topics.ttl#languages"],
         keywords: { en: ["kanji", "JLPT"] },
       },
     });
@@ -87,7 +87,7 @@ describe("BrowserScreen deck editing", () => {
 
     expect(props.onDescribeDeck).toHaveBeenCalledWith({
       description: { en: "The N5 kanji." },
-      topics: ["https://pod.solid-memo.com/vocab/topics#science"],
+      topics: ["https://solid-memo.com/ns/vocab/topics.ttl#science"],
       keywords: { en: ["kanji", "N5"] },
     });
     expect(screen.getByRole("button", { name: "Describe deck" })).toBeInTheDocument();
@@ -164,7 +164,7 @@ describe("BrowserScreen deck editing", () => {
   });
 
   it("shows no keyword line when no keyword is in the reader's language", () => {
-    renderScreen({ deck: { ...deck, themes: ["https://pod.solid-memo.com/vocab/topics#geography"], keywords: { sv: ["kanji-tecken"] } } });
+    renderScreen({ deck: { ...deck, themes: ["https://solid-memo.com/ns/vocab/topics.ttl#geography"], keywords: { sv: ["kanji-tecken"] } } });
     expect(screen.getByRole("region", { name: "About this deck" })).toHaveTextContent(/^Topics: GeographyDescribe deck$/);
   });
 
@@ -258,7 +258,7 @@ describe("BrowserScreen deck editing", () => {
   });
 
   it("shows topics alone, and nothing more for a deck that says nothing", () => {
-    renderScreen({ deck: { ...deck, themes: ["https://pod.solid-memo.com/vocab/topics#geography"] } });
+    renderScreen({ deck: { ...deck, themes: ["https://solid-memo.com/ns/vocab/topics.ttl#geography"] } });
     expect(screen.getByRole("region", { name: "About this deck" })).toHaveTextContent(/^Topics: GeographyDescribe deck$/);
   });
 

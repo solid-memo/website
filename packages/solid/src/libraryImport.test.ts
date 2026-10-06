@@ -10,7 +10,7 @@
 import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
-import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/pod";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/sources";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import { createUseCases } from "@solid-memo/application/useCases";
 import type { ResourceStore } from "@solid-memo/application/ports";
@@ -32,7 +32,7 @@ const RELEASE = `${SITE}decks/capitals/2.ttl`;
 /** A release of library deck format 5: its keywords tagged with their language. */
 const TAGGED_RELEASE = `${SITE}decks/capitals/3.ttl`;
 const KEYWORD = "http://www.w3.org/ns/dcat#keyword";
-const SM_NS = "https://pod.solid-memo.com/vocab/v1#";
+const SM_NS = "https://solid-memo.com/ns/vocab/v1.ttl#";
 const DCTERMS = "http://purl.org/dc/terms/";
 
 /**
@@ -84,7 +84,7 @@ async function everyTriple(store: ResourceStore): Promise<string[]> {
   return lines;
 }
 
-/** A document the app reads: a library release (a fixture), or a shape document as the shapes' pod has it. */
+/** A document the app reads: a library release (a fixture), or a shape document as the site publishes it. */
 const siteFetch: typeof fetch = async (input) => {
   const url = String(input instanceof Request ? input.url : input);
   const body =

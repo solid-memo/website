@@ -19,8 +19,8 @@ export type InvalidDataPolicyConcept = (typeof INVALID_DATA_POLICIES.concepts)[n
 export type ThemeConcept = (typeof THEME_SCHEME.concepts)[number]["iri"];
 
 /**
- * Lookups over Solid Memo's SKOS concept schemes (generated from the
- * vocabulary pod's v1 and topics documents; see docs/vocab.md). Data names a
+ * Lookups over Solid Memo's SKOS concept schemes (generated from
+ * ns/vocab/v1.ttl and ns/vocab/topics.ttl; see docs/vocab.md). Data names a
  * concept by its IRI; the app's own code, where a scheme predates it,
  * by the concept's notation.
  */

@@ -1,0 +1,289 @@
+@base <https://solid-memo.com/ns/vocab/topics.ttl> .
+
+@prefix topic:   <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+# What decks are about: a SKOS concept scheme used with dcat:theme on
+# decks (next to the EU data theme EDUC) and declared as a theme
+# taxonomy of the catalogues. Every concept has its label and
+# definition in each language the scheme's title is in (English and
+# Swedish, the app's languages). Concepts are only ever added; a
+# concept that should go is deprecated, never removed, since decks
+# point at it.
+<>
+    a skos:ConceptScheme ;
+    dcterms:title "Solid Memo topics"@en ,
+                  "Solid Memo-ämnen"@sv ;
+    skos:definition "What a deck of flashcards is about."@en ,
+                    "Vad en kortlek med flashcards handlar om."@sv ;
+    skos:hasTopConcept topic:languages ,
+                       topic:geography ,
+                       topic:computing ,
+                       topic:science ,
+                       topic:art ,
+                       topic:labour-market ,
+                       topic:history ,
+                       topic:literature ,
+                       topic:music ,
+                       topic:mythology ,
+                       topic:mathematics ,
+                       topic:sports ,
+                       topic:economics ,
+                       topic:film .
+
+topic:languages
+    a skos:Concept ;
+    skos:prefLabel "Languages"@en ,
+                   "Språk"@sv ;
+    skos:definition "Vocabulary and grammar of human languages."@en ,
+                    "Ordförråd och grammatik i mänskliga språk."@sv ;
+    skos:inScheme <> ;
+    skos:topConceptOf <> ;
+    skos:narrower topic:swedish ,
+                  topic:spanish ,
+                  topic:latin ,
+                  topic:greek ,
+                  topic:french ,
+                  topic:german ,
+                  topic:italian ,
+                  topic:finnish ,
+                  topic:portuguese .
+
+topic:swedish
+    a skos:Concept ;
+    skos:prefLabel "Swedish"@en ,
+                   "Svenska"@sv ;
+    skos:definition "The Swedish language."@en ,
+                    "Det svenska språket."@sv ;
+    skos:inScheme <> ;
+    skos:broader topic:languages .
+
+topic:geography
+    a skos:Concept ;
+    skos:prefLabel "Geography"@en ,
+                   "Geografi"@sv ;
+    skos:definition "Countries, capitals, flags and the places of the world."@en ,
+                    "Länder, huvudstäder, flaggor och världens platser."@sv ;
+    skos:inScheme <> ;
+    skos:topConceptOf <> .
+
+topic:computing
+    a skos:Concept ;
+    skos:prefLabel "Computing"@en ,
+                   "Datorer"@sv ;
+    skos:definition "Computers, software and the protocols of the web."@en ,
+                    "Datorer, mjukvara och webbens protokoll."@sv ;
+    skos:inScheme <> ;
+    skos:topConceptOf <> .
+
+topic:science
+    a skos:Concept ;
+    skos:prefLabel "Science"@en ,
+                   "Naturvetenskap"@sv ;
+    skos:definition "The natural sciences."@en ,
+                    "Naturvetenskaperna."@sv ;
+    skos:inScheme <> ;
+    skos:topConceptOf <> ;
+    skos:narrower topic:chemistry ,
+                  topic:physics ,
+                  topic:astronomy ,
+                  topic:biology .
+
+topic:chemistry
+    a skos:Concept ;
+    skos:prefLabel "Chemistry"@en ,
+                   "Kemi"@sv ;
+    skos:definition "Elements, compounds and their reactions."@en ,
+                    "Grundämnen, föreningar och deras reaktioner."@sv ;
+    skos:inScheme <> ;
+    skos:broader topic:science .
+
+topic:art
+    a skos:Concept ;
+    skos:prefLabel "Art"@en ,
+                   "Konst"@sv ;
+    skos:definition "Paintings, artists and the history of art."@en ,
+                    "Målningar, konstnärer och konstens historia."@sv ;
+    skos:inScheme <> ;
+    skos:topConceptOf <> .
+
+topic:labour-market
+    a skos:Concept ;
+    skos:prefLabel "Labour market"@en ,
+                   "Arbetsmarknad"@sv ;
+    skos:definition "Occupations, work and the labour market."@en ,
+                    "Yrken, arbete och arbetsmarknaden."@sv ;
+    skos:inScheme <> ;
+    skos:topConceptOf <> .
+
+topic:spanish
+    a skos:Concept ;
+    skos:prefLabel "Spanish"@en ,
+                   "Spanska"@sv ;
+    skos:definition "The Spanish language."@en ,
+                    "Det spanska språket."@sv ;
+    skos:inScheme <> ;
+    skos:broader topic:languages .
+
+topic:latin
+    a skos:Concept ;
+    skos:prefLabel "Latin"@en ,
+                   "Latin"@sv ;
+    skos:definition "The Latin language and its phrases."@en ,
+                    "Det latinska språket och dess uttryck."@sv ;
+    skos:inScheme <> ;
+    skos:broader topic:languages .
+
+topic:greek
+    a skos:Concept ;
+    skos:prefLabel "Greek"@en ,
+                   "Grekiska"@sv ;
+    skos:definition "The Greek language and its alphabet."@en ,
+                    "Det grekiska språket och dess alfabet."@sv ;
+    skos:inScheme <> ;
+    skos:broader topic:languages .
+
+topic:french
+    a skos:Concept ;
+    skos:prefLabel "French"@en ,
+                   "Franska"@sv ;
+    skos:definition "The French language."@en ,
+                    "Det franska språket."@sv ;
+    skos:inScheme <> ;
+    skos:broader topic:languages .
+
+topic:german
+    a skos:Concept ;
+    skos:prefLabel "German"@en ,
+                   "Tyska"@sv ;
+    skos:definition "The German language."@en ,
+                    "Det tyska språket."@sv ;
+    skos:inScheme <> ;
+    skos:broader topic:languages .
+
+topic:italian
+    a skos:Concept ;
+    skos:prefLabel "Italian"@en ,
+                   "Italienska"@sv ;
+    skos:definition "The Italian language."@en ,
+                    "Det italienska språket."@sv ;
+    skos:inScheme <> ;
+    skos:broader topic:languages .
+
+topic:finnish
+    a skos:Concept ;
+    skos:prefLabel "Finnish"@en ,
+                   "Finska"@sv ;
+    skos:definition "The Finnish language."@en ,
+                    "Det finska språket."@sv ;
+    skos:inScheme <> ;
+    skos:broader topic:languages .
+
+topic:portuguese
+    a skos:Concept ;
+    skos:prefLabel "Portuguese"@en ,
+                   "Portugisiska"@sv ;
+    skos:definition "The Portuguese language."@en ,
+                    "Det portugisiska språket."@sv ;
+    skos:inScheme <> ;
+    skos:broader topic:languages .
+
+topic:physics
+    a skos:Concept ;
+    skos:prefLabel "Physics"@en ,
+                   "Fysik"@sv ;
+    skos:definition "Matter, energy, forces and their units."@en ,
+                    "Materia, energi, krafter och deras enheter."@sv ;
+    skos:inScheme <> ;
+    skos:broader topic:science .
+
+topic:astronomy
+    a skos:Concept ;
+    skos:prefLabel "Astronomy"@en ,
+                   "Astronomi"@sv ;
+    skos:definition "Stars, planets, constellations and the universe."@en ,
+                    "Stjärnor, planeter, stjärnbilder och universum."@sv ;
+    skos:inScheme <> ;
+    skos:broader topic:science .
+
+topic:biology
+    a skos:Concept ;
+    skos:prefLabel "Biology"@en ,
+                   "Biologi"@sv ;
+    skos:definition "Living things: animals, plants and the human body."@en ,
+                    "Levande varelser: djur, växter och människokroppen."@sv ;
+    skos:inScheme <> ;
+    skos:broader topic:science .
+
+topic:history
+    a skos:Concept ;
+    skos:prefLabel "History"@en ,
+                   "Historia"@sv ;
+    skos:definition "Past events, eras and the people who shaped them."@en ,
+                    "Historiska händelser, epoker och människorna som formade dem."@sv ;
+    skos:inScheme <> ;
+    skos:topConceptOf <> .
+
+topic:literature
+    a skos:Concept ;
+    skos:prefLabel "Literature"@en ,
+                   "Litteratur"@sv ;
+    skos:definition "Books, authors and literary prizes."@en ,
+                    "Böcker, författare och litterära priser."@sv ;
+    skos:inScheme <> ;
+    skos:topConceptOf <> .
+
+topic:music
+    a skos:Concept ;
+    skos:prefLabel "Music"@en ,
+                   "Musik"@sv ;
+    skos:definition "Composers, works and the language of music."@en ,
+                    "Tonsättare, verk och musikens språk."@sv ;
+    skos:inScheme <> ;
+    skos:topConceptOf <> .
+
+topic:mythology
+    a skos:Concept ;
+    skos:prefLabel "Mythology"@en ,
+                   "Mytologi"@sv ;
+    skos:definition "Gods, heroes and the myths of the world."@en ,
+                    "Gudar, hjältar och världens myter."@sv ;
+    skos:inScheme <> ;
+    skos:topConceptOf <> .
+
+topic:mathematics
+    a skos:Concept ;
+    skos:prefLabel "Mathematics"@en ,
+                   "Matematik"@sv ;
+    skos:definition "Numbers, formulas and mathematical notation."@en ,
+                    "Tal, formler och matematisk notation."@sv ;
+    skos:inScheme <> ;
+    skos:topConceptOf <> .
+
+topic:sports
+    a skos:Concept ;
+    skos:prefLabel "Sports"@en ,
+                   "Sport"@sv ;
+    skos:definition "Sports, games and their competitions."@en ,
+                    "Idrotter, spel och deras tävlingar."@sv ;
+    skos:inScheme <> ;
+    skos:topConceptOf <> .
+
+topic:economics
+    a skos:Concept ;
+    skos:prefLabel "Economics"@en ,
+                   "Ekonomi"@sv ;
+    skos:definition "Money, currencies and the economy."@en ,
+                    "Pengar, valutor och ekonomin."@sv ;
+    skos:inScheme <> ;
+    skos:topConceptOf <> .
+
+topic:film
+    a skos:Concept ;
+    skos:prefLabel "Film"@en ,
+                   "Film"@sv ;
+    skos:definition "Films, film-makers and film awards."@en ,
+                    "Filmer, filmskapare och filmpriser."@sv ;
+    skos:inScheme <> ;
+    skos:topConceptOf <> .

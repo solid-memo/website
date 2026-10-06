@@ -5,7 +5,7 @@ import { summarize, type SubjectReport, type Violation } from "./validation";
 const INSTANCE = "https://pod.example/solid-memo/a/";
 const CATALOG = `${INSTANCE}catalog.ttl`;
 const REVIEWS = `${INSTANCE}reviews/deck-1.ttl`;
-const SM = "https://pod.solid-memo.com/vocab/v1#";
+const SM = "https://solid-memo.com/ns/vocab/v1.ttl#";
 const DC = "http://purl.org/dc/terms/";
 
 const v = (constraint: string, path?: string, severity: Violation["severity"] = "violation"): Violation => ({

@@ -1,0 +1,355 @@
+@base <https://solid-memo.com/ns/shapes/deck/v3.ttl> .
+
+@prefix sh:         <http://www.w3.org/ns/shacl#> .
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+
+# Deck format 3: a deck is a DCAT dataset. It states its study direction
+# as a SKOS concept (solid-memo:studyDirection) instead of a string,
+# always has a description, and names its creators as foaf:Agent nodes
+# of the same document instead of "Name <email>" strings. What a deck
+# was drawn from is prov:wasDerivedFrom: in a pod, the library release
+# it was imported from (dcterms:source, which DCAT-AP keeps for
+# datasets described alongside, is no longer used). Topics
+# (dcat:theme) and keywords are optional. In the library each document
+# is one release of a deck: it says which series it belongs to, its
+# version and the release before it. Classes of values (agents,
+# concepts, licences) are checked by the DCAT-AP profile, which is run
+# with the reference data (see docs/validation.md). A deck in a pod may
+# set its own study caps (added in vocabulary 1.7 without a version bump:
+# an older reader ignores them and uses the instance's preferences); a
+# library release never does, the caps being the learner's.
+<#inPod>
+    a sh:NodeShape ;
+    sh:name "DeckV3" ;
+    rdfs:comment "Deck format 3 as a catalog entry in a pod: a dcat:Dataset." ;
+    sh:nodeKind sh:IRI ;
+    sh:class solid-memo:Deck ;
+    sh:property <#formatVersion> ,
+                <#dataset> ,
+                <#title> ,
+                <#description> ,
+                <#created> ,
+                <#modified> ,
+                <#creator> ,
+                <#license> ,
+                <#studyDirection> ,
+                <#noDirection> ,
+                <#themes> ,
+                <#keywords> ,
+                <#distributions> ,
+                <#cardsDocument> ,
+                <#reviewsDocument> ,
+                <#source> ,
+                <#noSource> ,
+                <#newCardsPerDay> ,
+                <#maxReviewsPerDay> .
+
+<#inLibrary>
+    a sh:NodeShape ;
+    sh:name "LibraryDeckV3" ;
+    rdfs:comment "Deck format 3 as a deck-library document: one release of a deck, a dcat:Dataset in the deck's series." ;
+    sh:nodeKind sh:IRI ;
+    sh:class solid-memo:Deck ;
+    sh:property <#formatVersion> ,
+                <#dataset> ,
+                <#title> ,
+                <#description> ,
+                <#created> ,
+                <#modified> ,
+                <#issued> ,
+                <#creator> ,
+                <#publisher> ,
+                <#license> ,
+                <#studyDirection> ,
+                <#noDirection> ,
+                <#libraryThemes> ,
+                <#keywords> ,
+                <#languages> ,
+                <#version> ,
+                <#versionNotes> ,
+                <#inSeries> ,
+                <#isVersionOf> ,
+                <#previous> ,
+                <#previousVersion> ,
+                <#libraryDistributions> ,
+                <#derivedFrom> ,
+                <#noCardsDocument> ,
+                <#noReviewsDocument> ,
+                <#noSource> ,
+                <#noNewCardsPerDay> ,
+                <#noMaxReviewsPerDay> .
+
+<#formatVersion>
+    a sh:PropertyShape ;
+    sh:path solid-memo:formatVersion ;
+    sh:datatype xsd:integer ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:hasValue 3 ;
+    sh:message "Deck format 3 states its format version, 3."@en ,
+               "Kortleksformat 3 anger sin formatversion, 3."@sv .
+
+<#dataset>
+    a sh:PropertyShape ;
+    sh:path rdf:type ;
+    sh:hasValue dcat:Dataset ;
+    sh:message "A format-3 deck is a dcat:Dataset."@en ,
+               "En kortlek i format 3 är ett dcat:Dataset."@sv .
+
+<#title>
+    a sh:PropertyShape ;
+    sh:path dcterms:title ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 .
+
+<#description>
+    a sh:PropertyShape ;
+    sh:path dcterms:description ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "A format-3 deck has a description, as DCAT-AP asks of every dataset."@en ,
+               "En kortlek i format 3 har en beskrivning, som DCAT-AP kräver av varje datamängd."@sv .
+
+<#created>
+    a sh:PropertyShape ;
+    sh:path dcterms:created ;
+    sh:datatype xsd:dateTime ;
+    sh:maxCount 1 .
+
+<#modified>
+    a sh:PropertyShape ;
+    sh:path dcterms:modified ;
+    sh:datatype xsd:dateTime ;
+    sh:maxCount 1 ;
+    sh:message "A modification time is an xsd:dateTime, like the creation time."@en ,
+               "En ändringstid är ett xsd:dateTime, liksom tiden då den skapades."@sv .
+
+<#issued>
+    a sh:PropertyShape ;
+    sh:path dcterms:issued ;
+    sh:datatype xsd:dateTime ;
+    sh:maxCount 1 ;
+    sh:message "A release time is an xsd:dateTime."@en ,
+               "En utgivningstid är ett xsd:dateTime."@sv .
+
+<#creator>
+    a sh:PropertyShape ;
+    sh:path dcterms:creator ;
+    sh:nodeKind sh:IRI ;
+    sh:message "A creator is a foaf:Agent node (<#agent-…>), never a string literal."@en ,
+               "En skapare är en foaf:Agent-nod (<#agent-…>), aldrig en strängliteral."@sv .
+
+<#publisher>
+    a sh:PropertyShape ;
+    sh:path dcterms:publisher ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "A library deck names its publisher, a foaf:Agent."@en ,
+               "En bibliotekskortlek anger sin utgivare, en foaf:Agent."@sv .
+
+<#license>
+    a sh:PropertyShape ;
+    sh:path dcterms:license ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+    sh:message "A licence is an IRI (<https://…>), never a string literal."@en ,
+               "En licens är en IRI (<https://…>), aldrig en strängliteral."@sv .
+
+<#studyDirection>
+    a sh:PropertyShape ;
+    sh:path solid-memo:studyDirection ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:in ( solid-memo:frontToBack solid-memo:backToFront solid-memo:bidirectional ) ;
+    sh:message "A format-3 deck states its study direction, a concept of solid-memo:StudyDirections."@en ,
+               "En kortlek i format 3 anger sin studieriktning, ett begrepp i solid-memo:StudyDirections."@sv .
+
+<#noDirection>
+    a sh:PropertyShape ;
+    sh:path solid-memo:direction ;
+    sh:maxCount 0 ;
+    sh:message "Format 3 states the study direction with solid-memo:studyDirection, not the deprecated solid-memo:direction."@en ,
+               "Format 3 anger studieriktningen med solid-memo:studyDirection, inte med den utfasade solid-memo:direction."@sv .
+
+<#themes>
+    a sh:PropertyShape ;
+    sh:path dcat:theme ;
+    sh:nodeKind sh:IRI ;
+    sh:message "A theme is a skos:Concept IRI, never a string literal."@en ,
+               "Ett tema är en IRI till ett skos:Concept, aldrig en strängliteral."@sv .
+
+<#libraryThemes>
+    a sh:PropertyShape ;
+    sh:path dcat:theme ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:hasValue <http://publications.europa.eu/resource/authority/data-theme/EDUC> ;
+    sh:message "A library deck has the EU data theme EDUC (education) among its themes."@en ,
+               "En bibliotekskortlek har EU:s datatema EDUC (utbildning) bland sina teman."@sv .
+
+<#keywords>
+    a sh:PropertyShape ;
+    sh:path dcat:keyword ;
+    sh:datatype xsd:string .
+
+<#languages>
+    a sh:PropertyShape ;
+    sh:path dcterms:language ;
+    sh:nodeKind sh:IRI ;
+    sh:message "A language is an EU authority-table IRI, never a string literal."@en ,
+               "Ett språk är en IRI ur EU:s auktoritetstabeller, aldrig en strängliteral."@sv .
+
+<#version>
+    a sh:PropertyShape ;
+    sh:path dcat:version ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:pattern "^[1-9][0-9]*$" ;
+    sh:message "A release states its version: 1, 2, …"@en ,
+               "En utgåva anger sin version: 1, 2, …"@sv .
+
+<#versionNotes>
+    a sh:PropertyShape ;
+    sh:path adms:versionNotes ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 .
+
+<#inSeries>
+    a sh:PropertyShape ;
+    sh:path dcat:inSeries ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "A release belongs to its deck's series."@en ,
+               "En utgåva hör till sin kortleks serie."@sv .
+
+<#isVersionOf>
+    a sh:PropertyShape ;
+    sh:path dcat:isVersionOf ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "A release is a version of its deck's series."@en ,
+               "En utgåva är en version i sin kortleks serie."@sv .
+
+<#previous>
+    a sh:PropertyShape ;
+    sh:path dcat:prev ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 .
+
+<#previousVersion>
+    a sh:PropertyShape ;
+    sh:path dcat:previousVersion ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 .
+
+<#distributions>
+    a sh:PropertyShape ;
+    sh:path dcat:distribution ;
+    sh:nodeKind sh:IRI .
+
+<#libraryDistributions>
+    a sh:PropertyShape ;
+    sh:path dcat:distribution ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:message "A release has a distribution: its Turtle file."@en ,
+               "En utgåva har en distribution: sin Turtle-fil."@sv .
+
+<#derivedFrom>
+    a sh:PropertyShape ;
+    sh:path prov:wasDerivedFrom ;
+    sh:nodeKind sh:IRI ;
+    sh:message "A source the deck is drawn from is an IRI (<https://…>), never a string literal."@en ,
+               "En källa som kortleken bygger på är en IRI (<https://…>), aldrig en strängliteral."@sv .
+
+<#cardsDocument>
+    a sh:PropertyShape ;
+    sh:path solid-memo:cardsDocument ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 .
+
+<#reviewsDocument>
+    a sh:PropertyShape ;
+    sh:path solid-memo:reviewsDocument ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 .
+
+<#source>
+    a sh:PropertyShape ;
+    sh:path prov:wasDerivedFrom ;
+    sh:name "source" ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+    sh:message "In a pod, a deck is derived from at most one library release: the one it was imported from."@en ,
+               "I en Pod härstammar en kortlek från högst en biblioteksutgåva: den som den importerades från."@sv .
+
+<#noCardsDocument>
+    a sh:PropertyShape ;
+    sh:path solid-memo:cardsDocument ;
+    sh:maxCount 0 ;
+    sh:message "A library deck has no cards document: its cards are in the file."@en ,
+               "En bibliotekskortlek har inget kortdokument: dess kort finns i filen."@sv .
+
+<#noReviewsDocument>
+    a sh:PropertyShape ;
+    sh:path solid-memo:reviewsDocument ;
+    sh:maxCount 0 ;
+    sh:message "A library deck has no reviews document."@en ,
+               "En bibliotekskortlek har inget repetitionsdokument."@sv .
+
+<#newCardsPerDay>
+    a sh:PropertyShape ;
+    sh:path solid-memo:deckNewCardsPerDay ;
+    sh:name "newCardsPerDay" ;
+    sh:datatype xsd:integer ;
+    sh:minInclusive 0 ;
+    sh:maxCount 1 ;
+    sh:message "A deck's new cards per day is one whole number, 0 or more."@en ,
+               "En kortleks antal nya kort per dag är ett heltal, 0 eller mer."@sv .
+
+<#maxReviewsPerDay>
+    a sh:PropertyShape ;
+    sh:path solid-memo:deckMaxReviewsPerDay ;
+    sh:name "maxReviewsPerDay" ;
+    sh:datatype xsd:integer ;
+    sh:minInclusive 0 ;
+    sh:maxCount 1 ;
+    sh:message "A deck's max reviews per day is one whole number, 0 or more."@en ,
+               "En kortleks högsta antal repetitioner per dag är ett heltal, 0 eller mer."@sv .
+
+<#noNewCardsPerDay>
+    a sh:PropertyShape ;
+    sh:path solid-memo:deckNewCardsPerDay ;
+    sh:maxCount 0 ;
+    sh:message "A library deck sets no study caps: they are the learner's."@en ,
+               "En bibliotekskortlek anger inga studiegränser: dem bestämmer den som studerar."@sv .
+
+<#noMaxReviewsPerDay>
+    a sh:PropertyShape ;
+    sh:path solid-memo:deckMaxReviewsPerDay ;
+    sh:maxCount 0 ;
+    sh:message "A library deck sets no study caps: they are the learner's."@en ,
+               "En bibliotekskortlek anger inga studiegränser: dem bestämmer den som studerar."@sv .
+
+<#noSource>
+    a sh:PropertyShape ;
+    sh:path dcterms:source ;
+    sh:maxCount 0 ;
+    sh:message "A format-3 deck names what it is drawn from with prov:wasDerivedFrom: dcterms:source is for datasets described alongside."@en ,
+               "En kortlek i format 3 anger vad den bygger på med prov:wasDerivedFrom: dcterms:source är för datamängder som beskrivs bredvid."@sv .

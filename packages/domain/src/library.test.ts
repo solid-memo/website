@@ -8,7 +8,7 @@ import {
   type LibraryDeck,
 } from "./library";
 
-const TOPIC = "https://pod.solid-memo.com/vocab/topics#";
+const TOPIC = "https://solid-memo.com/ns/vocab/topics.ttl#";
 const EDUC = "http://publications.europa.eu/resource/authority/data-theme/EDUC";
 
 function libraryDeck(name: string, themes: string[], extra: Partial<LibraryDeck> = {}): LibraryDeck {

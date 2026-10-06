@@ -5,7 +5,7 @@
  * second local pod here; e2e/pod moves a guest's study into real servers.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/pod";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/sources";
 import { createUseCases } from "@solid-memo/application/useCases";
 import type { ResourceStore } from "@solid-memo/application/ports";
 import { GUEST_ORIGIN, GUEST_SESSION } from "@solid-memo/domain/guest";
@@ -40,7 +40,7 @@ async function everyTriple(store: ResourceStore): Promise<string[]> {
   return lines;
 }
 
-const SM_NS = "https://pod.solid-memo.com/vocab/v1#";
+const SM_NS = "https://solid-memo.com/ns/vocab/v1.ttl#";
 const XSD_INTEGER = "http://www.w3.org/2001/XMLSchema#integer";
 
 /** A subject's stated format set back to `version`, in place, as an app of that format left it. */

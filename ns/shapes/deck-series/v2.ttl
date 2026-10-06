@@ -1,0 +1,127 @@
+@base <https://solid-memo.com/ns/shapes/deck-series/v2.ttl> .
+
+@prefix sh:         <http://www.w3.org/ns/shacl#> .
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+
+# A deck of the library across its releases: a dataset series whose
+# members are the releases, which are also its versions. It is typed
+# dcat:Dataset too (DCAT 3 makes a series a dataset, and SHACL checks
+# only stated types). Subjects of the library index, never of a pod.
+# Format 2: the title and description are language-tagged text, as in
+# deck format 4, copied from the current release (an untagged one from
+# a format-3 release is tagged English).
+<#inLibrary>
+    a sh:NodeShape ;
+    sh:name "LibraryDeckSeriesV2" ;
+    rdfs:comment "A library deck across its releases: a dcat:DatasetSeries." ;
+    sh:nodeKind sh:IRI ;
+    sh:class dcat:DatasetSeries ;
+    sh:property <#formatVersion> ,
+                <#dataset> ,
+                <#title> ,
+                <#description> ,
+                <#publisher> ,
+                <#themes> ,
+                <#keywords> ,
+                <#first> ,
+                <#last> ,
+                <#versions> ,
+                <#currentVersion> .
+
+<#formatVersion>
+    a sh:PropertyShape ;
+    sh:path solid-memo:formatVersion ;
+    sh:datatype xsd:integer ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:hasValue 2 ;
+    sh:message "Deck series format 2 states its format version, 2."@en ,
+               "Format 2 för kortleksserier anger sin formatversion, 2."@sv .
+
+<#dataset>
+    a sh:PropertyShape ;
+    sh:path rdf:type ;
+    sh:hasValue dcat:Dataset ;
+    sh:message "A deck series is a dcat:Dataset too."@en ,
+               "En kortleksserie är också ett dcat:Dataset."@sv .
+
+<#title>
+    a sh:PropertyShape ;
+    sh:path dcterms:title ;
+    sh:datatype rdf:langString ;
+    sh:minCount 1 ;
+    sh:uniqueLang true ;
+    sh:qualifiedValueShape <#english> ;
+    sh:qualifiedMinCount 1 ;
+    sh:qualifiedMaxCount 1 ;
+    sh:message "A title is language-tagged text, one per language, and one of them English (\"…\"@en)."@en ,
+               "En titel är språktaggad text, en per språk, och en av dem på engelska (\"…\"@en)."@sv .
+
+<#description>
+    a sh:PropertyShape ;
+    sh:path dcterms:description ;
+    sh:datatype rdf:langString ;
+    sh:minCount 1 ;
+    sh:uniqueLang true ;
+    sh:qualifiedValueShape <#english> ;
+    sh:qualifiedMinCount 1 ;
+    sh:qualifiedMaxCount 1 ;
+    sh:message "A description is language-tagged text, one per language, and one of them English (\"…\"@en)."@en ,
+               "En beskrivning är språktaggad text, en per språk, och en av dem på engelska (\"…\"@en)."@sv .
+
+<#english>
+    a sh:NodeShape ;
+    sh:languageIn ( "en" ) .
+
+<#publisher>
+    a sh:PropertyShape ;
+    sh:path dcterms:publisher ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 .
+
+<#themes>
+    a sh:PropertyShape ;
+    sh:path dcat:theme ;
+    sh:nodeKind sh:IRI .
+
+<#keywords>
+    a sh:PropertyShape ;
+    sh:path dcat:keyword ;
+    sh:datatype xsd:string .
+
+<#first>
+    a sh:PropertyShape ;
+    sh:path dcat:first ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 .
+
+<#last>
+    a sh:PropertyShape ;
+    sh:path dcat:last ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 .
+
+<#versions>
+    a sh:PropertyShape ;
+    sh:path dcat:hasVersion ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:message "A deck series lists every release as a version."@en ,
+               "En kortleksserie listar varje utgåva som en version."@sv .
+
+<#currentVersion>
+    a sh:PropertyShape ;
+    sh:path dcat:hasCurrentVersion ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "A deck series names its current release."@en ,
+               "En kortleksserie anger sin aktuella utgåva."@sv .

@@ -1,0 +1,52 @@
+@base <https://solid-memo.com/ns/shapes/card/v1.ttl> .
+
+@prefix sh:         <http://www.w3.org/ns/shacl#> .
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+
+# Card format 1: text on both sides, required.
+<#shape>
+    a sh:NodeShape ;
+    sh:name "CardV1" ;
+    rdfs:comment "Card format 1: front and back text, both required." ;
+    sh:nodeKind sh:IRI ;
+    sh:class solid-memo:Card ;
+    sh:property <#formatVersion> ,
+                <#front> ,
+                <#back> ,
+                <#created> .
+
+<#formatVersion>
+    a sh:PropertyShape ;
+    sh:path solid-memo:formatVersion ;
+    sh:datatype xsd:integer ;
+    sh:maxCount 1 ;
+    sh:in ( 1 ) ;
+    sh:message "Card format 1 states no format version, or 1."@en ,
+               "Kortformat 1 anger ingen formatversion, eller 1."@sv .
+
+<#front>
+    a sh:PropertyShape ;
+    sh:path solid-memo:front ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "A format-1 card has text on its front."@en ,
+               "Ett kort i format 1 har text på framsidan."@sv .
+
+<#back>
+    a sh:PropertyShape ;
+    sh:path solid-memo:back ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "A format-1 card has text on its back."@en ,
+               "Ett kort i format 1 har text på baksidan."@sv .
+
+<#created>
+    a sh:PropertyShape ;
+    sh:path dcterms:created ;
+    sh:datatype xsd:dateTime ;
+    sh:maxCount 1 .
