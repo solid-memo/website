@@ -1,0 +1,99 @@
+name: Vocabulary, shapes and decks
+
+# What the site publishes under ns/ and decks/ (docs/vocab.md,
+# docs/shapes.md, docs/deck-library.md), checked whenever it or the code
+# that reads it changes: the Turtle in the house style, the deck library
+# valid with its index up to date and no published version edited or
+# removed since the base of the change, the generated code in step with
+# the vocabulary and the shapes, their tests, and pySHACL's cross-check.
+# CI runs most of this too, on every push, and gates the deploy; this
+# workflow adds the comparison with the base and reports on pull
+# requests.
+
+on:
+  push:
+    paths:
+      - ns/**
+      - decks/**
+      - packages/vocab/**
+      - packages/shacl/**
+      - packages/turtle/**
+      - scripts/shacl_crosscheck.py
+      - scripts/requirements-ci.txt
+      - .github/workflows/ns.yml
+  pull_request:
+    paths:
+      - ns/**
+      - decks/**
+      - packages/vocab/**
+      - packages/shacl/**
+      - packages/turtle/**
+      - scripts/shacl_crosscheck.py
+      - scripts/requirements-ci.txt
+      - .github/workflows/ns.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ns-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      # The whole history: the library is compared with an earlier commit.
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/cache@v6
+        with:
+          path: .turbo/cache
+          key: turbo-ns-${{ github.sha }}
+          restore-keys: |
+            turbo-ns-
+            turbo-
+      - run: npm ci
+      - run: npm run format:turtle:check
+      # A published version (decks/<name>/v<N>.ttl) is never edited or
+      # removed: compare with the pull request's base branch, or with the
+      # commit the push moved the branch from. A new branch has no such
+      # commit (all zeros), and one a force push left behind may not have
+      # been fetched; both compare with the default branch instead.
+      - name: npm run library:check -- --base <base>
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+          BEFORE: ${{ github.event.before }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          if [ "$EVENT" = pull_request ]; then
+            git fetch --no-tags origin "+refs/heads/$BASE_REF:refs/remotes/origin/$BASE_REF"
+            base="origin/$BASE_REF"
+          elif [ "$EVENT" = push ] && [ -n "$BEFORE" ] && ! [[ "$BEFORE" =~ ^0+$ ]] && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            base="$BEFORE"
+          else
+            git fetch --no-tags origin "+refs/heads/$DEFAULT_BRANCH:refs/remotes/origin/$DEFAULT_BRANCH"
+            base="origin/$DEFAULT_BRANCH"
+          fi
+          echo "Comparing the library with $base"
+          npm run library:check -- --base "$base"
+      - run: npm run generate:check
+      - run: npx turbo run test --filter=@solid-memo/vocab --filter=@solid-memo/shacl --filter=@solid-memo/turtle
+      # The vocabulary, the deck library and pod catalog documents, checked
+      # again by an independent SHACL engine (pySHACL), SPARQL constraints
+      # included.
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: scripts/requirements-ci.txt
+      - run: pip install -r scripts/requirements-ci.txt
+      - run: python scripts/shacl_crosscheck.py

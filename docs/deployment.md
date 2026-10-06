@@ -6,16 +6,44 @@ deployed automatically by CI.
 
 ## GitHub Pages (automatic)
 
-`.github/workflows/deploy.yml` runs on every push to `main`:
+The site is live at **https://solid-memo.com/**. `.github/workflows/deploy.yml`
+runs when the CI workflow has finished on `main`
+(`workflow_run`), and deploys only if CI passed:
 
 ```mermaid
 flowchart LR
-    push["push to main"] --> test["npm test"] --> build["npm run build"] --> pages["deploy apps/web/dist/ to GitHub Pages"]
+    push["push to main"] --> ci["CI: npm run check,<br/>build, pySHACL, pods"] -->|success| build["deploy.yml:<br/>npm run build"] --> guard["ns/ and decks/<br/>in the artifact?"] --> pages["deploy apps/web/dist/<br/>to GitHub Pages"]
 ```
 
-A red test run or build never deploys. The workflow enables Pages for
-the repository on its first run; no manual settings are required. The
-site lands at `https://<user>.github.io/solid-memo/`.
+A red CI run never deploys; `workflow_dispatch` deploys by hand. The
+workflow builds the commit CI checked, enables Pages for the repository
+on its first run, and stops before deploying if the vocabulary or the
+deck library is missing from the build. Pull requests and pushes that
+touch `ns/` or `decks/` also run the [ns workflow](../.github/workflows/ns.yml)
+([deck-library.md](deck-library.md#checks)).
+
+### What the artifact contains
+
+`apps/web/dist/` is the whole site, one origin for the app and the
+data it reads:
+
+| Path | From | What |
+|---|---|---|
+| `/` (`index.html`, `assets/`) | `apps/web/` | The app. |
+| `/ns/vocab/*.ttl`, `/ns/shapes/<class>/v<N>.ttl` | [`ns/`](../ns/) | The vocabulary and the shapes ([vocab.md](vocab.md), [shapes.md](shapes.md)). |
+| `/decks/index.ttl`, `/decks/<name>/v<N>.ttl` | [`decks/`](../decks/) | The deck library ([deck-library.md](deck-library.md)). |
+| `/vendor/…` | [`packages/vocab/vendor/`](../packages/vocab/vendor/) | The vendored DCAT-AP and SKOS shapes. |
+
+Vite copies `ns/`, `decks/` and `vendor/` as they are
+(`turtleDirectoryPlugin` in
+[publishTurtle.ts](../packages/vocab/tooling/publishTurtle.ts)), and
+serves them the same way in `npm run dev` and `npm run preview`.
+
+Pages serves a `.ttl` file as `text/turtle` with
+`Access-Control-Allow-Origin: *`, so any app or tool can read it, but
+it negotiates no content and lists no folders: an address without the
+extension, or a folder such as `/decks/`, is a 404. That is why every
+IRI of the vocabulary, the shapes and the library ends in `.ttl`.
 
 One-time setup on a new machine or fork:
 
@@ -24,7 +52,11 @@ gh auth login
 gh repo create <user>/solid-memo --public --source . --push
 ```
 
-(GitHub Pages on the free plan requires a public repository.)
+(GitHub Pages on the free plan requires a public repository.) A fork
+deploys to `https://<user>.github.io/solid-memo/`; its app works there,
+but the IRIs it reads still name `https://solid-memo.com/`, which
+`siteFetch` ([main.tsx](../apps/web/src/main.tsx)) maps to wherever the
+site is served.
 
 ## Why any static host works, unconfigured
 
@@ -39,17 +71,16 @@ gh repo create <user>/solid-memo --public --source . --push
 
 ## Custom domain (solid-memo.com via one.com DNS)
 
-To serve the Pages site on the owned domain later:
-
-1. In one.com's DNS panel, add a `CNAME` record for `www` pointing to
-   `<user>.github.io` (and/or apex `A` records to GitHub Pages' IPs).
-2. Set the custom domain in the repository: Settings → Pages →
-   Custom domain (GitHub then provisions the certificate).
-
-Nothing in the app changes: the same build serves from any origin.
+The domain is live: one.com's DNS points `solid-memo.com` at GitHub
+Pages, the custom domain is set in the repository (Settings → Pages →
+Custom domain, recorded in [CNAME](../CNAME)), and GitHub provisions
+the certificate. Nothing in the app depends on it: the same build
+serves from any origin. The vocabulary, shape and library IRIs do name
+it, so they resolve only once it serves this site.
 
 ## Manual publish (any static web space)
 
 `npm run build`, then upload the **contents** of `apps/web/dist/` to the web
-root (or any subfolder) via SFTP or a file manager. Verify a build
+root (or any subfolder) via SFTP or a file manager, `ns/`, `decks/` and
+`vendor/` included. Verify a build
 locally with `npm run preview`.

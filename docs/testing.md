@@ -128,9 +128,14 @@ git hook in place; 5.8.8 does too. The image installs without install
 scripts. node-solid-server prints every request it handles (`solid:*`),
 so its log runs to tens of megabytes.
 
-The vocabulary and the pod catalog fixtures are also cross-checked by
-pySHACL in CI (`python3 scripts/shacl_crosscheck.py`; see
-[validation.md](validation.md#the-ci-cross-check)).
+The vocabulary, the deck library and the pod catalog fixtures are also
+cross-checked by pySHACL in CI (`python3 scripts/shacl_crosscheck.py`;
+see [validation.md](validation.md#the-ci-cross-check)).
+
+Apart from the end-to-end tests' Docker images, nothing needs the
+network: the vocabulary, the shapes and the deck library are read from
+the repository's `ns/` and `decks/`, at the IRIs the site publishes
+them under.
 
 ## Coverage policy
 
@@ -159,7 +164,7 @@ Dependency inversion gives every layer a seam that makes mocks trivial:
 | UI | `UseCases` prop | Render with a fake `UseCases`; assert via testing-library queries. Query-dependent components get a fresh `QueryClient` (retries off). |
 | Infrastructure mappers | none needed | Pure `SolidDataset`/`Thing` → domain functions; feed in-memory datasets built with `mockSolidDatasetFrom`/`buildThing`. |
 | Infrastructure I/O shells | injected `fetch` + `vi.mock` | Mock `@inrupt/*` module functions; assert the shell orchestrates fetch → map → return. |
-| Shapes (`packages/shacl/`, `packages/solid/src/conformance.test.ts`) | the real engine | The real `rdf-validate-shacl` over the real shapes, read from their pod (the tests need the network): fixture documents under `packages/vocab/fixtures/` pass or fail as a table says; a record written through every descriptor, and every migration step's output, conforms (`conformance.test.ts`); every library deck passes. Shape documents are read through a fake `fetch` (a `Response` with its `url` set), exactly as the browser reads them. |
+| Shapes (`packages/shacl/`, `packages/solid/src/conformance.test.ts`) | the real engine | The real `rdf-validate-shacl` over the real shapes in `ns/shapes/`: fixture documents under `packages/vocab/fixtures/` pass or fail as a table says; a record written through every descriptor, and every migration step's output, conforms (`conformance.test.ts`). Every library deck passes too, by `npm run library:check` ([deck-library.md](deck-library.md#checks)). Shape documents are read through a `fetch` that serves the repository's files at their IRIs (`shapesFetch` in [sources.ts](../packages/vocab/tooling/sources.ts), a `Response` with its `url` set), exactly as the browser reads them. |
 | Generated code | drift test | `packages/vocab/tooling/generate.test.ts` renders the generators' output and compares it with the committed files; generated modules are data only, so importing them covers them (`packages/vocab/src/generated.test.ts`). |
 | End to end | real Solid servers | `e2e/pod/` wires the real use cases and Solid adapters as `main.tsx` does, over a fetch that records every request, against Community Solid Server 7 and 6 and node-solid-server 6 and 5. |
 
@@ -178,9 +183,9 @@ graph LR
 - Test files follow the same import boundaries as their subject
   ([boundaries.md](boundaries.md)); `packages/shacl/src/testing/turtle.ts` parses Turtle
   through `@inrupt/solid-client` for the SHACL tests.
-- Node tooling tests may read the vocab package's `vocab/`, `shapes/`,
-  `vendor/` and `fixtures/` (through `VOCAB_ROOT`): they are the
-  fixtures.
+- Node tooling tests may read the repository's `ns/` and `decks/`
+  (through `NS_ROOT` and `DECKS_ROOT`) and the vocab package's `vendor/`
+  and `fixtures/` (through `VOCAB_ROOT`): they are the fixtures.
 - Preact-compat note: `@tanstack/react-query` must be inlined in the vitest
   server deps so the `react → preact/compat` alias applies (see
   `apps/web/vite.config.ts`).

@@ -11,7 +11,7 @@ replacing one would cost.
 | TanStack | `@tanstack/react-query` (via `preact/compat`) | `apps/web/src/ui/`, `apps/web/src/main.tsx` | Async-state caching and invalidation |
 | Preact | `preact` | `apps/web/src/ui/`, `apps/web/src/main.tsx` | Rendering |
 | Fontsource | `@fontsource-variable/fredoka`, `@fontsource/bangers` (both SIL OFL-1.1) | `apps/web/src/style.css` (`@import`) | Typefaces — Fredoka for text, Bangers (comic lettering) for `h1`/`h2` — self-hosted: bundled into `dist/`, no third-party font requests |
-| Zazuko | `rdf-validate-shacl` (MIT; with `@rdfjs/*`, `clownface`) | `@solid-memo/shacl` (`src/engine.ts`, a lazily loaded chunk) | SHACL validation of pod and library documents against the shapes on https://pod.solid-memo.com/shapes/ |
+| Zazuko | `rdf-validate-shacl` (MIT; with `@rdfjs/*`, `clownface`) | `@solid-memo/shacl` (`src/engine.ts`, a lazily loaded chunk) | SHACL validation of pod and library documents against the shapes in `ns/shapes/` |
 | RDF/JS community | `n3` | `@solid-memo/turtle` and the node tooling of `shacl` | Build-time Turtle parsing for the generators and validation |
 
 ## Vendor-independent code

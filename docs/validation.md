@@ -23,7 +23,7 @@ flowchart LR
     uc --> docs["instanceDocumentUrls<br/>meta, preferences, catalog,<br/>every deck's cards + reviews"]
     docs --> port["ShapeValidator.validateDocument"]
     port --> pod["pod document<br/>(authenticated fetch)"]
-    port --> shapes["shapes/&lt;class&gt;/v&lt;N&gt;.ttl<br/>(the site's own copy)"]
+    port --> shapes["ns/shapes/&lt;class&gt;/v&lt;N&gt;.ttl<br/>(published with the site)"]
     port --> engine["rdf-validate-shacl<br/>(lazy chunk)"]
 ```
 
@@ -53,9 +53,13 @@ flowchart LR
   does not know: skipped, reported) or `untyped` (no Solid Memo class:
   listed so strays are visible). A document that does not exist is
   `missing`, which is normal, not a problem.
-- The shapes are fetched from their pod, https://pod.solid-memo.com/shapes/
-  (`SHAPES_POD`), not bundled: it is where they are published, and
-  their only copy. Each shape document is fetched once per session.
+- The shapes are fetched at their IRIs, under
+  `https://solid-memo.com/ns/shapes/` (`SHAPES_BASE`), not bundled: they
+  are published with the site anyway, and the document the browser
+  checks against is the one CI validated. `siteFetch` in
+  [main.tsx](../apps/web/src/main.tsx) reads them from wherever the
+  site is served, so `npm run dev` and `npm run preview` use the
+  repository's `ns/`. Each shape document is fetched once per session.
 - The SHACL engine ([engine.ts](../packages/shacl/src/engine.ts),
   the only module that imports `rdf-validate-shacl`) is loaded with a
   dynamic import, so the library is a separate chunk fetched only when a
@@ -72,7 +76,7 @@ checks) and published with the site at `/vendor/`:
 | Profile | Shapes | Applies to |
 |---|---|---|
 | `dcat-ap` | DCAT-AP 3.0.1 (SEMIC) | catalogues, decks and deck releases, distributions, agents |
-| `skos` | SkoHub `skos.shacl.ttl` + `skos.bestPractice.shacl.ttl` | the concept schemes on the vocabulary's pod |
+| `skos` | SkoHub `skos.shacl.ttl` + `skos.bestPractice.shacl.ttl` | the concept schemes in `ns/vocab/` |
 
 - [profiles.ts](../packages/shacl/src/profiles.ts) names each
   profile's files. Their shapes pick their own targets
@@ -84,10 +88,10 @@ checks) and published with the site at `/vendor/`:
 - DCAT-AP's class checks (`dcat:theme` must be a `skos:Concept`,
   `dcterms:language` a `dcterms:LinguisticSystem`, …) look for the
   value's type in the data graph, so the reference data in
-  [the vocabulary pod's `external`](https://pod.solid-memo.com/vocab/external) (the EU authority-table
+  [ns/vocab/external.ttl](../ns/vocab/external.ttl) (the EU authority-table
   entries and media types Solid Memo uses) is loaded next to the data
   being checked. Add a term there before data uses it.
-- At build time `validateProfile` ([packages/shacl/node/shacl.ts](../packages/shacl/node/shacl.ts))
+- In node (`npm run library`, the tests) `validateProfile` ([packages/shacl/node/shacl.ts](../packages/shacl/node/shacl.ts))
   fails on any violation about a subject of the document. Warnings (a
   profile's recommendations) fail too for Solid Memo's own concept
   schemes, which are held to SKOS best practice.
@@ -161,15 +165,16 @@ instance is checked again.
 
 ## The CI cross-check
 
-CI checks what Solid Memo publishes again with an
-independent SHACL engine, pySHACL (pinned in
-`scripts/requirements-ci.txt`), which also runs SPARQL-based constraints:
-[scripts/shacl_crosscheck.py](../scripts/shacl_crosscheck.py) holds the
-pod catalog documents
-of the deck format 4, 5 and 6 fixtures (format 5 titles a deck in any
+CI (and the [ns workflow](../.github/workflows/ns.yml)) checks what
+Solid Memo publishes again with an independent SHACL engine, pySHACL
+(pinned in `scripts/requirements-ci.txt`), which also runs SPARQL-based
+constraints: [scripts/shacl_crosscheck.py](../scripts/shacl_crosscheck.py)
+holds the [deck library](deck-library.md)'s index and every version,
+and the pod catalog documents of the deck format 4, 5 and 6 fixtures (format 5 titles a deck in any
 language, English or not; format 6 tags its keywords), to DCAT-AP, and the vocabulary's concept schemes to
 SkoHub's SKOS shapes, best practice included. A disagreement between the
-engines, or a constraint the browser's engine cannot run, fails CI. The
-decks repository runs the same cross-check over the built library.
-Locally: `pip install -r scripts/requirements-ci.txt`, then `npm run
-build && python3 scripts/shacl_crosscheck.py`.
+engines, or a constraint the browser's engine cannot run, fails CI. It
+reads `ns/` and `decks/` from the repository, each file at the IRI the
+site publishes it under, and needs neither a build nor the network.
+Locally: `pip install -r scripts/requirements-ci.txt`, then `python3
+scripts/shacl_crosscheck.py`.

@@ -5,7 +5,7 @@ import { toLibraryDeckContent, toLibraryDecks } from "./mappers/libraryMapper";
 
 export interface SolidDeckLibraryDeps {
   /**
-   * Plain fetch: the library is public Turtle in the library pod
+   * Plain fetch: the library is public Turtle published with the site
    * (docs/deck-library.md), readable by anyone, so no authentication is
    * involved.
    */

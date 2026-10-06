@@ -106,7 +106,7 @@ flowchart LR
     v3 -->|card/3-to-4<br/>text stays untagged| v4["CardV4"]
     v4 -->|card/4-to-5<br/>restamped: nothing guessed| v5["CardV5"]
     d1["DeckV1"] -->|deck/1-to-2<br/>direction: front-to-back| d2["DeckV2"]
-    d2 -->|deck/2-to-3<br/>DCAT dataset: direction concept,<br/>default description, creator agents,<br/>release 1 as its source| d3["DeckV3"]
+    d2 -->|deck/2-to-3<br/>DCAT dataset: direction concept,<br/>default description, creator agents| d3["DeckV3"]
     d3 -->|deck/3-to-4<br/>title and description tagged English| d4["DeckV4"]
     d4 -->|deck/4-to-5<br/>restamped: nothing guessed| d5["DeckV5"]
     d5 -->|deck/5-to-6<br/>keywords: untagged kept| d6["DeckV6"]
@@ -283,8 +283,7 @@ documents and switch the deck over to them
 ## Catching up with the library
 
 A deck imported from the [deck library](deck-library.md) says which
-release it came from (`prov:wasDerivedFrom <…/decks/name/vn>`; a deck
-imported before releases came from what became release 1). When the
+release it came from (`prov:wasDerivedFrom <…/decks/name/vN.ttl>`). When the
 library publishes a newer release, the deck page offers to bring the
 copy up to it (`planLibraryUpgrade` in
 [domain/libraryUpgrade.ts](../packages/domain/src/libraryUpgrade.ts), shown by
@@ -385,14 +384,14 @@ flowchart TD
 
 ## Adding a format version
 
-1. Put `<class>/v<N+1>` on the shapes' pod, as its owner (copy `v<N>`,
-   change the `@base`, the version assertion to `sh:hasValue N+1`, add
-   or change the properties), public like the others. Add any new terms
+1. Write `ns/shapes/<class>/v<N+1>.ttl` (copy `v<N>.ttl`, change the
+   `@base` to its own address and the version assertion to
+   `sh:hasValue N+1`, add or change the properties). Add any new terms
    to the [vocabulary](vocab.md). A shape's `sh:name` version must match
-   its document's, with no gaps, so a class whose shape shares a document
-   with another's moves to a folder of its own when only one of them gets
-   a new version: library deck 5 is `library-deck/v5`, a self-contained
-   copy of `LibraryDeckV4` from `deck/v4`.
+   its file's, with no gaps, so a class whose shape shares a file with
+   another's moves to a folder of its own when only one of them gets a
+   new version: library deck 5 is `ns/shapes/library-deck/v5.ttl`, a
+   self-contained copy of `LibraryDeckV4` from `ns/shapes/deck/v4.ttl`.
 2. `npm run generate`: the new record type, descriptor and
    `LATEST_VERSION` appear.
 3. Add `packages/domain/src/shapes/migrations/<class>/<N>-to-<N+1>.ts` and register
