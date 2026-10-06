@@ -1,6 +1,7 @@
 @base <https://solid-memo.com/ns/vocab/topics.ttl> .
 
 @prefix topic:   <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
 @prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 
@@ -10,9 +11,13 @@
 # definition in each language the scheme's title is in (English and
 # Swedish, the app's languages). Concepts are only ever added; a
 # concept that should go is deprecated, never removed, since decks
-# point at it.
+# point at it. So a topic's IRI never changes and carries no version:
+# each addition bumps owl:versionInfo and appends to the change note,
+# and every concept says in its history note when it arrived.
 <>
     a skos:ConceptScheme ;
+    owl:versionInfo "1.6" ;
+    skos:changeNote "1.0: languages, swedish, geography, computing, science, chemistry. 1.1: art. 1.2: labour-market. 1.3: every topic named and defined in Swedish as well as English. 1.4: history, literature, music, mythology, mathematics, sports, economics, astronomy, biology, physics, greek, latin, spanish (for the authored decks). 1.5: french, german. 1.6: film, finnish, italian, portuguese." ;
     dcterms:title "Solid Memo topics"@en ,
                   "Solid Memo-ämnen"@sv ;
     skos:definition "What a deck of flashcards is about."@en ,
@@ -48,7 +53,8 @@ topic:languages
                   topic:german ,
                   topic:italian ,
                   topic:finnish ,
-                  topic:portuguese .
+                  topic:portuguese ;
+    skos:historyNote "Since 1.0." .
 
 topic:swedish
     a skos:Concept ;
@@ -57,7 +63,8 @@ topic:swedish
     skos:definition "The Swedish language."@en ,
                     "Det svenska språket."@sv ;
     skos:inScheme <> ;
-    skos:broader topic:languages .
+    skos:broader topic:languages ;
+    skos:historyNote "Since 1.0." .
 
 topic:geography
     a skos:Concept ;
@@ -66,7 +73,8 @@ topic:geography
     skos:definition "Countries, capitals, flags and the places of the world."@en ,
                     "Länder, huvudstäder, flaggor och världens platser."@sv ;
     skos:inScheme <> ;
-    skos:topConceptOf <> .
+    skos:topConceptOf <> ;
+    skos:historyNote "Since 1.0." .
 
 topic:computing
     a skos:Concept ;
@@ -75,7 +83,8 @@ topic:computing
     skos:definition "Computers, software and the protocols of the web."@en ,
                     "Datorer, mjukvara och webbens protokoll."@sv ;
     skos:inScheme <> ;
-    skos:topConceptOf <> .
+    skos:topConceptOf <> ;
+    skos:historyNote "Since 1.0." .
 
 topic:science
     a skos:Concept ;
@@ -88,7 +97,8 @@ topic:science
     skos:narrower topic:chemistry ,
                   topic:physics ,
                   topic:astronomy ,
-                  topic:biology .
+                  topic:biology ;
+    skos:historyNote "Since 1.0." .
 
 topic:chemistry
     a skos:Concept ;
@@ -97,7 +107,8 @@ topic:chemistry
     skos:definition "Elements, compounds and their reactions."@en ,
                     "Grundämnen, föreningar och deras reaktioner."@sv ;
     skos:inScheme <> ;
-    skos:broader topic:science .
+    skos:broader topic:science ;
+    skos:historyNote "Since 1.0." .
 
 topic:art
     a skos:Concept ;
@@ -106,7 +117,8 @@ topic:art
     skos:definition "Paintings, artists and the history of art."@en ,
                     "Målningar, konstnärer och konstens historia."@sv ;
     skos:inScheme <> ;
-    skos:topConceptOf <> .
+    skos:topConceptOf <> ;
+    skos:historyNote "Since 1.1." .
 
 topic:labour-market
     a skos:Concept ;
@@ -115,7 +127,8 @@ topic:labour-market
     skos:definition "Occupations, work and the labour market."@en ,
                     "Yrken, arbete och arbetsmarknaden."@sv ;
     skos:inScheme <> ;
-    skos:topConceptOf <> .
+    skos:topConceptOf <> ;
+    skos:historyNote "Since 1.2." .
 
 topic:spanish
     a skos:Concept ;
@@ -124,7 +137,8 @@ topic:spanish
     skos:definition "The Spanish language."@en ,
                     "Det spanska språket."@sv ;
     skos:inScheme <> ;
-    skos:broader topic:languages .
+    skos:broader topic:languages ;
+    skos:historyNote "Since 1.4." .
 
 topic:latin
     a skos:Concept ;
@@ -133,7 +147,8 @@ topic:latin
     skos:definition "The Latin language and its phrases."@en ,
                     "Det latinska språket och dess uttryck."@sv ;
     skos:inScheme <> ;
-    skos:broader topic:languages .
+    skos:broader topic:languages ;
+    skos:historyNote "Since 1.4." .
 
 topic:greek
     a skos:Concept ;
@@ -142,7 +157,8 @@ topic:greek
     skos:definition "The Greek language and its alphabet."@en ,
                     "Det grekiska språket och dess alfabet."@sv ;
     skos:inScheme <> ;
-    skos:broader topic:languages .
+    skos:broader topic:languages ;
+    skos:historyNote "Since 1.4." .
 
 topic:french
     a skos:Concept ;
@@ -151,7 +167,8 @@ topic:french
     skos:definition "The French language."@en ,
                     "Det franska språket."@sv ;
     skos:inScheme <> ;
-    skos:broader topic:languages .
+    skos:broader topic:languages ;
+    skos:historyNote "Since 1.5." .
 
 topic:german
     a skos:Concept ;
@@ -160,7 +177,8 @@ topic:german
     skos:definition "The German language."@en ,
                     "Det tyska språket."@sv ;
     skos:inScheme <> ;
-    skos:broader topic:languages .
+    skos:broader topic:languages ;
+    skos:historyNote "Since 1.5." .
 
 topic:italian
     a skos:Concept ;
@@ -169,7 +187,8 @@ topic:italian
     skos:definition "The Italian language."@en ,
                     "Det italienska språket."@sv ;
     skos:inScheme <> ;
-    skos:broader topic:languages .
+    skos:broader topic:languages ;
+    skos:historyNote "Since 1.6." .
 
 topic:finnish
     a skos:Concept ;
@@ -178,7 +197,8 @@ topic:finnish
     skos:definition "The Finnish language."@en ,
                     "Det finska språket."@sv ;
     skos:inScheme <> ;
-    skos:broader topic:languages .
+    skos:broader topic:languages ;
+    skos:historyNote "Since 1.6." .
 
 topic:portuguese
     a skos:Concept ;
@@ -187,7 +207,8 @@ topic:portuguese
     skos:definition "The Portuguese language."@en ,
                     "Det portugisiska språket."@sv ;
     skos:inScheme <> ;
-    skos:broader topic:languages .
+    skos:broader topic:languages ;
+    skos:historyNote "Since 1.6." .
 
 topic:physics
     a skos:Concept ;
@@ -196,7 +217,8 @@ topic:physics
     skos:definition "Matter, energy, forces and their units."@en ,
                     "Materia, energi, krafter och deras enheter."@sv ;
     skos:inScheme <> ;
-    skos:broader topic:science .
+    skos:broader topic:science ;
+    skos:historyNote "Since 1.4." .
 
 topic:astronomy
     a skos:Concept ;
@@ -205,7 +227,8 @@ topic:astronomy
     skos:definition "Stars, planets, constellations and the universe."@en ,
                     "Stjärnor, planeter, stjärnbilder och universum."@sv ;
     skos:inScheme <> ;
-    skos:broader topic:science .
+    skos:broader topic:science ;
+    skos:historyNote "Since 1.4." .
 
 topic:biology
     a skos:Concept ;
@@ -214,7 +237,8 @@ topic:biology
     skos:definition "Living things: animals, plants and the human body."@en ,
                     "Levande varelser: djur, växter och människokroppen."@sv ;
     skos:inScheme <> ;
-    skos:broader topic:science .
+    skos:broader topic:science ;
+    skos:historyNote "Since 1.4." .
 
 topic:history
     a skos:Concept ;
@@ -223,7 +247,8 @@ topic:history
     skos:definition "Past events, eras and the people who shaped them."@en ,
                     "Historiska händelser, epoker och människorna som formade dem."@sv ;
     skos:inScheme <> ;
-    skos:topConceptOf <> .
+    skos:topConceptOf <> ;
+    skos:historyNote "Since 1.4." .
 
 topic:literature
     a skos:Concept ;
@@ -232,7 +257,8 @@ topic:literature
     skos:definition "Books, authors and literary prizes."@en ,
                     "Böcker, författare och litterära priser."@sv ;
     skos:inScheme <> ;
-    skos:topConceptOf <> .
+    skos:topConceptOf <> ;
+    skos:historyNote "Since 1.4." .
 
 topic:music
     a skos:Concept ;
@@ -241,7 +267,8 @@ topic:music
     skos:definition "Composers, works and the language of music."@en ,
                     "Tonsättare, verk och musikens språk."@sv ;
     skos:inScheme <> ;
-    skos:topConceptOf <> .
+    skos:topConceptOf <> ;
+    skos:historyNote "Since 1.4." .
 
 topic:mythology
     a skos:Concept ;
@@ -250,7 +277,8 @@ topic:mythology
     skos:definition "Gods, heroes and the myths of the world."@en ,
                     "Gudar, hjältar och världens myter."@sv ;
     skos:inScheme <> ;
-    skos:topConceptOf <> .
+    skos:topConceptOf <> ;
+    skos:historyNote "Since 1.4." .
 
 topic:mathematics
     a skos:Concept ;
@@ -259,7 +287,8 @@ topic:mathematics
     skos:definition "Numbers, formulas and mathematical notation."@en ,
                     "Tal, formler och matematisk notation."@sv ;
     skos:inScheme <> ;
-    skos:topConceptOf <> .
+    skos:topConceptOf <> ;
+    skos:historyNote "Since 1.4." .
 
 topic:sports
     a skos:Concept ;
@@ -268,7 +297,8 @@ topic:sports
     skos:definition "Sports, games and their competitions."@en ,
                     "Idrotter, spel och deras tävlingar."@sv ;
     skos:inScheme <> ;
-    skos:topConceptOf <> .
+    skos:topConceptOf <> ;
+    skos:historyNote "Since 1.4." .
 
 topic:economics
     a skos:Concept ;
@@ -277,7 +307,8 @@ topic:economics
     skos:definition "Money, currencies and the economy."@en ,
                     "Pengar, valutor och ekonomin."@sv ;
     skos:inScheme <> ;
-    skos:topConceptOf <> .
+    skos:topConceptOf <> ;
+    skos:historyNote "Since 1.4." .
 
 topic:film
     a skos:Concept ;
@@ -286,4 +317,5 @@ topic:film
     skos:definition "Films, film-makers and film awards."@en ,
                     "Filmer, filmskapare och filmpriser."@sv ;
     skos:inScheme <> ;
-    skos:topConceptOf <> .
+    skos:topConceptOf <> ;
+    skos:historyNote "Since 1.6." .

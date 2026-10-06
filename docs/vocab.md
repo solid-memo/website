@@ -69,6 +69,13 @@ string, so other applications can look up what it means:
   IRI or notation.
 - Concepts are only ever added. One that should go is deprecated
   (`owl:deprecated`), never removed: decks point at it.
+- The topics scheme is versioned the way `v1` is, but without a version
+  in its IRI. A topic is only a name decks point at, and adding one or
+  improving its labels breaks nothing, so there is never a
+  `topics/v2`. The scheme carries `owl:versionInfo` and a
+  `skos:changeNote` per release, each addition bumping it (1.0 → 1.1 →
+  …), and every topic carries a `skos:historyNote` saying when it
+  arrived ("Since 1.4.").
 
 ## Versioning policy
 
