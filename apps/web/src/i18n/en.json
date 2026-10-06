@@ -1015,5 +1015,9 @@
     "deck": "Deck",
     "lastStudied": "Last studied",
     "removedDeck": "A removed deck"
+  },
+  "zoomableImage": {
+    "enlarge": "Enlarge picture",
+    "shrink": "Shrink picture"
   }
 }

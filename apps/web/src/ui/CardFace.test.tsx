@@ -1,11 +1,15 @@
-import { describe, expect, it } from "vitest";
-import { render, screen } from "@testing-library/preact";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen } from "@testing-library/preact";
 import { CardFace, CardRowBack, CardRowFront, CardThumbnail } from "./CardFace";
 import { I18nProvider } from "./i18n";
 
 const FLAG = "https://flagcdn.com/af.svg";
 
 describe("CardFace", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it("shows text alone", () => {
     const { container } = render(<CardFace side="front" text={{ "": "水" }} />);
     expect(container.querySelector(".card-face.card-front")).toHaveTextContent(
@@ -105,10 +109,10 @@ describe("CardFace", () => {
     const { container } = render(
       <CardFace side="front" text={{ "": "Afghanistan" }} imageUrl={FLAG} />,
     );
-    const [name, image, text] = container.querySelector(".card-face")!.children;
+    const [name, picture, text] = container.querySelector(".card-face")!.children;
     expect(name).toHaveClass("visually-hidden");
-    expect(image.tagName).toBe("IMG");
-    expect(image).toHaveAttribute("alt", "Picture on the front of the card");
+    expect(picture).toHaveClass("picture-zoom");
+    expect(picture.querySelector("img")).toHaveAttribute("alt", "Picture on the front of the card");
     expect(text).toHaveTextContent("Afghanistan");
   });
 
@@ -133,9 +137,22 @@ describe("CardFace", () => {
       <CardFace side="front" text={{ "": "" }} imageUrl="javascript:alert(1)" />,
     );
     expect(container.querySelector("img")).toBeNull();
+    expect(screen.queryByRole("button")).toBeNull();
     expect(
       screen.getByText("Picture not shown: its address is not a web URL."),
     ).toBeInTheDocument();
+  });
+
+  it("enlarges its picture on a tap, the picture still read by its description", () => {
+    render(
+      <CardFace side="front" text={{ "": "Which country?" }} imageUrl={FLAG} imageDescription={{ sv: "En svart, röd och grön flagga" }} />,
+    );
+    const button = screen.getByRole("button", { name: "Enlarge picture" });
+    expect(screen.getByRole("img", { name: "En svart, röd och grön flagga" })).toHaveAttribute("lang", "sv");
+    vi.spyOn(screen.getByRole("img"), "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 40, height: 20 } as DOMRect);
+    fireEvent.click(button);
+    expect(button).toHaveAttribute("aria-expanded", "true");
+    expect(document.querySelector(".picture-zoom-layer")).not.toBeNull();
   });
 });
 

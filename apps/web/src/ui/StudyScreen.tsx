@@ -150,9 +150,10 @@ export function StudyScreen({
  *
  * The focus follows the card, as Reveal and the grade buttons go away
  * once pressed: to the question when a card comes up, and to the answer
- * once revealed, the grades a Tab after it. Neither is named, so a screen
- * reader reads the card's text on taking the focus; the position is said
- * by the status line.
+ * once revealed, the grades a Tab after it (or after its picture's
+ * button, when it has a picture). Neither is named, so a screen reader
+ * reads the card's text on taking the focus; the position is said by the
+ * status line.
  *
  * While the focus is in the card, Space reveals and a grade's key answers,
  * as a hint under the card says. The keys work only there, so they never

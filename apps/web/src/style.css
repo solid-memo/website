@@ -49,6 +49,8 @@
   --shadow-sm: 0 1px 2px rgba(22, 32, 42, 0.06);
   --shadow: 0 1px 2px rgba(22, 32, 42, 0.05), 0 8px 24px -12px rgba(22, 32, 42, 0.18);
   --ring: 0 0 0 3px color-mix(in srgb, var(--primary) 30%, transparent);
+  /* Under an enlarged picture: the page dimmed, so the picture stands out. */
+  --zoom-backdrop: rgba(22, 32, 42, 0.85);
 
   --heading-pop: var(--accent-yellow);
 
@@ -110,6 +112,7 @@
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 28px -14px rgba(0, 0, 0, 0.6);
+  --zoom-backdrop: rgba(0, 0, 0, 0.88);
 }
 
 *,
@@ -1753,7 +1756,7 @@ form.card-edit {
 
 .card-image {
   display: block;
-  max-width: min(100%, 24rem);
+  max-width: 100%;
   max-height: 14rem;
   height: auto;
   border: 1px solid var(--border);
@@ -1763,6 +1766,72 @@ form.card-edit {
 
 .card-back .card-image {
   max-height: 10rem;
+}
+
+/* A card's picture with a button laid over it that enlarges it
+   (ui/ZoomableImage.tsx). Its width is the picture's, up to the
+   picture's cap, so the button covers the picture and its focus ring
+   hugs it. */
+.picture-zoom {
+  position: relative;
+  max-width: min(100%, 24rem);
+}
+
+.picture-zoom-button {
+  position: absolute;
+  inset: 0;
+  min-height: 0;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  box-shadow: none;
+  cursor: zoom-in;
+}
+
+.picture-zoom-button:hover:not(:disabled, [aria-disabled="true"]),
+.picture-zoom-button:active:not(:disabled, [aria-disabled="true"]) {
+  background: none;
+  transform: none;
+}
+
+/* The picture keeps its place, unseen, while its copy is enlarged:
+   transparent, not visibility: hidden, which would take its alt text
+   out of what screen readers read. */
+.picture-zoom .zoomed-away {
+  opacity: 0;
+}
+
+/* The enlarged copy, over everything, on a dimmed page; a tap anywhere
+   puts it back. Only its transform and the dimming's opacity change. */
+.picture-zoom-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  cursor: zoom-out;
+}
+
+.picture-zoom-layer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--zoom-backdrop);
+  opacity: 0;
+  transition: opacity 0.18s ease-out;
+}
+
+.picture-zoom-layer.entered::before {
+  opacity: 1;
+}
+
+/* On the picture's own backing, so a transparent drawing stays as
+   legible as in its place rather than sitting on the dimmed page. */
+.picture-zoom-image {
+  position: absolute;
+  max-width: none;
+  background: var(--surface);
+  transform-origin: 0 0;
+  transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.3, 1);
 }
 
 .card-thumbnail {

@@ -1012,5 +1012,9 @@
     "deck": "Kortlek",
     "lastStudied": "Senast studerad",
     "removedDeck": "En borttagen kortlek"
+  },
+  "zoomableImage": {
+    "enlarge": "Förstora bilden",
+    "shrink": "Förminska bilden"
   }
 }

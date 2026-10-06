@@ -3,6 +3,7 @@ import type { LangText } from "@solid-memo/domain/langText";
 import { breakable } from "./breakable";
 import { useI18n } from "./i18n";
 import { ReaderText } from "./ReaderText";
+import { ZoomableImage } from "./ZoomableImage";
 
 /**
  * One side of a card as it looks in study: its picture (if any) above its
@@ -12,7 +13,9 @@ import { ReaderText } from "./ReaderText";
  * are loaded; anything else is named rather than shown. A picture is never
  * marked decorative, even beside text: the text need not describe it (a
  * flag under "Which country?"), so its alt is the description the card
- * gives it, in the reader's language, else a name for its side.
+ * gives it, in the reader's language, else a name for its side. A tap
+ * enlarges the picture to the viewport's size and another puts it back
+ * (ZoomableImage).
  *
  * The face is sized by its role — the question large, the answer under
  * it smaller — not by which side it is, so a deck studied back-to-front
@@ -61,7 +64,7 @@ export function CardFace({
       <span class="visually-hidden">{`${name}: `}</span>
       {imageUrl !== undefined &&
         (isHttpUrl(imageUrl) ? (
-          <img
+          <ZoomableImage
             class="card-image"
             src={imageUrl}
             alt={
