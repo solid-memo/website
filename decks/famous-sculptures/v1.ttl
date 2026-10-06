@@ -121,7 +121,7 @@
     prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Language, translation and language tags"@en ;
     rdfs:comment "Scope: All 51 cards (front, back and notes in both languages), the title, description and keywords; Swedish and English titles and names compared with live Wikidata labels and the Wikipedia article titles."@en ,
-                 "Outcome: No errors or warnings; seven suggestions. Five were applied: the two constructed Swedish name forms now cite the Swedish transcription tables instead of articles on other people, the Dutch name form in the Manneken Pis note, the English front note of The Kiss, and two wording fixes in the description. The untagged keywords come from the builder, outside the dossier, and are left to the library maintainers."@en .
+                 "Outcome: No errors or warnings; seven suggestions. Five were applied: the two constructed Swedish name forms now cite the Swedish transcription tables instead of articles on other people, the Dutch name form in the Manneken Pis note, the English front note of The Kiss, and two wording fixes in the description. The untagged keywords came from the deck builder, outside the dossier."@en .
 
 <#review-3>
     a prov:Activity ;
