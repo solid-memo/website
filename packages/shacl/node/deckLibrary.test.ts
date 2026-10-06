@@ -244,6 +244,15 @@ describe("buildIndex", () => {
     expect(built.some((q) => q.subject.value === `${current}#anton` && q.object.value === "Anton")).toBe(true);
   });
 
+  it("states a node the decks share once", () => {
+    const built = parseTurtle(index, INDEX);
+    const keys = built.map((q) => JSON.stringify([q.subject.value, q.predicate.value, q.object.value, q.object.termType]));
+    expect(new Set(keys).size).toBe(keys.length);
+    expect(
+      built.filter((q) => q.subject.value === "https://creativecommons.org/publicdomain/zero/1.0/" && q.predicate.value === RDF_TYPE),
+    ).toHaveLength(1);
+  });
+
   it("leaves out what a release does not say, for validation to name", () => {
     const bare = (version: number): DeckRelease => ({
       deck: "x",
