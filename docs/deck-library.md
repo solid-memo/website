@@ -144,7 +144,9 @@ what the versions make. Both check:
 With `-- --base <git ref>` they also compare with the library at that
 commit: a version published there that is gone or differs by a byte
 fails. `npm run check` runs `library:check` without a base, and so
-does CI; the [ns workflow](../.github/workflows/ns.yml), which runs on
+does CI, as a Turbo task of the shacl package
+([turbo.json](../packages/shacl/turbo.json)), cached until a file it
+reads (`ns/`, `decks/`, its packages' code) changes; the [ns workflow](../.github/workflows/ns.yml), which runs on
 pushes (not on pull requests), passes the commit a push to the default
 branch moved it from or, on a push to any other branch, the commit where
 that branch left the default branch, so an edit to a published version

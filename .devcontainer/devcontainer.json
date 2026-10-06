@@ -1,17 +1,30 @@
 {
-  "name": "Turborepo",
-  "build": {
-    "dockerfile": "Dockerfile"
-  },
+  "name": "Solid Memo",
+  // Node 24, as CI runs (.nvmrc) and engines asks for; Renovate keeps the
+  // image up to date within that major (renovate.json5). Turbo is the root devDependency, run through npm's
+  // scripts or npx.
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:24-bookworm",
 
   "features": {
-    "ghcr.io/devcontainers/features/git:1": {}
+    "ghcr.io/devcontainers/features/git:1": {},
+    // Docker for the end-to-end tests' servers (`npm run test:pod`), which
+    // ask for Docker Engine 28.3.3 or later (docs/testing.md).
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    // Python for pySHACL's cross-check (`npm run crosscheck`), the version
+    // CI runs it on.
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.14"
+    }
   },
 
   "customizations": {
     "vscode": {
+      // As .vscode/extensions.json recommends.
       "extensions": [
-        "anthropic.claude-code"
+        "anthropic.claude-code",
+        "vitest.explorer",
+        "typescriptteam.native-preview",
+        "stardog-union.stardog-rdf-grammars"
       ],
       "settings": {
         "editor.formatOnSave": false
@@ -24,7 +37,7 @@
     5173
   ],
 
-  "postCreateCommand": "npm ci",
+  "postCreateCommand": "npm ci && pip install -r scripts/requirements-ci.txt",
 
   "remoteUser": "node"
 }

@@ -1,0 +1,10 @@
+{
+  // As .devcontainer/devcontainer.json installs. TypeScript 7 ships no
+  // tsserver.js: its language service is the native preview's.
+  "recommendations": [
+    "anthropic.claude-code",
+    "vitest.explorer",
+    "typescriptteam.native-preview",
+    "stardog-union.stardog-rdf-grammars"
+  ]
+}

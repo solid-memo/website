@@ -5,10 +5,10 @@ name: Vocabulary, shapes and decks
 # that reads it changes: the Turtle in the house style, the deck library
 # valid with its index up to date and no published version edited or
 # removed since the base of the change, the generated code in step with
-# the vocabulary and the shapes, their tests, and pySHACL's cross-check.
-# CI runs most of this too, on every push, and gates the deploy; this
-# workflow adds the comparison with the base. It runs on pushes, not on
-# pull requests.
+# the vocabulary and the shapes, and their tests. CI runs most of this
+# too, on every push, and gates the deploy; it also runs pySHACL's
+# cross-check, which is not repeated here. This workflow adds the
+# comparison with the base. It runs on pushes, not on pull requests.
 
 on:
   push:
@@ -21,8 +21,7 @@ on:
       - packages/domain/**
       - package.json
       - package-lock.json
-      - scripts/shacl_crosscheck.py
-      - scripts/requirements-ci.txt
+      - .nvmrc
       - .github/workflows/ns.yml
   workflow_dispatch:
 
@@ -44,7 +43,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@v7
         with:
-          node-version: 24
+          node-version-file: .nvmrc
           cache: npm
       - uses: actions/cache@v6
         with:
@@ -79,13 +78,3 @@ jobs:
           npm run library:check -- --base "$base"
       - run: npm run generate:check
       - run: npx turbo run test --filter=@solid-memo/vocab --filter=@solid-memo/shacl --filter=@solid-memo/turtle
-      # The vocabulary, the deck library and pod catalog documents, checked
-      # again by an independent SHACL engine (pySHACL), SPARQL constraints
-      # included.
-      - uses: actions/setup-python@v7
-        with:
-          python-version: "3.14"
-          cache: pip
-          cache-dependency-path: scripts/requirements-ci.txt
-      - run: pip install -r scripts/requirements-ci.txt
-      - run: python scripts/shacl_crosscheck.py

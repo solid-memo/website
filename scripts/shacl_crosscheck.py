@@ -28,7 +28,7 @@ Solid Memo's own shapes are not run here: they have no targets (the app
 picks a subject's shape by its class and format version), which is what
 `npm run library:check` and the tests check them with.
 
-Run:  python3 scripts/shacl_crosscheck.py
+Run:  npm run crosscheck  (or python3 scripts/shacl_crosscheck.py)
 """
 
 from __future__ import annotations
@@ -36,8 +36,13 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from pyshacl import validate
-from rdflib import Graph
+try:
+    from pyshacl import validate
+    from rdflib import Graph
+except ModuleNotFoundError as missing:
+    # pySHACL (which brings rdflib) is not part of the npm install: say how
+    # to get it rather than end on a traceback.
+    sys.exit(f"{missing.name} is not installed: pip install -r scripts/requirements-ci.txt (in a virtual environment, if your Python is externally managed), then npm run crosscheck again.")
 
 ROOT = Path(__file__).resolve().parent.parent
 VOCAB = ROOT / "packages" / "vocab"

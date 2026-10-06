@@ -83,4 +83,6 @@ it, so they resolve only once it serves this site.
 `npm run build`, then upload the **contents** of `apps/web/dist/` to the web
 root (or any subfolder) via SFTP or a file manager, `ns/`, `decks/` and
 `vendor/` included. Verify a build
-locally with `npm run preview`.
+locally with `npm start` (builds, then serves `dist/` at
+http://localhost:4173), or `npm run preview -w @solid-memo/web` to serve
+the last build.

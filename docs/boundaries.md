@@ -27,7 +27,7 @@ configs may also use the shared test tooling of the root `package.json`.
 | Package | May import | Only from |
 |---|---|---|
 | `turtle` | — | |
-| `vocab` | `turtle` | `tooling/` (node-only) |
+| `vocab` | `turtle` | `turtle`: `tooling/` only |
 | `domain` | `vocab` | |
 | `application` | `domain`, `vocab` | |
 | `shacl` | `domain`, `vocab`, `turtle` | `turtle`: `node/` only |
@@ -36,13 +36,13 @@ configs may also use the shared test tooling of the root `package.json`.
 | `web` | `application`, `domain`, `vocab`, `solid`, `browser` | `solid`, `browser`: `src/main.tsx` only |
 | `e2e-pod` | `application`, `domain`, `vocab`, `solid` | |
 
-Browser code: `src/` of `domain`, `application`, `shacl`, `solid`,
-`browser` and `web`.
+Browser code: `src/` of `vocab`, `domain`, `application`, `shacl`,
+`solid`, `browser` and `web`; `vocab`'s `tooling/` is node-only.
 
 ## Vendor libraries
 
-Each is a dependency of exactly one package (and so, by the check, used
-nowhere else):
+Each is a dependency of only the packages listed (and so, by the check,
+used nowhere else):
 
 | Library | Package | Notes |
 |---|---|---|
@@ -50,8 +50,7 @@ nowhere else):
 | `@tanstack/react-query`, `preact` | `web` | UI and `main.tsx` |
 | `@fontsource/*`, `@fontsource-variable/*` | `web` | `src/style.css` only |
 | `rdf-validate-shacl` | `shacl` | `src/engine.ts` only, loaded lazily |
-| `n3` | `turtle`, and the node tooling of `shacl` | never in the browser |
-| `@solid/community-server` | `e2e-pod` | the local pod the end-to-end tests run against |
+| `n3` | `turtle`, the node tooling of `shacl`, and `e2e-pod` | never in the browser; in `e2e-pod`, the server contract and the tests |
 | `fake-indexeddb` | `browser` | tests only: IndexedDB in node, for the guest's pod's store |
 
 ## Further rules

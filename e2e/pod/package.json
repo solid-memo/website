@@ -7,6 +7,8 @@
   "scripts": {
     "typecheck": "tsc --noEmit -p .",
     "test": "vitest run -c vitest.unit.config.ts",
+    "test:unit": "vitest run -c vitest.unit.config.ts",
+    "test:watch": "vitest -c vitest.unit.config.ts",
     "test:pod": "vitest run",
     "pod": "node pod.ts",
     "servers": "node servers.ts prepare",

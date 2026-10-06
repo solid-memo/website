@@ -60,6 +60,12 @@
             matchDepNames: ['node'],
             allowedVersions: '<25',
         },
+        // The dev container's image keeps to Node 24, as .nvmrc and CI do.
+        {
+            matchFileNames: ['.devcontainer/devcontainer.json'],
+            matchDepNames: ['mcr.microsoft.com/devcontainers/typescript-node'],
+            allowedVersions: '<25',
+        },
         // Pivot, advisory: what it reports is for a person to look at. Its
         // image keeps to Node 22, which Pivot's own CI runs.
         {
