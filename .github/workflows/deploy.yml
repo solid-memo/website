@@ -30,6 +30,10 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      # The artifact is the whole site: the app, and beside it what Vite
+      # copies from ns/, decks/ and the vendored shapes (docs/deployment.md).
+      - name: The vocabulary and the deck library are in the artifact
+        run: test -f apps/web/dist/ns/vocab/v1.ttl && test -f apps/web/dist/decks/index.ttl
       - uses: actions/configure-pages@v6
         with:
           enablement: true

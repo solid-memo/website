@@ -7,12 +7,12 @@ Implemented in `packages/solid/src/` (vocabulary in
 
 ## Vocabulary and shapes
 
-Solid Memo mints its own terms under `https://pod.solid-memo.com/vocab/v1#`
+Solid Memo mints its own terms under `https://solid-memo.com/ns/vocab/v1.ttl#`
 (prefix `sm:` below) — no existing RDF vocabulary covers spaced repetition.
-The terms are defined in [`https://pod.solid-memo.com/vocab/v1`](https://pod.solid-memo.com/vocab/v1) ([vocab.md](vocab.md));
+The terms are defined in [`ns/vocab/v1.ttl`](../ns/vocab/v1.ttl) ([vocab.md](vocab.md));
 what a valid subject of each class looks like, version by version, is a
-SHACL shape on [`https://pod.solid-memo.com/shapes/`](https://pod.solid-memo.com/shapes/) ([shapes.md](shapes.md)). Both
-are published on their own pods, and the app's constants, record types and
+SHACL shape under [`ns/shapes/`](../ns/shapes/) ([shapes.md](shapes.md)). Both
+are published with the site, and the app's constants, record types and
 descriptors are generated from them. Readers ignore unknown triples and
 writers never delete triples they don't understand.
 

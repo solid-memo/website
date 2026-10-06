@@ -13,6 +13,8 @@ on:
     paths:
       - e2e/pod/**
       - packages/**
+      - ns/**
+      - decks/**
       - package.json
       - package-lock.json
       - .github/workflows/interop.yml

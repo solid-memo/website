@@ -32,7 +32,7 @@ full URLs, carried URL-encoded in hash query parameters.
 | `#/decks?instance=…` | deck list (home) |
 | `#/new-deck?instance=…` | deck creator |
 | `#/library?instance=…` | [deck library](deck-library.md): ready-made decks to import into the instance |
-| `#/library-deck?instance=…&deck=…` | one library deck's page — its description, topics, keywords in the reader's language, release, authors, licence, dates and sources, with an import button for that deck alone. `deck` is the deck's series (`…/decks/index#name`); a release's URL finds it too, and an unknown deck falls back to the library |
+| `#/library-deck?instance=…&deck=…` | one library deck's page — its description, topics, keywords in the reader's language, release, authors, licence, dates and sources, with an import button for that deck alone. `deck` is the deck's series (`…/decks/index.ttl#name`); a release's URL finds it too, and an unknown deck falls back to the library |
 | `#/library-browse?instance=…&deck=…[&page=n]` | a library deck's cards, read-only, paged like the Browser (paging *replaces* the history entry) |
 | `#/deck?instance=…&deck=…` | deck detail |
 | `#/deck-preferences?instance=…&deck=…[&section=languages]` | a deck's own preferences: its name, daily limits and the languages of its text. `section=languages` opens it at the Languages section, whose heading takes the focus (marked `data-arrival` for `useScreenFocus`): where the deck page's notice of text that does not say its language links; an unknown `section` opens the screen at its start |
