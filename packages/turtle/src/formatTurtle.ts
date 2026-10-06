@@ -4,11 +4,11 @@ import { Parser, type Quad, type Quad_Subject, type Term } from "n3";
 import { readTurtleTree, type TurtleFile } from "./rdf.ts";
 
 /**
- * The house style for the repository's hand-written Turtle (the vocab
- * package's shapes/, vocab/ and fixtures/, the deck library's decks/;
- * releases/ are frozen and vendor/ is not ours, so neither is ever
- * reformatted): `@base` first, prefixes aligned in
- * one block, every subject on a line of its own, one predicate per line
+ * The house style for the repository's hand-written Turtle (ns/, decks/
+ * and the vocab package's fixtures/; a published version is formatted
+ * once, before it is published, and never changes after, and vendor/ is
+ * not ours, so it is never reformatted): `@base` first, prefixes aligned
+ * in one block, every subject on a line of its own, one predicate per line
  * indented four spaces, further objects aligned under the first, and a
  * blank line between subjects. Lists and blank nodes stay inline.
  *
