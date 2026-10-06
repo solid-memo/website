@@ -80,6 +80,7 @@
                        <#review-4> ;
     rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
                  "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
                  "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
                  "1. Selection and capitals from Wikidata (query 1): every P150 (contains the administrative territorial entity) statement without an end time of Germany (Q183), Austria (Q40), Canada (Q16) and Australia (Q408), with the classes (P31) of each division, its P36 (capital) statements without an end time and their rank, and the English, Swedish and multilingual (mul) labels of division and capital. It returned 16 German divisions, all instances of \"federated state of Germany\" (Q1221156); 9 Austrian ones, all instances of \"federal state of Austria\" (Q261543); 13 Canadian ones, 10 instances of \"province of Canada\" (Q11828004) and 3 of \"territory of Canada\" (Q9357527); and 15 Australian ones: 6 instances of \"state of Australia\" (Q5852411), 3 \"mainland territories of Australia\" (Q14192234: the Australian Capital Territory, the Northern Territory and the Jervis Bay Territory) and 7 external territories. Every division in the deck has exactly one P36 statement without an end time, except Berlin (Q64), Hamburg (Q1055) and Vienna (Q1741), which have none: each is a single item that is both a city and a state (P31 includes Q133442, city-state). Query 2 read the further statements used in notes (Bremen's P150 and the P1448 official names of Klagenfurt and Quebec City) and the class and location of Q21882134, to confirm that this P36 value of Vorarlberg is the town of Bregenz."@en ,
                  "2. Names from Wikidata (the script entities.py, query 3): the Wikidata API (wbgetentities) returned the English, Swedish, multilingual and German labels and aliases, the English and Swedish Wikipedia sitelinks and the claims of every division and capital of query 1 and of the class items. The front is the division's English and Swedish label. The back is the capital's English and Swedish label, with two exceptions: Fredericton (Q2138) has no English label, so its multilingual label is used; the English back of Carinthia is \"Klagenfurt\", the city's multilingual alias and the form the Austrian government table, NE and the Swedish label use, rather than the English label \"Klagenfurt am Wörthersee\", its official name (P1448), which the card gives in a note. The front notes give the federation and the kind of division in the compiler's own short wording, based on the class items Q1221156, Q261543, Q11828004, Q9357527, Q5852411 and Q14192234 (sv labels \"förbundsland\", \"Österrikes förbundsländer\", \"provins i Kanada\", \"territorium i Kanada\", \"delstat i Australien\", \"fastlandsterritorium i Australien\"): \"Förbundsland i Tyskland\", \"Förbundsland i Österrike\", \"Provins i Kanada\", \"Territorium i Kanada\", \"Delstat i Australien\", \"Territorium i Australien\"."@en ,
@@ -92,35 +93,35 @@
 
 <#review-0>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Sources, licences and machine checks: every card's division, capital and names against Wikidata, the official page of its federation (Bundesrat, Migration.gv.at, Discover Canada, Tourism Australia), the Swedish Wikipedia list and, where found, Nationalencyklopedin; the city-state convention; the Swedish names."@en ;
     rdfs:comment "Scope: All 46 cards, the sources and the deck metadata."@en ,
                  "Outcome: Wikidata, the official pages and the Swedish Wikipedia agree on the capital of every division that has one; NE agrees wherever an article was found. No Wikidata check was skipped. The differences found are the city-states (no separate capital in Wikidata, the Austrian table and the Swedish Wikipedia; the Bundesrat names Berlin and Hamburg as their own capitals), a few name forms (Klagenfurt, Quebec City, Yukon, Swedish forms in NE) and the name Victoria on both sides of the deck."@en .
 
 <#review-1>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Factual accuracy"@en ;
     rdfs:comment "Scope: All 46 cards against live Wikidata, the Bundesrat page, German and English Wikipedia lists; the description and notes."@en ,
                  "Outcome: No factual errors. Two wording suggestions: the description listed Berlin, Hamburg and Vienna as \"the city-states\" although Bremen is one too, and the Québec notes said different things in English and Swedish. Both applied."@en .
 
 <#review-2>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Language, translation and language tags"@en ;
     rdfs:comment "Scope: All 46 cards, title, description, keywords and the language tags of the built TTL."@en ,
                  "Outcome: Swedish forms, lower-casing and tags correct. One warning (the description's list of city-states omits Bremen) and three style suggestions (Bremen note, Québec notes, full stops); all applied."@en .
 
 <#review-3>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Licensing, attribution and documentation"@en ;
     rdfs:comment "Scope: Sources, licence evidence, the method, queries and selection, the evidence quotes against re-fetched pages, the built TTL and report."@en ,
                  "Outcome: Licensing compliant (CC0 deck, Wikidata the only content source, all other sources verification only). Four documentation precision suggestions, all applied after checking: Q261543 and Q14192234 sv labels re-fetched (\"Österrikes förbundsländer\", \"fastlandsterritorium i Australien\"), and the NE terms URL re-fetched (it ends at https://www.ne.se/info/upphovsratt/)."@en .
 
 <#review-4>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Final full-deck review (facts and language)"@en ;
     rdfs:comment "Scope: All 46 cards (capitals as of 2026-10-04, Swedish forms, language tags, notes), title, description, keywords, study direction, and the fixes of rounds 1–3."@en ,
                  "Outcome: All 46 capitals correct as of 2026-10-04, Swedish names established, tags and notes consistent, description accurate, and the fixes of rounds 1–3 confirmed present. One optional suggestion (a note on Salzburg's identical front and back), applied."@en .

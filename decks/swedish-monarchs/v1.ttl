@@ -80,6 +80,7 @@
                        <#review-6> ;
     rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
                  "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
                  "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
                  "Finding the position: the Wikidata search API (query 1 below) returned Q1268572 \"Monarch of Sweden\". (Two earlier attempts, an exact-label SPARQL lookup and a guess at the current king's item, returned nothing; they are listed in the queries for completeness.)"@en ,
                  "Selection and reign years: a SPARQL query on the Wikidata Query Service (query 4) listed every item with a P39 (position held) statement of Q1268572, with the qualifiers P580 (start time), P582 (end time), P1365 (replaces) and P1366 (replaced by), and the English and Swedish labels. The raw result was saved. Holders with a start time from 1523 on (Gustav I to Carl XVI Gustaf, 23 people, linked into one unbroken chain by the replaces/replaced-by qualifiers) became the cards; Christian II (1520–1521, a union king of Denmark) and the legendary and medieval kings without dates were left out by the brief's scope."@en ,
@@ -89,55 +90,55 @@
                  "Convention for the years: a reign runs from accession — succession on the predecessor's death, abdication or deposition, or the monarch's proclamation or election, whichever came first — to the monarch's death, abdication or deposition; coronation dates are not used. Only years are given. The calendar change (Sweden used the Julian calendar until 1753) moves no year boundary in this deck. Karl IX counts from 1604, when he took the title of king; his regency (proclaimed in 1595, sole rule after Sigismund's deposition in 1599) is in the note. Carl XVI Gustaf's reign is written \"1973–\" because it continues."@en ,
                  "Notes: each back note names the royal house and, where helpful, one short fact for context (a by-name, a family relation, a regency, the manner of death, the convention used). Every note fact comes from a content source: from Wikidata where it holds the fact as a statement (queries 13–15: parents P22/P25, siblings P3373, spouses P26, dates of birth P569, place and manner of death P20/P1196, positions P39, military rank P410, the house's founder P112, significant events P793 and the item for the assassination of Gustav III), each such statement also a builder check; otherwise from the public-domain 1911 Encyclopædia Britannica on Wikisource (queries 16–17: the articles on the individual kings and the History section of \"Sweden\"). Ages at accession are computed from Wikidata's date of birth and the start of the reign. Every note fact was then checked against the Royal Court's page and the English Wikipedia list or article. The notes are the compiler's own wording, written directly in English and in Swedish, not copied or closely paraphrased from any source; facts found only in verification sources were left out (Gustaf V's decision not to be crowned, which only the Royal Court gave; the Riksdag's election of Ulrika Eleonora in 1719, which only the Wikipedia list and Svenskt kvinnobiografiskt lexikon gave)."@en ,
                  "Sources tried but not used: Encyclopaedia Britannica online (https://www.britannica.com/biography/Ulrika-Eleonora) answered HTTP 403 (a Cloudflare \"Just a moment...\" page) to both a fetch tool and curl, and the Nationalencyklopedin article URL tried (https://www.ne.se/uppslagsverk/encyklopedi/lång/ulrika-eleonora-d-y) returned an error page, so neither was consulted and neither is cited. The Royal Court's pages \"Sveriges monarki\", \"Sök\" and \"Mediecenter\" were fetched while looking for the Regentlängd and the site's terms of use; nothing on them was used (query 8b)."@en ,
-                 "Machine checks: each card carries Wikidata checks run by the builder against live Wikidata: P39 = Q1268572 (the person held the position), P53 = the house named in the note, the house's English and Swedish label or alias, the English and Swedish front text where it is exactly a Wikidata label or alias (with the disambiguator, where the front drops one), and every Wikidata statement a note relies on (P22, P25, P3373, P26, P569 year, P20, P1196, P39 King of Poland and Monarch of Norway, P410, P112, P793, and the assassination item's P8032 and P276). The reign years and the end of Oscar II's Norwegian reign are qualifiers, which the builder's checks cannot read; they were checked by queries 4 and 14, whose results are quoted in each card's evidence."@en ,
+                 "Machine checks: each card carried Wikidata checks run by the builder against live Wikidata: P39 = Q1268572 (the person held the position), P53 = the house named in the note, the house's English and Swedish label or alias, the English and Swedish front text where it is exactly a Wikidata label or alias (with the disambiguator, where the front drops one), and every Wikidata statement a note relies on (P22, P25, P3373, P26, P569 year, P20, P1196, P39 King of Poland and Monarch of Norway, P410, P112, P793, and the assassination item's P8032 and P276). The reign years and the end of Oscar II's Norwegian reign are qualifiers, which the builder's checks cannot read; they were checked by queries 4 and 14, whose results are quoted in each card's evidence."@en ,
                  "Selection: Every person Wikidata records as holding the position Monarch of Sweden (Q1268572) with a start date in 1523 or later: Gustav I, elected king in 1523, to the reigning Carl XVI Gustaf, 23 monarchs in all, including the two queens regnant, Kristina and Ulrika Eleonora. Regents who were not monarchs (Gustav Eriksson Vasa as regent before his election in 1523, Duke Karl as regent from 1595 and ruler from 1599 to 1604, the regency governments of Kristina and Karl XI) get no cards of their own; Karl IX's regency is mentioned in his note. Kalmar Union kings (the last, Christian II, 1520–1521) and the medieval and legendary kings are outside the deck's scope. Queens consort are not monarchs and are left out. Front texts are regnal names only; by-names (Gustav Vasa, Gustavus Adolphus) and former names (Jean-Baptiste Bernadotte) appear only in notes."@en ,
                  "Licensing: The content sources are Wikidata, whose structured data is CC0, and the 1911 Encyclopædia Britannica, which is in the public domain (published in 1910–1911, so public domain in the United States; most of the articles on the individual kings are by Robert Nisbet Bain, who died in 1909, and the others (Oscar I., Oscar II., Gustavus V.) are unsigned; all were published in 1910–1911). The selection of monarchs, the reign years, the English and Swedish names and the royal houses come from Wikidata, and so do the note facts Wikidata holds; the other note facts come from the 1911 Britannica, in the compiler's own words. So the deck can be CC0 1.0 like the rest of the library. The Royal Court's website (all rights reserved), the English Wikipedia list and article (CC BY-SA 4.0) and Svenskt kvinnobiografiskt lexikon (CC BY 4.0) were used for verification only: they confirmed facts the content sources gave, and no wording, name form, table or selection was taken from them. Facts found only in them were left out of the notes. The one place a verification source is named on a card, the Ulrika Eleonora note saying that the Royal Court's list gives 1719–1720, is a reference to that source's differing year, not content taken from it. The selection is the full set of holders of one Wikidata position since 1523, not a list taken from any of the verification sources."@en .
 
 <#review-0>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Sources, licences and machine checks: every card's years against Wikidata, the Royal Court's list and the English Wikipedia list; names against Wikidata labels and aliases; houses against Wikidata P53."@en ;
     rdfs:comment "Scope: All 23 cards, the sources and the deck metadata."@en ,
                  "Outcome: Wikidata, the Royal Court and Wikipedia agree on the years of 20 of the 23 reigns. Erik XIV/John III (1568 or 1569) and Ulrika Eleonora (1718 or 1719) differ between sources; the cards follow the accession convention stated in the description and the note gives the other year. Several day-level differences inside Wikidata (calendar conversions) leave the years unchanged. Builder checks cover the position (P39), the house (P53), the house labels and every front text that is exactly a Wikidata label or alias; reign years are qualifiers, checked by query 4 instead."@en .
 
 <#review-1>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Factual accuracy"@en ;
-    rdfs:comment "Scope: All 23 cards, against the Royal Court's Regentlängd, the Swedish Wikipedia list of regents and article on Karl IX, the English Wikipedia article on Erik XIV and the reviewer's own Wikidata query of the P39 qualifiers."@en ,
+    rdfs:comment "Scope: All 23 cards, against the Royal Court's Regentlängd, the Swedish Wikipedia list of regents and article on Karl IX, the English Wikipedia article on Erik XIV and the review's own Wikidata query of the P39 qualifiers."@en ,
                  "Outcome: All 23 reign spans and royal houses correct; the count of 23 confirmed; Ulrika Eleonora's 1718 start judged defensible under the stated convention. Three optional rewordings of notes, all verified against the 1911 Encyclopædia Britannica and Wikidata and applied."@en .
 
 <#review-2>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Language and translation"@en ;
     rdfs:comment "Scope: All 23 cards, the title, the description and the keywords in English and Swedish."@en ,
                  "Outcome: No errors. One warning (Bernadotte's birth name) and four suggestions on Swedish wording and the Gustav IV Adolf note; all verified and applied."@en .
 
 <#review-3>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Licensing, attribution and documentation"@en ;
     rdfs:comment "Scope: All 23 cards, every source's licence and evidence quotes, the method, queries and licensing paragraph."@en ,
                  "Outcome: One error (note facts without a content source) and five warnings and suggestions; all verified and fixed. The 1911 Encyclopædia Britannica (public domain) was added as a second content source, Wikidata statements for the note facts were added with builder checks, every note was re-worded from those sources, and facts found only in verification sources were removed. The deck stays CC0 1.0."@en .
 
 <#review-4>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Final re-check (loop 1): facts, language, metadata, licensing and documentation"@en ;
     rdfs:comment "Scope: All 23 cards, the sources, description, method, licensing and quality-control log."@en ,
                  "Outcome: No factual errors; three warnings and two suggestions, all verified and fixed. Gustav I's note no longer dates his regency to 1521 (only a verification source does); the 1911 Britannica attribution names the unsigned articles; English label checks were added for four cards and the English form \"Sigismund\" is explained; superseded round-0 entries point to round 3; the Swedish description says \"upphovsrättsfria\"."@en .
 
 <#review-5>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Final re-check (loop 2): changed cards, every third card, metadata, licensing and documentation"@en ;
     rdfs:comment "Scope: 12 cards (gustav-i, johan-iii, sigismund, karl-xiv-johan, gustaf-v, carl-xvi-gustaf, kristina, karl-xii, adolf-fredrik, karl-xiii, karl-xv, gustaf-vi-adolf), the metadata, licensing, queries and quality-control log."@en ,
                  "Outcome: No factual errors. One warning (two queries numbered 18) and one suggestion (Karl XIII note leaves out the first chosen heir); both verified and fixed."@en .
 
 <#review-6>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Final full-deck review (facts and language)"@en ;
     rdfs:comment "Scope: all 23 cards."@en ,
                  "Outcome: All reign spans, houses and front names confirmed. One warning (round 5 reintroduced \"childless\" / \"barnlös\" for Karl XIII, contradicted by Wikidata) and one Swedish style suggestion; both verified and fixed."@en .

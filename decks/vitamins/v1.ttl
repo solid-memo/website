@@ -77,6 +77,7 @@
                        <#review-5> ;
     rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
                  "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
                  "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
                  "Scope: the 13 vitamins of human nutrition, the complete set, for each of which the NIH Office of Dietary Supplements (ODS) publishes one health-professional fact sheet (A, D, E and K fat-soluble; thiamin, riboflavin, niacin, pantothenic acid, vitamin B6, biotin, folate, vitamin B12 and C water-soluble). The Swedish Food Agency's index page confirms the same 13 (\"Det finns 13 livsnödvändiga vitaminer\"). The set of 13 is the complete set, not a selection taken from a list."@en ,
                  "ODS fact sheets: ods.od.nih.gov answered every request from the research environment (curl and WebFetch) with a Cloudflare challenge page or HTTP 403 (query 6), and its API did the same (query 7). The 13 health-professional fact sheets were therefore downloaded unmodified from the Internet Archive's most recent 2026 capture of each (query 8: a request for https://web.archive.org/web/2026id_/<page> redirects to the latest 2026 capture; captures 2026-09-16 to 2026-10-04, all of the current versions, which were last updated between 2021 and 2026), decompressed and turned into plain text (totext.py), and the relevant sentences were extracted with grep_ods.py (queries 9–13). Every ODS quotation in the evidence is verbatim from these captures; each locator names the sheet, its \"Updated\" date and the capture."@en ,
@@ -94,42 +95,42 @@
 
 <#review-0>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Sources, licences and machine checks: every card against the ODS fact sheet for the vitamin, Wikidata where it has the statement or label, Livsmedelsverket's page on the vitamin and the Swedish Wikipedia article; the Swedish names; card ambiguity."@en ;
     rdfs:comment "Scope: All 35 cards, the sources and the deck metadata."@en ,
                  "Outcome: ODS, Livsmedelsverket and the Swedish Wikipedia agree on every card. Wikidata agrees wherever it has the fact, but its vitamin items are unevenly modelled: several labels are capitalised or name a related item, one Swedish label is wrong (ergocalciferol), and solubility is stated only for A, D, E, K and the B-group class. No card follows a Wikidata value that a better source contradicts; where Wikidata's form differs from the card (case, singular/plural, a related item), the check verifies the Wikidata form and the evidence says so, and no check was skipped to hide a disagreement. The builder's checks cover the names on 15 chemical-name cards, the disease names and four disease-to-deficiency links, and solubility for seven vitamins. The brief's generic vitamin D card (calciferol) was not made, because the name is ambiguous."@en .
 
 <#review-1>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Factual accuracy"@en ;
     rdfs:comment "Scope: All 35 cards against standard nutrition facts, spot checks of the ODS captures, a live run of the builder's Wikidata checks (97 checks) and the disease items on Wikidata."@en ,
                  "Outcome: No factual error on any card. One warning: the deck's description, selection and method called all seven kind-2 cards diseases caused by a lack of the vitamin, which fits neither night blindness (a sign) nor pernicious anemia (a disease that causes B12 deficiency). Three suggestions on check strength and one note's wording. All four were verified and applied."@en .
 
 <#review-2>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Language, translation and language tags"@en ;
     rdfs:comment "Scope: All 35 cards, the title, description and keywords in English and Swedish, and the language tags."@en ,
-                 "Outcome: No errors or warnings: every card text is tagged en or sv and the Swedish terms are the established forms. Six suggestions on consistency and idiom; five applied, one (untagged keywords) is a builder limitation outside this dossier."@en .
+                 "Outcome: No errors or warnings: every card text is tagged en or sv and the Swedish terms are the established forms. Six suggestions on consistency and idiom; five applied, one (untagged keywords) is a builder limitation outside the dossier."@en .
 
 <#review-3>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Licensing, attribution and documentation"@en ;
     rdfs:comment "Scope: All 35 cards' evidence (every non-Wikidata locator refetched and compared), the four sources' licence pages, the licensing, method and queries."@en ,
                  "Outcome: No licence breach; every recorded licence is right and a CC0 deck is compliant. Four warnings (two unsourced qualifiers in notes, a self-contradiction on where the Swedish vitamin-name forms come from, and Swedish notes worded close to Livsmedelsverket) and five suggestions; all verified and applied."@en .
 
 <#review-4>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
     rdfs:comment "Scope: 22 cards: the 13 cards changed in rounds 1–3 and every third card in dossier order; all claimed fixes of rounds 1–3; the builder check, validate_sources.ts and every ODS, Livsmedelsverket and Swedish Wikipedia quote refetched."@en ,
                  "Outcome: No errors or warnings; every fix claimed in rounds 1–3 is present. Two documentation suggestions, both verified (Swedish Wikipedia parse of Niacin rev 55091741 and Xeroftalmi rev 54264507 fetched today) and applied; no card text changed."@en .
 
 <#review-5>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Final full-deck review (facts and language)"@en ;
     rdfs:comment "Scope: All 35 cards (15 chemical-name, 7 deficiency and 13 solubility cards), the description, the fixes of rounds 1–4 and a live builder check of all 99 Wikidata checks."@en ,
                  "Outcome: Every fact confirmed and every round 1–4 fix present; one optional Swedish wording suggestion on vitamin-b12-name, verified and applied. No card was removed and no answer changed."@en .

@@ -81,6 +81,7 @@
                        <#review-6> ;
     rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
                  "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
                  "The cards were checked by machine (a script extracting dated sentences from Store norske leksikon, live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
                  "Candidates: from its own general knowledge, the authoring agent drew up 118 search strings for widely taught events of the Second World War, deliberately covering every theatre (Europe, the Nordic countries, the Atlantic, the Mediterranean and North Africa, China, South-East Asia and the Pacific) and including the Holocaust. No published list or timeline was copied. Each string was looked up with the Wikidata wbsearchentities API (queries 1 and 2, script <scratch>/search.py) and the item for the event picked by hand from the hits and their descriptions."@en ,
                  "Dates and labels: one SPARQL query (query 3) returned, for about 100 candidate items, their English and Swedish labels and every P585 point in time, P580 start time, P582 end time, P571 inception and P576 dissolution date with its precision and rank. The raw CSV was saved and read item by item (script <scratch>/show.py). Only day-precision values (precision 11) of normal or preferred rank were used; a deprecated value (Victory in Europe Day's P585) was not."@en ,
@@ -95,49 +96,49 @@
 
 <#review-0>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Sources, licences and machine checks: every card's date against Wikidata (full date, day precision) and against an independent authority (Store norske leksikon, the Imperial War Museums, the US Office of the Historian or Liberation Route Europe); the Swedish names against Wikidata sv labels."@en ;
     rdfs:comment "Scope: All 47 cards, the candidates left out, the sources and the deck metadata."@en ,
                  "Outcome: For all 47 cards Wikidata's date and the independent source agree on the day of the moment named on the front. Where sources differed on a related moment (the main versus the final surrender at Stalingrad, the entry of French troops into Paris versus the German surrender, the Italian armistice's signature versus its announcement, the signature versus the effect of the Moscow treaties, Reims versus VE Day) the front names the moment and a note gives the other date. Candidates whose dates differ between the sources were left out. No Wikidata check was skipped."@en .
 
 <#review-1>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Factual accuracy"@en ;
     rdfs:comment "Scope: All 47 cards, the description and selection; every Wikidata check re-run live."@en ,
                  "Outcome: No card had a wrong date. Two warnings (a misleading SNL sentence cited for the Continuation War, and a description narrower than the deck) and three suggestions. The evidence of the Continuation War card now flags the inaccurate half of the SNL sentence and adds English and Swedish Wikipedia; the description was reworded; the Okinawa front now names the main island; the Reims check is described as what it tests. The note on the night-time signing of the Molotov–Ribbentrop Pact was declined."@en .
 
 <#review-2>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Language, translation and language tags"@en ;
     rdfs:comment "Scope: All 47 cards, title, description and keywords; event names against live Wikidata sv labels."@en ,
                  "Outcome: Language tagging was clean. A gender agreement error in the Swedish description and a non-established Swedish name on the Moscow Armistice card were fixed; the vague \"a declaration\" was replaced by \"a declaration of war\"."@en .
 
 <#review-3>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Licensing, attribution and documentation"@en ;
     rdfs:comment "Scope: Every source's licence and terms page, every quote in the evidence, every Wikidata check, the queries and the method."@en ,
                  "Outcome: The CC0 licensing holds and every quote was verbatim. The Tunisia card gained a source that states the surrender; the licensing text now explains the resemblance of some fronts to SNL's timeline; the Swedish names \"Dagen D\" and \"andra slaget vid el-Alamein\" are sourced; the reference to the brief, the query records and the machine-check wording were tidied. Splitting query 8–10 by source was declined."@en .
 
 <#review-4>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
     rdfs:comment "Scope: The 7 cards changed in rounds 1–3 and every third card (22 cards), all 93 Wikidata checks (54 on dated statements, 39 on labels) against live Wikidata, the quotes added in rounds 1–3, the deck metadata and the quality-control log."@en ,
                  "Outcome: No wrong dates or errors; every fix claimed in rounds 1–3 was confirmed. The selection text no longer mentions an unpublished brief, the method explains the capital in \"Segerdagen\", and the Moscow Armistice evidence notes that Swedish Wikipedia's infobox gives 12 September against its own text."@en .
 
 <#review-5>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
     rdfs:comment "Scope: The card changed in round 4 (moscow-armistice) and every third card (16 cards): their Wikidata checks against live Wikidata, the cited SNL and Swedish Wikipedia passages, the Swedish text and language tags, the deck metadata and the quality-control log."@en ,
                  "Outcome: No wrong dates, language mistakes or tag problems; every fix claimed in round 4 was confirmed in the dossier and the built files. The only finding was a wrong check count in round 4's scope, now corrected."@en .
 
 <#review-6>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Final full-deck review (facts and language)"@en ;
     rdfs:comment "Scope: All 47 cards (fronts, backs, notes, evidence and Swedish text), the language tags, the deck metadata, the method's first paragraph, round 5's fix and the built .ttl and .md files."@en ,
                  "Outcome: No errors or warnings: every date matches the established date for the event, each front has one right answer and the Swedish is idiomatic and consistent. Two optional suggestions were both applied: a note on the date line for Pearl Harbor and smoother Swedish in the Auschwitz note."@en .

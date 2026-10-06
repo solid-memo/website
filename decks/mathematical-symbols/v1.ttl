@@ -78,6 +78,7 @@
                        <#review-5> ;
     rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
                  "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
                  "The cards were checked by machine (the Unicode Character Database, live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
                  "Candidate symbols: the library editor's brief named about 45 symbols in five groups (logic, sets, relations, operators, constants). For each, Wikidata was searched for the items that carry the symbol as Unicode character (P487) (query 1) and the statements of those items (query 2), which link character items to concepts through notation (P913), depicts (P180), has use (P366) or symbolizes (P4878)."@en ,
                  "ISO 80000-2 as recorded in Wikidata: query 3 listed every Wikidata item described by ISO 80000-2:2019 (Q109490582) with the item number (P958 section, e.g. \"2-6.8\") and the standard's verbal equivalent (P1810 subject named as, e.g. \"B is properly included in A\"). Every card's concept was matched to one of these records where one exists (all but ∝, and ∫ via the indefinite integral item); this is what the evidence calls the ISO item number. The standard's own tables could not be read: the ISO Online Browsing Platform answered 403 (https://www.iso.org/obp/ui/en/#iso:std:iso:80000:-2:ed-2:v1:en), and the publisher's free preview (query 10) ends after clause 4. From the preview only clause 4's sentence on mathematical constants (e, π, i) is used."@en ,
@@ -93,42 +94,42 @@
 
 <#review-0>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Sources, licences and machine checks: every symbol's character against the Unicode Character Database, its meaning against Wikidata and the English Wikipedia glossary, the Swedish terms against Wikidata sv labels and the Swedish Wikipedia; ambiguity of each front."@en ;
     rdfs:comment "Scope: All 45 cards, the sources and the deck metadata."@en ,
                  "Outcome: All 45 meanings agree between Wikidata and at least one independent source (the English glossary for 41; the ISO preview and the Swedish Wikipedia for π, e and i; the Unicode character name for ∠), and every front character was confirmed in UnicodeData.txt. ISO 80000-2's tables could not be read, so ISO is cited only through Wikidata's records and the preview's clause 4. Three Wikidata checks were left out because Wikidata (or its Query Service) disagrees with the card; eight fronts were given a short expression to remove ambiguity; ⊥, ≪ and ≫ were left out."@en .
 
 <#review-1>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Factual accuracy"@en ;
     rdfs:comment "Scope: All 45 cards: every front's code point and character name (Python unicodedata), the Wikidata items used in the checks (fetched live), the meanings and notes against the English and Swedish Wikipedia, and the deck description."@en ,
                  "Outcome: No factual errors in the 45 cards; three optional suggestions. Every code point and character name matched, the Wikidata items behind the checks are the intended concepts, and the notes and both stated conventions (⊂ as proper subset, 0 ∈ ℕ) are correct. All three suggestions were verified and applied."@en .
 
 <#review-2>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Language, translation and language tags"@en ;
     rdfs:comment "Scope: All 45 cards plus the title, description and keywords: language tags, Swedish terms against Wikidata sv labels and Swedish Wikipedia, idiom and consistency of the English and Swedish text."@en ,
                  "Outcome: All language tags are right (every front zxx, all other text en/sv, nothing untagged) and the Swedish terms match Wikidata and Swedish Wikipedia. One warning, the composition back naming the functions in the reverse order, was confirmed and fixed; the consistency and idiom suggestions were applied, the article style of the bare-symbol backs was kept on purpose."@en .
 
 <#review-3>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Licensing, attribution and documentation"@en ;
     rdfs:comment "Scope: Every source's licence page fetched again, spot checks of the evidence quotes (17 glossary entries, 12 Swedish list rows, 7 Swedish articles, 12 UnicodeData lines, 10 Wikidata items), the required method text, and the reproducibility of the method and queries."@en ,
                  "Outcome: The recorded licences are right and Wikidata (CC0) is the only content source, so the CC0 deck licence is consistent. Three warnings were confirmed and fixed: the documentation credited Swedish readings to a verification-only CC BY-SA source, the Swedish floor note followed Swedish Wikipedia's sentence and example, and several recorded steps read files no recorded command created. The smaller attribution points were applied within what the dossier can change."@en .
 
 <#review-4>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
     rdfs:comment "Scope: 29 cards: the 17 cards changed in round 3 and every third card (for-all, and, if-and-only-if, empty-set, union, natural-numbers, real-numbers, not-equal, greater-or-equal, divides, parallel-to, product, plus-minus, floor, composition, partial-derivative, e); all 148 Wikidata checks against live Wikidata, the build's sync check, the SHACL and DCAT-AP validators, the language tags, the description, keywords, licensing and the required method text."@en ,
                  "Outcome: No errors or warnings; every fix claimed in rounds 1–3 is present. Two suggestions, both confirmed and applied: the ceiling card's Swedish Wikipedia evidence now quotes the sentence that defines takfunktionen, and the first method paragraph names the Unicode Character Database check."@en .
 
 <#review-5>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Final full-deck review (facts and language)"@en ;
     rdfs:comment "Scope: All 45 cards (front characters against Python unicodedata, meanings, notes, examples, Swedish terms, language tags), the description and its counts, keywords, study direction, the required method text, the pinned UnicodeData.txt URL and the fixes logged in round 4."@en ,
                  "Outcome: No errors or warnings; both round 4 fixes confirmed in place. Two suggestions, both confirmed and applied: the proportional-to note now matches its Swedish Wikipedia source, and the selection calls the third group \"relations and geometry\"."@en .
