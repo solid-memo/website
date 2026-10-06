@@ -1,0 +1,699 @@
+@base <https://solid-memo.com/decks/spelling-alphabets/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Spelling alphabets: international and Swedish"@en ,
+                  "Bokstaveringsalfabet: internationellt och svenskt"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "Two spelling alphabets, 55 cards: all 26 letters of the international radiotelephony spelling alphabet, known as the NATO alphabet, in the ICAO spellings (Alfa, Bravo … Juliett … Zulu), and all 29 letters of the Swedish spelling alphabet (Adam, Bertil, Cesar … Åke, Ärlig, Östen) as the Swedish Transport Agency's regulations TSFS 2019:36 lay it down. Front: a letter and its alphabet; back: the code word, with notes on spellings that are easy to get wrong or that other bodies write differently. Taken from TSFS 2019:36 and the FAA's Aeronautical Information Manual, checked against the rules of the air SERA.14020 (the UK CAA's copy), the Swedish Armed Forces and Wikipedia."@en ,
+                        "Två bokstaveringsalfabet, 55 kort: alla 26 bokstäver i det internationella bokstaveringsalfabetet för radiotelefoni, som också Nato använder, med ICAO:s stavning (Alfa, Bravo … Juliett … Zulu), och alla 29 bokstäver i det svenska bokstaveringsalfabetet (Adam, Bertil, Cesar … Åke, Ärlig, Östen) så som Transportstyrelsens föreskrifter TSFS 2019:36 anger det. Framsida: en bokstav och dess alfabet; baksida: bokstaveringsordet, med en kommentar om stavningar som är lätta att ta fel på eller som andra myndigheter skriver annorlunda. Uppgifterna är hämtade från TSFS 2019:36 och amerikanska FAA:s Aeronautical Information Manual och kontrollerade mot luftfartsreglerna SERA.14020 (brittiska CAA:s utgåva), Försvarsmakten och Wikipedia."@sv ;
+    prov:wasDerivedFrom <https://www.transportstyrelsen.se/TSFS/TSFS%202019_36k.pdf> ,
+                        <https://www.faa.gov/air_traffic/publications/atpubs/aim_html/chap4_section_2.html> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:languages ,
+               topic:swedish ;
+    dcat:keyword "spelling alphabet"@en ,
+                 "NATO alphabet"@en ,
+                 "ICAO"@en ,
+                 "radiotelephony"@en ,
+                 "Swedish spelling alphabet"@en ,
+                 "bokstavering"@sv ,
+                 "bokstaveringsalfabet"@sv ,
+                 "ICAO"@sv ,
+                 "Nato"@sv ,
+                 "radiotelefoni"@sv ,
+                 "svenska bokstaveringsalfabetet"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#spelling-alphabets> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#spelling-alphabets> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.transportstyrelsen.se/TSFS/TSFS%202019_36k.pdf> ,
+              <https://www.faa.gov/air_traffic/publications/atpubs/aim_html/chap4_section_2.html> ,
+              <https://regulatorylibrary.caa.co.uk/923-2012/Content/Regs/03260_SERA14020_Word_spelling_in_radiotelephony.htm> ,
+              <https://web.archive.org/web/20221203224306/https://www.forsvarsmakten.se/siteassets/4-om-myndigheten/dokumentfiler/handbocker/h-sb-tfn-2021.pdf> ,
+              <https://sv.wikipedia.org/wiki/Bokstavering> ,
+              <https://en.wikipedia.org/wiki/NATO_phonetic_alphabet> ,
+              <https://en.wikipedia.org/wiki/Swedish_Armed_Forces_radio_alphabet> ,
+              <https://www.wikidata.org/wiki/Q12308941> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (a script that compares the sources' tables letter by letter, live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "1. Swedish regulation (queries 1–2): Transportstyrelsen's regulations on radiotelephony and phraseology for aviation, TSFS 2019:36, were downloaded as the original and as the consolidated electronic edition with amendments up to TSFS 2025:34, together with TSFS 2025:34 itself (which changes only 6 kap. 1 §, start-up phraseology). The text was extracted with pypdf (pdftext.py). 2 kap. 14 § gives a three-column table, \"Bokstav / Engelsk bokstavering / Svensk bokstavering\": the 26 international words (ALFA … ZULU) and the 29 Swedish words (ADAM … ÖSTEN, with \"–\" in the English column for Å, Ä and Ö). A footnote says the English spelling follows Commission Implementing Regulation (EU) No 923/2012. The table is the same in the original and the consolidated edition."@en ,
+                 "2. International alphabet (queries 3–5): the FAA's Aeronautical Information Manual, 4-2-7 Phonetic Alphabet (\"The International Civil Aviation Organization (ICAO) phonetic alphabet is used by FAA personnel …\"), and SERA.14020, Table S14-2, as published in the UK Civil Aviation Authority's regulatory library (Regulation (EU) No 923/2012 as retained in UK law; EUR-Lex answered 202 with an empty body, so the EU text itself was not read), were downloaded. ICAO's own page on the alphabet (https://www.icao.int/Pages/AlphabetRadiotelephony.aspx) answered 404; Annex 10 to the Chicago Convention, which defines the alphabet, is sold by ICAO and was not consulted, so the deck relies on its EU and US implementations. NATO's own leaflet (https://www.nato.int/nato_static_fl2014/assets/pdf/pdf_2018_01/20180111_nato-alphabet-sign-signal.pdf, cited by the English Wikipedia) answered 404. The English Wikipedia article \"NATO phonetic alphabet\" was fetched with its revision id (query 6)."@en ,
+                 "3. Swedish alphabet, independent checks (queries 7–9): the Swedish Armed Forces' handbook on telephony, H SB TFN 2021, answered 404 at both addresses the Swedish Wikipedia cites for it (one of them also found by a web search); the Internet Archive's copy of 3 December 2022 was downloaded and its text extracted. Its section 1.7 \"Uttal av bokstäver, siffror och skijetecken\" [sic] (printed p. 13) gives the alphabet in a table \"Bokstavering\" (Bokstav / Uttalas), repeated in appendix 2 \"Bilaga 2 – Bokstavering\" (printed p. 80); section 3.8 \"Bokstavering\" only refers back to chapter 1.7. The Swedish Wikipedia article \"Bokstavering\" and the English Wikipedia article \"Swedish Armed Forces radio alphabet\" were fetched with their revision ids. Nationalencyklopedin's article \"bokstavering\" was tried and shows its table only to subscribers; it was not used."@en ,
+                 "4. Comparison: the script compare.py (query 10) parsed the tables of all saved sources (TSFS 2019:36 consolidated, the FAA AIM, SERA.14020, the Armed Forces' handbook, both Wikipedia articles) and printed every letter on which they differ, ignoring case. Its rules: TSFS = each line \"<letter> <English word> <Swedish word>\" between \"bokstaveras enligt\" and the next heading \"Sändning av siffror\"; FAA = each \"<letter> <Morse code> <word> (\" in TBL 4-2-7; SERA = each \"<letter> <word> <PRONUNCIATION>\" in Table S14-2; Armed Forces = each \"<letter> <WORD>\" pair in the table of section 1.7; Swedish Wikipedia = the second (Svenska) and fifth (Engelska) cells of each row of the table \"Bokstäver\", wiki markup removed; English Wikipedia = the italic words of the sentence \"The 26 code words are as follows (ICAO spellings): …\" and the rows of the Swedish article's letter table. The script wrote compare.json, from which make_dossier.py generated the cards' evidence (the \"says\" texts) and the backs; the notes and the evidence about the differences were written by hand from the readings below. The scripts are not published with the deck; the rules above are what they do."@en ,
+                 "5. What the comparison found. International alphabet: all five sources agree on 23 letters. A: the Swedish Wikipedia gives \"Alpha (NATO) / Alfa (ITU, ICAO)\"; every regulation consulted writes Alfa. W: TSFS 2019:36 writes WHISKY; the FAA, SERA and both Wikipedias Whiskey. X: TSFS, SERA and the Swedish Wikipedia write X-ray; the FAA and the English Wikipedia Xray (the English Wikipedia: NATO changed X-ray to Xray, ICAO keeps X-ray). The cards use the ICAO spellings as SERA.14020 gives them (Alfa, Juliett, Whiskey, X-ray), with notes on W and X naming the bodies that write otherwise. Swedish alphabet: all four sources agree on 28 letters. O: TSFS 2019:36 has OLLE, the Armed Forces' handbook and the English Wikipedia Olof, and the Swedish Wikipedia gives both (\"Olle (flyg)\", \"Olof (försvaret)\"). The deck follows TSFS 2019:36, the regulation in force, so its O card is Olle, with the note \"The Swedish Armed Forces use Olof instead.\" X: the Swedish Wikipedia also mentions \"kryss\" (citing a Transportstyrelsen page that answered 404); neither regulation nor the handbook has it, and the card is Xerxes. All sources write C as Cesar (not Caesar), recorded in a note."@en ,
+                 "6. Cards: the international words are given with the case of SERA and the FAA (Alfa, X-ray), the Swedish words in the same style (Adam, Zäta), not in the capitals of TSFS and the handbook. Fronts: \"<letter> in the international (NATO) spelling alphabet\" / \"<letter> i det internationella bokstaveringsalfabetet (Nato)\" and \"<letter> in the Swedish spelling alphabet\" / \"<letter> i det svenska bokstaveringsalfabetet\". The Swedish term \"bokstaveringsalfabet\" is the Swedish Wikipedia's (the article \"Bokstavering\" names it \"även bokstaveringsalfabet\"), \"internationella\" follows the Wikidata sv alias \"Internationella alfabetet\" of Q190194 and the Swedish Wikipedia's heading \"Internationella standarder\", and \"Nato\" is written as the Swedish Wikipedia writes it (\"inom Nato (och därför ibland benämns Nato-standarden)\"); TSFS calls the alphabet \"engelsk bokstavering\". Both fronts name the alphabet's standing (international) and its popular name (NATO/Nato), and the X card's note says that NATO and the FAA write Xray while the card gives ICAO's X-ray. Back: the code word, the same text under English and Swedish. This departs from the library editor's brief, which asked for the international words tagged English only and the Swedish words Swedish only: the builder requires every card side to carry exactly the languages declared for that side of the deck, so one deck cannot have English-only backs on some cards and Swedish-only backs on others, and splitting the alphabets into two decks is the editor's decision. Here the language tags therefore mark the reader's language (the text an English or a Swedish reader is shown), not the word's origin: the code word is quoted unchanged whichever language is spoken. TSFS lists the international words as \"Engelsk bokstavering\" beside a separate \"Svensk bokstavering\", so the international words are English-based words, and Zäta (the Swedish name of the letter) and Ärlig (the Swedish adjective \"honest\") are Swedish words that an English reader learns unchanged; the other Swedish words are men's names. Study direction front to back only."@en ,
+                 "7. Machine checks: for each Swedish word except Zäta (the letter's Swedish name) and Ärlig (also the adjective \"honest\"), query 11 found the Wikidata item for that male given name; the builder checks against live Wikidata that the item is an instance of male given name (P31 Q12308941) and has the word as a Swedish or multilingual label. This confirms the spelling of the names only; which word stands for which letter rests on the comparison in step 5. The international words have no Wikidata items, so those cards have no Wikidata check. The built deck was validated with the app's SHACL and DCAT-AP validators (validate_sources.ts)."@en ,
+                 "8. History (for the selection, not on the cards): the Armed Forces' handbook says the Swedish alphabet consists of two-syllable men's names and \"utformades år 1891 och har därefter genomgått endast smärre förändringar\"; the Swedish Wikipedia adds that it was printed in the telephone directory from 1902, revised in 1930 and changed in 1960 when Harald became Helge. The English Wikipedia dates the international alphabet to ICAO in 1955–1956. These dates come only from copyrighted or CC BY-SA sources and are not on the cards."@en ,
+                 "Selection: Two complete alphabets, every letter of each, as of 4 October 2026: the 26 letters A–Z of the international radiotelephony spelling alphabet (ICAO's, used by NATO, the EU rules of the air, the FAA and Swedish aviation) in the ICAO spellings, and the 29 letters A–Ö of the Swedish spelling alphabet as TSFS 2019:36 (consolidated through TSFS 2025:34) lays it down; 55 cards. Where official bodies differ, the deck follows these two and says in a note what the others write: W (Whisky in TSFS), X (Xray at the FAA) and O in the Swedish alphabet (Olof at the Swedish Armed Forces). Left out: the digits and the punctuation words of both systems (they prescribe how numbers are spoken rather than code words for letters), the pronunciation guides, Å, Ä and Ö in the international alphabet (TSFS has no word for them), older and other national alphabets (the Swedish one before 1960 with Harald, the Swedish navy's, the German, French and others in the Swedish Wikipedia table) and the variant \"kryss\" for X."@en ,
+                 "Licensing: The content sources are two works that are not under copyright: Transportstyrelsen's regulations TSFS 2019:36, a Swedish författning, which the Swedish Copyright Act (1960:729, 9 §) excludes from copyright, and the FAA's Aeronautical Information Manual, a work of the US government (17 U.S.C. § 105). Both alphabets, their selection of letters and every code word on the cards come from these two, so the deck is CC0 1.0 like the rest of the library. SERA.14020 in the UK CAA's library and the Swedish Armed Forces' handbook (both all rights reserved), the English and Swedish Wikipedia (CC BY-SA 4.0) and Wikidata (CC0, used for machine checks) were used for verification only: no wording, table layout or selection was copied from them. The note on the Swedish O card states one fact in the compiler's own words (that the Armed Forces use Olof), confirmed by the handbook and both Wikipedias; a fact is not protected by copyright, and nothing of their text was taken. Each alphabet is a complete standard set, so the selection is not a choice taken from any source. The fronts and notes are the compiler's own wording."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Sources, licences and machine checks: every international word against TSFS 2019:36, the FAA AIM, SERA.14020 and both Wikipedias; every Swedish word against TSFS 2019:36, the Armed Forces' handbook and both Wikipedias; the spelling of the Swedish names against Wikidata."@en ;
+    rdfs:comment "Scope: All 55 cards, the sources and the deck metadata."@en ,
+                 "Outcome: The sources agree on 23 of the 26 international words and 28 of the 29 Swedish words. The differences (A in the Swedish Wikipedia, W, X, and the Swedish O) were resolved as below, each by following the regulations and recording the other form in a note or in the evidence. No Wikidata check was skipped; Wikidata has no items for the code words themselves, so only the spelling of 27 Swedish names is machine-checked."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "factual accuracy"@en ;
+    rdfs:comment "Scope: All 55 cards against TSFS 2019:36, the FAA AIM 4-2-7, SERA.14020 (UK CAA), the Armed Forces' handbook H SB TFN 2021, both Wikipedias and live Wikidata."@en ,
+                 "Outcome: Every code word was confirmed correct; three warnings, no errors. The X card's note now says that NATO writes Xray, and the handbook locator was corrected to section 1.7 and Bilaga 2 on all 29 Swedish cards, in the source's usedFor and in method steps 3 and 4. The request to retag the backs could not be applied with the builder; the deviation is documented in method step 6."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 55 cards, the title, description, keywords and the language tags of the built deck."@en ,
+                 "Outcome: The Swedish and English text was found correct and idiomatic. The Swedish international fronts now name Nato like the English ones, the Swedish keywords gain \"Nato\", and the Swedish description's vague \"anteckningar där andra avviker\" was rewritten. The back tags could not be split by language within one deck; the deviation from the brief and the status of Zäta and Ärlig are now documented in method step 6."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: Licences, attribution, evidence quotes, locators, method and recorded queries for all 55 cards."@en ,
+                 "Outcome: The CC0 licence and all 136 regulation quotes were confirmed. Fixed: the handbook locator (section 1.7 and Bilaga 2), the TSFS locator (printed and PDF pages, original edition added), the description and method now say that SERA was read in the UK CAA's retained-law copy, the dated note on the Swedish O card, the Wikidata label language per card, the Swedish Wikipedia-article footer, the Q190194 attribution and the recorded queries (q2.rq in full; the inline extraction re-run with pdftext.py). Two WebFetch prompts could not be recovered and are marked as such. The method no longer attributes the language-tag reasoning to TSFS; the tags themselves are unchanged (see round 2)."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: All 55 cards (every card changed in rounds 1–3 and an every-third sample), re-fetched sources, live Wikidata checks, metadata, licensing and the fixes logged in rounds 1–3."@en ,
+                 "Outcome: All 55 code words were confirmed again against TSFS 2019:36, the FAA AIM, SERA.14020 (UK CAA copy), the Armed Forces' handbook and both Wikipedias; all Wikidata checks pass and every fix claimed in rounds 1–3 is present. No errors or warnings. One optional suggestion was applied: the description now says the notes cover spellings that are easy to get wrong as well as those other bodies write differently."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: All 55 cards against TSFS 2019:36 (consolidated, PDF p. 18), the FAA AIM table 4-2-7 and live Wikidata; title, description, keywords, study direction and the fixes logged in rounds 1–4."@en ,
+                 "Outcome: No errors or warnings; all 55 code words, the 27 Wikidata checks and the fixes of rounds 1–4 were confirmed. Both optional suggestions were applied: front notes now say which official spelling the X card (ICAO) and the Swedish O card (aviation, Transportstyrelsen) expect."@en .
+
+<https://www.transportstyrelsen.se/TSFS/TSFS%202019_36k.pdf>
+    dcterms:title "TSFS 2019:36 Transportstyrelsens föreskrifter och allmänna råd om radiotelefoni och fraseologi för luftfart (konsoliderad elektronisk utgåva, ändringar införda t.o.m. TSFS 2025:34)" ;
+    dcterms:creator "Transportstyrelsen (Swedish Transport Agency)" ;
+    rdfs:comment "A Swedish regulation (föreskrift, a författning). Lag (1960:729) om upphovsrätt till litterära och konstnärliga verk, 9 § (https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/lag-1960729-om-upphovsratt-till-litterara-och_sfs-1960-729/): \"Upphovsrätt gäller inte till 1. författningar, 2. beslut av myndigheter, 3. yttranden av svenska myndigheter och 4. officiella översättningar av sådant som avses i 1-3.\" The table is none of the exceptions the section lists (maps, works of visual art, musical works, poems)."@en .
+
+<https://www.faa.gov/air_traffic/publications/atpubs/aim_html/chap4_section_2.html>
+    dcterms:title "Aeronautical Information Manual, Chapter 4, Section 2: Radio Communications Phraseology and Techniques, 4-2-7 Phonetic Alphabet" ;
+    dcterms:creator "Federal Aviation Administration, U.S. Department of Transportation" ;
+    rdfs:comment "A work of the United States Government (the Federal Aviation Administration): 17 U.S.C. § 105 (https://www.law.cornell.edu/uscode/text/17/105): \"Copyright protection under this title is not available for any work of the United States Government\". The FAA's Web Policies & Notices page (https://www.faa.gov/web_policies) was downloaded; its text as retrieved states no copyright or licence terms."@en .
+
+<https://regulatorylibrary.caa.co.uk/923-2012/Content/Regs/03260_SERA14020_Word_spelling_in_radiotelephony.htm>
+    dcterms:title "SERA.14020 Word spelling in radiotelephony (Commission Implementing Regulation (EU) No 923/2012, Standardised European Rules of the Air), UK CAA regulatory library" ;
+    dcterms:creator "Civil Aviation Authority (United Kingdom), publishing Regulation (EU) No 923/2012 as retained in UK law" ;
+    rdfs:comment "Footer of the page: \"2024 © Civil Aviation Authority\"; no licence is offered. Verification only."@en .
+
+<https://web.archive.org/web/20221203224306/https://www.forsvarsmakten.se/siteassets/4-om-myndigheten/dokumentfiler/handbocker/h-sb-tfn-2021.pdf>
+    dcterms:title "Handbok Samband telefonering, H SB TFN 2021, version 2.0 (M7739-352102)" ;
+    dcterms:creator "Försvarsmakten (Swedish Armed Forces)" ;
+    rdfs:comment "The handbook's front matter: \"© Försvarsmakten har upphovsrätt till detta verk.\" Verification only."@en .
+
+<https://sv.wikipedia.org/wiki/Bokstavering>
+    dcterms:title "Svenskspråkiga Wikipedia: Bokstavering" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of the article: \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported\""@en .
+
+<https://en.wikipedia.org/wiki/NATO_phonetic_alphabet>
+    dcterms:title "English Wikipedia: NATO phonetic alphabet" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of the article: \"Text is available under the Creative Commons Attribution-ShareAlike 4.0 License\""@en .
+
+<https://en.wikipedia.org/wiki/Swedish_Armed_Forces_radio_alphabet>
+    dcterms:title "English Wikipedia: Swedish Armed Forces radio alphabet" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of the article itself: \"This page was last edited on 26 July 2026, at 03:31\" … \"Text is available under the Creative Commons Attribution-ShareAlike 4.0 License\""@en .
+
+<https://www.wikidata.org/wiki/Q12308941>
+    dcterms:title "Wikidata: the male given names Adam, Bertil, Cesar … Östen (items with P31 Q12308941)" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<#nato-a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A in the international (NATO) spelling alphabet"@en ,
+                     "A i det internationella bokstaveringsalfabetet (Nato)"@sv ;
+    solid-memo:back "Alfa"@en ,
+                    "Alfa"@sv ;
+    solid-memo:backNote "Spelled Alfa, not Alpha."@en ,
+                        "Stavas Alfa, inte Alpha."@sv .
+
+<#nato-b>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "B in the international (NATO) spelling alphabet"@en ,
+                     "B i det internationella bokstaveringsalfabetet (Nato)"@sv ;
+    solid-memo:back "Bravo"@en ,
+                    "Bravo"@sv .
+
+<#nato-c>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "C in the international (NATO) spelling alphabet"@en ,
+                     "C i det internationella bokstaveringsalfabetet (Nato)"@sv ;
+    solid-memo:back "Charlie"@en ,
+                    "Charlie"@sv .
+
+<#nato-d>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "D in the international (NATO) spelling alphabet"@en ,
+                     "D i det internationella bokstaveringsalfabetet (Nato)"@sv ;
+    solid-memo:back "Delta"@en ,
+                    "Delta"@sv .
+
+<#nato-e>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "E in the international (NATO) spelling alphabet"@en ,
+                     "E i det internationella bokstaveringsalfabetet (Nato)"@sv ;
+    solid-memo:back "Echo"@en ,
+                    "Echo"@sv .
+
+<#nato-f>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "F in the international (NATO) spelling alphabet"@en ,
+                     "F i det internationella bokstaveringsalfabetet (Nato)"@sv ;
+    solid-memo:back "Foxtrot"@en ,
+                    "Foxtrot"@sv .
+
+<#nato-g>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "G in the international (NATO) spelling alphabet"@en ,
+                     "G i det internationella bokstaveringsalfabetet (Nato)"@sv ;
+    solid-memo:back "Golf"@en ,
+                    "Golf"@sv .
+
+<#nato-h>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "H in the international (NATO) spelling alphabet"@en ,
+                     "H i det internationella bokstaveringsalfabetet (Nato)"@sv ;
+    solid-memo:back "Hotel"@en ,
+                    "Hotel"@sv .
+
+<#nato-i>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "I in the international (NATO) spelling alphabet"@en ,
+                     "I i det internationella bokstaveringsalfabetet (Nato)"@sv ;
+    solid-memo:back "India"@en ,
+                    "India"@sv .
+
+<#nato-j>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "J in the international (NATO) spelling alphabet"@en ,
+                     "J i det internationella bokstaveringsalfabetet (Nato)"@sv ;
+    solid-memo:back "Juliett"@en ,
+                    "Juliett"@sv ;
+    solid-memo:backNote "Spelled with a double t."@en ,
+                        "Stavas med dubbelt t."@sv .
+
+<#nato-k>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "K in the international (NATO) spelling alphabet"@en ,
+                     "K i det internationella bokstaveringsalfabetet (Nato)"@sv ;
+    solid-memo:back "Kilo"@en ,
+                    "Kilo"@sv .
+
+<#nato-l>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "L in the international (NATO) spelling alphabet"@en ,
+                     "L i det internationella bokstaveringsalfabetet (Nato)"@sv ;
+    solid-memo:back "Lima"@en ,
+                    "Lima"@sv .
+
+<#nato-m>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "M in the international (NATO) spelling alphabet"@en ,
+                     "M i det internationella bokstaveringsalfabetet (Nato)"@sv ;
+    solid-memo:back "Mike"@en ,
+                    "Mike"@sv .
+
+<#nato-n>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "N in the international (NATO) spelling alphabet"@en ,
+                     "N i det internationella bokstaveringsalfabetet (Nato)"@sv ;
+    solid-memo:back "November"@en ,
+                    "November"@sv .
+
+<#nato-o>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "O in the international (NATO) spelling alphabet"@en ,
+                     "O i det internationella bokstaveringsalfabetet (Nato)"@sv ;
+    solid-memo:back "Oscar"@en ,
+                    "Oscar"@sv .
+
+<#nato-p>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "P in the international (NATO) spelling alphabet"@en ,
+                     "P i det internationella bokstaveringsalfabetet (Nato)"@sv ;
+    solid-memo:back "Papa"@en ,
+                    "Papa"@sv .
+
+<#nato-q>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Q in the international (NATO) spelling alphabet"@en ,
+                     "Q i det internationella bokstaveringsalfabetet (Nato)"@sv ;
+    solid-memo:back "Quebec"@en ,
+                    "Quebec"@sv .
+
+<#nato-r>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "R in the international (NATO) spelling alphabet"@en ,
+                     "R i det internationella bokstaveringsalfabetet (Nato)"@sv ;
+    solid-memo:back "Romeo"@en ,
+                    "Romeo"@sv .
+
+<#nato-s>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "S in the international (NATO) spelling alphabet"@en ,
+                     "S i det internationella bokstaveringsalfabetet (Nato)"@sv ;
+    solid-memo:back "Sierra"@en ,
+                    "Sierra"@sv .
+
+<#nato-t>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "T in the international (NATO) spelling alphabet"@en ,
+                     "T i det internationella bokstaveringsalfabetet (Nato)"@sv ;
+    solid-memo:back "Tango"@en ,
+                    "Tango"@sv .
+
+<#nato-u>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "U in the international (NATO) spelling alphabet"@en ,
+                     "U i det internationella bokstaveringsalfabetet (Nato)"@sv ;
+    solid-memo:back "Uniform"@en ,
+                    "Uniform"@sv .
+
+<#nato-v>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "V in the international (NATO) spelling alphabet"@en ,
+                     "V i det internationella bokstaveringsalfabetet (Nato)"@sv ;
+    solid-memo:back "Victor"@en ,
+                    "Victor"@sv .
+
+<#nato-w>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "W in the international (NATO) spelling alphabet"@en ,
+                     "W i det internationella bokstaveringsalfabetet (Nato)"@sv ;
+    solid-memo:back "Whiskey"@en ,
+                    "Whiskey"@sv ;
+    solid-memo:backNote "The Swedish aviation regulations (TSFS 2019:36) spell it Whisky."@en ,
+                        "Transportstyrelsens föreskrifter (TSFS 2019:36) stavar det Whisky."@sv .
+
+<#nato-x>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "X in the international (NATO) spelling alphabet"@en ,
+                     "X i det internationella bokstaveringsalfabetet (Nato)"@sv ;
+    solid-memo:frontNote "ICAO spelling"@en ,
+                         "ICAO:s stavning"@sv ;
+    solid-memo:back "X-ray"@en ,
+                    "X-ray"@sv ;
+    solid-memo:backNote "NATO and the US FAA write Xray instead."@en ,
+                        "Nato och amerikanska FAA skriver i stället Xray."@sv .
+
+<#nato-y>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Y in the international (NATO) spelling alphabet"@en ,
+                     "Y i det internationella bokstaveringsalfabetet (Nato)"@sv ;
+    solid-memo:back "Yankee"@en ,
+                    "Yankee"@sv .
+
+<#nato-z>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Z in the international (NATO) spelling alphabet"@en ,
+                     "Z i det internationella bokstaveringsalfabetet (Nato)"@sv ;
+    solid-memo:back "Zulu"@en ,
+                    "Zulu"@sv .
+
+<#swedish-a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A in the Swedish spelling alphabet"@en ,
+                     "A i det svenska bokstaveringsalfabetet"@sv ;
+    solid-memo:back "Adam"@en ,
+                    "Adam"@sv .
+
+<#swedish-b>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "B in the Swedish spelling alphabet"@en ,
+                     "B i det svenska bokstaveringsalfabetet"@sv ;
+    solid-memo:back "Bertil"@en ,
+                    "Bertil"@sv .
+
+<#swedish-c>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "C in the Swedish spelling alphabet"@en ,
+                     "C i det svenska bokstaveringsalfabetet"@sv ;
+    solid-memo:back "Cesar"@en ,
+                    "Cesar"@sv ;
+    solid-memo:backNote "Spelled Cesar, not Caesar."@en ,
+                        "Stavas Cesar, inte Caesar."@sv .
+
+<#swedish-d>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "D in the Swedish spelling alphabet"@en ,
+                     "D i det svenska bokstaveringsalfabetet"@sv ;
+    solid-memo:back "David"@en ,
+                    "David"@sv .
+
+<#swedish-e>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "E in the Swedish spelling alphabet"@en ,
+                     "E i det svenska bokstaveringsalfabetet"@sv ;
+    solid-memo:back "Erik"@en ,
+                    "Erik"@sv .
+
+<#swedish-f>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "F in the Swedish spelling alphabet"@en ,
+                     "F i det svenska bokstaveringsalfabetet"@sv ;
+    solid-memo:back "Filip"@en ,
+                    "Filip"@sv .
+
+<#swedish-g>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "G in the Swedish spelling alphabet"@en ,
+                     "G i det svenska bokstaveringsalfabetet"@sv ;
+    solid-memo:back "Gustav"@en ,
+                    "Gustav"@sv .
+
+<#swedish-h>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "H in the Swedish spelling alphabet"@en ,
+                     "H i det svenska bokstaveringsalfabetet"@sv ;
+    solid-memo:back "Helge"@en ,
+                    "Helge"@sv .
+
+<#swedish-i>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "I in the Swedish spelling alphabet"@en ,
+                     "I i det svenska bokstaveringsalfabetet"@sv ;
+    solid-memo:back "Ivar"@en ,
+                    "Ivar"@sv .
+
+<#swedish-j>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "J in the Swedish spelling alphabet"@en ,
+                     "J i det svenska bokstaveringsalfabetet"@sv ;
+    solid-memo:back "Johan"@en ,
+                    "Johan"@sv .
+
+<#swedish-k>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "K in the Swedish spelling alphabet"@en ,
+                     "K i det svenska bokstaveringsalfabetet"@sv ;
+    solid-memo:back "Kalle"@en ,
+                    "Kalle"@sv .
+
+<#swedish-l>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "L in the Swedish spelling alphabet"@en ,
+                     "L i det svenska bokstaveringsalfabetet"@sv ;
+    solid-memo:back "Ludvig"@en ,
+                    "Ludvig"@sv .
+
+<#swedish-m>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "M in the Swedish spelling alphabet"@en ,
+                     "M i det svenska bokstaveringsalfabetet"@sv ;
+    solid-memo:back "Martin"@en ,
+                    "Martin"@sv .
+
+<#swedish-n>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "N in the Swedish spelling alphabet"@en ,
+                     "N i det svenska bokstaveringsalfabetet"@sv ;
+    solid-memo:back "Niklas"@en ,
+                    "Niklas"@sv .
+
+<#swedish-o>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "O in the Swedish spelling alphabet"@en ,
+                     "O i det svenska bokstaveringsalfabetet"@sv ;
+    solid-memo:frontNote "aviation (Transportstyrelsen)"@en ,
+                         "luftfart (Transportstyrelsen)"@sv ;
+    solid-memo:back "Olle"@en ,
+                    "Olle"@sv ;
+    solid-memo:backNote "The Swedish Armed Forces' telephony handbook (2021) has Olof instead."@en ,
+                        "Försvarsmaktens handbok i telefonering (2021) har i stället Olof."@sv .
+
+<#swedish-p>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "P in the Swedish spelling alphabet"@en ,
+                     "P i det svenska bokstaveringsalfabetet"@sv ;
+    solid-memo:back "Petter"@en ,
+                    "Petter"@sv .
+
+<#swedish-q>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Q in the Swedish spelling alphabet"@en ,
+                     "Q i det svenska bokstaveringsalfabetet"@sv ;
+    solid-memo:back "Qvintus"@en ,
+                    "Qvintus"@sv .
+
+<#swedish-r>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "R in the Swedish spelling alphabet"@en ,
+                     "R i det svenska bokstaveringsalfabetet"@sv ;
+    solid-memo:back "Rudolf"@en ,
+                    "Rudolf"@sv .
+
+<#swedish-s>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "S in the Swedish spelling alphabet"@en ,
+                     "S i det svenska bokstaveringsalfabetet"@sv ;
+    solid-memo:back "Sigurd"@en ,
+                    "Sigurd"@sv .
+
+<#swedish-t>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "T in the Swedish spelling alphabet"@en ,
+                     "T i det svenska bokstaveringsalfabetet"@sv ;
+    solid-memo:back "Tore"@en ,
+                    "Tore"@sv .
+
+<#swedish-u>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "U in the Swedish spelling alphabet"@en ,
+                     "U i det svenska bokstaveringsalfabetet"@sv ;
+    solid-memo:back "Urban"@en ,
+                    "Urban"@sv .
+
+<#swedish-v>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "V in the Swedish spelling alphabet"@en ,
+                     "V i det svenska bokstaveringsalfabetet"@sv ;
+    solid-memo:back "Viktor"@en ,
+                    "Viktor"@sv .
+
+<#swedish-w>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "W in the Swedish spelling alphabet"@en ,
+                     "W i det svenska bokstaveringsalfabetet"@sv ;
+    solid-memo:back "Wilhelm"@en ,
+                    "Wilhelm"@sv .
+
+<#swedish-x>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "X in the Swedish spelling alphabet"@en ,
+                     "X i det svenska bokstaveringsalfabetet"@sv ;
+    solid-memo:back "Xerxes"@en ,
+                    "Xerxes"@sv .
+
+<#swedish-y>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Y in the Swedish spelling alphabet"@en ,
+                     "Y i det svenska bokstaveringsalfabetet"@sv ;
+    solid-memo:back "Yngve"@en ,
+                    "Yngve"@sv .
+
+<#swedish-z>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Z in the Swedish spelling alphabet"@en ,
+                     "Z i det svenska bokstaveringsalfabetet"@sv ;
+    solid-memo:back "Zäta"@en ,
+                    "Zäta"@sv .
+
+<#swedish-a-ring>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Å in the Swedish spelling alphabet"@en ,
+                     "Å i det svenska bokstaveringsalfabetet"@sv ;
+    solid-memo:back "Åke"@en ,
+                    "Åke"@sv .
+
+<#swedish-a-diaeresis>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ä in the Swedish spelling alphabet"@en ,
+                     "Ä i det svenska bokstaveringsalfabetet"@sv ;
+    solid-memo:back "Ärlig"@en ,
+                    "Ärlig"@sv .
+
+<#swedish-o-diaeresis>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ö in the Swedish spelling alphabet"@en ,
+                     "Ö i det svenska bokstaveringsalfabetet"@sv ;
+    solid-memo:back "Östen"@en ,
+                    "Östen"@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

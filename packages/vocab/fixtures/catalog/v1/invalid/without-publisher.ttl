@@ -17,5 +17,5 @@
     a foaf:Agent ;
     foaf:name "Anton" .
 
-<https://solid-memo.com/decks/capitals/1.ttl>
+<https://solid-memo.com/decks/capitals/v1.ttl>
     a dcat:Dataset .

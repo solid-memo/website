@@ -1,0 +1,521 @@
+@base <https://solid-memo.com/decks/trigonometry/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Trigonometry"@en ,
+                  "Trigonometri"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "40 cards of school trigonometry: exact values of sin and cos at 0, π/6, π/4, π/3 and π/2 and of tan at 0, π/6, π/4 and π/3 (each angle in radians and degrees), sin, cos and tan in a right triangle, the Pythagorean identity, tan x = sin x/cos x, the double-angle formulas, sin(x ± y), cos(x ± y), tan(x + y), sin(−x), cos(−x), the laws of sines and cosines, degrees and radians, and the periods. Front: the question, naming every variable; back: the value or formula, such as √3/2. Every card is checked with SymPy and against English and Swedish Wikipedia, the identities also against the NIST DLMF."@en ,
+                        "40 kort i skolans trigonometri: exakta värden av sin och cos för 0, π/6, π/4, π/3 och π/2 och av tan för 0, π/6, π/4 och π/3 (varje vinkel i radianer och grader), sin, cos och tan i en rätvinklig triangel, trigonometriska ettan, tan x = sin x/cos x, formlerna för dubbla vinkeln, sin(x ± y), cos(x ± y), tan(x + y), sin(−x), cos(−x), sinus- och cosinussatsen, grader och radianer samt perioderna. Framsida: frågan, med alla variabler namngivna; baksida: värdet eller formeln, t.ex. √3/2. Varje kort är kontrollerat med SymPy och mot engelska och svenska Wikipedia, identiteterna även mot NIST DLMF."@sv ;
+    prov:wasDerivedFrom <#own-work> ,
+                        <https://www.wikidata.org/> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:mathematics ;
+    dcat:keyword "trigonometry"@en ,
+                 "sine"@en ,
+                 "cosine"@en ,
+                 "tangent"@en ,
+                 "radians"@en ,
+                 "mathematics"@en ,
+                 "trigonometri"@sv ,
+                 "sinus"@sv ,
+                 "cosinus"@sv ,
+                 "tangens"@sv ,
+                 "radianer"@sv ,
+                 "matematik"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#trigonometry> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#trigonometry> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <#own-work> ,
+              <https://www.wikidata.org/> ,
+              <https://en.wikipedia.org/> ,
+              <https://sv.wikipedia.org/> ,
+              <https://dlmf.nist.gov/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (SymPy, live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Selection: the facts a school trigonometry course (in Sweden roughly upper-secondary Matematik 3–4) asks students to know by heart were listed from general mathematical knowledge, following the library editor's brief; no list was copied from any source. Exact values: sin and cos at 0, π/6, π/4, π/3 and π/2, and tan at 0, π/6, π/4 and π/3 (14 cards); sin, cos and tan of an acute angle in a right triangle (3); the Pythagorean identity and tan x = sin x/cos x (2); sin 2x, cos 2x in three forms and tan 2x (5); the addition and subtraction formulas of sin and cos and the addition formula of tan (5); sin(−x) and cos(−x) (2); the laws of sines and cosines (2); 1° and 1 rad, 180° and 360° converted (4); the periods of sin, cos and tan (3)."@en ,
+                 "Notation and fronts: each front asks one question and names every variable, so that exactly one answer fits. The value cards give the angle both in radians and in degrees (\"Exact value of sin(π/6), i.e. sin 30°\" / \"Exakta värdet av sin(π/6), dvs. sin 30°\"); values with a square root in the denominator are written with a rational denominator (√2/2, √3/3), as SymPy and the English Wikipedia table write them, and a back note gives the other common form (1/√2, 1/√3, as the Swedish Wikipedia table writes them). Formulas that have several standard forms are asked for by the variables they may use (\"cos 2x in terms of cos x only\"; the form in both, \"as a difference of squares\"), and the law of sines by the form wanted (\"with the sides over the sines\"), the other form in the note. The addition and subtraction formulas are asked for, and listed in the description, by their expression (sin(x + y) and so on) rather than by a name, so that no card depends on knowing the name. The right-triangle cards name the sides (a the leg opposite θ, b the leg adjacent to θ, c the hypotenuse; in Swedish motstående katet till θ and närliggande katet till θ), as Swedish Wikipedia's Trigonometrisk funktion letters them. The back is one text in no language (tagged zxx): plain Unicode with superscripts (sin²x), √, π, °, the slash for division (read with the usual precedence: sin x/cos x is (sin x)/(cos x)), a space between a numeric coefficient and a function (2 sin x cos x, 2 cos²x − 1), · in 2ab·cos C to separate the product of sides from the cosine, and − (U+2212) for minus; units of angle on the conversion cards (rad, °). Identity variables x and y are real; where a formula needs cos x ≠ 0 or the like, a back note says so."@en ,
+                 "Machine verification: the script verify_trigonometry.py (recorded verbatim under Queries) was run with `uv run --with sympy python3 verify_trigonometry.py` (SymPy 1.14.0). Exact values: from first principles, the side ratios of two explicit right triangles (half of an equilateral triangle with side 2, whose angle at (√3, 0) is computed from the coordinates as π/6, and the isosceles right triangle with legs 1) and the points (1, 0) and (0, 1) of the unit circle, each compared symbolically with the card's value; independently SymPy's own sin, cos and tan of the angle, symbolically and with 40-digit arithmetic, and rad(degrees) equal to the radian form on the front. Right-triangle cards: the angle θ = atan2(a, b) at the vertex (b, 0) of a triangle with its right angle at the origin, compared symbolically and numerically with a/c, b/c and a/b. Identities: simplify(left − right) = 0 (for tan 2x after writing both sides in sin and cos, since simplify cannot close it directly) and the difference below 10⁻²⁵ at five random points in 30-digit arithmetic, kept away from the poles of tan. Law of sines: a triangle with C at the origin, B = (a, 0) and A = (b cos C, b sin C); the sine of each angle computed from the vertex coordinates as |cross product|/(product of lengths); the ratios a/sin A, b/sin B, c/sin C equal symbolically and on ten random triangles; the note's 2R with the circumcentre solved from equal distances. Law of cosines: |AB|² expanded. Degrees and radians: one full turn computed as the arc-length integral of the unit circle (2π) for 360°, from which 180°, 1° and 1 rad follow; 180/π compared with 57.2958 (to 10⁻⁴) and π/180 with Wikidata's P2370 value of the degree (to 10⁻³⁵); these two and the degree forms of the periods in the notes are numerical or exact comparisons only, so their 'symbolic' column in the output carries no separate symbolic check. Periods: f(x + T) − f(x) simplifies to 0, sympy.periodicity returns T as the fundamental period, and numerically none of the 999 values T·k/1000 is a period at five random points. Five deliberately wrong statements (sin(x + y) with a minus, cos(x + y) with a plus, cos 2x = 2sin²x − 1, sin θ = b/c, period of tan 2π) are run as negative controls and fail, as they must. Result: 47 checks (40 cards and 7 statements in the notes or comparisons), 47 passed."@en ,
+                 "Wikidata: the items were found with wbsearchentities (find_items.py and find_items2.py, under Queries) and their English and Swedish labels and aliases, descriptions, claims and sitelinks fetched with wbgetentities. Four items have a defining formula (P2534) that states a card's fact: Q2039117 (Pythagorean trigonometric identity), Q1129196 (tangent, tan x = sin x/cos x), Q170181 (law of sines) and Q164321 (law of cosines); each agrees with its card and is quoted in the evidence. The P2534 values of sine (Q152415, \"\\sin(\\alpha) = \\frac{b}{c}\") and cosine (Q1256164, \"\\cos\\,\\theta = \\frac{\\text{AC}}{\\text{AB}}\") refer to unnamed figures and could not be compared with the right-triangle cards. The builder cannot check P2534 itself, because the SPARQL endpoint returns the value as MathML (seen for Q2039117 in a test query), so the builder's checks are label checks of the names on the fronts plus one statement check: the degree's conversion to SI unit (Q28390 P2370 = 0.01745329251994329576923690768488612713 rad)."@en ,
+                 "Cross-checking against sources: fetch_sources.py downloaded the current wikitext and revision id of 10 English and 13 Swedish pages (MediaWiki API) and the DLMF pages §4.14, §4.16, §4.21 (and §4.2, not used) with the DLMF copyright notice; dlmf_text.py reduced the DLMF pages to text with the TeX of each equation; wgrep.py listed the lines matching the card's terms and the section headings, and the section named in each evidence locator was then read in full by hand (the viewing commands for that reading are not recorded; the locators and revision links make it reproducible). Every card was compared with English Wikipedia (Trigonometric functions or Radian) and Swedish Wikipedia, and the 17 identity and period cards also with DLMF; the quoted wikitext (TeX as written in the source) is in each card's evidence with a link to the exact revision. No source disagrees with any card; the only differences are of notation (√2/2 or 1/√2; a/sin A or sin A/a), recorded in round 0. The script check_quotes.py (under Queries; the recorded text names the dossier by its repository path, the scratch copy by its absolute local path) then compared every Wikipedia quote with the saved wikitext of its revision after reducing both to plain text: its first run found 6 quotes whose parts were joined across intervening markup without an ellipsis or shortened with a trailing ellipsis (right-triangle cosine and tangent, tan x = sin x/cos x, sin(−x), cos 2x in cos x only and in sin x only), all corrected (it also flagged the 14 English table-row quotes, because of a bug in its own stripping of the column-header prefix, fixed in the script); the final run found every fragment except the Radian sentence whose {{tmath| {180^\\circ}/{\\pi} }} template the script cannot unwrap, compared by eye and verbatim."@en ,
+                 "Swedish text: the fronts and notes were written in Swedish directly, using Wikidata's Swedish labels and aliases (sinus, cosinus, rätvinklig triangel, hypotenusa, katet, trigonometriska ettan, sinussatsen, cosinussatsen, grad, radianer) and the terms of Swedish Wikipedia (motstående katet and närliggande katet from Trigonometrisk funktion § Geometrisk definition; perioden from Lista över trigonometriska identiteter § Perioder; udda and jämn funktion from § Symmetri; den omskrivna cirkelns radie from Sinussatsen; uttryckt i and enbart are ordinary Swedish). Decimals in the Swedish notes use the decimal comma (≈ 57,3°), as sv.wikipedia Radian writes 57,2958°. The keyword tangens is the word used in sv.wikipedia Trigonometrisk funktion; Wikidata's Swedish label of Q1129196 is \"Tangens\" with a capital letter, so it is not label-checked."@en ,
+                 "Finally the builder ran the Wikidata checks against live Wikidata and wrote the deck and this report, and the deck was validated with the app's SHACL and DCAT-AP validators (node scripts/validate_sources.ts trigonometry)."@en ,
+                 "Selection: Included: 40 standard facts of school trigonometry (listed in the method), each with one accepted answer given the front. Left out: tan(π/2) and tan 90°, which is undefined (the answer would be a word, not a value; the note on tan x = sin x/cos x says where tan is defined); values at other angles (π/12, 2π/3 and so on), which follow from these; the subtraction formula of tan and the half-angle, triple-angle, product-to-sum and sum-to-product formulas, beyond most school courses; cot, sec and csc, rarely taught in Swedish schools; inverse trigonometric functions and their ranges; the area formula ½ab·sin C, which is in the geometry-formulas deck; and sin(π − x), cos(π/2 − x) and similar reflection rules, of which sin(−x) and cos(−x) stand for the symmetry. The law of cosines is also a card in the geometry-formulas deck; it is kept here because it belongs with the law of sines in trigonometry, with a differently worded front. Angles in identities are real numbers (radians); the identities hold in any angle unit, the periods are given in radians on the back and in degrees in the note."@en ,
+                 "Licensing: The deck is CC0 1.0. Its content comes from two sources whose licences allow anything: the compiler's own selection, wording, notation and derivations (dedicated to the public domain with the deck; the values and formulas are mathematical facts, which are not copyrightable in any case) and Wikidata (structured data under CC0), from which the English and Swedish names on the fronts were taken and against whose defining formulas and conversion factor cards were compared. English and Swedish Wikipedia (CC BY-SA 4.0) and the NIST Digital Library of Mathematical Functions (copyright NIST, reuse limited to research and teaching) were used only to verify the facts and the usage of Swedish terms: no text, notation layout or list was copied from them. Single established terms (motstående katet, närliggande katet, perioden) carry no protectable expression. The selection follows the standard school syllabus and the library editor's brief, which the subject dictates, and was made independently of any source's list."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Machine verification and source cross-checks"@en ;
+    rdfs:comment "Scope: All 40 cards."@en ,
+                 "Outcome: verify_trigonometry.py (SymPy 1.14.0) ran 47 checks (40 cards and 7 statements in the notes or comparisons with Wikidata): 47 passed, each symbolically (where a symbolic check applies) and numerically; five deliberately wrong statements used as negative controls failed as they must. Every card was compared with English and Swedish Wikipedia (quoted with revision links), the 17 identity and period cards also with the NIST DLMF, and 4 cards with a Wikidata defining formula (P2534); no source disagrees with any card. The builder's 119 Wikidata checks (118 label checks and one statement check, the degree's P2370) passed against live Wikidata. Decisions and discrepancies are logged below."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 40 cards, the description, method and evidence; independent SymPy re-check, live Wikidata, DLMF and the cited Wikipedia revisions."@en ,
+                 "Outcome: No factual error on any card. One warning (the description claimed an exact value of tan at π/2, which is undefined) and two suggestions on the wording of cos-double-angle and on notation; all three verified and fixed (slash notation kept, see below)."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 40 cards, title, description, keywords and the built TTL (language tags, Unicode, Swedish terminology)."@en ,
+                 "Outcome: No language errors; tags, Unicode and Swedish terms confirmed. Three suggestions, all verified and applied."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: Every source's licence page, the deck licence, every Wikipedia quote against its revision, DLMF equation numbers, Wikidata items, method, queries and selection."@en ,
+                 "Outcome: Licensing and attribution confirmed sound (CC0 from Wikidata and the compiler's derivation; Wikipedia and DLMF verification only). Two warnings (an absolute local path in a recorded script; an extra AI-authorship remark in the method) and two documentation suggestions fixed; the creator-string suggestion needs no change."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: 29 cards: the 20 changed in rounds 1–3 plus every third card in dossier order; metadata, description, keywords, method, queries, licensing; cited Wikipedia revisions, DLMF Release 1.2.8 equations and live Wikidata checks."@en ,
+                 "Outcome: Every fix logged in rounds 1–3 confirmed as made; facts, uniqueness of answers, language tags, Swedish terms, licensing and documentation found sound. One notation suggestion, fixed."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: All 40 cards; title, description, keywords, settings, selection, the 119 Wikidata checks against live Wikidata, and the fixes of rounds 1–4."@en ,
+                 "Outcome: No errors and no warnings: every back is correct, each front has exactly one right answer, tags, notation and Swedish terms are consistent, and the fixes of rounds 1–4 are in place. Two suggestions about out-of-date wording in the dossier's own documentation, both verified and fixed; no card changed."@en .
+
+<#own-work>
+    dcterms:title "Derivations and SymPy verification for the Solid Memo trigonometry deck" ;
+    dcterms:creator "Anton Wiklund, with the help of AI" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "Own work of the deck's compiler, dedicated to the public domain together with the deck: the deck's dcterms:license is https://creativecommons.org/publicdomain/zero/1.0/ (CC0 1.0 Universal). The values, identities and laws themselves are mathematical facts, which are not copyrightable; the wording, the notation and the selection are this dossier's own. The verification script is recorded verbatim under Queries."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata: items of the trigonometric functions, identities, laws and angle units, their labels, defining formulas (P2534) and conversion to SI unit (P2370)" ;
+    dcterms:creator "Wikidata contributors (Wikimedia Foundation)" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing (fetched 2026-10-04): \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://en.wikipedia.org/>
+    dcterms:title "English Wikipedia: Trigonometric functions and Radian" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://en.wikipedia.org/wiki/Wikipedia:Copyrights (fetched 2026-10-04): \"If you wish to reuse content from Wikipedia, read § Reusers' rights and obligations first. Then review the licenses: the Creative Commons Attribution-ShareAlike 4.0 International License and the GNU Free Documentation License.\""@en .
+
+<https://sv.wikipedia.org/>
+    dcterms:title "Swedish Wikipedia: articles on the trigonometric functions, identities and laws" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of every Swedish Wikipedia article (e.g. https://sv.wikipedia.org/wiki/Sinussatsen, fetched 2026-10-04): \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported\""@en .
+
+<https://dlmf.nist.gov/>
+    dcterms:title "NIST Digital Library of Mathematical Functions, Release 1.2.8 (2026-09-15)" ;
+    dcterms:creator "F. W. J. Olver, A. B. Olde Daalhuis, D. W. Lozier, B. I. Schneider, R. F. Boisvert, C. W. Clark, B. R. Miller, B. V. Saunders, H. S. Cohl, M. A. McClain (eds.); National Institute of Standards and Technology" ;
+    rdfs:comment "https://dlmf.nist.gov/about/notices (fetched 2026-10-04): \"Authors of the works appearing in the Digital Library of Mathematical Functions (DLMF) have assigned copyright to the works to NIST, United States Department of Commerce, as represented by the Secretary of Commerce. All materials on this website are owned by NIST. Limited copying and internal distribution of the content of these pages is permitted for research and teaching. Reproduction, copying, or distribution for any commercial purpose is strictly prohibited.\" Not a public-domain US government work, so verification only."@en .
+
+<#sin-0>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Exact value of sin 0, i.e. sin 0°"@en ,
+                     "Exakta värdet av sin 0, dvs. sin 0°"@sv ;
+    solid-memo:back "0"@zxx .
+
+<#sin-pi-6>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Exact value of sin(π/6), i.e. sin 30°"@en ,
+                     "Exakta värdet av sin(π/6), dvs. sin 30°"@sv ;
+    solid-memo:back "1/2"@zxx .
+
+<#sin-pi-4>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Exact value of sin(π/4), i.e. sin 45°"@en ,
+                     "Exakta värdet av sin(π/4), dvs. sin 45°"@sv ;
+    solid-memo:back "√2/2"@zxx ;
+    solid-memo:backNote "Also written 1/√2."@en ,
+                        "Skrivs även 1/√2."@sv .
+
+<#sin-pi-3>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Exact value of sin(π/3), i.e. sin 60°"@en ,
+                     "Exakta värdet av sin(π/3), dvs. sin 60°"@sv ;
+    solid-memo:back "√3/2"@zxx .
+
+<#sin-pi-2>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Exact value of sin(π/2), i.e. sin 90°"@en ,
+                     "Exakta värdet av sin(π/2), dvs. sin 90°"@sv ;
+    solid-memo:back "1"@zxx .
+
+<#cos-0>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Exact value of cos 0, i.e. cos 0°"@en ,
+                     "Exakta värdet av cos 0, dvs. cos 0°"@sv ;
+    solid-memo:back "1"@zxx .
+
+<#cos-pi-6>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Exact value of cos(π/6), i.e. cos 30°"@en ,
+                     "Exakta värdet av cos(π/6), dvs. cos 30°"@sv ;
+    solid-memo:back "√3/2"@zxx .
+
+<#cos-pi-4>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Exact value of cos(π/4), i.e. cos 45°"@en ,
+                     "Exakta värdet av cos(π/4), dvs. cos 45°"@sv ;
+    solid-memo:back "√2/2"@zxx ;
+    solid-memo:backNote "Also written 1/√2."@en ,
+                        "Skrivs även 1/√2."@sv .
+
+<#cos-pi-3>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Exact value of cos(π/3), i.e. cos 60°"@en ,
+                     "Exakta värdet av cos(π/3), dvs. cos 60°"@sv ;
+    solid-memo:back "1/2"@zxx .
+
+<#cos-pi-2>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Exact value of cos(π/2), i.e. cos 90°"@en ,
+                     "Exakta värdet av cos(π/2), dvs. cos 90°"@sv ;
+    solid-memo:back "0"@zxx .
+
+<#tan-0>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Exact value of tan 0, i.e. tan 0°"@en ,
+                     "Exakta värdet av tan 0, dvs. tan 0°"@sv ;
+    solid-memo:back "0"@zxx .
+
+<#tan-pi-6>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Exact value of tan(π/6), i.e. tan 30°"@en ,
+                     "Exakta värdet av tan(π/6), dvs. tan 30°"@sv ;
+    solid-memo:back "√3/3"@zxx ;
+    solid-memo:backNote "Also written 1/√3."@en ,
+                        "Skrivs även 1/√3."@sv .
+
+<#tan-pi-4>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Exact value of tan(π/4), i.e. tan 45°"@en ,
+                     "Exakta värdet av tan(π/4), dvs. tan 45°"@sv ;
+    solid-memo:back "1"@zxx .
+
+<#tan-pi-3>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Exact value of tan(π/3), i.e. tan 60°"@en ,
+                     "Exakta värdet av tan(π/3), dvs. tan 60°"@sv ;
+    solid-memo:back "√3"@zxx .
+
+<#right-triangle-sine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "sin θ in a right triangle where θ is an acute angle, a the leg opposite θ, b the leg adjacent to θ and c the hypotenuse"@en ,
+                     "sin θ i en rätvinklig triangel där θ är en spetsig vinkel, a motstående katet till θ, b närliggande katet till θ och c hypotenusan"@sv ;
+    solid-memo:back "a/c"@zxx .
+
+<#right-triangle-cosine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "cos θ in a right triangle where θ is an acute angle, a the leg opposite θ, b the leg adjacent to θ and c the hypotenuse"@en ,
+                     "cos θ i en rätvinklig triangel där θ är en spetsig vinkel, a motstående katet till θ, b närliggande katet till θ och c hypotenusan"@sv ;
+    solid-memo:back "b/c"@zxx .
+
+<#right-triangle-tangent>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "tan θ in a right triangle where θ is an acute angle, a the leg opposite θ, b the leg adjacent to θ and c the hypotenuse"@en ,
+                     "tan θ i en rätvinklig triangel där θ är en spetsig vinkel, a motstående katet till θ, b närliggande katet till θ och c hypotenusan"@sv ;
+    solid-memo:back "a/b"@zxx .
+
+<#pythagorean-identity>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pythagorean identity for sin x and cos x"@en ,
+                     "Trigonometriska ettan för sin x och cos x"@sv ;
+    solid-memo:back "sin²x + cos²x = 1"@zxx .
+
+<#tan-in-sin-cos>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "tan x in terms of sin x and cos x"@en ,
+                     "tan x uttryckt i sin x och cos x"@sv ;
+    solid-memo:back "sin x/cos x"@zxx ;
+    solid-memo:backNote "Defined where cos x ≠ 0."@en ,
+                        "Definierad där cos x ≠ 0."@sv .
+
+<#sin-double-angle>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "sin 2x in terms of sin x and cos x"@en ,
+                     "sin 2x uttryckt i sin x och cos x"@sv ;
+    solid-memo:back "2 sin x cos x"@zxx .
+
+<#cos-double-angle>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "cos 2x in terms of both cos x and sin x, as a difference of squares"@en ,
+                     "cos 2x uttryckt i både cos x och sin x, som en skillnad mellan kvadrater"@sv ;
+    solid-memo:back "cos²x − sin²x"@zxx ;
+    solid-memo:backNote "By the Pythagorean identity also 2 cos²x − 1 or 1 − 2 sin²x."@en ,
+                        "Enligt trigonometriska ettan även 2 cos²x − 1 eller 1 − 2 sin²x."@sv .
+
+<#cos-double-angle-cos>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "cos 2x in terms of cos x only"@en ,
+                     "cos 2x uttryckt i enbart cos x"@sv ;
+    solid-memo:back "2 cos²x − 1"@zxx .
+
+<#cos-double-angle-sin>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "cos 2x in terms of sin x only"@en ,
+                     "cos 2x uttryckt i enbart sin x"@sv ;
+    solid-memo:back "1 − 2 sin²x"@zxx .
+
+<#tan-double-angle>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "tan 2x in terms of tan x"@en ,
+                     "tan 2x uttryckt i tan x"@sv ;
+    solid-memo:back "2 tan x/(1 − tan²x)"@zxx ;
+    solid-memo:backNote "Where tan x and tan 2x are defined."@en ,
+                        "Där tan x och tan 2x är definierade."@sv .
+
+<#sin-sum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "sin(x + y) in terms of sin and cos of x and y"@en ,
+                     "sin(x + y) uttryckt i sin och cos för x och y"@sv ;
+    solid-memo:back "sin x cos y + cos x sin y"@zxx .
+
+<#sin-difference>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "sin(x − y) in terms of sin and cos of x and y"@en ,
+                     "sin(x − y) uttryckt i sin och cos för x och y"@sv ;
+    solid-memo:back "sin x cos y − cos x sin y"@zxx .
+
+<#cos-sum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "cos(x + y) in terms of sin and cos of x and y"@en ,
+                     "cos(x + y) uttryckt i sin och cos för x och y"@sv ;
+    solid-memo:back "cos x cos y − sin x sin y"@zxx .
+
+<#cos-difference>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "cos(x − y) in terms of sin and cos of x and y"@en ,
+                     "cos(x − y) uttryckt i sin och cos för x och y"@sv ;
+    solid-memo:back "cos x cos y + sin x sin y"@zxx .
+
+<#tan-sum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "tan(x + y) in terms of tan x and tan y"@en ,
+                     "tan(x + y) uttryckt i tan x och tan y"@sv ;
+    solid-memo:back "(tan x + tan y)/(1 − tan x tan y)"@zxx ;
+    solid-memo:backNote "Where tan x, tan y and tan(x + y) are defined."@en ,
+                        "Där tan x, tan y och tan(x + y) är definierade."@sv .
+
+<#sin-negative-angle>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "sin(−x) in terms of sin x"@en ,
+                     "sin(−x) uttryckt i sin x"@sv ;
+    solid-memo:back "−sin x"@zxx ;
+    solid-memo:backNote "Sine is an odd function."@en ,
+                        "Sinus är en udda funktion."@sv .
+
+<#cos-negative-angle>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "cos(−x) in terms of cos x"@en ,
+                     "cos(−x) uttryckt i cos x"@sv ;
+    solid-memo:back "cos x"@zxx ;
+    solid-memo:backNote "Cosine is an even function."@en ,
+                        "Cosinus är en jämn funktion."@sv .
+
+<#law-of-sines>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Law of sines for a triangle with sides a, b, c and the opposite angles A, B, C, written with the sides over the sines"@en ,
+                     "Sinussatsen för en triangel med sidorna a, b, c och de motstående vinklarna A, B, C, skriven med sidorna i täljaren"@sv ;
+    solid-memo:back "a/sin A = b/sin B = c/sin C"@zxx ;
+    solid-memo:backNote "Each ratio equals 2R, R the radius of the circumscribed circle. Also written sin A/a = sin B/b = sin C/c."@en ,
+                        "Varje kvot är lika med 2R, där R är den omskrivna cirkelns radie. Skrivs även sin A/a = sin B/b = sin C/c."@sv .
+
+<#law-of-cosines>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Law of cosines for a triangle with sides a, b, c and the angle C opposite c"@en ,
+                     "Cosinussatsen för en triangel med sidorna a, b, c och vinkeln C mitt emot sidan c"@sv ;
+    solid-memo:back "c² = a² + b² − 2ab·cos C"@zxx ;
+    solid-memo:backNote "With C = 90° it becomes the Pythagorean theorem."@en ,
+                        "Med C = 90° övergår den i Pythagoras sats."@sv .
+
+<#degree-in-radians>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1° in radians"@en ,
+                     "1° i radianer"@sv ;
+    solid-memo:back "π/180 rad"@zxx ;
+    solid-memo:backNote "≈ 0.0175 rad."@en ,
+                        "≈ 0,0175 rad."@sv .
+
+<#radian-in-degrees>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1 rad in degrees"@en ,
+                     "1 rad i grader"@sv ;
+    solid-memo:back "(180/π)°"@zxx ;
+    solid-memo:backNote "≈ 57.3°."@en ,
+                        "≈ 57,3°."@sv .
+
+<#degrees-180-in-radians>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "180° in radians"@en ,
+                     "180° i radianer"@sv ;
+    solid-memo:back "π rad"@zxx .
+
+<#degrees-360-in-radians>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "360° (a full turn) in radians"@en ,
+                     "360° (ett helt varv) i radianer"@sv ;
+    solid-memo:back "2π rad"@zxx .
+
+<#period-sin>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Period of sin x, x in radians (the smallest positive period)"@en ,
+                     "Perioden för sin x, x i radianer (den minsta positiva perioden)"@sv ;
+    solid-memo:back "2π"@zxx ;
+    solid-memo:backNote "In degrees: 360°."@en ,
+                        "I grader: 360°."@sv .
+
+<#period-cos>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Period of cos x, x in radians (the smallest positive period)"@en ,
+                     "Perioden för cos x, x i radianer (den minsta positiva perioden)"@sv ;
+    solid-memo:back "2π"@zxx ;
+    solid-memo:backNote "In degrees: 360°."@en ,
+                        "I grader: 360°."@sv .
+
+<#period-tan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Period of tan x, x in radians (the smallest positive period)"@en ,
+                     "Perioden för tan x, x i radianer (den minsta positiva perioden)"@sv ;
+    solid-memo:back "π"@zxx ;
+    solid-memo:backNote "In degrees: 180°."@en ,
+                        "I grader: 180°."@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

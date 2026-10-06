@@ -1,11 +1,11 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { defineConfig } from "vitest/config";
 import preact from "@preact/preset-vite";
 import { turtleDirectoryPlugin } from "@solid-memo/vocab/tooling/publishTurtle";
-import { NS_ROOT, VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
+import { DECKS_ROOT, NS_ROOT, VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
 
 /**
  * The commit being built, shown as the site's version in the footer. Read
@@ -50,8 +50,11 @@ export default defineConfig({
   base: "./",
   plugins: [
     preact(),
-    // Published with the site: the vocabulary and the shapes (ns/), at their IRIs, and the vendored profiles.
+    // Published with the site: the vocabulary and the shapes (ns/) and the deck
+    // library (decks/), at their IRIs, and the vendored profiles. A checkout
+    // without decks/ builds without the library; the deploy checks it is there.
     turtleDirectoryPlugin({ dir: NS_ROOT, publicPath: "ns" }),
+    ...(existsSync(DECKS_ROOT) ? [turtleDirectoryPlugin({ dir: DECKS_ROOT, publicPath: "decks" })] : []),
     turtleDirectoryPlugin({ dir: `${VOCAB_ROOT}vendor`, publicPath: "vendor" }),
   ],
   resolve: {

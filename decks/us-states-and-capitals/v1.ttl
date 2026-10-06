@@ -1,0 +1,601 @@
+@base <https://solid-memo.com/decks/us-states-and-capitals/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "US states and capitals"@en ,
+                  "USA:s delstater och huvudstäder"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "The 50 states of the United States and their capitals, as of October 2026: 50 cards, studied in both directions. Front: the state, e.g. \"California\" (Swedish \"Kalifornien\"); back: its capital city, whose name is written the same in English and Swedish, with a short note for four states (New York, Illinois, Washington and Minnesota). Taken from Wikidata (the largest cities in two notes from the US Census Bureau's State Facts for Students) and checked against the Census Bureau and Nationalencyklopedin."@en ,
+                        "USA:s 50 delstater och deras huvudstäder, enligt läget i oktober 2026: 50 kort som övas åt båda hållen. Framsida: delstaten, t.ex. ”Kalifornien”; baksida: dess huvudstad, vars namn skrivs likadant på engelska och svenska, med en kort anteckning för fyra delstater (New York, Illinois, Washington och Minnesota). Uppgifterna är hämtade från Wikidata, utom de största städerna i två av anteckningarna, som kommer från State Facts for Students från den amerikanska statistikmyndigheten US Census Bureau, och de är kontrollerade mot Census Bureau och Nationalencyklopedin."@sv ;
+    prov:wasDerivedFrom <https://www.wikidata.org/wiki/Q35657> ,
+                        <https://www.census.gov/schools/statefacts/> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:geography ;
+    dcat:keyword "United States"@en ,
+                 "US states"@en ,
+                 "state capitals"@en ,
+                 "geography"@en ,
+                 "North America"@en ,
+                 "USA"@en ,
+                 "USA"@sv ,
+                 "delstater"@sv ,
+                 "huvudstäder"@sv ,
+                 "geografi"@sv ,
+                 "Nordamerika"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:bidirectional ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#us-states-and-capitals> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#us-states-and-capitals> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/wiki/Q35657> ,
+              <https://www.census.gov/schools/statefacts/> ,
+              <https://www.ne.se/uppslagsverk/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Selection and capitals from Wikidata (query 1): every item that is an instance (P31) of \"state of the United States\" (Q35657), with every P36 (capital) statement that has no end time (pq:P582), its rank, and the English and Swedish labels of the state and of the capital. The query returned exactly 50 rows, one per state, so each state has exactly one current capital. Query 2 listed every P36 statement of all ranks with its start and end times: 56 statements, the 6 extra ones being former capitals with an end time (Alabama: Tuscaloosa, Cahaba; California: San Jose, Vallejo, Benicia; Indiana: Corydon), so the truthy P36 value of every state is the current capital (preferred rank where former capitals are recorded, the only, normal-rank, statement otherwise). The raw CSV files were saved."@en ,
+                 "Names from Wikidata (query 3, the script fetch_entities.py): the Wikidata API (wbgetentities) returned the English, Swedish and multilingual (mul) labels and aliases and the English and Swedish Wikipedia sitelinks of the 50 states and 50 capitals. The front is the state's English and Swedish label; the back is the capital's English and Swedish label. The capital of Alaska, Juneau (Q29445), has no English or Swedish label, only the multilingual label \"Juneau\", which is used for both (Wikidata's mul label is the name shared by languages that write it the same; the builder accepts it for both checks)."@en ,
+                 "Swedish names of the states: Wikidata's Swedish label differs from the English one for one state only, California (\"Kalifornien\"); for the other 49 the Swedish label is the English name. Older Swedish forms survive as Swedish aliases (Californien, Georgien, Nya Hampshire, Nya Mexico/Nya Mexiko, Nordcarolina, Norddakota, Pennsylvanien, Sydcarolina, Syddakota, Virginien, Västvirginien). Each was decided by checking the Swedish label against the headword of Nationalencyklopedin's article (see the encyclopedia check below) and the title of the Swedish Wikipedia article (Wikidata's svwiki sitelink): both use \"Kalifornien\" and the English names for all the others (Swedish Wikipedia disambiguates two titles, \"New York (delstat)\" and \"Washington (delstat)\"). The deck therefore uses \"Kalifornien\" and the English name elsewhere (for example \"North Carolina\", not \"Nordkarolina\"). An attempt to look the names up in Svensk ordbok/SAOL on svenska.se (query 6) returned only the site's JavaScript application, not an entry, so these dictionaries were not used. The capitals' Swedish labels are all identical to the English ones, which NE also uses."@en ,
+                 "Official US check (queries 7 and 8): the US Census Bureau's State Facts for Students has one page per state, https://www.census.gov/schools/statefacts/state.php?<State_Name> (the URL pattern taken from the page's script usm.js). The script fetch_census.py downloaded all 50 pages (the address is the state's English Wikidata label with spaces replaced by underscores), stripped the HTML tags, collapsed white space and took the 60 characters after \"Capital city:\" (regular expression Capital city:\\s*(.{0,60})), accepting the state when that text starts with Wikidata's English label of the capital; every mismatch was to be inspected by hand (the only one was Minnesota). The \"Largest city:\" field was read the same way. The capital field it agrees with Wikidata for all 50 states (for Minnesota the Census writes \"St. Paul\", Wikidata's label is \"Saint Paul\" and \"St. Paul\" an alias). The quoted field is in each card's evidence."@en ,
+                 "Swedish encyclopedia check (queries 9 and 10): the script fetch_ne.py downloaded NE's article on each state at https://www.ne.se/uppslagsverk/encyklopedi/lång/<slug>, where the slug is the state's Swedish Wikidata label in lower case with spaces as hyphens (for New York the address \"new-york\" is the city, so the state's article \"new-york-(ingress-delstat)\" was found among that page's links and fetched). ne_capitals.py stripped the HTML tags of the article text (after the \"Skriv ut\" button and before \"Information om artikeln\") and printed every sentence containing \"huvudstad\" and the capital's English Wikidata label; ne_grep.py was the same search for a single state. All 50 headwords and capitals agree with the cards. In quality-control round 3 the evidence was reduced to that sentence alone (for New York the two consecutive sentences naming the largest city and the capital), quoted word for word without elisions: the script ne_round1.py confirmed that every quote occurs verbatim in the saved article text and read the article's contributors from its \"Medverkande\" field, which each locator names (Arne Jakobsson for 29 states; for the other 21 the article page names no contributor, confirmed for Idaho by fetching the page again, query 17). The headword is given in the locator."@en ,
+                 "Notes: brief back notes, in the compiler's own words, for four cards where they prevent a common wrong answer and the fact is stable: New York and Illinois (the largest city — New York City, Chicago — is not the capital: the Census page's \"Largest city:\" field is the source and NE's article confirms it; the cities' Wikidata labels are checked: Chicago in English and Swedish, and New York City (Q60) in English, \"New York City\". Wikidata's Swedish label of Q60 is \"New York\" (checked as such); the Swedish note nevertheless says \"New York City\", a name also used in Swedish, to tell the city from the state of the same name on the card), Washington (the state, not Washington, D.C., the federal capital: Wikidata P36 of the United States, Q30, is Washington, D.C., Q61) and Minnesota (Saint Paul is also written St. Paul, as the Census page does: Wikidata English and Swedish alias). The notes are worded so that they read correctly in both study directions. No largest-city note was written for other states, because the sources disagree about some of them (see quality control) and population rankings change."@en ,
+                 "Cards and checks: the script make_cards.py built the 50 cards with their evidence and Wikidata checks from the saved responses (q1.csv, entities.json, census/*.html, ne/*.html); the deck metadata, method and documentation were written by hand. The helper scripts (fetch_entities.py, fetch_census.py, fetch_ne.py, ne_capitals.py, ne_grep.py, make_cards.py, ne_round1.py) were throwaway scripts in the compiler's working directory and are not published; their logic is described in these steps, and every value they produced was checked as described here. make_cards.py only copied values from the saved responses into the card structure (front: state labels; back: capital labels; evidence: the extracted fields and sentences; checks: the label and P36 values). Each card has evidence from Wikidata (labels, P36), the Census Bureau and NE, and Wikidata checks for the state's English and Swedish label, its P36 value, and the capital's English and Swedish label (or alias), plus the Wikidata facts of the four notes. Card ids are the English state name as a slug. Every back text is unique (no two states have capitals of the same name), so the deck is studied in both directions."@en ,
+                 "Build and validation: the deck builder ran all the Wikidata checks against live Wikidata (all passed) and wrote the deck and this report; node packages/deck-library/scripts/validate_sources.ts us-states-and-capitals validated the deck with the app's SHACL and DCAT-AP validators."@en ,
+                 "Selection: All 50 states of the United States, each with its one current capital (as of October 2026; Wikidata, the Census Bureau and NE, all consulted on 2026-10-04, agree on all 50). Left out: the District of Columbia (a federal district, not a state, and itself the federal capital) and the territories (Puerto Rico, Guam, the US Virgin Islands, American Samoa and the Northern Mariana Islands), which are not states; former capitals (recorded in Wikidata with an end time, as for Alabama, California and Indiana). The back gives the capital only, not the largest city; a note is added only for New York, Illinois, Washington and Minnesota (see the method). Largest-city notes for other states (such as California or Pennsylvania) were considered and left out to keep notes few and because the sources disagree on the largest city of some states."@en ,
+                 "Licensing: The content sources are Wikidata, whose structured data is CC0, and the US Census Bureau's State Facts for Students, a work of the US federal government that is not protected by copyright in the United States (17 U.S.C. § 105). Wikidata supplies the selection of the 50 states (every instance of Q35657), the link from each state to its capital (P36) and the English and Swedish names of the states and the capitals; the Census Bureau supplies only two facts, the largest cities of New York and Illinois named in their notes, restated in the compiler's own words (facts are not copyrightable anywhere). Both allow any use, so the deck is CC0 1.0 like most of the library. Nationalencyklopedin (all rights reserved) was used for verification only: it confirmed facts the content sources gave; no wording, table or selection was copied from it. The selection is the complete set of the 50 states, not a choice taken from any list, and the notes are the compiler's own wording. Quotations in the provenance report's evidence are not part of the CC0 deck: NE's text remains under NE's copyright and is quoted, one word-for-word sentence (for New York two) per article, naming NE and the article's contributor where the page names one, under the Swedish quotation right (Upphovsrättslagen 22 §) and in line with the conditions of NE's own quotation permission (verbatim, with NE and the writer named); that permission is limited to non-commercial use, so anyone reusing the report commercially relies on the quotation right alone, while the deck itself contains no NE text."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Sources, licences and machine checks: every capital against Wikidata (P36, current statement), the US Census Bureau's State Facts for Students and NE; the Swedish names against Wikidata labels, NE's headwords and the Swedish Wikipedia titles; the notes against Wikidata, the Census Bureau and NE."@en ;
+    rdfs:comment "Scope: All 50 cards, the sources and the deck metadata."@en ,
+                 "Outcome: Wikidata, the Census Bureau and NE agree on the capital of all 50 states, and Wikidata's Swedish labels agree with NE's headwords and the Swedish Wikipedia titles; no card follows a value that a better source contradicts, and no Wikidata check was skipped. The builder's checks cover, for every card, the state's English and Swedish label, its P36 value and the capital's English and Swedish label (for Juneau the multilingual label), and the Wikidata facts in the four notes. The discrepancies found concern spellings and largest cities, which the cards avoid."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 50 cards and the four notes, against live Wikidata (P36 of every instance of Q35657), English Wikipedia's \"List of capitals in the United States\" and the Census Bureau's New York page, chosen by the reviewer; the builder's Wikidata checks re-run."@en ,
+                 "Outcome: No factual errors: all 50 capitals agree with live Wikidata and the reviewer's own sources, the four notes are correct and stable, every back is unique and each front has one right answer in both study directions; the builder's 258 Wikidata checks passed. The reviewer confirmed round 0."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 50 cards (100 front and back texts), the four notes, the title, description and keywords, in the dossier and the built deck."@en ,
+                 "Outcome: No language or tag errors: every text is tagged en or sv, the Swedish state names (only \"Kalifornien\" differs) and the notes are idiomatic. Three suggestions: one fixed, two declined (one outside this dossier's reach)."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: The licences and licence evidence of all three sources, the evidence of 17 cards fetched live, the attribution, the method, queries and licensing text."@en ,
+                 "Outcome: The licences are recorded correctly and the CC0 deck licence complies. Two warnings and three suggestions, all verified and fixed: the Census Bureau is now a content source (for two largest-city facts), the NE quotes were reduced to verbatim sentences naming NE and the contributor with their legal basis stated, the Q60 Swedish label is documented and checked, the misfiled queries are marked or split, and the helper scripts' logic is described."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: All 50 cards (every card changed in round 3), their Census Bureau and NE evidence fetched live, the Wikidata checks, licences, language tags, metadata and the quality-control log."@en ,
+                 "Outcome: No errors or warnings; all fixes from rounds 0 to 3 confirmed present. One suggestion on the Swedish description, verified and applied."@en .
+
+<https://www.wikidata.org/wiki/Q35657>
+    dcterms:title "Wikidata: the states of the United States (instances of Q35657), their capitals (P36) and the English, Swedish and multilingual labels and aliases of the states and the capitals" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero\" (fetched 2026-10-04)."@en .
+
+<https://www.census.gov/schools/statefacts/>
+    dcterms:title "U.S. Census Bureau, State Facts for Students (Statistics in Schools), the page of each state" ;
+    dcterms:creator "U.S. Census Bureau" ;
+    rdfs:comment "A work of the United States Government (the Census Bureau is a federal agency): 17 U.S.C. § 105, https://www.law.cornell.edu/uscode/text/17/105 — \"Copyright protection under this title is not available for any work of the United States Government\"; USA.gov, https://www.usa.gov/government-copyright — \"Government work is something created by a U.S. government officer or employee as part of their official duties.\" (both fetched 2026-10-04). Only two facts are taken from it (the largest cities of New York and Illinois), restated in the compiler's own words; facts are not protected by copyright in any case."@en .
+
+<https://www.ne.se/uppslagsverk/>
+    dcterms:title "Nationalencyklopedin (NE), the articles on the 50 states" ;
+    dcterms:creator "NE Nationalencyklopedin AB" ;
+    rdfs:comment "https://ne.se/info/hj%c3%a4lp/upphovsratt (NE's copyright page, linked from every article page; fetched 2026-10-04) — \"Nästan allt material på NE.se omfattas av upphovsrättslagen … Ingen kopiering får göras utan tillstånd.\" For texts from the encyclopedia: \"det är fritt att citera dem i delar eller i sin helhet, på webbsidor eller i tryckt form, i icke-kommersiellt syfte. Detta under förutsättning att NE, och i förekommande fall skribenten, anges som källa, att citaten är ordagranna och att ingen utomstående kan gå in och ändra i texten.\" Verification only; nothing from NE is in the deck. The report quotes one verbatim sentence (or two consecutive sentences) per article under the Swedish quotation right, Upphovsrättslagen (1960:729) 22 §, https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/lag-1960729-om-upphovsratt-till-litterara-och_sfs-1960-729/ — \"Var och en får citera ur offentliggjorda verk i överensstämmelse med god sed och i den omfattning som motiveras av ändamålet.\" (fetched 2026-10-04), naming NE and the contributor shown on the article page."@en .
+
+<#alabama>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Alabama"@en ,
+                     "Alabama"@sv ;
+    solid-memo:back "Montgomery"@en ,
+                    "Montgomery"@sv .
+
+<#alaska>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Alaska"@en ,
+                     "Alaska"@sv ;
+    solid-memo:back "Juneau"@en ,
+                    "Juneau"@sv .
+
+<#arizona>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Arizona"@en ,
+                     "Arizona"@sv ;
+    solid-memo:back "Phoenix"@en ,
+                    "Phoenix"@sv .
+
+<#arkansas>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Arkansas"@en ,
+                     "Arkansas"@sv ;
+    solid-memo:back "Little Rock"@en ,
+                    "Little Rock"@sv .
+
+<#california>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "California"@en ,
+                     "Kalifornien"@sv ;
+    solid-memo:back "Sacramento"@en ,
+                    "Sacramento"@sv .
+
+<#colorado>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Colorado"@en ,
+                     "Colorado"@sv ;
+    solid-memo:back "Denver"@en ,
+                    "Denver"@sv .
+
+<#connecticut>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Connecticut"@en ,
+                     "Connecticut"@sv ;
+    solid-memo:back "Hartford"@en ,
+                    "Hartford"@sv .
+
+<#delaware>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Delaware"@en ,
+                     "Delaware"@sv ;
+    solid-memo:back "Dover"@en ,
+                    "Dover"@sv .
+
+<#florida>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Florida"@en ,
+                     "Florida"@sv ;
+    solid-memo:back "Tallahassee"@en ,
+                    "Tallahassee"@sv .
+
+<#georgia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Georgia"@en ,
+                     "Georgia"@sv ;
+    solid-memo:back "Atlanta"@en ,
+                    "Atlanta"@sv .
+
+<#hawaii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hawaii"@en ,
+                     "Hawaii"@sv ;
+    solid-memo:back "Honolulu"@en ,
+                    "Honolulu"@sv .
+
+<#idaho>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Idaho"@en ,
+                     "Idaho"@sv ;
+    solid-memo:back "Boise"@en ,
+                    "Boise"@sv .
+
+<#illinois>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Illinois"@en ,
+                     "Illinois"@sv ;
+    solid-memo:back "Springfield"@en ,
+                    "Springfield"@sv ;
+    solid-memo:backNote "The largest city, Chicago, is not the capital."@en ,
+                        "Den största staden, Chicago, är inte huvudstad."@sv .
+
+<#indiana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Indiana"@en ,
+                     "Indiana"@sv ;
+    solid-memo:back "Indianapolis"@en ,
+                    "Indianapolis"@sv .
+
+<#iowa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Iowa"@en ,
+                     "Iowa"@sv ;
+    solid-memo:back "Des Moines"@en ,
+                    "Des Moines"@sv .
+
+<#kansas>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Kansas"@en ,
+                     "Kansas"@sv ;
+    solid-memo:back "Topeka"@en ,
+                    "Topeka"@sv .
+
+<#kentucky>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Kentucky"@en ,
+                     "Kentucky"@sv ;
+    solid-memo:back "Frankfort"@en ,
+                    "Frankfort"@sv .
+
+<#louisiana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Louisiana"@en ,
+                     "Louisiana"@sv ;
+    solid-memo:back "Baton Rouge"@en ,
+                    "Baton Rouge"@sv .
+
+<#maine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Maine"@en ,
+                     "Maine"@sv ;
+    solid-memo:back "Augusta"@en ,
+                    "Augusta"@sv .
+
+<#maryland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Maryland"@en ,
+                     "Maryland"@sv ;
+    solid-memo:back "Annapolis"@en ,
+                    "Annapolis"@sv .
+
+<#massachusetts>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Massachusetts"@en ,
+                     "Massachusetts"@sv ;
+    solid-memo:back "Boston"@en ,
+                    "Boston"@sv .
+
+<#michigan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Michigan"@en ,
+                     "Michigan"@sv ;
+    solid-memo:back "Lansing"@en ,
+                    "Lansing"@sv .
+
+<#minnesota>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Minnesota"@en ,
+                     "Minnesota"@sv ;
+    solid-memo:back "Saint Paul"@en ,
+                    "Saint Paul"@sv ;
+    solid-memo:backNote "Saint Paul is also written St. Paul."@en ,
+                        "Saint Paul skrivs även St. Paul."@sv .
+
+<#mississippi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mississippi"@en ,
+                     "Mississippi"@sv ;
+    solid-memo:back "Jackson"@en ,
+                    "Jackson"@sv .
+
+<#missouri>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Missouri"@en ,
+                     "Missouri"@sv ;
+    solid-memo:back "Jefferson City"@en ,
+                    "Jefferson City"@sv .
+
+<#montana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Montana"@en ,
+                     "Montana"@sv ;
+    solid-memo:back "Helena"@en ,
+                    "Helena"@sv .
+
+<#nebraska>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Nebraska"@en ,
+                     "Nebraska"@sv ;
+    solid-memo:back "Lincoln"@en ,
+                    "Lincoln"@sv .
+
+<#nevada>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Nevada"@en ,
+                     "Nevada"@sv ;
+    solid-memo:back "Carson City"@en ,
+                    "Carson City"@sv .
+
+<#new-hampshire>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "New Hampshire"@en ,
+                     "New Hampshire"@sv ;
+    solid-memo:back "Concord"@en ,
+                    "Concord"@sv .
+
+<#new-jersey>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "New Jersey"@en ,
+                     "New Jersey"@sv ;
+    solid-memo:back "Trenton"@en ,
+                    "Trenton"@sv .
+
+<#new-mexico>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "New Mexico"@en ,
+                     "New Mexico"@sv ;
+    solid-memo:back "Santa Fe"@en ,
+                    "Santa Fe"@sv .
+
+<#new-york>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "New York"@en ,
+                     "New York"@sv ;
+    solid-memo:back "Albany"@en ,
+                    "Albany"@sv ;
+    solid-memo:backNote "The largest city, New York City, is not the capital."@en ,
+                        "Den största staden, New York City, är inte huvudstad."@sv .
+
+<#north-carolina>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "North Carolina"@en ,
+                     "North Carolina"@sv ;
+    solid-memo:back "Raleigh"@en ,
+                    "Raleigh"@sv .
+
+<#north-dakota>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "North Dakota"@en ,
+                     "North Dakota"@sv ;
+    solid-memo:back "Bismarck"@en ,
+                    "Bismarck"@sv .
+
+<#ohio>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ohio"@en ,
+                     "Ohio"@sv ;
+    solid-memo:back "Columbus"@en ,
+                    "Columbus"@sv .
+
+<#oklahoma>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Oklahoma"@en ,
+                     "Oklahoma"@sv ;
+    solid-memo:back "Oklahoma City"@en ,
+                    "Oklahoma City"@sv .
+
+<#oregon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Oregon"@en ,
+                     "Oregon"@sv ;
+    solid-memo:back "Salem"@en ,
+                    "Salem"@sv .
+
+<#pennsylvania>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pennsylvania"@en ,
+                     "Pennsylvania"@sv ;
+    solid-memo:back "Harrisburg"@en ,
+                    "Harrisburg"@sv .
+
+<#rhode-island>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Rhode Island"@en ,
+                     "Rhode Island"@sv ;
+    solid-memo:back "Providence"@en ,
+                    "Providence"@sv .
+
+<#south-carolina>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "South Carolina"@en ,
+                     "South Carolina"@sv ;
+    solid-memo:back "Columbia"@en ,
+                    "Columbia"@sv .
+
+<#south-dakota>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "South Dakota"@en ,
+                     "South Dakota"@sv ;
+    solid-memo:back "Pierre"@en ,
+                    "Pierre"@sv .
+
+<#tennessee>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Tennessee"@en ,
+                     "Tennessee"@sv ;
+    solid-memo:back "Nashville"@en ,
+                    "Nashville"@sv .
+
+<#texas>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Texas"@en ,
+                     "Texas"@sv ;
+    solid-memo:back "Austin"@en ,
+                    "Austin"@sv .
+
+<#utah>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Utah"@en ,
+                     "Utah"@sv ;
+    solid-memo:back "Salt Lake City"@en ,
+                    "Salt Lake City"@sv .
+
+<#vermont>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vermont"@en ,
+                     "Vermont"@sv ;
+    solid-memo:back "Montpelier"@en ,
+                    "Montpelier"@sv .
+
+<#virginia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Virginia"@en ,
+                     "Virginia"@sv ;
+    solid-memo:back "Richmond"@en ,
+                    "Richmond"@sv .
+
+<#washington>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Washington"@en ,
+                     "Washington"@sv ;
+    solid-memo:back "Olympia"@en ,
+                    "Olympia"@sv ;
+    solid-memo:backNote "The state, not Washington, D.C., the federal capital."@en ,
+                        "Delstaten, inte den federala huvudstaden Washington, D.C."@sv .
+
+<#west-virginia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "West Virginia"@en ,
+                     "West Virginia"@sv ;
+    solid-memo:back "Charleston"@en ,
+                    "Charleston"@sv .
+
+<#wisconsin>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Wisconsin"@en ,
+                     "Wisconsin"@sv ;
+    solid-memo:back "Madison"@en ,
+                    "Madison"@sv .
+
+<#wyoming>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Wyoming"@en ,
+                     "Wyoming"@sv ;
+    solid-memo:back "Cheyenne"@en ,
+                    "Cheyenne"@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

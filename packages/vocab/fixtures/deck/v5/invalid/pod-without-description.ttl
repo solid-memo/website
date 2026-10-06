@@ -30,7 +30,7 @@
     dcat:distribution <#deck-1-cards> ;
     solid-memo:cardsDocument <https://pod.example/solid-memo/main/decks/deck-1.ttl> ;
     solid-memo:reviewsDocument <https://pod.example/solid-memo/main/reviews/deck-1.ttl> ;
-    prov:wasDerivedFrom <https://solid-memo.com/decks/capitals/1.ttl> ;
+    prov:wasDerivedFrom <https://solid-memo.com/decks/capitals/v1.ttl> ;
     solid-memo:deckNewCardsPerDay 5 ;
     solid-memo:deckMaxReviewsPerDay 50 .
 

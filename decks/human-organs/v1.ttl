@@ -1,0 +1,617 @@
+@base <https://solid-memo.com/decks/human-organs/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Organs of the human body"@en ,
+                  "Människokroppens organ"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "44 organs and organ parts of the human body, from the brain to the lymph nodes. Front: the organ's common name in English and Swedish; back: its Latin name in Terminologia Anatomica (TA98). A note on the back names the organ system or the organ's main function. Compiled from Wikidata and Svensk MeSH (Karolinska Institutet's Swedish translation of MeSH), with the Latin checked against TA98 and the facts against the Swedish and English Wikipedia."@en ,
+                        "44 organ och organdelar i människokroppen, från hjärnan till lymfknutorna. Framsida: organets gängse namn på engelska och svenska; baksida: dess latinska namn enligt Terminologia Anatomica (TA98). En anteckning på baksidan anger organsystemet eller organets huvudsakliga uppgift. Sammanställd från Wikidata och Svensk MeSH (Karolinska Institutets svenska översättning av MeSH), med latinet kontrollerat mot TA98 och fakta mot svenskspråkiga och engelskspråkiga Wikipedia."@sv ;
+    prov:wasDerivedFrom <https://www.wikidata.org/> ,
+                        <https://mesh.kib.ki.se/> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:biology ;
+    dcat:keyword "anatomy"@en ,
+                 "organs"@en ,
+                 "human body"@en ,
+                 "Latin"@en ,
+                 "Terminologia Anatomica"@en ,
+                 "anatomi"@sv ,
+                 "organ"@sv ,
+                 "människokroppen"@sv ,
+                 "latin"@sv ,
+                 "Terminologia Anatomica"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/LAT> ;
+    solid-memo:studyDirection solid-memo:bidirectional ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#human-organs> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#human-organs> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/> ,
+              <https://mesh.kib.ki.se/> ,
+              <https://ifaa.unifr.ch/> ,
+              <https://sv.wikipedia.org/> ,
+              <https://en.wikipedia.org/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ,
+                       <#review-6> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Data and scripts. Every value below was fetched on 2026-10-04; the exact queries and the scripts run on the downloads are listed under Queries: search.py (wbsearchentities), mesh.py (Svensk MeSH tables), ta98.py (the TA98 entity-page parser) and gen.py (the evidence and check generator). gen.py read one further file, cards_spec.py, the compiler's per-card specification: the card texts, the Wikidata items, the TA98 code, the MeSH descriptor and the quotes to look up in the saved pages, all of which appear in the cards themselves. The raw responses and the scripts were kept only in the authoring session's temporary working directory and are not preserved; rerunning the listed queries and scripts reproduces the data, though the live sources may have changed since. The corrections made after the review rounds (Quality control, rounds 1 to 3) were made directly in this dossier, with the newly fetched pages listed under Queries."@en ,
+                 "Candidate list. The deck follows the human-skeleton deck's conventions. Candidates were the main organs of each organ system and a few well-known organ parts (of the eye, ear, larynx and intestine), about 80 in all, written down by the compiler without taking a list from any source. A SPARQL query looked up the Wikidata item of each candidate by English label, requiring a Terminologia Anatomica 98 ID (P1323); items it missed (the general heart and skin items, which have no P1323, and the brainstem, labelled \"brain stem\") were found with wbsearchentities. Where the general item has no P1323 the human-specific item that has it was used for the TA98 code (Q2419844 human heart, Q5259911 human skin). wbgetentities then fetched every candidate item's en, sv and la labels and aliases and its P1323 statements."@en ,
+                 "Latin names (back). For each candidate the TA98 entity page for its P1323 code was fetched from the TA98 online edition (ifaa.unifr.ch) and parsed for the Latin preferred term, Latin official synonym, English equivalent, English synonym and the TA98 hierarchy above the entry. The card's Latin text is the TA98 Latin preferred term for the item's code, so TA98 decides between Latin forms where several exist (Splen rather than Lien, Hypophysis rather than Glandula pituitaria, Nodus lymphoideus rather than Nodus lymphaticus, Vesica biliaris rather than Vesica fellea). A single standardised anatomical term is a fact, not protected expression, so TA98 (all rights reserved) is a verification source; no definitions, lists or other text were taken from it. TA98 prints the terms in lower case online; the cards capitalise the first letter, as the human-skeleton deck does. The same term is a Wikidata la label or alias for 33 of the 44 cards; for the others it was confirmed where possible in another open source (Encephalon an NLM MeSH entry term, Cornea and Hepar Wikidata en label or alias) or in the Swedish Wikipedia (verification: truncus encephali, vesica urinaria; it names gaster and splen too, but as the Greek names). Membrana tympanica is also the first Latin term in the English Wikipedia Eardrum article's infobox (\"membrana tympanica; myringa\"). Pulmones, Glandula thyroidea and Nodus lymphoideus are in no other source consulted and rest on TA98 alone. Every disagreement is listed under Quality control, round 0."@en ,
+                 "English names (front). The front gives the organ's common English name: an everyday English word where the English anatomical name equals the Latin and an everyday word exists (windpipe, voice box, womb, testicle); otherwise the usual English name, which is often the anatomical one (cerebellum, cornea, duodenum, pancreas). English spelling is British, as in the TA98 English equivalents (oesophagus, caecum). Each English name is a Wikidata en label or alias (checked) except \"Windpipe\" and the singular \"Vocal fold\", and each was cross-checked against the TA98 English equivalent or synonym, an NLM MeSH heading or entry term, or the English Wikipedia introduction."@en ,
+                 "Swedish names (front). The Swedish name is the Wikidata sv label or alias when it agrees with the Svensk MeSH 2026 term or synonym (Karolinska Institutets Universitetsbibliotek, CC0), compared case-insensitively; this holds for 38 cards. For binjure the Wikidata sv label is the singular of the Svensk MeSH plural term Binjurar; for lymfknuta it is the singular of the Svensk MeSH Swedish synonym Lymfknutor (main term Lymfkörtlar), and the Swedish note on that card names lymfkörtel as the other common name. Where the two disagree or one is missing, the open source with the common noun was followed and the name confirmed in the Swedish Wikipedia: öronspottkörtel, blindtarmsbihang and urinledare (Svensk MeSH terms; Wikidata has a Latin label, a definite form or nothing), and lungor (the plural of both sources' \"lunga\", since TA98 names the pair). Swedish names are written in lower case as common nouns and in the indefinite singular, as in the human-skeleton deck."@en ,
+                 "Back notes. A short note on each card names the organ system (from the TA98 hierarchy: nervous, respiratory, cardiovascular, digestive, urinary, reproductive, endocrine, lymphatic; organa sensuum as the sense organs) or, for an organ part, the organ it belongs to, and the organ's main function, in plain wording written for the deck. Swedish system names follow the Swedish Wikipedia article titles and redirects (nervsystemet, andningssystemet, hjärt- och kärlsystemet, matsmältningssystemet, urinsystemet, endokrina systemet, lymfsystemet; kvinnliga and manliga könsorganen). Some English notes follow the wording of NLM's English scope notes (brainstem, skin, nose, tongue, lungs, liver, lymph-node), a U.S. Government work that NLM provides freely; see Licensing. Each fact in a note was checked against a Svensk MeSH scope note (KIB's Swedish, or NLM's English one in the same download) where one states it, and against the Swedish or English Wikipedia; the supporting sentence is quoted in the card's evidence."@en ,
+                 "Cross-check. A script (gen.py, in the authoring session's temporary working directory) built each card's evidence from the saved raw data only: the Wikidata labels and P1323 values, the TA98 fields, the Svensk MeSH terms, synonyms, scope notes and entry terms, and the Wikipedia quotes, asserting that each quoted text occurs in the saved page or table (whitespace normalised) and that each Latin back equals the TA98 preferred term apart from capitalisation. For each card it added Wikidata checks for the P1323 code and for every en, sv and la label or alias that equals the card's text apart from capitalisation, using Wikidata's own spelling; every side with no such label was logged as a finding in round 0 with how it was resolved. The builder re-runs all checks against live Wikidata."@en ,
+                 "Uniqueness. Every front is unique in English and in Swedish and every Latin back is unique, so the deck is studied in both directions."@en ,
+                 "Selection: 44 cards: the brain, cerebellum, brainstem and spinal cord; the eye with the cornea and retina; the ear with the eardrum; the nose; the tongue; the skin; the heart; the lungs, windpipe, voice box and vocal fold; the parotid gland, oesophagus, stomach, small intestine, duodenum, large intestine, caecum, appendix, rectum, liver, gallbladder and pancreas; the kidney, ureter and urinary bladder; the ovary, fallopian tube, uterus and testicle; the thyroid, adrenal, pituitary and pineal glands; and the spleen, thymus, palatine tonsil and lymph node. On the front, an everyday English word is used where the English anatomical name equals the Latin and an everyday word exists (windpipe, voice box, womb, testicle). An organ was included only if it has a TA98 code, a TA98 Latin preferred term that is unique in the deck, and an English and a Swedish name confirmed in two sources. Left out: the cerebrum, because TA98 makes cerebrum a synonym of telencephalon while the Swedish \"storhjärna\" is defined differently between sources; the colon, because Swedish uses tjocktarm and grovtarm for both the colon and the large intestine (Svensk MeSH and the Swedish Wikipedia disagree); the urethra, which TA98 splits into male and female entries; the jejunum, ileum, pharynx, epiglottis, iris, lens, cochlea, epididymis, prostate and vagina, left out only to keep the deck to about 40 cards (for all but the prostate, TA98 Latin prostata, the English name equals the TA98 Latin); the eyeball (no Swedish label in Wikidata or term in Svensk MeSH); the bronchi (Svensk MeSH's Swedish \"luftrör\" is also an everyday word for the windpipe); and vessels, muscles and tissues (aorta, diaphragm, pericardium, bone marrow), which are outside the deck's idea of organs. Bones are in the separate human-skeleton deck."@en ,
+                 "Licensing: The deck is CC0-1.0. Its content comes from two open sources: Wikidata (CC0: labels, aliases and TA98 IDs) and Svensk MeSH (CC0, Karolinska Institutets Universitetsbibliotek: Swedish names and Swedish scope notes; NLM's English MeSH data in the same download, a U.S. Government work that NLM provides freely with acknowledgement, identified concepts and confirmed facts, and NLM's English scope notes informed the wording of several English back notes: brainstem, skin, nose, tongue, lungs, liver, lymph-node). Terminologia Anatomica (all rights reserved) sets the naming convention of the backs: each Latin back is the TA98 preferred term for the organ's code. That is a single standardised name, a fact rather than protected expression; for 33 cards the same term is also a Wikidata la label or alias, for several others it is in another open source or in the English Wikipedia (Membrana tympanica, in the Eardrum infobox), and three rest on TA98 alone (see Method). No definitions, descriptions, lists or selections were taken from TA98; the organ systems named in the notes are facts read from its hierarchy. The selection of organs is the compiler's own. The Swedish and English Wikipedia (CC BY-SA 4.0) were used to verify names and the facts in the back notes; no selection was taken from them, and a few short factual phrases in the back notes follow their wording (for example retina, testis and large-intestine in Swedish). The back notes state short facts in plain wording written for the deck; where a phrase is close to a Svensk MeSH Swedish scope note (\"Hörsel- och balansorgan\", \"syresätta blodet\") that source is CC0 and cited, where it is close to an NLM English scope note that source is a U.S. Government work NLM provides freely, acknowledged here, and where it is close to a Wikipedia sentence it is a minimal factual statement, not protected expression; the notes that followed a Wikipedia sentence most closely (larynx, thymus, spinal-cord) were reworded in round 3. Attribution, though not required by CC0, is given in the deck (prov:wasDerivedFrom) and in this report: Karolinska Institutets Bibliotek for the Swedish MeSH translation and the U.S. National Library of Medicine for MeSH, as the Svensk MeSH page and NLM's terms ask, without implying NLM's endorsement."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Source cross-check and Wikidata machine checks"@en ;
+    rdfs:comment "Scope: All 44 cards, every side."@en ,
+                 "Outcome: Every card has evidence from Wikidata and Svensk MeSH (content), the TA98 entity page (verification) and the Swedish or English Wikipedia (verification), most from both. 161 Wikidata checks: the TA98 ID (P1323) of 44 items and every en, sv and la label or alias that equals the card's text apart from case. Every Latin back equals the TA98 Latin preferred term apart from capitalisation; the card sides with no matching Wikidata label, and other discrepancies between the sources and conventions chosen, are listed below with how they were resolved. The Latin always follows TA98's preferred term, never a disagreeing Wikidata label."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 44 cards: Latin backs against the live TA98 entity pages, all 161 Wikidata checks re-run, Swedish fronts against live Svensk MeSH, back notes against the TA98 hierarchies and the Svensk MeSH/NLM scope notes."@en ,
+                 "Outcome: One error: the rectum note called the rectum the last part of the large intestine (en) and of the whole intestinal tract (sv), but TA98 and NLM put the anal canal after it; fixed with the deck's \"Large intestine:\" prefix. Three warnings, all fixed: the selection wrongly said the prostate's English name equals its Latin, method step on Swedish names misstated the Svensk MeSH lymph-node term, and the Swedish small-intestine note dropped \"most\". Of three suggestions, the fragile capitalised tonsil check was dropped (160 checks remain) and the rectum prefix fixed; the caecum note was declined. Everything else was confirmed."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 44 cards' fronts (en/sv), Latin backs and back notes, and the title, description and keywords."@en ,
+                 "Outcome: No errors; language tags, uniqueness and Swedish names confirmed. Both warnings (Swedish notes on small-intestine and rectum not matching the English) were fixed, together with round 1. Of four suggestions, all were applied: the appendix notes now say the same in both languages, the description says \"common name\" and the selection states the front-naming rule, the larynx note no longer uses \"frambringar\", and the Swedish description says \"svenskspråkiga och engelskspråkiga Wikipedia\"."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All sources' licence pages, the evidence of all 44 cards (Wikidata statements, Wikipedia quotes, Svensk MeSH terms and scope notes), the wording of the back notes against their sources, the method, queries and licensing text."@en ,
+                 "Outcome: Licences confirmed and CC0 compliant. One error: the dossier said no NLM wording was used although several English notes follow NLM's English scope notes; the statement is now true and NLM's U.S. Government-work status is quoted. Three warnings fixed: Wikipedia usedFor now agrees with the licensing text and the three closest Swedish paraphrases were reworded; the first method paragraph is now exactly the required text, the rest moved to a new \"Data and scripts\" step; the TA98 parser, gen.py and search.py are now recorded verbatim under Queries. All four suggestions applied: eardrum infobox evidence (three Latin backs now rest on TA98 alone), the Svensk MeSH lymph-node term in the method, two quote artefacts, and <scratch> paths."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The 11 cards changed in rounds 1–3 plus an every-third sample (brain, spinal-cord, retina, nose, heart, larynx, oesophagus, duodenum, appendix, gallbladder, ureter, fallopian-tube, thyroid-gland, pineal-gland, palatine-tonsil): 21 cards, all 160 Wikidata checks against live Wikidata, TA98 and Svensk MeSH pages, cited Wikipedia revisions, metadata and documentation."@en ,
+                 "Outcome: No errors; two warnings and one suggestion, all fixed. The round 3 larynx rewording used \"luftröret\", which the rest of the deck avoids (\"luftstrupe\" is the trachea card's front; sv.wikipedia redirects \"Luftrör\" to \"Bronk\"); the Swedish rectum note's \"ändtarmsöppningen\" reads as \"the anus\" in ordinary Swedish, unlike the English \"anal canal\", so round 2's statement that both notes said the same did not hold for Swedish readers; the anal-canal evidence entry lacked its D001003 prefix. Everything else checked (Wikidata, TA98, Svensk MeSH, Wikipedia quotes, language tags, description, keywords, method text and counts, licence, build) passed."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The cards changed in round 4 (larynx, rectum) plus an every-third sample (cerebellum, eye, ear, tongue, lungs, vocal-fold, stomach, large-intestine, pancreas, urinary-bladder, uterus, adrenal-gland, spleen, lymph-node): 16 cards, their 51 Wikidata checks against live Wikidata, TA98 and Svensk MeSH pages, cited Wikipedia revisions, metadata and documentation."@en ,
+                 "Outcome: No errors and no warnings; all round 4 fixes confirmed in place. One suggestion, applied: the Swedish rectum note's relative clause could be read as referring to the rectum itself and dropped the \"just\" of the English note."@en .
+
+<#review-6>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: All 44 cards: Latin backs and note hierarchies against live TA98 entity pages, Swedish system names against the sv.wikipedia API, language tags, notes in both languages, description, keywords, check count and the round 5 fix."@en ,
+                 "Outcome: No errors and no warnings; the round 5 fix and the earlier fixes it builds on were confirmed in place. Two optional style suggestions: the ear suggestion was applied, the skin suggestion was declined."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://mesh.kib.ki.se/>
+    dcterms:title "Svensk MeSH 2026 (Swedish translation of Medical Subject Headings)" ;
+    dcterms:creator "Karolinska Institutets Universitetsbibliotek (Swedish translation); U.S. National Library of Medicine (MeSH)" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://mesh.kib.ki.se/info/om-webbplatsen — \"Licensen som tillhandahålls av KIB är också gratis och berättigar till att använda en kopia av de tabeller som gränssnittet är baserat på. Data distribueras under CC0. Ange Karolinska Institutets Bibliotek som upphovsman.\" The same page continues: \"Själva MeSH-vokabulären produceras av NLM (the National Library of Medicine). All användning av MeSH® är föremål för de restriktioner som anges i NLM:s villkor för användning av MeSH\". NLM's terms, https://www.nlm.nih.gov/databases/download/terms_and_conditions_mesh.html (fetched 2026-10-04): \"NLM freely provides MeSH data. Use of MeSH Translation (MTMS) files is not covered under the NLM Terms and Conditions for MeSH data.\" and users agree to \"acknowledge NLM as the source of the data in a clear and conspicuous manner, not indicate or imply that NLM has endorsed its products/services/applications.\" The Swedish terms and Swedish scope notes (KIB's translation, CC0) are the content used. NLM's English headings, entry terms and scope notes in the same download identified concepts and served as evidence for facts, and NLM's English scope notes also informed the wording of several English back notes (brainstem, skin, nose, tongue, lungs, liver, lymph-node). MeSH is a work of the U.S. Government; NLM's copyright page, https://www.nlm.nih.gov/web_policies.html (fetched 2026-10-04): \"Works produced by the U.S. government are not subject to copyright protection in the United States. Any such works found on National Library of Medicine (NLM) Web sites may be freely used or reproduced without permission in the U.S. Please acknowledge NLM as the source of the information\". NLM is credited as the creator of MeSH and the source of those scope notes, and nothing implies its endorsement."@en .
+
+<https://ifaa.unifr.ch/>
+    dcterms:title "Terminologia Anatomica (TA98), online entity pages" ;
+    dcterms:creator "Federative International Programme on Anatomical Terminologies (FIPAT), hosted by the University of Fribourg" ;
+    rdfs:comment "Footer of every TA98 entity page fetched, e.g. https://ifaa.unifr.ch/Public/EntryPage/TA98%20Tree/Entity%20TA98%20EN/05.8.01.001%20Entity%20TA98%20EN.htm — \"FEDERATIVE INTERNATIONAL PROGRAM ON ANATOMICAL TERMINOLOGIES All rights reserved, see http://www.unifr.ch/ifaa\"."@en .
+
+<https://sv.wikipedia.org/>
+    dcterms:title "Svenska Wikipedia" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of every article, e.g. https://sv.wikipedia.org/wiki/Hj%C3%A4rta — \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported.\""@en .
+
+<https://en.wikipedia.org/>
+    dcterms:title "English Wikipedia" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of every article, e.g. https://en.wikipedia.org/wiki/Heart — \"Text is available under the Creative Commons Attribution-ShareAlike 4.0 License\"."@en .
+
+<#brain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Brain"@en ,
+                     "hjärna"@sv ;
+    solid-memo:back "Encephalon"@la ;
+    solid-memo:backNote "Nervous system: with the spinal cord, forms the central nervous system."@en ,
+                        "Nervsystemet: bildar tillsammans med ryggmärgen det centrala nervsystemet."@sv .
+
+<#cerebellum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cerebellum"@en ,
+                     "lillhjärna"@sv ;
+    solid-memo:back "Cerebellum"@la ;
+    solid-memo:backNote "Nervous system: coordinates movement and balance."@en ,
+                        "Nervsystemet: samordnar rörelser och balans."@sv .
+
+<#brainstem>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Brainstem"@en ,
+                     "hjärnstam"@sv ;
+    solid-memo:back "Truncus encephali"@la ;
+    solid-memo:backNote "Nervous system: connects the cerebral hemispheres with the spinal cord."@en ,
+                        "Nervsystemet: förbinder hjärnhalvorna med ryggmärgen."@sv .
+
+<#spinal-cord>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Spinal cord"@en ,
+                     "ryggmärg"@sv ;
+    solid-memo:back "Medulla spinalis"@la ;
+    solid-memo:backNote "Nervous system: runs from the brain down the vertebral canal."@en ,
+                        "Nervsystemet: löper från hjärnan ned inuti ryggraden."@sv .
+
+<#eye>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eye"@en ,
+                     "öga"@sv ;
+    solid-memo:back "Oculus"@la ;
+    solid-memo:backNote "Sense organs: the organ of sight."@en ,
+                        "Sinnesorganen: synorganet."@sv .
+
+<#cornea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cornea"@en ,
+                     "hornhinna"@sv ;
+    solid-memo:back "Cornea"@la ;
+    solid-memo:backNote "Eye: the transparent front layer, the first to refract light."@en ,
+                        "Ögat: det genomskinliga främre skiktet, som först bryter ljuset."@sv .
+
+<#retina>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Retina"@en ,
+                     "näthinna"@sv ;
+    solid-memo:back "Retina"@la ;
+    solid-memo:backNote "Eye: the light-sensitive inner layer that turns light into nerve signals."@en ,
+                        "Ögat: det ljuskänsliga inre lagret, som omvandlar ljus till nervsignaler."@sv .
+
+<#ear>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ear"@en ,
+                     "öra"@sv ;
+    solid-memo:back "Auris"@la ;
+    solid-memo:backNote "Sense organs: the organ of hearing and balance."@en ,
+                        "Sinnesorganen: hörsel- och balansorganet."@sv .
+
+<#eardrum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eardrum"@en ,
+                     "trumhinna"@sv ;
+    solid-memo:back "Membrana tympanica"@la ;
+    solid-memo:backNote "Ear: the membrane between the ear canal and the middle ear."@en ,
+                        "Örat: hinnan mellan hörselgången och mellanörat."@sv .
+
+<#nose>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Nose"@en ,
+                     "näsa"@sv ;
+    solid-memo:back "Nasus"@la ;
+    solid-memo:backNote "Respiratory system: part of the upper airways, with the organ of smell."@en ,
+                        "Andningssystemet: en del av de övre luftvägarna, med luktorganet."@sv .
+
+<#tongue>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Tongue"@en ,
+                     "tunga"@sv ;
+    solid-memo:back "Lingua"@la ;
+    solid-memo:backNote "Digestive system: needed for chewing, swallowing and speech; carries the taste buds."@en ,
+                        "Matsmältningssystemet: behövs för att tugga, svälja och tala; bär smaklökarna."@sv .
+
+<#skin>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Skin"@en ,
+                     "hud"@sv ;
+    solid-memo:back "Cutis"@la ;
+    solid-memo:backNote "The body's outer covering, protecting it from the environment."@en ,
+                        "Kroppens yttersta hölje och skydd mot omgivningen."@sv .
+
+<#heart>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Heart"@en ,
+                     "hjärta"@sv ;
+    solid-memo:back "Cor"@la ;
+    solid-memo:backNote "Cardiovascular system: the muscular organ that pumps the blood."@en ,
+                        "Hjärt- och kärlsystemet: det muskulära organ som pumpar blodet."@sv .
+
+<#lungs>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Lungs"@en ,
+                     "lungor"@sv ;
+    solid-memo:back "Pulmones"@la ;
+    solid-memo:backNote "Respiratory system: the pair of organs in the chest that oxygenate the blood."@en ,
+                        "Andningssystemet: organparet i brösthålan som syresätter blodet."@sv .
+
+<#trachea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Windpipe"@en ,
+                     "luftstrupe"@sv ;
+    solid-memo:back "Trachea"@la ;
+    solid-memo:backNote "Respiratory system: the tube that carries air from the larynx to the lungs."@en ,
+                        "Andningssystemet: röret som leder luft från struphuvudet till lungorna."@sv .
+
+<#larynx>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Voice box"@en ,
+                     "struphuvud"@sv ;
+    solid-memo:back "Larynx"@la ;
+    solid-memo:backNote "Respiratory system: protects the windpipe and produces the voice."@en ,
+                        "Andningssystemet: skyddar luftstrupen och bildar rösten."@sv .
+
+<#vocal-fold>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vocal fold"@en ,
+                     "stämband"@sv ;
+    solid-memo:back "Plica vocalis"@la ;
+    solid-memo:backNote "Larynx: one of the two folds that vibrate to make the voice."@en ,
+                        "Struphuvudet: ett av de två veck som ger rösten när luft passerar mellan dem."@sv .
+
+<#parotid-gland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Parotid gland"@en ,
+                     "öronspottkörtel"@sv ;
+    solid-memo:back "Glandula parotidea"@la ;
+    solid-memo:backNote "Digestive system: the largest salivary gland, in front of the ear."@en ,
+                        "Matsmältningssystemet: den största spottkörteln, framför örat."@sv .
+
+<#oesophagus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Oesophagus"@en ,
+                     "matstrupe"@sv ;
+    solid-memo:back "Oesophagus"@la ;
+    solid-memo:backNote "Digestive system: carries food from the pharynx to the stomach."@en ,
+                        "Matsmältningssystemet: för maten från svalget till magsäcken."@sv .
+
+<#stomach>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Stomach"@en ,
+                     "magsäck"@sv ;
+    solid-memo:back "Gaster"@la ;
+    solid-memo:backNote "Digestive system: lies between the oesophagus and the duodenum."@en ,
+                        "Matsmältningssystemet: ligger mellan matstrupen och tolvfingertarmen."@sv .
+
+<#small-intestine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Small intestine"@en ,
+                     "tunntarm"@sv ;
+    solid-memo:back "Intestinum tenue"@la ;
+    solid-memo:backNote "Digestive system: where most nutrients from food are absorbed."@en ,
+                        "Matsmältningssystemet: här tas det mesta av näringsämnena i maten upp."@sv .
+
+<#duodenum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Duodenum"@en ,
+                     "tolvfingertarm"@sv ;
+    solid-memo:back "Duodenum"@la ;
+    solid-memo:backNote "Small intestine: its first part, after the stomach."@en ,
+                        "Tunntarmen: dess första del, efter magsäcken."@sv .
+
+<#large-intestine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Large intestine"@en ,
+                     "tjocktarm"@sv ;
+    solid-memo:back "Intestinum crassum"@la ;
+    solid-memo:backNote "Digestive system: absorbs water and salts from the gut contents."@en ,
+                        "Matsmältningssystemet: tar upp vatten och salter ur tarminnehållet."@sv .
+
+<#caecum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Caecum"@en ,
+                     "blindtarm"@sv ;
+    solid-memo:back "Caecum"@la ;
+    solid-memo:backNote "Large intestine: the pouch where it begins; the appendix hangs from it."@en ,
+                        "Tjocktarmen: utbuktningen där den börjar; blindtarmsbihanget sitter på den."@sv .
+
+<#appendix>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Appendix"@en ,
+                     "blindtarmsbihang"@sv ;
+    solid-memo:back "Appendix vermiformis"@la ;
+    solid-memo:backNote "Large intestine: a worm-shaped, blind-ended tube attached to the caecum; its inflammation is appendicitis."@en ,
+                        "Tjocktarmen: maskformigt bihang till blindtarmen; inflammation i det kallas i dagligt tal blindtarmsinflammation."@sv .
+
+<#rectum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Rectum"@en ,
+                     "ändtarm"@sv ;
+    solid-memo:back "Rectum"@la ;
+    solid-memo:backNote "Large intestine: the part just before the anal canal."@en ,
+                        "Tjocktarmen: delen närmast före tarmens sista avsnitt, det som mynnar i analöppningen."@sv .
+
+<#liver>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Liver"@en ,
+                     "lever"@sv ;
+    solid-memo:back "Hepar"@la ;
+    solid-memo:backNote "Digestive system: detoxifies, metabolises and stores substances."@en ,
+                        "Matsmältningssystemet: står för avgiftning, ämnesomsättning och lagring av ämnen."@sv .
+
+<#gallbladder>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Gallbladder"@en ,
+                     "gallblåsa"@sv ;
+    solid-memo:back "Vesica biliaris"@la ;
+    solid-memo:backNote "Digestive system: stores bile and releases it into the duodenum."@en ,
+                        "Matsmältningssystemet: lagrar galla och släpper ut den i tolvfingertarmen."@sv .
+
+<#pancreas>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pancreas"@en ,
+                     "bukspottkörtel"@sv ;
+    solid-memo:back "Pancreas"@la ;
+    solid-memo:backNote "Digestive and endocrine systems: makes digestive enzymes and insulin."@en ,
+                        "Matsmältningssystemet och endokrina systemet: bildar matsmältningsenzymer och insulin."@sv .
+
+<#kidney>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Kidney"@en ,
+                     "njure"@sv ;
+    solid-memo:back "Ren"@la ;
+    solid-memo:backNote "Urinary system: filters the blood and makes urine."@en ,
+                        "Urinsystemet: filtrerar blodet och bildar urin."@sv .
+
+<#ureter>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ureter"@en ,
+                     "urinledare"@sv ;
+    solid-memo:back "Ureter"@la ;
+    solid-memo:backNote "Urinary system: carries urine from the kidney to the bladder."@en ,
+                        "Urinsystemet: för urinen från njuren till urinblåsan."@sv .
+
+<#urinary-bladder>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Urinary bladder"@en ,
+                     "urinblåsa"@sv ;
+    solid-memo:back "Vesica urinaria"@la ;
+    solid-memo:backNote "Urinary system: stores urine until it is passed."@en ,
+                        "Urinsystemet: lagrar urinen fram till tömningen."@sv .
+
+<#ovary>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ovary"@en ,
+                     "äggstock"@sv ;
+    solid-memo:back "Ovarium"@la ;
+    solid-memo:backNote "Female reproductive system: produces egg cells and sex hormones."@en ,
+                        "Kvinnliga könsorganen: bildar äggceller och könshormoner."@sv .
+
+<#fallopian-tube>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Fallopian tube"@en ,
+                     "äggledare"@sv ;
+    solid-memo:back "Tuba uterina"@la ;
+    solid-memo:backNote "Female reproductive system: carries egg cells from the ovary to the uterus."@en ,
+                        "Kvinnliga könsorganen: för äggcellerna från äggstocken till livmodern."@sv .
+
+<#uterus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Womb"@en ,
+                     "livmoder"@sv ;
+    solid-memo:back "Uterus"@la ;
+    solid-memo:backNote "Female reproductive system: where the fetus develops."@en ,
+                        "Kvinnliga könsorganen: här utvecklas fostret."@sv .
+
+<#testis>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Testicle"@en ,
+                     "testikel"@sv ;
+    solid-memo:back "Testis"@la ;
+    solid-memo:backNote "Male reproductive system: produces sperm and male sex hormones."@en ,
+                        "Manliga könsorganen: bildar spermier och manliga könshormoner."@sv .
+
+<#thyroid-gland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Thyroid gland"@en ,
+                     "sköldkörtel"@sv ;
+    solid-memo:back "Glandula thyroidea"@la ;
+    solid-memo:backNote "Endocrine system: gland in the neck whose hormones are key to metabolism."@en ,
+                        "Endokrina systemet: körtel i halsen vars hormoner är viktiga för ämnesomsättningen."@sv .
+
+<#adrenal-gland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Adrenal gland"@en ,
+                     "binjure"@sv ;
+    solid-memo:back "Glandula suprarenalis"@la ;
+    solid-memo:backNote "Endocrine system: sits above the kidney; makes adrenaline and cortisol."@en ,
+                        "Endokrina systemet: sitter ovanför njuren; bildar adrenalin och kortisol."@sv .
+
+<#pituitary-gland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pituitary gland"@en ,
+                     "hypofys"@sv ;
+    solid-memo:back "Hypophysis"@la ;
+    solid-memo:backNote "Endocrine system: small gland under the brain, joined to the hypothalamus."@en ,
+                        "Endokrina systemet: liten körtel under hjärnan, förbunden med hypotalamus."@sv .
+
+<#pineal-gland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pineal gland"@en ,
+                     "tallkottkörtel"@sv ;
+    solid-memo:back "Glandula pinealis"@la ;
+    solid-memo:backNote "Endocrine system: gland in the brain that makes melatonin."@en ,
+                        "Endokrina systemet: körtel i hjärnan som bildar melatonin."@sv .
+
+<#spleen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Spleen"@en ,
+                     "mjälte"@sv ;
+    solid-memo:back "Splen"@la ;
+    solid-memo:backNote "Lymphatic system: filters the blood."@en ,
+                        "Lymfsystemet: filtrerar blodet."@sv .
+
+<#thymus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Thymus"@en ,
+                     "bräss"@sv ;
+    solid-memo:back "Thymus"@la ;
+    solid-memo:backNote "Lymphatic system: key to the immune system early in life; shrinks after puberty."@en ,
+                        "Lymfsystemet: viktig för immunförsvaret tidigt i livet; krymper efter puberteten."@sv .
+
+<#palatine-tonsil>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Palatine tonsil"@en ,
+                     "halsmandel"@sv ;
+    solid-memo:back "Tonsilla palatina"@la ;
+    solid-memo:backNote "Lymphatic system: lymphoid tissue in the side wall of the throat, one on each side."@en ,
+                        "Lymfsystemet: lymfvävnad i svalgets sidovägg, en på vardera sidan."@sv .
+
+<#lymph-node>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Lymph node"@en ,
+                     "lymfknuta"@sv ;
+    solid-memo:back "Nodus lymphoideus"@la ;
+    solid-memo:backNote "Lymphatic system: a small oval or bean-shaped body along the lymph vessels; also called a lymph gland."@en ,
+                        "Lymfsystemet: en liten oval eller bönformad knuta längs lymfkärlen; kallas också lymfkörtel."@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

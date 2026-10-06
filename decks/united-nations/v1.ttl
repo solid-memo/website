@@ -1,0 +1,707 @@
+@base <https://solid-memo.com/decks/united-nations/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "United Nations: Secretaries-General and seats of UN bodies"@en ,
+                  "FN: generalsekreterare och FN-organens säten"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "40 cards on the United Nations as of 4 October 2026. Nine give the years in office of each Secretary-General, from Trygve Lie (1946) to António Guterres (since 2017): front the name, back the years. Thirty-one give the seat of a body of the UN system (the six principal organs, the 15 specialized agencies, the six funds and programmes, UNHCR, the IAEA, the WTO and the OPCW): front the body's name, back the city. Taken from Wikidata and checked against the United Nations Handbook 2026–27, the UN's own pages and Swedish UN sources."@en ,
+                        "40 kort om Förenta nationerna per den 4 oktober 2026. Nio anger ämbetsåren för var och en av generalsekreterarna, från Trygve Lie (1946) till António Guterres (sedan 2017): framsida namnet, baksida åren. Trettioett anger var ett organ i FN-systemet har sitt säte (de sex huvudorganen, de 15 fackorganen, de sex fonderna och programmen, UNHCR, IAEA, WTO och OPCW): framsida organets namn, baksida staden. Uppgifterna är hämtade från Wikidata och kontrollerade mot United Nations Handbook 2026–27, FN:s egna webbsidor och svenska FN-källor."@sv ;
+    prov:wasDerivedFrom <https://www.wikidata.org/wiki/Q81066> ,
+                        <https://data.riksdagen.se/dokument/HC0361.html> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:history ,
+               topic:geography ;
+    dcat:keyword "United Nations"@en ,
+                 "UN"@en ,
+                 "Secretary-General"@en ,
+                 "UN specialized agencies"@en ,
+                 "international organizations"@en ,
+                 "Förenta nationerna"@sv ,
+                 "FN"@sv ,
+                 "generalsekreterare"@sv ,
+                 "FN:s fackorgan"@sv ,
+                 "internationella organisationer"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#united-nations> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#united-nations> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/wiki/Q81066> ,
+              <https://www.mfat.govt.nz/assets/Peace-Rights-and-Security/Our-work-with-the-UN/United-Nations-Handbook-2026-27.pdf> ,
+              <https://ask.un.org/faq/14625> ,
+              <https://www.un.org/en/about-us/main-bodies> ,
+              <https://turkiye.un.org/en/314189-who-will-lead-un-next-selection-process-gets-underway> ,
+              <https://www.securitycouncilreport.org/whatsinblue/2026/10/security-council-programme-of-work-for-october-2026.php> ,
+              <https://unric.org/sv/fns-program-och-fackorgan-2/> ,
+              <https://sv.wikipedia.org/wiki/F%C3%B6renta_nationernas_generalsekreterare> ,
+              <https://www.wto.org/english/info_e/cont_e.htm> ,
+              <https://www.securitycouncilreport.org/whatsinblue/2026/09/fourth-security-council-straw-poll-on-un-secretary-general-candidates.php> ,
+              <https://www.unfpa.org/unfpa-hq-optimization> ,
+              <https://data.riksdagen.se/dokument/HC0361.html> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "1. Secretaries-General (Wikidata, query 1): every non-deprecated P39 (position held) statement whose value is Secretary-General of the United Nations (Q81066), with its P1545 (series ordinal), P580 (start time) and P582 (end time) qualifiers, its rank and the English and Swedish labels, was fetched as CSV from the Wikidata Query Service (run.sh). It returned ten statements: nine with the ordinals 1 to 9 (Trygve Lie to António Guterres, the last of preferred rank and without an end time) and Gladwyn Jebb (Q1275) without an ordinal, 1945-10-24 to 1946-02-02, who served only as acting Secretary-General before the first was appointed (Ask DAG: \"served as Acting Secretary-General from 24 October 1945 - 1 February 1946\") and is left out."@en ,
+                 "2. Years in office: each card's back is the first and last year of the term, from the P580 and P582 qualifiers, compared by hand with the UN's own list on Ask DAG (Dag Hammarskjöld Library, query 12), with the list \"Secretaries-General\" of the United Nations Handbook 2026–27 (p. 198, \"installed\" dates, query 16) and with the table of the Swedish Wikipedia article \"Förenta nationernas generalsekreterare\" (query 11). All four agree on every year except Ban Ki-moon's last: Wikidata's P582 is 2017-01-01 (the day his successor took office), the UN list and the Swedish table say 2016 and the Handbook has António Guterres installed on 1 January 2017; the card says 2007–2016. For António Guterres the back is \"2017–\": he was still in office on 4 October 2026. Whether a successor had been appointed was checked on 4 October 2026: Wikidata has no tenth holder; the UN in Türkiye's page on the selection (query 13) says his term ends on 31 December 2026; the web searches of query 14 found no recommendation or appointment, and Security Council Report's What's In Blue of 29 September 2026 (query 24) dates the fourth Security Council straw poll to that afternoon, 29 September 2026; Security Council Report's programme of work for October 2026 (posted 1 October, query 13) says Council members \"are expected to continue conducting “straw polls”\". The deck therefore names no successor."@en ,
+                 "3. Bodies and their seats (Wikidata, queries 2, 3, 8 and 9): the specialized agencies are the items that are instances of specialized agency of the United Nations (Q15925165) (query 2: fifteen current agencies and the defunct International Refugee Organization, left out); the funds and programmes, principal organs and other bodies were looked up by English label (query 3) or by search (search.py, query 5), and their classes (P31) and headquarters (P159) fetched (queries 8 and 9). The fifteen agencies agree with the \"Specialized Agencies\" of the UN Handbook's UN system chart (pp. 8–9), and the six funds and programmes (UNDP, UNEP, UNFPA, UN-Habitat, UNICEF, WFP) with its \"Funds and Programmes\", all six of which Wikidata classes as United Nations programmes and funds (Q139312011); the six principal organs are those of the UN's \"Main Bodies\" page and Wikidata's principal organ of the United Nations (Q15899789). For ICAO, the General Assembly and the International Court of Justice, P159 is a building (ICAO Headquarters, Headquarters of the United Nations, Peace Palace), and for the WTO it is the city Geneva (normal rank) and, with preferred rank, the Centre William Rappard; query 6 fetched the buildings' locations (Quartier international de Montréal; Manhattan; The Hague; Geneva); for the General Assembly, Manhattan has P131 New York City (wbgetclaims, query 27), and the builder checks this chain too, and the builder checks these cards through the building, since it sees only the best-ranked P159 values. For ICAO, the building's P276 (Quartier international de Montréal) has P131 Ville-Marie, which has P131 Montreal (wbgetentities, query 23), and the builder checks this whole chain. The rank of every body's P159 statement was re-checked live with query 21, and the class memberships with query 22 (exactly the fifteen agencies on the cards plus the defunct International Refugee Organization; exactly the six funds and programmes; exactly the six principal organs). The city on each card is the P159 city (or the building's city) and was compared with the address block of the body's entry in the UN Handbook 2026–27 (\"accurate as at 1 July 2026\"; the WTO, which has no address block there, with the WTO's own contact page) and, for the organs, with the UN's \"Main Bodies\" page (query 18). make_cards.py (query 15) read the Wikidata CSVs, the Handbook text and the other saved pages and generated every Wikidata, Handbook, Ask DAG, UNRIC and Swedish Wikipedia evidence text from them, asserting that each quoted text occurs in the saved page (the evidence added or corrected in quality-control rounds 1–3 was written by hand, patch5.py, query 26, from the pages and query results named in it); the card texts and notes were written by hand in that script."@en ,
+                 "4. The Handbook was downloaded as a PDF from MFAT (query 16; the DFAT .docx of the previous edition timed out and was not used) and converted to text with pypdf (pdf2txt.py); the entries were found by searching the text for each body's name and address (ctx.py prints the lines before and after a line number). The organisations' own websites were also tried (fetch.py and fetch2.py, queries 17 and 18; WebFetch, query 14): many answered 403 or 404 or rendered nothing without JavaScript, so apart from the WTO's contact page they are not sources of this deck."@en ,
+                 "5. Swedish: the Swedish names are Wikidata's sv labels or aliases (query 4) checked against the UN's Swedish page \"FN:s program och fackorgan\" (UNRIC, query 19) and the introductions of the Swedish Wikipedia articles (svwiki.py, query 11, each cited with its revision id). Where these differ, the deck uses the name that two of them share: \"FN:s boende- och bosättningsorgan\" for UN-Habitat (UNRIC, the Swedish article's introduction and a Wikidata alias, and the abbreviation list of skr. 2024/25:61, which writes it without the hyphen; the Wikidata label and the article title are \"FN:s program för boende- och bebyggelsefrågor\"), \"Världslivsmedelsprogrammet\" for WFP (Wikidata label and UNRIC), \"Internationella fonden för jordbruksutveckling\" for IFAD (Wikidata label and Swedish article; UNRIC writes \"Internationella jordbruksutvecklingsfonden\") and \"Världspostföreningen\" for the UPU (Wikidata label and Swedish article, which adds that it is also called Världspostunionen, UNRIC's form). Wikidata's sv labels for UNIDO and WIPO are the English names; WIPO's Swedish name \"Världsorganisationen för den intellektuella äganderätten\" is a Wikidata sv alias (also UNRIC's). Wikidata has no Swedish name for UNIDO and none for UNESCO's long form; these two are taken from the Government's communication to the Riksdag skr. 2024/25:61 \"Internationellt bistånd genom multilaterala organisationer\" (12 December 2024; public domain under upphovsrättslagen 9 §), found by searching the Riksdag's open data for the names (query 25): \"FN:s organisation för industriell utveckling (UNIDO)\" and \"FN:s organisation för utbildning, vetenskap och kultur (Unesco)\", the same forms as UNRIC's and, for UNIDO, the Swedish article's introduction. FN-förbundet's pages were looked for once (query 14) and not used; NE was not consulted. Acronyms are written in capitals in both languages, as UNRIC does, except Unesco, Unicef and Unep, which Swedish writes with only an initial capital (for Unesco and Unicef the Wikidata sv labels and the Swedish article titles; for all three skr. 2024/25:61, which writes \"Unep\" but \"UNIDO\" and \"UNFPA\", query 28). The organs are named \"FN:s …\" after their Wikidata sv labels (\"FN:s sekretariat\" is an sv alias; the label is \"FN-sekretariatet\"); the International Court of Justice is \"Internationella domstolen\" (sv label), not the article title \"Internationella domstolen i Haag\", which would give the answer away. City names: the Wikidata en and sv labels, except \"New York\" for New York City (Q60, sv label \"New York\")."@en ,
+                 "6. Cards: Secretaries-General: front the name (identical in English and Swedish, the Wikidata en and sv labels), front note \"Years as UN Secretary-General\", back the years (text in no language, zxx). Bodies: front the name with its acronym, front note \"Seat (city)\" / \"Säte (stad)\", back the city; a back note says whether it is a principal organ (\"One of the six principal organs of the UN\"), a specialized agency, a programme or a fund (from P31 and the name) or, for the IAEA, the WTO and the OPCW, a related organization of the UN system (the UN Handbook's chart, p. 8), and a few notes add a fact that Wikidata holds (the ICJ's Peace Palace; UN Tourism's former abbreviation UNWTO and UNHCR's alias UN Refugee Agency, both Wikidata en aliases; Hammarskjöld's country and death in office) or that a cited source states (the Trusteeship Council's suspension in 1994, UN Main Bodies; the move of some of UNFPA's headquarters functions to Nairobi, UNFPA's own page, query 24). The Swedish note texts are the compiler's own translations of the English notes (\"FN:s flyktingorgan\" renders \"UN Refugee Agency\"; it is not a Wikidata alias). Study direction front to back only: many bodies share a city."@en ,
+                 "7. Machine checks: for every card the builder checks against live Wikidata the English and Swedish name (label or alias) where Wikidata has it, the P159 value (or the building and its location, for ICAO down to Montreal and for the General Assembly down to New York City), the class (P31) of the organs, agencies, funds and programmes, and the English and Swedish labels of the city; for the Secretaries-General, P39 Q81066 and the en and sv labels, and for Dag Hammarskjöld P27 Q34 and P570 1961. The years in office are qualifiers, which the builder's checks cannot reach; they rest on query 1 and the comparison in step 2. The built deck was validated with the app's SHACL and DCAT-AP validators (validate_sources.ts)."@en ,
+                 "Selection: Forty cards, as of 4 October 2026: all nine Secretaries-General of the United Nations, from Trygve Lie (1946) to António Guterres, still in office (his second term ends on 31 December 2026; no successor had been appointed by 4 October 2026); the six principal organs; the fifteen current members of Wikidata's class specialized agency of the United Nations (Q15925165), in which the World Bank Group is a single item, as it is in the UN Handbook's chart; the six members of Wikidata's United Nations programmes and funds (Q139312011); and four more bodies whose seats are often asked about: UNHCR (other UN entity) and three related organizations, the IAEA, the WTO and the OPCW. Left out: Gladwyn Jebb, acting Secretary-General 1945–1946; the defunct International Refugee Organization; UN Trade and Development (UNCTAD), renamed in 2024, for whose new name no Swedish form was found (Wikidata and the Swedish Wikipedia still have the old name, \"FN:s konferens om handel och utveckling\"); UN-Women and the other entities whose future was under review in the UN80 reforms (a merger of UNFPA and UN-Women was being assessed in 2026 and was not decided by 4 October 2026; UNFPA is kept, with the seat the Handbook gives as at 1 July 2026); UNRWA (headquarters in both Amman and Gaza); the Secretariat's departments and offices; regional commissions, peacekeeping missions and research institutes. The seat is the city of the body's headquarters, not its other offices (the Secretariat also has offices in Geneva, Vienna and Nairobi; UN-Habitat, for one, has a New York office); the Trusteeship Council, which suspended operation on 1 November 1994, is still a principal organ under the Charter and is kept. Headquarters can move: news reports in 2025 spoke of moving the headquarters, or some headquarters functions, of UNICEF, UNFPA and UN-Women from New York to Nairobi under the UN80 reforms; the Handbook (as at 1 July 2026) and Wikidata still give New York for UNICEF and UNFPA, and the cards give the seat as at 4 October 2026."@en ,
+                 "Licensing: The content sources are Wikidata, whose structured data is CC0, and the Swedish Government's communication skr. 2024/25:61, which as a statement of a Swedish authority is not protected by copyright (upphovsrättslagen 9 §). From Wikidata come the Secretaries-General and their years, the bodies, their classes and seats, the English names and the Swedish names except two, and the facts in most notes; from skr. 2024/25:61 the Swedish names of UNIDO and UNESCO, which Wikidata lacks. The deck is therefore CC0 1.0 like the rest of the library. Every other source was used for verification only: the UN Handbook 2026–27 (Crown copyright reserved), the UN's pages (Ask DAG, Main Bodies, the UN in Türkiye and UNRIC's Swedish page, all under the UN's non-commercial Terms of Use), UNFPA's page (all rights reserved), Security Council Report (copyright Security Council Report) and the WTO (all rights reserved) and the Swedish Wikipedia (CC BY-SA 4.0) confirmed facts and names, and no wording, layout or list was copied from them; the three facts that only they state (the Trusteeship Council's suspension, UNFPA's partial move and the IAEA, WTO and OPCW being related organizations) are given as bare facts in the compiler's own words. The selection is the compiler's: complete official categories (all Secretaries-General, and the six principal organs, the specialized agencies and the funds and programmes as Wikidata's classes list them) plus four bodies chosen for this deck. The fronts, the notes and the description are the compiler's own wording. Quotations in the provenance report's evidence remain under their sources' licences and are given only to make the checks verifiable."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Sources, licences and machine checks: every Secretary-General's years against Wikidata, Ask DAG, the UN Handbook and the Swedish Wikipedia; every body's seat against Wikidata, the UN Handbook (or the WTO's own page) and, for the organs, the UN's Main Bodies page; every Swedish name against Wikidata, UNRIC's Swedish page and the Swedish Wikipedia; whether a new Secretary-General had been appointed; the builder's live Wikidata checks."@en ;
+    rdfs:comment "Scope: All 40 cards, the sources and the deck metadata."@en ,
+                 "Outcome: All sources agree on every Secretary-General's years except Wikidata's end date for Ban Ki-moon (2017-01-01 for the UN's 2016), and on every seat. No successor to António Guterres had been appointed by 4 October 2026. No Wikidata check was skipped; where Wikidata's headquarters is a building, the check goes through the building. The Swedish names differ between sources for four bodies; the deck uses the form two sources share. UNCTAD and UN-Women were left out."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 40 cards: the Secretaries-General's years against Ask DAG, the successor question as of 4 October 2026, every seat against live Wikidata P159, the description's counts, and round 0's claims."@en ,
+                 "Outcome: No factual error on any card. One dating error in the method and round 0 (the fourth straw poll was on 29, not 30, September 2026), fixed. Of four optional suggestions, three were applied (notes on UNFPA, the Trusteeship Council and the three related organizations); the U Thant note was declined and the UNICEF part of the UNFPA suggestion was declined for lack of a primary source."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 40 cards: language tags, Swedish names and idiom, acronym style, city names, the title, description and keywords."@en ,
+                 "Outcome: No errors in language or tags. All three wording suggestions were applied: \"ämbetsåren\" in the Swedish description, a title that matches the cards' \"Seat\"/\"Säte\", and \"omkom i tjänsten\" for Hammarskjöld."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: Every source's licence page, a sample of 30 cards' evidence quotes, the licensing paragraph, the recorded queries and the method."@en ,
+                 "Outcome: Three errors, all confirmed and fixed: the Swedish names of UNIDO and UNESCO came only from a verification source (now from the public-domain government communication skr. 2024/25:61, added as a content source), the OPCW's Wikidata evidence was garbled, and the ICAO evidence misattributed a description (the check chain now reaches Montreal). The warnings and suggestions were applied: Security Council Report's copyright line, the IMF quote, the P159 ranks (re-checked live), unique query numbers matching the file names, a selection based on Wikidata's classes, and the origin of the Swedish notes."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The 32 cards changed in rounds 1–3 and every third card (35 cards), the builder's live checks, the validator, the UN Handbook 2026–27, Ask DAG, UN Main Bodies, Security Council Report, UNFPA's HQ optimization page and skr. 2024/25:61."@en ,
+                 "Outcome: No errors or warnings; every fix claimed in rounds 1–3 is present. Both suggestions were confirmed and applied: the General Assembly's check chain now reaches New York City, and UNFPA's note no longer uses a present tense that rests on a page last updated in February 2024."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: All 40 cards, the title, description, keywords, method and tags; live Wikidata for a sample of Swedish labels and aliases; the state of the Secretary-General selection; UNFPA's HQ optimization page; skr. 2024/25:61 and the Riksdag's open data."@en ,
+                 "Outcome: No errors; one warning and two suggestions, all applied after checking them (query 28). UNFPA's note no longer dates the move itself to 2023, UNEP is written \"Unep\" in Swedish as the Government's communication writes it, and UN-Habitat's evidence now records why its Swedish name is a Wikidata alias rather than the label."@en .
+
+<https://www.wikidata.org/wiki/Q81066>
+    dcterms:title "Wikidata: the Secretaries-General of the United Nations (Q81066) and the bodies of the UN system" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://www.mfat.govt.nz/assets/Peace-Rights-and-Security/Our-work-with-the-UN/United-Nations-Handbook-2026-27.pdf>
+    dcterms:title "United Nations Handbook 2026–27 (63rd edition)" ;
+    dcterms:creator "Australian Department of Foreign Affairs and Trade and New Zealand Ministry of Foreign Affairs and Trade" ;
+    rdfs:comment "Page 3 of the PDF (printed page 2): \"© Crown Copyright Reserved 2026\"; no licence is offered (the MFAT page https://www.mfat.govt.nz/en/peace-rights-and-security/our-work-with-the-un/un-handbook links the PDF and states none). Verification only."@en .
+
+<https://ask.un.org/faq/14625>
+    dcterms:title "Ask DAG: Who is and has been Secretary-General of the United Nations?" ;
+    dcterms:creator "Dag Hammarskjöld Library, United Nations" ;
+    rdfs:comment "The page's footer links the UN's Terms of Use (https://www.un.org/en/about-us/terms-of-use), which allow downloading and copying \"for the User’s personal, non-commercial use, without any right to resell or redistribute them or to compile or create derivative works therefrom\". Verification only."@en .
+
+<https://www.un.org/en/about-us/main-bodies>
+    dcterms:title "United Nations: Main Bodies" ;
+    dcterms:creator "United Nations" ;
+    rdfs:comment "https://www.un.org/en/about-us/terms-of-use — \"The United Nations grants permission to Users to visit the Site and to download and copy the information, documents and materials (collectively, “Materials”) from the Site for the User’s personal, non-commercial use, without any right to resell or redistribute them or to compile or create derivative works therefrom\". Verification only."@en .
+
+<https://turkiye.un.org/en/314189-who-will-lead-un-next-selection-process-gets-underway>
+    dcterms:title "Who will lead the UN next? Selection process gets underway (United Nations in Türkiye)" ;
+    dcterms:creator "United Nations" ;
+    rdfs:comment "A UN country-team site under the UN's Terms of Use (https://www.un.org/en/about-us/terms-of-use): \"for the User’s personal, non-commercial use, without any right to resell or redistribute them\". Verification only."@en .
+
+<https://www.securitycouncilreport.org/whatsinblue/2026/10/security-council-programme-of-work-for-october-2026.php>
+    dcterms:title "Security Council Programme of Work for October 2026 (What's In Blue, posted Thu 1 Oct 2026)" ;
+    dcterms:creator "Security Council Report" ;
+    rdfs:comment "Page footer: \"Copyright © 2026 Security Council Report\"; no licence is offered. Verification only. Nothing copied."@en .
+
+<https://unric.org/sv/fns-program-och-fackorgan-2/>
+    dcterms:title "FN:s program och fackorgan (UNRIC, FN:s regionala informationskontor för Västeuropa, svenska sidor)" ;
+    dcterms:creator "United Nations Regional Information Centre for Western Europe (UNRIC)" ;
+    rdfs:comment "Footer of the page: \"© Förenta Nationerna © 2026\"; no licence is offered (the UN's Terms of Use, https://www.un.org/en/about-us/terms-of-use, allow only personal, non-commercial use). Verification only."@en .
+
+<https://sv.wikipedia.org/wiki/F%C3%B6renta_nationernas_generalsekreterare>
+    dcterms:title "Svenskspråkiga Wikipedia: Förenta nationernas generalsekreterare and other articles" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of the article: \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported.\""@en .
+
+<https://www.wto.org/english/info_e/cont_e.htm>
+    dcterms:title "WTO: How to contact us" ;
+    dcterms:creator "World Trade Organization" ;
+    rdfs:comment "https://www.wto.org/english/info_e/copyrights_permissions_e.htm — \"This site and its contents are the copyright of the World Trade Organization.\" … \"Commercial use of materials from the website requires written permission from the WTO.\" Verification only."@en .
+
+<https://www.securitycouncilreport.org/whatsinblue/2026/09/fourth-security-council-straw-poll-on-un-secretary-general-candidates.php>
+    dcterms:title "Fourth Security Council Straw Poll on UN Secretary-General Candidates (What's In Blue, posted Tue 29 Sep 2026)" ;
+    dcterms:creator "Security Council Report" ;
+    rdfs:comment "Page footer: \"Copyright © 2026 Security Council Report\"; no licence is offered. Verification only."@en .
+
+<https://www.unfpa.org/unfpa-hq-optimization>
+    dcterms:title "UNFPA: HQ optimization (frequently asked questions, last updated 13 February 2024)" ;
+    dcterms:creator "United Nations Population Fund" ;
+    rdfs:comment "Page footer: \"© All rights reserved 2026.\" with a link to UNFPA's Terms of Use; no licence is offered. Verification only."@en .
+
+<https://data.riksdagen.se/dokument/HC0361.html>
+    dcterms:title "Regeringens skrivelse 2024/25:61 Internationellt bistånd genom multilaterala organisationer (Riksdagen open data, document HC0361)" ;
+    dcterms:creator "Regeringen (Utrikesdepartementet)" ;
+    rdfs:comment "A government communication to the Riksdag, a statement of a Swedish authority. Lag (1960:729) om upphovsrätt till litterära och konstnärliga verk, 9 § (https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/lag-1960729-om-upphovsratt-till-litterara-och_sfs-1960-729/, fetched 2026-10-04): \"Upphovsrätt gäller inte till 1. författningar, 2. beslut av myndigheter, 3. yttranden av svenska myndigheter och 4. officiella översättningar av sådant som avses i 1-3.\""@en .
+
+<#trygve-lie>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Trygve Lie"@en ,
+                     "Trygve Lie"@sv ;
+    solid-memo:frontNote "Years as UN Secretary-General"@en ,
+                         "År som FN:s generalsekreterare"@sv ;
+    solid-memo:back "1946–1952"@zxx ;
+    solid-memo:backNote "The first Secretary-General."@en ,
+                        "Den förste generalsekreteraren."@sv .
+
+<#dag-hammarskjold>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Dag Hammarskjöld"@en ,
+                     "Dag Hammarskjöld"@sv ;
+    solid-memo:frontNote "Years as UN Secretary-General"@en ,
+                         "År som FN:s generalsekreterare"@sv ;
+    solid-memo:back "1953–1961"@zxx ;
+    solid-memo:backNote "From Sweden; died in office in 1961."@en ,
+                        "Från Sverige; omkom i tjänsten 1961."@sv .
+
+<#u-thant>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "U Thant"@en ,
+                     "U Thant"@sv ;
+    solid-memo:frontNote "Years as UN Secretary-General"@en ,
+                         "År som FN:s generalsekreterare"@sv ;
+    solid-memo:back "1961–1971"@zxx .
+
+<#kurt-waldheim>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Kurt Waldheim"@en ,
+                     "Kurt Waldheim"@sv ;
+    solid-memo:frontNote "Years as UN Secretary-General"@en ,
+                         "År som FN:s generalsekreterare"@sv ;
+    solid-memo:back "1972–1981"@zxx .
+
+<#javier-perez-de-cuellar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Javier Pérez de Cuéllar"@en ,
+                     "Javier Pérez de Cuéllar"@sv ;
+    solid-memo:frontNote "Years as UN Secretary-General"@en ,
+                         "År som FN:s generalsekreterare"@sv ;
+    solid-memo:back "1982–1991"@zxx .
+
+<#boutros-boutros-ghali>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Boutros Boutros-Ghali"@en ,
+                     "Boutros Boutros-Ghali"@sv ;
+    solid-memo:frontNote "Years as UN Secretary-General"@en ,
+                         "År som FN:s generalsekreterare"@sv ;
+    solid-memo:back "1992–1996"@zxx .
+
+<#kofi-annan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Kofi Annan"@en ,
+                     "Kofi Annan"@sv ;
+    solid-memo:frontNote "Years as UN Secretary-General"@en ,
+                         "År som FN:s generalsekreterare"@sv ;
+    solid-memo:back "1997–2006"@zxx .
+
+<#ban-ki-moon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ban Ki-moon"@en ,
+                     "Ban Ki-moon"@sv ;
+    solid-memo:frontNote "Years as UN Secretary-General"@en ,
+                         "År som FN:s generalsekreterare"@sv ;
+    solid-memo:back "2007–2016"@zxx .
+
+<#antonio-guterres>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "António Guterres"@en ,
+                     "António Guterres"@sv ;
+    solid-memo:frontNote "Years as UN Secretary-General"@en ,
+                         "År som FN:s generalsekreterare"@sv ;
+    solid-memo:back "2017–"@zxx ;
+    solid-memo:backNote "Still in office on 4 October 2026."@en ,
+                        "Fortfarande i tjänst den 4 oktober 2026."@sv .
+
+<#general-assembly>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "United Nations General Assembly"@en ,
+                     "FN:s generalförsamling"@sv ;
+    solid-memo:frontNote "Seat (city)"@en ,
+                         "Säte (stad)"@sv ;
+    solid-memo:back "New York"@en ,
+                    "New York"@sv ;
+    solid-memo:backNote "One of the six principal organs of the UN."@en ,
+                        "Ett av FN:s sex huvudorgan."@sv .
+
+<#security-council>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "United Nations Security Council"@en ,
+                     "FN:s säkerhetsråd"@sv ;
+    solid-memo:frontNote "Seat (city)"@en ,
+                         "Säte (stad)"@sv ;
+    solid-memo:back "New York"@en ,
+                    "New York"@sv ;
+    solid-memo:backNote "One of the six principal organs of the UN."@en ,
+                        "Ett av FN:s sex huvudorgan."@sv .
+
+<#economic-and-social-council>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "United Nations Economic and Social Council"@en ,
+                     "FN:s ekonomiska och sociala råd"@sv ;
+    solid-memo:frontNote "Seat (city)"@en ,
+                         "Säte (stad)"@sv ;
+    solid-memo:back "New York"@en ,
+                    "New York"@sv ;
+    solid-memo:backNote "One of the six principal organs of the UN."@en ,
+                        "Ett av FN:s sex huvudorgan."@sv .
+
+<#trusteeship-council>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "United Nations Trusteeship Council"@en ,
+                     "FN:s förvaltarskapsråd"@sv ;
+    solid-memo:frontNote "Seat (city)"@en ,
+                         "Säte (stad)"@sv ;
+    solid-memo:back "New York"@en ,
+                    "New York"@sv ;
+    solid-memo:backNote "One of the six principal organs of the UN; suspended operation in 1994."@en ,
+                        "Ett av FN:s sex huvudorgan; vilande sedan 1994."@sv .
+
+<#international-court-of-justice>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "International Court of Justice"@en ,
+                     "Internationella domstolen"@sv ;
+    solid-memo:frontNote "Seat (city)"@en ,
+                         "Säte (stad)"@sv ;
+    solid-memo:back "The Hague"@en ,
+                    "Haag"@sv ;
+    solid-memo:backNote "One of the six principal organs of the UN. The only principal organ not in New York; it sits in the Peace Palace."@en ,
+                        "Ett av FN:s sex huvudorgan. Det enda huvudorganet utanför New York; domstolen har sitt säte i Fredspalatset."@sv .
+
+<#secretariat>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "United Nations Secretariat"@en ,
+                     "FN:s sekretariat"@sv ;
+    solid-memo:frontNote "Seat (city)"@en ,
+                         "Säte (stad)"@sv ;
+    solid-memo:back "New York"@en ,
+                    "New York"@sv ;
+    solid-memo:backNote "One of the six principal organs of the UN."@en ,
+                        "Ett av FN:s sex huvudorgan."@sv .
+
+<#fao>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Food and Agriculture Organization of the United Nations (FAO)"@en ,
+                     "FN:s livsmedels- och jordbruksorganisation (FAO)"@sv ;
+    solid-memo:frontNote "Seat (city)"@en ,
+                         "Säte (stad)"@sv ;
+    solid-memo:back "Rome"@en ,
+                    "Rom"@sv ;
+    solid-memo:backNote "A UN specialized agency."@en ,
+                        "Ett av FN:s fackorgan."@sv .
+
+<#icao>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "International Civil Aviation Organization (ICAO)"@en ,
+                     "Internationella civila luftfartsorganisationen (ICAO)"@sv ;
+    solid-memo:frontNote "Seat (city)"@en ,
+                         "Säte (stad)"@sv ;
+    solid-memo:back "Montreal"@en ,
+                    "Montréal"@sv ;
+    solid-memo:backNote "A UN specialized agency."@en ,
+                        "Ett av FN:s fackorgan."@sv .
+
+<#ifad>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "International Fund for Agricultural Development (IFAD)"@en ,
+                     "Internationella fonden för jordbruksutveckling (IFAD)"@sv ;
+    solid-memo:frontNote "Seat (city)"@en ,
+                         "Säte (stad)"@sv ;
+    solid-memo:back "Rome"@en ,
+                    "Rom"@sv ;
+    solid-memo:backNote "A UN specialized agency."@en ,
+                        "Ett av FN:s fackorgan."@sv .
+
+<#ilo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "International Labour Organization (ILO)"@en ,
+                     "Internationella arbetsorganisationen (ILO)"@sv ;
+    solid-memo:frontNote "Seat (city)"@en ,
+                         "Säte (stad)"@sv ;
+    solid-memo:back "Geneva"@en ,
+                    "Genève"@sv ;
+    solid-memo:backNote "A UN specialized agency."@en ,
+                        "Ett av FN:s fackorgan."@sv .
+
+<#imf>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "International Monetary Fund (IMF)"@en ,
+                     "Internationella valutafonden (IMF)"@sv ;
+    solid-memo:frontNote "Seat (city)"@en ,
+                         "Säte (stad)"@sv ;
+    solid-memo:back "Washington, D.C."@en ,
+                    "Washington, D.C."@sv ;
+    solid-memo:backNote "A UN specialized agency."@en ,
+                        "Ett av FN:s fackorgan."@sv .
+
+<#imo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "International Maritime Organization (IMO)"@en ,
+                     "Internationella sjöfartsorganisationen (IMO)"@sv ;
+    solid-memo:frontNote "Seat (city)"@en ,
+                         "Säte (stad)"@sv ;
+    solid-memo:back "London"@en ,
+                    "London"@sv ;
+    solid-memo:backNote "A UN specialized agency."@en ,
+                        "Ett av FN:s fackorgan."@sv .
+
+<#itu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "International Telecommunication Union (ITU)"@en ,
+                     "Internationella teleunionen (ITU)"@sv ;
+    solid-memo:frontNote "Seat (city)"@en ,
+                         "Säte (stad)"@sv ;
+    solid-memo:back "Geneva"@en ,
+                    "Genève"@sv ;
+    solid-memo:backNote "A UN specialized agency."@en ,
+                        "Ett av FN:s fackorgan."@sv .
+
+<#unesco>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "United Nations Educational, Scientific and Cultural Organization (UNESCO)"@en ,
+                     "FN:s organisation för utbildning, vetenskap och kultur (Unesco)"@sv ;
+    solid-memo:frontNote "Seat (city)"@en ,
+                         "Säte (stad)"@sv ;
+    solid-memo:back "Paris"@en ,
+                    "Paris"@sv ;
+    solid-memo:backNote "A UN specialized agency."@en ,
+                        "Ett av FN:s fackorgan."@sv .
+
+<#unido>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "United Nations Industrial Development Organization (UNIDO)"@en ,
+                     "FN:s organisation för industriell utveckling (UNIDO)"@sv ;
+    solid-memo:frontNote "Seat (city)"@en ,
+                         "Säte (stad)"@sv ;
+    solid-memo:back "Vienna"@en ,
+                    "Wien"@sv ;
+    solid-memo:backNote "A UN specialized agency."@en ,
+                        "Ett av FN:s fackorgan."@sv .
+
+<#un-tourism>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "World Tourism Organization (UN Tourism)"@en ,
+                     "Världsturismorganisationen (UN Tourism)"@sv ;
+    solid-memo:frontNote "Seat (city)"@en ,
+                         "Säte (stad)"@sv ;
+    solid-memo:back "Madrid"@en ,
+                    "Madrid"@sv ;
+    solid-memo:backNote "A UN specialized agency. Formerly abbreviated UNWTO."@en ,
+                        "Ett av FN:s fackorgan. Förkortades tidigare UNWTO."@sv .
+
+<#upu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Universal Postal Union (UPU)"@en ,
+                     "Världspostföreningen (UPU)"@sv ;
+    solid-memo:frontNote "Seat (city)"@en ,
+                         "Säte (stad)"@sv ;
+    solid-memo:back "Bern"@en ,
+                    "Bern"@sv ;
+    solid-memo:backNote "A UN specialized agency."@en ,
+                        "Ett av FN:s fackorgan."@sv .
+
+<#world-bank-group>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "World Bank Group"@en ,
+                     "Världsbanksgruppen"@sv ;
+    solid-memo:frontNote "Seat (city)"@en ,
+                         "Säte (stad)"@sv ;
+    solid-memo:back "Washington, D.C."@en ,
+                    "Washington, D.C."@sv ;
+    solid-memo:backNote "A UN specialized agency."@en ,
+                        "Ett av FN:s fackorgan."@sv .
+
+<#who>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "World Health Organization (WHO)"@en ,
+                     "Världshälsoorganisationen (WHO)"@sv ;
+    solid-memo:frontNote "Seat (city)"@en ,
+                         "Säte (stad)"@sv ;
+    solid-memo:back "Geneva"@en ,
+                    "Genève"@sv ;
+    solid-memo:backNote "A UN specialized agency."@en ,
+                        "Ett av FN:s fackorgan."@sv .
+
+<#wipo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "World Intellectual Property Organization (WIPO)"@en ,
+                     "Världsorganisationen för den intellektuella äganderätten (WIPO)"@sv ;
+    solid-memo:frontNote "Seat (city)"@en ,
+                         "Säte (stad)"@sv ;
+    solid-memo:back "Geneva"@en ,
+                    "Genève"@sv ;
+    solid-memo:backNote "A UN specialized agency."@en ,
+                        "Ett av FN:s fackorgan."@sv .
+
+<#wmo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "World Meteorological Organization (WMO)"@en ,
+                     "Meteorologiska världsorganisationen (WMO)"@sv ;
+    solid-memo:frontNote "Seat (city)"@en ,
+                         "Säte (stad)"@sv ;
+    solid-memo:back "Geneva"@en ,
+                    "Genève"@sv ;
+    solid-memo:backNote "A UN specialized agency."@en ,
+                        "Ett av FN:s fackorgan."@sv .
+
+<#undp>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "United Nations Development Programme (UNDP)"@en ,
+                     "FN:s utvecklingsprogram (UNDP)"@sv ;
+    solid-memo:frontNote "Seat (city)"@en ,
+                         "Säte (stad)"@sv ;
+    solid-memo:back "New York"@en ,
+                    "New York"@sv ;
+    solid-memo:backNote "A UN programme."@en ,
+                        "Ett av FN:s program."@sv .
+
+<#unep>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "United Nations Environment Programme (UNEP)"@en ,
+                     "FN:s miljöprogram (Unep)"@sv ;
+    solid-memo:frontNote "Seat (city)"@en ,
+                         "Säte (stad)"@sv ;
+    solid-memo:back "Nairobi"@en ,
+                    "Nairobi"@sv ;
+    solid-memo:backNote "A UN programme."@en ,
+                        "Ett av FN:s program."@sv .
+
+<#unfpa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "United Nations Population Fund (UNFPA)"@en ,
+                     "FN:s befolkningsfond (UNFPA)"@sv ;
+    solid-memo:frontNote "Seat (city)"@en ,
+                         "Säte (stad)"@sv ;
+    solid-memo:back "New York"@en ,
+                    "New York"@sv ;
+    solid-memo:backNote "A UN fund; in 2023 it began a plan to move some headquarters functions to Nairobi."@en ,
+                        "En av FN:s fonder; 2023 inledde den en plan för att flytta vissa huvudkontorsfunktioner till Nairobi."@sv .
+
+<#un-habitat>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "United Nations Human Settlements Programme (UN-Habitat)"@en ,
+                     "FN:s boende- och bosättningsorgan (UN-Habitat)"@sv ;
+    solid-memo:frontNote "Seat (city)"@en ,
+                         "Säte (stad)"@sv ;
+    solid-memo:back "Nairobi"@en ,
+                    "Nairobi"@sv ;
+    solid-memo:backNote "A UN programme."@en ,
+                        "Ett av FN:s program."@sv .
+
+<#unicef>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "United Nations Children's Fund (UNICEF)"@en ,
+                     "FN:s barnfond (Unicef)"@sv ;
+    solid-memo:frontNote "Seat (city)"@en ,
+                         "Säte (stad)"@sv ;
+    solid-memo:back "New York"@en ,
+                    "New York"@sv ;
+    solid-memo:backNote "A UN fund."@en ,
+                        "En av FN:s fonder."@sv .
+
+<#wfp>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "World Food Programme (WFP)"@en ,
+                     "Världslivsmedelsprogrammet (WFP)"@sv ;
+    solid-memo:frontNote "Seat (city)"@en ,
+                         "Säte (stad)"@sv ;
+    solid-memo:back "Rome"@en ,
+                    "Rom"@sv ;
+    solid-memo:backNote "A UN programme."@en ,
+                        "Ett av FN:s program."@sv .
+
+<#unhcr>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Office of the United Nations High Commissioner for Refugees (UNHCR)"@en ,
+                     "FN:s flyktingkommissariat (UNHCR)"@sv ;
+    solid-memo:frontNote "Seat (city)"@en ,
+                         "Säte (stad)"@sv ;
+    solid-memo:back "Geneva"@en ,
+                    "Genève"@sv ;
+    solid-memo:backNote "The UN Refugee Agency."@en ,
+                        "FN:s flyktingorgan."@sv .
+
+<#iaea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "International Atomic Energy Agency (IAEA)"@en ,
+                     "Internationella atomenergiorganet (IAEA)"@sv ;
+    solid-memo:frontNote "Seat (city)"@en ,
+                         "Säte (stad)"@sv ;
+    solid-memo:back "Vienna"@en ,
+                    "Wien"@sv ;
+    solid-memo:backNote "A related organization of the UN system."@en ,
+                        "En organisation med anknytning till FN-systemet."@sv .
+
+<#wto>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "World Trade Organization (WTO)"@en ,
+                     "Världshandelsorganisationen (WTO)"@sv ;
+    solid-memo:frontNote "Seat (city)"@en ,
+                         "Säte (stad)"@sv ;
+    solid-memo:back "Geneva"@en ,
+                    "Genève"@sv ;
+    solid-memo:backNote "A related organization of the UN system."@en ,
+                        "En organisation med anknytning till FN-systemet."@sv .
+
+<#opcw>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Organisation for the Prohibition of Chemical Weapons (OPCW)"@en ,
+                     "Organisationen för förbud mot kemiska vapen (OPCW)"@sv ;
+    solid-memo:frontNote "Seat (city)"@en ,
+                         "Säte (stad)"@sv ;
+    solid-memo:back "The Hague"@en ,
+                    "Haag"@sv ;
+    solid-memo:backNote "A related organization of the UN system."@en ,
+                        "En organisation med anknytning till FN-systemet."@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

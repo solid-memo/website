@@ -1,0 +1,1331 @@
+@base <https://solid-memo.com/decks/nobel-prize-in-chemistry/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Nobel Prize in Chemistry"@en ,
+                  "Nobelpriset i kemi"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "Every Nobel Prize in Chemistry from 1901 to 2025, one card per prize year: 117 cards with the year on the front and the laureate or laureates on the back, with a short note on what the prize was for. Years with no award are left out; the deck ends with the 2025 prize, as the 2026 prize had not been announced when the deck was made on 4 October 2026. From the Nobel Prize API and Wikidata, checked against NobelPrize.org. Not affiliated with or endorsed by the Nobel Foundation or the Royal Swedish Academy of Sciences."@en ,
+                        "Varje nobelpris i kemi från 1901 till 2025, ett kort per prisår: 117 kort med året på framsidan och pristagaren eller pristagarna på baksidan, med en kort anteckning om vad priset gavs för. År då priset inte delades ut är utelämnade; kortleken slutar med 2025 års pris, eftersom 2026 års pris inte var tillkännagivet när kortleken gjordes den 4 oktober 2026. Från Nobelprisets API och Wikidata, kontrollerat mot NobelPrize.org. Inte knuten till eller godkänd av Nobelstiftelsen eller Kungl. Vetenskapsakademien."@sv ;
+    prov:wasDerivedFrom <https://api.nobelprize.org/2.1/> ,
+                        <https://www.wikidata.org/wiki/Q44585> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:chemistry ,
+               topic:history ;
+    dcat:keyword "Nobel Prize in Chemistry"@en ,
+                 "Nobel laureates"@en ,
+                 "chemistry"@en ,
+                 "history of science"@en ,
+                 "Nobelpriset i kemi"@sv ,
+                 "nobelpristagare"@sv ,
+                 "kemi"@sv ,
+                 "vetenskapshistoria"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#nobel-prize-in-chemistry> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#nobel-prize-in-chemistry> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://api.nobelprize.org/2.1/> ,
+              <https://www.wikidata.org/wiki/Q44585> ,
+              <https://www.nobelprize.org/prizes/lists/all-nobel-prizes-in-chemistry/> ,
+              <https://sv.wikipedia.org/wiki/Nobelpriset_i_kemi> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Prizes and selection. On 2026-10-04 the Nobel Prize API was queried for all Nobel Prizes in Chemistry (nobelPrizeCategory=che, sorted by year; see Queries) and for all chemistry laureates. It returned 125 prize years, 1901–2025, and 198 laureates (two of them with two chemistry prizes, so 200 laureate-years). Eight years have no laureates: 1916, 1917, 1919, 1924, 1933, 1940, 1941 and 1942; NobelPrize.org's summary page for each of them says \"No Nobel Prize was awarded this year\". They are left out. Each of the other 117 years became one card, with the year (the API's awardYear, the year the prize is for) on the front, tagged zxx as a number in no language."@en ,
+                 "Back: English. The laureates of each year, in the order the API lists them, joined with \", \" and \" and \". The English names are the API's knownName.en, the names under which the Nobel Foundation lists the laureates (titles such as Sir and Lord included: Sir William Ramsay, Lord Todd), unchanged except in two places: the API's \"Aleksey Yekimov \" has a trailing space, removed; and \"Jaroslav Heyrovsky\" is written \"Jaroslav Heyrovský\", his Czech name and Wikidata's English label (as the peace deck restored the accents of María Corina Machado and Óscar Arias Sánchez)."@en ,
+                 "Back: Swedish. The same laureates joined with \", \" and \" och \". Each Swedish name is the API's knownName.se (from the laureates endpoint, see Queries; the nobelPrizes endpoint has English names only) unless Swedish has an established form that differs, taken from Wikidata's Swedish label (query 2) and confirmed by the Swedish Wikipedia's table of laureates (its link targets): Nikolaj Semjonov (API \"Nikolaj Semjenov\"), Ilya Prigogine (API \"Ilja Prigozjin\", a transliteration from Russian of the name of a Belgian chemist, who wrote it Prigogine) and Jaroslav Heyrovský (API \"Jaroslav Heyrovsky\"). Every other Swedish name is the API's, which for these laureates is the same as the English name."@en ,
+                 "Notes. Every card has a backNote saying briefly what the prize was for, written in the deck's own words from the API's English motivation (motivation.en) and, for the Swedish note, the API's Swedish motivation (motivation.se) where it is given and correct; the notes shorten the motivations, sometimes keeping their wording (for example the Swedish notes for 1987 and 2013); the API is CC0, so this needs no attribution. Where the laureates of one year were cited for different work, the note names each (for example 1912: \"Grignard: … Sabatier: …\"). Four notes add a fact about another Nobel Prize, each from the API's laureate records and Wikidata's P166: Marie Curie's earlier Physics Prize (1911), Linus Pauling's Peace Prize (1954), and Frederick Sanger's and K. Barry Sharpless's second chemistry prizes (1958/1980, 2001/2022). The API has no Swedish motivation for 2021 and a wrong one for 1958 (see Quality control); the Swedish note for 2021 was translated for this deck, its term confirmed by the Swedish press release on NobelPrize.org, and for 1958 it was translated from the English motivation. Swedish vitamin names follow the form \"C-vitamin\" throughout."@en ,
+                 "Second source for every laureate. Wikidata was queried (query 1) for every item with P166 award received = Q44585 (Nobel Prize in Chemistry) and the year of its P585 point in time qualifier. It returned 200 laureate-years for 198 items. All 198 laureates in the API were matched by the Wikidata id the API itself gives (laureate.wikidata.id), and every one has Q44585 with exactly the API's year or years; Wikidata names no holder of the prize that the API does not."@en ,
+                 "Third source. NobelPrize.org's summary page for each year 1901–2025 was fetched (one request per second, script fetch_summary.py) and compared with the cards: every laureate's name (the API's knownName or fullName) appears on that year's page, the eight years without an award say \"No Nobel Prize was awarded this year\", and the nine prizes whose award decision the API dates to the following year (1914, 1918, 1920, 1921, 1925, 1927, 1938, 1943 and 1944) each say the laureate \"received his Nobel Prize one year later\". NobelPrize.org is copyrighted and used for verification only."@en ,
+                 "Machine checks. Every card carries Wikidata checks run by the builder against live Wikidata, 548 in all: for every laureate, P166 includes Q44585; the English and the Swedish name on the card is a Wikidata label or alias in that language, or the language-independent \"mul\" label or alias, where Wikidata has that form (each card's Wikidata evidence says which: 20 names on 14 cards are only mul forms, Marie Curie having no English or Swedish label at all); and Q7186 (Marie Curie) P166 Q38104 and Q48983 (Linus Pauling) P166 Q35637 for the notes. The checks read only truthy property values and cannot see the P585 year qualifier, so the link between year and laureate — the core fact of each card — is verified by query 1 (re-run on 2026-10-04 with the query \"P166 years\" in Queries: every card's P166-checked items are exactly the items whose Q44585 statement has that card's year), not on every build; it should be re-run before release. Name checks are left out where the card's form is not on Wikidata in that language (mostly the Nobel Foundation's forms with initials or titles, such as \"Francis W. Aston\" or \"Lord Todd\"); every such name was confirmed against the API and the NobelPrize.org summary page, and the Swedish ones also against the Swedish Wikipedia table; they are listed in Quality control. The deck was then validated with the app's SHACL and DCAT-AP validators (node scripts/validate_sources.ts nobel-prize-in-chemistry)."@en ,
+                 "Study direction. Front to back only: Frederick Sanger and K. Barry Sharpless each appear on two cards, and the backs, lists of names, are not fit to be asked in reverse."@en ,
+                 "Reproduction. The cards were generated from the saved API and Wikidata responses by a script (gen_cards.py) that applies the name decisions in steps 3 and 4 (Back: English and Back: Swedish) and no other transformation (every other name is the API's), joins the names, adds the notes (notes.py, written by hand), writes the evidence of each card from the saved responses and NobelPrize.org pages, and adds the Wikidata checks; a second script (assemble.py) wrote the dossier. The scripts (gen_cards.py, notes.py, compare.py, svlist.py, fetch_summary.py, assemble.py, runq.sh) and all raw responses are kept in a scratch directory outside the repository, so the generation step itself cannot be rerun from the repository; the queries and URLs below are enough to fetch the same data again and the rules above to rebuild the cards."@en ,
+                 "Selection: All 117 years from 1901 to 2025 in which the Nobel Prize in Chemistry was awarded, one card per year, with every laureate of that year: the complete set, nothing chosen. Left out: the eight years with no award (1916, 1917, 1919, 1924, 1933, 1940, 1941 and 1942), since a card for them would have no laureate to learn; and the 2026 prize, which NobelPrize.org says is announced on 7 October 2026, after this deck was made on 4 October 2026. The year is the prize year, not the year it was awarded: the nine prizes reserved and awarded the following year (1914, 1918, 1920, 1921, 1925, 1927, 1938, 1943 and 1944) are on the card of the year they are for (Fritz Haber's 1918 prize, awarded in 1919, is on the card 1918). The notes say what each prize was for and, where a laureate won another Nobel Prize, which; they do not give the laureates' countries or affiliations (several laureates had more than one), and they do not mention that Richard Kuhn (1938) and Adolf Butenandt (1939) were made by the German authorities to decline their prizes and later received the diploma and medal: the API, the content source, records both prizes as received, and NobelPrize.org, which tells the story (for Kuhn), is a verification source only."@en ,
+                 "Licensing: The deck is CC0 1.0. Its content comes from two sources whose terms allow that: the Nobel Prize API, whose terms say the service is \"free to use according to the Creative Commons Zero (CC0) license\", and Wikidata, whose structured data is CC0. The selection (every prize year with an award), the laureates and their order, the English and most Swedish names, the facts in the notes and the motivations the notes paraphrase come from the API, cross-checked with Wikidata; the three Swedish forms and one English spelling that differ from the API come from Wikidata's labels. The notes are in the deck's own words. Two sources were used for verification only and contributed nothing but confirmation: NobelPrize.org's pages (copyright Nobel Prize Outreach: \"You may not reproduce, distribute ... or otherwise use the Content without prior written permission\"), read to confirm what the open sources give — the evidence quotes each year's one-sentence award statement from that year's summary page with the motivations elided, and the title and five-word motivation of the 2021 Swedish press release (short quotations, to show what was checked; the same facts are CC0 from the same maker through the API, and the quotes are in the provenance report, not on the cards), but no text, selection or data field was taken, which also keeps clear of the EU sui generis database right (Directive 96/9/EC) in the site as a whole; and the Swedish Wikipedia's table of laureates (CC BY-SA 4.0), compared with the Swedish names but not copied, its selection not used (copying the table would have made the deck CC BY-SA). The API terms say that, in case of conflict, they prevail over CC0, and they add conditions for applications: not to alter the data or mislead users — the deck changes the API's names in five documented places only (in English a trailing space removed and an accent restored; in Swedish three established forms of names: Semjonov, Prigogine and Heyrovský), and its notes summarise the official motivations without changing their meaning — and to credit the API as the data source, which the deck does. They also say applications may not use Nobel Prize Outreach's name or trademarks \"in their titles or logos, or in any way that implies endorsement\", and NobelPrize.org's terms of use say \"you may not use the Nobel Foundation trademarks without prior written permission from the Nobel Foundation\". The deck's title, \"Nobel Prize in Chemistry\" / \"Nobelpriset i kemi\", uses the prize's name only to say what the deck is about (descriptive use: there is no other way to name the subject), with no logo, medal or other Nobel graphics, and its description says it is not affiliated with or endorsed by the Nobel Foundation or the Royal Swedish Academy of Sciences. As for the literature and peace decks, whether that satisfies the API terms' \"titles\" clause is an open question; the fallback is a title without the prize's name, such as \"Chemistry laureates 1901–2025\" / \"Kemipristagare 1901–2025\"."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Completeness and correctness against the sources; agreement between the Nobel Prize API, Wikidata, NobelPrize.org and the Swedish Wikipedia; Wikidata machine checks"@en ;
+    rdfs:comment "Scope: All 117 cards."@en ,
+                 "Outcome: The API's 125 prize years (117 with an award, 8 without) and 198 laureates (200 laureate-years) were matched one by one against Wikidata's P166 Q44585 statements with their P585 years and against NobelPrize.org's summary page for every year. The laureates and years agree in all three, with no exception; the eight years without an award and the nine prizes awarded a year later agree between the API and NobelPrize.org. All 548 Wikidata checks passed in the build (2026-10-04). No review round has been run yet. The P166 checks confirm that each laureate received the prize but cannot see the year; the year of each card rests on the API, NobelPrize.org and query 1 (the P585 years), as method step 8 (Machine checks) says."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 117 cards, the sources and the method."@en ,
+                 "Outcome: The reviewer re-verified all 117 cards against the Nobel Prize API, Wikidata (P166 with P585) and NobelPrize.org, fetched independently, and found no factual error on any card; the documented name changes, the nine reserved prizes, the eight years without an award and the 2026 cut-off were confirmed. One documentation error (which API endpoint gives the Swedish names) was fixed; the suggestion on year-blind P166 checks was answered by re-running the year check and recording it."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 117 cards, the title, description and keywords, in both languages."@en ,
+                 "Outcome: Language tags are correct throughout (zxx fronts, en and sv backs and notes, no untagged text); Swedish names and terms follow the API's Swedish motivations, Wikidata and established forms. No errors or warnings; of three suggestions, two Swedish/English note wordings were applied and the capitalisation of Sir/Lord/Jr. in Swedish was kept, as a library-wide question."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 117 cards, the sources, licence evidence, method, queries and licensing."@en ,
+                 "Outcome: Licensing found sound: both content sources are CC0, every licence quote verbatim, nothing from the two verification sources on the cards, and every quoted API motivation, NobelPrize.org sentence and Swedish Wikipedia row confirmed. One error: the Wikidata evidence called 20 names on 14 cards \"en/sv label or alias\" although Wikidata has them only as language-independent (mul) labels or aliases. Fixed by restating every Wikidata name in the evidence by its exact kind (label, alias, mul label or mul alias), on all cards with name checks. The endpoint suggestion was the same as round 1's and is fixed; the remaining \"authoring agent\" wording in the method and licensing was replaced."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: All 117 cards re-compared by script with the Nobel Prize API and Wikidata (fetched 2026-10-04), NobelPrize.org summary pages for a sample of cards, the 2026 announcement date, the rounds 1–3 fixes, description, keywords, topics, method and licensing."@en ,
+                 "Outcome: No errors or warnings: every back, note, P166 and label check, and every quoted evidence string matched the live sources, the 2026 cut-off holds (chemistry prize announced 7 October 2026), and the fixes of rounds 1–3 are present. Two optional wording suggestions, both confirmed and applied: the Swedish description now lower-cases \"nobelpris\" used as a common noun, and method step 5 no longer claims that the notes never quote the motivations."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: All 117 cards against the live Nobel Prize API (fetched 2026-10-04): backs, name order, notes against the English and (sampled) Swedish motivations, Swedish language and name forms, language tags, description, keywords, study direction, method and licensing, and the round-4 fixes."@en ,
+                 "Outcome: All 117 cards match the API apart from the documented name changes; the 2026 cut-off holds and the round-4 fixes are present. One warning, confirmed and fixed: the licensing text miscounted the departures from the API's names. One optional suggestion, applied: the 1957 note now gives Lord Todd's personal name and when he took the title."@en .
+
+<https://api.nobelprize.org/2.1/>
+    dcterms:title "Nobel Prize API 2.1 (api.nobelprize.org): Nobel Prizes in Chemistry and chemistry laureates (nobelPrizes and laureates endpoints)" ;
+    dcterms:creator "Nobel Prize Outreach" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "Every API response's meta block links the terms (\"terms\": \"https://www.nobelprize.org/about/terms-of-use-for-api-nobelprize-org-and-data-nobelprize-org/\", \"license\": \"…#licence\"), which say: \"The Services are free to use according to the Creative Commons Zero (CC0) license. In case of conflicting terms or other inconsistencies, these Terms shall prevail.\" They add: \"Applications that use the Services should not deliberately alter or censor the data, or deliberately mislead the end users\" and \"Applications and other products and services may not use Nobel Prize Outreach’s name, logos, or other trademarks in their titles or logos, or in any way that implies endorsement, sponsorship, or false association with Nobel Prize Outreach or any other association within the Nobel Foundation’s sphere. However, you are encouraged to cite the Services as the data source for your application.\""@en .
+
+<https://www.wikidata.org/wiki/Q44585>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing: \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://www.nobelprize.org/prizes/lists/all-nobel-prizes-in-chemistry/>
+    dcterms:title "NobelPrize.org: the summary page of every Nobel Prize in Chemistry year, the 2026 announcement dates and the Swedish press release of 2021" ;
+    dcterms:creator "Nobel Prize Outreach" ;
+    rdfs:comment "https://www.nobelprize.org/about/terms-of-use/: \"Everything, including but not limited to the articles, texts, photographs, images, data, files, audio and video clips, illustrations, designs, educational games and documentation in whole or in part (the “Content”) which appears on the Site is either proprietary to Nobel Prize Outreach or used in accordance with applicable law or third party consents. You may not reproduce, distribute, display, transmit, modify, perform, adapt, generate derivative works or otherwise use the Content without prior written permission […]\" (the sentence goes on to list exceptions for press use, legislative exemptions and educators; the deck relies on none of them); and \"you may not use the Nobel Foundation trademarks without prior written permission from the Nobel Foundation\"; the site speaks of \"the Nobel Prize®\"; every page ends \"Copyright © Nobel Prize Outreach 2026\"."@en .
+
+<https://sv.wikipedia.org/wiki/Nobelpriset_i_kemi>
+    dcterms:title "Wikipedia på svenska: Nobelpriset i kemi (the table of laureates)" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "The page footer: \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported. För bilder, se respektive bildsida (klicka på bilden). Se vidare Wikipedia:Upphovsrätt och användarvillkor.\""@en .
+
+<#1901-van-t-hoff>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1901"@zxx ;
+    solid-memo:back "Jacobus H. van 't Hoff"@en ,
+                    "Jacobus H. van 't Hoff"@sv ;
+    solid-memo:backNote "The laws of chemical dynamics and of osmotic pressure in solutions."@en ,
+                        "Lagarna för kemisk dynamik och för osmotiskt tryck i lösningar."@sv .
+
+<#1902-fischer>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1902"@zxx ;
+    solid-memo:back "Emil Fischer"@en ,
+                    "Emil Fischer"@sv ;
+    solid-memo:backNote "Syntheses of sugars and purines."@en ,
+                        "Synteser av sockerarter och puriner."@sv .
+
+<#1903-arrhenius>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1903"@zxx ;
+    solid-memo:back "Svante Arrhenius"@en ,
+                    "Svante Arrhenius"@sv ;
+    solid-memo:backNote "The theory of electrolytic dissociation."@en ,
+                        "Teorin om elektrolytisk dissociation."@sv .
+
+<#1904-ramsay>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1904"@zxx ;
+    solid-memo:back "Sir William Ramsay"@en ,
+                    "Sir William Ramsay"@sv ;
+    solid-memo:backNote "Discovering the inert gases of the air and placing them in the periodic table."@en ,
+                        "Upptäckten av luftens ädelgaser och deras plats i det periodiska systemet."@sv .
+
+<#1905-baeyer>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1905"@zxx ;
+    solid-memo:back "Adolf von Baeyer"@en ,
+                    "Adolf von Baeyer"@sv ;
+    solid-memo:backNote "Work on organic dyes and hydroaromatic compounds."@en ,
+                        "Arbeten om organiska färgämnen och hydroaromatiska föreningar."@sv .
+
+<#1906-moissan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1906"@zxx ;
+    solid-memo:back "Henri Moissan"@en ,
+                    "Henri Moissan"@sv ;
+    solid-memo:backNote "Isolating the element fluorine, and the electric furnace named after him."@en ,
+                        "Isoleringen av grundämnet fluor och den elektriska ugn som bär hans namn."@sv .
+
+<#1907-buchner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1907"@zxx ;
+    solid-memo:back "Eduard Buchner"@en ,
+                    "Eduard Buchner"@sv ;
+    solid-memo:backNote "Biochemical research and the discovery of cell-free fermentation."@en ,
+                        "Biokemisk forskning och upptäckten av cellfri jäsning."@sv .
+
+<#1908-rutherford>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1908"@zxx ;
+    solid-memo:back "Ernest Rutherford"@en ,
+                    "Ernest Rutherford"@sv ;
+    solid-memo:backNote "The disintegration of the elements and the chemistry of radioactive substances."@en ,
+                        "Grundämnenas sönderfall och de radioaktiva ämnenas kemi."@sv .
+
+<#1909-ostwald>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1909"@zxx ;
+    solid-memo:back "Wilhelm Ostwald"@en ,
+                    "Wilhelm Ostwald"@sv ;
+    solid-memo:backNote "Catalysis, chemical equilibria and reaction rates."@en ,
+                        "Katalys, kemisk jämvikt och reaktionshastigheter."@sv .
+
+<#1910-wallach>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1910"@zxx ;
+    solid-memo:back "Otto Wallach"@en ,
+                    "Otto Wallach"@sv ;
+    solid-memo:backNote "Pioneering work on alicyclic compounds."@en ,
+                        "Banbrytande arbeten om alicykliska föreningar."@sv .
+
+<#1911-curie>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1911"@zxx ;
+    solid-memo:back "Marie Curie"@en ,
+                    "Marie Curie"@sv ;
+    solid-memo:backNote "Discovering radium and polonium and isolating radium. Her second Nobel Prize, after the 1903 Physics Prize."@en ,
+                        "Upptäckten av radium och polonium och isoleringen av radium. Hennes andra nobelpris, efter fysikpriset 1903."@sv .
+
+<#1912-grignard-sabatier>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1912"@zxx ;
+    solid-memo:back "Victor Grignard and Paul Sabatier"@en ,
+                    "Victor Grignard och Paul Sabatier"@sv ;
+    solid-memo:backNote "Grignard: the Grignard reagent. Sabatier: hydrogenating organic compounds with finely divided metals."@en ,
+                        "Grignard: Grignardreagens. Sabatier: hydrering av organiska föreningar med finfördelade metaller."@sv .
+
+<#1913-werner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1913"@zxx ;
+    solid-memo:back "Alfred Werner"@en ,
+                    "Alfred Werner"@sv ;
+    solid-memo:backNote "How atoms are linked in molecules, especially in inorganic chemistry."@en ,
+                        "Hur atomerna är bundna i molekyler, särskilt inom oorganisk kemi."@sv .
+
+<#1914-richards>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1914"@zxx ;
+    solid-memo:back "Theodore W. Richards"@en ,
+                    "Theodore W. Richards"@sv ;
+    solid-memo:backNote "Accurate atomic weights of a large number of elements."@en ,
+                        "Noggranna atomvikter för ett stort antal grundämnen."@sv .
+
+<#1915-willstatter>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1915"@zxx ;
+    solid-memo:back "Richard Willstätter"@en ,
+                    "Richard Willstätter"@sv ;
+    solid-memo:backNote "Plant pigments, especially chlorophyll."@en ,
+                        "Växternas färgämnen, särskilt klorofyll."@sv .
+
+<#1918-haber>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1918"@zxx ;
+    solid-memo:back "Fritz Haber"@en ,
+                    "Fritz Haber"@sv ;
+    solid-memo:backNote "Synthesising ammonia from its elements."@en ,
+                        "Syntesen av ammoniak ur dess grundämnen."@sv .
+
+<#1920-nernst>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1920"@zxx ;
+    solid-memo:back "Walther Nernst"@en ,
+                    "Walther Nernst"@sv ;
+    solid-memo:backNote "Work in thermochemistry."@en ,
+                        "Arbeten inom termokemi."@sv .
+
+<#1921-soddy>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1921"@zxx ;
+    solid-memo:back "Frederick Soddy"@en ,
+                    "Frederick Soddy"@sv ;
+    solid-memo:backNote "The chemistry of radioactive substances and the origin and nature of isotopes."@en ,
+                        "De radioaktiva ämnenas kemi och isotopernas ursprung och natur."@sv .
+
+<#1922-aston>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1922"@zxx ;
+    solid-memo:back "Francis W. Aston"@en ,
+                    "Francis W. Aston"@sv ;
+    solid-memo:backNote "Finding isotopes of many non-radioactive elements with his mass spectrograph, and the whole-number rule."@en ,
+                        "Isotoper hos många icke-radioaktiva grundämnen, funna med hans masspektrograf, och heltalslagen."@sv .
+
+<#1923-pregl>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1923"@zxx ;
+    solid-memo:back "Fritz Pregl"@en ,
+                    "Fritz Pregl"@sv ;
+    solid-memo:backNote "A method of micro-analysis of organic substances."@en ,
+                        "En metod för mikroanalys av organiska ämnen."@sv .
+
+<#1925-zsigmondy>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1925"@zxx ;
+    solid-memo:back "Richard Zsigmondy"@en ,
+                    "Richard Zsigmondy"@sv ;
+    solid-memo:backNote "Showing that colloid solutions are heterogeneous, with methods basic to colloid chemistry."@en ,
+                        "Påvisandet av att kolloida lösningar är heterogena, med metoder som blev grundläggande för kolloidkemin."@sv .
+
+<#1926-svedberg>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1926"@zxx ;
+    solid-memo:back "The Svedberg"@en ,
+                    "The Svedberg"@sv ;
+    solid-memo:backNote "Work on disperse systems."@en ,
+                        "Arbeten om dispersa system."@sv .
+
+<#1927-wieland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1927"@zxx ;
+    solid-memo:back "Heinrich Wieland"@en ,
+                    "Heinrich Wieland"@sv ;
+    solid-memo:backNote "The structure of the bile acids and related substances."@en ,
+                        "Gallsyrornas och närbesläktade ämnens struktur."@sv .
+
+<#1928-windaus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1928"@zxx ;
+    solid-memo:back "Adolf Windaus"@en ,
+                    "Adolf Windaus"@sv ;
+    solid-memo:backNote "The structure of the sterols and their connection with the vitamins."@en ,
+                        "Sterolernas struktur och deras samband med vitaminerna."@sv .
+
+<#1929-harden-von-euler-chelpin>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1929"@zxx ;
+    solid-memo:back "Arthur Harden and Hans von Euler-Chelpin"@en ,
+                    "Arthur Harden och Hans von Euler-Chelpin"@sv ;
+    solid-memo:backNote "The fermentation of sugar and the enzymes at work in it."@en ,
+                        "Sockerjäsningen och de enzymer som verkar i den."@sv .
+
+<#1930-fischer>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1930"@zxx ;
+    solid-memo:back "Hans Fischer"@en ,
+                    "Hans Fischer"@sv ;
+    solid-memo:backNote "The structure of haemin and chlorophyll, and synthesising haemin."@en ,
+                        "Heminets och klorofyllets struktur, och syntesen av hemin."@sv .
+
+<#1931-bosch-bergius>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1931"@zxx ;
+    solid-memo:back "Carl Bosch and Friedrich Bergius"@en ,
+                    "Carl Bosch och Friedrich Bergius"@sv ;
+    solid-memo:backNote "Inventing and developing high-pressure methods in chemistry."@en ,
+                        "Uppfinningen och utvecklingen av kemiska högtrycksmetoder."@sv .
+
+<#1932-langmuir>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1932"@zxx ;
+    solid-memo:back "Irving Langmuir"@en ,
+                    "Irving Langmuir"@sv ;
+    solid-memo:backNote "Discoveries in surface chemistry."@en ,
+                        "Upptäckter inom ytkemin."@sv .
+
+<#1934-urey>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1934"@zxx ;
+    solid-memo:back "Harold C. Urey"@en ,
+                    "Harold C. Urey"@sv ;
+    solid-memo:backNote "Discovering heavy hydrogen."@en ,
+                        "Upptäckten av tungt väte."@sv .
+
+<#1935-joliot-joliot-curie>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1935"@zxx ;
+    solid-memo:back "Frédéric Joliot and Irène Joliot-Curie"@en ,
+                    "Frédéric Joliot och Irène Joliot-Curie"@sv ;
+    solid-memo:backNote "Synthesising new radioactive elements."@en ,
+                        "Syntesen av nya radioaktiva grundämnen."@sv .
+
+<#1936-debye>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1936"@zxx ;
+    solid-memo:back "Peter Debye"@en ,
+                    "Peter Debye"@sv ;
+    solid-memo:backNote "Molecular structure, studied through dipole moments and the diffraction of X-rays and electrons in gases."@en ,
+                        "Molekylers byggnad, studerad genom dipolmoment och diffraktion av röntgenstrålar och elektroner i gaser."@sv .
+
+<#1937-haworth-karrer>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1937"@zxx ;
+    solid-memo:back "Norman Haworth and Paul Karrer"@en ,
+                    "Norman Haworth och Paul Karrer"@sv ;
+    solid-memo:backNote "Haworth: carbohydrates and vitamin C. Karrer: carotenoids, flavins and vitamins A and B2."@en ,
+                        "Haworth: kolhydrater och C-vitamin. Karrer: karotenoider, flaviner och A- och B2-vitamin."@sv .
+
+<#1938-kuhn>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1938"@zxx ;
+    solid-memo:back "Richard Kuhn"@en ,
+                    "Richard Kuhn"@sv ;
+    solid-memo:backNote "Work on carotenoids and vitamins."@en ,
+                        "Arbeten om karotenoider och vitaminer."@sv .
+
+<#1939-butenandt-ruzicka>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1939"@zxx ;
+    solid-memo:back "Adolf Butenandt and Leopold Ruzicka"@en ,
+                    "Adolf Butenandt och Leopold Ruzicka"@sv ;
+    solid-memo:backNote "Butenandt: sex hormones. Ruzicka: polymethylenes and higher terpenes."@en ,
+                        "Butenandt: könshormoner. Ruzicka: polymetylener och högre terpener."@sv .
+
+<#1943-hevesy>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1943"@zxx ;
+    solid-memo:back "George de Hevesy"@en ,
+                    "George de Hevesy"@sv ;
+    solid-memo:backNote "Using isotopes as tracers to study chemical processes."@en ,
+                        "Isotoper som spårämnen i studiet av kemiska processer."@sv .
+
+<#1944-hahn>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1944"@zxx ;
+    solid-memo:back "Otto Hahn"@en ,
+                    "Otto Hahn"@sv ;
+    solid-memo:backNote "Discovering the fission of heavy nuclei."@en ,
+                        "Upptäckten av klyvningen av tunga atomkärnor."@sv .
+
+<#1945-virtanen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1945"@zxx ;
+    solid-memo:back "Artturi Virtanen"@en ,
+                    "Artturi Virtanen"@sv ;
+    solid-memo:backNote "Agricultural and nutrition chemistry, especially a method of preserving fodder."@en ,
+                        "Jordbruks- och näringskemi, särskilt en metod för att konservera foder."@sv .
+
+<#1946-sumner-northrop-stanley>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1946"@zxx ;
+    solid-memo:back "James B. Sumner, John H. Northrop and Wendell M. Stanley"@en ,
+                    "James B. Sumner, John H. Northrop och Wendell M. Stanley"@sv ;
+    solid-memo:backNote "Sumner: discovering that enzymes can be crystallised. Northrop and Stanley: preparing enzymes and virus proteins in pure form."@en ,
+                        "Sumner: upptäckten att enzymer kan kristalliseras. Northrop och Stanley: framställning av rena enzymer och virusproteiner."@sv .
+
+<#1947-robinson>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1947"@zxx ;
+    solid-memo:back "Sir Robert Robinson"@en ,
+                    "Sir Robert Robinson"@sv ;
+    solid-memo:backNote "Plant substances of biological importance, especially the alkaloids."@en ,
+                        "Biologiskt viktiga ämnen ur växtriket, särskilt alkaloiderna."@sv .
+
+<#1948-tiselius>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1948"@zxx ;
+    solid-memo:back "Arne Tiselius"@en ,
+                    "Arne Tiselius"@sv ;
+    solid-memo:backNote "Electrophoresis and adsorption analysis, and the complex nature of the serum proteins."@en ,
+                        "Elektrofores och adsorptionsanalys, och serumproteinernas sammansatta natur."@sv .
+
+<#1949-giauque>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1949"@zxx ;
+    solid-memo:back "William F. Giauque"@en ,
+                    "William F. Giauque"@sv ;
+    solid-memo:backNote "Chemical thermodynamics, especially of substances at extremely low temperatures."@en ,
+                        "Kemisk termodynamik, särskilt ämnens beteende vid extremt låga temperaturer."@sv .
+
+<#1950-diels-alder>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1950"@zxx ;
+    solid-memo:back "Otto Diels and Kurt Alder"@en ,
+                    "Otto Diels och Kurt Alder"@sv ;
+    solid-memo:backNote "Discovering and developing the diene synthesis."@en ,
+                        "Upptäckten och utvecklingen av diensyntesen."@sv .
+
+<#1951-mcmillan-seaborg>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1951"@zxx ;
+    solid-memo:back "Edwin M. McMillan and Glenn T. Seaborg"@en ,
+                    "Edwin M. McMillan och Glenn T. Seaborg"@sv ;
+    solid-memo:backNote "Discoveries in the chemistry of the transuranium elements."@en ,
+                        "Upptäckter inom transuranernas kemi."@sv .
+
+<#1952-martin-synge>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1952"@zxx ;
+    solid-memo:back "Archer J.P. Martin and Richard L.M. Synge"@en ,
+                    "Archer J.P. Martin och Richard L.M. Synge"@sv ;
+    solid-memo:backNote "Inventing partition chromatography."@en ,
+                        "Uppfinningen av fördelningskromatografi."@sv .
+
+<#1953-staudinger>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1953"@zxx ;
+    solid-memo:back "Hermann Staudinger"@en ,
+                    "Hermann Staudinger"@sv ;
+    solid-memo:backNote "Discoveries in macromolecular chemistry."@en ,
+                        "Upptäckter inom makromolekylär kemi."@sv .
+
+<#1954-pauling>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1954"@zxx ;
+    solid-memo:back "Linus Pauling"@en ,
+                    "Linus Pauling"@sv ;
+    solid-memo:backNote "The nature of the chemical bond and the structure of complex substances. He also received the 1962 Peace Prize."@en ,
+                        "Den kemiska bindningens natur och komplicerade ämnens byggnad. Han fick även Nobels fredspris 1962."@sv .
+
+<#1955-du-vigneaud>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1955"@zxx ;
+    solid-memo:back "Vincent du Vigneaud"@en ,
+                    "Vincent du Vigneaud"@sv ;
+    solid-memo:backNote "Biochemically important sulphur compounds, especially the first synthesis of a polypeptide hormone."@en ,
+                        "Biokemiskt viktiga svavelföreningar, särskilt den första syntesen av ett polypeptidhormon."@sv .
+
+<#1956-hinshelwood-semenov>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1956"@zxx ;
+    solid-memo:back "Sir Cyril Hinshelwood and Nikolay Semenov"@en ,
+                    "Sir Cyril Hinshelwood och Nikolaj Semjonov"@sv ;
+    solid-memo:backNote "The mechanisms of chemical reactions."@en ,
+                        "Kemiska reaktioners mekanismer."@sv .
+
+<#1957-todd>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1957"@zxx ;
+    solid-memo:back "Lord Todd"@en ,
+                    "Lord Todd"@sv ;
+    solid-memo:backNote "Nucleotides and nucleotide coenzymes. Alexander Todd (Lord Todd from 1962)."@en ,
+                        "Nukleotider och nukleotidkoenzymer. Alexander Todd (lord Todd från 1962)."@sv .
+
+<#1958-sanger>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1958"@zxx ;
+    solid-memo:back "Frederick Sanger"@en ,
+                    "Frederick Sanger"@sv ;
+    solid-memo:backNote "The structure of proteins, especially insulin. The first of his two chemistry prizes (1958, 1980)."@en ,
+                        "Proteiners struktur, särskilt insulinets. Det första av hans två kemipris (1958, 1980)."@sv .
+
+<#1959-heyrovsky>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1959"@zxx ;
+    solid-memo:back "Jaroslav Heyrovský"@en ,
+                    "Jaroslav Heyrovský"@sv ;
+    solid-memo:backNote "Discovering and developing the polarographic method of analysis."@en ,
+                        "Upptäckten och utvecklingen av den polarografiska analysmetoden."@sv .
+
+<#1960-libby>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1960"@zxx ;
+    solid-memo:back "Willard F. Libby"@en ,
+                    "Willard F. Libby"@sv ;
+    solid-memo:backNote "Dating with carbon-14 in archaeology, geology, geophysics and other sciences."@en ,
+                        "Åldersbestämning med kol-14 inom arkeologi, geologi, geofysik och andra vetenskaper."@sv .
+
+<#1961-calvin>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1961"@zxx ;
+    solid-memo:back "Melvin Calvin"@en ,
+                    "Melvin Calvin"@sv ;
+    solid-memo:backNote "How plants assimilate carbon dioxide."@en ,
+                        "Växternas assimilation av koldioxid."@sv .
+
+<#1962-perutz-kendrew>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1962"@zxx ;
+    solid-memo:back "Max F. Perutz and John C. Kendrew"@en ,
+                    "Max F. Perutz och John C. Kendrew"@sv ;
+    solid-memo:backNote "The structures of globular proteins."@en ,
+                        "Globulära proteiners byggnad."@sv .
+
+<#1963-ziegler-natta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1963"@zxx ;
+    solid-memo:back "Karl Ziegler and Giulio Natta"@en ,
+                    "Karl Ziegler och Giulio Natta"@sv ;
+    solid-memo:backNote "The chemistry and technology of high polymers."@en ,
+                        "Högpolymerers kemi och teknologi."@sv .
+
+<#1964-hodgkin>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1964"@zxx ;
+    solid-memo:back "Dorothy Crowfoot Hodgkin"@en ,
+                    "Dorothy Crowfoot Hodgkin"@sv ;
+    solid-memo:backNote "Determining the structures of important biochemical substances by X-ray techniques."@en ,
+                        "Strukturbestämning av viktiga biokemiska ämnen med röntgenmetoder."@sv .
+
+<#1965-woodward>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1965"@zxx ;
+    solid-memo:back "Robert B. Woodward"@en ,
+                    "Robert B. Woodward"@sv ;
+    solid-memo:backNote "Outstanding achievements in the art of organic synthesis."@en ,
+                        "Framstående insatser inom den organiska synteskonsten."@sv .
+
+<#1966-mulliken>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1966"@zxx ;
+    solid-memo:back "Robert S. Mulliken"@en ,
+                    "Robert S. Mulliken"@sv ;
+    solid-memo:backNote "Chemical bonds and the electronic structure of molecules by the molecular orbital method."@en ,
+                        "Kemisk bindning och molekylers elektronstruktur med molekylorbitalmetoden."@sv .
+
+<#1967-eigen-norrish-porter>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1967"@zxx ;
+    solid-memo:back "Manfred Eigen, Ronald G.W. Norrish and George Porter"@en ,
+                    "Manfred Eigen, Ronald G.W. Norrish och George Porter"@sv ;
+    solid-memo:backNote "Extremely fast chemical reactions, studied with very short pulses of energy."@en ,
+                        "Ytterst snabba kemiska reaktioner, studerade med korta energipulser."@sv .
+
+<#1968-onsager>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1968"@zxx ;
+    solid-memo:back "Lars Onsager"@en ,
+                    "Lars Onsager"@sv ;
+    solid-memo:backNote "The reciprocal relations named after him, basic to the thermodynamics of irreversible processes."@en ,
+                        "De reciprocitetsrelationer som bär hans namn, grundläggande för irreversibla processers termodynamik."@sv .
+
+<#1969-barton-hassel>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1969"@zxx ;
+    solid-memo:back "Derek Barton and Odd Hassel"@en ,
+                    "Derek Barton och Odd Hassel"@sv ;
+    solid-memo:backNote "The concept of conformation and its use in chemistry."@en ,
+                        "Konformationsbegreppet och dess tillämpning inom kemin."@sv .
+
+<#1970-leloir>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1970"@zxx ;
+    solid-memo:back "Luis Leloir"@en ,
+                    "Luis Leloir"@sv ;
+    solid-memo:backNote "Sugar nucleotides and their role in the biosynthesis of carbohydrates."@en ,
+                        "Sockernukleotider och deras roll i biosyntesen av kolhydrater."@sv .
+
+<#1971-herzberg>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1971"@zxx ;
+    solid-memo:back "Gerhard Herzberg"@en ,
+                    "Gerhard Herzberg"@sv ;
+    solid-memo:backNote "The electronic structure and geometry of molecules, especially free radicals."@en ,
+                        "Molekylers elektronstruktur och geometri, särskilt fria radikaler."@sv .
+
+<#1972-anfinsen-moore-stein>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1972"@zxx ;
+    solid-memo:back "Christian Anfinsen, Stanford Moore and William H. Stein"@en ,
+                    "Christian Anfinsen, Stanford Moore och William H. Stein"@sv ;
+    solid-memo:backNote "Anfinsen: how ribonuclease's amino acid sequence relates to its active shape. Moore and Stein: how its active centre's structure relates to its catalytic activity."@en ,
+                        "Anfinsen: sambandet mellan ribonukleasets aminosyrasekvens och dess aktiva form. Moore och Stein: sambandet mellan struktur och katalytisk aktivitet i dess aktiva centrum."@sv .
+
+<#1973-fischer-wilkinson>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1973"@zxx ;
+    solid-memo:back "Ernst Otto Fischer and Geoffrey Wilkinson"@en ,
+                    "Ernst Otto Fischer och Geoffrey Wilkinson"@sv ;
+    solid-memo:backNote "The chemistry of organometallic sandwich compounds, worked out independently."@en ,
+                        "De metallorganiska sandwichföreningarnas kemi, utforskad av var och en för sig."@sv .
+
+<#1974-flory>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1974"@zxx ;
+    solid-memo:back "Paul J. Flory"@en ,
+                    "Paul J. Flory"@sv ;
+    solid-memo:backNote "The physical chemistry of macromolecules."@en ,
+                        "Makromolekylernas fysikaliska kemi."@sv .
+
+<#1975-cornforth-prelog>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1975"@zxx ;
+    solid-memo:back "John Cornforth and Vladimir Prelog"@en ,
+                    "John Cornforth och Vladimir Prelog"@sv ;
+    solid-memo:backNote "Cornforth: the stereochemistry of enzyme-catalysed reactions. Prelog: the stereochemistry of organic molecules and reactions."@en ,
+                        "Cornforth: enzymkatalyserade reaktioners stereokemi. Prelog: organiska molekylers och reaktioners stereokemi."@sv .
+
+<#1976-lipscomb>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1976"@zxx ;
+    solid-memo:back "William Lipscomb"@en ,
+                    "William Lipscomb"@sv ;
+    solid-memo:backNote "The structure of boranes and what it shows about chemical bonding."@en ,
+                        "Boranernas struktur och vad den visar om kemisk bindning."@sv .
+
+<#1977-prigogine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1977"@zxx ;
+    solid-memo:back "Ilya Prigogine"@en ,
+                    "Ilya Prigogine"@sv ;
+    solid-memo:backNote "Non-equilibrium thermodynamics, especially the theory of dissipative structures."@en ,
+                        "Icke-jämviktstermodynamik, särskilt teorin om dissipativa strukturer."@sv .
+
+<#1978-mitchell>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1978"@zxx ;
+    solid-memo:back "Peter Mitchell"@en ,
+                    "Peter Mitchell"@sv ;
+    solid-memo:backNote "Biological energy transfer: the chemiosmotic theory."@en ,
+                        "Biologisk energiöverföring: den kemiosmotiska teorin."@sv .
+
+<#1979-brown-wittig>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1979"@zxx ;
+    solid-memo:back "Herbert C. Brown and Georg Wittig"@en ,
+                    "Herbert C. Brown och Georg Wittig"@sv ;
+    solid-memo:backNote "Brown: boron compounds as reagents in organic synthesis. Wittig: phosphorus compounds as reagents in organic synthesis."@en ,
+                        "Brown: borföreningar som reagens i organisk syntes. Wittig: fosforföreningar som reagens i organisk syntes."@sv .
+
+<#1980-berg-gilbert-sanger>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1980"@zxx ;
+    solid-memo:back "Paul Berg, Walter Gilbert and Frederick Sanger"@en ,
+                    "Paul Berg, Walter Gilbert och Frederick Sanger"@sv ;
+    solid-memo:backNote "Berg: the biochemistry of nucleic acids, especially recombinant DNA. Gilbert and Sanger: determining base sequences in nucleic acids. Sanger's second chemistry prize."@en ,
+                        "Berg: nukleinsyrornas biokemi, särskilt rekombinant DNA. Gilbert och Sanger: bestämning av bassekvenser i nukleinsyror. Sangers andra kemipris."@sv .
+
+<#1981-fukui-hoffmann>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1981"@zxx ;
+    solid-memo:back "Kenichi Fukui and Roald Hoffmann"@en ,
+                    "Kenichi Fukui och Roald Hoffmann"@sv ;
+    solid-memo:backNote "Theories, developed independently, of how chemical reactions proceed."@en ,
+                        "Teorier, utvecklade var för sig, om hur kemiska reaktioner förlöper."@sv .
+
+<#1982-klug>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1982"@zxx ;
+    solid-memo:back "Aaron Klug"@en ,
+                    "Aaron Klug"@sv ;
+    solid-memo:backNote "Crystallographic electron microscopy and the structure of nucleic acid–protein complexes."@en ,
+                        "Kristallografisk elektronmikroskopi och strukturen hos komplex av nukleinsyror och proteiner."@sv .
+
+<#1983-taube>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1983"@zxx ;
+    solid-memo:back "Henry Taube"@en ,
+                    "Henry Taube"@sv ;
+    solid-memo:backNote "The mechanisms of electron-transfer reactions, especially in metal complexes."@en ,
+                        "Mekanismerna bakom elektronöverföringsreaktioner, särskilt i metallkomplex."@sv .
+
+<#1984-merrifield>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1984"@zxx ;
+    solid-memo:back "Bruce Merrifield"@en ,
+                    "Bruce Merrifield"@sv ;
+    solid-memo:backNote "A method of chemical synthesis on a solid matrix."@en ,
+                        "En metod för kemisk syntes på en fast matris."@sv .
+
+<#1985-hauptman-karle>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1985"@zxx ;
+    solid-memo:back "Herbert A. Hauptman and Jerome Karle"@en ,
+                    "Herbert A. Hauptman och Jerome Karle"@sv ;
+    solid-memo:backNote "Direct methods for determining crystal structures."@en ,
+                        "Direkta metoder för att bestämma kristallstrukturer."@sv .
+
+<#1986-herschbach-lee-polanyi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1986"@zxx ;
+    solid-memo:back "Dudley R. Herschbach, Yuan T. Lee and John C. Polanyi"@en ,
+                    "Dudley R. Herschbach, Yuan T. Lee och John C. Polanyi"@sv ;
+    solid-memo:backNote "The dynamics of elementary chemical processes."@en ,
+                        "Dynamiken i kemiska elementarprocesser."@sv .
+
+<#1987-cram-lehn-pedersen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1987"@zxx ;
+    solid-memo:back "Donald J. Cram, Jean-Marie Lehn and Charles J. Pedersen"@en ,
+                    "Donald J. Cram, Jean-Marie Lehn och Charles J. Pedersen"@sv ;
+    solid-memo:backNote "Molecules with highly selective, structure-specific interactions."@en ,
+                        "Molekyler med strukturspecifik växelverkan av hög selektivitet."@sv .
+
+<#1988-deisenhofer-huber-michel>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1988"@zxx ;
+    solid-memo:back "Johann Deisenhofer, Robert Huber and Hartmut Michel"@en ,
+                    "Johann Deisenhofer, Robert Huber och Hartmut Michel"@sv ;
+    solid-memo:backNote "The three-dimensional structure of a photosynthetic reaction centre."@en ,
+                        "Den tredimensionella strukturen hos ett fotosyntetiskt reaktionscentrum."@sv .
+
+<#1989-altman-cech>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1989"@zxx ;
+    solid-memo:back "Sidney Altman and Thomas R. Cech"@en ,
+                    "Sidney Altman och Thomas R. Cech"@sv ;
+    solid-memo:backNote "Discovering that RNA can act as a catalyst."@en ,
+                        "Upptäckten att RNA kan verka som katalysator."@sv .
+
+<#1990-corey>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1990"@zxx ;
+    solid-memo:back "Elias James Corey"@en ,
+                    "Elias James Corey"@sv ;
+    solid-memo:backNote "The theory and methodology of organic synthesis."@en ,
+                        "Den organiska syntesens teori och metodik."@sv .
+
+<#1991-ernst>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1991"@zxx ;
+    solid-memo:back "Richard R. Ernst"@en ,
+                    "Richard R. Ernst"@sv ;
+    solid-memo:backNote "Methods of high-resolution NMR spectroscopy."@en ,
+                        "Metoder för högupplösande NMR-spektroskopi."@sv .
+
+<#1992-marcus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1992"@zxx ;
+    solid-memo:back "Rudolph A. Marcus"@en ,
+                    "Rudolph A. Marcus"@sv ;
+    solid-memo:backNote "The theory of electron-transfer reactions in chemical systems."@en ,
+                        "Teorin för elektronöverföringsreaktioner i kemiska system."@sv .
+
+<#1993-mullis-smith>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1993"@zxx ;
+    solid-memo:back "Kary B. Mullis and Michael Smith"@en ,
+                    "Kary B. Mullis och Michael Smith"@sv ;
+    solid-memo:backNote "Mullis: the polymerase chain reaction (PCR). Smith: site-directed mutagenesis."@en ,
+                        "Mullis: polymeraskedjereaktionen (PCR). Smith: riktad mutagenes."@sv .
+
+<#1994-olah>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1994"@zxx ;
+    solid-memo:back "George A. Olah"@en ,
+                    "George A. Olah"@sv ;
+    solid-memo:backNote "Carbocation chemistry."@en ,
+                        "Karbokatjonkemi."@sv .
+
+<#1995-crutzen-molina-rowland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1995"@zxx ;
+    solid-memo:back "Paul J. Crutzen, Mario J. Molina and F. Sherwood Rowland"@en ,
+                    "Paul J. Crutzen, Mario J. Molina och F. Sherwood Rowland"@sv ;
+    solid-memo:backNote "Atmospheric chemistry, especially how ozone forms and breaks down."@en ,
+                        "Atmosfärskemi, särskilt hur ozon bildas och bryts ned."@sv .
+
+<#1996-curl-kroto-smalley>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1996"@zxx ;
+    solid-memo:back "Robert F. Curl Jr., Sir Harold Kroto and Richard E. Smalley"@en ,
+                    "Robert F. Curl Jr., Sir Harold Kroto och Richard E. Smalley"@sv ;
+    solid-memo:backNote "Discovering fullerenes."@en ,
+                        "Upptäckten av fullerener."@sv .
+
+<#1997-boyer-walker-skou>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1997"@zxx ;
+    solid-memo:back "Paul D. Boyer, John E. Walker and Jens C. Skou"@en ,
+                    "Paul D. Boyer, John E. Walker och Jens C. Skou"@sv ;
+    solid-memo:backNote "Boyer and Walker: the enzyme mechanism that makes ATP. Skou: the first ion-transporting enzyme found, Na⁺/K⁺-ATPase."@en ,
+                        "Boyer och Walker: den enzymatiska mekanismen bakom syntesen av ATP. Skou: det första upptäckta jontransporterande enzymet, Na⁺/K⁺-ATPas."@sv .
+
+<#1998-kohn-pople>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1998"@zxx ;
+    solid-memo:back "Walter Kohn and John Pople"@en ,
+                    "Walter Kohn och John Pople"@sv ;
+    solid-memo:backNote "Kohn: density functional theory. Pople: computational methods in quantum chemistry."@en ,
+                        "Kohn: täthetsfunktionalteorin. Pople: kvantkemiska beräkningsmetoder."@sv .
+
+<#1999-zewail>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1999"@zxx ;
+    solid-memo:back "Ahmed Zewail"@en ,
+                    "Ahmed Zewail"@sv ;
+    solid-memo:backNote "The transition states of chemical reactions, studied by femtosecond spectroscopy."@en ,
+                        "Kemiska reaktioners övergångstillstånd, studerade med femtosekundspektroskopi."@sv .
+
+<#2000-heeger-macdiarmid-shirakawa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2000"@zxx ;
+    solid-memo:back "Alan Heeger, Alan MacDiarmid and Hideki Shirakawa"@en ,
+                    "Alan Heeger, Alan MacDiarmid och Hideki Shirakawa"@sv ;
+    solid-memo:backNote "Discovering and developing conductive polymers."@en ,
+                        "Upptäckten och utvecklingen av ledande polymerer."@sv .
+
+<#2001-knowles-noyori-sharpless>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2001"@zxx ;
+    solid-memo:back "William Knowles, Ryoji Noyori and K. Barry Sharpless"@en ,
+                    "William Knowles, Ryoji Noyori och K. Barry Sharpless"@sv ;
+    solid-memo:backNote "Knowles and Noyori: chirally catalysed hydrogenation. Sharpless: chirally catalysed oxidation (the first of his two chemistry prizes)."@en ,
+                        "Knowles och Noyori: kiralt katalyserad hydrering. Sharpless: kiralt katalyserad oxidation (det första av hans två kemipris)."@sv .
+
+<#2002-fenn-tanaka-wuthrich>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2002"@zxx ;
+    solid-memo:back "John B. Fenn, Koichi Tanaka and Kurt Wüthrich"@en ,
+                    "John B. Fenn, Koichi Tanaka och Kurt Wüthrich"@sv ;
+    solid-memo:backNote "Fenn and Tanaka: soft ionisation for mass spectrometry of biological macromolecules. Wüthrich: NMR for their 3D structure in solution."@en ,
+                        "Fenn och Tanaka: mjuk jonisering för masspektrometri av biologiska makromolekyler. Wüthrich: NMR för deras tredimensionella struktur i lösning."@sv .
+
+<#2003-agre-mackinnon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2003"@zxx ;
+    solid-memo:back "Peter Agre and Roderick MacKinnon"@en ,
+                    "Peter Agre och Roderick MacKinnon"@sv ;
+    solid-memo:backNote "Agre: discovering water channels. MacKinnon: the structure and mechanism of ion channels."@en ,
+                        "Agre: upptäckten av vattenkanaler. MacKinnon: jonkanalers struktur och mekanism."@sv .
+
+<#2004-ciechanover-hershko-rose>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2004"@zxx ;
+    solid-memo:back "Aaron Ciechanover, Avram Hershko and Irwin Rose"@en ,
+                    "Aaron Ciechanover, Avram Hershko och Irwin Rose"@sv ;
+    solid-memo:backNote "How cells break down proteins marked with ubiquitin."@en ,
+                        "Hur celler bryter ned proteiner som märkts med ubiquitin."@sv .
+
+<#2005-chauvin-grubbs-schrock>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2005"@zxx ;
+    solid-memo:back "Yves Chauvin, Robert H. Grubbs and Richard R. Schrock"@en ,
+                    "Yves Chauvin, Robert H. Grubbs och Richard R. Schrock"@sv ;
+    solid-memo:backNote "The metathesis method in organic synthesis."@en ,
+                        "Metatesmetoden inom organisk syntes."@sv .
+
+<#2006-kornberg>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2006"@zxx ;
+    solid-memo:back "Roger D. Kornberg"@en ,
+                    "Roger D. Kornberg"@sv ;
+    solid-memo:backNote "The molecular basis of transcription in eukaryotic cells."@en ,
+                        "Den molekylära grunden för transkription i eukaryota celler."@sv .
+
+<#2007-ertl>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2007"@zxx ;
+    solid-memo:back "Gerhard Ertl"@en ,
+                    "Gerhard Ertl"@sv ;
+    solid-memo:backNote "Chemical processes on solid surfaces."@en ,
+                        "Kemiska processer på fasta ytor."@sv .
+
+<#2008-shimomura-chalfie-tsien>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2008"@zxx ;
+    solid-memo:back "Osamu Shimomura, Martin Chalfie and Roger Y. Tsien"@en ,
+                    "Osamu Shimomura, Martin Chalfie och Roger Y. Tsien"@sv ;
+    solid-memo:backNote "Discovering and developing the green fluorescent protein, GFP."@en ,
+                        "Upptäckten och utvecklingen av det grönt fluorescerande proteinet GFP."@sv .
+
+<#2009-ramakrishnan-steitz-yonath>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2009"@zxx ;
+    solid-memo:back "Venkatraman Ramakrishnan, Thomas A. Steitz and Ada E. Yonath"@en ,
+                    "Venkatraman Ramakrishnan, Thomas A. Steitz och Ada E. Yonath"@sv ;
+    solid-memo:backNote "The structure and function of the ribosome."@en ,
+                        "Ribosomens struktur och funktion."@sv .
+
+<#2010-heck-negishi-suzuki>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2010"@zxx ;
+    solid-memo:back "Richard F. Heck, Ei-ichi Negishi and Akira Suzuki"@en ,
+                    "Richard F. Heck, Ei-ichi Negishi och Akira Suzuki"@sv ;
+    solid-memo:backNote "Palladium-catalysed cross-coupling in organic synthesis."@en ,
+                        "Palladiumkatalyserade korskopplingar inom organisk syntes."@sv .
+
+<#2011-shechtman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2011"@zxx ;
+    solid-memo:back "Dan Shechtman"@en ,
+                    "Dan Shechtman"@sv ;
+    solid-memo:backNote "Discovering quasicrystals."@en ,
+                        "Upptäckten av kvasikristaller."@sv .
+
+<#2012-lefkowitz-kobilka>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2012"@zxx ;
+    solid-memo:back "Robert J. Lefkowitz and Brian Kobilka"@en ,
+                    "Robert J. Lefkowitz och Brian Kobilka"@sv ;
+    solid-memo:backNote "Studies of G-protein-coupled receptors."@en ,
+                        "Studier av G-proteinkopplade receptorer."@sv .
+
+<#2013-karplus-levitt-warshel>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2013"@zxx ;
+    solid-memo:back "Martin Karplus, Michael Levitt and Arieh Warshel"@en ,
+                    "Martin Karplus, Michael Levitt och Arieh Warshel"@sv ;
+    solid-memo:backNote "Multiscale models of complex chemical systems."@en ,
+                        "Flerskalemodeller för komplexa kemiska system."@sv .
+
+<#2014-betzig-hell-moerner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2014"@zxx ;
+    solid-memo:back "Eric Betzig, Stefan W. Hell and William E. Moerner"@en ,
+                    "Eric Betzig, Stefan W. Hell och William E. Moerner"@sv ;
+    solid-memo:backNote "Super-resolved fluorescence microscopy."@en ,
+                        "Superupplöst fluorescensmikroskopi."@sv .
+
+<#2015-lindahl-modrich-sancar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2015"@zxx ;
+    solid-memo:back "Tomas Lindahl, Paul Modrich and Aziz Sancar"@en ,
+                    "Tomas Lindahl, Paul Modrich och Aziz Sancar"@sv ;
+    solid-memo:backNote "Mechanistic studies of DNA repair."@en ,
+                        "Mekanistiska studier av DNA-reparation."@sv .
+
+<#2016-sauvage-stoddart-feringa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2016"@zxx ;
+    solid-memo:back "Jean-Pierre Sauvage, Sir J. Fraser Stoddart and Bernard L. Feringa"@en ,
+                    "Jean-Pierre Sauvage, Sir J. Fraser Stoddart och Bernard L. Feringa"@sv ;
+    solid-memo:backNote "Designing and synthesising molecular machines."@en ,
+                        "Design och syntes av molekylära maskiner."@sv .
+
+<#2017-dubochet-frank-henderson>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2017"@zxx ;
+    solid-memo:back "Jacques Dubochet, Joachim Frank and Richard Henderson"@en ,
+                    "Jacques Dubochet, Joachim Frank och Richard Henderson"@sv ;
+    solid-memo:backNote "Cryo-electron microscopy for high-resolution structures of biomolecules in solution."@en ,
+                        "Kryoelektronmikroskopi för högupplöst strukturbestämning av biomolekyler i lösning."@sv .
+
+<#2018-arnold-smith-winter>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2018"@zxx ;
+    solid-memo:back "Frances H. Arnold, George P. Smith and Sir Gregory P. Winter"@en ,
+                    "Frances H. Arnold, George P. Smith och Sir Gregory P. Winter"@sv ;
+    solid-memo:backNote "Arnold: the directed evolution of enzymes. Smith and Winter: phage display of peptides and antibodies."@en ,
+                        "Arnold: riktad evolution av enzymer. Smith och Winter: fagdisplay av peptider och antikroppar."@sv .
+
+<#2019-goodenough-whittingham-yoshino>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2019"@zxx ;
+    solid-memo:back "John B. Goodenough, M. Stanley Whittingham and Akira Yoshino"@en ,
+                    "John B. Goodenough, M. Stanley Whittingham och Akira Yoshino"@sv ;
+    solid-memo:backNote "Developing lithium-ion batteries."@en ,
+                        "Utvecklingen av litiumjonbatterier."@sv .
+
+<#2020-charpentier-doudna>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2020"@zxx ;
+    solid-memo:back "Emmanuelle Charpentier and Jennifer A. Doudna"@en ,
+                    "Emmanuelle Charpentier och Jennifer A. Doudna"@sv ;
+    solid-memo:backNote "Developing a method for genome editing."@en ,
+                        "Utvecklingen av en metod för genomeditering."@sv .
+
+<#2021-list-macmillan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2021"@zxx ;
+    solid-memo:back "Benjamin List and David W.C. MacMillan"@en ,
+                    "Benjamin List och David W.C. MacMillan"@sv ;
+    solid-memo:backNote "Developing asymmetric organocatalysis."@en ,
+                        "Utvecklingen av asymmetrisk organokatalys."@sv .
+
+<#2022-bertozzi-meldal-sharpless>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2022"@zxx ;
+    solid-memo:back "Carolyn Bertozzi, Morten Meldal and K. Barry Sharpless"@en ,
+                    "Carolyn Bertozzi, Morten Meldal och K. Barry Sharpless"@sv ;
+    solid-memo:backNote "Click chemistry and bioorthogonal chemistry. Sharpless's second chemistry prize."@en ,
+                        "Klickkemi och bioortogonal kemi. Sharpless andra kemipris."@sv .
+
+<#2023-bawendi-brus-yekimov>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2023"@zxx ;
+    solid-memo:back "Moungi Bawendi, Louis Brus and Aleksey Yekimov"@en ,
+                    "Moungi Bawendi, Louis Brus och Aleksej Jekimov"@sv ;
+    solid-memo:backNote "Discovering and synthesising quantum dots."@en ,
+                        "Upptäckten och syntesen av kvantprickar."@sv .
+
+<#2024-baker-hassabis-jumper>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2024"@zxx ;
+    solid-memo:back "David Baker, Demis Hassabis and John Jumper"@en ,
+                    "David Baker, Demis Hassabis och John Jumper"@sv ;
+    solid-memo:backNote "Baker: computational protein design. Hassabis and Jumper: protein structure prediction."@en ,
+                        "Baker: datorbaserad proteindesign. Hassabis och Jumper: förutsägelse av proteiners struktur."@sv .
+
+<#2025-kitagawa-robson-yaghi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2025"@zxx ;
+    solid-memo:back "Susumu Kitagawa, Richard Robson and Omar M. Yaghi"@en ,
+                    "Susumu Kitagawa, Richard Robson och Omar M. Yaghi"@sv ;
+    solid-memo:backNote "Developing metal–organic frameworks."@en ,
+                        "Utvecklingen av metallorganiska ramverk."@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

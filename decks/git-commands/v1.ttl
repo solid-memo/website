@@ -1,0 +1,676 @@
+@base <https://solid-memo.com/decks/git-commands/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Git commands"@en ,
+                  "Git-kommandon"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "56 everyday Git commands: the front describes a task in plain words in English and Swedish, the back is the command that does it, with placeholders such as <branch> or <file>. Uses the current commands Git recommends (git switch and git restore rather than git checkout, git config set), with older equivalents in notes. Every command was run with Git 2.53.0 in a test repository and checked against the official Git reference manual."@en ,
+                        "56 vardagliga Git-kommandon: på framsidan en uppgift beskriven med vanliga ord på engelska och svenska, på baksidan kommandot som utför den, med platshållare som <branch> eller <file>. Använder de aktuella kommandon som Git rekommenderar (git switch och git restore i stället för git checkout, git config set), med äldre motsvarigheter i anteckningar. Varje kommando har körts med Git 2.53.0 i ett testarkiv och kontrollerats mot Gits officiella referenshandbok."@sv ;
+    prov:wasDerivedFrom <#test-runs> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:computing ;
+    dcat:keyword "Git"@en ,
+                 "version control"@en ,
+                 "command line"@en ,
+                 "branches"@en ,
+                 "commits"@en ,
+                 "versionshantering"@sv ,
+                 "kommandorad"@sv ,
+                 "Git-kommandon"@sv ,
+                 "grenar"@sv ,
+                 "incheckningar"@sv ,
+                 "Git"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#git-commands> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#git-commands> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+<https://www.gnu.org/licenses/old-licenses/gpl-2.0.html>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <#test-runs> ,
+              <https://git-scm.com/docs> ,
+              <https://github.com/git/git/blob/master/Documentation/RelNotes/2.46.0.adoc> ,
+              <https://github.com/git/git/blob/master/po/sv.po> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ,
+                       <#review-6> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (a test run of every command in a throwaway repository, live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Candidate tasks: the authoring agent drew up a list of about 60 everyday Git tasks covering setting up a repository, staging and committing, undoing changes, branches, merging and rebasing, history, remotes, stashing and tags (see Selection). The list is the agent's own; it was not taken from any published list or cheat sheet."@en ,
+                 "Current commands: where Git now offers a dedicated command, the deck uses it: git switch for changing and creating branches and git restore for discarding and unstaging changes (both documented in the current reference manual without any experimental warning, and suggested by git status itself: \"use git restore --staged <file>... to unstage\", \"use git restore <file>... to discard changes in working directory\"), and git config set for writing configuration, because the git-config manual lists the old form git config <name> <value> under DEPRECATED MODES and recommends the subcommands (introduced in Git 2.46.0 according to its release notes). The older equivalents (git checkout -b, git checkout -, git checkout <branch>, git checkout -- <file>, git reset <file>, git config --global ...) are given in back notes and were run too."@en ,
+                 "Notation on the back: the exact command as typed, with placeholders in angle brackets (<branch>, <file>, <commit>, <url>, <name>, <tag>, <message>, <email>, <old>, <new>, <new-name>) as in the Git manual's synopses, and quotes where a value usually contains spaces (\"<name>\", \"<message>\"). Short options are used where Git has them (-c, -A, -p, -u, -m, -a, -d, -D, -f); the long form is named in a note where it is commonly seen. Remote commands that need a remote name use origin, the name git clone gives the remote, and the front says so."@en ,
+                 "Test run (the content source): the script run-git-commands.sh (reproduced verbatim under Queries) was run with bash on Linux with the installed git, version 2.53.0, on 2026-10-04. It isolates itself from the user's own Git configuration (HOME, GIT_CONFIG_GLOBAL and GIT_CONFIG_NOSYSTEM point into the scratch directory), fixes the author and committer dates so that commit ids are repeatable, uses a bare repository in the scratch directory as the remote origin and a second clone of it to simulate another person's pushes, and runs every card's command with its placeholders filled in, followed by commands that show the effect (git status --short, git log --oneline, git branch, ls, git branch -r and so on). The editor is replaced by the command true (GIT_EDITOR=true) so that git commit --amend and git revert can run unattended, and git add -p was answered with y on standard input. The full output is reproduced under Queries; every card's evidence cites its section (\"CARD <id>\") and what it showed. In quality-control round 3 the script was extended, at the end only, with a section 'CARD notes-checks' that runs, in a fresh repository with its own bare remote, the remaining forms and behaviours the notes name: git add --patch, git show without an argument, git switch --create, git branch --delete --force, a git stash pop that conflicts and a git stash apply (each followed by git stash list), git stash -u with an ignored file present, git push without and with --tags, git tag -m without -a, git fetch -p after a branch was deleted in the remote repository, git clean -f and -f -d run from a subdirectory with a nested untracked directory, and git reset --hard leaving a commit that another branch still contains. The whole script was re-run with git 2.53.0 on 2026-10-04 (python3 gc-run.py, which runs bash run-git-commands.sh with its output in run-output.txt); the output of every earlier section was byte for byte the same as in the first run, and the full new output is under Queries. In quality-control round 4 two checks were appended at the end of that section: git reset --hard with one unstaged and one staged change followed by git fsck --lost-found, and git branch -d / -D on a branch that is merged into another branch but not into HEAD. The script was re-run the same way on 2026-10-04; the output of everything before the new checks was byte for byte the same as in the round-3 run. In quality-control round 5 two more were appended: git reset --hard HEAD~1 followed by git log ORIG_HEAD and git reset --hard ORIG_HEAD, and git branch -D on a branch that HEAD never visited, recreated from the commit id that git branch -D printed. The script was re-run the same way; the output of everything before the new checks was byte for byte the same as in the round-4 run."@en ,
+                 "Cross-check (verification source): for every card the git-scm.com manual page of the command (latest version, 2.56.0, fetched as HTML and converted to text on 2026-10-04 with fetch_docs.py, reproduced under Queries) was read at the option used, and the evidence records what it documents. Behaviour seen in the test run with Git 2.53.0 and documented for 2.56.0 agreed for every card; the one version difference found (git pull with diverged branches, see Quality control) affects only a note. The manual pages were read at the cited options with the helper scripts opts.py and grep2.py (print the lines after given headings of the converted pages), the manual's version with inspect.py, the licence page and the release notes with fetch.py, and Git's Swedish translation with po.py; all five are reproduced verbatim under Queries with the command lines used. The exact command lines of the first session were not recorded; the ones given were re-run in quality-control round 3 and produced the facts cited."@en ,
+                 "Swedish text: the Swedish fronts and notes were written by the authoring agent in its own words, using the technical terms of Git's own Swedish translation (po/sv.po, checked by searching the file for the English message strings, e.g. 'Changes to be committed' -> 'Ändringar att checka in', 'Untracked files' -> 'Ospårade filer', 'Stage this hunk' -> 'Köa stycket', 'remote-tracking branch' -> 'fjärrspårande gren'). Placeholders and commands on the backs and in notes are kept in their English form because they are typed literally. After review (rounds 2 and 3) the fronts were also compared with the manual's one-line NAME descriptions and option texts and with their sv.po translations, and the fronts that followed them closely (blame, rebase, pull-rebase, log-follow, fetch-prune) were rewritten with a different structure."@en ,
+                 "Ambiguity checks: each front was written so that one command answers it: fronts name the scope (one file, the whole working tree, the current directory), the remote (origin), whether to switch, keep or discard changes, and whether the stash includes untracked files. Pairs that look alike were made distinct on purpose: git restore --staged (unstage, file stays tracked) versus git rm --cached (stop tracking); git branch -d versus -D; git reset --soft versus --hard; git stash versus git stash -u; git pull versus git pull --rebase; git diff versus git diff --staged. Where Git accepts an exact synonym (--staged/--cached, -A/--all, -u/--set-upstream, HEAD~1/HEAD^, git stash/git stash push), the deck's form is the one the manual describes first or the shorter one, and the synonym is named in the note. Because the study direction is front to back only, the builder's uniqueness check applies to the fronts, and every front is unique in both languages."@en ,
+                 "Everything was then written into this dossier, built with the builder and validated with the app's SHACL and DCAT-AP validators (scripts/validate_sources.ts git-commands). There are no Wikidata checks: no card's fact or wording is a Wikidata statement or label."@en ,
+                 "Selection: 56 tasks that come up in everyday work with Git on the command line: setting up (init, clone, user name and email), the staging and committing cycle (status, add, diff, commit, amend), undoing changes (restore, revert, reset --soft and --hard, clean), moving and removing files (rm, rm --cached, mv), branches (list, create, switch, rename, delete, merge, rebase, cherry-pick), history (log, log --oneline, log --follow, show, blame, reflog), remotes (remote, fetch, pull, push, upstream, deleting a remote branch, pruning), the stash (stash, stash -u, list, pop) and annotated tags. Left out: plumbing commands; rarely needed or advanced porcelain (bisect, worktree, submodule, sparse-checkout, interactive rebase, filter-branch, reset --mixed, git switch --detach); commands whose canonical form is still disputed or changing between Git versions; commands that duplicate a card with another spelling (git checkout for switching and restoring, which appear only as older equivalents in notes); and tasks that cannot be phrased so that only one command answers them (for example 'stage all changes in this directory', which git add . and git add -A both do in the top-level directory). Three further tasks were tested but dropped at the end to keep the deck near 50 cards, and are mentioned in notes instead: listing all branches (git branch -a), listing tags (git tag) and a dry run of git clean (-n)."@en ,
+                 "Licensing: The deck is CC0 1.0. Its only content source is the authoring agent's own test run of the commands with the installed git program, whose script and output are reproduced in this report; the script and the agent's annotations are dedicated to the public domain with the deck, while the Git messages quoted in the output remain Git's (GPL-2.0) and are reproduced only as a factual record, none of them in the deck. Which command line performs a task is a fact about the program's behaviour, and observing it copies nothing from Git's GPL-2.0 code or documentation. The fronts, notes and the selection of tasks are the authoring agent's own wording and choice. The Git reference manual on git-scm.com, the Git 2.46.0 release notes and Git's Swedish translation file are all GPL-2.0 and were used as verification sources only: they confirmed that each command does what the front says and that the Swedish technical terms are the ones Git uses, and no sentence, example or list was copied from them (single technical terms such as 'gren', 'incheckning' or 'helt sammanslagen' are ordinary Swedish vocabulary, not protected expression). After review the fronts were checked against the manual's NAME lines and option texts and against their sv.po translations, and the five that followed them closely were reworded (quality-control rounds 2 and 3). In round 5 a reviewer noted that the fronts of branch-delete and branch-force-delete resemble git branch's short option help strings ('delete fully merged branch', 'delete branch (even if not merged)') and their sv.po translations; these are minimal functional descriptions of what the option does, the fronts are full sentences of the agent's own, and they were kept. One fact in the notes is not shown by the test run: that the git config subcommands arrived in Git 2.46. It comes from the 2.46.0 release notes; a release number is a bare fact, not copyrightable, and nothing else was taken from them. Command names and option spellings are the program's interface, needed to state the fact at all. The Pro Git book (CC BY-NC-SA) and third-party cheat sheets were not consulted, nor was the git-scm.com cheat sheet (MIT): the task list and wording were written independently, and the blame front, which a reviewer found resembled both the manual and that cheat sheet, was reworded. No source's licence therefore requires attribution or share-alike, though every source is credited in the deck and this report."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Every command run in a throwaway repository with git 2.53.0 and checked against the git-scm.com reference manual (2.56.0); fronts checked for a single canonical answer; Swedish terms checked against Git's Swedish translation; builder and validator checks."@en ;
+    rdfs:comment "Scope: All 56 cards, and the older equivalents and long forms named in the notes."@en ,
+                 "Outcome: All 56 commands ran and had the effect the front describes; commands expected to fail (git branch -d on an unmerged branch, git clean without -f, git pull on diverged branches) failed as the notes say. Every command and option is documented in the current manual with the behaviour on the card. No Wikidata checks: no card's content is a Wikidata statement or label. The findings record the problems met while writing the test script and the decisions about current versus older commands."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "factual accuracy"@en ;
+    rdfs:comment "Scope: All 56 cards, checked against the git-scm.com manual (2.56.0) and the reviewer's own test runs with git 2.53.0."@en ,
+                 "Outcome: The reviewer confirmed all 56 commands and every long and short form in the notes, and found one warning (the clean front overstated what git clean -f reaches) and four incomplete notes. All five were verified by the authoring agent against the manual and a new test section ('CARD notes-checks') and fixed."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language and translation"@en ;
+    rdfs:comment "Scope: All 56 cards and the deck's title, description and keywords, with Git's Swedish translation (po/sv.po)."@en ,
+                 "Outcome: The reviewer found the Swedish terminology consistent with Git's own translation and no errors; two warnings (stash-pop's 'Återställ', merge-abort's 'stannat på konflikter') and seven suggestions. The authoring agent checked the cited sv.po strings and applied all nine."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 56 cards, every source's licence, the recorded test run (re-run by the reviewer) and the queries, with a 4-gram comparison of the cards against the manual, sv.po and the git-scm.com cheat sheet."@en ,
+                 "Outcome: The reviewer confirmed the licences, that CC0 is defensible and that the recorded test run is real and reproducible, and found one error (notes' forms and behaviours claimed as tested but never run), five warnings and two suggestions. All were verified and fixed except the suggestion to test Git 2.45 versus 2.46 in a container, which was declined in favour of documenting the source of that fact."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final re-check (loop 1): the 21 cards changed in the last fix, every third card, metadata, licence decision and documentation"@en ;
+    rdfs:comment "Scope: 33 cards (the 21 changed in round 3 and every third card), the metadata, the licence decision and the documentation, re-checked against the git-scm.com manual, the 2.46.0 release notes, the site licence page, sv.po and the reviewer's own runs with git 2.53.0."@en ,
+                 "Outcome: The reviewer found one error, one warning and one suggestion; all three were verified and fixed. Two checks were appended to the test script's notes-checks section, the script was re-run (earlier output unchanged) and the new output re-embedded under Queries."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final re-check (loop 2): the cards changed in the last fix (branch-force-delete, reset-hard), every third card, metadata, licence decision and documentation"@en ;
+    rdfs:comment "Scope: 20 cards (branch-force-delete, reset-hard and every third card), the metadata, the licence decision and the documentation, re-checked against the git-scm.com manual (2.56.0), sv.po and the reviewer's own runs with git 2.53.0."@en ,
+                 "Outcome: The reviewer found one warning and two suggestions. The warning and the first suggestion were verified and fixed: two checks were appended to the test script's notes-checks section, the script was re-run (earlier output unchanged) and the new output re-embedded under Queries. The second suggestion was verified and handled by documenting the resemblance in the licensing statement; the fronts were kept."@en .
+
+<#review-6>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: all 56 cards."@en ,
+                 "Outcome: The reviewer checked all 56 cards, the metadata and round 5, found no factual errors, and raised two warnings and one suggestion about round 5's note changes. All three were verified (against the dossier's other notes, the round-4 test output and sv.po fetched 2026-10-04) and fixed."@en .
+
+<#test-runs>
+    dcterms:title "Test run of every command with Git 2.53.0 in a throwaway repository" ;
+    dcterms:creator "Anton Wiklund, with the help of AI" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "Written for this deck: the test script and its recorded output are recorded verbatim in the deck's original provenance report. The test script and the authoring agent's annotations are dedicated to the public domain under CC0 1.0. The program messages quoted in the recorded output (such as Git's hint and error texts) are Git's own (GNU GPL v2, https://raw.githubusercontent.com/git/git/master/COPYING, fetched 2026-10-04: \"the only valid version of the GPL as far as this project is concerned is _this_ particular version of the license (ie v2 ...)\") and are reproduced only as a factual record of what the program printed; the deck itself contains none of them. Running a program and recording which command lines it accepts and what they do copies none of its code or documentation."@en .
+
+<https://git-scm.com/docs>
+    dcterms:title "Git reference manual (git-scm.com/docs, latest version 2.56.0)" ;
+    dcterms:creator "The Git project" ;
+    dcterms:license <https://www.gnu.org/licenses/old-licenses/gpl-2.0.html> ;
+    rdfs:comment "https://git-scm.com/site (fetched 2026-10-04): \"The reference manual is imported from the Git project, and is available under the GPL.\" The same page says the Pro Git book on the site is under a CC-BY-NC-SA licence; the book was not used."@en .
+
+<https://github.com/git/git/blob/master/Documentation/RelNotes/2.46.0.adoc>
+    dcterms:title "Git 2.46.0 release notes (Documentation/RelNotes/2.46.0.adoc in the Git source repository)" ;
+    dcterms:creator "The Git project" ;
+    dcterms:license <https://www.gnu.org/licenses/old-licenses/gpl-2.0.html> ;
+    rdfs:comment "The Git source repository is licensed under the GPL v2: https://raw.githubusercontent.com/git/git/master/COPYING (fetched 2026-10-04): \"Note that the only valid version of the GPL as far as this project is concerned is _this_ particular version of the license (ie v2, not v2.2 or v3.x or whatever)\"."@en .
+
+<https://github.com/git/git/blob/master/po/sv.po>
+    dcterms:title "Git's Swedish translation (po/sv.po in the Git source repository, for Git 2.56.0)" ;
+    dcterms:creator "Peter Krefting and the Git project" ;
+    dcterms:license <https://www.gnu.org/licenses/old-licenses/gpl-2.0.html> ;
+    rdfs:comment "File header of https://raw.githubusercontent.com/git/git/master/po/sv.po (fetched 2026-10-04): \"This file is distributed under the same license as the Git package.\" The Git package is GPL v2 (COPYING, see git-relnotes)."@en .
+
+<#init>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Create a new, empty Git repository in the current directory"@en ,
+                     "Skapa ett nytt, tomt Git-arkiv i den aktuella katalogen"@sv ;
+    solid-memo:back "git init" .
+
+<#clone>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Copy a remote repository, with its whole history, into a new directory"@en ,
+                     "Kopiera ett fjärrarkiv med hela dess historik till en ny katalog"@sv ;
+    solid-memo:back "git clone <url>" .
+
+<#config-name>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Set the name recorded in your commits, for all your repositories"@en ,
+                     "Ange namnet som skrivs in i dina incheckningar, för alla dina arkiv"@sv ;
+    solid-memo:back "git config set --global user.name \"<name>\"" ;
+    solid-memo:backNote "Subcommand form since Git 2.46. The older form git config --global user.name \"<name>\" is still accepted."@en ,
+                        "Underkommandoformen finns sedan Git 2.46. Den äldre formen git config --global user.name \"<name>\" fungerar fortfarande."@sv .
+
+<#config-email>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Set the email address recorded in your commits, for all your repositories"@en ,
+                     "Ange e-postadressen som skrivs in i dina incheckningar, för alla dina arkiv"@sv ;
+    solid-memo:back "git config set --global user.email \"<email>\"" ;
+    solid-memo:backNote "Subcommand form since Git 2.46. The older form git config --global user.email \"<email>\" is still accepted."@en ,
+                        "Underkommandoformen finns sedan Git 2.46. Den äldre formen git config --global user.email \"<email>\" fungerar fortfarande."@sv .
+
+<#status>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Show which files are staged, modified or untracked"@en ,
+                     "Visa vilka filer som är köade, ändrade eller ospårade"@sv ;
+    solid-memo:back "git status" .
+
+<#add-file>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Stage the changes in one file for the next commit"@en ,
+                     "Köa ändringarna i en fil inför nästa incheckning"@sv ;
+    solid-memo:back "git add <file>" .
+
+<#add-all>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Stage every change in the whole working tree, including new and deleted files"@en ,
+                     "Köa alla ändringar i hela arbetskatalogen, även nya och borttagna filer"@sv ;
+    solid-memo:back "git add -A" ;
+    solid-memo:backNote "Long form: --all. git add . only stages changes in the current directory and below."@en ,
+                        "Lång form: --all. git add . köar bara ändringar i den aktuella katalogen och dess underkataloger."@sv .
+
+<#add-patch>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Choose interactively which parts (hunks) of your changes to stage"@en ,
+                     "Välj interaktivt vilka delar (stycken) av dina ändringar som ska köas"@sv ;
+    solid-memo:back "git add -p" ;
+    solid-memo:backNote "Long form: --patch. Answer y or n for each hunk."@en ,
+                        "Lång form: --patch. Svara y eller n för varje stycke."@sv .
+
+<#diff>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Show the changes in the working tree that are not yet staged"@en ,
+                     "Visa ändringarna i arbetskatalogen som ännu inte är köade"@sv ;
+    solid-memo:back "git diff" .
+
+<#diff-staged>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Show the staged changes that will go into the next commit"@en ,
+                     "Visa de köade ändringarna som kommer med i nästa incheckning"@sv ;
+    solid-memo:back "git diff --staged" ;
+    solid-memo:backNote "--cached is a synonym."@en ,
+                        "--cached betyder samma sak."@sv .
+
+<#commit-message>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Commit the staged changes with a message given on the command line"@en ,
+                     "Checka in de köade ändringarna med ett meddelande som anges på kommandoraden"@sv ;
+    solid-memo:back "git commit -m \"<message>\"" .
+
+<#commit-amend>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Replace the last commit with a new one that also contains the staged changes, editing its message"@en ,
+                     "Ersätt den senaste incheckningen med en ny som även innehåller de köade ändringarna, och redigera meddelandet"@sv ;
+    solid-memo:back "git commit --amend" ;
+    solid-memo:backNote "Add --no-edit to keep the message unchanged. Avoid amending commits you have already pushed."@en ,
+                        "Lägg till --no-edit för att behålla meddelandet. Undvik att ändra incheckningar som du redan har skickat till ett fjärrarkiv (push)."@sv .
+
+<#restore>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Discard the unstaged changes to a file"@en ,
+                     "Kasta bort de oköade ändringarna i en fil"@sv ;
+    solid-memo:back "git restore <file>" ;
+    solid-memo:backNote "Older equivalent: git checkout -- <file>. The discarded changes cannot be recovered."@en ,
+                        "Äldre motsvarighet: git checkout -- <file>. Ändringarna som kastas går inte att få tillbaka."@sv .
+
+<#restore-staged>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Unstage a file but keep its changes in the working tree"@en ,
+                     "Ta bort en fil från kön men behåll ändringarna i arbetskatalogen"@sv ;
+    solid-memo:back "git restore --staged <file>" ;
+    solid-memo:backNote "Older equivalent: git reset <file>."@en ,
+                        "Äldre motsvarighet: git reset <file>."@sv .
+
+<#rm>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Delete a tracked file and stage its removal"@en ,
+                     "Ta bort en spårad fil och köa borttagningen"@sv ;
+    solid-memo:back "git rm <file>" .
+
+<#rm-cached>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Stop tracking a file but keep it in the working tree"@en ,
+                     "Sluta spåra en fil men behåll den i arbetskatalogen"@sv ;
+    solid-memo:back "git rm --cached <file>" ;
+    solid-memo:backNote "The file becomes untracked; list it in .gitignore to keep it out of later commits."@en ,
+                        "Filen blir ospårad; lägg till den i .gitignore så att den inte kommer med i senare incheckningar."@sv .
+
+<#mv>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Rename a tracked file and stage the rename"@en ,
+                     "Byt namn på en spårad fil och köa namnbytet"@sv ;
+    solid-memo:back "git mv <old> <new>" .
+
+<#branch-list>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "List the local branches"@en ,
+                     "Visa de lokala grenarna"@sv ;
+    solid-memo:back "git branch" ;
+    solid-memo:backNote "The current branch is marked with *. Add -a to include remote-tracking branches."@en ,
+                        "Den aktuella grenen är markerad med *. Lägg till -a för att även visa fjärrspårande grenar."@sv .
+
+<#branch-create>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Create a new branch without switching to it"@en ,
+                     "Skapa en ny gren utan att byta till den"@sv ;
+    solid-memo:back "git branch <branch>" .
+
+<#switch>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Switch to an existing branch"@en ,
+                     "Byt till en befintlig gren"@sv ;
+    solid-memo:back "git switch <branch>" ;
+    solid-memo:backNote "Older equivalent: git checkout <branch>."@en ,
+                        "Äldre motsvarighet: git checkout <branch>."@sv .
+
+<#switch-create>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Create a new branch and switch to it"@en ,
+                     "Skapa en ny gren och byt till den"@sv ;
+    solid-memo:back "git switch -c <branch>" ;
+    solid-memo:backNote "Older equivalent: git checkout -b <branch>. Long form: --create."@en ,
+                        "Äldre motsvarighet: git checkout -b <branch>. Lång form: --create."@sv .
+
+<#switch-previous>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Switch back to the branch you were on before"@en ,
+                     "Byt tillbaka till grenen du var på innan"@sv ;
+    solid-memo:back "git switch -" ;
+    solid-memo:backNote "Older equivalent: git checkout -."@en ,
+                        "Äldre motsvarighet: git checkout -."@sv .
+
+<#branch-rename>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Rename the current branch"@en ,
+                     "Byt namn på den aktuella grenen"@sv ;
+    solid-memo:back "git branch -m <new-name>" ;
+    solid-memo:backNote "Long form: --move."@en ,
+                        "Lång form: --move."@sv .
+
+<#branch-delete>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Delete a local branch that has been fully merged"@en ,
+                     "Ta bort en lokal gren som redan är helt sammanslagen"@sv ;
+    solid-memo:back "git branch -d <branch>" .
+
+<#branch-force-delete>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Delete a local branch even if it has not been merged"@en ,
+                     "Ta bort en lokal gren även om den inte har slagits ihop"@sv ;
+    solid-memo:back "git branch -D <branch>" ;
+    solid-memo:backNote "Short for --delete --force. Git prints the deleted branch's last commit id ('was …'); git branch <branch> <id> recreates the branch."@en ,
+                        "Förkortning av --delete --force. Git skriver ut id:t för grenens sista incheckning ('var …'); git branch <branch> <id> återskapar grenen."@sv .
+
+<#merge>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Merge another branch into the current branch"@en ,
+                     "Slå ihop en annan gren med den aktuella grenen"@sv ;
+    solid-memo:back "git merge <branch>" .
+
+<#merge-abort>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Abandon a merge that stopped with conflicts and go back to the state before it"@en ,
+                     "Avbryt en sammanslagning som har stoppats av konflikter och gå tillbaka till läget före den"@sv ;
+    solid-memo:back "git merge --abort" .
+
+<#rebase>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Move the current branch's commits so that they start from the tip of another branch"@en ,
+                     "Flytta den aktuella grenens incheckningar så att de utgår från toppen av en annan gren"@sv ;
+    solid-memo:back "git rebase <branch>" ;
+    solid-memo:backNote "This rewrites the branch's commits; avoid rebasing commits others have already fetched."@en ,
+                        "Detta skriver om grenens incheckningar; undvik att ombasera incheckningar som andra redan har hämtat."@sv .
+
+<#rebase-continue>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Continue a rebase after resolving and staging the conflicts"@en ,
+                     "Fortsätt en ombasering efter att du har löst och köat konflikterna"@sv ;
+    solid-memo:back "git rebase --continue" .
+
+<#rebase-abort>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cancel a rebase in progress and return to the state before it began"@en ,
+                     "Avbryt en pågående ombasering och återgå till läget innan den började"@sv ;
+    solid-memo:back "git rebase --abort" .
+
+<#cherry-pick>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Apply the change made by one existing commit as a new commit on the current branch"@en ,
+                     "Tillämpa ändringen från en befintlig incheckning som en ny incheckning på den aktuella grenen"@sv ;
+    solid-memo:back "git cherry-pick <commit>" .
+
+<#log>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Show the commit history of the current branch"@en ,
+                     "Visa incheckningshistoriken för den aktuella grenen"@sv ;
+    solid-memo:back "git log" .
+
+<#log-oneline>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Show the commit history with one short line per commit"@en ,
+                     "Visa incheckningshistoriken med en kort rad per incheckning"@sv ;
+    solid-memo:back "git log --oneline" .
+
+<#log-follow>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "List the commits that changed one file, including those made before it was renamed"@en ,
+                     "Lista incheckningarna som ändrade en fil, även de som gjordes innan den bytte namn"@sv ;
+    solid-memo:back "git log --follow <file>" .
+
+<#show>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Show a commit's author, message and changes"@en ,
+                     "Visa en incheckning med författare, meddelande och ändringar"@sv ;
+    solid-memo:back "git show <commit>" ;
+    solid-memo:backNote "Without an argument it shows the latest commit (HEAD)."@en ,
+                        "Utan argument visas den senaste incheckningen (HEAD)."@sv .
+
+<#blame>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "For each line of a file, show the commit that last changed it and who made that commit"@en ,
+                     "Visa för varje rad i en fil vilken incheckning som senast ändrade den och vem som gjorde incheckningen"@sv ;
+    solid-memo:back "git blame <file>" .
+
+<#reflog>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Show where HEAD has recently pointed, to find lost commits"@en ,
+                     "Visa var HEAD nyligen har pekat, för att hitta förlorade incheckningar"@sv ;
+    solid-memo:back "git reflog" .
+
+<#remote-list>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "List the remotes with their URLs"@en ,
+                     "Visa fjärrarkiven med deras URL:er"@sv ;
+    solid-memo:back "git remote -v" .
+
+<#remote-add>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Add a new remote under a name of your choice"@en ,
+                     "Lägg till ett nytt fjärrarkiv under ett valfritt namn"@sv ;
+    solid-memo:back "git remote add <name> <url>" .
+
+<#fetch>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Download new commits and branches from the remote without changing your own branches"@en ,
+                     "Hämta nya incheckningar och grenar från fjärrarkivet utan att ändra dina egna grenar"@sv ;
+    solid-memo:back "git fetch" .
+
+<#fetch-prune>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Fetch, and also delete your remote-tracking branches for branches that were deleted on the remote"@en ,
+                     "Hämta och ta även bort de fjärrspårande grenar vars gren har tagits bort i fjärrarkivet"@sv ;
+    solid-memo:back "git fetch --prune" ;
+    solid-memo:backNote "Short form: -p."@en ,
+                        "Kort form: -p."@sv .
+
+<#pull>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Fetch the current branch's upstream and integrate it into the current branch"@en ,
+                     "Hämta den aktuella grenens uppströmsgren och integrera den i den aktuella grenen"@sv ;
+    solid-memo:back "git pull" ;
+    solid-memo:backNote "If both sides have new commits, Git stops and asks you to choose --rebase, --no-rebase (merge) or --ff-only, or to set pull.rebase or pull.ff."@en ,
+                        "Om båda sidor har nya incheckningar avbryter Git och ber dig välja --rebase, --no-rebase (sammanslagning) eller --ff-only, eller ställa in pull.rebase eller pull.ff."@sv .
+
+<#pull-rebase>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Fetch the upstream and move your local commits so that they start from its new tip"@en ,
+                     "Hämta uppströmsgrenen och flytta dina lokala incheckningar så att de utgår från dess nya topp"@sv ;
+    solid-memo:back "git pull --rebase" .
+
+<#push>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Send the current branch's new commits to its upstream branch"@en ,
+                     "Skicka den aktuella grenens nya incheckningar till dess uppströmsgren"@sv ;
+    solid-memo:back "git push" .
+
+<#push-upstream>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Send a new local branch to origin for the first time and make origin's new branch the local branch's upstream"@en ,
+                     "Skicka en ny lokal gren till origin för första gången och ställ in den nya grenen i origin som den lokala grenens uppströmsgren"@sv ;
+    solid-memo:back "git push -u origin <branch>" ;
+    solid-memo:backNote "Long form: --set-upstream. Afterwards plain git push and git pull use that branch."@en ,
+                        "Lång form: --set-upstream. Därefter använder git push och git pull utan argument den grenen."@sv .
+
+<#push-delete>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Delete a branch on the remote origin"@en ,
+                     "Ta bort en gren i fjärrarkivet origin"@sv ;
+    solid-memo:back "git push origin --delete <branch>" .
+
+<#push-tag>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Send a single tag to origin"@en ,
+                     "Skicka en enskild tagg till origin"@sv ;
+    solid-memo:back "git push origin <tag>" ;
+    solid-memo:backNote "By default git push sends no tags unless you name them; --tags sends all of them."@en ,
+                        "Som standard skickar git push inga taggar om du inte anger dem; --tags skickar alla."@sv .
+
+<#stash>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Set aside your uncommitted changes to tracked files and return to a clean working tree"@en ,
+                     "Lägg undan dina ej incheckade ändringar i spårade filer och återgå till en ren arbetskatalog"@sv ;
+    solid-memo:back "git stash" ;
+    solid-memo:backNote "Same as git stash push. Untracked files are left where they are."@en ,
+                        "Samma som git stash push. Ospårade filer lämnas kvar."@sv .
+
+<#stash-untracked>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Stash your uncommitted changes, including untracked files"@en ,
+                     "Lägg undan dina ej incheckade ändringar, även ospårade filer"@sv ;
+    solid-memo:back "git stash -u" ;
+    solid-memo:backNote "Long form: --include-untracked. Ignored files are still left alone."@en ,
+                        "Lång form: --include-untracked. Ignorerade filer lämnas fortfarande kvar."@sv .
+
+<#stash-list>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "List your stash entries"@en ,
+                     "Visa dina undanlagda ändringar (stash-posterna)"@sv ;
+    solid-memo:back "git stash list" .
+
+<#stash-pop>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Reapply the most recent stash and remove it from the stash list"@en ,
+                     "Applicera de senast undanlagda ändringarna på nytt och ta bort dem från stash-listan"@sv ;
+    solid-memo:back "git stash pop" ;
+    solid-memo:backNote "If applying gives conflicts, the entry is kept; git stash apply never removes it."@en ,
+                        "Om det blir konflikter behålls posten; git stash apply tar aldrig bort den."@sv .
+
+<#revert>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Undo an earlier commit by making a new commit that reverses its changes"@en ,
+                     "Ångra en tidigare incheckning genom att göra en ny incheckning som upphäver dess ändringar"@sv ;
+    solid-memo:back "git revert <commit>" ;
+    solid-memo:backNote "Safe for commits that are already shared, because history is not rewritten."@en ,
+                        "Säkert även för incheckningar som redan delats, eftersom historiken inte skrivs om."@sv .
+
+<#reset-soft>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Undo the last commit but keep its changes staged"@en ,
+                     "Ångra den senaste incheckningen men behåll dess ändringar köade"@sv ;
+    solid-memo:back "git reset --soft HEAD~1" ;
+    solid-memo:backNote "HEAD^ means the same as HEAD~1."@en ,
+                        "HEAD^ betyder samma sak som HEAD~1."@sv .
+
+<#reset-hard>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Move the current branch to a given commit and discard all uncommitted changes to tracked files"@en ,
+                     "Flytta den aktuella grenen till en viss incheckning och kasta bort alla ej incheckade ändringar i spårade filer"@sv ;
+    solid-memo:back "git reset --hard <commit>" ;
+    solid-memo:backNote "Destructive: all uncommitted changes to tracked files are discarded (unstaged ones cannot be recovered at all). The old branch tip is kept in ORIG_HEAD (until another command such as reset, merge or rebase replaces it) and in the reflog, so dropped commits can be restored."@en ,
+                        "Destruktivt: alla ej incheckade ändringar i spårade filer kastas bort (oköade ändringar går inte att få tillbaka alls). Grenens förra topp sparas i ORIG_HEAD (tills ett annat kommando, till exempel reset, merge eller rebase, ersätter den) och i referensloggen, så att bortkastade incheckningar kan återfås."@sv .
+
+<#clean>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Delete the untracked files from the current directory down, leaving untracked directories alone"@en ,
+                     "Ta bort de ospårade filerna från den aktuella katalogen och nedåt, men lämna ospårade kataloger orörda"@sv ;
+    solid-memo:back "git clean -f" ;
+    solid-memo:backNote "Without -f Git refuses. Add -d to delete untracked directories and their contents too; -n only lists what would be deleted."@en ,
+                        "Utan -f vägrar Git. Lägg till -d för att även ta bort ospårade kataloger med innehåll; -n visar bara vad som skulle tas bort."@sv .
+
+<#tag-annotated>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Create an annotated tag with a message on the current commit"@en ,
+                     "Skapa en annoterad tagg med ett meddelande på den aktuella incheckningen"@sv ;
+    solid-memo:back "git tag -a <tag> -m \"<message>\"" ;
+    solid-memo:backNote "-m on its own also implies -a. git tag with no arguments lists the tags."@en ,
+                        "-m ensamt innebär också -a. git tag utan argument visar taggarna."@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

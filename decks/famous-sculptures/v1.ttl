@@ -1,0 +1,741 @@
+@base <https://solid-memo.com/decks/famous-sculptures/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Famous sculptures"@en ,
+                  "Kända skulpturer"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "51 of the world's most famous sculptures, ranked by their number of Wikipedia and other Wikimedia sitelinks in Wikidata, from the Statue of Liberty and Michelangelo's David to Rodin's The Thinker and Louise Bourgeois's Maman (works of unknown, shared or disputed authorship left out). Front: the sculpture's title in English or Swedish, with the place or material, in brackets or in a note, where the title alone could mean another work; back: the sculptor, in the English or Swedish form of the name, with a note on collaborators or lost originals where it helps. Taken from Wikidata and checked against the English and Swedish Wikipedia, the holding museum or responsible authority where its website could be read and, for ancient works, Pliny and Pausanias."@en ,
+                        "51 av världens mest kända skulpturer, rangordnade efter hur många länkar till Wikipedia och andra Wikimediaprojekt de har i Wikidata, från Frihetsgudinnan och Michelangelos David till Rodins Tänkaren och Louise Bourgeois Maman (verk med okänd, delad eller omstridd upphovsman ingår inte). Framsida: skulpturens titel på engelska eller svenska, med plats eller material, inom parentes eller i en anteckning, där titeln ensam kan syfta på ett annat verk; baksida: skulptören, med namnet i engelsk eller svensk form och en anteckning om medarbetare eller förlorade original där den hjälper. Uppgifterna är hämtade från Wikidata och kontrollerade mot engelska och svenska Wikipedia, museet eller den ansvariga myndigheten där webbplatsen gick att läsa och, för antika verk, Plinius och Pausanias."@sv ;
+    prov:wasDerivedFrom <https://www.wikidata.org/wiki/Q860861> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:art ;
+    dcat:keyword "sculpture"@en ,
+                 "sculptors"@en ,
+                 "art history"@en ,
+                 "statues"@en ,
+                 "monuments"@en ,
+                 "skulptur"@sv ,
+                 "skulptörer"@sv ,
+                 "bildhuggare"@sv ,
+                 "konsthistoria"@sv ,
+                 "statyer"@sv ,
+                 "monument"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#famous-sculptures> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#famous-sculptures> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/3.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/wiki/Q860861> ,
+              <https://en.wikipedia.org/wiki/Sculpture> ,
+              <https://sv.wikipedia.org/wiki/Skulptur> ,
+              <https://www.nps.gov/stli/learn/historyculture/fr%C3%A9d%C3%A9ric-auguste-bartholdi.htm> ,
+              <https://www.cia.gov/legacy/headquarters/kryptos-sculpture/> ,
+              <https://www.musee-rodin.fr/en/musee/collections/oeuvres/kiss> ,
+              <https://www.collezionegalleriaborghese.it/en/opere/apollo-and-daphne> ,
+              <https://www.louvre.fr/decouvrir/le-palais/trois-siecles-de-sculpture-italienne> ,
+              <https://www.hamhelsinki.fi/en/sculptures/havis-amanda-2/> ,
+              <https://www.luzern.com/en/poi/lion-monument/> ,
+              <https://www.perseus.tufts.edu/hopper/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Ranking (queries 1–4): as in the library's famous-paintings deck, fame is measured by the number of Wikipedia (and other Wikimedia) sitelinks of a Wikidata item. The ranking query for sculptures (instances of Q860861 or any subclass) timed out on query.wikidata.org (query 1), so it was run on QLever's mirror of Wikidata (https://qlever.dev/api/wikidata), which the famous-paintings generator also uses. A FILTER on the sitelink count returned nothing there (query 2; query 3 showed the endpoint itself worked), so the ranking takes the top N by ORDER BY … LIMIT instead. The first ranking (query 4a, top 400) lacked The Thinker: entity searches (query 5) and the class items (query 6) showed that Wikidata models works with many casts as instances of \"group of casts\" (Q28890616) or \"sculpture series\" (Q19479037), which are not subclasses of sculpture. The final ranking (query 4) therefore takes instances of sculpture or its subclasses, of group of casts and of sculpture series, top 500 by sitelinks, with each item's creators (P170). QLever's statistics (https://qlever.dev/api/wikidata?cmd=stats, read 2026-10-04) describe the index as \"Complete Wikidata, TTL from https://dumps.wikimedia.org/wikidatawiki/entities (latest-all.ttl.bz2 from 10.08.2026 munged, latest-lexemes.ttl.bz2 from 07.08.2026), updated LIVE\"; a review round re-ran query 4 on 2026-10-04 and got the same 561 rows and the same sitelink counts for all 51 cards. The raw CSV files were saved in the research scratch directory, which is not published."@en ,
+                 "Selection (see the selection): walking down the ranking of query 4, an item became a card when it is a sculptural work of art whose maker is a single, named sculptor under the standard attribution, and its title identifies it. The walk stopped at 21 sitelinks, which gave 51 cards (from the Statue of Liberty, 158 sitelinks, to Maman, 21). Each item's Wikidata entity, its creators' entities and its English and Swedish Wikipedia introductions were fetched (query 8); for every candidate with a named creator the English article was read to confirm or reject the attribution, and the articles on the rejected candidates were fetched as well (query 9)."@en ,
+                 "Back (the sculptor): the Wikidata creator (P170) of each work. Where Wikidata lists more than one creator, the card gives the sculptor the standard attribution names and a back note names the others' roles: the Statue of Liberty (Bartholdi; Gustave Eiffel's framework and Richard Morris Hunt's pedestal), The Motherland Calls (Vuchetich; the engineer Nikolai Nikitin), The Thinker (Rodin; Wikidata also lists his founder Fonderie Hébrard, not mentioned), the Marine Corps War Memorial (Felix de Weldon; Wikidata also lists the architect Horace W. Peaslee) and the Lion Monument (Thorvaldsen's design; carved by Lukas Ahorn). For Worker and Kolkhoz Woman, Wikidata lists only Vera Mukhina; the note adds Boris Iofan's concept, from the English Wikipedia."@en ,
+                 "Front (the title): the English title is the Wikidata English label (or, for the Lion Monument and Hermannsdenkmal, the label the English Wikipedia uses), the Swedish title the Wikidata Swedish label where it is the Swedish name. Where Wikidata has no Swedish label or a non-Swedish one, the Swedish title was taken from the Swedish Wikipedia (query 10 and the searches of query 11): Den lilla sjöjungfrun (Den lille havfrue's article gives the Swedish name), Pluto och Proserpina (Bernini's article and the Galleria Borghese article), Kyssen (Rodin's article), Lejonet i Belfort (Bartholdi's article), Lejonmonumentet (its own article; Wikidata's sv label is the German Löwendenkmal), Minin och Pozjarskijs monument (the article on the medal For the Defence of Moscow), US Marine Corps War Memorial (its article's title; Wikidata's sv label is \"US Marine Corps Memorial\"). For two works with no Swedish name anywhere the Swedish front keeps the English name, as Swedish texts do (Charging Bull, The Dinner Party), and for Canova's Psyche Revived by Cupid's Kiss, which has no Swedish article, the Swedish front is the compiler's translation of the French title, Wikidata's fr label of Q517408 (Psyché ranimée par le baiser de l'Amour, checked by the builder), which the Louvre's page confirms: \"Psyche återupplivad av Amors kyss\", with the names in the form of Wikidata's Swedish labels of the depicted figures (P180 of Q517408): Psyche (Q843382), as the Swedish Wikipedia's article on her is titled, and Amor (Q5011, Cupid); both labels are checked by the builder. The form \"Psyke\", used in older Swedish titles such as Sergel's \"Amor och Psyke\", was not used because neither Wikidata nor the Swedish Wikipedia gives it for the figure."@en ,
+                 "Swedish names of the sculptors: the Wikidata Swedish label where it is the Swedish form (Fidias, Vera Muchina, Giovanni Lorenzo Bernini, Auguste Bartholdi …). Four are not in Wikidata in Swedish form and were checked against the Swedish Wikipedia: Chares från Lindos (Wikidata sv \"Chares\"; the Swedish article on 280 f.Kr. writes \"Chares från Lindos\", his own article \"Chares av Lindos\"); Hieronymus Duquesnoy den äldre (Wikidata sv \"Hieronymus Duquesnoy\", as the Swedish Manneken Pis article; \"den äldre\" distinguishes him from his son, as the English \"the Elder\"); Jevgenij Vutjetitj and Elgudzja Amasjukeli are the compiler's rule-based transcriptions, which no Swedish text found attests. For Vuchetich, Wikidata's sv label is the English transliteration \"Yevgeny Vuchetich\" and no Swedish text about him was found (query 11; a full-text search of the Swedish Wikipedia for Vutjetitj on 2026-10-04 returned nothing); his Russian name Евгений Викторович Вучетич (Wikidata ru label; given name and surname transcribed) was transcribed with the table in the Swedish Wikipedia's \"Transkribering av östslaviska språk\" (е at the start of a word → je, й → j, ч → tj). For Amashukeli, Wikidata's sv label is the scholarly transliteration \"Elgudža Amašukeli\"; his Georgian name ელგუჯა ამაშუკელი (Wikidata ka label) was transcribed with the \"Transkribering\" column of the Swedish Wikipedia's \"Georgiska alfabetet\" (ჯ → dzj, შ → sj), the convention the Swedish Wikipedia uses for Georgian names; the Swedish Kartlis Deda article's \"Elgudzja Amsjukeli\" was treated as a typo (an a missing). Felix de Weldon's Swedish label \"Felix Weihs DeWeldon\" is a full-name variant; the card uses the multilingual label \"Felix de Weldon\", which the Swedish Wikipedia also uses (\"Felix W. de Weldon\"). The English back for Manneken Pis is \"Jérôme Duquesnoy the Elder\", the English Wikipedia's form (Wikidata's English label is the Dutch form \"Hiëronymus Duquesnoy the Elder\"); the note gives the other form."@en ,
+                 "Disambiguation: three works share the title David (Michelangelo's, Donatello's and Bernini's), and the builder requires every front to be unique, so their fronts add the holding museum (and, for Donatello's, the material), which tells them apart without naming the sculptor. The Bargello also holds Donatello's marble David and Verrocchio's bronze David (Wikidata Q3703074 and Q2415504), so Donatello's bronze card also has the front note \"nude, in hat and boots\" (Wikidata P180 hat and boot; Verrocchio's David wears a leather tunic, as the English Wikipedia says, and Wikidata gives it no hat). The Pietà front adds St Peter's Basilica (Michelangelo's later Rondanini Pietà has its own card). A front note gives the place (and, where it helps, the material or subject) where a title alone could mean another work: The Rape of Proserpina (Girardon's group at Versailles and others share the title), Moses, Bacchus (with its date, since Jacopo Sansovino's Bacchus is in the same museum), Triton Fountain, The Kiss (Rodin's Paolo and Francesca, not Brâncuși's or Klimt's), The Sphere, Kryptos, Charging Bull, The Dinner Party, The Little Mermaid, Apollo and Daphne, Psyche, Maman, Cloud Gate, Kartlis Deda, Pobednik, the Lion Monument, the Monument to Minin and Pozharsky, The Motherland Calls, Hermannsdenkmal, Fallen Astronaut and the Marine Corps War Memorial. No note names or hints at the sculptor."@en ,
+                 "Cross-checks: every card's attribution was checked against the English Wikipedia (the sentence naming the sculptor is quoted from the full text of the revision read) and, where a Swedish article exists, the Swedish Wikipedia. Where the holding museum's or the responsible authority's site could be read, it was a further check (query 12): the National Park Service (Statue of Liberty, Marine Corps War Memorial), the CIA (Kryptos), the Musée Rodin (The Thinker, The Kiss, The Gates of Hell), the Galleria Borghese (Apollo and Daphne, David, The Rape of Proserpina), the Louvre (Dying Slave, Psyche), HAM Helsinki Art Museum (Havis Amanda, Sibelius Monument) and Lucerne Tourism (Lion Monument). Other sites refused the research environment (the National Gallery of Art, the Accademia, Britannica: HTTP 403, a certificate error) or had no usable page; those cards rest on Wikidata and the two Wikipedias. For the six lost or copied Greek works the ancient written sources of the attribution were read on Perseus (query 13): Pliny the Elder (Natural History 34.18, 34.19, 36.4) and Pausanias (1.28.2)."@en ,
+                 "Notes: the notes are the compiler's own wording of facts; each fact has a quoted source in the card's evidence. Facts given by Wikidata (CC0) or by public-domain US government pages: the collaborators named above (Wikidata P170), the subject of The Kiss (Wikidata P180, P144), the photograph behind the Marine Corps War Memorial (Wikidata P144 and the National Park Service), the places and materials of the front notes (Wikidata P276, P186, P180), except two front-note facts that Wikidata does not give and that were confirmed only in the English and Swedish Wikipedia: Kartlis Deda's site on Sololaki hill (Swedish \"Sololakihöjden\", the Swedish article's form; Wikidata gives only Tbilisi) and Fallen Astronaut being left on the Moon by the crew of Apollo 15 (Wikidata gives only the location Mons Hadley). Facts confirmed in the English and Swedish Wikipedia, which only state facts that are not anyone's expression: the lost originals and Roman copies of the Greek works (and, for the lost works, Pliny), the earthquake of the 220s BC that felled the Colossus (most often dated 226 BC; the English Wikipedia's article on the earthquake says sources give 226 or 227 BC, so the note gives the decade), the 1965 replica of Manneken Pis."@en ,
+                 "Machine checks: for every card the builder checks against live Wikidata that the work's P170 includes the sculptor, the English and Swedish labels or aliases of the work that the front uses (where the front is a Wikidata label), and the English and Swedish labels or aliases of the sculptor (where the back is one). The builder accepts a multilingual (mul) label for any language. Where the card's text is not a Wikidata label, no check is made and the evidence and round 0 say why. The deck was then validated with the app's SHACL and DCAT-AP validators (scripts/validate_sources.ts)."@en ,
+                 "The dossier was assembled by a script (make_dossier.py, in the research scratch directory, which like the other helper scripts and the saved CSV files and pages is not published) from a hand-written card list: it cuts every Wikipedia quotation verbatim from the saved article text (stopping if a phrase is not found), records the revision ids, writes the Wikidata evidence from the saved entities and generates the Wikidata checks only where the card's text equals a Wikidata label or alias."@en ,
+                 "Review (round 1 onwards): review rounds checked the deck for factual accuracy, language and licensing/documentation; every finding was re-verified against the sources (queries 15 and 16) before it was applied or rejected, and the outcome is recorded in the quality-control rounds."@en ,
+                 "Selection: About 50 of the world's most famous sculptures, chosen objectively: the Wikidata items that are sculptures (instances of Q860861 or a subclass), groups of casts or sculpture series, ranked by their number of sitelinks (query 4, 2026-10-04), taken in rank order down to 21 sitelinks: 51 cards. An item in the ranking was left out when it is not a sculptural work of art (coins and currencies such as the dinars, guilders and the florin; gates, towers, columns and buildings such as the Brandenburg Gate, Trajan's Column, Nelson's Column and the Siegessäule; inscriptions, steles and tablets such as the Rosetta Stone, the Mesha Stele and the Behistun inscription; parks, museums and miniature parks; classes such as caryatid and totem pole; the toy He-Man); when its maker is unknown or anonymous (the Great Sphinx, the Venus of Willendorf, the Winged Victory of Samothrace, the Venus de Milo, the Riace bronzes, the Capitoline Wolf, the Dying Gaul, the Buddhas of Bamiyan, the Leshan Giant Buddha, the Aztec sun stone and other ancient works without a named sculptor); when it is the work of several people or a studio without one standard sculptor (Christ the Redeemer: Paul Landowski, the engineer Heitor da Silva Costa and Gheorghe Leonida, who sculpted the face; the Trevi Fountain, an architectural fountain designed by the architect Nicola Salvi and completed by Giuseppe Pannini; Laocoön and His Sons, which Pliny attributed to three Rhodian sculptors, Agesander, Athenodoros and Polydorus; the Elgin Marbles, a whole set of temple sculptures; the Holy Trinity Column in Olomouc and Mother Albania, each with three creators in Wikidata; the African Renaissance Monument, by the studio Mansudae Overseas Projects); when it was designed by one person and made or finished by others without a standard single attribution (the Merlion, designed as a logo by Alec Fraser-Brunner and sculpted by Lim Nang Seng; Mother Ukraine, begun by Vuchetich and reworked and completed under Vasyl Borodai after his death in 1974; the Crazy Horse Memorial, a mountain carving begun to Korczak Ziolkowski's design and in progress since 1948); when the attribution is disputed or rests on a hypothesis (the Bust of Nefertiti, which the English Wikipedia says is believed to be by Thutmose because it was found in his workshop; Hermes and the Infant Dionysus, whose attribution to Praxiteles the English Wikipedia calls \"the object of fierce controversy\"; the Apollo Belvedere, a Roman copy for which Wikidata lists an unknown maker beside Leochares; the Venus de' Medici, which Wikidata gives to Cleomenes but the English Wikipedia describes only as a copy after a sculptor \"in the immediate Praxitelean tradition\"; Duchamp's Fountain, a readymade the English Wikipedia calls \"attributed to Marcel Duchamp\"; the legendary bull of Phalaris); when Wikidata's creator is not the sculptor (Jeanneke Pis: Denis-Adrien Debouvrie conceived and commissioned it and \"commissioned a sculptor to realise the design\"; the Black Obelisk and the Mesha Stele, whose 'creators' are kings); when the title alone cannot identify the work or names the sculptor (the Soviet War Memorial, one of three in Berlin; the Chair of Saint Peter, both a relic and Bernini's monument around it; the Liberty Statue in Budapest, whose English name is nearly that of the Statue of Liberty); and when the sitelink count reflects interest other than the work's fame: the Wikipedia Monument in Słubice (articles written by Wikipedians about a monument to Wikipedia), and Norra skenet and Grön eld in Umeå, whose articles in the same two dozen languages (Afrikaans, Bengali, Hindi, Punjabi, Urdu …) point to a coordinated translation effort. Mount Rushmore is not in the ranking: Wikidata models it as a mountain, not a sculpture. Lost works whose sculptor is recorded by ancient writers (the Colossus of Rhodes, the Statue of Zeus at Olympia, the Athena Parthenos and Athena Promachos) and Greek works known from Roman copies (Discobolus, Doryphoros, Aphrodite of Knidos) are kept, with a note. Facts are as of 2026-10-04; a sculptor's authorship does not change, so the deck has no cut-off issue."@en ,
+                 "Licensing: The only content source is Wikidata, whose structured data is CC0: the selection (the sitelink ranking), the link from each work to its sculptor (P170) and most English and Swedish titles and names come from it, so the deck can be CC0 1.0 like the rest of the library. The English and Swedish Wikipedia (CC BY-SA 4.0), the Perseus Digital Library (CC BY-SA 3.0 US), the NPS and CIA pages (US federal works, public domain) and the pages of the Musée Rodin, the Galleria Borghese, the Louvre, HAM and Lucerne Tourism (all rights reserved) were used for verification only. Some short names that are not Wikidata labels were confirmed in the Swedish Wikipedia (Den lilla sjöjungfrun, Kyssen, Pluto och Proserpina, Lejonet i Belfort, Lejonmonumentet, Minin och Pozjarskijs monument, Chares från Lindos, the US Marine Corps War Memorial): the name of a work or a person is a fact, not a creative expression, and no wording, list or selection was taken from Wikipedia. Two Swedish name forms, Jevgenij Vutjetitj and Elgudzja Amasjukeli, are the compiler's own transcriptions of the Russian and Georgian names in Wikidata, made by the transcription rules tabulated in the Swedish Wikipedia; no Swedish text found uses them. The Swedish title of Canova's Psyche is the compiler's translation of Wikidata's French label, with the names in the form of Wikidata's Swedish labels of the depicted figures. The notes are the compiler's own wording of facts. Quotations in the provenance report's evidence are not part of the CC0 deck: they remain under their sources' licences (Wikipedia text CC BY-SA 4.0 by Wikipedia contributors, each linked to the quoted revision; the Perseus texts under CC BY-SA 3.0 US, recorded under the CC-BY-SA-3.0 identifier because the builder has no identifier for the US port; the museums' text all rights reserved) and are short quotations given only to make the verification checkable."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Sources, licences and machine checks: every card's sculptor against Wikidata's P170, the English Wikipedia and, where available, the Swedish Wikipedia, the holding museum or authority, and the ancient sources; the English and Swedish titles and names against Wikidata labels and the Swedish Wikipedia."@en ;
+    rdfs:comment "Scope: All 51 cards, the selection, the sources and the deck metadata."@en ,
+                 "Outcome: Wikidata's creator agrees with the English Wikipedia (and, where read, the Swedish Wikipedia, the museum or authority and the ancient sources) for all 51 cards; no card follows a value that a better source contradicts and no Wikidata check was skipped where the card's text is a Wikidata statement or label. The discrepancies are in names: Wikidata has no Swedish label, or a non-Swedish one, for several works and sculptors (handled with the Swedish Wikipedia's forms and recorded below), lists collaborators as co-creators for five works (handled with notes), and models works with many casts outside the sculpture class (handled by widening the ranking query). The builder checks P170 for every card, and the English and Swedish labels wherever the card's text is one."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 51 cards, the description and the selection; sculptors re-checked against live Wikidata, and the builder's 237 Wikidata checks re-run."@en ,
+                 "Outcome: 50 of 51 cards held up. One error: Donatello's bronze David was not the only bronze David in the Bargello (Verrocchio's is there too), so the front got a note that singles it out. One warning (The Rape of Proserpina's front had no place or material although other sculptures share the title) and one suggestion (the year the Colossus fell varies by source) were applied. All three were re-verified before fixing."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 51 cards (front, back and notes in both languages), the title, description and keywords; Swedish and English titles and names compared with live Wikidata labels and the Wikipedia article titles."@en ,
+                 "Outcome: No errors or warnings; seven suggestions. Five were applied: the two constructed Swedish name forms now cite the Swedish transcription tables instead of articles on other people, the Dutch name form in the Manneken Pis note, the English front note of The Kiss, and two wording fixes in the description. The untagged keywords come from the builder, outside this dossier, and are left to the library maintainers."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 51 cards' sources and quotations (about 110 Wikipedia quotations against their revisions, the museum, agency and Perseus quotations on 16 cards), every licence page, the method, queries and licensing; the ranking query re-run on QLever."@en ,
+                 "Outcome: The licensing is compliant (Wikidata is the only content source; CC0). Five warnings and three suggestions about attribution and documentation; all were re-verified and applied, except that the Perseus licence identifier cannot be changed without a builder change, so it is documented instead."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The 15 cards changed in round 3 and every third card (29 of 51 cards), the metadata, the licensing decision and the documentation; the builder's Wikidata checks and the SHACL/DCAT-AP validation re-run."@en ,
+                 "Outcome: Every fix of rounds 1 to 3 confirmed; no errors. Three warnings (the descriptions' wording of the ranking, two front-note facts without quoted evidence, the unsupported Swedish form \"Psyke\") and three suggestions; all were re-verified against the sources (query 16) and applied."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The 5 cards changed in round 4 and every third card (22 of 51 cards), the metadata, the licensing decision and the documentation; the builder's Wikidata checks and the SHACL/DCAT-AP validation re-run."@en ,
+                 "Outcome: Every fix of round 4 confirmed; no errors. One warning (the Manneken Pis note's firm year 1619, which the sources give as 1618, 1619 or a 1619 commission cast in 1620) and two suggestions (a Swedish Wikipedia quotation without a revision id, two round-0 resolutions that later rounds superseded); all were re-verified (query 17) and applied."@en .
+
+<https://www.wikidata.org/wiki/Q860861>
+    dcterms:title "Wikidata: sculptures (Q860861 and its subclasses), groups of casts (Q28890616) and sculpture series (Q19479037), their sitelinks, creators (P170) and English and Swedish labels" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\" (as read on 2026-10-04: \"... the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero .\")"@en .
+
+<https://en.wikipedia.org/wiki/Sculpture>
+    dcterms:title "English Wikipedia: the articles on the 51 sculptures (and on Ernst von Bandel, Verrocchio's David and the 226 BC Rhodes earthquake), introductions and the passages quoted" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://en.wikipedia.org/wiki/Wikipedia:Copyrights — \"Permission is granted to copy, distribute and/or modify Wikipedia's text under the terms of the Creative Commons Attribution-ShareAlike 4.0 International License\""@en .
+
+<https://sv.wikipedia.org/wiki/Skulptur>
+    dcterms:title "Svenskspråkiga Wikipedia: artiklarna om skulpturerna och de artiklar som citeras för svenska titlar och namnformer" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of every Swedish Wikipedia article (e.g. https://sv.wikipedia.org/wiki/T%C3%A4nkaren, read 2026-10-04): \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0\""@en .
+
+<https://www.nps.gov/stli/learn/historyculture/fr%C3%A9d%C3%A9ric-auguste-bartholdi.htm>
+    dcterms:title "National Park Service: Statue of Liberty National Monument, \"Frédéric-Auguste Bartholdi\", and George Washington Memorial Parkway, \"History of the Marine Corps War Memorial\"" ;
+    dcterms:creator "U.S. National Park Service" ;
+    rdfs:comment "https://www.nps.gov/aboutus/disclaimer.htm — \"Thus, material created by the National Park Service and presented on this website, unless otherwise indicated, is generally considered in the public domain.\""@en .
+
+<https://www.cia.gov/legacy/headquarters/kryptos-sculpture/>
+    dcterms:title "Central Intelligence Agency: About the \"Kryptos\" Sculpture" ;
+    dcterms:creator "Central Intelligence Agency" ;
+    rdfs:comment "https://www.cia.gov/site-policies/ — \"Unless a copyright is indicated, information on our website is in the public domain and may be reproduced, published or otherwise used without our permission.\" The Kryptos page itself carries \"“Kryptos” © Copyright 1988 James Sanborn. All rights reserved.\" (the sculpture, read 2026-10-04); only the fact of authorship is used."@en .
+
+<https://www.musee-rodin.fr/en/musee/collections/oeuvres/kiss>
+    dcterms:title "Musée Rodin: collection pages \"The Thinker\", \"The Kiss\" and \"The Gates of Hell\"" ;
+    dcterms:creator "Musée Rodin" ;
+    rdfs:comment "https://www.musee-rodin.fr/en/legal-information (read 2026-10-04) offers no licence to reuse the site's texts; the collection pages carry the credit \"© Agence photographique du musée Rodin\". Treated as all rights reserved: verification only."@en .
+
+<https://www.collezionegalleriaborghese.it/en/opere/apollo-and-daphne>
+    dcterms:title "Galleria Borghese, collection database: Apollo and Daphne, David, Rape of Proserpine" ;
+    dcterms:creator "Galleria Borghese (Ministero della Cultura)" ;
+    rdfs:comment "Footer of the collection pages (read 2026-10-04): \"© 2018 MiC\"; no licence is offered (the linked disclaimer page, https://galleriaborghese.cultura.gov.it/disconoscimento/, did not answer). Treated as all rights reserved: verification only."@en .
+
+<https://www.louvre.fr/decouvrir/le-palais/trois-siecles-de-sculpture-italienne>
+    dcterms:title "Musée du Louvre: \"Trois siècles de sculpture italienne – Galerie Michel-Ange\"" ;
+    dcterms:creator "Musée du Louvre" ;
+    rdfs:comment "https://www.louvre.fr/mentions-legales — \"Toute reproduction, toute représentation totale ou partielle, toute utilisation, toute adaptation, toute mise à disposition ou modification de ses éléments par quelque procédé que ce soit, par quelque personne que ce soit et par quelque m[oyen] … sans l’autorisation expresse de l’établissement public du musée du Louvre, des éventuels auteurs ou de leurs ayant droits est strictement interdite et constitue un délit de contrefaçon au sens du Code de la propriété intellectuelle.\" Verification only."@en .
+
+<https://www.hamhelsinki.fi/en/sculptures/havis-amanda-2/>
+    dcterms:title "HAM Helsinki Art Museum, public art: Havis Amanda; The Sibelius Monument" ;
+    dcterms:creator "HAM Helsinki Art Museum" ;
+    rdfs:comment "https://www.hamhelsinki.fi/en/website-terms-of-use/ (read 2026-10-04) grants no licence to reuse the site's texts; the sculpture pages credit their photographs \"© Photo: HAM / …\". Treated as all rights reserved: verification only."@en .
+
+<https://www.luzern.com/en/poi/lion-monument/>
+    dcterms:title "Lucerne Tourism: Lion Monument" ;
+    dcterms:creator "Luzern Tourismus AG" ;
+    rdfs:comment "https://www.luzern.com/en/terms-and-conditions — \"5 Intellectual property/intellectual property rights The entire content of the websites www. …\" and \"… the content of the newsletter to which visitors can subscribe and the content of brochures or any city tours attended are copyright protected.\" Verification only."@en .
+
+<https://www.perseus.tufts.edu/hopper/>
+    dcterms:title "Perseus Digital Library: Pliny the Elder, Natural History, tr. John Bostock and H. T. Riley (1855), books 34 and 36; Pausanias, Description of Greece, tr. W. H. S. Jones (1918), 1.28" ;
+    dcterms:creator "Perseus Digital Library, Tufts University (texts: Pliny the Elder, Pausanias; translators John Bostock, H. T. Riley, W. H. S. Jones)" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/3.0/> ;
+    rdfs:comment "Footer of the text pages (e.g. https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.02.0137:book=34:chapter=18): \"This work is licensed under a Creative Commons Attribution-ShareAlike 3.0 United States License.\" (the United States port of CC BY-SA 3.0; the 1855 and 1918 translations themselves are old enough to be in the public domain). Verification only. Recorded as CC-BY-SA-3.0 (the unported licence's identifier) because the builder has no identifier for the United States port; the pages also add \"An XML version of this text is available for download, with the additional restriction that you offer Perseus any modifications you make.\" (not relevant: nothing was downloaded or modified)."@en .
+
+<#statue-of-liberty>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Statue of Liberty"@en ,
+                     "Frihetsgudinnan"@sv ;
+    solid-memo:back "Frédéric Auguste Bartholdi"@en ,
+                    "Auguste Bartholdi"@sv ;
+    solid-memo:backNote "Gustave Eiffel built its internal metal framework and Richard Morris Hunt designed the pedestal."@en ,
+                        "Gustave Eiffel byggde dess inre metallstomme och Richard Morris Hunt ritade sockeln."@sv .
+
+<#colossus-of-rhodes>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Colossus of Rhodes"@en ,
+                     "Kolossen på Rhodos"@sv ;
+    solid-memo:back "Chares of Lindos"@en ,
+                    "Chares från Lindos"@sv ;
+    solid-memo:backNote "Lost: it fell in an earthquake in the 220s BC (most often dated 226 BC). The attribution comes from ancient writers such as Pliny the Elder."@en ,
+                        "Förlorad: den föll vid en jordbävning på 220-talet f.Kr. (oftast daterad till 226 f.Kr.). Tillskrivningen kommer från antika författare som Plinius den äldre."@sv .
+
+<#statue-of-zeus-at-olympia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Statue of Zeus at Olympia"@en ,
+                     "Zeusstatyn i Olympia"@sv ;
+    solid-memo:back "Phidias"@en ,
+                    "Fidias"@sv ;
+    solid-memo:backNote "Lost: destroyed in late antiquity, known only from descriptions and from images on coins and in other art."@en ,
+                        "Förlorad: förstörd under senantiken, känd bara från beskrivningar och avbildningar på mynt och i annan konst."@sv .
+
+<#the-little-mermaid>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Little Mermaid"@en ,
+                     "Den lilla sjöjungfrun"@sv ;
+    solid-memo:frontNote "bronze statue, Langelinie, Copenhagen"@en ,
+                         "bronsstaty, Langelinie, Köpenhamn"@sv ;
+    solid-memo:back "Edvard Eriksen"@en ,
+                    "Edvard Eriksen"@sv .
+
+<#david-michelangelo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "David (Galleria dell'Accademia, Florence)"@en ,
+                     "David (Galleria dell'Accademia, Florens)"@sv ;
+    solid-memo:back "Michelangelo"@en ,
+                    "Michelangelo"@sv .
+
+<#manneken-pis>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Manneken Pis"@en ,
+                     "Manneken Pis"@sv ;
+    solid-memo:back "Jérôme Duquesnoy the Elder"@en ,
+                    "Hieronymus Duquesnoy den äldre"@sv ;
+    solid-memo:backNote "Also called Hieronymus (Dutch Hiëronymus) Duquesnoy; he made the bronze commissioned in 1619. Since 1965 a replica has stood on the site."@en ,
+                        "Kallas även Jérôme Duquesnoy (den franska formen av namnet); han gjorde bronsstatyn som beställdes 1619. Sedan 1965 står en kopia på platsen."@sv .
+
+<#pieta-st-peters>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pietà (St Peter's Basilica)"@en ,
+                     "Pietà (Peterskyrkan)"@sv ;
+    solid-memo:back "Michelangelo"@en ,
+                    "Michelangelo"@sv .
+
+<#the-motherland-calls>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Motherland Calls"@en ,
+                     "Fosterlandet kallar"@sv ;
+    solid-memo:frontNote "Mamayev Kurgan, Volgograd"@en ,
+                         "Mamajev Kurgan, Volgograd"@sv ;
+    solid-memo:back "Yevgeny Vuchetich"@en ,
+                    "Jevgenij Vutjetitj"@sv ;
+    solid-memo:backNote "Its construction was led by the structural engineer Nikolai Nikitin."@en ,
+                        "Bygget leddes av konstruktören Nikolaj Nikitin."@sv .
+
+<#the-thinker>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Thinker"@en ,
+                     "Tänkaren"@sv ;
+    solid-memo:back "Auguste Rodin"@en ,
+                    "Auguste Rodin"@sv .
+
+<#ecstasy-of-saint-teresa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ecstasy of Saint Teresa"@en ,
+                     "Den heliga Teresas extas"@sv ;
+    solid-memo:back "Gian Lorenzo Bernini"@en ,
+                    "Giovanni Lorenzo Bernini"@sv .
+
+<#we-are-our-mountains>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "We Are Our Mountains"@en ,
+                     "Vi är våra berg"@sv ;
+    solid-memo:back "Sargis Baghdasaryan"@en ,
+                    "Sargis Baghdasaryan"@sv .
+
+<#bronze-horseman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bronze Horseman"@en ,
+                     "Bronsryttaren"@sv ;
+    solid-memo:back "Étienne Maurice Falconet"@en ,
+                    "Étienne Maurice Falconet"@sv .
+
+<#worker-and-kolkhoz-woman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Worker and Kolkhoz Woman"@en ,
+                     "Arbetare och kolchoskvinna"@sv ;
+    solid-memo:back "Vera Mukhina"@en ,
+                    "Vera Muchina"@sv ;
+    solid-memo:backNote "The concept and composition were the architect Boris Iofan's; Mukhina sculpted it."@en ,
+                        "Idén och kompositionen kom från arkitekten Boris Iofan; Muchina utförde skulpturen."@sv .
+
+<#discobolus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Discobolus"@en ,
+                     "Diskuskastaren"@sv ;
+    solid-memo:back "Myron"@en ,
+                    "Myron"@sv ;
+    solid-memo:backNote "The Greek bronze original is lost; the work is known from Roman copies."@en ,
+                        "Det grekiska bronsoriginalet är förlorat; verket är känt genom romerska kopior."@sv .
+
+<#moses-michelangelo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Moses"@en ,
+                     "Mose"@sv ;
+    solid-memo:frontNote "marble, San Pietro in Vincoli, Rome"@en ,
+                         "marmor, San Pietro in Vincoli, Rom"@sv ;
+    solid-memo:back "Michelangelo"@en ,
+                    "Michelangelo"@sv .
+
+<#fallen-astronaut>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Fallen Astronaut"@en ,
+                     "Fallen Astronaut"@sv ;
+    solid-memo:frontNote "left on the Moon by the crew of Apollo 15"@en ,
+                         "lämnad på månen av Apollo 15:s besättning"@sv ;
+    solid-memo:back "Paul Van Hoeydonck"@en ,
+                    "Paul Van Hoeydonck"@sv .
+
+<#madonna-of-bruges>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Madonna of Bruges"@en ,
+                     "Bryggemadonnan"@sv ;
+    solid-memo:back "Michelangelo"@en ,
+                    "Michelangelo"@sv .
+
+<#aphrodite-of-knidos>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Aphrodite of Knidos"@en ,
+                     "Afrodite från Knidos"@sv ;
+    solid-memo:back "Praxiteles"@en ,
+                    "Praxiteles"@sv ;
+    solid-memo:backNote "The original is lost; the work is known from Roman copies."@en ,
+                        "Originalet är förlorat; verket är känt genom romerska kopior."@sv .
+
+<#kartlis-deda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Kartlis Deda"@en ,
+                     "Kartlis Deda"@sv ;
+    solid-memo:frontNote "Sololaki hill, Tbilisi"@en ,
+                         "Sololakihöjden, Tbilisi"@sv ;
+    solid-memo:back "Elguja Amashukeli"@en ,
+                    "Elgudzja Amasjukeli"@sv .
+
+<#athena-parthenos>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Athena Parthenos"@en ,
+                     "Athena Parthenos"@sv ;
+    solid-memo:back "Phidias"@en ,
+                    "Fidias"@sv ;
+    solid-memo:backNote "Lost: the gold-and-ivory statue stood in the Parthenon; it is known from small copies."@en ,
+                        "Förlorad: statyn i guld och elfenben stod i Parthenon; den är känd genom små kopior."@sv .
+
+<#the-burghers-of-calais>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Burghers of Calais"@en ,
+                     "Borgarna i Calais"@sv ;
+    solid-memo:back "Auguste Rodin"@en ,
+                    "Auguste Rodin"@sv .
+
+<#angel-of-the-north>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Angel of the North"@en ,
+                     "Angel of the North"@sv ;
+    solid-memo:back "Antony Gormley"@en ,
+                    "Antony Gormley"@sv .
+
+<#david-donatello>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "David (bronze, Bargello, Florence)"@en ,
+                     "David (brons, Bargello, Florens)"@sv ;
+    solid-memo:frontNote "nude, in hat and boots"@en ,
+                         "naken, i hatt och stövlar"@sv ;
+    solid-memo:back "Donatello"@en ,
+                    "Donatello"@sv .
+
+<#cloud-gate>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cloud Gate"@en ,
+                     "Cloud Gate"@sv ;
+    solid-memo:frontNote "Millennium Park, Chicago"@en ,
+                         "Millennium Park, Chicago"@sv ;
+    solid-memo:back "Anish Kapoor"@en ,
+                    "Anish Kapoor"@sv .
+
+<#triton-fountain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Triton Fountain"@en ,
+                     "Tritonfontänen"@sv ;
+    solid-memo:frontNote "Piazza Barberini, Rome"@en ,
+                         "Piazza Barberini, Rom"@sv ;
+    solid-memo:back "Gian Lorenzo Bernini"@en ,
+                    "Giovanni Lorenzo Bernini"@sv .
+
+<#kryptos>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Kryptos"@en ,
+                     "Kryptos"@sv ;
+    solid-memo:frontNote "sculpture at CIA headquarters, Langley, Virginia"@en ,
+                         "skulptur vid CIA:s högkvarter i Langley, Virginia"@sv ;
+    solid-memo:back "Jim Sanborn"@en ,
+                    "Jim Sanborn"@sv .
+
+<#hermannsdenkmal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hermannsdenkmal"@en ,
+                     "Hermannsdenkmal"@sv ;
+    solid-memo:frontNote "near Detmold, Germany"@en ,
+                         "nära Detmold i Tyskland"@sv ;
+    solid-memo:back "Ernst von Bandel"@en ,
+                    "Ernst von Bandel"@sv .
+
+<#havis-amanda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Havis Amanda"@en ,
+                     "Havis Amanda"@sv ;
+    solid-memo:back "Ville Vallgren"@en ,
+                    "Ville Vallgren"@sv .
+
+<#apollo-and-daphne>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Apollo and Daphne"@en ,
+                     "Apollo och Daphne"@sv ;
+    solid-memo:frontNote "marble, Galleria Borghese, Rome"@en ,
+                         "marmor, Galleria Borghese, Rom"@sv ;
+    solid-memo:back "Gian Lorenzo Bernini"@en ,
+                    "Giovanni Lorenzo Bernini"@sv .
+
+<#bronze-soldier-of-tallinn>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bronze Soldier of Tallinn"@en ,
+                     "Bronssoldaten i Tallinn"@sv ;
+    solid-memo:back "Enn Roos"@en ,
+                    "Enn Roos"@sv .
+
+<#doryphoros>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Doryphoros"@en ,
+                     "Spjutbäraren"@sv ;
+    solid-memo:back "Polykleitos"@en ,
+                    "Polykleitos"@sv ;
+    solid-memo:backNote "The bronze original is lost; the work is known from Roman marble copies."@en ,
+                        "Bronsoriginalet är förlorat; verket är känt genom romerska kopior i marmor."@sv .
+
+<#athena-promachos>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Athena Promachos"@en ,
+                     "Athena Promachos"@sv ;
+    solid-memo:back "Phidias"@en ,
+                    "Fidias"@sv ;
+    solid-memo:backNote "Lost: the colossal bronze stood on the Acropolis of Athens."@en ,
+                        "Förlorad: bronskolossen stod på Akropolis i Aten."@sv .
+
+<#marine-corps-war-memorial>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Marine Corps War Memorial"@en ,
+                     "US Marine Corps War Memorial"@sv ;
+    solid-memo:frontNote "the Iwo Jima flag raising, Arlington, Virginia"@en ,
+                         "flagghissningen på Iwo Jima, Arlington i Virginia"@sv ;
+    solid-memo:back "Felix de Weldon"@en ,
+                    "Felix de Weldon"@sv ;
+    solid-memo:backNote "He based it on Joe Rosenthal's photograph of the flag raising."@en ,
+                        "Han utgick från Joe Rosenthals fotografi av flagghissningen."@sv .
+
+<#the-sphere>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Sphere"@en ,
+                     "The Sphere"@sv ;
+    solid-memo:frontNote "bronze, from the World Trade Center plaza, New York"@en ,
+                         "brons, från World Trade Center-platsen i New York"@sv ;
+    solid-memo:back "Fritz Koenig"@en ,
+                    "Fritz Koenig"@sv .
+
+<#the-gates-of-hell>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Gates of Hell"@en ,
+                     "Helvetets portar"@sv ;
+    solid-memo:back "Auguste Rodin"@en ,
+                    "Auguste Rodin"@sv .
+
+<#charging-bull>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Charging Bull"@en ,
+                     "Charging Bull"@sv ;
+    solid-memo:frontNote "bronze bull, Lower Manhattan, New York"@en ,
+                         "bronstjur på södra Manhattan, New York"@sv ;
+    solid-memo:back "Arturo Di Modica"@en ,
+                    "Arturo Di Modica"@sv .
+
+<#lion-of-belfort>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Lion of Belfort"@en ,
+                     "Lejonet i Belfort"@sv ;
+    solid-memo:back "Frédéric Auguste Bartholdi"@en ,
+                    "Auguste Bartholdi"@sv .
+
+<#the-rape-of-proserpina>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Rape of Proserpina"@en ,
+                     "Pluto och Proserpina"@sv ;
+    solid-memo:frontNote "marble, Galleria Borghese, Rome"@en ,
+                         "marmor, Galleria Borghese, Rom"@sv ;
+    solid-memo:back "Gian Lorenzo Bernini"@en ,
+                    "Giovanni Lorenzo Bernini"@sv .
+
+<#monument-to-minin-and-pozharsky>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Monument to Minin and Pozharsky"@en ,
+                     "Minin och Pozjarskijs monument"@sv ;
+    solid-memo:frontNote "Red Square, Moscow"@en ,
+                         "Röda torget, Moskva"@sv ;
+    solid-memo:back "Ivan Martos"@en ,
+                    "Ivan Martos"@sv .
+
+<#lion-monument>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Lion Monument"@en ,
+                     "Lejonmonumentet"@sv ;
+    solid-memo:frontNote "Lucerne"@en ,
+                         "Luzern"@sv ;
+    solid-memo:back "Bertel Thorvaldsen"@en ,
+                    "Bertel Thorvaldsen"@sv ;
+    solid-memo:backNote "Thorvaldsen designed it; Lukas Ahorn carved it into the rock in 1820–1821."@en ,
+                        "Thorvaldsen formgav det; Lukas Ahorn högg ut det i klippan 1820–1821."@sv .
+
+<#the-dinner-party>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Dinner Party"@en ,
+                     "The Dinner Party"@sv ;
+    solid-memo:frontNote "installation, Brooklyn Museum, New York"@en ,
+                         "installation, Brooklyn Museum, New York"@sv ;
+    solid-memo:back "Judy Chicago"@en ,
+                    "Judy Chicago"@sv .
+
+<#david-bernini>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "David (Galleria Borghese, Rome)"@en ,
+                     "David (Galleria Borghese, Rom)"@sv ;
+    solid-memo:back "Gian Lorenzo Bernini"@en ,
+                    "Giovanni Lorenzo Bernini"@sv .
+
+<#bacchus-michelangelo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bacchus"@en ,
+                     "Bacchus"@sv ;
+    solid-memo:frontNote "marble, 1496–1497, Bargello, Florence"@en ,
+                         "marmor, 1496–1497, Bargello, Florens"@sv ;
+    solid-memo:back "Michelangelo"@en ,
+                    "Michelangelo"@sv .
+
+<#dying-slave>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Dying Slave"@en ,
+                     "Den döende slaven"@sv ;
+    solid-memo:back "Michelangelo"@en ,
+                    "Michelangelo"@sv .
+
+<#pobednik>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pobednik"@en ,
+                     "Pobednik"@sv ;
+    solid-memo:frontNote "Belgrade Fortress"@en ,
+                         "Belgrads fästning"@sv ;
+    solid-memo:back "Ivan Meštrović"@en ,
+                    "Ivan Meštrović"@sv .
+
+<#the-kiss-rodin>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Kiss"@en ,
+                     "Kyssen"@sv ;
+    solid-memo:frontNote "the lovers Paolo and Francesca in marble, from Dante's Inferno"@en ,
+                         "marmorparet Paolo och Francesca, ur Dantes Inferno"@sv ;
+    solid-memo:back "Auguste Rodin"@en ,
+                    "Auguste Rodin"@sv .
+
+<#sibelius-monument>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sibelius Monument"@en ,
+                     "Sibeliusmonumentet"@sv ;
+    solid-memo:back "Eila Hiltunen"@en ,
+                    "Eila Hiltunen"@sv .
+
+<#psyche-revived-by-cupids-kiss>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Psyche Revived by Cupid's Kiss"@en ,
+                     "Psyche återupplivad av Amors kyss"@sv ;
+    solid-memo:frontNote "marble, Louvre, Paris"@en ,
+                         "marmor, Louvren, Paris"@sv ;
+    solid-memo:back "Antonio Canova"@en ,
+                    "Antonio Canova"@sv .
+
+<#little-dancer-of-fourteen-years>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Little Dancer of Fourteen Years"@en ,
+                     "Fjortonårig dansös"@sv ;
+    solid-memo:back "Edgar Degas"@en ,
+                    "Edgar Degas"@sv .
+
+<#rondanini-pieta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Rondanini Pietà"@en ,
+                     "Pietà Rondanini"@sv ;
+    solid-memo:back "Michelangelo"@en ,
+                    "Michelangelo"@sv .
+
+<#maman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Maman"@en ,
+                     "Maman"@sv ;
+    solid-memo:frontNote "giant spider sculpture, 1999"@en ,
+                         "jättelik spindelskulptur, 1999"@sv ;
+    solid-memo:back "Louise Bourgeois"@en ,
+                    "Louise Bourgeois"@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

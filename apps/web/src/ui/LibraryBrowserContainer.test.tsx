@@ -8,8 +8,8 @@ import { makeUseCasesFake } from "../test/useCasesFake";
 import { firstRelease } from "@solid-memo/domain/testing/libraryDeck";
 
 const capitals: LibraryDeck = {
-  url: "https://solid-memo.com/decks/capitals.ttl",
-  ...firstRelease("https://solid-memo.com/decks/capitals.ttl"),
+  url: "https://solid-memo.com/decks/capitals/v1.ttl",
+  ...firstRelease("https://solid-memo.com/decks/capitals/v1.ttl"),
   title: { en: "Capitals" },
   cardCount: 1,
   authors: [],

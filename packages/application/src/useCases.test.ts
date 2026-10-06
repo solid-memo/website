@@ -70,8 +70,8 @@ const card: Card = {
   formatVersion: 1,
 };
 const libraryDeck: LibraryDeck = {
-  url: "https://solid-memo.com/decks/capitals.ttl",
-  ...firstRelease("https://solid-memo.com/decks/capitals.ttl"),
+  url: "https://solid-memo.com/decks/capitals/v1.ttl",
+  ...firstRelease("https://solid-memo.com/decks/capitals/v1.ttl"),
   title: { en: "Capitals" },
   cardCount: 1,
   authors: ["Anton Wiklund"],
@@ -1309,9 +1309,9 @@ describe("createUseCases", () => {
   it("planLibraryUpgrade compares the release a copy came from with the deck's current one, and writes nothing", async () => {
     const deps = makeDeps();
     const copy: Deck = { ...deck, sourceUrl: libraryDeck.url };
-    const current: LibraryDeck = { ...libraryDeck, url: "https://solid-memo.com/decks/capitals/2.ttl", version: "2" };
+    const current: LibraryDeck = { ...libraryDeck, url: "https://solid-memo.com/decks/capitals/v2.ttl", version: "2" };
     vi.mocked(deps.deckLibrary.listLibraryDecks).mockResolvedValue([
-      { ...libraryDeck, seriesUrl: "https://solid-memo.com/decks/index.ttl#rivers", url: "https://solid-memo.com/decks/rivers/1.ttl" },
+      { ...libraryDeck, seriesUrl: "https://solid-memo.com/decks/index.ttl#rivers", url: "https://solid-memo.com/decks/rivers/v1.ttl" },
       current,
     ]);
     vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) =>
@@ -1333,7 +1333,7 @@ describe("createUseCases", () => {
   it("planLibraryUpgrade offers nothing for a home-made deck, or one whose deck the library no longer has", async () => {
     const deps = makeDeps();
     await expect(createUseCases(deps).planLibraryUpgrade(deck)).resolves.toBeNull();
-    const stray: Deck = { ...deck, sourceUrl: "https://solid-memo.com/decks/gone/1.ttl" };
+    const stray: Deck = { ...deck, sourceUrl: "https://solid-memo.com/decks/gone/v1.ttl" };
     await expect(createUseCases(deps).planLibraryUpgrade(stray)).resolves.toBeNull();
     expect(deps.deckLibrary.fetchLibraryDeck).not.toHaveBeenCalled();
   });
@@ -2055,13 +2055,13 @@ describe("library deck upgrade", () => {
     const writeFence = { hold: vi.fn(() => fence) };
     const v1: LibraryDeckContent = {
       ...libraryContent,
-      url: `${LIB}1.ttl`,
-      seriesUrl: librarySeriesUrlOf(`${LIB}1.ttl`),
+      url: `${LIB}v1.ttl`,
+      seriesUrl: librarySeriesUrlOf(`${LIB}v1.ttl`),
       cards: [libraryCard("sweden", "Stockholm?"), libraryCard("denmark", "Copenhagen"), libraryCard("latvia", "Riga")],
     };
     const v2: LibraryDeckContent = {
       ...v1,
-      url: `${LIB}2.ttl`,
+      url: `${LIB}v2.ttl`,
       version: "2",
       title: { en: "Capitals", sv: "Huvudstäder" },
       cards: [
@@ -2155,7 +2155,7 @@ describe("library deck upgrade", () => {
       url: copy.url,
       cardsDocumentUrl: STAGED_CARDS,
       reviewsDocumentUrl: STAGED_REVIEWS,
-      sourceUrl: `${LIB}2.ttl`,
+      sourceUrl: `${LIB}v2.ttl`,
       title: { en: "Capitals", sv: "Huvudstäder" },
     });
     expect(outcome.ok && outcome.deck).toEqual(pod.deck);

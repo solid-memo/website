@@ -1,0 +1,504 @@
+@base <https://solid-memo.com/decks/geologic-time-scale/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Geologic time scale"@en ,
+                  "Geologisk tidsskala"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "The geologic time scale in 37 cards: the four eons, the three eras of the Phanerozoic and its twelve periods in order, the era each period belongs to, the current eon, era and period, and when each era began. Front: a prompt such as \"Period after the Triassic\" or a question such as \"Which era does the Jurassic period belong to?\"; back: the name in English and Swedish, or an age in millions of years (Ma). Taken from Wikidata and checked against the International Chronostratigraphic Chart (v2026/06), the Geological Survey of Sweden (SGU) and Nationalencyklopedin."@en ,
+                        "Den geologiska tidsskalan i 37 kort: de fyra eonerna, fanerozoikums tre eror och dess tolv perioder i ordning, vilken era varje period hör till, nuvarande eon, era och period samt när varje era började. Framsida: t.ex. ”Perioden efter trias” eller ”Vilken era hör jura till?”; baksida: namnet på engelska och svenska, eller en ålder i miljoner år (Ma). Uppgifterna är hämtade från Wikidata och kontrollerade mot den internationella kronostratigrafiska tabellen (v2026/06), Sveriges geologiska undersökning (SGU) och Nationalencyklopedin."@sv ;
+    prov:wasDerivedFrom <https://www.wikidata.org/wiki/Q43521> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:science ;
+    dcat:keyword "geologic time scale"@en ,
+                 "geology"@en ,
+                 "geologic periods"@en ,
+                 "Phanerozoic"@en ,
+                 "Earth history"@en ,
+                 "geologisk tidsskala"@sv ,
+                 "geologi"@sv ,
+                 "geologiska perioder"@sv ,
+                 "fanerozoikum"@sv ,
+                 "jordens historia"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#geologic-time-scale> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#geologic-time-scale> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/wiki/Q43521> ,
+              <https://stratigraphy.org/ICSchart/ChronostratChart2026-06.pdf> ,
+              <https://resource.sgu.se/dokument/publikation/ovriginfo/ovriginfo85broschyr/tidslinje-broschyr.pdf> ,
+              <https://www.sgu.se/globalassets/produkter/publikationer/tidigare/sveriges-berggrund---hur-var-och-nar.pdf> ,
+              <https://www.ne.se/uppslagsverk/encyklopedi/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (a script asserting every name, order and age against the saved ICS chart, NE and SGU texts, live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "1. Wikidata (query 1): the items whose English label is one of the four eon names (Hadean, Archean, Proterozoic, Phanerozoic), the three Phanerozoic era names and the twelve Phanerozoic period names were fetched with their instance of (P31), part of (P361), follows (P155), followed by (P156), start time (P580) and Swedish label. The geological units are the 19 items that are instances of period (Q392928), erathem (Q2464485) or eonothem (Q2669627) and part of the ICS Standard Global Chronostratigraphic (Geochronologic) Scale (Q63463770); the other rows (Wikimedia disambiguation pages and items of other kinds that share an English label, none of them part of Q63463770) were discarded. Query 2 fetched every English, Swedish and multilingual label and alias of the 19 items and of the items they point to; query 3 identified the units before the Cambrian and the Paleozoic (Q188654 Ediacaran, part of Q191935 Neoproterozoic, part of Q104162 Proterozoic). The chains of P155/P156 run unbroken Hadean → Archean → Proterozoic → Phanerozoic, Paleozoic → Mesozoic → Cenozoic and Cambrian → … → Quaternary, and each period is part of (P361) exactly one of the three eras."@en ,
+                 "2. The International Chronostratigraphic Chart of the International Commission on Stratigraphy (ICS): stratigraphy.org/chart is a JavaScript application and returned no content to curl, so the chart's PDF was used. The address pattern https://stratigraphy.org/ICSchart/ChronostratChart<YYYY-MM>.pdf was probed for every month from 2024-12 to 2026-09 (query 5): 2024-12 and 2026-06 exist, and the home page of stratigraphy.org lists \"Chart update 2026/06\" as its latest chart news, so v2026/06 (dated \"(c) International Commission on Stratigraphy, June 2026\") is the current version. Both PDFs were downloaded, their text extracted with pypdf and the 2026/06 chart rendered to PNG with PyMuPDF and read (queries 6 and 7). Between v2024/12 and v2026/06 only three stage boundaries changed (259.51 → 259.857, 249.9 → 250.8 and 246.7 → 247.0 Ma); no eon, era or period name, order or base changed."@en ,
+                 "3. SGU (Sveriges geologiska undersökning, the Swedish geological survey): its page \"Sveriges berggrund\" (https://www.sgu.se/om-geologi/berg/sveriges-berggrund/) links the brochure \"Sveriges berggrund – hur, var och när\", whose figure 11 (page 10) names the eons and the Phanerozoic eras in Swedish with the boundaries 541, 252 and 66 million years; the brochure \"SGUs tidslinje\" (found by a web search restricted to sgu.se) shows a time line whose bands are labelled, from the oldest, HADEIKUM, ARKEIKUM, PROTEROZOIKUM, KAMBRIUM, ORDOVICIUM, SILUR, DEVON, KARBON, PERM, TRIAS, JURA, KRITA, PALEOGEN, NEOGEN and KVARTÄR. Both PDFs were downloaded, their text extracted with pypdf, and the pages with the figure and the time line rendered to PNG and read (queries 8–11), because on the time line's page 3 the band labels are in the image only (the text layer has only page 4's labels)."@en ,
+                 "4. Swedish names: Nationalencyklopedin's article on each of the 19 units was fetched with curl from https://www.ne.se/uppslagsverk/encyklopedi/lång/<headword> (ne.py, query 12) and its headword and opening definition extracted (nehead.py, nebody.py). NE writes every name in lower case (\"kaʹmbrium\", \"ordoviʹcium\", \"siluʹr\", \"kenozoikum\" …), as does SGU in running text (\"fram till kambrium\", \"Under karbon och perm\", \"tidsperioden kvartär\"); SGU's figure and time line set the names as headings in capitals or with an initial capital. The cards use NE's lower-case headwords, which are also the Wikidata sv labels apart from capitalisation (Wikidata gives \"Kambrium\", \"Ordovicium\" … with a capital, but \"paleogen\", \"neogen\" and \"kvartär\" in lower case). An attempt to look the names up in SAOL and Svensk ordbok (query 16: sh <scratch>/svenska.sh, which runs curl -s -A \"solid-memo deck research (https://github.com/antwika/solid-memo)\" \"https://svenska.se/tri/f_<saol|so>.php?sok=<word>\" for each name) returned only the site's empty page frame (and HTTP 400 for \"kvartär\"), so svenska.se was not used. NE quotations in the evidence are given as \"headword: definition\": the headword (and its alternative name, where NE gives one) without NE's stress mark, followed by a colon in place of NE's comma; the definition is verbatim except that the space NE's page puts before some commas is left out; \"…\" marks an omission and \" | \" separates quotations from different articles."@en ,
+                 "5. Cards and cross-check: the cards were written by the script gen.py (query 13) from the saved data; fixgen.py (query 13) revised gen.py once, to write the NE headwords as described in step 4 and to match each quoted fragment against the NE text. Before writing it asserts, for every unit, that the English name is the Wikidata en label and occurs on the ICS chart, that each base age quoted occurs on the chart, that each NE quotation occurs in the saved NE text, that the Swedish name equals the Wikidata sv label apart from the initial capital, that the period-to-era and era-to-eon P361 statements hold, that each successor in the three chains is the P156 of its predecessor and its predecessor the P155 of the successor, and that the SGU labels quoted occur in the SGU text layers (the labels visible only in the rendered images were read from them). Each card has evidence from Wikidata (content), the ICS chart and NE, and, where SGU shows the unit, SGU; the builder's Wikidata checks rerun every order, era and start-time statement and every English label against live Wikidata."@en ,
+                 "6. Wording: the fronts are the compiler's own (\"Period after the Triassic\" / \"Perioden efter trias\", \"Which era does the Jurassic period belong to?\" / \"Vilken era hör jura till?\"). The three ages are the ICS base ages rounded to whole millions of years and written as text in no language (zxx), \"≈ 66 Ma\"; the note gives the chart value as Wikidata also gives it, without the chart's uncertainty. Ma (mega-annum, million years) is the unit of the ICS chart's age column."@en ,
+                 "7. Notes: every fact in a note is a Wikidata statement or description (query 14–15 and the builder's checks): the start of the Hadean (Q104460 P580, -4567300000, rounded to \"about 4567 Ma\", which is also the chart's value, and its en description \"beginning with the formation of the Earth\", given in the note as \"as the Earth began to form\", not as a formed Earth; query 18), the start times of the eras and the end times of the Permian and the Cretaceous, the two subperiods of the Carboniferous (Q744718, Q373772) and the Tertiary (Q188645, \"obsolete term\", replaced by the Paleogene and the Neogene). The Swedish \"mississippian\" and \"pennsylvanian\" are the English names in lower case, as NE writes them (Wikidata's sv labels \"Mississippi\" and \"Pennsylvania\" are not used in Swedish geology texts); \"tertiär\" is the Wikidata sv label in lower case, as NE writes it."@en ,
+                 "Selection: The four eons (Hadean, Archean, Proterozoic, Phanerozoic), the three eras of the Phanerozoic (Paleozoic, Mesozoic, Cenozoic) and its twelve periods (Cambrian to Quaternary), as they stand on the International Chronostratigraphic Chart v2026/06 and in Wikidata. For each chain the deck asks for the first unit and for the unit after each other one, and for the current eon, era and period; for each period it asks for its era; for each era it asks when it began. Left out: the Precambrian eras and periods (Ediacaran, Cryogenian …) and the epochs and ages, which are outside the deck's scope (the eons and the Phanerozoic eras and periods) and would double the deck; the informal \"Precambrian\" (italic on the ICS chart); the obsolete \"Tertiary\" (mentioned in a note); the start ages of the periods and of the Precambrian eons, several of which differ between the chart, Wikidata and the Swedish sources (e.g. the Cretaceous, 143.1 ±0.6 Ma on the chart against 145 in Wikidata and SGU and 146 in NE; the Proterozoic, 2500 against NE's 2430); and the proposed Anthropocene, which is not on the chart. Hadean is kept as the first eon: the chart sets it in the Eonothem/Eon column in regular type, and Wikidata and SGU list it as an eon, although NE calls it an informal name. English names are in ICS spelling (Archean, Paleozoic, Cenozoic, not Archaean, Palaeozoic, Caenozoic)."@en ,
+                 "Licensing: The only content source is Wikidata, whose structured data is CC0: the units, their order, which era each period belongs to, the start times of the eras and the English names come from it, so the deck is CC0 1.0 like the rest of the library. The Swedish names are the established Swedish terms (the Wikidata sv labels, written in lower case as NE and SGU write them in running text; for the two Carboniferous subperiods, the Wikidata English labels in lower case, as NE writes them); a single word is not protected by copyright. The ICS chart (© International Commission on Stratigraphy, all rights reserved), SGU's two brochures (covered by copyright; no Creative Commons licence stated on them) and Nationalencyklopedin (non-commercial quotation only) were used for verification only: they confirmed the facts on the cards and in the notes, each of which Wikidata also gives as a statement, label or description (the notes' ages without the chart's uncertainties; the Carboniferous subperiods from Q744718 and Q373772; the Tertiary as an obsolete term from Q188645), and no wording, layout or selection was copied from them. The short NE and SGU quotations in the evidence document the check; they are quoted under the right of quotation (upphovsrättslagen 22 §) with the source named, and they are not part of the deck. The selection is the complete set of eons, Phanerozoic eras and Phanerozoic periods, which every version of the time scale shares, not a choice taken from one source. The fronts and notes are the compiler's own wording."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Sources, licences and machine checks: every name, order, era assignment and age against Wikidata, the ICS chart v2026/06, SGU and NE; the chart version; the Swedish names and their case."@en ;
+    rdfs:comment "Scope: All cards, the sources and the deck metadata."@en ,
+                 "Outcome: Wikidata, the ICS chart, SGU and NE agree on every name, every order and every period's era. The Swedish names agree in spelling everywhere; Wikidata capitalises 16 of the 19 sv labels where NE and SGU's running text write lower case. Wikidata's start times differ from the current chart for some periods (not on any card); the start of the Paleozoic differs between the current chart and older sources, which the note on that card states. No Wikidata check was skipped except the sv label checks on the 16 capitalised labels."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 37 cards, against live Wikidata (labels, P361, P155, P156, P580 of the 19 units) and the ICS chart v2026/06 (downloaded, text-extracted and its fonts inspected); the chart version; the notes."@en ,
+                 "Outcome: Every order, every period's era and the three era base ages match the chart and Wikidata, all Wikidata checks hold live, v2026/06 is the newest chart and the Quaternary is still the current period. One warning: the Hadean note equated 4567 Ma with the Earth's formation, which is the age of the Solar System's oldest solids (USGS gives the Earth's age as 4.54 billion years). Fixed."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 37 cards, the title, the description and the keywords: language tags, Swedish names and idiom, English wording, typography."@en ,
+                 "Outcome: Every text is correctly tagged and the Swedish names follow NE's lower-case forms consistently. One warning (title case in the English title) and five suggestions; the title, the description, the twelve era fronts, the Hadean and Carboniferous notes and the number spacing were changed; the article before \"Earth\" was left as it was."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: The sources and their licence pages, the licensing paragraph, the method, the queries and every card's evidence; spot checks against freshly fetched sources."@en ,
+                 "Outcome: The CC0 licence holds and all three closed sources are verification only, but some notes carried facts that only verification sources gave; they were rewritten to rest on Wikidata statements and descriptions (new evidence and 15 new checks), and the licensing paragraph now says so and names the right of quotation. The NE tertiär locator, the missing svenska.sh and fixgen.py commands, the NE quotation convention, the SGU figure caption and misprint, the NE article URLs and the deck's own script check in the statement of how the deck was made were all corrected."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The 24 cards changed in round 3 and every third card (32 cards), the metadata, the licence and the documentation; every Wikidata check against live wbgetentities, the ICS chart v2026/06, the NE and SGU quotations."@en ,
+                 "Outcome: Nothing wrong or misleading; all checks hold live, v2026/06 is still the newest chart, quotations are verbatim and the builds match the dossier. Three documentation suggestions were applied: the source of the Hadean note, a mark where an NE quotation breaks off, and a published reason for leaving out the Precambrian subdivisions, epochs and ages."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: All 37 cards, the title, description, keywords and notes; names, order, era assignments and era base ages against the ICS chart v2026/06 and live Wikidata; the Swedish text and the language tags."@en ,
+                 "Outcome: No errors or warnings. Two optional wording suggestions were applied: the English fronts of the three \"current\" cards now say \"geologic\", so \"The current era\" cannot be read as the Common Era, and the English keyword \"geological periods\" became \"geologic periods\" to match the rest of the deck."@en .
+
+<https://www.wikidata.org/wiki/Q43521>
+    dcterms:title "Wikidata: the eons, the Phanerozoic eras and the Phanerozoic periods of the geologic time scale (Q43521), with their part of (P361), follows (P155), followed by (P156) and start time (P580) statements and their English and Swedish labels" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under [https://creativecommons.org/publicdomain/zero/1.0/ Creative Commons Zero].\""@en .
+
+<https://stratigraphy.org/ICSchart/ChronostratChart2026-06.pdf>
+    dcterms:title "International Chronostratigraphic Chart, v 2026/06" ;
+    dcterms:creator "International Commission on Stratigraphy (IUGS); K.M. Cohen, D.A.T. Harper, P.L. Gibbard and N. Car" ;
+    rdfs:comment "The chart itself: \"(c) International Commission on Stratigraphy, June 2026\"; the footer of https://stratigraphy.org/: \"© 2013-2026 International Commission on Stratigraphy, all rights reserved\". No licence is offered for the chart. Verification only."@en .
+
+<https://resource.sgu.se/dokument/publikation/ovriginfo/ovriginfo85broschyr/tidslinje-broschyr.pdf>
+    dcterms:title "SGUs tidslinje: 14 miljarder år på 175 cm (brochure)" ;
+    dcterms:creator "Sveriges geologiska undersökning (SGU)" ;
+    rdfs:comment "https://www.sgu.se/produkter-och-tjanster/kundservice/upphovsratt-for-sgus-produkter-och-material/ — \"SGU:s information omfattas av lagen om upphovsrätt till litterära och konstnärliga verk (1960:729).\" Parts of SGU's material are CC BY 4.0, but \"Om information är släppt under denna licens så är det angivet\", and the brochure states no licence. Verification only."@en .
+
+<https://www.sgu.se/globalassets/produkter/publikationer/tidigare/sveriges-berggrund---hur-var-och-nar.pdf>
+    dcterms:title "Sveriges berggrund – hur, var och när (brochure)" ;
+    dcterms:creator "Sveriges geologiska undersökning (SGU)" ;
+    rdfs:comment "https://www.sgu.se/produkter-och-tjanster/kundservice/upphovsratt-for-sgus-produkter-och-material/ — \"SGU:s information omfattas av lagen om upphovsrätt till litterära och konstnärliga verk (1960:729).\" The brochure states no Creative Commons licence. Verification only."@en .
+
+<https://www.ne.se/uppslagsverk/encyklopedi/>
+    dcterms:title "Nationalencyklopedin: the articles hadeikum, arkeikum, proterozoikum, fanerozoikum, paleozoikum, mesozoikum, kenozoikum, kambrium, ordovicium, silur, devon, karbon, perm, trias, jura, krita, paleogen, neogen, kvartär and tertiär" ;
+    dcterms:creator "Nationalencyklopedin (NE Nationalencyklopedin AB)" ;
+    rdfs:comment "https://ne.se/info/hj%c3%a4lp/upphovsratt — \"För texter från uppslagsverket har NE valt att inte strikt följa upphovsrättslagen. Det innebär att det är fritt att citera dem i delar eller i sin helhet, på webbsidor eller i tryckt form, i icke-kommersiellt syfte.\" Non-commercial quotation only: verification only."@en .
+
+<#first-eon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First eon of Earth's history"@en ,
+                     "Jordens första eon"@sv ;
+    solid-memo:back "Hadean"@en ,
+                    "hadeikum"@sv ;
+    solid-memo:backNote "Starts about 4567 Ma (ICS chart, Wikidata), as the Earth began to form"@en ,
+                        "Börjar för ca 4 567 miljoner år sedan (ICS-tabellen, Wikidata), när jorden började bildas"@sv .
+
+<#eon-after-hadean>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eon after the Hadean"@en ,
+                     "Eonen efter hadeikum"@sv ;
+    solid-memo:back "Archean"@en ,
+                    "arkeikum"@sv .
+
+<#eon-after-archean>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eon after the Archean"@en ,
+                     "Eonen efter arkeikum"@sv ;
+    solid-memo:back "Proterozoic"@en ,
+                    "proterozoikum"@sv .
+
+<#eon-after-proterozoic>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eon after the Proterozoic"@en ,
+                     "Eonen efter proterozoikum"@sv ;
+    solid-memo:back "Phanerozoic"@en ,
+                    "fanerozoikum"@sv .
+
+<#current-eon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The current geologic eon"@en ,
+                     "Den nuvarande eonen"@sv ;
+    solid-memo:back "Phanerozoic"@en ,
+                    "fanerozoikum"@sv .
+
+<#first-era-of-phanerozoic>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First era of the Phanerozoic eon"@en ,
+                     "Fanerozoikums första era"@sv ;
+    solid-memo:back "Paleozoic"@en ,
+                    "paleozoikum"@sv .
+
+<#era-after-paleozoic>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Era after the Paleozoic"@en ,
+                     "Eran efter paleozoikum"@sv ;
+    solid-memo:back "Mesozoic"@en ,
+                    "mesozoikum"@sv .
+
+<#era-after-mesozoic>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Era after the Mesozoic"@en ,
+                     "Eran efter mesozoikum"@sv ;
+    solid-memo:back "Cenozoic"@en ,
+                    "kenozoikum"@sv .
+
+<#current-era>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The current geologic era"@en ,
+                     "Den nuvarande eran"@sv ;
+    solid-memo:back "Cenozoic"@en ,
+                    "kenozoikum"@sv .
+
+<#first-period-of-paleozoic>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First period of the Paleozoic era"@en ,
+                     "Paleozoikums första period"@sv ;
+    solid-memo:back "Cambrian"@en ,
+                    "kambrium"@sv .
+
+<#period-after-cambrian>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Period after the Cambrian"@en ,
+                     "Perioden efter kambrium"@sv ;
+    solid-memo:back "Ordovician"@en ,
+                    "ordovicium"@sv .
+
+<#period-after-ordovician>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Period after the Ordovician"@en ,
+                     "Perioden efter ordovicium"@sv ;
+    solid-memo:back "Silurian"@en ,
+                    "silur"@sv .
+
+<#period-after-silurian>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Period after the Silurian"@en ,
+                     "Perioden efter silur"@sv ;
+    solid-memo:back "Devonian"@en ,
+                    "devon"@sv .
+
+<#period-after-devonian>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Period after the Devonian"@en ,
+                     "Perioden efter devon"@sv ;
+    solid-memo:back "Carboniferous"@en ,
+                    "karbon"@sv ;
+    solid-memo:backNote "Divided into two subperiods, the Mississippian (older) and the Pennsylvanian"@en ,
+                        "Indelas i två underperioder, mississippian (äldre) och pennsylvanian"@sv .
+
+<#period-after-carboniferous>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Period after the Carboniferous"@en ,
+                     "Perioden efter karbon"@sv ;
+    solid-memo:back "Permian"@en ,
+                    "perm"@sv .
+
+<#period-after-permian>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Period after the Permian"@en ,
+                     "Perioden efter perm"@sv ;
+    solid-memo:back "Triassic"@en ,
+                    "trias"@sv .
+
+<#period-after-triassic>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Period after the Triassic"@en ,
+                     "Perioden efter trias"@sv ;
+    solid-memo:back "Jurassic"@en ,
+                    "jura"@sv .
+
+<#period-after-jurassic>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Period after the Jurassic"@en ,
+                     "Perioden efter jura"@sv ;
+    solid-memo:back "Cretaceous"@en ,
+                    "krita"@sv .
+
+<#period-after-cretaceous>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Period after the Cretaceous"@en ,
+                     "Perioden efter krita"@sv ;
+    solid-memo:back "Paleogene"@en ,
+                    "paleogen"@sv ;
+    solid-memo:backNote "Paleogene and Neogene together were formerly called the Tertiary, an obsolete term"@en ,
+                        "Paleogen och neogen kallades tidigare tillsammans tertiär, en föråldrad beteckning"@sv .
+
+<#period-after-paleogene>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Period after the Paleogene"@en ,
+                     "Perioden efter paleogen"@sv ;
+    solid-memo:back "Neogene"@en ,
+                    "neogen"@sv ;
+    solid-memo:backNote "Paleogene and Neogene together were formerly called the Tertiary, an obsolete term"@en ,
+                        "Paleogen och neogen kallades tidigare tillsammans tertiär, en föråldrad beteckning"@sv .
+
+<#period-after-neogene>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Period after the Neogene"@en ,
+                     "Perioden efter neogen"@sv ;
+    solid-memo:back "Quaternary"@en ,
+                    "kvartär"@sv .
+
+<#current-period>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The current geologic period"@en ,
+                     "Den nuvarande perioden"@sv ;
+    solid-memo:back "Quaternary"@en ,
+                    "kvartär"@sv .
+
+<#cambrian-era>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Which era does the Cambrian period belong to?"@en ,
+                     "Vilken era hör kambrium till?"@sv ;
+    solid-memo:back "Paleozoic"@en ,
+                    "paleozoikum"@sv .
+
+<#ordovician-era>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Which era does the Ordovician period belong to?"@en ,
+                     "Vilken era hör ordovicium till?"@sv ;
+    solid-memo:back "Paleozoic"@en ,
+                    "paleozoikum"@sv .
+
+<#silurian-era>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Which era does the Silurian period belong to?"@en ,
+                     "Vilken era hör silur till?"@sv ;
+    solid-memo:back "Paleozoic"@en ,
+                    "paleozoikum"@sv .
+
+<#devonian-era>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Which era does the Devonian period belong to?"@en ,
+                     "Vilken era hör devon till?"@sv ;
+    solid-memo:back "Paleozoic"@en ,
+                    "paleozoikum"@sv .
+
+<#carboniferous-era>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Which era does the Carboniferous period belong to?"@en ,
+                     "Vilken era hör karbon till?"@sv ;
+    solid-memo:back "Paleozoic"@en ,
+                    "paleozoikum"@sv .
+
+<#permian-era>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Which era does the Permian period belong to?"@en ,
+                     "Vilken era hör perm till?"@sv ;
+    solid-memo:back "Paleozoic"@en ,
+                    "paleozoikum"@sv .
+
+<#triassic-era>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Which era does the Triassic period belong to?"@en ,
+                     "Vilken era hör trias till?"@sv ;
+    solid-memo:back "Mesozoic"@en ,
+                    "mesozoikum"@sv .
+
+<#jurassic-era>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Which era does the Jurassic period belong to?"@en ,
+                     "Vilken era hör jura till?"@sv ;
+    solid-memo:back "Mesozoic"@en ,
+                    "mesozoikum"@sv .
+
+<#cretaceous-era>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Which era does the Cretaceous period belong to?"@en ,
+                     "Vilken era hör krita till?"@sv ;
+    solid-memo:back "Mesozoic"@en ,
+                    "mesozoikum"@sv .
+
+<#paleogene-era>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Which era does the Paleogene period belong to?"@en ,
+                     "Vilken era hör paleogen till?"@sv ;
+    solid-memo:back "Cenozoic"@en ,
+                    "kenozoikum"@sv .
+
+<#neogene-era>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Which era does the Neogene period belong to?"@en ,
+                     "Vilken era hör neogen till?"@sv ;
+    solid-memo:back "Cenozoic"@en ,
+                    "kenozoikum"@sv .
+
+<#quaternary-era>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Which era does the Quaternary period belong to?"@en ,
+                     "Vilken era hör kvartär till?"@sv ;
+    solid-memo:back "Cenozoic"@en ,
+                    "kenozoikum"@sv .
+
+<#paleozoic-start>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "When did the Paleozoic era begin? (millions of years ago, Ma)"@en ,
+                     "När började paleozoikum? (miljoner år sedan, Ma)"@sv ;
+    solid-memo:back "≈ 539 Ma"@zxx ;
+    solid-memo:backNote "ICS chart v2026/06: 538.8 Ma, also the start of the Phanerozoic and the Cambrian"@en ,
+                        "ICS-tabellen v2026/06: 538,8 miljoner år, även fanerozoikums och kambriums början"@sv .
+
+<#mesozoic-start>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "When did the Mesozoic era begin? (millions of years ago, Ma)"@en ,
+                     "När började mesozoikum? (miljoner år sedan, Ma)"@sv ;
+    solid-memo:back "≈ 252 Ma"@zxx ;
+    solid-memo:backNote "ICS chart v2026/06: 251.902 Ma, the end of the Permian"@en ,
+                        "ICS-tabellen v2026/06: 251,902 miljoner år, permperiodens slut"@sv .
+
+<#cenozoic-start>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "When did the Cenozoic era begin? (millions of years ago, Ma)"@en ,
+                     "När började kenozoikum? (miljoner år sedan, Ma)"@sv ;
+    solid-memo:back "≈ 66 Ma"@zxx ;
+    solid-memo:backNote "ICS chart v2026/06: 66.00 Ma, the end of the Cretaceous"@en ,
+                        "ICS-tabellen v2026/06: 66,00 miljoner år, kritperiodens slut"@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

@@ -26,29 +26,29 @@ const roundTrips: RouteRef[] = [
   {
     screen: "libraryDeck",
     instanceUrl: "https://pod.example/solid-memo/a/",
-    libraryDeckUrl: "https://solid-memo.com/decks/capitals.ttl",
+    libraryDeckUrl: "https://solid-memo.com/decks/capitals/v1.ttl",
   },
   {
     screen: "libraryBrowser",
     instanceUrl: "https://pod.example/solid-memo/a/",
-    libraryDeckUrl: "https://solid-memo.com/decks/capitals.ttl",
+    libraryDeckUrl: "https://solid-memo.com/decks/capitals/v1.ttl",
   },
   {
     screen: "libraryBrowser",
     instanceUrl: "https://pod.example/solid-memo/a/",
-    libraryDeckUrl: "https://solid-memo.com/decks/capitals.ttl",
+    libraryDeckUrl: "https://solid-memo.com/decks/capitals/v1.ttl",
     page: 2,
   },
   {
     screen: "libraryCard",
     instanceUrl: "https://pod.example/solid-memo/a/",
-    libraryDeckUrl: "https://solid-memo.com/decks/capitals.ttl",
+    libraryDeckUrl: "https://solid-memo.com/decks/capitals/v1.ttl",
     cardId: "sweden",
   },
   {
     screen: "libraryPreview",
     instanceUrl: "https://pod.example/solid-memo/a/",
-    libraryDeckUrl: "https://solid-memo.com/decks/capitals.ttl",
+    libraryDeckUrl: "https://solid-memo.com/decks/capitals/v1.ttl",
   },
   {
     screen: "deckDetail",
@@ -177,15 +177,15 @@ describe("routeToHash / parseHash", () => {
     "#/library",
     "#/library-deck",
     "#/library-deck?instance=https%3A%2F%2Fpod.example%2F",
-    "#/library-deck?deck=https%3A%2F%2Fsolid-memo.com%2Fdecks%2Fcapitals.ttl",
+    "#/library-deck?deck=https%3A%2F%2Fsolid-memo.com%2Fdecks%2Fcapitals%2Fv1.ttl",
     "#/library-browse",
     "#/library-browse?instance=https%3A%2F%2Fpod.example%2F",
-    "#/library-browse?deck=https%3A%2F%2Fsolid-memo.com%2Fdecks%2Fcapitals.ttl&page=2",
+    "#/library-browse?deck=https%3A%2F%2Fsolid-memo.com%2Fdecks%2Fcapitals%2Fv1.ttl&page=2",
     "#/library-card?instance=a&deck=b",
     "#/library-card?instance=a&card=c",
     "#/library-card?deck=b&card=c",
     "#/library-preview?instance=https%3A%2F%2Fpod.example%2F",
-    "#/library-preview?deck=https%3A%2F%2Fsolid-memo.com%2Fdecks%2Fcapitals.ttl",
+    "#/library-preview?deck=https%3A%2F%2Fsolid-memo.com%2Fdecks%2Fcapitals%2Fv1.ttl",
     "#/deck",
     "#/deck?instance=https%3A%2F%2Fpod.example%2F",
     "#/deck-preferences?instance=https%3A%2F%2Fpod.example%2F",
@@ -215,10 +215,10 @@ describe("libraryDeckHref", () => {
     expect(
       libraryDeckHref(
         "https://pod.example/a/",
-        "https://solid-memo.com/decks/capitals.ttl",
+        "https://solid-memo.com/decks/capitals/v1.ttl",
       ),
     ).toBe(
-      "#/library-deck?instance=https%3A%2F%2Fpod.example%2Fa%2F&deck=https%3A%2F%2Fsolid-memo.com%2Fdecks%2Fcapitals.ttl",
+      "#/library-deck?instance=https%3A%2F%2Fpod.example%2Fa%2F&deck=https%3A%2F%2Fsolid-memo.com%2Fdecks%2Fcapitals%2Fv1.ttl",
     );
   });
 });

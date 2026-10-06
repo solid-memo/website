@@ -1,0 +1,1229 @@
+@base <https://solid-memo.com/decks/nobel-prize-in-literature/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Nobel Prize in Literature"@en ,
+                  "Nobelpriset i litteratur"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "Every Nobel Prize in Literature from 1901 to 2025, one card per prize year: 118 cards with the year on the front and the laureate or laureates on the back, and a note on the language they wrote in (from Wikidata, checked against NobelPrize.org). Years with no award are left out; the deck ends with the 2025 prize, as the 2026 prize had not been announced when the deck was made on 4 October 2026. From the Nobel Prize API and Wikidata. Not affiliated with or endorsed by the Nobel Foundation."@en ,
+                        "Varje Nobelpris i litteratur från 1901 till 2025, ett kort per prisår: 118 kort med året på framsidan och pristagaren eller pristagarna på baksidan, och en anteckning om vilket språk de skrev på (från Wikidata, kontrollerad mot NobelPrize.org). År då priset inte delades ut är utelämnade; kortleken slutar med 2025 års pris, eftersom 2026 års pris inte var tillkännagivet när kortleken gjordes den 4 oktober 2026. Från Nobelprisets API och Wikidata. Inte knuten till eller godkänd av Nobelstiftelsen."@sv ;
+    prov:wasDerivedFrom <https://api.nobelprize.org/2.1/> ,
+                        <https://www.wikidata.org/wiki/Q37922> ,
+                        <https://www.cia.gov/legacy/museum/artifact/miniature-volume-of-pasternaks-doctor-zhivago/> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:literature ;
+    dcat:keyword "Nobel Prize in Literature"@en ,
+                 "Nobel laureates"@en ,
+                 "literature"@en ,
+                 "authors"@en ,
+                 "Nobelpriset i litteratur"@sv ,
+                 "nobelpristagare"@sv ,
+                 "litteratur"@sv ,
+                 "författare"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:bidirectional ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#nobel-prize-in-literature> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#nobel-prize-in-literature> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://api.nobelprize.org/2.1/> ,
+              <https://www.wikidata.org/wiki/Q37922> ,
+              <https://www.nobelprize.org/prizes/lists/all-nobel-prizes-in-literature/> ,
+              <https://www.cia.gov/legacy/museum/artifact/miniature-volume-of-pasternaks-doctor-zhivago/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ,
+                       <#review-6> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Prizes. On 2026-10-04 the Nobel Prize API was queried for all prizes in literature (nobelPrizeCategory=lit, sorted by year, see Queries). It returned 125 prize years, 1901–2025. Seven of them (1914, 1918, 1935, 1940, 1941, 1942, 1943) have no laureates and the text \"No Nobel Prize was awarded this year\"; they are left out. Each of the other 118 years became one card, with the year (the API's awardYear, the year the prize is for) on the front."@en ,
+                 "Laureates and names. The laureates of each year, in the order the API lists them, are on the back, joined by a comma where the prize was shared (1904, 1917, 1966, 1974). The names are the API's knownName: the English form (knownName.en) is used as untagged text, since a personal name has no language. Where the API's Swedish form (knownName.se) differs — the Russian transliterations Michail Sjolochov, Aleksandr Solzjenitsyn and Svetlana Aleksijevitj — the back is given in English and Swedish instead. One name was corrected: the API and NobelPrize.org write \"Miguel Angel Asturias\" without the accent, the card uses \"Miguel Ángel Asturias\", the Spanish spelling and the English and Swedish label on Wikidata (Q75603). Two further departures, both from review round 2: \"T. S. Eliot\" is written with a space between the initials (the API has \"T.S. Eliot\"), like \"V. S. Naipaul\" and \"J. M. Coetzee\" in the same deck, and as Wikidata's English and language-independent label; and the 1979 card keeps the Nobel Foundation's \"Odysseus Elytis\" but its note gives the spelling of Wikidata's English and Swedish labels, \"Odysseas Elytis\"."@en ,
+                 "Second source for every laureate. Wikidata was queried (query 1) for everyone with P166 award received = Q37922 (Nobel Prize in Literature) and the year of its P585 point in time qualifier, with their English and Swedish labels. Every one of the 122 laureates and years in the API was matched against it by the Wikidata id the API itself gives for each laureate (laureate.wikidata.id). All 122 matched with the same year, except one wrong link in the API (see Quality control): the API links Jean-Marie Gustave Le Clézio to Q7884119, which is an essay of his (\"Une lettre de J. M. G. Le Clézio\", described on Wikidata as \"essay by Jean-Marie Gustave Le Clézio\"); the laureate is Q42037, which Wikidata gives the 2008 prize. No laureate or year is on Wikidata and missing from the API."@en ,
+                 "Language note. Each card's backNote gives the language the laureate wrote in, taken from Wikidata (query 2): the laureate's P6886 writing language, or P1412 languages spoken, written or signed where Wikidata has no P6886; the Swedish name is the language item's Swedish label. A variety is given as the language it belongs to: for Giorgos Seferis, P6886 Modern Greek (Q36510), which Wikidata makes a P279 subclass of Greek (Q9129), is given as Greek, as for Odysseas Elytis; for Winston Churchill and Wole Soyinka (P6886 British English) and Mo Yan (P6886 Mandarin) the note uses their P1412 English and Chinese; for Bjørnstjerne Bjørnson (P1412 Norwegian and Riksmål) Norwegian. Where Wikidata gives a laureate more than one writing language, the note gives the language or languages of the laureate's own works on Wikidata — the works listed as P800 notable work (query 5) or, where those do not cover a language, works with P50 author = the laureate and no translator (queries 7 and 8) — with their P407 language of work, and leaves out a language in which Wikidata lists no work of theirs (or only a dictionary or a literary history). That gives Occitan for Frédéric Mistral (not French), English for Pearl Buck (not Arabic), English for Winston Churchill (not French), Hebrew for Shmuel Agnon (not Yiddish), Yiddish for Isaac Bashevis Singer (not English), Polish for Czesław Miłosz (not English) and English for Louise Glück (not German), and keeps both languages for Rabindranath Tagore (Bengali, and English: The Religion of Man, Q7760113), Samuel Beckett (English and French notable works) and Joseph Brodsky (Russian, and English: Watermark, Q18246659). These decisions are the authoring agent's, recorded in each card's Wikidata evidence, and the works and languages they rest on are machine-checked. The result was then compared with NobelPrize.org (verification only): all 122 facts pages (https://www.nobelprize.org/prizes/literature/<year>/<name>/facts/, the URL taken from the API's laureate link) were fetched; on the 113 that have a \"Language:\" field the note agrees with it in every case; for the nine that have none (2010, 2011 and 2015–2021) the Swedish Academy's bio-bibliography of that year (https://www.nobelprize.org/prizes/literature/<year>/bio-bibliography/), which lists the original works (\"Works in Spanish\", \"Works in Swedish\", \"Works in Russian\", \"Works in English\", or for Olga Tokarczuk and Peter Handke their works under Polish and German titles), agrees with Wikidata. History: the first draft took the language from the facts pages' \"Language:\" field and required Wikidata to have it; review round 3 pointed out that this made a copyrighted site the deciding source, and the notes were re-derived from Wikidata by the rule above, which gives the same language on every card. The Nobel Foundation's country information (birth country, residence at the time of the award) was not used: birth country often says little about a writer (Sigrid Undset, born in Denmark, wrote in Norwegian), and several laureates had no or several residences."@en ,
+                 "Other notes. Where the API's date of the award decision (dateAwarded) falls in the year after the prize year — 1915, 1919, 1925, 1926, 1927 and 1949, prizes reserved and awarded the following year — the note says so (in Swedish \"tilldelades\", the decision, not \"delades ut\", the handing over); the facts pages confirm each one (\"received his Nobel Prize one year later, in 1916\"). The 2018 prize was awarded in 2019, on the same date as the 2019 prize (dateAwarded 2019-10-10 for both). The API's prizeStatus marks Jean-Paul Sartre (1964) as \"declined\" (Wikidata has the qualifier P793 significant event \"nomination declined\" on his P166 Q37922 statement) and Boris Pasternak (1958) as \"restricted\"; the API does not explain \"restricted\", so the 1958 note rests on the CIA Museum's public-domain page on Doctor Zhivago (\"A delighted Pasternak initially accepted the prize, but the Soviet government soon forced him to decline the honor\"), confirmed by the facts page. Erik Axel Karlfeldt's 1931 prize was awarded posthumously: the API's laureate record gives his death on 1931-04-08 and the award decision on 1931-11-08 (the facts page confirms). Shared prizes (portion 1/2 for both laureates) say that the prize was shared equally."@en ,
+                 "Swedish text. The Swedish names of the languages are Wikidata's Swedish labels of the language items (checked by machine: franska Q150, occitanska Q14185, bengali Q9610, serbokroatiska Q9301, jiddisch Q8641, nynorska Q25164 and the others), lower-case as Swedish writes language names. For Giorgos Seferis Wikidata's P6886 is Modern Greek (Q36510, \"nygrekiska\"), a P279 subclass of Greek (Q9129, \"grekiska\"); the note says \"grekiska\", and both links are machine-checked. The rest of the Swedish notes are the authoring agent's own translation of the English note, revised in review round 2."@en ,
+                 "Machine checks. Every card carries Wikidata checks run by the builder against the live Wikidata: for every laureate, P166 includes Q37922; the English and Swedish name on the card is a Wikidata label or alias in that language (or the language-independent \"mul\" label); the note's language is a value of P6886 or P1412; and the Swedish language name is that language item's Swedish label; where Wikidata gives several languages, the notable work or work and its language of work that the note's choice rests on (P800 or P50, and P407); for Seferis, that Modern Greek is a P279 subclass of Greek. The checks read only truthy property values and cannot see the P585 year qualifier, so the link between year and laureate — the core fact of each card — is not re-checked by the build: it was verified once by query 1 (all 122 match), and review round 1 repeated that query on 2026-10-04 with the same result. Three name checks are left out because the Nobel Foundation's form is not on Wikidata, and the P166 check for Peter Handke because a preferred-rank award hides his Nobel statement from the truthy statements the builder reads (see Quality control). The deck was then validated with the app's SHACL and DCAT-AP validators (node scripts/validate_sources.ts nobel-prize-in-literature)."@en ,
+                 "Study direction. Every year has one card and every laureate is on one card only, so the backs are unique and the deck is studied in both directions: from the year to the laureate and from the laureate to the year."@en ,
+                 "Selection: All 118 years from 1901 to 2025 in which the Nobel Prize in Literature was awarded, one card per year, with every laureate of that year: the complete set, nothing chosen. Left out: the seven years with no award (1914, 1918, 1935, 1940, 1941, 1942, 1943), since a card for them would have no laureate to learn; and the 2026 prize, which had not been announced when this deck was made on 4 October 2026. Prizes that were declined (Sartre 1964) or that the laureate was forced to decline (Pasternak 1958) are included, as the Nobel Foundation lists both as laureates; their notes say so. The year is the prize year, not the year it was handed over: the 2018 prize, awarded in 2019, is on the card 2018."@en ,
+                 "Licensing: The deck is CC0 1.0. Its content comes from three sources whose terms allow that: the Nobel Prize API, whose terms say the service is \"free to use according to the Creative Commons Zero (CC0) license\"; Wikidata, whose structured data is CC0; and one page of the CIA Museum website, which as a US government work is in the public domain (\"Unless a copyright is indicated, information on our website is in the public domain\"; no copyright is indicated on the page). The selection (every prize year with an award), the laureates, their names and the notes on shared, late, declined and posthumous prizes come from the API (the Pasternak note from the CIA page), cross-checked with Wikidata; the language notes are derived from Wikidata (P6886/P1412, and for laureates with several languages the language of their works) by the rule in the method, in the authoring agent's own wording. NobelPrize.org's web pages are copyrighted by Nobel Prize Outreach (\"You may not reproduce, distribute ... or otherwise use the Content without prior written permission\") and were used for verification only: they were read to confirm what the open sources give, and no text, selection or data field was taken from them. This matters beyond copyright: the facts pages' \"Language:\" field across all laureates is a database, and in the EU (the deck is published from Sweden) a database can be protected by the sui generis database right (Directive 96/9/EC), which forbids extracting or re-using a substantial part of its contents. The first draft did take the language from that field; review round 3 found this, and the notes were re-derived from Wikidata, so the deck contains no data extracted from NobelPrize.org. The evidence in the provenance report quotes a few words of individual facts pages (the language field and the remarks) to show what was checked; these short quotations of single records are for verification and are not part of the deck's cards. The API terms say that, in case of conflict, they prevail over CC0, and they add conditions for applications: not to alter the data or mislead users — the deck changes the API's names in two places only, the accent in Miguel Ángel Asturias and the spacing in T. S. Eliot, both documented here — and to credit the API as the data source, which the deck does. They also say applications may not use Nobel Prize Outreach's name or trademarks \"in their titles or logos, or in any way that implies endorsement\", and the Nobel Foundation lists \"Nobel Prize®\" among its trademarks. The deck's title, \"Nobel Prize in Literature\" / \"Nobelpriset i litteratur\", uses the prize's name only to say what the deck is about (nominative, descriptive use: there is no other way to name the subject); it uses no logo, medal or other Nobel graphics, and its description says it is not affiliated with or endorsed by the Nobel Foundation. Whether that is enough under the API terms' \"titles\" clause is an open question, raised in review rounds 4 and 6 and not yet settled. If the clause is read strictly, the fallback is a title without the prize's name, such as \"Literature laureates 1901–2025\" / \"Litteraturpristagare 1901–2025\", with the prize named only in the description; the decision will be recorded here."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Completeness and correctness against the sources; agreement between the Nobel Prize API, Wikidata and NobelPrize.org; Wikidata machine checks"@en ;
+    rdfs:comment "Scope: All 118 cards."@en ,
+                 "Outcome: The API's 118 prize years and 122 laureates were matched one by one against Wikidata's P166 Q37922 statements with their P585 years: all agree, after correcting one wrong Wikidata link in the API (Le Clézio). Every language note was matched against the Nobel Foundation's facts page (or bio-bibliography) and against Wikidata P6886/P1412. Every card's Wikidata checks pass in the build. Discrepancies and how they were resolved are listed below. Note added in review round 4: the language resolutions in this round were made before round 3; since round 3 every language note is derived from Wikidata by the rule in the method, and NobelPrize.org only confirms it. Entries that later rounds changed are marked \"Superseded\"."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 118 cards, against the Nobel Prize API v1 and v2.1, every facts page cited and an independent Wikidata SPARQL query of every P166 Q37922 statement with its year."@en ,
+                 "Outcome: No factual error found on any card: every year's laureates, the language notes, the Swedish names, the late, declined, forced-to-decline and posthumous notes and the completeness (118 award years, seven without) all check out. Four findings on wording and documentation; three applied, one needed no change."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language and translation"@en ;
+    rdfs:comment "Scope: All 118 cards, the title, description and keywords in English and Swedish, and the language tags of the built deck."@en ,
+                 "Outcome: No wrong text found; three Swedish and description wording problems and two optional name suggestions. All five applied."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 118 cards' evidence and the sources, licences, method, queries and licensing text; the three source licences fetched again; 12 facts pages, 4 bio-bibliographies and 14 Wikidata items re-read."@en ,
+                 "Outcome: Two errors, two warnings and four suggestions; all eight applied. The main change: the language notes, which the first draft took from NobelPrize.org's copyrighted facts pages, are now derived from Wikidata by a stated rule (language of the laureate's works where Wikidata gives several), with NobelPrize.org only confirming them; the rule gives the same language on every card. The Pasternak note now rests on a public-domain CIA page, a new content source."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final skeptical re-check (loop 1): the 30 cards changed in the last fix, every third card (facts and language), metadata, description, licence decision, documentation and quality-control log accuracy"@en ;
+    rdfs:comment "Scope: 61 cards in depth (the 30 changed in round 3 and every third card); all 118 cards' core facts against the live Nobel Prize API; metadata, description, licensing, method and the quality-control log."@en ,
+                 "Outcome: No errors on the cards. Two warnings and one suggestion, all verified: three round-0 log entries had become stale after rounds 2 and 3 and are now marked as superseded (round 0 kept as history); the Glück bio-bibliography wording was corrected after re-fetching the page; the trademark question about the title remains the publisher's decision and is recorded as open, with a fallback title, in the licensing text. No card changed."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final skeptical re-check (loop 2): every third card (facts and language), metadata, description, licence decision, documentation and quality-control log accuracy (no cards changed in the last fix)"@en ;
+    rdfs:comment "Scope: all 118 cards' core facts against the live Nobel Prize API; 40 cards (every third) in depth for facts and English and Swedish wording; metadata, description, licensing, method and the quality-control log."@en ,
+                 "Outcome: No errors on the cards; the builder's 635 Wikidata checks pass and the SHACL/DCAT-AP validator returns valid. One suggestion, verified and applied: method step 1 still described the review rounds as something that might happen later, although rounds 1–4 had been done; it now states that they were done. The round-4 reviewer label was also lower-cased. No card changed."@en .
+
+<#review-6>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: all 118 cards."@en ,
+                 "Outcome: No wrong facts: every year, laureate, name order, shared, late, declined and posthumous prize matches the live Nobel Prize API, and every language note and its Swedish translation is correct. One suggestion applied: Brodsky's note now puts Russian, his main language, first, as the method and the Tagore note do. One warning verified and left open: whether the title may use the prize's name is an open question, to be recorded in the licensing text once settled."@en .
+
+<https://api.nobelprize.org/2.1/>
+    dcterms:title "Nobel Prize API 2.1 (api.nobelprize.org): Nobel Prizes and laureates in literature (nobelPrizes and laureate endpoints)" ;
+    dcterms:creator "Nobel Prize Outreach" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "Every API response's meta block links the terms (https://www.nobelprize.org/about/terms-of-use-for-api-nobelprize-org-and-data-nobelprize-org/), which say: \"The Services are free to use according to the Creative Commons Zero (CC0) license. In case of conflicting terms or other inconsistencies, these Terms shall prevail.\" They add: \"Applications that use the Services should not deliberately alter or censor the data, or deliberately mislead the end users\"; \"Applications and other products and services may not use Nobel Prize Outreach’s name, logos, or other trademarks in their titles or logos, or in any way that implies endorsement, sponsorship, or false association with Nobel Prize Outreach or any other association within the Nobel Foundation’s sphere. However, you are encouraged to cite the Services as the data source\"."@en .
+
+<https://www.wikidata.org/wiki/Q37922>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing: \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://www.nobelprize.org/prizes/lists/all-nobel-prizes-in-literature/>
+    dcterms:title "NobelPrize.org: laureate facts pages and the Swedish Academy's bio-bibliographies" ;
+    dcterms:creator "Nobel Prize Outreach" ;
+    rdfs:comment "https://www.nobelprize.org/about/terms-of-use/: \"Everything, including but not limited to the articles, texts, photographs, images, data, files, audio and video clips, illustrations, designs, educational games and documentation in whole or in part (the “Content”) which appears on the Site is either proprietary to Nobel Prize Outreach or used in accordance with applicable law or third party consents. You may not reproduce, distribute, display, transmit, modify, perform, adapt, generate derivative works or otherwise use the Content without prior written permission\"; every page ends \"Copyright © Nobel Prize Outreach 2026\"."@en .
+
+<https://www.cia.gov/legacy/museum/artifact/miniature-volume-of-pasternaks-doctor-zhivago/>
+    dcterms:title "CIA Museum: Miniature Volume of Pasternak’s Doctor Zhivago" ;
+    dcterms:creator "Central Intelligence Agency" ;
+    rdfs:comment "https://www.cia.gov/site-policies/ (Copyright Notice): \"Unless a copyright is indicated, information on our website is in the public domain and may be reproduced, published or otherwise used without our permission. We request only that our Agency be cited as the source of the information\"; the Pasternak page indicates no copyright. A work of the US federal government."@en .
+
+<#1901-prudhomme>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1901" ;
+    solid-memo:back "Sully Prudhomme" ;
+    solid-memo:backNote "Language: French."@en ,
+                        "Språk: franska."@sv .
+
+<#1902-mommsen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1902" ;
+    solid-memo:back "Theodor Mommsen" ;
+    solid-memo:backNote "Language: German."@en ,
+                        "Språk: tyska."@sv .
+
+<#1903-bjornson>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1903" ;
+    solid-memo:back "Bjørnstjerne Bjørnson" ;
+    solid-memo:backNote "Language: Norwegian."@en ,
+                        "Språk: norska."@sv .
+
+<#1904-mistral-echegaray>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1904" ;
+    solid-memo:back "Frédéric Mistral, José Echegaray" ;
+    solid-memo:backNote "Mistral wrote in Occitan, Echegaray in Spanish. The prize was shared equally."@en ,
+                        "Mistral skrev på occitanska, Echegaray på spanska. Priset delades lika mellan dem."@sv .
+
+<#1905-sienkiewicz>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1905" ;
+    solid-memo:back "Henryk Sienkiewicz" ;
+    solid-memo:backNote "Language: Polish."@en ,
+                        "Språk: polska."@sv .
+
+<#1906-carducci>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1906" ;
+    solid-memo:back "Giosuè Carducci" ;
+    solid-memo:backNote "Language: Italian."@en ,
+                        "Språk: italienska."@sv .
+
+<#1907-kipling>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1907" ;
+    solid-memo:back "Rudyard Kipling" ;
+    solid-memo:backNote "Language: English."@en ,
+                        "Språk: engelska."@sv .
+
+<#1908-eucken>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1908" ;
+    solid-memo:back "Rudolf Eucken" ;
+    solid-memo:backNote "Language: German."@en ,
+                        "Språk: tyska."@sv .
+
+<#1909-lagerlof>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1909" ;
+    solid-memo:back "Selma Lagerlöf" ;
+    solid-memo:backNote "Language: Swedish."@en ,
+                        "Språk: svenska."@sv .
+
+<#1910-heyse>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1910" ;
+    solid-memo:back "Paul Heyse" ;
+    solid-memo:backNote "Language: German."@en ,
+                        "Språk: tyska."@sv .
+
+<#1911-maeterlinck>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1911" ;
+    solid-memo:back "Maurice Maeterlinck" ;
+    solid-memo:backNote "Language: French."@en ,
+                        "Språk: franska."@sv .
+
+<#1912-hauptmann>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1912" ;
+    solid-memo:back "Gerhart Hauptmann" ;
+    solid-memo:backNote "Language: German."@en ,
+                        "Språk: tyska."@sv .
+
+<#1913-tagore>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1913" ;
+    solid-memo:back "Rabindranath Tagore" ;
+    solid-memo:backNote "Language: Bengali and English."@en ,
+                        "Språk: bengali och engelska."@sv .
+
+<#1915-rolland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1915" ;
+    solid-memo:back "Romain Rolland" ;
+    solid-memo:backNote "Language: French. The prize was awarded a year later, in 1916."@en ,
+                        "Språk: franska. Priset tilldelades honom ett år senare, 1916."@sv .
+
+<#1916-von-heidenstam>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1916" ;
+    solid-memo:back "Verner von Heidenstam" ;
+    solid-memo:backNote "Language: Swedish."@en ,
+                        "Språk: svenska."@sv .
+
+<#1917-gjellerup-pontoppidan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1917" ;
+    solid-memo:back "Karl Gjellerup, Henrik Pontoppidan" ;
+    solid-memo:backNote "Both wrote in Danish. The prize was shared equally."@en ,
+                        "Båda skrev på danska. Priset delades lika mellan dem."@sv .
+
+<#1919-spitteler>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1919" ;
+    solid-memo:back "Carl Spitteler" ;
+    solid-memo:backNote "Language: German. The prize was awarded a year later, in 1920."@en ,
+                        "Språk: tyska. Priset tilldelades honom ett år senare, 1920."@sv .
+
+<#1920-hamsun>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1920" ;
+    solid-memo:back "Knut Hamsun" ;
+    solid-memo:backNote "Language: Norwegian."@en ,
+                        "Språk: norska."@sv .
+
+<#1921-france>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1921" ;
+    solid-memo:back "Anatole France" ;
+    solid-memo:backNote "Language: French."@en ,
+                        "Språk: franska."@sv .
+
+<#1922-benavente>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1922" ;
+    solid-memo:back "Jacinto Benavente" ;
+    solid-memo:backNote "Language: Spanish."@en ,
+                        "Språk: spanska."@sv .
+
+<#1923-yeats>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1923" ;
+    solid-memo:back "William Butler Yeats" ;
+    solid-memo:backNote "Language: English."@en ,
+                        "Språk: engelska."@sv .
+
+<#1924-reymont>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1924" ;
+    solid-memo:back "Władysław Reymont" ;
+    solid-memo:backNote "Language: Polish."@en ,
+                        "Språk: polska."@sv .
+
+<#1925-shaw>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1925" ;
+    solid-memo:back "George Bernard Shaw" ;
+    solid-memo:backNote "Language: English. The prize was awarded a year later, in 1926."@en ,
+                        "Språk: engelska. Priset tilldelades honom ett år senare, 1926."@sv .
+
+<#1926-deledda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1926" ;
+    solid-memo:back "Grazia Deledda" ;
+    solid-memo:backNote "Language: Italian. The prize was awarded a year later, in 1927."@en ,
+                        "Språk: italienska. Priset tilldelades henne ett år senare, 1927."@sv .
+
+<#1927-bergson>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1927" ;
+    solid-memo:back "Henri Bergson" ;
+    solid-memo:backNote "Language: French. The prize was awarded a year later, in 1928."@en ,
+                        "Språk: franska. Priset tilldelades honom ett år senare, 1928."@sv .
+
+<#1928-undset>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1928" ;
+    solid-memo:back "Sigrid Undset" ;
+    solid-memo:backNote "Language: Norwegian."@en ,
+                        "Språk: norska."@sv .
+
+<#1929-mann>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1929" ;
+    solid-memo:back "Thomas Mann" ;
+    solid-memo:backNote "Language: German."@en ,
+                        "Språk: tyska."@sv .
+
+<#1930-lewis>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1930" ;
+    solid-memo:back "Sinclair Lewis" ;
+    solid-memo:backNote "Language: English."@en ,
+                        "Språk: engelska."@sv .
+
+<#1931-karlfeldt>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1931" ;
+    solid-memo:back "Erik Axel Karlfeldt" ;
+    solid-memo:backNote "Language: Swedish. Awarded posthumously."@en ,
+                        "Språk: svenska. Tilldelades postumt."@sv .
+
+<#1932-galsworthy>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1932" ;
+    solid-memo:back "John Galsworthy" ;
+    solid-memo:backNote "Language: English."@en ,
+                        "Språk: engelska."@sv .
+
+<#1933-bunin>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1933" ;
+    solid-memo:back "Ivan Bunin" ;
+    solid-memo:backNote "Language: Russian."@en ,
+                        "Språk: ryska."@sv .
+
+<#1934-pirandello>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1934" ;
+    solid-memo:back "Luigi Pirandello" ;
+    solid-memo:backNote "Language: Italian."@en ,
+                        "Språk: italienska."@sv .
+
+<#1936-o-neill>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1936" ;
+    solid-memo:back "Eugene O'Neill" ;
+    solid-memo:backNote "Language: English."@en ,
+                        "Språk: engelska."@sv .
+
+<#1937-martin-du-gard>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1937" ;
+    solid-memo:back "Roger Martin du Gard" ;
+    solid-memo:backNote "Language: French."@en ,
+                        "Språk: franska."@sv .
+
+<#1938-buck>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1938" ;
+    solid-memo:back "Pearl Buck" ;
+    solid-memo:backNote "Language: English."@en ,
+                        "Språk: engelska."@sv .
+
+<#1939-sillanpaa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1939" ;
+    solid-memo:back "Frans Eemil Sillanpää" ;
+    solid-memo:backNote "Language: Finnish."@en ,
+                        "Språk: finska."@sv .
+
+<#1944-jensen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1944" ;
+    solid-memo:back "Johannes V. Jensen" ;
+    solid-memo:backNote "Language: Danish."@en ,
+                        "Språk: danska."@sv .
+
+<#1945-mistral>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1945" ;
+    solid-memo:back "Gabriela Mistral" ;
+    solid-memo:backNote "Language: Spanish."@en ,
+                        "Språk: spanska."@sv .
+
+<#1946-hesse>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1946" ;
+    solid-memo:back "Hermann Hesse" ;
+    solid-memo:backNote "Language: German."@en ,
+                        "Språk: tyska."@sv .
+
+<#1947-gide>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1947" ;
+    solid-memo:back "André Gide" ;
+    solid-memo:backNote "Language: French."@en ,
+                        "Språk: franska."@sv .
+
+<#1948-eliot>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1948" ;
+    solid-memo:back "T. S. Eliot" ;
+    solid-memo:backNote "Language: English."@en ,
+                        "Språk: engelska."@sv .
+
+<#1949-faulkner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1949" ;
+    solid-memo:back "William Faulkner" ;
+    solid-memo:backNote "Language: English. The prize was awarded a year later, in 1950."@en ,
+                        "Språk: engelska. Priset tilldelades honom ett år senare, 1950."@sv .
+
+<#1950-russell>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1950" ;
+    solid-memo:back "Bertrand Russell" ;
+    solid-memo:backNote "Language: English."@en ,
+                        "Språk: engelska."@sv .
+
+<#1951-lagerkvist>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1951" ;
+    solid-memo:back "Pär Lagerkvist" ;
+    solid-memo:backNote "Language: Swedish."@en ,
+                        "Språk: svenska."@sv .
+
+<#1952-mauriac>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1952" ;
+    solid-memo:back "François Mauriac" ;
+    solid-memo:backNote "Language: French."@en ,
+                        "Språk: franska."@sv .
+
+<#1953-churchill>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1953" ;
+    solid-memo:back "Winston Churchill" ;
+    solid-memo:backNote "Language: English."@en ,
+                        "Språk: engelska."@sv .
+
+<#1954-hemingway>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1954" ;
+    solid-memo:back "Ernest Hemingway" ;
+    solid-memo:backNote "Language: English."@en ,
+                        "Språk: engelska."@sv .
+
+<#1955-laxness>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1955" ;
+    solid-memo:back "Halldór Laxness" ;
+    solid-memo:backNote "Language: Icelandic."@en ,
+                        "Språk: isländska."@sv .
+
+<#1956-jimenez>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1956" ;
+    solid-memo:back "Juan Ramón Jiménez" ;
+    solid-memo:backNote "Language: Spanish."@en ,
+                        "Språk: spanska."@sv .
+
+<#1957-camus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1957" ;
+    solid-memo:back "Albert Camus" ;
+    solid-memo:backNote "Language: French."@en ,
+                        "Språk: franska."@sv .
+
+<#1958-pasternak>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1958" ;
+    solid-memo:back "Boris Pasternak" ;
+    solid-memo:backNote "Language: Russian. Accepted the prize at first, but the Soviet government forced him to decline it."@en ,
+                        "Språk: ryska. Tackade först ja till priset, men den sovjetiska regeringen tvingade honom att avböja det."@sv .
+
+<#1959-quasimodo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1959" ;
+    solid-memo:back "Salvatore Quasimodo" ;
+    solid-memo:backNote "Language: Italian."@en ,
+                        "Språk: italienska."@sv .
+
+<#1960-saint-john-perse>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1960" ;
+    solid-memo:back "Saint-John Perse" ;
+    solid-memo:backNote "Language: French."@en ,
+                        "Språk: franska."@sv .
+
+<#1961-andric>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1961" ;
+    solid-memo:back "Ivo Andrić" ;
+    solid-memo:backNote "Language: Serbo-Croatian."@en ,
+                        "Språk: serbokroatiska."@sv .
+
+<#1962-steinbeck>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1962" ;
+    solid-memo:back "John Steinbeck" ;
+    solid-memo:backNote "Language: English."@en ,
+                        "Språk: engelska."@sv .
+
+<#1963-seferis>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1963" ;
+    solid-memo:back "Giorgos Seferis" ;
+    solid-memo:backNote "Language: Greek."@en ,
+                        "Språk: grekiska."@sv .
+
+<#1964-sartre>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1964" ;
+    solid-memo:back "Jean-Paul Sartre" ;
+    solid-memo:backNote "Language: French. Declined the prize."@en ,
+                        "Språk: franska. Avböjde priset."@sv .
+
+<#1965-sholokhov>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1965" ;
+    solid-memo:back "Mikhail Sholokhov"@en ,
+                    "Michail Sjolochov"@sv ;
+    solid-memo:backNote "Language: Russian."@en ,
+                        "Språk: ryska."@sv .
+
+<#1966-agnon-sachs>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1966" ;
+    solid-memo:back "Shmuel Agnon, Nelly Sachs" ;
+    solid-memo:backNote "Agnon wrote in Hebrew, Sachs in German. The prize was shared equally."@en ,
+                        "Agnon skrev på hebreiska, Sachs på tyska. Priset delades lika mellan dem."@sv .
+
+<#1967-asturias>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1967" ;
+    solid-memo:back "Miguel Ángel Asturias" ;
+    solid-memo:backNote "Language: Spanish."@en ,
+                        "Språk: spanska."@sv .
+
+<#1968-kawabata>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1968" ;
+    solid-memo:back "Yasunari Kawabata" ;
+    solid-memo:backNote "Language: Japanese."@en ,
+                        "Språk: japanska."@sv .
+
+<#1969-beckett>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1969" ;
+    solid-memo:back "Samuel Beckett" ;
+    solid-memo:backNote "Language: English and French."@en ,
+                        "Språk: engelska och franska."@sv .
+
+<#1970-solzhenitsyn>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1970" ;
+    solid-memo:back "Aleksandr Solzhenitsyn"@en ,
+                    "Aleksandr Solzjenitsyn"@sv ;
+    solid-memo:backNote "Language: Russian."@en ,
+                        "Språk: ryska."@sv .
+
+<#1971-neruda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1971" ;
+    solid-memo:back "Pablo Neruda" ;
+    solid-memo:backNote "Language: Spanish."@en ,
+                        "Språk: spanska."@sv .
+
+<#1972-boll>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1972" ;
+    solid-memo:back "Heinrich Böll" ;
+    solid-memo:backNote "Language: German."@en ,
+                        "Språk: tyska."@sv .
+
+<#1973-white>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1973" ;
+    solid-memo:back "Patrick White" ;
+    solid-memo:backNote "Language: English."@en ,
+                        "Språk: engelska."@sv .
+
+<#1974-johnson-martinson>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1974" ;
+    solid-memo:back "Eyvind Johnson, Harry Martinson" ;
+    solid-memo:backNote "Both wrote in Swedish. The prize was shared equally."@en ,
+                        "Båda skrev på svenska. Priset delades lika mellan dem."@sv .
+
+<#1975-montale>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1975" ;
+    solid-memo:back "Eugenio Montale" ;
+    solid-memo:backNote "Language: Italian."@en ,
+                        "Språk: italienska."@sv .
+
+<#1976-bellow>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1976" ;
+    solid-memo:back "Saul Bellow" ;
+    solid-memo:backNote "Language: English."@en ,
+                        "Språk: engelska."@sv .
+
+<#1977-aleixandre>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1977" ;
+    solid-memo:back "Vicente Aleixandre" ;
+    solid-memo:backNote "Language: Spanish."@en ,
+                        "Språk: spanska."@sv .
+
+<#1978-singer>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1978" ;
+    solid-memo:back "Isaac Bashevis Singer" ;
+    solid-memo:backNote "Language: Yiddish."@en ,
+                        "Språk: jiddisch."@sv .
+
+<#1979-elytis>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1979" ;
+    solid-memo:back "Odysseus Elytis" ;
+    solid-memo:backNote "Language: Greek. Also spelled Odysseas Elytis."@en ,
+                        "Språk: grekiska. Skrivs även Odysseas Elytis."@sv .
+
+<#1980-milosz>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1980" ;
+    solid-memo:back "Czesław Miłosz" ;
+    solid-memo:backNote "Language: Polish."@en ,
+                        "Språk: polska."@sv .
+
+<#1981-canetti>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1981" ;
+    solid-memo:back "Elias Canetti" ;
+    solid-memo:backNote "Language: German."@en ,
+                        "Språk: tyska."@sv .
+
+<#1982-garcia-marquez>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1982" ;
+    solid-memo:back "Gabriel García Márquez" ;
+    solid-memo:backNote "Language: Spanish."@en ,
+                        "Språk: spanska."@sv .
+
+<#1983-golding>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1983" ;
+    solid-memo:back "William Golding" ;
+    solid-memo:backNote "Language: English."@en ,
+                        "Språk: engelska."@sv .
+
+<#1984-seifert>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1984" ;
+    solid-memo:back "Jaroslav Seifert" ;
+    solid-memo:backNote "Language: Czech."@en ,
+                        "Språk: tjeckiska."@sv .
+
+<#1985-simon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1985" ;
+    solid-memo:back "Claude Simon" ;
+    solid-memo:backNote "Language: French."@en ,
+                        "Språk: franska."@sv .
+
+<#1986-soyinka>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1986" ;
+    solid-memo:back "Wole Soyinka" ;
+    solid-memo:backNote "Language: English."@en ,
+                        "Språk: engelska."@sv .
+
+<#1987-brodsky>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1987" ;
+    solid-memo:back "Joseph Brodsky" ;
+    solid-memo:backNote "Language: Russian and English."@en ,
+                        "Språk: ryska och engelska."@sv .
+
+<#1988-mahfouz>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1988" ;
+    solid-memo:back "Naguib Mahfouz" ;
+    solid-memo:backNote "Language: Arabic."@en ,
+                        "Språk: arabiska."@sv .
+
+<#1989-cela>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1989" ;
+    solid-memo:back "Camilo José Cela" ;
+    solid-memo:backNote "Language: Spanish."@en ,
+                        "Språk: spanska."@sv .
+
+<#1990-paz>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1990" ;
+    solid-memo:back "Octavio Paz" ;
+    solid-memo:backNote "Language: Spanish."@en ,
+                        "Språk: spanska."@sv .
+
+<#1991-gordimer>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1991" ;
+    solid-memo:back "Nadine Gordimer" ;
+    solid-memo:backNote "Language: English."@en ,
+                        "Språk: engelska."@sv .
+
+<#1992-walcott>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1992" ;
+    solid-memo:back "Derek Walcott" ;
+    solid-memo:backNote "Language: English."@en ,
+                        "Språk: engelska."@sv .
+
+<#1993-morrison>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1993" ;
+    solid-memo:back "Toni Morrison" ;
+    solid-memo:backNote "Language: English."@en ,
+                        "Språk: engelska."@sv .
+
+<#1994-oe>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1994" ;
+    solid-memo:back "Kenzaburo Oe" ;
+    solid-memo:backNote "Language: Japanese."@en ,
+                        "Språk: japanska."@sv .
+
+<#1995-heaney>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1995" ;
+    solid-memo:back "Seamus Heaney" ;
+    solid-memo:backNote "Language: English."@en ,
+                        "Språk: engelska."@sv .
+
+<#1996-szymborska>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1996" ;
+    solid-memo:back "Wisława Szymborska" ;
+    solid-memo:backNote "Language: Polish."@en ,
+                        "Språk: polska."@sv .
+
+<#1997-fo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1997" ;
+    solid-memo:back "Dario Fo" ;
+    solid-memo:backNote "Language: Italian."@en ,
+                        "Språk: italienska."@sv .
+
+<#1998-saramago>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1998" ;
+    solid-memo:back "José Saramago" ;
+    solid-memo:backNote "Language: Portuguese."@en ,
+                        "Språk: portugisiska."@sv .
+
+<#1999-grass>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1999" ;
+    solid-memo:back "Günter Grass" ;
+    solid-memo:backNote "Language: German."@en ,
+                        "Språk: tyska."@sv .
+
+<#2000-gao-xingjian>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2000" ;
+    solid-memo:back "Gao Xingjian" ;
+    solid-memo:backNote "Language: Chinese."@en ,
+                        "Språk: kinesiska."@sv .
+
+<#2001-naipaul>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2001" ;
+    solid-memo:back "V. S. Naipaul" ;
+    solid-memo:backNote "Language: English."@en ,
+                        "Språk: engelska."@sv .
+
+<#2002-kertesz>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2002" ;
+    solid-memo:back "Imre Kertész" ;
+    solid-memo:backNote "Language: Hungarian."@en ,
+                        "Språk: ungerska."@sv .
+
+<#2003-coetzee>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2003" ;
+    solid-memo:back "J. M. Coetzee" ;
+    solid-memo:backNote "Language: English."@en ,
+                        "Språk: engelska."@sv .
+
+<#2004-jelinek>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2004" ;
+    solid-memo:back "Elfriede Jelinek" ;
+    solid-memo:backNote "Language: German."@en ,
+                        "Språk: tyska."@sv .
+
+<#2005-pinter>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2005" ;
+    solid-memo:back "Harold Pinter" ;
+    solid-memo:backNote "Language: English."@en ,
+                        "Språk: engelska."@sv .
+
+<#2006-pamuk>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2006" ;
+    solid-memo:back "Orhan Pamuk" ;
+    solid-memo:backNote "Language: Turkish."@en ,
+                        "Språk: turkiska."@sv .
+
+<#2007-lessing>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2007" ;
+    solid-memo:back "Doris Lessing" ;
+    solid-memo:backNote "Language: English."@en ,
+                        "Språk: engelska."@sv .
+
+<#2008-le-clezio>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2008" ;
+    solid-memo:back "Jean-Marie Gustave Le Clézio" ;
+    solid-memo:backNote "Language: French."@en ,
+                        "Språk: franska."@sv .
+
+<#2009-muller>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2009" ;
+    solid-memo:back "Herta Müller" ;
+    solid-memo:backNote "Language: German."@en ,
+                        "Språk: tyska."@sv .
+
+<#2010-vargas-llosa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2010" ;
+    solid-memo:back "Mario Vargas Llosa" ;
+    solid-memo:backNote "Language: Spanish."@en ,
+                        "Språk: spanska."@sv .
+
+<#2011-transtromer>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2011" ;
+    solid-memo:back "Tomas Tranströmer" ;
+    solid-memo:backNote "Language: Swedish."@en ,
+                        "Språk: svenska."@sv .
+
+<#2012-mo-yan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2012" ;
+    solid-memo:back "Mo Yan" ;
+    solid-memo:backNote "Language: Chinese."@en ,
+                        "Språk: kinesiska."@sv .
+
+<#2013-munro>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2013" ;
+    solid-memo:back "Alice Munro" ;
+    solid-memo:backNote "Language: English."@en ,
+                        "Språk: engelska."@sv .
+
+<#2014-modiano>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2014" ;
+    solid-memo:back "Patrick Modiano" ;
+    solid-memo:backNote "Language: French."@en ,
+                        "Språk: franska."@sv .
+
+<#2015-alexievich>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2015" ;
+    solid-memo:back "Svetlana Alexievich"@en ,
+                    "Svetlana Aleksijevitj"@sv ;
+    solid-memo:backNote "Language: Russian."@en ,
+                        "Språk: ryska."@sv .
+
+<#2016-dylan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2016" ;
+    solid-memo:back "Bob Dylan" ;
+    solid-memo:backNote "Language: English."@en ,
+                        "Språk: engelska."@sv .
+
+<#2017-ishiguro>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2017" ;
+    solid-memo:back "Kazuo Ishiguro" ;
+    solid-memo:backNote "Language: English."@en ,
+                        "Språk: engelska."@sv .
+
+<#2018-tokarczuk>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2018" ;
+    solid-memo:back "Olga Tokarczuk" ;
+    solid-memo:backNote "Language: Polish. The prize was awarded in 2019, together with the 2019 prize."@en ,
+                        "Språk: polska. Priset tilldelades henne 2019, samtidigt med 2019 års pris."@sv .
+
+<#2019-handke>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2019" ;
+    solid-memo:back "Peter Handke" ;
+    solid-memo:backNote "Language: German."@en ,
+                        "Språk: tyska."@sv .
+
+<#2020-gluck>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2020" ;
+    solid-memo:back "Louise Glück" ;
+    solid-memo:backNote "Language: English."@en ,
+                        "Språk: engelska."@sv .
+
+<#2021-gurnah>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2021" ;
+    solid-memo:back "Abdulrazak Gurnah" ;
+    solid-memo:backNote "Language: English."@en ,
+                        "Språk: engelska."@sv .
+
+<#2022-ernaux>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2022" ;
+    solid-memo:back "Annie Ernaux" ;
+    solid-memo:backNote "Language: French."@en ,
+                        "Språk: franska."@sv .
+
+<#2023-fosse>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2023" ;
+    solid-memo:back "Jon Fosse" ;
+    solid-memo:backNote "Language: Norwegian Nynorsk."@en ,
+                        "Språk: nynorska."@sv .
+
+<#2024-han-kang>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2024" ;
+    solid-memo:back "Han Kang" ;
+    solid-memo:backNote "Language: Korean."@en ,
+                        "Språk: koreanska."@sv .
+
+<#2025-krasznahorkai>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2025" ;
+    solid-memo:back "László Krasznahorkai" ;
+    solid-memo:backNote "Language: Hungarian."@en ,
+                        "Språk: ungerska."@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

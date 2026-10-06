@@ -1,0 +1,612 @@
+@base <https://solid-memo.com/decks/sql-basics/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "SQL basics"@en ,
+                  "Grundläggande SQL"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "48 everyday SQL statements: the front describes a task in plain words in English and Swedish, the back is the one statement that does it, on three example tables (customers, products and orders) and in one style: upper-case keywords, AS for aliases, <> for not equal and a closing semicolon. Every statement runs unchanged in both SQLite and PostgreSQL, so rows are limited with LIMIT; FETCH FIRST, which SQLite rejects, is given in a note. Each was run in SQLite 3.53 and PostgreSQL 16 and checked against both projects' documentation."@en ,
+                        "48 vardagliga SQL-satser: på framsidan en uppgift beskriven med vanliga ord på engelska och svenska, på baksidan den sats som utför den, mot tre exempeltabeller (customers, products och orders) och i en enda stil: nyckelord med versaler, AS för alias, <> för ”inte lika med” och avslutande semikolon. Varje sats fungerar oförändrad i både SQLite och PostgreSQL, så antalet rader begränsas med LIMIT; FETCH FIRST, som SQLite inte godtar, nämns i en anteckning. Alla har körts i SQLite 3.53 och PostgreSQL 16 och kontrollerats mot båda projektens dokumentation."@sv ;
+    prov:wasDerivedFrom <#test-runs> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:computing ;
+    dcat:keyword "SQL"@en ,
+                 "databases"@en ,
+                 "queries"@en ,
+                 "SQLite"@en ,
+                 "PostgreSQL"@en ,
+                 "SQL"@sv ,
+                 "databaser"@sv ,
+                 "databasfrågor"@sv ,
+                 "SQLite"@sv ,
+                 "PostgreSQL"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#sql-basics> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#sql-basics> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <#test-runs> ,
+              <https://www.sqlite.org/lang.html> ,
+              <https://www.postgresql.org/docs/current/> ,
+              <https://learn.microsoft.com/sv-se/sql/relational-databases/performance/subqueries?view=sql-server-ver17> ,
+              <https://www.wikidata.org/> ,
+              <https://sv.wikipedia.org/wiki/Databasnyckel> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (a test run of every statement in SQLite and PostgreSQL, live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Candidate tasks: the authoring agent drew up a list of everyday SQL tasks following the editor's brief (SELECT, WHERE, ORDER BY, GROUP BY, HAVING, joins, INSERT, UPDATE, DELETE, CREATE TABLE, ALTER TABLE, DROP TABLE, indexes, DISTINCT, LIMIT, COUNT/SUM/AVG, NULL tests, LIKE, IN, BETWEEN, aliases and subqueries) and wrote a statement for each. The list and the wording are the agent's own; they were not taken from any published tutorial, cheat sheet or list."@en ,
+                 "Example database: every task works on three small tables of the agent's own design, named on the fronts: customers (id, name, email, city, country), products (id, name, category, price) and orders (id, customer_id, total), with 7, 8 and 5 rows. The data were chosen so that each statement's effect is visible and the pitfalls the notes mention actually occur: three customers have no email, one has no city, one name begins with a lower-case a, two customers have no orders, the prices include the boundary value 200, and so on. Table and column names, and the text values in the fronts (Lund, Norway, books, Gustav), are written as on the back; text values are in single quotes on the back."@en ,
+                 "One style (the deck's convention, stated so that each front has one canonical answer): SQL keywords and function names in upper case; table and column names in lower case; one statement per card, on one line, ending with a semicolon; AS written for every column and table alias; <> for not equal; INNER JOIN and LEFT JOIN written in those forms; ascending order not written (ASC is the default), DESC written; in a join condition the column of the table named first comes first; constraints as column constraints (id INTEGER PRIMARY KEY, customer_id INTEGER REFERENCES customers (id)); a space before a parenthesised column list. Above all, every statement must run unchanged in both SQLite and PostgreSQL. This rule decides the two cases where the brief asked for a choice: rows are limited with LIMIT (and OFFSET), which both accept, although it is not standard SQL; the standard OFFSET ... FETCH FIRST|NEXT ... ROWS ONLY works in PostgreSQL but is a syntax error in SQLite, and is given in the notes. Likewise the whole table is emptied with DELETE FROM orders; because SQLite has no TRUNCATE. Equivalent forms that are also correct (!=, AS left out, JOIN without INNER, LEFT OUTER JOIN, ASC, ADD without COLUMN, EXISTS, table constraints) were run too and are named in notes where a learner is likely to meet them."@en ,
+                 "Test run (the content source): the script run_sql.py (reproduced verbatim under Queries) was run on Linux on 2026-10-04 with: uv run --python 3.12 --with pgserver --with \"psycopg[binary]\" python3 <scratch>/run_sql.py. It uses Python's sqlite3 module (SQLite 3.53.1, the library bundled with the Python 3.12 build that uv installed) and a throwaway PostgreSQL 16.2 server started from the pgserver package's bundled binaries, reached with psycopg. For each card it builds a fresh copy of the example database (an in-memory SQLite database; in PostgreSQL the schema public is dropped and recreated), runs the card's statement exactly as printed on the card, and then runs check queries that show the effect (the changed rows, the remaining rows, the table's columns, the catalogue of indexes, or inserts that must fail). Its last section, NOTES, runs the alternative forms and behaviours named in the notes in both engines. The full output (run-output.txt) is reproduced under Queries; each card's evidence cites its section (\"CARD <id>\") and what it showed. The card backs in this dossier were generated from the statements the script ran (make_dossier.py asserts that every back is exactly the tested statement)."@en ,
+                 "Cross-check (verification sources): for every card the relevant pages of the SQLite documentation (sqlite.org, public domain) and of the PostgreSQL 18 documentation (postgresql.org/docs/current) were downloaded and converted to text with fetch_docs.py and read at the clause used, with the helper scripts grepdocs.py and lines.py (all reproduced under Queries with the pattern files and command lines used); the PostgreSQL character-types page and the licence pages were fetched with fetch.py. The evidence records what each documents. The documentation agreed with the observed behaviour for every card. What the PostgreSQL documentation says about the SQL standard (LIMIT not standard, FETCH FIRST standard since SQL:2008, <> the standard not-equal, ILIKE an extension, TEXT not a standard type) informed the deck's choice of forms; since the ISO standard itself is not freely available, and the PostgreSQL documentation is only a verification source, no card states these facts: the notes say only which engine accepted which form in the test run."@en ,
+                 "Swedish text: the Swedish fronts and notes were written by the authoring agent in its own words. The database terms follow established Swedish usage: 'primärnyckel' is Wikidata's Swedish label for primary key (Q934729, checked by the builder); 'tabell', 'kolumn' and 'index' are the terms of Swedish Wikipedia's article Databasnyckel, and its article Structured Query Language describes the basic statements as hämta, lägga till, sätt ... till and ta bort. Wikidata has no Swedish label for subquery, and a search of Swedish Wikipedia found neither 'underfråga' nor 'delfråga' in this sense (svsearch.py); the fronts use 'underfråga', which the language review confirmed in Microsoft's Swedish documentation (Underfrågor (SQL Server)), where the review also confirmed 'mängdfunktion' (aggregate function) and 'inre koppling' (inner join). Ordinary words were used for the rest (stigande / fallande for ascending / descending, dubbletter, medelvärde, värdelista, intervallvillkor). Table names, column names and data values stay in their English form in both languages, because they are typed literally."@en ,
+                 "Ambiguity checks: each front names the table, the columns, the values and, where SQL offers several constructs, the construct to use ('using a list of values' for IN, 'using one range test' for BETWEEN, 'using a subquery', 'without a WHERE clause' for COUNT(email), 'joining orders to customers on ...'). Pairs that look alike were made distinct: WHERE versus HAVING (where-group-by, having), COUNT(*) versus COUNT(email) versus COUNT(DISTINCT city), INNER versus LEFT JOIN, DELETE FROM orders versus DROP TABLE orders, LIMIT versus LIMIT ... OFFSET. Because the study direction is front to back only, the builder's uniqueness check applies to the fronts, and every front is unique in both languages."@en ,
+                 "Everything was then written into this dossier with make_dossier.py, built with the builder, which also ran the Wikidata check, and validated with the app's SHACL and DCAT-AP validators (scripts/validate_sources.ts sql-basics). The changes made after the review rounds (logged under Quality control) were made directly in this dossier; the card backs, and therefore the tested statements, did not change."@en ,
+                 "Selection: 48 statements that cover the everyday core of SQL as the editor's brief asked: reading rows (SELECT with * and named columns, DISTINCT, column and table aliases), filtering (=, <>, AND, OR, IN, BETWEEN, LIKE with a prefix and a substring, IS NULL and IS NOT NULL), sorting (ascending, descending, two keys), limiting (LIMIT, LIMIT with OFFSET), aggregates (COUNT(*), COUNT(column), COUNT(DISTINCT), SUM, AVG, MAX), grouping (GROUP BY with COUNT and SUM, HAVING, WHERE with GROUP BY), joins (INNER and LEFT), subqueries (IN and a scalar subquery), changing data (INSERT of one and of two rows, UPDATE of one row and of every row with an expression, DELETE of one row and of all rows) and the schema (CREATE TABLE with a primary key, NOT NULL and a foreign key, ALTER TABLE ADD, RENAME and DROP COLUMN, DROP TABLE, CREATE and DROP INDEX). Left out: statements that do not run unchanged in both SQLite and PostgreSQL (TRUNCATE, FETCH FIRST, ILIKE, which appear only in notes); RIGHT and FULL joins, CROSS JOIN and NATURAL JOIN (less common in everyday use; LEFT JOIN covers the outer-join idea); NOT IN with a subquery (it silently returns no rows when the subquery yields a NULL, a pitfall too large for one card); CASE, UNION, views, transactions, window functions and common table expressions (beyond the basics); MIN, ALTER TABLE RENAME TO, DROP TABLE IF EXISTS and CREATE UNIQUE INDEX as cards of their own (they are mentioned in notes or were dropped to keep the deck near the brief's 45 cards); and any task that could not be phrased so that, under the deck's stated style, exactly one statement answers it."@en ,
+                 "Licensing: The deck is CC0 1.0. Its only content source is the authoring agent's own test run of the statements in SQLite and PostgreSQL, whose script and output are reproduced in this report and dedicated to the public domain with the deck; the database programs' messages quoted in the output remain theirs and are reproduced only as a factual record, none of them in the deck. Which statement performs a task is a fact about the language and the programs' behaviour, and running them copies nothing from their code or documentation. The fronts, the notes, the example tables and the selection of tasks are the authoring agent's own wording and choice; SQL keywords and syntax are the language's interface, needed to state the fact at all. The SQLite documentation is in the public domain and would allow any use, but it was used only to verify. The PostgreSQL documentation is under the permissive PostgreSQL Licence, which requires its copyright notice to accompany copies; it was used as a verification source only: no sentence, example or list was copied from it, and no card states a fact that only it supplied (what it says about the SQL standard informed the choice of forms but is not stated on any card; the notes give only what the test run showed). Its licence appears as \"Unknown\" in the source table only because the builder has no licence id for the PostgreSQL Licence; the licence evidence quotes it. Wikidata (CC0) confirmed one Swedish term, Microsoft's Swedish documentation (all rights reserved) confirmed three single terms and nothing was copied from it, and Swedish Wikipedia (CC BY-SA 4.0) was used only to confirm single Swedish technical terms, which are ordinary vocabulary and not protected expression; no text or selection was taken from it, so its share-alike condition does not reach the deck. No tutorial, textbook or cheat sheet was consulted. No source's licence therefore requires attribution or share-alike, though every source is credited in the deck and this report."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Every statement run exactly as printed in SQLite 3.53.1 and PostgreSQL 16.2 on fresh example data; every card checked against the SQLite and PostgreSQL documentation; fronts checked for a single canonical answer under the deck's stated style; Swedish terms checked against Wikidata and Swedish Wikipedia; builder (including the live Wikidata check) and validator checks."@en ;
+    rdfs:comment "Scope: All 48 cards, and the alternative forms and behaviours named in the notes."@en ,
+                 "Outcome: All 48 statements ran without error in both engines and had the effect the front describes; the forms the notes describe as failing (FETCH FIRST, OFFSET ... FETCH NEXT, TRUNCATE and ILIKE in SQLite; COUNT(*) in WHERE; a second DROP TABLE; a duplicate in a unique index; an order for a missing customer once foreign keys are enforced) failed as stated. Every clause used is documented by both projects with the behaviour on the card. The Wikidata check (the Swedish label primärnyckel, on the two cards that use the term) passed. The findings record the decisions about dialect differences and ambiguity."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 48 cards: every statement re-run in SQLite 3.46.1 on the deck's example data, PostgreSQL behaviour checked against the recorded output and the documentation, every note tested for refutation."@en ,
+                 "Outcome: No factual errors. Three fronts did not have exactly one right answer or were not exactly what the statement does in both engines, and one note overstated what the standard says; all four were fixed after checking the reviewer's evidence against the test output and the documentation."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 48 cards in both languages, the title, description, keywords and the language tags in the dossier and the built TTL."@en ,
+                 "Outcome: Language tags correct throughout and the Swedish idiomatic overall. One note treated NULL as a city and was reworded; the Swedish inner-join note now uses 'inre koppling'; 'underfråga' and 'mängdfunktion' are now sourced; numbers are written as digits on both LIMIT cards; English uses 'Remove' for dropping schema objects and 'Delete' only for DELETE."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All sources and licence pages (re-fetched), the evidence on all 48 cards, the method, queries and licensing text, compared with the scratch files."@en ,
+                 "Outcome: Licensing sound and the CC0 choice holds. A few facts in notes (standard status, MySQL support, TRUNCATE being faster) came only from the PostgreSQL documentation, a verification source; they were removed from the cards, so the notes now state only what the test run showed. The documentation no longer claims 'främmande nyckel' is used, credits the Swedish Wikipedia SQL article by URL, and records pgprobe.py. The PostgreSQL licence still shows as 'Unknown' because the builder has no id for it, which is outside this dossier."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The 14 cards changed in rounds 1–3 and every third card in dossier order (28 cards); all 48 statements re-run in SQLite 3.46.1 on the example data; the SQLite, PostgreSQL, Microsoft Swedish and Swedish Wikipedia pages re-fetched; the live Wikidata label of Q934729; the built TTL and report."@en ,
+                 "Outcome: No errors. Every fix claimed in rounds 1–3 is in the dossier, the TTL and the report. One warning: the update-expression note and evidence overstated SQLite's behaviour; fixed. Two suggestions, both applied: a clearer description sentence and a corrected credit for the Microsoft term checks."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The card changed in round 4 (update-expression), every third card in dossier order (cards 2, 5, ..., 47), the deck metadata and documentation, and every fix claimed in round 4; the update-expression statement re-run in SQLite 3.46.1 with a NUMERIC(10, 2) column; the SQLite and PostgreSQL UPDATE pages re-fetched."@en ,
+                 "Outcome: No errors; every fix claimed in round 4 is in the dossier, the TTL and the report. One warning, fixed: the Swedish note on update-expression put two numbers side by side, which reads as one number with a space as thousands separator. One suggestion, applied: the max front now names the construct, as other fronts do."@en .
+
+<#test-runs>
+    dcterms:title "Test run of every statement in SQLite 3.53.1 and PostgreSQL 16.2 on a small example database" ;
+    dcterms:creator "Anton Wiklund, with the help of AI" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "Written for this deck: the test script run_sql.py and its complete output are recorded verbatim in the deck's original provenance report. The script, the example data and the authoring agent's annotations are dedicated to the public domain under CC0 1.0 with the deck. The error messages quoted in the output are the database programs' own (SQLite: public domain, https://www.sqlite.org/copyright.html; PostgreSQL: PostgreSQL Licence, https://www.postgresql.org/about/licence/) and are reproduced only as a factual record of what the programs printed; the deck contains none of them. Running a program and recording which statements it accepts and what they do copies none of its code or documentation."@en .
+
+<https://www.sqlite.org/lang.html>
+    dcterms:title "SQL As Understood By SQLite (the SQLite documentation, sqlite.org)" ;
+    dcterms:creator "D. Richard Hipp and the SQLite developers" ;
+    rdfs:comment "https://www.sqlite.org/copyright.html (fetched 2026-10-04): \"SQLite is in the Public Domain. All of the code and documentation in SQLite has been dedicated to the public domain by the authors.\" and \"Anyone is free to copy, modify, publish, use, compile, sell, or distribute the original SQLite code ... The previous paragraph applies to the deliverable code and documentation in SQLite\"."@en .
+
+<https://www.postgresql.org/docs/current/>
+    dcterms:title "PostgreSQL 18 Documentation (postgresql.org/docs/current)" ;
+    dcterms:creator "The PostgreSQL Global Development Group" ;
+    rdfs:comment "Licence: the PostgreSQL Licence, a permissive BSD/MIT-style licence, recorded as \"unknown\" only because the builder has no licence id for it. https://www.postgresql.org/docs/current/legalnotice.html (fetched 2026-10-04): \"Portions Copyright © 1996-2026, PostgreSQL Global Development Group ... Permission to use, copy, modify, and distribute this software and its documentation for any purpose, without fee, and without a written agreement is hereby granted, provided that the above copyright notice and this paragraph and the following two paragraphs appear in all copies.\" Because the licence requires its notice to accompany copies, the documentation is used for verification only: nothing is copied from it."@en .
+
+<https://learn.microsoft.com/sv-se/sql/relational-databases/performance/subqueries?view=sql-server-ver17>
+    dcterms:title "Microsoft's Swedish documentation: Underfrågor (SQL Server), Beräkningar med fältvärden i SQL-funktioner, Koppla tabeller och frågor" ;
+    dcterms:creator "Microsoft" ;
+    rdfs:comment "All rights reserved. Microsoft Terms of Use, https://www.microsoft.com/en-us/legal/terms-of-use (fetched 2026-10-04): \"Unless otherwise specified, the Services are for your personal and non-commercial use. You may not modify, copy, distribute, transmit, display, perform, reproduce, publish, license, create derivative works from, transfer, or sell any information, software, products or services obtained from the Services.\" Used for verification only: nothing was copied."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Copyright (fetched 2026-10-04), page footer: \"All structured data from the main, Property, Lexeme, and EntitySchema namespaces is available under the Creative Commons CC0 License\"."@en .
+
+<https://sv.wikipedia.org/wiki/Databasnyckel>
+    dcterms:title "Swedish Wikipedia: articles Databasnyckel and Structured Query Language" ;
+    dcterms:creator "Swedish Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of https://sv.wikipedia.org/wiki/Databasnyckel (fetched 2026-10-04): \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported.\""@en .
+
+<#select-all>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Select every column of every row in the table customers"@en ,
+                     "Hämta alla kolumner för alla rader i tabellen customers"@sv ;
+    solid-memo:back "SELECT * FROM customers;"@zxx .
+
+<#select-columns>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Select the columns name and city, in that order, of every row in customers"@en ,
+                     "Hämta kolumnerna name och city, i den ordningen, för alla rader i customers"@sv ;
+    solid-memo:back "SELECT name, city FROM customers;"@zxx .
+
+<#select-distinct>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Select the column city of customers with duplicate values removed"@en ,
+                     "Hämta kolumnen city i customers med dubbletter borttagna"@sv ;
+    solid-memo:back "SELECT DISTINCT city FROM customers;"@zxx ;
+    solid-memo:backNote "Rows where city is NULL give one NULL row in the result."@en ,
+                        "Rader där city är NULL ger en enda NULL-rad i resultatet."@sv .
+
+<#column-alias>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Select the column name of customers, renamed customer_name in the result"@en ,
+                     "Hämta kolumnen name i customers, med namnet customer_name i resultatet"@sv ;
+    solid-memo:back "SELECT name AS customer_name FROM customers;"@zxx ;
+    solid-memo:backNote "AS may be left out in SQLite and PostgreSQL; this deck always writes it."@en ,
+                        "AS kan utelämnas i SQLite och PostgreSQL; den här kortleken skriver alltid ut det."@sv .
+
+<#table-alias>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Select the column name of customers, giving the table the alias c and naming the column through it"@en ,
+                     "Hämta kolumnen name i customers, med aliaset c för tabellen och kolumnen angiven via aliaset"@sv ;
+    solid-memo:back "SELECT c.name FROM customers AS c;"@zxx ;
+    solid-memo:backNote "AS may be left out here too: FROM customers c."@en ,
+                        "AS kan utelämnas även här: FROM customers c."@sv .
+
+<#where-equals>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Select every column of the rows in customers where city is Lund"@en ,
+                     "Hämta alla kolumner för raderna i customers där city är Lund"@sv ;
+    solid-memo:back "SELECT * FROM customers WHERE city = 'Lund';"@zxx .
+
+<#where-not-equal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Select every column of the rows in customers where city is not Lund"@en ,
+                     "Hämta alla kolumner för raderna i customers där city inte är Lund"@sv ;
+    solid-memo:back "SELECT * FROM customers WHERE city <> 'Lund';"@zxx ;
+    solid-memo:backNote "!= also works in SQLite and PostgreSQL. Rows where city is NULL are not returned."@en ,
+                        "!= fungerar också i SQLite och PostgreSQL. Rader där city är NULL kommer inte med."@sv .
+
+<#where-and>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Select every column of the rows in products where category is books and price is below 100"@en ,
+                     "Hämta alla kolumner för raderna i products där category är books och price är under 100"@sv ;
+    solid-memo:back "SELECT * FROM products WHERE category = 'books' AND price < 100;"@zxx .
+
+<#where-or>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Select every column of the rows in customers where city is Lund or country is Norway"@en ,
+                     "Hämta alla kolumner för raderna i customers där city är Lund eller country är Norway"@sv ;
+    solid-memo:back "SELECT * FROM customers WHERE city = 'Lund' OR country = 'Norway';"@zxx .
+
+<#in-list>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Select every column of the rows in customers where country is one of Sweden, Norway and Denmark, using a list of values"@en ,
+                     "Hämta alla kolumner för raderna i customers där country är något av Sweden, Norway och Denmark, med en värdelista"@sv ;
+    solid-memo:back "SELECT * FROM customers WHERE country IN ('Sweden', 'Norway', 'Denmark');"@zxx ;
+    solid-memo:backNote "The same as three conditions joined with OR."@en ,
+                        "Samma sak som tre villkor förenade med OR."@sv .
+
+<#between>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Select every column of the rows in products where price is from 100 to 200, both included, using one range test"@en ,
+                     "Hämta alla kolumner för raderna i products där price är från 100 till 200, båda inräknade, med ett enda intervallvillkor"@sv ;
+    solid-memo:back "SELECT * FROM products WHERE price BETWEEN 100 AND 200;"@zxx ;
+    solid-memo:backNote "BETWEEN includes both ends: price >= 100 AND price <= 200."@en ,
+                        "BETWEEN tar med båda gränserna: price >= 100 AND price <= 200."@sv .
+
+<#like-prefix>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Select every column of the rows in customers where name begins with the letter A, using LIKE"@en ,
+                     "Hämta alla kolumner för raderna i customers där name börjar med bokstaven A, med LIKE"@sv ;
+    solid-memo:back "SELECT * FROM customers WHERE name LIKE 'A%';"@zxx ;
+    solid-memo:backNote "% stands for any run of characters. In SQLite this also matches a lower-case a, because SQLite's LIKE ignores the case of ASCII letters; PostgreSQL's LIKE is case-sensitive, and PostgreSQL has ILIKE for case-insensitive matching."@en ,
+                        "% står för en godtycklig följd av tecken. I SQLite matchar detta också ett litet a, eftersom LIKE i SQLite bortser från skillnaden mellan stora och små ASCII-bokstäver; LIKE i PostgreSQL skiljer på dem, och PostgreSQL har ILIKE för matchning utan hänsyn till skiftläge."@sv .
+
+<#like-contains>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Select every column of the rows in customers where email contains example"@en ,
+                     "Hämta alla kolumner för raderna i customers där email innehåller example"@sv ;
+    solid-memo:back "SELECT * FROM customers WHERE email LIKE '%example%';"@zxx .
+
+<#is-null>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Select every column of the rows in customers where email is NULL"@en ,
+                     "Hämta alla kolumner för raderna i customers där email är NULL"@sv ;
+    solid-memo:back "SELECT * FROM customers WHERE email IS NULL;"@zxx ;
+    solid-memo:backNote "email = NULL matches no row: a comparison with NULL is unknown, never true."@en ,
+                        "email = NULL träffar ingen rad: en jämförelse med NULL blir okänd, aldrig sann."@sv .
+
+<#is-not-null>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Select every column of the rows in customers where email is not NULL"@en ,
+                     "Hämta alla kolumner för raderna i customers där email inte är NULL"@sv ;
+    solid-memo:back "SELECT * FROM customers WHERE email IS NOT NULL;"@zxx .
+
+<#order-by>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Select every column of every row in customers, sorted by name in ascending order"@en ,
+                     "Hämta alla kolumner för alla rader i customers, sorterade stigande efter name"@sv ;
+    solid-memo:back "SELECT * FROM customers ORDER BY name;"@zxx ;
+    solid-memo:backNote "Ascending is the default; ASC may be written out."@en ,
+                        "Stigande ordning är standard; ASC kan skrivas ut."@sv .
+
+<#order-by-desc>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Select every column of every row in products, sorted by price in descending order"@en ,
+                     "Hämta alla kolumner för alla rader i products, sorterade fallande efter price"@sv ;
+    solid-memo:back "SELECT * FROM products ORDER BY price DESC;"@zxx .
+
+<#order-by-two>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Select every column of every row in customers, sorted in ascending order by country and then by name"@en ,
+                     "Hämta alla kolumner för alla rader i customers, sorterade stigande först efter country och sedan efter name"@sv ;
+    solid-memo:back "SELECT * FROM customers ORDER BY country, name;"@zxx .
+
+<#limit>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Select every column of the 3 rows in products with the highest price"@en ,
+                     "Hämta alla kolumner för de 3 rader i products som har högst price"@sv ;
+    solid-memo:back "SELECT * FROM products ORDER BY price DESC LIMIT 3;"@zxx ;
+    solid-memo:backNote "FETCH FIRST 3 ROWS ONLY in place of LIMIT 3 also works in PostgreSQL, but not in SQLite."@en ,
+                        "FETCH FIRST 3 ROWS ONLY i stället för LIMIT 3 fungerar också i PostgreSQL, men inte i SQLite."@sv .
+
+<#limit-offset>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Select every column of the rows in products sorted by name in ascending order, skipping the first 3 rows and returning the next 3"@en ,
+                     "Hämta alla kolumner för raderna i products sorterade stigande efter name, men hoppa över de 3 första raderna och returnera de 3 följande"@sv ;
+    solid-memo:back "SELECT * FROM products ORDER BY name LIMIT 3 OFFSET 3;"@zxx ;
+    solid-memo:backNote "OFFSET 3 ROWS FETCH NEXT 3 ROWS ONLY in place of LIMIT 3 OFFSET 3 also works in PostgreSQL, but not in SQLite."@en ,
+                        "OFFSET 3 ROWS FETCH NEXT 3 ROWS ONLY i stället för LIMIT 3 OFFSET 3 fungerar också i PostgreSQL, men inte i SQLite."@sv .
+
+<#count-rows>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Count the rows in customers"@en ,
+                     "Räkna raderna i customers"@sv ;
+    solid-memo:back "SELECT COUNT(*) FROM customers;"@zxx .
+
+<#count-column>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Count the values in the column email of customers that are not NULL, without a WHERE clause"@en ,
+                     "Räkna de värden i kolumnen email i customers som inte är NULL, utan WHERE-villkor"@sv ;
+    solid-memo:back "SELECT COUNT(email) FROM customers;"@zxx ;
+    solid-memo:backNote "COUNT(column) skips NULLs; COUNT(*) counts every row."@en ,
+                        "COUNT(kolumn) hoppar över NULL; COUNT(*) räknar alla rader."@sv .
+
+<#count-distinct>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Count the different values in the column city of customers"@en ,
+                     "Räkna de olika värdena i kolumnen city i customers"@sv ;
+    solid-memo:back "SELECT COUNT(DISTINCT city) FROM customers;"@zxx ;
+    solid-memo:backNote "NULL is not counted."@en ,
+                        "NULL räknas inte."@sv .
+
+<#sum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Add up the column total over every row in orders"@en ,
+                     "Summera kolumnen total över alla rader i orders"@sv ;
+    solid-memo:back "SELECT SUM(total) FROM orders;"@zxx .
+
+<#avg>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Compute the average of the column price over every row in products"@en ,
+                     "Beräkna medelvärdet av kolumnen price över alla rader i products"@sv ;
+    solid-memo:back "SELECT AVG(price) FROM products;"@zxx .
+
+<#max>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Find the highest value in the column price of products using an aggregate function"@en ,
+                     "Ta fram det högsta värdet i kolumnen price i products med en mängdfunktion"@sv ;
+    solid-memo:back "SELECT MAX(price) FROM products;"@zxx ;
+    solid-memo:backNote "MIN(price) gives the lowest."@en ,
+                        "MIN(price) ger det lägsta."@sv .
+
+<#group-by-count>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Select each value of city in customers with the number of rows that have it"@en ,
+                     "Hämta varje värde i city i customers med antalet rader som har det värdet"@sv ;
+    solid-memo:back "SELECT city, COUNT(*) FROM customers GROUP BY city;"@zxx .
+
+<#group-by-sum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Select each value of customer_id in orders with the sum of total for that value"@en ,
+                     "Hämta varje värde i customer_id i orders med summan av total för det värdet"@sv ;
+    solid-memo:back "SELECT customer_id, SUM(total) FROM orders GROUP BY customer_id;"@zxx .
+
+<#having>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Select each value of city in customers with its number of rows, keeping only the cities that occur more than once"@en ,
+                     "Hämta varje värde i city i customers med dess antal rader, men behåll bara de städer som förekommer mer än en gång"@sv ;
+    solid-memo:back "SELECT city, COUNT(*) FROM customers GROUP BY city HAVING COUNT(*) > 1;"@zxx ;
+    solid-memo:backNote "HAVING filters groups; an aggregate such as COUNT(*) is not allowed in WHERE."@en ,
+                        "HAVING filtrerar grupper; en mängdfunktion som COUNT(*) är inte tillåten i WHERE."@sv .
+
+<#where-group-by>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Select each value of category in products that has rows with price above 100, with the number of those rows"@en ,
+                     "Hämta varje värde i category i products som har rader där price är över 100, med antalet sådana rader"@sv ;
+    solid-memo:back "SELECT category, COUNT(*) FROM products WHERE price > 100 GROUP BY category;"@zxx ;
+    solid-memo:backNote "WHERE filters rows before they are grouped, so a category with no such row does not appear."@en ,
+                        "WHERE filtrerar rader innan de grupperas, så en kategori utan sådana rader kommer inte med."@sv .
+
+<#inner-join>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Select orders.id and customers.name for every order that has a matching customer, joining orders to customers on orders.customer_id = customers.id"@en ,
+                     "Hämta orders.id och customers.name för varje order som har en matchande kund, genom att koppla orders till customers med orders.customer_id = customers.id"@sv ;
+    solid-memo:back "SELECT orders.id, customers.name FROM orders INNER JOIN customers ON orders.customer_id = customers.id;"@zxx ;
+    solid-memo:backNote "INNER may be left out: JOIN alone is an inner join."@en ,
+                        "INNER kan utelämnas: JOIN ensamt ger en inre koppling."@sv .
+
+<#left-join>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Select customers.name and orders.id for every customer, including customers with no order, joining customers to orders on customers.id = orders.customer_id"@en ,
+                     "Hämta customers.name och orders.id för varje kund, även kunder utan order, genom att koppla customers till orders med customers.id = orders.customer_id"@sv ;
+    solid-memo:back "SELECT customers.name, orders.id FROM customers LEFT JOIN orders ON customers.id = orders.customer_id;"@zxx ;
+    solid-memo:backNote "Customers with no order get NULL as orders.id. LEFT OUTER JOIN means the same."@en ,
+                        "Kunder utan order får NULL som orders.id. LEFT OUTER JOIN betyder samma sak."@sv .
+
+<#subquery-in>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Select every column of the rows in customers whose id is among the customer_id values in orders, using a subquery"@en ,
+                     "Hämta alla kolumner för raderna i customers vars id finns bland värdena i customer_id i orders, med en underfråga"@sv ;
+    solid-memo:back "SELECT * FROM customers WHERE id IN (SELECT customer_id FROM orders);"@zxx ;
+    solid-memo:backNote "WHERE EXISTS (SELECT 1 FROM orders WHERE orders.customer_id = customers.id) gives the same rows."@en ,
+                        "WHERE EXISTS (SELECT 1 FROM orders WHERE orders.customer_id = customers.id) ger samma rader."@sv .
+
+<#subquery-scalar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Select every column of the rows in products whose price is above the average price of all products, using a subquery"@en ,
+                     "Hämta alla kolumner för raderna i products där price är högre än medelvärdet av price för alla rader, med en underfråga"@sv ;
+    solid-memo:back "SELECT * FROM products WHERE price > (SELECT AVG(price) FROM products);"@zxx .
+
+<#insert>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Add a row to customers with id 8 and name Gustav, naming only those two columns"@en ,
+                     "Lägg till en rad i customers med id 8 och name Gustav, där bara de två kolumnerna anges"@sv ;
+    solid-memo:back "INSERT INTO customers (id, name) VALUES (8, 'Gustav');"@zxx ;
+    solid-memo:backNote "Columns not named get their default value, here NULL."@en ,
+                        "Kolumner som inte anges får sitt standardvärde, här NULL."@sv .
+
+<#insert-many>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Add two rows to customers in one statement, id 8 with name Gustav and id 9 with name Hanna, naming only the columns id and name"@en ,
+                     "Lägg till två rader i customers med en enda sats, id 8 med name Gustav och id 9 med name Hanna, där bara kolumnerna id och name anges"@sv ;
+    solid-memo:back "INSERT INTO customers (id, name) VALUES (8, 'Gustav'), (9, 'Hanna');"@zxx .
+
+<#update>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Set city to Lund in the row of customers whose id is 2"@en ,
+                     "Sätt city till Lund i den rad i customers vars id är 2"@sv ;
+    solid-memo:back "UPDATE customers SET city = 'Lund' WHERE id = 2;"@zxx ;
+    solid-memo:backNote "Without WHERE, UPDATE changes every row."@en ,
+                        "Utan WHERE ändrar UPDATE alla rader."@sv .
+
+<#update-expression>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Multiply price by 1.1 in every row of products"@en ,
+                     "Multiplicera price med 1,1 i alla rader i products"@sv ;
+    solid-memo:back "UPDATE products SET price = price * 1.1;"@zxx ;
+    solid-memo:backNote "In SQLite the result can be inexact: in the deck's example table, where price is NUMERIC(10, 2), 200 becomes 220.00000000000003."@en ,
+                        "I SQLite kan resultatet bli inexakt: i kortlekens exempeltabell, där price är NUMERIC(10, 2), ändras 200 till 220,00000000000003."@sv .
+
+<#delete>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Delete the row of customers whose id is 5"@en ,
+                     "Ta bort den rad i customers vars id är 5"@sv ;
+    solid-memo:back "DELETE FROM customers WHERE id = 5;"@zxx .
+
+<#delete-all>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Delete every row of orders but keep the table"@en ,
+                     "Ta bort alla rader i orders men behåll tabellen"@sv ;
+    solid-memo:back "DELETE FROM orders;"@zxx ;
+    solid-memo:backNote "PostgreSQL also has TRUNCATE orders; SQLite has no TRUNCATE."@en ,
+                        "PostgreSQL har också TRUNCATE orders; SQLite saknar TRUNCATE."@sv .
+
+<#create-table>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Create a table customers with an INTEGER column id as its primary key and a TEXT column name that must not be NULL"@en ,
+                     "Skapa en tabell customers med en INTEGER-kolumn id som primärnyckel och en TEXT-kolumn name som inte får vara NULL"@sv ;
+    solid-memo:back "CREATE TABLE customers (id INTEGER PRIMARY KEY, name TEXT NOT NULL);"@zxx ;
+    solid-memo:backNote "VARCHAR(100) in place of TEXT is accepted by both too."@en ,
+                        "VARCHAR(100) i stället för TEXT godtas också av båda."@sv .
+
+<#create-table-fk>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Create a table orders with an INTEGER column id as its primary key and an INTEGER column customer_id that references id in customers"@en ,
+                     "Skapa en tabell orders med en INTEGER-kolumn id som primärnyckel och en INTEGER-kolumn customer_id som refererar till id i customers"@sv ;
+    solid-memo:back "CREATE TABLE orders (id INTEGER PRIMARY KEY, customer_id INTEGER REFERENCES customers (id));"@zxx ;
+    solid-memo:backNote "SQLite enforces the reference only after PRAGMA foreign_keys = ON;"@en ,
+                        "SQLite kontrollerar referensen först efter PRAGMA foreign_keys = ON;"@sv .
+
+<#alter-add-column>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Add a TEXT column phone to the table customers"@en ,
+                     "Lägg till en TEXT-kolumn phone i tabellen customers"@sv ;
+    solid-memo:back "ALTER TABLE customers ADD COLUMN phone TEXT;"@zxx ;
+    solid-memo:backNote "The word COLUMN may be left out."@en ,
+                        "Ordet COLUMN kan utelämnas."@sv .
+
+<#alter-rename-column>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Rename the column name of the table customers to full_name"@en ,
+                     "Byt namn på kolumnen name i tabellen customers till full_name"@sv ;
+    solid-memo:back "ALTER TABLE customers RENAME COLUMN name TO full_name;"@zxx .
+
+<#alter-drop-column>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Remove the column email from the table customers"@en ,
+                     "Ta bort kolumnen email ur tabellen customers"@sv ;
+    solid-memo:back "ALTER TABLE customers DROP COLUMN email;"@zxx .
+
+<#drop-table>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Remove the table orders together with all its rows"@en ,
+                     "Ta bort tabellen orders med alla dess rader"@sv ;
+    solid-memo:back "DROP TABLE orders;"@zxx ;
+    solid-memo:backNote "DROP TABLE IF EXISTS orders; gives no error if the table is missing."@en ,
+                        "DROP TABLE IF EXISTS orders; ger inget fel om tabellen saknas."@sv .
+
+<#create-index>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Create an index named idx_customers_city on the column city of customers"@en ,
+                     "Skapa ett index med namnet idx_customers_city på kolumnen city i customers"@sv ;
+    solid-memo:back "CREATE INDEX idx_customers_city ON customers (city);"@zxx ;
+    solid-memo:backNote "CREATE UNIQUE INDEX also forbids duplicate values."@en ,
+                        "CREATE UNIQUE INDEX förbjuder dessutom dubbletter."@sv .
+
+<#drop-index>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Remove the index idx_customers_city"@en ,
+                     "Ta bort indexet idx_customers_city"@sv ;
+    solid-memo:back "DROP INDEX idx_customers_city;"@zxx .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

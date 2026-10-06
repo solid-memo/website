@@ -1,0 +1,367 @@
+@base <https://solid-memo.com/decks/greek-alphabet/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Greek alphabet"@en ,
+                  "Grekiska alfabetet"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "The 24 letters of the Greek alphabet in 24 cards, studied in both directions. The front shows a letter in upper and lower case (Α α), the back its name in English and Swedish (alpha, alfa). Names and characters from Wikidata, checked against the Unicode Character Database, Svenska Akademiens ordlista, the SALDO lexicon and Nationalencyklopedin."@en ,
+                        "Det grekiska alfabetets 24 bokstäver på 24 kort, som övas åt båda hållen. Framsidan visar en bokstav som versal och gemen (Α α), baksidan dess namn på engelska och svenska (alpha, alfa). Namnen och tecknen kommer från Wikidata och har kontrollerats mot Unicodes teckendatabas, Svenska Akademiens ordlista, lexikonet SALDO och Nationalencyklopedin."@sv ;
+    prov:wasDerivedFrom <https://www.wikidata.org/> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:languages ,
+               topic:greek ,
+               topic:mathematics ;
+    dcat:keyword "Greek alphabet"@en ,
+                 "Greek letters"@en ,
+                 "letter names"@en ,
+                 "mathematical symbols"@en ,
+                 "grekiska alfabetet"@sv ,
+                 "grekiska bokstäver"@sv ,
+                 "bokstavsnamn"@sv ,
+                 "matematiska symboler"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:bidirectional ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#greek-alphabet> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#greek-alphabet> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/licenses/by/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/> ,
+              <https://www.unicode.org/Public/UCD/latest/ucd/UnicodeData.txt> ,
+              <https://svenska.se/saol/> ,
+              <https://svenska.se/so/> ,
+              <https://sprakbanken.se/en/resources/saldo> ,
+              <https://sv.wikipedia.org/w/index.php?title=Grekiska_alfabetet&oldid=59450821> ,
+              <https://www.ne.se/uppslagsverk/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Selection: the Wikidata Query Service (https://query.wikidata.org/sparql) was asked for every value of has part(s) (P527) of Greek alphabet (Q8216), with English and Swedish labels, classes and Unicode characters (P487) (query 1). It returned exactly 24 items, one per letter of the standard 24-letter alphabet, and no others."@en ,
+                 "Labels and aliases: a second SPARQL query for the English, Swedish and mul labels and aliases (query 2) returned no values because of how it combined OPTIONAL and GROUP_CONCAT, so the same data was read from the Wikidata API instead (query 3, wbgetentities for the 24 items with labels, aliases and claims in en, sv and mul) and printed with a small Python script that, for each of the 24 items in alphabet order, printed its labels and aliases per language and the values of P487 (Unicode character), P31, P279 and P361, without filtering. The Swedish labels are the Swedish names on the cards. The English labels of 18 items are the letters themselves (for example \"Α/α\"), so the English name was taken from the label or alias that spells the name: an exact lower-case label or alias for 18 letters (alpha, beta, delta, epsilon, zeta, eta, theta, iota, kappa, lambda, mu, nu, omicron, pi, sigma, phi, psi, omega); for gamma, rho, tau and upsilon Wikidata gives the name only capitalised (\"Gamma\", \"Rho\", \"Tau\", \"Upsilon\"), for xi only in phrases such as \"xi (Greek letter)\" and for chi as \"chi (Greek)\"; these six are written in lower case, as the other names are."@en ,
+                 "Card fronts: each front is the upper-case letter, a space and the lower-case letter, written with the Greek code points U+0391–U+03A9 and U+03B1–U+03C9 (never the look-alike Latin letters, the micro sign U+00B5 or the ohm sign U+2126). The characters come from Wikidata: the Unicode character (P487) values of each item, and for the letters without them (capital alpha, iota, nu, xi, omicron) the single-character English aliases Α, Ι/ι, Ν/ν, Ξ/ξ and Ο/ο, which are the same Greek code points. They were compared with the Unicode Character Database's UnicodeData.txt (version 18.0.0, command 4): every front character is the GREEK CAPITAL LETTER or GREEK SMALL LETTER of the card's name. The builder's checks confirm every front character against Wikidata (step 7)."@en ,
+                 "English names were cross-checked against the Unicode character names: all 24 agree except that Unicode names λ GREEK SMALL LETTER LAMDA; its Unicode 1.0 name field gives GREEK SMALL LETTER LAMBDA, and Wikidata gives both lambda and lamda as aliases. The card says lambda, the usual English spelling."@en ,
+                 "Swedish names were checked against four sources. (a) Svenska Akademiens ordlista (SAOL) and Svensk ordbok (SO) through the search API behind svenska.se (commands 5 and 6, https://svenska.se/api/search/saol?q=<word> and …/so?q=<word>, first ranked and then with exactMatch=true): SAOL has 11 of the names as headwords defined as a Greek letter (alfa, beta, gamma, delta, epsilon, jota, lambda, pi, sigma, ypsilon, omega), SO 5 of them (alfa, beta, gamma, delta, omega); neither has the other 13 (SAOL and SO have kappa only as the garment and ny only as the adjective and the moon phase) nor the alternative spellings khi, teta, ksi or phi. (b) SALDO, Språkbanken's lexicon of Swedish, through the Karp API (command 7, equals|baseform|<word>): all 24 Wikidata Swedish names are base forms of a sense with primary descriptor bokstav (letter) and secondary descriptor grekiska (Greek); khi, teta and ksi are not SALDO base forms; four of the senses have a second base form, which the cards do not use: thäta (theta..1), iota (jota..2), ro (rho..1) and phi (fi..1). (c) The table in Swedish Wikipedia's article Grekiska alfabetet (command 8, revision 59450821) lists the same 24 Swedish names. (d) In quality-control round 2, Nationalencyklopedin's entries (command 14, https://www.ne.se/uppslagsverk/encyklopedi/lång/<word>) confirmed zeta, theta, kappa, my, ny, xi, omikron, rho, tau, ypsilon, fi, chi and psi as headwords defined as Greek letters, and jota as a cross-reference to iota; NE also has khi (\"annan translitterering\" of chi) and phi (\"se fi\"). Every Swedish name on the cards is thus the Wikidata Swedish label and confirmed by SALDO and, where they have the word, by SAOL and NE."@en ,
+                 "Machine checks: every card has a check that its Swedish name is the Wikidata Swedish label of its item; 18 cards also check the English name as a Wikidata English label or alias; every front character is checked against Wikidata, as a Unicode character (P487) value (20 cards) or, for capital alpha, iota, nu, xi and omicron, as an English label or alias. The builder runs these against live Wikidata on every check and build."@en ,
+                 "Notes: only the sigma card has a note. It gives the word-final form ς, taken from Wikidata: Q14413's Unicode character (P487) value \"ς\" has the qualifier applies to part (P518) final form (Q5449465, described as \"conditional form of a grapheme at the end of a word\"); verified with Unicode (U+03C2 GREEK SMALL LETTER FINAL SIGMA) and Swedish Wikipedia's table entry \"ς (avslutande sigma)\". Variant Swedish spellings (thäta for theta, iota for jota, ro for rho, phi for fi, khi for chi) are not given in notes: Wikidata, the deck's only content source, does not have them as Swedish names; only verification sources (SALDO, NE) do, and under the licence policy a verification source contributes nothing to the cards. The note text is the authoring agent's own wording."@en ,
+                 "Exclusions: archaic letters (digamma, koppa, sampi, san, heta) and variant glyphs (ϐ, ϑ, ϰ, ϖ, ϱ, ϕ, ϒ, ϵ) are left out; letter order, numeric values, pronunciation and transliteration are not asked, because they vary between ancient and modern Greek and between transliteration schemes."@en ,
+                 "Selection: The deck has exactly the 24 letters of the standard (Ionic, classical and modern) Greek alphabet, as listed by Wikidata's has part(s) statements on Greek alphabet (Q8216): one card per letter, front the upper- and lower-case letter, back the letter's English and Swedish names. The word-final form of sigma (ς) is not a letter of its own and is given in the sigma card's note. Left out: archaic letters that dropped out of the alphabet (digamma, koppa, sampi, san, heta), variant glyphs used in mathematics (ϑ, ϕ, ϖ and others), alternative Swedish spellings that are not Wikidata Swedish labels or aliases (teta and ksi, which no source checked has; thäta, iota, ro, phi and khi, which SALDO or Nationalencyklopedin list as variants but which the content source does not give), and anything that differs between ancient and modern Greek, such as pronunciation, transliteration and numeric values."@en ,
+                 "Licensing: The deck is CC0 1.0. Its only content source is Wikidata, whose structured data is CC0: the selection of the 24 letters, their Swedish labels, English names, characters and the word-final form of sigma come from it. The Unicode Character Database (Unicode License v3, a permissive licence that asks for its notice to accompany copies of the data files), Svenska Akademiens ordlista and Svensk ordbok (© Svenska Akademien), SALDO (CC BY 4.0 according to Språkbanken's metadata, with a ShareAlike phrase in its description), Nationalencyklopedin (all rights reserved; quoting allowed only non-commercially) and Swedish Wikipedia (CC BY-SA 4.0) were used for verification only: they confirmed facts Wikidata gave (letter names and code points, which as facts are not copyrightable), and no text, list, selection or additional fact was taken from them. Variant spellings that only these sources give (thäta, iota, ro, phi, khi) were deliberately left off the cards for this reason. The note is the authoring agent's own wording. So no source's licence imposes conditions on the deck, and it can be CC0 like the rest of the library."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Sources, licences and machine checks"@en ;
+    rdfs:comment "Scope: All 24 cards: selection, front characters, English and Swedish names, notes; the builder's Wikidata checks; the app's SHACL and DCAT-AP validators."@en ,
+                 "Outcome: Wikidata (query 1) lists exactly the 24 letters. Every front's characters are the Greek letters of the card's name in UnicodeData.txt. Every English name agrees with Wikidata and the Unicode character names (lambda: see below). Every Swedish name is the Wikidata Swedish label and a SALDO base form for a Greek letter; 11 are also SAOL headwords. The builder's checks cover all 24 Swedish labels, 18 English names and 20 fronts' characters (P487), and pass. Discrepancies and gaps are listed below."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 24 cards: re-verified against live Wikidata, UnicodeData.txt, SAOL, SALDO and Swedish Wikipedia; the builder's Wikidata checks."@en ,
+                 "Outcome: No factual errors in the 24 cards. Three optional suggestions: soften the phi note, cite Swedish Wikipedia's table entry for final sigma, and adjust the description's \"Names from Wikidata\"."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language and translation"@en ;
+    rdfs:comment "Scope: All 24 cards: front code points, language tags, Swedish names against SAOL, SO, SALDO and Nationalencyklopedin, English and Swedish notes and description; the builder's Wikidata checks."@en ,
+                 "Outcome: No language errors. One warning (the chi card should note the variant khi, and the dossier wrongly said no checked source has khi) and four suggestions (add NE as a verification source, reword the phi and sigma English notes, use \"har kontrollerats\" in the Swedish description)."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 24 cards and every source: licences and their evidence, the licence policy, attribution, evidence \"says\" against the live sources, queries and reproducibility."@en ,
+                 "Outcome: One error (the phi note's fact came only from a verification source), three warnings (omega P487 wording, sigma note traced only to verification sources, front characters without P487 not machine-checked) and four suggestions (Unicode licence wording, iota SALDO base forms, SALDO version, reproducibility gaps). All were confirmed against the live sources and fixed."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final re-check (loop 1): the 17 changed cards plus every third card (alpha, delta, eta, kappa, nu, pi, tau, chi, among others), checked for facts and language; metadata, licence decision, documentation and the accuracy of the qualityControl log"@en ;
+    rdfs:comment "Scope: 20 cards (the 17 changed in rounds 1–3 plus every third card), metadata, licence decision, documentation and the qualityControl log; the builder's Wikidata checks and the SHACL and DCAT-AP validators."@en ,
+                 "Outcome: No card text was wrong. Two warnings (the SALDO evidence for theta and rho left out a second base form) and one suggestion (the dossier's lists of SALDO variants missed the same two). All three were confirmed by re-running the SALDO query for all 24 names (command 15), which showed that only theta..1, jota..2, rho..1 and fi..1 have more than one base form, and were fixed in the documentation; no card text changed."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing: \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://www.unicode.org/Public/UCD/latest/ucd/UnicodeData.txt>
+    dcterms:title "Unicode Character Database 18.0.0, UnicodeData.txt" ;
+    dcterms:creator "Unicode, Inc." ;
+    rdfs:comment "Licence: Unicode License v3 (SPDX Unicode-3.0), recorded as \"unknown\" only because the builder has no licence id for it. https://www.unicode.org/copyright.html (where https://www.unicode.org/terms_of_use.html now redirects): \"All Unicode Data Files and Unicode Software are subject to the terms and conditions of the free and open-source Unicode License v3\"; https://www.unicode.org/license.txt (Unicode License v3) permits use \"without restriction\" \"provided that either (a) this copyright and permission notice appear with all copies of the Data Files or Software, or (b) this copyright and permission notice appear in associated Documentation.\" Because the licence is notice-requiring and not among the builder's ids, the database is used for verification only: nothing is copied from it."@en .
+
+<https://svenska.se/saol/>
+    dcterms:title "Svenska Akademiens ordlista (SAOL), on svenska.se" ;
+    dcterms:creator "Svenska Akademien" ;
+    rdfs:comment "https://svenska.se/ page footer: \"© Svenska Akademien\"; no open licence is stated for the dictionaries' content, so SAOL is treated as all rights reserved and used for verification only."@en .
+
+<https://svenska.se/so/>
+    dcterms:title "Svensk ordbok utgiven av Svenska Akademien (SO), on svenska.se" ;
+    dcterms:creator "Svenska Akademien" ;
+    rdfs:comment "https://svenska.se/ page footer: \"© Svenska Akademien\"; no open licence is stated for the dictionaries' content, so SO is treated as all rights reserved and used for verification only."@en .
+
+<https://sprakbanken.se/en/resources/saldo>
+    dcterms:title "SALDO (Swedish Associative Thesaurus), development version through Språkbanken's Karp API (v7), queried 2026-10-04" ;
+    dcterms:creator "Lars Borin, Markus Forsberg, Lennart Lönngren; Språkbanken Text, University of Gothenburg" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    rdfs:comment "https://sprakbanken.se/en/resources/saldo: the resource's metadata table gives \"saldo.xml lexicon (LMF) 70.98 MB 2017-09-19 CC-BY-4.0\" and \"Licence … CC-BY-4.0\"; the page's description also says \"All components are released under a Creative Commons Attribute-Share Alike license.\" Either way SALDO is used for verification only: nothing is copied from it."@en .
+
+<https://sv.wikipedia.org/w/index.php?title=Grekiska_alfabetet&oldid=59450821>
+    dcterms:title "Grekiska alfabetet (Swedish Wikipedia), revision 59450821" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use, section 7: \"When you submit text to which you hold the copyright, you agree to license it under: Creative Commons Attribution-ShareAlike 4.0 International License (\"CC BY-SA 4.0\"), and GNU Free Documentation License (\"GFDL\").\""@en .
+
+<https://www.ne.se/uppslagsverk/>
+    dcterms:title "Nationalencyklopedin (NE), uppslagsverket, entries for the Greek letter names" ;
+    dcterms:creator "NE Nationalencyklopedin AB" ;
+    rdfs:comment "https://www.ne.se/info/upphovsratt/: \"Nästan allt material på NE.se omfattas av upphovsrättslagen. … Ingen kopiering får göras utan tillstånd.\" Texts from the encyclopedia may be quoted \"i icke-kommersiellt syfte\" with attribution; that is a non-commercial permission, so NE is used for verification only: nothing is copied from it."@en .
+
+<#alpha>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Α α" ;
+    solid-memo:back "alpha"@en ,
+                    "alfa"@sv .
+
+<#beta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Β β" ;
+    solid-memo:back "beta"@en ,
+                    "beta"@sv .
+
+<#gamma>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Γ γ" ;
+    solid-memo:back "gamma"@en ,
+                    "gamma"@sv .
+
+<#delta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Δ δ" ;
+    solid-memo:back "delta"@en ,
+                    "delta"@sv .
+
+<#epsilon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ε ε" ;
+    solid-memo:back "epsilon"@en ,
+                    "epsilon"@sv .
+
+<#zeta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ζ ζ" ;
+    solid-memo:back "zeta"@en ,
+                    "zeta"@sv .
+
+<#eta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Η η" ;
+    solid-memo:back "eta"@en ,
+                    "eta"@sv .
+
+<#theta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Θ θ" ;
+    solid-memo:back "theta"@en ,
+                    "theta"@sv .
+
+<#iota>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ι ι" ;
+    solid-memo:back "iota"@en ,
+                    "jota"@sv .
+
+<#kappa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Κ κ" ;
+    solid-memo:back "kappa"@en ,
+                    "kappa"@sv .
+
+<#lambda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Λ λ" ;
+    solid-memo:back "lambda"@en ,
+                    "lambda"@sv .
+
+<#mu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Μ μ" ;
+    solid-memo:back "mu"@en ,
+                    "my"@sv .
+
+<#nu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ν ν" ;
+    solid-memo:back "nu"@en ,
+                    "ny"@sv .
+
+<#xi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ξ ξ" ;
+    solid-memo:back "xi"@en ,
+                    "xi"@sv .
+
+<#omicron>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ο ο" ;
+    solid-memo:back "omicron"@en ,
+                    "omikron"@sv .
+
+<#pi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Π π" ;
+    solid-memo:back "pi"@en ,
+                    "pi"@sv .
+
+<#rho>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ρ ρ" ;
+    solid-memo:back "rho"@en ,
+                    "rho"@sv .
+
+<#sigma>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Σ σ" ;
+    solid-memo:back "sigma"@en ,
+                    "sigma"@sv ;
+    solid-memo:backNote "At the end of a word, lower-case sigma is written ς."@en ,
+                        "I slutet av ett ord skrivs gemenen ς."@sv .
+
+<#tau>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Τ τ" ;
+    solid-memo:back "tau"@en ,
+                    "tau"@sv .
+
+<#upsilon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Υ υ" ;
+    solid-memo:back "upsilon"@en ,
+                    "ypsilon"@sv .
+
+<#phi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Φ φ" ;
+    solid-memo:back "phi"@en ,
+                    "fi"@sv .
+
+<#chi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Χ χ" ;
+    solid-memo:back "chi"@en ,
+                    "chi"@sv .
+
+<#psi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ψ ψ" ;
+    solid-memo:back "psi"@en ,
+                    "psi"@sv .
+
+<#omega>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ω ω" ;
+    solid-memo:back "omega"@en ,
+                    "omega"@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

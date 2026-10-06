@@ -1,4 +1,4 @@
-@base <https://solid-memo.com/decks/capitals/2.ttl> .
+@base <https://solid-memo.com/decks/capitals/v2.ttl> .
 
 @prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
 @prefix dcterms:    <http://purl.org/dc/terms/> .
@@ -30,8 +30,8 @@
     adms:versionNotes "Added Norway." ;
     dcat:inSeries <https://solid-memo.com/decks/index.ttl#capitals> ;
     dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#capitals> ;
-    dcat:prev <https://solid-memo.com/decks/capitals/1.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/capitals/1.ttl> ;
+    dcat:prev <https://solid-memo.com/decks/capitals/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/capitals/v1.ttl> ;
     dcat:distribution <#turtle> ;
     prov:wasDerivedFrom <https://en.wikipedia.org/wiki/List_of_national_capitals> .
 

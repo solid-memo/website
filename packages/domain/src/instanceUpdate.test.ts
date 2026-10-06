@@ -24,8 +24,8 @@ describe("rebaseIri", () => {
     expect(rebaseIri("https://pod.example/solid-memo/main-old/x.ttl", MAIN, TO)).toBe(
       "https://pod.example/solid-memo/main-old/x.ttl",
     );
-    expect(rebaseIri("https://solid-memo.com/decks/capitals/1.ttl", MAIN, TO)).toBe(
-      "https://solid-memo.com/decks/capitals/1.ttl",
+    expect(rebaseIri("https://solid-memo.com/decks/capitals/v1.ttl", MAIN, TO)).toBe(
+      "https://solid-memo.com/decks/capitals/v1.ttl",
     );
   });
 });

@@ -7,8 +7,8 @@ import { firstRelease } from "@solid-memo/domain/testing/libraryDeck";
 import { statusTexts } from "../test/liveRegions";
 
 const capitals: LibraryDeck = {
-  url: "https://solid-memo.com/decks/capitals.ttl",
-  ...firstRelease("https://solid-memo.com/decks/capitals.ttl"),
+  url: "https://solid-memo.com/decks/capitals/v1.ttl",
+  ...firstRelease("https://solid-memo.com/decks/capitals/v1.ttl"),
   title: { en: "Capitals of the world" },
   cardCount: 243,
   authors: ["Anton Wiklund"],
@@ -18,8 +18,8 @@ const capitals: LibraryDeck = {
   sources: [],
 };
 const rivers: LibraryDeck = {
-  url: "https://solid-memo.com/decks/rivers.ttl",
-  ...firstRelease("https://solid-memo.com/decks/rivers.ttl"),
+  url: "https://solid-memo.com/decks/rivers/v1.ttl",
+  ...firstRelease("https://solid-memo.com/decks/rivers/v1.ttl"),
   title: { en: "Rivers" },
   cardCount: 1,
   authors: [],

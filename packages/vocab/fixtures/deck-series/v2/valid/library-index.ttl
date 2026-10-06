@@ -18,23 +18,23 @@
                         "Världens huvudstäder."@sv ;
     dcterms:publisher <#solid-memo> ;
     dcat:theme <https://solid-memo.com/ns/vocab/topics.ttl#geography> ;
-    dcat:first <https://solid-memo.com/decks/capitals/1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/capitals/2.ttl> ;
-    dcat:hasVersion <https://solid-memo.com/decks/capitals/1.ttl> ,
-                    <https://solid-memo.com/decks/capitals/2.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/capitals/2.ttl> .
+    dcat:first <https://solid-memo.com/decks/capitals/v1.ttl> ;
+    dcat:last <https://solid-memo.com/decks/capitals/v2.ttl> ;
+    dcat:hasVersion <https://solid-memo.com/decks/capitals/v1.ttl> ,
+                    <https://solid-memo.com/decks/capitals/v2.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/capitals/v2.ttl> .
 
 <#solid-memo>
     a foaf:Agent ;
     foaf:name "Solid Memo" .
 
-<https://solid-memo.com/decks/capitals/1.ttl>
+<https://solid-memo.com/decks/capitals/v1.ttl>
     a dcat:Dataset ;
     dcterms:title "Capitals" ;
     dcterms:description "Capitals of the world." ;
     dcat:version "1" .
 
-<https://solid-memo.com/decks/capitals/2.ttl>
+<https://solid-memo.com/decks/capitals/v2.ttl>
     a dcat:Dataset ;
     dcterms:title "Capitals" ;
     dcterms:description "Capitals of the world." ;

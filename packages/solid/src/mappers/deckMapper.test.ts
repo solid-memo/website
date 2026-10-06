@@ -65,14 +65,14 @@ describe("toDeck", () => {
         .addStringNoLocale(DCTERMS.creator, "A friend")
         .addIri(DCTERMS.license, "https://creativecommons.org/publicdomain/zero/1.0/")
         .addStringNoLocale(DCTERMS.description, "Capitals, from Wikipedia.")
-        .addIri(DCTERMS.source, "https://solid-memo.com/decks/capitals.ttl"),
+        .addIri(DCTERMS.source, "https://solid-memo.com/decks/capitals/v1.ttl"),
     );
     expect(toDeck(thing)).toMatchObject({
       formatVersion: 1,
       authors: ["Anton Wiklund", "A friend"],
       license: "https://creativecommons.org/publicdomain/zero/1.0/",
       description: { en: "Capitals, from Wikipedia." },
-      sourceUrl: "https://solid-memo.com/decks/capitals/v1",
+      sourceUrl: "https://solid-memo.com/decks/capitals/v1.ttl",
     });
   });
 

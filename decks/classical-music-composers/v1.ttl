@@ -1,0 +1,909 @@
+@base <https://solid-memo.com/decks/classical-music-composers/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Classical music: who composed it?"@en ,
+                  "Klassisk musik: vem komponerade den?"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "83 famous works of Western classical music composed before 1950 – operas, ballets and concert works chosen by how many Wikimedia sites (mostly language editions of Wikipedia) have a page on them. Front: the work's title in English and Swedish (where a title has been used for several works, the best-known one is meant); back: its composer. Titles and composers from Wikidata, checked against the Library of Congress name authorities and IMSLP."@en ,
+                        "83 berömda verk ur den västerländska klassiska musiken, komponerade före 1950 – operor, baletter och konsertverk utvalda efter hur många Wikimedia-webbplatser (främst språkversioner av Wikipedia) som har en sida om dem. Framsida: verkets titel på engelska och svenska (har flera verk samma titel avses det mest kända); baksida: tonsättaren. Titlar och tonsättare från Wikidata, kontrollerade mot Library of Congress namnauktoriteter och IMSLP."@sv ;
+    prov:wasDerivedFrom <https://www.wikidata.org/> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:music ;
+    dcat:keyword "classical music"@en ,
+                 "composers"@en ,
+                 "opera"@en ,
+                 "ballet"@en ,
+                 "music history"@en ,
+                 "klassisk musik"@sv ,
+                 "tonsättare"@sv ,
+                 "kompositörer"@sv ,
+                 "balett"@sv ,
+                 "musikhistoria"@sv ,
+                 "opera"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#classical-music-composers> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#classical-music-composers> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/> ,
+              <https://id.loc.gov/authorities/names.html> ,
+              <https://imslp.org/> ,
+              <https://sv.wikipedia.org/> ,
+              <https://en.wikipedia.org/> ,
+              <https://libris.kb.se/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Candidates (Wikidata, 2026-10-04): every Wikidata item with a composer statement (P86) and at least 25 sitelinks, from the Wikidata Query Service (query 1). wikibase:sitelinks counts the item's pages on every Wikimedia project: mostly the language editions of Wikipedia, but also Wikiquote, Wikisource, Wikinews and Commons; the whole selection ranks by this count, not by Wikipedia articles alone. This returned 9,616 rows for 8,262 items, most of them films, TV series and anthems."@en ,
+                 "Details: for the 8,262 items, in batches of 300, the English and Swedish labels, the composer and the composer's English label and date of death, the item's classes (P31) and the earliest inception (P571), publication date (P577) and date of first performance (P1191) (query 2)."@en ,
+                 "Filter (a Python script over the saved results): a work was kept when its earliest P571/P577/P1191 date is before 1950 — or, with none of those dates, when every composer died before 1950 — and when its classes include musical work/composition (Q105543609), dramatico-musical work (Q58483083), ballet (Q58483088), passion (Q781815) or one of the other music classes listed in the filter under Queries, but none of film, animated film, short film, TV series, animated series or national anthem. The remaining works were ranked by sitelink count (all Wikimedia projects)."@en ,
+                 "Editorial screening of the ranked list from the top, by the criteria in Selection: songs, carols, hymns, chant, anthems, patriotic and military songs and marches, musicals and plays with music were set aside as not Western classical concert, opera or ballet repertoire; numbered works without an established nickname (e.g. Beethoven's Symphony No. 9, Mozart's Requiem) were set aside as generic titles. Every work at or above the cut that was set aside is listed in Selection."@en ,
+                 "Title clashes: for the shortlisted works, query 3 found every other Wikidata item with a composer whose English or Swedish label is exactly the same as the work's label in that language. A work was dropped when a same-titled musical work by another composer has at least half as many sitelinks (this removed Verdi's Otello, 45 sitelinks, against Rossini's Otello with 26). Query 3 compared labels only, so after review (quality-control round 3) query 4 repeated the search with the titles actually on the card fronts, in each language, matched against the labels and the aliases of every item with a composer. Namesakes that are films, TV series, video games, theatre productions or popular songs were ignored. Every other namesake (an opera, operetta, musical, ballet or concert work by another composer) with at least 5 sitelinks is named in a back note that says which work is meant: Aida, Turandot, The Barber of Seville, La bohème, Manon Lescaut, Falstaff, Faust, Macbeth, Salome, Boléro, Pastoral Symphony, Orfeo ed Euridice and L'Orfeo. A few less-known namesakes are named too (Ferdinando Bertoni, Antonio Sartorio); the others with fewer than 5 sitelinks are not (e.g. Galuppi's and Federici's Idomeneo, Prokofiev's film music The Queen of Spades, Strauss II's quadrille Un ballo in maschera, Balfe's Falstaff). Works with a different title (e.g. Suppé's Pique Dame) are outside this check. Query 4 found no new clash under the drop rule: the only musical namesake with more than half a card's sitelinks, Massenet's Manon (29, against Manon Lescaut's 40), matched only through its Swedish alias 'Manon Lescaut'; its title is Manon, so the card stays and its back note names Massenet's opera. Every namesake named in a note is cited on the card with its Wikidata item and has a composer (P86) check."@en ,
+                 "The deck takes the eligible works in sitelink order down to 35 sitelinks, with the whole of the tie at 35, which gives 83 cards (the brief asked for about 80)."@en ,
+                 "Titles: the English front is Wikidata's English label, or an English alias where the label is a generic numbered title (Moonlight Sonata, Pastoral Symphony, Sonata Pathétique, Jupiter Symphony, Canon in D); 'Eroica Symphony' is our own English form of the alias 'Eroica'. La traviata has no English or Swedish label in Wikidata, only a multilingual ('mul') label 'La traviata'; the builder's label checks accept a mul label. The Swedish front is Wikidata's Swedish label or alias, except where that is missing or would mislead; then the title of the Swedish Wikipedia article (a sitelink in Wikidata) or a Swedish form checked in Swedish Wikipedia's text was used: La traviata, La bohème, Symphonie fantastique, Spader dam, Sonata Pathétique, Jupitersymfonin, L'Orfeo (Swedish Wikipedia's redirect title for Monteverdi's opera, whose article opens 'Orfeo (italienska: L'Orfeo …)'; Wikidata's Swedish label 'Orfeus' is also the name of the mythical singer, and the bare 'Orfeo' is Wikidata's Swedish label of Luigi Rossi's opera) and Uvertyren 1812 (Wikidata's Swedish label is just '1812', which would read as a year; its Swedish alias 'Ouvertyren 1812', used at first, was not found in Swedish Wikipedia's text, which has 'Uvertyren 1812'). Swedish Wikipedia's text was read for those cards and for the Swedish titles that differ from the original-language title in a way a Swedish reader might question (Nebukadnessar, Ragnarök, Valkyrian, Rhenguldet, Läderlappen, Trubaduren, Eroica, Pastoralsymfonin, Månskenssonaten, Kanon i D, Törnrosa, Wilhelm Tell). Titles are tagged with the language in whose usage they are the established title, even when the title itself is in the original language (German, Italian, Latin or French): e.g. 'Der Ring des Nibelungen'@en, 'Das wohltemperierte Klavier'@sv, 'Così fan tutte'@en and @sv; Wikidata's English and Swedish labels follow the same practice."@en ,
+                 "Composers: the back is the composer from Wikidata P86 (every selected work has exactly one). The name is Wikidata's English label (one exception: for Gluck, the back uses 'Christoph Willibald Gluck', an English alias, the Swedish label and the title of the English and Swedish Wikipedia articles, rather than the English label 'Christoph Willibald von Gluck'); where Wikidata's Swedish label spells the name differently (transliterated Russian names, Handel/Händel, Rossini's Gioachino/Gioacchino, Leoncavallo's Ruggero/Ruggiero, the Strausses' II/I against d.y./d.ä.) the back gives the English and the Swedish form, tagged; otherwise the name is untagged."@en ,
+                 "Cross-check: for each work, its Library of Congress authority id (Wikidata P244) was looked up and the LC record fetched from id.loc.gov (…/authorities/names/<id>.madsrdf.json); the LC authorized heading begins with the composer's name and dates. For the 12 works with no usable LC heading (no P244, or for Giselle a heading without the composer) the IMSLP work page was found through the IMSLP API; IMSLP page titles end with the composer's name; the title cited is the one the page shows after any redirect. Every card's composer agreed with its second source."@en ,
+                 "Machine checks: every card has Wikidata checks run by the builder: the composer (P86), the English and Swedish front titles as a label or alias where they are one, and the composer's name as a label in each language used. Label checks were left out only where the card's title is not a Wikidata label or alias, as listed in quality control."@en ,
+                 "Back notes were written by us from the evidence listed on each card: Wikidata namesake items (each with a composer check), Library of Congress headings showing a work as part of a larger one, and Swedish Wikipedia for the Swedish title of a larger work (Triptyken). IMSLP page lists and English Wikipedia only confirm what Wikidata gives."@en ,
+                 "Dates in the evidence: each Wikidata entry gives the work's earliest inception (P571), publication (P577) or first performance (P1191) at year precision or finer. Sixteen works also have a coarser value, a publication date of 1850 with century precision ('19th century'); the evidence says so, since Wikidata does not date them 1850 (quality-control round 3). Four works have none of these dates in Wikidata and passed the filter only through its fallback, the composer's death before 1950: canon-in-d (Pachelbel, died 1706), goldberg-variations and brandenburg-concertos (Bach, died 1750) and nessun-dorma (Puccini, died 1924); their evidence says this instead of giving a work date (quality-control round 5). Alias lists in the evidence are the aliases seen at retrieval and are given as 'aliases include', since Wikidata's alias lists change. No date is shown on a card."@en ,
+                 "Selection: Included: the 83 highest-ranked works by Wikidata sitelink count (pages on all Wikimedia projects, mostly Wikipedias; Wikidata, 2026-10-04) among musical works with a single named composer, dated (inception, publication or first performance) before 1950, that belong to the Western classical opera, ballet, concert or church-music repertoire and have a title that identifies them on its own. The cut is at 35 sitelinks, with the whole tie at 35. Because the count includes Wikiquote, Wikisource, Wikinews and Commons, 11 of the 83 works have fewer than 35 Wikipedia articles (Sonata Pathétique has 32 of its 35 sitelinks on Wikipedias); a ranking by Wikipedia articles alone would give a slightly different list. Excluded: every work that passed the filter with at least 35 sitelinks but is not in the deck, all 30 of them (Wikidata item, sitelinks): songs, carols, hymns and chant — The Internationale (Q49617, 133), Stille Nacht (Q172152, 79), Auld Lang Syne (Q211939, 55), Happy Birthday to You (Q167545, 53), 'O Sole Mio (Q205891, 50), Jingle Bells (Q406845, 48), Hava Nagila (Q131718, 47), Salve Regina (Q301934, 45), Waltzing Matilda (Q752873, 40), La Espero (Q141005, 38), Greensleeves (Q674738, 37), Bogurodzica (Q890692, 37); national, patriotic and military songs and marches — Katyusha (Q18288, 58), Rule, Britannia! (Q215729, 40), Farewell of Slavianka (Q331969, 39), Erika (Q700867, 37), The Sacred War (Q714119, 37); popular songs — Bésame Mucho (Q391180, 45), Gloomy Sunday (Q747869, 42), Over the Rainbow (Q161402, 40), You'll Never Walk Alone (Q728692, 38), White Christmas (Q1131761, 37), Lili Marleen (Q154968, 37); a play with music — The Threepenny Opera (Q212495, 46); generic numbered titles without an established nickname in both languages — Beethoven's Symphony No. 9 (Q11989, 65), Symphony No. 5 (Q188709, 56) and Symphony No. 1 (Q163493, 35), Mozart's Symphony No. 40 (Q231390, 35) and Mozart's Requiem (Q207875, 51; a generic title, and Wikidata also names Franz Xaver Süssmayr as its composer); and Verdi's Otello (Q172324, 45), whose title is shared with Rossini's Otello. The Radetzky March is kept as an orchestral concert piece by Johann Strauss I, though it is a march; this is a judgement call. Arias and parts with their own Wikidata item and rank (Nessun dorma; the four operas of the Ring) are kept as works in their own right. Sitelink counts change over time, so a re-run of the queries may give a slightly different list."@en ,
+                 "Licensing: The deck is CC0 1.0. Everything in the cards — the choice of works, the titles, the composers and their names, and the namesakes named in back notes — comes from Wikidata, whose structured data is CC0, or is our own wording (the back notes, 'Eroica Symphony', and Swedish titles that are common names checked in Swedish Wikipedia, such as 'Jupitersymfonin', 'Uvertyren 1812' and 'Triptyken'). The selection is our own: a ranking by Wikidata's sitelink counts with the stated exclusions, not a list taken from any publication. The Library of Congress Name Authority File (a public-domain data set) and IMSLP (wiki pages CC BY-SA 4.0) were used only to confirm composers and namesakes, and Swedish and English Wikipedia (CC BY-SA 4.0) only to confirm titles and what kind of work a namesake is; no text or selection was copied from them, so their share-alike terms do not reach the deck. Facts such as who composed a work or what a work is called are not copyrightable."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Machine checks against Wikidata, a second source for every composer, and the Swedish titles"@en ;
+    rdfs:comment "Scope: All 83 cards."@en ,
+                 "Outcome: Every card's composer was confirmed by a Library of Congress heading or an IMSLP work page; no disagreement on who composed a work was found. The builder's Wikidata checks cover the composer (P86) of every card, the composer's name in each language used, and the front titles where they are a Wikidata label or alias. Title label checks were left out for: la-boheme (sv \"La bohème\"); eroica-symphony (en \"Eroica Symphony\"); symphonie-fantastique (sv \"Symphonie fantastique\"); the-queen-of-spades (sv \"Spader dam\"); sonata-pathetique (sv \"Sonata Pathétique\"); jupiter-symphony (sv \"Jupitersymfonin\"); l-orfeo (sv \"L'Orfeo\"); 1812-overture (sv \"Uvertyren 1812\"). Differences in name forms and titles between the sources are recorded below. (This list gives the final state after quality-control rounds 1 and 2, which changed the Swedish fronts of l-orfeo from 'Orfeo' to 'L'Orfeo' and of 1812-overture from 'Ouvertyren 1812' to 'Uvertyren 1812'; neither is a Wikidata Swedish label or alias; corrected in round 4.)"@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 83 cards: each composer checked against the opening of the work's English Wikipedia article and the reviewer's own knowledge; the builder's 408 Wikidata checks re-run; the selection compared with an independent query of works with 35 or more sitelinks."@en ,
+                 "Outcome: No wrong composer and no wrong back note. Two warnings: the Swedish front 'Orfeo' on l-orfeo was ambiguous (Gluck's opera, Luigi Rossi's Orfeo) and lacked a namesake note, and the deck described its ranking as Wikipedia coverage although wikibase:sitelinks counts all Wikimedia projects. Three suggestions: inconsistent namesake notes, a note for Vaughan Williams's Pastoral Symphony, and the Gluck name form. All were checked against Wikidata and Wikipedia and resolved; the namesake check was redone for the card fronts as used (query 4) with one rule for all notes."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language and translation"@en ;
+    rdfs:comment "Scope: All 83 cards: every front, back and note in the dossier and the built deck; doubtful Swedish titles and names checked against Swedish Wikipedia; the builder's read-only check run."@en ,
+                 "Outcome: No language errors. One warning: the Swedish note on gianni-schicchi used the Italian 'Il trittico' although Swedish has 'Triptyken'. Five suggestions: the attested spelling 'Uvertyren 1812', idiomatic wording of the orfeo-ed-euridice note, Swedish punctuation and wording in the description, a 'balett' keyword, and documenting the language-tag convention for original-language titles. All were applied after checking Swedish Wikipedia."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 83 cards' evidence checked against the live sources (71 Library of Congress headings, 20 Swedish Wikipedia quotes, 12 IMSLP pages, the Wikidata statements), source licences, the AI-involvement statement, query 1 re-run, the builder's check."@en ,
+                 "Outcome: All evidence matched its sources and nothing was copied from a closed source. One error: IMSLP's licence was recorded as unknown although its pages are CC BY-SA 4.0. Warnings: two back notes rested only on IMSLP (verification) listings, the namesake check covered labels only and missed the Swedish 'Orfeo' clash, the ranking was described as Wikipedia coverage, the editorial exclusions were given only as examples, 16 cards' evidence turned a century-precision date into '1850', and three IMSLP citations named redirect titles. Suggestions on Sonata Pathétique's Swedish evidence, the Gluck name form, La traviata's multilingual label and non-URL locators. All resolved; the deck stays CC0 because IMSLP and Wikipedia remain verification only."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final re-check (loop 1): changed cards, every third card, metadata, licensing and documentation"@en ;
+    rdfs:comment "Scope: 49 cards (the 32 cards changed in rounds 1-3 and every third card, overlapping on 11), deck metadata, licensing, method, queries and the quality-control log; builder check and validator."@en ,
+                 "Outcome: No card errors: composers, Wikidata statements, Wikipedia quotes, IMSLP titles, Swedish wording and licensing all matched the live sources, and the fixes claimed in rounds 1-3 were found in the built deck. Three documentation findings, all confirmed and fixed: the statement of how the deck was made was corrected, round 0's list of omitted label checks now gives the final Swedish fronts of l-orfeo and 1812-overture, and query 4 was re-run and recorded with the current fronts (no new namesake). No card content or evidence changed."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final re-check (loop 2): changed cards (none listed), every third card (28 cards: 1st, 4th, ... 82nd), metadata, licence decision, documentation and the quality-control log"@en ;
+    rdfs:comment "Scope: 28 cards (every third card) against Wikidata, Library of Congress, Swedish and English Wikipedia and IMSLP; an all-card scan of the work dates in the Wikidata evidence; deck metadata, licensing, method, queries and the quality-control log; builder check and validator."@en ,
+                 "Outcome: No card's front, back or note was wrong. One documentation error, confirmed and fixed: four cards' Wikidata evidence gave the composer's death year as the work's earliest date. Two suggestions applied: The Well-Tempered Clavier now cites IMSLP for both books, and alias lists in the Wikidata evidence now read 'aliases include'. Card fronts, backs and notes are unchanged."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://id.loc.gov/authorities/names.html>
+    dcterms:title "Library of Congress Name Authority File (id.loc.gov)" ;
+    dcterms:creator "Library of Congress" ;
+    rdfs:comment "https://id.loc.gov/about/ — \"The Library of Congress has prepared this linked data system and is making it available as a public domain data set.\""@en .
+
+<https://imslp.org/>
+    dcterms:title "IMSLP Petrucci Music Library" ;
+    dcterms:creator "IMSLP contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://imslp.org/wiki/IMSLP:General_disclaimer — page footer, the same on every IMSLP work page cited: \"Content is available under the Creative Commons Attribution-ShareAlike 4.0 License\". This covers the wiki pages; the scores carry their own licences (\"Each item listed on IMSLP is either in the public domain or has been released under license by its copyright holder(s).\"). Used for verification only: no text or selection was copied."@en .
+
+<https://sv.wikipedia.org/>
+    dcterms:title "Svenska Wikipedia" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of https://sv.wikipedia.org/wiki/Pastoralsymfonin — \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported.\" Used for verification only: no text was copied."@en .
+
+<https://en.wikipedia.org/>
+    dcterms:title "English Wikipedia" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of https://en.wikipedia.org/wiki/Salom%C3%A9_(Mariotte) — \"Text is available under the Creative Commons Attribution-ShareAlike 4.0 License; additional terms may apply.\" Used for verification only: no text was copied."@en .
+
+<https://libris.kb.se/>
+    dcterms:title "LIBRIS (Swedish union catalogue)" ;
+    dcterms:creator "Kungliga biblioteket (National Library of Sweden)" ;
+    rdfs:comment "No licence statement for the xsearch API's results was found during this check, so LIBRIS is treated as of unknown licence: verification only, nothing taken from it."@en .
+
+<#carmen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Carmen"@en ,
+                     "Carmen"@sv ;
+    solid-memo:back "Georges Bizet" .
+
+<#the-magic-flute>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Magic Flute"@en ,
+                     "Trollflöjten"@sv ;
+    solid-memo:back "Wolfgang Amadeus Mozart" .
+
+<#aida>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Aida"@en ,
+                     "Aida"@sv ;
+    solid-memo:back "Giuseppe Verdi" ;
+    solid-memo:backNote "Verdi's opera; Elton John also wrote an Aida musical."@en ,
+                        "Verdis opera; även Elton John skrev en Aida-musikal."@sv .
+
+<#la-traviata>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "La traviata"@en ,
+                     "La traviata"@sv ;
+    solid-memo:back "Giuseppe Verdi" .
+
+<#madama-butterfly>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Madama Butterfly"@en ,
+                     "Madama Butterfly"@sv ;
+    solid-memo:back "Giacomo Puccini" .
+
+<#swan-lake>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Swan Lake"@en ,
+                     "Svansjön"@sv ;
+    solid-memo:back "Pyotr Ilyich Tchaikovsky"@en ,
+                    "Pjotr Tjajkovskij"@sv .
+
+<#the-marriage-of-figaro>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Marriage of Figaro"@en ,
+                     "Figaros bröllop"@sv ;
+    solid-memo:back "Wolfgang Amadeus Mozart" .
+
+<#don-giovanni>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Don Giovanni"@en ,
+                     "Don Giovanni"@sv ;
+    solid-memo:back "Wolfgang Amadeus Mozart" .
+
+<#tosca>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Tosca"@en ,
+                     "Tosca"@sv ;
+    solid-memo:back "Giacomo Puccini" .
+
+<#rigoletto>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Rigoletto"@en ,
+                     "Rigoletto"@sv ;
+    solid-memo:back "Giuseppe Verdi" .
+
+<#fur-elise>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Für Elise"@en ,
+                     "Für Elise"@sv ;
+    solid-memo:back "Ludwig van Beethoven" ;
+    solid-memo:backNote "A bagatelle for piano in A minor."@en ,
+                        "En bagatell för piano i a-moll."@sv .
+
+<#the-four-seasons>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Four Seasons"@en ,
+                     "De fyra årstiderna"@sv ;
+    solid-memo:back "Antonio Vivaldi" ;
+    solid-memo:backNote "The first four violin concertos of Il cimento dell'armonia e dell'inventione."@en ,
+                        "De fyra första violinkonserterna i Il cimento dell'armonia e dell'inventione."@sv .
+
+<#der-ring-des-nibelungen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Der Ring des Nibelungen"@en ,
+                     "Nibelungens ring"@sv ;
+    solid-memo:back "Richard Wagner" .
+
+<#the-nutcracker>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Nutcracker"@en ,
+                     "Nötknäpparen"@sv ;
+    solid-memo:back "Pyotr Ilyich Tchaikovsky"@en ,
+                    "Pjotr Tjajkovskij"@sv .
+
+<#nabucco>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Nabucco"@en ,
+                     "Nebukadnessar"@sv ;
+    solid-memo:back "Giuseppe Verdi" ;
+    solid-memo:backNote "Known in Swedish as Nebukadnessar; Italian title Nabucco."@en ,
+                        "Italiensk titel: Nabucco."@sv .
+
+<#turandot>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Turandot"@en ,
+                     "Turandot"@sv ;
+    solid-memo:back "Giacomo Puccini" ;
+    solid-memo:backNote "Puccini's opera; Ferruccio Busoni also wrote a Turandot."@en ,
+                        "Puccinis opera; även Ferruccio Busoni skrev en Turandot."@sv .
+
+<#tristan-und-isolde>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Tristan und Isolde"@en ,
+                     "Tristan och Isolde"@sv ;
+    solid-memo:back "Richard Wagner" .
+
+<#the-barber-of-seville>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Barber of Seville"@en ,
+                     "Barberaren i Sevilla"@sv ;
+    solid-memo:back "Gioachino Rossini"@en ,
+                    "Gioacchino Rossini"@sv ;
+    solid-memo:backNote "Rossini's opera; Giovanni Paisiello also wrote a Barber of Seville."@en ,
+                        "Rossinis opera; även Giovanni Paisiello skrev en Barberaren i Sevilla."@sv .
+
+<#la-boheme>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "La bohème"@en ,
+                     "La bohème"@sv ;
+    solid-memo:back "Giacomo Puccini" ;
+    solid-memo:backNote "Puccini's opera; Ruggero Leoncavallo also wrote a La bohème."@en ,
+                        "Puccinis opera; även Ruggiero Leoncavallo skrev en La bohème."@sv .
+
+<#fidelio>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Fidelio"@en ,
+                     "Fidelio"@sv ;
+    solid-memo:back "Ludwig van Beethoven" .
+
+<#il-trovatore>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Il trovatore"@en ,
+                     "Trubaduren"@sv ;
+    solid-memo:back "Giuseppe Verdi" .
+
+<#cosi-fan-tutte>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Così fan tutte"@en ,
+                     "Così fan tutte"@sv ;
+    solid-memo:back "Wolfgang Amadeus Mozart" .
+
+<#cavalleria-rusticana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cavalleria rusticana"@en ,
+                     "Cavalleria rusticana"@sv ;
+    solid-memo:back "Pietro Mascagni" .
+
+<#the-rite-of-spring>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Rite of Spring"@en ,
+                     "Våroffer"@sv ;
+    solid-memo:back "Igor Stravinsky"@en ,
+                    "Igor Stravinskij"@sv .
+
+<#pagliacci>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pagliacci"@en ,
+                     "Pajazzo"@sv ;
+    solid-memo:back "Ruggero Leoncavallo"@en ,
+                    "Ruggiero Leoncavallo"@sv .
+
+<#carmina-burana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Carmina Burana"@en ,
+                     "Carmina Burana"@sv ;
+    solid-memo:back "Carl Orff" .
+
+<#messiah>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Messiah"@en ,
+                     "Messias"@sv ;
+    solid-memo:back "George Frideric Handel"@en ,
+                    "Georg Friedrich Händel"@sv .
+
+<#the-well-tempered-clavier>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Well-Tempered Clavier"@en ,
+                     "Das wohltemperierte Klavier"@sv ;
+    solid-memo:back "Johann Sebastian Bach" .
+
+<#1812-overture>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1812 Overture"@en ,
+                     "Uvertyren 1812"@sv ;
+    solid-memo:back "Pyotr Ilyich Tchaikovsky"@en ,
+                    "Pjotr Tjajkovskij"@sv .
+
+<#parsifal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Parsifal"@en ,
+                     "Parsifal"@sv ;
+    solid-memo:back "Richard Wagner" .
+
+<#lohengrin>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Lohengrin"@en ,
+                     "Lohengrin"@sv ;
+    solid-memo:back "Richard Wagner" .
+
+<#the-blue-danube>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Blue Danube"@en ,
+                     "An der schönen blauen Donau"@sv ;
+    solid-memo:back "Johann Strauss II"@en ,
+                    "Johann Strauss d.y."@sv .
+
+<#eugene-onegin>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eugene Onegin"@en ,
+                     "Eugen Onegin"@sv ;
+    solid-memo:back "Pyotr Ilyich Tchaikovsky"@en ,
+                    "Pjotr Tjajkovskij"@sv .
+
+<#eroica-symphony>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eroica Symphony"@en ,
+                     "Eroica"@sv ;
+    solid-memo:back "Ludwig van Beethoven" ;
+    solid-memo:backNote "Symphony No. 3."@en ,
+                        "Symfoni nr 3."@sv .
+
+<#don-carlos>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Don Carlos"@en ,
+                     "Don Carlos"@sv ;
+    solid-memo:back "Giuseppe Verdi" .
+
+<#bolero>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Boléro"@en ,
+                     "Boléro"@sv ;
+    solid-memo:back "Maurice Ravel" ;
+    solid-memo:backNote "Ravel's orchestral piece; Frédéric Chopin also wrote a Boléro for piano."@en ,
+                        "Ravels orkesterverk; även Frédéric Chopin skrev en Boléro för piano."@sv .
+
+<#la-forza-del-destino>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "La forza del destino"@en ,
+                     "Ödets makt"@sv ;
+    solid-memo:back "Giuseppe Verdi" .
+
+<#moonlight-sonata>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Moonlight Sonata"@en ,
+                     "Månskenssonaten"@sv ;
+    solid-memo:back "Ludwig van Beethoven" ;
+    solid-memo:backNote "Piano Sonata No. 14."@en ,
+                        "Pianosonat nr 14."@sv .
+
+<#un-ballo-in-maschera>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Un ballo in maschera"@en ,
+                     "Maskeradbalen"@sv ;
+    solid-memo:back "Giuseppe Verdi" .
+
+<#falstaff>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Falstaff"@en ,
+                     "Falstaff"@sv ;
+    solid-memo:back "Giuseppe Verdi" ;
+    solid-memo:backNote "Verdi's opera; Antonio Salieri also wrote a Falstaff opera and Edward Elgar a symphonic study Falstaff."@en ,
+                        "Verdis opera; även Antonio Salieri skrev en Falstaff-opera och Edward Elgar en symfonisk studie Falstaff."@sv .
+
+<#the-flying-dutchman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Flying Dutchman"@en ,
+                     "Den flygande holländaren"@sv ;
+    solid-memo:back "Richard Wagner" .
+
+<#der-freischutz>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Der Freischütz"@en ,
+                     "Friskytten"@sv ;
+    solid-memo:back "Carl Maria von Weber" .
+
+<#die-walkure>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Die Walküre"@en ,
+                     "Valkyrian"@sv ;
+    solid-memo:back "Richard Wagner" ;
+    solid-memo:backNote "Part of Der Ring des Nibelungen."@en ,
+                        "Del av Nibelungens ring."@sv .
+
+<#eine-kleine-nachtmusik>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eine kleine Nachtmusik"@en ,
+                     "Eine kleine Nachtmusik"@sv ;
+    solid-memo:back "Wolfgang Amadeus Mozart" .
+
+<#goldberg-variations>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Goldberg Variations"@en ,
+                     "Goldbergvariationerna"@sv ;
+    solid-memo:back "Johann Sebastian Bach" .
+
+<#das-rheingold>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Das Rheingold"@en ,
+                     "Rhenguldet"@sv ;
+    solid-memo:back "Richard Wagner" ;
+    solid-memo:backNote "Part of Der Ring des Nibelungen."@en ,
+                        "Del av Nibelungens ring."@sv .
+
+<#manon-lescaut>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Manon Lescaut"@en ,
+                     "Manon Lescaut"@sv ;
+    solid-memo:back "Giacomo Puccini" ;
+    solid-memo:backNote "Puccini's opera; Daniel Auber also wrote a Manon Lescaut, and Jules Massenet the opera Manon."@en ,
+                        "Puccinis opera; även Daniel Auber skrev en Manon Lescaut, och Jules Massenet operan Manon."@sv .
+
+<#symphonie-fantastique>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Symphonie fantastique"@en ,
+                     "Symphonie fantastique"@sv ;
+    solid-memo:back "Hector Berlioz" .
+
+<#faust>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Faust"@en ,
+                     "Faust"@sv ;
+    solid-memo:back "Charles Gounod" ;
+    solid-memo:backNote "Gounod's opera; Louis Spohr also wrote a Faust."@en ,
+                        "Gounods opera; även Louis Spohr skrev en Faust."@sv .
+
+<#giselle>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Giselle"@en ,
+                     "Giselle"@sv ;
+    solid-memo:back "Adolphe Adam" .
+
+<#lucia-di-lammermoor>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Lucia di Lammermoor"@en ,
+                     "Lucia di Lammermoor"@sv ;
+    solid-memo:back "Gaetano Donizetti" .
+
+<#tannhauser>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Tannhäuser"@en ,
+                     "Tannhäuser"@sv ;
+    solid-memo:back "Richard Wagner" .
+
+<#brandenburg-concertos>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Brandenburg Concertos"@en ,
+                     "Brandenburgkonserterna"@sv ;
+    solid-memo:back "Johann Sebastian Bach" .
+
+<#the-queen-of-spades>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Queen of Spades"@en ,
+                     "Spader dam"@sv ;
+    solid-memo:back "Pyotr Ilyich Tchaikovsky"@en ,
+                    "Pjotr Tjajkovskij"@sv .
+
+<#pastoral-symphony>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pastoral Symphony"@en ,
+                     "Pastoralsymfonin"@sv ;
+    solid-memo:back "Ludwig van Beethoven" ;
+    solid-memo:backNote "Symphony No. 6. Vaughan Williams's Symphony No. 3 is called A Pastoral Symphony."@en ,
+                        "Symfoni nr 6. Vaughan Williams symfoni nr 3 kallas A Pastoral Symphony."@sv .
+
+<#gotterdammerung>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Götterdämmerung"@en ,
+                     "Ragnarök"@sv ;
+    solid-memo:back "Richard Wagner" ;
+    solid-memo:backNote "Part of Der Ring des Nibelungen."@en ,
+                        "Del av Nibelungens ring."@sv .
+
+<#norma>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Norma"@en ,
+                     "Norma"@sv ;
+    solid-memo:back "Vincenzo Bellini" .
+
+<#salome>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Salome"@en ,
+                     "Salome"@sv ;
+    solid-memo:back "Richard Strauss" ;
+    solid-memo:backNote "Richard Strauss's opera; Antoine Mariotte also wrote a Salomé opera."@en ,
+                        "Richard Strauss opera; även Antoine Mariotte skrev en Salomé-opera."@sv .
+
+<#radetzky-march>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Radetzky March"@en ,
+                     "Radetzkymarsch"@sv ;
+    solid-memo:back "Johann Strauss I"@en ,
+                    "Johann Strauss d.ä."@sv .
+
+<#die-entfuhrung-aus-dem-serail>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Die Entführung aus dem Serail"@en ,
+                     "Enleveringen ur Seraljen"@sv ;
+    solid-memo:back "Wolfgang Amadeus Mozart" .
+
+<#l-elisir-d-amore>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "L'elisir d'amore"@en ,
+                     "Kärleksdrycken"@sv ;
+    solid-memo:back "Gaetano Donizetti" .
+
+<#siegfried>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Siegfried"@en ,
+                     "Siegfried"@sv ;
+    solid-memo:back "Richard Wagner" ;
+    solid-memo:backNote "Part of Der Ring des Nibelungen."@en ,
+                        "Del av Nibelungens ring."@sv .
+
+<#the-tales-of-hoffmann>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Tales of Hoffmann"@en ,
+                     "Hoffmanns äventyr"@sv ;
+    solid-memo:back "Jacques Offenbach" .
+
+<#st-matthew-passion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "St Matthew Passion"@en ,
+                     "Matteuspassionen"@sv ;
+    solid-memo:back "Johann Sebastian Bach" .
+
+<#die-fledermaus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Die Fledermaus"@en ,
+                     "Läderlappen"@sv ;
+    solid-memo:back "Johann Strauss II"@en ,
+                    "Johann Strauss d.y."@sv .
+
+<#nessun-dorma>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Nessun dorma"@en ,
+                     "Nessun dorma"@sv ;
+    solid-memo:back "Giacomo Puccini" ;
+    solid-memo:backNote "An aria from the opera Turandot."@en ,
+                        "En aria ur operan Turandot."@sv .
+
+<#coppelia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Coppélia"@en ,
+                     "Coppélia"@sv ;
+    solid-memo:back "Léo Delibes" .
+
+<#macbeth>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Macbeth"@en ,
+                     "Macbeth"@sv ;
+    solid-memo:back "Giuseppe Verdi" ;
+    solid-memo:backNote "Verdi's opera; Ernest Bloch also wrote a Macbeth opera and Richard Strauss a Macbeth tone poem."@en ,
+                        "Verdis opera; även Ernest Bloch skrev en Macbeth-opera och Richard Strauss en symfonisk dikt Macbeth."@sv .
+
+<#die-meistersinger-von-nurnberg>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Die Meistersinger von Nürnberg"@en ,
+                     "Mästersångarna i Nürnberg"@sv ;
+    solid-memo:back "Richard Wagner" .
+
+<#der-rosenkavalier>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Der Rosenkavalier"@en ,
+                     "Rosenkavaljeren"@sv ;
+    solid-memo:back "Richard Strauss" .
+
+<#the-merry-widow>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Merry Widow"@en ,
+                     "Glada änkan"@sv ;
+    solid-memo:back "Franz Lehár" .
+
+<#simon-boccanegra>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Simon Boccanegra"@en ,
+                     "Simon Boccanegra"@sv ;
+    solid-memo:back "Giuseppe Verdi" .
+
+<#canon-in-d>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Canon in D"@en ,
+                     "Kanon i D"@sv ;
+    solid-memo:back "Johann Pachelbel" .
+
+<#orfeo-ed-euridice>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Orfeo ed Euridice"@en ,
+                     "Orfeus och Eurydike"@sv ;
+    solid-memo:back "Christoph Willibald Gluck" ;
+    solid-memo:backNote "Gluck's opera; Ferdinando Bertoni and others also wrote operas of this title, and Joseph Haydn's L'anima del filosofo is also known as Orfeo ed Euridice."@en ,
+                        "Glucks opera; även Ferdinando Bertoni med flera skrev operor med samma titel, och Joseph Haydns L'anima del filosofo kallas också Orfeo ed Euridice."@sv .
+
+<#the-sleeping-beauty>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Sleeping Beauty"@en ,
+                     "Törnrosa"@sv ;
+    solid-memo:back "Pyotr Ilyich Tchaikovsky"@en ,
+                    "Pjotr Tjajkovskij"@sv .
+
+<#the-bartered-bride>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Bartered Bride"@en ,
+                     "Brudköpet"@sv ;
+    solid-memo:back "Bedřich Smetana" .
+
+<#sonata-pathetique>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sonata Pathétique"@en ,
+                     "Sonata Pathétique"@sv ;
+    solid-memo:back "Ludwig van Beethoven" ;
+    solid-memo:backNote "Piano Sonata No. 8."@en ,
+                        "Pianosonat nr 8."@sv .
+
+<#jupiter-symphony>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Jupiter Symphony"@en ,
+                     "Jupitersymfonin"@sv ;
+    solid-memo:back "Wolfgang Amadeus Mozart" ;
+    solid-memo:backNote "Symphony No. 41."@en ,
+                        "Symfoni nr 41."@sv .
+
+<#idomeneo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Idomeneo"@en ,
+                     "Idomeneo"@sv ;
+    solid-memo:back "Wolfgang Amadeus Mozart" .
+
+<#l-orfeo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "L'Orfeo"@en ,
+                     "L'Orfeo"@sv ;
+    solid-memo:back "Claudio Monteverdi" ;
+    solid-memo:backNote "Monteverdi's opera of 1607; Luigi Rossi and Antonio Sartorio also wrote Orfeo operas."@en ,
+                        "Monteverdis opera från 1607; även Luigi Rossi och Antonio Sartorio skrev Orfeo-operor."@sv .
+
+<#gianni-schicchi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Gianni Schicchi"@en ,
+                     "Gianni Schicchi"@sv ;
+    solid-memo:back "Giacomo Puccini" ;
+    solid-memo:backNote "Part of Il trittico."@en ,
+                        "Del av Triptyken (Il trittico)."@sv .
+
+<#william-tell>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "William Tell"@en ,
+                     "Wilhelm Tell"@sv ;
+    solid-memo:back "Gioachino Rossini"@en ,
+                    "Gioacchino Rossini"@sv .
+
+<#the-firebird>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Firebird"@en ,
+                     "Eldfågeln"@sv ;
+    solid-memo:back "Igor Stravinsky"@en ,
+                    "Igor Stravinskij"@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

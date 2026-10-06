@@ -1,0 +1,630 @@
+@base <https://solid-memo.com/decks/minerals/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Minerals"@en ,
+                  "Mineral"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "The formulas of 40 common minerals and the hardness of the ten Mohs reference minerals, in 50 cards. Forty cards show a mineral's name in English and Swedish on the front and its ideal chemical formula on the back, written with subscripts (quartz SiO₂, calcite CaCO₃). Ten cards ask for the hardness, from 1 to 10, of the ten reference minerals of the Mohs scale. The formulas come from Wikidata, checked against the IMA list of minerals, and the hardness values from the US Geological Survey. The Swedish names were checked against Svenska Akademiens ordböcker, SGU and the Swedish Wikipedia."@en ,
+                        "Formlerna för 40 vanliga mineral och hårdheten hos Mohs tio referensmineral, på 50 kort. Fyrtio kort har mineralets namn på engelska och svenska på framsidan och dess idealformel på baksidan, skriven med nedsänkta siffror (kvarts SiO₂, kalkspat CaCO₃). Tio kort frågar efter hårdheten, från 1 till 10, hos de tio referensmineralen i Mohs hårdhetsskala. Formlerna kommer från Wikidata, kontrollerade mot IMA:s mineralförteckning, och hårdheterna från USA:s geologiska undersökning (USGS). De svenska namnen är kontrollerade mot Svenska Akademiens ordböcker, SGU och svenskspråkiga Wikipedia."@sv ;
+    prov:wasDerivedFrom <https://www.wikidata.org/> ,
+                        <https://volcanoes.usgs.gov/volcanic_ash/density_hardness.html> ,
+                        <https://pubs.usgs.gov/gip/gemstones/mineral.html> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:chemistry ,
+               topic:science ;
+    dcat:keyword "minerals"@en ,
+                 "mineralogy"@en ,
+                 "geology"@en ,
+                 "chemical formulas"@en ,
+                 "Mohs scale"@en ,
+                 "mineral"@sv ,
+                 "mineralogi"@sv ,
+                 "geologi"@sv ,
+                 "kemiska formler"@sv ,
+                 "Mohs hårdhetsskala"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#minerals> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#minerals> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/3.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/> ,
+              <https://volcanoes.usgs.gov/volcanic_ash/density_hardness.html> ,
+              <https://pubs.usgs.gov/gip/gemstones/mineral.html> ,
+              <https://www.nps.gov/articles/mohs-hardness-scale.htm> ,
+              <https://cnmnc.units.it/files/editor/IMA_Master_List_%282026-07%29.pdf> ,
+              <https://sv.wikipedia.org/> ,
+              <https://svenska.se/> ,
+              <https://www.sgu.se/om-geologi/mineral/malmmineral-och-industrimineral/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (a script comparing each formula's element composition with Wikidata and the IMA list, live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Candidates: a list of about 75 minerals met in school chemistry and geology (common rock-forming minerals, ore minerals, evaporites, carbonates, gemstone minerals and the Mohs reference minerals) was drawn up by the compiler (the VALUES of query 1) and looked up on Wikidata by exact English label (query 1), requesting the instance-of class, chemical formula (P274), Mohs hardness (P1088), Mindat ID (P6263) and Swedish label. Requests were made with Python urllib and curl with the User-Agent \"solid-memo deck research (https://github.com/antwika/solid-memo)\"; the raw responses were kept in working files (not published), and the queries below reproduce them."@en ,
+                 "Selection: 40 minerals were kept (see Selection), each a Wikidata item that is an instance of 'mineral species' (Q12089225). For them query 2 fetched every P274 value with its rank, all English and Swedish labels and aliases, and the sv.wikipedia sitelink; query 4 fetched the formula of the related talc item Q108584660 (the mineral item Q134583 has no P274), of andalusite and microcline (named in notes), and the data of chalcocite, arsenopyrite and uraninite, which were added after the first selection."@en ,
+                 "IMA check: the RRUFF IMA database of mineral properties, suggested as a source, could not be used: rruff.info/ima answered 404, rruff.info redirected to an unrelated NASA database, and the new site's 'IMA Mineral List' page (https://www.rruff.net/ima-mineral-list/) looped in redirects; rruff.net also states only 'Copyright © 2026 RRUFF', so it could only have been a verification source. The official list of the IMA Commission on New Minerals, Nomenclature and Classification, 'The New IMA List of Minerals', updated July 2026, was downloaded as PDF instead (query 6). Its formula column prints sub- and superscripts as smaller characters, so a script (imaformulas.py, a working file, not published; its command line is in query 6) read the characters of each mineral's row with pdfplumber and wrote lowered small characters as subscripts and raised ones as superscripts. All 40 minerals are in the list as valid species."@en ,
+                 "Formula cross-check: a script (verify.py, a working file, not published; its command line is in query 6) turned each card's formula, each Wikidata P274 value and the IMA formula into element counts (subscript digits read as numbers, oxidation-state superscripts ignored, each element symbol an upper-case letter optionally followed by a lower-case one, parenthesised groups multiplied by the count after them, a hydrate '·2H₂O' added twice) and compared them. All 40 agree in composition with both Wikidata and the IMA list."@en ,
+                 "Formula notation: the back is Wikidata's P274 string, written with Unicode subscript digits, for 34 minerals; it equals the IMA formula or differs only in brackets the IMA list puts around a single anion group (IMA Ca(CO₃), card CaCO₃; IMA Ca(SO₄)(H₂O)₂, card CaSO₄·2H₂O). For five minerals Wikidata gives the IMA list's structural notation, and the card uses the conventional form of the same composition, as the Swedish Wikipedia and SGU write it: magnetite Fe₃O₄ (IMA and Wikidata Fe²⁺Fe³⁺₂O₄), chromite FeCr₂O₄ (Fe²⁺Cr₂O₄), ilmenite FeTiO₃ (Fe²⁺Ti⁴⁺O₃), orthoclase KAlSi₃O₈ (K(AlSi₃O₈); Wikidata gives KAlSi₃O₈ for microcline) and kyanite Al₂SiO₅ (Al₂OSiO₄; Wikidata gives Al₂SiO₅ for its polymorph andalusite). The notes of magnetite, chromite, ilmenite and kyanite give that structural form, taken from Wikidata's P274 and confirmed by the IMA list. For talc, whose Wikidata mineral item has no formula, the back is the composition of the related Wikidata item Q108584660 (P274 H₂Mg₃O₁₂Si₄, in Hill order) written in conventional mineral notation, Mg₃Si₄O₁₀(OH)₂, which the IMA list and the Swedish Wikipedia confirm. The formula is the ideal (end-member) formula; natural samples vary, which the notes of topaz and sphalerite mention."@en ,
+                 "Mohs hardness: the ten reference minerals and their numbers were taken from two USGS pages (queries 7 and 8; sources 'usgs-ash' and 'usgs-gemstones'): the volcanic-ash page's table 'Moh's scale of hardness' (1 Talc to 9 Corundum; 6 is 'Orthoclase (Feldspar)') and the 'Natural Gemstones' page ('Talc is 1' to 'Diamond is 10', with 'Feldspar is 6' and 'Sapphire is 9'). They were confirmed by the National Park Service's article (all ten, by the same names, query 9), the Swedish Wikipedia's article 'Mohs hårdhetsskala' (caption listing 1. Talk to 10. Diamant) and Wikidata's P1088 (query 3), which agrees for eight of the ten items; the calcite and apatite discrepancies are recorded under Quality control. The card names the scale's own reference mineral (orthoclase, corundum), as the USGS volcanic-ash page and the NPS article do."@en ,
+                 "English names: Wikidata's English labels, which match the IMA list's names (its 'Name' column, with the initial capital its explanation describes as table style); the spelling 'baryte' (Wikidata label and IMA name) is used, with 'barite' in the note."@en ,
+                 "Swedish names: from the Wikidata Swedish label or alias, written in lower case as Swedish common nouns are (capitalised only at the start of a front). Each was resolved on sv.wikipedia through the MediaWiki API, following redirects (query 10): 39 of the 40 reach the item's own article (magnesit redirects to Magnesiumkarbonat, whose article says the compound occurs in nature as magnesit). Each was then looked up in SAOL and SO through the JSON search API behind svenska.se (query 11) and, for ore minerals, in SGU's table 'Några viktiga malmmineral' (query 12) and SGU's 'Handbok för mineraljägare' (query 13). Every name is confirmed by at least two of Wikidata, the Swedish Wikipedia, SAOL/SO and SGU. Where Swedish has two names, the one most sources use was chosen and the other appears in the note or under Quality control: kalkspat (Wikidata label, Swedish Wikipedia, SAOL, SO; SGU writes kalcit), svavelkis (SAOL, SO, Swedish Wikipedia article, Wikidata alias; the Wikidata label is pyrit), järnspat (label, SO, article; SAOL has siderit 'ett järnmineral, järnspat'), fluorit (label, article, SO; flusspat in the note)."@en ,
+                 "Fronts: 'Quartz: chemical formula' / 'Kvarts: kemisk formel' for the 40 formula cards, 'Quartz: Mohs hardness' / 'Kvarts: hårdhet enligt Mohs hårdhetsskala' for the ten hardness cards (the Swedish name of the scale is Wikidata's Swedish label of Q41472 and the Swedish Wikipedia article title). The backs are text in no language (zxx). The deck is studied front to back only, because several formulas belong to more than one mineral (calcite and aragonite CaCO₃, diamond and graphite C) and the hardness numbers are not unique answers in reverse."@en ,
+                 "Machine checks: every formula card carries a Wikidata check of the P274 value it is based on (the card text itself for 34 cards, otherwise the IMA-style string, and for talc, kyanite and orthoclase the related items above), and a check of the English label and the Swedish label or alias the Swedish name was compared with; the hardness cards check P1088 for the eight items whose Wikidata value is the scale value, and the labels: 150 checks in all, run against live Wikidata by the builder. The deck was built with the builder and validated with the app's SHACL and DCAT-AP validators (node packages/deck-library/scripts/validate_sources.ts minerals)."@en ,
+                 "Selection: 40 common minerals: quartz; the carbonates calcite, aragonite, dolomite, magnesite, siderite, malachite and azurite; the halides halite, sylvite and fluorite; the sulfates gypsum, anhydrite and baryte; the sulfides pyrite, galena, sphalerite, chalcopyrite, chalcocite, cinnabar, molybdenite and arsenopyrite; the oxides hematite, magnetite, corundum, cassiterite, rutile, chromite, ilmenite and uraninite; the silicates talc, orthoclase, albite, topaz, zircon, kyanite and beryl; the tungstate scheelite; and the native elements diamond and graphite. They were chosen by the compiler as minerals met in school chemistry and geology: the main rock-forming and ore minerals, the classic evaporites and carbonates, well-known gem minerals and the members of the Mohs scale. Inclusion: an IMA-approved (or grandfathered) valid species with a single ideal formula in the IMA list, a Wikidata item that is a mineral species with that composition, and an established English and Swedish name. The ten Mohs cards cover the scale's complete set of reference minerals (talc, gypsum, calcite, fluorite, apatite, orthoclase, quartz, topaz, corundum, diamond) as published by the USGS; apatite has no formula card because it is a mineral group, not a species. Excluded: groups and series without one formula (feldspar, mica, garnet, olivine, pyroxene, amphibole, apatite, tourmaline); minerals with variable composition written with element ranges, such as pyrrhotite (Fe₁₋ₓS) and wolframite ((Fe,Mn)WO₄); stibnite, whose Swedish name differs between sources (antimonglans in SAOL and SO, antimonit at SGU, spetsglans as the Wikidata label and Swedish Wikipedia title); forsterite and fluorapatite, whose Swedish names have no Swedish Wikipedia article, Wikidata label or dictionary entry to confirm them; and, to keep the deck near 40 minerals, further candidates such as anorthite, microcline, andalusite, muscovite, kaolinite, goethite, cuprite, celestine, cerussite, anglesite, rhodochrosite, smithsonite and wollastonite. Hardness cards are limited to the ten reference minerals: other minerals' hardness is usually a range that varies between sources."@en ,
+                 "Licensing: The deck is CC0 1.0. Its content sources are Wikidata (CC0), for the formulas, names, labels and the selection's lookup, and two US Geological Survey pages, the volcanic-ash hardness table and 'Natural Gemstones' (US federal government works, public domain in the US), for the Mohs reference minerals and their numbers. The selection of the 40 minerals is the compiler's own, and the ten Mohs minerals are the complete set of the scale devised by Friedrich Mohs in 1812 (Wikidata Q41472, inception), shared by every source. The IMA list of minerals (CC BY-SA 3.0), the Swedish Wikipedia (CC BY-SA 4.0), the National Park Service article (licence uncertain), Svenska Akademiens ordböcker and SGU (all rights reserved) were used for verification only: they confirmed facts that the content sources gave (a mineral's composition, its validity as a species, a Swedish name, a hardness number), and no wording, table or selection was copied from them. The structural forms quoted in four notes are Wikidata's P274 values. The written notation of the formulas, including the conventional forms Fe₃O₄, FeCr₂O₄, FeTiO₃, KAlSi₃O₈, Al₂SiO₅ and Mg₃Si₄O₁₀(OH)₂ that the Swedish Wikipedia and SGU also use, is standard chemical notation of facts, not text taken from those sources. The fronts and notes are the compiler's own wording."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Sources, licences and machine checks: every formula's composition against Wikidata and the IMA list; every hardness value against two USGS pages, the NPS, Wikidata and the Swedish Wikipedia; every Swedish name against Wikidata, the Swedish Wikipedia, SAOL/SO and SGU."@en ;
+    rdfs:comment "Scope: All 50 cards, the sources and the deck metadata."@en ,
+                 "Outcome: All 40 formulas agree in composition with Wikidata and the IMA list (July 2026); all ten hardness values agree across the USGS, NPS and Swedish Wikipedia. Wikidata disagrees with the Mohs scale for calcite and apatite; those two P1088 checks were left out and the better-sourced scale values kept. The suggested RRUFF database could not be reached and the official IMA list was used instead. Notation differences and Swedish name choices are recorded below."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 50 cards and the deck metadata; all 150 Wikidata checks re-run, the 40 formulas against the IMA list (July 2026), the Mohs values against the USGS."@en ,
+                 "Outcome: No errors in the cards; one warning and two suggestions, all verified and fixed: the Mohs scale's date in 'licensing', the description's mineral count, and the polymorph notes."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 50 cards, the title, description and keywords in both languages, and the language tags in the built TTL."@en ,
+                 "Outcome: Tags, names and conventions are correct. One warning (kattguld) and one wording suggestion fixed; the suggestion to shorten the Swedish hardness fronts declined."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: Every source's licence page, the wording of 28 cards against the live sources, the method, queries and licensing text."@en ,
+                 "Outcome: Licensing is sound and the deck stays CC0. Three warnings (Gips evidence, IMA list described as a content source, second USGS page not credited) and four suggestions; all fixed."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: All 50 cards in both languages, the title, description, keywords and topics, all 150 Wikidata checks re-run against live Wikidata, and the fixes from round 3."@en ,
+                 "Outcome: No errors or warnings; round 3's fixes confirmed in place. One suggestion (halite note wording) fixed."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing (page footer, fetched 2026-10-04): \"All structured data from the main, Property, Lexeme, and EntitySchema namespaces is available under the Creative Commons CC0 License\"."@en .
+
+<https://volcanoes.usgs.gov/volcanic_ash/density_hardness.html>
+    dcterms:title "U.S. Geological Survey: 'Volcanic Ash – Impacts & Mitigation: Density & Hardness'" ;
+    dcterms:creator "U.S. Geological Survey, Volcano Hazards Program" ;
+    rdfs:comment "https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits (fetched 2026-10-04): \"USGS-authored or produced data and information are considered to be in the U.S. Public Domain.\" The same page warns that \"not all information, illustrations, or photographs on our site are\". The page's table credits its hardness values to Deer et al. (2004); the deck takes from it only the scale numbers of the Mohs reference minerals, which are facts, not the table or its other columns and rows."@en .
+
+<https://pubs.usgs.gov/gip/gemstones/mineral.html>
+    dcterms:title "U.S. Geological Survey: 'Natural Gemstones – Mineral Gemstones' (USGS General Interest Publication)" ;
+    dcterms:creator "U.S. Geological Survey" ;
+    rdfs:comment "https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits (fetched 2026-10-04): \"USGS-authored or produced data and information are considered to be in the U.S. Public Domain.\" The page is a USGS publication and carries no third-party credit for the passages used."@en .
+
+<https://www.nps.gov/articles/mohs-hardness-scale.htm>
+    dcterms:title "Mohs Hardness Scale (U.S. National Park Service article)" ;
+    dcterms:creator "National Park Service, Geologic Resources Division (illustration by Heather Walborn, Guest Scientist)" ;
+    rdfs:comment "https://www.nps.gov/aboutus/disclaimer.htm (fetched 2026-10-04): \"material created by the National Park Service and presented on this website, unless otherwise indicated, is generally considered in the public domain.\" The illustration whose alt text lists the scale is credited \"NPS illustration by Heather Walborn, Guest Scientist (2013-2014), NPS Geologic Resources Division\", so its status is uncertain; recorded as unknown and used for verification only."@en .
+
+<https://cnmnc.units.it/files/editor/IMA_Master_List_%282026-07%29.pdf>
+    dcterms:title "The New IMA List of Minerals – A Work in Progress – Updated: July 2026" ;
+    dcterms:creator "IMA Commission on New Minerals, Nomenclature and Classification (CNMNC); compiled by Marco Pasero and contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/3.0/> ;
+    rdfs:comment "The list itself, page 2 (downloaded 2026-10-04): \"Distribution terms and conditions: This work is licensed under the Creative Commons Attribution-ShareAlike 3.0 Unported License.\""@en .
+
+<https://sv.wikipedia.org/>
+    dcterms:title "Svenskspråkiga Wikipedia" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Page footer of https://sv.wikipedia.org/wiki/Kvarts (fetched 2026-10-04): \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported\"."@en .
+
+<https://svenska.se/>
+    dcterms:title "Svenska Akademiens ordböcker: Svenska Akademiens ordlista (SAOL) and Svensk ordbok (SO)" ;
+    dcterms:creator "Svenska Akademien" ;
+    rdfs:comment "No licence or reuse statement on https://svenska.se/om-webbplatsen/ (fetched 2026-10-04), which shows only \"© Svenska Akademien\"; treated as all rights reserved, so used for verification only, nothing copied."@en .
+
+<https://www.sgu.se/om-geologi/mineral/malmmineral-och-industrimineral/>
+    dcterms:title "Sveriges geologiska undersökning (SGU): 'Malmmineral och industrimineral' and 'Handbok för mineraljägare'" ;
+    dcterms:creator "Sveriges geologiska undersökning (Geological Survey of Sweden)" ;
+    rdfs:comment "https://www.sgu.se/om-sgu/om-webbplatsen/ (fetched 2026-10-04): \"SGU:s information omfattas av lagen (1960:729) om upphovsrätt till litterära och konstnärliga verk.\" Used for verification only, nothing copied."@en .
+
+<#formula-quartz>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Quartz: chemical formula"@en ,
+                     "Kvarts: kemisk formel"@sv ;
+    solid-memo:back "SiO₂"@zxx .
+
+<#formula-calcite>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Calcite: chemical formula"@en ,
+                     "Kalkspat: kemisk formel"@sv ;
+    solid-memo:back "CaCO₃"@zxx ;
+    solid-memo:backNote "Same formula as aragonite; both are polymorphs of calcium carbonate"@en ,
+                        "Samma formel som aragonit; båda är polymorfer av kalciumkarbonat"@sv .
+
+<#formula-aragonite>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Aragonite: chemical formula"@en ,
+                     "Aragonit: kemisk formel"@sv ;
+    solid-memo:back "CaCO₃"@zxx ;
+    solid-memo:backNote "Same formula as calcite; both are polymorphs of calcium carbonate"@en ,
+                        "Samma formel som kalkspat; båda är polymorfer av kalciumkarbonat"@sv .
+
+<#formula-dolomite>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Dolomite: chemical formula"@en ,
+                     "Dolomit: kemisk formel"@sv ;
+    solid-memo:back "CaMg(CO₃)₂"@zxx .
+
+<#formula-magnesite>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Magnesite: chemical formula"@en ,
+                     "Magnesit: kemisk formel"@sv ;
+    solid-memo:back "MgCO₃"@zxx .
+
+<#formula-siderite>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Siderite: chemical formula"@en ,
+                     "Järnspat: kemisk formel"@sv ;
+    solid-memo:back "FeCO₃"@zxx .
+
+<#formula-malachite>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Malachite: chemical formula"@en ,
+                     "Malakit: kemisk formel"@sv ;
+    solid-memo:back "Cu₂(CO₃)(OH)₂"@zxx .
+
+<#formula-azurite>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Azurite: chemical formula"@en ,
+                     "Azurit: kemisk formel"@sv ;
+    solid-memo:back "Cu₃(CO₃)₂(OH)₂"@zxx .
+
+<#formula-halite>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Halite: chemical formula"@en ,
+                     "Halit: kemisk formel"@sv ;
+    solid-memo:back "NaCl"@zxx ;
+    solid-memo:backNote "Also called rock salt"@en ,
+                        "Kallas även stensalt"@sv .
+
+<#formula-sylvite>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sylvite: chemical formula"@en ,
+                     "Sylvin: kemisk formel"@sv ;
+    solid-memo:back "KCl"@zxx .
+
+<#formula-fluorite>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Fluorite: chemical formula"@en ,
+                     "Fluorit: kemisk formel"@sv ;
+    solid-memo:back "CaF₂"@zxx ;
+    solid-memo:backNote "Also called fluorspar"@en ,
+                        "Kallas även flusspat"@sv .
+
+<#formula-gypsum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Gypsum: chemical formula"@en ,
+                     "Gips: kemisk formel"@sv ;
+    solid-memo:back "CaSO₄·2H₂O"@zxx ;
+    solid-memo:backNote "Calcium sulfate dihydrate; anhydrite is CaSO₄"@en ,
+                        "Kalciumsulfatdihydrat; anhydrit är CaSO₄"@sv .
+
+<#formula-anhydrite>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Anhydrite: chemical formula"@en ,
+                     "Anhydrit: kemisk formel"@sv ;
+    solid-memo:back "CaSO₄"@zxx .
+
+<#formula-baryte>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Baryte: chemical formula"@en ,
+                     "Baryt: kemisk formel"@sv ;
+    solid-memo:back "BaSO₄"@zxx ;
+    solid-memo:backNote "Also spelled barite"@en ,
+                        "Kallas även tungspat"@sv .
+
+<#formula-pyrite>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pyrite: chemical formula"@en ,
+                     "Svavelkis: kemisk formel"@sv ;
+    solid-memo:back "FeS₂"@zxx ;
+    solid-memo:backNote "Also called iron pyrite or fool's gold"@en ,
+                        "Kallas även pyrit"@sv .
+
+<#formula-galena>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Galena: chemical formula"@en ,
+                     "Blyglans: kemisk formel"@sv ;
+    solid-memo:back "PbS"@zxx .
+
+<#formula-sphalerite>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sphalerite: chemical formula"@en ,
+                     "Zinkblände: kemisk formel"@sv ;
+    solid-memo:back "ZnS"@zxx ;
+    solid-memo:backNote "Natural sphalerite usually has some iron in place of zinc"@en ,
+                        "Naturlig zinkblände innehåller oftast en del järn i stället för zink"@sv .
+
+<#formula-chalcopyrite>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Chalcopyrite: chemical formula"@en ,
+                     "Kopparkis: kemisk formel"@sv ;
+    solid-memo:back "CuFeS₂"@zxx .
+
+<#formula-chalcocite>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Chalcocite: chemical formula"@en ,
+                     "Kopparglans: kemisk formel"@sv ;
+    solid-memo:back "Cu₂S"@zxx .
+
+<#formula-cinnabar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cinnabar: chemical formula"@en ,
+                     "Cinnober: kemisk formel"@sv ;
+    solid-memo:back "HgS"@zxx .
+
+<#formula-molybdenite>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Molybdenite: chemical formula"@en ,
+                     "Molybdenglans: kemisk formel"@sv ;
+    solid-memo:back "MoS₂"@zxx .
+
+<#formula-arsenopyrite>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Arsenopyrite: chemical formula"@en ,
+                     "Arsenikkis: kemisk formel"@sv ;
+    solid-memo:back "FeAsS"@zxx .
+
+<#formula-hematite>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hematite: chemical formula"@en ,
+                     "Hematit: kemisk formel"@sv ;
+    solid-memo:back "Fe₂O₃"@zxx .
+
+<#formula-magnetite>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Magnetite: chemical formula"@en ,
+                     "Magnetit: kemisk formel"@sv ;
+    solid-memo:back "Fe₃O₄"@zxx ;
+    solid-memo:backNote "IMA formula Fe²⁺Fe³⁺₂O₄: one Fe²⁺ and two Fe³⁺"@en ,
+                        "IMA-formel Fe²⁺Fe³⁺₂O₄: en Fe²⁺ och två Fe³⁺"@sv .
+
+<#formula-corundum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Corundum: chemical formula"@en ,
+                     "Korund: kemisk formel"@sv ;
+    solid-memo:back "Al₂O₃"@zxx ;
+    solid-memo:backNote "Ruby and sapphire are varieties of corundum"@en ,
+                        "Rubin och safir är varieteter av korund"@sv .
+
+<#formula-cassiterite>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cassiterite: chemical formula"@en ,
+                     "Kassiterit: kemisk formel"@sv ;
+    solid-memo:back "SnO₂"@zxx .
+
+<#formula-rutile>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Rutile: chemical formula"@en ,
+                     "Rutil: kemisk formel"@sv ;
+    solid-memo:back "TiO₂"@zxx .
+
+<#formula-chromite>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Chromite: chemical formula"@en ,
+                     "Kromit: kemisk formel"@sv ;
+    solid-memo:back "FeCr₂O₄"@zxx ;
+    solid-memo:backNote "IMA formula Fe²⁺Cr₂O₄"@en ,
+                        "IMA-formel Fe²⁺Cr₂O₄"@sv .
+
+<#formula-ilmenite>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ilmenite: chemical formula"@en ,
+                     "Ilmenit: kemisk formel"@sv ;
+    solid-memo:back "FeTiO₃"@zxx ;
+    solid-memo:backNote "IMA formula Fe²⁺Ti⁴⁺O₃"@en ,
+                        "IMA-formel Fe²⁺Ti⁴⁺O₃"@sv .
+
+<#formula-uraninite>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Uraninite: chemical formula"@en ,
+                     "Uraninit: kemisk formel"@sv ;
+    solid-memo:back "UO₂"@zxx .
+
+<#formula-talc>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Talc: chemical formula"@en ,
+                     "Talk: kemisk formel"@sv ;
+    solid-memo:back "Mg₃Si₄O₁₀(OH)₂"@zxx .
+
+<#formula-orthoclase>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Orthoclase: chemical formula"@en ,
+                     "Ortoklas: kemisk formel"@sv ;
+    solid-memo:back "KAlSi₃O₈"@zxx ;
+    solid-memo:backNote "A potassium feldspar; microcline has the same formula"@en ,
+                        "En kalifältspat; mikroklin har samma formel"@sv .
+
+<#formula-albite>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Albite: chemical formula"@en ,
+                     "Albit: kemisk formel"@sv ;
+    solid-memo:back "NaAlSi₃O₈"@zxx ;
+    solid-memo:backNote "A sodium feldspar"@en ,
+                        "En natriumfältspat"@sv .
+
+<#formula-topaz>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Topaz: chemical formula"@en ,
+                     "Topas: kemisk formel"@sv ;
+    solid-memo:back "Al₂SiO₄F₂"@zxx ;
+    solid-memo:backNote "Ideal formula; natural topaz often has some OH in place of F"@en ,
+                        "Idealformel; naturlig topas har ofta en del OH i stället för F"@sv .
+
+<#formula-diamond>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Diamond: chemical formula"@en ,
+                     "Diamant: kemisk formel"@sv ;
+    solid-memo:back "C"@zxx ;
+    solid-memo:backNote "Same formula as graphite; both are polymorphs of carbon"@en ,
+                        "Samma formel som grafit; båda är polymorfer av kol"@sv .
+
+<#formula-graphite>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Graphite: chemical formula"@en ,
+                     "Grafit: kemisk formel"@sv ;
+    solid-memo:back "C"@zxx ;
+    solid-memo:backNote "Same formula as diamond; both are polymorphs of carbon"@en ,
+                        "Samma formel som diamant; båda är polymorfer av kol"@sv .
+
+<#formula-zircon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Zircon: chemical formula"@en ,
+                     "Zirkon: kemisk formel"@sv ;
+    solid-memo:back "ZrSiO₄"@zxx .
+
+<#formula-kyanite>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Kyanite: chemical formula"@en ,
+                     "Kyanit: kemisk formel"@sv ;
+    solid-memo:back "Al₂SiO₅"@zxx ;
+    solid-memo:backNote "IMA writes Al₂OSiO₄; andalusite and sillimanite have the same formula"@en ,
+                        "IMA skriver Al₂OSiO₄; andalusit och sillimanit har samma formel"@sv .
+
+<#formula-beryl>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Beryl: chemical formula"@en ,
+                     "Beryll: kemisk formel"@sv ;
+    solid-memo:back "Be₃Al₂Si₆O₁₈"@zxx ;
+    solid-memo:backNote "Emerald and aquamarine are varieties of beryl"@en ,
+                        "Smaragd och akvamarin är varieteter av beryll"@sv .
+
+<#formula-scheelite>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Scheelite: chemical formula"@en ,
+                     "Scheelit: kemisk formel"@sv ;
+    solid-memo:back "CaWO₄"@zxx .
+
+<#mohs-talc>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Talc: Mohs hardness"@en ,
+                     "Talk: hårdhet enligt Mohs hårdhetsskala"@sv ;
+    solid-memo:back "1"@zxx ;
+    solid-memo:backNote "The softest mineral on the scale"@en ,
+                        "Skalans mjukaste mineral"@sv .
+
+<#mohs-gypsum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Gypsum: Mohs hardness"@en ,
+                     "Gips: hårdhet enligt Mohs hårdhetsskala"@sv ;
+    solid-memo:back "2"@zxx .
+
+<#mohs-calcite>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Calcite: Mohs hardness"@en ,
+                     "Kalkspat: hårdhet enligt Mohs hårdhetsskala"@sv ;
+    solid-memo:back "3"@zxx .
+
+<#mohs-fluorite>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Fluorite: Mohs hardness"@en ,
+                     "Fluorit: hårdhet enligt Mohs hårdhetsskala"@sv ;
+    solid-memo:back "4"@zxx .
+
+<#mohs-apatite>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Apatite: Mohs hardness"@en ,
+                     "Apatit: hårdhet enligt Mohs hårdhetsskala"@sv ;
+    solid-memo:back "5"@zxx ;
+    solid-memo:backNote "Apatite is a mineral group, not a single species"@en ,
+                        "Apatit är en mineralgrupp, inte en enskild art"@sv .
+
+<#mohs-orthoclase>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Orthoclase: Mohs hardness"@en ,
+                     "Ortoklas: hårdhet enligt Mohs hårdhetsskala"@sv ;
+    solid-memo:back "6"@zxx ;
+    solid-memo:backNote "A feldspar"@en ,
+                        "En fältspat"@sv .
+
+<#mohs-quartz>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Quartz: Mohs hardness"@en ,
+                     "Kvarts: hårdhet enligt Mohs hårdhetsskala"@sv ;
+    solid-memo:back "7"@zxx .
+
+<#mohs-topaz>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Topaz: Mohs hardness"@en ,
+                     "Topas: hårdhet enligt Mohs hårdhetsskala"@sv ;
+    solid-memo:back "8"@zxx .
+
+<#mohs-corundum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Corundum: Mohs hardness"@en ,
+                     "Korund: hårdhet enligt Mohs hårdhetsskala"@sv ;
+    solid-memo:back "9"@zxx .
+
+<#mohs-diamond>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Diamond: Mohs hardness"@en ,
+                     "Diamant: hårdhet enligt Mohs hårdhetsskala"@sv ;
+    solid-memo:back "10"@zxx ;
+    solid-memo:backNote "The hardest mineral on the scale"@en ,
+                        "Skalans hårdaste mineral"@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

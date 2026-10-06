@@ -170,12 +170,12 @@ describe("DeckLanguagesSection", () => {
   });
 
   it("says when the cards are still read, and that a library deck's untouched cards are left out", () => {
-    renderSection({ languages: undefined, deck: { ...deck, sourceUrl: "https://solid-memo.com/decks/x.ttl" } });
+    renderSection({ languages: undefined, deck: { ...deck, sourceUrl: "https://solid-memo.com/decks/x/v1.ttl" } });
     expect(screen.getByText("Checking the languages of the cards…")).toBeInTheDocument();
     expect(screen.queryByText(/library release/)).toBeNull();
     renderSection({
       languages: { unstatedCounts: { front: 0, back: 0 } },
-      deck: { ...deck, sourceUrl: "https://solid-memo.com/decks/x.ttl" },
+      deck: { ...deck, sourceUrl: "https://solid-memo.com/decks/x/v1.ttl" },
     });
     expect(
       screen.getByText("Cards still as their library release has them are left out: a later release updates them."),

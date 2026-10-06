@@ -287,7 +287,7 @@ describe("createDeck", () => {
 
 describe("importDeck", () => {
   const content: LibraryDeckContent = {
-    url: "https://solid-memo.com/decks/capitals.ttl",
+    url: "https://solid-memo.com/decks/capitals/v1.ttl",
     title: { en: "Capitals" },
     formatVersion: 1,
     authors: ["Anton Wiklund", "A friend"],
@@ -988,7 +988,7 @@ describe("library upgrade writes", () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
       setThing(catalogWithDeck(), buildThing(getThing(catalogWithDeck(), deck.url)!).addUrl(DCTERMS.license, CC0).build()),
     );
-    const next = { ...current, cardsDocumentUrl: STAGED, sourceUrl: "https://solid-memo.com/decks/capitals/2.ttl" };
+    const next = { ...current, cardsDocumentUrl: STAGED, sourceUrl: "https://solid-memo.com/decks/capitals/v2.ttl" };
     const switched = await makeRepository().switchDeck(current, next);
     expect(switched).toMatchObject({ cardsDocumentUrl: STAGED, sourceUrl: next.sourceUrl, license: CC0, formatVersion: 6 });
     expect(saveSolidDatasetAt).toHaveBeenCalledOnce();

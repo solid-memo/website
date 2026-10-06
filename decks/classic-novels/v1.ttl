@@ -1,0 +1,865 @@
+@base <https://solid-memo.com/decks/classic-novels/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Classic novels"@en ,
+                  "Klassiska romaner"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "82 famous novels first published before 1950: the novels in Wikidata (works whose form or genre is novel) that the most Wikipedia language editions and other Wikimedia sites cover. Front: the novel's title in English and Swedish; back: its author. Compiled from Wikidata and LIBRIS, the National Library of Sweden's catalogue, and checked against Wikipedia. A few works whose authorship is traditional or uncertain, such as three of the four classic Chinese novels, are left out."@en ,
+                        "82 kända romaner som först gavs ut före 1950: de romaner i Wikidata (verk vars form eller genre är roman) som flest språkversioner av Wikipedia och andra Wikimediawebbplatser behandlar. Framsida: romanens titel på engelska och svenska; baksida: författaren. Sammanställd från Wikidata och Kungliga bibliotekets katalog LIBRIS och kontrollerad mot Wikipedia. Några verk vars författarskap är traditionellt tillskrivet eller osäkert, som tre av de fyra klassiska kinesiska romanerna, är inte med."@sv ;
+    prov:wasDerivedFrom <https://www.wikidata.org/> ,
+                        <https://libris.kb.se/> ,
+                        <https://zh.wikisource.org/wiki/紅樓夢（程甲本）> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:literature ;
+    dcat:keyword "novels"@en ,
+                 "literature"@en ,
+                 "authors"@en ,
+                 "classics"@en ,
+                 "romaner"@sv ,
+                 "litteratur"@sv ,
+                 "författare"@sv ,
+                 "klassiker"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#classic-novels> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#classic-novels> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/> ,
+              <https://libris.kb.se/> ,
+              <https://sv.wikipedia.org/> ,
+              <https://en.wikipedia.org/> ,
+              <https://zh.wikisource.org/wiki/紅樓夢（程甲本）> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ,
+                       <#review-6> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Candidates came from Wikidata on 2026-10-04: every item that is an instance of literary work (Q7725634) whose form of creative work (P7937) is novel (Q8261) or whose genre (P136) is novel or a subclass of novel, with at least 40 sitelinks and a publication date (P577). The query is listed under Queries as q1; it returned 218 items ranked by sitelinks (wikibase:sitelinks, the number of Wikimedia sites — mostly Wikipedia language editions — with a page on the item). A first attempt (q1a) that required P31 novel or P136 novel directly returned no rows; an inspection query (q0) showed that famous novels are typed as literary work with a specific novel genre, which is why the genre path is followed through subclasses; a second query (q2) confirmed that no further novels hide under other classes (written work, book, novel as class). The deck is therefore the novels as Wikidata classifies them: a work that Wikidata gives only other genres is not a candidate, however often it is called a novel. Query q5 (run in the first review loop (rounds 1–3)) lists the literary works with 48 or more sitelinks that q1 misses and whose English description says novel or novella: The Little Prince (151 sitelinks), The Adventures of Pinocchio (84) and Heidi (52), described as novels but given genres such as fairy tale or children's fiction; four novellas (The Metamorphosis, A Christmas Carol, The Time Machine, Notes from Underground); and two works without a date (Harry Potter and the Deathly Hallows, The Golden Ass). The Tale of Genji (116 sitelinks, genre tsukuri monogatari, no P577) is also outside q1. These were not added: the selection follows Wikidata's classification rather than hand-picking among borderline works."@en ,
+                 "Novels first published before 1950 were kept: the earliest year among the item's P577 values had to be before 1950. Items that are not novels in the ordinary sense, or whose authorship is traditional or disputed, were excluded (see Selection). The deck takes every remaining novel with at least 48 sitelinks; the next novels have 47, so the cut falls between two values."@en ,
+                 "Wikidata's dates were checked for errors that would wrongly move a famous novel across the 1950 line, and, in the first review loop (rounds 1–3), for wrong first-publication years generally (every card's P577 compared with the English and Swedish Wikipedia leads). In Search of Lost Time (Q464928) has the single P577 value 2000, which is wrong: it was published 1913–1927 (Swedish Wikipedia; Wikidata's own items for its first and last parts have P577 1913 and 1927), and LIBRIS holds the Swedish translation from 1964–1982. It was added with its sitelinks (59) by hand. The Master and Margarita (Q188538) has P577 1928, the year Bulgakov began writing it; English Wikipedia says it was first published in 1966–1967, so it was excluded. Three cards have a wrong Wikidata year that does not affect the selection (all are before 1950 either way): The Mysterious Island (1888; serialised 1874–1875, book 1875), The Last of the Mohicans (1824; published 1826) and Dream of the Red Chamber (earliest 1792, the second Cheng–Gao edition; first printed 1791). These cards carry no P577 check. Query q4 listed novels with 45 or more sitelinks and no P577: the Odyssey, the Epic of Gilgamesh and the Book of Judith (not novels), Harry Potter and the Deathly Hallows (2007) and The Golden Ass (48 sitelinks). The Golden Ass was not added because it has no Swedish label in Wikidata and LIBRIS shows no settled Swedish title (Den gyllne åsnan 1960, Den gyllene åsnan 1985, Metamorfoser eller Den gyllene åsnan 2024)."@en ,
+                 "Each card's front is the novel's English title and its Swedish title. Both are the item's Wikidata labels (en, sv), except: Frankenstein, whose English label is the full title 'Frankenstein; or, The Modern Prometheus' — the card uses the short title, Wikidata's preferred title (P1476) 'Frankenstein', and gives the full title in a note; Journey to the Centre of the Earth, whose English label begins with 'A' — the card uses 'Journey to the Centre of the Earth', a Wikidata English alias and P1476 value (also the English Wikipedia article title), checked as an alias; and Dr Jekyll och Mr Hyde, whose Swedish label 'Dr. Jekyll och Mr. Hyde' has full stops that most LIBRIS records leave out — the card uses the Wikidata alias 'Dr Jekyll och Mr Hyde', the form that begins 40 of the 48 Swedish-language LIBRIS records by Stevenson matching the search (from 1921); 8 (1959–2014), like Swedish Wikipedia, write 'mr' in lower case."@en ,
+                 "Each Swedish title was looked up in LIBRIS, the union catalogue of the National Library of Sweden, with the xsearch API: query tit:\"<Swedish title>\" förf:<author surname>, keeping Swedish-language records whose title begins with the card's title (a plain string-prefix match, so genitive titles such as 'Robinson Crusoes …' are counted too) and whose creator contains the surname. The first run fetched only the first 200 hits of each search; in the first review loop (rounds 1–3) every search was re-run with full paging (start=1, 201, 401 …), which corrected the counts of six cards and the earliest record of two (Robinson Crusoe, Oliver Twist). Every card's Swedish title was found as the title of Swedish editions of the novel by that author; the evidence names the earliest record whose title is the card's title as such (followed by nothing, a subtitle or other words, not a genitive ending; for Robinson Crusoe the earliest prefix match, the genitive 'Robinson Crusoes …' of 1826, is named as well), and, where an older spelling of the same title exists (Švejk: 'Svejks' from 1930; Karamazov: 'Karamasov' from 1918), also the earliest record with that spelling. Two titles needed a hand search: the Hobbit (LIBRIS catalogues 'Bilbo : en hobbits äventyr', with the colon of cataloguing practice where Wikidata and Swedish Wikipedia write 'Bilbo – En hobbits äventyr') and Dream of the Red Chamber (the Swedish translation in LIBRIS, by Pär Bergman, 2005–2010, reissued 2017, is catalogued as five volumes titled Guldåldern … Stenåldern under the uniform title Hongloumeng; Swedish Wikipedia names them parts of Drömmar om röda gemak). Where a novel has two established Swedish titles (the Hobbit: 1962 and 2007 translations; Ulysses: Odysseus 1946 and Ulysses 2012; Buddenbrooks: Huset Buddenbrook 1904 and Buddenbrooks 2005), the card keeps the Wikidata label and names the other title in a note."@en ,
+                 "Each card's back is the author given by Wikidata's author property (P50); all 82 items have exactly one best-ranked P50 value (the value the builder's checks read). Only The Count of Monte Cristo (Q191838) has a second P50 statement: Auguste Maquet (Q766768), at normal rank below Alexandre Dumas (Q38337, preferred rank); the card's back gives Dumas and a note names Maquet as his collaborator. The name is the author's Wikidata English label, untagged because a personal name has no language — except where English and Swedish write the name differently: Russian names are transliterated differently (Leo Tolstoy / Lev Tolstoj, Fyodor Dostoevsky / Fjodor Dostojevskij, Alexander Pushkin / Aleksandr Pusjkin, Nikolai Gogol / Nikolaj Gogol, from the Wikidata en and sv labels; for Dostoevsky the English Wikipedia spelling, also a Wikidata alias, was preferred to the label 'Fyodor Dostoyevsky'), and Alexandre Dumas the elder is 'Alexandre Dumas d.ä.' in Swedish (Wikidata sv label). Those cards carry English and Swedish backs."@en ,
+                 "Authorship was cross-checked against the LIBRIS records (the creator of the Swedish edition) and against the lead section of each novel's Swedish and English Wikipedia article, fetched with the MediaWiki API (titles from the Wikidata sitelinks). A script checked that each lead contains the card's title and the author's surname; every lead did, except the Swedish lead of Drömmar om röda gemak, whose body names Cao Xueqin and was read in full. For three Swedish articles (Alice i Underlandet, Candide, Alice i Spegellandet) the extract begins with a disambiguation hatnote; the evidence quotes the first sentence after it. The English leads write 'Dostoevsky'; Wikidata's English label is 'Dostoyevsky' (both are standard transliterations)."@en ,
+                 "Notes were written by the authoring agent in its own words, from content sources only (Wikidata, LIBRIS records of Swedish editions, and a public-domain primary text), with Wikipedia used to verify them: the other Swedish titles of the Hobbit, Ulysses and Buddenbrooks (LIBRIS; the Wikidata Swedish aliases where they exist); Frankenstein's full original title (Wikidata English label) and its Swedish form (Wikidata Swedish alias); Eugene Onegin as a novel in verse (Wikidata P136 verse novel); In Search of Lost Time's seven volumes, 1913–1927 (Wikidata P527 and the P577 of the first and last parts); Dumas père and his son (Wikidata aliases, P40, P106); Auguste Maquet as Dumas's collaborator on The Count of Monte Cristo (Wikidata's normal-rank P50 statement on Q191838; Swedish Wikipedia's lead names him too); other English titles of The Stranger and Demons (Wikidata aliases); and the first printing of Dream of the Red Chamber in 1791 by Cheng Weiyuan and Gao E, who added 40 chapters to the 80 then circulating and said they had collected and edited them (their 1791 prefaces, public domain, read in the Chinese Wikisource transcription; confirmed by English Wikipedia). The Dream of the Red Chamber note deliberately does not say who wrote the last 40 chapters: English Wikipedia reports that this is debated, and the deck's back gives Cao Xueqin, the author named by Wikidata (P50) and by every LIBRIS record of the Swedish translation, including its last volume."@en ,
+                 "Every card carries Wikidata checks run by the builder against live Wikidata (438 in all): the author (P50), the English and Swedish titles (labels or aliases; P1476 for Frankenstein), the first-publication year used for the selection (P577; not for In Search of Lost Time, The Mysterious Island, The Last of the Mohicans and Dream of the Red Chamber, whose Wikidata years are wrong), the author's English label (and Swedish label for the names written differently in Swedish), and the facts in the notes where Wikidata states them (aliases, labels, P136, P527, P577 of the parts, P40). The deck was built with the deck builder and validated with the app's SHACL and DCAT-AP validators (validate_sources.ts). Label checks read the item's labels and aliases in the given language and also accept the language-neutral 'mul' label, which Wikidata uses as the default for languages without their own label: Jane Eyre (Q182961) and Victor Hugo (Q535) have no 'en' label, and their English text on the cards is the 'mul' label. Likewise, six authors have no 'sv' label and their Swedish name is the 'mul' label, the same as the untagged back: Victor Hugo (Q535), Johann Wolfgang von Goethe (Q5879), Agatha Christie (Q35064), Arthur Conan Doyle (Q35610), Mark Twain (Q7245) and Voltaire (Q9068); their cards carry no Swedish author-label check. Property checks read best-ranked (truthy) values only."@en ,
+                 "Selection: The deck holds 82 novels first published before 1950: the novels in Wikidata (literary works whose form or genre, followed through subclasses, is novel) with at least 48 Wikimedia sitelinks on 2026-10-04 and a first publication date (P577) before 1950, plus In Search of Lost Time, whose Wikidata date (2000) is wrong. The ranking covers only works that Wikidata classes as novels: works that Wikidata gives other genres are not candidates even when often called novels — known cases with enough sitelinks are The Little Prince, The Adventures of Pinocchio, Heidi and The Tale of Genji (which also has no date) — and were not added by hand. Excluded although they ranked high enough (48 or more sitelinks): Thus Spoke Zarathustra (80; a philosophical work, not usually counted as a novel); The Master and Margarita (79; first published 1966–1967, Wikidata's 1928 is when writing began); Journey to the West (79), Romance of the Three Kingdoms (73) and Water Margin (61) (attribution to a single author is traditional and uncertain, so the back would not have one safe answer). Six further works in the candidate pool fell below the cut-off and were therefore not selected; they would also have been excluded for these reasons: Orlando Furioso (44; an epic poem), Lazarillo de Tormes (42; anonymous), And Quiet Flows the Don (42; authorship has been disputed), La Celestina (41; a work in dialogue, authorship partly disputed), Emile, or On Education (40; a treatise) and Jin Ping Mei (40; pseudonymous author). Dream of the Red Chamber was kept: Cao Xueqin is the author that Wikidata and the library catalogues name; a note says that the novel was first printed in 1791 by Cheng Weiyuan and Gao E, who added the last 40 of its 120 chapters, without taking a side in the debate over who wrote them. Short novels and novellas that Wikidata classes as novels (Animal Farm, Candide, Heart of Darkness, Dr Jekyll and Mr Hyde) were kept as Wikidata classes them. The Golden Ass (48 sitelinks, no P577) was left out for want of a settled Swedish title. Sitelink counts change over time; the ranking is a snapshot of 2026-10-04 and decides only which novels are in the deck."@en ,
+                 "Licensing: The deck is CC0 1.0. Its content sources are all CC0 or public domain. Wikidata (CC0) gives the selection (sitelink ranking and publication dates), the English and Swedish titles (labels, aliases, P1476), the authors (P50) and their names (labels), and most facts in the notes. LIBRIS gives the Swedish titles and translation years in three notes (the Hobbit, Ulysses, Buddenbrooks); these come from records of editions published in Sweden, the scope of the Swedish national bibliography, which the National Library of Sweden releases under CC0, and are bibliographic facts. The 1791 prefaces of the first printed edition of Dream of the Red Chamber are public domain worldwide; only facts were taken from them, not the punctuation added by Wikisource. The English and Swedish Wikipedias (CC BY-SA 4.0) were consulted only to verify titles, authors, dates and the facts in the notes; nothing on the cards — no wording, no fact and no selection — is taken from them alone, so their licence puts no conditions on the deck. The notes are the authoring agent's own wording."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Sources and machine checks: Wikidata checks, LIBRIS title search, Wikipedia lead search, the builder's dossier checks"@en ;
+    rdfs:comment "Scope: All 82 cards and the selection."@en ,
+                 "Outcome: Every card was checked against three sources besides Wikidata: a LIBRIS record of a Swedish edition with the card's Swedish title by the card's author, and the Swedish and English Wikipedia leads (title and author's surname present). The builder ran 419 Wikidata checks at first (436 after the first review loop (rounds 1–3)) (author, titles, first-publication year, author names). Discrepancies between the sources and how they were resolved are listed below."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 82 cards: authors, titles, notes, selection query q1 re-run, P50 and P577 of every item, LIBRIS searches for alternative Swedish titles."@en ,
+                 "Outcome: All 82 authors and every front were found correct and unambiguous. The reviewer found one error (the Dream of the Red Chamber note stated a disputed attribution of the last 40 chapters to Gao E as the usual view), three P577 checks asserting wrong first-publication years, a selection description that overstated what the genre-based query covers, a second current Swedish title for Buddenbrooks, and two documentation slips. All findings were verified independently and fixed."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language and translation"@en ;
+    rdfs:comment "Scope: All 82 cards: English and Swedish fronts against live Wikidata labels and Wikipedia titles, language tags, author names, notes, title, description and keywords."@en ,
+                 "Outcome: The reviewer found the language and translation in very good shape, with one warning (the Swedish Frankenstein note presented the English original as the full title) and one optional suggestion (lower-case 'mr' on Dr Jekyll och Mr Hyde). The note was fixed; the capitalisation was kept and documented."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 82 cards: sources and licences, licence evidence, selection reproducibility, 148 Wikipedia lead quotes, 8 LIBRIS searches with full paging, 15 Wikidata items, queries and method."@en ,
+                 "Outcome: No closed-licence source was used and the CC0 deck licence was judged defensible, but the provenance record was inaccurate: the licensing paragraph said nothing was taken from LIBRIS or Wikipedia although notes and one front title were; the LIBRIS script read only 200 hits per search; the Swedish Wikipedia licence quote was attributed to the wrong page; three Swedish Wikipedia 'leads' were hatnotes; the Journey card lacked an English title check; LIBRIS's CC0 scope was overstated; query ids were not labelled. All were verified and fixed."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final re-check (loop 1): changed cards, every third card, metadata, licence and documentation"@en ;
+    rdfs:comment "Scope: 42 cards (the 27 changed in the last fix plus every third card), metadata, licence, selection (query q1 re-run) and documentation."@en ,
+                 "Outcome: The cards were found correct, the builder's Wikidata checks and the app validator pass, and CC0 was confirmed. One error in the selection text (six works below the cut-off were described as excluded although ranking high enough), one warning (inconsistent LIBRIS counts for Dr Jekyll och Mr Hyde) and one suggestion (the Robinson Crusoe 'earliest record' was a genitive prefix match). All three were verified against live Wikidata and LIBRIS and fixed."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final re-check (loop 2): changed cards, every third card, metadata, licence and documentation"@en ;
+    rdfs:comment "Scope: 29 cards (the 2 changed in the last fix plus every third card), metadata, licence and documentation; builder check and validator re-run."@en ,
+                 "Outcome: No card errors were found; the builder's checks and the app validator pass. Two warnings (the method's 'exactly one P50 value' claim, which does not hold for The Count of Monte Cristo's normal-rank Auguste Maquet statement; a stale LIBRIS count in the round-0 log for Dr Jekyll och Mr Hyde) and two suggestions (ambiguous 'round 1' labels; Jane Eyre's English title is a 'mul' label, not an 'en' label). All four were verified against live Wikidata and the dossier and fixed."@en .
+
+<#review-6>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: all 82 cards."@en ,
+                 "Outcome: All 82 cards were checked against live Wikidata (authors and their ranks, en/sv/mul labels of novels and authors, sitelinks, P577), the notes, Swedish titles and the selection (q1 re-run). No card text is wrong. One warning: the Wikidata evidence of ten cards claimed a Swedish label for authors who have only 'en' and 'mul' labels (Victor Hugo has only 'mul'); verified and fixed, with method step 10 extended. Two suggestions: the description now says that a few works of traditional or uncertain authorship are left out (adopted, reworded because Dream of the Red Chamber, a classic Chinese novel, is in the deck); a Maquet note on The Three Musketeers was declined for want of a CC0 source."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://libris.kb.se/>
+    dcterms:title "LIBRIS — the Swedish union catalogue (records of Swedish editions)" ;
+    dcterms:creator "Kungliga biblioteket (National Library of Sweden)" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.kb.se/samverkan-och-utveckling/libris/att-anvanda-librisdata.html — \"Svensk nationalbibliografi och svenska auktoritetsposter är fritt tillgängliga utan restriktioner. Licensformen är Creative Commons nivå 0\". The same page says that much LIBRIS data comes from external sources (\"En stor del av data i Libris kommer in via automatiserade flöden från ett antal externa källor, exempelvis Bokinfo\"), so CC0 is stated for the national bibliography and authority records, not for every record in the union catalogue. The deck uses LIBRIS only for bibliographic facts about editions published in Sweden (Swedish titles, years of Swedish translations, author headings)."@en .
+
+<https://sv.wikipedia.org/>
+    dcterms:title "Svenskspråkiga Wikipedia" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://sv.wikipedia.org/wiki/Don_Quijote (page footer, as on every article) — \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported\" (the link goes to https://creativecommons.org/licenses/by-sa/4.0/deed.sv). The policy page Wikipedia:Upphovsrätt still names CC BY-SA 3.0 (\"nämligen (vad gäller texten) CC BY-SA 3.0\"); the footer is the current licence."@en .
+
+<https://en.wikipedia.org/>
+    dcterms:title "English Wikipedia" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://en.wikipedia.org/wiki/Wikipedia:Copyrights — \"Permission is granted to copy, distribute and/or modify Wikipedia's text under the terms of the Creative Commons Attribution-ShareAlike 4.0 International License.\""@en .
+
+<https://zh.wikisource.org/wiki/紅樓夢（程甲本）>
+    dcterms:title "Prefaces to the first printed edition of Hongloumeng (Dream of the Red Chamber), 1791" ;
+    dcterms:creator "Cheng Weiyuan and Gao E (transcription: Chinese Wikisource contributors)" ;
+    rdfs:comment "https://zh.wikisource.org/wiki/紅樓夢（程甲本） (licence notice on the page) — \"此清朝作品在全世界都属于公有领域，因为作者逝世已经超过100年，且作品于1931年1月1日之前出版。\" (This Qing-dynasty work is in the public domain worldwide.) Only facts stated in the 1791 text were used; the punctuation Wikisource added (which the page says may be CC BY-SA) was not copied."@en .
+
+<#don-quixote>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Don Quixote"@en ,
+                     "Don Quijote"@sv ;
+    solid-memo:back "Miguel de Cervantes" .
+
+<#nineteen-eighty-four>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Nineteen Eighty-Four"@en ,
+                     "1984"@sv ;
+    solid-memo:back "George Orwell" .
+
+<#alices-adventures-in-wonderland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Alice's Adventures in Wonderland"@en ,
+                     "Alice i Underlandet"@sv ;
+    solid-memo:back "Lewis Carroll" .
+
+<#animal-farm>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Animal Farm"@en ,
+                     "Djurfarmen"@sv ;
+    solid-memo:back "George Orwell" .
+
+<#the-hobbit>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Hobbit"@en ,
+                     "Bilbo – En hobbits äventyr"@sv ;
+    solid-memo:back "J. R. R. Tolkien" ;
+    solid-memo:backNote "Swedish title of the 1962 translation; the 2007 translation is called Hobbiten eller Bort och hem igen."@en ,
+                        "Svensk titel på översättningen från 1962; översättningen från 2007 heter Hobbiten eller Bort och hem igen."@sv .
+
+<#dream-of-the-red-chamber>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Dream of the Red Chamber"@en ,
+                     "Drömmar om röda gemak"@sv ;
+    solid-memo:back "Cao Xueqin" ;
+    solid-memo:backNote "First printed in 1791 by Cheng Weiyuan and Gao E, who added 40 chapters to the 80 then in circulation; they said they had collected and edited them."@en ,
+                        "Trycktes första gången 1791 av Cheng Weiyuan och Gao E, som lade till 40 kapitel till de 80 som då var i omlopp; enligt dem hade de samlat in och redigerat dem."@sv .
+
+<#anna-karenina>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Anna Karenina"@en ,
+                     "Anna Karenina"@sv ;
+    solid-memo:back "Leo Tolstoy"@en ,
+                    "Lev Tolstoj"@sv .
+
+<#crime-and-punishment>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Crime and Punishment"@en ,
+                     "Brott och straff"@sv ;
+    solid-memo:back "Fyodor Dostoevsky"@en ,
+                    "Fjodor Dostojevskij"@sv .
+
+<#pride-and-prejudice>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pride and Prejudice"@en ,
+                     "Stolthet och fördom"@sv ;
+    solid-memo:back "Jane Austen" .
+
+<#robinson-crusoe>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Robinson Crusoe"@en ,
+                     "Robinson Crusoe"@sv ;
+    solid-memo:back "Daniel Defoe" .
+
+<#war-and-peace>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "War and Peace"@en ,
+                     "Krig och fred"@sv ;
+    solid-memo:back "Leo Tolstoy"@en ,
+                    "Lev Tolstoj"@sv .
+
+<#les-miserables>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Les Misérables"@en ,
+                     "Samhällets olycksbarn"@sv ;
+    solid-memo:back "Victor Hugo" .
+
+<#the-brothers-karamazov>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Brothers Karamazov"@en ,
+                     "Bröderna Karamazov"@sv ;
+    solid-memo:back "Fyodor Dostoevsky"@en ,
+                    "Fjodor Dostojevskij"@sv .
+
+<#moby-dick>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Moby-Dick"@en ,
+                     "Moby Dick"@sv ;
+    solid-memo:back "Herman Melville" .
+
+<#the-three-musketeers>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Three Musketeers"@en ,
+                     "De tre musketörerna"@sv ;
+    solid-memo:back "Alexandre Dumas"@en ,
+                    "Alexandre Dumas d.ä."@sv ;
+    solid-memo:backNote "Dumas père, the father; his son Alexandre Dumas fils was also a writer."@en ,
+                        "Dumas den äldre, fadern; sonen Alexandre Dumas d.y. var också författare."@sv .
+
+<#frankenstein>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Frankenstein"@en ,
+                     "Frankenstein"@sv ;
+    solid-memo:back "Mary Shelley" ;
+    solid-memo:backNote "Full original title: Frankenstein; or, The Modern Prometheus."@en ,
+                        "Originalets fullständiga titel: Frankenstein; or, The Modern Prometheus (på svenska Frankenstein: eller den moderne Prometeus)."@sv .
+
+<#the-stranger>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Stranger"@en ,
+                     "Främlingen"@sv ;
+    solid-memo:back "Albert Camus" ;
+    solid-memo:backNote "Also published in English as The Outsider."@en ,
+                        "Har på engelska även getts ut som The Outsider."@sv .
+
+<#gullivers-travels>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Gulliver's Travels"@en ,
+                     "Gullivers resor"@sv ;
+    solid-memo:back "Jonathan Swift" .
+
+<#treasure-island>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Treasure Island"@en ,
+                     "Skattkammarön"@sv ;
+    solid-memo:back "Robert Louis Stevenson" .
+
+<#ulysses>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ulysses"@en ,
+                     "Odysseus"@sv ;
+    solid-memo:back "James Joyce" ;
+    solid-memo:backNote "Swedish title of the 1946 translation; the 2012 translation is called Ulysses."@en ,
+                        "Svensk titel på översättningen från 1946; översättningen från 2012 heter Ulysses."@sv .
+
+<#the-great-gatsby>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Great Gatsby"@en ,
+                     "Den store Gatsby"@sv ;
+    solid-memo:back "F. Scott Fitzgerald" .
+
+<#oliver-twist>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Oliver Twist"@en ,
+                     "Oliver Twist"@sv ;
+    solid-memo:back "Charles Dickens" .
+
+<#the-picture-of-dorian-gray>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Picture of Dorian Gray"@en ,
+                     "Dorian Grays porträtt"@sv ;
+    solid-memo:back "Oscar Wilde" .
+
+<#wuthering-heights>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Wuthering Heights"@en ,
+                     "Svindlande höjder"@sv ;
+    solid-memo:back "Emily Brontë" .
+
+<#the-count-of-monte-cristo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Count of Monte Cristo"@en ,
+                     "Greven av Monte Cristo"@sv ;
+    solid-memo:back "Alexandre Dumas"@en ,
+                    "Alexandre Dumas d.ä."@sv ;
+    solid-memo:backNote "Dumas père, the father; his son Alexandre Dumas fils was also a writer. Dumas wrote the novel in collaboration with Auguste Maquet."@en ,
+                        "Dumas den äldre, fadern; sonen Alexandre Dumas d.y. var också författare. Dumas skrev romanen i samarbete med Auguste Maquet."@sv .
+
+<#around-the-world-in-eighty-days>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Around the World in Eighty Days"@en ,
+                     "Jorden runt på 80 dagar"@sv ;
+    solid-memo:back "Jules Verne" .
+
+<#the-adventures-of-tom-sawyer>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Adventures of Tom Sawyer"@en ,
+                     "Tom Sawyers äventyr"@sv ;
+    solid-memo:back "Mark Twain" .
+
+<#twenty-thousand-leagues-under-the-sea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Twenty Thousand Leagues Under the Sea"@en ,
+                     "En världsomsegling under havet"@sv ;
+    solid-memo:back "Jules Verne" .
+
+<#the-hunchback-of-notre-dame>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Hunchback of Notre Dame"@en ,
+                     "Ringaren i Notre Dame"@sv ;
+    solid-memo:back "Victor Hugo" .
+
+<#dracula>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Dracula"@en ,
+                     "Dracula"@sv ;
+    solid-memo:back "Bram Stoker" .
+
+<#brave-new-world>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Brave New World"@en ,
+                     "Du sköna nya värld"@sv ;
+    solid-memo:back "Aldous Huxley" .
+
+<#madame-bovary>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Madame Bovary"@en ,
+                     "Madame Bovary"@sv ;
+    solid-memo:back "Gustave Flaubert" .
+
+<#the-trial>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Trial"@en ,
+                     "Processen"@sv ;
+    solid-memo:back "Franz Kafka" .
+
+<#adventures-of-huckleberry-finn>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Adventures of Huckleberry Finn"@en ,
+                     "Huckleberry Finns äventyr"@sv ;
+    solid-memo:back "Mark Twain" .
+
+<#uncle-toms-cabin>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Uncle Tom's Cabin"@en ,
+                     "Onkel Toms stuga"@sv ;
+    solid-memo:back "Harriet Beecher Stowe" .
+
+<#eugene-onegin>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eugene Onegin"@en ,
+                     "Eugen Onegin"@sv ;
+    solid-memo:back "Alexander Pushkin"@en ,
+                    "Aleksandr Pusjkin"@sv ;
+    solid-memo:backNote "A novel in verse."@en ,
+                        "En roman på vers."@sv .
+
+<#jane-eyre>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Jane Eyre"@en ,
+                     "Jane Eyre"@sv ;
+    solid-memo:back "Charlotte Brontë" .
+
+<#the-idiot>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Idiot"@en ,
+                     "Idioten"@sv ;
+    solid-memo:back "Fyodor Dostoevsky"@en ,
+                    "Fjodor Dostojevskij"@sv .
+
+<#great-expectations>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Great Expectations"@en ,
+                     "Lysande utsikter"@sv ;
+    solid-memo:back "Charles Dickens" .
+
+<#david-copperfield>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "David Copperfield"@en ,
+                     "David Copperfield"@sv ;
+    solid-memo:back "Charles Dickens" .
+
+<#the-wonderful-wizard-of-oz>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Wonderful Wizard of Oz"@en ,
+                     "Trollkarlen från Oz"@sv ;
+    solid-memo:back "L. Frank Baum" .
+
+<#all-quiet-on-the-western-front>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "All Quiet on the Western Front"@en ,
+                     "På västfronten intet nytt"@sv ;
+    solid-memo:back "Erich Maria Remarque" .
+
+<#for-whom-the-bell-tolls>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "For Whom the Bell Tolls"@en ,
+                     "Klockan klämtar för dig"@sv ;
+    solid-memo:back "Ernest Hemingway" .
+
+<#the-war-of-the-worlds>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The War of the Worlds"@en ,
+                     "Världarnas krig"@sv ;
+    solid-memo:back "H. G. Wells" .
+
+<#candide>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Candide"@en ,
+                     "Candide"@sv ;
+    solid-memo:back "Voltaire" .
+
+<#the-grapes-of-wrath>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Grapes of Wrath"@en ,
+                     "Vredens druvor"@sv ;
+    solid-memo:back "John Steinbeck" .
+
+<#a-tale-of-two-cities>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A Tale of Two Cities"@en ,
+                     "Två städer"@sv ;
+    solid-memo:back "Charles Dickens" .
+
+<#gone-with-the-wind>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Gone with the Wind"@en ,
+                     "Borta med vinden"@sv ;
+    solid-memo:back "Margaret Mitchell" .
+
+<#the-sorrows-of-young-werther>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Sorrows of Young Werther"@en ,
+                     "Den unge Werthers lidanden"@sv ;
+    solid-memo:back "Johann Wolfgang von Goethe" .
+
+<#journey-to-the-centre-of-the-earth>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Journey to the Centre of the Earth"@en ,
+                     "Till jordens medelpunkt"@sv ;
+    solid-memo:back "Jules Verne" .
+
+<#the-hound-of-the-baskervilles>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Hound of the Baskervilles"@en ,
+                     "Baskervilles hund"@sv ;
+    solid-memo:back "Arthur Conan Doyle" .
+
+<#the-plague>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Plague"@en ,
+                     "Pesten"@sv ;
+    solid-memo:back "Albert Camus" .
+
+<#dead-souls>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Dead Souls"@en ,
+                     "Döda själar"@sv ;
+    solid-memo:back "Nikolai Gogol"@en ,
+                    "Nikolaj Gogol"@sv .
+
+<#through-the-looking-glass>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Through the Looking-Glass"@en ,
+                     "Alice i Spegellandet"@sv ;
+    solid-memo:back "Lewis Carroll" .
+
+<#a-study-in-scarlet>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A Study in Scarlet"@en ,
+                     "En studie i rött"@sv ;
+    solid-memo:back "Arthur Conan Doyle" .
+
+<#pere-goriot>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Père Goriot"@en ,
+                     "Pappa Goriot"@sv ;
+    solid-memo:back "Honoré de Balzac" .
+
+<#siddhartha>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Siddhartha"@en ,
+                     "Siddhartha"@sv ;
+    solid-memo:back "Hermann Hesse" .
+
+<#dr-jekyll-and-mr-hyde>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Strange Case of Dr Jekyll and Mr Hyde"@en ,
+                     "Dr Jekyll och Mr Hyde"@sv ;
+    solid-memo:back "Robert Louis Stevenson" .
+
+<#heart-of-darkness>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Heart of Darkness"@en ,
+                     "Mörkrets hjärta"@sv ;
+    solid-memo:back "Joseph Conrad" .
+
+<#of-mice-and-men>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Of Mice and Men"@en ,
+                     "Möss och människor"@sv ;
+    solid-memo:back "John Steinbeck" .
+
+<#steppenwolf>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Steppenwolf"@en ,
+                     "Stäppvargen"@sv ;
+    solid-memo:back "Hermann Hesse" .
+
+<#a-farewell-to-arms>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A Farewell to Arms"@en ,
+                     "Farväl till vapnen"@sv ;
+    solid-memo:back "Ernest Hemingway" .
+
+<#sense-and-sensibility>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sense and Sensibility"@en ,
+                     "Förnuft och känsla"@sv ;
+    solid-memo:back "Jane Austen" .
+
+<#the-good-soldier-svejk>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Good Soldier Švejk"@en ,
+                     "Den tappre soldaten Švejks äventyr under världskriget"@sv ;
+    solid-memo:back "Jaroslav Hašek" .
+
+<#the-call-of-the-wild>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Call of the Wild"@en ,
+                     "Skriet från vildmarken"@sv ;
+    solid-memo:back "Jack London" .
+
+<#demons>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Demons"@en ,
+                     "Onda andar"@sv ;
+    solid-memo:back "Fyodor Dostoevsky"@en ,
+                    "Fjodor Dostojevskij"@sv ;
+    solid-memo:backNote "Also published in English as The Possessed."@en ,
+                        "Har på engelska även getts ut som The Possessed."@sv .
+
+<#the-mysterious-island>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Mysterious Island"@en ,
+                     "Den hemlighetsfulla ön"@sv ;
+    solid-memo:back "Jules Verne" .
+
+<#the-last-of-the-mohicans>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Last of the Mohicans"@en ,
+                     "Den siste mohikanen"@sv ;
+    solid-memo:back "James Fenimore Cooper" .
+
+<#little-women>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Little Women"@en ,
+                     "Unga kvinnor"@sv ;
+    solid-memo:back "Louisa May Alcott" .
+
+<#and-then-there-were-none>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "And Then There Were None"@en ,
+                     "Och så var de bara en"@sv ;
+    solid-memo:back "Agatha Christie" .
+
+<#the-sun-also-rises>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Sun Also Rises"@en ,
+                     "Och solen har sin gång"@sv ;
+    solid-memo:back "Ernest Hemingway" .
+
+<#anne-of-green-gables>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Anne of Green Gables"@en ,
+                     "Anne på Grönkulla"@sv ;
+    solid-memo:back "Lucy Maud Montgomery" .
+
+<#the-red-and-the-black>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Red and the Black"@en ,
+                     "Rött och svart"@sv ;
+    solid-memo:back "Stendhal" .
+
+<#ivanhoe>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ivanhoe"@en ,
+                     "Ivanhoe"@sv ;
+    solid-memo:back "Walter Scott" .
+
+<#murder-on-the-orient-express>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Murder on the Orient Express"@en ,
+                     "Mordet på Orientexpressen"@sv ;
+    solid-memo:back "Agatha Christie" .
+
+<#martin-eden>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Martin Eden"@en ,
+                     "Martin Eden"@sv ;
+    solid-memo:back "Jack London" .
+
+<#the-gambler>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Gambler"@en ,
+                     "Spelaren"@sv ;
+    solid-memo:back "Fyodor Dostoevsky"@en ,
+                    "Fjodor Dostojevskij"@sv .
+
+<#emma>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Emma"@en ,
+                     "Emma"@sv ;
+    solid-memo:back "Jane Austen" .
+
+<#buddenbrooks>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Buddenbrooks"@en ,
+                     "Huset Buddenbrook"@sv ;
+    solid-memo:back "Thomas Mann" ;
+    solid-memo:backNote "Swedish title of the 1904 translation; the 2005 translation is called Buddenbrooks."@en ,
+                        "Svensk titel på översättningen från 1904; översättningen från 2005 heter Buddenbrooks."@sv .
+
+<#white-fang>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "White Fang"@en ,
+                     "Varghunden"@sv ;
+    solid-memo:back "Jack London" .
+
+<#journey-to-the-end-of-the-night>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Journey to the End of the Night"@en ,
+                     "Resa till nattens ände"@sv ;
+    solid-memo:back "Louis-Ferdinand Céline" .
+
+<#in-search-of-lost-time>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "In Search of Lost Time"@en ,
+                     "På spaning efter den tid som flytt"@sv ;
+    solid-memo:back "Marcel Proust" ;
+    solid-memo:backNote "A novel in seven volumes, published 1913–1927."@en ,
+                        "En roman i sju delar, utgiven 1913–1927."@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

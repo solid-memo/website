@@ -1,0 +1,487 @@
+@base <https://solid-memo.com/decks/us-constitution-amendments/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Amendments to the US Constitution"@en ,
+                  "Tilläggen till USA:s konstitution"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "All 27 amendments to the Constitution of the United States as of 4 October 2026, from the First Amendment (1791) to the Twenty-seventh (1992); the first ten form the Bill of Rights. Front: the amendment, e.g. \"Nineteenth Amendment\"; back: what it does, summarised in English and Swedish, with the year its ratification was completed in a note. Summaries written from the text of the Constitution as transcribed by the National Archives and printed in the House Manual; numbering and years from Wikidata, the National Archives and the House Manual."@en ,
+                        "Samtliga 27 tillägg till USA:s konstitution per den 4 oktober 2026, från första tillägget (1791) till det tjugosjunde (1992); de tio första utgör Bill of Rights. Framsida: tillägget, t.ex. ”Nittonde tillägget”; baksida: vad det innebär, sammanfattat på engelska och svenska, med året då ratificeringen fullbordades i en anteckning. Sammanfattningarna bygger på konstitutionens text så som National Archives och representanthusets regelsamling (House Manual) återger den; numrering och år från Wikidata, National Archives och House Manual."@sv ;
+    prov:wasDerivedFrom <https://www.archives.gov/founding-docs/bill-of-rights-transcript> ,
+                        <https://www.archives.gov/founding-docs/amendments-11-27> ,
+                        <https://www.govinfo.gov/app/details/HMAN-119> ,
+                        <https://www.wikidata.org/wiki/Q102410240> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:history ;
+    dcat:keyword "US Constitution"@en ,
+                 "constitutional amendments"@en ,
+                 "Bill of Rights"@en ,
+                 "American history"@en ,
+                 "civil rights"@en ,
+                 "USA:s konstitution"@sv ,
+                 "författningstillägg"@sv ,
+                 "Bill of Rights"@sv ,
+                 "amerikansk historia"@sv ,
+                 "medborgerliga rättigheter"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#us-constitution-amendments> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#us-constitution-amendments> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.archives.gov/founding-docs/bill-of-rights-transcript> ,
+              <https://www.archives.gov/founding-docs/amendments-11-27> ,
+              <https://www.govinfo.gov/app/details/HMAN-119> ,
+              <https://www.wikidata.org/wiki/Q102410240> ,
+              <https://sv.wikipedia.org/wiki/USA:s_konstitution> ,
+              <https://sv.wikipedia.org/wiki/Bill_of_Rights_(USA)> ,
+              <https://www.svt.se/nyheter/utrikes/trumps-krigforing-mot-medier-har-natt-en-ny-niva> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ,
+                       <#review-6> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "1. Wikidata (query 1): every item that is an instance of amendment to the United States Constitution (Q102410240), with its P179 (part of the series) statement for list of amendments to the United States Constitution (Q230698) and that statement's P1545 (series ordinal), its P7588 (effective date) and its English and Swedish labels, was fetched as CSV from the Wikidata Query Service. It returned 27 items with the ordinals 1 to 27 (and the Bill of Rights itself, Q862765, which has no ordinal and was dropped). Query 2 fetched every English, Swedish and mul label and alias of the 27 items. (Query 0 first listed all direct statements of the First Amendment, Q12616, to find the class and properties used.)"@en ,
+                 "2. National Archives (query 4): the transcriptions \"The Bill of Rights: A Transcription\" (https://www.archives.gov/founding-docs/bill-of-rights-transcript, source nara-bill-of-rights) and \"The Constitution: Amendments 11-27\" (https://www.archives.gov/founding-docs/amendments-11-27, source nara-amendments-11-27) were downloaded and reduced to plain text with totext.py (scripts and tags removed, one line per paragraph). The first gives the text of Amendments I–X and \"These amendments were ratified December 15, 1791\"; the second gives, under each of Amendments XI–XXVII, \"Passed by Congress … Ratified …\" and the text. The Archives list exactly 27 amendments, the last being XXVII (\"Originally proposed Sept. 25, 1789. Ratified May 7, 1992.\")."@en ,
+                 "3. House Manual (query 5): the Constitution section of the House Manual for the 119th Congress (House Document 118-187, https://www.govinfo.gov/app/details/HMAN-119) was downloaded from govinfo as HTML granules, found by trying page numbers: hman.sh fetched pg94 and pg96 to pg132 with the sub-granules pg96-2, pg96-3, pg97-2, pg97-3, pg98-2, pg98-3, pg99-2, pg99-3 and pg99-4. Of these, pg96-3, pg99-4, pg101, pg102, pg105 to pg108, pg115 to pg117, pg121, pg124, pg125, pg128 to pg130 and pg132 returned \"Page Not Found\", and pg131 is the start of Jefferson's Manual. The amendments are in pg96, pg96-2, pg97, pg97-2, pg97-3, pg98, pg98-2, pg98-3, pg99, pg99-2, pg99-3, pg100, pg103, pg104, pg109 to pg114, pg118, pg119, pg120, pg122, pg123, pg126 and pg127, and Article VII with footnote 1 in pg94; each card's locator names the granules of its section heading and footnote. hman_extract.py joined them into one text and listed each amendment's section headings (\"Sec. NNN. …\"). The footnote of each amendment states when it was proposed and when \"Ratification was completed\" (for the Bill of Rights in footnote 1: \"Ratification was completed on December 15, 1791.\"; for the Twenty-first only the proclamation of December 5, 1933)."@en ,
+                 "4. The congress.gov Constitution Annotated (https://constitution.congress.gov/constitution/) and the Senate's Constitution page (https://www.senate.gov/about/origins-foundations/senate-and-constitution/constitution.htm) were tried first as the second official text and both answered 403 to the research environment (query 6); they were not used. A web search for a GPO edition of the amended Constitution led to the House Manual."@en ,
+                 "5. Cards: one per amendment. Front: the amendment's ordinal name, English \"First Amendment\" … \"Twenty-seventh Amendment\" (the ordinal of the Wikidata English label \"<Ordinal> Amendment to the United States Constitution\", the usual short form) and Swedish \"Första tillägget\" … \"Tjugosjunde tillägget\", the pattern of the Wikidata Swedish labels (\"Femte tillägget …\", \"Artonde tillägget …\", \"Tjugoförsta tillägget …\", \"Tjugofemte tillägget …\") and of the Swedish Wikipedia's list of the amendments, with the Swedish ordinals spelled out; for the First Amendment, whose Wikidata label and Swedish Wikipedia list entry say \"Första författningstillägget\", the short form \"Första tillägget\" is confirmed by the Swedish Wikipedia article \"Bill of Rights (USA)\" and by SVT Nyheter (query 9). Back: what the amendment does, written by the compiler in English and Swedish from the National Archives text and compared with the House Manual's section heading; for amendments that do several things (the Fifth, Sixth, Fourteenth, Twenty-fifth) the back names the main provisions only. The Swedish backs are the compiler's translations of the English public-domain text; for single legal terms the Swedish Wikipedia article was consulted as a guide to established usage (åtalsjury, kapitationsskatt, elektorer, alkoholförbud, skälig misstanke for probable cause, borgenssummor), and one term is used for one concept throughout (due process: rättssäkert förfarande; denying the vote: förvägras). English text follows British spelling (\"defence\", \"summarised\") except for words taken from the Constitution itself (\"naturalized\", \"color\"). Back note: \"Ratified <year>\" / \"Ratificerat <year>\", the year ratification was completed, with \"part of the Bill of Rights\" on the first ten, the repeal on the Eighteenth and the year of proposal on the Twenty-seventh."@en ,
+                 "6. Cross-check: make_cards.py read the saved Wikidata CSV, the two National Archives texts, the joined House Manual text and the Swedish Wikipedia wikitext, compared for each amendment the year of Wikidata's P7588, the year of the National Archives' \"Ratified\" date (1791 for I–X) and the year of the House Manual's \"Ratification was completed\" (the proclamation year for the Twenty-first); all 27 agree. It then cut each card's evidence verbatim from those texts (a quote is shortened only at a word boundary and marked …; in the National Archives quotes the amendment's heading, e.g. \"Amendment I\", which stands on its own line on the page, is joined to its text with a colon, and in the House Manual quotes GPO typesetting codes are printed as the characters they stand for, e.g. \"Women<n-iden-2>s\" as \"Women's\" and \"Citizenship<ls-thn-eq> security\" as \"Citizenship: security\" (the colon read from the printed page, granule HMAN-119-pg104 as PDF, query 10); the quotes for the Sixth and Fourteenth Amendments were extended in quality-control round 1 to show the whole clauses the backs summarise) and wrote cards.json, from which make_dossier.py wrote this dossier; the card texts (fronts, backs, notes) are fixed strings in make_cards.py. The day-level differences between sources, which do not affect any card, are recorded under Quality control. The scripts are not published with the deck; the rules above are what they do."@en ,
+                 "7. Swedish: the Swedish article \"USA:s konstitution\" was fetched with its revision id through the MediaWiki API (query 3); its section \"Tillägg\" lists every amendment as \"''<Ordningstal> tillägget'' (<år>)\", which was compared with each Swedish front. The Swedish Wikipedia was used for verification only."@en ,
+                 "8. Recency: no amendment has been added since 1992. On 4 October 2026 the National Archives page and the House Manual of the 119th Congress list 27 amendments. The Equal Rights Amendment, which some call the 28th Amendment, has not been certified or published as part of the Constitution: in its \"Statement on the Equal Rights Amendment Ratification Process\" of December 17, 2024 (https://www.archives.gov/press/press-releases/2025/nr25-004, query 7) the Archivist and Deputy Archivist said that \"the Equal Rights Amendment (ERA) cannot be certified as part of the Constitution due to established legal, judicial, and procedural decisions\" and that \"the Archivist of the United States cannot legally publish the Equal Rights Amendment\"; a web search (query 7) found reports from January 2025 that President Biden had declared it ratified, contradicting the Archivist, and nothing that has changed its status since. It is not in this deck. The Supreme Court's decision in Trump v. Barbara (30 June 2026), found by a web search (query 7), interpreted the Fourteenth Amendment's citizenship clause (\"subject to the jurisdiction thereof\"); it did not change the amendment's text, which the card summarises."@en ,
+                 "9. Machine checks: for every card the builder checks against live Wikidata that the item is an amendment to the United States Constitution (P31 Q102410240), that its English label is \"<Ordinal> Amendment to the United States Constitution\" (which ties the item to the number on the front) and that the year of its P7588 is the year in the back note. The summaries on the backs are not machine-checkable; they rest on the National Archives text and the House Manual headings recorded in each card's evidence. The built deck was validated with the app's SHACL and DCAT-AP validators (validate_sources.ts)."@en ,
+                 "Selection: All 27 amendments to the Constitution of the United States, as of 4 October 2026: the ten of the Bill of Rights (ratified 1791) and the seventeen later ones (1795–1992), the set listed by the National Archives and the House Manual and returned by Wikidata. Repealed amendments are included (the Eighteenth, repealed by the Twenty-first). Left out: amendments proposed by Congress but never ratified (among them the first of the twelve articles of 1789, the Titles of Nobility, Corwin and Child Labor amendments and the District of Columbia Voting Rights Amendment), and the Equal Rights Amendment, which some call the 28th Amendment but which the National Archives has not certified (method step 8); and the articles of the original Constitution. Each back summarises the amendment's main effect; the many details of the longer amendments (the Fourteenth's sections 2–5, the Twentieth's sections 3–6, the Twenty-fifth's procedure) are left out to keep the cards short."@en ,
+                 "Licensing: Every content source is public domain or CC0: the text of the Constitution and its amendments as transcribed by the National Archives (works of the United States Government; NARA states that its works \"are available for worldwide use and reuse under the terms of the Creative Commons CC0 1.0 Universal license\") and printed in the House Manual (a work of the United States Government, not under copyright in the US, and in any case far older than any copyright term), and Wikidata (CC0), which gave the set of amendments, their numbers, the years and the Swedish naming pattern. The deck is therefore CC0 1.0 like the rest of the library. The summaries on the backs are the compiler's own wording; the Swedish backs are the compiler's translations of the public-domain English text. The Swedish Wikipedia (CC BY-SA 4.0; the articles \"USA:s konstitution\" and \"Bill of Rights (USA)\") was consulted to check the Swedish names and years and as a guide to single established Swedish legal terms (åtalsjury, kapitationsskatt, elektorer, alkoholförbud, skälig misstanke, borgenssummor); single terms are not protected, and no sentence, summary, selection or layout was taken from it. Where a Swedish back resembles the article's summary (the Seventeenth, Twenty-first, Twenty-second, Twenty-fourth), both are close translations of the same short English sentence; the Tenth's back was reworded in quality-control round 1 so that it does not follow the article's translation. SVT Nyheter (all rights reserved) was consulted for one Swedish name only; nothing was copied. The selection is the complete set of 27 amendments, which every list shares."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Sources, licences and machine checks: every card's number and year against Wikidata, the National Archives and the House Manual; every summary against the National Archives text and the House Manual heading; the Swedish fronts against Wikidata sv labels and the Swedish Wikipedia."@en ;
+    rdfs:comment "Scope: All 27 cards, the sources and the deck metadata."@en ,
+                 "Outcome: Wikidata, the National Archives and the House Manual agree on the 27 amendments, their numbers and the year each was ratified, and the builder's 81 Wikidata checks passed; no check was skipped. The differences found are in exact days, in Wikidata's modelling and in the Swedish naming; none affects a card."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 27 cards: each back against the amendment's text, each note's year against the National Archives dates, and the Wikidata items, ordinals, labels and P7588 years by the reviewer's own SPARQL query; the deck's count, coverage and cut-off."@en ,
+                 "Outcome: No factual errors; all 27 items, ordinals, labels and years match, and no 28th amendment exists as of 4 October 2026. One warning (the Fourteenth's back left out \"subject to the jurisdiction thereof\" and that the clauses bind the states, and the recency step did not mention Trump v. Barbara) and three wording suggestions (the Twenty-fifth's Swedish, the Sixth's \"witnesses\", the Third's \"private houses\"). All four were checked against the National Archives text and fixed."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 27 cards, the title, description and keywords: language tags, Swedish idiom and terminology, consistency of terms and spelling."@en ,
+                 "Outcome: Language tags are correct (only @en and @sv, no untagged text), the keywords and Swedish ordinals are right. Three warnings (the Fourth's \"sannolika skäl\" and \"en order\", the Sixth's \"rätt till vittnen\", the Twenty-fifth's missing removal) and nine suggestions on idiom and consistency. All were checked and applied; the Swedish Wikipedia quotes the reviewer gave were confirmed in revision 59500995."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: Every source's licence and licence evidence, attribution in the dossier and the built deck, every evidence quote against freshly fetched pages, the method, selection, queries and the required statement of how the deck was made."@en ,
+                 "Outcome: CC0 holds: every content source is public domain or CC0, every licence quote and evidence quote matched. Three warnings (the Swedish Wikipedia's role described inconsistently, the Bill of Rights page missing from attribution, no source for the Swedish front \"Första tillägget\") and five suggestions (NARA's CC0 statement, House Manual granule locators, two quote normalisations, the ERA statement, query details). All were verified and fixed."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: All 27 cards (facts, language, tags), the metadata, licensing and documentation, every fix claimed in rounds 1–3, and the machine checks (the deck builder's check and sync, validate_sources.ts)."@en ,
+                 "Outcome: The deck is accurate and compliant and every fix from rounds 1–3 was confirmed. One warning (the Twenty-second's House Manual footnote continues into granule pg120, which its locator did not name) and one suggestion (the Twenty-fifth's English and Swedish backs gave different detail). Both were verified and fixed."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The two cards changed in round 4 (amendment-22, amendment-25) and every third card (amendment-2, -5, -8, -11, -14, -17, -20, -23, -26) against both National Archives transcriptions, the House Manual granules, a live Wikidata query and the Swedish Wikipedia; the metadata, keywords, the statement of how the deck was made, the CC0 decision and the ERA status."@en ,
+                 "Outcome: Every sampled card is accurate, the years agree across the three content sources, the Swedish is idiomatic and consistent, and both round-4 fixes are confirmed. One suggestion (a House Manual quote that dropped a GPO typesetting code) was verified and fixed."@en .
+
+<#review-6>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: All 27 cards against the National Archives transcriptions and the ratification years, the Swedish fronts and backs, the language tags, the description, keywords, study direction, the statement of how the deck was made, the recency handling (Trump v. Barbara, the ERA) and the round-5 fix."@en ,
+                 "Outcome: Every card, year and note is correct, every front has one right answer, the Swedish is idiomatic and the round-5 fix is in place. One optional suggestion (render \"probable cause\" in Swedish as \"sannolika skäl\" rather than \"skälig misstanke\") was checked against the Swedish Wikipedia and declined; no card was changed."@en .
+
+<https://www.archives.gov/founding-docs/bill-of-rights-transcript>
+    dcterms:title "The Bill of Rights: A Transcription (National Archives)" ;
+    dcterms:creator "U.S. National Archives and Records Administration" ;
+    rdfs:comment "NARA's Privacy and Use Policies, \"Copyright, Restrictions, and Permissions Notice\" (https://www.archives.gov/global-pages/privacy.html): \"Works of the U.S. Government that have been produced by the National Archives and Records Administration are in the public domain and may be copied and distributed without permission. These works are available for worldwide use and reuse under the terms of the Creative Commons CC0 1.0 Universal license.\" The text of the Constitution and its amendments is a work of the United States Government and far older than any copyright term; the transcriptions are by NARA staff. NARA's Copyright and Permissions page (https://www.archives.gov/research/still-pictures/permissions): materials created by federal agencies or employees in their official duties \"are not eligible for copyright protection, in the United States, and are treated as though they are in the public domain\"; \"Copies of Federal records, as part of the public domain, are equally available to all\". 17 U.S.C. § 105: \"Copyright protection under this title is not available for any work of the United States Government\"."@en .
+
+<https://www.archives.gov/founding-docs/amendments-11-27>
+    dcterms:title "The Constitution: Amendments 11-27 (National Archives)" ;
+    dcterms:creator "U.S. National Archives and Records Administration" ;
+    rdfs:comment "NARA's Privacy and Use Policies, \"Copyright, Restrictions, and Permissions Notice\" (https://www.archives.gov/global-pages/privacy.html): \"Works of the U.S. Government that have been produced by the National Archives and Records Administration are in the public domain and may be copied and distributed without permission. These works are available for worldwide use and reuse under the terms of the Creative Commons CC0 1.0 Universal license.\" The text of the Constitution and its amendments is a work of the United States Government and far older than any copyright term; the transcriptions are by NARA staff. NARA's Copyright and Permissions page (https://www.archives.gov/research/still-pictures/permissions): materials created by federal agencies or employees in their official duties \"are not eligible for copyright protection, in the United States, and are treated as though they are in the public domain\"; \"Copies of Federal records, as part of the public domain, are equally available to all\". 17 U.S.C. § 105: \"Copyright protection under this title is not available for any work of the United States Government\"."@en .
+
+<https://www.govinfo.gov/app/details/HMAN-119>
+    dcterms:title "Constitution, Jefferson's Manual, and the Rules of the House of Representatives, 119th Congress (House Document 118-187): The United States Constitution, amendments" ;
+    dcterms:creator "U.S. House of Representatives (Parliamentarian); published by the U.S. Government Publishing Office on govinfo" ;
+    rdfs:comment "govinfo's Public Domain & Copyright Notice (https://www.govinfo.gov/about/policies#copyright): \"Copyright protection under this title is not available for any work of the United States Government\" and \"The intent of the section is to place in the public domain all work of the United States Government\". A House document prepared in official duties; the Constitution's text itself is public domain."@en .
+
+<https://www.wikidata.org/wiki/Q102410240>
+    dcterms:title "Wikidata: the items that are instances of amendment to the United States Constitution (Q102410240), with their series ordinal, effective date and English and Swedish labels and aliases" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://sv.wikipedia.org/wiki/USA:s_konstitution>
+    dcterms:title "Svenskspråkiga Wikipedia: USA:s konstitution" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of the article: \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported\""@en .
+
+<https://sv.wikipedia.org/wiki/Bill_of_Rights_(USA)>
+    dcterms:title "Svenskspråkiga Wikipedia: Bill of Rights (USA)" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "The footer of every page of the Swedish Wikipedia, as quoted for the article \"USA:s konstitution\": \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported\""@en .
+
+<https://www.svt.se/nyheter/utrikes/trumps-krigforing-mot-medier-har-natt-en-ny-niva>
+    dcterms:title "SVT Nyheter: Analys: \"Trumps krigföring mot medier har nått en ny nivå\" (12 October 2017)" ;
+    dcterms:creator "Sveriges Television (SVT Nyheter)" ;
+    rdfs:comment "The article page (fetched 2026-10-04) states no open licence; a news article is protected under the Swedish Copyright Act (upphovsrättslagen 1960:729, 1 §), so it is treated as all rights reserved and used for verification only, with one short phrase quoted as evidence."@en .
+
+<#amendment-1>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First Amendment"@en ,
+                     "Första tillägget"@sv ;
+    solid-memo:back "Freedom of religion, speech, the press and assembly, and the right to petition the government"@en ,
+                    "Religionsfrihet, yttrandefrihet, pressfrihet, mötesfrihet och rätten att vända sig till staten med klagomål"@sv ;
+    solid-memo:backNote "Ratified 1791; part of the Bill of Rights"@en ,
+                        "Ratificerat 1791; ingår i Bill of Rights"@sv .
+
+<#amendment-2>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Second Amendment"@en ,
+                     "Andra tillägget"@sv ;
+    solid-memo:back "The right to keep and bear arms"@en ,
+                    "Rätten att inneha och bära vapen"@sv ;
+    solid-memo:backNote "Ratified 1791; part of the Bill of Rights"@en ,
+                        "Ratificerat 1791; ingår i Bill of Rights"@sv .
+
+<#amendment-3>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Third Amendment"@en ,
+                     "Tredje tillägget"@sv ;
+    solid-memo:back "No soldiers may be quartered in any house in peacetime without the owner's consent"@en ,
+                    "Inga soldater får inkvarteras i något hus i fredstid utan ägarens samtycke"@sv ;
+    solid-memo:backNote "Ratified 1791; part of the Bill of Rights"@en ,
+                        "Ratificerat 1791; ingår i Bill of Rights"@sv .
+
+<#amendment-4>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Fourth Amendment"@en ,
+                     "Fjärde tillägget"@sv ;
+    solid-memo:back "Protection against unreasonable searches and seizures; warrants require probable cause"@en ,
+                    "Skydd mot orimliga husrannsakningar och beslag; ett beslut om husrannsakan eller beslag kräver skälig misstanke"@sv ;
+    solid-memo:backNote "Ratified 1791; part of the Bill of Rights"@en ,
+                        "Ratificerat 1791; ingår i Bill of Rights"@sv .
+
+<#amendment-5>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Fifth Amendment"@en ,
+                     "Femte tillägget"@sv ;
+    solid-memo:back "Grand jury indictment, no double jeopardy, no self-incrimination, due process and compensation for property taken"@en ,
+                    "Åtal genom åtalsjury, förbud mot att prövas två gånger för samma brott och mot tvång att vittna mot sig själv, rättssäkert förfarande och ersättning för egendom som tas i anspråk"@sv ;
+    solid-memo:backNote "Ratified 1791; part of the Bill of Rights"@en ,
+                        "Ratificerat 1791; ingår i Bill of Rights"@sv .
+
+<#amendment-6>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sixth Amendment"@en ,
+                     "Sjätte tillägget"@sv ;
+    solid-memo:back "In criminal cases: a speedy and public trial by an impartial jury, the right to confront and call witnesses, and a defence lawyer"@en ,
+                    "I brottmål: snabb och offentlig rättegång inför en opartisk jury, rätt att möta och kalla vittnen och rätt till försvarare"@sv ;
+    solid-memo:backNote "Ratified 1791; part of the Bill of Rights"@en ,
+                        "Ratificerat 1791; ingår i Bill of Rights"@sv .
+
+<#amendment-7>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Seventh Amendment"@en ,
+                     "Sjunde tillägget"@sv ;
+    solid-memo:back "The right to a jury trial in civil suits at common law over twenty dollars"@en ,
+                    "Rätten till juryrättegång i civilmål enligt common law där värdet överstiger tjugo dollar"@sv ;
+    solid-memo:backNote "Ratified 1791; part of the Bill of Rights"@en ,
+                        "Ratificerat 1791; ingår i Bill of Rights"@sv .
+
+<#amendment-8>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eighth Amendment"@en ,
+                     "Åttonde tillägget"@sv ;
+    solid-memo:back "No excessive bail or fines, and no cruel and unusual punishments"@en ,
+                    "Förbud mot orimligt höga borgenssummor och böter samt mot grymma och ovanliga straff"@sv ;
+    solid-memo:backNote "Ratified 1791; part of the Bill of Rights"@en ,
+                        "Ratificerat 1791; ingår i Bill of Rights"@sv .
+
+<#amendment-9>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ninth Amendment"@en ,
+                     "Nionde tillägget"@sv ;
+    solid-memo:back "Listing certain rights in the Constitution does not deny other rights retained by the people"@en ,
+                    "Att vissa rättigheter räknas upp i konstitutionen förnekar inte andra rättigheter som folket har kvar"@sv ;
+    solid-memo:backNote "Ratified 1791; part of the Bill of Rights"@en ,
+                        "Ratificerat 1791; ingår i Bill of Rights"@sv .
+
+<#amendment-10>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Tenth Amendment"@en ,
+                     "Tionde tillägget"@sv ;
+    solid-memo:back "Powers not delegated to the federal government, nor prohibited to the states, are reserved to the states or the people"@en ,
+                    "Befogenheter som konstitutionen inte ger den federala staten och inte förbjuder delstaterna tillkommer delstaterna eller folket"@sv ;
+    solid-memo:backNote "Ratified 1791; part of the Bill of Rights"@en ,
+                        "Ratificerat 1791; ingår i Bill of Rights"@sv .
+
+<#amendment-11>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eleventh Amendment"@en ,
+                     "Elfte tillägget"@sv ;
+    solid-memo:back "Federal courts may not hear suits against a state by citizens of another state or of a foreign country"@en ,
+                    "Federala domstolar får inte pröva mål mot en delstat som väckts av medborgare i en annan delstat eller i ett annat land"@sv ;
+    solid-memo:backNote "Ratified 1795"@en ,
+                        "Ratificerat 1795"@sv .
+
+<#amendment-12>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Twelfth Amendment"@en ,
+                     "Tolfte tillägget"@sv ;
+    solid-memo:back "Electors cast separate votes for president and vice president"@en ,
+                    "Elektorerna röstar separat på president och vicepresident"@sv ;
+    solid-memo:backNote "Ratified 1804"@en ,
+                        "Ratificerat 1804"@sv .
+
+<#amendment-13>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Thirteenth Amendment"@en ,
+                     "Trettonde tillägget"@sv ;
+    solid-memo:back "Abolishes slavery and involuntary servitude, except as punishment for a crime"@en ,
+                    "Avskaffar slaveri och annat tvångsarbete, utom som straff för brott"@sv ;
+    solid-memo:backNote "Ratified 1865"@en ,
+                        "Ratificerat 1865"@sv .
+
+<#amendment-14>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Fourteenth Amendment"@en ,
+                     "Fjortonde tillägget"@sv ;
+    solid-memo:back "Citizenship for all persons born or naturalized in the US and subject to its jurisdiction; states must give everyone due process and equal protection of the laws"@en ,
+                    "Medborgarskap för alla som är födda eller naturaliserade i USA och lyder under dess jurisdiktion; delstaterna måste ge alla rättssäkert förfarande och lika skydd av lagen"@sv ;
+    solid-memo:backNote "Ratified 1868"@en ,
+                        "Ratificerat 1868"@sv .
+
+<#amendment-15>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Fifteenth Amendment"@en ,
+                     "Femtonde tillägget"@sv ;
+    solid-memo:back "The right to vote may not be denied on account of race, color or previous condition of servitude"@en ,
+                    "Rösträtten får inte förvägras på grund av ras, hudfärg eller att man tidigare varit slav"@sv ;
+    solid-memo:backNote "Ratified 1870"@en ,
+                        "Ratificerat 1870"@sv .
+
+<#amendment-16>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sixteenth Amendment"@en ,
+                     "Sextonde tillägget"@sv ;
+    solid-memo:back "Congress may levy an income tax without apportioning it among the states"@en ,
+                    "Kongressen får ta ut inkomstskatt utan att fördela den mellan delstaterna efter folkmängd"@sv ;
+    solid-memo:backNote "Ratified 1913"@en ,
+                        "Ratificerat 1913"@sv .
+
+<#amendment-17>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Seventeenth Amendment"@en ,
+                     "Sjuttonde tillägget"@sv ;
+    solid-memo:back "Senators are elected directly by the people of each state"@en ,
+                    "Senatorerna väljs direkt av folket i varje delstat"@sv ;
+    solid-memo:backNote "Ratified 1913"@en ,
+                        "Ratificerat 1913"@sv .
+
+<#amendment-18>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eighteenth Amendment"@en ,
+                     "Artonde tillägget"@sv ;
+    solid-memo:back "Prohibition: bans the manufacture, sale and transport of alcoholic drinks"@en ,
+                    "Alkoholförbud: förbjuder tillverkning, försäljning och transport av alkoholdrycker"@sv ;
+    solid-memo:backNote "Ratified 1919; repealed by the Twenty-first Amendment in 1933"@en ,
+                        "Ratificerat 1919; upphävt genom tjugoförsta tillägget 1933"@sv .
+
+<#amendment-19>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Nineteenth Amendment"@en ,
+                     "Nittonde tillägget"@sv ;
+    solid-memo:back "The right to vote may not be denied on account of sex (women's suffrage)"@en ,
+                    "Rösträtten får inte förvägras på grund av kön (kvinnlig rösträtt)"@sv ;
+    solid-memo:backNote "Ratified 1920"@en ,
+                        "Ratificerat 1920"@sv .
+
+<#amendment-20>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Twentieth Amendment"@en ,
+                     "Tjugonde tillägget"@sv ;
+    solid-memo:back "Presidential terms begin on 20 January and congressional terms on 3 January"@en ,
+                    "Presidentens mandatperiod börjar den 20 januari och kongressledamöternas den 3 januari"@sv ;
+    solid-memo:backNote "Ratified 1933"@en ,
+                        "Ratificerat 1933"@sv .
+
+<#amendment-21>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Twenty-first Amendment"@en ,
+                     "Tjugoförsta tillägget"@sv ;
+    solid-memo:back "Repeals Prohibition (the Eighteenth Amendment)"@en ,
+                    "Upphäver alkoholförbudet (artonde tillägget)"@sv ;
+    solid-memo:backNote "Ratified 1933"@en ,
+                        "Ratificerat 1933"@sv .
+
+<#amendment-22>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Twenty-second Amendment"@en ,
+                     "Tjugoandra tillägget"@sv ;
+    solid-memo:back "No one may be elected president more than twice"@en ,
+                    "Ingen får väljas till president mer än två gånger"@sv ;
+    solid-memo:backNote "Ratified 1951"@en ,
+                        "Ratificerat 1951"@sv .
+
+<#amendment-23>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Twenty-third Amendment"@en ,
+                     "Tjugotredje tillägget"@sv ;
+    solid-memo:back "Gives the District of Columbia electors in presidential elections"@en ,
+                    "Ger District of Columbia elektorer i presidentval"@sv ;
+    solid-memo:backNote "Ratified 1961"@en ,
+                        "Ratificerat 1961"@sv .
+
+<#amendment-24>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Twenty-fourth Amendment"@en ,
+                     "Tjugofjärde tillägget"@sv ;
+    solid-memo:back "The vote in federal elections may not be denied for failure to pay a poll tax or other tax"@en ,
+                    "Rösträtten i federala val får inte förvägras för att man inte betalat kapitationsskatt eller annan skatt"@sv ;
+    solid-memo:backNote "Ratified 1964"@en ,
+                        "Ratificerat 1964"@sv .
+
+<#amendment-25>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Twenty-fifth Amendment"@en ,
+                     "Tjugofemte tillägget"@sv ;
+    solid-memo:back "Rules for when the president is removed, resigns, dies or cannot discharge the office, and for filling a vacant vice presidency"@en ,
+                    "Regler för när presidenten avsätts, avgår, dör eller inte kan sköta ämbetet, och för att tillsätta en vakant vicepresidentpost"@sv ;
+    solid-memo:backNote "Ratified 1967"@en ,
+                        "Ratificerat 1967"@sv .
+
+<#amendment-26>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Twenty-sixth Amendment"@en ,
+                     "Tjugosjätte tillägget"@sv ;
+    solid-memo:back "Citizens aged 18 or older may not be denied the vote on account of age"@en ,
+                    "Rösträtten får inte förvägras medborgare som fyllt 18 år på grund av ålder"@sv ;
+    solid-memo:backNote "Ratified 1971"@en ,
+                        "Ratificerat 1971"@sv .
+
+<#amendment-27>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Twenty-seventh Amendment"@en ,
+                     "Tjugosjunde tillägget"@sv ;
+    solid-memo:back "A change in the pay of members of Congress takes effect only after the next House election"@en ,
+                    "En ändring av kongressledamöternas arvode träder i kraft först efter nästa val till representanthuset"@sv ;
+    solid-memo:backNote "Proposed 1789, ratified 1992"@en ,
+                        "Föreslaget 1789, ratificerat 1992"@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

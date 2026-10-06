@@ -179,7 +179,7 @@ describe("DeckPreferencesContainer", () => {
 
     it("counts the cards' untagged sides, leaving out those still as the library release has them", async () => {
       const released = cardOf("fe", { "": "Fe" }, { en: "iron" });
-      const imported = { ...deck, sourceUrl: "https://solid-memo.com/decks/elements.ttl" };
+      const imported = { ...deck, sourceUrl: "https://solid-memo.com/decks/elements/v1.ttl" };
       const useCases = makeUseCasesFake({
         listCards: vi.fn(async () => [released, cardOf("cu", { "": "Cu" }, { "": "copper" })]),
         deckRelease: vi.fn(async () => ({ cards: [{ ...released, formatVersion: 4 }] }) as unknown as LibraryDeckContent),

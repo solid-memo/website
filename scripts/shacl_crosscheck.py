@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 """Cross-check what Solid Memo publishes with an independent SHACL engine.
 
-The tests validate the vocabulary and the pod fixtures with
-rdf-validate-shacl (SHACL Core). This script checks the same documents with pySHACL, a separate implementation that
+`npm run library:check` validates the deck library and the tests
+validate the vocabulary and the pod fixtures with rdf-validate-shacl
+(SHACL Core). This script checks the same documents with pySHACL, a separate implementation that
 also runs SPARQL-based constraints (SkoHub's SKOS best practice has
 some), so a disagreement between the engines, or a constraint the
 browser's engine cannot run, fails CI (see docs/validation.md):
 
+- DCAT-AP 3 over the deck library: decks/index.ttl and every release
+  decks/<name>/v<N>.ttl, each with the index and the reference data
+  (ns/vocab/external.ttl, ns/vocab/topics.ttl) beside it;
 - DCAT-AP 3 over pod catalog documents as the app writes them (the
   valid pod fixtures of deck formats 4, 5 and 6 under
   packages/vocab/fixtures/deck/: format 5 titles and describes a deck in
@@ -22,8 +26,7 @@ publishes it under; nothing needs the network.
 
 Solid Memo's own shapes are not run here: they have no targets (the app
 picks a subject's shape by its class and format version), which is what
-the tests check them with. The deck library is checked the same way in
-its own repository, https://github.com/solid-memo/decks.
+`npm run library:check` and the tests check them with.
 
 Run:  python3 scripts/shacl_crosscheck.py
 """
@@ -50,7 +53,7 @@ def graph(*documents: tuple[Path, str]) -> Graph:
 
 
 def site(path: str) -> tuple[Path, str]:
-    """A file the site publishes at `path`: ns/ from the repository, vendor/ from the vocab package."""
+    """A file the site publishes at `path`: ns/ and decks/ from the repository, vendor/ from the vocab package."""
     return (VOCAB if path.startswith("vendor/") else ROOT) / path, SITE + path
 
 
@@ -74,7 +77,13 @@ def main() -> int:
     skos = graph(site("vendor/skohub/skos.shacl.ttl"), site("vendor/skohub/skos.bestPractice.shacl.ttl"))
     reference = [site("ns/vocab/external.ttl"), site("ns/vocab/topics.ttl")]
 
-    results: list[bool] = []
+    index = site("decks/index.ttl")
+
+    results = [check("decks/index.ttl (DCAT-AP)", graph(index, *reference), dcat_ap, warnings_fail=False)]
+    for release in sorted((ROOT / "decks").glob("*/v*.ttl")):
+        name = release.relative_to(ROOT).as_posix()
+        data = graph(site(name), index, *reference)
+        results.append(check(f"{name} (DCAT-AP)", data, dcat_ap, warnings_fail=False))
     pods = [
         VOCAB / "fixtures/deck/v4/valid/pod.ttl",
         *sorted((VOCAB / "fixtures/deck/v5/valid").glob("pod*.ttl")),

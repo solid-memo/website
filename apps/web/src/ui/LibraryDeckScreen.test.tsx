@@ -13,8 +13,8 @@ const WIKIPEDIA = "https://en.wikipedia.org/wiki/List_of_national_capitals";
 const WIKIDATA = "https://www.wikidata.org/wiki/Property:P36";
 
 const capitals: LibraryDeck = {
-  url: "https://solid-memo.com/decks/capitals.ttl",
-  ...firstRelease("https://solid-memo.com/decks/capitals.ttl"),
+  url: "https://solid-memo.com/decks/capitals/v1.ttl",
+  ...firstRelease("https://solid-memo.com/decks/capitals/v1.ttl"),
   title: { en: "Capitals of the world" },
   cardCount: 243,
   authors: ["Anton Wiklund"],
@@ -62,12 +62,12 @@ describe("LibraryDeckScreen", () => {
     renderScreen({
       deck: {
         ...capitals,
-        url: "https://solid-memo.com/decks/capitals/2.ttl",
+        url: "https://solid-memo.com/decks/capitals/v2.ttl",
         version: "2",
         versionNotes: "Added Norway.",
         releases: [
-          { url: "https://solid-memo.com/decks/capitals/1.ttl", version: "1" },
-          { url: "https://solid-memo.com/decks/capitals/2.ttl", version: "2", issued: "2026-09-28T10:00:00Z" },
+          { url: "https://solid-memo.com/decks/capitals/v1.ttl", version: "1" },
+          { url: "https://solid-memo.com/decks/capitals/v2.ttl", version: "2", issued: "2026-09-28T10:00:00Z" },
         ],
         themes: [
           "http://publications.europa.eu/resource/authority/data-theme/EDUC",
