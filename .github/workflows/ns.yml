@@ -7,24 +7,11 @@ name: Vocabulary, shapes and decks
 # removed since the base of the change, the generated code in step with
 # the vocabulary and the shapes, their tests, and pySHACL's cross-check.
 # CI runs most of this too, on every push, and gates the deploy; this
-# workflow adds the comparison with the base and reports on pull
-# requests.
+# workflow adds the comparison with the base. It runs on pushes, not on
+# pull requests.
 
 on:
   push:
-    paths:
-      - ns/**
-      - decks/**
-      - packages/vocab/**
-      - packages/shacl/**
-      - packages/turtle/**
-      - packages/domain/**
-      - package.json
-      - package-lock.json
-      - scripts/shacl_crosscheck.py
-      - scripts/requirements-ci.txt
-      - .github/workflows/ns.yml
-  pull_request:
     paths:
       - ns/**
       - decks/**
@@ -69,24 +56,20 @@ jobs:
       - run: npm ci
       - run: npm run format:turtle:check
       # A published version (decks/<name>/v<N>.ttl) is never edited or
-      # removed: compare with the pull request's base branch; on a push to
-      # the default branch, with the commit the push moved it from; on a
-      # push to any other branch, with where it left the default branch,
-      # so a version not merged yet can still be fixed there. A push that
+      # removed: on a push to the default branch, compare with the commit
+      # the push moved it from; on a push to any other branch, with where
+      # it left the default branch, so a version not merged yet can still
+      # be fixed there. A push that
       # created the default branch (all zeros), or one whose earlier commit
       # a force push left unfetched, compares with the default branch.
       - name: npm run library:check -- --base <base>
         env:
           EVENT: ${{ github.event_name }}
           REF: ${{ github.ref }}
-          BASE_REF: ${{ github.base_ref }}
           BEFORE: ${{ github.event.before }}
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
-          if [ "$EVENT" = pull_request ]; then
-            git fetch --no-tags origin "+refs/heads/$BASE_REF:refs/remotes/origin/$BASE_REF"
-            base="origin/$BASE_REF"
-          elif [ "$EVENT" = push ] && [ "$REF" = "refs/heads/$DEFAULT_BRANCH" ] && [ -n "$BEFORE" ] && ! [[ "$BEFORE" =~ ^0+$ ]] && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+          if [ "$EVENT" = push ] && [ "$REF" = "refs/heads/$DEFAULT_BRANCH" ] && [ -n "$BEFORE" ] && ! [[ "$BEFORE" =~ ^0+$ ]] && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
             base="$BEFORE"
           else
             git fetch --no-tags origin "+refs/heads/$DEFAULT_BRANCH:refs/remotes/origin/$DEFAULT_BRANCH"

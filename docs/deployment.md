@@ -18,8 +18,8 @@ flowchart LR
 A red CI run never deploys; `workflow_dispatch` deploys by hand. The
 workflow builds the commit CI checked, enables Pages for the repository
 on its first run, and stops before deploying if the vocabulary or the
-deck library is missing from the build. Pull requests and pushes that
-touch `ns/` or `decks/` also run the [ns workflow](../.github/workflows/ns.yml)
+deck library is missing from the build. Pushes that touch `ns/` or
+`decks/` also run the [ns workflow](../.github/workflows/ns.yml)
 ([deck-library.md](deck-library.md#checks)).
 
 ### What the artifact contains
