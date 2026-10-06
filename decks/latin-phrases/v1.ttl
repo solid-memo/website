@@ -1,0 +1,887 @@
+@base <https://solid-memo.com/decks/latin-phrases/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Latin phrases in English and Swedish"@en ,
+                  "Latinska uttryck i svenskan och engelskan"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "77 Latin phrases still used in both English and Swedish, from ad hoc and carpe diem to status quo and vice versa. The Latin phrase on the front, its meaning in English and Swedish on the back, with the literal sense or origin as a note where it helps. Every phrase has an entry in Dictionary.com and in a Swedish reference work (Svenska Akademiens ordlista, Svensk ordbok or Nationalencyklopedin) and is recorded in Wikidata; the meanings are written for this deck, using the conventional translation where a phrase has one, and checked against those dictionaries and Wiktionary."@en ,
+                        "77 latinska uttryck som fortfarande används både på svenska och engelska, från ad hoc och carpe diem till status quo och vice versa. Det latinska uttrycket på framsidan, betydelsen på svenska och engelska på baksidan, med den ordagranna betydelsen eller ursprunget som anteckning där det hjälper. Varje uttryck finns i Dictionary.com och i ett svenskt uppslagsverk (Svenska Akademiens ordlista, Svensk ordbok eller Nationalencyklopedin) och är registrerat i Wikidata; betydelserna är skrivna för den här kortleken, med den vedertagna översättningen där uttrycket har en, och kontrollerade mot de ordböckerna och Wiktionary."@sv ;
+    prov:wasDerivedFrom <https://www.wikidata.org/> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:languages ,
+               topic:latin ;
+    dcat:keyword "Latin"@en ,
+                 "Latin phrases"@en ,
+                 "idioms"@en ,
+                 "loanwords"@en ,
+                 "vocabulary"@en ,
+                 "latin"@sv ,
+                 "latinska uttryck"@sv ,
+                 "bevingade ord"@sv ,
+                 "lånord"@sv ,
+                 "ordförråd"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/LAT> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#latin-phrases> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#latin-phrases> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/2.5/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/> ,
+              <https://svenska.se/saol/> ,
+              <https://svenska.se/so/> ,
+              <https://www.ne.se/> ,
+              <https://www.dictionary.com/> ,
+              <https://en.wiktionary.org/> ,
+              <https://sv.wiktionary.org/> ,
+              <https://folkets-lexikon.csc.kth.se/folkets/> ,
+              <https://spraakbanken.gu.se/en/tools/korp> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ,
+                       <#review-6> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Candidates. The authoring agent wrote a list of Latin phrases it judged to be in current English or Swedish use, from its own general knowledge; with duplicates and single words removed it holds 216 multi-word phrases. No list was copied from any source."@en ,
+                 "Swedish use. Each candidate was looked up in SAOL and Svensk ordbok through the svenska.se search API (https://svenska.se/api/search/saol and /api/search/so, parameters q, size=10, exactMatch=true), searching for the whole phrase and for each of its words longer than two letters, and keeping a hit when the phrase is the headword (field ortografi) or an idiom (field idiom) of a returned article. Each candidate was also looked up in Nationalencyklopedin at https://www.ne.se/uppslagsverk/encyklopedi/lång/<phrase with spaces as hyphens>, keeping a hit when the page has an article title (reader-title heading); the title and opening text were saved. A missing NE article means only that no page exists at that URL slug: NE returns the same error page for a slug that does not exist at all as for a phrase it may treat under another title, so a “no” from NE is not proof that NE never mentions the phrase."@en ,
+                 "English use. Each candidate was looked up at https://www.dictionary.com/browse/<phrase with spaces as hyphens> without following redirects: HTTP 200 means the phrase has its own entry (its meta description, which carries the first definition, was saved); a 301 redirect to another word or a 404 means it has none. Merriam-Webster, Cambridge and Collins refused automated requests (HTTP 403), so Dictionary.com is the English dictionary of record."@en ,
+                 "Wikidata. Each candidate was searched with the Wikidata API (wbsearchentities, type item and type lexeme, languages la, en and sv) and the matching entities fetched with wbgetentities (labels, aliases, descriptions, claims, lemmas, senses). For each card the item that represents the phrase itself was chosen by hand (for example Q190273 for carpe diem rather than artworks named after it); where no such item exists, English or Swedish lexemes with the phrase as lemma serve instead."@en ,
+                 "Wiktionary. The English and Swedish Wiktionary wikitext of each candidate was fetched with action=raw and its definition lines kept, for checking meanings only."@en ,
+                 "Other avenues tried and not used: a first SAOL/SO pass searched only the whole phrase and missed idioms filed under one of their words (for example per capita under capita in SO), so the word-by-word search above replaced it; a Wikidata SPARQL query for lexemes timed out (HTTP 504), so the API search was used instead; Folkets lexikon (the KTH Swedish–English dictionary, CC BY-SA 2.5) was downloaded as XML from https://folkets-lexikon.csc.kth.se/folkets/folkets_sv_en_public.xml and matched only four of the first 134 candidates (ad notam, alter ego, nota bene, vice versa), too few to serve as a usage criterion; frequency counts in Språkbanken’s Korp news corpora (API https://ws.spraakbanken.gu.se/ws/korp/v8/, corpus list from /info) were too small and noisy (names of series and bands) to serve as one either. The Korp count requests themselves were not recorded verbatim when they were run, so they are not listed under Queries; the URLs that were recorded are. None of these avenues contributed anything to the deck."@en ,
+                 "Selection. A candidate was kept if it has an entry in Dictionary.com and in at least one of SAOL, Svensk ordbok or NE, then the exclusions listed under Selection were applied (non-Latin phrases, names and titles, a disputed subject, senses that differ between the languages, no Wikidata entity)."@en ,
+                 "Writing the cards. Front: the phrase in Latin as Dictionary.com, SAOL, SO and NE spell it (lower case, j in de jure, ipso jure and res judicata, capital D in anno Domini, the commas of cogito, ergo sum and veni, vidi, vici). Back: a short meaning in English and in Swedish. Where a phrase has an established, conventional translation or fixed Swedish equivalent — a fact of the language that every dictionary repeats, such as “I came, I saw, I conquered”, “skynda långsamt” or “å ämbetets vägnar” — the back uses it; otherwise the meaning is the authoring agent’s own wording, and no dictionary definition or explanatory wording was copied (backs that had come too close to a definition were reworded in quality-control rounds 1 and 3). Where a phrase has a narrower sense in one language the back gives the sense common to both. A back note gives the literal sense, the origin (author, motto, field), an abbreviation or the contrasting phrase when it helps; every fact in a note is stated by at least one of NE, Dictionary.com, Wiktionary, SAOL, SO or Wikidata in the card’s evidence."@en ,
+                 "Cross-checking. Every card’s meaning was compared with the definitions saved from the Swedish source(s), Dictionary.com and Wiktionary; the evidence of each card quotes what those sources returned on 2026-10-04 (generated from the saved responses, trimmed). Wikidata label checks were added wherever the front, or a back text, is exactly (same case and punctuation) a Wikidata label or alias of the chosen item in that language (when only the multilingual “mul” label matches, one check is written for Latin, which the builder compares with mul labels too); they are run against live Wikidata by the deck builder. After the review rounds, every back and note was compared mechanically with every quoted source text of its card (any segment of three or more words between commas or semicolons, and any whole back; before comparing, case and punctuation are normalised, parenthesised abbreviations such as “(a.m.)” or “(RIP)” are removed, a leading article is ignored and “/” in a source is read as “or”/“eller”). The first run (round 3) compared whole backs including the parenthesis and only backs of two or more words, and so missed six cards; the corrected run (round 4) flags only the conventional translations listed under Licensing. The quotations in the evidence were shortened to what confirms the card (gloss, literal sense, origin), with omissions marked “…” and NE’s pronunciation keys replaced by “[…]”."@en ,
+                 "Selection: The deck holds the multi-word Latin phrases, from a candidate list of 216, that have their own entry in Dictionary.com (English) and appear in at least one Swedish reference work — as a headword or idiom in Svenska Akademiens ordlista or Svensk ordbok, or as a Nationalencyklopedin article — and that Wikidata records as an item or lexeme. 91 candidates met the dictionary criteria; 14 were then left out: “a cappella”: Italian, not Latin (NE: “italienska, egentligen ’i kapellstil’”). “lingua franca”: Italian, not Latin (NE: “italienska, egentligen ’frankernas språk’”). “homo sapiens”: a scientific species name, not a phrase of general use. “agnus dei”: a liturgical text and title (NE: a litany sung at the breaking of bread). “dies irae”: the title of a hymn of the requiem mass. “de profundis”: NE treats it as the Latin title of Psalm 130. “dominus vobiscum”: a liturgical greeting rather than a phrase used in everyday English or Swedish. “opus dei”: the NE article is about the Catholic organisation of that name. “pax romana”: the name of a historical period, not a phrase used of anything else. “pro patria”: the NE article is about the Swedish charitable society Pro Patria, not the phrase, so the Swedish criterion is not really met. “in corpore”: the Swedish sense (SAOL, SO: “med fulltalig representation”, as a whole body) differs from the English one (Dictionary.com: “in body; in substance”), so one back would mislead one of the two audiences. “jus primae noctis”: it names an alleged right whose historical existence is disputed (NE: “… förekommit i Europa är omstridd”). “ecce homo”: Wikidata has no item or lexeme for the phrase itself (only artworks titled so), so the card would have no CC0 content source. “terra firma”: Wikidata has no item or lexeme for the phrase (only unrelated works and the general item “land”), so the card would have no CC0 content source. Single Latin words (veto, alibi, ergo) and abbreviations (e.g., i.e., etc.) are outside the deck. Phrases that did not meet the criteria include several well-known ones (alea iacta est, et cetera, per se, quid pro quo, sui generis, vox populi, habeas corpus): either Dictionary.com has no entry for them or none of SAOL, SO and NE had a matching headword, idiom or article at the URL tried; they can be added if a later check finds them. Candidates not meeting the dictionary criteria: a capella, a contrario, ab absurdo, ad absurdum, ad acta, ad astra, ad fontes, ad lib, ad nauseam, ad notam, ad personam, ad undas, ad usum, ad usum delphini, alea iacta est, alea jacta est, annus horribilis, ante portas, conditio sine qua non, corpus juris, cui bono, cum laude, de lege ferenda, de lege lata, deo gratias, divide et impera, do ut des, dum spiro spero, eo ipso, et alii, et cetera, et tu brute, ex libris, ex nihilo, ex nunc, ex post facto, ex tempore, ex tunc, ex ungue leonem, ex voto, exempli gratia, fiat lux, habeas corpus, hannibal ante portas, homo homini lupus, id est, in absentia, in abstracto, in blanco, in camera, in casu, in concreto, in dubio pro reo, in extremis, in flagranti, in hoc signo vinces, in loco parentis, in natura, in nuce, in persona, in pleno, in praxi, in spe, in statu nascendi, in toto, in vacuo, inter alia, inter nos, ius primae noctis, lapsus linguae, lege artis, lex talionis, magna cum laude, nemo propheta in patria, nihil obstat, non compos mentis, non plus ultra, non sequitur, numerus clausus, opus magnum, pater familias, pax vobiscum, per annum, per aspera ad astra, per definitionem, per diem, per procura, per se, post festum, post mortem, post partum, post scriptum, pro anno, pro bono, pro domo, pro et contra, pro memoria, pro mille, pro primo, pro rata, pro rata temporis, pro tem, pro tempore, quid pro quo, sapere aude, senatus populusque romanus, sensu lato, sensu stricto, si vis pacem para bellum, stante pede, status nascendi, stricto sensu, sub rosa, sub specie aeternitatis, sui generis, sui juris, summa cum laude, summa summarum, tempora mutantur, tempus fugit, tertium non datur, ultima ratio, urbi et orbi, vade mecum, vox populi."@en ,
+                 "Licensing: The deck is CC0-1.0. Its only content source is Wikidata, whose structured data (items and lexemes) is CC0. Selection: the dictionaries (SAOL, Svensk ordbok, NE, Dictionary.com) were used only as a yes/no filter on a candidate list the authoring agent wrote independently (all 216 candidates are named under Selection: the 77 cards, the 14 exclusions and the candidates that failed); no item was taken from their word lists, so no selection or arrangement of theirs is reproduced. Wording: the English and Swedish meanings and the notes are the authoring agent’s own wording of facts about the phrases, except that where a phrase has an established, non-original translation or fixed Swedish equivalent, that conventional rendering is used as a fact of the language rather than as any dictionary’s expression. This applies to a priori (“independent of experience”, “oberoende av erfarenhet”); ad infinitum (“i det oändliga”); ad libitum (“efter behag”); alter ego (“a second self”, “ett andra jag”); anno Domini (“in the year of our Lord”, “i Herrens år”); ante meridiem (“before noon”, “på förmiddagen”); ars longa, vita brevis; bona fide; carpe diem (“seize the day”, “fånga dagen”); caveat emptor; cogito, ergo sum; cum grano salis (“med en nypa salt”); e pluribus unum; errare humanum est; ex gratia (“as a favour”); ex officio (“å ämbetets vägnar”); festina lente; honoris causa (“för hederns skull”); in medias res (“mitt in i händelserna”); in memoriam; in vino veritas; in vivo (“in a living organism”); ipso jure (“by the law itself”); mens sana in corpore sano; nota bene (“märk väl”); o tempora, o mores! (“o tider, o seder!”); ora et labora; panem et circenses; per capita (“per person”); post meridiem (“after noon”, “på eftermiddagen”); primus inter pares; pro forma (“för formens skull”); quod erat demonstrandum (“vilket skulle bevisas”); requiescat in pace (“may he or she rest in peace”, “må han eller hon vila i frid”); rigor mortis (“likstelhet”); sic transit gloria mundi; tabula rasa (“ett oskrivet blad”); and veni, vidi, vici. No definition or explanatory wording was copied from SAOL, Svensk ordbok, NE or Dictionary.com (all rights reserved) or from the English and Swedish Wiktionary (CC BY-SA 4.0); backs that had followed a definition or a Wiktionary gloss list too closely were reworded (quality-control rounds 1 and 3; the list above was completed in round 4). These sources, and Folkets lexikon (CC BY-SA 2.5) and Korp, which were tried and contributed nothing, are verification sources only, so their licences place no conditions on the deck. Quotations: the evidence in this provenance report quotes the sources briefly, verbatim and with the source named, to show what each one says about a card. These quotations are made under the quotation right (upphovsrättslagen 22 § for the Swedish works; fair use for the American ones), are kept to the minimum needed, and remain the property of their owners: they are not part of the deck’s cards and are not covered by the deck’s CC0 dedication or by the licence of the repository that holds this report. Wiktionary quotations are attributed to the English or Swedish edition and its contributors under CC BY-SA 4.0."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Source agreement, selection criteria, Wikidata checks, licence policy"@en ;
+    rdfs:comment "Scope: All 77 cards and all 216 candidates."@en ,
+                 "Outcome: Every card’s meaning was compared with Dictionary.com, the Swedish source(s) found and, where they have an entry, English and Swedish Wiktionary; 81 Wikidata label checks were written and pass. Discrepancies between sources were resolved as recorded in the findings; candidates that failed a criterion or had a problem were excluded rather than forced in."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 77 cards; Dictionary.com fetched for all 77 fronts; SAOL/SO via the svenska.se API; NE for selected articles; all 81 Wikidata checks rerun."@en ,
+                 "Outcome: No factual errors in the 77 cards. One warning (three backs matched a dictionary or Wiktionary definition word for word, contrary to the “no text was copied” claim) and four suggestions on Swedish wording and sourcing. All five were verified against the sources and applied."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language and translation"@en ;
+    rdfs:comment "Scope: All 77 cards, the title, description and keywords in both languages."@en ,
+                 "Outcome: Language tags and typography correct; Swedish backs mostly follow established renderings. One error (“en ode”), one warning (“per huvuden”) and nine suggestions. Eight were applied after checking; one (ad-hominem) was declined because the existing note follows NE and is correct; one (per-capita) duplicates round 1."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 77 cards (every back compared with all quoted source text; evidence re-fetched for about 22 cards), all sources and licence pages, the queries, method, selection and licensing text."@en ,
+                 "Outcome: Licences correctly recorded and the selection reproducible, but several backs followed Wiktionary (CC BY-SA) or Dictionary.com wording, the documentation claimed outright that nothing was copied, the report quoted NE at length without a stated legal basis, one NE quote was truncated, and some queries were missing. All nine findings were verified and applied; the deck stays CC0 because the copied wording was replaced and the conventional translations that remain are documented as such."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final skeptical re-check (loop 1): changed cards, every third card, metadata, licence decision and documentation"@en ;
+    rdfs:comment "Scope: All 77 cards (the 76 changed in round 3, every third card and veni-vidi-vici), the metadata, licence decision and documentation."@en ,
+                 "Outcome: No factual, language or study-direction errors; the deck stays CC0. Two documentation warnings and one suggestion, all verified and applied: the Licensing list of conventional renderings was incomplete because the round-3 overlap check compared backs with their parenthesised abbreviation; the Folkets lexikon licence URL pointed to a page without the licence text; anno-domini now uses the established English rendering."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final skeptical re-check (loop 2): the changed card (anno-domini), every third card, metadata, licence decision and documentation"@en ;
+    rdfs:comment "Scope: anno-domini and every third card (27 cards in all), the metadata, licence decision and documentation."@en ,
+                 "Outcome: No errors or warnings; the builder check and the SHACL/DCAT-AP validation pass. Two optional suggestions, both verified and applied: the anno-domini Wiktionary evidence now cites the page that actually glosses the phrase, and the Swedish note on e-pluribus-unum is made idiomatic."@en .
+
+<#review-6>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: all 77 cards."@en ,
+                 "Outcome: All 77 cards checked: Latin fronts, English and Swedish backs, notes and language tags; the round-5 fixes are in place and the metadata fits the deck. One warning, verified and fixed: ora-et-labora now uses the established Swedish rendering “bed och arbeta”. Two optional suggestions, verified and applied: the bona-fide note now gives the adjective’s common sense “genuine”, and the bare author notes now follow the “From …” / “Från …” pattern already used for Juvenal."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors (Wikimedia Foundation)" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — “All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.”"@en .
+
+<https://svenska.se/saol/>
+    dcterms:title "Svenska Akademiens ordlista (SAOL), 14th edition, on svenska.se" ;
+    dcterms:creator "Svenska Akademien" ;
+    rdfs:comment "https://svenska.se/ — the site footer reads “© Svenska Akademien”; no open licence is offered for the dictionary content."@en .
+
+<https://svenska.se/so/>
+    dcterms:title "Svensk ordbok utgiven av Svenska Akademien (SO), on svenska.se" ;
+    dcterms:creator "Svenska Akademien" ;
+    rdfs:comment "https://svenska.se/ — the site footer reads “© Svenska Akademien”; no open licence is offered for the dictionary content."@en .
+
+<https://www.ne.se/>
+    dcterms:title "Nationalencyklopedin (NE.se), encyclopedia articles" ;
+    dcterms:creator "NE Nationalencyklopedin AB" ;
+    rdfs:comment "https://www.ne.se/info/upphovsratt/ (https://ne.se/info/hj%c3%a4lp/upphovsratt redirects there) — “Nästan allt material på NE.se omfattas av upphovsrättslagen.” For encyclopedia texts NE allows quoting “i delar eller i sin helhet, på webbsidor eller i tryckt form, i icke-kommersiellt syfte. Detta under förutsättning att NE, och i förekommande fall skribenten, anges som källa, att citaten är ordagranna och att ingen utomstående kan gå in och ändra i texten.” NE can therefore only be a verification source; the short quotations in this report rest on the quotation right (see Licensing), not on that permission."@en .
+
+<https://www.dictionary.com/>
+    dcterms:title "Dictionary.com (based on the Random House Unabridged Dictionary)" ;
+    dcterms:creator "Dictionary Media Group, Inc. (IXL Learning)" ;
+    rdfs:comment "https://www.dictionary.com/terms-and-privacy — “All content provided through the Services is protected by copyright, trademark, and other applicable intellectual property and proprietary rights laws and is owned, controlled, and/or licensed by Dictionary.”"@en .
+
+<https://en.wiktionary.org/>
+    dcterms:title "Wiktionary, the free dictionary (English edition)" ;
+    dcterms:creator "Wiktionary contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Page footer (e.g. https://en.wiktionary.org/wiki/carpe_diem): “Definitions and other text are available under the Creative Commons Attribution-ShareAlike License; additional terms may apply.” Wikimedia Terms of Use (https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use): “When you submit text to which you hold the copyright, you agree to license it under: Creative Commons Attribution-ShareAlike 4.0 International License (\"CC BY-SA 4.0\"), and GNU Free Documentation License (\"GFDL\") …”"@en .
+
+<https://sv.wiktionary.org/>
+    dcterms:title "Wiktionary, den fria ordlistan (Swedish edition)" ;
+    dcterms:creator "Wiktionary contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Page footer (e.g. https://sv.wiktionary.org/wiki/carpe_diem): “Text är tillgänglig under licensen Creative Commons Erkännande-Dela Lika; …”; the Wikimedia Terms of Use (https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use) license contributed text under “Creative Commons Attribution-ShareAlike 4.0 International License (\"CC BY-SA 4.0\"), and GNU Free Documentation License (\"GFDL\")”."@en .
+
+<https://folkets-lexikon.csc.kth.se/folkets/>
+    dcterms:title "Folkets lexikon (Swedish–English dictionary, KTH)" ;
+    dcterms:creator "Viggo Kann and Folkets lexikon contributors (KTH Royal Institute of Technology)" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/2.5/> ;
+    rdfs:comment "https://folkets-lexikon.csc.kth.se/folkets/om.html (“Om Folkets lexikon”) — the dictionaries “kan laddas ner i ett eget XML-format under Distributed Creative Commons Attribution-Share Alike 2.5 Generic license” (link to http://creativecommons.org/licenses/by-sa/2.5/)."@en .
+
+<https://spraakbanken.gu.se/en/tools/korp>
+    dcterms:title "Korp (Språkbanken Text corpus search, University of Gothenburg)" ;
+    dcterms:creator "Språkbanken Text, University of Gothenburg" ;
+    rdfs:comment "https://spraakbanken.gu.se/en/tools/korp — the service page (fetched 2026-10-04) states no licence for query results; Språkbanken licenses its corpora one by one. Nothing from Korp is in the deck, so its terms place no conditions on it."@en .
+
+<#a-fortiori>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "a fortiori"@la ;
+    solid-memo:back "with all the more reason"@en ,
+                    "med så mycket större skäl"@sv .
+
+<#a-posteriori>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "a posteriori"@la ;
+    solid-memo:back "based on experience or observation"@en ,
+                    "grundat på erfarenhet"@sv ;
+    solid-memo:backNote "The opposite of a priori."@en ,
+                        "Motsatsen till a priori."@sv .
+
+<#a-priori>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "a priori"@la ;
+    solid-memo:back "beforehand; independent of experience"@en ,
+                    "på förhand; oberoende av erfarenhet"@sv ;
+    solid-memo:backNote "The opposite of a posteriori."@en ,
+                        "Motsatsen till a posteriori."@sv .
+
+<#ad-hoc>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ad hoc"@la ;
+    solid-memo:back "for this particular purpose only"@en ,
+                    "för just detta ändamål"@sv .
+
+<#ad-hominem>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ad hominem"@la ;
+    solid-memo:back "aimed at the person instead of the argument"@en ,
+                    "riktat mot personen i stället för mot argumentet"@sv ;
+    solid-memo:backNote "Literally “to the person”."@en ,
+                        "Ordagrant ”till människan”."@sv .
+
+<#ad-infinitum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ad infinitum"@la ;
+    solid-memo:back "endlessly; to infinity"@en ,
+                    "i det oändliga"@sv .
+
+<#ad-interim>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ad interim"@la ;
+    solid-memo:back "for the time being; temporarily"@en ,
+                    "tills vidare; tillfälligt"@sv ;
+    solid-memo:backNote "Abbreviated a.i."@en ,
+                        "Förkortas a.i."@sv .
+
+<#ad-libitum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ad libitum"@la ;
+    solid-memo:back "as much as one likes; at will"@en ,
+                    "efter behag"@sv ;
+    solid-memo:backNote "Often shortened to ad lib."@en ,
+                        "Förkortas ofta ad lib."@sv .
+
+<#ad-rem>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ad rem"@la ;
+    solid-memo:back "to the point; relevant"@en ,
+                    "till saken; relevant"@sv .
+
+<#ad-valorem>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ad valorem"@la ;
+    solid-memo:back "according to the value"@en ,
+                    "i förhållande till värdet"@sv ;
+    solid-memo:backNote "Said of taxes and customs duties."@en ,
+                        "Om skatter och tullar."@sv .
+
+<#alma-mater>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "alma mater"@la ;
+    solid-memo:back "the school or university one attended"@en ,
+                    "det lärosäte man har studerat vid"@sv ;
+    solid-memo:backNote "Literally “nurturing mother”."@en ,
+                        "Ordagrant ”den närande modern”."@sv .
+
+<#alter-ego>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "alter ego"@la ;
+    solid-memo:back "a second self"@en ,
+                    "ett andra jag"@sv .
+
+<#anno-domini>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "anno Domini"@la ;
+    solid-memo:back "in the year of our Lord (AD)"@en ,
+                    "i Herrens år (e.Kr.)"@sv .
+
+<#ante-meridiem>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ante meridiem"@la ;
+    solid-memo:back "before noon (a.m.)"@en ,
+                    "på förmiddagen (a.m.)"@sv .
+
+<#ars-longa-vita-brevis>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ars longa, vita brevis"@la ;
+    solid-memo:back "art is long, life is short"@en ,
+                    "konsten är lång, livet är kort"@sv ;
+    solid-memo:backNote "A Latin rendering of an aphorism of Hippocrates."@en ,
+                        "Latinsk form av en aforism av Hippokrates."@sv .
+
+<#bona-fide>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "bona fide"@la ;
+    solid-memo:back "in good faith"@en ,
+                    "i god tro"@sv ;
+    solid-memo:backNote "In English also an adjective: genuine, or made in good faith."@en ,
+                        "På engelska även adjektiv: äkta, eller gjord i god tro."@sv .
+
+<#carpe-diem>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "carpe diem"@la ;
+    solid-memo:back "seize the day; live for the present"@en ,
+                    "fånga dagen; lev i nuet"@sv ;
+    solid-memo:backNote "From an ode by Horace; literally “pluck the day”."@en ,
+                        "Ur ett ode av Horatius; ordagrant ”plocka dagen”."@sv .
+
+<#casus-belli>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "casus belli"@la ;
+    solid-memo:back "an event that justifies or provokes war"@en ,
+                    "en anledning till krig"@sv .
+
+<#caveat-emptor>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "caveat emptor"@la ;
+    solid-memo:back "let the buyer beware"@en ,
+                    "köparen får se upp"@sv .
+
+<#ceteris-paribus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ceteris paribus"@la ;
+    solid-memo:back "all else being equal"@en ,
+                    "allt annat lika"@sv .
+
+<#cogito-ergo-sum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "cogito, ergo sum"@la ;
+    solid-memo:back "I think, therefore I am"@en ,
+                    "jag tänker, alltså finns jag"@sv ;
+    solid-memo:backNote "From Descartes."@en ,
+                        "Från Descartes."@sv .
+
+<#corpus-delicti>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "corpus delicti"@la ;
+    solid-memo:back "the evidence that a crime has been committed"@en ,
+                    "bevis för att ett brott har begåtts"@sv ;
+    solid-memo:backNote "Literally “the body of the crime”."@en ,
+                        "Ordagrant ”brottets kropp”."@sv .
+
+<#cum-grano-salis>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "cum grano salis"@la ;
+    solid-memo:back "with a pinch of salt; with some scepticism"@en ,
+                    "med en nypa salt"@sv .
+
+<#curriculum-vitae>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "curriculum vitae"@la ;
+    solid-memo:back "an account of one’s education and career (CV)"@en ,
+                    "en meritförteckning (cv)"@sv ;
+    solid-memo:backNote "Literally “the course of life”."@en ,
+                        "Ordagrant ”levnadsloppet”."@sv .
+
+<#de-facto>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "de facto"@la ;
+    solid-memo:back "in fact; in practice"@en ,
+                    "i praktiken; i realiteten"@sv ;
+    solid-memo:backNote "Contrasted with de jure."@en ,
+                        "Ställs mot de jure."@sv .
+
+<#de-jure>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "de jure"@la ;
+    solid-memo:back "by law; legally"@en ,
+                    "enligt lag; rättsligt"@sv ;
+    solid-memo:backNote "Contrasted with de facto."@en ,
+                        "Ställs mot de facto."@sv .
+
+<#deus-ex-machina>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "deus ex machina"@la ;
+    solid-memo:back "an unexpected intervention that resolves everything"@en ,
+                    "ett oväntat ingripande som löser allt"@sv ;
+    solid-memo:backNote "Literally “a god from the machine”, from ancient theatre."@en ,
+                        "Ordagrant ”en gud ur maskinen”, från antikens teater."@sv .
+
+<#e-pluribus-unum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "e pluribus unum"@la ;
+    solid-memo:back "out of many, one"@en ,
+                    "av många, ett"@sv ;
+    solid-memo:backNote "A motto of the United States."@en ,
+                        "Ett av USA:s valspråk."@sv .
+
+<#errare-humanum-est>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "errare humanum est"@la ;
+    solid-memo:back "to err is human"@en ,
+                    "att fela är mänskligt"@sv .
+
+<#ex-ante>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ex ante"@la ;
+    solid-memo:back "beforehand, as planned or expected"@en ,
+                    "i förväg, som planerat eller förväntat"@sv ;
+    solid-memo:backNote "Used in economics; the opposite of ex post."@en ,
+                        "Används inom ekonomi; motsatsen till ex post."@sv .
+
+<#ex-cathedra>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ex cathedra"@la ;
+    solid-memo:back "with the full authority of one’s office"@en ,
+                    "med ämbetets fulla auktoritet"@sv ;
+    solid-memo:backNote "Literally “from the chair”; used of the pope."@en ,
+                        "Ordagrant ”från lärostolen”; används om påven."@sv .
+
+<#ex-gratia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ex gratia"@la ;
+    solid-memo:back "as a favour, without legal obligation"@en ,
+                    "av välvilja, utan rättslig skyldighet"@sv .
+
+<#ex-officio>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ex officio"@la ;
+    solid-memo:back "by virtue of one’s office"@en ,
+                    "å ämbetets vägnar"@sv .
+
+<#ex-post>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ex post"@la ;
+    solid-memo:back "afterwards, as it actually turned out"@en ,
+                    "i efterhand, som det faktiskt blev"@sv ;
+    solid-memo:backNote "Used in economics; the opposite of ex ante."@en ,
+                        "Används inom ekonomi; motsatsen till ex ante."@sv .
+
+<#festina-lente>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "festina lente"@la ;
+    solid-memo:back "make haste slowly"@en ,
+                    "skynda långsamt"@sv .
+
+<#honoris-causa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "honoris causa"@la ;
+    solid-memo:back "for the sake of honour (honorary)"@en ,
+                    "för hederns skull"@sv ;
+    solid-memo:backNote "As in doctor honoris causa, an honorary doctor."@en ,
+                        "Som i doktor honoris causa, hedersdoktor."@sv .
+
+<#in-extenso>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "in extenso"@la ;
+    solid-memo:back "in full; unabridged"@en ,
+                    "i full längd; utan strykningar"@sv .
+
+<#in-medias-res>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "in medias res"@la ;
+    solid-memo:back "into the middle of things"@en ,
+                    "mitt in i händelserna"@sv .
+
+<#in-memoriam>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "in memoriam"@la ;
+    solid-memo:back "in memory (of)"@en ,
+                    "till minne (av)"@sv .
+
+<#in-situ>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "in situ"@la ;
+    solid-memo:back "in its original place; on site"@en ,
+                    "på sin ursprungliga plats"@sv .
+
+<#in-vino-veritas>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "in vino veritas"@la ;
+    solid-memo:back "in wine there is truth"@en ,
+                    "i vinet finns sanningen"@sv .
+
+<#in-vitro>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "in vitro"@la ;
+    solid-memo:back "outside a living organism, in the laboratory"@en ,
+                    "utanför en levande organism, i laboratoriet"@sv ;
+    solid-memo:backNote "Literally “in glass”. The opposite of in vivo."@en ,
+                        "Ordagrant ”i glas”. Motsatsen till in vivo."@sv .
+
+<#in-vivo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "in vivo"@la ;
+    solid-memo:back "in a living organism"@en ,
+                    "i en levande organism"@sv ;
+    solid-memo:backNote "The opposite of in vitro."@en ,
+                        "Motsatsen till in vitro."@sv .
+
+<#ipso-facto>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ipso facto"@la ;
+    solid-memo:back "by that fact alone"@en ,
+                    "redan genom detta faktum"@sv .
+
+<#ipso-jure>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ipso jure"@la ;
+    solid-memo:back "by the law itself, automatically"@en ,
+                    "direkt genom lagen, utan särskilt beslut"@sv .
+
+<#magnum-opus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "magnum opus"@la ;
+    solid-memo:back "someone’s greatest work"@en ,
+                    "någons främsta verk"@sv .
+
+<#mea-culpa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "mea culpa"@la ;
+    solid-memo:back "my fault; I admit it"@en ,
+                    "mitt fel; jag erkänner"@sv .
+
+<#memento-mori>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "memento mori"@la ;
+    solid-memo:back "remember that you will die"@en ,
+                    "kom ihåg att du ska dö"@sv .
+
+<#mens-sana-in-corpore-sano>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "mens sana in corpore sano"@la ;
+    solid-memo:back "a sound mind in a sound body"@en ,
+                    "en sund själ i en sund kropp"@sv ;
+    solid-memo:backNote "From Juvenal."@en ,
+                        "Från Juvenalis."@sv .
+
+<#modus-operandi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "modus operandi"@la ;
+    solid-memo:back "way of operating; method"@en ,
+                    "tillvägagångssätt; arbetssätt"@sv ;
+    solid-memo:backNote "Often of a criminal’s method."@en ,
+                        "Ofta om en brottslings tillvägagångssätt."@sv .
+
+<#modus-vivendi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "modus vivendi"@la ;
+    solid-memo:back "a temporary working arrangement between parties who disagree"@en ,
+                    "en provisorisk uppgörelse mellan oeniga parter"@sv ;
+    solid-memo:backNote "Literally “way of living”."@en ,
+                        "Ordagrant ”sätt att leva”."@sv .
+
+<#mutatis-mutandis>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "mutatis mutandis"@la ;
+    solid-memo:back "with the necessary changes made"@en ,
+                    "med nödvändiga ändringar"@sv .
+
+<#nolens-volens>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "nolens volens"@la ;
+    solid-memo:back "like it or not"@en ,
+                    "med eller mot sin vilja"@sv .
+
+<#nota-bene>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "nota bene"@la ;
+    solid-memo:back "note well (NB)"@en ,
+                    "märk väl (NB)"@sv .
+
+<#o-tempora-o-mores>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "o tempora, o mores!"@la ;
+    solid-memo:back "oh, the times, oh, the customs!"@en ,
+                    "o tider, o seder!"@sv ;
+    solid-memo:backNote "From Cicero."@en ,
+                        "Från Cicero."@sv .
+
+<#obiter-dictum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "obiter dictum"@la ;
+    solid-memo:back "a remark made in passing"@en ,
+                    "ett uttalande i förbigående"@sv ;
+    solid-memo:backNote "In law, a judge’s remark that is not binding."@en ,
+                        "Inom juridiken ett icke bindande domaruttalande."@sv .
+
+<#ora-et-labora>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ora et labora"@la ;
+    solid-memo:back "pray and work"@en ,
+                    "bed och arbeta"@sv ;
+    solid-memo:backNote "The Benedictine motto."@en ,
+                        "Benediktinernas valspråk."@sv .
+
+<#panem-et-circenses>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "panem et circenses"@la ;
+    solid-memo:back "bread and circuses"@en ,
+                    "bröd och skådespel"@sv ;
+    solid-memo:backNote "From Juvenal."@en ,
+                        "Från Juvenalis."@sv .
+
+<#per-capita>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "per capita"@la ;
+    solid-memo:back "per person"@en ,
+                    "per person"@sv ;
+    solid-memo:backNote "Literally “by heads”."@en ,
+                        "Ordagrant ”efter huvuden”."@sv .
+
+<#persona-grata>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "persona grata"@la ;
+    solid-memo:back "a welcome or acceptable person"@en ,
+                    "en välkommen eller omtyckt person"@sv .
+
+<#persona-non-grata>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "persona non grata"@la ;
+    solid-memo:back "an unwelcome person"@en ,
+                    "en ovälkommen person"@sv .
+
+<#post-meridiem>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "post meridiem"@la ;
+    solid-memo:back "after noon (p.m.)"@en ,
+                    "på eftermiddagen (p.m.)"@sv .
+
+<#primus-inter-pares>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "primus inter pares"@la ;
+    solid-memo:back "first among equals"@en ,
+                    "den främste bland likar"@sv .
+
+<#pro-forma>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "pro forma"@la ;
+    solid-memo:back "for form’s sake"@en ,
+                    "för formens skull"@sv .
+
+<#quod-erat-demonstrandum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "quod erat demonstrandum"@la ;
+    solid-memo:back "which was to be proved (QED)"@en ,
+                    "vilket skulle bevisas (QED)"@sv .
+
+<#reductio-ad-absurdum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "reductio ad absurdum"@la ;
+    solid-memo:back "disproof by showing that a claim leads to absurdity"@en ,
+                    "motbevis genom att visa att ett påstående leder till orimligheter"@sv .
+
+<#requiescat-in-pace>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "requiescat in pace"@la ;
+    solid-memo:back "may he or she rest in peace (RIP)"@en ,
+                    "må han eller hon vila i frid (RIP)"@sv .
+
+<#res-judicata>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "res judicata"@la ;
+    solid-memo:back "a matter already decided by a court"@en ,
+                    "en sak som redan har avgjorts genom dom"@sv .
+
+<#rigor-mortis>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "rigor mortis"@la ;
+    solid-memo:back "the stiffness of the muscles that sets in after death"@en ,
+                    "likstelhet"@sv .
+
+<#sic-transit-gloria-mundi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "sic transit gloria mundi"@la ;
+    solid-memo:back "thus passes the glory of the world"@en ,
+                    "så förgår världens härlighet"@sv .
+
+<#sine-qua-non>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "sine qua non"@la ;
+    solid-memo:back "an essential precondition"@en ,
+                    "en oundgänglig förutsättning"@sv .
+
+<#status-quo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "status quo"@la ;
+    solid-memo:back "the current state of affairs"@en ,
+                    "det rådande läget"@sv .
+
+<#tabula-rasa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "tabula rasa"@la ;
+    solid-memo:back "a blank slate"@en ,
+                    "ett oskrivet blad"@sv .
+
+<#terra-incognita>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "terra incognita"@la ;
+    solid-memo:back "unexplored territory"@en ,
+                    "outforskat område"@sv .
+
+<#terra-nullius>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "terra nullius"@la ;
+    solid-memo:back "land that belongs to no one"@en ,
+                    "land som inte tillhör någon"@sv ;
+    solid-memo:backNote "A term of international law."@en ,
+                        "En term inom folkrätten."@sv .
+
+<#veni-vidi-vici>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "veni, vidi, vici"@la ;
+    solid-memo:back "I came, I saw, I conquered"@en ,
+                    "jag kom, jag såg, jag segrade"@sv ;
+    solid-memo:backNote "From Julius Caesar."@en ,
+                        "Från Julius Caesar."@sv .
+
+<#vice-versa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "vice versa"@la ;
+    solid-memo:back "the other way round"@en ,
+                    "tvärtom; omvänt"@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

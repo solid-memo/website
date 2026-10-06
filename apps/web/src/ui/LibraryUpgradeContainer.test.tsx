@@ -24,12 +24,12 @@ const imported: Deck = {
   createdAt: "2026-09-21T10:00:00.000Z",
   formatVersion: 1,
   authors: ["Anton Wiklund"],
-  sourceUrl: "https://solid-memo.com/decks/capitals.ttl",
+  sourceUrl: "https://solid-memo.com/decks/capitals/v1.ttl",
 };
 const plan: LibraryUpgradePlan = {
   fromVersion: "1",
   toVersion: "2",
-  releaseUrl: "https://solid-memo.com/decks/capitals/2.ttl",
+  releaseUrl: "https://solid-memo.com/decks/capitals/v2.ttl",
   notes: [],
   add: [{ id: "no", front: { "": "Norway" }, back: { "": "Oslo" }, formatVersion: 1 }],
   change: [],

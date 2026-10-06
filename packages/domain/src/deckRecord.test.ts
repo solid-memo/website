@@ -30,7 +30,7 @@ const deck: Deck = {
   authors: ["Anton Wiklund"],
   license: "https://creativecommons.org/publicdomain/zero/1.0/",
   description: { en: "From Wikipedia." },
-  sourceUrl: "https://solid-memo.com/decks/capitals.ttl",
+  sourceUrl: "https://solid-memo.com/decks/capitals/v1.ttl",
 };
 
 const SM = "https://solid-memo.com/ns/vocab/v1.ttl#";
@@ -43,7 +43,7 @@ describe("deck records", () => {
     const full: Deck = {
       ...deck,
       formatVersion: 3,
-      sourceUrl: "https://solid-memo.com/decks/capitals/1.ttl",
+      sourceUrl: "https://solid-memo.com/decks/capitals/v1.ttl",
       themes: [TOPIC],
       keywords: { en: ["capitals", "countries"], sv: ["huvudstäder"], "": ["legacy"] },
       newCardsPerDay: 5,
@@ -236,20 +236,20 @@ describe("card records", () => {
   });
 
   it("read a library card, retired or not, keeping its fragment id", () => {
-    expect(libraryCardFromRecord("https://solid-memo.com/decks/x/2.ttl#se", 3, { front: { "": "Sweden" }, back: { "": "Stockholm" } })).toEqual({
+    expect(libraryCardFromRecord("https://solid-memo.com/decks/x/v2.ttl#se", 3, { front: { "": "Sweden" }, back: { "": "Stockholm" } })).toEqual({
       id: "se",
       front: { "": "Sweden" },
       back: { "": "Stockholm" },
       formatVersion: 3,
     });
     expect(
-      libraryCardFromRecord("https://solid-memo.com/decks/x/2.ttl#yu", 3, { front: { "": "Yugoslavia" }, back: { "": "Belgrade" }, deprecated: true }),
+      libraryCardFromRecord("https://solid-memo.com/decks/x/v2.ttl#yu", 3, { front: { "": "Yugoslavia" }, back: { "": "Belgrade" }, deprecated: true }),
     ).toEqual({ id: "yu", front: { "": "Yugoslavia" }, back: { "": "Belgrade" }, formatVersion: 3, retired: true });
   });
 });
 
 describe("library deck records", () => {
-  const RELEASE = "https://solid-memo.com/decks/capitals/1.ttl";
+  const RELEASE = "https://solid-memo.com/decks/capitals/v1.ttl";
   const release = {
     title: { en: "Capitals" },
     description: { en: "From Wikipedia." },

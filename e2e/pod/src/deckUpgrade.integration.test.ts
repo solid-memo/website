@@ -39,8 +39,8 @@ const libraryCard = (id: string, back: string): LibraryCard => ({
 
 function release(version: number, cards: LibraryCard[]): LibraryDeckContent {
   return {
-    url: `${LIBRARY}${version}.ttl`,
-    seriesUrl: librarySeriesUrlOf(`${LIBRARY}1.ttl`),
+    url: `${LIBRARY}v${version}.ttl`,
+    seriesUrl: librarySeriesUrlOf(`${LIBRARY}v1.ttl`),
     title: version === 1 ? { en: "Capitals" } : { en: "Capitals", sv: "Huvudstäder" },
     description: { en: "Capitals of Europe." },
     formatVersion: 5,

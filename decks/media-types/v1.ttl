@@ -1,0 +1,525 @@
+@base <https://solid-memo.com/decks/media-types/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Media types (MIME types)"@en ,
+                  "Medietyper (MIME-typer)"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "40 common file types and the media types (MIME types) they are registered under in the IANA Media Types registry, as of its update of 24 September 2026: text, documents and data, archives, images, audio, video and fonts. Front: the kind of file with its usual extension, e.g. \"PNG image (.png)\"; back: the registered media type, e.g. \"image/png\". Notes give the obsolete, deprecated or alias types that the registry, its templates or the RFCs name, such as application/javascript. Media types from the IANA registry, extensions from Wikidata, checked against IANA's registration templates, the RFCs and MDN Web Docs."@en ,
+                        "40 vanliga filtyper och de medietyper (MIME-typer) som de är registrerade under i IANA:s register över medietyper, enligt dess uppdatering den 24 september 2026: text, dokument och data, arkiv, bilder, ljud, video och teckensnitt. Framsida: filtypen med sin vanliga filändelse, t.ex. ”PNG-bild (.png)”; baksida: den registrerade medietypen, t.ex. ”image/png”. Anteckningar anger de föråldrade, utfasade eller alternativa typer som registret, dess registreringsmallar eller RFC:erna nämner, som application/javascript. Medietyperna är hämtade från IANA:s register och filändelserna från Wikidata, kontrollerade mot IANA:s registreringsmallar, RFC:erna och MDN Web Docs."@sv ;
+    prov:wasDerivedFrom <https://www.iana.org/assignments/media-types/media-types.xhtml> ,
+                        <https://www.wikidata.org/> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:computing ;
+    dcat:keyword "media types"@en ,
+                 "MIME types"@en ,
+                 "file extensions"@en ,
+                 "file formats"@en ,
+                 "IANA"@en ,
+                 "web development"@en ,
+                 "medietyper"@sv ,
+                 "MIME-typer"@sv ,
+                 "filändelser"@sv ,
+                 "filformat"@sv ,
+                 "IANA"@sv ,
+                 "webbutveckling"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#media-types> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#media-types> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/2.5/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.iana.org/assignments/media-types/media-types.xhtml> ,
+              <https://www.iana.org/assignments/media-types/> ,
+              <https://www.wikidata.org/> ,
+              <https://www.rfc-editor.org/> ,
+              <https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/MIME_types/Common_types> ,
+              <https://svenska.se/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (a script that stops on any mismatch with IANA's registry tables, registration templates, the RFCs and MDN, live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "1. Registry: IANA's Media Types registry was downloaded on 2026-10-04 as media-types.xml (header \"updated 2026-09-24\") and as the eight per-type CSV tables (application, audio, font, image, model, text, video, multipart; query 1). IANA's licensing-terms page and the protocols page were saved with it to confirm that the registry is one of the CC0 \"Protocol Registries\". Each CSV row gives the subtype name (with any OBSOLETED or DEPRECATED marker), the full type in the \"Template\" column and the references."@en ,
+                 "2. Candidates: a list of 104 candidate types for file formats in everyday use (documents, data and web files, archives, images, audio, video, fonts and 3D models, together with the unofficial names often seen for them, such as audio/wav or video/webm) was written from general knowledge and looked up in the CSV tables by look.py (query 2), which printed for each whether it is registered and with which references. Unregistered types were dropped (see Selection)."@en ,
+                 "3. Registration templates: for 61 shortlisted types (the registered candidates most likely to make a card, and the types they could be confused with), IANA's registration template was downloaded (templates.py and templates2.py, queries 3 and 4) and its \"File extension(s)\" field and any deprecated-alias statements were extracted (exts.py, query 5). This showed where a file extension belongs to more than one registered type (.ttf and .otf under font/ttf, font/otf and font/sfnt; .xml under application/xml and text/xml; RTF registered both as application/rtf and as text/rtf) and that the video/quicktime template names no extension."@en ,
+                 "4. Wikidata: the file-format items carrying each media type as P1163 (MIME type) were listed with their file extensions (P1195), labels and number of sitelinks (queries 6 to 8), and for each card the main format item was chosen: the item with the most sitelinks whose best-rank P1163 holds the card's type and whose P1195 holds the card's extension; where the general item lacks the statement, a more specific item was used (JPEG: Q110098625 Exif Image File Format (Compressed), since the general JPEG item Q2195 holds image/jpeg only at deprecated rank and has no P1195; Office Open XML: the three ECMA-376 1st Edition document items; FLAC: Q131481410; Matroska: Q27967512 Matroska Video; WOFF2: Q18413771). Query 10 fetched every P1163 statement with its rank and the best-rank (truthy) P1195 values of the items used on the cards and of the JFIF item Q26329975 (query 11 for the JPEG item Q110098625 and the general JPEG item Q2195); query 12 fetched their English and Swedish labels, Swedish aliases and Swedish Wikipedia titles. After review, query 16 (q8.rq) fetched every P1195 statement of the 40 items with its rank; the evidence quotes that full list (e.g. GeoJSON Q5533904: geojson preferred, json normal), and every card's extension is a best-rank value."@en ,
+                 "5. RFCs and MDN: the RFCs named in the registry's references for the chosen types were downloaded in plain text from the RFC Editor, with the IETF Trust Legal Provisions (query 13); MDN's \"Common media types\" table was downloaded as the Markdown source of the page from the mdn/content repository with its licence file, and parsed into rows by mdn.py (query 14)."@en ,
+                 "6. Cards: cards.py (query 15) assembled every card from the saved files: the registry row (stopping if the type is missing or marked OBSOLETED or DEPRECATED), the template's extension field, the Wikidata statements (stopping unless the card's type is a best-rank P1163 value and the card's extension a P1195 value of the item), the RFC's \"File extension(s)\" line (located under the matching \"Type name\" and \"Subtype name\") and the MDN row (stopping if MDN gives another type). Every \"says\" text is cut from the saved file it cites. make_dossier.py (query 18) then added the registry rows and RFC passages behind the notes, added the font/otf template and the extra font/ttf template lines, replaced cards.py's TrueType note with a reworded one, added the Swedish-dictionary and Swedish-alias evidence and wrote this dossier with its documentation; sparql.py (query 17) ran every SPARQL query, and grep.py and rfcext.py (query 19) were used to read the saved files."@en ,
+                 "7. Wording: the front names the kind of file in plain words with the extension in brackets, in English and Swedish (the compiler's own wording, e.g. \"PNG image (.png)\" / \"PNG-bild (.png)\"). Format names follow Wikidata's Swedish labels where Swedish writes them differently (Javascript, Zip, Epub, Opendocument, Truetype, V-card, Powerpoint as in \"Microsoft Powerpoint\"). This one rule is applied to every Swedish format name, so the deck keeps Wikidata's Swedish form even where it keeps internal capitals (WebAssembly, WebP, iCalendar), rather than imposing a single capitalisation style; V-card is also the Swedish Wikipedia title; \"stilmall\" is a Swedish alias of the CSS item; the Swedish common nouns were looked up in SAOL and Svensk ordbok through svenska.se's search API (query 9): teckensnitt, arbetsbok, e-bok, ljudfil, textfil, arkiv, dokument, bild, ikon, presentation, modul, fil, webb and komprimera have entries in SAOL, and all but textfil also in Svensk ordbok; videofil, textdokument and stilmall are in neither and are regular compounds (video + fil, text + dokument, stil + mall). The back is the media type exactly as in the registry's \"Template\" column, as text in no language (zxx), since a media type is a code."@en ,
+                 "8. Notes: a back note names an obsolete, deprecated or unregistered name still seen for the same files where the registry, the template or the RFC states it (application/x-gzip and similar informal names, application/javascript, text/xml, text/x-vcard and text/directory, the YAML x- names, application/vnd.geo+json, application/x-rar-compressed, image/x-icon, audio/x-flac, video/x-matroska, application/font-woff), or explains the extension (.ogg, .ttf). The XML card has a front note, because both application/xml and text/xml are registered for .xml files: it asks for the type RFC 7303 recommends."@en ,
+                 "9. Machine checks: for every card the builder checks against live Wikidata that the format item has the card's media type as a best-rank P1163 value and the card's extension as a best-rank P1195 value (80 checks). These confirm the Wikidata side only; the IANA registry row, the template and the RFC for every card rest on the saved files and the stops in cards.py, recorded in each card's evidence. The built deck was validated with the app's SHACL and DCAT-AP validators (validate_sources.ts)."@en ,
+                 "10. Review: three review rounds (facts; language and tags; licensing and documentation) were resolved by round1.py (query 21), which reads the saved files, rewrites the Wikidata evidence from query 16, adds the gzip note and its RFC 6713 passage, the font/sfnt template line, the reworded Swedish notes and TrueType note, and the documentation changes, and logs rounds 1 to 3. \"utfasad\" for \"deprecated\" was checked in Svensk ordbok (\"fasa ut\": \"successivt avveckla\"; query 21)."@en ,
+                 "Selection: 40 file types in common use, as of IANA's Media Types registry of 24 September 2026: 8 text formats (plain text, HTML, CSS, JavaScript, CSV, Markdown, iCalendar, vCard), 15 application formats (JSON, PDF, ZIP, gzip, XML, EPUB, the three Office Open XML documents, OpenDocument text, WebAssembly, SQL, YAML, GeoJSON, RAR), 9 image formats (PNG, JPEG, GIF, SVG, WebP, AVIF, BMP, TIFF, ICO), 3 audio formats (MP3, Ogg Vorbis, FLAC), 2 video formats (MP4, Matroska) and 3 fonts (WOFF, WOFF2, TrueType). A type is in the deck only if (a) it is registered in the IANA registry and not marked OBSOLETED or DEPRECATED there; (b) the extension on the front is named for it by its IANA template or RFC, or, for text/plain and image/gif, which have no template, and application/zip, whose template has no extension field, by Wikidata and MDN; (c) the front, read with the description, has exactly one current registered answer; and (d) Wikidata has a format item with the type and the extension, so the card can be checked by machine. Left out because the common type is not registered: WAV (audio/wav, audio/x-wav and audio/vnd.wave are all absent from the registry), WebM (video/webm, audio/webm), MIDI (audio/midi), 7z, tar, bzip2 and xz archives, shell scripts, Android packages, AVI (video/x-msvideo) and RSS (application/rss+xml). Left out because the extension has more than one registered answer: RTF (application/rtf and text/rtf), OpenType .otf (font/otf, font/sfnt and font/ttf all list it). Left out because IANA's template names no extension: QuickTime (video/quicktime). Left out to keep the deck to about 40 cards, though registered: the legacy Microsoft Office formats (.doc, .xls, .ppt), the other OpenDocument types, HEIC, JPEG XL, APNG, AAC, Opus, MP4 audio (.m4a), Ogg video, 3GPP, MPEG video, MPEG transport streams, OpenType font collections, glTF, STL and other 3D models, JSON-LD, XHTML, the web app manifest, Zstandard, Java archives and SQLite databases. The Ogg card keeps audio/ogg although the registry also lists audio/vorbis (RFC 5215): that type depends on RTP framing and is defined only for transfer via RTP, so it is not a type for .ogg files; the back note says so. XML is kept with a front note: RFC 7303 registers text/xml as an alias of application/xml and recommends application/xml, so the card asks for the recommended type."@en ,
+                 "Licensing: The deck is CC0 1.0. Its content sources are IANA's Media Types registry, whose data IANA and the IETF dedicate to the public domain under CC0 1.0 (joint statement of 10 November 2021), and Wikidata, whose structured data is CC0. The media types come from the registry, the file extensions and format names from Wikidata, and the selection of 40 types is the compiler's own, made by the criteria under Selection; the wording of the fronts and notes is the compiler's own. IANA's registration templates (status unknown, often reproducing RFC text), the RFCs (IETF Trust Legal Provisions: no licence to modify outside the IETF), MDN Web Docs (CC BY-SA 2.5) and Svenska Akademien's dictionaries (© Svenska Akademien, no licence stated) were used only to verify facts the content sources gave: no text, list or selection was taken from them, and MDN's table was consulted only after the selection was made. The evidence in the provenance report quotes short, unmodified passages of them, each attributed to its source and, for the RFCs, naming the RFC, as citations. That a type is registered under a name and used with an extension is a fact, so verifying it against these sources puts no conditions on the deck. Some fronts coincide with generic descriptions also used in MDN's table (e.g. \"ZIP archive\", \"RAR archive\"); these are ordinary names of the formats, not text taken from MDN. The RFCs published before 25 March 2015 fall under the IETF copyright provisions in force when they were published, and the Independent Submission RFC 7903 under the Legal Provisions as applied to that stream; none grants a licence to modify, and the deck relies on none, since it only cites them."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Machine and source checks: every card's type looked up in IANA's registry tables (registered, not obsolete or deprecated), its extension in IANA's template and the RFC, its type and extension in Wikidata (best-rank P1163, P1195) and MDN; Wikidata checks run by the builder."@en ;
+    rdfs:comment "Scope: All 40 cards."@en ,
+                 "Outcome: All 40 types are registered and none is marked OBSOLETED or DEPRECATED in the registry of 2026-09-24. For every card Wikidata's chosen item has the type as a best-rank P1163 value and the front's extension as a P1195 value; the template or RFC names the extension for every card that has one (ZIP, plain text and GIF rest on Wikidata and MDN for the extension); MDN, where it lists the type (33 cards), gives the same type and extension. No source gives a different registered type for any front. The findings record where the sources hold further values and how the cards deal with them."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 40 cards, the description, selection and method, against IANA's media-types.xml, 37 live registration templates, ten RFCs and live Wikidata (all 80 checks re-run)."@en ,
+                 "Outcome: No errors. Every back type is registered and current, every front has one right answer and every extension is named by the template or RFC (or, for text/plain, image/gif and application/zip, by Wikidata and MDN); all 12 notes match their sources. One warning (no note on application/x-gzip although RFC 6713 names it) and two suggestions; all three applied."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 40 cards, title, description and keywords in English and Swedish; language tags in the dossier and the built TTL."@en ,
+                 "Outcome: Tags correct throughout (backs zxx, everything else en or sv, nothing untagged); Swedish format names match Wikidata and sv.wikipedia. One warning: six Swedish notes used \"avförd\" for \"deprecated\", which says the name was struck off; replaced by \"utfasad\". One suggestion on the Ogg note, applied."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: Every source's licence page, the licensing text, the recorded queries against the scratch files, and spot checks of the evidence against live sources (all 40 registry rows, 33 MDN rows, 22 RFC and template quotes, P1195 of all 40 Wikidata items)."@en ,
+                 "Outcome: The CC0 deck licence complies: the content sources (IANA registry, Wikidata) are CC0 and the others were used for verification only. The problems were in the documentation: the Wikidata evidence quoted only best-rank P1195 values (and round 0 called .geojson Q5533904's only one), make_dossier.py and some helpers were not recorded, and the RFC licence evidence cited only TLP 5.0. All fixed; of four suggestions, all applied. While revising, the JPEG card's Wikidata locator was also corrected: its item Q110098625 was read by query 11 (q7.rq), not query 10."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: All 40 cards (rounds 1 to 3 touched every card's evidence): the live IANA registry tables and templates, RFCs, all 80 Wikidata checks against live SPARQL, the 12 notes, language tags in the dossier and TTL, the generated report, the description, keywords, licensing and the fixes logged in rounds 1 to 3."@en ,
+                 "Outcome: No errors or warnings: every back type is registered, current and spelled as in the registry; every front extension is named by its template, RFC or (for plain text, GIF and ZIP) Wikidata and MDN; all notes match their sources; all Wikidata checks pass; every fix logged in rounds 1 to 3 is in the dossier. One suggestion, on the Ogg card, applied."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: All 40 cards: every back type against IANA's live per-type CSV tables, the vnd.rar template, the text/directory registry row, the text of RFC 7303, the Wikidata Swedish labels of 14 items, language tags, the description and its counts, keywords, study direction, licence and round 4's fix."@en ,
+                 "Outcome: No errors: all 40 back types are registered and current, every extension and alias note matches its source, and every front has one right answer. One warning (the description promised a note for every obsolete or unofficial name) and three suggestions (the RFC 7303 section number in the XML evidence, mixed capitalisation of Swedish format names, the wording of the ICO note). All four were verified; the description, the XML locator, the method and the ICO note were changed, and V-card-fil was kept."@en .
+
+<https://www.iana.org/assignments/media-types/media-types.xhtml>
+    dcterms:title "Media Types (IANA protocol registry; media-types.xml and the per-type CSV tables, last updated 2026-09-24)" ;
+    dcterms:creator "Internet Assigned Numbers Authority (IANA), operated by Public Technical Identifiers, an affiliate of ICANN" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.iana.org/help/licensing-terms (Joint Statement of IANA and IETF Concerning Copyright Rights in the Protocol Registries, 10 November 2021): \"“Protocol Registries” means the technical protocol registry data directly linked at either https://www.iana.org/protocols or https://www.ietf.org/assignments/ ; it does not include any other material on or linked from those pages (e.g., the RFC documents that are linked on those pages are excluded).\" … \"both IANA and IETF affirm that any applicable rights that they may have in the Protocol Registries are subject to the Creative Commons CC0 1.0 dedication\". The Media Types registry is linked directly from https://www.iana.org/protocols (checked in the saved page)."@en .
+
+<https://www.iana.org/assignments/media-types/>
+    dcterms:title "IANA Media Types registry: the registration templates of the types on the cards (one page per type, e.g. https://www.iana.org/assignments/media-types/image/png)" ;
+    dcterms:creator "Internet Assigned Numbers Authority (IANA); the templates were written by each type's registrant (often as part of an RFC)" ;
+    rdfs:comment "The CC0 joint statement (https://www.iana.org/help/licensing-terms) covers the \"technical protocol registry data directly linked\" at https://www.iana.org/protocols and excludes \"any other material on or linked from those pages (e.g., the RFC documents …)\". The templates are linked from the registry, not from the protocols page, and many reproduce RFC text (IETF Trust terms, see the RFC source). Their status is therefore treated as unknown, and they are used for verification only: nothing copied but short citations in the evidence."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata: file formats with their MIME type (P1163) and file extension (P1195)" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://www.rfc-editor.org/>
+    dcterms:title "The RFCs that register or define the media types on the cards: RFC 2046, 3003, 3302, 4180, 4337, 5334, 5545, 6350, 6713, 6922, 7303, 7763, 7903, 7946, 8081, 8118, 8259, 9239, 9512, 9559, 9639 and 9649 (plain-text versions from the RFC Editor)" ;
+    dcterms:creator "IETF, the Independent Submission stream (RFC 7903) and the authors of each RFC; published by the RFC Editor" ;
+    rdfs:comment "IETF Trust Legal Provisions 5.0 (https://trustee.ietf.org/wp-content/uploads/Corrected-TLP-5.0-legal-provsions.pdf, linked from https://trustee.ietf.org/documents/trust-legal-provisions/), Section 3.c grants outside the IETF Standards Process only rights \"to copy, publish, display and distribute IETF Contributions and IETF Documents in full and without modification\" and \"unmodified portions … provided that … each such portion is clearly attributed to IETF and identifies the RFC\"; Section 3.d: not granted is \"any license to modify IETF Contributions or IETF Documents, or portions thereof … in any context outside the IETF Standards Process\". Used for verification only; the evidence quotes short unmodified portions, each naming its RFC. TLP 5.0 Section 2.b applies its licences \"only with respect to … IETF RFCs and other IETF Documents that are published after the Effective Date\" (25 March 2015), and Section 2.c leaves earlier ones (RFC 2046, 3003, 3302, 4180, 4337, 5334, 5545, 6350, 6713, 6922 and 7303) \"subject to the licensing provisions of the IETF copyright policy document in effect at the time of their contribution or publication\" (RFCs 2026, 3978, 4748 and earlier TLP versions), none of which is a licence to modify outside the IETF; RFC 7903 is an Independent Submission, to which Section 8.f applies the same Legal Provisions (\"applied to documents submitted and published in the Independent Submission Stream following December 28, 2009\")."@en .
+
+<https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/MIME_types/Common_types>
+    dcterms:title "Common media types (MDN Web Docs)" ;
+    dcterms:creator "Mozilla and individual contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/2.5/> ;
+    rdfs:comment "https://github.com/mdn/content/blob/main/LICENSE.md — \"All prose content is available under ([CC-BY-SA 2.5](https://creativecommons.org/licenses/by-sa/2.5/)).\" Used for verification only, so the deck takes on no share-alike condition."@en .
+
+<https://svenska.se/>
+    dcterms:title "Svenska Akademiens ordböcker: Svenska Akademiens ordlista (SAOL) and Svensk ordbok (SO)" ;
+    dcterms:creator "Svenska Akademien" ;
+    rdfs:comment "https://svenska.se/om-webbplatsen/ (curl, without running its scripts) shows only the footer \"© Svenska Akademien\" and no licence or reuse statement; treated as all rights reserved, so used for verification only, nothing copied."@en .
+
+<#plain-text>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Plain text file (.txt)"@en ,
+                     "Textfil (.txt)"@sv ;
+    solid-memo:back "text/plain"@zxx .
+
+<#html>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "HTML document (.html)"@en ,
+                     "HTML-dokument (.html)"@sv ;
+    solid-memo:back "text/html"@zxx .
+
+<#css>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "CSS style sheet (.css)"@en ,
+                     "CSS-stilmall (.css)"@sv ;
+    solid-memo:back "text/css"@zxx .
+
+<#javascript>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "JavaScript file (.js)"@en ,
+                     "Javascript-fil (.js)"@sv ;
+    solid-memo:back "text/javascript"@zxx ;
+    solid-memo:backNote "application/javascript is obsolete: RFC 9239 (2022) made text/javascript the only current type."@en ,
+                        "application/javascript är föråldrad: RFC 9239 (2022) gjorde text/javascript till den enda aktuella typen."@sv .
+
+<#csv>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "CSV file (.csv)"@en ,
+                     "CSV-fil (.csv)"@sv ;
+    solid-memo:back "text/csv"@zxx .
+
+<#markdown>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Markdown document (.md)"@en ,
+                     "Markdown-dokument (.md)"@sv ;
+    solid-memo:back "text/markdown"@zxx .
+
+<#icalendar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "iCalendar file (.ics)"@en ,
+                     "iCalendar-fil (.ics)"@sv ;
+    solid-memo:back "text/calendar"@zxx .
+
+<#vcard>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "vCard file (.vcf)"@en ,
+                     "V-card-fil (.vcf)"@sv ;
+    solid-memo:back "text/vcard"@zxx ;
+    solid-memo:backNote "text/x-vcard and text/directory are deprecated in favour of text/vcard (RFC 6350)."@en ,
+                        "text/x-vcard och text/directory är utfasade till förmån för text/vcard (RFC 6350)."@sv .
+
+<#json>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "JSON file (.json)"@en ,
+                     "JSON-fil (.json)"@sv ;
+    solid-memo:back "application/json"@zxx .
+
+<#pdf>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "PDF document (.pdf)"@en ,
+                     "PDF-dokument (.pdf)"@sv ;
+    solid-memo:back "application/pdf"@zxx .
+
+<#zip>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ZIP archive (.zip)"@en ,
+                     "Zip-arkiv (.zip)"@sv ;
+    solid-memo:back "application/zip"@zxx .
+
+<#gzip>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Gzip-compressed file (.gz)"@en ,
+                     "Gzip-komprimerad fil (.gz)"@sv ;
+    solid-memo:back "application/gzip"@zxx ;
+    solid-memo:backNote "application/x-gzip and similar informal names are replaced by application/gzip (RFC 6713)."@en ,
+                        "application/x-gzip och liknande inofficiella namn ersätts av application/gzip (RFC 6713)."@sv .
+
+<#xml>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "XML document (.xml)"@en ,
+                     "XML-dokument (.xml)"@sv ;
+    solid-memo:frontNote "the type RFC 7303 recommends"@en ,
+                         "den typ som RFC 7303 rekommenderar"@sv ;
+    solid-memo:back "application/xml"@zxx ;
+    solid-memo:backNote "text/xml is registered as an alias, but RFC 7303 recommends application/xml."@en ,
+                        "text/xml är registrerad som alias, men RFC 7303 rekommenderar application/xml."@sv .
+
+<#epub>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "EPUB e-book (.epub)"@en ,
+                     "E-bok i Epub-format (.epub)"@sv ;
+    solid-memo:back "application/epub+zip"@zxx .
+
+<#docx>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Word document (.docx)"@en ,
+                     "Word-dokument (.docx)"@sv ;
+    solid-memo:back "application/vnd.openxmlformats-officedocument.wordprocessingml.document"@zxx .
+
+<#xlsx>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Excel workbook (.xlsx)"@en ,
+                     "Excel-arbetsbok (.xlsx)"@sv ;
+    solid-memo:back "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"@zxx .
+
+<#pptx>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "PowerPoint presentation (.pptx)"@en ,
+                     "Powerpoint-presentation (.pptx)"@sv ;
+    solid-memo:back "application/vnd.openxmlformats-officedocument.presentationml.presentation"@zxx .
+
+<#odt>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "OpenDocument text document (.odt)"@en ,
+                     "Textdokument i Opendocument-format (.odt)"@sv ;
+    solid-memo:back "application/vnd.oasis.opendocument.text"@zxx .
+
+<#wasm>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "WebAssembly module (.wasm)"@en ,
+                     "WebAssembly-modul (.wasm)"@sv ;
+    solid-memo:back "application/wasm"@zxx .
+
+<#sql>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "SQL file (.sql)"@en ,
+                     "SQL-fil (.sql)"@sv ;
+    solid-memo:back "application/sql"@zxx .
+
+<#yaml>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "YAML file (.yaml)"@en ,
+                     "YAML-fil (.yaml)"@sv ;
+    solid-memo:back "application/yaml"@zxx ;
+    solid-memo:backNote "application/x-yaml, text/yaml and text/x-yaml are deprecated, unregistered aliases (RFC 9512)."@en ,
+                        "application/x-yaml, text/yaml och text/x-yaml är utfasade alias som aldrig har registrerats (RFC 9512)."@sv .
+
+<#geojson>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "GeoJSON file (.geojson)"@en ,
+                     "GeoJSON-fil (.geojson)"@sv ;
+    solid-memo:back "application/geo+json"@zxx ;
+    solid-memo:backNote "application/vnd.geo+json is obsolete, replaced by application/geo+json (RFC 7946)."@en ,
+                        "application/vnd.geo+json är föråldrad och ersatt av application/geo+json (RFC 7946)."@sv .
+
+<#rar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "RAR archive (.rar)"@en ,
+                     "RAR-arkiv (.rar)"@sv ;
+    solid-memo:back "application/vnd.rar"@zxx ;
+    solid-memo:backNote "application/x-rar-compressed is a deprecated alias."@en ,
+                        "application/x-rar-compressed är ett utfasat alias."@sv .
+
+<#png>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "PNG image (.png)"@en ,
+                     "PNG-bild (.png)"@sv ;
+    solid-memo:back "image/png"@zxx .
+
+<#jpeg>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "JPEG image (.jpg)"@en ,
+                     "JPEG-bild (.jpg)"@sv ;
+    solid-memo:back "image/jpeg"@zxx .
+
+<#gif>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "GIF image (.gif)"@en ,
+                     "GIF-bild (.gif)"@sv ;
+    solid-memo:back "image/gif"@zxx .
+
+<#svg>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "SVG image (.svg)"@en ,
+                     "SVG-bild (.svg)"@sv ;
+    solid-memo:back "image/svg+xml"@zxx .
+
+<#webp>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "WebP image (.webp)"@en ,
+                     "WebP-bild (.webp)"@sv ;
+    solid-memo:back "image/webp"@zxx .
+
+<#avif>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "AVIF image (.avif)"@en ,
+                     "AVIF-bild (.avif)"@sv ;
+    solid-memo:back "image/avif"@zxx .
+
+<#bmp>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "BMP image (.bmp)"@en ,
+                     "BMP-bild (.bmp)"@sv ;
+    solid-memo:back "image/bmp"@zxx .
+
+<#tiff>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "TIFF image (.tif)"@en ,
+                     "TIFF-bild (.tif)"@sv ;
+    solid-memo:back "image/tiff"@zxx .
+
+<#ico>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ICO icon (.ico)"@en ,
+                     "ICO-ikon (.ico)"@sv ;
+    solid-memo:back "image/vnd.microsoft.icon"@zxx ;
+    solid-memo:backNote "The often-seen type image/x-icon is not registered."@en ,
+                        "Den ofta förekommande typen image/x-icon är inte registrerad."@sv .
+
+<#mp3>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "MP3 audio file (.mp3)"@en ,
+                     "MP3-ljudfil (.mp3)"@sv ;
+    solid-memo:back "audio/mpeg"@zxx .
+
+<#ogg-vorbis>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ogg Vorbis audio file (.ogg)"@en ,
+                     "Ogg Vorbis-ljudfil (.ogg)"@sv ;
+    solid-memo:back "audio/ogg"@zxx ;
+    solid-memo:backNote "Ogg audio in general uses .oga; .ogg is for Ogg files with only Vorbis audio (RFC 5334). audio/vorbis is only for RTP streaming, not files (RFC 5215)."@en ,
+                        "Ogg-ljudfiler i allmänhet har filändelsen .oga; .ogg används för Ogg-filer med enbart Vorbis-ljud (RFC 5334). audio/vorbis gäller bara strömning via RTP, inte filer (RFC 5215)."@sv .
+
+<#flac>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FLAC audio file (.flac)"@en ,
+                     "FLAC-ljudfil (.flac)"@sv ;
+    solid-memo:back "audio/flac"@zxx ;
+    solid-memo:backNote "audio/x-flac is a deprecated alias (RFC 9639)."@en ,
+                        "audio/x-flac är ett utfasat alias (RFC 9639)."@sv .
+
+<#mp4-video>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "MP4 video file (.mp4)"@en ,
+                     "MP4-videofil (.mp4)"@sv ;
+    solid-memo:back "video/mp4"@zxx .
+
+<#matroska-video>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Matroska video file (.mkv)"@en ,
+                     "Matroska-videofil (.mkv)"@sv ;
+    solid-memo:back "video/matroska"@zxx ;
+    solid-memo:backNote "video/x-matroska is a deprecated alias (RFC 9559)."@en ,
+                        "video/x-matroska är ett utfasat alias (RFC 9559)."@sv .
+
+<#woff>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "WOFF web font (.woff)"@en ,
+                     "WOFF-webbteckensnitt (.woff)"@sv ;
+    solid-memo:back "font/woff"@zxx ;
+    solid-memo:backNote "application/font-woff is deprecated in favour of font/woff (RFC 8081)."@en ,
+                        "application/font-woff är utfasad till förmån för font/woff (RFC 8081)."@sv .
+
+<#woff2>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "WOFF2 web font (.woff2)"@en ,
+                     "WOFF2-webbteckensnitt (.woff2)"@sv ;
+    solid-memo:back "font/woff2"@zxx .
+
+<#truetype>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "TrueType font (.ttf)"@en ,
+                     "Truetype-teckensnitt (.ttf)"@sv ;
+    solid-memo:back "font/ttf"@zxx ;
+    solid-memo:backNote "IANA's font/ttf, font/otf and font/sfnt templates all name .ttf and .otf; .ttf files are usually fonts with TrueType outlines (RFC 8081)."@en ,
+                        "IANA:s mallar för font/ttf, font/otf och font/sfnt anger alla .ttf och .otf; .ttf-filer är oftast teckensnitt med Truetype-konturer (RFC 8081)."@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

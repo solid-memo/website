@@ -1,0 +1,559 @@
+@base <https://solid-memo.com/decks/integrals/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Integrals"@en ,
+                  "Integraler"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    dcterms:description "42 cards on integrals for calculus students: the definition of an antiderivative, the rules of integration (linearity, integration by parts, substitution, the fundamental theorem of calculus) and standard antiderivatives of powers and roots, exponential, logarithmic, trigonometric and hyperbolic functions, and of the forms that give arctan, arcsin and ln. Front: the integral or rule in plain notation such as ∫ sin x dx; back: the result, with + C for an indefinite integral; conditions on x in a note; angles in radians. Every result is machine-checked with SymPy by differentiation and numerical integration, and against the NIST Digital Library of Mathematical Functions and/or Wikipedia."@en ,
+                        "42 kort om integraler för den som läser matematisk analys: definitionen av primitiv funktion, integrationsreglerna (linjäritet, partialintegration, integration genom substitution, analysens fundamentalsats) och standardprimitiver till potenser och rötter, exponential- och logaritmfunktioner, trigonometriska och hyperboliska funktioner samt till de uttryck som ger arctan, arcsin och ln. Framsida: integralen eller regeln i enkel notation som ∫ sin x dx; baksida: resultatet, med + C för en obestämd integral; villkor på x i en kommentar; vinklar i radianer. Varje resultat är maskinkontrollerat med SymPy genom derivering och numerisk integrering, och mot NIST Digital Library of Mathematical Functions och/eller Wikipedia."@sv ;
+    prov:wasDerivedFrom <#own-work> ,
+                        <https://www.wikidata.org/> ,
+                        <https://en.wikipedia.org/wiki/Lists_of_integrals> ,
+                        <https://sv.wikipedia.org/wiki/Primitiv_funktion> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:mathematics ;
+    dcat:keyword "calculus"@en ,
+                 "integrals"@en ,
+                 "antiderivatives"@en ,
+                 "integration by parts"@en ,
+                 "mathematics"@en ,
+                 "infinitesimalkalkyl"@sv ,
+                 "integraler"@sv ,
+                 "primitiva funktioner"@sv ,
+                 "partialintegration"@sv ,
+                 "matematik"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#integrals> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#integrals> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <#own-work> ,
+              <https://www.wikidata.org/> ,
+              <https://dlmf.nist.gov/> ,
+              <https://en.wikipedia.org/wiki/Lists_of_integrals> ,
+              <https://sv.wikipedia.org/wiki/Primitiv_funktion> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (SymPy and mpmath, live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Selection: the integration rules and standard antiderivatives a first calculus course asks students to know by heart were listed from general mathematical knowledge, following the library editor's brief (∫xⁿ, ∫1/x, ∫eˣ, ∫aˣ, ∫sin, ∫cos, ∫sec², ∫1/(1 + x²), ∫1/√(1 − x²), ∫ln x, integration by parts, substitution, the fundamental theorem of calculus, linearity). Added to the brief: the definition of an antiderivative and of the indefinite integral; the constant; 1/x², √x, 1/√x; 1/(ax + b) and (ax + b)ⁿ; eᵏˣ; sin(kx), cos(kx); csc², sec·tan, csc·cot, tan, cot, sec; sin², cos²; 1/(a² + x²), 1/√(a² − x²), 1/√(x² + 1); sinh, cosh; f′/f; the derivative of an integral with a variable upper limit; and the integral over an interval of length zero. The additions and the alternative forms named in the notes were chosen with the Wikipedia articles used for cross-checking open, and they follow two of its lists closely (found in review round 3): the trigonometric cards are the run sin, cos, tan, cot, sec, (csc), sec², csc², sec·tan, csc·cot, sin², cos² of English Wikipedia's \"Lists of integrals\" § Integrals of simple functions, whose rational and exponential lines are also cards and whose alternative forms (ln|sec x| for tan, ln|tan(x/2 + π/4)| for sec, (x ∓ sin x·cos x)/2 for sin² and cos²) are those in the notes; and every row of the table \"Några primitiva funktioner\" of Swedish Wikipedia's \"Primitiv funktion\" (including 1/√(x² + a), here with a = 1) and four of the eight rules of its § Användbara räknelagar (∫a·f with a ≠ 0, ∫(f ± g), ∫ₐᵃ f = 0, ∫f′/f) are cards. The other four were left out: splitting the interval at a point c and reversing the limits need a subscript b, which Unicode lacks, to be written in plain text (see Selection); renaming the integration variable (∫f(x)dx = ∫f(t)dt) is a remark on notation rather than a rule to recall; and ∫f·f′ dx = f²/2 + C is a special case of substitution, which has its own card. Since the selection cannot be shown to have been made independently of these lists, both Wikipedias are content sources for it (see Licensing)."@en ,
+                 "Notation: plain Unicode that reads as text (superscripts such as x², eˣ, xⁿ⁺¹; √ for the square root; · for multiplication; ′ U+2032 for the prime; − U+2212 for minus; ₐ and ᵇ, ˣ, ᵃ for the limits of a definite integral). Fronts and backs that are pure notation are tagged zxx (no language); the four fronts with words (the definition of an antiderivative, integration by parts, integration by substitution, the fundamental theorem of calculus) and all notes are in English and Swedish. Indefinite integrals carry + C on the back; the rules about integrals of arbitrary functions (sum, constant multiple, parts) are written, as is usual, without it. A front note states what each letter means (a constant, a > 0, k ≠ 0, F an antiderivative of f) wherever the front would otherwise be ambiguous, and a back note gives the conditions on x (x ≠ 0, x > 0, cos x ≠ 0, |x| < 1) and, where an antiderivative has several standard forms, the others. Angles are in radians."@en ,
+                 "Machine verification: every card except the two definition cards was written as a pair of SymPy expressions (integrand f on the front, claimed antiderivative F on the back) in the script verify_integrals.py, recorded verbatim under Queries with its output, and run with `uv run --with sympy python3 <scratch>/verify_integrals.py` (SymPy 1.14.0, mpmath 1.3.0). For each card it checks (1) symbolically that simplify(diff(F) − f) is 0, keeping the parameters general (k ≠ 0, a > 0, general n, a, b), on each piece of the domain where an absolute value has a fixed sign (|u| replaced by u or −u: x > 0 and x < 0 for ln|x|, cos x > 0 and < 0 for tan, sin x > 0 and < 0 for cot, sec x + tan x > 0 and < 0 for sec), and (2) independently numerically that the definite integral of f computed by quadrature (mpmath.quad, 30 digits) over an interval in each piece equals F(q) − F(p) to within 10⁻²⁰, for concrete parameter values (k = 3 and −1/2; a = 5 and 1/2; n = 5, 1/3, −2, π, −1/2 on [1/2, 2] and n = 5, −2, −3 on [−3, −1]). The rules are checked symbolically with undefined SymPy functions f, g, F (for example that d/dx(f·g − ∫f′·g dx) = f·g′ and d/dx F(g(x)) = F′(g(x))·g′(x)) and numerically with concrete functions (sin x + 2, x³ + 1, cos, 1/u, exp(−x²)): the fundamental theorem for x³, cos x, eˣ and 1/(1 + x²) with general limits; its derivative form by a central difference quotient (h = 10⁻¹⁰) of quadrature integrals. The equivalent forms and identities named in the notes (ln|sec x| for tan, ln|tan(x/2 + π/4)| for sec, (x ∓ sin x·cos x)/2 for sin² and cos², sin² x = (1 − cos(2x))/2 and cos² x = (1 + cos(2x))/2, −arccos x for arcsin, arsinh x for ln(x + √(x² + 1)), (2/3)·x^(3/2) for √x) are checked as identities symbolically and numerically at x = −0.7, 0.3 and 0.9 (0.7, 0.3 and 0.9 for √x). Result: 49 checks, 49 passed, each symbolically and numerically. To show the checks can fail, mutate.py (recorded under Queries) plants five wrong backs (cos(kx) without /k, ln x without − x, tan with the wrong sign, aˣ·ln a instead of aˣ/ln a, sin² with + instead of −) and confirms that both the symbolic and the numerical check catch every one. The two definition cards (antiderivative, indefinite integral) are definitions, not results, and are checked against the sources only."@en ,
+                 "Wikidata: the items of the rules (Q273328 integration by parts, Q1071270 integration by substitution, Q1217677 fundamental theorem of calculus, Q114326 antiderivative, Q80091 integral, Q8437543 indefinite integral, Q6553542 linearity of integration, Q1355804 constant of integration, Q423189 lists of integrals, Q1991596 definite integral, Q5054786 Cavalieri's quadrature formula, Q4201936 integral of the secant function, Q762521 logarithmic derivative) were found with wbsearchentities, and their English and Swedish labels and aliases, English and Swedish Wikipedia sitelinks and defining formulas (P2534, TeX) fetched with one wbgetentities request (both under Queries). The Swedish names on the fronts are the Swedish Wikidata labels (primitiv funktion, partialintegration, Integration genom substitution, analysens fundamentalsats), which are also the titles of the Swedish Wikipedia articles. The P2534 formulas were compared with the cards and agree with them (Wikidata states substitution for a definite integral, the card the equivalent indefinite form); the cards' formulas were not taken from Wikidata. Q80091, Q423189, Q1991596, Q5054786, Q4201936 and Q762521 were looked up as candidates and are not used on any card (a label check on Q4201936, integral of the secant function, was dropped in review round 3 because that name is on no card). The helper scripts are recorded verbatim under Queries."@en ,
+                 "Cross-checking: each card was compared, equation by equation, with the NIST DLMF (pages saved from https://dlmf.nist.gov/<section> with fetch.sh and read as text with each formula's TeX alttext by dlmf_eqs.py and dlmf_text.py: §1.4 for the rules and ∫xⁿ, §4.10 logarithms and exponentials, §4.23 integral representations of arcsin, arctan and gd⁻¹, §4.26 trigonometric, §4.40 hyperbolic functions) and with the wikitext of the English and Swedish Wikipedia articles (downloaded with action=raw; the revision read is named in each locator). Each card's evidence lists exactly the sources it was compared with. 22 cards have a DLMF equation; DLMF has none for the other 20 (among them aˣ, sin(kx), sec², sin², 1/(a² + x²)), which are checked against English and/or Swedish Wikipedia (the integral over an interval of length zero against Swedish Wikipedia's \"Primitiv funktion\" and English Wikipedia's \"Integral\", § Conventions). DLMF states several formulas for a complex variable or on a restricted interval without the absolute value (∫tan x dx = −ln(cos x) for −π/2 < x < π/2); the cards state the real-variable form with absolute values taught in calculus, verified on both signs. Where a card is a special case of a general formula in a source (n = −2, 1/2, −1/2 in the power formula; a = 1 in the arctan, arcsin and ln(x + √(x² + a²)) formulas; a = 1 in DLMF's ∫e^(az)), the locator says so."@en ,
+                 "Swedish text: the notes were written in Swedish directly, using the terms Wikidata and Swedish Wikipedia use (primitiv funktion, partialintegration, partiell integration (sv.wikipedia Partialintegration: \"Partialintegration eller partiell integration\"), integration genom substitution, variabelbyte (sv.wikipedia Primitiv funktion: \"lämpliga variabelbyten\"), analysens fundamentalsats, standardprimitiver, integrationskonstant (sv.wikipedia Integration genom substitution: \"där C är en godtycklig integrationskonstant\"; Partialintegration: \"där vi låter bli att skriva ut integrationskonstanten\"), konstant, kontinuerlig, produktregeln, kedjeregeln). The keyword infinitesimalkalkyl is the Swedish label of Wikidata Q149972 (calculus). Notation is the same in both languages; the notes of sec² and csc² give the definitions sec x = 1/cos x and csc x = 1/sin x, so that the cards can also be read as ∫ 1/cos² x dx and ∫ 1/sin² x dx."@en ,
+                 "The builder's Wikidata checks confirm the rule names against live Wikidata. Finally the built deck was validated with the app's SHACL and DCAT-AP validators (node packages/deck-library/scripts/validate_sources.ts integrals)."@en ,
+                 "Selection: Included: the definitions of an antiderivative and of the indefinite integral, eight rules (sum, constant multiple, integration by parts, substitution, the fundamental theorem of calculus in its evaluation and its derivative form, the integral over an interval of length zero, ∫f′/f) and 32 standard antiderivatives: the constant, powers and roots, 1/(ax + b) and (ax + b)ⁿ, eˣ, eᵏˣ, aˣ, ln x, the six basic trigonometric forms with sin(kx), cos(kx), sin² and cos², tan, cot and sec, the forms giving arctan, arcsin and ln(x + √(x² + 1)), and sinh, cosh; 42 cards in all. The choice of the antiderivatives beyond the editor's brief and of the alternative forms in the notes follows English Wikipedia's \"Lists of integrals\" (§ Integrals of simple functions) and the table and rules of Swedish Wikipedia's \"Primitiv funktion\" (see Method and Licensing). Left out: ∫csc x dx, whose standard forms differ (−ln|csc x + cot x|, ln|csc x − cot x|, ln|tan(x/2)|) so that one back would not be the one right answer; ∫1/(x² − a²) and ∫1/(1 − x²), given as a logarithm or as artanh/arcoth depending on the interval; the integrals of the inverse trigonometric and hyperbolic functions, tanh, coth, sech and csch, tan² x, reduction formulas and products such as x·eˣ, which are worked examples or beyond a first course; the reversal and additivity of the limits of a definite integral, since Unicode has no subscript b to write ∫ᵇₐ or ∫ᵇᶜ in plain text; improper and named definite integrals (Gaussian, Dirichlet); partial fractions and other methods that are procedures rather than facts."@en ,
+                 "Licensing: The deck is CC BY-SA 4.0. Its card content comes from four sources. The compiler's own derivations, notation and notes are dedicated to the public domain (CC0); the formulas themselves are mathematical facts, which are not copyrightable in any case. Wikidata (structured data under CC0) gave the English and Swedish names of the rules, and the cards were compared with its defining formulas (P2534). English Wikipedia (\"Lists of integrals\", § Integrals of simple functions) and Swedish Wikipedia (\"Primitiv funktion\", table \"Några primitiva funktioner\" and § Användbara räknelagar) are CC BY-SA 4.0. The deck's selection of antiderivatives beyond the editor's brief, and the alternative forms named in its notes, follow those lists closely; review round 3 found this. A list of standard first-course antiderivatives is largely dictated by the subject and may well have no protectable selection. But the overlap cannot be shown to be independent, and the licence policy lets a verification source contribute no selection. Both Wikipedias are therefore content sources, attributed in the deck, and the deck carries their licence, CC BY-SA 4.0. No Wikipedia text was copied: the formulas are written in the deck's own notation, and single established Swedish terms (partiell integration, variabelbyte, standardprimitiver, integrationskonstant) are used as words. The NIST Digital Library of Mathematical Functions is copyrighted by NIST with reuse limited to research and teaching. It was used only to verify facts, and nothing was taken from it. Every formula was re-derived and machine-checked with SymPy."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Machine verification and source cross-checks"@en ;
+    rdfs:comment "Scope: All 42 cards."@en ,
+                 "Outcome: verify_integrals.py (SymPy 1.14.0, mpmath 1.3.0) ran 49 checks (40 cards plus 9 equivalent forms and identities named in the notes): 49 passed, each symbolically and numerically; the mutation test caught all 5 planted errors both ways. The first run had one symbolic failure, an artefact of SymPy not simplifying a logarithm identity (below). Every card was compared with DLMF and/or English or Swedish Wikipedia (each card's evidence lists which); no card's formula disagrees with any source once conventions are accounted for. The builder's Wikidata checks cover the rule names (12 label checks on 7 items). Discrepancies and convention differences found in the sources are logged below."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 42 cards; the reviewer's own mpmath check (30 antiderivatives, other parameter values, both signs), a re-run of verify_integrals.py, all DLMF equations, Wikipedia revisions and Wikidata values."@en ,
+                 "Outcome: No factual errors and no warnings; five suggestions. Three were applied (the domain note of linear-power, a second external source for zero-width-interval, the Swedish term integrationskonstanten), one was applied in round 3 (the Q4201936 label check, dropped), and one was declined (the domain notes of power-rule and square-root are both correct as they stand)."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 42 cards, the title, description and keywords; language tags in the dossier and the built TTL."@en ,
+                 "Outcome: No errors or warnings; four suggestions. Two were applied (integrationskonstanten in the Swedish note of indefinite-integral, and \"Följer av\" instead of \"Ur\" in the sin² and cos² notes); \"linjäritet\" and the Swedish-only alternative name in the integration-by-parts note were kept."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 42 cards' evidence, every source's licence page, the method, selection, licensing and queries."@en ,
+                 "Outcome: One warning and four suggestions. The warning was right: the selection and the alternative forms in the notes follow two CC BY-SA Wikipedia lists too closely for the claim that no list was copied. Both Wikipedias are now content sources and the deck is CC BY-SA 4.0, with the overlap documented in Method, Selection and Licensing. The Q4201936 check was dropped, the DLMF quote for cot now gives the condition 0 < x < π, and the helper scripts are recorded verbatim. The AI mention in the derivation source's creator was kept."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The 7 cards changed in rounds 1–3 and every third card (18 cards), against the cited Wikipedia revisions, DLMF and live Wikidata; the fixes claimed in rounds 1–3; the sources, method and selection."@en ,
+                 "Outcome: Every fix claimed in rounds 1–3 is present and every evidence quote checked matches its source. One error and one suggestion, both confirmed and fixed: the derivation source's licence evidence still called the deck CC0 after the round 3 relicence, and the method's selection paragraph and the Swedish Wikipedia source overstated which rules of § Användbara räknelagar are cards. No card changed."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: All 42 cards (facts, ambiguity, language tags, Swedish), the deck's title, description, keywords, counts, study direction and licence, two source details re-checked live, and the fixes claimed in round 4."@en ,
+                 "Outcome: No errors and no warnings; every result, condition in the notes and Swedish term is correct, the description and counts match the cards, and both round 4 fixes are present and correct. One optional notation suggestion, applied: the notes of sin-squared and cos-squared now bracket the argument of cos as the backs and the rest of the deck do."@en .
+
+<#own-work>
+    dcterms:title "Derivations and SymPy verification for the Solid Memo integrals deck" ;
+    dcterms:creator "Anton Wiklund, with the help of AI" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "Own work of the deck's compiler, dedicated to the public domain (CC0 1.0 Universal, https://creativecommons.org/publicdomain/zero/1.0/); the deck as a whole is CC BY-SA 4.0 because of the Wikipedia-derived selection (see Licensing). The standard antiderivatives and integration rules are mathematical facts, which are not copyrightable; the wording, notation and verification are this dossier's own (the selection of cards and of the alternative forms in the notes follows English and Swedish Wikipedia closely and is attributed to them; see Licensing). The verification scripts are recorded verbatim under Queries."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors (Wikimedia Foundation)" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing (fetched 2026-10-04): \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://dlmf.nist.gov/>
+    dcterms:title "NIST Digital Library of Mathematical Functions, Release 1.2.8 (2026-09-15)" ;
+    dcterms:creator "F. W. J. Olver, A. B. Olde Daalhuis, D. W. Lozier, B. I. Schneider, R. F. Boisvert, C. W. Clark, B. R. Miller, B. V. Saunders, H. S. Cohl, M. A. McClain (eds.); National Institute of Standards and Technology" ;
+    rdfs:comment "https://dlmf.nist.gov/about/notices (fetched 2026-10-04): \"Authors of the works appearing in the Digital Library of Mathematical Functions (DLMF) have assigned copyright to the works to NIST ... All materials on this website are owned by NIST. Limited copying and internal distribution of the content of these pages is permitted for research and teaching. Reproduction, copying, or distribution for any commercial purpose is strictly prohibited.\" Not a public-domain US government work, so verification only."@en .
+
+<https://en.wikipedia.org/wiki/Lists_of_integrals>
+    dcterms:title "English Wikipedia: Lists of integrals and related articles (List of integrals of trigonometric, rational and irrational algebraic functions; Antiderivative; Integration by parts; Integration by substitution; Fundamental theorem of calculus; Integral)" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://en.wikipedia.org/wiki/Wikipedia:Copyrights (fetched 2026-10-04): \"If you wish to reuse content from Wikipedia, read § Reusers' rights and obligations first. Then review the licenses: the Creative Commons Attribution-ShareAlike 4.0 International License and the GNU Free Documentation License.\""@en .
+
+<https://sv.wikipedia.org/wiki/Primitiv_funktion>
+    dcterms:title "Swedish Wikipedia: Primitiv funktion, Partialintegration, Integration genom substitution, Analysens fundamentalsats" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of https://sv.wikipedia.org/wiki/Primitiv_funktion (fetched 2026-10-04): \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported.\""@en .
+
+<#antiderivative-definition>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "F is an antiderivative of f if …"@en ,
+                     "F är en primitiv funktion till f om …"@sv ;
+    solid-memo:back "F′(x) = f(x)"@zxx ;
+    solid-memo:backNote "For every x in the interval considered."@en ,
+                        "För alla x i det aktuella intervallet."@sv .
+
+<#indefinite-integral>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ f(x) dx"@zxx ;
+    solid-memo:frontNote "F is an antiderivative of f"@en ,
+                         "F är en primitiv funktion till f"@sv ;
+    solid-memo:back "F(x) + C"@zxx ;
+    solid-memo:backNote "C is an arbitrary constant, the constant of integration."@en ,
+                        "C är en godtycklig konstant, integrationskonstanten."@sv .
+
+<#sum-rule>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ (f(x) + g(x)) dx"@zxx ;
+    solid-memo:back "∫ f(x) dx + ∫ g(x) dx"@zxx ;
+    solid-memo:backNote "Linearity of integration: integrate term by term; the same holds for a difference."@en ,
+                        "Integrationen är linjär: integrera term för term; detsamma gäller en differens."@sv .
+
+<#constant-multiple>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ k·f(x) dx"@zxx ;
+    solid-memo:frontNote "k is a constant, k ≠ 0"@en ,
+                         "k är en konstant, k ≠ 0"@sv ;
+    solid-memo:back "k·∫ f(x) dx"@zxx ;
+    solid-memo:backNote "A constant factor can be moved outside the integral. For k = 0 the left side is an arbitrary constant, hence k ≠ 0."@en ,
+                        "En konstant faktor kan flyttas ut ur integralen. För k = 0 är vänsterledet en godtycklig konstant, därav k ≠ 0."@sv .
+
+<#integration-by-parts>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Integration by parts: ∫ f(x)·g′(x) dx"@en ,
+                     "Partialintegration: ∫ f(x)·g′(x) dx"@sv ;
+    solid-memo:back "f(x)·g(x) − ∫ f′(x)·g(x) dx"@zxx ;
+    solid-memo:backNote "The integral form of the product rule."@en ,
+                        "Integralformen av produktregeln; kallas även partiell integration."@sv .
+
+<#substitution>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Integration by substitution: ∫ f(g(x))·g′(x) dx"@en ,
+                     "Integration genom substitution: ∫ f(g(x))·g′(x) dx"@sv ;
+    solid-memo:frontNote "F is an antiderivative of f"@en ,
+                         "F är en primitiv funktion till f"@sv ;
+    solid-memo:back "F(g(x)) + C"@zxx ;
+    solid-memo:backNote "Substitute u = g(x), du = g′(x) dx: ∫ f(u) du = F(u) + C. The integral form of the chain rule."@en ,
+                        "Variabelbyte u = g(x), du = g′(x) dx: ∫ f(u) du = F(u) + C. Integralformen av kedjeregeln."@sv .
+
+<#ftc-evaluation>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Fundamental theorem of calculus: ∫ₐᵇ f(x) dx"@en ,
+                     "Analysens fundamentalsats: ∫ₐᵇ f(x) dx"@sv ;
+    solid-memo:frontNote "F is an antiderivative of f, and f is continuous on [a, b]"@en ,
+                         "F är en primitiv funktion till f, och f är kontinuerlig på [a, b]"@sv ;
+    solid-memo:back "F(b) − F(a)"@zxx ;
+    solid-memo:backNote "Also written [F(x)]ₐᵇ."@en ,
+                        "Skrivs även [F(x)]ₐᵇ."@sv .
+
+<#ftc-derivative>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "d/dx ∫ₐˣ f(t) dt"@zxx ;
+    solid-memo:frontNote "f is continuous"@en ,
+                         "f är kontinuerlig"@sv ;
+    solid-memo:back "f(x)"@zxx ;
+    solid-memo:backNote "Fundamental theorem of calculus: integrating and then differentiating gives f back."@en ,
+                        "Analysens fundamentalsats: att integrera och sedan derivera ger tillbaka f."@sv .
+
+<#zero-width-interval>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ₐᵃ f(x) dx"@zxx ;
+    solid-memo:back "0"@zxx ;
+    solid-memo:backNote "An integral over an interval of length zero."@en ,
+                        "En integral över ett intervall med längden noll."@sv .
+
+<#log-derivative>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ f′(x)/f(x) dx"@zxx ;
+    solid-memo:back "ln|f(x)| + C"@zxx ;
+    solid-memo:backNote "Where f(x) ≠ 0. Example: ∫ tan x dx = −ln|cos x| + C."@en ,
+                        "Där f(x) ≠ 0. Exempel: ∫ tan x dx = −ln|cos x| + C."@sv .
+
+<#constant>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ k dx"@zxx ;
+    solid-memo:frontNote "k is a constant"@en ,
+                         "k är en konstant"@sv ;
+    solid-memo:back "kx + C"@zxx .
+
+<#power-rule>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ xⁿ dx"@zxx ;
+    solid-memo:frontNote "n is a constant, n ≠ −1"@en ,
+                         "n är en konstant, n ≠ −1"@sv ;
+    solid-memo:back "xⁿ⁺¹/(n + 1) + C"@zxx ;
+    solid-memo:backNote "For x > 0 when n is not an integer, and for x ≠ 0 when n is a negative integer. For n = −1: ln|x| + C."@en ,
+                        "För x > 0 när n inte är ett heltal, och för x ≠ 0 när n är ett negativt heltal. För n = −1: ln|x| + C."@sv .
+
+<#one-over-x>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ 1/x dx"@zxx ;
+    solid-memo:back "ln|x| + C"@zxx ;
+    solid-memo:backNote "For x ≠ 0. For x > 0 this is ln x + C; the constant may differ on the two sides of 0."@en ,
+                        "För x ≠ 0. För x > 0 blir det ln x + C; konstanten kan vara olika på var sida om 0."@sv .
+
+<#one-over-x-squared>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ 1/x² dx"@zxx ;
+    solid-memo:back "−1/x + C"@zxx ;
+    solid-memo:backNote "For x ≠ 0. The power rule with n = −2."@en ,
+                        "För x ≠ 0. Potensregeln med n = −2."@sv .
+
+<#square-root>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ √x dx"@zxx ;
+    solid-memo:back "(2/3)·x√x + C"@zxx ;
+    solid-memo:backNote "For x ≥ 0. Also written (2/3)·x^(3/2) + C: the power rule with n = 1/2."@en ,
+                        "För x ≥ 0. Skrivs även (2/3)·x^(3/2) + C: potensregeln med n = 1/2."@sv .
+
+<#one-over-square-root>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ 1/√x dx"@zxx ;
+    solid-memo:back "2√x + C"@zxx ;
+    solid-memo:backNote "For x > 0. The power rule with n = −1/2."@en ,
+                        "För x > 0. Potensregeln med n = −1/2."@sv .
+
+<#linear-reciprocal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ 1/(ax + b) dx"@zxx ;
+    solid-memo:frontNote "a and b are constants, a ≠ 0"@en ,
+                         "a och b är konstanter, a ≠ 0"@sv ;
+    solid-memo:back "(1/a)·ln|ax + b| + C"@zxx ;
+    solid-memo:backNote "For ax + b ≠ 0."@en ,
+                        "För ax + b ≠ 0."@sv .
+
+<#linear-power>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ (ax + b)ⁿ dx"@zxx ;
+    solid-memo:frontNote "a, b and n are constants, a ≠ 0, n ≠ −1"@en ,
+                         "a, b och n är konstanter, a ≠ 0, n ≠ −1"@sv ;
+    solid-memo:back "(ax + b)ⁿ⁺¹/(a(n + 1)) + C"@zxx ;
+    solid-memo:backNote "The power rule with the substitution u = ax + b. For ax + b > 0 when n is not an integer, and for ax + b ≠ 0 when n is a negative integer."@en ,
+                        "Potensregeln med variabelbytet u = ax + b. För ax + b > 0 när n inte är ett heltal, och för ax + b ≠ 0 när n är ett negativt heltal."@sv .
+
+<#e-to-x>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ eˣ dx"@zxx ;
+    solid-memo:back "eˣ + C"@zxx .
+
+<#e-to-kx>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ eᵏˣ dx"@zxx ;
+    solid-memo:frontNote "k is a constant, k ≠ 0"@en ,
+                         "k är en konstant, k ≠ 0"@sv ;
+    solid-memo:back "eᵏˣ/k + C"@zxx .
+
+<#a-to-x>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ aˣ dx"@zxx ;
+    solid-memo:frontNote "a is a constant, a > 0, a ≠ 1"@en ,
+                         "a är en konstant, a > 0, a ≠ 1"@sv ;
+    solid-memo:back "aˣ/ln a + C"@zxx .
+
+<#ln-x>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ ln x dx"@zxx ;
+    solid-memo:back "x·ln x − x + C"@zxx ;
+    solid-memo:backNote "For x > 0. Found by integration by parts with ln x = 1·ln x."@en ,
+                        "För x > 0. Fås med partialintegration av 1·ln x."@sv .
+
+<#sin>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ sin x dx"@zxx ;
+    solid-memo:back "−cos x + C"@zxx .
+
+<#cos>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ cos x dx"@zxx ;
+    solid-memo:back "sin x + C"@zxx .
+
+<#sin-kx>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ sin(kx) dx"@zxx ;
+    solid-memo:frontNote "k is a constant, k ≠ 0"@en ,
+                         "k är en konstant, k ≠ 0"@sv ;
+    solid-memo:back "−cos(kx)/k + C"@zxx .
+
+<#cos-kx>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ cos(kx) dx"@zxx ;
+    solid-memo:frontNote "k is a constant, k ≠ 0"@en ,
+                         "k är en konstant, k ≠ 0"@sv ;
+    solid-memo:back "sin(kx)/k + C"@zxx .
+
+<#sec-squared>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ sec² x dx"@zxx ;
+    solid-memo:back "tan x + C"@zxx ;
+    solid-memo:backNote "sec x = 1/cos x, so this is ∫ 1/cos² x dx. For cos x ≠ 0."@en ,
+                        "sec x = 1/cos x, så detta är ∫ 1/cos² x dx. För cos x ≠ 0."@sv .
+
+<#csc-squared>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ csc² x dx"@zxx ;
+    solid-memo:back "−cot x + C"@zxx ;
+    solid-memo:backNote "csc x = 1/sin x, so this is ∫ 1/sin² x dx. For sin x ≠ 0."@en ,
+                        "csc x = 1/sin x, så detta är ∫ 1/sin² x dx. För sin x ≠ 0."@sv .
+
+<#sec-tan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ sec x·tan x dx"@zxx ;
+    solid-memo:back "sec x + C"@zxx ;
+    solid-memo:backNote "For cos x ≠ 0."@en ,
+                        "För cos x ≠ 0."@sv .
+
+<#csc-cot>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ csc x·cot x dx"@zxx ;
+    solid-memo:back "−csc x + C"@zxx ;
+    solid-memo:backNote "For sin x ≠ 0."@en ,
+                        "För sin x ≠ 0."@sv .
+
+<#tan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ tan x dx"@zxx ;
+    solid-memo:back "−ln|cos x| + C"@zxx ;
+    solid-memo:backNote "For cos x ≠ 0. Also written ln|sec x| + C."@en ,
+                        "För cos x ≠ 0. Skrivs även ln|sec x| + C."@sv .
+
+<#cot>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ cot x dx"@zxx ;
+    solid-memo:back "ln|sin x| + C"@zxx ;
+    solid-memo:backNote "For sin x ≠ 0."@en ,
+                        "För sin x ≠ 0."@sv .
+
+<#sec>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ sec x dx"@zxx ;
+    solid-memo:back "ln|sec x + tan x| + C"@zxx ;
+    solid-memo:backNote "For cos x ≠ 0. Also written ln|tan(x/2 + π/4)| + C."@en ,
+                        "För cos x ≠ 0. Skrivs även ln|tan(x/2 + π/4)| + C."@sv .
+
+<#sin-squared>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ sin² x dx"@zxx ;
+    solid-memo:back "x/2 − sin(2x)/4 + C"@zxx ;
+    solid-memo:backNote "From sin² x = (1 − cos(2x))/2. Also written (x − sin x·cos x)/2 + C."@en ,
+                        "Följer av sin² x = (1 − cos(2x))/2. Skrivs även (x − sin x·cos x)/2 + C."@sv .
+
+<#cos-squared>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ cos² x dx"@zxx ;
+    solid-memo:back "x/2 + sin(2x)/4 + C"@zxx ;
+    solid-memo:backNote "From cos² x = (1 + cos(2x))/2. Also written (x + sin x·cos x)/2 + C."@en ,
+                        "Följer av cos² x = (1 + cos(2x))/2. Skrivs även (x + sin x·cos x)/2 + C."@sv .
+
+<#arctan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ 1/(1 + x²) dx"@zxx ;
+    solid-memo:back "arctan x + C"@zxx ;
+    solid-memo:backNote "For every real x."@en ,
+                        "För alla reella x."@sv .
+
+<#arctan-a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ 1/(a² + x²) dx"@zxx ;
+    solid-memo:frontNote "a is a constant, a > 0"@en ,
+                         "a är en konstant, a > 0"@sv ;
+    solid-memo:back "(1/a)·arctan(x/a) + C"@zxx .
+
+<#arcsin>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ 1/√(1 − x²) dx"@zxx ;
+    solid-memo:back "arcsin x + C"@zxx ;
+    solid-memo:backNote "For −1 < x < 1. −arccos x + C is also correct, since arcsin x + arccos x = π/2."@en ,
+                        "För −1 < x < 1. Även −arccos x + C är rätt, eftersom arcsin x + arccos x = π/2."@sv .
+
+<#arcsin-a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ 1/√(a² − x²) dx"@zxx ;
+    solid-memo:frontNote "a is a constant, a > 0"@en ,
+                         "a är en konstant, a > 0"@sv ;
+    solid-memo:back "arcsin(x/a) + C"@zxx ;
+    solid-memo:backNote "For −a < x < a."@en ,
+                        "För −a < x < a."@sv .
+
+<#one-over-sqrt-x-squared-plus-one>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ 1/√(x² + 1) dx"@zxx ;
+    solid-memo:back "ln(x + √(x² + 1)) + C"@zxx ;
+    solid-memo:backNote "For every real x. Equal to arsinh x + C."@en ,
+                        "För alla reella x. Lika med arsinh x + C."@sv .
+
+<#sinh>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ sinh x dx"@zxx ;
+    solid-memo:back "cosh x + C"@zxx .
+
+<#cosh>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫ cosh x dx"@zxx ;
+    solid-memo:back "sinh x + C"@zxx .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

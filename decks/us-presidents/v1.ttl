@@ -1,0 +1,683 @@
+@base <https://solid-memo.com/decks/us-presidents/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Presidents of the United States"@en ,
+                  "USA:s presidenter"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "All 47 presidencies of the United States as of 4 October 2026, from George Washington (1st, 1789) to Donald Trump (47th, since 2025), numbered as the US government numbers them. Front: the number, e.g. \"16th president of the United States\"; back: the president's name in English and Swedish, with the years in office in a note. Grover Cleveland (22nd and 24th) and Donald Trump (45th and 47th) served non-consecutive terms and are counted twice, so the 47 presidencies were held by 45 people. Taken from Wikidata and checked against the Office of the Historian of the US House of Representatives, the White House, USA.gov and the Miller Center (University of Virginia)."@en ,
+                        "USA:s alla 47 presidentskap per den 4 oktober 2026, från George Washington (den 1:a, 1789) till Donald Trump (den 47:e, sedan 2025), numrerade enligt den officiella amerikanska räkningen. Framsida: numret, t.ex. ”USA:s 16:e president”; baksida: presidentens namn på engelska och svenska, med åren i ämbetet i en anteckning. Grover Cleveland (den 22:a och 24:e) och Donald Trump (den 45:e och 47:e) satt två perioder som inte följde direkt på varandra och räknas två gånger, så de 47 presidentskapen har innehafts av 45 personer. Uppgifterna är hämtade från Wikidata och kontrollerade mot Office of the Historian vid USA:s representanthus, Vita huset, USA.gov och Miller Center (University of Virginia)."@sv ;
+    prov:wasDerivedFrom <https://www.wikidata.org/wiki/Q11696> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:history ;
+    dcat:keyword "US presidents"@en ,
+                 "President of the United States"@en ,
+                 "American history"@en ,
+                 "White House"@en ,
+                 "amerikanska presidenter"@sv ,
+                 "USA:s president"@sv ,
+                 "amerikansk historia"@sv ,
+                 "Vita huset"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#us-presidents> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#us-presidents> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/wiki/Q11696> ,
+              <https://history.house.gov/Institution/Presidents-Coinciding/Presidents-Coinciding/> ,
+              <https://www.whitehouse.gov/administration/donald-j-trump/> ,
+              <https://www.usa.gov/presidents> ,
+              <https://millercenter.org/president> ,
+              <https://sv.wikipedia.org/wiki/Lista_%C3%B6ver_USA:s_presidenter> ,
+              <https://frageladan.isof.se/faqs/24030> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "1. Wikidata (query 1): every non-deprecated P39 (position held) statement whose value is President of the United States (Q11696), with its P1545 (series ordinal), P580 (start time) and P582 (end time) qualifiers, its rank and the English and Swedish labels, was fetched as CSV from the Wikidata Query Service. The result also holds fictional presidents (characters from films, comics and television, among them \"Quentin Trembley\" with the ordinal \"8½\"), which have no numeric ordinal or are not humans. Query 2 therefore restricted the statements to those with a P1545 qualifier on items that are instances of human (P31 Q5) and fetched every English, Swedish and multilingual (mul) label and alias of those people. The rows with a whole-number ordinal are 47 statements, 1 to 47, on 45 items: Grover Cleveland (Q35171) holds two statements (22 and 24) and Donald Trump (Q22686) two (45 and 47, the latter of preferred rank and without an end time)."@en ,
+                 "2. Official US government check: the White House's former page listing all presidents (https://www.whitehouse.gov/about-the-white-house/presidents/) answered 404. USA.gov's page on the presidents (https://www.usa.gov/presidents, last updated March 2, 2026) states that Donald John Trump is the 47th and current president, sworn in on January 20, 2025, and links, for past presidents, to the table \"Presidents, Vice Presidents, & Coinciding Sessions of Congress\" of the House of Representatives' Office of the Historian. That table was downloaded (query 6) and parsed: it numbers 47 presidencies, Grover Cleveland as No. 22 and No. 24 and Donald J. Trump as No. 45 and No. 47 (\"Jan. 20, 2025–present\"). The White House's page on the current president (query 7) heads it \"45th & 47th President of the United States\"."@en ,
+                 "3. Independent check: the Miller Center of Public Affairs (University of Virginia) list of presidents (https://millercenter.org/president, query 8) gives a number, a first and last year and a name for each president. (Britannica's table of presidents was tried first and answered 403 to the research environment: curl -sL -A \"solid-memo deck research (https://github.com/antwika/solid-memo)\" -o britannica.html -w \"%{http_code} %{url_effective} %{size_download}\\n\" https://www.britannica.com/topic/Presidents-of-the-United-States-1846696; it was not used.)"@en ,
+                 "4. Swedish: the Swedish Wikipedia list \"Lista över USA:s presidenter\" was fetched with its revision id through the MediaWiki API (query 9). Its rows link each president's Swedish article; every Swedish name on the cards is the Wikidata sv label (or, for George Washington, Ronald Reagan, George W. Bush, Barack Obama, Donald Trump and Joe Biden, who have no sv label, the mul label) and equals the title of the linked Swedish article. Its introduction uses the ordinal abbreviations \"22:a och 24:e … 45:e och 47:e\", the pattern used on the Swedish fronts: \"USA:s 22:a president\". The rule is Språkrådet's (Frågelådan, https://frageladan.isof.se/faqs/24030, query 12): a numeral, a colon and the last letter of the spelled-out ordinal (\"1:a, 2:a, 3:e, 4:e och så vidare\"). The Swedish ordinal abbreviation is therefore :a for numbers ending in 1 or 2 (första, andra, tjugoförsta …) except 11 and 12 (elfte, tolfte), and :e for all others."@en ,
+                 "5. Cross-check: the script compare.py (query 10) parsed the saved Wikidata CSVs, the House table, the Miller Center list and the Swedish Wikipedia list, and compared for every number the first and last year in office; it found no disagreement. Its rules: Wikidata = the P39 statements of query 1 whose P1545 is a whole number, start and end year taken from P580 and P582 (no P582 = \"present\"); House table = the table rows grouped under each \"No.\" (a row with an empty No. cell continues the presidency above), start year from the first row's dates of service and end year from the last row's (\"present\" if it has none); Miller Center = the \"president-number\", \"inauguration-date\" and \"date-ended\" fields of each entry (the end year is not compared where Wikidata has no end); Swedish Wikipedia = the last four characters of \"tillträde\" and \"frånträde\" in the {{Tabell befattningshavare}} block with that \"nummer\" (wiki links and <ref> notes removed). The script compares years only; that each number belongs to the same person in every source, and the name forms, were checked by reading the parsed rows side by side. The script wrote its parsed readings to compare.json, and the evidence on every card (the \"says\" texts of the Wikidata, House, Miller Center and Swedish Wikipedia evidence) was generated from those parsed fields by make_dossier.py, not typed by hand; the readings of the White House and USA.gov pages were added by hand. The scripts themselves are not published with the deck; the rules above are what they do. The Miller Center's end year for the current term, which the script does not compare (Wikidata has no end), was read by hand: it is an error on that page (see quality control). The names were compared by reading: the House table uses formal forms (\"William H. Taft\", \"Richard M. Nixon\", \"Gerald R. Ford\", \"James Earl “Jimmy” Carter\", \"William J. Clinton\", \"Donald J. Trump\", \"Joseph R. Biden Jr.\"), the Miller Center \"William Harrison\" and \"William Taft\"; all name the same person as the Wikidata item. The cards use the Wikidata English label, the name by which each president is commonly known, except for Franklin D. Roosevelt, whose English label is the full \"Franklin Delano Roosevelt\": the card uses \"Franklin D. Roosevelt\" (an English and a mul alias of the item, the form of the House table, the Miller Center and the Swedish label)."@en ,
+                 "6. Cards: front \"<ordinal> president of the United States\" / \"USA:s <ordinal> president\" (English ordinals 1st, 2nd, 3rd, 4th, 11th, 12th, 13th, 21st …); back: the name; back note: \"President <first year>–<last year>\" in both languages, from the years of the P580 and P582 qualifiers, with the months for the two presidencies that began and ended in the same year (William Henry Harrison and James A. Garfield); the notes do not say how a presidency ended (death, assassination or resignation), so that no card implies anything about the others, and, for Cleveland and Trump, the other number and term. Study direction front to back only, because Cleveland and Trump each answer two cards."@en ,
+                 "7. Machine checks: for every card the builder checks against live Wikidata that the item holds P39 Q11696 and has the English and Swedish name of the back as a label or alias (in that language or mul). The builder's checks therefore confirm only that each person held the office and the English and Swedish name forms; they would not notice two cards with their names swapped. The number on each front and the years in each note are qualifiers of the P39 statement, which the builder's checks cannot reach; they rest on query 1 and the comparison in step 5 (Wikidata, the House table, the Miller Center and the Swedish Wikipedia) and are recorded in each card's evidence. The built deck was validated with the app's SHACL and DCAT-AP validators (validate_sources.ts)."@en ,
+                 "Selection: Every presidency of the United States from the first (George Washington, 1789) to the current one (Donald Trump's second term, since 20 January 2025), as of 4 October 2026: 47 cards. A presidency is a numbered term of continuous service, the convention of the US government (the House of Representatives' table, the White House, USA.gov), of Wikidata and of the Miller Center: a president who served two non-consecutive terms is counted twice, so Grover Cleveland is the 22nd and the 24th president and Donald Trump the 45th and the 47th, and the 47 presidencies were held by 45 people. Consecutive terms of the same president are one presidency (Franklin D. Roosevelt's four terms are the 32nd). Left out: acting presidents and anyone who exercised the powers of the office temporarily under the 25th Amendment (not numbered by any source), vice presidents, presidents of the Continental Congress or under the Articles of Confederation (before the Constitution) and the Confederate States, and the fictional presidents that the Wikidata query also returned. The current presidency is the cut-off: the note says \"since 2025\"."@en ,
+                 "Licensing: The only content source is Wikidata, whose structured data is CC0: the selection of presidencies, their numbers, the years in the notes and the English and Swedish names all come from it, so the deck is CC0 1.0 like the rest of the library. The House of Representatives' table, the White House and USA.gov (US government works, not under copyright in the US), the Miller Center (all rights reserved) and the Swedish Wikipedia (CC BY-SA 4.0) were used for verification only: they confirmed facts that the Wikidata data gave, and no wording, table layout or selection was copied from them. The selection is the complete set of numbered presidencies, which any list of presidents shares because it is the complete set, not a choice taken from a list. The fronts and notes are the compiler's own wording of facts."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Sources, licences and machine checks: every card's number, name and years against Wikidata, the House of Representatives' table, the Miller Center and the Swedish Wikipedia; the current president against the White House and USA.gov; the Swedish names and ordinals against Wikidata sv labels and the Swedish Wikipedia."@en ;
+    rdfs:comment "Scope: All 47 cards, the sources and the deck metadata."@en ,
+                 "Outcome: Wikidata, the House table, the Miller Center and the Swedish Wikipedia agree on the number, the person and the first and last year of all 47 presidencies, and the White House and USA.gov confirm that Donald Trump is the 47th and current president. No Wikidata check was skipped. The differences found are in name forms, in Wikidata's modelling (fictional presidents, missing sv labels) and one error on the Miller Center page; none affects a card."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 47 cards, checked against the UCSB American Presidency Project (not used by the author), the White House and news of October 2026."@en ,
+                 "Outcome: No errors in the cards: the order, every name and every first and last year agree with the UCSB American Presidency Project, and Donald Trump is still in office on 4 October 2026. Two suggestions, both applied: the death-in-office remark on William Henry Harrison's card only was removed, and the method now says plainly what the builder's Wikidata checks do and do not cover."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 47 cards, the title, description and keywords, and the built TTL."@en ,
+                 "Outcome: No errors on the cards: every card text is tagged @en or @sv, the English and Swedish ordinals and Swedish month names are right. The untagged keywords are a limitation of the builder, outside this dossier, and are left to the builder's owner. The description now names the House source correctly and its Swedish wording is more idiomatic; the Harrison note was made consistent; the Garfield and Bush name forms were kept as sourced."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 6 sources and their licence pages, the evidence of 16 cards against freshly fetched pages, and the method, queries and licensing text."@en ,
+                 "Outcome: Licensing and attribution are compliant (CC0, Wikidata the only content source). The comparison rules of the cross-check scripts are now spelled out in method step 5, the Miller Center evidence on the 47th card quotes only the page, the USA.gov licence evidence cites its real policies page, the Franklin D. Roosevelt alias is described as English and mul, and the Swedish ordinal rule is now sourced to Språkrådet."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The three cards changed in round 3 (president-9, president-32, president-47) and every third card (1, 4, 7 … 46), 19 cards in all, against freshly fetched sources; the sources' usedFor texts and the method."@en ,
+                 "Outcome: All 19 checked cards match live Wikidata, the House Office of the Historian table and the Miller Center; round 3's fixes are confirmed. The USA.gov source's usedFor misread \"45 former U.S. presidents\" and is corrected; method step 7 no longer repeats itself. No card changed."@en .
+
+<https://www.wikidata.org/wiki/Q11696>
+    dcterms:title "Wikidata: the holders of the position President of the United States (Q11696), with the series ordinal, start and end of each term and the English and Swedish labels and aliases of the presidents" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://history.house.gov/Institution/Presidents-Coinciding/Presidents-Coinciding/>
+    dcterms:title "Presidents, Vice Presidents, & Coinciding Sessions of Congress" ;
+    dcterms:creator "Office of the Historian and Office of Art & Archives (Office of the Clerk), U.S. House of Representatives" ;
+    rdfs:comment "A work of the United States Government, prepared by House staff (the Office of the Historian and the Office of the Clerk) in their official duties: 17 U.S.C. § 105 (https://www.law.cornell.edu/uscode/text/17/105): \"Copyright protection under this title is not available for any work of the United States Government\". The site gives no licence of its own; its Rights and Reproductions page (https://history.house.gov/About/Rights-and-Reproductions/) concerns only images of objects in the House Collection. Used for verification only, so the deck does not depend on this assessment."@en .
+
+<https://www.whitehouse.gov/administration/donald-j-trump/>
+    dcterms:title "The White House: Donald J. Trump (administration page)" ;
+    dcterms:creator "The White House" ;
+    rdfs:comment "https://www.whitehouse.gov/copyright/ — \"Pursuant to federal law, government-produced materials appearing on this site are not copyright protected.\""@en .
+
+<https://www.usa.gov/presidents>
+    dcterms:title "Presidents, vice presidents, and first ladies (USAGov)" ;
+    dcterms:creator "USAGov, U.S. General Services Administration" ;
+    rdfs:comment "A work of the United States Government (the General Services Administration's USAGov): 17 U.S.C. § 105 (https://www.law.cornell.edu/uscode/text/17/105): \"Copyright protection under this title is not available for any work of the United States Government\". The page states no licence of its own (its Website policies and notices page, https://www.usa.gov/website-policies-and-notices, lists \"Privacy and security policies\", \"Accessibility policy\", \"USA.gov linking policy\", \"How to cite USA.gov\", \"Free commercial downloads\" and \"Paperwork Reduction Act statements\" and states no copyright or licence terms; the older address https://www.usa.gov/website-policies answered 404). Used for verification only."@en .
+
+<https://millercenter.org/president>
+    dcterms:title "U.S. Presidents (Miller Center of Public Affairs, University of Virginia)" ;
+    dcterms:creator "Miller Center of Public Affairs, University of Virginia" ;
+    rdfs:comment "Footer of https://millercenter.org/president: \"© Copyright 2026. Rector and Visitors of the University of Virginia\"; no licence is offered. Verification only."@en .
+
+<https://sv.wikipedia.org/wiki/Lista_%C3%B6ver_USA:s_presidenter>
+    dcterms:title "Svenskspråkiga Wikipedia: Lista över USA:s presidenter" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of the article: \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported\""@en .
+
+<https://frageladan.isof.se/faqs/24030>
+    dcterms:title "Frågelådan: Hur skriver man ordningstal, med bokstäver eller siffror, alltså första, andra, eller 1:a, 2:a?" ;
+    dcterms:creator "Språkrådet, Institutet för språk och folkminnen (Isof)" ;
+    rdfs:comment "The page and the service's \"Om Frågelådan\" page (https://frageladan.isof.se/about) state no licence; treated as all rights reserved and used for verification only. Nothing copied."@en .
+
+<#president-1>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1st president of the United States"@en ,
+                     "USA:s 1:a president"@sv ;
+    solid-memo:back "George Washington"@en ,
+                    "George Washington"@sv ;
+    solid-memo:backNote "President 1789–1797"@en ,
+                        "President 1789–1797"@sv .
+
+<#president-2>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2nd president of the United States"@en ,
+                     "USA:s 2:a president"@sv ;
+    solid-memo:back "John Adams"@en ,
+                    "John Adams"@sv ;
+    solid-memo:backNote "President 1797–1801"@en ,
+                        "President 1797–1801"@sv .
+
+<#president-3>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "3rd president of the United States"@en ,
+                     "USA:s 3:e president"@sv ;
+    solid-memo:back "Thomas Jefferson"@en ,
+                    "Thomas Jefferson"@sv ;
+    solid-memo:backNote "President 1801–1809"@en ,
+                        "President 1801–1809"@sv .
+
+<#president-4>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "4th president of the United States"@en ,
+                     "USA:s 4:e president"@sv ;
+    solid-memo:back "James Madison"@en ,
+                    "James Madison"@sv ;
+    solid-memo:backNote "President 1809–1817"@en ,
+                        "President 1809–1817"@sv .
+
+<#president-5>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "5th president of the United States"@en ,
+                     "USA:s 5:e president"@sv ;
+    solid-memo:back "James Monroe"@en ,
+                    "James Monroe"@sv ;
+    solid-memo:backNote "President 1817–1825"@en ,
+                        "President 1817–1825"@sv .
+
+<#president-6>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "6th president of the United States"@en ,
+                     "USA:s 6:e president"@sv ;
+    solid-memo:back "John Quincy Adams"@en ,
+                    "John Quincy Adams"@sv ;
+    solid-memo:backNote "President 1825–1829"@en ,
+                        "President 1825–1829"@sv .
+
+<#president-7>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "7th president of the United States"@en ,
+                     "USA:s 7:e president"@sv ;
+    solid-memo:back "Andrew Jackson"@en ,
+                    "Andrew Jackson"@sv ;
+    solid-memo:backNote "President 1829–1837"@en ,
+                        "President 1829–1837"@sv .
+
+<#president-8>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "8th president of the United States"@en ,
+                     "USA:s 8:e president"@sv ;
+    solid-memo:back "Martin Van Buren"@en ,
+                    "Martin Van Buren"@sv ;
+    solid-memo:backNote "President 1837–1841"@en ,
+                        "President 1837–1841"@sv .
+
+<#president-9>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "9th president of the United States"@en ,
+                     "USA:s 9:e president"@sv ;
+    solid-memo:back "William Henry Harrison"@en ,
+                    "William Henry Harrison"@sv ;
+    solid-memo:backNote "President March–April 1841"@en ,
+                        "President mars–april 1841"@sv .
+
+<#president-10>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "10th president of the United States"@en ,
+                     "USA:s 10:e president"@sv ;
+    solid-memo:back "John Tyler"@en ,
+                    "John Tyler"@sv ;
+    solid-memo:backNote "President 1841–1845"@en ,
+                        "President 1841–1845"@sv .
+
+<#president-11>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "11th president of the United States"@en ,
+                     "USA:s 11:e president"@sv ;
+    solid-memo:back "James K. Polk"@en ,
+                    "James K. Polk"@sv ;
+    solid-memo:backNote "President 1845–1849"@en ,
+                        "President 1845–1849"@sv .
+
+<#president-12>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "12th president of the United States"@en ,
+                     "USA:s 12:e president"@sv ;
+    solid-memo:back "Zachary Taylor"@en ,
+                    "Zachary Taylor"@sv ;
+    solid-memo:backNote "President 1849–1850"@en ,
+                        "President 1849–1850"@sv .
+
+<#president-13>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "13th president of the United States"@en ,
+                     "USA:s 13:e president"@sv ;
+    solid-memo:back "Millard Fillmore"@en ,
+                    "Millard Fillmore"@sv ;
+    solid-memo:backNote "President 1850–1853"@en ,
+                        "President 1850–1853"@sv .
+
+<#president-14>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "14th president of the United States"@en ,
+                     "USA:s 14:e president"@sv ;
+    solid-memo:back "Franklin Pierce"@en ,
+                    "Franklin Pierce"@sv ;
+    solid-memo:backNote "President 1853–1857"@en ,
+                        "President 1853–1857"@sv .
+
+<#president-15>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "15th president of the United States"@en ,
+                     "USA:s 15:e president"@sv ;
+    solid-memo:back "James Buchanan"@en ,
+                    "James Buchanan"@sv ;
+    solid-memo:backNote "President 1857–1861"@en ,
+                        "President 1857–1861"@sv .
+
+<#president-16>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "16th president of the United States"@en ,
+                     "USA:s 16:e president"@sv ;
+    solid-memo:back "Abraham Lincoln"@en ,
+                    "Abraham Lincoln"@sv ;
+    solid-memo:backNote "President 1861–1865"@en ,
+                        "President 1861–1865"@sv .
+
+<#president-17>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "17th president of the United States"@en ,
+                     "USA:s 17:e president"@sv ;
+    solid-memo:back "Andrew Johnson"@en ,
+                    "Andrew Johnson"@sv ;
+    solid-memo:backNote "President 1865–1869"@en ,
+                        "President 1865–1869"@sv .
+
+<#president-18>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "18th president of the United States"@en ,
+                     "USA:s 18:e president"@sv ;
+    solid-memo:back "Ulysses S. Grant"@en ,
+                    "Ulysses S. Grant"@sv ;
+    solid-memo:backNote "President 1869–1877"@en ,
+                        "President 1869–1877"@sv .
+
+<#president-19>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "19th president of the United States"@en ,
+                     "USA:s 19:e president"@sv ;
+    solid-memo:back "Rutherford B. Hayes"@en ,
+                    "Rutherford B. Hayes"@sv ;
+    solid-memo:backNote "President 1877–1881"@en ,
+                        "President 1877–1881"@sv .
+
+<#president-20>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "20th president of the United States"@en ,
+                     "USA:s 20:e president"@sv ;
+    solid-memo:back "James A. Garfield"@en ,
+                    "James Garfield"@sv ;
+    solid-memo:backNote "President March–September 1881"@en ,
+                        "President mars–september 1881"@sv .
+
+<#president-21>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "21st president of the United States"@en ,
+                     "USA:s 21:a president"@sv ;
+    solid-memo:back "Chester A. Arthur"@en ,
+                    "Chester A. Arthur"@sv ;
+    solid-memo:backNote "President 1881–1885"@en ,
+                        "President 1881–1885"@sv .
+
+<#president-22>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "22nd president of the United States"@en ,
+                     "USA:s 22:a president"@sv ;
+    solid-memo:back "Grover Cleveland"@en ,
+                    "Grover Cleveland"@sv ;
+    solid-memo:backNote "President 1885–1889, and again 1893–1897 as the 24th"@en ,
+                        "President 1885–1889 och på nytt 1893–1897 som den 24:e"@sv .
+
+<#president-23>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "23rd president of the United States"@en ,
+                     "USA:s 23:e president"@sv ;
+    solid-memo:back "Benjamin Harrison"@en ,
+                    "Benjamin Harrison"@sv ;
+    solid-memo:backNote "President 1889–1893"@en ,
+                        "President 1889–1893"@sv .
+
+<#president-24>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "24th president of the United States"@en ,
+                     "USA:s 24:e president"@sv ;
+    solid-memo:back "Grover Cleveland"@en ,
+                    "Grover Cleveland"@sv ;
+    solid-memo:backNote "President 1893–1897; earlier 1885–1889 as the 22nd"@en ,
+                        "President 1893–1897, tidigare 1885–1889 som den 22:a"@sv .
+
+<#president-25>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "25th president of the United States"@en ,
+                     "USA:s 25:e president"@sv ;
+    solid-memo:back "William McKinley"@en ,
+                    "William McKinley"@sv ;
+    solid-memo:backNote "President 1897–1901"@en ,
+                        "President 1897–1901"@sv .
+
+<#president-26>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "26th president of the United States"@en ,
+                     "USA:s 26:e president"@sv ;
+    solid-memo:back "Theodore Roosevelt"@en ,
+                    "Theodore Roosevelt"@sv ;
+    solid-memo:backNote "President 1901–1909"@en ,
+                        "President 1901–1909"@sv .
+
+<#president-27>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "27th president of the United States"@en ,
+                     "USA:s 27:e president"@sv ;
+    solid-memo:back "William Howard Taft"@en ,
+                    "William Howard Taft"@sv ;
+    solid-memo:backNote "President 1909–1913"@en ,
+                        "President 1909–1913"@sv .
+
+<#president-28>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "28th president of the United States"@en ,
+                     "USA:s 28:e president"@sv ;
+    solid-memo:back "Woodrow Wilson"@en ,
+                    "Woodrow Wilson"@sv ;
+    solid-memo:backNote "President 1913–1921"@en ,
+                        "President 1913–1921"@sv .
+
+<#president-29>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "29th president of the United States"@en ,
+                     "USA:s 29:e president"@sv ;
+    solid-memo:back "Warren G. Harding"@en ,
+                    "Warren G. Harding"@sv ;
+    solid-memo:backNote "President 1921–1923"@en ,
+                        "President 1921–1923"@sv .
+
+<#president-30>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "30th president of the United States"@en ,
+                     "USA:s 30:e president"@sv ;
+    solid-memo:back "Calvin Coolidge"@en ,
+                    "Calvin Coolidge"@sv ;
+    solid-memo:backNote "President 1923–1929"@en ,
+                        "President 1923–1929"@sv .
+
+<#president-31>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "31st president of the United States"@en ,
+                     "USA:s 31:a president"@sv ;
+    solid-memo:back "Herbert Hoover"@en ,
+                    "Herbert Hoover"@sv ;
+    solid-memo:backNote "President 1929–1933"@en ,
+                        "President 1929–1933"@sv .
+
+<#president-32>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "32nd president of the United States"@en ,
+                     "USA:s 32:a president"@sv ;
+    solid-memo:back "Franklin D. Roosevelt"@en ,
+                    "Franklin D. Roosevelt"@sv ;
+    solid-memo:backNote "President 1933–1945"@en ,
+                        "President 1933–1945"@sv .
+
+<#president-33>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "33rd president of the United States"@en ,
+                     "USA:s 33:e president"@sv ;
+    solid-memo:back "Harry S. Truman"@en ,
+                    "Harry S. Truman"@sv ;
+    solid-memo:backNote "President 1945–1953"@en ,
+                        "President 1945–1953"@sv .
+
+<#president-34>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "34th president of the United States"@en ,
+                     "USA:s 34:e president"@sv ;
+    solid-memo:back "Dwight D. Eisenhower"@en ,
+                    "Dwight D. Eisenhower"@sv ;
+    solid-memo:backNote "President 1953–1961"@en ,
+                        "President 1953–1961"@sv .
+
+<#president-35>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "35th president of the United States"@en ,
+                     "USA:s 35:e president"@sv ;
+    solid-memo:back "John F. Kennedy"@en ,
+                    "John F. Kennedy"@sv ;
+    solid-memo:backNote "President 1961–1963"@en ,
+                        "President 1961–1963"@sv .
+
+<#president-36>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "36th president of the United States"@en ,
+                     "USA:s 36:e president"@sv ;
+    solid-memo:back "Lyndon B. Johnson"@en ,
+                    "Lyndon B. Johnson"@sv ;
+    solid-memo:backNote "President 1963–1969"@en ,
+                        "President 1963–1969"@sv .
+
+<#president-37>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "37th president of the United States"@en ,
+                     "USA:s 37:e president"@sv ;
+    solid-memo:back "Richard Nixon"@en ,
+                    "Richard Nixon"@sv ;
+    solid-memo:backNote "President 1969–1974"@en ,
+                        "President 1969–1974"@sv .
+
+<#president-38>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "38th president of the United States"@en ,
+                     "USA:s 38:e president"@sv ;
+    solid-memo:back "Gerald Ford"@en ,
+                    "Gerald Ford"@sv ;
+    solid-memo:backNote "President 1974–1977"@en ,
+                        "President 1974–1977"@sv .
+
+<#president-39>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "39th president of the United States"@en ,
+                     "USA:s 39:e president"@sv ;
+    solid-memo:back "Jimmy Carter"@en ,
+                    "Jimmy Carter"@sv ;
+    solid-memo:backNote "President 1977–1981"@en ,
+                        "President 1977–1981"@sv .
+
+<#president-40>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "40th president of the United States"@en ,
+                     "USA:s 40:e president"@sv ;
+    solid-memo:back "Ronald Reagan"@en ,
+                    "Ronald Reagan"@sv ;
+    solid-memo:backNote "President 1981–1989"@en ,
+                        "President 1981–1989"@sv .
+
+<#president-41>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "41st president of the United States"@en ,
+                     "USA:s 41:a president"@sv ;
+    solid-memo:back "George H. W. Bush"@en ,
+                    "George H.W. Bush"@sv ;
+    solid-memo:backNote "President 1989–1993"@en ,
+                        "President 1989–1993"@sv .
+
+<#president-42>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "42nd president of the United States"@en ,
+                     "USA:s 42:a president"@sv ;
+    solid-memo:back "Bill Clinton"@en ,
+                    "Bill Clinton"@sv ;
+    solid-memo:backNote "President 1993–2001"@en ,
+                        "President 1993–2001"@sv .
+
+<#president-43>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "43rd president of the United States"@en ,
+                     "USA:s 43:e president"@sv ;
+    solid-memo:back "George W. Bush"@en ,
+                    "George W. Bush"@sv ;
+    solid-memo:backNote "President 2001–2009"@en ,
+                        "President 2001–2009"@sv .
+
+<#president-44>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "44th president of the United States"@en ,
+                     "USA:s 44:e president"@sv ;
+    solid-memo:back "Barack Obama"@en ,
+                    "Barack Obama"@sv ;
+    solid-memo:backNote "President 2009–2017"@en ,
+                        "President 2009–2017"@sv .
+
+<#president-45>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "45th president of the United States"@en ,
+                     "USA:s 45:e president"@sv ;
+    solid-memo:back "Donald Trump"@en ,
+                    "Donald Trump"@sv ;
+    solid-memo:backNote "President 2017–2021, and again since 2025 as the 47th"@en ,
+                        "President 2017–2021 och på nytt sedan 2025 som den 47:e"@sv .
+
+<#president-46>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "46th president of the United States"@en ,
+                     "USA:s 46:e president"@sv ;
+    solid-memo:back "Joe Biden"@en ,
+                    "Joe Biden"@sv ;
+    solid-memo:backNote "President 2021–2025"@en ,
+                        "President 2021–2025"@sv .
+
+<#president-47>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "47th president of the United States"@en ,
+                     "USA:s 47:e president"@sv ;
+    solid-memo:back "Donald Trump"@en ,
+                    "Donald Trump"@sv ;
+    solid-memo:backNote "President since 2025; earlier 2017–2021 as the 45th"@en ,
+                        "President sedan 2025, tidigare 2017–2021 som den 45:e"@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

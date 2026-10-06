@@ -12,7 +12,7 @@ const libraryCard = (id: string) => ({ id, front: { "": id }, back: { "": id }, 
 const plan: LibraryUpgradePlan = {
   fromVersion: "1",
   toVersion: "3",
-  releaseUrl: "https://solid-memo.com/decks/capitals/3.ttl",
+  releaseUrl: "https://solid-memo.com/decks/capitals/v3.ttl",
   notes: [
     { version: "2", notes: "Added Norway." },
     { version: "3", notes: "Fixed Sweden." },

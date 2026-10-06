@@ -1,0 +1,536 @@
+@base <https://solid-memo.com/decks/common-ions/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Common ions"@en ,
+                  "Vanliga joner"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "43 common ions of school chemistry: 16 cations, from the hydrogen and oxonium ions to iron(III) and aluminium, and 27 anions, from chloride and oxide to sulfate, phosphate, permanganate and thiosulfate. Front: the ion's name in English and Swedish, e.g. \"Sulfate ion\" / \"sulfatjon\"; back: its formula with the charge as a superscript, e.g. SO₄²⁻. English names follow IUPAC (oxonium, hydrogencarbonate), Swedish names are formed by the Swedish Chemical Society's writing rules and checked for use. Formulas from Wikidata and PubChem; names checked against the IUPAC Red Book and Swedish sources. Studied in both directions."@en ,
+                        "43 vanliga joner från skolkemin: 16 katjoner, från vätejonen och oxoniumjonen till järn(III)jonen och aluminiumjonen, och 27 anjoner, från kloridjonen och oxidjonen till sulfatjonen, fosfatjonen, permanganatjonen och tiosulfatjonen. Framsida: jonens namn på engelska och svenska, t.ex. ”Sulfate ion” / ”sulfatjon”; baksida: dess formel med laddningen upphöjd, t.ex. SO₄²⁻. De engelska namnen följer IUPAC (oxonium, hydrogencarbonate), de svenska är bildade efter Svenska Kemisamfundets skrivregler och kontrollerade i bruk. Formlerna kommer från Wikidata och PubChem; namnen är kontrollerade mot IUPAC:s Red Book och svenska källor. Övas i båda riktningarna."@sv ;
+    prov:wasDerivedFrom <https://www.wikidata.org/> ,
+                        <https://pubchem.ncbi.nlm.nih.gov/> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:chemistry ;
+    dcat:keyword "chemistry"@en ,
+                 "ions"@en ,
+                 "chemical formulas"@en ,
+                 "cations"@en ,
+                 "anions"@en ,
+                 "kemi"@sv ,
+                 "joner"@sv ,
+                 "kemiska formler"@sv ,
+                 "katjoner"@sv ,
+                 "anjoner"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:bidirectional ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#common-ions> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#common-ions> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/> ,
+              <https://pubchem.ncbi.nlm.nih.gov/> ,
+              <https://iupac.org/wp-content/uploads/2016/07/Red_Book_2005.pdf> ,
+              <https://kemisamfundet.se/wp-content/uploads/2020/05/Skrivregler-S%C3%A4rtryck-Kemisk-Tidskrift.pdf> ,
+              <https://www.lth.se/fileadmin/kemigen/pdf/nomenklaturregler.pdf> ,
+              <https://sv.wikipedia.org/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (a script comparing each formula's composition and charge with PubChem and Wikidata, live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "1. Candidates: a list of about 60 cations and anions met in school chemistry (the hydrogen, oxonium and ammonium ions, the ions of the alkali and alkaline-earth metals and of common transition and other metals, the halides, oxide and sulfide, and the common oxoanions and hydrogen anions) was drawn up by the authoring agent from its own knowledge of the subject, not taken from any list. Every candidate was looked up in PubChem by name through PUG REST (query 2, pubchem_names.py, which requests MolecularFormula, Charge, Title and IUPACName for each name) and on Wikidata by English label or alias (query 1). Wikidata's ion items turned out to be scattered (the salt classes such as \"sulfate\" or \"phosphates\" are separate items from the ions, and many ion items have few labels), so the ions were matched to Wikidata through PubChem: query 4 fetched the items whose PubChem CID (P662) is one of the chosen CIDs, with every P274 value, the English and Swedish labels and aliases and the Swedish Wikipedia article. Two PubChem name lookups returned the wrong species and were replaced (thiosulfate → CID 1084, query 3; see quality control)."@en ,
+                 "2. Formula on the back: written in Unicode with subscript counts and the charge as a superscript, number before sign (SO₄²⁻, Fe³⁺, Cl⁻), the convention of chemistry teaching and of the IUPAC Red Book. Inorganic ions are written in the conventional order (central atom first, hydrogen first in the hydrogen anions: HSO₄⁻, HCO₃⁻, H₂PO₄⁻; NH₄⁺, OH⁻), which is Wikidata's P274 text for 35 of the 43 ions; for the other 8 Wikidata gives only the Hill-order string (H₄N⁺, HO⁻, O₃S²⁻, HO₄S⁻, CHO₃⁻, H₂O₄P⁻, C₂H₃O₂⁻, O₃S₂²⁻). The acetate ion is written CH₃COO⁻, the form of school chemistry; a note gives CH₃CO₂⁻ and C₂H₃O₂⁻. The hydroxide and hypochlorite ions are written OH⁻ and ClO⁻ as in school chemistry (KemIgen writes \"hydroxidjon(OH-)\" and \"ClO-\"); notes say that IUPAC writes HO⁻ and OCl⁻."@en ,
+                 "3. Formula cross-check: compare.py (query 8) parsed every card formula into element counts and a charge (subscript digits as counts, each element symbol an upper-case letter optionally followed by a lower-case one, the superscript digits and sign as the charge) and compared them with PubChem's computed formula and charge (query 6: the PUG REST property table for all CIDs, e.g. \"O4S-2\", charge −2) and with every Wikidata P274 value of the item, parsed the same way. All 43 agree in composition and charge with both. The script also recorded whether the card's exact text is a Wikidata P274 value and whether the Swedish name is a Swedish label or alias of the item. Wikidata has no charge property on these items (query 5: neither P1121 oxidation state nor P2200 electric charge is used; P1109 is refractive index), so the charge was compared through the superscript in P274."@en ,
+                 "4. English names: \"<name> ion\" in sentence case, with the names of the IUPAC Red Book 2005 (verification source): oxonium ion for H₃O⁺ (the Red Book: \"oxonium (not hydronium)\"; the note gives hydronium), and the one-word accepted hydrogen names hydrogencarbonate, hydrogensulfate, hydrogenphosphate and dihydrogenphosphate of its Section IR-8.5 (a note on each of these four cards gives the two-word English spelling, as in PubChem's IUPAC names and, for hydrogen sulfate and hydrogen phosphate, Wikidata's English labels; Wikidata labels HCO₃⁻ \"bicarbonate ion\", with \"hydrogen carbonate\" as an alias, and H₂PO₄⁻ \"dihydrogenphosphate ion\", with \"dihydrogen phosphate\" as an alias). Metals with more than one common ion take the oxidation number in Roman numerals (copper(I), copper(II), iron(II), iron(III)), the stock notation that the Red Book allows and Swedish teaching uses; the others are named after the element only. IUPAC spellings sulfate, sulfide and aluminium are used. Each English name was compared with the Wikidata English label and aliases and with the PubChem title and IUPAC name (the evidence of each card). The Red Book was downloaded, turned into text and searched (query 13), and the passages cited in the evidence were then read on the PDF pages; the PDF's text layer flattens the superscript charges (the evidence writes them out as the printed page shows them)."@en ,
+                 "5. Swedish names: formed as Swedish chemistry forms them and then checked for use. Svenska Kemisamfundet's nomenclature committee's \"Nya svenska skrivregler för kemi\" (query 11) gives the Swedish element names and, in its table of inorganic and organic acids, the Swedish anion names (karbonat, klorat, klorit, kromat, hypoklorit, nitrat, nitrit, perklorat, permanganat, fosfat, sulfat, fluorid, klorid, acetat), with rules for the rest (-ide/-ate/-ite lose the final -e, hypo- and per- are kept in anion names, thio- becomes tio-, ch becomes k, and compound names are written as one word). The ion names follow the pattern given by Lund University's teaching material KemIgen (query 12) and by the Swedish Wikipedia articles \"Jon\" and \"IUPAC-nomenklatur\" (query 10): element name + -jon for cations (natriumjon, koppar(II)jon, järn(III)jon, with the Roman numeral in parentheses and no hyphen), -idjon for monatomic anions and the anion name + -jon for polyatomic anions; the hydrogen anions are väte-/divätenames (vätekarbonat, as Wikidata's Swedish label of the hydrogencarbonate ion). Each Swedish name was then searched as an exact phrase on the Swedish Wikipedia (query 9, svwiki_search.py, whose base words are the 43 Swedish fronts; inflected forms such as \"permanganatjonen\" or \"silverjoner\" where the base form gave no hit), and a result snippet using it is quoted in each card's evidence. Swedish common nouns are written in lower case. NE and Svenska Akademiens ordböcker were not consulted."@en ,
+                 "6. Notes: nine cards carry a back note: the hydrogen ion (bound to water, e.g. as H₃O⁺, in water; the negative ion H⁻ is the hydride ion, Swedish hydridjon, query 18), the oxonium ion (also called hydroniumjon/hydronium ion, a name IUPAC no longer recommends), the hydrogencarbonate ion (older name bicarbonate/bikarbonat, which the Swedish Wikipedia article \"Vätekarbonat\" calls \"ett äldre namn\", and the two-word English spelling), the hydrogensulfate, hydrogenphosphate and dihydrogenphosphate ions (the two-word English spelling), the acetate ion (other ways of writing the formula) and the hydroxide and hypochlorite ions (IUPAC's formula form). The hydrogen ion also carries a front note, \"the positive ion\" / \"den positiva jonen\": \"hydrogen ion\" and \"vätejon\" mean H⁺ in school chemistry, but the Swedish Wikipedia article \"Vätejon\" uses vätejon for either charge, so the note settles which ion is asked for."@en ,
+                 "7. Machine checks: every card checks that its Wikidata item carries the PubChem CID of the evidence (P662), which ties the two content sources to the same species; 35 cards check that the exact formula text on the card is a P274 value of the item, and 7 that the Swedish name is a Swedish label or alias (kloridjon, jodidjon, hydroxidjon, nitratjon, nitritjon, vätekarbonatjon, kloritjon): 85 checks, run against live Wikidata by the builder. Formula checks are omitted for the 8 cards whose formula Wikidata gives only in Hill order (step 2), and Swedish-name checks where Wikidata has no matching Swedish label or alias (most ion items have no Swedish label; Ammoniumjon is an alias with a capital letter). The composition and charge of those 8 formulas rest on compare.py (step 3). The deck was built with the builder and validated with the app's SHACL and DCAT-AP validators (node packages/deck-library/scripts/validate_sources.ts common-ions)."@en ,
+                 "8. Licences and records: the licence or terms of every source were fetched or read on 2026-10-04 (queries 14–17 and, for the Red Book's imprint, query 13) and are quoted under Sources. The scripts named in the queries (sparql.py, pubchem_names.py, compare.py, svwiki_search.py, svwiki_search2.py, svwiki_pages.py, pdf2txt.py, rb_terms.py, rb_table81.py, grep.py) and their raw outputs are kept in the authoring agent's working notes (<scratch>), which are not published. Steps 1–5 describe what each script does (compare.py's parsing and comparison in step 3), and the queries give the exact commands, arguments, SPARQL and URLs they ran."@en ,
+                 "Selection: 43 ions that school chemistry teaches by name and formula: the hydrogen ion (H⁺; \"hydrogen ion\" and \"vätejon\" mean the positive ion here, as in school chemistry, and the card's front note says so) and the oxonium and ammonium ions; the cations of lithium, sodium, potassium, silver, magnesium, calcium, barium, zinc and aluminium, which have one common charge, and copper(I), copper(II), iron(II) and iron(III), which need the oxidation number; the monatomic anions fluoride, chloride, bromide, iodide, oxide and sulfide; and the polyatomic anions hydroxide, nitrate, nitrite, sulfate, sulfite, hydrogensulfate, carbonate, hydrogencarbonate, phosphate, hydrogenphosphate, dihydrogenphosphate, acetate, permanganate, chromate, dichromate, cyanide, the four chlorine oxoanions (hypochlorite, chlorite, chlorate, perchlorate) and thiosulfate. Inclusion: an ion with a PubChem record whose computed formula and charge agree with a Wikidata item linked to it, an English name confirmed by IUPAC or Wikidata, and an established Swedish name found in use on the Swedish Wikipedia. Each name and each formula occurs once, so the deck can be studied both ways. Left out: the lead(II) ion, whose Swedish name bly(II)jon was not found in use (Swedish texts say blyjon or blyjoner, see quality control); ions met less often in school (peroxide, hydride, nitride, thiocyanate, oxalate, hydrogensulfite, mercury, tin, nickel, manganese, cobalt and chromium cations); and ions whose name or formula varies between sources (silicate, borate)."@en ,
+                 "Licensing: The deck is CC0 1.0. Its content comes from Wikidata (structured data under CC0 1.0: formulas, labels, aliases, PubChem links) and PubChem (formulas and charges computed by PubChem, a service of the US National Library of Medicine; information created by or for the US government is in the public domain). Only PubChem-computed values were used; PubChem record titles, which come from depositor synonyms, were read for comparison only and do not appear on the cards. The English and Swedish names are names of chemical species, facts rather than protected expression; the IUPAC Red Book (all rights reserved), Svenska Kemisamfundet's writing rules (all rights reserved), Lund University's KemIgen material (no licence stated) and the Swedish Wikipedia (CC BY-SA 4.0) were used only to confirm that each name is the recommended or established one and in use, and no text, table layout or list was copied from any of them. The selection of 43 ions was made by the authoring agent, not taken from a list in any source. The notes and the formula notation are the compiler's own wording of facts. No source's licence therefore requires attribution or share-alike, though every source is credited in the deck and this report."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Sources, licences and machine checks: every formula's composition and charge against PubChem and Wikidata, every English name against Wikidata, PubChem and the IUPAC Red Book, every Swedish name against Svenska Kemisamfundet's rules, Lund University's KemIgen material and its use on the Swedish Wikipedia."@en ;
+    rdfs:comment "Scope: All 43 cards (44 drafted), the sources and the deck metadata."@en ,
+                 "Outcome: All 43 formulas agree in composition and charge with PubChem's computed formula and with Wikidata's P274; 85 Wikidata checks pass. One drafted card was dropped (lead(II) ion) because its Swedish name was not found in use. The other findings are conventions (formula forms, IUPAC names) stated in notes and the method, and Wikidata or PubChem modelling issues that do not affect a card."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 43 cards: every formula against PubChem's computed formula and charge (own script), every Wikidata check against live Wikidata, names and notes against the IUPAC Red Book, the description and selection counts."@en ,
+                 "Outcome: No wrong formula or name: all 43 formulas agree with PubChem in composition and charge, all 85 Wikidata checks hold, and the oxonium, hydroxide, hypochlorite and hydrogen-anion names and notes are confirmed by the Red Book. One warning (the Swedish front \"vätejon\" can also mean H⁻) and one suggestion (the description's cation range ends at iron(III) although aluminium is the last cation); both fixed."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 43 cards, the title, description and keywords: language tags, Unicode formulas, English and Swedish names and notes, Swedish idiom, uniqueness for both study directions."@en ,
+                 "Outcome: Tags, Unicode formulas and names are correct throughout; Swedish names follow Svenska Kemisamfundet's rules and are each supported by Swedish usage. One warning (the ambiguous Swedish front \"vätejon\") and six suggestions; five fixed, the optional extra Swedish check declined."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: Every source's licence or terms page, the content/verification split, the recorded queries and method, and spot checks of the evidence against Wikidata, PubChem, the Red Book, Svenska Kemisamfundet, KemIgen and the Swedish Wikipedia."@en ,
+                 "Outcome: Licensing is sound (CC0 from Wikidata and PubChem; all other sources verification only) and every spot-checked quote matches. One warning (recorded queries 9 and 11–13 not verbatim, and method step 8 overstated what the queries reproduce) and four suggestions; all fixed. The PDF-to-text step was rebuilt as pdf2txt.py and re-run: its output is byte-identical to the text the evidence was read from."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The 7 cards changed in rounds 1–3 (hydrogen, oxonium, hydrogensulfate, hydrogencarbonate, hydrogenphosphate, dihydrogenphosphate and cyanide ions) and every third card in dossier order (13 more, 20 in all): formulas and charges against live Wikidata and PubChem, all Wikidata checks, quoted labels and aliases, the Red Book, Svenska Kemisamfundet, KemIgen and Swedish Wikipedia quotations, language tags, description, keywords, licence, and that every fix logged in rounds 1–3 is in the dossier and the built deck."@en ,
+                 "Outcome: All 20 cards checked are correct and correctly tagged; every fix logged in rounds 1–3 is present; the built deck validates. Two optional suggestions, both verified and fixed."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: All 43 cards: formulas and charges, English and Swedish names, language tags, notes, uniqueness of backs, description, keywords, title, licence, and that the fixes of round 4 are in the dossier (the four Wikidata items of method step 4 re-fetched live, the Tiosulfat evidence)."@en ,
+                 "Outcome: All 43 cards are correct and correctly tagged, the counts in the description match the cards and the round 4 fixes are present. One optional suggestion on the description's wording about Svenska Kemisamfundet's rules, verified against method step 5 and fixed."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata: the items of the 43 ions (one per PubChem CID), with their chemical formula (P274), PubChem CID (P662) and English and Swedish labels and aliases" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing (raw page text, fetched 2026-10-04): \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://pubchem.ncbi.nlm.nih.gov/>
+    dcterms:title "PubChem: compound records of the 43 ions (molecular formula, charge, title and IUPAC name)" ;
+    dcterms:creator "National Center for Biotechnology Information, US National Library of Medicine" ;
+    rdfs:comment "https://www.ncbi.nlm.nih.gov/home/about/policies/ (fetched 2026-10-04): \"Information that is created by or for the US government on this site is within the public domain.\" The same page notes that the site also holds material contributed by others; only PubChem-computed values were used: the molecular formula of the sulfate ion (CID 1117) is attributed to \"Computed by PubChem 2.2 (PubChem release 2025.09.15)\" (query 7), and the formula and charge of every ion were taken from the same computed property table."@en .
+
+<https://iupac.org/wp-content/uploads/2016/07/Red_Book_2005.pdf>
+    dcterms:title "Nomenclature of Inorganic Chemistry: IUPAC Recommendations 2005 (the Red Book)" ;
+    dcterms:creator "International Union of Pure and Applied Chemistry (N. G. Connelly, T. Damhus, R. M. Hartshorn and A. T. Hutton, eds.)" ;
+    rdfs:comment "Imprint page of the PDF (PDF page 4, read 2026-10-04): \"© International Union of Pure and Applied Chemistry, 2005. All rights reserved\". Verification only: nothing copied."@en .
+
+<https://kemisamfundet.se/wp-content/uploads/2020/05/Skrivregler-S%C3%A4rtryck-Kemisk-Tidskrift.pdf>
+    dcterms:title "Nya svenska skrivregler för kemi (särtryck ur Kemivärlden Biotech med Kemisk Tidskrift)" ;
+    dcterms:creator "Svenska Kemisamfundets nomenklaturutskott (Swedish Chemical Society, nomenclature committee)" ;
+    rdfs:comment "The PDF states no licence; the society's website footer (https://kemisamfundet.se/, fetched 2026-10-04) reads \"© 2015 Svenska Kemisamfundet – Alla rättigheter reserverade\". Verification only: nothing copied."@en .
+
+<https://www.lth.se/fileadmin/kemigen/pdf/nomenklaturregler.pdf>
+    dcterms:title "Nomenklatur - namngivning och formelskrivning (KemIgen, 2006-03-18)" ;
+    dcterms:creator "KemIgen, Lunds tekniska högskola (Lund University)" ;
+    rdfs:comment "The PDF (fetched 2026-10-04) carries no author, copyright or licence statement. LTH's website page on its sites, \"Om våra webbplatser\" (https://www.lth.se/om-vaara-webbplatser/, linked from the footer of https://www.lth.se/ as \"Om webbplatsen\"; fetched 2026-10-04, query 19), covers cookies and personal data only and states no copyright or licence terms. Treated as all rights reserved and used for verification only. Nothing copied."@en .
+
+<https://sv.wikipedia.org/>
+    dcterms:title "Svenskspråkiga Wikipedia" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Page footer of https://sv.wikipedia.org/wiki/Jon (fetched 2026-10-04): \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported.\""@en .
+
+<#hydrogen-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hydrogen ion"@en ,
+                     "vätejon"@sv ;
+    solid-memo:frontNote "the positive ion"@en ,
+                         "den positiva jonen"@sv ;
+    solid-memo:back "H⁺"@zxx ;
+    solid-memo:backNote "In water it is bound to water molecules, e.g. as the oxonium ion H₃O⁺. The negative ion H⁻ is the hydride ion."@en ,
+                        "I vatten är den bunden till vattenmolekyler, t.ex. som oxoniumjon, H₃O⁺. Den negativa jonen H⁻ kallas hydridjon."@sv .
+
+<#oxonium-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Oxonium ion"@en ,
+                     "oxoniumjon"@sv ;
+    solid-memo:back "H₃O⁺"@zxx ;
+    solid-memo:backNote "Also called the hydronium ion, a name IUPAC no longer recommends."@en ,
+                        "Kallas även hydroniumjon, ett namn som IUPAC inte längre rekommenderar."@sv .
+
+<#ammonium-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ammonium ion"@en ,
+                     "ammoniumjon"@sv ;
+    solid-memo:back "NH₄⁺"@zxx .
+
+<#lithium-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Lithium ion"@en ,
+                     "litiumjon"@sv ;
+    solid-memo:back "Li⁺"@zxx .
+
+<#sodium-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sodium ion"@en ,
+                     "natriumjon"@sv ;
+    solid-memo:back "Na⁺"@zxx .
+
+<#potassium-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Potassium ion"@en ,
+                     "kaliumjon"@sv ;
+    solid-memo:back "K⁺"@zxx .
+
+<#silver-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Silver ion"@en ,
+                     "silverjon"@sv ;
+    solid-memo:back "Ag⁺"@zxx .
+
+<#copper-i-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Copper(I) ion"@en ,
+                     "koppar(I)jon"@sv ;
+    solid-memo:back "Cu⁺"@zxx .
+
+<#magnesium-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Magnesium ion"@en ,
+                     "magnesiumjon"@sv ;
+    solid-memo:back "Mg²⁺"@zxx .
+
+<#calcium-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Calcium ion"@en ,
+                     "kalciumjon"@sv ;
+    solid-memo:back "Ca²⁺"@zxx .
+
+<#barium-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Barium ion"@en ,
+                     "bariumjon"@sv ;
+    solid-memo:back "Ba²⁺"@zxx .
+
+<#zinc-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Zinc ion"@en ,
+                     "zinkjon"@sv ;
+    solid-memo:back "Zn²⁺"@zxx .
+
+<#copper-ii-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Copper(II) ion"@en ,
+                     "koppar(II)jon"@sv ;
+    solid-memo:back "Cu²⁺"@zxx .
+
+<#iron-ii-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Iron(II) ion"@en ,
+                     "järn(II)jon"@sv ;
+    solid-memo:back "Fe²⁺"@zxx .
+
+<#iron-iii-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Iron(III) ion"@en ,
+                     "järn(III)jon"@sv ;
+    solid-memo:back "Fe³⁺"@zxx .
+
+<#aluminium-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Aluminium ion"@en ,
+                     "aluminiumjon"@sv ;
+    solid-memo:back "Al³⁺"@zxx .
+
+<#fluoride-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Fluoride ion"@en ,
+                     "fluoridjon"@sv ;
+    solid-memo:back "F⁻"@zxx .
+
+<#chloride-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Chloride ion"@en ,
+                     "kloridjon"@sv ;
+    solid-memo:back "Cl⁻"@zxx .
+
+<#bromide-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bromide ion"@en ,
+                     "bromidjon"@sv ;
+    solid-memo:back "Br⁻"@zxx .
+
+<#iodide-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Iodide ion"@en ,
+                     "jodidjon"@sv ;
+    solid-memo:back "I⁻"@zxx .
+
+<#oxide-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Oxide ion"@en ,
+                     "oxidjon"@sv ;
+    solid-memo:back "O²⁻"@zxx .
+
+<#sulfide-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sulfide ion"@en ,
+                     "sulfidjon"@sv ;
+    solid-memo:back "S²⁻"@zxx .
+
+<#hydroxide-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hydroxide ion"@en ,
+                     "hydroxidjon"@sv ;
+    solid-memo:back "OH⁻"@zxx ;
+    solid-memo:backNote "IUPAC writes it HO⁻."@en ,
+                        "IUPAC skriver den HO⁻."@sv .
+
+<#nitrate-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Nitrate ion"@en ,
+                     "nitratjon"@sv ;
+    solid-memo:back "NO₃⁻"@zxx .
+
+<#nitrite-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Nitrite ion"@en ,
+                     "nitritjon"@sv ;
+    solid-memo:back "NO₂⁻"@zxx .
+
+<#sulfate-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sulfate ion"@en ,
+                     "sulfatjon"@sv ;
+    solid-memo:back "SO₄²⁻"@zxx .
+
+<#sulfite-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sulfite ion"@en ,
+                     "sulfitjon"@sv ;
+    solid-memo:back "SO₃²⁻"@zxx .
+
+<#hydrogensulfate-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hydrogensulfate ion"@en ,
+                     "vätesulfatjon"@sv ;
+    solid-memo:back "HSO₄⁻"@zxx ;
+    solid-memo:backNote "Also written hydrogen sulfate."@en ,
+                        "På engelska skrivs även hydrogen sulfate."@sv .
+
+<#carbonate-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Carbonate ion"@en ,
+                     "karbonatjon"@sv ;
+    solid-memo:back "CO₃²⁻"@zxx .
+
+<#hydrogencarbonate-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hydrogencarbonate ion"@en ,
+                     "vätekarbonatjon"@sv ;
+    solid-memo:back "HCO₃⁻"@zxx ;
+    solid-memo:backNote "Also written hydrogen carbonate; older name bicarbonate."@en ,
+                        "Äldre namn: bikarbonatjon; på engelska skrivs även hydrogen carbonate."@sv .
+
+<#phosphate-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Phosphate ion"@en ,
+                     "fosfatjon"@sv ;
+    solid-memo:back "PO₄³⁻"@zxx .
+
+<#hydrogenphosphate-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hydrogenphosphate ion"@en ,
+                     "vätefosfatjon"@sv ;
+    solid-memo:back "HPO₄²⁻"@zxx ;
+    solid-memo:backNote "Also written hydrogen phosphate."@en ,
+                        "På engelska skrivs även hydrogen phosphate."@sv .
+
+<#dihydrogenphosphate-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Dihydrogenphosphate ion"@en ,
+                     "divätefosfatjon"@sv ;
+    solid-memo:back "H₂PO₄⁻"@zxx ;
+    solid-memo:backNote "Also written dihydrogen phosphate."@en ,
+                        "På engelska skrivs även dihydrogen phosphate."@sv .
+
+<#acetate-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Acetate ion"@en ,
+                     "acetatjon"@sv ;
+    solid-memo:back "CH₃COO⁻"@zxx ;
+    solid-memo:backNote "Also written CH₃CO₂⁻ or C₂H₃O₂⁻."@en ,
+                        "Skrivs även CH₃CO₂⁻ eller C₂H₃O₂⁻."@sv .
+
+<#permanganate-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Permanganate ion"@en ,
+                     "permanganatjon"@sv ;
+    solid-memo:back "MnO₄⁻"@zxx .
+
+<#chromate-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Chromate ion"@en ,
+                     "kromatjon"@sv ;
+    solid-memo:back "CrO₄²⁻"@zxx .
+
+<#dichromate-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Dichromate ion"@en ,
+                     "dikromatjon"@sv ;
+    solid-memo:back "Cr₂O₇²⁻"@zxx .
+
+<#cyanide-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cyanide ion"@en ,
+                     "cyanidjon"@sv ;
+    solid-memo:back "CN⁻"@zxx .
+
+<#hypochlorite-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hypochlorite ion"@en ,
+                     "hypokloritjon"@sv ;
+    solid-memo:back "ClO⁻"@zxx ;
+    solid-memo:backNote "IUPAC writes it OCl⁻."@en ,
+                        "IUPAC skriver den OCl⁻."@sv .
+
+<#chlorite-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Chlorite ion"@en ,
+                     "kloritjon"@sv ;
+    solid-memo:back "ClO₂⁻"@zxx .
+
+<#chlorate-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Chlorate ion"@en ,
+                     "kloratjon"@sv ;
+    solid-memo:back "ClO₃⁻"@zxx .
+
+<#perchlorate-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Perchlorate ion"@en ,
+                     "perkloratjon"@sv ;
+    solid-memo:back "ClO₄⁻"@zxx .
+
+<#thiosulfate-ion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Thiosulfate ion"@en ,
+                     "tiosulfatjon"@sv ;
+    solid-memo:back "S₂O₃²⁻"@zxx .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

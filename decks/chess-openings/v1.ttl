@@ -1,0 +1,538 @@
+@base <https://solid-memo.com/decks/chess-openings/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Chess openings"@en ,
+                  "Schacköppningar"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "37 well-known chess openings and the moves that define them. Front: the opening's name, e.g. \"Ruy Lopez (Spanish Opening)\" or \"Sicilian Defence\"; back: its defining moves in standard algebraic notation with English piece letters (K, Q, R, B, N), e.g. \"1.e4 e5 2.Nf3 Nc6 3.Bb5\", with the ECO code in a note. Every move sequence was replayed with python-chess. Moves and codes from the lichess-org/chess-openings data set and Wikidata, checked against the Encyclopaedia of Chess Openings codes as listed by Wikipedia and against 365Chess."@en ,
+                        "37 välkända schacköppningar och de drag som definierar dem. Framsida: öppningens namn, t.ex. ”Spanskt parti” eller ”Sicilianskt parti”; baksida: de definierande dragen i algebraisk notation med engelska pjäsbokstäver (K, Q, R, B, N i stället för svenska K, D, T, L, S), t.ex. ”1.e4 e5 2.Nf3 Nc6 3.Bb5”, med ECO-koden i en anteckning. Varje dragföljd har spelats upp med python-chess. Drag och koder kommer från datamängden lichess-org/chess-openings och Wikidata och är kontrollerade mot koderna i Encyclopaedia of Chess Openings så som Wikipedia återger dem och mot 365Chess."@sv ;
+    prov:wasDerivedFrom <https://github.com/lichess-org/chess-openings> ,
+                        <https://www.wikidata.org/wiki/Property:P9838> ,
+                        <#own-work> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:sports ;
+    dcat:keyword "chess"@en ,
+                 "chess openings"@en ,
+                 "ECO codes"@en ,
+                 "algebraic notation"@en ,
+                 "gambits"@en ,
+                 "schack"@sv ,
+                 "schacköppningar"@sv ,
+                 "ECO-koder"@sv ,
+                 "algebraisk notation"@sv ,
+                 "gambiter"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#chess-openings> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#chess-openings> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://github.com/lichess-org/chess-openings> ,
+              <https://www.wikidata.org/wiki/Property:P9838> ,
+              <#own-work> ,
+              <https://en.wikipedia.org/wiki/List_of_ECO_codes> ,
+              <https://sv.wikipedia.org/wiki/Lista_%C3%B6ver_schack%C3%B6ppningar> ,
+              <https://www.365chess.com/eco.php> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (python-chess, live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "1. Candidates (Wikidata): query 1 listed every item with an ECO code (P9838), 320 rows, ordered by the number of Wikipedia language editions with an article on it, with English and Swedish labels. Queries 2 and 3 added the items' English and Swedish Wikipedia sitelinks and Swedish aliases (and found the King's Gambit, Q194506, which has no P9838). Query 4 fetched, for the 37 chosen items, every English, Swedish and multilingual label and alias and every P9838 value: each item has an English (or multilingual) alias that is its defining move sequence, written with a space after each move number (\"1. e4 e5 2. Nf3 Nc6 3. Bb5\")."@en ,
+                 "2. Moves and ECO codes (lichess-org/chess-openings): the five TSV files (eco, name, pgn) were downloaded from the master branch (query 6; head commit 5a13018, 2026-10-03). The README says that each opening name has a unique shortest line; for every card, the back is that shortest line under the exact lichess name (e.g. \"Ruy Lopez\", \"Italian Game: Giuoco Piano\", \"Sicilian Defense: Najdorf Variation\") and the note's ECO code is that row's code. The lines were rewritten without the space after the move number (\"1.e4\" instead of \"1. e4\"); castling is written with the letter O as in the data set. The selection, the English front names and the notes are the compiler's own."@en ,
+                 "3. Selection: the compiler chose the main openings and defences after 1.e4, 1.d4 and 1.c4 that are commonly taught and played at master level, the main gambits, and five of the most famous named variations (Berlin, Marshall, Najdorf, Dragon, Winawer). An opening was taken only if lichess, the Wikidata alias, the English Wikipedia article and the Swedish Wikipedia agree on its defining moves. Openings that sources define differently, or as a set-up reachable by several move orders, were left out; see Selection."@en ,
+                 "4. ECO codes: compare.py (query 12) parsed the English Wikipedia \"List of ECO codes\" (revision 1376141224), which gives the head line of every code with a page reference to the first edition of the Encyclopaedia of Chess Openings (Matanović, 1974–1979) and to the 2010 edition (Veličković). A line belongs to the code whose head line is its longest prefix. With all head lines, this rule gives every card the same code as lichess. editions.py (query 12) applied the rule to each edition separately: 35 cards have the same code in both; the Four Knights Game is C47 in 2010 but C46 in the first edition (whose C47 begins with 4.d4), and the Grünfeld Defence is D80 in 2010 while the first edition's D80 begins only with 4.Bg5. For the Grünfeld the rule gives no first-edition code of its own: the first edition's D70 head is \"1.d4 Nf6 2.c4 g6 with d7–d5\", which is not a move prefix (so the rule falls back to E61, a King's Indian code), and its D71–D79 begin 3.g3 d5; no source states which first-edition code covers 3.Nc3 d5, so the deck does not name one. The two cards give the 2010 (and lichess) code and say so in the note; the Four Knights note names the first-edition C46, which 365Chess also gives, and the Grünfeld note says only where the first edition's D80 begins. Wikidata's P9838 was compared too: it states the card's exact code for 8 openings, a range starting at it for 26 (the code range of the opening family), another range for the Grünfeld (D70–D99), none for the King's Gambit, and C77 for the Ruy Lopez (see quality control)."@en ,
+                 "5. Moves cross-check: compare.py compared every lichess line with the infobox \"moves\" of the English Wikipedia article on the opening (query 7; for the King's Gambit Accepted and the Winawer Variation the article on the parent opening, whose text names the line), with the Swedish Wikipedia list \"Lista över schacköppningar\" (revision 53530900; Swedish piece letters S, L, T, D translated to N, B, R, Q) and the Swedish articles' infobox \"drag\", and with the 365Chess ECO index (queries 9). No move sequence disagreed. Where a list's entry is a shorter head line that the card's line extends (for example C44 \"1.e4 e5 2.Nf3 Nc6\" for the Scotch Game), the evidence says so. The evidence on every card was generated from the parsed data by make_dossier.py (query 14), except the readings of the Swedish articles' text, which were written by hand from the saved wikitext."@en ,
+                 "6. Swedish names: each Swedish front is the title of the Swedish Wikipedia article on the opening, which is also the item's svwiki sitelink in Wikidata (for example \"Spanskt parti\", \"Sicilianskt parti\", \"Preussiskt parti\" for the Two Knights Defence, \"Wienerparti\", \"Löparspel\", \"Moderna försvaret\"). Wikidata's own sv labels often differ from these titles and some are wrong (\"Skotsk gambit\" on the Scotch Game, \"Phillidors försvar\"); the article titles were preferred. Where the Swedish Wikipedia treats an opening in a section of a broader article, the Swedish name is the one that section uses: \"Antagen kungsgambit\" and \"Antagen damgambit\"/\"Avböjd damgambit\" (Kungsgambit, Damgambit), \"Nordisk gambit\" for the Danish Gambit (Centrumspel), \"Benkögambit\" (Benoniförsvaret), and for the named variations the parent's name followed by the variation, \"Spanskt parti: Berlinerförsvaret\", \"Spanskt parti: Marshallangreppet\", \"Sicilianskt parti: Najdorfvarianten\", \"Sicilianskt parti: Drakvarianten\", \"Franskt parti: Winawervarianten\", matching the English fronts (\"Ruy Lopez: Berlin Defence\"). The Swedish Wikipedia list confirms these forms (\"Spanskt, Berlinerförsvaret\", \"Sicilianskt, drakvarianten\", \"Kungsgambit, antagen\"). Nationalencyklopedin (ne.se) was tried as a second Swedish reference (query 11) but its pages returned only the site's shell or an error to the research environment, and no Sveriges Schackförbund material listing opening names was found by web search; the Swedish names therefore rest on the Swedish Wikipedia and Wikidata's sitelinks alone. For the ten names above that Wikidata does not give (the Najdorf item's sv label is the longer \"Najdorfvarianten i Sicilianskt parti\"), the Swedish Wikipedia is their only source; see Licensing."@en ,
+                 "7. English names: English (British) spelling throughout (\"Defence\"), in the form most English sources use (Wikidata label or alias, lichess, the English Wikipedia article title). Variations are written \"Opening: Variation\" as lichess does. Alternative names that help a learner are in the notes (Russian Game, Robatsch Defence, Centre Counter Defence, Volga Gambit, Italian Game), each a Wikidata alias or lichess name (written in British spelling) and confirmed by the Wikipedia articles or 365Chess. The Swedish notes name the Swedish alternative names tvåspringarspel, Volgagambit and nordisk gambit, found in the Swedish Wikipedia, Petrovs försvar and Robatschs försvar (article redirects), and Giuoco Piano (Wikidata's mul label)."@en ,
+                 "8. Machine checks: verify_moves.py (query 13, python-chess 1.11.2) read the finished dossier (run again after the review rounds) and replayed every back from the initial position: the move numbers must be in step, every move legal and written exactly as python-chess writes it in standard algebraic notation (so piece letters, capture signs, check signs and castling are canonical), the final position must equal the one recorded in the card's evidence, and the back must equal the shortest lichess line under the card's lichess name. As a test of the test, each back with its last move replaced by an impossible queen move was replayed and had to be rejected. All 37 cards passed every check and all 37 mutations were caught. The builder checks against live Wikidata, for every card, that the item has the back's move sequence as an English or multilingual alias, compared character for character with Wikidata's string (a space after each move number; 10 of the aliases it uses are written with no-break spaces, U+00A0, and the check uses them as they are), and where Wikidata states them, the exact ECO code (P9838) and the English and Swedish names (and, for the Englund Gambit, that the item is named after Fritz Englund, P138). The built deck was validated with the app's SHACL and DCAT-AP validators (validate_sources.ts)."@en ,
+                 "Selection: 37 openings: the main openings and defences after 1.e4 (Ruy Lopez, Giuoco Piano, Two Knights, Evans Gambit, Scotch, Four Knights, Petrov, Philidor, King's Gambit and King's Gambit Accepted, Vienna, Bishop's Opening, Danish Gambit, Sicilian, French, Caro-Kann, Modern, Alekhine, Scandinavian), after 1.d4 (Queen's Gambit, Accepted and Declined, Slav, Grünfeld, Nimzo-Indian, Queen's Indian, Budapest Gambit, Benko Gambit, Dutch, Trompowsky, Englund Gambit) and 1.c4 (English Opening), and five famous named variations (Berlin Defence and Marshall Attack in the Ruy Lopez, Najdorf and Dragon in the Sicilian, Winawer in the French). Left out because the sources define them differently: the Pirc Defence (lichess and the English Wikipedia: 1.e4 d6 2.d4 Nf6 3.Nc3 g6; the Swedish Wikipedia: 1.e4 d6 2.d4 Nf6), the King's Indian Defence (1.d4 Nf6 2.c4 g6 in the English and Swedish Wikipedia, 1.d4 Nf6 2.c4 g6 3.Nc3 as the shortest lichess line, whose 4.e4 d6 lichess calls the Normal Variation), the Centre Game (2...exd4 or 3.Qxd4; C21 or C22), the Réti Opening (1.Nf3 d5 2.c4, but the name is also used for 1.Nf3), the Smith-Morra Gambit (ECO B20 in the 2002 ECO, B21 in Chess Informant's index, as the English Wikipedia notes). Left out because they are a set-up reached by several move orders: the Catalan Opening (the Swedish Wikipedia: \"Dragen kan utföras i olika ordning\"), the Semi-Slav Defence, the London System, the King's Indian Attack and the Stonewall. Left out as less common: openings beginning with other first moves (Bird's, Nimzowitsch-Larsen, Sokolsky, Grob and the rest of A00), and minor defences and gambits (Nimzowitsch Defence, Latvian, Elephant and Albin Countergambits, Ponziani, Falkbeer, Old Indian, Bogo-Indian). Named lines inside an opening other than the five variations, traps and transpositions are not covered. The ECO code in each note is the code of the defining line in the 2010 edition of the Encyclopaedia of Chess Openings, as lichess gives it, not the range of the opening family."@en ,
+                 "Licensing: The content sources are the lichess-org/chess-openings data set (CC0: the README dedicates it to the public domain), Wikidata (CC0) and the compiler's own selection, wording and verification (CC0), so the deck is CC0 1.0 like the rest of the library. Move sequences and classification codes are facts. The English and Swedish Wikipedia (CC BY-SA 4.0) and 365Chess (all rights reserved) were used for verification only: they confirmed moves, codes and names that the content sources gave, and no wording, table or selection was copied from them. The deck's selection is the compiler's own choice and is not taken from any list. The Swedish names are single established terms, not copyrightable text. Most are the titles of the Swedish Wikipedia articles that are also the Wikidata items' sitelinks (CC0). Ten fronts (Antagen kungsgambit, Nordisk gambit, Antagen damgambit, Avböjd damgambit, Benkögambit and the five named variations, each written as the parent opening's Swedish name followed by the variation's) and three alternative names in notes (tvåspringarspel, Volgagambit, nordisk gambit) were found only in the Swedish Wikipedia's section headings, list entries and article text: they were taken as names, which are facts about Swedish usage rather than expression, and no sentence, table or selection came with them, so the share-alike terms of the Swedish Wikipedia do not reach the deck. The notes are worded by the compiler."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Sources, licences and machine checks: every move sequence replayed with python-chess; moves and ECO codes compared across lichess, Wikidata, the English Wikipedia ECO list and articles, the Swedish Wikipedia list and articles and 365Chess; Swedish names against the Swedish Wikipedia and Wikidata sitelinks."@en ;
+    rdfs:comment "Scope: All 37 cards (and the 39 candidates of the comparison), the sources and the deck metadata."@en ,
+                 "Outcome: verify_moves.py: all 37 backs legal and canonical, final positions as recorded, each equal to the shortest lichess line; all 37 planted errors caught. No move sequence disagrees between sources. The ECO code agrees between lichess and the longest-prefix reading of the ECO list for all 37; two depend on the ECO edition and say so in the note. Wikidata disagrees on one ECO code (Ruy Lopez) and its Swedish labels often differ from the Swedish Wikipedia's titles; neither is used where it disagrees, and no check was skipped to hide a disagreement (the builder checks only the values Wikidata gets right, listed in each card's evidence). No second Swedish reference besides the Swedish Wikipedia could be reached."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 37 cards: every back replayed with python-chess and compared with the current lichess-org/chess-openings TSVs; ECO codes and the edition notes against the English Wikipedia List of ECO codes; Swedish names and notes against the Swedish Wikipedia; Wikidata checks; description count."@en ,
+                 "Outcome: No factual errors in the 37 cards: every back is legal, canonical and the lichess line under the card's name with the note's ECO code; the edition notes, the Swedish names and the alternative names were confirmed. Two optional suggestions about notes, both applied."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 37 cards, the title, description, keywords, notes, source titles and the language tags of the dossier and the built TTL."@en ,
+                 "Outcome: No language errors; every front is tagged en and sv and every back zxx. Four minor suggestions, all applied: a stiff Swedish note, the description of the alternative names in method step 7, one dash style for names of two people, and the Swedish Wikipedia source title."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: Every source's licence page and locator, the evidence of all 37 cards, the recorded queries and the method, licensing and source records."@en ,
+                 "Outcome: Licences right and CC0 holds; four warnings and three suggestions about the provenance record, all applied (the remaining dossier-assembly scripts are described rather than reproduced). The Swedish Wikipedia is now documented as the place where 13 Swedish names were found, the absolute local path is gone from query 13, the compilation creator no longer carries an AI remark, and the Englund Gambit's namesake is cited from Wikidata and checked."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: 17 cards: the five changed in rounds 1–3 (grunfeld-defence, four-knights-game, queens-gambit-declined, giuoco-piano, englund-gambit) and every third card; all 37 backs replayed with python-chess against the live lichess TSVs; Wikidata checks, Swedish article quotes, the English Wikipedia List of ECO codes (revision 1376141224), metadata and the fixes claimed in rounds 1–3."@en ,
+                 "Outcome: All fixes of rounds 1–3 confirmed in the dossier, TTL and report; backs, ECO codes, Wikidata checks, quotes, language tags and metadata correct. One warning, applied: the Grünfeld note stated as fact that the first edition files 3.Nc3 d5 under D70, which no source says."@en .
+
+<https://github.com/lichess-org/chess-openings>
+    dcterms:title "lichess-org/chess-openings: an aggregated data set of chess opening names (a.tsv–e.tsv)" ;
+    dcterms:creator "Lichess (lichess.org) and the data set's contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "README.md, section Copyright (https://github.com/lichess-org/chess-openings/blob/5a13018164f6bd88f48b3dc31a8e2a39f31a060a/README.md): \"As a collection of facts, this data set is in the public domain. Considerable effort was spent curating and cleaning the data. Insofar as that qualifies for copyright, the work is released under the CC0 Public Domain Dedication.\""@en .
+
+<https://www.wikidata.org/wiki/Property:P9838>
+    dcterms:title "Wikidata: chess opening items with an ECO code (P9838), their English and Swedish labels and aliases and their Swedish Wikipedia sitelinks" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<#own-work>
+    dcterms:title "Selection, Swedish names and python-chess verification for the Solid Memo chess openings deck" ;
+    dcterms:creator "Anton Wiklund, with the help of AI" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "Own work of the deck's compiler, dedicated to the public domain together with the deck: the deck's dcterms:license is https://creativecommons.org/publicdomain/zero/1.0/ (CC0 1.0 Universal). Move sequences and classification codes are facts, which are not copyrightable; the selection, the card wording and the notes are this dossier's own. The verification script is recorded verbatim under Queries."@en .
+
+<https://en.wikipedia.org/wiki/List_of_ECO_codes>
+    dcterms:title "English Wikipedia: List of ECO codes, and the article on each opening" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of the article: \"Text is available under the Creative Commons Attribution-ShareAlike 4.0 License\""@en .
+
+<https://sv.wikipedia.org/wiki/Lista_%C3%B6ver_schack%C3%B6ppningar>
+    dcterms:title "Swedish Wikipedia: Lista över schacköppningar, and the article on each opening" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of the article: \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported\""@en .
+
+<https://www.365chess.com/eco.php>
+    dcterms:title "365Chess: ECO chess openings index" ;
+    dcterms:creator "365Chess.com" ;
+    rdfs:comment "Footer of the page and of the terms of service (https://www.365chess.com/view/terms-of-service/): \"© 2007 - 2026 | 365Chess.com\"; the terms state no licence for the site's content. Verification only."@en .
+
+<#ruy-lopez>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ruy Lopez (Spanish Opening)"@en ,
+                     "Spanskt parti"@sv ;
+    solid-memo:back "1.e4 e5 2.Nf3 Nc6 3.Bb5"@zxx ;
+    solid-memo:backNote "ECO code: C60."@en ,
+                        "ECO-kod: C60."@sv .
+
+<#giuoco-piano>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Giuoco Piano"@en ,
+                     "Italienskt parti"@sv ;
+    solid-memo:back "1.e4 e5 2.Nf3 Nc6 3.Bc4 Bc5"@zxx ;
+    solid-memo:backNote "ECO code: C50. Often called the Italian Game, a name also used for 3.Bc4 alone."@en ,
+                        "ECO-kod: C50. Internationellt ofta kallat Giuoco Piano."@sv .
+
+<#two-knights-defence>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Two Knights Defence"@en ,
+                     "Preussiskt parti"@sv ;
+    solid-memo:back "1.e4 e5 2.Nf3 Nc6 3.Bc4 Nf6"@zxx ;
+    solid-memo:backNote "ECO code: C55."@en ,
+                        "ECO-kod: C55. Kallas även tvåspringarspel."@sv .
+
+<#evans-gambit>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Evans Gambit"@en ,
+                     "Evansgambit"@sv ;
+    solid-memo:back "1.e4 e5 2.Nf3 Nc6 3.Bc4 Bc5 4.b4"@zxx ;
+    solid-memo:backNote "ECO code: C51."@en ,
+                        "ECO-kod: C51."@sv .
+
+<#scotch-game>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Scotch Game"@en ,
+                     "Skotskt parti"@sv ;
+    solid-memo:back "1.e4 e5 2.Nf3 Nc6 3.d4"@zxx ;
+    solid-memo:backNote "ECO code: C44."@en ,
+                        "ECO-kod: C44."@sv .
+
+<#four-knights-game>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Four Knights Game"@en ,
+                     "Fyrspringarspel"@sv ;
+    solid-memo:back "1.e4 e5 2.Nf3 Nc6 3.Nc3 Nf6"@zxx ;
+    solid-memo:backNote "ECO code: C47. Code as in the 2010 ECO; the first edition files this position under C46."@en ,
+                        "ECO-kod: C47. Kod enligt ECO 2010; i första utgåvan räknas ställningen till C46."@sv .
+
+<#petrovs-defence>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Petrov's Defence"@en ,
+                     "Ryskt parti"@sv ;
+    solid-memo:back "1.e4 e5 2.Nf3 Nf6"@zxx ;
+    solid-memo:backNote "ECO code: C42. Also called the Russian Game."@en ,
+                        "ECO-kod: C42. Kallas även Petrovs försvar."@sv .
+
+<#philidor-defence>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Philidor Defence"@en ,
+                     "Philidors försvar"@sv ;
+    solid-memo:back "1.e4 e5 2.Nf3 d6"@zxx ;
+    solid-memo:backNote "ECO code: C41."@en ,
+                        "ECO-kod: C41."@sv .
+
+<#kings-gambit>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "King's Gambit"@en ,
+                     "Kungsgambit"@sv ;
+    solid-memo:back "1.e4 e5 2.f4"@zxx ;
+    solid-memo:backNote "ECO code: C30."@en ,
+                        "ECO-kod: C30."@sv .
+
+<#kings-gambit-accepted>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "King's Gambit Accepted"@en ,
+                     "Antagen kungsgambit"@sv ;
+    solid-memo:back "1.e4 e5 2.f4 exf4"@zxx ;
+    solid-memo:backNote "ECO code: C33."@en ,
+                        "ECO-kod: C33."@sv .
+
+<#vienna-game>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vienna Game"@en ,
+                     "Wienerparti"@sv ;
+    solid-memo:back "1.e4 e5 2.Nc3"@zxx ;
+    solid-memo:backNote "ECO code: C25."@en ,
+                        "ECO-kod: C25."@sv .
+
+<#bishops-opening>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bishop's Opening"@en ,
+                     "Löparspel"@sv ;
+    solid-memo:back "1.e4 e5 2.Bc4"@zxx ;
+    solid-memo:backNote "ECO code: C23."@en ,
+                        "ECO-kod: C23."@sv .
+
+<#danish-gambit>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Danish Gambit"@en ,
+                     "Nordisk gambit"@sv ;
+    solid-memo:back "1.e4 e5 2.d4 exd4 3.c3"@zxx ;
+    solid-memo:backNote "ECO code: C21. Called nordisk gambit (Nordic Gambit) in Swedish."@en ,
+                        "ECO-kod: C21. Heter Danish Gambit på engelska."@sv .
+
+<#berlin-defence>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ruy Lopez: Berlin Defence"@en ,
+                     "Spanskt parti: Berlinerförsvaret"@sv ;
+    solid-memo:back "1.e4 e5 2.Nf3 Nc6 3.Bb5 Nf6"@zxx ;
+    solid-memo:backNote "ECO code: C65."@en ,
+                        "ECO-kod: C65."@sv .
+
+<#marshall-attack>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ruy Lopez: Marshall Attack"@en ,
+                     "Spanskt parti: Marshallangreppet"@sv ;
+    solid-memo:back "1.e4 e5 2.Nf3 Nc6 3.Bb5 a6 4.Ba4 Nf6 5.O-O Be7 6.Re1 b5 7.Bb3 O-O 8.c3 d5"@zxx ;
+    solid-memo:backNote "ECO code: C89."@en ,
+                        "ECO-kod: C89."@sv .
+
+<#sicilian-defence>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sicilian Defence"@en ,
+                     "Sicilianskt parti"@sv ;
+    solid-memo:back "1.e4 c5"@zxx ;
+    solid-memo:backNote "ECO code: B20."@en ,
+                        "ECO-kod: B20."@sv .
+
+<#najdorf-variation>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sicilian Defence: Najdorf Variation"@en ,
+                     "Sicilianskt parti: Najdorfvarianten"@sv ;
+    solid-memo:back "1.e4 c5 2.Nf3 d6 3.d4 cxd4 4.Nxd4 Nf6 5.Nc3 a6"@zxx ;
+    solid-memo:backNote "ECO code: B90."@en ,
+                        "ECO-kod: B90."@sv .
+
+<#dragon-variation>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sicilian Defence: Dragon Variation"@en ,
+                     "Sicilianskt parti: Drakvarianten"@sv ;
+    solid-memo:back "1.e4 c5 2.Nf3 d6 3.d4 cxd4 4.Nxd4 Nf6 5.Nc3 g6"@zxx ;
+    solid-memo:backNote "ECO code: B70."@en ,
+                        "ECO-kod: B70."@sv .
+
+<#french-defence>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "French Defence"@en ,
+                     "Franskt parti"@sv ;
+    solid-memo:back "1.e4 e6"@zxx ;
+    solid-memo:backNote "ECO code: C00."@en ,
+                        "ECO-kod: C00."@sv .
+
+<#winawer-variation>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "French Defence: Winawer Variation"@en ,
+                     "Franskt parti: Winawervarianten"@sv ;
+    solid-memo:back "1.e4 e6 2.d4 d5 3.Nc3 Bb4"@zxx ;
+    solid-memo:backNote "ECO code: C15."@en ,
+                        "ECO-kod: C15."@sv .
+
+<#caro-kann-defence>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Caro-Kann Defence"@en ,
+                     "Caro-Kann"@sv ;
+    solid-memo:back "1.e4 c6"@zxx ;
+    solid-memo:backNote "ECO code: B10."@en ,
+                        "ECO-kod: B10."@sv .
+
+<#modern-defence>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Modern Defence"@en ,
+                     "Moderna försvaret"@sv ;
+    solid-memo:back "1.e4 g6"@zxx ;
+    solid-memo:backNote "ECO code: B06. Also called the Robatsch Defence."@en ,
+                        "ECO-kod: B06. Kallas även Robatschs försvar."@sv .
+
+<#alekhines-defence>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Alekhine's Defence"@en ,
+                     "Aljechins försvar"@sv ;
+    solid-memo:back "1.e4 Nf6"@zxx ;
+    solid-memo:backNote "ECO code: B02."@en ,
+                        "ECO-kod: B02."@sv .
+
+<#scandinavian-defence>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Scandinavian Defence"@en ,
+                     "Skandinaviskt parti"@sv ;
+    solid-memo:back "1.e4 d5"@zxx ;
+    solid-memo:backNote "ECO code: B01. Also called the Centre Counter Defence."@en ,
+                        "ECO-kod: B01. Kallas på engelska även Centre Counter Defence."@sv .
+
+<#queens-gambit>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Queen's Gambit"@en ,
+                     "Damgambit"@sv ;
+    solid-memo:back "1.d4 d5 2.c4"@zxx ;
+    solid-memo:backNote "ECO code: D06."@en ,
+                        "ECO-kod: D06."@sv .
+
+<#queens-gambit-accepted>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Queen's Gambit Accepted"@en ,
+                     "Antagen damgambit"@sv ;
+    solid-memo:back "1.d4 d5 2.c4 dxc4"@zxx ;
+    solid-memo:backNote "ECO code: D20."@en ,
+                        "ECO-kod: D20."@sv .
+
+<#queens-gambit-declined>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Queen's Gambit Declined"@en ,
+                     "Avböjd damgambit"@sv ;
+    solid-memo:back "1.d4 d5 2.c4 e6"@zxx ;
+    solid-memo:backNote "ECO code: D30. In the usual, narrow sense; other ways of declining, such as 2...c6 (the Slav), have names of their own."@en ,
+                        "ECO-kod: D30. I den vanliga, snävare betydelsen; andra sätt att avböja, som 2...c6 (slaviskt parti), har egna namn."@sv .
+
+<#slav-defence>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Slav Defence"@en ,
+                     "Slaviskt parti"@sv ;
+    solid-memo:back "1.d4 d5 2.c4 c6"@zxx ;
+    solid-memo:backNote "ECO code: D10."@en ,
+                        "ECO-kod: D10."@sv .
+
+<#grunfeld-defence>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Grünfeld Defence"@en ,
+                     "Grünfeldindiskt försvar"@sv ;
+    solid-memo:back "1.d4 Nf6 2.c4 g6 3.Nc3 d5"@zxx ;
+    solid-memo:backNote "ECO code: D80. Code as in the 2010 ECO; in the first edition, D80 begins only with 4.Bg5."@en ,
+                        "ECO-kod: D80. Kod enligt ECO 2010; i första utgåvan börjar D80 först med 4.Bg5."@sv .
+
+<#nimzo-indian-defence>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Nimzo-Indian Defence"@en ,
+                     "Nimzoindiskt försvar"@sv ;
+    solid-memo:back "1.d4 Nf6 2.c4 e6 3.Nc3 Bb4"@zxx ;
+    solid-memo:backNote "ECO code: E20."@en ,
+                        "ECO-kod: E20."@sv .
+
+<#queens-indian-defence>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Queen's Indian Defence"@en ,
+                     "Damindiskt försvar"@sv ;
+    solid-memo:back "1.d4 Nf6 2.c4 e6 3.Nf3 b6"@zxx ;
+    solid-memo:backNote "ECO code: E12."@en ,
+                        "ECO-kod: E12."@sv .
+
+<#budapest-gambit>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Budapest Gambit"@en ,
+                     "Budapestgambit"@sv ;
+    solid-memo:back "1.d4 Nf6 2.c4 e5"@zxx ;
+    solid-memo:backNote "ECO code: A51."@en ,
+                        "ECO-kod: A51."@sv .
+
+<#benko-gambit>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Benko Gambit"@en ,
+                     "Benkögambit"@sv ;
+    solid-memo:back "1.d4 Nf6 2.c4 c5 3.d5 b5"@zxx ;
+    solid-memo:backNote "ECO code: A57. Also called the Volga Gambit."@en ,
+                        "ECO-kod: A57. Kallas även Volgagambit."@sv .
+
+<#dutch-defence>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Dutch Defence"@en ,
+                     "Holländskt parti"@sv ;
+    solid-memo:back "1.d4 f5"@zxx ;
+    solid-memo:backNote "ECO code: A80."@en ,
+                        "ECO-kod: A80."@sv .
+
+<#english-opening>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "English Opening"@en ,
+                     "Engelskt parti"@sv ;
+    solid-memo:back "1.c4"@zxx ;
+    solid-memo:backNote "ECO code: A10."@en ,
+                        "ECO-kod: A10."@sv .
+
+<#trompowsky-attack>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Trompowsky Attack"@en ,
+                     "Trompowskys attack"@sv ;
+    solid-memo:back "1.d4 Nf6 2.Bg5"@zxx ;
+    solid-memo:backNote "ECO code: A45."@en ,
+                        "ECO-kod: A45."@sv .
+
+<#englund-gambit>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Englund Gambit"@en ,
+                     "Englundgambit"@sv ;
+    solid-memo:back "1.d4 e5"@zxx ;
+    solid-memo:backNote "ECO code: A40. Named after the Swedish player Fritz Englund."@en ,
+                        "ECO-kod: A40. Uppkallad efter den svenske schackspelaren Fritz Englund."@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

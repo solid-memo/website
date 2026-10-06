@@ -1,0 +1,691 @@
+@base <https://solid-memo.com/decks/chemical-compounds/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Chemical compounds"@en ,
+                  "Kemiska föreningar"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "60 common chemical compounds and their formulas: the front is the compound's name in English and Swedish, the back its chemical formula with subscripts (conventional formulas for inorganic compounds, molecular formulas in Hill order for organic compounds). Compiled from Wikidata and PubChem; Swedish names checked against Swedish Wikipedia and, for the less common ones, Svenska Akademiens ordböcker and Swedish official sources."@en ,
+                        "60 vanliga kemiska föreningar och deras formler: på framsidan föreningens namn på engelska och svenska, på baksidan dess kemiska formel med nedsänkta siffror (gängse formler för oorganiska föreningar, summaformler i Hill-ordning för organiska föreningar). Sammanställd från Wikidata och PubChem; de svenska namnen är kontrollerade mot svenskspråkiga Wikipedia och, för de mindre vanliga, mot Svenska Akademiens ordböcker och svenska myndighetskällor."@sv ;
+    prov:wasDerivedFrom <https://www.wikidata.org/> ,
+                        <https://pubchem.ncbi.nlm.nih.gov/> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:chemistry ;
+    dcat:keyword "chemistry"@en ,
+                 "chemical compounds"@en ,
+                 "chemical formulas"@en ,
+                 "molecular formulas"@en ,
+                 "kemi"@sv ,
+                 "kemiska föreningar"@sv ,
+                 "kemiska formler"@sv ,
+                 "summaformler"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:bidirectional ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#chemical-compounds> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#chemical-compounds> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/> ,
+              <https://pubchem.ncbi.nlm.nih.gov/> ,
+              <https://sv.wikipedia.org/> ,
+              <https://www.av.se/globalassets/filer/publikationer/foreskrifter/konsoliderade-foreskrifter/gransvarden-luftvagsexponering-arbetsmiljon-afs2023-14-konsoliderad.pdf> ,
+              <https://svenska.se/> ,
+              <https://docetp.mpa.se/LMF/Medicinsk%20Lustgas%20Air%20Liquide%20medicinal%20gas,%20liquefied%20SmPC_09001bee807a489a.pdf> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (a script comparing each formula's composition, live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Candidates: a list of about 70 compounds met in school chemistry and everyday life (acids, bases, salts, oxides, simple hydrocarbons, alcohols, sugars, a few well-known organic compounds) was drawn up by the authoring agent and looked up on Wikidata by exact English label (first query) or by label and alias (second query), requesting the chemical formula (P274), the Swedish label and the PubChem CID (P662). The raw SPARQL JSON responses were saved in the authoring agent's working notes, which are not published; the queries listed below reproduce them. Requests were made with curl and Python urllib with the User-Agent \"solid-memo deck research (https://github.com/antwika/solid-memo)\"."@en ,
+                 "Selection: 60 compounds were kept (see Selection). For them the third query fetched every P274 value, all English and Swedish labels and aliases, and the PubChem CIDs. Glucose (Q37525) has no PubChem CID on Wikidata; PubChem CID 5793 (D-Glucose) was used."@en ,
+                 "Formula on the back: written with Unicode subscript digits. Inorganic compounds, including the carbon compounds conventionally counted as inorganic (CO, CO₂, HCN and the carbonates), use the conventional formula of chemistry teaching (electropositive part first, polyatomic ions kept together: H₂SO₄, NaHCO₃, NH₄NO₃, Ca(OH)₂, HCN), which is Wikidata's P274 value for all of them except HF, HCN and Ca(OH)₂, where Wikidata gives only the Hill-order FH, CHN and CaH₂O₂. Organic compounds use the molecular formula in Hill order (C, H, then other elements alphabetically), exactly as Wikidata's P274 and PubChem give it, e.g. C₂H₆O for ethanol, CH₄N₂O for urea. For ionic compounds the formula is the formula unit (empirical formula), not a molecule."@en ,
+                 "Formula cross-check: the PubChem PUG REST property table (MolecularFormula, Title, IUPACName) was fetched for all 60 CIDs. PubChem writes formulas in the Hill system (e.g. H2O4S for sulfuric acid), so a comparison script (verify.py, in the unpublished working notes; see Queries) turned each card's formula into element counts (subscript digits read as numbers, each element symbol an upper-case letter optionally followed by a lower-case one, parenthesised groups multiplied by the count after them) and compared those counts with the counts parsed the same way from PubChem's formula and from every Wikidata P274 value of the item (query 3). It also compared the card's exact formula text with the P274 values, the English name case-insensitively with the item's English label and aliases, the Swedish name with its Swedish label and aliases, and resolved the Swedish name on sv.wikipedia (the sitelink and title queries). All 60 matched both in composition; the card's exact text matched a Wikidata P274 value for 57 of 60."@en ,
+                 "English names: the English front is the compound's common English name, in sentence case. Each was compared case-insensitively with the Wikidata English label and aliases (all 60 matched; acetylsalicylic acid is an alias of the item labelled 'aspirin') and against the PubChem record title. IUPAC spelling 'sulfur'/'sulfate' and 'aluminium' is used."@en ,
+                 "Swedish names: taken from the Wikidata Swedish label or alias, written in lower case as Swedish common nouns are. Each was resolved on sv.wikipedia through the MediaWiki API (following redirects) and compared with the Wikidata item's sv.wikipedia sitelink: 59 of 60 reached the item's own article, directly or by redirect. Hydrogen chloride (Q211086) has no sv.wikipedia article, and 'väteklorid' redirects to Saltsyra, the article of hydrochloric acid (Q2409), which defines saltsyra as a water solution of väteklorid. Where the label was not the best choice the established name confirmed by sv.wikipedia was used instead: väteklorid (Wikidata has no Swedish label; saltsyra is the solution), kvävemonoxid (Wikidata label 'kväveoxid' is also the generic word for nitrogen oxides), dikväveoxid (systematic; 'lustgas' is in the note), koppar(II)sulfat (alias; label 'Kopparsulfat'), glycerol (label 'propantriol'; sv.wikipedia's article is 'Glycerol'). In quality-control round 2 the less common names were also checked against independent Swedish sources: Svenska Akademiens ordböcker (SAOL and SO, through the JSON search API that the svenska.se site itself calls, found in its JavaScript: https://svenska.se/api/search/{saol|so}?q=<word>&exactMatch=true), Arbetsmiljöverket's limit-value regulation AFS 2023:14 (bilaga 1 lists Väteklorid 'Se saltsyra', Kvävemonoxid, Eten, Vätesulfid) and Läkemedelsverket's product information for medical nitrous oxide ('Dikväveoxid (N2O, medicinsk lustgas)'). SAOL and SO have glycerol, svavelväte, saltsyra, etylen, bikarbonat, lustgas and acetylsalicylsyra; SAOL also has kopparsulfat (neuter: 'ett kopparsulfat') and SO also has vätesulfid; neither has väteklorid, kvävemonoxid or dikväveoxid, which are confirmed by AFS 2023:14 and Läkemedelsverket. Svenska kemisamfundets nomenklaturutskott and NE were not consulted."@en ,
+                 "Notes: a back note gives a common name from the Wikidata labels or aliases (table salt, baking soda, bikarbonat, quicklime, slaked lime, laughing gas/lustgas, aspirin, ASA, ethene, vätesulfid), or, where Wikidata has no Swedish alias, from the sv.wikipedia article's first sentence (etylen); the solution name for HCl (saltsyra is the Swedish label of Wikidata's hydrochloric-acid item Q2409) and HF; the hydrate for copper(II) sulfate; or, for eight organic compounds, a well-known, commonly taught isomer with the same molecular formula (formulas checked in PubChem and Wikidata), so that the formula-to-name direction has one answer within the deck and the learner knows the formula is not unique in general. Not every isomer is named: only the pairs met in teaching (C₉H₈O₄ is also caffeic acid, which is not mentioned, the card's note being about aspirin)."@en ,
+                 "Machine checks: each card carries a Wikidata check of its formula (P274) where the card's exact text is a Wikidata value, and of its Swedish name where that exact string is a Swedish label or alias; quality control added checks of the isomer isocitric acid's formula (Q288927), the Swedish label 'saltsyra' of hydrochloric acid (Q2409) and the Swedish alias 'vätesulfid' of hydrogen sulfide (Q170591): 110 checks in all, run against live Wikidata by the builder. Formula checks are omitted for hydrogen-fluoride, hydrogen-cyanide, calcium-hydroxide (Wikidata has only the Hill-order string), Swedish-name checks for hydrogen-peroxide, hydrogen-chloride, nitric-oxide, iron-iii-oxide, copper-ii-sulfate, ammonium-nitrate, ethane, glycerol, formaldehyde, urea (Wikidata's string differs only in capitalisation, or the name was chosen over Wikidata's label as described above)."@en ,
+                 "Every card's evidence lists what Wikidata, PubChem and sv.wikipedia showed for it on 2026-10-04, with the opening sentence of the sv.wikipedia article that uses the Swedish name (the article introductions were fetched with the extracts queries below). The deck was built with the builder and validated with the app's SHACL and DCAT-AP validators (node packages/deck-library/scripts/validate_sources.ts chemical-compounds)."@en ,
+                 "Selection: 60 common chemical compounds taught in school chemistry or met in everyday life: water and other simple hydrogen compounds (ammonia, hydrogen peroxide, hydrogen chloride, hydrogen fluoride, hydrogen sulfide, hydrogen cyanide), the common mineral acids, sodium, potassium and calcium salts and hydroxides, magnesium oxide and sulfate, common oxides (of carbon, nitrogen, sulfur, silicon, iron, aluminium, titanium, zinc, calcium, magnesium), copper(II) sulfate, silver nitrate, ammonium nitrate, the simplest hydrocarbons (methane to butane, ethylene, acetylene, benzene), methanol, ethanol, glycerol, formaldehyde, formic, acetic and citric acid, acetone, urea, glucose, sucrose, caffeine, acetylsalicylic acid and chloroform. Inclusion: a single well-defined compound with a Wikidata item carrying P274 and a PubChem record, an established English and Swedish name, and a formula no other card in the deck shares (so the deck can be studied in both directions). Excluded: elements and allotropes (O₂, O₃, N₂), which are not compounds; mixtures and solutions (hydrochloric acid, ammonia water, bleach); hydrates as separate cards (the hydrate is mentioned in a note where it is the familiar form); compounds whose common name is ambiguous between several substances (e.g. 'iron oxide', 'soda'); and, to keep the deck near 60 cards, the further candidates naphthalene, ethylene glycol, toluene, phenol, carbon tetrachloride, sulfur trioxide, ammonium chloride and calcium sulfate. Isomers are not excluded as long as only one of them is in the deck; eight cards name a well-known, commonly taught isomer in a note (not every isomer of every formula is named: C₉H₈O₄, for example, is also caffeic acid)."@en ,
+                 "Licensing: The deck is CC0 1.0. Its content comes from Wikidata (structured data under CC0 1.0: formulas, labels, aliases) and PubChem (molecular formulas computed by PubChem, a service of the US National Library of Medicine; information created by or for the US government is in the public domain). Only PubChem-computed molecular formulas were used; PubChem record titles, which come from depositor synonyms, were consulted for comparison only and do not appear on the cards. The English names, the formula notation and the notes are the authoring agent's own wording of facts. The selection of compounds was made by the authoring agent, not copied from any list. Swedish Wikipedia (CC BY-SA 4.0) was used to confirm that each Swedish name is established and refers to the compound; three single names (väteklorid, glycerol and the note name etylen) were first found there because Wikidata lacks them for the item. Single names are facts, not protected expression, so no text, list or selection was copied and the share-alike condition is not triggered; the three names are now also confirmed by independent sources. Arbetsmiljöverket's regulation AFS 2023:14 is a Swedish författning and so not protected by copyright (Copyright Act 9 §). Svenska Akademiens ordböcker and Läkemedelsverket's product information carry no open licence and were used for verification only, nothing copied. No source's licence therefore requires attribution or share-alike, though every source is credited in the deck and this report."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Sources and machine checks: formula composition against PubChem and Wikidata, names against Wikidata labels and sv.wikipedia, uniqueness of formulas, the builder's live Wikidata checks."@en ;
+    rdfs:comment "Scope: All 60 cards."@en ,
+                 "Outcome: All 60 formulas agree in composition with PubChem's computed formula and with Wikidata's P274; all English names match a Wikidata label or alias; all Swedish names lead to the item's sv.wikipedia article. No two cards share a formula, so the deck is bidirectional. 107 Wikidata checks pass. The findings record notation and naming differences and how they were resolved."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 60 cards, the description and the selection; formulas re-checked against the NIST Chemistry WebBook and PubChem."@en ,
+                 "Outcome: No factual errors: every formula is correct in composition, every front has one right answer, no two cards share a formula, and the 107 Wikidata checks passed on re-run. Four suggestions: an isomer note for citric acid, the uneven isomer-note policy (caffeic acid), 'carbon compounds' where organic compounds is meant, and loose selection wording. All four were applied (the second by rewording the policy rather than adding a note)."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language and translation"@en ;
+    rdfs:comment "Scope: All 60 cards plus title, description and keywords; Swedish labels re-fetched from Wikidata."@en ,
+                 "Outcome: Names, language tags, Swedish case and Unicode formulas were found correct. Two warnings (the 'carbon compounds' wording and the thin sourcing of Swedish names) and three note suggestions. The wording was fixed; independent Swedish sources were found and cited (SAOL and SO through svenska.se's search API, Arbetsmiljöverket's AFS 2023:14, Läkemedelsverket's product information); the vätesulfid and bikarbonat notes were changed; the ASA/aspirin note was aligned in English but the Swedish note kept, because Aspirin is a registered trademark in Swedish usage."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 60 cards' evidence, the sources, licence evidence, method, queries and licensing; licence pages and queries re-run."@en ,
+                 "Outcome: CC0 compliance confirmed and all quoted evidence verified. Two warnings on documentation (sv.wikipedia supplied some single names although recorded as verification-only; Swedish names rested on linked community sources) and three suggestions (reproducibility, PubChem titles wording, generic sv.wikipedia evidence). All were applied."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final re-check (loop 1): changed cards, every third card, metadata, licence and documentation"@en ;
+    rdfs:comment "Scope: All 60 cards against live Wikidata, PubChem, sv.wikipedia extracts, AFS 2023:14, Läkemedelsverket and SAOL/SO; metadata, licence and documentation."@en ,
+                 "Outcome: All formulas, names, notes, the licence decision and the Wikidata checks were confirmed. One misquoted sv.wikipedia fragment (copper-ii-sulfate) and one inaccurate method sentence (hydrogen chloride's sv.wikipedia article) were found; both were verified against the sources on 2026-10-04 and fixed."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final re-check (loop 2): changed cards, every third card, metadata, licence and documentation"@en ;
+    rdfs:comment "Scope: 21 cards (copper-ii-sulfate, changed in round 4, and every third card) against live Wikidata, PubChem, sv.wikipedia, AFS 2023:14, Läkemedelsverket and SAOL/SO; metadata, licence and documentation."@en ,
+                 "Outcome: Every checked formula, name, note, language tag and quoted fragment was confirmed, as were the licence decision and the live Wikidata checks. One documentation warning (method step 7 assigned kopparsulfat and acetylsalicylsyra to the wrong dictionaries) and one Swedish suggestion (neuter agreement in the copper(II) sulfate note) were verified against SAOL/SO on 2026-10-04 and both fixed."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing (page footer, fetched 2026-10-04): \"All structured data from the main, Property, Lexeme, and EntitySchema namespaces is available under the Creative Commons CC0 License\"."@en .
+
+<https://pubchem.ncbi.nlm.nih.gov/>
+    dcterms:title "PubChem" ;
+    dcterms:creator "National Center for Biotechnology Information, US National Library of Medicine" ;
+    rdfs:comment "https://www.ncbi.nlm.nih.gov/home/about/policies/ (fetched 2026-10-04): \"Information that is created by or for the US government on this site is within the public domain.\" The same page warns that PubChem incorporates material contributed by others that may be protected; only PubChem's own computed molecular formulas were used: PubChem's record of the molecular formula (checked for water, CID 962) attributes it to \"Computed by PubChem 2.2 (PubChem release 2025.04.14)\"; the card formulas were compared only with the PubChem-computed formulas returned by PUG REST."@en .
+
+<https://sv.wikipedia.org/>
+    dcterms:title "Svenskspråkiga Wikipedia" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Page footer of https://sv.wikipedia.org/wiki/Saltsyra (fetched 2026-10-04): \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported\"."@en .
+
+<https://www.av.se/globalassets/filer/publikationer/foreskrifter/konsoliderade-foreskrifter/gransvarden-luftvagsexponering-arbetsmiljon-afs2023-14-konsoliderad.pdf>
+    dcterms:title "Arbetsmiljöverkets föreskrifter och allmänna råd (AFS 2023:14) om gränsvärden för luftvägsexponering i arbetsmiljön (konsoliderad version, ändringar till och med AFS 2025:5)" ;
+    dcterms:creator "Arbetsmiljöverket (Swedish Work Environment Authority)" ;
+    rdfs:comment "AFS 2023:14 is an agency regulation (författning). Swedish Copyright Act (SFS 1960:729) 9 §, https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/lag-1960729-om-upphovsratt-till-litterara-och_sfs-1960-729/ (fetched 2026-10-04): \"Upphovsrätt gäller inte till 1. författningar, 2. beslut av myndigheter, 3. yttranden av svenska myndigheter\"."@en .
+
+<https://svenska.se/>
+    dcterms:title "Svenska Akademiens ordböcker: Svenska Akademiens ordlista (SAOL) and Svensk ordbok (SO)" ;
+    dcterms:creator "Svenska Akademien" ;
+    rdfs:comment "No licence or reuse statement found on https://svenska.se/om-webbplatsen/ (fetched 2026-10-04); treated as all rights reserved, so used for verification only, nothing copied."@en .
+
+<https://docetp.mpa.se/LMF/Medicinsk%20Lustgas%20Air%20Liquide%20medicinal%20gas,%20liquefied%20SmPC_09001bee807a489a.pdf>
+    dcterms:title "Produktresumé: Medicinsk Lustgas Air Liquide, medicinsk gas, kondenserad (Läkemedelsverket's product information database)" ;
+    dcterms:creator "Air Liquide Santé International (marketing authorisation holder); published by Läkemedelsverket" ;
+    rdfs:comment "The PDF carries no licence statement (checked 2026-10-04); treated as all rights reserved, so used for verification only, nothing copied."@en .
+
+<#water>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Water"@en ,
+                     "vatten"@sv ;
+    solid-memo:back "H₂O" .
+
+<#hydrogen-peroxide>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hydrogen peroxide"@en ,
+                     "väteperoxid"@sv ;
+    solid-memo:back "H₂O₂" .
+
+<#carbon-dioxide>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Carbon dioxide"@en ,
+                     "koldioxid"@sv ;
+    solid-memo:back "CO₂" .
+
+<#carbon-monoxide>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Carbon monoxide"@en ,
+                     "kolmonoxid"@sv ;
+    solid-memo:back "CO" .
+
+<#ammonia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ammonia"@en ,
+                     "ammoniak"@sv ;
+    solid-memo:back "NH₃" .
+
+<#hydrogen-chloride>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hydrogen chloride"@en ,
+                     "väteklorid"@sv ;
+    solid-memo:back "HCl" ;
+    solid-memo:backNote "Dissolved in water it forms hydrochloric acid."@en ,
+                        "Löst i vatten bildar den saltsyra."@sv .
+
+<#hydrogen-fluoride>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hydrogen fluoride"@en ,
+                     "vätefluorid"@sv ;
+    solid-memo:back "HF" ;
+    solid-memo:backNote "Dissolved in water it forms hydrofluoric acid."@en ,
+                        "Löst i vatten bildar den fluorvätesyra."@sv .
+
+<#hydrogen-sulfide>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hydrogen sulfide"@en ,
+                     "svavelväte"@sv ;
+    solid-memo:back "H₂S" ;
+    solid-memo:backNote "In Swedish also called vätesulfid."@en ,
+                        "Kallas även vätesulfid."@sv .
+
+<#hydrogen-cyanide>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hydrogen cyanide"@en ,
+                     "vätecyanid"@sv ;
+    solid-memo:back "HCN" .
+
+<#sulfuric-acid>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sulfuric acid"@en ,
+                     "svavelsyra"@sv ;
+    solid-memo:back "H₂SO₄" .
+
+<#nitric-acid>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Nitric acid"@en ,
+                     "salpetersyra"@sv ;
+    solid-memo:back "HNO₃" .
+
+<#phosphoric-acid>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Phosphoric acid"@en ,
+                     "fosforsyra"@sv ;
+    solid-memo:back "H₃PO₄" .
+
+<#sodium-chloride>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sodium chloride"@en ,
+                     "natriumklorid"@sv ;
+    solid-memo:back "NaCl" ;
+    solid-memo:backNote "Table salt."@en ,
+                        "Koksalt."@sv .
+
+<#sodium-hydroxide>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sodium hydroxide"@en ,
+                     "natriumhydroxid"@sv ;
+    solid-memo:back "NaOH" .
+
+<#sodium-bicarbonate>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sodium bicarbonate"@en ,
+                     "natriumvätekarbonat"@sv ;
+    solid-memo:back "NaHCO₃" ;
+    solid-memo:backNote "Baking soda."@en ,
+                        "Bikarbonat."@sv .
+
+<#sodium-carbonate>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sodium carbonate"@en ,
+                     "natriumkarbonat"@sv ;
+    solid-memo:back "Na₂CO₃" .
+
+<#sodium-hypochlorite>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sodium hypochlorite"@en ,
+                     "natriumhypoklorit"@sv ;
+    solid-memo:back "NaClO" .
+
+<#potassium-chloride>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Potassium chloride"@en ,
+                     "kaliumklorid"@sv ;
+    solid-memo:back "KCl" .
+
+<#potassium-hydroxide>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Potassium hydroxide"@en ,
+                     "kaliumhydroxid"@sv ;
+    solid-memo:back "KOH" .
+
+<#potassium-nitrate>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Potassium nitrate"@en ,
+                     "kaliumnitrat"@sv ;
+    solid-memo:back "KNO₃" .
+
+<#potassium-permanganate>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Potassium permanganate"@en ,
+                     "kaliumpermanganat"@sv ;
+    solid-memo:back "KMnO₄" .
+
+<#calcium-carbonate>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Calcium carbonate"@en ,
+                     "kalciumkarbonat"@sv ;
+    solid-memo:back "CaCO₃" .
+
+<#calcium-hydroxide>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Calcium hydroxide"@en ,
+                     "kalciumhydroxid"@sv ;
+    solid-memo:back "Ca(OH)₂" ;
+    solid-memo:backNote "Slaked lime."@en ,
+                        "Släckt kalk."@sv .
+
+<#calcium-oxide>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Calcium oxide"@en ,
+                     "kalciumoxid"@sv ;
+    solid-memo:back "CaO" ;
+    solid-memo:backNote "Quicklime."@en ,
+                        "Bränd kalk."@sv .
+
+<#calcium-chloride>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Calcium chloride"@en ,
+                     "kalciumklorid"@sv ;
+    solid-memo:back "CaCl₂" .
+
+<#magnesium-oxide>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Magnesium oxide"@en ,
+                     "magnesiumoxid"@sv ;
+    solid-memo:back "MgO" .
+
+<#magnesium-sulfate>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Magnesium sulfate"@en ,
+                     "magnesiumsulfat"@sv ;
+    solid-memo:back "MgSO₄" .
+
+<#sulfur-dioxide>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sulfur dioxide"@en ,
+                     "svaveldioxid"@sv ;
+    solid-memo:back "SO₂" .
+
+<#nitrogen-dioxide>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Nitrogen dioxide"@en ,
+                     "kvävedioxid"@sv ;
+    solid-memo:back "NO₂" .
+
+<#nitric-oxide>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Nitric oxide"@en ,
+                     "kvävemonoxid"@sv ;
+    solid-memo:back "NO" .
+
+<#nitrous-oxide>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Nitrous oxide"@en ,
+                     "dikväveoxid"@sv ;
+    solid-memo:back "N₂O" ;
+    solid-memo:backNote "Laughing gas."@en ,
+                        "Lustgas."@sv .
+
+<#silicon-dioxide>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Silicon dioxide"@en ,
+                     "kiseldioxid"@sv ;
+    solid-memo:back "SiO₂" .
+
+<#iron-iii-oxide>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Iron(III) oxide"@en ,
+                     "järn(III)oxid"@sv ;
+    solid-memo:back "Fe₂O₃" .
+
+<#aluminium-oxide>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Aluminium oxide"@en ,
+                     "aluminiumoxid"@sv ;
+    solid-memo:back "Al₂O₃" .
+
+<#copper-ii-sulfate>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Copper(II) sulfate"@en ,
+                     "koppar(II)sulfat"@sv ;
+    solid-memo:back "CuSO₄" ;
+    solid-memo:backNote "Anhydrous; the blue crystals are the pentahydrate, CuSO₄·5H₂O."@en ,
+                        "Vattenfritt; de blå kristallerna är pentahydratet CuSO₄·5H₂O."@sv .
+
+<#silver-nitrate>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Silver nitrate"@en ,
+                     "silvernitrat"@sv ;
+    solid-memo:back "AgNO₃" .
+
+<#titanium-dioxide>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Titanium dioxide"@en ,
+                     "titandioxid"@sv ;
+    solid-memo:back "TiO₂" .
+
+<#zinc-oxide>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Zinc oxide"@en ,
+                     "zinkoxid"@sv ;
+    solid-memo:back "ZnO" .
+
+<#ammonium-nitrate>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ammonium nitrate"@en ,
+                     "ammoniumnitrat"@sv ;
+    solid-memo:back "NH₄NO₃" .
+
+<#methane>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Methane"@en ,
+                     "metan"@sv ;
+    solid-memo:back "CH₄" .
+
+<#ethane>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ethane"@en ,
+                     "etan"@sv ;
+    solid-memo:back "C₂H₆" .
+
+<#propane>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Propane"@en ,
+                     "propan"@sv ;
+    solid-memo:back "C₃H₈" .
+
+<#butane>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Butane"@en ,
+                     "butan"@sv ;
+    solid-memo:back "C₄H₁₀" ;
+    solid-memo:backNote "Isobutane has the same molecular formula."@en ,
+                        "Isobutan har samma summaformel."@sv .
+
+<#ethylene>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ethylene"@en ,
+                     "eten"@sv ;
+    solid-memo:back "C₂H₄" ;
+    solid-memo:backNote "Also called ethene."@en ,
+                        "Kallas även etylen."@sv .
+
+<#acetylene>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Acetylene"@en ,
+                     "etyn"@sv ;
+    solid-memo:back "C₂H₂" ;
+    solid-memo:backNote "Also called ethyne."@en ,
+                        "Kallas även acetylen."@sv .
+
+<#benzene>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Benzene"@en ,
+                     "bensen"@sv ;
+    solid-memo:back "C₆H₆" .
+
+<#methanol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Methanol"@en ,
+                     "metanol"@sv ;
+    solid-memo:back "CH₄O" .
+
+<#ethanol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ethanol"@en ,
+                     "etanol"@sv ;
+    solid-memo:back "C₂H₆O" ;
+    solid-memo:backNote "Dimethyl ether has the same molecular formula."@en ,
+                        "Dimetyleter har samma summaformel."@sv .
+
+<#glycerol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Glycerol"@en ,
+                     "glycerol"@sv ;
+    solid-memo:back "C₃H₈O₃" .
+
+<#formaldehyde>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Formaldehyde"@en ,
+                     "formaldehyd"@sv ;
+    solid-memo:back "CH₂O" .
+
+<#formic-acid>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Formic acid"@en ,
+                     "myrsyra"@sv ;
+    solid-memo:back "CH₂O₂" .
+
+<#acetic-acid>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Acetic acid"@en ,
+                     "ättiksyra"@sv ;
+    solid-memo:back "C₂H₄O₂" ;
+    solid-memo:backNote "Methyl formate has the same molecular formula."@en ,
+                        "Metylformiat har samma summaformel."@sv .
+
+<#acetone>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Acetone"@en ,
+                     "aceton"@sv ;
+    solid-memo:back "C₃H₆O" ;
+    solid-memo:backNote "Propanal has the same molecular formula."@en ,
+                        "Propanal har samma summaformel."@sv .
+
+<#urea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Urea"@en ,
+                     "urea"@sv ;
+    solid-memo:back "CH₄N₂O" ;
+    solid-memo:backNote "Ammonium cyanate has the same molecular formula."@en ,
+                        "Ammoniumcyanat har samma summaformel."@sv .
+
+<#glucose>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Glucose"@en ,
+                     "glukos"@sv ;
+    solid-memo:back "C₆H₁₂O₆" ;
+    solid-memo:backNote "Fructose has the same molecular formula."@en ,
+                        "Fruktos har samma summaformel."@sv .
+
+<#sucrose>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sucrose"@en ,
+                     "sackaros"@sv ;
+    solid-memo:back "C₁₂H₂₂O₁₁" ;
+    solid-memo:backNote "Lactose has the same molecular formula."@en ,
+                        "Laktos har samma summaformel."@sv .
+
+<#citric-acid>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Citric acid"@en ,
+                     "citronsyra"@sv ;
+    solid-memo:back "C₆H₈O₇" ;
+    solid-memo:backNote "Isocitric acid has the same molecular formula."@en ,
+                        "Isocitronsyra har samma summaformel."@sv .
+
+<#caffeine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Caffeine"@en ,
+                     "koffein"@sv ;
+    solid-memo:back "C₈H₁₀N₄O₂" .
+
+<#acetylsalicylic-acid>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Acetylsalicylic acid"@en ,
+                     "acetylsalicylsyra"@sv ;
+    solid-memo:back "C₉H₈O₄" ;
+    solid-memo:backNote "Known as aspirin; abbreviated ASA."@en ,
+                        "Förkortas ASA."@sv .
+
+<#chloroform>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Chloroform"@en ,
+                     "kloroform"@sv ;
+    solid-memo:back "CHCl₃" .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

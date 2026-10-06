@@ -1,0 +1,702 @@
+@base <https://solid-memo.com/decks/sweden-counties-and-provinces/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Sweden's counties and provinces"@en ,
+                  "Sveriges län och landskap"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "Sweden's 21 counties and 25 provinces in 46 cards, in English and Swedish. A county card shows the county's name and asks for its seat (residensstad); a province card shows the province's name and asks for the land (landsdel) it traditionally belongs to: Götaland, Svealand or Norrland. Compiled from Wikidata and checked against the county administrative boards' websites, Nationalencyklopedin and Wikipedia."@en ,
+                        "Sveriges 21 län och 25 landskap på 46 kort, på engelska och svenska. Ett länskort visar länets namn och frågar efter residensstaden; ett landskapskort visar landskapets namn och frågar efter landsdelen det traditionellt hör till: Götaland, Svealand eller Norrland. Sammanställd från Wikidata och kontrollerad mot länsstyrelsernas webbplatser, Nationalencyklopedin och Wikipedia."@sv ;
+    prov:wasDerivedFrom <https://www.wikidata.org/> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:geography ;
+    dcat:keyword "Sweden"@en ,
+                 "counties"@en ,
+                 "provinces"@en ,
+                 "county seats"@en ,
+                 "geography"@en ,
+                 "lands of Sweden"@en ,
+                 "Sverige"@sv ,
+                 "län"@sv ,
+                 "landskap"@sv ,
+                 "residensstäder"@sv ,
+                 "landsdelar"@sv ,
+                 "geografi"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#sweden-counties-and-provinces> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#sweden-counties-and-provinces> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/> ,
+              <https://www.lansstyrelsen.se/> ,
+              <https://sv.wikipedia.org/wiki/Sveriges_l%C3%A4n> ,
+              <https://sv.wikipedia.org/wiki/Landskap_i_Sverige> ,
+              <https://en.wikipedia.org/wiki/Provinces_of_Sweden> ,
+              <https://sv.wikipedia.org/wiki/Svealand> ,
+              <https://sv.wikipedia.org/wiki/Residensstad> ,
+              <https://www.ne.se/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Counties: the Wikidata Query Service (https://query.wikidata.org/sparql) was asked for every instance of county of Sweden (Q200547) without a dissolution date (P576), with its English and Swedish labels, its seat (P36 capital) and the seat's English and Swedish labels, and its county code (P507) (query 1). It returned exactly 21 counties, one seat each. The card front is the county's English label (\"Västra Götaland County\") and Swedish label (\"Västra Götalands län\"), the back the seat's English and Swedish labels (English \"Gothenburg\", Swedish \"Göteborg\"; all other seats have the same name in both languages)."@en ,
+                 "County seats were checked against the counties' own administrative boards: a script (command 4, given verbatim in Queries) fetched each board's start page https://www.lansstyrelsen.se/<county>.html, stripped scripts, styles and tags, and took the last match of the regular expressions Postadress (.{0,60}?) Telefon (postal address) and Besöksadress (.{0,60}?) Postadress (visiting address); in all 21 the town of the postal address is the Wikidata seat. The visiting-address pattern found nothing for Skåne, whose footer was then read by hand in the saved page. Skåne's board gives visiting addresses in both Kristianstad and Malmö, so its county residence page was read as well: governors have lived at Stortorget in Malmö since 1658 (with short exceptions); the card says Malmö and notes the Kristianstad office. Norrbotten's board also lists an office in Jokkmokk, with Luleå first. The government ordinance on the boards, Förordning (2017:868) med länsstyrelseinstruktion (https://data.riksdagen.se/dokument/sfs-2017-868.text, command 11), was also fetched and searched for the boards' seats; it does not name them, so it is not cited."@en ,
+                 "As an independent check, the raw wikitext of Swedish Wikipedia's article Sveriges län (command 5) was read: its table's Residensstad column agrees with Wikidata for all 21 counties."@en ,
+                 "Provinces: Wikidata was asked for every instance of province of Sweden (Q193556) with its English and Swedish labels and its P361/P131/P706 values (query 2), and for the provinces each land lists under P527 has part(s) (query 3: Götaland Q201694, Svealand Q203835, Norrland Q203505; the stray items were inspected with command 10). Query 2 returned the 25 provinces plus two stray items: Q19400650 (no labels, different from Gotland Q1027830) and Q10376643 (a second Södermanland item, labelled Södermanland in English and Swedish and described only as \"landskap\", duplicating Q626062), both left out. The provinces' own P361 statements name a land for only three of them, so the land was taken from the lands' P527 lists, which cover all 25 except as described in step 7."@en ,
+                 "Each province's land was checked against two independent tables: Swedish Wikipedia's Landskap i Sverige (column Landsdel, command 6) and English Wikipedia's Provinces of Sweden (per-land lists in the Heraldry section, command 7). Both agree on 10 provinces in Götaland, 6 in Svealand and 9 in Norrland, Lappland in Norrland. Swedish Wikipedia's Svealand article (command 8) was read for Värmland's history. As a non-Wikimedia check, the freely visible lead sentences of Nationalencyklopedin's articles Götaland, Svealand and Norrland (command 14) list the same 10, 6 and 9 provinces. The deck uses this traditional division by province; the natural-geography border of Norrland (limes norrlandicus) and the county-based statistical regions differ from it."@en ,
+                 "Wikidata's P527 statements and their qualifiers (query 3 uses truthy wdt:P527, which does not show qualifiers, so the claims were also read with wbgetclaims, query 12): Värmland is listed under Götaland with end time (P582) 1815 and under Svealand with start time (P580) 1815, so Wikidata agrees with the other sources that Värmland is in Svealand today. Swedish Wikipedia also says Värmland was counted to Götaland until 1815; English Wikipedia says until 1812. The card gives Svealand, with the note \"formerly counted as part of Götaland\" (no year, since the sources disagree), and checks Svealand's P527. Svealand's P527 also lists Åland (Q5689) with end time 1809-09-17 (Treaty of Fredrikshamn, when Åland was ceded to Russia); it is not a Swedish province today and plays no part, since the province list comes from the instances of Q193556, not from the lands' P527. Götaland's P527 lists the island Öland (Q239276) instead of the province item Q15981396, so the Öland card has label checks only; both Wikipedia tables and Nationalencyklopedin put the province in Götaland."@en ,
+                 "Card text: fronts are \"<English name> (province)\" and \"<Swedish name> (landskap)\" for provinces, so a province is never confused with the county of the same name (Gotland, Jämtland, Norrbotten and others). English names are Wikidata's English labels (Scania for Skåne and Lapland for Lappland; the rest keep the Swedish name in English). The back label says what is asked: Seat / Residensstad, Land / Landsdel. The lands are called Götaland, Svealand and Norrland in both languages."@en ,
+                 "Every card carries Wikidata checks (command 9 runs them): the English and Swedish labels on the card, the county's P36 seat, the land's labels and, except Öland, the land's P527 statement that lists the province. The notes added after review are checked where Wikidata states them: the former Älvsborg County's labels, seat (P36) and dissolution year (P576)."@en ,
+                 "Notes added after review round 1 and 2: the Västra Götaland note (Vänersborg, the former Älvsborg County's seat until 1997) rests on Wikidata Q254990 (P36 Vänersborg, P576 1998-01-01) and is checked against Swedish Wikipedia's Residensstad; the Västernorrland and Södermanland notes (the seat is not the largest town) rest on Wikidata's municipal populations (P1082, query 13) and Swedish Wikipedia's Residensstad, and the board's contact pages were read for Västra Götaland's offices. The Scania and Lapland notes give the Swedish or English name from the Wikidata labels already on the cards."@en ,
+                 "Selection: All of Sweden's 21 present counties (län) and all 25 provinces (landskap): a complete, closed set, so nothing was selected or left out by judgement. Two card kinds only: county → seat (residensstad) and province → land (landsdel). Not included: dissolved counties (e.g. Malmöhus and Kristianstads län), the counties' letters and codes, and the province → county relation, since many provinces lie in several counties and such a card would have no single answer. Two stray Wikidata items typed as provinces (Q19400650, Q10376643) were excluded as duplicates or empty items."@en ,
+                 "Licensing: Everything in the cards comes from Wikidata, whose structured data is CC0: the list of counties and provinces, their English and Swedish names, the seats and the lands. The set is the complete set of Sweden's counties and provinces, so no selection was taken from anywhere. The county boards' websites and Nationalencyklopedin (all rights reserved) and the Wikipedia articles (CC BY-SA 4.0) were only consulted to confirm the facts; no text, wording or selection was copied from them, and the card wording (\"X (province)\", the back labels and notes) is the compilers' own. Facts are not copyrightable, so the deck can be released under CC0 1.0 like the rest of the library."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Sources agree; Wikidata checks pass; every card has one answer"@en ;
+    rdfs:comment "Scope: All 46 cards."@en ,
+                 "Outcome: All 21 county seats agree across Wikidata P36, the boards' postal addresses and Swedish Wikipedia. All 25 province lands agree across Wikidata P527, Swedish and English Wikipedia; Wikidata lists Värmland under Götaland with end time 1815 and under Svealand with start time 1815 (qualifiers first missed because query 3 is truthy; corrected after review round 3), and lists the island rather than the province of Öland. The builder's Wikidata checks cover every label on the cards, every seat (P36) and 24 of the 25 province–land statements (P527, all but Öland); all pass."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 46 cards, the title, description, keywords, sources, method, queries and licensing."@en ,
+                 "Outcome: No factual errors in the 46 cards: the reviewer checked all 21 seats against the boards' Kontakta oss pages and Swedish Wikipedia's Residensstad, and all 25 lands against Wikipedia and a genealogy site. Four findings, all applied: notes on Västra Götaland and on Västernorrland and Södermanland; Nationalencyklopedin as a non-Wikimedia check of the lands (its suggested Dalarna note was declined); the Svealand P527 check on Värmland."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language and translation"@en ;
+    rdfs:comment "Scope: All 46 cards, the title, description, keywords, sources, method, queries and licensing."@en ,
+                 "Outcome: No errors or warnings: names, language tags, idiom and study direction are right. Three suggestions, all applied."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 46 cards, the title, description, keywords, sources, method, queries and licensing."@en ,
+                 "Outcome: Licensing sound (CC0; Wikidata the only content source). One error and three warnings in the documentation, all confirmed and fixed: the Värmland 'discrepancy' was an artefact of a truthy query, the Åland entry was unrecorded, the footer script and two fetches were missing from Queries. Three suggestions applied."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final re-check (loop 1): changed cards, every third card, metadata, licence and documentation"@en ;
+    rdfs:comment "Scope: 37 of the 46 cards (the cards changed in rounds 1–3 and every third card), the title, description, keywords, sources, licence evidence, method, queries, licensing and the quality-control log."@en ,
+                 "Outcome: No errors or warnings: the builder's 237 Wikidata checks pass, the app validator reports valid, and the seats, lands, notes and licence evidence were re-checked live. Two documentation suggestions, both applied: the round 1 summary now matches its four findings, and the three Swedish Wikipedia sources cite their own article's footer as licence evidence. No card changed."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing: \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://www.lansstyrelsen.se/>
+    dcterms:title "Länsstyrelsen (the 21 county administrative boards' websites)" ;
+    dcterms:creator "Länsstyrelserna (Sweden's county administrative boards)" ;
+    rdfs:comment "https://www.lansstyrelsen.se/stockholm/om-oss/om-webbplatsen.html, Juridisk information: \"Länsstyrelsernas webbplatser innehåller texter, kartor, bilder, ljud och illustrationer som är upphovsrättsskyddade och får inte användas utan tillstånd.\""@en .
+
+<https://sv.wikipedia.org/wiki/Sveriges_l%C3%A4n>
+    dcterms:title "Sveriges län (Swedish Wikipedia)" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://sv.wikipedia.org/wiki/Sveriges_l%C3%A4n, page footer: \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported.\""@en .
+
+<https://sv.wikipedia.org/wiki/Landskap_i_Sverige>
+    dcterms:title "Landskap i Sverige (Swedish Wikipedia)" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://sv.wikipedia.org/wiki/Landskap_i_Sverige, page footer: \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported.\""@en .
+
+<https://en.wikipedia.org/wiki/Provinces_of_Sweden>
+    dcterms:title "Provinces of Sweden (English Wikipedia)" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://en.wikipedia.org/wiki/Provinces_of_Sweden, page footer: \"Text is available under the Creative Commons Attribution-ShareAlike 4.0 License; additional terms may apply.\""@en .
+
+<https://sv.wikipedia.org/wiki/Svealand>
+    dcterms:title "Svealand (Swedish Wikipedia)" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://sv.wikipedia.org/wiki/Svealand, page footer: \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported.\""@en .
+
+<https://sv.wikipedia.org/wiki/Residensstad>
+    dcterms:title "Residensstad (Swedish Wikipedia)" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://sv.wikipedia.org/wiki/Residensstad, page footer: \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported.\""@en .
+
+<https://www.ne.se/>
+    dcterms:title "Nationalencyklopedin (articles Götaland, Svealand, Norrland, Värmland)" ;
+    dcterms:creator "NE Nationalencyklopedin AB" ;
+    rdfs:comment "https://www.ne.se/info/upphovsratt/: \"Nästan allt material på NE.se omfattas av upphovsrättslagen. [...] Ingen kopiering får göras utan tillstånd.\" (quoting of encyclopedia texts is allowed only for non-commercial purposes)."@en .
+
+<#stockholms-lan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Stockholm County"@en ,
+                     "Stockholms län"@sv ;
+    solid-memo:backLabel "Seat"@en ,
+                         "Residensstad"@sv ;
+    solid-memo:back "Stockholm"@en ,
+                    "Stockholm"@sv .
+
+<#uppsala-lan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Uppsala County"@en ,
+                     "Uppsala län"@sv ;
+    solid-memo:backLabel "Seat"@en ,
+                         "Residensstad"@sv ;
+    solid-memo:back "Uppsala"@en ,
+                    "Uppsala"@sv .
+
+<#sodermanlands-lan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Södermanland County"@en ,
+                     "Södermanlands län"@sv ;
+    solid-memo:backLabel "Seat"@en ,
+                         "Residensstad"@sv ;
+    solid-memo:back "Nyköping"@en ,
+                    "Nyköping"@sv ;
+    solid-memo:backNote "Not Eskilstuna, though Eskilstuna is larger."@en ,
+                        "Inte Eskilstuna, trots att Eskilstuna är större."@sv .
+
+<#ostergotlands-lan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Östergötland County"@en ,
+                     "Östergötlands län"@sv ;
+    solid-memo:backLabel "Seat"@en ,
+                         "Residensstad"@sv ;
+    solid-memo:back "Linköping"@en ,
+                    "Linköping"@sv .
+
+<#jonkopings-lan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Jönköping County"@en ,
+                     "Jönköpings län"@sv ;
+    solid-memo:backLabel "Seat"@en ,
+                         "Residensstad"@sv ;
+    solid-memo:back "Jönköping"@en ,
+                    "Jönköping"@sv .
+
+<#kronobergs-lan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Kronoberg County"@en ,
+                     "Kronobergs län"@sv ;
+    solid-memo:backLabel "Seat"@en ,
+                         "Residensstad"@sv ;
+    solid-memo:back "Växjö"@en ,
+                    "Växjö"@sv .
+
+<#kalmar-lan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Kalmar County"@en ,
+                     "Kalmar län"@sv ;
+    solid-memo:backLabel "Seat"@en ,
+                         "Residensstad"@sv ;
+    solid-memo:back "Kalmar"@en ,
+                    "Kalmar"@sv .
+
+<#gotlands-lan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Gotland County"@en ,
+                     "Gotlands län"@sv ;
+    solid-memo:backLabel "Seat"@en ,
+                         "Residensstad"@sv ;
+    solid-memo:back "Visby"@en ,
+                    "Visby"@sv .
+
+<#blekinge-lan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Blekinge County"@en ,
+                     "Blekinge län"@sv ;
+    solid-memo:backLabel "Seat"@en ,
+                         "Residensstad"@sv ;
+    solid-memo:back "Karlskrona"@en ,
+                    "Karlskrona"@sv .
+
+<#skane-lan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Skåne County"@en ,
+                     "Skåne län"@sv ;
+    solid-memo:backLabel "Seat"@en ,
+                         "Residensstad"@sv ;
+    solid-memo:back "Malmö"@en ,
+                    "Malmö"@sv ;
+    solid-memo:backNote "The County Administrative Board also has an office in Kristianstad."@en ,
+                        "Länsstyrelsen har även kontor i Kristianstad."@sv .
+
+<#hallands-lan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Halland County"@en ,
+                     "Hallands län"@sv ;
+    solid-memo:backLabel "Seat"@en ,
+                         "Residensstad"@sv ;
+    solid-memo:back "Halmstad"@en ,
+                    "Halmstad"@sv .
+
+<#vastra-gotalands-lan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Västra Götaland County"@en ,
+                     "Västra Götalands län"@sv ;
+    solid-memo:backLabel "Seat"@en ,
+                         "Residensstad"@sv ;
+    solid-memo:back "Gothenburg"@en ,
+                    "Göteborg"@sv ;
+    solid-memo:backNote "Not Vänersborg, the seat of the former Älvsborg County until 1997."@en ,
+                        "Inte Vänersborg, som var residensstad i det tidigare Älvsborgs län till 1997."@sv .
+
+<#varmlands-lan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Värmland County"@en ,
+                     "Värmlands län"@sv ;
+    solid-memo:backLabel "Seat"@en ,
+                         "Residensstad"@sv ;
+    solid-memo:back "Karlstad"@en ,
+                    "Karlstad"@sv .
+
+<#orebro-lan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Örebro County"@en ,
+                     "Örebro län"@sv ;
+    solid-memo:backLabel "Seat"@en ,
+                         "Residensstad"@sv ;
+    solid-memo:back "Örebro"@en ,
+                    "Örebro"@sv .
+
+<#vastmanlands-lan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Västmanland County"@en ,
+                     "Västmanlands län"@sv ;
+    solid-memo:backLabel "Seat"@en ,
+                         "Residensstad"@sv ;
+    solid-memo:back "Västerås"@en ,
+                    "Västerås"@sv .
+
+<#dalarnas-lan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Dalarna County"@en ,
+                     "Dalarnas län"@sv ;
+    solid-memo:backLabel "Seat"@en ,
+                         "Residensstad"@sv ;
+    solid-memo:back "Falun"@en ,
+                    "Falun"@sv .
+
+<#gavleborgs-lan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Gävleborg County"@en ,
+                     "Gävleborgs län"@sv ;
+    solid-memo:backLabel "Seat"@en ,
+                         "Residensstad"@sv ;
+    solid-memo:back "Gävle"@en ,
+                    "Gävle"@sv .
+
+<#vasternorrlands-lan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Västernorrland County"@en ,
+                     "Västernorrlands län"@sv ;
+    solid-memo:backLabel "Seat"@en ,
+                         "Residensstad"@sv ;
+    solid-memo:back "Härnösand"@en ,
+                    "Härnösand"@sv ;
+    solid-memo:backNote "Not Sundsvall, though Sundsvall is larger."@en ,
+                        "Inte Sundsvall, trots att Sundsvall är större."@sv .
+
+<#jamtlands-lan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Jämtland County"@en ,
+                     "Jämtlands län"@sv ;
+    solid-memo:backLabel "Seat"@en ,
+                         "Residensstad"@sv ;
+    solid-memo:back "Östersund"@en ,
+                    "Östersund"@sv .
+
+<#vasterbottens-lan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Västerbotten County"@en ,
+                     "Västerbottens län"@sv ;
+    solid-memo:backLabel "Seat"@en ,
+                         "Residensstad"@sv ;
+    solid-memo:back "Umeå"@en ,
+                    "Umeå"@sv .
+
+<#norrbottens-lan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Norrbotten County"@en ,
+                     "Norrbottens län"@sv ;
+    solid-memo:backLabel "Seat"@en ,
+                         "Residensstad"@sv ;
+    solid-memo:back "Luleå"@en ,
+                    "Luleå"@sv .
+
+<#province-blekinge>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Blekinge (province)"@en ,
+                     "Blekinge (landskap)"@sv ;
+    solid-memo:backLabel "Land"@en ,
+                         "Landsdel"@sv ;
+    solid-memo:back "Götaland"@en ,
+                    "Götaland"@sv .
+
+<#province-bohuslan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bohuslän (province)"@en ,
+                     "Bohuslän (landskap)"@sv ;
+    solid-memo:backLabel "Land"@en ,
+                         "Landsdel"@sv ;
+    solid-memo:back "Götaland"@en ,
+                    "Götaland"@sv .
+
+<#province-dalarna>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Dalarna (province)"@en ,
+                     "Dalarna (landskap)"@sv ;
+    solid-memo:backLabel "Land"@en ,
+                         "Landsdel"@sv ;
+    solid-memo:back "Svealand"@en ,
+                    "Svealand"@sv .
+
+<#province-dalsland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Dalsland (province)"@en ,
+                     "Dalsland (landskap)"@sv ;
+    solid-memo:backLabel "Land"@en ,
+                         "Landsdel"@sv ;
+    solid-memo:back "Götaland"@en ,
+                    "Götaland"@sv .
+
+<#province-gotland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Gotland (province)"@en ,
+                     "Gotland (landskap)"@sv ;
+    solid-memo:backLabel "Land"@en ,
+                         "Landsdel"@sv ;
+    solid-memo:back "Götaland"@en ,
+                    "Götaland"@sv .
+
+<#province-gastrikland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Gästrikland (province)"@en ,
+                     "Gästrikland (landskap)"@sv ;
+    solid-memo:backLabel "Land"@en ,
+                         "Landsdel"@sv ;
+    solid-memo:back "Norrland"@en ,
+                    "Norrland"@sv .
+
+<#province-halland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Halland (province)"@en ,
+                     "Halland (landskap)"@sv ;
+    solid-memo:backLabel "Land"@en ,
+                         "Landsdel"@sv ;
+    solid-memo:back "Götaland"@en ,
+                    "Götaland"@sv .
+
+<#province-halsingland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hälsingland (province)"@en ,
+                     "Hälsingland (landskap)"@sv ;
+    solid-memo:backLabel "Land"@en ,
+                         "Landsdel"@sv ;
+    solid-memo:back "Norrland"@en ,
+                    "Norrland"@sv .
+
+<#province-harjedalen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Härjedalen (province)"@en ,
+                     "Härjedalen (landskap)"@sv ;
+    solid-memo:backLabel "Land"@en ,
+                         "Landsdel"@sv ;
+    solid-memo:back "Norrland"@en ,
+                    "Norrland"@sv .
+
+<#province-jamtland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Jämtland (province)"@en ,
+                     "Jämtland (landskap)"@sv ;
+    solid-memo:backLabel "Land"@en ,
+                         "Landsdel"@sv ;
+    solid-memo:back "Norrland"@en ,
+                    "Norrland"@sv .
+
+<#province-lappland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Lapland (province)"@en ,
+                     "Lappland (landskap)"@sv ;
+    solid-memo:backLabel "Land"@en ,
+                         "Landsdel"@sv ;
+    solid-memo:back "Norrland"@en ,
+                    "Norrland"@sv ;
+    solid-memo:backNote "Swedish: Lappland."@en ,
+                        "Engelska: Lapland."@sv .
+
+<#province-medelpad>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Medelpad (province)"@en ,
+                     "Medelpad (landskap)"@sv ;
+    solid-memo:backLabel "Land"@en ,
+                         "Landsdel"@sv ;
+    solid-memo:back "Norrland"@en ,
+                    "Norrland"@sv .
+
+<#province-norrbotten>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Norrbotten (province)"@en ,
+                     "Norrbotten (landskap)"@sv ;
+    solid-memo:backLabel "Land"@en ,
+                         "Landsdel"@sv ;
+    solid-memo:back "Norrland"@en ,
+                    "Norrland"@sv .
+
+<#province-narke>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Närke (province)"@en ,
+                     "Närke (landskap)"@sv ;
+    solid-memo:backLabel "Land"@en ,
+                         "Landsdel"@sv ;
+    solid-memo:back "Svealand"@en ,
+                    "Svealand"@sv .
+
+<#province-skane>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Scania (province)"@en ,
+                     "Skåne (landskap)"@sv ;
+    solid-memo:backLabel "Land"@en ,
+                         "Landsdel"@sv ;
+    solid-memo:back "Götaland"@en ,
+                    "Götaland"@sv ;
+    solid-memo:backNote "Swedish: Skåne, as in Skåne County."@en ,
+                        "Engelska: Scania."@sv .
+
+<#province-smaland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Småland (province)"@en ,
+                     "Småland (landskap)"@sv ;
+    solid-memo:backLabel "Land"@en ,
+                         "Landsdel"@sv ;
+    solid-memo:back "Götaland"@en ,
+                    "Götaland"@sv .
+
+<#province-sodermanland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Södermanland (province)"@en ,
+                     "Södermanland (landskap)"@sv ;
+    solid-memo:backLabel "Land"@en ,
+                         "Landsdel"@sv ;
+    solid-memo:back "Svealand"@en ,
+                    "Svealand"@sv .
+
+<#province-uppland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Uppland (province)"@en ,
+                     "Uppland (landskap)"@sv ;
+    solid-memo:backLabel "Land"@en ,
+                         "Landsdel"@sv ;
+    solid-memo:back "Svealand"@en ,
+                    "Svealand"@sv .
+
+<#province-varmland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Värmland (province)"@en ,
+                     "Värmland (landskap)"@sv ;
+    solid-memo:backLabel "Land"@en ,
+                         "Landsdel"@sv ;
+    solid-memo:back "Svealand"@en ,
+                    "Svealand"@sv ;
+    solid-memo:backNote "Formerly counted as part of Götaland."@en ,
+                        "Räknades förr till Götaland."@sv .
+
+<#province-vasterbotten>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Västerbotten (province)"@en ,
+                     "Västerbotten (landskap)"@sv ;
+    solid-memo:backLabel "Land"@en ,
+                         "Landsdel"@sv ;
+    solid-memo:back "Norrland"@en ,
+                    "Norrland"@sv .
+
+<#province-vastergotland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Västergötland (province)"@en ,
+                     "Västergötland (landskap)"@sv ;
+    solid-memo:backLabel "Land"@en ,
+                         "Landsdel"@sv ;
+    solid-memo:back "Götaland"@en ,
+                    "Götaland"@sv .
+
+<#province-vastmanland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Västmanland (province)"@en ,
+                     "Västmanland (landskap)"@sv ;
+    solid-memo:backLabel "Land"@en ,
+                         "Landsdel"@sv ;
+    solid-memo:back "Svealand"@en ,
+                    "Svealand"@sv .
+
+<#province-angermanland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ångermanland (province)"@en ,
+                     "Ångermanland (landskap)"@sv ;
+    solid-memo:backLabel "Land"@en ,
+                         "Landsdel"@sv ;
+    solid-memo:back "Norrland"@en ,
+                    "Norrland"@sv .
+
+<#province-oland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Öland (province)"@en ,
+                     "Öland (landskap)"@sv ;
+    solid-memo:backLabel "Land"@en ,
+                         "Landsdel"@sv ;
+    solid-memo:back "Götaland"@en ,
+                    "Götaland"@sv .
+
+<#province-ostergotland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Östergötland (province)"@en ,
+                     "Östergötland (landskap)"@sv ;
+    solid-memo:backLabel "Land"@en ,
+                         "Landsdel"@sv ;
+    solid-memo:back "Götaland"@en ,
+                    "Götaland"@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

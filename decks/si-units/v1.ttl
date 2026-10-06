@@ -1,0 +1,762 @@
+@base <https://solid-memo.com/decks/si-units/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "SI units and prefixes"@en ,
+                  "SI-enheter och prefix"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "The International System of Units (SI) in 53 cards: the 7 base units, the 22 derived units with special names and the 24 SI prefixes, including ronna, quetta, ronto and quecto from 2022. The front names a quantity or a prefix; the back gives the SI unit with its symbol, or the prefix's factor and symbol. Compiled from NIST's SI guide and prefix table, Swedac's regulations on units of measurement (STAFS 2009:26) and Wikidata, and checked against the BIPM SI Brochure."@en ,
+                        "Internationella måttenhetssystemet (SI) i 53 kort: de 7 grundenheterna, de 22 härledda enheterna med särskilda namn och de 24 SI-prefixen, inklusive ronna, quetta, ronto och quekto från 2022. Framsidan anger en storhet eller ett prefix; baksidan ger SI-enheten och dess beteckning, eller prefixets faktor och beteckning. Sammanställd ur NIST:s SI-guide och prefixtabell, Swedacs föreskrifter om måttenheter (STAFS 2009:26) och Wikidata, och kontrollerad mot BIPM:s SI-broschyr."@sv ;
+    prov:wasDerivedFrom <https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication811e2008.pdf> ,
+                        <https://www.nist.gov/pml/owm/metric-si-prefixes> ,
+                        <https://regelverk.swedac.se/foreskrifter/swedac/stafs-2009-26-konsol.pdf> ,
+                        <https://www.wikidata.org/> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:physics ,
+               topic:science ;
+    dcat:keyword "SI units"@en ,
+                 "SI prefixes"@en ,
+                 "metric system"@en ,
+                 "units of measurement"@en ,
+                 "physics"@en ,
+                 "SI-enheter"@sv ,
+                 "SI-prefix"@sv ,
+                 "metriska systemet"@sv ,
+                 "måttenheter"@sv ,
+                 "fysik"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#si-units> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#si-units> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/licenses/by/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication811e2008.pdf> ,
+              <https://www.nist.gov/pml/owm/metric-si-prefixes> ,
+              <https://regelverk.swedac.se/foreskrifter/swedac/stafs-2009-26-konsol.pdf> ,
+              <https://www.wikidata.org/> ,
+              <https://www.bipm.org/documents/20126/41483022/SI-Brochure-9-EN.pdf> ,
+              <https://sv.wikipedia.org/wiki/Mall:SI-prefix> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ,
+                       <#review-6> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Units in English: downloaded NIST SP 811 (2008) as PDF and extracted its text with pypdf. Table 1 (SI base units, PDF p. 16) gave the 7 base units and Table 3 (\"The 22 SI coherent derived units with special names and symbols\", PDF p. 17) the 22 derived units: for each, the quantity, the unit name and the symbol. Where a row names several quantities (\"energy, work, amount of heat\") the card names the first one, which is unique among the 29 units."@en ,
+                 "Prefixes: downloaded NIST's Metric (SI) Prefixes page and read its table of 24 prefixes (name, symbol, factor 10^30 to 10^−30). The deck uses all 24."@en ,
+                 "Swedish: downloaded the consolidated Swedac regulation STAFS 2009:26 om måttenheter (amended up to STAFS 2020:2) and extracted its text. Bilaga 1.1 (SI-grundenheter), 1.1.1 (Celsiustemperatur), 1.2.3 (Härledda SI-enheter med särskilda namn och beteckningar) and 1.3 (Multipelprefix) gave the Swedish quantity names, unit names and the 20 prefixes it lists (hekto, deka, mikro, piko, yokto ...). Where STAFS names several quantities for one unit the card uses the one that matches the English front (\"elektrisk laddning\", \"elektrisk spänning\")."@en ,
+                 "The four prefixes adopted in 2022 (ronna, quetta, ronto, quecto) are not in STAFS 2009:26. Their Swedish names were taken from the Swedish labels of their Wikidata items (ronna, quetta, ronto, quekto) and checked against the prefix table of Swedish Wikipedia (Mall:SI-prefix: Quetta, Ronna, Ronto, Quekto)."@en ,
+                 "Wikidata: SPARQL queries (see Queries) fetched, for the 29 units, their English and Swedish labels and aliases, unit symbols (P5061) and measured quantities (P111) with the quantities' labels; and for every item that is an instance of SI prefix (Q131299), its labels, symbol (P5061) and numeric value (P1181). English unit names follow the international (BIPM and Wikidata) spelling: metre, deca; NIST's US spellings meter and deka are given in a note."@en ,
+                 "Card text: fronts read \"SI unit of <quantity>\" / \"SI-enhet för <storhet>\" for units and the bare prefix name with the note \"SI prefix\" for prefixes. Backs give the unit name and symbol, \"newton (N)\", in English and Swedish, or the factor and symbol of a prefix, \"10³ (k)\", untagged since it has no language. The micro sign is the Greek letter μ (U+03BC), as on NIST's page and in Wikidata. Unit names are lower case, as the SI requires; \"Celsius\" keeps its capital. Notes say whether a unit is a base unit or a derived unit with a special name, and point out the pairs that share a dimension (Hz and Bq, Gy and Sv). Further notes: the radian and steradian notes follow the current BIPM brochure (Section 2.3.3: plane and solid angle are treated as quantities with the unit one by convention), backed by NIST SP 811 Table 3 (expressed as 1), after QC round 1 found SP 811's 2008 wording out of date; the degree Celsius note (equal to the kelvin, t/°C = T/K − 273.15) comes from NIST SP 811 Section 4.2.1.1 and STAFS bilaga 1.1.1; kilo's lower-case symbol from NIST's prefix page (Capitalization), checked against BIPM Section 3.1; the year 2022 and the four prefixes added together from NIST's prefix page (Prefix Progress table), checked against Wikidata P571 and BIPM Resolution 3 of the 27th CGPM; the alternative Swedish names of illuminance (belysningsstyrka, illuminans) from Wikidata Q194411; the US spellings meter and deka from NIST."@en ,
+                 "Cross-check: every card was compared against the BIPM SI Brochure (9th edition, V4.01, June 2026; Table 2 base units, Table 4 the 22 derived units, Table 7 the 24 prefixes, and Resolution 3 of the 27th CGPM for the 2022 prefixes) and against Wikidata through the builder's machine checks: the English and Swedish label of each unit and prefix, its symbol, each prefix's numeric value and SI-prefix class, each unit's measured quantity, and the English and Swedish labels of the quantities wherever Wikidata uses the card's wording. Where Wikidata disagreed with the official sources the check was left out and the discrepancy recorded (Quality control, round 0)."@en ,
+                 "Not used: NIST SP 330 (2019), the US edition of the SI Brochure, was downloaded (see Queries) and read for its licence only: it carries the BIPM's note that \"All BIPM's works are internationally protected by copyright\", so it is not a public-domain source, and it predates the 2022 prefixes."@en ,
+                 "Swedish forms of the 2022 prefixes: no Swedish regulation or authority lists them yet (STAFS 2009:26 stops at yotta and yokto), so 'ronna', 'quetta', 'ronto' and 'quekto' rest on Wikidata's Swedish labels and Swedish Wikipedia only. The quekto card says so in its Swedish note. The web search behind this claim was not logged at authoring; in QC round 4 it was re-run on 2026-10-04 (two web searches, terms under Queries). Neither found guidance from Swedac, RISE or Språkrådet on Swedish forms of the 2022 prefixes. The second listed STAFS 2022:6, which was downloaded and checked: it amends STAFS 2016:1 on measuring instruments, not STAFS 2009:26, and the consolidated STAFS 2009:26 still ends at the amendment STAFS 2020:2."@en ,
+                 "Text extraction: PDFs with pypdf and the NIST HTML pages with Beautiful Soup (see Queries). The original extraction commands were not logged in full during authoring; in QC round 3 the commands listed under Queries were re-run on 2026-10-04 and produce the text files used for the cards byte for byte, and the re-downloaded NIST SP 330 PDF has the same SHA-256 as the copy read at authoring."@en ,
+                 "Selection: All of the core SI: the 7 base units, the 22 derived units with special names and symbols (as listed in NIST SP 811 Table 3 and BIPM SI Brochure Table 4, including the radian, steradian, degree Celsius and katal), and the 24 SI prefixes from quetta (10³⁰) to quecto (10⁻³⁰) as listed by NIST. Left out: derived units without special names (square metre, metre per second ...), non-SI units accepted for use with the SI (litre, tonne, minute, electronvolt ...), the binary prefixes (kibi, mebi ...), which are IEC, not SI, and the defining constants. One card per unit and per prefix; for units with several quantities the first quantity named in the tables is on the front."@en ,
+                 "Licensing: The deck is CC0 1.0. Its content sources are all public domain or CC0. NIST SP 811 is a work of NIST employees, not subject to copyright in the United States; elsewhere NIST grants a non-exclusive, worldwide, royalty-free right to reprint it and make derivative works. NIST's prefix page is, under NIST's website terms, public information that may be distributed or copied (it is not marked as copyrighted). In any case the deck takes only facts from NIST (unit and prefix names, symbols, factors, the year the four newest prefixes were added), which are not copyrightable. STAFS 2009:26 is a Swedish statute, which Swedish copyright law (9 § upphovsrättslagen) excludes from copyright; Wikidata is CC0. The card wording is our own. The BIPM SI Brochure (CC BY 4.0) and Swedish Wikipedia's prefix table (CC BY-SA 4.0) were used only to verify facts the content sources gave (names, symbols, factors, the unit-one convention for angles, the 2022 adoption); no text and no selection was taken from them — the selection, the complete set of named SI units and prefixes, comes from NIST. NIST SP 330, the US edition of the BIPM brochure, was deliberately not used because it carries a BIPM copyright notice. The sources are nevertheless credited in the deck and in this report."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Source agreement and machine checks: every card against NIST (SP 811, prefix page), Swedac STAFS 2009:26, the BIPM SI Brochure and Wikidata."@en ;
+    rdfs:comment "Scope: All 53 cards; the licences of all sources."@en ,
+                 "Outcome: 276 Wikidata checks pass (2026-10-04): for every unit its English label, Swedish label (except two, below), symbol (P5061) and, for 27 units, measured quantity (P111); for every prefix its English and Swedish label, symbol, numeric value (P1181) and class SI prefix (Q131299); and the English or Swedish label of the quantity on the front wherever Wikidata uses the card's wording. All 29 units and 24 prefixes agree in name, symbol and factor across NIST, the BIPM brochure and Wikidata; the Swedish unit and prefix names agree between STAFS 2009:26 and Wikidata except where noted. Discrepancies and how they were resolved are listed as findings; no check was dropped to make the build pass other than those listed."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 53 cards, against the BIPM SI Brochure (V4.01, June 2026), NIST's prefix page and STAFS 2009:26; the builder's Wikidata checks re-run."@en ,
+                 "Outcome: No factual errors in fronts or backs. The radian and steradian notes used NIST SP 811's 2008 wording (\"a special name for the number one\"), which the current BIPM brochure no longer uses; both notes now follow BIPM Section 2.3.3. The Swedish 'quekto' has no official Swedish source; the card now says so. Two optional notes (Celsius, lux) were added. All findings verified against the scratch copies of the sources and applied."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language and translation"@en ;
+    rdfs:comment "Scope: All 53 cards in English and Swedish, the title, description and keywords."@en ,
+                 "Outcome: Language quality high; Swedish names match STAFS. The Swedish name of the CGPM in the 2022 notes was wrong ('generalkonferensen'); the notes no longer name the CGPM (see round 3). Notes on lux, kilo and micro reworded to use established terms ('belysningsstyrka', 'beteckning'). All findings verified and applied."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 53 cards' evidence, every source's licence, the method, queries and licensing paragraph; builder check, sync and validator re-run."@en ,
+                 "Outcome: Licensing sound, CC0 compliant. Three warnings fixed: the 2022 notes and the kilo note now rest on a content source (NIST's prefix page, with Wikidata P571 checks); the queries now give the SP 330 download, the full pypdf and HTML-to-text commands (re-run and verified to reproduce the text files byte for byte) and the sparql.py helper. The licensing paragraph and method were made precise."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final re-check (loop 1): changed cards, every third card, metadata, licence and documentation"@en ;
+    rdfs:comment "Scope: 25 of 53 cards (the 10 changed in round 3 plus every third card), the metadata, licence, method, queries and QC log; builder check, sync and validator re-run."@en ,
+                 "Outcome: Facts and licensing clean. One warning fixed: the web search behind the Swedish 2022-prefix claim was re-run, logged under Queries and the method updated. One suggestion applied ('enligt konvention' in the radian and steradian notes); the Wikidata check total is now stated. After this round the builder check passes with 283 Wikidata checks."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final re-check (loop 2): changed cards (radian, steradian), every third card, metadata, licence and documentation"@en ;
+    rdfs:comment "Scope: 20 of 53 cards (radian, steradian and every third card), the metadata, licence, method, queries and QC log; builder check and validator re-run."@en ,
+                 "Outcome: No errors or warnings. One suggestion applied: the record overstated Wikidata's disagreement on the radian's measured quantity. The radian now has a P111 check and an English label check of 'plane angle' on Q1357788 (which passes through the alias), and the round-0 finding and the card's Wikidata evidence say precisely what differs. After this round the builder check passes with 285 Wikidata checks."@en .
+
+<#review-6>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: all 53 cards."@en ,
+                 "Outcome: All 53 cards (7 base units, 22 derived units with special names, 24 prefixes) checked against the BIPM SI Brochure (9th edition, V4.01: Tables 4 and 7, section 2.3.3) and the consolidated STAFS 2009:26 (Bilaga 1.1 and 1.2.3); unit names, symbols, quantities, prefix factors, notes and language tags are correct, and the description's claims match the cards. One suggestion on the Swedish description was applied."@en .
+
+<https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication811e2008.pdf>
+    dcterms:title "Guide for the Use of the International System of Units (SI), NIST Special Publication 811, 2008 edition" ;
+    dcterms:creator "Ambler Thompson and Barry N. Taylor, National Institute of Standards and Technology (NIST)" ;
+    rdfs:comment "Written by NIST employees (title page), and carries no third-party copyright notice. NIST's Copyright, Fair Use, and Licensing Statements for SRD, Data, Software, and Technical Series Publications (https://www.nist.gov/open/copyright-fair-use-and-licensing-statements-srd-data-software-and-technical-series-publications): \"Works authored by NIST employees are not subject to Copyright protection within the United States; foreign rights are reserved.\" The same page grants \"the non-exclusive, perpetual, paid-up, royalty-free, worldwide right to reprint works in all formats including print, electronically, and online, and in all subsequent editions, and derivative works.\""@en .
+
+<https://www.nist.gov/pml/owm/metric-si-prefixes>
+    dcterms:title "Metric (SI) Prefixes" ;
+    dcterms:creator "National Institute of Standards and Technology (NIST), Office of Weights and Measures" ;
+    rdfs:comment "NIST Copyrights & Disclaimers (https://www.nist.gov/oism/copyrights; the page gives its address as https://www.nist.gov/copyrights-disclaimers): \"With the exception of material marked as copyrighted, information presented on NIST sites are considered public information and may be distributed or copied. Use of appropriate byline/photo/image credits is requested.\" The prefix table is not marked as copyrighted."@en .
+
+<https://regelverk.swedac.se/foreskrifter/swedac/stafs-2009-26-konsol.pdf>
+    dcterms:title "Styrelsen för ackreditering och teknisk kontrolls föreskrifter (STAFS 2009:26) om måttenheter, konsoliderad version t.o.m. STAFS 2020:2" ;
+    dcterms:creator "Swedac (Styrelsen för ackreditering och teknisk kontroll)" ;
+    rdfs:comment "A Swedish statute (författning). Lag (1960:729) om upphovsrätt till litterära och konstnärliga verk, 9 § (https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/lag-1960729-om-upphovsratt-till-litterara-och_sfs-1960-729/): \"Upphovsrätt gäller inte till 1. författningar, 2. beslut av myndigheter, 3. yttranden av svenska myndigheter och 4. officiella översättningar av sådant som avses i 1-3.\""@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "Wikidata:Licensing (https://www.wikidata.org/wiki/Wikidata:Licensing): \"All data in Wikidata has a CC0 license.\""@en .
+
+<https://www.bipm.org/documents/20126/41483022/SI-Brochure-9-EN.pdf>
+    dcterms:title "The International System of Units (SI), 9th edition 2019, V4.01 June 2026 (SI Brochure)" ;
+    dcterms:creator "Bureau International des Poids et Mesures (BIPM)" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    rdfs:comment "Copyright statement on page 2 of the PDF: \"The SI Brochure is distributed under the terms of the Creative Commons Attribution 4.0 International License (http://creativecommons.org/licenses/by/4.0/), which permits unrestricted use, distribution, and reproduction in any medium, provided you give appropriate credit to the original author(s) and the source, provide a link to the Creative Commons license, and indicate if changes were made.\""@en .
+
+<https://sv.wikipedia.org/wiki/Mall:SI-prefix>
+    dcterms:title "Mall:SI-prefix (Swedish Wikipedia)" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Swedish Wikipedia's site rights (https://sv.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=rightsinfo&format=json): {\"url\":\"https://creativecommons.org/licenses/by-sa/4.0/deed.sv\",\"text\":\"Creative Commons Attribution-Share Alike 4.0\"}"@en .
+
+<#metre>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "SI unit of length"@en ,
+                     "SI-enhet för längd"@sv ;
+    solid-memo:back "metre (m)"@en ,
+                    "meter (m)"@sv ;
+    solid-memo:backNote "One of the seven SI base units. US spelling (NIST): meter."@en ,
+                        "En av de sju SI-grundenheterna."@sv .
+
+<#kilogram>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "SI unit of mass"@en ,
+                     "SI-enhet för massa"@sv ;
+    solid-memo:back "kilogram (kg)"@en ,
+                    "kilogram (kg)"@sv ;
+    solid-memo:backNote "One of the seven SI base units."@en ,
+                        "En av de sju SI-grundenheterna."@sv .
+
+<#second>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "SI unit of time"@en ,
+                     "SI-enhet för tid"@sv ;
+    solid-memo:back "second (s)"@en ,
+                    "sekund (s)"@sv ;
+    solid-memo:backNote "One of the seven SI base units."@en ,
+                        "En av de sju SI-grundenheterna."@sv .
+
+<#ampere>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "SI unit of electric current"@en ,
+                     "SI-enhet för elektrisk ström"@sv ;
+    solid-memo:back "ampere (A)"@en ,
+                    "ampere (A)"@sv ;
+    solid-memo:backNote "One of the seven SI base units."@en ,
+                        "En av de sju SI-grundenheterna."@sv .
+
+<#kelvin>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "SI unit of thermodynamic temperature"@en ,
+                     "SI-enhet för termodynamisk temperatur"@sv ;
+    solid-memo:back "kelvin (K)"@en ,
+                    "kelvin (K)"@sv ;
+    solid-memo:backNote "One of the seven SI base units."@en ,
+                        "En av de sju SI-grundenheterna."@sv .
+
+<#mole>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "SI unit of amount of substance"@en ,
+                     "SI-enhet för substansmängd"@sv ;
+    solid-memo:back "mole (mol)"@en ,
+                    "mol (mol)"@sv ;
+    solid-memo:backNote "One of the seven SI base units."@en ,
+                        "En av de sju SI-grundenheterna."@sv .
+
+<#candela>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "SI unit of luminous intensity"@en ,
+                     "SI-enhet för ljusstyrka"@sv ;
+    solid-memo:back "candela (cd)"@en ,
+                    "candela (cd)"@sv ;
+    solid-memo:backNote "One of the seven SI base units."@en ,
+                        "En av de sju SI-grundenheterna."@sv .
+
+<#radian>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "SI unit of plane angle"@en ,
+                     "SI-enhet för plan vinkel"@sv ;
+    solid-memo:back "radian (rad)"@en ,
+                    "radian (rad)"@sv ;
+    solid-memo:backNote "One of the 22 SI derived units with special names. By convention the SI treats plane angle as a quantity with the unit one."@en ,
+                        "En av de 22 härledda SI-enheterna med särskilda namn. Inom SI behandlas plan vinkel enligt konvention som en storhet med enheten ett."@sv .
+
+<#steradian>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "SI unit of solid angle"@en ,
+                     "SI-enhet för rymdvinkel"@sv ;
+    solid-memo:back "steradian (sr)"@en ,
+                    "steradian (sr)"@sv ;
+    solid-memo:backNote "One of the 22 SI derived units with special names. By convention the SI treats solid angle as a quantity with the unit one."@en ,
+                        "En av de 22 härledda SI-enheterna med särskilda namn. Inom SI behandlas rymdvinkel enligt konvention som en storhet med enheten ett."@sv .
+
+<#hertz>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "SI unit of frequency"@en ,
+                     "SI-enhet för frekvens"@sv ;
+    solid-memo:back "hertz (Hz)"@en ,
+                    "hertz (Hz)"@sv ;
+    solid-memo:backNote "One of the 22 SI derived units with special names. Like the becquerel (Bq), it equals s⁻¹."@en ,
+                        "En av de 22 härledda SI-enheterna med särskilda namn. Liksom becquerel (Bq) är den lika med s⁻¹."@sv .
+
+<#newton>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "SI unit of force"@en ,
+                     "SI-enhet för kraft"@sv ;
+    solid-memo:back "newton (N)"@en ,
+                    "newton (N)"@sv ;
+    solid-memo:backNote "One of the 22 SI derived units with special names."@en ,
+                        "En av de 22 härledda SI-enheterna med särskilda namn."@sv .
+
+<#pascal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "SI unit of pressure"@en ,
+                     "SI-enhet för tryck"@sv ;
+    solid-memo:back "pascal (Pa)"@en ,
+                    "pascal (Pa)"@sv ;
+    solid-memo:backNote "One of the 22 SI derived units with special names."@en ,
+                        "En av de 22 härledda SI-enheterna med särskilda namn."@sv .
+
+<#joule>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "SI unit of energy"@en ,
+                     "SI-enhet för energi"@sv ;
+    solid-memo:back "joule (J)"@en ,
+                    "joule (J)"@sv ;
+    solid-memo:backNote "One of the 22 SI derived units with special names."@en ,
+                        "En av de 22 härledda SI-enheterna med särskilda namn."@sv .
+
+<#watt>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "SI unit of power"@en ,
+                     "SI-enhet för effekt"@sv ;
+    solid-memo:back "watt (W)"@en ,
+                    "watt (W)"@sv ;
+    solid-memo:backNote "One of the 22 SI derived units with special names."@en ,
+                        "En av de 22 härledda SI-enheterna med särskilda namn."@sv .
+
+<#coulomb>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "SI unit of electric charge"@en ,
+                     "SI-enhet för elektrisk laddning"@sv ;
+    solid-memo:back "coulomb (C)"@en ,
+                    "coulomb (C)"@sv ;
+    solid-memo:backNote "One of the 22 SI derived units with special names."@en ,
+                        "En av de 22 härledda SI-enheterna med särskilda namn."@sv .
+
+<#volt>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "SI unit of electric potential difference"@en ,
+                     "SI-enhet för elektrisk spänning"@sv ;
+    solid-memo:back "volt (V)"@en ,
+                    "volt (V)"@sv ;
+    solid-memo:backNote "One of the 22 SI derived units with special names."@en ,
+                        "En av de 22 härledda SI-enheterna med särskilda namn."@sv .
+
+<#farad>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "SI unit of capacitance"@en ,
+                     "SI-enhet för kapacitans"@sv ;
+    solid-memo:back "farad (F)"@en ,
+                    "farad (F)"@sv ;
+    solid-memo:backNote "One of the 22 SI derived units with special names."@en ,
+                        "En av de 22 härledda SI-enheterna med särskilda namn."@sv .
+
+<#ohm>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "SI unit of electric resistance"@en ,
+                     "SI-enhet för resistans"@sv ;
+    solid-memo:back "ohm (Ω)"@en ,
+                    "ohm (Ω)"@sv ;
+    solid-memo:backNote "One of the 22 SI derived units with special names."@en ,
+                        "En av de 22 härledda SI-enheterna med särskilda namn."@sv .
+
+<#siemens>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "SI unit of electric conductance"@en ,
+                     "SI-enhet för konduktans"@sv ;
+    solid-memo:back "siemens (S)"@en ,
+                    "siemens (S)"@sv ;
+    solid-memo:backNote "One of the 22 SI derived units with special names."@en ,
+                        "En av de 22 härledda SI-enheterna med särskilda namn."@sv .
+
+<#weber>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "SI unit of magnetic flux"@en ,
+                     "SI-enhet för magnetiskt flöde"@sv ;
+    solid-memo:back "weber (Wb)"@en ,
+                    "weber (Wb)"@sv ;
+    solid-memo:backNote "One of the 22 SI derived units with special names."@en ,
+                        "En av de 22 härledda SI-enheterna med särskilda namn."@sv .
+
+<#tesla>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "SI unit of magnetic flux density"@en ,
+                     "SI-enhet för magnetisk flödestäthet"@sv ;
+    solid-memo:back "tesla (T)"@en ,
+                    "tesla (T)"@sv ;
+    solid-memo:backNote "One of the 22 SI derived units with special names."@en ,
+                        "En av de 22 härledda SI-enheterna med särskilda namn."@sv .
+
+<#henry>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "SI unit of inductance"@en ,
+                     "SI-enhet för induktans"@sv ;
+    solid-memo:back "henry (H)"@en ,
+                    "henry (H)"@sv ;
+    solid-memo:backNote "One of the 22 SI derived units with special names."@en ,
+                        "En av de 22 härledda SI-enheterna med särskilda namn."@sv .
+
+<#degree-celsius>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "SI unit of Celsius temperature"@en ,
+                     "SI-enhet för Celsiustemperatur"@sv ;
+    solid-memo:back "degree Celsius (°C)"@en ,
+                    "grad Celsius (°C)"@sv ;
+    solid-memo:backNote "One of the 22 SI derived units with special names. Equal in size to the kelvin: t/°C = T/K − 273.15."@en ,
+                        "En av de 22 härledda SI-enheterna med särskilda namn. Lika stor som kelvin: t/°C = T/K − 273,15."@sv .
+
+<#lumen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "SI unit of luminous flux"@en ,
+                     "SI-enhet för ljusflöde"@sv ;
+    solid-memo:back "lumen (lm)"@en ,
+                    "lumen (lm)"@sv ;
+    solid-memo:backNote "One of the 22 SI derived units with special names."@en ,
+                        "En av de 22 härledda SI-enheterna med särskilda namn."@sv .
+
+<#lux>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "SI unit of illuminance"@en ,
+                     "SI-enhet för belysning"@sv ;
+    solid-memo:back "lux (lx)"@en ,
+                    "lux (lx)"@sv ;
+    solid-memo:backNote "One of the 22 SI derived units with special names."@en ,
+                        "En av de 22 härledda SI-enheterna med särskilda namn. Storheten kallas även belysningsstyrka eller illuminans."@sv .
+
+<#becquerel>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "SI unit of activity of a radionuclide"@en ,
+                     "SI-enhet för aktivitet hos en radionuklid"@sv ;
+    solid-memo:back "becquerel (Bq)"@en ,
+                    "becquerel (Bq)"@sv ;
+    solid-memo:backNote "One of the 22 SI derived units with special names. Like the hertz (Hz), it equals s⁻¹."@en ,
+                        "En av de 22 härledda SI-enheterna med särskilda namn. Liksom hertz (Hz) är den lika med s⁻¹."@sv .
+
+<#gray>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "SI unit of absorbed dose"@en ,
+                     "SI-enhet för absorberad dos"@sv ;
+    solid-memo:back "gray (Gy)"@en ,
+                    "gray (Gy)"@sv ;
+    solid-memo:backNote "One of the 22 SI derived units with special names. Like the sievert (Sv), it equals J/kg."@en ,
+                        "En av de 22 härledda SI-enheterna med särskilda namn. Liksom sievert (Sv) är den lika med J/kg."@sv .
+
+<#sievert>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "SI unit of dose equivalent"@en ,
+                     "SI-enhet för dosekvivalent"@sv ;
+    solid-memo:back "sievert (Sv)"@en ,
+                    "sievert (Sv)"@sv ;
+    solid-memo:backNote "One of the 22 SI derived units with special names. Like the gray (Gy), it equals J/kg."@en ,
+                        "En av de 22 härledda SI-enheterna med särskilda namn. Liksom gray (Gy) är den lika med J/kg."@sv .
+
+<#katal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "SI unit of catalytic activity"@en ,
+                     "SI-enhet för katalytisk aktivitet"@sv ;
+    solid-memo:back "katal (kat)"@en ,
+                    "katal (kat)"@sv ;
+    solid-memo:backNote "One of the 22 SI derived units with special names."@en ,
+                        "En av de 22 härledda SI-enheterna med särskilda namn."@sv .
+
+<#prefix-quetta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "quetta"@en ,
+                     "quetta"@sv ;
+    solid-memo:frontNote "SI prefix"@en ,
+                         "SI-prefix"@sv ;
+    solid-memo:back "10³⁰ (Q)" ;
+    solid-memo:backNote "Added to the SI in 2022, together with ronna, ronto and quecto."@en ,
+                        "Infördes i SI 2022, tillsammans med ronna, ronto och quekto."@sv .
+
+<#prefix-ronna>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ronna"@en ,
+                     "ronna"@sv ;
+    solid-memo:frontNote "SI prefix"@en ,
+                         "SI-prefix"@sv ;
+    solid-memo:back "10²⁷ (R)" ;
+    solid-memo:backNote "Added to the SI in 2022, together with quetta, ronto and quecto."@en ,
+                        "Infördes i SI 2022, tillsammans med quetta, ronto och quekto."@sv .
+
+<#prefix-yotta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "yotta"@en ,
+                     "yotta"@sv ;
+    solid-memo:frontNote "SI prefix"@en ,
+                         "SI-prefix"@sv ;
+    solid-memo:back "10²⁴ (Y)" .
+
+<#prefix-zetta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "zetta"@en ,
+                     "zetta"@sv ;
+    solid-memo:frontNote "SI prefix"@en ,
+                         "SI-prefix"@sv ;
+    solid-memo:back "10²¹ (Z)" .
+
+<#prefix-exa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "exa"@en ,
+                     "exa"@sv ;
+    solid-memo:frontNote "SI prefix"@en ,
+                         "SI-prefix"@sv ;
+    solid-memo:back "10¹⁸ (E)" .
+
+<#prefix-peta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "peta"@en ,
+                     "peta"@sv ;
+    solid-memo:frontNote "SI prefix"@en ,
+                         "SI-prefix"@sv ;
+    solid-memo:back "10¹⁵ (P)" .
+
+<#prefix-tera>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "tera"@en ,
+                     "tera"@sv ;
+    solid-memo:frontNote "SI prefix"@en ,
+                         "SI-prefix"@sv ;
+    solid-memo:back "10¹² (T)" .
+
+<#prefix-giga>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "giga"@en ,
+                     "giga"@sv ;
+    solid-memo:frontNote "SI prefix"@en ,
+                         "SI-prefix"@sv ;
+    solid-memo:back "10⁹ (G)" .
+
+<#prefix-mega>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "mega"@en ,
+                     "mega"@sv ;
+    solid-memo:frontNote "SI prefix"@en ,
+                         "SI-prefix"@sv ;
+    solid-memo:back "10⁶ (M)" .
+
+<#prefix-kilo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "kilo"@en ,
+                     "kilo"@sv ;
+    solid-memo:frontNote "SI prefix"@en ,
+                         "SI-prefix"@sv ;
+    solid-memo:back "10³ (k)" ;
+    solid-memo:backNote "A lower-case k: of the multiples, only da, h and k have lower-case symbols."@en ,
+                        "Litet k: bland multiplarna är det bara da, h och k som har beteckningar med små bokstäver."@sv .
+
+<#prefix-hecto>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "hecto"@en ,
+                     "hekto"@sv ;
+    solid-memo:frontNote "SI prefix"@en ,
+                         "SI-prefix"@sv ;
+    solid-memo:back "10² (h)" .
+
+<#prefix-deca>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "deca"@en ,
+                     "deka"@sv ;
+    solid-memo:frontNote "SI prefix"@en ,
+                         "SI-prefix"@sv ;
+    solid-memo:back "10¹ (da)" ;
+    solid-memo:backNote "US spelling (NIST): deka."@en ,
+                        "Engelska: deca (i USA deka)."@sv .
+
+<#prefix-deci>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "deci"@en ,
+                     "deci"@sv ;
+    solid-memo:frontNote "SI prefix"@en ,
+                         "SI-prefix"@sv ;
+    solid-memo:back "10⁻¹ (d)" .
+
+<#prefix-centi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "centi"@en ,
+                     "centi"@sv ;
+    solid-memo:frontNote "SI prefix"@en ,
+                         "SI-prefix"@sv ;
+    solid-memo:back "10⁻² (c)" .
+
+<#prefix-milli>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "milli"@en ,
+                     "milli"@sv ;
+    solid-memo:frontNote "SI prefix"@en ,
+                         "SI-prefix"@sv ;
+    solid-memo:back "10⁻³ (m)" .
+
+<#prefix-micro>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "micro"@en ,
+                     "mikro"@sv ;
+    solid-memo:frontNote "SI prefix"@en ,
+                         "SI-prefix"@sv ;
+    solid-memo:back "10⁻⁶ (μ)" ;
+    solid-memo:backNote "The symbol is the Greek letter mu."@en ,
+                        "Beteckningen är den grekiska bokstaven my."@sv .
+
+<#prefix-nano>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "nano"@en ,
+                     "nano"@sv ;
+    solid-memo:frontNote "SI prefix"@en ,
+                         "SI-prefix"@sv ;
+    solid-memo:back "10⁻⁹ (n)" .
+
+<#prefix-pico>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "pico"@en ,
+                     "piko"@sv ;
+    solid-memo:frontNote "SI prefix"@en ,
+                         "SI-prefix"@sv ;
+    solid-memo:back "10⁻¹² (p)" .
+
+<#prefix-femto>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "femto"@en ,
+                     "femto"@sv ;
+    solid-memo:frontNote "SI prefix"@en ,
+                         "SI-prefix"@sv ;
+    solid-memo:back "10⁻¹⁵ (f)" .
+
+<#prefix-atto>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "atto"@en ,
+                     "atto"@sv ;
+    solid-memo:frontNote "SI prefix"@en ,
+                         "SI-prefix"@sv ;
+    solid-memo:back "10⁻¹⁸ (a)" .
+
+<#prefix-zepto>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "zepto"@en ,
+                     "zepto"@sv ;
+    solid-memo:frontNote "SI prefix"@en ,
+                         "SI-prefix"@sv ;
+    solid-memo:back "10⁻²¹ (z)" .
+
+<#prefix-yocto>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "yocto"@en ,
+                     "yokto"@sv ;
+    solid-memo:frontNote "SI prefix"@en ,
+                         "SI-prefix"@sv ;
+    solid-memo:back "10⁻²⁴ (y)" .
+
+<#prefix-ronto>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ronto"@en ,
+                     "ronto"@sv ;
+    solid-memo:frontNote "SI prefix"@en ,
+                         "SI-prefix"@sv ;
+    solid-memo:back "10⁻²⁷ (r)" ;
+    solid-memo:backNote "Added to the SI in 2022, together with ronna, quetta and quecto."@en ,
+                        "Infördes i SI 2022, tillsammans med ronna, quetta och quekto."@sv .
+
+<#prefix-quecto>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "quecto"@en ,
+                     "quekto"@sv ;
+    solid-memo:frontNote "SI prefix"@en ,
+                         "SI-prefix"@sv ;
+    solid-memo:back "10⁻³⁰ (q)" ;
+    solid-memo:backNote "Added to the SI in 2022, together with ronna, quetta and ronto."@en ,
+                        "Infördes i SI 2022, tillsammans med ronna, quetta och ronto. Stavningen quekto följer mönstret yokto och piko; Swedacs föreskrifter tar ännu inte upp prefixet. Internationellt: quecto."@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

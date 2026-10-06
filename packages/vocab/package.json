@@ -13,8 +13,8 @@
     "test": "vitest run --coverage",
     "generate": "node -e \"import('./tooling/generate.ts').then((m) => m.run(process))\"",
     "generate:check": "node -e \"import('./tooling/generate.ts').then((m) => m.run(process))\" -- --check",
-    "format:turtle": "node -e \"import('@solid-memo/turtle/formatTurtle').then((m) => m.run(process))\" -- fixtures ../../ns",
-    "format:turtle:check": "node -e \"import('@solid-memo/turtle/formatTurtle').then((m) => m.run(process))\" -- --check fixtures ../../ns"
+    "format:turtle": "node -e \"import('@solid-memo/turtle/formatTurtle').then((m) => m.run(process))\" -- fixtures ../../ns ../../decks",
+    "format:turtle:check": "node -e \"import('@solid-memo/turtle/formatTurtle').then((m) => m.run(process))\" -- --check fixtures ../../ns ../../decks"
   },
   "devDependencies": {
     "@types/n3": "^1.26.4",

@@ -1,0 +1,498 @@
+@base <https://solid-memo.com/decks/imperial-units/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Imperial and US customary units"@en ,
+                  "Brittiska och amerikanska måttenheter"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "Imperial and US customary units in 33 cards: length, area, volume, mass, speed, pressure, power, energy and the Fahrenheit formulas, with the nautical mile and knot as common non-SI extras. The front names a unit, keeping US and imperial versions apart where they differ; the back gives its value in SI units or litres with a decimal point, exact where the definition is exact and short, otherwise rounded to four significant digits and marked ≈. Compiled from NIST Handbook 44 (2026) and NIST SP 811, checked against the UK Weights and Measures Act 1985 and Wikidata."@en ,
+                        "Brittiska (imperial) och amerikanska måttenheter i 33 kort: längd, area, volym, massa, fart, tryck, effekt, energi och formlerna för Fahrenheit, med den nautiska milen och knopen som vanliga enheter utanför SI. Framsidan anger en enhet, med amerikansk och brittisk version åtskilda där de skiljer sig åt; baksidan ger dess värde i SI-enheter eller liter med decimalpunkt, exakt där definitionen är exakt och kort, annars avrundat till fyra värdesiffror och markerat med ≈. Sammanställd ur NIST Handbook 44 (2026) och NIST SP 811, kontrollerad mot den brittiska lagen Weights and Measures Act 1985 och mot Wikidata."@sv ;
+    prov:wasDerivedFrom <https://www.nist.gov/document/2026-nist-handbook-44-appendix-c> ,
+                        <https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication811e2008.pdf> ,
+                        <https://www.wikidata.org/> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:physics ,
+               topic:science ;
+    dcat:keyword "imperial units"@en ,
+                 "US customary units"@en ,
+                 "unit conversion"@en ,
+                 "units of measurement"@en ,
+                 "physics"@en ,
+                 "brittiska måttenheter"@sv ,
+                 "amerikanska måttenheter"@sv ,
+                 "enhetsomvandling"@sv ,
+                 "måttenheter"@sv ,
+                 "fysik"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#imperial-units> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#imperial-units> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.nist.gov/document/2026-nist-handbook-44-appendix-c> ,
+              <https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication811e2008.pdf> ,
+              <https://www.wikidata.org/> ,
+              <https://www.legislation.gov.uk/ukpga/1985/72/schedule/1> ,
+              <https://sv.wikipedia.org/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (an exact-arithmetic Python script, live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Sources: downloaded Appendix C (General Tables of Units of Measurement) and the title page of NIST Handbook 44, 2026 edition (approved December 2025, the current edition on NIST's Handbook 44 page on 2026-10-04), NIST Special Publication 811 (2008) with its Appendix B conversion factors, NIST's licensing statements, and the revised text of Schedule 1 of the UK Weights and Measures Act 1985 (legislation.gov.uk XML), and extracted their text with pypdf and Beautiful Soup (see Queries). SP 811 marks exact factors in bold; since bold does not survive text extraction, the fonts of the factor columns were read with pdfplumber (bold.py)."@en ,
+                 "Selection: started from the units the brief named and the units HB 44's Tables of Equivalents and the British notes cover, and kept those in everyday or technical use today: the length units from the inch to the mile plus the fathom, chain and furlong; the square foot, acre and square mile; the cubic foot, the US and imperial gallon, liquid pint and fluid ounce, and the 42-gallon oil barrel; the grain, avoirdupois ounce, troy ounce, pound, stone, short ton and long ton; the mile per hour; the psi, mechanical horsepower and International Table Btu; and the two Fahrenheit conversion formulas. The nautical mile and the knot are not imperial or US customary units but SI-accepted non-SI units; they were kept because they are common, and their notes say so."@en ,
+                 "Values: every value comes from the NIST sources. Where HB 44 gives an exact value (marked \"(exactly)\" in its Tables of Equivalents, or the full-precision entries of its Section 4 conversion tables, whose exact figures the PDF underlines; the underlining does not survive text extraction, so each such value was recomputed by verify.py), that value is used; the imperial gallon (4.546 09 L) is exact in SP 811 (bold), and the imperial pint, imperial fluid ounce, stone and long ton follow from it and from the pound by the relations in HB 44's Notes on British Units (8 pints and 160 fluid ounces to the gallon, 14 pounds to the stone, 2240 pounds to the ton). The Btu (IT) and the pound-force are exact in SP 811's notes 9 and 23; the psi and horsepower are derived from the pound-force (verify.py), and NIST's rounded values (6894.757 Pa, 745.6999 W) were compared with them. All values use the international foot (HB 44 2026: the US survey foot was deprecated at the end of 2022)."@en ,
+                 "Card text: the front names one unit, \"1 inch (in)\" / \"1 tum (in)\", with its usual symbol where NIST gives one and with \"US\" or \"imperial\" (Swedish \"amerikansk\", \"brittisk (imperial)\") wherever the US and British units differ. The back is the value in SI units or, for volumes, in litres (L, mL), a non-SI unit accepted for use with the SI (SP 811 Table 6), written without a language (zxx) with a decimal point: the exact value when it has at most 8 significant digits, otherwise rounded to 4 significant digits and marked \"≈\", in which case the note gives the exact value (or NIST's 7-digit value for the psi and horsepower). The unit on the back is chosen for readability (cm for the inch, mL for fluid ounces, g for ounces, L for volumes, km² for the square mile). The two temperature cards give NIST's formulas with 1.8; notes add 5/9 and check points. English and Swedish notes give the defining relation (12 inches, 14 pounds ...) and, for the US and imperial pairs, the difference."@en ,
+                 "Verification of every value: verify.py recomputes all 31 numerical cards with Python's exact fractions from the base definitions (inch 0.0254 m, pound 0.453 592 37 kg, US gallon 231 in³, imperial gallon 4.546 09 L, standard gravity 9.806 65 m/s², Btu 1055.055 852 62 J), applies the rounding rule above, asserts the derived values against HB 44's exact table entries and the UK Act's own figures (pint 0.568 261 25 dm³, acre 4840 yd², chain 22 yd ...), and checks that the two Fahrenheit formulas are inverse and map 32 °F to 0 °C, 212 °F to 100 °C, −40 °C to −40 °F and −459.67 °F to −273.15 °C. Every card's back was compared with the script's output."@en ,
+                 "Second source: each card is backed by both NIST publications where both list the unit, and checked against the UK Act wherever UK law defines it (verification only, see Licensing), against Wikidata (labels, symbols and the conversion to SI unit, P2370, via the builder's machine checks) and against the Swedish Wikipedia article on the unit. Wikidata's value is checked wherever it is the exact value or a correct rounding of it to at least the precision the card's back shows (rounded values checked: US gallon, US liquid pint, US and imperial fluid ounce, oil barrel, psi, horsepower, Btu; p2370.py compares each with the exact value). It is left out where it is wrong (imperial gallon), coarser than the card (knot, 0.514 m/s) or on a generic item with the old US survey value (fathom and chain, which are checked on the international items instead); each difference is recorded under Quality control (rounds 0 and 3). No check was dropped to make the build pass."@en ,
+                 "Swedish: unit names are Wikidata's Swedish labels where they exist and match Swedish usage (tum, fot, yard, engelsk mil, nautisk mil, famn, chain, furlong, kvadratfot, kubikfot, uns, grain, short ton, knop, psi), and otherwise the plain Swedish descriptive forms confirmed by the Swedish Wikipedia articles: amerikansk/brittisk gallon and pint (\"gallon (USA, våt)\", \"imperial gallon (Storbritannien)\"), troy-uns, pund (Wikidata's 'skålpund' is an old Swedish unit), engelskt ton (long ton), brittisk hästkraft (Swedish hk normally means the metric horsepower), fat for the oil barrel, acre. \"Engelsk kvadratmil\" is our own form, parallel to \"engelsk mil\" and kept apart from the Swedish mil. Swedish notes use the decimal comma, the litre symbols l and ml, and uninflected plurals after numbers (\"10 chain\", \"160 brittiska fluid ounce\"); fluid ounce is neuter (\"ett fluid ounce\", Swedish Wikipedia). The backs, which have no language, use the decimal point and L/mL."@en ,
+                 "Left out (see Selection): units that are rare today or ambiguous without context (rod, link, league, cable, hand, gill, dram, minim, pennyweight, apothecaries' units, peck, bushel, quart, hundredweight, US cup, tablespoon and teaspoon, which have several legal definitions), the US survey versions of the foot, acre and chain, the US dry pint (mentioned in a note), and compound units other than the mile per hour, the knot and the psi."@en ,
+                 "Selection: 33 cards: 29 imperial and US customary units of length (inch, foot, yard, mile, fathom, chain, furlong), area (square foot, acre, square mile), volume (cubic foot; US and imperial gallon, liquid pint and fluid ounce; the 42-gallon oil barrel), mass (grain, avoirdupois ounce, troy ounce, pound, stone, short ton, long ton), speed (mile per hour), pressure (psi), power (mechanical horsepower) and energy (International Table Btu), the nautical mile and the knot as common non-SI units outside the imperial and US systems, and the two Fahrenheit–Celsius conversion formulas. US and imperial units are separate cards wherever they differ (gallon, pint, fluid ounce, short and long ton). Every value uses the international foot and pound of 1959; the US survey foot and the units defined from it are left out because NIST deprecated it at the end of 2022. Left out as rare or with several competing definitions: rod, link, league, cable, hand, gill, dram, minim, pennyweight, the apothecaries' units, peck, bushel, quart, hundredweight, cup, tablespoon and teaspoon, the dry pint (in a note only) and the other barrels (31-gallon beer barrel in a note). Values follow the NIST Handbook 44 (2026) and SP 811 as of 2026-10-04; the yard and pound have been the international ones since 1959, and the imperial gallon is exactly 4.546 09 L (SP 811; UK law)."@en ,
+                 "Licensing: The deck is CC0 1.0. Its content sources are public domain or CC0: NIST Handbook 44 (2026) and NIST SP 811 are works of NIST employees, not subject to copyright in the United States, and NIST grants a royalty-free, worldwide right to reprint them and make derivative works elsewhere; Wikidata is CC0. The deck takes only facts from them (unit definitions, conversion factors, relations between units), which are not copyrightable in any case, and the card wording, notes and the selection of units are our own. The UK Weights and Measures Act 1985 is Crown copyright, available under the Open Government Licence v3.0, an attribution licence that its text says is compatible with CC BY 4.0. Using it as a content source would have made the deck CC BY 4.0; it was deliberately kept to verification (and the builder, which has no identifier for the OGL, records it as 'unknown'), because every value it gives is also in the public-domain NIST publications, where the imperial gallon is exact in SP 811. Swedish Wikipedia (CC BY-SA 4.0) was likewise used only to confirm Swedish unit names and values; no text and no selection were taken from it. Both are still credited in the deck and in this report."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Source agreement and machine checks: every value against NIST HB 44 (2026), NIST SP 811, the UK Weights and Measures Act 1985 and an exact-arithmetic Python script; names and values against Wikidata and the Swedish Wikipedia."@en ;
+    rdfs:comment "Scope: All 33 cards, the licences of all sources and the deck metadata."@en ,
+                 "Outcome: All 31 numerical values agree between verify.py, NIST HB 44 and SP 811, and the UK Act wherever it defines the unit; the two temperature formulas agree between HB 44 and SP 811 and pass the script's checks. The builder's 80 Wikidata checks (labels, unit symbols and P2370 conversions) pass (2026-10-04). Wikidata's value was left unchecked for seven cards where it is rounded or wrong (us-gallon, imperial-gallon, us-pint, us-fluid-ounce, imperial-fluid-ounce, oil-barrel, knot; corrected from \"nine\" in round 3, which also added checks for the correctly rounded values), and the fathom and chain values are checked on the international items rather than the generic ones with the old US survey value; these and the other differences found are listed below. None changes a card's value."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 33 cards (every value recomputed with exact arithmetic from the base definitions), the notes, the description and the selection."@en ,
+                 "Outcome: No wrong value on any card back; all exact values and 4-digit roundings and the notes were confirmed. Two documentation errors in the selection (unit count, imperial gallon year), one Swedish note overstating 'deprecated', and two suggestions (the inch note's parties, the treatment of rounded Wikidata values). All were applied."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 33 cards' fronts and notes in English and Swedish, the title, description and keywords, and the language tags in the dossier and built TTL."@en ,
+                 "Outcome: Language tags, structure and Swedish unit names were confirmed. One grammar error (fluid ounce is neuter in Swedish) and the inch note's 'samväldet' were fixed, and most idiom suggestions were applied; the 'engelskt tunnland' suggestion was declined."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: Every source's licence (terms pages fetched), the evidence quotes and locators of all 33 cards against the downloaded texts, the recorded queries and scripts, the method, selection and licensing text."@en ,
+                 "Outcome: The CC0 licence holds and quotes and locators were confirmed. Four usage remarks rested only on the verification source Swedish Wikipedia; three were removed and the troy ounce's was re-sourced to HB 44. The inch note's unsourced parties, the UK Act's licence display, the account of the Wikidata value checks, a locator and three trimmed scripts were fixed. The final build ran all checks against live Wikidata."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The 18 cards changed in round 3 plus every third card (22 cards): facts, exact values and roundings against HB 44 Appendix C (2026) and SP 811, language and language tags, evidence quotes, all 85 Wikidata checks against live Wikidata, description, keywords and the method text."@en ,
+                 "Outcome: All values, tags and quotes confirmed and all Wikidata checks pass. One documentation mismatch (the horsepower note gave Wikidata's 8-digit value, not NIST's 7-digit value as the method says) was fixed by giving NIST's value; the knot's notes were reworded to match the nautical mile's."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: All 33 cards: every back value recomputed (exact values and four-digit roundings), every note, front uniqueness, US/imperial separation, language tags, Swedish wording and plurals, round 4's fixes, the description (claims and word count), keywords and study direction."@en ,
+                 "Outcome: No errors and nothing at warning level; round 4's fixes confirmed. Two optional suggestions: the description called the litre an SI unit, fixed by saying \"SI units or litres\" (and the method now says the litre is accepted for use with the SI); the 1959 date in the inch note was left as it is, since the note already ties it to the international yard and pound."@en .
+
+<https://www.nist.gov/document/2026-nist-handbook-44-appendix-c>
+    dcterms:title "NIST Handbook 44 – 2026, Appendix C: General Tables of Units of Measurement" ;
+    dcterms:creator "Isabel Chavez Baucom, Elizabeth J. Benham, Jan Konijnenburg, G. Diane Lee, Katrice A. Lippa, John T. McGuire, Loren B. Minnich and Juana S. Williams, National Institute of Standards and Technology (NIST), Office of Weights and Measures" ;
+    rdfs:comment "Written by NIST employees (title page of NIST HB 44-2026, https://www.nist.gov/document/2026-nist-handbook-44-title-page, which points to the NIST Technical Series policy). NIST's Copyright, Fair Use, and Licensing Statements for SRD, Data, Software, and Technical Series Publications (https://www.nist.gov/open/copyright-fair-use-and-licensing-statements-srd-data-software-and-technical-series-publications): \"Works authored by NIST employees are not subject to Copyright protection within the United States; foreign rights are reserved. To the extent NIST may assert rights outside of the United States, the public is granted the non-exclusive, perpetual, paid-up, royalty-free, worldwide right to reprint works in all formats including print, electronically, and online, and in all subsequent editions, and derivative works.\""@en .
+
+<https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication811e2008.pdf>
+    dcterms:title "Guide for the Use of the International System of Units (SI), NIST Special Publication 811, 2008 edition (Appendix B: Conversion Factors)" ;
+    dcterms:creator "Ambler Thompson and Barry N. Taylor, National Institute of Standards and Technology (NIST)" ;
+    rdfs:comment "Written by NIST employees (title page). NIST's Copyright, Fair Use, and Licensing Statements for SRD, Data, Software, and Technical Series Publications (https://www.nist.gov/open/copyright-fair-use-and-licensing-statements-srd-data-software-and-technical-series-publications): \"Works authored by NIST employees are not subject to Copyright protection within the United States; foreign rights are reserved.\" The same page grants \"the non-exclusive, perpetual, paid-up, royalty-free, worldwide right to reprint works in all formats including print, electronically, and online, and in all subsequent editions, and derivative works.\""@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "Wikidata:Licensing (https://www.wikidata.org/wiki/Wikidata:Licensing): \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://www.legislation.gov.uk/ukpga/1985/72/schedule/1>
+    dcterms:title "Weights and Measures Act 1985, Schedule 1: Definitions of Units of Measurement (legislation.gov.uk, revised text up to date to 30 September 2026; Open Government Licence v3.0)" ;
+    dcterms:creator "Parliament of the United Kingdom; revised text by The National Archives (legislation.gov.uk)" ;
+    rdfs:comment "The legislation.gov.uk footer (seen on https://www.legislation.gov.uk/help on 2026-10-04): \"All content is available under the Open Government Licence v3.0 except where otherwise stated\" and \"© Crown and database right\". The Open Government Licence v3.0 (https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/) lets you \"copy, publish, distribute and transmit the Information; adapt the Information; exploit the Information commercially and non-commercially\" if you \"acknowledge the source\", and says it is \"compatible with the Creative Commons Attribution License 4.0\". The builder has no identifier for the OGL, so the source is recorded as 'unknown' (the licence is named in the source title instead), which makes it verification only; nothing was taken from it."@en .
+
+<https://sv.wikipedia.org/>
+    dcterms:title "Swedish Wikipedia: articles on the units (Tum, Fot (enhet), Yard, Engelsk mil, Nautisk mil, Famn, Chain, Furlong, Engelska tunnland, Gallon, Pint, Fluid ounce, Fat (mått), Grain, Uns, Pund (viktenhet), Stone (enhet), Short ton, Engelskt ton, Knop (enhet), Hästkraft, Btu, Grad Fahrenheit)" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Swedish Wikipedia's site rights (https://sv.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=rightsinfo&format=json): {\"url\":\"https://creativecommons.org/licenses/by-sa/4.0/deed.sv\",\"text\":\"Creative Commons Attribution-Share Alike 4.0\"}"@en .
+
+<#inch>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1 inch (in)"@en ,
+                     "1 tum (in)"@sv ;
+    solid-memo:back "2.54 cm"@zxx ;
+    solid-memo:backNote "Exact since 1959 (international yard and pound): 1 in = 25.4 mm."@en ,
+                        "Exakt sedan 1959 (den internationella yarden och det internationella pundet): 1 in = 25,4 mm."@sv .
+
+<#foot>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1 foot (ft)"@en ,
+                     "1 fot (ft)"@sv ;
+    solid-memo:back "0.3048 m"@zxx ;
+    solid-memo:backNote "12 inches, exact. The old US survey foot (1200/3937 m) was deprecated at the end of 2022."@en ,
+                        "12 tum, exakt. Den äldre amerikanska US survey foot (1200/3937 m) fasades ut vid utgången av 2022."@sv .
+
+<#yard>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1 yard (yd)"@en ,
+                     "1 yard (yd)"@sv ;
+    solid-memo:back "0.9144 m"@zxx ;
+    solid-memo:backNote "3 feet, exact; also the definition in UK law."@en ,
+                        "3 fot, exakt; också definitionen i brittisk lag."@sv .
+
+<#mile>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1 mile (mi)"@en ,
+                     "1 engelsk mil (mi)"@sv ;
+    solid-memo:back "1609.344 m"@zxx ;
+    solid-memo:backNote "1760 yards = 5280 feet, exact. Also called the statute mile."@en ,
+                        "1760 yard = 5280 fot, exakt. Kallas på engelska även statute mile."@sv .
+
+<#nautical-mile>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1 nautical mile"@en ,
+                     "1 nautisk mil"@sv ;
+    solid-memo:back "1852 m"@zxx ;
+    solid-memo:backNote "Not an imperial or US customary unit: the international nautical mile, exact by definition (1929; adopted by the US in 1954). Included as a common non-SI unit."@en ,
+                        "Ingen brittisk eller amerikansk enhet: den internationella nautiska milen (sjömil, distansminut), exakt per definition (1929; antagen i USA 1954). Med som vanlig enhet utanför SI."@sv .
+
+<#fathom>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1 fathom"@en ,
+                     "1 engelsk famn (fathom)"@sv ;
+    solid-memo:back "1.8288 m"@zxx ;
+    solid-memo:backNote "6 feet, exact (international foot)."@en ,
+                        "6 fot, exakt (internationell fot)."@sv .
+
+<#chain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1 chain (ch)"@en ,
+                     "1 chain (ch)"@sv ;
+    solid-memo:back "20.1168 m"@zxx ;
+    solid-memo:backNote "66 feet = 22 yards, exact; 10 chains make a furlong."@en ,
+                        "66 fot = 22 yard, exakt; 10 chain är en furlong."@sv .
+
+<#furlong>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1 furlong (fur)"@en ,
+                     "1 furlong (fur)"@sv ;
+    solid-memo:back "201.168 m"@zxx ;
+    solid-memo:backNote "660 feet = 220 yards = 1/8 mile, exact."@en ,
+                        "660 fot = 220 yard = 1/8 engelsk mil, exakt."@sv .
+
+<#square-foot>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1 square foot (ft²)"@en ,
+                     "1 kvadratfot (ft²)"@sv ;
+    solid-memo:back "0.09290304 m²"@zxx ;
+    solid-memo:backNote "144 square inches, exact."@en ,
+                        "144 kvadrattum, exakt."@sv .
+
+<#acre>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1 acre"@en ,
+                     "1 acre"@sv ;
+    solid-memo:back "≈ 4047 m²"@zxx ;
+    solid-memo:backNote "Exactly 4046.8564224 m² (43 560 ft² = 4840 yd²), about 0.4047 ha."@en ,
+                        "Exakt 4046,8564224 m² (43 560 ft² = 4840 yd²), cirka 0,4047 ha."@sv .
+
+<#square-mile>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1 square mile (mi²)"@en ,
+                     "1 engelsk kvadratmil (mi²)"@sv ;
+    solid-memo:back "≈ 2.590 km²"@zxx ;
+    solid-memo:backNote "Exactly 2.589988110336 km² (640 acres)."@en ,
+                        "Exakt 2,589988110336 km² (640 acre)."@sv .
+
+<#cubic-foot>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1 cubic foot (ft³)"@en ,
+                     "1 kubikfot (ft³)"@sv ;
+    solid-memo:back "≈ 28.32 L"@zxx ;
+    solid-memo:backNote "Exactly 28.316846592 L (1728 cubic inches)."@en ,
+                        "Exakt 28,316846592 l (1728 kubiktum)."@sv .
+
+<#us-gallon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1 US gallon"@en ,
+                     "1 amerikansk gallon"@sv ;
+    solid-memo:back "≈ 3.785 L"@zxx ;
+    solid-memo:backNote "Exactly 3.785411784 L (231 cubic inches). The imperial gallon is about 20 % larger."@en ,
+                        "Exakt 3,785411784 l (231 kubiktum). Den brittiska (imperial) gallonen är cirka 20 % större."@sv .
+
+<#imperial-gallon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1 imperial gallon"@en ,
+                     "1 brittisk gallon (imperial)"@sv ;
+    solid-memo:back "4.54609 L"@zxx ;
+    solid-memo:backNote "Exact by definition (UK and Canada); 8 imperial pints = 160 imperial fluid ounces."@en ,
+                        "Exakt per definition (Storbritannien och Kanada); 8 brittiska pint = 160 brittiska fluid ounce."@sv .
+
+<#us-pint>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1 US liquid pint"@en ,
+                     "1 amerikansk pint (våt)"@sv ;
+    solid-memo:back "≈ 0.4732 L"@zxx ;
+    solid-memo:backNote "Exactly 0.473176473 L: 1/8 US gallon = 16 US fluid ounces. The US dry pint is larger (≈ 0.5506 L)."@en ,
+                        "Exakt 0,473176473 l: 1/8 amerikansk gallon = 16 amerikanska fluid ounce. Den amerikanska torra pinten är större (≈ 0,5506 l)."@sv .
+
+<#imperial-pint>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1 imperial pint"@en ,
+                     "1 brittisk pint (imperial)"@sv ;
+    solid-memo:back "0.56826125 L"@zxx ;
+    solid-memo:backNote "Exact: 1/8 imperial gallon = 20 imperial fluid ounces."@en ,
+                        "Exakt: 1/8 brittisk gallon = 20 brittiska fluid ounce."@sv .
+
+<#us-fluid-ounce>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1 US fluid ounce"@en ,
+                     "1 amerikanskt fluid ounce"@sv ;
+    solid-memo:back "≈ 29.57 mL"@zxx ;
+    solid-memo:backNote "Exactly 29.5735295625 mL: 1/128 US gallon. A volume, not the ounce of mass."@en ,
+                        "Exakt 29,5735295625 ml: 1/128 amerikansk gallon. En volym, inte massenheten uns."@sv .
+
+<#imperial-fluid-ounce>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1 imperial fluid ounce"@en ,
+                     "1 brittiskt fluid ounce (imperial)"@sv ;
+    solid-memo:back "≈ 28.41 mL"@zxx ;
+    solid-memo:backNote "Exactly 28.4130625 mL: 1/160 imperial gallon = 1/20 imperial pint."@en ,
+                        "Exakt 28,4130625 ml: 1/160 brittisk gallon = 1/20 brittisk pint."@sv .
+
+<#oil-barrel>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1 barrel of oil (bbl)"@en ,
+                     "1 fat olja (barrel, bbl)"@sv ;
+    solid-memo:back "≈ 159.0 L"@zxx ;
+    solid-memo:backNote "42 US gallons = exactly 158.987294928 L, the customary barrel for crude oil. Other barrels exist (31 gallons for beer in US tax law)."@en ,
+                        "42 amerikanska gallon = exakt 158,987294928 l, det vedertagna fatet för råolja. Det finns andra fat (31 gallon för öl i amerikansk skattelag)."@sv .
+
+<#grain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1 grain (gr)"@en ,
+                     "1 grain (gr)"@sv ;
+    solid-memo:back "64.79891 mg"@zxx ;
+    solid-memo:backNote "1/7000 pound, exact; the same grain in avoirdupois, troy and apothecaries' weight."@en ,
+                        "1/7000 pund, exakt; samma grain i avoirdupois-, troy- och apoteksvikt."@sv .
+
+<#ounce>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1 ounce (avoirdupois, oz)"@en ,
+                     "1 uns (avoirdupois, oz)"@sv ;
+    solid-memo:back "≈ 28.35 g"@zxx ;
+    solid-memo:backNote "Exactly 28.349523125 g: 1/16 pound. Not the troy ounce used for precious metals."@en ,
+                        "Exakt 28,349523125 g: 1/16 pund. Inte troy-unsen som används för ädelmetaller."@sv .
+
+<#troy-ounce>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1 troy ounce (oz t)"@en ,
+                     "1 troy-uns (oz t)"@sv ;
+    solid-memo:back "≈ 31.10 g"@zxx ;
+    solid-memo:backNote "Exactly 31.1034768 g (480 grains); the ounce for precious metals."@en ,
+                        "Exakt 31,1034768 g (480 grain); unsen för ädelmetaller."@sv .
+
+<#pound>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1 pound (avoirdupois, lb)"@en ,
+                     "1 pund (avoirdupois, lb)"@sv ;
+    solid-memo:back "0.45359237 kg"@zxx ;
+    solid-memo:backNote "Exact since 1959 (international yard and pound); 16 ounces = 7000 grains."@en ,
+                        "Exakt sedan 1959 (den internationella yarden och det internationella pundet); 16 uns = 7000 grain."@sv .
+
+<#stone>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1 stone (st)"@en ,
+                     "1 stone (st)"@sv ;
+    solid-memo:back "≈ 6.350 kg"@zxx ;
+    solid-memo:backNote "14 pounds = exactly 6.35029318 kg. A British unit."@en ,
+                        "14 pund = exakt 6,35029318 kg. En brittisk enhet."@sv .
+
+<#short-ton>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1 short ton (US ton)"@en ,
+                     "1 short ton (amerikanskt ton)"@sv ;
+    solid-memo:back "907.18474 kg"@zxx ;
+    solid-memo:backNote "2000 pounds, exact; called simply ton in the US."@en ,
+                        "2000 pund, exakt; kallas bara ton i USA."@sv .
+
+<#long-ton>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1 long ton (imperial ton)"@en ,
+                     "1 engelskt ton (long ton)"@sv ;
+    solid-memo:back "≈ 1016 kg"@zxx ;
+    solid-memo:backNote "2240 pounds = exactly 1016.0469088 kg; the British ton."@en ,
+                        "2240 pund = exakt 1016,0469088 kg; det brittiska tonnet."@sv .
+
+<#mile-per-hour>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1 mile per hour (mph)"@en ,
+                     "1 engelsk mil per timme (mph)"@sv ;
+    solid-memo:back "0.44704 m/s"@zxx ;
+    solid-memo:backNote "Exact; 1 mph = 1.609344 km/h."@en ,
+                        "Exakt; 1 mph = 1,609344 km/h."@sv .
+
+<#knot>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1 knot (kn)"@en ,
+                     "1 knop (kn)"@sv ;
+    solid-memo:back "≈ 0.5144 m/s"@zxx ;
+    solid-memo:backNote "1 nautical mile per hour = exactly 1.852 km/h (1852/3600 m/s). Not an imperial or US customary unit; included with the nautical mile."@en ,
+                        "1 nautisk mil per timme = exakt 1,852 km/h (1852/3600 m/s). Ingen brittisk eller amerikansk enhet; finns med här tillsammans med den nautiska milen."@sv .
+
+<#psi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1 psi (pound-force per square inch)"@en ,
+                     "1 psi (pound-force per square inch)"@sv ;
+    solid-memo:back "≈ 6895 Pa"@zxx ;
+    solid-memo:backNote "≈ 6894.757 Pa, about 6.895 kPa."@en ,
+                        "≈ 6894,757 Pa, cirka 6,895 kPa."@sv .
+
+<#horsepower>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1 horsepower (mechanical, hp)"@en ,
+                     "1 brittisk hästkraft (hp)"@sv ;
+    solid-memo:back "≈ 745.7 W"@zxx ;
+    solid-memo:backNote "550 foot-pounds-force per second ≈ 745.6999 W. The metric horsepower (PS) is smaller, ≈ 735.5 W."@en ,
+                        "550 foot-pound-force per sekund ≈ 745,6999 W. Den metriska hästkraften (hk) är mindre, ≈ 735,5 W."@sv .
+
+<#btu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1 British thermal unit (Btu, IT)"@en ,
+                     "1 Btu (British thermal unit, IT)"@sv ;
+    solid-memo:back "≈ 1055 J"@zxx ;
+    solid-memo:backNote "The International Table Btu: exactly 1055.05585262 J."@en ,
+                        "Btu enligt International Table (IT): exakt 1055,05585262 J."@sv .
+
+<#fahrenheit-to-celsius>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Convert °F to °C"@en ,
+                     "Omvandla °F till °C"@sv ;
+    solid-memo:back "°C = (°F − 32) / 1.8"@zxx ;
+    solid-memo:backNote "Same as × 5/9. Check: 32 °F = 0 °C, 212 °F = 100 °C."@en ,
+                        "Samma som × 5/9. Kontroll: 32 °F = 0 °C, 212 °F = 100 °C."@sv .
+
+<#celsius-to-fahrenheit>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Convert °C to °F"@en ,
+                     "Omvandla °C till °F"@sv ;
+    solid-memo:back "°F = °C × 1.8 + 32"@zxx ;
+    solid-memo:backNote "Same as × 9/5 + 32. Check: −40 °C = −40 °F."@en ,
+                        "Samma som × 9/5 + 32. Kontroll: −40 °C = −40 °F."@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

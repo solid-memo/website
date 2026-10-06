@@ -1,0 +1,764 @@
+@base <https://solid-memo.com/decks/brightest-stars/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Brightest stars of the night sky"@en ,
+                  "Natthimlens ljusaste stjärnor"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    dcterms:description "52 cards on the brightest stars of the night sky. 49 cover every star with a name approved by the International Astronomical Union (IAU) that is brighter than apparent magnitude 2.0 (close pairs by their combined light), plus Polaris: front, the star's name, e.g. “Sirius”; back, its constellation, in English by its official IAU name (e.g. “Canis Major”), in Swedish by its Swedish name (“Stora hunden”), with the Bayer designation in a note. Three more ask for the brightest and second-brightest star of the night sky and the north pole star. Names from the IAU Working Group on Star Names; constellations and magnitudes from Wikidata, checked against SIMBAD."@en ,
+                        "52 kort om natthimlens ljusaste stjärnor. 49 av dem gäller alla stjärnor med ett namn som godkänts av Internationella astronomiska unionen (IAU) och som är ljusare än skenbar magnitud 2,0 (täta par efter sitt sammanlagda ljus), samt Polstjärnan: på framsidan stjärnans namn, t.ex. ”Sirius”; på baksidan dess stjärnbild, på engelska med det officiella IAU-namnet (t.ex. ”Canis Major”), på svenska med det svenska namnet (”Stora hunden”), med Bayerbeteckningen i en anteckning. Tre kort frågar efter natthimlens ljusaste och näst ljusaste stjärna och stjärnan närmast norra himmelspolen. Namnen kommer från IAU:s arbetsgrupp för stjärnnamn; stjärnbilder och magnituder från Wikidata, kontrollerade mot SIMBAD."@sv ;
+    prov:wasDerivedFrom <https://www.pas.rochester.edu/~emamajek/WGSN/IAU-CSN.txt> ,
+                        <https://www.wikidata.org/wiki/Q3409> ,
+                        <https://iauarchive.eso.org/public/themes/constellations/> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:astronomy ;
+    dcat:keyword "stars"@en ,
+                 "star names"@en ,
+                 "constellations"@en ,
+                 "night sky"@en ,
+                 "astronomy"@en ,
+                 "IAU"@en ,
+                 "stjärnor"@sv ,
+                 "stjärnnamn"@sv ,
+                 "stjärnbilder"@sv ,
+                 "natthimlen"@sv ,
+                 "astronomi"@sv ,
+                 "IAU"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#brightest-stars> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#brightest-stars> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/licenses/by/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.pas.rochester.edu/~emamajek/WGSN/IAU-CSN.txt> ,
+              <https://www.wikidata.org/wiki/Q3409> ,
+              <https://iauarchive.eso.org/public/themes/constellations/> ,
+              <https://exopla.net/star-names/modern-iau-star-names/> ,
+              <https://simbad.cds.unistra.fr/simbad/> ,
+              <https://docs.astropy.org/en/stable/api/astropy.coordinates.get_constellation.html> ,
+              <https://sv.wikipedia.org/wiki/Polstj%C3%A4rnan> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ,
+                       <#review-6> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (SIMBAD, astropy, live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "1. IAU star names: the IAU Working Group on Star Names (WGSN) publishes its IAU Catalog of Star Names (IAU-CSN). The plain-text edition, IAU-CSN.txt (header: “Last updated 2022-04-04”), was downloaded from the WGSN secretary's page at the University of Rochester (query 1). It gives, for every approved name, the star's designation, Bayer letter, constellation abbreviation (Con), component, V magnitude, HIP number and date of adoption, and states that IAU-produced products are released under Creative Commons Attribution. The IAU's own former page (https://www.iau.org/public/themes/naming_stars/) answered 404; the IAU's announcement “New Star Names 2026” (12 February 2026) links to the living catalogue on the WGSN's site exopla.net, which was downloaded (query 2) and its table (640 names, the latest adopted 2026/09/22) parsed (parse_csn.py). Every name brighter than magnitude 2.6 in either table was compared: the current catalogue adds no name for a star brighter than 2.0 (its newer bright names, Uridim, Tiansi and Leepwal, are α Lupi 2.29, γ Cassiopeiae 2.39 and ζ Centauri 2.55), and every name of the deck is in both with the same Bayer letter and constellation."@en ,
+                 "2. Ranking: the two WGSN tables give different magnitudes for some multiple stars, because the 2022 file gives the magnitude of the named component (Castor 1.98, Shaula 2.08, Acrux 1.33, Algieba 2.61) and the current catalogue mostly the combined light (1.58, 1.63, 0.76, 1.98). The deck ranks by one stated catalogue: the V-band apparent magnitude (P1215 with qualifier P1227 = V band, Q4892529, preferred rank) on the Wikidata item that carries the IAU name, whatever that item models (a system for Castor and Shaula, the named component for Acrux and Rigil Kentaurus). Wikidata items were found from the HIP numbers of both tables (query 3, compare.py), their labels, aliases, constellations (P59) and magnitudes read with wbgetentities (query 5, entities.py), names.py made a first cut on the items found by HIP number (rule in step 6), and the item for each name was then chosen as the one that has the name as an English or multilingual label or alias and a P59 statement (for Sirius the system item Q3409 rather than the Sirius A item that carries the HIP number; for Acrux the α¹ Crucis item Q66476660; for Fomalhaut Q13169, found with wbsearchentities). Where more than one item carries the name, the one with the WGSN file's HIP number is taken (added in review round 4, query 16): this keeps the items already chosen for Aldebaran (Q12170, not the system item Q88540091), Alnitak (Q13076, not ζ Orionis A Q66477108), Hadar (Q13175, not β Centauri A Q66476662), Regulus (Q13013, not Q76493786), Rigil Kentaurus and Toliman (Q2090157 and Q1052548, not the system Q12176) and Shaula (Q13023, not Q78603928), none of which changes a star's side of the 2.0 limit, and gives Q66477100 for Algieba (HIP 50583), not the γ¹ Leonis item Q14203. Where that item has no V-band magnitude (Fomalhaut and Alsephina), the 2022 WGSN file's magnitude is used (1.17 and 1.99). The values equal SIMBAD's V magnitudes (query 9) except Hadar (Wikidata 0.60, SIMBAD 0.58) and Sargas (1.862, 1.85); SIMBAD gives no V for the objects named Acrux (“* alf Cru”, whose component “* alf01 Cru” has 1.28 in query 10) and Alsephina (“* del01 Vel”). In review round 1 the rule was re-applied to the chosen items and to Algieba's item (Q66477100) against live Wikidata (query 15, rule_check.py): all 47 stars then in the deck are below 2.0, Polaris 2.02, Algieba 2.37. In review round 4 Algieba's 2.37 (referenced to UCAC4, an astrometric catalogue) was found to be impossible for the pair, which cannot be fainter than its brighter star γ¹ Leonis (SIMBAD V 2.23, query 16); it was replaced by the preferred V-band value of Q14203, the γ¹ Leonis item that also carries the name (1.98, referenced to Ducati 2002, Johnson photometry), which the current IAU catalogue confirms for the pair (1.98), and Algieba was added as the 48th star. A query for every name of either WGSN table brighter than 2.6 (query 17, all_name_items.py) found Algieba to be the only name outside the deck carried by any Wikidata item with a V-band value below 2.0."@en ,
+                 "3. Constellations: the constellation of each star is Wikidata's P59. It was compared with the WGSN file's and the current catalogue's Con column, the abbreviation (P1813) of the Wikidata constellation item, and an independent computation: the star's SIMBAD position (ICRS, J2000) placed in the IAU constellation boundaries with astropy's get_constellation (query 11, constellation_check.py; recorded as the source “astropy”). All five agree for every star (the script make_dossier.py asserts it). The English back of each card gives the constellation's English Wikidata label, which is its official Latin name as listed by the IAU's page “The Constellations” (query 8; checked by make_dossier.py), and its Swedish Wikidata label, the same Swedish names as the library's Constellations deck. English uses these IAU (Latin) names as its ordinary names for the constellations, so the English back is tagged “en”; the library's Constellations deck, which asks for the English translations (“Great Dog”), tags the same Latin names “la” on its fronts. Each reader sees one side: English readers the IAU name, Swedish readers the Swedish name."@en ,
+                 "4. Swedish: the Swedish names of the stars are the IAU names, which Swedish uses unchanged, except Polaris, whose established Swedish name is Polstjärnan (Wikidata sv label; title of the Swedish Wikipedia article). For every star the Swedish Wikipedia article was fetched through the MediaWiki API with its revision id (query 12, svwiki.py; Algieba's in query 16), following redirects and choosing the star article where the name leads to a disambiguation page (Vega, Hadar → Beta Centauri, Pollux, Mimosa, Castor, Atria, Peacock, Polaris → Polstjärnan; Rigil Kentaurus → Alfa Centauri). The lead of each article names the star by the IAU name (or, for Hadar, Miaplacidus and Avior, gives it beside the Bayer name used as the title) and, except Capella, the constellation in Swedish; sv_clauses.py picked the sentence naming the constellation, quoted in each card's evidence. Toliman has no Swedish article; its Swedish name rests on Wikidata's multilingual label and the IAU. Popular Swedish names such as hundstjärnan (Sirius) and Axet (Spica) are not used: only Polstjärnan is established enough to replace the IAU name."@en ,
+                 "5. Notes: the back note gives the star's Bayer designation, built from the WGSN file's Bayer letter and the constellation's genitive in the IAU's table “The Constellations” (e.g. α + Canis Majoris), with the component for the two stars of the Alpha Centauri pair (WGSN components A and B) and, since review round 4, for Acrux (α¹ Crucis, the item ranked) and Algieba (γ¹ Leonis, the WGSN file's ID “γ1”), each called the brighter star of its pair. Three further cards ask for the brightest and second-brightest star of the night sky (Sirius and Canopus, from the V magnitudes of Wikidata, SIMBAD and the WGSN file and the Swedish Wikipedia) and for the bright star nearest the north celestial pole (Polaris, SIMBAD declination +89.264109° for J2000, 0.736° from the pole; moved to 4 October 2026 with its SIMBAD proper motion, parallax and radial velocity and precessed to the equinox of that date with astropy, 0.626°; closest, 0.46°, in 2102 in a yearly sampling of 2000–2200; query 15, polaris_today.py). Study direction: front to back only, since several stars share a constellation."@en ,
+                 "6. Evidence and machine checks: make_dossier.py (query 14) wrote the cards and the evidence of every star card from the saved, parsed files (the WGSN file, the current catalogue, the Wikidata entities, the IAU constellations table, the SIMBAD results, the astropy computation and the Swedish Wikipedia leads), so that every “says” is what the parsed source holds; the evidence of the three superlative cards was written by hand from the same files. The scripts are not published with the deck; their rules are: parse_csn.py reads the largest HTML table of the catalogue page into rows keyed by its header (a repeated header row at the end is not a name). make_q3.py collects the HIP numbers of every row below magnitude 2.6 in either WGSN table. compare.py joins the q3 results to both tables by HIP number. names.py (the first cut) keeps every name of the 2022 WGSN file whose HIP-matched Wikidata item has a V-band magnitude below 2.0 (the preferred-rank value, else any value; where there is none, the WGSN file's magnitude), plus Polaris; stars.py then fixes the item carrying each name (step 2). make_dossier.py takes each item's magnitude as the first preferred-rank, non-deprecated P1215 value with P1227 = Q4892529, else the first non-deprecated one, else the WGSN file's value, sorts by it, and asserts for every star that the item has exactly one IAU constellation in P59 and that its P1813 abbreviation equals the WGSN Con, the current catalogue's Constellation and astropy's short name, and that the IAU table's name equals the Wikidata en label. constellation_check.py calls get_constellation(SkyCoord(ra * u.deg, dec * u.deg, frame='icrs')) and get_constellation(…, short_name=True) on the positions of simbad-names.csv. entities.py, fetch_cons.py and svwiki.py make the GET requests recorded in queries 5, 6 and 12, in batches (50 items; 20 titles), and sv_clauses.py picks the sentence of each Swedish lead that names the constellation. For every star card the builder checks against live Wikidata that the star item has the constellation as P59, has the English and Swedish front as a label or alias (in that language or mul), has the V magnitude used for the ranking as a P1215 value (where Wikidata has one), and that the constellation item has the English and Swedish back as labels. The built deck was validated with the app's SHACL and DCAT-AP validators (validate_sources.ts)."@en ,
+                 "Selection: Every star with an IAU-approved proper name (IAU Catalog of Star Names) whose V-band apparent magnitude is below 2.0, as of 4 October 2026: 48 stars, from Sirius (−1.46) to Alsephina (1.99). The magnitude is the preferred V-band value on the Wikidata item that carries the IAU name as an English or multilingual label or alias and has a constellation (P59); where several items carry the name (Aldebaran, Alnitak, Hadar, Regulus, Rigil Kentaurus, Shaula, Toliman, Algieba), the one that has the star's HIP number from the WGSN file; where that item has no V-band value (Fomalhaut, Alsephina), the WGSN file's value. The rule takes the value of whatever that item models: the combined light where the item is the system (Castor 1.58, Shaula 1.63), the named component's light where it is the component (Acrux 1.28, Rigil Kentaurus 0.01). One value is replaced: Algieba's item (Q66477100, the γ Leonis pair, HIP 50583) has the preferred V-band value 2.37 (from the UCAC4 astrometric catalogue), which cannot be the pair's light, since its brighter star γ¹ Leonis alone is 2.23 in SIMBAD; the deck uses instead the preferred V-band value of the other item that carries the name Algieba, the γ¹ Leonis item Q14203 (1.98, from Johnson photometry of the unresolved pair), which the current IAU catalogue confirms for the pair (1.98). Algieba stays a borderline case: the Swedish Wikipedia gives the pair 2.08, and the 2022 WGSN file gives γ¹ Leonis alone 2.61. In effect, for the borderline multiple stars (Castor, Shaula, Algieba) the deck ranks by the combined light that the eye sees as one point: Algieba is in the deck on the light of the unresolved pair, and its IAU-named star γ¹ Leonis alone would be fainter than 2.0 (2.23 in SIMBAD). Polaris (2.02) is added as the 49th star, as the pole star, together with three cards on undisputed superlatives (the brightest and the second-brightest star of the night sky, and the star nearest the north celestial pole): 52 cards. Left out: the Sun; stars brighter than 2.0 that have no IAU name (γ² Velorum, 1.83; α² Crucis, 1.58, the companion of Acrux); stars just fainter than 2.0 (Hamal and Diphda 2.01); galaxies and other non-stellar objects. The 2.0 limit is the deck's own round cut-off: magnitudes near it differ by a few hundredths between catalogues, and the selection follows the stated rule rather than any list of brightest stars. In Swedish the stars keep their IAU names, except Polaris, whose established Swedish name Polstjärnan is used; popular names such as hundstjärnan (Sirius) and Axet (Spica) are not."@en ,
+                 "Licensing: The deck is licensed CC BY 4.0. The IAU star names and the decision which stars have one come from the IAU Working Group on Star Names' catalogue in its plain-text edition, which states that “All IAU-produced products (Images, Videos, Texts) are released under Creative Commons Attribution”, and the IAU releases the web texts of iau.org under CC BY 4.0; the official Latin names and genitives of the constellations come from the IAU's page “The Constellations”, also under CC BY 4.0. Using these as content sources was a deliberate choice: Wikidata (CC0) has no property that marks a name as IAU-approved, so the IAU list is needed to select the stars, and CC BY 4.0 lets anyone reuse the deck, commercially too, with attribution. The IAU is credited, by name, in the deck description, in the deck metadata (prov:wasDerivedFrom with title, creator and licence) and in this report, and nothing in the deck states or implies IAU endorsement. The WGSN file asks users to cite the official IAU version at https://www.iau.org/public/themes/naming_stars/, which now answers 404; the deck credits the WGSN's file and names the current IAU catalogue on exopla.net, which the IAU's 2026 announcement links as the IAU Star Names Catalog, as the official version. Wikidata (CC0) supplied the constellation of each star, the magnitudes used for the ranking and the Swedish names, with no conditions. The current catalogue on exopla.net (© the WGSN, no licence stated), SIMBAD (CDS; the service is offered under the ODbL, a share-alike database licence), astropy (BSD 3-clause; used only to compute constellations and Polaris's distance from the pole) and the Swedish Wikipedia (CC BY-SA 4.0) were used only to verify facts: no wording, list or selection was taken from them. The fronts of the superlative cards and all notes are the compiler's own wording."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Sources, licences and machine checks: every star's IAU name against both WGSN tables and SIMBAD; its constellation against Wikidata P59, both WGSN tables, the Wikidata abbreviation and an astropy computation from the SIMBAD position; its magnitude against Wikidata, SIMBAD and both WGSN tables; the Swedish names against Wikidata sv labels and the Swedish Wikipedia."@en ;
+    rdfs:comment "Scope: All 51 cards, the selection, the sources and the deck metadata."@en ,
+                 "Outcome: All 48 names are in both WGSN tables and in SIMBAD (as NAME identifiers); for every star the five constellation readings agree; the Wikidata V magnitudes equal SIMBAD's except two that differ by 0.02 or less (Hadar, Sargas), which does not move either across the 2.0 limit. No Wikidata check was skipped. The findings concern differences between catalogues that shaped the selection, Wikidata modelling and a few errors in the Swedish Wikipedia that do not reach the cards."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 51 cards, the selection and the method, re-checked against SIMBAD TAP, the current IAU catalogue on exopla.net and live Wikidata."@en ,
+                 "Outcome: The reviewer re-checked every star's V magnitude in SIMBAD, re-downloaded the current IAU catalogue, ran every Wikidata check and found the facts on all 51 cards correct; round 0 reproduced. Two warnings (the pole-star note gave the J2000 distance for a front that says “today”; the selection's “combined light” wording did not match its rule) and one suggestion (the catalogue row count) were raised. Both warnings were confirmed and fixed; the row count was corrected to 640, which is what the parse produces, not the reviewer's 647."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 51 cards, title, description and keywords: language tags, Swedish names and style, study direction."@en ,
+                 "Outcome: No errors: tags, Swedish star and constellation names, Swedish style and study direction were found correct. A warning that the English backs, which are the IAU Latin names, are tagged “en” while the description calls them Latin and the Constellations deck tags the same strings “la”, was resolved by keeping “en” and rewording the description and method; a suggestion about the popular Swedish names was taken up in the selection and method."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All five licence pages, the deck licence, attribution in the built deck, the recorded queries and method, spot checks of all 51 cards' evidence."@en ,
+                 "Outcome: The deck licence (CC BY 4.0) complies with every content source and attribution is complete; the Swedish Wikipedia quotes, WGSN rows and Wikidata checks were confirmed. One error (SIMBAD's licence recorded as not found, though its home page states the ODbL), a warning about elided queries, a warning that astropy's results were filed as SIMBAD evidence, and two suggestions were raised; all were confirmed and fixed."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: All 51 cards re-checked against live Wikidata, SIMBAD, the current IAU catalogue on exopla.net, astropy and the Swedish Wikipedia; the built deck, the description, the method, the licensing and the quality-control log."@en ,
+                 "Outcome: The reviewer confirmed every card, every Wikidata check and every fix of rounds 1–3, and raised one error and one suggestion. The error was confirmed and went further than reported: the stated rule did not settle which item to use for eight names carried by more than one Wikidata item, and for Algieba the choice decided the selection. A tie-break by HIP number was added, which keeps every earlier choice; Algieba's V value on that item (2.37) was shown to be impossible and replaced by the 1.98 of the other item carrying the name, confirmed by the current IAU catalogue, so Algieba was added: 49 stars, 52 cards. The suggestion on Acrux's note was applied."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The two cards changed in round 4 (acrux, algieba) and every third card (18 cards), against live Wikidata, the WGSN IAU-CSN.txt, the current IAU catalogue on exopla.net, SIMBAD TAP and the Swedish Wikipedia; the metadata, description, keywords, licensing and documentation."@en ,
+                 "Outcome: The reviewer confirmed all 101 Wikidata checks on the sampled cards, every sampled value against the WGSN file, the current IAU catalogue, SIMBAD and the Swedish Wikipedia, and every fix of round 4, and raised one error and one suggestion, both on Algieba. The error was confirmed and fixed; the suggestion was applied to the selection, except for moving Algieba's label checks, which was declined."@en .
+
+<#review-6>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: All 52 cards, the metadata, description, keywords, selection, licensing and the fixes of round 5, against live Wikidata, SIMBAD TAP, the current IAU catalogue on exopla.net and the WGSN tables."@en ,
+                 "Outcome: The reviewer found no errors: the 48 IAU-named stars brighter than 2.0 match the current IAU catalogue exactly, the magnitudes, constellations, Bayer notes and Swedish names are right, and both fixes of round 5 are in place. Two wording suggestions were raised and both applied."@en .
+
+<https://www.pas.rochester.edu/~emamajek/WGSN/IAU-CSN.txt>
+    dcterms:title "IAU Catalog of Star Names (IAU-CSN), plain-text edition" ;
+    dcterms:creator "IAU Division C Working Group on Star Names (WGSN)" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    rdfs:comment "Header of the file: “All IAU-produced products (Images, Videos, Texts) are released under Creative Commons Attribution (i.e. free to use in all perpetuity, world-wide, as long as the source is mentioned).” It names no version; the IAU's copyright page (https://www.iau.org/Iau/Copyright.aspx, read with WebFetch) states: “The images, videos and web texts on iau.org are released under the Creative Commons Attribution 4.0 International license and may on a non-exclusive basis be reproduced without fee, on the conditions outlined below.”, so CC BY 4.0 is assumed. The file asks users to cite the official IAU version of the data."@en .
+
+<https://www.wikidata.org/wiki/Q3409>
+    dcterms:title "Wikidata: the star items (constellation P59, apparent magnitude P1215, labels and aliases) and the constellation items" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — “All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.”"@en .
+
+<https://iauarchive.eso.org/public/themes/constellations/>
+    dcterms:title "The Constellations" ;
+    dcterms:creator "International Astronomical Union (IAU)" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    rdfs:comment "https://iauarchive.eso.org/copyright/ — “The images, videos and web texts on iau.org are released under the Creative Commons Attribution 4.0 International license and may on a non-exclusive basis be reproduced without fee, on the conditions outlined below.” The page is the IAU's former iau.org theme page kept in the IAU's web archive."@en .
+
+<https://exopla.net/star-names/modern-iau-star-names/>
+    dcterms:title "IAU-Catalog of Star Names (current edition)" ;
+    dcterms:creator "IAU Working Group on Star Names (WGSN)" ;
+    rdfs:comment "Footer of exopla.net: “exopla.net © 2026 The Working Group on Star Names (WGSN) of the International Astronomical Union (IAU).” The imprint (https://exopla.net/imprint/) states no licence. The IAU's announcement “New Star Names 2026” (https://iau.org/IAU/News/Ann2026/New-Star-Names-2026.aspx, footer “© 2025 International Astronomical Union (IAU)”) links this page as the IAU Star Names Catalog. Verification only."@en .
+
+<https://simbad.cds.unistra.fr/simbad/>
+    dcterms:title "SIMBAD astronomical database" ;
+    dcterms:creator "CDS, Strasbourg Astronomical Observatory, France" ;
+    rdfs:comment "The SIMBAD home page (https://simbad.cds.unistra.fr/simbad/, fetched with curl, query 13): “Use of SIMBAD service is free without any registration under ODbL licence. We request that users cite the original paper reference.” The ODbL (Open Database License) is a share-alike database licence that is not in the builder's licence list, so “unknown” stands in for it here; either way the source is verification only. CDS's acknowledgement page (https://cds.unistra.fr/help/acknowledgement/, read with WebFetch) asks users to acknowledge: “This research has made use of the SIMBAD database, CDS, Strasbourg Astronomical Observatory, France”. No SIMBAD content is reused in the deck."@en .
+
+<https://docs.astropy.org/en/stable/api/astropy.coordinates.get_constellation.html>
+    dcterms:title "Astropy: get_constellation (the IAU constellation boundaries as tabulated by Roman 1987) and coordinate transformations" ;
+    dcterms:creator "The Astropy Project (Astropy Developers)" ;
+    rdfs:comment "astropy's licence file (https://raw.githubusercontent.com/astropy/astropy/main/LICENSE.rst, fetched with curl, query 11) is the 3-clause BSD licence: “Copyright (c) 2011-2026, Astropy Developers … Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met”. BSD-3-Clause is not in the builder's licence list, so “unknown” stands in for it here. Verification only: the software computed values that were compared with the cards; nothing from it is in the deck."@en .
+
+<https://sv.wikipedia.org/wiki/Polstj%C3%A4rnan>
+    dcterms:title "Svenskspråkiga Wikipedia: artiklarna om stjärnorna" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of the articles: “Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported”"@en .
+
+<#sirius>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sirius"@en ,
+                     "Sirius"@sv ;
+    solid-memo:back "Canis Major"@en ,
+                    "Stora hunden"@sv ;
+    solid-memo:backNote "Bayer designation: α Canis Majoris."@en ,
+                        "Bayerbeteckning: α Canis Majoris."@sv .
+
+<#canopus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Canopus"@en ,
+                     "Canopus"@sv ;
+    solid-memo:back "Carina"@en ,
+                    "Kölen"@sv ;
+    solid-memo:backNote "Bayer designation: α Carinae."@en ,
+                        "Bayerbeteckning: α Carinae."@sv .
+
+<#arcturus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Arcturus"@en ,
+                     "Arcturus"@sv ;
+    solid-memo:back "Boötes"@en ,
+                    "Björnvaktaren"@sv ;
+    solid-memo:backNote "Bayer designation: α Boötis."@en ,
+                        "Bayerbeteckning: α Boötis."@sv .
+
+<#rigil-kentaurus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Rigil Kentaurus"@en ,
+                     "Rigil Kentaurus"@sv ;
+    solid-memo:back "Centaurus"@en ,
+                    "Kentauren"@sv ;
+    solid-memo:backNote "Bayer designation: α Centauri A, the brighter star of the Alpha Centauri pair."@en ,
+                        "Bayerbeteckning: α Centauri A, den ljusare stjärnan i paret Alfa Centauri."@sv .
+
+<#vega>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vega"@en ,
+                     "Vega"@sv ;
+    solid-memo:back "Lyra"@en ,
+                    "Lyran"@sv ;
+    solid-memo:backNote "Bayer designation: α Lyrae."@en ,
+                        "Bayerbeteckning: α Lyrae."@sv .
+
+<#capella>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Capella"@en ,
+                     "Capella"@sv ;
+    solid-memo:back "Auriga"@en ,
+                    "Kusken"@sv ;
+    solid-memo:backNote "Bayer designation: α Aurigae."@en ,
+                        "Bayerbeteckning: α Aurigae."@sv .
+
+<#rigel>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Rigel"@en ,
+                     "Rigel"@sv ;
+    solid-memo:back "Orion"@en ,
+                    "Orion"@sv ;
+    solid-memo:backNote "Bayer designation: β Orionis."@en ,
+                        "Bayerbeteckning: β Orionis."@sv .
+
+<#procyon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Procyon"@en ,
+                     "Procyon"@sv ;
+    solid-memo:back "Canis Minor"@en ,
+                    "Lilla hunden"@sv ;
+    solid-memo:backNote "Bayer designation: α Canis Minoris."@en ,
+                        "Bayerbeteckning: α Canis Minoris."@sv .
+
+<#betelgeuse>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Betelgeuse"@en ,
+                     "Betelgeuse"@sv ;
+    solid-memo:back "Orion"@en ,
+                    "Orion"@sv ;
+    solid-memo:backNote "Bayer designation: α Orionis."@en ,
+                        "Bayerbeteckning: α Orionis."@sv .
+
+<#achernar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Achernar"@en ,
+                     "Achernar"@sv ;
+    solid-memo:back "Eridanus"@en ,
+                    "Eridanus"@sv ;
+    solid-memo:backNote "Bayer designation: α Eridani."@en ,
+                        "Bayerbeteckning: α Eridani."@sv .
+
+<#hadar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hadar"@en ,
+                     "Hadar"@sv ;
+    solid-memo:back "Centaurus"@en ,
+                    "Kentauren"@sv ;
+    solid-memo:backNote "Bayer designation: β Centauri."@en ,
+                        "Bayerbeteckning: β Centauri."@sv .
+
+<#altair>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Altair"@en ,
+                     "Altair"@sv ;
+    solid-memo:back "Aquila"@en ,
+                    "Örnen"@sv ;
+    solid-memo:backNote "Bayer designation: α Aquilae."@en ,
+                        "Bayerbeteckning: α Aquilae."@sv .
+
+<#aldebaran>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Aldebaran"@en ,
+                     "Aldebaran"@sv ;
+    solid-memo:back "Taurus"@en ,
+                    "Oxen"@sv ;
+    solid-memo:backNote "Bayer designation: α Tauri."@en ,
+                        "Bayerbeteckning: α Tauri."@sv .
+
+<#antares>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Antares"@en ,
+                     "Antares"@sv ;
+    solid-memo:back "Scorpius"@en ,
+                    "Skorpionen"@sv ;
+    solid-memo:backNote "Bayer designation: α Scorpii."@en ,
+                        "Bayerbeteckning: α Scorpii."@sv .
+
+<#spica>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Spica"@en ,
+                     "Spica"@sv ;
+    solid-memo:back "Virgo"@en ,
+                    "Jungfrun"@sv ;
+    solid-memo:backNote "Bayer designation: α Virginis."@en ,
+                        "Bayerbeteckning: α Virginis."@sv .
+
+<#pollux>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pollux"@en ,
+                     "Pollux"@sv ;
+    solid-memo:back "Gemini"@en ,
+                    "Tvillingarna"@sv ;
+    solid-memo:backNote "Bayer designation: β Geminorum."@en ,
+                        "Bayerbeteckning: β Geminorum."@sv .
+
+<#fomalhaut>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Fomalhaut"@en ,
+                     "Fomalhaut"@sv ;
+    solid-memo:back "Piscis Austrinus"@en ,
+                    "Södra fisken"@sv ;
+    solid-memo:backNote "Bayer designation: α Piscis Austrini."@en ,
+                        "Bayerbeteckning: α Piscis Austrini."@sv .
+
+<#deneb>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Deneb"@en ,
+                     "Deneb"@sv ;
+    solid-memo:back "Cygnus"@en ,
+                    "Svanen"@sv ;
+    solid-memo:backNote "Bayer designation: α Cygni."@en ,
+                        "Bayerbeteckning: α Cygni."@sv .
+
+<#mimosa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mimosa"@en ,
+                     "Mimosa"@sv ;
+    solid-memo:back "Crux"@en ,
+                    "Södra korset"@sv ;
+    solid-memo:backNote "Bayer designation: β Crucis."@en ,
+                        "Bayerbeteckning: β Crucis."@sv .
+
+<#acrux>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Acrux"@en ,
+                     "Acrux"@sv ;
+    solid-memo:back "Crux"@en ,
+                    "Södra korset"@sv ;
+    solid-memo:backNote "Bayer designation: α¹ Crucis, the brighter star of the Alpha Crucis pair."@en ,
+                        "Bayerbeteckning: α¹ Crucis, den ljusare stjärnan i paret Alfa Crucis."@sv .
+
+<#toliman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Toliman"@en ,
+                     "Toliman"@sv ;
+    solid-memo:back "Centaurus"@en ,
+                    "Kentauren"@sv ;
+    solid-memo:backNote "Bayer designation: α Centauri B, the fainter star of the Alpha Centauri pair."@en ,
+                        "Bayerbeteckning: α Centauri B, den ljussvagare stjärnan i paret Alfa Centauri."@sv .
+
+<#regulus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Regulus"@en ,
+                     "Regulus"@sv ;
+    solid-memo:back "Leo"@en ,
+                    "Lejonet"@sv ;
+    solid-memo:backNote "Bayer designation: α Leonis."@en ,
+                        "Bayerbeteckning: α Leonis."@sv .
+
+<#adhara>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Adhara"@en ,
+                     "Adhara"@sv ;
+    solid-memo:back "Canis Major"@en ,
+                    "Stora hunden"@sv ;
+    solid-memo:backNote "Bayer designation: ε Canis Majoris."@en ,
+                        "Bayerbeteckning: ε Canis Majoris."@sv .
+
+<#castor>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Castor"@en ,
+                     "Castor"@sv ;
+    solid-memo:back "Gemini"@en ,
+                    "Tvillingarna"@sv ;
+    solid-memo:backNote "Bayer designation: α Geminorum."@en ,
+                        "Bayerbeteckning: α Geminorum."@sv .
+
+<#shaula>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Shaula"@en ,
+                     "Shaula"@sv ;
+    solid-memo:back "Scorpius"@en ,
+                    "Skorpionen"@sv ;
+    solid-memo:backNote "Bayer designation: λ Scorpii."@en ,
+                        "Bayerbeteckning: λ Scorpii."@sv .
+
+<#bellatrix>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bellatrix"@en ,
+                     "Bellatrix"@sv ;
+    solid-memo:back "Orion"@en ,
+                    "Orion"@sv ;
+    solid-memo:backNote "Bayer designation: γ Orionis."@en ,
+                        "Bayerbeteckning: γ Orionis."@sv .
+
+<#gacrux>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Gacrux"@en ,
+                     "Gacrux"@sv ;
+    solid-memo:back "Crux"@en ,
+                    "Södra korset"@sv ;
+    solid-memo:backNote "Bayer designation: γ Crucis."@en ,
+                        "Bayerbeteckning: γ Crucis."@sv .
+
+<#elnath>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Elnath"@en ,
+                     "Elnath"@sv ;
+    solid-memo:back "Taurus"@en ,
+                    "Oxen"@sv ;
+    solid-memo:backNote "Bayer designation: β Tauri."@en ,
+                        "Bayerbeteckning: β Tauri."@sv .
+
+<#alnilam>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Alnilam"@en ,
+                     "Alnilam"@sv ;
+    solid-memo:back "Orion"@en ,
+                    "Orion"@sv ;
+    solid-memo:backNote "Bayer designation: ε Orionis."@en ,
+                        "Bayerbeteckning: ε Orionis."@sv .
+
+<#miaplacidus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Miaplacidus"@en ,
+                     "Miaplacidus"@sv ;
+    solid-memo:back "Carina"@en ,
+                    "Kölen"@sv ;
+    solid-memo:backNote "Bayer designation: β Carinae."@en ,
+                        "Bayerbeteckning: β Carinae."@sv .
+
+<#alnair>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Alnair"@en ,
+                     "Alnair"@sv ;
+    solid-memo:back "Grus"@en ,
+                    "Tranan"@sv ;
+    solid-memo:backNote "Bayer designation: α Gruis."@en ,
+                        "Bayerbeteckning: α Gruis."@sv .
+
+<#alioth>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Alioth"@en ,
+                     "Alioth"@sv ;
+    solid-memo:back "Ursa Major"@en ,
+                    "Stora björnen"@sv ;
+    solid-memo:backNote "Bayer designation: ε Ursae Majoris."@en ,
+                        "Bayerbeteckning: ε Ursae Majoris."@sv .
+
+<#alnitak>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Alnitak"@en ,
+                     "Alnitak"@sv ;
+    solid-memo:back "Orion"@en ,
+                    "Orion"@sv ;
+    solid-memo:backNote "Bayer designation: ζ Orionis."@en ,
+                        "Bayerbeteckning: ζ Orionis."@sv .
+
+<#dubhe>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Dubhe"@en ,
+                     "Dubhe"@sv ;
+    solid-memo:back "Ursa Major"@en ,
+                    "Stora björnen"@sv ;
+    solid-memo:backNote "Bayer designation: α Ursae Majoris."@en ,
+                        "Bayerbeteckning: α Ursae Majoris."@sv .
+
+<#mirfak>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mirfak"@en ,
+                     "Mirfak"@sv ;
+    solid-memo:back "Perseus"@en ,
+                    "Perseus"@sv ;
+    solid-memo:backNote "Bayer designation: α Persei."@en ,
+                        "Bayerbeteckning: α Persei."@sv .
+
+<#kaus-australis>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Kaus Australis"@en ,
+                     "Kaus Australis"@sv ;
+    solid-memo:back "Sagittarius"@en ,
+                    "Skytten"@sv ;
+    solid-memo:backNote "Bayer designation: ε Sagittarii."@en ,
+                        "Bayerbeteckning: ε Sagittarii."@sv .
+
+<#wezen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Wezen"@en ,
+                     "Wezen"@sv ;
+    solid-memo:back "Canis Major"@en ,
+                    "Stora hunden"@sv ;
+    solid-memo:backNote "Bayer designation: δ Canis Majoris."@en ,
+                        "Bayerbeteckning: δ Canis Majoris."@sv .
+
+<#alkaid>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Alkaid"@en ,
+                     "Alkaid"@sv ;
+    solid-memo:back "Ursa Major"@en ,
+                    "Stora björnen"@sv ;
+    solid-memo:backNote "Bayer designation: η Ursae Majoris."@en ,
+                        "Bayerbeteckning: η Ursae Majoris."@sv .
+
+<#avior>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Avior"@en ,
+                     "Avior"@sv ;
+    solid-memo:back "Carina"@en ,
+                    "Kölen"@sv ;
+    solid-memo:backNote "Bayer designation: ε Carinae."@en ,
+                        "Bayerbeteckning: ε Carinae."@sv .
+
+<#sargas>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sargas"@en ,
+                     "Sargas"@sv ;
+    solid-memo:back "Scorpius"@en ,
+                    "Skorpionen"@sv ;
+    solid-memo:backNote "Bayer designation: θ Scorpii."@en ,
+                        "Bayerbeteckning: θ Scorpii."@sv .
+
+<#atria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Atria"@en ,
+                     "Atria"@sv ;
+    solid-memo:back "Triangulum Australe"@en ,
+                    "Södra triangeln"@sv ;
+    solid-memo:backNote "Bayer designation: α Trianguli Australis."@en ,
+                        "Bayerbeteckning: α Trianguli Australis."@sv .
+
+<#menkalinan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Menkalinan"@en ,
+                     "Menkalinan"@sv ;
+    solid-memo:back "Auriga"@en ,
+                    "Kusken"@sv ;
+    solid-memo:backNote "Bayer designation: β Aurigae."@en ,
+                        "Bayerbeteckning: β Aurigae."@sv .
+
+<#peacock>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Peacock"@en ,
+                     "Peacock"@sv ;
+    solid-memo:back "Pavo"@en ,
+                    "Påfågeln"@sv ;
+    solid-memo:backNote "Bayer designation: α Pavonis."@en ,
+                        "Bayerbeteckning: α Pavonis."@sv .
+
+<#alhena>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Alhena"@en ,
+                     "Alhena"@sv ;
+    solid-memo:back "Gemini"@en ,
+                    "Tvillingarna"@sv ;
+    solid-memo:backNote "Bayer designation: γ Geminorum."@en ,
+                        "Bayerbeteckning: γ Geminorum."@sv .
+
+<#alphard>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Alphard"@en ,
+                     "Alphard"@sv ;
+    solid-memo:back "Hydra"@en ,
+                    "Vattenormen"@sv ;
+    solid-memo:backNote "Bayer designation: α Hydrae."@en ,
+                        "Bayerbeteckning: α Hydrae."@sv .
+
+<#mirzam>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mirzam"@en ,
+                     "Mirzam"@sv ;
+    solid-memo:back "Canis Major"@en ,
+                    "Stora hunden"@sv ;
+    solid-memo:backNote "Bayer designation: β Canis Majoris."@en ,
+                        "Bayerbeteckning: β Canis Majoris."@sv .
+
+<#algieba>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Algieba"@en ,
+                     "Algieba"@sv ;
+    solid-memo:back "Leo"@en ,
+                    "Lejonet"@sv ;
+    solid-memo:backNote "Bayer designation: γ¹ Leonis, the brighter star of the Gamma Leonis pair."@en ,
+                        "Bayerbeteckning: γ¹ Leonis, den ljusare stjärnan i paret Gamma Leonis."@sv .
+
+<#alsephina>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Alsephina"@en ,
+                     "Alsephina"@sv ;
+    solid-memo:back "Vela"@en ,
+                    "Seglet"@sv ;
+    solid-memo:backNote "Bayer designation: δ Velorum."@en ,
+                        "Bayerbeteckning: δ Velorum."@sv .
+
+<#polaris>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Polaris"@en ,
+                     "Polstjärnan"@sv ;
+    solid-memo:back "Ursa Minor"@en ,
+                    "Lilla björnen"@sv ;
+    solid-memo:backNote "Bayer designation: α Ursae Minoris."@en ,
+                        "Bayerbeteckning: α Ursae Minoris."@sv .
+
+<#brightest-star-of-the-night-sky>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The brightest star of the night sky"@en ,
+                     "Natthimlens ljusaste stjärna"@sv ;
+    solid-memo:back "Sirius"@en ,
+                    "Sirius"@sv ;
+    solid-memo:backNote "Apparent magnitude −1.46 (V)."@en ,
+                        "Skenbar magnitud −1,46 (V)."@sv .
+
+<#second-brightest-star-of-the-night-sky>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The second-brightest star of the night sky"@en ,
+                     "Natthimlens näst ljusaste stjärna"@sv ;
+    solid-memo:back "Canopus"@en ,
+                    "Canopus"@sv ;
+    solid-memo:backNote "Apparent magnitude −0.74 (V)."@en ,
+                        "Skenbar magnitud −0,74 (V)."@sv .
+
+<#north-pole-star>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The bright star nearest the north celestial pole today"@en ,
+                     "Den ljusa stjärna som i dag står närmast norra himmelspolen"@sv ;
+    solid-memo:back "Polaris"@en ,
+                    "Polstjärnan"@sv ;
+    solid-memo:backNote "About 0.6° from the pole in 2026 (0.74° in 2000); it will come closest around 2100."@en ,
+                        "Omkring 0,6° från polen år 2026 (0,74° år 2000); den kommer som närmast polen omkring år 2100."@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

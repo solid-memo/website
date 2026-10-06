@@ -1,0 +1,756 @@
+@base <https://solid-memo.com/decks/swedish-provincial-symbols/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Sweden's provincial flowers and animals"@en ,
+                  "Landskapsblommor och landskapsdjur"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    dcterms:description "The provincial flowers (landskapsblommor) and provincial animals (landskapsdjur) of Sweden's 25 provinces: 50 cards. Front: the province, under its Swedish name (Skåne = Scania, Lappland = Lapland), and the symbol, e.g. \"Uppland: provincial flower\"; back: the plant or animal in English and Swedish, with its scientific name in a note. The flowers go back to a list of 1908; Blekinge, Dalarna, Härjedalen and Medelpad have two plants in use, and their cards give both. The animals were announced in 1988 after a public vote that WWF Sweden ran in 1987. From Wikidata, Dyntaxa and Wikipedia, checked against WWF Sweden and the Swedish Museum of Natural History."@en ,
+                        "Landskapsblommorna och landskapsdjuren för Sveriges 25 landskap: 50 kort. Framsida: landskapet och symbolen, t.ex. ”Uppland: landskapsblomma”; baksida: växten eller djuret på engelska och svenska, med det vetenskapliga namnet i en anteckning. Blommorna går tillbaka på en lista från 1908; Blekinge, Dalarna, Härjedalen och Medelpad har två växter i bruk, och deras kort anger båda. Djuren tillkännagavs 1988 efter en folkomröstning som Världsnaturfonden WWF anordnade 1987. Uppgifterna kommer från Wikidata, Dyntaxa och Wikipedia och är kontrollerade mot WWF och Naturhistoriska riksmuseet."@sv ;
+    prov:wasDerivedFrom <https://www.wikidata.org/wiki/Q7252554> ,
+                        <https://www.gbif.org/dataset/de8934f4-a136-481c-a87a-b0b202b80a31> ,
+                        <https://sv.wikipedia.org/wiki/Landskapsdjur> ,
+                        <https://sv.wikipedia.org/wiki/Landskapsblommor> ,
+                        <https://en.wikipedia.org/wiki/Province_flowers_of_Sweden> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:biology ,
+               topic:geography ;
+    dcat:keyword "provincial flowers"@en ,
+                 "provincial animals"@en ,
+                 "provinces of Sweden"@en ,
+                 "Swedish nature"@en ,
+                 "botany"@en ,
+                 "zoology"@en ,
+                 "landskapsblommor"@sv ,
+                 "landskapsdjur"@sv ,
+                 "landskap"@sv ,
+                 "svensk natur"@sv ,
+                 "botanik"@sv ,
+                 "zoologi"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#swedish-provincial-symbols> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#swedish-provincial-symbols> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/wiki/Q7252554> ,
+              <https://www.gbif.org/dataset/de8934f4-a136-481c-a87a-b0b202b80a31> ,
+              <https://sv.wikipedia.org/wiki/Landskapsdjur> ,
+              <https://sv.wikipedia.org/wiki/Landskapsblommor> ,
+              <https://en.wikipedia.org/wiki/Province_flowers_of_Sweden> ,
+              <https://web.archive.org/web/20211202042718/http://linnaeus.nrm.se/flora/landskap.html> ,
+              <https://web.archive.org/web/20131020064303/http://info.bergianska.se/historia_landskapsblom.html> ,
+              <https://www.wwf.se/djur/sveriges-landskapsdjur/> ,
+              <https://www.skogeniskolan.se/wp-content/uploads/2024/08/varalandskapsvaxterochlandskapsdjur2022.pdf> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (Dyntaxa through the GBIF API, live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "1. Provincial flowers from Wikidata (query 1): every P2238 (official symbol) statement on the instances of province of Sweden (Q193556), with its P3831 (object of statement has role) qualifier, rank, taxon name and English and Swedish labels. All 29 statements have the role landskapsblommor (Q7252554) and normal rank; they cover the 25 provinces, Blekinge, Dalarna, Härjedalen and Medelpad with two plants each. (Wikidata has two items that are instances of Q193556 for Södermanland; only Q626062 has P2238 statements.) Wikidata has no statements for the provincial animals."@en ,
+                 "2. Names from Wikidata (queries 2 and 3): the P225 (taxon name), the English, Swedish and multilingual labels and aliases and the P1843 (taxon common name) values of all the plants and animals (query 2 reads the truthy wdt: values, so where one value has preferred rank the normal-rank values are not returned; the evidence on the cards says \"truthy values\", and query 12 lists all ranks for the animals), and the labels and aliases of the provinces. The animals' items were found through the Swedish Wikipedia articles linked from its \"Landskapsdjur\" table (query 6, pageprops wikibase_item); the link \"Älg\" leads to the article on the genus (Q10731891), so the species item moose (Q35517, Alces alces) was found with the Wikidata search API and its names fetched with query 3."@en ,
+                 "3. Dyntaxa (query 4): the script dyntaxa.py looked up every scientific name in the Dyntaxa checklist as published on GBIF (dataset version of 29 September 2026), kept the entries whose canonical name matches the scientific name exactly (no fuzzy or partial matches), followed each to its accepted taxon (the acceptedKey of a synonym), and fetched the Swedish (and English) vernacular names of the accepted taxon. All 54 names are accepted except Trientalis europaea, which Dyntaxa lists as a synonym of Lysimachia europaea."@en ,
+                 "4. Provincial animals from the Swedish Wikipedia (query 5): the wikitext of \"Landskapsdjur\" and \"Landskapsblommor\" (with the overview \"Svenska landskapssymboler\") was fetched through the MediaWiki API with revision ids; rows.py extracted the table row of each province, which is quoted on the cards. The animals' list is checked against WWF Sweden's own page on the 1987–1988 vote (query 8), which lists the same 25 animals, and five of them against Skogen i skolan's lesson plan (query 9)."@en ,
+                 "5. Flowers cross-checked against the Swedish Museum of Natural History's Den virtuella floran (query 7): the live page answered 404, so the Wayback Machine's copy of 2 December 2021 was read. It gives one plant per province and says its choice follows Nationalencyklopedin; for the four provinces with two plants it gives the oak (Blekinge), the spreading bellflower (Dalarna), the spring pasqueflower (Härjedalen) and the Norway spruce (Medelpad). It agrees with Wikidata on the other 21 provinces. It is not fully independent of the Swedish Wikipedia, whose \"Andra förslag\" column cites Den virtuella floran for most entries; for the flowers, the independent checks of that column are Wikidata, the table's 1908 column and the English Wikipedia list. Wittrock's 1908 list, as quoted in six notes, was checked against Bergianska trädgården's history page (query 14), which gives \"Hälsningland: Tall\" where the Swedish Wikipedia table's 1908 column wrongly gives lin. The Swedish and English Wikipedia lists (queries 5 and 10) agree with Wikidata on all 25 provinces, including the two plants of the four provinces."@en ,
+                 "6. English names: the English name is a label, alias or P1843 value of the plant's or animal's Wikidata item where one has the form used (lower case except proper names such as Norway, Arctic, Eurasian, Siberian). Where Wikidata or Dyntaxa gives the name only in title case (e.g. \"Siberian Jay\", \"Western capercaillie\", \"Mountain Hare\", \"Hazel dormouse\"), the card uses it in sentence case, keeping capitals only for proper names (Eurasian, Siberian, Arctic, Atlantic); this applies to animal-norrbotten, animal-gastrikland, animal-medelpad, animal-narke, animal-vasterbotten, animal-vastergotland, animal-ostergotland, animal-dalarna and animal-angermanland, whose names the truthy Wikidata values or Dyntaxa give in that form apart from case (common crane, mute swan and Eurasian beaver are also normal-rank P1843 values in exactly the card's form, query 12). Otherwise the card uses the name given in the introduction of the English Wikipedia article on the plant or animal (queries 10 and 13), quoted on the card. Species are named with the qualified species name (common honeysuckle, common ivy, European mistletoe, common raven), not a name that also covers the genus. Swedish names: the Dyntaxa Swedish name, all of which are also given by the Swedish Wikipedia and NRM lists; Blekinge's oak is \"ek\" (Dyntaxa lists \"skogsek\" and \"ek\"; every list of provincial flowers says \"ek\") and Medelpad's globeflower \"smörboll\" (Dyntaxa lists \"smörbollar\" and \"smörboll\"; the lists say \"smörboll\")."@en ,
+                 "7. Cards: cards.py built the 50 cards from the saved data and an editorial table (province, plant or animal items, English and Swedish names, notes), quoting each source's own row or statement as evidence, and generated the Wikidata checks: the province's Swedish and English label or alias, each P2238 statement, each P225 value, and the English and Swedish name wherever Wikidata has it exactly as on the card (label, alias or P1843). dossier.py added the evidence for the notes and the metadata. Fronts: \"<province>: provincial flower\" / \"<province>: landskapsblomma\" and \"<province>: provincial animal\" / \"<province>: landskapsdjur\", with the provinces under their Swedish names in both languages (Wikidata's English aliases include \"Skåne\" and \"Lappland\"). The four provinces with two flowers have the front note \"two plants are named\" and both plants on the back, the one in Wittrock's 1908 list first. Every back note gives the scientific name, written as part of the English and Swedish note text."@en ,
+                 "Selection: One provincial flower card and one provincial animal card for each of Sweden's 25 provinces (landskap): 50 cards. Flowers: the plants Wikidata records as each province's official symbol in the role landskapsblommor, which match the Swedish and English Wikipedia lists and, for 21 provinces, Den virtuella floran; for Blekinge, Dalarna, Härjedalen and Medelpad, where two plants are in use and no list settles which, the card names both. Animals: the 25 landskapsdjur chosen in 1987–1988 by a jury after WWF Sweden's public vote, as listed by the Swedish Wikipedia and by WWF Sweden. Left out: the many other provincial symbols (birds, fish, insects, fungi, mosses, stones, apples and so on, most of them chosen by private societies), county (län) symbols, Sweden's national flower (liten blåklocka, chosen in a 2021 vote) and the older choices of Wittrock's 1908 list that are no longer used (they appear in notes where they explain a card)."@en ,
+                 "Licensing: The deck is CC BY-SA 4.0 because its provincial animals come from the Swedish Wikipedia (CC BY-SA 4.0), the one source that lists them under a free licence (Wikidata has no statements for them; WWF Sweden's own list is all rights reserved and was used only to check), and because English plant names and the history in some notes come from the Swedish and English Wikipedias. Both Wikipedias are attributed as sources in the deck and this report: the two Swedish articles each as its own source with its own address, and the English articles by title and revision. Wikidata and Dyntaxa (both CC0) supplied the flowers, the scientific names and most English and Swedish names, which CC0 allows under any licence. Den virtuella floran (Swedish Museum of Natural History), Bergianska trädgården, WWF Sweden and Skogen i skolan were used for verification only: they confirmed facts the content sources gave, and no wording, layout or selection was copied from them. The fronts and notes are the compiler's own wording."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Sources, licences and machine checks: every flower against Wikidata, Den virtuella floran and both Wikipedias; every animal against the Swedish Wikipedia, WWF Sweden and (five) Skogen i skolan; every scientific and Swedish name against Dyntaxa; English names against Wikidata and the English Wikipedia."@en ;
+    rdfs:comment "Scope: All 50 cards, the sources and the deck metadata."@en ,
+                 "Outcome: All sources agree on the provincial animal of every province and on the flower of 21 provinces; four provinces have two plants in use and their cards give both. Two scientific or Swedish names were corrected against Dyntaxa (Lysimachia europaea; äkta förgätmigej). No Wikidata check was skipped because Wikidata disagreed with a better source in substance; checks are absent only where Wikidata's capitalisation differs or it has no name in that form."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 50 cards, re-verified against WWF Sweden, the Swedish and English Wikipedias, Bergianska trädgården's copy of Wittrock's list and live Wikidata (255 checks)."@en ,
+                 "Outcome: No factual errors. Two warnings concerned evidence: the quote cited for Härjedalen's alpine yellow-violet did not contain the name, and the Swedish Wikipedia table row cited for Hälsingland gives lin in the 1908 column, against the card's (correct) note. Both fixed; Bergianska trädgården's archived page was added as a verification source for Wittrock's 1908 list. Truncated quotes and two wordings were also fixed."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 50 cards, the title, description and keywords in both languages, and the generated TTL."@en ,
+                 "Outcome: No hard errors; tags, Swedish names and casing were found correct. One warning (Dalarna's Swedish note naming the plant differently from the back) and four suggestions; all were applied."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 50 cards, every source's licence and licence evidence, the method, queries, selection and licensing text, and the generated TTL."@en ,
+                 "Outcome: Licences confirmed correct and CC BY-SA 4.0 justified. One error (no evidence for \"alpine yellow-violet\") and five warnings on evidence and documentation, all fixed; four suggestions, three applied and one declined in part."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The cards and metadata changed in rounds 1–3, a sample of every third card (17 cards), the description, keywords, method, licensing, the Wikidata checks against live Wikidata, and a fresh Dyntaxa/GBIF lookup of all scientific names."@en ,
+                 "Outcome: No errors or warnings; every fix from rounds 1–3 was confirmed in the dossier. One suggestion on the keywords, applied."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: All 50 cards, title, description, keywords, study direction, licence, the method's first paragraph and the fixes from rounds 1–4; the 25 animals against WWF Sweden's live page (last changed 13/11/25) and the 25 flowers against the established lists and Dyntaxa names."@en ,
+                 "Outcome: No errors or warnings; every card, the description and the fixes from rounds 1–4 were confirmed. One optional suggestion on a Swedish note, applied."@en .
+
+<https://www.wikidata.org/wiki/Q7252554>
+    dcterms:title "Wikidata: the official symbols (P2238) of the provinces of Sweden (instances of Q193556) in the role landskapsblommor (Q7252554), and the taxon names, labels, aliases and taxon common names (P1843) of the plants and animals" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://www.gbif.org/dataset/de8934f4-a136-481c-a87a-b0b202b80a31>
+    dcterms:title "Dyntaxa. Svensk taxonomisk databas (the Swedish taxonomic database), as published on GBIF (dataset de8934f4-a136-481c-a87a-b0b202b80a31, version of 29 September 2026)" ;
+    dcterms:creator "SLU Swedish Species Information Centre (SLU Artdatabanken)" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "GBIF's record of the dataset (https://api.gbif.org/v1/dataset/de8934f4-a136-481c-a87a-b0b202b80a31): \"license\": \"http://creativecommons.org/publicdomain/zero/1.0/legalcode\" (Creative Commons Zero), modified 2026-09-29."@en .
+
+<https://sv.wikipedia.org/wiki/Landskapsdjur>
+    dcterms:title "Swedish Wikipedia: \"Landskapsdjur\" (revision 57714099)" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Wikimedia Terms of Use (https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use), section 7: text contributors license it under the \"Creative Commons Attribution-ShareAlike 4.0 International License\" (\"CC BY-SA 4.0\"); each Wikipedia page's footer states that text is available under CC BY-SA 4.0."@en .
+
+<https://sv.wikipedia.org/wiki/Landskapsblommor>
+    dcterms:title "Swedish Wikipedia: \"Landskapsblommor\" (revision 57974648)" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Wikimedia Terms of Use (https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use), section 7: text contributors license it under the \"Creative Commons Attribution-ShareAlike 4.0 International License\" (\"CC BY-SA 4.0\"); each Wikipedia page's footer states that text is available under CC BY-SA 4.0."@en .
+
+<https://en.wikipedia.org/wiki/Province_flowers_of_Sweden>
+    dcterms:title "English Wikipedia: \"Province flowers of Sweden\" and the articles \"Campanula patula\", \"Campanula rotundifolia\", \"Common raven\", \"Dryas octopetala\", \"Fritillaria meleagris\", \"Genista pilosa\", \"Gymnadenia nigra\", \"Hedera helix\", \"Helianthemum oelandicum\", \"Linnaea\", \"Lonicera periclymenum\", \"Lysimachia europaea\", \"Moose\", \"Myosotis scorpioides\", \"Nymphaea alba\", \"Pedicularis sceptrum-carolinum\", \"Pulsatilla vernalis\", \"Quercus robur\", \"Rubus arcticus\", \"Trollius europaeus\", \"Verbascum thapsus\", \"Viola biflora\", \"Viscum album\" (revisions as cited on the cards; each article is at https://en.wikipedia.org/wiki/ followed by its title)" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Wikimedia Terms of Use (https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use), section 7: text contributors license it under the \"Creative Commons Attribution-ShareAlike 4.0 International License\" (\"CC BY-SA 4.0\")."@en .
+
+<https://web.archive.org/web/20211202042718/http://linnaeus.nrm.se/flora/landskap.html>
+    dcterms:title "Den virtuella floran: Svenska landskapsblommor (Wayback Machine copy of 2 December 2021; the page says it was last updated on 1 December 1998)" ;
+    dcterms:creator "Naturhistoriska riksmuseet (Swedish Museum of Natural History), Arne Anderberg" ;
+    rdfs:comment "The page's footer: \"© Naturhistoriska riksmuseet 1996\"; no licence is offered. The live address http://linnaeus.nrm.se/flora/landskap.html answered 404. Verification only."@en .
+
+<https://web.archive.org/web/20131020064303/http://info.bergianska.se/historia_landskapsblom.html>
+    dcterms:title "Bergianska trädgården: \"Landskapsblommor\" (history page with Wittrock's list; Wayback Machine copy of 20 October 2013)" ;
+    dcterms:creator "Bergianska trädgården" ;
+    rdfs:comment "The archived page states no licence or copyright notice; treated as all rights reserved. Verification only."@en .
+
+<https://www.wwf.se/djur/sveriges-landskapsdjur/>
+    dcterms:title "Sveriges landskapsdjur – folkomröstningen" ;
+    dcterms:creator "Världsnaturfonden WWF (WWF Sweden)" ;
+    rdfs:comment "The page's footer: \"© 2026 Stiftelsen Världsnaturfonden WWF.\"; no licence is offered. Verification only."@en .
+
+<https://www.skogeniskolan.se/wp-content/uploads/2024/08/varalandskapsvaxterochlandskapsdjur2022.pdf>
+    dcterms:title "Våra landskapsväxter och landskapsdjur (lesson plan, 2022)" ;
+    dcterms:creator "Skogen i skolan" ;
+    rdfs:comment "Neither the PDF nor the site's home page (https://www.skogeniskolan.se/) states a licence or copyright notice; treated as all rights reserved. Verification only."@en .
+
+<#flower-blekinge>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Blekinge: provincial flower"@en ,
+                     "Blekinge: landskapsblomma"@sv ;
+    solid-memo:frontNote "two plants are named"@en ,
+                         "två växter anges"@sv ;
+    solid-memo:back "pedunculate oak or great mullein"@en ,
+                    "ek eller kungsljus"@sv ;
+    solid-memo:backNote "The 1908 list named the oak; some lists also give the great mullein. Scientific names: Quercus robur, Verbascum thapsus."@en ,
+                        "1908 års lista angav ek; vissa listor anger även kungsljus. Vetenskapliga namn: Quercus robur, Verbascum thapsus."@sv .
+
+<#flower-bohuslan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bohuslän: provincial flower"@en ,
+                     "Bohuslän: landskapsblomma"@sv ;
+    solid-memo:back "common honeysuckle"@en ,
+                    "vildkaprifol"@sv ;
+    solid-memo:backNote "Scientific name: Lonicera periclymenum."@en ,
+                        "Vetenskapligt namn: Lonicera periclymenum."@sv .
+
+<#flower-dalarna>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Dalarna: provincial flower"@en ,
+                     "Dalarna: landskapsblomma"@sv ;
+    solid-memo:frontNote "two plants are named"@en ,
+                         "två växter anges"@sv ;
+    solid-memo:back "harebell or spreading bellflower"@en ,
+                    "liten blåklocka eller ängsklocka"@sv ;
+    solid-memo:backNote "The 1908 list named the harebell; many in Dalarna preferred the spreading bellflower, which some lists give instead. Scientific names: Campanula rotundifolia, Campanula patula."@en ,
+                        "1908 års lista angav liten blåklocka (där kallad blåklocka); många i Dalarna föredrog ängsklocka, som vissa listor anger i stället. Vetenskapliga namn: Campanula rotundifolia, Campanula patula."@sv .
+
+<#flower-dalsland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Dalsland: provincial flower"@en ,
+                     "Dalsland: landskapsblomma"@sv ;
+    solid-memo:back "true forget-me-not"@en ,
+                    "äkta förgätmigej"@sv ;
+    solid-memo:backNote "Scientific name: Myosotis scorpioides."@en ,
+                        "Vetenskapligt namn: Myosotis scorpioides."@sv .
+
+<#flower-gotland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Gotland: provincial flower"@en ,
+                     "Gotland: landskapsblomma"@sv ;
+    solid-memo:back "common ivy"@en ,
+                    "murgröna"@sv ;
+    solid-memo:backNote "Scientific name: Hedera helix."@en ,
+                        "Vetenskapligt namn: Hedera helix."@sv .
+
+<#flower-gastrikland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Gästrikland: provincial flower"@en ,
+                     "Gästrikland: landskapsblomma"@sv ;
+    solid-memo:back "lily of the valley"@en ,
+                    "liljekonvalj"@sv ;
+    solid-memo:backNote "Scientific name: Convallaria majalis."@en ,
+                        "Vetenskapligt namn: Convallaria majalis."@sv .
+
+<#flower-halland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Halland: provincial flower"@en ,
+                     "Halland: landskapsblomma"@sv ;
+    solid-memo:back "hairy greenweed"@en ,
+                    "hårginst"@sv ;
+    solid-memo:backNote "Scientific name: Genista pilosa."@en ,
+                        "Vetenskapligt namn: Genista pilosa."@sv .
+
+<#flower-halsingland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hälsingland: provincial flower"@en ,
+                     "Hälsingland: landskapsblomma"@sv ;
+    solid-memo:back "flax"@en ,
+                    "lin"@sv ;
+    solid-memo:backNote "The 1908 list named the Scots pine; after protests from Hälsingland the choice was changed to flax in 1909. Scientific name: Linum usitatissimum."@en ,
+                        "1908 års lista angav tall; efter protester från Hälsingland byttes den mot lin 1909. Vetenskapligt namn: Linum usitatissimum."@sv .
+
+<#flower-harjedalen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Härjedalen: provincial flower"@en ,
+                     "Härjedalen: landskapsblomma"@sv ;
+    solid-memo:frontNote "two plants are named"@en ,
+                         "två växter anges"@sv ;
+    solid-memo:back "alpine yellow-violet or spring pasqueflower"@en ,
+                    "fjällviol eller mosippa"@sv ;
+    solid-memo:backNote "The 1908 list named the alpine yellow-violet; many in Härjedalen preferred the spring pasqueflower, which some lists give instead. Scientific names: Viola biflora, Pulsatilla vernalis."@en ,
+                        "1908 års lista angav fjällviol; många i Härjedalen föredrog mosippa, som vissa listor anger i stället. Vetenskapliga namn: Viola biflora, Pulsatilla vernalis."@sv .
+
+<#flower-jamtland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Jämtland: provincial flower"@en ,
+                     "Jämtland: landskapsblomma"@sv ;
+    solid-memo:back "black vanilla orchid"@en ,
+                    "brunkulla"@sv ;
+    solid-memo:backNote "Scientific name: Gymnadenia nigra."@en ,
+                        "Vetenskapligt namn: Gymnadenia nigra."@sv .
+
+<#flower-lappland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Lappland: provincial flower"@en ,
+                     "Lappland: landskapsblomma"@sv ;
+    solid-memo:back "mountain avens"@en ,
+                    "fjällsippa"@sv ;
+    solid-memo:backNote "Scientific name: Dryas octopetala."@en ,
+                        "Vetenskapligt namn: Dryas octopetala."@sv .
+
+<#flower-medelpad>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Medelpad: provincial flower"@en ,
+                     "Medelpad: landskapsblomma"@sv ;
+    solid-memo:frontNote "two plants are named"@en ,
+                         "två växter anges"@sv ;
+    solid-memo:back "Norway spruce or globeflower"@en ,
+                    "gran eller smörboll"@sv ;
+    solid-memo:backNote "The 1908 list named the Norway spruce; the globeflower is sometimes given instead. Scientific names: Picea abies, Trollius europaeus."@en ,
+                        "1908 års lista angav gran; ibland anges smörboll i stället. Vetenskapliga namn: Picea abies, Trollius europaeus."@sv .
+
+<#flower-norrbotten>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Norrbotten: provincial flower"@en ,
+                     "Norrbotten: landskapsblomma"@sv ;
+    solid-memo:back "Arctic raspberry"@en ,
+                    "åkerbär"@sv ;
+    solid-memo:backNote "Scientific name: Rubus arcticus."@en ,
+                        "Vetenskapligt namn: Rubus arcticus."@sv .
+
+<#flower-narke>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Närke: provincial flower"@en ,
+                     "Närke: landskapsblomma"@sv ;
+    solid-memo:back "cowslip"@en ,
+                    "gullviva"@sv ;
+    solid-memo:backNote "Scientific name: Primula veris."@en ,
+                        "Vetenskapligt namn: Primula veris."@sv .
+
+<#flower-skane>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Skåne: provincial flower"@en ,
+                     "Skåne: landskapsblomma"@sv ;
+    solid-memo:back "oxeye daisy"@en ,
+                    "prästkrage"@sv ;
+    solid-memo:backNote "The 1908 list named the beech; after protests from Skåne the choice was changed to the oxeye daisy in 1909. Scientific name: Leucanthemum vulgare."@en ,
+                        "1908 års lista angav bok; efter protester från Skåne byttes den mot prästkrage 1909. Vetenskapligt namn: Leucanthemum vulgare."@sv .
+
+<#flower-smaland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Småland: provincial flower"@en ,
+                     "Småland: landskapsblomma"@sv ;
+    solid-memo:back "twinflower"@en ,
+                    "linnea"@sv ;
+    solid-memo:backNote "Scientific name: Linnaea borealis."@en ,
+                        "Vetenskapligt namn: Linnaea borealis."@sv .
+
+<#flower-sodermanland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Södermanland: provincial flower"@en ,
+                     "Södermanland: landskapsblomma"@sv ;
+    solid-memo:back "white water lily"@en ,
+                    "vit näckros"@sv ;
+    solid-memo:backNote "Scientific name: Nymphaea alba."@en ,
+                        "Vetenskapligt namn: Nymphaea alba."@sv .
+
+<#flower-uppland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Uppland: provincial flower"@en ,
+                     "Uppland: landskapsblomma"@sv ;
+    solid-memo:back "snake's head fritillary"@en ,
+                    "kungsängslilja"@sv ;
+    solid-memo:backNote "Scientific name: Fritillaria meleagris."@en ,
+                        "Vetenskapligt namn: Fritillaria meleagris."@sv .
+
+<#flower-varmland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Värmland: provincial flower"@en ,
+                     "Värmland: landskapsblomma"@sv ;
+    solid-memo:back "chickweed wintergreen"@en ,
+                    "skogsstjärna"@sv ;
+    solid-memo:backNote "Scientific name: Lysimachia europaea (formerly Trientalis europaea)."@en ,
+                        "Vetenskapligt namn: Lysimachia europaea (tidigare Trientalis europaea)."@sv .
+
+<#flower-vasterbotten>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Västerbotten: provincial flower"@en ,
+                     "Västerbotten: landskapsblomma"@sv ;
+    solid-memo:back "moor-king"@en ,
+                    "kung Karls spira"@sv ;
+    solid-memo:backNote "Scientific name: Pedicularis sceptrum-carolinum."@en ,
+                        "Vetenskapligt namn: Pedicularis sceptrum-carolinum."@sv .
+
+<#flower-vastergotland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Västergötland: provincial flower"@en ,
+                     "Västergötland: landskapsblomma"@sv ;
+    solid-memo:back "heather"@en ,
+                    "ljung"@sv ;
+    solid-memo:backNote "Scientific name: Calluna vulgaris."@en ,
+                        "Vetenskapligt namn: Calluna vulgaris."@sv .
+
+<#flower-vastmanland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Västmanland: provincial flower"@en ,
+                     "Västmanland: landskapsblomma"@sv ;
+    solid-memo:back "European mistletoe"@en ,
+                    "mistel"@sv ;
+    solid-memo:backNote "Scientific name: Viscum album."@en ,
+                        "Vetenskapligt namn: Viscum album."@sv .
+
+<#flower-angermanland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ångermanland: provincial flower"@en ,
+                     "Ångermanland: landskapsblomma"@sv ;
+    solid-memo:back "wild pansy"@en ,
+                    "styvmorsviol"@sv ;
+    solid-memo:backNote "Scientific name: Viola tricolor."@en ,
+                        "Vetenskapligt namn: Viola tricolor."@sv .
+
+<#flower-oland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Öland: provincial flower"@en ,
+                     "Öland: landskapsblomma"@sv ;
+    solid-memo:back "hoary rockrose"@en ,
+                    "ölandssolvända"@sv ;
+    solid-memo:backNote "Scientific name: Helianthemum oelandicum."@en ,
+                        "Vetenskapligt namn: Helianthemum oelandicum."@sv .
+
+<#flower-ostergotland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Östergötland: provincial flower"@en ,
+                     "Östergötland: landskapsblomma"@sv ;
+    solid-memo:back "cornflower"@en ,
+                    "blåklint"@sv ;
+    solid-memo:backNote "Scientific name: Centaurea cyanus."@en ,
+                        "Vetenskapligt namn: Centaurea cyanus."@sv .
+
+<#animal-blekinge>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Blekinge: provincial animal"@en ,
+                     "Blekinge: landskapsdjur"@sv ;
+    solid-memo:back "stag beetle"@en ,
+                    "ekoxe"@sv ;
+    solid-memo:backNote "Scientific name: Lucanus cervus."@en ,
+                        "Vetenskapligt namn: Lucanus cervus."@sv .
+
+<#animal-bohuslan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bohuslän: provincial animal"@en ,
+                     "Bohuslän: landskapsdjur"@sv ;
+    solid-memo:back "harbour seal"@en ,
+                    "knubbsäl"@sv ;
+    solid-memo:backNote "Scientific name: Phoca vitulina."@en ,
+                        "Vetenskapligt namn: Phoca vitulina."@sv .
+
+<#animal-dalarna>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Dalarna: provincial animal"@en ,
+                     "Dalarna: landskapsdjur"@sv ;
+    solid-memo:back "Eurasian eagle-owl"@en ,
+                    "berguv"@sv ;
+    solid-memo:backNote "Scientific name: Bubo bubo."@en ,
+                        "Vetenskapligt namn: Bubo bubo."@sv .
+
+<#animal-dalsland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Dalsland: provincial animal"@en ,
+                     "Dalsland: landskapsdjur"@sv ;
+    solid-memo:back "common raven"@en ,
+                    "korp"@sv ;
+    solid-memo:backNote "Scientific name: Corvus corax."@en ,
+                        "Vetenskapligt namn: Corvus corax."@sv .
+
+<#animal-gotland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Gotland: provincial animal"@en ,
+                     "Gotland: landskapsdjur"@sv ;
+    solid-memo:back "European hedgehog"@en ,
+                    "igelkott"@sv ;
+    solid-memo:backNote "Scientific name: Erinaceus europaeus."@en ,
+                        "Vetenskapligt namn: Erinaceus europaeus."@sv .
+
+<#animal-gastrikland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Gästrikland: provincial animal"@en ,
+                     "Gästrikland: landskapsdjur"@sv ;
+    solid-memo:back "western capercaillie"@en ,
+                    "tjäder"@sv ;
+    solid-memo:backNote "Scientific name: Tetrao urogallus."@en ,
+                        "Vetenskapligt namn: Tetrao urogallus."@sv .
+
+<#animal-halland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Halland: provincial animal"@en ,
+                     "Halland: landskapsdjur"@sv ;
+    solid-memo:back "Atlantic salmon"@en ,
+                    "lax"@sv ;
+    solid-memo:backNote "Scientific name: Salmo salar."@en ,
+                        "Vetenskapligt namn: Salmo salar."@sv .
+
+<#animal-halsingland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hälsingland: provincial animal"@en ,
+                     "Hälsingland: landskapsdjur"@sv ;
+    solid-memo:back "Eurasian lynx"@en ,
+                    "lodjur"@sv ;
+    solid-memo:backNote "Scientific name: Lynx lynx."@en ,
+                        "Vetenskapligt namn: Lynx lynx."@sv .
+
+<#animal-harjedalen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Härjedalen: provincial animal"@en ,
+                     "Härjedalen: landskapsdjur"@sv ;
+    solid-memo:back "brown bear"@en ,
+                    "brunbjörn"@sv ;
+    solid-memo:backNote "Dalarna voted for the bear too; the jury gave it to Härjedalen. Scientific name: Ursus arctos."@en ,
+                        "Även Dalarna röstade på björnen; juryn gav den till Härjedalen. Vetenskapligt namn: Ursus arctos."@sv .
+
+<#animal-jamtland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Jämtland: provincial animal"@en ,
+                     "Jämtland: landskapsdjur"@sv ;
+    solid-memo:back "moose"@en ,
+                    "älg"@sv ;
+    solid-memo:backNote "Called “elk” in British English. Scientific name: Alces alces."@en ,
+                        "Kallas ”elk” på brittisk engelska. Vetenskapligt namn: Alces alces."@sv .
+
+<#animal-lappland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Lappland: provincial animal"@en ,
+                     "Lappland: landskapsdjur"@sv ;
+    solid-memo:back "Arctic fox"@en ,
+                    "fjällräv"@sv ;
+    solid-memo:backNote "Scientific name: Vulpes lagopus."@en ,
+                        "Vetenskapligt namn: Vulpes lagopus."@sv .
+
+<#animal-medelpad>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Medelpad: provincial animal"@en ,
+                     "Medelpad: landskapsdjur"@sv ;
+    solid-memo:back "mountain hare"@en ,
+                    "skogshare"@sv ;
+    solid-memo:backNote "Scientific name: Lepus timidus."@en ,
+                        "Vetenskapligt namn: Lepus timidus."@sv .
+
+<#animal-norrbotten>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Norrbotten: provincial animal"@en ,
+                     "Norrbotten: landskapsdjur"@sv ;
+    solid-memo:back "Siberian jay"@en ,
+                    "lavskrika"@sv ;
+    solid-memo:backNote "Scientific name: Perisoreus infaustus."@en ,
+                        "Vetenskapligt namn: Perisoreus infaustus."@sv .
+
+<#animal-narke>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Närke: provincial animal"@en ,
+                     "Närke: landskapsdjur"@sv ;
+    solid-memo:back "hazel dormouse"@en ,
+                    "hasselmus"@sv ;
+    solid-memo:backNote "Scientific name: Muscardinus avellanarius."@en ,
+                        "Vetenskapligt namn: Muscardinus avellanarius."@sv .
+
+<#animal-skane>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Skåne: provincial animal"@en ,
+                     "Skåne: landskapsdjur"@sv ;
+    solid-memo:back "red deer"@en ,
+                    "kronhjort"@sv ;
+    solid-memo:backNote "Scientific name: Cervus elaphus."@en ,
+                        "Vetenskapligt namn: Cervus elaphus."@sv .
+
+<#animal-smaland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Småland: provincial animal"@en ,
+                     "Småland: landskapsdjur"@sv ;
+    solid-memo:back "Eurasian otter"@en ,
+                    "utter"@sv ;
+    solid-memo:backNote "Scientific name: Lutra lutra."@en ,
+                        "Vetenskapligt namn: Lutra lutra."@sv .
+
+<#animal-sodermanland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Södermanland: provincial animal"@en ,
+                     "Södermanland: landskapsdjur"@sv ;
+    solid-memo:back "osprey"@en ,
+                    "fiskgjuse"@sv ;
+    solid-memo:backNote "Scientific name: Pandion haliaetus."@en ,
+                        "Vetenskapligt namn: Pandion haliaetus."@sv .
+
+<#animal-uppland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Uppland: provincial animal"@en ,
+                     "Uppland: landskapsdjur"@sv ;
+    solid-memo:back "white-tailed eagle"@en ,
+                    "havsörn"@sv ;
+    solid-memo:backNote "Scientific name: Haliaeetus albicilla."@en ,
+                        "Vetenskapligt namn: Haliaeetus albicilla."@sv .
+
+<#animal-varmland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Värmland: provincial animal"@en ,
+                     "Värmland: landskapsdjur"@sv ;
+    solid-memo:back "grey wolf"@en ,
+                    "varg"@sv ;
+    solid-memo:backNote "Scientific name: Canis lupus."@en ,
+                        "Vetenskapligt namn: Canis lupus."@sv .
+
+<#animal-vasterbotten>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Västerbotten: provincial animal"@en ,
+                     "Västerbotten: landskapsdjur"@sv ;
+    solid-memo:back "Eurasian curlew"@en ,
+                    "storspov"@sv ;
+    solid-memo:backNote "Scientific name: Numenius arquata."@en ,
+                        "Vetenskapligt namn: Numenius arquata."@sv .
+
+<#animal-vastergotland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Västergötland: provincial animal"@en ,
+                     "Västergötland: landskapsdjur"@sv ;
+    solid-memo:back "common crane"@en ,
+                    "trana"@sv ;
+    solid-memo:backNote "Scientific name: Grus grus."@en ,
+                        "Vetenskapligt namn: Grus grus."@sv .
+
+<#animal-vastmanland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Västmanland: provincial animal"@en ,
+                     "Västmanland: landskapsdjur"@sv ;
+    solid-memo:back "roe deer"@en ,
+                    "rådjur"@sv ;
+    solid-memo:backNote "Scientific name: Capreolus capreolus."@en ,
+                        "Vetenskapligt namn: Capreolus capreolus."@sv .
+
+<#animal-angermanland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ångermanland: provincial animal"@en ,
+                     "Ångermanland: landskapsdjur"@sv ;
+    solid-memo:back "Eurasian beaver"@en ,
+                    "bäver"@sv ;
+    solid-memo:backNote "Scientific name: Castor fiber."@en ,
+                        "Vetenskapligt namn: Castor fiber."@sv .
+
+<#animal-oland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Öland: provincial animal"@en ,
+                     "Öland: landskapsdjur"@sv ;
+    solid-memo:back "thrush nightingale"@en ,
+                    "näktergal"@sv ;
+    solid-memo:backNote "Scientific name: Luscinia luscinia."@en ,
+                        "Vetenskapligt namn: Luscinia luscinia."@sv .
+
+<#animal-ostergotland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Östergötland: provincial animal"@en ,
+                     "Östergötland: landskapsdjur"@sv ;
+    solid-memo:back "mute swan"@en ,
+                    "knölsvan"@sv ;
+    solid-memo:backNote "Scientific name: Cygnus olor."@en ,
+                        "Vetenskapligt namn: Cygnus olor."@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

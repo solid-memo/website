@@ -1,0 +1,414 @@
+@base <https://solid-memo.com/decks/swedish-monarchs/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Monarchs of Sweden since Gustav Vasa"@en ,
+                  "Sveriges regenter sedan Gustav Vasa"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "The 23 monarchs of Sweden from Gustav I (elected 1523) to Carl XVI Gustaf, the two queens regnant included. Front: the monarch's regnal name in English and Swedish; back: the years of the reign, counted from accession to death, abdication or deposition, with the royal house, a short fact and any differing convention in a note. Taken from Wikidata and the public-domain 1911 Encyclopædia Britannica, and checked against the Royal Court's list of monarchs (kungahuset.se)."@en ,
+                        "Sveriges 23 regenter från Gustav I (vald 1523) till Carl XVI Gustaf, de två regerande drottningarna inräknade. Framsida: regentens namn på engelska och svenska; baksida: regeringsåren, räknade från trontillträdet till regentens död, abdikation eller avsättning, med ätten, en kort upplysning och eventuella avvikande räknesätt i en anteckning. Uppgifterna kommer från Wikidata och den upphovsrättsfria Encyclopædia Britannica från 1911 och är kontrollerade mot Kungahusets regentlängd (kungahuset.se)."@sv ;
+    prov:wasDerivedFrom <https://www.wikidata.org/wiki/Q1268572> ,
+                        <https://en.wikisource.org/wiki/1911_Encyclop%C3%A6dia_Britannica> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:history ;
+    dcat:keyword "Swedish monarchs"@en ,
+                 "kings of Sweden"@en ,
+                 "Swedish history"@en ,
+                 "royal houses"@en ,
+                 "svenska kungar"@sv ,
+                 "regentlängd"@sv ,
+                 "Sveriges historia"@sv ,
+                 "kungaätter"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:bidirectional ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#swedish-monarchs> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#swedish-monarchs> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/licenses/by/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/wiki/Q1268572> ,
+              <https://en.wikisource.org/wiki/1911_Encyclop%C3%A6dia_Britannica> ,
+              <https://www.kungahuset.se/sveriges-monarki/monarkins-historia> ,
+              <https://en.wikipedia.org/wiki/List_of_monarchs_of_Sweden> ,
+              <https://en.wikipedia.org/wiki/Erik_XIV> ,
+              <https://skbl.se/en/article/UlrikaEleonoradydrottning> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ,
+                       <#review-6> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Finding the position: the Wikidata search API (query 1 below) returned Q1268572 \"Monarch of Sweden\". (Two earlier attempts, an exact-label SPARQL lookup and a guess at the current king's item, returned nothing; they are listed in the queries for completeness.)"@en ,
+                 "Selection and reign years: a SPARQL query on the Wikidata Query Service (query 4) listed every item with a P39 (position held) statement of Q1268572, with the qualifiers P580 (start time), P582 (end time), P1365 (replaces) and P1366 (replaced by), and the English and Swedish labels. The raw result was saved. Holders with a start time from 1523 on (Gustav I to Carl XVI Gustaf, 23 people, linked into one unbroken chain by the replaces/replaced-by qualifiers) became the cards; Christian II (1520–1521, a union king of Denmark) and the legendary and medieval kings without dates were left out by the brief's scope."@en ,
+                 "Names: query 5 fetched every English and Swedish label and alias of the 23 items, and the Wikidata API (query 6) their English and Swedish Wikipedia sitelink titles. The English front is the conventional English regnal name: the Wikidata label, alias or sitelink title without \"of Sweden\" (Gustav I from the label \"Gustav I of Sweden\", Erik XIV, John III, Charles IX … Carl XVI Gustaf; Gustav II Adolf rather than the Latinised Gustavus Adolphus, which is given in the note). The one exception is Sigismund: his Wikidata English label \"Sigismund III Vasa\" and alias \"Sigismund III of Poland\" carry his Polish ordinal, so the English front is his Swedish regnal name, the Swedish label \"Sigismund\", without the ordinal (he was the only Swedish king of that name); the Polish title is in the note. The Swedish front is the Wikidata Swedish label; where that is a by-name, carries a disambiguator or is an older spelling, it is the Swedish alias or label with the disambiguator removed: Gustav I (alias \"Gustav I av Sverige\"; the label \"Gustav Vasa\" is the by-name, given in the note), Kristina (label \"Kristina av Sverige\"; also the alias \"Drottning Kristina\" without the title) and Gustav IV Adolf (label \"Gustaf IV Adolf\", alias and sitelink \"Gustav IV Adolf\"). The Royal Court's list writes the same forms, which confirmed them; no name form was taken from it."@en ,
+                 "Royal houses: query 7 fetched each monarch's P53 (family) and the English and Swedish labels of the five houses; their aliases came from the Wikidata API (query 15). English notes use the Wikidata English labels (House of Vasa, House of Palatinate-Zweibrücken, House of Hesse, House of Holstein-Gottorp, House of Bernadotte). Swedish notes use the Wikidata Swedish labels Vasaätten, Pfalziska ätten and Hessiska ätten, the label \"Holstein-Gottorpska ätten (Sverige)\" without its disambiguator, and the alias \"Ätten Bernadotte\" (the Swedish label is just \"Bernadotte\"). Until quality-control round 3 the Swedish notes wrote \"Bernadotteska ätten\", the Royal Court's form; it was replaced because the Royal Court is a verification source only."@en ,
+                 "Cross-check: the Royal Court's page \"Monarkins historia\" (kungahuset.se), whose table \"Regentlängd\" gives each monarch's period and house, was downloaded and its text extracted (query 8); every card's years were compared with it. The English Wikipedia \"List of monarchs of Sweden\" (query 9, wikitext through the MediaWiki API) was compared as a second check of the full dates. Where all three agree the card's years are those years. Where they differ (Erik XIV, John III, Ulrika Eleonora; see quality control) the card follows the deck's stated convention and the note names the other year."@en ,
+                 "Convention for the years: a reign runs from accession — succession on the predecessor's death, abdication or deposition, or the monarch's proclamation or election, whichever came first — to the monarch's death, abdication or deposition; coronation dates are not used. Only years are given. The calendar change (Sweden used the Julian calendar until 1753) moves no year boundary in this deck. Karl IX counts from 1604, when he took the title of king; his regency (proclaimed in 1595, sole rule after Sigismund's deposition in 1599) is in the note. Carl XVI Gustaf's reign is written \"1973–\" because it continues."@en ,
+                 "Notes: each back note names the royal house and, where helpful, one short fact for context (a by-name, a family relation, a regency, the manner of death, the convention used). Every note fact comes from a content source: from Wikidata where it holds the fact as a statement (queries 13–15: parents P22/P25, siblings P3373, spouses P26, dates of birth P569, place and manner of death P20/P1196, positions P39, military rank P410, the house's founder P112, significant events P793 and the item for the assassination of Gustav III), each such statement also a builder check; otherwise from the public-domain 1911 Encyclopædia Britannica on Wikisource (queries 16–17: the articles on the individual kings and the History section of \"Sweden\"). Ages at accession are computed from Wikidata's date of birth and the start of the reign. Every note fact was then checked against the Royal Court's page and the English Wikipedia list or article. The notes are the compiler's own wording, written directly in English and in Swedish, not copied or closely paraphrased from any source; facts found only in verification sources were left out (Gustaf V's decision not to be crowned, which only the Royal Court gave; the Riksdag's election of Ulrika Eleonora in 1719, which only the Wikipedia list and Svenskt kvinnobiografiskt lexikon gave)."@en ,
+                 "Sources tried but not used: Encyclopaedia Britannica online (https://www.britannica.com/biography/Ulrika-Eleonora) answered HTTP 403 (a Cloudflare \"Just a moment...\" page) to both a fetch tool and curl, and the Nationalencyklopedin article URL tried (https://www.ne.se/uppslagsverk/encyklopedi/lång/ulrika-eleonora-d-y) returned an error page, so neither was consulted and neither is cited. The Royal Court's pages \"Sveriges monarki\", \"Sök\" and \"Mediecenter\" were fetched while looking for the Regentlängd and the site's terms of use; nothing on them was used (query 8b)."@en ,
+                 "Machine checks: each card carries Wikidata checks run by the builder against live Wikidata: P39 = Q1268572 (the person held the position), P53 = the house named in the note, the house's English and Swedish label or alias, the English and Swedish front text where it is exactly a Wikidata label or alias (with the disambiguator, where the front drops one), and every Wikidata statement a note relies on (P22, P25, P3373, P26, P569 year, P20, P1196, P39 King of Poland and Monarch of Norway, P410, P112, P793, and the assassination item's P8032 and P276). The reign years and the end of Oscar II's Norwegian reign are qualifiers, which the builder's checks cannot read; they were checked by queries 4 and 14, whose results are quoted in each card's evidence."@en ,
+                 "Selection: Every person Wikidata records as holding the position Monarch of Sweden (Q1268572) with a start date in 1523 or later: Gustav I, elected king in 1523, to the reigning Carl XVI Gustaf, 23 monarchs in all, including the two queens regnant, Kristina and Ulrika Eleonora. Regents who were not monarchs (Gustav Eriksson Vasa as regent before his election in 1523, Duke Karl as regent from 1595 and ruler from 1599 to 1604, the regency governments of Kristina and Karl XI) get no cards of their own; Karl IX's regency is mentioned in his note. Kalmar Union kings (the last, Christian II, 1520–1521) and the medieval and legendary kings are outside the deck's scope. Queens consort are not monarchs and are left out. Front texts are regnal names only; by-names (Gustav Vasa, Gustavus Adolphus) and former names (Jean-Baptiste Bernadotte) appear only in notes."@en ,
+                 "Licensing: The content sources are Wikidata, whose structured data is CC0, and the 1911 Encyclopædia Britannica, which is in the public domain (published in 1910–1911, so public domain in the United States; most of the articles on the individual kings are by Robert Nisbet Bain, who died in 1909, and the others (Oscar I., Oscar II., Gustavus V.) are unsigned; all were published in 1910–1911). The selection of monarchs, the reign years, the English and Swedish names and the royal houses come from Wikidata, and so do the note facts Wikidata holds; the other note facts come from the 1911 Britannica, in the compiler's own words. So the deck can be CC0 1.0 like the rest of the library. The Royal Court's website (all rights reserved), the English Wikipedia list and article (CC BY-SA 4.0) and Svenskt kvinnobiografiskt lexikon (CC BY 4.0) were used for verification only: they confirmed facts the content sources gave, and no wording, name form, table or selection was taken from them. Facts found only in them were left out of the notes. The one place a verification source is named on a card, the Ulrika Eleonora note saying that the Royal Court's list gives 1719–1720, is a reference to that source's differing year, not content taken from it. The selection is the full set of holders of one Wikidata position since 1523, not a list taken from any of the verification sources."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Sources, licences and machine checks: every card's years against Wikidata, the Royal Court's list and the English Wikipedia list; names against Wikidata labels and aliases; houses against Wikidata P53."@en ;
+    rdfs:comment "Scope: All 23 cards, the sources and the deck metadata."@en ,
+                 "Outcome: Wikidata, the Royal Court and Wikipedia agree on the years of 20 of the 23 reigns. Erik XIV/John III (1568 or 1569) and Ulrika Eleonora (1718 or 1719) differ between sources; the cards follow the accession convention stated in the description and the note gives the other year. Several day-level differences inside Wikidata (calendar conversions) leave the years unchanged. Builder checks cover the position (P39), the house (P53), the house labels and every front text that is exactly a Wikidata label or alias; reign years are qualifiers, checked by query 4 instead."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 23 cards, against the Royal Court's Regentlängd, the Swedish Wikipedia list of regents and article on Karl IX, the English Wikipedia article on Erik XIV and the reviewer's own Wikidata query of the P39 qualifiers."@en ,
+                 "Outcome: All 23 reign spans and royal houses correct; the count of 23 confirmed; Ulrika Eleonora's 1718 start judged defensible under the stated convention. Three optional rewordings of notes, all verified against the 1911 Encyclopædia Britannica and Wikidata and applied."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language and translation"@en ;
+    rdfs:comment "Scope: All 23 cards, the title, the description and the keywords in English and Swedish."@en ,
+                 "Outcome: No errors. One warning (Bernadotte's birth name) and four suggestions on Swedish wording and the Gustav IV Adolf note; all verified and applied."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 23 cards, every source's licence and evidence quotes, the method, queries and licensing paragraph."@en ,
+                 "Outcome: One error (note facts without a content source) and five warnings and suggestions; all verified and fixed. The 1911 Encyclopædia Britannica (public domain) was added as a second content source, Wikidata statements for the note facts were added with builder checks, every note was re-worded from those sources, and facts found only in verification sources were removed. The deck stays CC0 1.0."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final re-check (loop 1): facts, language, metadata, licensing and documentation"@en ;
+    rdfs:comment "Scope: All 23 cards, the sources, description, method, licensing and quality-control log."@en ,
+                 "Outcome: No factual errors; three warnings and two suggestions, all verified and fixed. Gustav I's note no longer dates his regency to 1521 (only a verification source does); the 1911 Britannica attribution names the unsigned articles; English label checks were added for four cards and the English form \"Sigismund\" is explained; superseded round-0 entries point to round 3; the Swedish description says \"upphovsrättsfria\"."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final re-check (loop 2): changed cards, every third card, metadata, licensing and documentation"@en ;
+    rdfs:comment "Scope: 12 cards (gustav-i, johan-iii, sigismund, karl-xiv-johan, gustaf-v, carl-xvi-gustaf, kristina, karl-xii, adolf-fredrik, karl-xiii, karl-xv, gustaf-vi-adolf), the metadata, licensing, queries and quality-control log."@en ,
+                 "Outcome: No factual errors. One warning (two queries numbered 18) and one suggestion (Karl XIII note leaves out the first chosen heir); both verified and fixed."@en .
+
+<#review-6>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: all 23 cards."@en ,
+                 "Outcome: All reign spans, houses and front names confirmed. One warning (round 5 reintroduced \"childless\" / \"barnlös\" for Karl XIII, contradicted by Wikidata) and one Swedish style suggestion; both verified and fixed."@en .
+
+<https://www.wikidata.org/wiki/Q1268572>
+    dcterms:title "Wikidata: holders of the position Monarch of Sweden (Q1268572), with their labels, aliases, sitelinks and family (P53)" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://en.wikisource.org/wiki/1911_Encyclop%C3%A6dia_Britannica>
+    dcterms:title "Encyclopædia Britannica, 11th edition (1911): the articles on the Swedish kings (Gustavus I. Eriksson to Gustavus V.) and \"Sweden\" (History), as transcribed on Wikisource" ;
+    dcterms:creator "Robert Nisbet Bain (the articles on the kings from Gustavus I. to Charles XV., except Oscar I.); Oscar I., Oscar II. and Gustavus V. unsigned; \"Sweden\" by Frederick Beck, Robert Nisbet Bain, Oskar Dumrath, Osbert Howarth and Edmund Gosse; transcribed by Wikisource contributors" ;
+    rdfs:comment "https://en.wikisource.org/wiki/1911_Encyclop%C3%A6dia_Britannica — licence box: \"This work is in the public domain in the United States because it was published before January 1, 1931.\" Most of the articles on the individual kings name Robert Nisbet Bain (1854–1909) as contributor in their Wikisource header (e.g. https://en.wikisource.org/wiki/1911_Encyclop%C3%A6dia_Britannica/Gustavus_III.?action=raw: \"|contributor = Robert Nisbet Bain\"), so they are out of copyright under life-plus-70 terms as well; \"Oscar I.\", \"Oscar II.\" and \"Gustavus V.\" have no contributor field (unsigned), and as anonymous works published in 1910–1911 they are out of copyright under publication-based terms too. Only facts were taken, in the compiler's own words."@en .
+
+<https://www.kungahuset.se/sveriges-monarki/monarkins-historia>
+    dcterms:title "Monarkins historia — Regentlängd (Sveriges monarker och deras valspråk)" ;
+    dcterms:creator "Kungl. Hovstaterna (the Royal Court of Sweden)" ;
+    rdfs:comment "No open licence is stated on the page. The Royal Court's press-image page (https://www.kungahuset.se/mediecenter/pressbilder) says: \"Bilder på andra delar av webbplatsen skyddas av upphovsrätten och får inte kopieras.\" Treated as all rights reserved: verification only."@en .
+
+<https://en.wikipedia.org/wiki/List_of_monarchs_of_Sweden>
+    dcterms:title "List of monarchs of Sweden" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://en.wikipedia.org/wiki/Wikipedia:Copyrights — \"Permission is granted to copy, distribute and/or modify Wikipedia's text under the terms of the Creative Commons Attribution-ShareAlike 4.0 International License\""@en .
+
+<https://en.wikipedia.org/wiki/Erik_XIV>
+    dcterms:title "Erik XIV" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://en.wikipedia.org/wiki/Wikipedia:Copyrights — \"Permission is granted to copy, distribute and/or modify Wikipedia's text under the terms of the Creative Commons Attribution-ShareAlike 4.0 International License\""@en .
+
+<https://skbl.se/en/article/UlrikaEleonoradydrottning>
+    dcterms:title "Ulrika Eleonora d.y., drottning (article by Sari Nauman), Svenskt kvinnobiografiskt lexikon" ;
+    dcterms:creator "Sari Nauman (translated by Alexia Grosjean), Svenskt kvinnobiografiskt lexikon" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    rdfs:comment "https://skbl.se/en/about-skbl — \"The Biographical Dictionary of Swedish Women (SKBL) resolves this dilemma by providing free ( CC-BY licensed ) access to 2000 biographies\", the words linked to https://creativecommons.org/licenses/by/4.0/. Used for verification only (no text taken), so the deck's licence is not affected; attributed here."@en .
+
+<#gustav-i>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Gustav I"@en ,
+                     "Gustav I"@sv ;
+    solid-memo:back "1523–1560" ;
+    solid-memo:backNote "Gustav Vasa. House of Vasa. Led the rising that drove out the Danes (1521–1523); elected king in 1523."@en ,
+                        "Gustav Vasa. Vasaätten. Ledde upproret som drev ut danskarna (1521–1523); vald till kung 1523."@sv .
+
+<#erik-xiv>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Erik XIV"@en ,
+                     "Erik XIV"@sv ;
+    solid-memo:back "1560–1568" ;
+    solid-memo:backNote "House of Vasa. Overthrown in 1568 by his half-brothers John (who became John III) and Charles; the Riksdag formally deposed him in January 1569."@en ,
+                        "Vasaätten. Störtades 1568 av halvbröderna Johan (sedan Johan III) och Karl; riksdagen avsatte honom formellt i januari 1569."@sv .
+
+<#johan-iii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "John III"@en ,
+                     "Johan III"@sv ;
+    solid-memo:back "1568–1592" ;
+    solid-memo:backNote "House of Vasa. Took power from Erik XIV in 1568; some lists count from Erik's formal deposition in 1569."@en ,
+                        "Vasaätten. Tog makten från Erik XIV 1568; vissa förteckningar räknar från Eriks formella avsättning 1569."@sv .
+
+<#sigismund>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sigismund"@en ,
+                     "Sigismund"@sv ;
+    solid-memo:back "1592–1599" ;
+    solid-memo:backNote "House of Vasa. Also King of Poland as Sigismund III Vasa; deposed by the Riksdag in 1599."@en ,
+                        "Vasaätten. Även kung av Polen som Sigismund III; avsatt av riksdagen 1599."@sv .
+
+<#karl-ix>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Charles IX"@en ,
+                     "Karl IX"@sv ;
+    solid-memo:back "1604–1611" ;
+    solid-memo:backNote "House of Vasa. Proclaimed regent by the Riksdag in 1595, ruled after Sigismund's deposition in 1599 and took the title of king in 1604."@en ,
+                        "Vasaätten. Utsågs till riksföreståndare av riksdagen 1595, styrde riket efter Sigismunds avsättning 1599 och tog kungatiteln 1604."@sv .
+
+<#gustav-ii-adolf>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Gustav II Adolf"@en ,
+                     "Gustav II Adolf"@sv ;
+    solid-memo:back "1611–1632" ;
+    solid-memo:backNote "Gustavus Adolphus. House of Vasa. Fell in battle at Lützen in 1632."@en ,
+                        "Vasaätten. Föll i strid vid Lützen 1632."@sv .
+
+<#kristina>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Christina"@en ,
+                     "Kristina"@sv ;
+    solid-memo:back "1632–1654" ;
+    solid-memo:backNote "House of Vasa. Queen regnant; succeeded her father at five and abdicated in 1654."@en ,
+                        "Vasaätten. Regerande drottning; efterträdde sin far som femåring och abdikerade 1654."@sv .
+
+<#karl-x-gustav>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Charles X Gustav"@en ,
+                     "Karl X Gustav"@sv ;
+    solid-memo:back "1654–1660" ;
+    solid-memo:backNote "House of Palatinate-Zweibrücken. Cousin and successor of Christina."@en ,
+                        "Pfalziska ätten. Kristinas kusin och efterträdare."@sv .
+
+<#karl-xi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Charles XI"@en ,
+                     "Karl XI"@sv ;
+    solid-memo:back "1660–1697" ;
+    solid-memo:backNote "House of Palatinate-Zweibrücken. Became king at four; regents ruled until he came of age in 1672."@en ,
+                        "Pfalziska ätten. Blev kung som fyraåring; förmyndare styrde riket tills han blev myndig 1672."@sv .
+
+<#karl-xii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Charles XII"@en ,
+                     "Karl XII"@sv ;
+    solid-memo:back "1697–1718" ;
+    solid-memo:backNote "House of Palatinate-Zweibrücken. Killed in 1718 while besieging the fortress of Fredriksten in Norway."@en ,
+                        "Pfalziska ätten. Stupade 1718 under belägringen av fästningen Fredriksten i Norge."@sv .
+
+<#ulrika-eleonora>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ulrika Eleonora"@en ,
+                     "Ulrika Eleonora"@sv ;
+    solid-memo:back "1718–1720" ;
+    solid-memo:backNote "House of Palatinate-Zweibrücken. Queen regnant; succeeded her brother Charles XII in 1718 and abdicated in favour of her husband, Frederick I, in 1720. The Royal Court's list gives 1719–1720."@en ,
+                        "Pfalziska ätten. Regerande drottning; efterträdde brodern Karl XII 1718 och abdikerade 1720 till förmån för maken Fredrik I. Kungahusets regentlängd anger 1719–1720."@sv .
+
+<#fredrik-i>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Frederick I"@en ,
+                     "Fredrik I"@sv ;
+    solid-memo:back "1720–1751" ;
+    solid-memo:backNote "House of Hesse. Husband of Ulrika Eleonora, who abdicated in his favour."@en ,
+                        "Hessiska ätten. Make till Ulrika Eleonora, som abdikerade till hans förmån."@sv .
+
+<#adolf-fredrik>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Adolf Frederick"@en ,
+                     "Adolf Fredrik"@sv ;
+    solid-memo:back "1751–1771" ;
+    solid-memo:backNote "House of Holstein-Gottorp, its first king of Sweden."@en ,
+                        "Holstein-Gottorpska ätten; ättens förste kung i Sverige."@sv .
+
+<#gustav-iii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Gustav III"@en ,
+                     "Gustav III"@sv ;
+    solid-memo:back "1771–1792" ;
+    solid-memo:backNote "House of Holstein-Gottorp. Assassinated in 1792: shot during a masquerade at the Stockholm opera house."@en ,
+                        "Holstein-Gottorpska ätten. Mördad 1792, skjuten under en maskerad i Gustavianska operahuset i Stockholm."@sv .
+
+<#gustav-iv-adolf>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Gustav IV Adolf"@en ,
+                     "Gustav IV Adolf"@sv ;
+    solid-memo:back "1792–1809" ;
+    solid-memo:backNote "House of Holstein-Gottorp. Deposed in the coup of 1809, during the Finnish War, which cost Sweden Finland."@en ,
+                        "Holstein-Gottorpska ätten. Avsatt genom statskuppen 1809, under finska kriget, som kostade Sverige Finland."@sv .
+
+<#karl-xiii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Charles XIII"@en ,
+                     "Karl XIII"@sv ;
+    solid-memo:back "1809–1818" ;
+    solid-memo:backNote "House of Holstein-Gottorp. Uncle of Gustav IV Adolf; with no heir of his own, he adopted Bernadotte as crown prince in 1810, after the first chosen heir had died."@en ,
+                        "Holstein-Gottorpska ätten. Farbror till Gustav IV Adolf; han saknade egna arvingar och adopterade 1810 Bernadotte som tronföljare, sedan den först valda tronföljaren hade dött."@sv .
+
+<#karl-xiv-johan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Charles XIV John"@en ,
+                     "Karl XIV Johan"@sv ;
+    solid-memo:back "1818–1844" ;
+    solid-memo:backNote "House of Bernadotte, its founder; formerly Jean-Baptiste Bernadotte, a French marshal."@en ,
+                        "Ätten Bernadotte; ättens grundare, tidigare fransk marskalk under namnet Jean Baptiste Bernadotte."@sv .
+
+<#oscar-i>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Oscar I"@en ,
+                     "Oscar I"@sv ;
+    solid-memo:back "1844–1859" ;
+    solid-memo:backNote "House of Bernadotte. Son of Charles XIV John."@en ,
+                        "Ätten Bernadotte. Son till Karl XIV Johan. Skrivs även Oskar I."@sv .
+
+<#karl-xv>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Charles XV"@en ,
+                     "Karl XV"@sv ;
+    solid-memo:back "1859–1872" ;
+    solid-memo:backNote "House of Bernadotte. Son of Oscar I."@en ,
+                        "Ätten Bernadotte. Son till Oscar I."@sv .
+
+<#oscar-ii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Oscar II"@en ,
+                     "Oscar II"@sv ;
+    solid-memo:back "1872–1907" ;
+    solid-memo:backNote "House of Bernadotte. Brother of Charles XV; the union with Norway was dissolved in his reign (1905)."@en ,
+                        "Ätten Bernadotte. Bror till Karl XV; unionen med Norge upplöstes under hans regering (1905). Skrivs även Oskar II."@sv .
+
+<#gustaf-v>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Gustaf V"@en ,
+                     "Gustaf V"@sv ;
+    solid-memo:back "1907–1950" ;
+    solid-memo:backNote "House of Bernadotte. Son of Oscar II."@en ,
+                        "Ätten Bernadotte. Son till Oscar II."@sv .
+
+<#gustaf-vi-adolf>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Gustaf VI Adolf"@en ,
+                     "Gustaf VI Adolf"@sv ;
+    solid-memo:back "1950–1973" ;
+    solid-memo:backNote "House of Bernadotte. Son of Gustaf V."@en ,
+                        "Ätten Bernadotte. Son till Gustaf V."@sv .
+
+<#carl-xvi-gustaf>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Carl XVI Gustaf"@en ,
+                     "Carl XVI Gustaf"@sv ;
+    solid-memo:back "1973–" ;
+    solid-memo:backNote "House of Bernadotte. Grandson of Gustaf VI Adolf; the reigning king (as of 2026)."@en ,
+                        "Ätten Bernadotte. Sonson till Gustaf VI Adolf; regerande kung (2026)."@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

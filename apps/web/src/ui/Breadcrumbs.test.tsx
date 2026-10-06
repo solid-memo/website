@@ -72,7 +72,7 @@ describe("breadcrumbsFor", () => {
     const libraryDeck: RouteRef = {
       screen: "libraryDeck",
       instanceUrl,
-      libraryDeckUrl: "https://solid-memo.com/decks/capitals.ttl",
+      libraryDeckUrl: "https://solid-memo.com/decks/capitals/v1.ttl",
     };
     expect(
       breadcrumbsFor(libraryDeck, { ...NO_NAMES, libraryDeck: "Capitals" }),
@@ -93,7 +93,7 @@ describe("breadcrumbsFor", () => {
     const libraryCard: RouteRef = { ...libraryDeck, screen: "libraryCard", cardId: "sweden" };
     const cardsCrumb = {
       label: "Cards",
-      route: { screen: "libraryBrowser", instanceUrl, libraryDeckUrl: "https://solid-memo.com/decks/capitals.ttl" },
+      route: { screen: "libraryBrowser", instanceUrl, libraryDeckUrl: "https://solid-memo.com/decks/capitals/v1.ttl" },
     };
     expect(
       breadcrumbsFor(libraryCard, { ...NO_NAMES, libraryDeck: "Capitals", libraryCard: "Sweden" }),

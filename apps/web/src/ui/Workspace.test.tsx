@@ -625,7 +625,7 @@ describe("Workspace", () => {
       createdAt: "2026-09-21T10:00:00.000Z",
       formatVersion: 1,
       authors: [],
-      sourceUrl: "https://solid-memo.com/decks/capitals.ttl",
+      sourceUrl: "https://solid-memo.com/decks/capitals/v1.ttl",
     };
     const listDecks = vi
       .fn<() => Promise<Deck[]>>()
@@ -672,7 +672,7 @@ describe("Workspace", () => {
   });
 
   it("opens a library deck's page from the library and imports it there", async () => {
-    const libraryUrl = "https://solid-memo.com/decks/capitals.ttl";
+    const libraryUrl = "https://solid-memo.com/decks/capitals/v1.ttl";
     const deck: Deck = {
       id: "deck-1",
       url: `${instanceA.url}catalog.ttl#deck-1`,
@@ -744,7 +744,7 @@ describe("Workspace", () => {
   });
 
   it("browses a library deck's cards from its page and pages through them", async () => {
-    const libraryUrl = "https://solid-memo.com/decks/capitals.ttl";
+    const libraryUrl = "https://solid-memo.com/decks/capitals/v1.ttl";
     const cards = Array.from({ length: CARDS_PER_PAGE + 1 }, (_, i) => ({
       id: `card-${i + 1}`,
       front: { "": `Front ${i + 1}` },
@@ -792,7 +792,7 @@ describe("Workspace", () => {
   });
 
   it("previews a library deck from the library and goes back to it", async () => {
-    const libraryUrl = "https://solid-memo.com/decks/capitals.ttl";
+    const libraryUrl = "https://solid-memo.com/decks/capitals/v1.ttl";
     renderWorkspace(
       makeUseCases({
         listInstances: vi.fn(async () => [instanceA]),
@@ -836,7 +836,7 @@ describe("Workspace", () => {
   });
 
   it("opens a library card from the deck's card list and goes back to the list", async () => {
-    const libraryUrl = "https://solid-memo.com/decks/capitals.ttl";
+    const libraryUrl = "https://solid-memo.com/decks/capitals/v1.ttl";
     renderWorkspace(
       makeUseCases({
         listInstances: vi.fn(async () => [instanceA]),
@@ -871,7 +871,7 @@ describe("Workspace", () => {
   });
 
   it("falls back to the card list for a library card the deck does not have", async () => {
-    const libraryUrl = "https://solid-memo.com/decks/capitals.ttl";
+    const libraryUrl = "https://solid-memo.com/decks/capitals/v1.ttl";
     const libraryDeckUrl = librarySeriesUrlOf(libraryUrl);
     window.history.replaceState(
       null,
@@ -896,7 +896,7 @@ describe("Workspace", () => {
   });
 
   it("shows an error when a library card's deck cannot be read", async () => {
-    const libraryUrl = "https://solid-memo.com/decks/capitals.ttl";
+    const libraryUrl = "https://solid-memo.com/decks/capitals/v1.ttl";
     window.history.replaceState(
       null,
       "",
@@ -922,7 +922,7 @@ describe("Workspace", () => {
   });
 
   it("opens a library deck's page from a link to one of its releases", async () => {
-    const release = "https://solid-memo.com/decks/capitals/1.ttl";
+    const release = "https://solid-memo.com/decks/capitals/v1.ttl";
     window.history.replaceState(
       null,
       "",
@@ -933,11 +933,11 @@ describe("Workspace", () => {
         listInstances: vi.fn(async () => [instanceA]),
         listLibraryDecks: vi.fn(async () => [
           {
-            url: "https://solid-memo.com/decks/capitals/2.ttl",
+            url: "https://solid-memo.com/decks/capitals/v2.ttl",
             ...firstRelease(release),
             releases: [
               { url: release, version: "1" },
-              { url: "https://solid-memo.com/decks/capitals/2.ttl", version: "2" },
+              { url: "https://solid-memo.com/decks/capitals/v2.ttl", version: "2" },
             ],
             title: { en: "Capitals" },
             cardCount: 3,
@@ -959,7 +959,7 @@ describe("Workspace", () => {
       routeToHash({
         screen: "libraryDeck",
         instanceUrl: instanceA.url,
-        libraryDeckUrl: "https://solid-memo.com/decks/nope.ttl",
+        libraryDeckUrl: "https://solid-memo.com/decks/nope/v1.ttl",
       }),
     );
     renderWorkspace(
@@ -967,8 +967,8 @@ describe("Workspace", () => {
         listInstances: vi.fn(async () => [instanceA]),
         listLibraryDecks: vi.fn(async () => [
           {
-            url: "https://solid-memo.com/decks/capitals/1.ttl",
-            ...firstRelease("https://solid-memo.com/decks/capitals/1.ttl"),
+            url: "https://solid-memo.com/decks/capitals/v1.ttl",
+            ...firstRelease("https://solid-memo.com/decks/capitals/v1.ttl"),
             title: { en: "Capitals" },
             cardCount: 3,
             authors: [],
@@ -994,7 +994,7 @@ describe("Workspace", () => {
       routeToHash({
         screen: "libraryDeck",
         instanceUrl: instanceA.url,
-        libraryDeckUrl: "https://solid-memo.com/decks/capitals.ttl",
+        libraryDeckUrl: "https://solid-memo.com/decks/capitals/v1.ttl",
       }),
     );
     renderWorkspace(

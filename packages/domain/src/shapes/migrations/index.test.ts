@@ -122,15 +122,15 @@ describe("migrate", () => {
     expect(
       migrate(
         "deck",
-        { version: 2, data: { ...deck, description: "Mine.", direction: "bidirectional", source: "https://solid-memo.com/decks/capitals.ttl" } },
+        { version: 2, data: { ...deck, description: "Mine.", direction: "bidirectional", source: "https://solid-memo.com/decks/capitals/v1.ttl" } },
         CONTEXT,
       ),
     ).toMatchObject({
       description: { en: "Mine." },
       studyDirection: `${SM}bidirectional`,
-      source: "https://solid-memo.com/decks/capitals/v1",
+      source: "https://solid-memo.com/decks/capitals/v1.ttl",
     });
-    const LIBRARY = "https://solid-memo.com/decks/capitals.ttl";
+    const LIBRARY = "https://solid-memo.com/decks/capitals/v1.ttl";
     expect(
       migrate(
         "libraryDeck",
@@ -141,14 +141,14 @@ describe("migrate", () => {
       title: { en: "L" },
       description: { en: "Capitals." },
       creator: [],
-      publisher: "https://solid-memo.com/decks/index#solid-memo",
+      publisher: "https://solid-memo.com/decks/index.ttl#solid-memo",
       studyDirection: `${SM}frontToBack`,
       theme: [EDUC],
       keyword: {},
       language: [],
       version: "1",
-      inSeries: "https://solid-memo.com/decks/index#capitals",
-      isVersionOf: "https://solid-memo.com/decks/index#capitals",
+      inSeries: "https://solid-memo.com/decks/index.ttl#capitals",
+      isVersionOf: "https://solid-memo.com/decks/index.ttl#capitals",
       distribution: [`${LIBRARY}#turtle`],
       wasDerivedFrom: ["https://en.wikipedia.org/"],
     });

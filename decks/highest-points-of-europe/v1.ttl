@@ -1,0 +1,627 @@
+@base <https://solid-memo.com/decks/highest-points-of-europe/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Highest points of European countries"@en ,
+                  "Högsta punkterna i Europas länder"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "The highest point of 40 sovereign states of Europe, one card each: the states that the UN's M49 standard places in Europe, Russia included and Cyprus, Turkey and the Caucasus states not, leaving out Italy, Serbia, Monaco and Vatican City, whose highest point is disputed or not a named summit. Front: the country, e.g. “Highest point of Sweden”; back: the name of the summit in English and Swedish, often with a short note. For Denmark the card asks about Denmark proper (without Greenland and the Faroe Islands), for the Netherlands about the European part. Taken from Wikidata and checked against the CIA World Factbook's last edition, Wikipedia and national sources."@en ,
+                        "Den högsta punkten i 40 självständiga stater i Europa, ett kort för varje: de stater som FN:s standard M49 räknar till Europa, med Ryssland men utan Cypern, Turkiet och Kaukasusländerna, och utan Italien, Serbien, Monaco och Vatikanstaten, vars högsta punkt är omstridd eller inte en namngiven topp. Framsida: landet, t.ex. ”Högsta punkten i Sverige”; baksida: toppens namn på engelska och svenska, ofta med en kort anteckning. För Danmark gäller kortet det egentliga Danmark (utan Grönland och Färöarna), för Nederländerna den europeiska delen. Uppgifterna är hämtade från Wikidata och kontrollerade mot den sista utgåvan av CIA:s World Factbook, Wikipedia och nationella källor."@sv ;
+    prov:wasDerivedFrom <https://www.wikidata.org/wiki/Property:P610> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:geography ;
+    dcat:keyword "highest points"@en ,
+                 "mountains"@en ,
+                 "summits"@en ,
+                 "Europe"@en ,
+                 "geography"@en ,
+                 "högsta punkter"@sv ,
+                 "berg"@sv ,
+                 "bergstoppar"@sv ,
+                 "Europa"@sv ,
+                 "geografi"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#highest-points-of-europe> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#highest-points-of-europe> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/wiki/Property:P610> ,
+              <https://github.com/factbook/factbook.json> ,
+              <https://en.wikipedia.org/wiki/List_of_highest_points_of_European_countries> ,
+              <https://en.wikipedia.org/wiki/Kneiff> ,
+              <https://sv.wikipedia.org/wiki/Kebnekaise> ,
+              <https://unstats.un.org/unsd/methodology/m49/overview/> ,
+              <https://www.mynewsdesk.com/se/su/pressreleases/kebnekaises-sydtopp-fortsaetter-att-smaelta-3467234> ,
+              <https://luxembourg.public.lu/dam-assets/publications/le-luxembourg-en-chiffres/2025/luxembourg-in-figures-2025.pdf> ,
+              <https://lex.dk/M%C3%B8lleh%C3%B8j> ,
+              <https://en.wikipedia.org/wiki/Signal_de_Botrange> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "1. Wikidata (query 1): every item that is a sovereign state (P31 Q3624078) on the continent Europe (P30 Q46), apart from states with limited recognition (P31 Q3024240), with its M49 code (P2082), every P610 (highest point) statement with its rank, the English, Swedish and mul labels of the point and its elevation (P2044). The result has 49 items, among them the transcontinental Russia, Turkey, Georgia and Kazakhstan and Cyprus (Armenia and Azerbaijan are not on the continent Europe in Wikidata), but neither Denmark (Q35) nor the Netherlands (Q55), whose items are constituent countries; their P610 statements were fetched with query 2. Query 1 also returned the items Kingdom of Denmark and Kingdom of the Netherlands and, despite the filter, Kosovo; none of the three is a card."@en ,
+                 "2. Selection: the states were limited to those that the UN Statistics Division's M49 standard places in its region Europe (code 150), parsed from the M49 overview page (query 5, script m49.py: the rows of the page's first, English table whose third cell, Region Code, is \"150\"): 51 rows, of which 44 are sovereign states (43 UN members and the Holy See) and 7 are dependencies (Åland, the Faroe Islands, Guernsey, the Isle of Man, Jersey, Svalbard and Jan Mayen, Gibraltar). So M49 decides which states get a card (see Licensing for why that is a fact that may be used). An attempt to corroborate the region membership from Wikidata (query 16: states that are part of (P361) the items with the M49 codes 154, 151, 039 and 155) returned no rows, because Wikidata does not link the states to those items. M49 puts Russia in Eastern Europe, and Cyprus, Turkey, Georgia, Armenia and Azerbaijan in Western Asia and Kazakhstan in Central Asia, so those six are not in the deck, and Russia's card asks for the highest point of Russia as a whole (Mount Elbrus, in the Caucasus). Four of the 44 were then left out (see Selection): Italy, Serbia, Monaco and Vatican City. 40 cards."@en ,
+                 "3. Independent check, all states: The World Factbook of the CIA, discontinued in February 2026, was read in its last edition from the public-domain factbook.json repository (query 6; country files last updated 22 January 2026), field Geography > Elevation > highest point. Further check: the English Wikipedia's \"List of highest points of European countries\" (revision 1374673390), fetched as wikitext through the MediaWiki API and parsed by enwiki_parse.py (query 7). Every card's summit was compared with both by reading the three readings side by side; the differences are listed under quality control (round 0)."@en ,
+                 "4. National and other sources where the readings differed or a fact changes: for Sweden the Tarfala research station's 2026 measurement of Kebnekaise (11 September 2026) as published by Stockholm University on 16 September 2026 (query 9; the dossier first cited the 2025 measurement, see quality-control round 1); for Luxembourg the national statistics office's \"Luxembourg in figures 2025\" (query 10) and the English Wikipedia article Kneiff (query 8); for Denmark the Lex (Den Store Danske) article Møllehøj (query 11). The brief named Lantmäteriet; Stockholm University's Tarfala station makes the annual measurement of the Kebnekaise peaks, so its report was used instead."@en ,
+                 "5. Names: the English back is the Wikidata English label of the summit, except for Belarus, where the English label \"Dziaržynkaja hara\" is a Belarusian Latin form that no other source uses: the card uses the English alias \"Dzyarzhynskaya Hara\" (also the Factbook's and the English Wikipedia's form). The Swedish back is the Wikidata Swedish label where it equals the title of the Swedish Wikipedia article (sitelink, query 3) and the local official form; otherwise: Ireland \"Carrauntoohil\" (the Irish official form and a Swedish alias; the Swedish label is \"Carrauntoohill\" and the Swedish article \"Carrantuohill\"), Finland \"Haldefjäll\" (the Swedish Wikipedia title and Finland-Swedish name, also an English alias; the Swedish label writes \"Halde fjäll\"; changed from \"Halti\" in quality-control round 2), Malta \"Ta' Dmejrek\" (the mul label, with the Maltese apostrophe and space; the Swedish label is \"Ta'Dmejrek\"), Croatia \"Dinara\" (the mul label; there is no Swedish label or article). Where Swedish and English differ the Swedish form is the one in Swedish use (Olympos, Elbrus, Moldoveanu, Aukštojas, Dealul Bălănești, Ponta do Pico, Hvannadalshnjúkur, Gora Dzerzjinskaja). Liechtenstein's card says \"Vorder-Grauspitz\" in both languages (the Swedish label and article, the Factbook and the English list; the English label is \"Grauspitz\"), so the answer does not depend on the language (quality-control round 2). Country names are the Wikidata English and Swedish labels, with \"Czechia\" (the short name the UN uses, an English alias) for the Czech Republic. Swedish fronts read \"Högsta punkten i <land>\", which avoids genitives of names such as Schweiz, except for the island states, where Swedish says \"på\": \"Högsta punkten på Island\" and \"Högsta punkten på Malta\". English fronts read \"Highest point of <country>\", with the article where English uses one (\"the United Kingdom\", \"the European Netherlands\")."@en ,
+                 "6. Swedish check: the introductions of the Swedish Wikipedia articles were fetched through the MediaWiki API with their revision ids (query 4, svwiki.py); the evidence quotes the sentences of the introduction (split at \". \") that contain a keyword chosen per card: \"högsta\" for most cards (\"högst\" for Iceland), plus or instead: Andorra \"Coma Pedrosa är\", Belgium \"ås\", Bosnia and Herzegovina \"gränsen\" and \"Veliki\", Czechia \"Tjeckiens\" and \"gränsen\", Finland \"Finlands\" and \"Norge\", France \"Alpernas\", Germany \"Österrike\", the Netherlands \"trelandsgränspunkt\", Poland \"gränsen\" and \"Slovakien\", Romania \"Făgăraș\", Russia \"Elbrus (\" and \"Europas\", Slovakia \"Karpaterna\", Spain \"Spaniens\" and \"Teneriffa\", Sweden \"Nordtoppen\", Switzerland \"Monte Rosa\", Ukraine \"Hoverla (\" and the United Kingdom \"Skottland\"; if none matched, the first sentence (Zla Kolata, whose introduction does not call it Montenegro's highest point). Dinara has no Swedish article. Germany's sentence on the Bavarian Alps was added to the evidence by hand in quality-control round 3."@en ,
+                 "7. Cards: front \"Highest point of <country>\" / \"Högsta punkten i <land>\" (\"på\" for Iceland and Malta); back: the summit; backNote: short context (mountain range, border, the mainland high point of Spain and Portugal, other names), every fact of it from one of the sources named in the card's evidence. Elevations are left off the cards because surveys differ; the one exception is Kebnekaise's north peak, given with its source and year because the change of Sweden's highest point is the point of the note. Denmark and the Netherlands are asked about their European part: Denmark proper (front note), whose highest point is Møllehøj (the Kingdom of Denmark's is Gunnbjørn Fjeld in Greenland), and the European Netherlands, whose highest point is the Vaalserberg (the whole country's is Mount Scenery on Saba). Study direction front to back, because Korab answers two cards (Albania and North Macedonia)."@en ,
+                 "8. The dossier was generated from the saved query results by make_dossier.py, which writes each card's evidence from the parsed readings (the Wikidata statements and labels, the Factbook text, the English Wikipedia row, the Swedish Wikipedia sentence); the Stockholm University, STATEC, Kneiff and Lex readings were added by hand from the fetched pages, and the changes of quality-control rounds 1–3 were made by hand from the readings of queries 9 and 13–16. The scripts are not published with the deck; the steps above give what they do, including the parsing rule of m49.py (step 2) and the keywords of svwiki.py's sentence choice (step 6)."@en ,
+                 "9. Machine checks: for every card the builder checks against live Wikidata that the country item has the summit as a P610 value, that the summit has the English and Swedish back as a label or alias (in that language or mul), and that the country item has the English and Swedish country name of the front. For the Netherlands the builder's P610 check cannot be used: it reads only best-rank values, and the Vaalserberg is a normal-rank P610 value of Q55 beside the preferred Mount Scenery (query 2), so the card checks instead that the Vaalserberg's country (P17) is the Netherlands. That is only a sanity check (the Vaalserberg also has Belgium and Germany as P17 values); the real Wikidata support for the card is the normal-rank P610 value of Q55 read with query 2. Two label checks are left out on purpose: Finland's Swedish back \"Haldefjäll\" is the Swedish Wikipedia sitelink of Q216035 but not a Swedish label or alias (the label is \"Halde fjäll\"), and Liechtenstein's English back \"Vorder-Grauspitz\" is not an English label or alias of Q665000 (the label is \"Grauspitz\"); both are documented in the cards' evidence. The built deck was validated with the app's SHACL and DCAT-AP validators (validate_sources.ts)."@en ,
+                 "Selection: The sovereign states that the UN M49 standard places in Europe (43 UN members and the Holy See), as of 4 October 2026, each with its highest point: 40 cards. Transcontinental states follow M49: Russia is in (its highest point is Mount Elbrus in the Caucasus, the highest point of Russia as a whole), while Turkey, Georgia, Armenia, Azerbaijan and Cyprus (Western Asia) and Kazakhstan (Central Asia) are out; so are Kosovo (not a UN member and not listed by M49) and the dependencies (Åland, the Faroe Islands, Gibraltar, Guernsey, the Isle of Man, Jersey, Svalbard and Jan Mayen). Left out of the 44: Italy, because sources differ on whether its highest point is Mont Blanc or the Mont Blanc de Courmayeur (French and Italian maps disagree about the border at the summit; Wikidata gives Mont Blanc, the Factbook the Mont Blanc de Courmayeur); Serbia, because its highest point depends on whether Kosovo is counted (Wikidata's normal-rank value is Velika Rudoka in Kosovo, the Factbook gives Midžor); Monaco, whose highest point is a spot on the road Chemin des Révoires on the slope of Mont Agel, not a summit; and Vatican City, whose highest point is an unnamed spot in the Vatican Gardens on the Vatican Hill. For Denmark and the Netherlands, whose highest points overall lie outside Europe (Greenland, Saba), the cards ask for the European part; Spain's and Portugal's cards keep the country as a whole (Teide on Tenerife, Mount Pico in the Azores) and name the mainland high point in the note, as all the sources do."@en ,
+                 "Licensing: The only content source is Wikidata, whose structured data is CC0: which summit is each state's highest point, the English and Swedish names of the summits and states and the alternative names in the notes come from it, so the deck is CC0 1.0 like the rest of the library. Every other source was used for verification only: the CIA World Factbook (public domain, but not needed as content), the English and Swedish Wikipedia (CC BY-SA 4.0), the UN M49 page (UN terms of use, non-commercial), Stockholm University, STATEC and Lex (all rights reserved or no open licence). They confirmed facts, and no wording or table was copied from them; the fronts and notes are the compiler's own wording of facts. The one thing a verification source decided is which states get a card: the deck follows the UN M49 standard's region Europe. M49 is a classification that assigns every country or area of the world to one region; that a state belongs to its region Europe is a fact of the standard, as an ISO code is, and facts are not protected by copyright, so using them to decide the deck's scope copies nothing protected. No list was taken over: the deck's items are the states with their Wikidata highest points, with exclusions decided and explained here, and the English Wikipedia list's own selection, which differs, was not used."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Sources, licences and machine checks: every card's summit against Wikidata P610, the Factbook's last edition and the English Wikipedia list; the Swedish names against Wikidata sv labels and the Swedish Wikipedia; national sources where these differed."@en ;
+    rdfs:comment "Scope: All 40 cards, the 4 excluded states, the sources and the deck metadata."@en ,
+                 "Outcome: Wikidata, the Factbook and the English Wikipedia name the same summit for 38 of the 40 states (the Factbook still names Kebnekaise's south peak). The two differences (Luxembourg, the Netherlands) were settled with a national source or by restricting the question; two states whose highest point differs by source (Italy, Serbia) and two without a named summit (Monaco, Vatican City) were left out. No Wikidata check was skipped; for the Netherlands the P610 check is replaced by a P17 check (method, step 9). (Round 2 later left out two label checks, Finland sv and Liechtenstein en; see method step 9.)"@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 40 cards against live Wikidata, the English Wikipedia articles on the summits, Lex for Denmark and recent news for Sweden."@en ,
+                 "Outcome: No card had a wrong answer. The reviewer found that the 2026 Kebnekaise measurement had been missed, that the Belgium and Denmark notes were doubtful or misleading, a missing article in the United Kingdom's English front, and \"i\" where Swedish uses \"på\" with island states and archipelagos. All were verified and fixed; the Netherlands and Iceland suggestions were applied too."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 40 cards, the title, description and keywords: summit names against live Wikidata en and sv labels, Swedish Wikipedia titles and other-language labels; language tags."@en ,
+                 "Outcome: Language tags, metadata and most Swedish forms passed. Fixed: the United Kingdom's missing article, Liechtenstein's language-dependent answer, Finland's Swedish name, \"på\" for Iceland, Malta and the Canary Islands, and the description's promise of a note on every card. Declined: switching all Swedish fronts to the genitive, adding a Belarusian form to the Swedish note, unifying Iceland's spelling and adding cross-language names for Portugal."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: Every source's licence and role, the licensing text, the method, the recorded queries, and the evidence of all 40 cards (about 23 re-fetched)."@en ,
+                 "Outcome: The CC0 licence and every source's licence and role were confirmed. Fixed: the account of how M49 decides the selection, missing <scratch>/ prefixes, wrong query references for Denmark and the Netherlands, duplicated P610 values for San Marino and Slovakia, unsupported or unquoted notes (Croatia, Germany), Denmark's note, Belgium's close paraphrase, the United Kingdom and Swedish \"på\" wording, the Gaelic label evidence, the scripts' rules and the STATEC licence description. Declined: per-card Swedish Wikipedia URLs."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The 15 cards changed in rounds 1–3 and every third card (albania, belarus, bulgaria, denmark, hungary, latvia, luxembourg, montenegro, norway, romania, slovakia, sweden, united-kingdom), plus metadata, description, keywords, licensing and documentation; all 40 cards' Wikidata checks run live; every source re-fetched."@en ,
+                 "Outcome: Every fix of rounds 1–3 was confirmed present and correct, and no errors were found. Fixed two suggestions: round 0's summary now points to the two label checks left out in round 2, and the Kebnekaise quote marks the skipped sentences with [...]."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: All 40 cards, the title, description, keywords, study direction and the fixes of round 4; Swedish names spot-checked against live Wikidata; the Sweden card's 2026 Stockholm University press release re-fetched."@en ,
+                 "Outcome: All 40 cards were found correct, with accurate notes, Swedish names and language tags, and both round-4 fixes confirmed. One warning, fixed: the description wrongly summarised the Denmark card as asking about the European part of Denmark."@en .
+
+<https://www.wikidata.org/wiki/Property:P610>
+    dcterms:title "Wikidata: the highest point (P610) of the sovereign states of Europe, and the English, Swedish and multilingual labels and aliases of the summits and states" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://github.com/factbook/factbook.json>
+    dcterms:title "The World Factbook (Central Intelligence Agency), last edition, as kept in the factbook.json repository (Geography > Elevation > highest point)" ;
+    dcterms:creator "Central Intelligence Agency; factbook.json by Gerald Bauer and contributors" ;
+    rdfs:comment "README of https://github.com/factbook/factbook.json (commit 144d6977b2b01ac1cbd220de754c0a005616760b): \"The World Factbook [1][2] published by the Central Intelligence Agency (CIA) offers free country profiles in the public domain (that is, no copyright(s), no rights reserved, no license).\" and \"The datasets and scripts are dedicated to the public domain.\" The CIA ended The World Factbook in February 2026 (https://www.cia.gov/stories/story/spotlighting-the-world-factbook-as-we-bid-a-fond-farewell/, 4 February 2026: \"The World Factbook, has sunset.\"); the country files of this repository were last updated on 22 January 2026 (\"auto-update week 4\"). Used for verification only."@en .
+
+<https://en.wikipedia.org/wiki/List_of_highest_points_of_European_countries>
+    dcterms:title "English Wikipedia: List of highest points of European countries" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of the article: \"Text is available under the Creative Commons Attribution-ShareAlike 4.0 License\" (link text \"Creative Commons Attribution-ShareAlike 4.0 International License\")."@en .
+
+<https://en.wikipedia.org/wiki/Kneiff>
+    dcterms:title "English Wikipedia: Kneiff" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Wikipedia's footer on every article: \"Text is available under the Creative Commons Attribution-ShareAlike 4.0 License\"."@en .
+
+<https://sv.wikipedia.org/wiki/Kebnekaise>
+    dcterms:title "Svenskspråkiga Wikipedia: the articles on the summits (Kebnekaise, Galdhøpiggen, Haldefjäll, Møllehøj and the others)" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of the articles (e.g. Kebnekaise): \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported\"."@en .
+
+<https://unstats.un.org/unsd/methodology/m49/overview/>
+    dcterms:title "Standard country or area codes for statistical use (M49): overview" ;
+    dcterms:creator "United Nations Statistics Division" ;
+    rdfs:comment "The page links the UN Terms of Use (https://www.un.org/en/about-us/terms-of-use): \"The United Nations grants permission to Users to visit the Site and to download and copy the information, documents and materials (collectively, “Materials”) from the Site for the User’s personal, non-commercial use, without any right to resell or redistribute them or to compile or create derivative works therefrom\". Verification only."@en .
+
+<https://www.mynewsdesk.com/se/su/pressreleases/kebnekaises-sydtopp-fortsaetter-att-smaelta-3467234>
+    dcterms:title "Kebnekaises sydtopp fortsätter att smälta (Stockholm University press release, 16 September 2026)" ;
+    dcterms:creator "Stockholms universitet" ;
+    rdfs:comment "The press release states no licence for its text; its only terms concern the images: \"Bilderna i Mediearkivet är upphovsrättsligt skyddade. Bilderna får enbart användas i tydlig anslutning till nyheter kopplade till Stockholms universitet.\" Treated as all rights reserved and used for verification only."@en .
+
+<https://luxembourg.public.lu/dam-assets/publications/le-luxembourg-en-chiffres/2025/luxembourg-in-figures-2025.pdf>
+    dcterms:title "Luxembourg in figures, edition 2025" ;
+    dcterms:creator "STATEC (Institut national de la statistique et des études économiques du Grand-Duché de Luxembourg)" ;
+    rdfs:comment "Imprint (page 2): \"Reproduction only authorized if the source is mentioned.\" Reproduction is allowed with the source named, but no open licence is given; it is recorded under the builder's closed category (\"all-rights-reserved\", which here means no open licence) and used for verification only."@en .
+
+<https://lex.dk/M%C3%B8lleh%C3%B8j>
+    dcterms:title "Møllehøj (Lex, Den Store Danske)" ;
+    dcterms:creator "Hanne Kirstine Adriansen (Aarhus Universitet), Lex.dk" ;
+    rdfs:comment "The article: \"VILKÅR FOR GENBRUG: begrænset genbrug\". Verification only."@en .
+
+<https://en.wikipedia.org/wiki/Signal_de_Botrange>
+    dcterms:title "English Wikipedia: the articles Signal de Botrange, Dinara, Grauspitz and Hvannadalshnjúkur" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of the articles (e.g. Signal de Botrange, fetched 2026-10-04): \"Text is available under the Creative Commons Attribution-ShareAlike 4.0 License; additional terms may apply.\""@en .
+
+<#albania>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Albania"@en ,
+                     "Högsta punkten i Albanien"@sv ;
+    solid-memo:back "Korab"@en ,
+                    "Korab"@sv ;
+    solid-memo:backNote "On the border with North Macedonia; also North Macedonia's highest point."@en ,
+                        "På gränsen mot Nordmakedonien; även Nordmakedoniens högsta punkt."@sv .
+
+<#andorra>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Andorra"@en ,
+                     "Högsta punkten i Andorra"@sv ;
+    solid-memo:back "Coma Pedrosa"@en ,
+                    "Coma Pedrosa"@sv .
+
+<#austria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Austria"@en ,
+                     "Högsta punkten i Österrike"@sv ;
+    solid-memo:back "Grossglockner"@en ,
+                    "Grossglockner"@sv ;
+    solid-memo:backNote "German: Großglockner."@en ,
+                        "Tyska: Großglockner."@sv .
+
+<#belarus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Belarus"@en ,
+                     "Högsta punkten i Belarus"@sv ;
+    solid-memo:back "Dzyarzhynskaya Hara"@en ,
+                    "Gora Dzerzjinskaja"@sv ;
+    solid-memo:backNote "Named after Felix Dzerzhinsky."@en ,
+                        "Uppkallad efter Felix Dzerzjinskij."@sv .
+
+<#belgium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Belgium"@en ,
+                     "Högsta punkten i Belgien"@sv ;
+    solid-memo:back "Signal de Botrange"@en ,
+                    "Signal de Botrange"@sv ;
+    solid-memo:backNote "On the High Fens plateau in the Ardennes; not a distinct peak."@en ,
+                        "På högplatån Hohes Venn i Ardennerna; ingen tydlig bergstopp."@sv .
+
+<#bosnia-and-herzegovina>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Bosnia and Herzegovina"@en ,
+                     "Högsta punkten i Bosnien och Hercegovina"@sv ;
+    solid-memo:back "Maglić"@en ,
+                    "Maglić"@sv ;
+    solid-memo:backNote "On the border with Montenegro."@en ,
+                        "På gränsen mot Montenegro."@sv .
+
+<#bulgaria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Bulgaria"@en ,
+                     "Högsta punkten i Bulgarien"@sv ;
+    solid-memo:back "Musala"@en ,
+                    "Musala"@sv ;
+    solid-memo:backNote "In the Rila mountains; the highest peak of the Balkan Peninsula."@en ,
+                        "I Rilabergen; Balkanhalvöns högsta topp."@sv .
+
+<#croatia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Croatia"@en ,
+                     "Högsta punkten i Kroatien"@sv ;
+    solid-memo:back "Dinara"@en ,
+                    "Dinara"@sv ;
+    solid-memo:backNote "The peak, also called Sinjal, gave its name to the Dinara range."@en ,
+                        "Toppen kallas även Sinjal och har gett namn åt bergskedjan Dinara."@sv .
+
+<#czechia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Czechia"@en ,
+                     "Högsta punkten i Tjeckien"@sv ;
+    solid-memo:back "Sněžka"@en ,
+                    "Sněžka"@sv ;
+    solid-memo:backNote "On the border with Poland (Polish: Śnieżka)."@en ,
+                        "På gränsen mot Polen (polska: Śnieżka)."@sv .
+
+<#denmark>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Denmark"@en ,
+                     "Högsta punkten i Danmark"@sv ;
+    solid-memo:frontNote "Denmark proper, without Greenland and the Faroe Islands"@en ,
+                         "Egentliga Danmark, utan Grönland och Färöarna"@sv ;
+    solid-memo:back "Møllehøj"@en ,
+                    "Møllehøj"@sv ;
+    solid-memo:backNote "The highest natural point (2005 survey): 9 cm higher than Yding Skovhøj without its burial mound and 51 cm higher than Ejer Bavnehøj without its tower. The highest point of the whole Kingdom of Denmark is Gunnbjørn Fjeld in Greenland."@en ,
+                        "Den högsta naturliga punkten (mätning 2005): 9 cm högre än Yding Skovhøj utan gravhögen och 51 cm högre än Ejer Bavnehøj utan tornet. Hela konungariket Danmarks högsta punkt är Gunnbjørn Fjeld på Grönland."@sv .
+
+<#estonia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Estonia"@en ,
+                     "Högsta punkten i Estland"@sv ;
+    solid-memo:back "Suur Munamägi"@en ,
+                    "Suur Munamägi"@sv ;
+    solid-memo:backNote "Also the highest point of the Baltic states."@en ,
+                        "Även Baltikums högsta punkt."@sv .
+
+<#finland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Finland"@en ,
+                     "Högsta punkten i Finland"@sv ;
+    solid-memo:back "Halti"@en ,
+                    "Haldefjäll"@sv ;
+    solid-memo:backNote "Finland's highest point is on the slope of the fell, on the Norwegian border; Halti's summit itself is in Norway."@en ,
+                        "Finlands högsta punkt ligger på fjällets sluttning vid norska gränsen; själva toppen ligger i Norge. Finska: Halti."@sv .
+
+<#france>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of France"@en ,
+                     "Högsta punkten i Frankrike"@sv ;
+    solid-memo:back "Mont Blanc"@en ,
+                    "Mont Blanc"@sv ;
+    solid-memo:backNote "On the border with Italy; French and Italian maps disagree on where the border runs near the summit."@en ,
+                        "På gränsen mot Italien; franska och italienska kartor är oeniga om var gränsen går vid toppen."@sv .
+
+<#germany>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Germany"@en ,
+                     "Högsta punkten i Tyskland"@sv ;
+    solid-memo:back "Zugspitze"@en ,
+                    "Zugspitze"@sv ;
+    solid-memo:backNote "In the Bavarian Alps, on the border with Austria."@en ,
+                        "I Bayerska alperna, på gränsen mot Österrike."@sv .
+
+<#greece>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Greece"@en ,
+                     "Högsta punkten i Grekland"@sv ;
+    solid-memo:back "Mount Olympus"@en ,
+                    "Olympos"@sv .
+
+<#hungary>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Hungary"@en ,
+                     "Högsta punkten i Ungern"@sv ;
+    solid-memo:back "Kékes"@en ,
+                    "Kékes"@sv ;
+    solid-memo:backNote "In the Mátra mountains."@en ,
+                        "I Mátrabergen."@sv .
+
+<#iceland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Iceland"@en ,
+                     "Högsta punkten på Island"@sv ;
+    solid-memo:back "Hvannadalshnúkur"@en ,
+                    "Hvannadalshnjúkur"@sv ;
+    solid-memo:backNote "On the crater rim of the Öræfajökull volcano, in Vatnajökull National Park; also spelled Hvannadalshnjúkur."@en ,
+                        "På kraterkanten av vulkanen Öræfajökull i Vatnajökulls nationalpark; skrivs även Hvannadalshnúkur."@sv .
+
+<#ireland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Ireland"@en ,
+                     "Högsta punkten i Irland"@sv ;
+    solid-memo:back "Carrauntoohil"@en ,
+                    "Carrauntoohil"@sv ;
+    solid-memo:backNote "Irish: Corrán Tuathail."@en ,
+                        "Iriska: Corrán Tuathail."@sv .
+
+<#latvia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Latvia"@en ,
+                     "Högsta punkten i Lettland"@sv ;
+    solid-memo:back "Gaiziņkalns"@en ,
+                    "Gaiziņkalns"@sv .
+
+<#liechtenstein>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Liechtenstein"@en ,
+                     "Högsta punkten i Liechtenstein"@sv ;
+    solid-memo:back "Vorder-Grauspitz"@en ,
+                    "Vorder-Grauspitz"@sv ;
+    solid-memo:backNote "The summit of the Grauspitz, on the border with Switzerland."@en ,
+                        "Toppen på berget Grauspitz, på gränsen mot Schweiz."@sv .
+
+<#lithuania>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Lithuania"@en ,
+                     "Högsta punkten i Litauen"@sv ;
+    solid-memo:back "Aukštojas Hill"@en ,
+                    "Aukštojas"@sv .
+
+<#luxembourg>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Luxembourg"@en ,
+                     "Högsta punkten i Luxemburg"@sv ;
+    solid-memo:back "Kneiff"@en ,
+                    "Kneiff"@sv ;
+    solid-memo:backNote "About a metre higher than the nearby Buurgplaatz, long taken to be the highest point."@en ,
+                        "Omkring en meter högre än närbelägna Buurgplaatz, som länge räknades som den högsta punkten."@sv .
+
+<#malta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Malta"@en ,
+                     "Högsta punkten på Malta"@sv ;
+    solid-memo:back "Ta' Dmejrek"@en ,
+                    "Ta' Dmejrek"@sv ;
+    solid-memo:backNote "On the Dingli Cliffs."@en ,
+                        "På Dingliklipporna."@sv .
+
+<#moldova>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Moldova"@en ,
+                     "Högsta punkten i Moldavien"@sv ;
+    solid-memo:back "Bălănești Hill"@en ,
+                    "Dealul Bălănești"@sv .
+
+<#montenegro>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Montenegro"@en ,
+                     "Högsta punkten i Montenegro"@sv ;
+    solid-memo:back "Zla Kolata"@en ,
+                    "Zla Kolata"@sv ;
+    solid-memo:backNote "In the Albanian Alps, on the border with Albania."@en ,
+                        "I Albanska alperna, på gränsen mot Albanien."@sv .
+
+<#netherlands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of the European Netherlands"@en ,
+                     "Högsta punkten i Nederländernas europeiska del"@sv ;
+    solid-memo:back "Vaalserberg"@en ,
+                    "Vaalserberg"@sv ;
+    solid-memo:backNote "Where Belgium, Germany and the Netherlands meet. The highest point of the whole Netherlands is Mount Scenery on Saba, in the Caribbean."@en ,
+                        "Där Belgien, Tyskland och Nederländerna möts. Hela Nederländernas högsta punkt är Mount Scenery på Saba i Karibien."@sv .
+
+<#north-macedonia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of North Macedonia"@en ,
+                     "Högsta punkten i Nordmakedonien"@sv ;
+    solid-memo:back "Korab"@en ,
+                    "Korab"@sv ;
+    solid-memo:backNote "On the border with Albania; also Albania's highest point."@en ,
+                        "På gränsen mot Albanien; även Albaniens högsta punkt."@sv .
+
+<#norway>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Norway"@en ,
+                     "Högsta punkten i Norge"@sv ;
+    solid-memo:back "Galdhøpiggen"@en ,
+                    "Galdhøpiggen"@sv ;
+    solid-memo:backNote "In Jotunheimen."@en ,
+                        "I Jotunheimen."@sv .
+
+<#poland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Poland"@en ,
+                     "Högsta punkten i Polen"@sv ;
+    solid-memo:back "Rysy"@en ,
+                    "Rysy"@sv ;
+    solid-memo:backNote "Its north-western summit, on the border with Slovakia; Rysy's highest summit is in Slovakia."@en ,
+                        "Dess nordvästra topp, på gränsen mot Slovakien; Rysys högsta topp ligger i Slovakien."@sv .
+
+<#portugal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Portugal"@en ,
+                     "Högsta punkten i Portugal"@sv ;
+    solid-memo:back "Mount Pico"@en ,
+                    "Ponta do Pico"@sv ;
+    solid-memo:backNote "On Pico island in the Azores; the highest point of mainland Portugal is in the Serra da Estrela."@en ,
+                        "På ön Pico, Azorerna; fastlandets högsta punkt ligger i Serra da Estrela."@sv .
+
+<#romania>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Romania"@en ,
+                     "Högsta punkten i Rumänien"@sv ;
+    solid-memo:back "Moldoveanu Peak"@en ,
+                    "Moldoveanu"@sv ;
+    solid-memo:backNote "In the Făgăraș mountains."@en ,
+                        "I Făgărașbergen."@sv .
+
+<#russia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Russia"@en ,
+                     "Högsta punkten i Ryssland"@sv ;
+    solid-memo:back "Mount Elbrus"@en ,
+                    "Elbrus"@sv ;
+    solid-memo:backNote "In the Caucasus; usually counted as the highest mountain in Europe."@en ,
+                        "I Kaukasus; räknas oftast som Europas högsta berg."@sv .
+
+<#san-marino>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of San Marino"@en ,
+                     "Högsta punkten i San Marino"@sv ;
+    solid-memo:back "Monte Titano"@en ,
+                    "Monte Titano"@sv .
+
+<#slovakia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Slovakia"@en ,
+                     "Högsta punkten i Slovakien"@sv ;
+    solid-memo:back "Gerlachovský štít"@en ,
+                    "Gerlachovský štít"@sv ;
+    solid-memo:backNote "In the Tatras; the highest peak of the Carpathians."@en ,
+                        "I Tatrabergen; Karpaternas högsta topp."@sv .
+
+<#slovenia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Slovenia"@en ,
+                     "Högsta punkten i Slovenien"@sv ;
+    solid-memo:back "Triglav"@en ,
+                    "Triglav"@sv ;
+    solid-memo:backNote "In the Julian Alps."@en ,
+                        "I Juliska alperna."@sv .
+
+<#spain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Spain"@en ,
+                     "Högsta punkten i Spanien"@sv ;
+    solid-memo:back "Teide"@en ,
+                    "Teide"@sv ;
+    solid-memo:backNote "A volcano on Tenerife in the Canary Islands; the highest point of mainland Spain is Mulhacén."@en ,
+                        "En vulkan på Teneriffa, Kanarieöarna; fastlandets högsta punkt är Mulhacén."@sv .
+
+<#sweden>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Sweden"@en ,
+                     "Högsta punkten i Sverige"@sv ;
+    solid-memo:back "Kebnekaise"@en ,
+                    "Kebnekaise"@sv ;
+    solid-memo:backNote "Its north peak (2,096.8 m, bare rock) has been the highest point since 2019, when the glacier-capped south peak melted below it (Stockholm University, 2026 measurement)."@en ,
+                        "Nordtoppen (2 096,8 m, fast berg) är högsta punkten sedan 2019, då den glaciärtäckta sydtoppen smälte ner under den (Stockholms universitet, mätning 2026)."@sv .
+
+<#switzerland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Switzerland"@en ,
+                     "Högsta punkten i Schweiz"@sv ;
+    solid-memo:back "Dufourspitze"@en ,
+                    "Dufourspitze"@sv ;
+    solid-memo:backNote "In the Monte Rosa massif, near the Italian border."@en ,
+                        "I Monte Rosa-massivet, nära italienska gränsen."@sv .
+
+<#ukraine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of Ukraine"@en ,
+                     "Högsta punkten i Ukraina"@sv ;
+    solid-memo:back "Hoverla"@en ,
+                    "Hoverla"@sv .
+
+<#united-kingdom>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Highest point of the United Kingdom"@en ,
+                     "Högsta punkten i Storbritannien"@sv ;
+    solid-memo:back "Ben Nevis"@en ,
+                    "Ben Nevis"@sv ;
+    solid-memo:backNote "In Scotland; Scottish Gaelic: Beinn Nibheis."@en ,
+                        "I Skottland; skotsk gaeliska: Beinn Nibheis."@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

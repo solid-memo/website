@@ -28,9 +28,9 @@ import { createSolidWebIdDocumentRepository } from "./solidWebIdDocumentReposito
 const POD = "https://alice.example/";
 const ALICE = { webId: `${POD}profile/card#me` };
 const SITE = "https://solid-memo.com/";
-const RELEASE = `${SITE}decks/capitals/2.ttl`;
+const RELEASE = `${SITE}decks/capitals/v2.ttl`;
 /** A release of library deck format 5: its keywords tagged with their language. */
-const TAGGED_RELEASE = `${SITE}decks/capitals/3.ttl`;
+const TAGGED_RELEASE = `${SITE}decks/capitals/v3.ttl`;
 const KEYWORD = "http://www.w3.org/ns/dcat#keyword";
 const SM_NS = "https://solid-memo.com/ns/vocab/v1.ttl#";
 const DCTERMS = "http://purl.org/dc/terms/";

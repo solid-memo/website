@@ -1,0 +1,929 @@
+@base <https://solid-memo.com/decks/eurovision-winners/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Eurovision Song Contest winners"@en ,
+                  "Vinnare i Eurovision Song Contest"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    dcterms:description "The winners of every Eurovision Song Contest from the first, in 1956, to the 70th, in May 2026: 70 cards (no contest was held in 2020). Front: the contest, e.g. “Eurovision Song Contest 1974”; back: the winning country and song, e.g. Sweden – “Waterloo”, with the performer in a note. Song titles are given as performed, untranslated. The 1969 contest ended in a four-way tie, so its card names all four winners. Taken from Wikidata and the English Wikipedia and checked against the EBU’s eurovision.com and the Swedish Wikipedia."@en ,
+                        "Vinnarna i varje Eurovision Song Contest från den första 1956 till den 70:e i maj 2026: 70 kort (år 2020 hölls ingen tävling). Framsida: tävlingen, t.ex. ”Eurovision Song Contest 1974”; baksida: vinnarlandet och låten, t.ex. Sverige – ”Waterloo”, med artisten i en anteckning. Låttitlarna står som de framfördes, oöversatta. Tävlingen 1969 slutade med att fyra bidrag delade segern, så det kortet nämner alla fyra. Uppgifterna är hämtade från Wikidata och engelskspråkiga Wikipedia och kontrollerade mot EBU:s eurovision.com och svenskspråkiga Wikipedia."@sv ;
+    prov:wasDerivedFrom <https://www.wikidata.org/wiki/Q276> ,
+                        <https://en.wikipedia.org/wiki/List_of_Eurovision_Song_Contest_winners> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:music ;
+    dcat:keyword "Eurovision Song Contest"@en ,
+                 "Eurovision"@en ,
+                 "song contest"@en ,
+                 "pop music"@en ,
+                 "winning songs"@en ,
+                 "Eurovision Song Contest"@sv ,
+                 "Eurovision"@sv ,
+                 "sångtävling"@sv ,
+                 "popmusik"@sv ,
+                 "vinnarlåtar"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#eurovision-winners> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#eurovision-winners> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/wiki/Q276> ,
+              <https://en.wikipedia.org/wiki/List_of_Eurovision_Song_Contest_winners> ,
+              <https://www.eurovision.com/eurovision-song-contest/history/> ,
+              <https://sv.wikipedia.org/wiki/Lista_%C3%B6ver_vinnare_i_Eurovision_Song_Contest> ,
+              <https://www.bta.bg/en/news/1127547-bulgaria-s-dara-wins-eurovision-2026> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "1. Contests (Wikidata, query 2): every item that is part of the series Eurovision Song Contest (P179 Q276) with a P1545 ordinal, its date (P585), its English, Swedish and multilingual labels and its winner statements (P1346 with their P1532 and P175 qualifiers), fetched as CSV from the Wikidata Query Service. Ordinals 1 to 70 run from 1956 to 2026; the cancelled 2020 contest (Q30973589) has no ordinal and no winner, and the items for 2027–2029 are future contests. The edition items' P1346 statements are inconsistent: for 1956–1960 and 2004–2025 most name the performer rather than the song, and 2026 has none. (Query 1, which looked for editions as instances of Q276, returned nothing: Q276 is the series, the editions are instances of Q110288240.)"@en ,
+                 "2. Winning entries (Wikidata, query 3 and entries.py): every item with P2522 (victory) = an edition, or a P1344 (participant in) statement for an edition with the qualifier P1352 (ranking) 1. The result mixes the entry items (instances of Q63481999, Eurovision Song Contest entry), song items and performer items; for each contest the entry item was chosen (for 2007, which has none, the song item “Molitva”, Q753818), and the chosen items were fetched in full with the Wikidata API (wbgetentities) by entries.py, with the items they name. 1969 has four entry items with ranking 1. The card's title is the entry's English label; its country is the P17 qualifier of its P1344 statement, or where there is none the P1532 (country for sport) qualifier of the edition's P1346 statement (1965, 1974, 1995, 2013, 2015) or, for 2007, its P1268 (represents) qualifier Serbia (Q10153's P1346 names the performer Marija Šerifović, with the qualifiers P1686 (for work) Molitva and P1268 Serbia; query 2 did not ask for P1268, and the qualifier was read with wbgetclaims, query 10); for 2025 the item Austria in the Eurovision Song Contest 2025 (Q131936274: P17 Austria, P175 JJ), found by country_items.py."@en ,
+                 "3. 2026: the Wikidata item of the 70th contest (Q125933843, last modified 2026-09-27) records no winner, and none of the 75 items with P1344 = Q125933843 (found with the search haswbstatement:P1344=Q125933843, entries2026.py) carries a ranking. The result was therefore established from sources fetched on the day of research: a web search, the contest page and the final scoreboard on eurovision.com (Bulgaria, DARA, “Bangaranga”, 516 points), the English and Swedish Wikipedia lists of winners, and the Bulgarian News Agency's report (“Dara's song, Bangaranga, collected 516 points and secured Bulgaria's first ever win”). The English Wikipedia list is the content source for this fact; the song item Q138666487 in Wikidata gives its title, performer (Dara, Q27643209) and country (P17 and P495 Bulgaria)."@en ,
+                 "4. Independent check, the organiser (eurovision.com): the URL of every contest page was taken from the edition items' P856 (query 5); the eurovision.tv/event/ addresses that Wikidata gives for 1979 and 1981–1999 answered 403 and were replaced by the same page on eurovision.com. fetch_ebu.py downloaded each page and read the three lines after each “Winner” heading (performer, song, country); fetch_finals.py followed each page's link to its (grand) final and read every entry in place 1 of the scoreboard (points, country, performer, song). The contest pages of 2012, 2016, 2018, 2019, 2023 and 2024 have no “Winner” box and the final pages of 1959 and 1970 no scoreboard; every contest is covered by at least one of the two."@en ,
+                 "5. Independent check, the encyclopaedias: the English list “List of Eurovision Song Contest winners” (revision 1370224646) and the Swedish list “Lista över vinnare i Eurovision Song Contest” (revision 59337108) were fetched with their revision ids through the MediaWiki API (query 7) and their winners tables parsed by parse_wiki.py (country, song, performer; in Swedish also the language)."@en ,
+                 "6. Comparison: compare.py compared, for every contest, the winning country and the song title (case, punctuation and spaces ignored) in Wikidata, on both eurovision.com pages and in both Wikipedia lists, through a fixed table of each source's country names. All four agree on the winning country and song of all 70 contests, apart from the errors and gaps listed under quality control round 0 (Wikidata's France for 1961 and 1973, its “Belive” for 2008, two typing errors in the Swedish list, the countries Wikidata does not tie to an entry). The evidence on every card (the “says” texts) was generated by make_cards.py from the parsed source files, not typed by hand, except the Swedish Wikipedia row for 2026, whose year cell the parser did not recognise and which was read by hand. The scripts are not published with the deck; the rules above are what they do."@en ,
+                 "7. Card text. Front: the contest's name, which is the same in English and Swedish (the Wikidata en and sv labels — for 2026, which has no Swedish label, the multilingual (mul) label, which the builder's sv check also accepts — and the titles of the Swedish Wikipedia articles, e.g. “Eurovision Song Contest 1974”). Back: the country, an en dash and the song title in quotation marks (English “…”, Swedish ”…”); in 1969 the four entries in alphabetical order of the English country names, which is also the Swedish order. The country is named as it was at the time (West Germany 1982, Yugoslavia 1989), in English and Swedish from the Wikidata labels; Yugoslavia's Wikidata label is the full name of the state, so the cards use its English alias “Yugoslavia” and the Swedish “Jugoslavien”, the Swedish label of Wikidata's item Yugoslavia (Q36704). The song title is the title as performed, in its own language and untranslated, written as Wikidata's English label of the entry gives it except where that label is wrong (1984, 2008; see quality control), and with the typographic apostrophe ’ where the label has the straight one (1964, 1977, 1980, 1986, 1994; the label checks compare against the label as Wikidata writes it). A back is therefore an English or Swedish phrase that quotes a title which may be in another language (French, Dutch, Italian, Hebrew, German, Norwegian, Swedish, Serbian, Portuguese, Ukrainian, or an invented word): the whole back is tagged en and sv, and the quoted title is a name, not text in that language. Note: the performer as credited at the contest, in the form most sources share (eurovision.com, the English Wikipedia list and Wikidata's performer labels and aliases); for 1979, where eurovision.com credits “Milk & Honey with Gali Atari” and the English list only “Milk and Honey”, the note follows Wikidata's alias “Gali Atari & Milk and Honey” of Q926040. “Performed by …” / “Framförd av …”, with “and” or “&” rendered “och” in Swedish where it joins names (not inside a band's name such as Milk and Honey; “Grethe och Jørgen Ingmann” is also a Swedish alias of Q241520). In 1978 the English credit “Izhar Cohen and the Alphabeta” keeps the English article; Swedish has no such article before a band's name, so the Swedish note names the band Alphabeta, its Wikidata label (Q661126). ABBA is written Abba in Swedish, the Wikidata sv label of Q18233. The Swedish Wikipedia list was used only to confirm these forms."@en ,
+                 "8. Machine checks: every card's checks (run against live Wikidata by the deck builder) confirm the English and Swedish labels of the contest (for 2026 the multilingual label, there being no sv label), that the winning entry's item participated in that contest (P1344) or won it (P2522, victory), as the item states it, its performer (P175), its English label where it is the card's title, the English and Swedish labels of the country, the Wikidata labels or aliases that the Swedish name forms and the 1963, 1978 and 1979 credits rest on, and, where Wikidata states it, that the contest's P1346 (winner) is the entry. The checks cannot test qualifiers, so the ranking 1 and the country qualifiers are covered by the evidence and the comparison of step 6, not by the builder; the 2026 result is not in Wikidata at all."@en ,
+                 "Selection: Every Eurovision Song Contest held, from the first (Lugano, 1956) to the 70th (Vienna, May 2026), as of 4 October 2026: 70 cards, one per contest. The 2020 contest was cancelled (COVID-19 pandemic) and has no winner and no card. The 1969 contest ended in a tie between four entries on 18 points each (France, the Netherlands, Spain and the United Kingdom), all of which are listed as winners by the EBU, Wikidata and both Wikipedias; its card names all four. Left out: runners-up and points (except the 18 points of the 1969 tie, in its note), the host cities, the songwriters, the languages of the songs, the national selections (such as Melodifestivalen) and other Eurovision events (Junior Eurovision, Eurovision Song Contest Asia). The 2027 contest has not been held; the 2026 card is the cut-off."@en ,
+                 "Licensing: The content sources are Wikidata (CC0) and the English Wikipedia list of winners (CC BY-SA 4.0). Wikidata gives the contests, the winning entries of 1956–2025, their titles, performers and countries and the English and Swedish names. Wikidata does not record the result of the 2026 contest, and no openly licensed (CC0, public domain or CC BY) report of the 2026 result was found (Wikinews has none); these facts, some credited performer names and two corrected titles were taken from the English Wikipedia list, which makes the deck CC BY-SA 4.0, with the list attributed in the deck (prov:wasDerivedFrom) and in this report. No wording or table layout was copied from it: the cards are the compiler's own phrasing of facts. The selection is the complete set of contests held, which every list of winners shares, not a choice taken from one. eurovision.com (EBU, all rights reserved), the BTA report (all rights reserved) and the Swedish Wikipedia (CC BY-SA 4.0) were used for verification only: they confirmed facts that the content sources gave, and nothing was copied from them. If Wikidata comes to record the 2026 winner, and the credited names and titles listed under the English Wikipedia source can be confirmed from openly licensed data, the deck could be rebuilt without the English Wikipedia list and released as CC0."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Sources, licences and machine checks: every card's winning country and song in Wikidata, on eurovision.com (contest page and final scoreboard) and in the English and Swedish Wikipedia lists; the 2026 result against sources fetched on the day; the Swedish names against the Wikidata sv labels and the Swedish list."@en ;
+    rdfs:comment "Scope: All 70 cards, the sources and the deck metadata."@en ,
+                 "Outcome: The four sources agree on the winning country and song of every contest from 1956 to 2026. Wikidata has two wrong countries, one misspelt title, one wrong title spelling and no 2026 result; the Swedish list has two typing errors; the sources differ in the capitalisation and punctuation of some titles and in the name of the 1982 winning country. Two Wikidata checks were left out (the titles of 1984 and 2008, where the label is wrong); no other check was skipped."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 70 cards, checked against each contest's own English Wikipedia article; all 602 Wikidata checks re-run against live Wikidata."@en ,
+                 "Outcome: No factual errors. Every card's winning country and song matched the contest's English Wikipedia article except 1982, where the card deliberately says West Germany. Two suggestions: document that the 2026 Swedish label check is met by the multilingual label (fixed in the method), and consider “Germany” for 1982 (declined)."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 70 cards, the description, keywords and language tags."@en ,
+                 "Outcome: No errors. Three style suggestions: typographic apostrophes (fixed), “Merci Chérie” capitalisation (declined) and the wording of the 1969 sentence in the Swedish description (fixed)."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: Sources, licence quotes, method, queries and licensing text; 17 cards' evidence fetched again."@en ,
+                 "Outcome: The licence (CC BY-SA 4.0) is right and every licence quote verbatim. Two errors, both confirmed with live Wikidata (query 10) and fixed: Wikidata does tie Norway (1995) and Serbia (2007) to the winners. Three warnings fixed by sourcing the Swedish name forms and credits from Wikidata (with checks), restating the credit rule, and citing BTA on the 2026 card. Minor documentation fixes applied; the numbering of the unnumbered first method paragraph is the builder's layout, shared by every dossier, and left as it is."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: 32 cards: the 12 changed in round 3 and every third card (1956, 1959, … 2023); every Wikidata check on them re-run live; both Wikipedia lists fetched again (revisions 1370224646 and 59337108 still latest); the 2026 result on eurovision.com and BTA; the three licence quotes; the rounds 1–3 fixes."@en ,
+                 "Outcome: No errors and no warnings; every round 1–3 fix confirmed in the dossier and every licence quote verbatim. One suggestion, applied: the 2007 card now checks the edition's winner statement (Q10153 P1346 Q226701), which its country rests on; the Serbia qualifier itself cannot be checked by the builder and stays documented in the evidence."@en .
+
+<https://www.wikidata.org/wiki/Q276>
+    dcterms:title "Wikidata: the editions of the Eurovision Song Contest (series Q276), their winners (P1346) and the winning entries' participation (P1344 with ranking P1352 and country P17), victory (P2522), performers (P175) and English and Swedish labels" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://en.wikipedia.org/wiki/List_of_Eurovision_Song_Contest_winners>
+    dcterms:title "English Wikipedia: List of Eurovision Song Contest winners" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of the article: \"Text is available under the Creative Commons Attribution-ShareAlike 4.0 License\" (https://en.wikipedia.org/wiki/Wikipedia:Text_of_the_Creative_Commons_Attribution-ShareAlike_4.0_International_License)."@en .
+
+<https://www.eurovision.com/eurovision-song-contest/history/>
+    dcterms:title "Eurovision Song Contest: History by Year (contest pages and final scoreboards, eurovision.com)" ;
+    dcterms:creator "European Broadcasting Union (EBU)" ;
+    rdfs:comment "https://www.eurovision.com/terms-and-conditions/ — \"EBU (and/or our licensors) shall remain owner(s) of the copyrights, title and/or interest in each Content that the EBU contributes to the Service.\" and \"This license does not include a license to reproduce, modify, or distribute the Service.\" Verification only."@en .
+
+<https://sv.wikipedia.org/wiki/Lista_%C3%B6ver_vinnare_i_Eurovision_Song_Contest>
+    dcterms:title "Svenskspråkiga Wikipedia: Lista över vinnare i Eurovision Song Contest" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of the article: \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported\" (https://creativecommons.org/licenses/by-sa/4.0/deed.sv)."@en .
+
+<https://www.bta.bg/en/news/1127547-bulgaria-s-dara-wins-eurovision-2026>
+    dcterms:title "BTA (Bulgarian News Agency): Bulgaria's Dara Wins Eurovision Contest" ;
+    dcterms:creator "Bulgarian News Agency (BTA)" ;
+    rdfs:comment "Footer of the page: \"© 2022 - 2026, All rights reserved.\" Verification only."@en .
+
+<#eurovision-1956>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1956"@en ,
+                     "Eurovision Song Contest 1956"@sv ;
+    solid-memo:back "Switzerland – “Refrain”"@en ,
+                    "Schweiz – ”Refrain”"@sv ;
+    solid-memo:backNote "Performed by Lys Assia"@en ,
+                        "Framförd av Lys Assia"@sv .
+
+<#eurovision-1957>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1957"@en ,
+                     "Eurovision Song Contest 1957"@sv ;
+    solid-memo:back "Netherlands – “Net als toen”"@en ,
+                    "Nederländerna – ”Net als toen”"@sv ;
+    solid-memo:backNote "Performed by Corry Brokken"@en ,
+                        "Framförd av Corry Brokken"@sv .
+
+<#eurovision-1958>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1958"@en ,
+                     "Eurovision Song Contest 1958"@sv ;
+    solid-memo:back "France – “Dors, mon amour”"@en ,
+                    "Frankrike – ”Dors, mon amour”"@sv ;
+    solid-memo:backNote "Performed by André Claveau"@en ,
+                        "Framförd av André Claveau"@sv .
+
+<#eurovision-1959>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1959"@en ,
+                     "Eurovision Song Contest 1959"@sv ;
+    solid-memo:back "Netherlands – “Een beetje”"@en ,
+                    "Nederländerna – ”Een beetje”"@sv ;
+    solid-memo:backNote "Performed by Teddy Scholten"@en ,
+                        "Framförd av Teddy Scholten"@sv .
+
+<#eurovision-1960>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1960"@en ,
+                     "Eurovision Song Contest 1960"@sv ;
+    solid-memo:back "France – “Tom Pillibi”"@en ,
+                    "Frankrike – ”Tom Pillibi”"@sv ;
+    solid-memo:backNote "Performed by Jacqueline Boyer"@en ,
+                        "Framförd av Jacqueline Boyer"@sv .
+
+<#eurovision-1961>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1961"@en ,
+                     "Eurovision Song Contest 1961"@sv ;
+    solid-memo:back "Luxembourg – “Nous les amoureux”"@en ,
+                    "Luxemburg – ”Nous les amoureux”"@sv ;
+    solid-memo:backNote "Performed by Jean-Claude Pascal"@en ,
+                        "Framförd av Jean-Claude Pascal"@sv .
+
+<#eurovision-1962>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1962"@en ,
+                     "Eurovision Song Contest 1962"@sv ;
+    solid-memo:back "France – “Un premier amour”"@en ,
+                    "Frankrike – ”Un premier amour”"@sv ;
+    solid-memo:backNote "Performed by Isabelle Aubret"@en ,
+                        "Framförd av Isabelle Aubret"@sv .
+
+<#eurovision-1963>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1963"@en ,
+                     "Eurovision Song Contest 1963"@sv ;
+    solid-memo:back "Denmark – “Dansevise”"@en ,
+                    "Danmark – ”Dansevise”"@sv ;
+    solid-memo:backNote "Performed by Grethe and Jørgen Ingmann"@en ,
+                        "Framförd av Grethe och Jørgen Ingmann"@sv .
+
+<#eurovision-1964>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1964"@en ,
+                     "Eurovision Song Contest 1964"@sv ;
+    solid-memo:back "Italy – “Non ho l’età”"@en ,
+                    "Italien – ”Non ho l’età”"@sv ;
+    solid-memo:backNote "Performed by Gigliola Cinquetti"@en ,
+                        "Framförd av Gigliola Cinquetti"@sv .
+
+<#eurovision-1965>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1965"@en ,
+                     "Eurovision Song Contest 1965"@sv ;
+    solid-memo:back "Luxembourg – “Poupée de cire, poupée de son”"@en ,
+                    "Luxemburg – ”Poupée de cire, poupée de son”"@sv ;
+    solid-memo:backNote "Performed by France Gall"@en ,
+                        "Framförd av France Gall"@sv .
+
+<#eurovision-1966>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1966"@en ,
+                     "Eurovision Song Contest 1966"@sv ;
+    solid-memo:back "Austria – “Merci Chérie”"@en ,
+                    "Österrike – ”Merci Chérie”"@sv ;
+    solid-memo:backNote "Performed by Udo Jürgens"@en ,
+                        "Framförd av Udo Jürgens"@sv .
+
+<#eurovision-1967>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1967"@en ,
+                     "Eurovision Song Contest 1967"@sv ;
+    solid-memo:back "United Kingdom – “Puppet on a String”"@en ,
+                    "Storbritannien – ”Puppet on a String”"@sv ;
+    solid-memo:backNote "Performed by Sandie Shaw"@en ,
+                        "Framförd av Sandie Shaw"@sv .
+
+<#eurovision-1968>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1968"@en ,
+                     "Eurovision Song Contest 1968"@sv ;
+    solid-memo:back "Spain – “La, la, la”"@en ,
+                    "Spanien – ”La, la, la”"@sv ;
+    solid-memo:backNote "Performed by Massiel"@en ,
+                        "Framförd av Massiel"@sv .
+
+<#eurovision-1969>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1969"@en ,
+                     "Eurovision Song Contest 1969"@sv ;
+    solid-memo:back "France – “Un jour, un enfant”; Netherlands – “De troubadour”; Spain – “Vivo cantando”; United Kingdom – “Boom Bang-a-Bang”"@en ,
+                    "Frankrike – ”Un jour, un enfant”; Nederländerna – ”De troubadour”; Spanien – ”Vivo cantando”; Storbritannien – ”Boom Bang-a-Bang”"@sv ;
+    solid-memo:backNote "Four-way tie on 18 points each; performed by Frida Boccara, Lenny Kuhr, Salomé and Lulu"@en ,
+                        "Fyra bidrag delade segern med 18 poäng vardera; framförda av Frida Boccara, Lenny Kuhr, Salomé och Lulu"@sv .
+
+<#eurovision-1970>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1970"@en ,
+                     "Eurovision Song Contest 1970"@sv ;
+    solid-memo:back "Ireland – “All Kinds of Everything”"@en ,
+                    "Irland – ”All Kinds of Everything”"@sv ;
+    solid-memo:backNote "Performed by Dana"@en ,
+                        "Framförd av Dana"@sv .
+
+<#eurovision-1971>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1971"@en ,
+                     "Eurovision Song Contest 1971"@sv ;
+    solid-memo:back "Monaco – “Un banc, un arbre, une rue”"@en ,
+                    "Monaco – ”Un banc, un arbre, une rue”"@sv ;
+    solid-memo:backNote "Performed by Séverine"@en ,
+                        "Framförd av Séverine"@sv .
+
+<#eurovision-1972>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1972"@en ,
+                     "Eurovision Song Contest 1972"@sv ;
+    solid-memo:back "Luxembourg – “Après toi”"@en ,
+                    "Luxemburg – ”Après toi”"@sv ;
+    solid-memo:backNote "Performed by Vicky Leandros"@en ,
+                        "Framförd av Vicky Leandros"@sv .
+
+<#eurovision-1973>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1973"@en ,
+                     "Eurovision Song Contest 1973"@sv ;
+    solid-memo:back "Luxembourg – “Tu te reconnaîtras”"@en ,
+                    "Luxemburg – ”Tu te reconnaîtras”"@sv ;
+    solid-memo:backNote "Performed by Anne-Marie David"@en ,
+                        "Framförd av Anne-Marie David"@sv .
+
+<#eurovision-1974>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1974"@en ,
+                     "Eurovision Song Contest 1974"@sv ;
+    solid-memo:back "Sweden – “Waterloo”"@en ,
+                    "Sverige – ”Waterloo”"@sv ;
+    solid-memo:backNote "Performed by ABBA"@en ,
+                        "Framförd av Abba"@sv .
+
+<#eurovision-1975>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1975"@en ,
+                     "Eurovision Song Contest 1975"@sv ;
+    solid-memo:back "Netherlands – “Ding-a-dong”"@en ,
+                    "Nederländerna – ”Ding-a-dong”"@sv ;
+    solid-memo:backNote "Performed by Teach-In"@en ,
+                        "Framförd av Teach-In"@sv .
+
+<#eurovision-1976>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1976"@en ,
+                     "Eurovision Song Contest 1976"@sv ;
+    solid-memo:back "United Kingdom – “Save Your Kisses for Me”"@en ,
+                    "Storbritannien – ”Save Your Kisses for Me”"@sv ;
+    solid-memo:backNote "Performed by Brotherhood of Man"@en ,
+                        "Framförd av Brotherhood of Man"@sv .
+
+<#eurovision-1977>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1977"@en ,
+                     "Eurovision Song Contest 1977"@sv ;
+    solid-memo:back "France – “L’oiseau et l’enfant”"@en ,
+                    "Frankrike – ”L’oiseau et l’enfant”"@sv ;
+    solid-memo:backNote "Performed by Marie Myriam"@en ,
+                        "Framförd av Marie Myriam"@sv .
+
+<#eurovision-1978>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1978"@en ,
+                     "Eurovision Song Contest 1978"@sv ;
+    solid-memo:back "Israel – “A-Ba-Ni-Bi”"@en ,
+                    "Israel – ”A-Ba-Ni-Bi”"@sv ;
+    solid-memo:backNote "Performed by Izhar Cohen and the Alphabeta"@en ,
+                        "Framförd av Izhar Cohen och Alphabeta"@sv .
+
+<#eurovision-1979>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1979"@en ,
+                     "Eurovision Song Contest 1979"@sv ;
+    solid-memo:back "Israel – “Hallelujah”"@en ,
+                    "Israel – ”Hallelujah”"@sv ;
+    solid-memo:backNote "Performed by Gali Atari and Milk and Honey"@en ,
+                        "Framförd av Gali Atari och Milk and Honey"@sv .
+
+<#eurovision-1980>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1980"@en ,
+                     "Eurovision Song Contest 1980"@sv ;
+    solid-memo:back "Ireland – “What’s Another Year?”"@en ,
+                    "Irland – ”What’s Another Year?”"@sv ;
+    solid-memo:backNote "Performed by Johnny Logan"@en ,
+                        "Framförd av Johnny Logan"@sv .
+
+<#eurovision-1981>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1981"@en ,
+                     "Eurovision Song Contest 1981"@sv ;
+    solid-memo:back "United Kingdom – “Making Your Mind Up”"@en ,
+                    "Storbritannien – ”Making Your Mind Up”"@sv ;
+    solid-memo:backNote "Performed by Bucks Fizz"@en ,
+                        "Framförd av Bucks Fizz"@sv .
+
+<#eurovision-1982>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1982"@en ,
+                     "Eurovision Song Contest 1982"@sv ;
+    solid-memo:back "West Germany – “Ein bißchen Frieden”"@en ,
+                    "Västtyskland – ”Ein bißchen Frieden”"@sv ;
+    solid-memo:backNote "Performed by Nicole; West Germany competed under the name “Germany”"@en ,
+                        "Framförd av Nicole; Västtyskland tävlade under namnet ”Tyskland”"@sv .
+
+<#eurovision-1983>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1983"@en ,
+                     "Eurovision Song Contest 1983"@sv ;
+    solid-memo:back "Luxembourg – “Si la vie est cadeau”"@en ,
+                    "Luxemburg – ”Si la vie est cadeau”"@sv ;
+    solid-memo:backNote "Performed by Corinne Hermès"@en ,
+                        "Framförd av Corinne Hermès"@sv .
+
+<#eurovision-1984>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1984"@en ,
+                     "Eurovision Song Contest 1984"@sv ;
+    solid-memo:back "Sweden – “Diggi-Loo Diggi-Ley”"@en ,
+                    "Sverige – ”Diggi-Loo Diggi-Ley”"@sv ;
+    solid-memo:backNote "Performed by Herreys"@en ,
+                        "Framförd av Herreys"@sv .
+
+<#eurovision-1985>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1985"@en ,
+                     "Eurovision Song Contest 1985"@sv ;
+    solid-memo:back "Norway – “La det swinge”"@en ,
+                    "Norge – ”La det swinge”"@sv ;
+    solid-memo:backNote "Performed by Bobbysocks"@en ,
+                        "Framförd av Bobbysocks"@sv .
+
+<#eurovision-1986>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1986"@en ,
+                     "Eurovision Song Contest 1986"@sv ;
+    solid-memo:back "Belgium – “J’aime la vie”"@en ,
+                    "Belgien – ”J’aime la vie”"@sv ;
+    solid-memo:backNote "Performed by Sandra Kim"@en ,
+                        "Framförd av Sandra Kim"@sv .
+
+<#eurovision-1987>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1987"@en ,
+                     "Eurovision Song Contest 1987"@sv ;
+    solid-memo:back "Ireland – “Hold Me Now”"@en ,
+                    "Irland – ”Hold Me Now”"@sv ;
+    solid-memo:backNote "Performed by Johnny Logan"@en ,
+                        "Framförd av Johnny Logan"@sv .
+
+<#eurovision-1988>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1988"@en ,
+                     "Eurovision Song Contest 1988"@sv ;
+    solid-memo:back "Switzerland – “Ne partez pas sans moi”"@en ,
+                    "Schweiz – ”Ne partez pas sans moi”"@sv ;
+    solid-memo:backNote "Performed by Céline Dion"@en ,
+                        "Framförd av Céline Dion"@sv .
+
+<#eurovision-1989>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1989"@en ,
+                     "Eurovision Song Contest 1989"@sv ;
+    solid-memo:back "Yugoslavia – “Rock Me”"@en ,
+                    "Jugoslavien – ”Rock Me”"@sv ;
+    solid-memo:backNote "Performed by Riva"@en ,
+                        "Framförd av Riva"@sv .
+
+<#eurovision-1990>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1990"@en ,
+                     "Eurovision Song Contest 1990"@sv ;
+    solid-memo:back "Italy – “Insieme: 1992”"@en ,
+                    "Italien – ”Insieme: 1992”"@sv ;
+    solid-memo:backNote "Performed by Toto Cutugno"@en ,
+                        "Framförd av Toto Cutugno"@sv .
+
+<#eurovision-1991>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1991"@en ,
+                     "Eurovision Song Contest 1991"@sv ;
+    solid-memo:back "Sweden – “Fångad av en stormvind”"@en ,
+                    "Sverige – ”Fångad av en stormvind”"@sv ;
+    solid-memo:backNote "Performed by Carola"@en ,
+                        "Framförd av Carola"@sv .
+
+<#eurovision-1992>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1992"@en ,
+                     "Eurovision Song Contest 1992"@sv ;
+    solid-memo:back "Ireland – “Why Me?”"@en ,
+                    "Irland – ”Why Me?”"@sv ;
+    solid-memo:backNote "Performed by Linda Martin"@en ,
+                        "Framförd av Linda Martin"@sv .
+
+<#eurovision-1993>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1993"@en ,
+                     "Eurovision Song Contest 1993"@sv ;
+    solid-memo:back "Ireland – “In Your Eyes”"@en ,
+                    "Irland – ”In Your Eyes”"@sv ;
+    solid-memo:backNote "Performed by Niamh Kavanagh"@en ,
+                        "Framförd av Niamh Kavanagh"@sv .
+
+<#eurovision-1994>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1994"@en ,
+                     "Eurovision Song Contest 1994"@sv ;
+    solid-memo:back "Ireland – “Rock ’n’ Roll Kids”"@en ,
+                    "Irland – ”Rock ’n’ Roll Kids”"@sv ;
+    solid-memo:backNote "Performed by Paul Harrington and Charlie McGettigan"@en ,
+                        "Framförd av Paul Harrington och Charlie McGettigan"@sv .
+
+<#eurovision-1995>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1995"@en ,
+                     "Eurovision Song Contest 1995"@sv ;
+    solid-memo:back "Norway – “Nocturne”"@en ,
+                    "Norge – ”Nocturne”"@sv ;
+    solid-memo:backNote "Performed by Secret Garden"@en ,
+                        "Framförd av Secret Garden"@sv .
+
+<#eurovision-1996>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1996"@en ,
+                     "Eurovision Song Contest 1996"@sv ;
+    solid-memo:back "Ireland – “The Voice”"@en ,
+                    "Irland – ”The Voice”"@sv ;
+    solid-memo:backNote "Performed by Eimear Quinn"@en ,
+                        "Framförd av Eimear Quinn"@sv .
+
+<#eurovision-1997>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1997"@en ,
+                     "Eurovision Song Contest 1997"@sv ;
+    solid-memo:back "United Kingdom – “Love Shine a Light”"@en ,
+                    "Storbritannien – ”Love Shine a Light”"@sv ;
+    solid-memo:backNote "Performed by Katrina and the Waves"@en ,
+                        "Framförd av Katrina and the Waves"@sv .
+
+<#eurovision-1998>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1998"@en ,
+                     "Eurovision Song Contest 1998"@sv ;
+    solid-memo:back "Israel – “Diva”"@en ,
+                    "Israel – ”Diva”"@sv ;
+    solid-memo:backNote "Performed by Dana International"@en ,
+                        "Framförd av Dana International"@sv .
+
+<#eurovision-1999>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 1999"@en ,
+                     "Eurovision Song Contest 1999"@sv ;
+    solid-memo:back "Sweden – “Take Me to Your Heaven”"@en ,
+                    "Sverige – ”Take Me to Your Heaven”"@sv ;
+    solid-memo:backNote "Performed by Charlotte Nilsson"@en ,
+                        "Framförd av Charlotte Nilsson"@sv .
+
+<#eurovision-2000>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 2000"@en ,
+                     "Eurovision Song Contest 2000"@sv ;
+    solid-memo:back "Denmark – “Fly on the Wings of Love”"@en ,
+                    "Danmark – ”Fly on the Wings of Love”"@sv ;
+    solid-memo:backNote "Performed by Olsen Brothers"@en ,
+                        "Framförd av Olsen Brothers"@sv .
+
+<#eurovision-2001>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 2001"@en ,
+                     "Eurovision Song Contest 2001"@sv ;
+    solid-memo:back "Estonia – “Everybody”"@en ,
+                    "Estland – ”Everybody”"@sv ;
+    solid-memo:backNote "Performed by Tanel Padar, Dave Benton and 2XL"@en ,
+                        "Framförd av Tanel Padar, Dave Benton och 2XL"@sv .
+
+<#eurovision-2002>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 2002"@en ,
+                     "Eurovision Song Contest 2002"@sv ;
+    solid-memo:back "Latvia – “I Wanna”"@en ,
+                    "Lettland – ”I Wanna”"@sv ;
+    solid-memo:backNote "Performed by Marie N"@en ,
+                        "Framförd av Marie N"@sv .
+
+<#eurovision-2003>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 2003"@en ,
+                     "Eurovision Song Contest 2003"@sv ;
+    solid-memo:back "Turkey – “Everyway That I Can”"@en ,
+                    "Turkiet – ”Everyway That I Can”"@sv ;
+    solid-memo:backNote "Performed by Sertab Erener"@en ,
+                        "Framförd av Sertab Erener"@sv .
+
+<#eurovision-2004>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 2004"@en ,
+                     "Eurovision Song Contest 2004"@sv ;
+    solid-memo:back "Ukraine – “Wild Dances”"@en ,
+                    "Ukraina – ”Wild Dances”"@sv ;
+    solid-memo:backNote "Performed by Ruslana"@en ,
+                        "Framförd av Ruslana"@sv .
+
+<#eurovision-2005>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 2005"@en ,
+                     "Eurovision Song Contest 2005"@sv ;
+    solid-memo:back "Greece – “My Number One”"@en ,
+                    "Grekland – ”My Number One”"@sv ;
+    solid-memo:backNote "Performed by Helena Paparizou"@en ,
+                        "Framförd av Helena Paparizou"@sv .
+
+<#eurovision-2006>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 2006"@en ,
+                     "Eurovision Song Contest 2006"@sv ;
+    solid-memo:back "Finland – “Hard Rock Hallelujah”"@en ,
+                    "Finland – ”Hard Rock Hallelujah”"@sv ;
+    solid-memo:backNote "Performed by Lordi"@en ,
+                        "Framförd av Lordi"@sv .
+
+<#eurovision-2007>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 2007"@en ,
+                     "Eurovision Song Contest 2007"@sv ;
+    solid-memo:back "Serbia – “Molitva”"@en ,
+                    "Serbien – ”Molitva”"@sv ;
+    solid-memo:backNote "Performed by Marija Šerifović"@en ,
+                        "Framförd av Marija Šerifović"@sv .
+
+<#eurovision-2008>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 2008"@en ,
+                     "Eurovision Song Contest 2008"@sv ;
+    solid-memo:back "Russia – “Believe”"@en ,
+                    "Ryssland – ”Believe”"@sv ;
+    solid-memo:backNote "Performed by Dima Bilan"@en ,
+                        "Framförd av Dima Bilan"@sv .
+
+<#eurovision-2009>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 2009"@en ,
+                     "Eurovision Song Contest 2009"@sv ;
+    solid-memo:back "Norway – “Fairytale”"@en ,
+                    "Norge – ”Fairytale”"@sv ;
+    solid-memo:backNote "Performed by Alexander Rybak"@en ,
+                        "Framförd av Alexander Rybak"@sv .
+
+<#eurovision-2010>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 2010"@en ,
+                     "Eurovision Song Contest 2010"@sv ;
+    solid-memo:back "Germany – “Satellite”"@en ,
+                    "Tyskland – ”Satellite”"@sv ;
+    solid-memo:backNote "Performed by Lena"@en ,
+                        "Framförd av Lena"@sv .
+
+<#eurovision-2011>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 2011"@en ,
+                     "Eurovision Song Contest 2011"@sv ;
+    solid-memo:back "Azerbaijan – “Running Scared”"@en ,
+                    "Azerbajdzjan – ”Running Scared”"@sv ;
+    solid-memo:backNote "Performed by Ell & Nikki"@en ,
+                        "Framförd av Ell & Nikki"@sv .
+
+<#eurovision-2012>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 2012"@en ,
+                     "Eurovision Song Contest 2012"@sv ;
+    solid-memo:back "Sweden – “Euphoria”"@en ,
+                    "Sverige – ”Euphoria”"@sv ;
+    solid-memo:backNote "Performed by Loreen"@en ,
+                        "Framförd av Loreen"@sv .
+
+<#eurovision-2013>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 2013"@en ,
+                     "Eurovision Song Contest 2013"@sv ;
+    solid-memo:back "Denmark – “Only Teardrops”"@en ,
+                    "Danmark – ”Only Teardrops”"@sv ;
+    solid-memo:backNote "Performed by Emmelie de Forest"@en ,
+                        "Framförd av Emmelie de Forest"@sv .
+
+<#eurovision-2014>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 2014"@en ,
+                     "Eurovision Song Contest 2014"@sv ;
+    solid-memo:back "Austria – “Rise Like a Phoenix”"@en ,
+                    "Österrike – ”Rise Like a Phoenix”"@sv ;
+    solid-memo:backNote "Performed by Conchita Wurst"@en ,
+                        "Framförd av Conchita Wurst"@sv .
+
+<#eurovision-2015>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 2015"@en ,
+                     "Eurovision Song Contest 2015"@sv ;
+    solid-memo:back "Sweden – “Heroes”"@en ,
+                    "Sverige – ”Heroes”"@sv ;
+    solid-memo:backNote "Performed by Måns Zelmerlöw"@en ,
+                        "Framförd av Måns Zelmerlöw"@sv .
+
+<#eurovision-2016>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 2016"@en ,
+                     "Eurovision Song Contest 2016"@sv ;
+    solid-memo:back "Ukraine – “1944”"@en ,
+                    "Ukraina – ”1944”"@sv ;
+    solid-memo:backNote "Performed by Jamala"@en ,
+                        "Framförd av Jamala"@sv .
+
+<#eurovision-2017>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 2017"@en ,
+                     "Eurovision Song Contest 2017"@sv ;
+    solid-memo:back "Portugal – “Amar pelos dois”"@en ,
+                    "Portugal – ”Amar pelos dois”"@sv ;
+    solid-memo:backNote "Performed by Salvador Sobral"@en ,
+                        "Framförd av Salvador Sobral"@sv .
+
+<#eurovision-2018>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 2018"@en ,
+                     "Eurovision Song Contest 2018"@sv ;
+    solid-memo:back "Israel – “Toy”"@en ,
+                    "Israel – ”Toy”"@sv ;
+    solid-memo:backNote "Performed by Netta"@en ,
+                        "Framförd av Netta"@sv .
+
+<#eurovision-2019>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 2019"@en ,
+                     "Eurovision Song Contest 2019"@sv ;
+    solid-memo:back "Netherlands – “Arcade”"@en ,
+                    "Nederländerna – ”Arcade”"@sv ;
+    solid-memo:backNote "Performed by Duncan Laurence"@en ,
+                        "Framförd av Duncan Laurence"@sv .
+
+<#eurovision-2021>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 2021"@en ,
+                     "Eurovision Song Contest 2021"@sv ;
+    solid-memo:back "Italy – “Zitti e buoni”"@en ,
+                    "Italien – ”Zitti e buoni”"@sv ;
+    solid-memo:backNote "Performed by Måneskin"@en ,
+                        "Framförd av Måneskin"@sv .
+
+<#eurovision-2022>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 2022"@en ,
+                     "Eurovision Song Contest 2022"@sv ;
+    solid-memo:back "Ukraine – “Stefania”"@en ,
+                    "Ukraina – ”Stefania”"@sv ;
+    solid-memo:backNote "Performed by Kalush Orchestra"@en ,
+                        "Framförd av Kalush Orchestra"@sv .
+
+<#eurovision-2023>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 2023"@en ,
+                     "Eurovision Song Contest 2023"@sv ;
+    solid-memo:back "Sweden – “Tattoo”"@en ,
+                    "Sverige – ”Tattoo”"@sv ;
+    solid-memo:backNote "Performed by Loreen"@en ,
+                        "Framförd av Loreen"@sv .
+
+<#eurovision-2024>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 2024"@en ,
+                     "Eurovision Song Contest 2024"@sv ;
+    solid-memo:back "Switzerland – “The Code”"@en ,
+                    "Schweiz – ”The Code”"@sv ;
+    solid-memo:backNote "Performed by Nemo"@en ,
+                        "Framförd av Nemo"@sv .
+
+<#eurovision-2025>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 2025"@en ,
+                     "Eurovision Song Contest 2025"@sv ;
+    solid-memo:back "Austria – “Wasted Love”"@en ,
+                    "Österrike – ”Wasted Love”"@sv ;
+    solid-memo:backNote "Performed by JJ"@en ,
+                        "Framförd av JJ"@sv .
+
+<#eurovision-2026>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurovision Song Contest 2026"@en ,
+                     "Eurovision Song Contest 2026"@sv ;
+    solid-memo:back "Bulgaria – “Bangaranga”"@en ,
+                    "Bulgarien – ”Bangaranga”"@sv ;
+    solid-memo:backNote "Performed by Dara"@en ,
+                        "Framförd av Dara"@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

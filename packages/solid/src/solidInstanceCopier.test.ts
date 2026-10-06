@@ -95,7 +95,7 @@ describe("copyResource", () => {
         mockSolidDatasetFrom(`${FROM}catalog.ttl`),
         buildThing(createThing({ url: `${FROM}catalog.ttl#deck-1` }))
           .addIri(`${SM}cardsDocument`, `${FROM}decks/deck-1.ttl`)
-          .addIri("http://www.w3.org/ns/prov#wasDerivedFrom", "https://solid-memo.com/decks/capitals/1.ttl")
+          .addIri("http://www.w3.org/ns/prov#wasDerivedFrom", "https://solid-memo.com/decks/capitals/v1.ttl")
           .addDatetime("http://purl.org/dc/terms/created", new Date("2026-09-21T10:00:00.000Z"))
           .build(),
       ) as never,
@@ -107,7 +107,7 @@ describe("copyResource", () => {
     expect(getThing(saved as SolidDataset, `${FROM}catalog.ttl#deck-1`)).toBeNull();
     const deck = getThing(saved as SolidDataset, `${TO}catalog.ttl#deck-1`)!;
     expect(getUrl(deck, `${SM}cardsDocument`)).toBe(`${TO}decks/deck-1.ttl`);
-    expect(getUrl(deck, "http://www.w3.org/ns/prov#wasDerivedFrom")).toBe("https://solid-memo.com/decks/capitals/1.ttl");
+    expect(getUrl(deck, "http://www.w3.org/ns/prov#wasDerivedFrom")).toBe("https://solid-memo.com/decks/capitals/v1.ttl");
     expect(getDatetime(deck, "http://purl.org/dc/terms/created")?.toISOString()).toBe("2026-09-21T10:00:00.000Z");
   });
 

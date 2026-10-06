@@ -1,0 +1,1168 @@
+@base <https://solid-memo.com/decks/finnish-basics/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Basic Finnish"@en ,
+                  "Grundläggande finska"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "120 basic Finnish words and phrases for beginners: the numbers 0–20, the tens and 100, the days of the week, the months, eight colours, family members, greetings and polite phrases, everyday nouns, six adjectives and 16 verbs in their dictionary form (the first infinitive). The front shows the Finnish word; the back gives its English and Swedish meaning, or the digits for a number. Words come from Wikidata's lexemes and items and the US Foreign Service Institute's Conversational Finnish (public domain); meanings from Wikidata or the authors, checked against Kotus's Nykysuomen sanalista (single words), English and Swedish Wiktionary, and Folkets lexikon (the English and Swedish)."@en ,
+                        "120 grundläggande finska ord och fraser för nybörjare: talen 0–20, tiotalen och 100, veckodagarna, månaderna, åtta färger, familjemedlemmar, hälsningar och artighetsfraser, vardagliga substantiv, sex adjektiv och 16 verb i grundform (första infinitiven). Framsidan visar det finska ordet; baksidan ger betydelsen på engelska och svenska, eller siffrorna för ett tal. Orden kommer från Wikidatas lexem och objekt och amerikanska Foreign Service Institutes Conversational Finnish (fri från upphovsrätt); betydelserna från Wikidata eller författarna, kontrollerade mot Institutet för de inhemska språkens (Kotus) Nykysuomen sanalista (enstaka ord), engelska och svenska Wiktionary samt Folkets lexikon (engelskan och svenskan)."@sv ;
+    prov:wasDerivedFrom <https://www.wikidata.org/> ,
+                        <https://archive.org/details/Fsi-ConversationalFinnish-StudentText> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:languages ,
+               topic:finnish ;
+    dcat:keyword "Finnish"@en ,
+                 "vocabulary"@en ,
+                 "beginners"@en ,
+                 "phrases"@en ,
+                 "finska"@sv ,
+                 "ordförråd"@sv ,
+                 "nybörjare"@sv ,
+                 "fraser"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/FIN> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#finnish-basics> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#finnish-basics> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/2.5/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/licenses/by/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/mark/1.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/> ,
+              <https://archive.org/details/Fsi-ConversationalFinnish-StudentText> ,
+              <https://kotus.fi/sanakirjat/kielitoimiston-sanakirja/nykysuomen-sana-aineistot/nykysuomen-sanalista/> ,
+              <https://en.wiktionary.org/> ,
+              <https://sv.wiktionary.org/> ,
+              <https://folkets-lexikon.csc.kth.se/folkets/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ,
+                       <#review-6> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Word list. A candidate list of 120 words and phrases for a first Finnish course was drawn up by hand from the brief's categories (numbers 0–20, the tens and 100; days; months; colours; family; greetings and polite phrases; everyday nouns; adjectives; verbs), choosing the most basic word for each concept and following the library's first French deck where the languages allow. No frequency list or textbook word list was copied."@en ,
+                 "Wikidata lexemes. SPARQL query 1 fetched every Finnish lexeme (language Q1412) whose lemma is one of 124 candidate words (the 120 cards and four alternatives: sisar, moi, terve, nähdään), with its category, senses, English and Finnish glosses and sense items (P5137). It found 82 lexemes for 79 candidates (the 78 cards that cite a lexeme, and sisar). The lexeme search (API calls 2) for the 45 candidates not found returned no Finnish lexeme with any of these lemmas, only longer Finnish words (harmaakaihi L1574405, ystävätär L1567516, vanhainkoti L1465920) and the idiom hyvää päivää kirvesvartta (L592108), none of which is the word on the card. The full JSON of the lexemes found was fetched with API calls 3, and the lexemes that their translation statements (P5972) point to with API calls 4. Where two lexemes share a lemma, both are cited (yksi: L411314 and L1567518; sisko is cited with sisar, L31796); for kaksi and neljä the numeral lexemes (L1568610, L1568611) were used."@en ,
+                 "Wikidata items. The items linked from the chosen senses, the number items 0–100 (the same items as the French deck's), and items found with the item search in Finnish and English (API calls 6 and 7: e.g. kiitos Q17249274, tervetuloa Q13109234, kyllä Q6452715, ruskea Q47071, isoisä Q9238344, isoäiti Q9235758, maito Q8495, hello Q12068060, good evening Q19279366, goodbye Q2506912) were fetched with API calls 5 (labels, aliases and descriptions in fi, en, sv and mul). They gave the Finnish word where no lexeme exists (the numbers 0 and 11–90 as fi aliases, five colours, grandparents, kiitos, tervetuloa, kyllä, milk, window, street, friend and iso as an alias of Q12935276), and the English and Swedish names of days, months, colours, family members, some greetings and everyday things. A SPARQL query for the number items by numeric value (query 8) returned nothing and was not used; the number items were taken by their ids."@en ,
+                 "Phrases from the FSI course. For the greetings and polite phrases with no Wikidata lexeme or Finnish label, the Internet Archive was searched for public-domain US Government Finnish courses (call 9). It found the Foreign Service Institute's Conversational Finnish (1987), whose textbook OCR text was downloaded (call 10). Hyvää huomenta, hyvää päivää, hyvää iltaa and tervetuloa come from the Unit I list \"Greetings when meeting\"; hyvää yötä, näkemiin and hei (in hei sitten) from \"Greetings when departing\"; ole hyvä (olkaa hyvä/ole hyvä) and anteeksi from \"Other courtesy forms\". In these lists the Finnish and the English are printed in separate columns, which the OCR text gives one after the other; they were read in order. Dialogue lines that give a phrase and its English on one line (Hyvää päivää. Good day.; Näkemiin, rouva Virtanen. Good bye, Mrs. Virtanen.; Kiitos kyllä … Yes, please.) were found with grep and Python scripts that print the matching lines with their context (call 11). The OCR text has no ä or ö; the spelling on the cards comes from Kotus's word list and from Wiktionary. Unit and page numbers in the evidence come from the page markers printed in the OCR text (II-47, III-20, …)."@en ,
+                 "Writing the cards. The front is the Finnish word as in the lexeme's lemma, the item's Finnish label or alias, or FSI's phrase, in lower case (Finnish writes days, months and greetings in lower case). Nouns and adjectives are in the nominative singular, verbs in the first infinitive (the dictionary form). The back is the authors' own short English and Swedish rendering of the main sense: for nouns the bare noun, for verbs the infinitive (English \"to …\", Swedish \"att …\"), for numbers the digits (tagged zxx, as digits are in no language). English and Swedish follow the Wikidata labels where an item has them; otherwise they are the usual equivalents, chosen by the authors and checked in English Wiktionary, Swedish Wiktionary and Folkets lexikon. Where a Finnish word has two everyday English or Swedish equivalents both are given (poika: son, boy; käsi: hand, arm; mennä: gå, åka; hyvä: bra, god; anteeksi: excuse me, sorry). Swedish greetings are written as two words (god morgon, god dag, god kväll, god natt), as Swedish Wiktionary gives them. Rule for text not given by a content source: English and Swedish equivalents and the facts behind the notes come from the authors' own knowledge of the languages, are worded by the authors and are only confirmed in the verification sources; such single words and short facts of usage count as the authors' own content."@en ,
+                 "Notes. A short note was added where it helps a beginner and a source confirms it: kuusi also meaning spruce (with the front note \"number\"); the -toista and -kymmentä endings of the teens and tens (FSI's structural note on numerals); sisar beside sisko; tyttö for girl; the everyday vaari and ukki, mummo and mummu; hei when leaving; päivää for hyvää päivää; kuulemiin on the phone; kiitos kyllä; olkaa hyvä; joo and the answer by repeating the verb; ei as the negative verb; mies also meaning husband; suuri beside iso; minulla on for having; voida of health; lukea for studying; the Swedish gå and åka on mennä. Notes are the authors' own wording."@en ,
+                 "Cross-checking. Every single Finnish word was looked up in Kotus's Nykysuomen sanalista 2024 (call 13) for its spelling and word class. Every Finnish word and phrase was looked up in English Wiktionary's REST definitions (call 14, Finnish section) and in the Finnish section of Swedish Wiktionary (call 15); the first definitions are quoted in each card's evidence. Every Swedish word was checked in Folkets lexikon (call 16), English → Swedish, or Swedish → English when the first direction had no match. A Python script built the evidence lines from the responses saved during authoring, so each quote is what the source returned, with HTML, wiki markup and templates removed; quotations longer than 120 characters are cut and marked with \"…\". The raw responses and scripts were working files and are not published."@en ,
+                 "Dictionaries not used. The brief suggested checking the Finnish against the Kielitoimiston sanakirja. Kotus's list of open materials names the Nykysuomen sanalista, a word list built from the dictionary's headwords, as CC BY 4.0, but not the dictionary itself, and the dictionary's page on kotus.fi states no licence (it says only that the dictionary is free to use online). The dictionary was therefore not consulted; its CC BY 4.0 word list was used instead. SAOL and Svensk ordbok were not consulted either; Folkets lexikon and Swedish Wiktionary, whose licences allow automated use, verified the Swedish."@en ,
+                 "Machine checks. The dossier's Wikidata checks (the Finnish, English and Swedish label or alias of each linked item that matches the card's text, and the mul digit label of each number) are re-run against live Wikidata by the builder on every build. Wikidata lexemes cannot be checked by the builder (it checks items only); the lexeme facts in the evidence were read from the API responses of 4 October 2026. The built deck was validated with the app's SHACL and DCAT-AP validators (scripts/validate_sources.ts)."@en ,
+                 "Excluded: nähdään (see you; Wikidata has no lexeme and FSI has it only inside a sentence), the colloquial moi and terve (FSI gives them as Hi! and Hello!, but a beginner's deck keeps hei), the colloquial joo and kiitti (named in notes, not cards), purple and orange (violetti, purppura, lila; oranssi, oranssinvärinen: several competing words), tyttö (girl, named in the note on tytär), sisar (named in the note on sisko), suuri (named in the note on iso), and tietää/tuntea (both to know)."@en ,
+                 "Selection: 120 cards: the cardinal numbers 0–20, the tens 30–90 and 100 (29); the seven days of the week; the twelve months; eight colours (red, blue, green, yellow, black, white, grey, brown); eight family members (mother, father, brother, sister, son or boy, daughter, grandfather, grandmother); twelve greetings and polite phrases (hei, hyvää huomenta, hyvää päivää, hyvää iltaa, hyvää yötä, näkemiin, kiitos, ole hyvä, anteeksi, tervetuloa, kyllä, ei); 22 everyday nouns (house, water, bread, milk, apple, book, table, chair, door, window, dog, cat, town, street, school, man, woman, friend, hand, day, night, week); six common adjectives (iso, pieni, hyvä, huono, uusi, vanha); and 16 common verbs in the first infinitive (olla, mennä, tulla, tehdä, puhua, syödä, juoda, rakastaa, haluta, voida, nähdä, lukea, kirjoittaa, nukkua, asua, ymmärtää). Finnish has no verb \"to have\" (it says minulla on, \"at me is\"; see the note on olla), so asua and ymmärtää take the places of the French deck's avoir and travailler. The list was chosen by the deck's authors for a first course, not copied from any frequency list or textbook. Left out: nähdään, the colloquial moi, terve, joo and kiitti, purple and orange (several competing words), tyttö, sisar and suuri (named in notes), and tietää/tuntea. All words are standard Finnish as in Kotus's word list; days and months are in lower case, as Finnish writes them."@en ,
+                 "Licensing: The deck is CC0 1.0. Its content comes from two sources whose terms allow any reuse: Wikidata's lexemes and items (CC0 1.0: Finnish lemmas and labels, glosses, translations and English and Swedish labels) and the Foreign Service Institute's Conversational Finnish (1987), a work of the United States Government with no copyright protection under 17 U.S.C. § 105 (the greetings and polite phrases without a Wikidata entry, vanha, the number rule, and the facts behind several notes). The selection of words is the authors' own. The English and Swedish renderings not taken from Wikidata are the usual equivalents chosen by the authors; several of them are the same short stock glosses that English Wiktionary, Swedish Wiktionary or Folkets lexikon give, as the method says. Single words and fixed greetings such as \"good morning\" or \"varsågod\" are facts of usage, not protectable expression, so this does not carry those sources' licences into the deck; no definition, example, comment or list was taken from them. Kotus's Nykysuomen sanalista (CC BY 4.0), English and Swedish Wiktionary (CC BY-SA 4.0) and Folkets lexikon (CC BY-SA 2.5) were used for verification only. The Kielitoimiston sanakirja was not used, because no licence for reusing it could be found (method, step 9). So no source requires attribution or share-alike for the deck, although all are credited in its provenance. The quotations in this provenance report are not covered by the deck's CC0 dedication or the repository's MIT licence: quotations from the two Wiktionaries are © their contributors, CC BY-SA 4.0; quotations from Kotus's word list are CC BY 4.0 (© Kotimaisten kielten keskus); quotations from Folkets lexikon are CC BY-SA 2.5; quotations from the FSI course are in the public domain; Wikidata data is CC0."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Sources, licences and machine checks"@en ;
+    rdfs:comment "Scope: All 120 cards: every Finnish form, English and Swedish meaning and note against the content sources and the verification sources; the builder's Wikidata checks."@en ,
+                 "Outcome: Every card has evidence from a content source (Wikidata, or the FSI course for the greetings and polite phrases and for vanha) and at least two verification sources. Kotus's word list agrees with the spelling of every single Finnish word on the cards and in the notes; English Wiktionary and Swedish Wiktionary have every Finnish word and phrase on the cards with the meaning given; Folkets lexikon, Swedish Wiktionary or a Swedish Wikidata label confirms every Swedish back. The builder's Wikidata checks cover the Finnish, English and Swedish labels or aliases of 99 linked items on 97 cards (259 checks), including the digit label of every number; they all pass. Discrepancies between sources and how they were resolved are listed below."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 120 cards: Finnish fronts against Kotus's word list, the 259 Wikidata checks against live Wikidata, the FSI quotes against the OCR text, and Swedish backs against Folkets lexikon."@en ,
+                 "Outcome: No card was found wrong. One error (placeholder locator \"X\" on the FSI numeral evidence of 18 cards), one warning (the description overstated which sources checked every card) and four suggestions; all six were verified and applied."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 120 cards, the title, description and keywords: language tags, Swedish and English idiom, consistency of notes, study direction."@en ,
+                 "Outcome: No errors in language or tagging. One warning (the Swedish term for the negative verb) and four suggestions; all were verified and applied."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: Every source's licence page, the content/verification roles, the recorded queries and method, and the evidence of 32 cards against live sources; a script scan of all 120 cards."@en ,
+                 "Outcome: The CC0 licence holds: only Wikidata (CC0) and the FSI course (US Government work) are content sources. One error (the placeholder locator, also reported in round 1), three warnings and three suggestions; all but part of the last were applied."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The 26 cards changed in rounds 1–3 and every third card in dossier order (56 cards): all 259 Wikidata checks against live Wikidata, the cited lexemes, Kotus headwords, Wiktionary definitions, FSI OCR line references, the licence quotes, language tags, description and keywords, and whether every fix logged in rounds 1–3 is in the dossier."@en ,
+                 "Outcome: Every fix logged in rounds 1–3 was found in the dossier and all sampled facts, language tags and licence statements held. One warning: the koulu card's Folkets lexikon evidence cited the verb entry for \"school\"; it now cites the noun entry."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: koulu (changed in round 4) and every third card in dossier order, 41 cards: their Wikidata checks against live Wikidata, the cited lexemes, Kotus headwords and inflection codes, Wiktionary definitions, FSI OCR line references and quotes, Folkets entries, language tags, description, keywords, topics and the licence decision."@en ,
+                 "Outcome: All sampled facts, checks, language tags and metadata held, and the round 4 fix on koulu was confirmed. Two warnings and two suggestions were raised and all four were verified against the downloaded Folkets lexicon and FSI OCR text and fixed: haluta now cites the verb entry of \"want\", the FSI greetings and courtesy-forms quotes now give the OCR as printed, and the Folkets grep look-ups are recorded in query 16."@en .
+
+<#review-6>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: All 120 cards (Finnish spelling, English and Swedish meanings, notes, language tags, unambiguous fronts), the category counts against the description and selection, the deck metadata (first method paragraph, description length, keywords, study direction, licence) and whether every fix logged in round 5 is in the dossier."@en ,
+                 "Outcome: No card needed a change, and all four round 5 fixes were confirmed in the dossier. One suggestion, that the description's last sentence had no main verb in either language, was verified and fixed without lengthening the description."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata (Finnish lexemes and items)" ;
+    dcterms:creator "Wikidata contributors (Wikimedia Foundation)" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing (read with action=raw) — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://archive.org/details/Fsi-ConversationalFinnish-StudentText>
+    dcterms:title "Conversational Finnish / Suomea keskustellen (Foreign Service Institute, 1987), textbook as scanned on the Internet Archive (item \"FSI - Conversational Finnish - Student Text\")" ;
+    dcterms:creator "Aili Rytkonen-Bell (as the scan's OCR text spells it) and H. David Argoff, with the FSI School of Language Studies Finnish teaching staff; Foreign Service Institute, U.S. Department of State" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> ;
+    rdfs:comment "A work of the United States Government: the title page reads \"FOREIGN SERVICE INSTITUTE U.S. DEPARTMENT OF STATE\" and 1987, the introduction says \"Conversational Finnish is the work of the FSI School of Language Studies Finnish teaching staff\" and is signed \"Ambassador Raymond C Ewing, Dean, School of Language Studies, Foreign Service Institute, U.S. Department of State\", the last page carries the U.S. Government Printing Office imprint (\"U. S, GOVERNMENT PRINTING OfFICE ■ 1987\", as the OCR reads it), and the text carries no copyright notice. 17 U.S.C. § 105 (https://www.law.cornell.edu/uscode/text/17/105): \"Copyright protection under this title is not available for any work of the United States Government\". The Internet Archive item's metadata (https://archive.org/metadata/Fsi-ConversationalFinnish-StudentText) gives licenseurl \"http://creativecommons.org/licenses/publicdomain/\". Recorded here with the Public Domain Mark: free of known copyright."@en .
+
+<https://kotus.fi/sanakirjat/kielitoimiston-sanakirja/nykysuomen-sana-aineistot/nykysuomen-sanalista/>
+    dcterms:title "Nykysuomen sanalista 2024 (Kotimaisten kielten keskus, Institute for the Languages of Finland)" ;
+    dcterms:creator "Kotimaisten kielten keskus (Kotus)" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    rdfs:comment "https://kotus.fi/sanakirjat/kielitoimiston-sanakirja/nykysuomen-sana-aineistot/nykysuomen-sanalista/ — \"Sanalista julkaistaan lisenssillä Creative Commons Nimeä 4.0 Kansainvälinen (CC BY 4.0).\" The page also says the list is based on the headwords of the Kielitoimiston sanakirja (\"Kielitoimiston sanakirjan hakusanoihin perustuva, päivitettävä sanalista\") and links the file https://kaino.kotus.fi/lataa/nykysuomensanalista2024.txt (\"Nykysuomen sanalista 2024 (TXT, päivitetty 11.4.2025)\"). Kotus's list of open materials (https://kotus.fi/kotus/kieliaineistot/aineistot-verkossa/) names it as \"Nykysuomen sanalista (lisenssi CC BY 4.0)\"."@en .
+
+<https://en.wiktionary.org/>
+    dcterms:title "English Wiktionary (Finnish entries)" ;
+    dcterms:creator "Wiktionary contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://en.wiktionary.org/wiki/talo — page footer: \"Definitions and other text are available under the Creative Commons Attribution-ShareAlike License; additional terms may apply.\", linking to https://creativecommons.org/licenses/by-sa/4.0/."@en .
+
+<https://sv.wiktionary.org/>
+    dcterms:title "Swedish Wiktionary (Finnish entries)" ;
+    dcterms:creator "Wiktionary contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://sv.wiktionary.org/wiki/talo — page footer: \"Text är tillgänglig under licensen Creative Commons Erkännande-Dela Lika; ytterligare villkor kan gälla.\", linking to https://creativecommons.org/licenses/by-sa/4.0/deed.sv."@en .
+
+<https://folkets-lexikon.csc.kth.se/folkets/>
+    dcterms:title "Folkets lexikon (English–Swedish and Swedish–English)" ;
+    dcterms:creator "Viggo Kann and Joachim Hollman (Algoritmica HB) and the contributors of Folkets lexikon; hosted by KTH" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/2.5/> ;
+    rdfs:comment "https://folkets-lexikon.csc.kth.se/folkets/om.html — \"Både engelsk-svenska lexikonet och svensk-engelska lexikonet kan laddas ner i ett eget XML-format under Distributed Creative Commons Attribution-Share Alike 2.5 Generic license.\""@en .
+
+<#nolla>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "nolla"@fi ;
+    solid-memo:back "0"@zxx .
+
+<#yksi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "yksi"@fi ;
+    solid-memo:back "1"@zxx .
+
+<#kaksi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "kaksi"@fi ;
+    solid-memo:back "2"@zxx .
+
+<#kolme>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "kolme"@fi ;
+    solid-memo:back "3"@zxx .
+
+<#nelja>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "neljä"@fi ;
+    solid-memo:back "4"@zxx .
+
+<#viisi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "viisi"@fi ;
+    solid-memo:back "5"@zxx .
+
+<#kuusi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "kuusi"@fi ;
+    solid-memo:frontNote "number"@en ,
+                         "tal"@sv ;
+    solid-memo:back "6"@zxx ;
+    solid-memo:backNote "Kuusi also means spruce (the tree)."@en ,
+                        "Kuusi betyder också gran (trädet)."@sv .
+
+<#seitseman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "seitsemän"@fi ;
+    solid-memo:back "7"@zxx .
+
+<#kahdeksan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "kahdeksan"@fi ;
+    solid-memo:back "8"@zxx .
+
+<#yhdeksan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "yhdeksän"@fi ;
+    solid-memo:back "9"@zxx .
+
+<#kymmenen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "kymmenen"@fi ;
+    solid-memo:back "10"@zxx .
+
+<#yksitoista>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "yksitoista"@fi ;
+    solid-memo:back "11"@zxx ;
+    solid-memo:backNote "11–19 end in -toista, “of the second (ten)”: yksitoista, kaksitoista …"@en ,
+                        "11–19 slutar på -toista, ”av det andra (tiotalet)”: yksitoista, kaksitoista …"@sv .
+
+<#kaksitoista>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "kaksitoista"@fi ;
+    solid-memo:back "12"@zxx .
+
+<#kolmetoista>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "kolmetoista"@fi ;
+    solid-memo:back "13"@zxx .
+
+<#neljatoista>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "neljätoista"@fi ;
+    solid-memo:back "14"@zxx .
+
+<#viisitoista>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "viisitoista"@fi ;
+    solid-memo:back "15"@zxx .
+
+<#kuusitoista>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "kuusitoista"@fi ;
+    solid-memo:back "16"@zxx .
+
+<#seitsemantoista>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "seitsemäntoista"@fi ;
+    solid-memo:back "17"@zxx .
+
+<#kahdeksantoista>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "kahdeksantoista"@fi ;
+    solid-memo:back "18"@zxx .
+
+<#yhdeksantoista>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "yhdeksäntoista"@fi ;
+    solid-memo:back "19"@zxx .
+
+<#kaksikymmenta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "kaksikymmentä"@fi ;
+    solid-memo:back "20"@zxx ;
+    solid-memo:backNote "20–90 end in -kymmentä, “tens”: kaksikymmentä is “two tens”."@en ,
+                        "20–90 slutar på -kymmentä, ”tiotal”: kaksikymmentä är ”två tiotal”."@sv .
+
+<#kolmekymmenta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "kolmekymmentä"@fi ;
+    solid-memo:back "30"@zxx .
+
+<#neljakymmenta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "neljäkymmentä"@fi ;
+    solid-memo:back "40"@zxx .
+
+<#viisikymmenta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "viisikymmentä"@fi ;
+    solid-memo:back "50"@zxx .
+
+<#kuusikymmenta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "kuusikymmentä"@fi ;
+    solid-memo:back "60"@zxx .
+
+<#seitsemankymmenta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "seitsemänkymmentä"@fi ;
+    solid-memo:back "70"@zxx .
+
+<#kahdeksankymmenta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "kahdeksankymmentä"@fi ;
+    solid-memo:back "80"@zxx .
+
+<#yhdeksankymmenta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "yhdeksänkymmentä"@fi ;
+    solid-memo:back "90"@zxx .
+
+<#sata>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "sata"@fi ;
+    solid-memo:back "100"@zxx .
+
+<#maanantai>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "maanantai"@fi ;
+    solid-memo:back "Monday"@en ,
+                    "måndag"@sv .
+
+<#tiistai>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "tiistai"@fi ;
+    solid-memo:back "Tuesday"@en ,
+                    "tisdag"@sv .
+
+<#keskiviikko>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "keskiviikko"@fi ;
+    solid-memo:back "Wednesday"@en ,
+                    "onsdag"@sv .
+
+<#torstai>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "torstai"@fi ;
+    solid-memo:back "Thursday"@en ,
+                    "torsdag"@sv .
+
+<#perjantai>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "perjantai"@fi ;
+    solid-memo:back "Friday"@en ,
+                    "fredag"@sv .
+
+<#lauantai>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "lauantai"@fi ;
+    solid-memo:back "Saturday"@en ,
+                    "lördag"@sv .
+
+<#sunnuntai>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "sunnuntai"@fi ;
+    solid-memo:back "Sunday"@en ,
+                    "söndag"@sv .
+
+<#tammikuu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "tammikuu"@fi ;
+    solid-memo:back "January"@en ,
+                    "januari"@sv .
+
+<#helmikuu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "helmikuu"@fi ;
+    solid-memo:back "February"@en ,
+                    "februari"@sv .
+
+<#maaliskuu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "maaliskuu"@fi ;
+    solid-memo:back "March"@en ,
+                    "mars"@sv .
+
+<#huhtikuu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "huhtikuu"@fi ;
+    solid-memo:back "April"@en ,
+                    "april"@sv .
+
+<#toukokuu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "toukokuu"@fi ;
+    solid-memo:back "May"@en ,
+                    "maj"@sv .
+
+<#kesakuu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "kesäkuu"@fi ;
+    solid-memo:back "June"@en ,
+                    "juni"@sv .
+
+<#heinakuu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "heinäkuu"@fi ;
+    solid-memo:back "July"@en ,
+                    "juli"@sv .
+
+<#elokuu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "elokuu"@fi ;
+    solid-memo:back "August"@en ,
+                    "augusti"@sv .
+
+<#syyskuu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "syyskuu"@fi ;
+    solid-memo:back "September"@en ,
+                    "september"@sv .
+
+<#lokakuu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "lokakuu"@fi ;
+    solid-memo:back "October"@en ,
+                    "oktober"@sv .
+
+<#marraskuu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "marraskuu"@fi ;
+    solid-memo:back "November"@en ,
+                    "november"@sv .
+
+<#joulukuu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "joulukuu"@fi ;
+    solid-memo:back "December"@en ,
+                    "december"@sv .
+
+<#punainen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "punainen"@fi ;
+    solid-memo:back "red"@en ,
+                    "röd"@sv .
+
+<#sininen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "sininen"@fi ;
+    solid-memo:back "blue"@en ,
+                    "blå"@sv .
+
+<#vihrea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "vihreä"@fi ;
+    solid-memo:back "green"@en ,
+                    "grön"@sv .
+
+<#keltainen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "keltainen"@fi ;
+    solid-memo:back "yellow"@en ,
+                    "gul"@sv .
+
+<#musta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "musta"@fi ;
+    solid-memo:back "black"@en ,
+                    "svart"@sv .
+
+<#valkoinen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "valkoinen"@fi ;
+    solid-memo:back "white"@en ,
+                    "vit"@sv .
+
+<#harmaa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "harmaa"@fi ;
+    solid-memo:back "grey"@en ,
+                    "grå"@sv .
+
+<#ruskea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ruskea"@fi ;
+    solid-memo:back "brown"@en ,
+                    "brun"@sv .
+
+<#aiti>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "äiti"@fi ;
+    solid-memo:back "mother"@en ,
+                    "mor"@sv .
+
+<#isa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "isä"@fi ;
+    solid-memo:back "father"@en ,
+                    "far"@sv .
+
+<#veli>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "veli"@fi ;
+    solid-memo:back "brother"@en ,
+                    "bror"@sv .
+
+<#sisko>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "sisko"@fi ;
+    solid-memo:back "sister"@en ,
+                    "syster"@sv ;
+    solid-memo:backNote "Also sisar."@en ,
+                        "Även sisar."@sv .
+
+<#poika>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "poika"@fi ;
+    solid-memo:back "son, boy"@en ,
+                    "son, pojke"@sv .
+
+<#tytar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "tytär"@fi ;
+    solid-memo:back "daughter"@en ,
+                    "dotter"@sv ;
+    solid-memo:backNote "A girl is tyttö."@en ,
+                        "En flicka heter tyttö."@sv .
+
+<#isoisa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "isoisä"@fi ;
+    solid-memo:back "grandfather"@en ,
+                    "farfar, morfar"@sv ;
+    solid-memo:backNote "Everyday words include vaari and ukki."@en ,
+                        "Vardagliga ord är bland andra vaari och ukki."@sv .
+
+<#isoaiti>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "isoäiti"@fi ;
+    solid-memo:back "grandmother"@en ,
+                    "farmor, mormor"@sv ;
+    solid-memo:backNote "Everyday words include mummo and mummu."@en ,
+                        "Vardagliga ord är bland andra mummo och mummu."@sv .
+
+<#hei>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "hei"@fi ;
+    solid-memo:back "hi, hello"@en ,
+                    "hej"@sv ;
+    solid-memo:backNote "Also said when leaving: hei hei, hei sitten (bye)."@en ,
+                        "Sägs också vid avsked: hei hei, hei sitten (hej då)."@sv .
+
+<#hyvaa-huomenta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "hyvää huomenta"@fi ;
+    solid-memo:back "good morning"@en ,
+                    "god morgon"@sv .
+
+<#hyvaa-paivaa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "hyvää päivää"@fi ;
+    solid-memo:back "good day"@en ,
+                    "god dag"@sv ;
+    solid-memo:backNote "A polite daytime greeting, also rendered “how do you do”; often shortened to päivää."@en ,
+                        "En artig hälsning under dagen, på engelska även återgiven som ”how do you do”; ofta förkortad till päivää."@sv .
+
+<#hyvaa-iltaa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "hyvää iltaa"@fi ;
+    solid-memo:back "good evening"@en ,
+                    "god kväll"@sv .
+
+<#hyvaa-yota>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "hyvää yötä"@fi ;
+    solid-memo:back "good night"@en ,
+                    "god natt"@sv .
+
+<#nakemiin>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "näkemiin"@fi ;
+    solid-memo:back "goodbye"@en ,
+                    "adjö, hej då"@sv ;
+    solid-memo:backNote "On the phone: kuulemiin."@en ,
+                        "I telefon: kuulemiin."@sv .
+
+<#kiitos>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "kiitos"@fi ;
+    solid-memo:back "thank you, thanks"@en ,
+                    "tack"@sv ;
+    solid-memo:backNote "Also used to accept an offer: kiitos kyllä (yes, please)."@en ,
+                        "Används också för att tacka ja: kiitos kyllä (ja tack)."@sv .
+
+<#ole-hyva>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ole hyvä"@fi ;
+    solid-memo:back "here you are; you're welcome"@en ,
+                    "varsågod"@sv ;
+    solid-memo:backNote "To several people, or formally: olkaa hyvä."@en ,
+                        "Till flera personer, eller artigt: olkaa hyvä."@sv .
+
+<#anteeksi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "anteeksi"@fi ;
+    solid-memo:back "excuse me, sorry"@en ,
+                    "ursäkta, förlåt"@sv .
+
+<#tervetuloa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "tervetuloa"@fi ;
+    solid-memo:back "welcome"@en ,
+                    "välkommen"@sv .
+
+<#kylla>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "kyllä"@fi ;
+    solid-memo:back "yes"@en ,
+                    "ja"@sv ;
+    solid-memo:backNote "Everyday speech often says joo, or answers by repeating the verb of the question."@en ,
+                        "I vardagligt tal säger man ofta joo, eller svarar genom att upprepa frågans verb."@sv .
+
+<#ei>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ei"@fi ;
+    solid-memo:back "no"@en ,
+                    "nej"@sv ;
+    solid-memo:backNote "Ei is also the negative verb: en, et, ei … (I don't, you don't, he or she doesn't …)."@en ,
+                        "Ei är också negationsverbet: en, et, ei … (jag … inte, du … inte, han eller hon … inte …)."@sv .
+
+<#talo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "talo"@fi ;
+    solid-memo:back "house"@en ,
+                    "hus"@sv .
+
+<#vesi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "vesi"@fi ;
+    solid-memo:back "water"@en ,
+                    "vatten"@sv .
+
+<#leipa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "leipä"@fi ;
+    solid-memo:back "bread"@en ,
+                    "bröd"@sv .
+
+<#maito>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "maito"@fi ;
+    solid-memo:back "milk"@en ,
+                    "mjölk"@sv .
+
+<#omena>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "omena"@fi ;
+    solid-memo:back "apple"@en ,
+                    "äpple"@sv .
+
+<#kirja>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "kirja"@fi ;
+    solid-memo:back "book"@en ,
+                    "bok"@sv .
+
+<#poyta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "pöytä"@fi ;
+    solid-memo:back "table"@en ,
+                    "bord"@sv .
+
+<#tuoli>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "tuoli"@fi ;
+    solid-memo:back "chair"@en ,
+                    "stol"@sv .
+
+<#ovi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ovi"@fi ;
+    solid-memo:back "door"@en ,
+                    "dörr"@sv .
+
+<#ikkuna>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ikkuna"@fi ;
+    solid-memo:back "window"@en ,
+                    "fönster"@sv .
+
+<#koira>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "koira"@fi ;
+    solid-memo:back "dog"@en ,
+                    "hund"@sv .
+
+<#kissa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "kissa"@fi ;
+    solid-memo:back "cat"@en ,
+                    "katt"@sv .
+
+<#kaupunki>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "kaupunki"@fi ;
+    solid-memo:back "town, city"@en ,
+                    "stad"@sv .
+
+<#katu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "katu"@fi ;
+    solid-memo:back "street"@en ,
+                    "gata"@sv .
+
+<#koulu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "koulu"@fi ;
+    solid-memo:back "school"@en ,
+                    "skola"@sv .
+
+<#mies>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "mies"@fi ;
+    solid-memo:back "man"@en ,
+                    "man"@sv ;
+    solid-memo:backNote "Also husband: mieheni, my husband."@en ,
+                        "Också make: mieheni, min man."@sv .
+
+<#nainen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "nainen"@fi ;
+    solid-memo:back "woman"@en ,
+                    "kvinna"@sv .
+
+<#ystava>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ystävä"@fi ;
+    solid-memo:back "friend"@en ,
+                    "vän"@sv .
+
+<#kasi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "käsi"@fi ;
+    solid-memo:back "hand, arm"@en ,
+                    "hand, arm"@sv .
+
+<#paiva>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "päivä"@fi ;
+    solid-memo:back "day"@en ,
+                    "dag"@sv .
+
+<#yo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "yö"@fi ;
+    solid-memo:back "night"@en ,
+                    "natt"@sv .
+
+<#viikko>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "viikko"@fi ;
+    solid-memo:back "week"@en ,
+                    "vecka"@sv .
+
+<#iso>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "iso"@fi ;
+    solid-memo:back "big"@en ,
+                    "stor"@sv ;
+    solid-memo:backNote "Also suuri."@en ,
+                        "Även suuri."@sv .
+
+<#pieni>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "pieni"@fi ;
+    solid-memo:back "small, little"@en ,
+                    "liten"@sv .
+
+<#hyva>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "hyvä"@fi ;
+    solid-memo:back "good"@en ,
+                    "bra, god"@sv .
+
+<#huono>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "huono"@fi ;
+    solid-memo:back "bad"@en ,
+                    "dålig"@sv .
+
+<#uusi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "uusi"@fi ;
+    solid-memo:back "new"@en ,
+                    "ny"@sv .
+
+<#vanha>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "vanha"@fi ;
+    solid-memo:back "old"@en ,
+                    "gammal"@sv .
+
+<#olla>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "olla"@fi ;
+    solid-memo:back "to be"@en ,
+                    "att vara"@sv ;
+    solid-memo:backNote "Also used for having: minulla on, I have (literally: at me is)."@en ,
+                        "Används också för att ha: minulla on, jag har (ordagrant: hos mig är)."@sv .
+
+<#menna>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "mennä"@fi ;
+    solid-memo:back "to go"@en ,
+                    "att gå, att åka"@sv ;
+    solid-memo:backNote "In Swedish, gå is on foot and åka by vehicle."@en ,
+                        "Gå används till fots och åka med fordon."@sv .
+
+<#tulla>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "tulla"@fi ;
+    solid-memo:back "to come"@en ,
+                    "att komma"@sv .
+
+<#tehda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "tehdä"@fi ;
+    solid-memo:back "to do, to make"@en ,
+                    "att göra"@sv .
+
+<#puhua>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "puhua"@fi ;
+    solid-memo:back "to speak, to talk"@en ,
+                    "att tala, att prata"@sv .
+
+<#syoda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "syödä"@fi ;
+    solid-memo:back "to eat"@en ,
+                    "att äta"@sv .
+
+<#juoda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "juoda"@fi ;
+    solid-memo:back "to drink"@en ,
+                    "att dricka"@sv .
+
+<#rakastaa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "rakastaa"@fi ;
+    solid-memo:back "to love"@en ,
+                    "att älska"@sv .
+
+<#haluta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "haluta"@fi ;
+    solid-memo:back "to want"@en ,
+                    "att vilja"@sv .
+
+<#voida>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "voida"@fi ;
+    solid-memo:back "to be able to"@en ,
+                    "att kunna"@sv ;
+    solid-memo:backNote "Also of health: Kuinka voitte? (How are you feeling?)"@en ,
+                        "Också om hälsan: Kuinka voitte? (Hur mår ni?)"@sv .
+
+<#nahda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "nähdä"@fi ;
+    solid-memo:back "to see"@en ,
+                    "att se"@sv .
+
+<#lukea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "lukea"@fi ;
+    solid-memo:back "to read"@en ,
+                    "att läsa"@sv ;
+    solid-memo:backNote "Also to study, e.g. for an exam."@en ,
+                        "Också att studera, som svenskans läsa, till exempel inför ett prov."@sv .
+
+<#kirjoittaa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "kirjoittaa"@fi ;
+    solid-memo:back "to write"@en ,
+                    "att skriva"@sv .
+
+<#nukkua>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "nukkua"@fi ;
+    solid-memo:back "to sleep"@en ,
+                    "att sova"@sv .
+
+<#asua>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "asua"@fi ;
+    solid-memo:back "to live (in a place)"@en ,
+                    "att bo"@sv .
+
+<#ymmartaa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ymmärtää"@fi ;
+    solid-memo:back "to understand"@en ,
+                    "att förstå"@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

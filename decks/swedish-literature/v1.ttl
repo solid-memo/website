@@ -1,0 +1,720 @@
+@base <https://solid-memo.com/decks/swedish-literature/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Swedish Literature"@en ,
+                  "Svensk litteratur"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "60 works of Swedish literature and their authors, from Bellman's Fredman's Epistles (Fredmans epistlar, 1790) to the crime novels and bestsellers of the 21st century: novels, plays, poetry and children's books written in Swedish by Swedish authors. The works were chosen by how widely Wikimedia sites cover them and how often they have been published in Sweden (records in LIBRIS), at most three per author. Front: the title in Swedish and in English (the Swedish title for the four works with no English edition found); back: the author. Compiled from Wikidata and LIBRIS, the National Library of Sweden's catalogue, and checked against Wikipedia and Open Library."@en ,
+                        "60 verk ur den svenska litteraturen och deras författare, från Bellmans Fredmans epistlar (1790) till 2000-talets deckare och storsäljare: romaner, pjäser, poesi och barnböcker skrivna på svenska av svenska författare. Verken är utvalda efter hur många Wikimediawebbplatser som behandlar dem och hur ofta de har getts ut i Sverige (poster i LIBRIS), högst tre per författare. Framsida: titeln på svenska och på engelska (den svenska titeln för de fyra verk som inte har hittats i engelsk utgåva); baksida: författaren. Sammanställd från Wikidata och Kungliga bibliotekets katalog LIBRIS och kontrollerad mot Wikipedia och Open Library."@sv ;
+    prov:wasDerivedFrom <https://www.wikidata.org/wiki/Wikidata:Main_Page> ,
+                        <https://libris.kb.se/> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:literature ,
+               topic:swedish ;
+    dcat:keyword "Swedish literature"@en ,
+                 "novels"@en ,
+                 "authors"@en ,
+                 "children's books"@en ,
+                 "crime fiction"@en ,
+                 "svensk litteratur"@sv ,
+                 "romaner"@sv ,
+                 "författare"@sv ,
+                 "barnböcker"@sv ,
+                 "deckare"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#swedish-literature> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#swedish-literature> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/wiki/Wikidata:Main_Page> ,
+              <https://libris.kb.se/> ,
+              <https://openlibrary.org/> ,
+              <https://sv.wikipedia.org/> ,
+              <https://en.wikipedia.org/> ,
+              <https://litteraturbanken.se/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "1. Candidates (Wikidata, 2026-10-04). Four queries were combined: query 1 (<scratch>/pool2.py) takes every item in Swedish (P407 Q9027) or from Sweden (P495 Q34) whose author (P50) is a Swedish citizen (P27 Q34) and that at least 2 Wikimedia sites cover (wikibase:sitelinks ≥ 2): 722 items. Query 2 lists the Swedish citizens whose occupation (P106) is writer, novelist, poet, playwright or children's writer with at least 15 sitelinks (310 people) and query 3 every item they are the author of (7,400 items, of which those with ≥ 2 sitelinks were kept), which adds works without a language statement. Query 4 adds works whose author is a group (not a human) whose members (P527) are Swedish citizens: for some of the Martin Beck novels the query service lists only the partnership Sjöwall and Wahlöö (Q2342834) as author, and Hypnotisören has the pen name Lars Kepler (Q1806270). Together: 853 items."@en ,
+                 "2. Eligibility (script eligible.py). Dropped: 71 items whose type (P31) is not a single book (film, television, series of books or comics, songs, hymns and single poems, documents, manifestos, maps, scholarly articles and the like); 67 with a language statement that is not Swedish (Latin, English, German, French, Finnish …: Linnaeus's botanical works, Swedenborg, Munthe's The Story of San Michele, Peter Weiss's German plays, Strindberg's Inferno and En dåres försvarstal, written in French); 23 without a Swedish label; and 3 edition items duplicating a work (same Swedish label and authors). 689 works remained."@en ,
+                 "3. LIBRIS count (script libris_count.py). For each of the 689 works, LIBRIS was searched with the xsearch API, tit:\"<Swedish title>\" förf:<author's surname> (the Swedish label without a parenthesised disambiguator such as \"(roman)\"; the surname is the last word of the author's Swedish, mul or English label; for the two groups Sjöwall and Kepler), reading every result page of 200. A record counts when its language is Swedish (\"swe\"), its creator contains the surname and its title is the work's title alone or followed by a subtitle or statement (\" :\", \" /\", \" ;\", \",\", \".\"), case-insensitively. The count measures how often the work has been published and catalogued in Sweden (printed editions, reprints, e-books, audiobooks and talking books)."@en ,
+                 "4. Ranking (script rank.py). Each work's score is the geometric mean of its sitelinks and its LIBRIS count, √(sitelinks × records). Sitelinks measure how widely the work is known abroad; the LIBRIS count how much it has been published at home. Either alone gave a skewed list (see Quality control): sitelinks favour recent international bestsellers and give some classics few (Röda rummet and Hemsöborna have 8 sitelinks each, Utvandrarna 3), while LIBRIS counts favour nineteenth- and early twentieth-century works with many reprints. Works were taken in order of score, at most three per author (an author partnership counts as one author), until 60 were chosen; the 60th has score 9.2 (Jack: √(17 × 5)) and the next eligible work 9.1, so the cut falls between two values. Ties are broken by the LIBRIS count, then by item id."@en ,
+                 "5. Hand exclusions. Every work ranked above the cut was read for whether it is a work of fiction, poetry or drama written in Swedish. Three were excluded (see Selection): Olaus Magnus's Historia om de nordiska folken (a Latin work of history, in Swedish translation), Viktor Rydberg's Tomten (a single poem) and Lennart Nilsson's Ett barn blir till (photographic non-fiction)."@en ,
+                 "6. Swedish titles. The Swedish front is the work's Wikidata Swedish label, which on every card is also the title of the earliest dated Swedish-language LIBRIS record of the work (for Gösta Berlings saga a facsimile of the 1890 competition manuscript; the first edition is from 1891) (followed by a subtitle on some, e.g. \"Röda rummet : skildringar ur artist- och författarlifvet\", 1879). Singoalla's label is \"Singoalla (roman)\", with a disambiguator; the card uses \"Singoalla\", the title in LIBRIS."@en ,
+                 "7. English titles (script resolve.py, corrected by hand in quality-control rounds 1–2). Candidates, in order: the English Wikipedia article title (without a parenthesised disambiguator), the Wikidata English label and the Wikidata English aliases. A candidate is attested when LIBRIS has an English-language record, or Open Library an English-language work, by the author whose title is the candidate alone or with a subtitle, compared case- and accent-insensitively. The first attested candidate is the English front. Six fronts were then set by hand: \"Frithiof's Saga\" and \"The Markurells of Wadköping\" (English editions from 1833 and 2016 whose titles differ from Wikidata's English names only by an apostrophe or a leading article, which the comparison did not ignore); \"Sara Videbeck\" (the title of the English translation of Det går an, 1919, which had no candidate); \"Fredman's Epistles\" and \"Fredman's Songs\" (the Wikidata English labels and the names English Wikipedia gives; the two collections were published in English together as \"Fredman's Epistles & Songs\", 1977–1999); and \"Ronia, the Robber's Daughter\" (the title of the English editions of 1983, 1985 and 2010, a Wikidata English alias and the name in the English Wikipedia lead, rather than the \"Ronja\" spelling of one 2018 edition and of the article title). Nine cards show the Swedish title on the English side: five because their English editions keep it (Kallocain 1966, Singoalla 1903, Aniara 1963, Roseanna 1967, Barabbas 1951: LIBRIS English-language records and Open Library works, on each card), four because no English edition was found in LIBRIS or Open Library (Ondskan, Kattresan, Svinalängorna, Jack). The English title is a fact about a published edition; on every card with an English title it is backed by a LIBRIS record, an Open Library work or both (see each card's evidence), except Fredman's Epistles and Fredman's Songs: their English names are the Wikidata English labels, and the texts were published in English only together, as Fredman's Epistles & Songs (LIBRIS also has Peter Dahl's lithographs, \"Fredman's epistles : lithographs\", 1984). The four Swedish-only fronts have no English edition."@en ,
+                 "8. Authors. The back is the author's Wikidata English and Swedish label (or mul label where a language has none: August Strindberg and Hjalmar Söderberg have no English label, Esaias Tegnér no Swedish label); all are written the same in both languages. The four Martin Beck novels' author is the partnership Sjöwall and Wahlöö (Q2342834, P527 Maj Sjöwall Q264855 and Per Wahlöö Q553730); the back names both people, \"Maj Sjöwall and Per Wahlöö\" / \"Maj Sjöwall och Per Wahlöö\", as LIBRIS and the Wikipedia leads do. Hypnotisören's author is the pen name Lars Kepler (Q1806270), which is the name on the book; a note names the two writers behind it (P527)."@en ,
+                 "9. Cross-checks. For every card with a Swedish Wikipedia article (59 works; Det som inte dödar oss has none) its lead and, where there is one (56 works), the English Wikipedia article linked from Wikidata was fetched with the MediaWiki API; a script checked that each lead contains the author's surname (all do). The LIBRIS Swedish records confirm title and author (the creator heading of each counted record contains the surname). The evidence on every card was generated by make_cards.py from the saved responses, not typed by hand; the scripts are not published, their rules are the ones above, and Selection lists the works just below the cut and those left out by the per-author cap with their scores."@en ,
+                 "10. Machine checks: 371 Wikidata checks run by the builder against live Wikidata: on every card the author (P50; the group item for the partnerships), the language Swedish (P407 Q9027), the Swedish title as sv label (all but Singoalla), the English-side front as en label or alias where it is one (54 cards: the title of the English edition, the English name of Bellman's two collections, and on Kattresan, Svinalängorna and Jack the Swedish title, which is also their en label; the en label checks on Kallocain, Singoalla, Aniara, Roseanna and Barabbas were added in quality-control round 4, those on Kattresan, Svinalängorna and Jack in round 5; Ondskan is not checked, as its en label 'Evil' is not on the card), and the author's English and Swedish labels (for the partnerships, P527 of the group item and the members' labels). The built deck was validated with the app's SHACL and DCAT-AP validators (validate_sources.ts)."@en ,
+                 "11. Earlier attempts, recorded for completeness. A first candidate query on Swedish-language works only (q1) missed works without a P407 statement; queries starting from all works by Swedish citizens timed out (502/timeout) and were replaced by queries 1–4. A ranking by sitelinks alone (with three or four works per author) was tried and rejected for the reasons in step 4; Wikidata's notable work (P800) of Swedish writers was looked at and found too patchy to select from. Litteraturbanken was probed as a further check of the older works: its rights page (https://litteraturbanken.se/om/rattigheter) is a JavaScript application whose text neither curl nor WebFetch returned, two web searches (\"Litteraturbanken rättigheter texter fri användning licens\", \"litteraturbanken.se om rättigheter upphovsrätt texterna\") found no licence statement for its data, and the first lookup in its public API (query 18, <scratch>/lb.py) reported only 4 of the 60 works (Röda rummet, Singoalla, Det går an, Frithiofs saga). That count was wrong: the script matched authors on a field (work_authors) that most records do not have. Rerun in quality-control round 3 on the field the records do have (authors; <scratch>/lb2.py), the same API finds 20 of the 60 works by the card's author under the card's Swedish title: Nils Holgerssons underbara resa genom Sverige, Gösta Berlings saga, Fröken Julie, Kallocain, Hemsöborna, Röde Orm, Röda rummet, Singoalla, Herr Arnes penningar, Doktor Glas, Aniara, Fredmans epistlar, Den allvarsamma leken, Det går an, Frithiofs saga, Martin Bircks ungdom, Markurells i Wadköping, Fredmans sånger, Bränt barn and Kattresan. Each record carries its own licence field (\"pd\", \"cc-0\" and Litteraturbanken's own licences, e.g. \"lb-svs\"). Litteraturbanken holds mainly older texts, so it covers a third of the deck; it serves as a verification source for those 20 works and was not used to select or word anything."@en ,
+                 "Selection: The deck holds the 60 highest-scoring works of fiction, poetry, drama and children's literature written in Swedish by Swedish authors, as of 2026-10-04, with at most three works per author. Eligible works are those that Wikidata gives a Swedish author (a Swedish citizen, or a partnership of Swedish citizens) and that are in Swedish or from Sweden, covered by at least two Wikimedia sites; the score is the geometric mean of the work's Wikimedia sitelinks and its number of Swedish-language LIBRIS records. Left out by rule: book series and series items (the Millennium trilogy as a whole, Utvandrarserien, Barnen i Bullerbyn, Pettson och Findus; the individual novels compete instead), films, songs, hymns and single poems, and works not written in Swedish (Strindberg's Inferno and En dåres försvarstal were written in French; Linnaeus and Swedenborg wrote in Latin); Finland-Swedish literature is not in the pool because its authors are not Swedish citizens in Wikidata (query 20: Johan Ludvig Runeberg, Edith Södergran and Tove Jansson are citizens of Finland, the Grand Duchy of Finland or the Russian Empire). Left out by hand, although they ranked high enough: Historia om de nordiska folken by Olaus Magnus (written in Latin, 1555; history, not literature), Tomten by Viktor Rydberg (a single poem) and Ett barn blir till by Lennart Nilsson (photographic non-fiction). The cap of three per author left out, among others, Strindberg's Fadren, Ett drömspel and Mäster Olof, Selma Lagerlöf's Jerusalem, Kejsarn av Portugallien and Körkarlen, Astrid Lindgren's Mio, min Mio and Mästerdetektiven Blomkvist, and further novels by Henning Mankell and by Sjöwall and Wahlöö. Sitelink and LIBRIS counts change over time; the ranking is a snapshot of 2026-10-04 and decides only which works are in the deck. Around the cut (score √(sitelinks × LIBRIS records), 2026-10-04): the 58th to 60th works are Strändernas svall 9.4, Barn av sin stad 9.3 and Jack 9.2; Ett barn blir till (9.2) was excluded by hand, Strindberg's Ensam (9.2) and Läckberg's Olycksfågeln (9.2) by the cap; the next eligible works are Hjalmar Bergman's Hans nåds testamente 9.1, Elin Wägner's Pennskaftet 9.0, Per Anders Fogelström's Mina drömmars stad 8.8, Annika Thor's En ö i havet 8.7 and Karin Alvtegen's Skam 8.7. Highest-scoring works left out by the cap: Mio, min Mio 28.1, Fadren 27.1, Ett drömspel 25.7, Jerusalem 23.9, Kejsarn av Portugallien 21.9, Mäster Olof 21.5, Körkarlen 19.5, Mästerdetektiven Blomkvist 17.9, En herrgårdssägen 17.2, Löwensköldska ringen 17.1, Dödsdansen 16.0, Mannen på balkongen (Sjöwall and Wahlöö) 15.6, Den vedervärdige mannen från Säffle 14.5 and Hundarna i Riga (Mankell) 14.5."@en ,
+                 "Licensing: The deck is CC0 1.0. Its content sources are CC0: Wikidata (the candidate works, sitelinks, Swedish titles, English labels and aliases, authors and their names) and LIBRIS (record counts for the ranking, and the titles of English editions, which are bibliographic facts; KB releases the Swedish national bibliography under CC0; from records outside it, such as editions published abroad, the deck takes only bibliographic facts (that an edition with a given title by a given author exists, and how many records there are), which copyright does not protect, and it consulted only a small number of single records, not a substantial part of the database). Open Library (no licence stated), Litteraturbanken (no licence for its catalogue data found) and the Swedish and English Wikipedias (CC BY-SA 4.0) were used for verification only: they confirmed authors and English editions; no wording and no selection was taken from them. The English Wikipedia article title is used only to choose among English titles that LIBRIS or Open Library show were published, so the title on the card is a fact about an edition, not text taken from Wikipedia; this decided two cards, Gösta Berling's Saga and The Stonecutter, whose English titles are attested by LIBRIS but are not Wikidata English names. The selection is the result of the ranking rule applied to Wikidata and LIBRIS data, not a list copied from any source."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Selection rule, sources, licences and machine checks: every card's Swedish title and author against Wikidata, LIBRIS and Swedish Wikipedia (and English Wikipedia where there is an article); every English title against LIBRIS and Open Library."@en ;
+    rdfs:comment "Scope: All 60 cards, the candidate pool and ranking, the sources and the deck metadata."@en ,
+                 "Outcome: All 60 cards agree across Wikidata, LIBRIS and the Wikipedia leads on the author, and every Swedish title is the title of Swedish LIBRIS records of the work. All 361 Wikidata checks pass. The findings are about the selection measure, Wikidata's English labels and the modelling of the two author partnerships; no Wikidata check was skipped because Wikidata disagreed with a better source."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 60 cards: authors, Swedish and English titles against live Wikidata, LIBRIS and Open Library; the description's claims."@en ,
+                 "Outcome: All authors and Swedish titles are correct and all 361 Wikidata checks passed. Two errors: Frithiofs saga kept its Swedish title although English editions as \"Frithiof's saga\" go back to 1833, and the description said the Swedish title appears only where no English edition was found, which was false for several cards. Two warnings (the Swedish Wikipedia check claimed for every card; the less established \"Ronja\" spelling) and two suggestions. All findings were confirmed against LIBRIS, Open Library and live Wikidata; five were fixed and one suggestion declined."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 60 cards' English and Swedish titles and author names, their language tags, notes, keywords and the description."@en ,
+                 "Outcome: Swedish titles and author names are correct and consistent, and nothing is untagged. The main problem was the English front: three works with well-attested English editions (Frithiofs saga, Markurells i Wadköping, Det går an) showed the Swedish title tagged as English, contrary to the description; Ronja used the less established spelling; the Bellman collections kept their Swedish titles although English names are established; and the five same-title works had not been checked for English editions. All were confirmed and fixed. A frontNote on the four Swedish-only titles was declined."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: Sources, licence evidence, licensing, method, selection, queries and the locators of 16 cards."@en ,
+                 "Outcome: The licence quotes are accurate and the deck's CC0 licence is defensible; 16 card locators matched. Three errors (the Litteraturbanken coverage and licence claim, the description, the Swedish Wikipedia claim), four warnings (the LIBRIS licence argument, incomplete queries, step 1's count, reproducibility around the cut) and four suggestions. All were confirmed and fixed, the Litteraturbanken finding with one correction: its records carry varying licence values, not \"pd\" on every record."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The 12 cards changed in rounds 1–3 plus every third card (29 cards), the metadata, documentation and quality-control log; all 363 Wikidata checks re-run live."@en ,
+                 "Outcome: No errors; every fact checked was correct and all checks passed. Three warnings (the English Wikipedia licence-evidence URL redirected to a disambiguation page, method step 7's closing sentence overstated the edition backing, method step 10's count of English-title checks) and two suggestions (the Frithiof's saga record count, the English description's Swedish-only title). All five were confirmed against live sources (query 21) and fixed."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The 6 cards changed in round 4 (kallocain, singoalla, aniara, roseanna, barabbas, frithiofs-saga) and every third card from the 2nd onward (24 cards in all), the metadata, documentation and quality-control log; Wikidata checks, LIBRIS and Open Library records, Wikipedia leads and licence pages re-fetched live."@en ,
+                 "Outcome: No errors and no warnings; every fact checked was correct, all checks passed and every round-4 fix was found in the dossier. Two suggestions on documentation wording (method step 10's count of English-title checks, the description's \"as published in English\" for the Bellman collections). Both were confirmed (query 22 for the first) and fixed."@en .
+
+<https://www.wikidata.org/wiki/Wikidata:Main_Page>
+    dcterms:title "Wikidata: literary works with a Swedish author, their labels, authors (P50), language (P407) and sitelinks" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://libris.kb.se/>
+    dcterms:title "LIBRIS — the Swedish union catalogue (xsearch API)" ;
+    dcterms:creator "Kungliga biblioteket (National Library of Sweden)" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.kb.se/samverkan-och-utveckling/libris/att-anvanda-librisdata.html — \"Svensk nationalbibliografi och svenska auktoritetsposter är fritt tillgängliga utan restriktioner. Licensformen är Creative Commons nivå 0\". The same page says that much LIBRIS data comes from external sources (\"En stor del av data i Libris kommer in via automatiserade flöden från ett antal externa källor, exempelvis Bokinfo, Myndigheten för tillgängliga medier (MTM)\"), so CC0 is stated for the national bibliography and authority records, not for every record; the deck takes only bibliographic facts (that an edition with a given title by a given author exists, and how many such records there are). The English edition titles, author headings and record counts the deck takes from records outside the national bibliography are bibliographic facts, which copyright does not protect, and only a small number of single records was consulted, not a substantial part of the database."@en .
+
+<https://openlibrary.org/>
+    dcterms:title "Open Library: search API (works, titles, authors, languages)" ;
+    dcterms:creator "Internet Archive and Open Library contributors" ;
+    rdfs:comment "https://openlibrary.org/developers/licensing — \"The Internet Archive does not assert any new copyright or other proprietary rights over any of the material in the Open Library database.\" No licence is given for the records themselves; used for verification only."@en .
+
+<https://sv.wikipedia.org/>
+    dcterms:title "Svenskspråkiga Wikipedia (articles on the works)" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://sv.wikipedia.org/wiki/R%C3%B6da_rummet (footer of the article, as of every article consulted): \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported\""@en .
+
+<https://en.wikipedia.org/>
+    dcterms:title "English Wikipedia (articles on the works)" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://en.wikipedia.org/wiki/The_Red_Room_(Strindberg_novel) (footer of the article, fetched again on 2026-10-04, as of every article consulted): \"Text is available under the Creative Commons Attribution-ShareAlike 4.0 License\""@en .
+
+<https://litteraturbanken.se/>
+    dcterms:title "Litteraturbanken (public API of its texts: titles, authors, licence per text)" ;
+    dcterms:creator "Litteraturbanken (Svenska Akademien, Kungliga biblioteket and partners)" ;
+    rdfs:comment "https://litteraturbanken.se/om/rattigheter — a JavaScript application whose text curl did not return (fetched again 2026-10-04); no licence for its catalogue data as a whole was found. The API gives each text its own licence field; among the records matched here: \"pd\", \"cc-0\", \"cc-by\", \"cc-by-nc-nd\", \"lb-svs\", \"lb-assv\" and \"lb-2-20120306\". Used for verification only."@en .
+
+<#nils-holgersson>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Wonderful Adventures of Nils"@en ,
+                     "Nils Holgerssons underbara resa genom Sverige"@sv ;
+    solid-memo:back "Selma Lagerlöf"@en ,
+                    "Selma Lagerlöf"@sv .
+
+<#gosta-berlings-saga>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Gösta Berling's Saga"@en ,
+                     "Gösta Berlings saga"@sv ;
+    solid-memo:back "Selma Lagerlöf"@en ,
+                    "Selma Lagerlöf"@sv .
+
+<#froken-julie>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Miss Julie"@en ,
+                     "Fröken Julie"@sv ;
+    solid-memo:back "August Strindberg"@en ,
+                    "August Strindberg"@sv .
+
+<#ronja-rovardotter>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ronia, the Robber's Daughter"@en ,
+                     "Ronja rövardotter"@sv ;
+    solid-memo:back "Astrid Lindgren"@en ,
+                    "Astrid Lindgren"@sv .
+
+<#pippi-langstrump>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pippi Longstocking"@en ,
+                     "Pippi Långstrump"@sv ;
+    solid-memo:back "Astrid Lindgren"@en ,
+                    "Astrid Lindgren"@sv .
+
+<#kallocain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Kallocain"@en ,
+                     "Kallocain"@sv ;
+    solid-memo:back "Karin Boye"@en ,
+                    "Karin Boye"@sv .
+
+<#broderna-lejonhjarta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Brothers Lionheart"@en ,
+                     "Bröderna Lejonhjärta"@sv ;
+    solid-memo:back "Astrid Lindgren"@en ,
+                    "Astrid Lindgren"@sv .
+
+<#hemsoborna>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The People of Hemsö"@en ,
+                     "Hemsöborna"@sv ;
+    solid-memo:back "August Strindberg"@en ,
+                    "August Strindberg"@sv .
+
+<#rode-orm>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Long Ships"@en ,
+                     "Röde Orm"@sv ;
+    solid-memo:back "Frans G. Bengtsson"@en ,
+                    "Frans G. Bengtsson"@sv .
+
+<#roda-rummet>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Red Room"@en ,
+                     "Röda rummet"@sv ;
+    solid-memo:back "August Strindberg"@en ,
+                    "August Strindberg"@sv .
+
+<#man-som-hatar-kvinnor>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Girl with the Dragon Tattoo"@en ,
+                     "Män som hatar kvinnor"@sv ;
+    solid-memo:back "Stieg Larsson"@en ,
+                    "Stieg Larsson"@sv .
+
+<#singoalla>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Singoalla"@en ,
+                     "Singoalla"@sv ;
+    solid-memo:back "Viktor Rydberg"@en ,
+                    "Viktor Rydberg"@sv .
+
+<#herr-arnes-penningar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Treasure"@en ,
+                     "Herr Arnes penningar"@sv ;
+    solid-memo:back "Selma Lagerlöf"@en ,
+                    "Selma Lagerlöf"@sv .
+
+<#doktor-glas>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Doctor Glas"@en ,
+                     "Doktor Glas"@sv ;
+    solid-memo:back "Hjalmar Söderberg"@en ,
+                    "Hjalmar Söderberg"@sv .
+
+<#flickan-som-lekte-med-elden>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Girl Who Played with Fire"@en ,
+                     "Flickan som lekte med elden"@sv ;
+    solid-memo:back "Stieg Larsson"@en ,
+                    "Stieg Larsson"@sv .
+
+<#aniara>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Aniara"@en ,
+                     "Aniara"@sv ;
+    solid-memo:back "Harry Martinson"@en ,
+                    "Harry Martinson"@sv .
+
+<#dvargen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Dwarf"@en ,
+                     "Dvärgen"@sv ;
+    solid-memo:back "Pär Lagerkvist"@en ,
+                    "Pär Lagerkvist"@sv .
+
+<#luftslottet-som-sprangdes>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Girl Who Kicked the Hornets' Nest"@en ,
+                     "Luftslottet som sprängdes"@sv ;
+    solid-memo:back "Stieg Larsson"@en ,
+                    "Stieg Larsson"@sv .
+
+<#en-man-som-heter-ove>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A Man Called Ove"@en ,
+                     "En man som heter Ove"@sv ;
+    solid-memo:back "Fredrik Backman"@en ,
+                    "Fredrik Backman"@sv .
+
+<#roseanna>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Roseanna"@en ,
+                     "Roseanna"@sv ;
+    solid-memo:back "Maj Sjöwall and Per Wahlöö"@en ,
+                    "Maj Sjöwall och Per Wahlöö"@sv .
+
+<#den-skrattande-polisen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Laughing Policeman"@en ,
+                     "Den skrattande polisen"@sv ;
+    solid-memo:back "Maj Sjöwall and Per Wahlöö"@en ,
+                    "Maj Sjöwall och Per Wahlöö"@sv .
+
+<#fredmans-epistlar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Fredman's Epistles"@en ,
+                     "Fredmans epistlar"@sv ;
+    solid-memo:back "Carl Michael Bellman"@en ,
+                    "Carl Michael Bellman"@sv .
+
+<#barabbas>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Barabbas"@en ,
+                     "Barabbas"@sv ;
+    solid-memo:back "Pär Lagerkvist"@en ,
+                    "Pär Lagerkvist"@sv .
+
+<#ondskan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ondskan"@en ,
+                     "Ondskan"@sv ;
+    solid-memo:back "Jan Guillou"@en ,
+                    "Jan Guillou"@sv .
+
+<#den-allvarsamma-leken>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Serious Game"@en ,
+                     "Den allvarsamma leken"@sv ;
+    solid-memo:back "Hjalmar Söderberg"@en ,
+                    "Hjalmar Söderberg"@sv .
+
+<#hundraaringen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The 100-Year-Old Man Who Climbed Out the Window and Disappeared"@en ,
+                     "Hundraåringen som klev ut genom fönstret och försvann"@sv ;
+    solid-memo:back "Jonas Jonasson"@en ,
+                    "Jonas Jonasson"@sv .
+
+<#det-gar-an>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sara Videbeck"@en ,
+                     "Det går an"@sv ;
+    solid-memo:back "Carl Jonas Love Almqvist"@en ,
+                    "Carl Jonas Love Almqvist"@sv .
+
+<#frithiofs-saga>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Frithiof's Saga"@en ,
+                     "Frithiofs saga"@sv ;
+    solid-memo:back "Esaias Tegnér"@en ,
+                    "Esaias Tegnér"@sv .
+
+<#lat-den-ratte-komma-in>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Let the Right One In"@en ,
+                     "Låt den rätte komma in"@sv ;
+    solid-memo:back "John Ajvide Lindqvist"@en ,
+                    "John Ajvide Lindqvist"@sv .
+
+<#mannen-som-gick-upp-i-rok>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Man Who Went Up in Smoke"@en ,
+                     "Mannen som gick upp i rök"@sv ;
+    solid-memo:back "Maj Sjöwall and Per Wahlöö"@en ,
+                    "Maj Sjöwall och Per Wahlöö"@sv .
+
+<#villospar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sidetracked"@en ,
+                     "Villospår"@sv ;
+    solid-memo:back "Henning Mankell"@en ,
+                    "Henning Mankell"@sv .
+
+<#den-femte-kvinnan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Fifth Woman"@en ,
+                     "Den femte kvinnan"@sv ;
+    solid-memo:back "Henning Mankell"@en ,
+                    "Henning Mankell"@sv .
+
+<#isprinsessan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Ice Princess"@en ,
+                     "Isprinsessan"@sv ;
+    solid-memo:back "Camilla Läckberg"@en ,
+                    "Camilla Läckberg"@sv .
+
+<#mordare-utan-ansikte>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Faceless Killers"@en ,
+                     "Mördare utan ansikte"@sv ;
+    solid-memo:back "Henning Mankell"@en ,
+                    "Henning Mankell"@sv .
+
+<#vagen-till-jerusalem>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Road to Jerusalem"@en ,
+                     "Vägen till Jerusalem"@sv ;
+    solid-memo:back "Jan Guillou"@en ,
+                    "Jan Guillou"@sv .
+
+<#martin-bircks-ungdom>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Martin Birck's Youth"@en ,
+                     "Martin Bircks ungdom"@sv ;
+    solid-memo:back "Hjalmar Söderberg"@en ,
+                    "Hjalmar Söderberg"@sv .
+
+<#popularmusik-fran-vittula>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Popular Music from Vittula"@en ,
+                     "Populärmusik från Vittula"@sv ;
+    solid-memo:back "Mikael Niemi"@en ,
+                    "Mikael Niemi"@sv .
+
+<#markurells-i-wadkoping>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Markurells of Wadköping"@en ,
+                     "Markurells i Wadköping"@sv ;
+    solid-memo:back "Hjalmar Bergman"@en ,
+                    "Hjalmar Bergman"@sv .
+
+<#fredmans-sanger>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Fredman's Songs"@en ,
+                     "Fredmans sånger"@sv ;
+    solid-memo:back "Carl Michael Bellman"@en ,
+                    "Carl Michael Bellman"@sv .
+
+<#det-som-inte-dodar-oss>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Girl in the Spider's Web"@en ,
+                     "Det som inte dödar oss"@sv ;
+    solid-memo:back "David Lagercrantz"@en ,
+                    "David Lagercrantz"@sv .
+
+<#tempelriddaren>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Knight Templar"@en ,
+                     "Tempelriddaren"@sv ;
+    solid-memo:back "Jan Guillou"@en ,
+                    "Jan Guillou"@sv .
+
+<#hypnotisoren>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Hypnotist"@en ,
+                     "Hypnotisören"@sv ;
+    solid-memo:back "Lars Kepler"@en ,
+                    "Lars Kepler"@sv ;
+    solid-memo:backNote "Pen name of Alexandra Coelho Ahndoril and Alexander Ahndoril"@en ,
+                        "Pseudonym för Alexandra Coelho Ahndoril och Alexander Ahndoril"@sv .
+
+<#brant-barn>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A Burnt Child"@en ,
+                     "Bränt barn"@sv ;
+    solid-memo:back "Stig Dagerman"@en ,
+                    "Stig Dagerman"@sv .
+
+<#analfabeten-som-kunde-rakna>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Girl Who Saved the King of Sweden"@en ,
+                     "Analfabeten som kunde räkna"@sv ;
+    solid-memo:back "Jonas Jonasson"@en ,
+                    "Jonas Jonasson"@sv .
+
+<#utvandrarna>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Emigrants"@en ,
+                     "Utvandrarna"@sv ;
+    solid-memo:back "Vilhelm Moberg"@en ,
+                    "Vilhelm Moberg"@sv .
+
+<#livlakarens-besok>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Visit of the Royal Physician"@en ,
+                     "Livläkarens besök"@sv ;
+    solid-memo:back "Per Olov Enquist"@en ,
+                    "Per Olov Enquist"@sv .
+
+<#kattresan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Kattresan"@en ,
+                     "Kattresan"@sv ;
+    solid-memo:back "Ivar Arosenius"@en ,
+                    "Ivar Arosenius"@sv .
+
+<#britt-marie-var-har>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Britt-Marie Was Here"@en ,
+                     "Britt-Marie var här"@sv ;
+    solid-memo:back "Fredrik Backman"@en ,
+                    "Fredrik Backman"@sv .
+
+<#handelser-vid-vatten>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Blackwater"@en ,
+                     "Händelser vid vatten"@sv ;
+    solid-memo:back "Kerstin Ekman"@en ,
+                    "Kerstin Ekman"@sv .
+
+<#predikanten>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Preacher"@en ,
+                     "Predikanten"@sv ;
+    solid-memo:back "Camilla Läckberg"@en ,
+                    "Camilla Läckberg"@sv .
+
+<#mor-gifter-sig>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "My Mother Gets Married"@en ,
+                     "Mor gifter sig"@sv ;
+    solid-memo:back "Moa Martinson"@en ,
+                    "Moa Martinson"@sv .
+
+<#nasslorna-blomma>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Flowering Nettle"@en ,
+                     "Nässlorna blomma"@sv ;
+    solid-memo:back "Harry Martinson"@en ,
+                    "Harry Martinson"@sv .
+
+<#kris>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Crisis"@en ,
+                     "Kris"@sv ;
+    solid-memo:back "Karin Boye"@en ,
+                    "Karin Boye"@sv .
+
+<#sprangaren>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Bomber"@en ,
+                     "Sprängaren"@sv ;
+    solid-memo:back "Liza Marklund"@en ,
+                    "Liza Marklund"@sv .
+
+<#min-mormor-halsar-och-sager-forlat>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "My Grandmother Asked Me to Tell You She's Sorry"@en ,
+                     "Min mormor hälsar och säger förlåt"@sv ;
+    solid-memo:back "Fredrik Backman"@en ,
+                    "Fredrik Backman"@sv .
+
+<#svinalangorna>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Svinalängorna"@en ,
+                     "Svinalängorna"@sv ;
+    solid-memo:back "Susanna Alakoski"@en ,
+                    "Susanna Alakoski"@sv .
+
+<#stenhuggaren>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Stonecutter"@en ,
+                     "Stenhuggaren"@sv ;
+    solid-memo:back "Camilla Läckberg"@en ,
+                    "Camilla Läckberg"@sv .
+
+<#strandernas-svall>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Return to Ithaca"@en ,
+                     "Strändernas svall"@sv ;
+    solid-memo:back "Eyvind Johnson"@en ,
+                    "Eyvind Johnson"@sv .
+
+<#barn-av-sin-stad>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Children of Their City"@en ,
+                     "Barn av sin stad"@sv ;
+    solid-memo:back "Per Anders Fogelström"@en ,
+                    "Per Anders Fogelström"@sv .
+
+<#jack>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Jack"@en ,
+                     "Jack"@sv ;
+    solid-memo:back "Ulf Lundell"@en ,
+                    "Ulf Lundell"@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

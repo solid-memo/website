@@ -16,7 +16,7 @@ vi.mock("@inrupt/solid-client", async (importOriginal) => {
 });
 
 const INDEX = "https://solid-memo.com/decks/index.ttl";
-const DOC = "https://solid-memo.com/decks/capitals.ttl";
+const DOC = "https://solid-memo.com/decks/capitals/v1.ttl";
 const fetch = vi.fn() as unknown as typeof globalThis.fetch;
 
 function makeLibrary() {

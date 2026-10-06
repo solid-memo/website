@@ -40,13 +40,13 @@ const deck: Deck = {
   formatVersion: 3,
   direction: "front-to-back",
   authors: [],
-  sourceUrl: "https://solid-memo.com/decks/capitals/1.ttl",
+  sourceUrl: "https://solid-memo.com/decks/capitals/v1.ttl",
 };
 
 const plan: LibraryUpgradePlan = {
   fromVersion: "1",
   toVersion: "2",
-  releaseUrl: "https://solid-memo.com/decks/capitals/2.ttl",
+  releaseUrl: "https://solid-memo.com/decks/capitals/v2.ttl",
   notes: [],
   add: [libraryCard("no", "Oslo")],
   change: [libraryCard("se", "Stockholm")],

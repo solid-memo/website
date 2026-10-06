@@ -13,11 +13,10 @@ import { getSolidDataset } from "@inrupt/solid-client";
 import { turtleFetch } from "@solid-memo/shacl/testing/turtle";
 import { DCTERMS, RDF, SM } from "../vocab";
 
-const INDEX = "https://solid-memo.com/decks/index";
-const DOC = "https://solid-memo.com/decks/capitals.ttl";
-const CANONICAL = "https://solid-memo.com/decks/capitals";
+const INDEX = "https://solid-memo.com/decks/index.ttl";
+const DOC = "https://solid-memo.com/decks/capitals/v1.ttl";
 const CC0 = "https://creativecommons.org/publicdomain/zero/1.0/";
-const SERIES = "https://solid-memo.com/decks/index#capitals";
+const SERIES = "https://solid-memo.com/decks/index.ttl#capitals";
 const EDUC = "http://publications.europa.eu/resource/authority/data-theme/EDUC";
 const FLAG = "https://flagcdn.com/af.svg";
 
@@ -50,31 +49,31 @@ const INDEX_TURTLE = `
    dcat:dataset <#capitals>, <#broken-series>, <#no-current>, <#missing>, <#undescribed-current> .
 <#solid-memo> a foaf:Agent ; foaf:name "Solid Memo" .
 <#capitals> a dcat:DatasetSeries, dcat:Dataset ; dcterms:title "Capitals" ; dcterms:description "Capitals." ;
-   dcterms:publisher <#solid-memo> ; dcat:first <capitals/1.ttl> ; dcat:last <capitals/2.ttl> ;
-   dcat:hasVersion <capitals/2.ttl>, <capitals/1.ttl>, <capitals/3.ttl> ; dcat:hasCurrentVersion <capitals/2.ttl> .
-<capitals/1.ttl> a dcat:Dataset ; dcat:version "1" ; dcterms:issued "2026-09-21T10:00:00Z"^^xsd:dateTime ; adms:versionNotes "First." .
-<capitals/3.ttl> a dcat:Dataset .
-<capitals/2.ttl> a sm:Deck, dcat:Dataset ; sm:formatVersion 3 ; sm:cardCount 243 ;
+   dcterms:publisher <#solid-memo> ; dcat:first <capitals/v1.ttl> ; dcat:last <capitals/v2.ttl> ;
+   dcat:hasVersion <capitals/v2.ttl>, <capitals/v1.ttl>, <capitals/v3.ttl> ; dcat:hasCurrentVersion <capitals/v2.ttl> .
+<capitals/v1.ttl> a dcat:Dataset ; dcat:version "1" ; dcterms:issued "2026-09-21T10:00:00Z"^^xsd:dateTime ; adms:versionNotes "First." .
+<capitals/v3.ttl> a dcat:Dataset .
+<capitals/v2.ttl> a sm:Deck, dcat:Dataset ; sm:formatVersion 3 ; sm:cardCount 243 ;
    dcterms:title "Capitals" ; dcterms:description "Capitals of the world." ;
-   dcterms:creator <capitals/2.ttl#anton>, <capitals/2.ttl#gone> ; dcterms:license <${CC0}> ;
+   dcterms:creator <capitals/v2.ttl#anton>, <capitals/v2.ttl#gone> ; dcterms:license <${CC0}> ;
    dcterms:created "2026-09-22T09:49:00.236Z"^^xsd:dateTime ; dcterms:modified "2026-09-27T20:12:13Z"^^xsd:dateTime ;
    dcterms:issued "2026-09-22T10:00:00Z"^^xsd:dateTime ;
    dcterms:publisher <#solid-memo> ; sm:studyDirection sm:bidirectional ;
    dcat:theme <${EDUC}>, <https://solid-memo.com/ns/vocab/topics.ttl#geography> ; dcat:keyword "capitals" ;
    dcat:version "2" ; adms:versionNotes "Added Norway." ;
-   dcat:inSeries <#capitals> ; dcat:isVersionOf <#capitals> ; dcat:distribution <capitals/2.ttl#turtle> ;
+   dcat:inSeries <#capitals> ; dcat:isVersionOf <#capitals> ; dcat:distribution <capitals/v2.ttl#turtle> ;
    prov:wasDerivedFrom <${WIKIPEDIA}>, <https://iupac.org/>, <${WIKIDATA}> .
 <https://iupac.org/> dcterms:creator "IUPAC" .
-<capitals/2.ttl#anton> a foaf:Agent ; foaf:name "Anton" ; foaf:mbox <mailto:anton@example.com> .
+<capitals/v2.ttl#anton> a foaf:Agent ; foaf:name "Anton" ; foaf:mbox <mailto:anton@example.com> .
 <${WIKIPEDIA}> dcterms:title "List of national capitals" ; dcterms:creator "Wikipedia contributors" ; dcterms:license <${BY_SA}> .
 <#broken-series> a dcat:DatasetSeries .
 <#no-current> a dcat:DatasetSeries, dcat:Dataset ; dcterms:title "N" ; dcterms:description "N." ;
-   dcterms:publisher <#solid-memo> ; dcat:first <n/1.ttl> ; dcat:last <n/1.ttl> ;
-   dcat:hasVersion <n/1.ttl> ; dcat:hasCurrentVersion <n/1.ttl> .
-<n/1.ttl> a dcat:Dataset .
+   dcterms:publisher <#solid-memo> ; dcat:first <n/v1.ttl> ; dcat:last <n/v1.ttl> ;
+   dcat:hasVersion <n/v1.ttl> ; dcat:hasCurrentVersion <n/v1.ttl> .
+<n/v1.ttl> a dcat:Dataset .
 <#undescribed-current> a dcat:DatasetSeries, dcat:Dataset ; dcterms:title "U" ; dcterms:description "U." ;
-   dcterms:publisher <#solid-memo> ; dcat:first <u/1.ttl> ; dcat:last <u/1.ttl> ;
-   dcat:hasVersion <u/1.ttl> ; dcat:hasCurrentVersion <u/1.ttl> .
+   dcterms:publisher <#solid-memo> ; dcat:first <u/v1.ttl> ; dcat:last <u/v1.ttl> ;
+   dcat:hasVersion <u/v1.ttl> ; dcat:hasCurrentVersion <u/v1.ttl> .
 `;
 
 describe("toLibraryDecks", () => {
@@ -82,18 +81,18 @@ describe("toLibraryDecks", () => {
     const index = await datasetFromIndex(INDEX_TURTLE);
     expect(toLibraryDecks(index)).toEqual([
       {
-        url: "https://solid-memo.com/decks/capitals/2.ttl",
+        url: "https://solid-memo.com/decks/capitals/v2.ttl",
         seriesUrl: SERIES,
         version: "2",
         versionNotes: "Added Norway.",
         releases: [
-          { url: "https://solid-memo.com/decks/capitals/1.ttl", version: "1", issued: "2026-09-21T10:00:00.000Z", notes: "First." },
-          { url: "https://solid-memo.com/decks/capitals/2.ttl", version: "2", issued: "2026-09-22T10:00:00.000Z", notes: "Added Norway." },
-          { url: "https://solid-memo.com/decks/capitals/3.ttl", version: "?" },
+          { url: "https://solid-memo.com/decks/capitals/v1.ttl", version: "1", issued: "2026-09-21T10:00:00.000Z", notes: "First." },
+          { url: "https://solid-memo.com/decks/capitals/v2.ttl", version: "2", issued: "2026-09-22T10:00:00.000Z", notes: "Added Norway." },
+          { url: "https://solid-memo.com/decks/capitals/v3.ttl", version: "?" },
         ],
         title: { en: "Capitals" },
         cardCount: 243,
-        authors: ["Anton <anton@example.com>", "https://solid-memo.com/decks/capitals/2.ttl#gone"],
+        authors: ["Anton <anton@example.com>", "https://solid-memo.com/decks/capitals/v2.ttl#gone"],
         license: CC0,
         description: { en: "Capitals of the world." },
         direction: "bidirectional",
@@ -118,13 +117,13 @@ describe("toLibraryDecks", () => {
 <> a dcat:Catalog ; dcterms:title "Library" ; dcterms:description "Decks." ; dcterms:publisher <#solid-memo> ; dcat:dataset <#capitals> .
 <#capitals> a dcat:DatasetSeries, dcat:Dataset ; sm:formatVersion 3 ;
    dcterms:title "Capitals"@en ; dcterms:description "Capitals."@en ; dcat:keyword "capitals"@en, "huvudstäder"@sv ;
-   dcterms:publisher <#solid-memo> ; dcat:first <capitals/1.ttl> ; dcat:last <capitals/1.ttl> ;
-   dcat:hasVersion <capitals/1.ttl> ; dcat:hasCurrentVersion <capitals/1.ttl> .
-<capitals/1.ttl> a sm:Deck, dcat:Dataset ; sm:formatVersion 5 ;
+   dcterms:publisher <#solid-memo> ; dcat:first <capitals/v1.ttl> ; dcat:last <capitals/v1.ttl> ;
+   dcat:hasVersion <capitals/v1.ttl> ; dcat:hasCurrentVersion <capitals/v1.ttl> .
+<capitals/v1.ttl> a sm:Deck, dcat:Dataset ; sm:formatVersion 5 ;
    dcterms:title "Capitals"@en ; dcterms:description "Capitals of the world."@en ;
    dcat:keyword "capitals"@en, "countries"@en, "huvudstäder"@sv, "länder"@sv, "stray" ;
    dcterms:publisher <#solid-memo> ; sm:studyDirection sm:frontToBack ; dcat:theme <${EDUC}> ;
-   dcat:version "1" ; dcat:inSeries <#capitals> ; dcat:isVersionOf <#capitals> ; dcat:distribution <capitals/1.ttl#turtle> .
+   dcat:version "1" ; dcat:inSeries <#capitals> ; dcat:isVersionOf <#capitals> ; dcat:distribution <capitals/v1.ttl#turtle> .
 `);
     expect(toLibraryDecks(index)).toEqual([
       expect.objectContaining({ keywords: { en: ["capitals", "countries"], sv: ["huvudstäder", "länder"] } }),
@@ -139,12 +138,12 @@ describe("toLibraryDecks", () => {
 <> a dcat:Catalog ; dcterms:title "Library" ; dcterms:description "Decks." ; dcterms:publisher <#solid-memo> ; dcat:dataset <#capitals> .
 <#capitals> a dcat:DatasetSeries, dcat:Dataset ; sm:formatVersion 2 ;
    dcterms:title "Capitals"@en, "Huvudstäder"@sv ; dcterms:description "Capitals."@en, "Huvudstäder."@sv ;
-   dcterms:publisher <#solid-memo> ; dcat:first <capitals/1.ttl> ; dcat:last <capitals/1.ttl> ;
-   dcat:hasVersion <capitals/1.ttl> ; dcat:hasCurrentVersion <capitals/1.ttl> .
-<capitals/1.ttl> a sm:Deck, dcat:Dataset ; sm:formatVersion 4 ;
+   dcterms:publisher <#solid-memo> ; dcat:first <capitals/v1.ttl> ; dcat:last <capitals/v1.ttl> ;
+   dcat:hasVersion <capitals/v1.ttl> ; dcat:hasCurrentVersion <capitals/v1.ttl> .
+<capitals/v1.ttl> a sm:Deck, dcat:Dataset ; sm:formatVersion 4 ;
    dcterms:title "Huvudstäder"@sv, "Capitals"@en ; dcterms:description "Capitals of the world."@en, "Världens huvudstäder."@sv ;
    dcterms:publisher <#solid-memo> ; sm:studyDirection sm:frontToBack ; dcat:theme <${EDUC}> ;
-   dcat:version "1" ; dcat:inSeries <#capitals> ; dcat:isVersionOf <#capitals> ; dcat:distribution <capitals/1.ttl#turtle> .
+   dcat:version "1" ; dcat:inSeries <#capitals> ; dcat:isVersionOf <#capitals> ; dcat:distribution <capitals/v1.ttl#turtle> .
 `);
     expect(toLibraryDecks(index)).toEqual([
       expect.objectContaining({
@@ -156,7 +155,7 @@ describe("toLibraryDecks", () => {
 
   it("names a release the index does not describe by its URL alone, and counts no cards it does not state", async () => {
     const index = await datasetFromIndex(
-      INDEX_TURTLE.replace("sm:cardCount 243 ;", "").replace(', <capitals/1.ttl>, <capitals/3.ttl>', ', <capitals/9.ttl>')
+      INDEX_TURTLE.replace("sm:cardCount 243 ;", "").replace(', <capitals/v1.ttl>, <capitals/v3.ttl>', ', <capitals/v9.ttl>')
         .replace(`dcterms:license <${CC0}> ;`, "").replace('dcterms:created "2026-09-22T09:49:00.236Z"^^xsd:dateTime ; dcterms:modified "2026-09-27T20:12:13Z"^^xsd:dateTime ;', "")
         .replace('adms:versionNotes "Added Norway." ;', ""),
     );
@@ -190,7 +189,7 @@ describe("toLibraryDeckContent", () => {
 
   it("maps the deck and its well-formed cards, keeping the fragment ids", () => {
     const dataset = deckDocument(
-      thing(CANONICAL, (t) =>
+      thing(DOC, (t) =>
         t
           .addIri(RDF.type, SM.Deck)
           .addStringNoLocale(DCTERMS.title, "Capitals")
@@ -200,31 +199,31 @@ describe("toLibraryDeckContent", () => {
           .addStringNoLocale(DCTERMS.description, "From Wikipedia.")
           .addStringNoLocale(SM.direction, "bidirectional"),
       ),
-      thing(`${CANONICAL}#sweden`, (t) =>
+      thing(`${DOC}#sweden`, (t) =>
         t
           .addIri(RDF.type, SM.Card)
           .addStringNoLocale(SM.front, "Sweden")
           .addStringNoLocale(SM.back, "Stockholm")
           .addInteger(SM.formatVersion, 1),
       ),
-      thing(`${CANONICAL}#afghanistan`, (t) =>
+      thing(`${DOC}#afghanistan`, (t) =>
         t
           .addIri(RDF.type, SM.Card)
           .addIri(SM.frontImage, FLAG)
           .addStringNoLocale(SM.back, "Afghanistan")
           .addInteger(SM.formatVersion, 2),
       ),
-      thing(`${CANONICAL}#note`, (t) => t.addStringNoLocale(SM.front, "x")),
-      thing(`${CANONICAL}#half`, (t) =>
+      thing(`${DOC}#note`, (t) => t.addStringNoLocale(SM.front, "x")),
+      thing(`${DOC}#half`, (t) =>
         t.addIri(RDF.type, SM.Card).addStringNoLocale(SM.front, "Norway"),
       ),
-      thing(`${CANONICAL}#half-2`, (t) =>
+      thing(`${DOC}#half-2`, (t) =>
         t
           .addIri(RDF.type, SM.Card)
           .addStringNoLocale(SM.front, "Norway")
           .addInteger(SM.formatVersion, 2),
       ),
-      thing(`${CANONICAL}#literal`, (t) =>
+      thing(`${DOC}#literal`, (t) =>
         t
           .addIri(RDF.type, SM.Card)
           .addStringNoLocale(SM.frontImage, FLAG)
@@ -258,10 +257,10 @@ describe("toLibraryDeckContent", () => {
 
   it("treats a deck and cards without a version as the first format", () => {
     const dataset = deckDocument(
-      thing(CANONICAL, (t) =>
+      thing(DOC, (t) =>
         t.addIri(RDF.type, SM.Deck).addStringNoLocale(DCTERMS.title, "Capitals"),
       ),
-      thing(`${CANONICAL}#se`, (t) =>
+      thing(`${DOC}#se`, (t) =>
         t
           .addIri(RDF.type, SM.Card)
           .addStringNoLocale(SM.front, "Sweden")
@@ -286,7 +285,7 @@ describe("toLibraryDeckContent", () => {
 
   it("refuses a deck in a newer format than it writes", () => {
     const dataset = deckDocument(
-      thing(CANONICAL, (t) =>
+      thing(DOC, (t) =>
         t.addIri(RDF.type, SM.Deck).addInteger(SM.formatVersion, 6),
       ),
     );
@@ -296,7 +295,7 @@ describe("toLibraryDeckContent", () => {
   });
 
   it("names a release's creators from the agents in its document, or by IRI when there is none", () => {
-    const RELEASE = "https://solid-memo.com/decks/capitals/2.ttl";
+    const RELEASE = "https://solid-memo.com/decks/capitals/v2.ttl";
     const dataset = deckDocument(
       thing(RELEASE, (t) =>
         t
@@ -334,10 +333,10 @@ describe("toLibraryDeckContent", () => {
 
   it("refuses a card in a newer format than it writes", () => {
     const dataset = deckDocument(
-      thing(CANONICAL, (t) =>
+      thing(DOC, (t) =>
         t.addIri(RDF.type, SM.Deck).addStringNoLocale(DCTERMS.title, "Capitals"),
       ),
-      thing(`${CANONICAL}#se`, (t) =>
+      thing(`${DOC}#se`, (t) =>
         t
           .addIri(RDF.type, SM.Card)
           .addStringNoLocale(SM.front, "Sweden")
@@ -346,7 +345,7 @@ describe("toLibraryDeckContent", () => {
       ),
     );
     expect(() => toLibraryDeckContent(DOC, dataset)).toThrow(
-      `A card in this deck is in a newer format than this version of Solid Memo can read. Reload the page to get the latest version.\ncard: ${CANONICAL}#se\nurl: ${DOC}\nversion: 6\nlatest: 5`,
+      `A card in this deck is in a newer format than this version of Solid Memo can read. Reload the page to get the latest version.\ncard: ${DOC}#se\nurl: ${DOC}\nversion: 6\nlatest: 5`,
     );
   });
 
@@ -357,7 +356,7 @@ describe("toLibraryDeckContent", () => {
     expect(() =>
       toLibraryDeckContent(
         DOC,
-        deckDocument(thing(CANONICAL, (t) => t.addIri(RDF.type, SM.Deck))),
+        deckDocument(thing(DOC, (t) => t.addIri(RDF.type, SM.Deck))),
       ),
     ).toThrow(`That is not a Solid Memo deck, so it cannot be added. Choose another deck.\nurl: ${DOC}`);
   });

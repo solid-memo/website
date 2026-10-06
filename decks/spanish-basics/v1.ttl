@@ -1,0 +1,1214 @@
+@base <https://solid-memo.com/decks/spanish-basics/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Basic Spanish"@en ,
+                  "Grundläggande spanska"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "120 basic Spanish words and phrases for beginners: the numbers 0–20, the tens and 100, the days of the week, the months, eight colours, family members, greetings and common phrases, and everyday nouns and verbs. The front shows the Spanish word, nouns with their article (el libro), except the days and months, whose gender is in a note; the back gives its English and Swedish meaning, or the digits for a number. Words, genders and meanings from Wikidata's lexemes and the US Foreign Service Institute's Spanish Basic Course (public domain), checked against the Real Academia Española's dictionary, Wiktionary and Folkets lexikon."@en ,
+                        "120 grundläggande spanska ord och fraser för nybörjare: talen 0–20, tiotalen och 100, veckodagarna, månaderna, åtta färger, familjemedlemmar, hälsningar och vanliga fraser samt vardagliga substantiv och verb. Framsidan visar det spanska ordet, substantiv med sin artikel (el libro) utom veckodagar och månader, vars genus står i en anteckning; baksidan ger betydelsen på engelska och svenska, eller siffrorna för ett tal. Ord, genus och betydelser från Wikidatas lexem och amerikanska Foreign Service Institutes Spanish Basic Course (fri från upphovsrätt), kontrollerade mot Real Academia Españolas ordbok, Wiktionary och Folkets lexikon."@sv ;
+    prov:wasDerivedFrom <https://www.wikidata.org/> ,
+                        <https://archive.org/details/Fsi-SpanishBasicCourse-StudentText> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:languages ,
+               topic:spanish ;
+    dcat:keyword "Spanish"@en ,
+                 "vocabulary"@en ,
+                 "beginners"@en ,
+                 "phrases"@en ,
+                 "spanska"@sv ,
+                 "ordförråd"@sv ,
+                 "nybörjare"@sv ,
+                 "fraser"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#spanish-basics> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#spanish-basics> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/2.5/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/mark/1.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/> ,
+              <https://archive.org/details/Fsi-SpanishBasicCourse-StudentText> ,
+              <https://dle.rae.es/> ,
+              <https://en.wiktionary.org/> ,
+              <https://folkets-lexikon.csc.kth.se/folkets/> ,
+              <https://sv.wiktionary.org/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ,
+                       <#review-6> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Word list. A candidate list of 120 words for a first Spanish course was drawn up by hand from the brief's categories (numbers 0–20, the tens and 100; days; months; colours; family; greetings and phrases; everyday nouns; everyday verbs), choosing the most basic word for each concept and avoiding words whose everyday form differs between Spain and Latin America. No frequency list or textbook word list was copied."@en ,
+                 "Wikidata lexemes. The SPARQL query 1 fetched every Spanish lexeme (language Q1321) whose lemma is a candidate, with its category, gender (P5185), senses, glosses and sense items (P5137). Lemmas not found, or found without senses, were looked up with the lexeme search (API calls 2). The full JSON of the lexeme chosen for each word (the noun lexeme for nouns, the verb lexeme for verbs, and so on) was fetched with API calls 3, and the English and Swedish lexemes named by the senses' translation statements (P5972) with API calls 4. Feminine family words (hermana, hija, abuela) are forms of the lexemes hermano, hijo and abuelo, whose forms carry the feminine and singular features."@en ,
+                 "Wikidata items. The items linked from the senses (P5137) were fetched with API calls 5 and gave English and Swedish labels for days, months, colours, numbers and everyday things. For concepts with no item link (colours yellow, white, green and grey; brother, sister, woman, man, street, window, hand, work; greetings) items were found with the item search (API calls 6) and fetched with API calls 7."@en ,
+                 "Phrases. Wikidata has no Spanish lexeme for buenos días, buenas tardes, buenas noches, gracias, de nada, lo siento, hasta luego or mucho gusto. Their Spanish form and meaning were taken from the basic sentences of Units 1 and 2 of the Foreign Service Institute's Spanish Basic Course (1961, a US Government work in the public domain), read in the Internet Archive's OCR text (calls 10 and 11) and compared with the scanned layout of the English and Spanish columns. The English on the cards is our own choice of the usual English equivalent of that meaning, not always FSI's wording: FSI has \"So long\" (card: see you later), \"Glad to meet you\" (nice to meet you), \"thanks\" (thank you), \"Good evening\" (good evening, good night, the second added from RAE's \"al irse a acostar\") and \"I'm very sorry\" for Lo siento mucho (I'm sorry). These English backs are also the first glosses in English Wiktionary, which was consulted (step 8); they are short stock phrases, not protectable expression."@en ,
+                 "Writing the cards. The front is the Spanish word as in the lexeme's lemma (or form), nouns preceded by the definite article that matches their gender (el agua takes el although feminine). The back is our own short English and Swedish rendering of the main sense: for nouns the bare noun, for verbs the infinitive (English \"to …\", Swedish \"att …\"), for numbers the digits (untagged, since digits have no language). English and Swedish follow the Wikidata labels where an item exists; otherwise they are the standard Swedish equivalent, chosen by the authors and checked in Folkets lexikon (step 8). For the greetings and phrases, por favor and abuelo/abuela, where no CC0 source gives Swedish, the Swedish on the card is the same as the Folkets entry it was checked against (for example good morning → god morgon, pleased to meet you → trevligt att träffas, grandfather → farfar, morfar); these are single words or fixed greetings, facts of usage rather than protectable expression, and no Folkets definitions, examples or selection were used. Swedish uses lower case for days and months. Where one English word maps to two Swedish words (ir: gå or åka; vivir: leva or bo; abuelo: farfar or morfar) both are given."@en ,
+                 "Notes. A short note was added where it helps a beginner and is confirmed by the dictionary: irregular genders (el agua, la mano, el día), the gender of every day and month, the short form un, cien as the short form of ciento used for 100 by itself and before a noun, mil or millones (101–199 use ciento), the plural padres (parents), mujer also meaning wife, querer also meaning to love, sí versus si, ser versus estar (with ser for where an event takes place), naranja the colour versus la naranja the fruit (with a front note \"colour\"), noche also covering the evening after dark (buenas noches), lo siento also used in sympathy, Swedish requests often ending with tack rather than a word for please, the Swedish gå/åka distinction, buenos días being said until midday or lunch, and buenas tardes being used until nightfall. Notes are our own wording."@en ,
+                 "Cross-checking. Every Spanish word was looked up in the Real Academia Española's Diccionario de la lengua española (calls 12): its spelling, its grammatical gender against the article on the card, and its first relevant definition (quoted in each card's evidence). Every English meaning was checked against the Spanish section of the English Wiktionary (calls 13). Every Swedish word was checked in Folkets lexikon (calls 14), English → Swedish, or Swedish → English when the first direction had no match. Where the FSI vocabulary appendix lists the word, its English gloss was compared as well. A Python script built the evidence lines from the responses saved during authoring, so each quote is what the source returned (the look-up logic is recorded with calls 11–14); the raw responses and scripts were working files and are not published. Quotations from the RAE dictionary are cut to the headword, the grammatical label and the first words of the sense, marked with \"…\"."@en ,
+                 "Machine checks. The dossier's Wikidata checks (the Spanish, English and Swedish label or alias of each linked item that matches the card's text, and the multilingual digit label of each number) are re-run against live Wikidata by the builder on every build. Wikidata lexemes cannot be checked by the builder (it checks items only); the lexeme facts in the evidence were read from the API responses of 4 October 2026."@en ,
+                 "Excluded: words whose usual form differs by region (car: coche/carro/auto; brown: marrón/café; juice: zumo/jugo; computer: ordenador/computadora), saber/conocer (both \"to know\", which needs more context than a flashcard gives), niño (child or boy), the morning/tomorrow pair mañana, and tiempo (time or weather), since each would need more than one answer."@en ,
+                 "Review rounds. Three review rounds (factual accuracy; language and translation; licensing and documentation) checked the deck, followed by two final re-check rounds of the changed cards, every third card, the metadata and the documentation, and a final full-deck round. Their findings were verified against the sources before any change: the Folkets entries sorry, ledsen, beklaga and wife, the RAE entries ser (acepción 7), día, mañana, tarde and anochecer, the FSI basic sentences for querer and ver (calls 15–17), and the Swedish Wiktionary entries buenos días, buenas tardes and naranja (call 18); in the re-checks, the mul labels of the number items (call 19), the English Wiktionary usage notes of cien (call 20) and the sense items of the lexemes hijo and abuelo (call 21). The resulting changes are listed under quality control, rounds 1–6."@en ,
+                 "Selection: 120 cards: the cardinal numbers 0–20, the tens 30–90 and 100 (29); the seven days of the week; the twelve months; eight colours (red, blue, green, yellow, black, white, grey, orange); eight family members (mother, father, brother, sister, son, daughter, grandfather, grandmother); twelve greetings and common phrases; 25 everyday nouns (house, water, bread, milk, apple, book, table, chair, door, window, dog, cat, city, street, school, man, woman, friend, money, work, hand, day, night, year, week); and 19 common verbs in the infinitive (ser, estar, tener, hacer, ir, venir, hablar, comer, beber, vivir, querer, poder, ver, decir, escribir, leer, dormir, trabajar, comprar). The list was chosen by the deck's authors for a first course, not copied from any frequency list or textbook. Every word has a Wikidata lexeme except the eight phrases noted in the method, which come from the public-domain FSI course. Left out: words whose everyday form differs between Spain and Latin America (coche/carro, marrón/café, zumo/jugo, ordenador/computadora), word pairs a beginner cannot tell apart on a single card without context (saber/conocer), words with two equally common meanings (mañana, tiempo, niño), and brown and purple (several competing words). Colours are given in the masculine singular; the feminine form is in a note. Days and months are given without an article, as they are usually written; their gender is in a note on every day and month card."@en ,
+                 "Licensing: The deck is CC0 1.0. Its content comes from two sources whose terms allow any reuse: Wikidata's lexemes and items (CC0 1.0: Spanish lemmas, genders, glosses, translations and English and Swedish labels) and the Foreign Service Institute's Spanish Basic Course (1961), a work of the United States Government with no copyright protection under 17 U.S.C. § 105 (the Spanish phrases with their meaning, and the meaning of querer and ver). The selection of words is the authors' own. The English and Swedish renderings not taken from Wikidata are the usual equivalents chosen by the authors; several of them (the English of five phrases, the Swedish of the phrases, por favor and abuelo/abuela) are the same short stock glosses that English Wiktionary or Folkets lexikon give, as the method says. Single words and fixed greetings such as \"see you later\" or \"god morgon\" are facts of usage, not protectable expression, so this does not carry their licences into the deck; no definition, example, comment or list was taken from them. The Real Academia Española's dictionary (all rights reserved), English Wiktionary (CC BY-SA 4.0), Swedish Wiktionary (CC BY-SA 4.0) and Folkets lexikon (CC BY-SA 2.5) were used for verification only. So no source requires attribution or share-alike for the deck, although all are credited in its provenance. The quotations in this provenance report are not covered by the deck's CC0 dedication or the repository's MIT licence: quotations from the RAE dictionary (© Real Academia Española, all rights reserved) are short citations for verification, cut to what the check needs; quotations from English and Swedish Wiktionary are © Wiktionary contributors, CC BY-SA 4.0; quotations from Folkets lexikon are CC BY-SA 2.5; quotations from the FSI course are in the public domain."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Sources, licences and machine checks"@en ;
+    rdfs:comment "Scope: All 120 cards: every Spanish form, gender, English and Swedish meaning and note against the content sources and the three verification sources; the builder's Wikidata checks."@en ,
+                 "Outcome: Every card has evidence from a content source (Wikidata or the FSI course) and at least two of the verification sources; RAE, Wiktionary and Folkets agree with every card as written. The genders on the cards (article el or la) match the RAE entries for all 33 nouns and the Wikidata lexemes wherever the lexeme records a gender. The builder's Wikidata checks cover the Spanish, English and Swedish labels or aliases of 93 linked items (245 checks) and the digit label of every number; they all pass. Discrepancies between sources and how they were resolved are listed below."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 120 cards, re-checked mainly against Swedish Wiktionary's Spanish entries, the RAE entries and the FSI scan; the builder's Wikidata checks re-run."@en ,
+                 "Outcome: No factual errors found; all numbers, days, months, colours, family words, nouns (with genders), phrases and verbs confirmed, and the Wikidata checks pass. Two warnings (the Swedish back of lo siento covered only the apology; the day and month cards after lunes and enero gave no gender) and three suggestions (buenos días until midday, ser for the location of events, naranja colour versus fruit). All five were verified and fixed."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language and translation"@en ;
+    rdfs:comment "Scope: All 120 cards in every language: Spanish fronts, English and Swedish backs and notes, language tags, title, description and keywords."@en ,
+                 "Outcome: No errors. Two warnings (lo siento's Swedish back; the Swedish buenas tardes note said \"until evening\" where the English and RAE say nightfall) and five suggestions (fru in the mujer note, snälla for por favor, a note on buenos días, typographic quotes, a confusing sentence in the selection). Six were applied; the por favor suggestion was declined."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: Every source's licence and terms page; the method, queries and licensing text; 46 cards in detail against their evidence; the builder's Wikidata checks."@en ,
+                 "Outcome: Every source's licence is recorded correctly and CC0 is defensible, but the record misdescribed where some English and Swedish wording came from, quoted the RAE dictionary at length, and claimed unpublished working files. One error, four warnings and two suggestions; all were verified and fixed."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final re-check: the 63 cards changed in the last fix, every third card (facts and language), metadata, licence decision, documentation and the accuracy of the qualityControl log"@en ;
+    rdfs:comment "Scope: 82 of 120 cards (the 63 changed in round 3 and every third card) against sources fetched on 2026-10-04; metadata, licence decision, documentation and the qualityControl log; the builder's Wikidata checks and the app validator."@en ,
+                 "Outcome: No factual, language or licence errors. One warning (the round 3 log did not name every RAE quotation kept whole) and six suggestions; all were verified and fixed."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final re-check (loop 2): the 13 cards changed in the last fix, every third card (facts and language), metadata, licence decision, documentation and the accuracy of the qualityControl log"@en ;
+    rdfs:comment "Scope: 49 of 120 cards (the 13 changed in round 4 and every third card) against sources fetched on 2026-10-04; metadata, licence decision, documentation and the qualityControl log; the builder's Wikidata checks and the app validator."@en ,
+                 "Outcome: No factual, language or licence errors. One warning (the method did not describe review round 4) and two suggestions; all were verified and fixed."@en .
+
+<#review-6>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: all 120 cards."@en ,
+                 "Outcome: No errors or warnings. Spelling and accents, articles and genders, English and Swedish meanings, Swedish capitalisation, language tags, every note and the metadata were checked; round 5's fixes were confirmed. One suggestion (the cien note) was verified against English Wiktionary (call 20) and RAE and fixed."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata (Spanish lexemes and items)" ;
+    dcterms:creator "Wikidata contributors (Wikimedia Foundation)" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://archive.org/details/Fsi-SpanishBasicCourse-StudentText>
+    dcterms:title "Spanish Basic Course, Units 1–30 (Foreign Service Institute, 1961), volumes 1 and 2 as scanned on the Internet Archive" ;
+    dcterms:creator "Robert P. Stockwell, J. Donald Bowen and Ismael Silva-Fuenzalida; Foreign Service Institute, U.S. Department of State" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> ;
+    rdfs:comment "A work of the United States Government (title page: \"Foreign Service Institute, Department of State … For sale by the Superintendent of Documents, U.S. Government Printing Office\"; preface, vol. 1 p. 0.2: \"Foreign Service Institute - Spanish Basic Course was originally prepared by the Spanish staff of the Foreign Service Institute under the supervision of the linguists whose names appear on the title page.\"). 17 U.S.C. § 105 (https://www.law.cornell.edu/uscode/text/17/105): \"Copyright protection under this title is not available for any work of the United States Government\". The Internet Archive item's metadata (https://archive.org/metadata/Fsi-SpanishBasicCourse-StudentText) gives licenseurl \"http://creativecommons.org/licenses/publicdomain/\". Recorded here with the Public Domain Mark: free of known copyright."@en .
+
+<https://dle.rae.es/>
+    dcterms:title "Diccionario de la lengua española, 23.ª edición (online version)" ;
+    dcterms:creator "Real Academia Española and Asociación de Academias de la Lengua Española" ;
+    rdfs:comment "Every entry page carries <meta name=\"rights\" content=\"Real Academia Española © Todos los derechos reservados\"> (e.g. https://dle.rae.es/libro). No open licence, so used for verification only."@en .
+
+<https://en.wiktionary.org/>
+    dcterms:title "English Wiktionary (Spanish entries)" ;
+    dcterms:creator "Wiktionary contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://en.wiktionary.org/wiki/libro — page footer: \"Definitions and other text are available under the Creative Commons Attribution-ShareAlike License; additional terms may apply.\", linking to https://creativecommons.org/licenses/by-sa/4.0/."@en .
+
+<https://folkets-lexikon.csc.kth.se/folkets/>
+    dcterms:title "Folkets lexikon (English–Swedish and Swedish–English)" ;
+    dcterms:creator "Viggo Kann and Joachim Hollman (Algoritmica HB) and the contributors of Folkets lexikon; hosted by KTH" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/2.5/> ;
+    rdfs:comment "https://folkets-lexikon.csc.kth.se/folkets/om.html — \"Både engelsk-svenska lexikonet och svensk-engelska lexikonet kan laddas ner i ett eget XML-format under Distributed Creative Commons Attribution-Share Alike 2.5 Generic license.\" The XML files carry license=\"http://creativecommons.org/licenses/by-sa/2.5/\"."@en .
+
+<https://sv.wiktionary.org/>
+    dcterms:title "Swedish Wiktionary (Spanish entries)" ;
+    dcterms:creator "Wiktionary contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://sv.wiktionary.org/wiki/naranja — page footer: \"Text är tillgänglig under licensen Creative Commons Erkännande-Dela Lika\", linking to https://creativecommons.org/licenses/by-sa/4.0/deed.sv."@en .
+
+<#cero>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "cero"@es ;
+    solid-memo:back "0" .
+
+<#uno>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "uno"@es ;
+    solid-memo:back "1" ;
+    solid-memo:backNote "Before a masculine noun it is shortened to un: un libro. Feminine: una."@en ,
+                        "Före ett maskulint substantiv förkortas det till un: un libro. Femininum: una."@sv .
+
+<#dos>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "dos"@es ;
+    solid-memo:back "2" .
+
+<#tres>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "tres"@es ;
+    solid-memo:back "3" .
+
+<#cuatro>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "cuatro"@es ;
+    solid-memo:back "4" .
+
+<#cinco>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "cinco"@es ;
+    solid-memo:back "5" .
+
+<#seis>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "seis"@es ;
+    solid-memo:back "6" .
+
+<#siete>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "siete"@es ;
+    solid-memo:back "7" .
+
+<#ocho>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ocho"@es ;
+    solid-memo:back "8" .
+
+<#nueve>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "nueve"@es ;
+    solid-memo:back "9" .
+
+<#diez>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "diez"@es ;
+    solid-memo:back "10" .
+
+<#once>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "once"@es ;
+    solid-memo:back "11" .
+
+<#doce>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "doce"@es ;
+    solid-memo:back "12" .
+
+<#trece>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "trece"@es ;
+    solid-memo:back "13" .
+
+<#catorce>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "catorce"@es ;
+    solid-memo:back "14" .
+
+<#quince>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "quince"@es ;
+    solid-memo:back "15" .
+
+<#dieciseis>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "dieciséis"@es ;
+    solid-memo:back "16" .
+
+<#diecisiete>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "diecisiete"@es ;
+    solid-memo:back "17" .
+
+<#dieciocho>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "dieciocho"@es ;
+    solid-memo:back "18" .
+
+<#diecinueve>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "diecinueve"@es ;
+    solid-memo:back "19" .
+
+<#veinte>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "veinte"@es ;
+    solid-memo:back "20" .
+
+<#treinta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "treinta"@es ;
+    solid-memo:back "30" .
+
+<#cuarenta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "cuarenta"@es ;
+    solid-memo:back "40" .
+
+<#cincuenta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "cincuenta"@es ;
+    solid-memo:back "50" .
+
+<#sesenta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "sesenta"@es ;
+    solid-memo:back "60" .
+
+<#setenta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "setenta"@es ;
+    solid-memo:back "70" .
+
+<#ochenta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ochenta"@es ;
+    solid-memo:back "80" .
+
+<#noventa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "noventa"@es ;
+    solid-memo:back "90" .
+
+<#cien>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "cien"@es ;
+    solid-memo:back "100" ;
+    solid-memo:backNote "Short form of ciento, used for 100 by itself and before a noun, mil or millones (cien libros, cien mil); 101–199 use ciento (ciento uno)."@en ,
+                        "Kortform av ciento, som används för 100 ensamt och före substantiv, mil eller millones (cien libros, cien mil); 101–199 bildas med ciento (ciento uno)."@sv .
+
+<#lunes>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "lunes"@es ;
+    solid-memo:back "Monday"@en ,
+                    "måndag"@sv ;
+    solid-memo:backNote "Days of the week are masculine (el lunes) and written in lower case."@en ,
+                        "Veckodagarna är maskulina (el lunes) och skrivs med liten bokstav."@sv .
+
+<#martes>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "martes"@es ;
+    solid-memo:back "Tuesday"@en ,
+                    "tisdag"@sv ;
+    solid-memo:backNote "Days of the week are masculine (el martes) and written in lower case."@en ,
+                        "Veckodagarna är maskulina (el martes) och skrivs med liten bokstav."@sv .
+
+<#miercoles>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "miércoles"@es ;
+    solid-memo:back "Wednesday"@en ,
+                    "onsdag"@sv ;
+    solid-memo:backNote "Days of the week are masculine (el miércoles) and written in lower case."@en ,
+                        "Veckodagarna är maskulina (el miércoles) och skrivs med liten bokstav."@sv .
+
+<#jueves>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "jueves"@es ;
+    solid-memo:back "Thursday"@en ,
+                    "torsdag"@sv ;
+    solid-memo:backNote "Days of the week are masculine (el jueves) and written in lower case."@en ,
+                        "Veckodagarna är maskulina (el jueves) och skrivs med liten bokstav."@sv .
+
+<#viernes>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "viernes"@es ;
+    solid-memo:back "Friday"@en ,
+                    "fredag"@sv ;
+    solid-memo:backNote "Days of the week are masculine (el viernes) and written in lower case."@en ,
+                        "Veckodagarna är maskulina (el viernes) och skrivs med liten bokstav."@sv .
+
+<#sabado>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "sábado"@es ;
+    solid-memo:back "Saturday"@en ,
+                    "lördag"@sv ;
+    solid-memo:backNote "Days of the week are masculine (el sábado) and written in lower case."@en ,
+                        "Veckodagarna är maskulina (el sábado) och skrivs med liten bokstav."@sv .
+
+<#domingo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "domingo"@es ;
+    solid-memo:back "Sunday"@en ,
+                    "söndag"@sv ;
+    solid-memo:backNote "Days of the week are masculine (el domingo) and written in lower case."@en ,
+                        "Veckodagarna är maskulina (el domingo) och skrivs med liten bokstav."@sv .
+
+<#enero>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "enero"@es ;
+    solid-memo:back "January"@en ,
+                    "januari"@sv ;
+    solid-memo:backNote "Month names are masculine and written in lower case."@en ,
+                        "Månadsnamnen är maskulina och skrivs med liten bokstav."@sv .
+
+<#febrero>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "febrero"@es ;
+    solid-memo:back "February"@en ,
+                    "februari"@sv ;
+    solid-memo:backNote "Month names are masculine and written in lower case."@en ,
+                        "Månadsnamnen är maskulina och skrivs med liten bokstav."@sv .
+
+<#marzo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "marzo"@es ;
+    solid-memo:back "March"@en ,
+                    "mars"@sv ;
+    solid-memo:backNote "Month names are masculine and written in lower case."@en ,
+                        "Månadsnamnen är maskulina och skrivs med liten bokstav."@sv .
+
+<#abril>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "abril"@es ;
+    solid-memo:back "April"@en ,
+                    "april"@sv ;
+    solid-memo:backNote "Month names are masculine and written in lower case."@en ,
+                        "Månadsnamnen är maskulina och skrivs med liten bokstav."@sv .
+
+<#mayo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "mayo"@es ;
+    solid-memo:back "May"@en ,
+                    "maj"@sv ;
+    solid-memo:backNote "Month names are masculine and written in lower case."@en ,
+                        "Månadsnamnen är maskulina och skrivs med liten bokstav."@sv .
+
+<#junio>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "junio"@es ;
+    solid-memo:back "June"@en ,
+                    "juni"@sv ;
+    solid-memo:backNote "Month names are masculine and written in lower case."@en ,
+                        "Månadsnamnen är maskulina och skrivs med liten bokstav."@sv .
+
+<#julio>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "julio"@es ;
+    solid-memo:back "July"@en ,
+                    "juli"@sv ;
+    solid-memo:backNote "Month names are masculine and written in lower case."@en ,
+                        "Månadsnamnen är maskulina och skrivs med liten bokstav."@sv .
+
+<#agosto>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "agosto"@es ;
+    solid-memo:back "August"@en ,
+                    "augusti"@sv ;
+    solid-memo:backNote "Month names are masculine and written in lower case."@en ,
+                        "Månadsnamnen är maskulina och skrivs med liten bokstav."@sv .
+
+<#septiembre>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "septiembre"@es ;
+    solid-memo:back "September"@en ,
+                    "september"@sv ;
+    solid-memo:backNote "Month names are masculine and written in lower case."@en ,
+                        "Månadsnamnen är maskulina och skrivs med liten bokstav."@sv .
+
+<#octubre>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "octubre"@es ;
+    solid-memo:back "October"@en ,
+                    "oktober"@sv ;
+    solid-memo:backNote "Month names are masculine and written in lower case."@en ,
+                        "Månadsnamnen är maskulina och skrivs med liten bokstav."@sv .
+
+<#noviembre>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "noviembre"@es ;
+    solid-memo:back "November"@en ,
+                    "november"@sv ;
+    solid-memo:backNote "Month names are masculine and written in lower case."@en ,
+                        "Månadsnamnen är maskulina och skrivs med liten bokstav."@sv .
+
+<#diciembre>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "diciembre"@es ;
+    solid-memo:back "December"@en ,
+                    "december"@sv ;
+    solid-memo:backNote "Month names are masculine and written in lower case."@en ,
+                        "Månadsnamnen är maskulina och skrivs med liten bokstav."@sv .
+
+<#rojo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "rojo"@es ;
+    solid-memo:back "red"@en ,
+                    "röd"@sv ;
+    solid-memo:backNote "Feminine: roja."@en ,
+                        "Femininum: roja."@sv .
+
+<#azul>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "azul"@es ;
+    solid-memo:back "blue"@en ,
+                    "blå"@sv ;
+    solid-memo:backNote "Same form for masculine and feminine."@en ,
+                        "Samma form i maskulinum och femininum."@sv .
+
+<#verde>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "verde"@es ;
+    solid-memo:back "green"@en ,
+                    "grön"@sv ;
+    solid-memo:backNote "Same form for masculine and feminine."@en ,
+                        "Samma form i maskulinum och femininum."@sv .
+
+<#amarillo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "amarillo"@es ;
+    solid-memo:back "yellow"@en ,
+                    "gul"@sv ;
+    solid-memo:backNote "Feminine: amarilla."@en ,
+                        "Femininum: amarilla."@sv .
+
+<#negro>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "negro"@es ;
+    solid-memo:back "black"@en ,
+                    "svart"@sv ;
+    solid-memo:backNote "Feminine: negra."@en ,
+                        "Femininum: negra."@sv .
+
+<#blanco>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "blanco"@es ;
+    solid-memo:back "white"@en ,
+                    "vit"@sv ;
+    solid-memo:backNote "Feminine: blanca."@en ,
+                        "Femininum: blanca."@sv .
+
+<#gris>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "gris"@es ;
+    solid-memo:back "grey"@en ,
+                    "grå"@sv ;
+    solid-memo:backNote "Same form for masculine and feminine."@en ,
+                        "Samma form i maskulinum och femininum."@sv .
+
+<#naranja>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "naranja"@es ;
+    solid-memo:frontNote "colour"@en ,
+                         "färg"@sv ;
+    solid-memo:back "orange"@en ,
+                    "orange"@sv ;
+    solid-memo:backNote "Same form for masculine and feminine. The noun la naranja is the fruit (an orange)."@en ,
+                        "Samma form i maskulinum och femininum. Substantivet la naranja är frukten (apelsin)."@sv .
+
+<#madre>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la madre"@es ;
+    solid-memo:back "mother"@en ,
+                    "mor"@sv .
+
+<#padre>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "el padre"@es ;
+    solid-memo:back "father"@en ,
+                    "far"@sv ;
+    solid-memo:backNote "Plural los padres: “parents”."@en ,
+                        "Plural los padres: ”föräldrar”."@sv .
+
+<#hermano>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "el hermano"@es ;
+    solid-memo:back "brother"@en ,
+                    "bror"@sv .
+
+<#hermana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la hermana"@es ;
+    solid-memo:back "sister"@en ,
+                    "syster"@sv .
+
+<#hijo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "el hijo"@es ;
+    solid-memo:back "son"@en ,
+                    "son"@sv .
+
+<#hija>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la hija"@es ;
+    solid-memo:back "daughter"@en ,
+                    "dotter"@sv .
+
+<#abuelo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "el abuelo"@es ;
+    solid-memo:back "grandfather"@en ,
+                    "farfar eller morfar"@sv .
+
+<#abuela>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la abuela"@es ;
+    solid-memo:back "grandmother"@en ,
+                    "farmor eller mormor"@sv .
+
+<#casa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la casa"@es ;
+    solid-memo:back "house"@en ,
+                    "hus"@sv .
+
+<#agua>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "el agua"@es ;
+    solid-memo:back "water"@en ,
+                    "vatten"@sv ;
+    solid-memo:backNote "Feminine, but el in the singular because it begins with a stressed a: el agua, las aguas."@en ,
+                        "Femininum, men el i singular eftersom ordet börjar med betonat a: el agua, las aguas."@sv .
+
+<#pan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "el pan"@es ;
+    solid-memo:back "bread"@en ,
+                    "bröd"@sv .
+
+<#leche>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la leche"@es ;
+    solid-memo:back "milk"@en ,
+                    "mjölk"@sv .
+
+<#manzana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la manzana"@es ;
+    solid-memo:back "apple"@en ,
+                    "äpple"@sv .
+
+<#libro>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "el libro"@es ;
+    solid-memo:back "book"@en ,
+                    "bok"@sv .
+
+<#mesa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la mesa"@es ;
+    solid-memo:back "table"@en ,
+                    "bord"@sv .
+
+<#silla>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la silla"@es ;
+    solid-memo:back "chair"@en ,
+                    "stol"@sv .
+
+<#puerta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la puerta"@es ;
+    solid-memo:back "door"@en ,
+                    "dörr"@sv .
+
+<#ventana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la ventana"@es ;
+    solid-memo:back "window"@en ,
+                    "fönster"@sv .
+
+<#perro>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "el perro"@es ;
+    solid-memo:back "dog"@en ,
+                    "hund"@sv .
+
+<#gato>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "el gato"@es ;
+    solid-memo:back "cat"@en ,
+                    "katt"@sv .
+
+<#ciudad>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la ciudad"@es ;
+    solid-memo:back "city"@en ,
+                    "stad"@sv .
+
+<#calle>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la calle"@es ;
+    solid-memo:back "street"@en ,
+                    "gata"@sv .
+
+<#escuela>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la escuela"@es ;
+    solid-memo:back "school"@en ,
+                    "skola"@sv .
+
+<#hombre>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "el hombre"@es ;
+    solid-memo:back "man"@en ,
+                    "man"@sv .
+
+<#mujer>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la mujer"@es ;
+    solid-memo:back "woman"@en ,
+                    "kvinna"@sv ;
+    solid-memo:backNote "Also “wife”."@en ,
+                        "Även ”fru, hustru”."@sv .
+
+<#amigo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "el amigo"@es ;
+    solid-memo:back "friend"@en ,
+                    "vän"@sv ;
+    solid-memo:backNote "Feminine: la amiga."@en ,
+                        "Femininum: la amiga."@sv .
+
+<#dinero>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "el dinero"@es ;
+    solid-memo:back "money"@en ,
+                    "pengar"@sv .
+
+<#trabajo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "el trabajo"@es ;
+    solid-memo:back "work, job"@en ,
+                    "arbete, jobb"@sv .
+
+<#mano>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la mano"@es ;
+    solid-memo:back "hand"@en ,
+                    "hand"@sv ;
+    solid-memo:backNote "Feminine although it ends in -o."@en ,
+                        "Femininum trots att ordet slutar på -o."@sv .
+
+<#dia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "el día"@es ;
+    solid-memo:back "day"@en ,
+                    "dag"@sv ;
+    solid-memo:backNote "Masculine although it ends in -a."@en ,
+                        "Maskulinum trots att ordet slutar på -a."@sv .
+
+<#noche>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la noche"@es ;
+    solid-memo:back "night"@en ,
+                    "natt"@sv ;
+    solid-memo:backNote "Also the evening after dark (buenas noches)."@en ,
+                        "Även kvällen efter mörkrets inbrott (buenas noches)."@sv .
+
+<#anio>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "el año"@es ;
+    solid-memo:back "year"@en ,
+                    "år"@sv .
+
+<#semana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "la semana"@es ;
+    solid-memo:back "week"@en ,
+                    "vecka"@sv .
+
+<#hola>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "hola"@es ;
+    solid-memo:back "hello"@en ,
+                    "hej"@sv .
+
+<#adios>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "adiós"@es ;
+    solid-memo:back "goodbye"@en ,
+                    "hej då"@sv .
+
+<#buenos-dias>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "buenos días"@es ;
+    solid-memo:back "good morning"@en ,
+                    "god morgon"@sv ;
+    solid-memo:backNote "Said all morning, until midday or lunchtime (la mañana)."@en ,
+                        "Sägs hela förmiddagen, fram till mitt på dagen eller lunch (la mañana)."@sv .
+
+<#buenas-tardes>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "buenas tardes"@es ;
+    solid-memo:back "good afternoon"@en ,
+                    "god eftermiddag"@sv ;
+    solid-memo:backNote "Said from midday until nightfall (la tarde), so also in the early evening."@en ,
+                        "Sägs från mitt på dagen tills det blir mörkt (la tarde), alltså även tidig kväll."@sv .
+
+<#buenas-noches>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "buenas noches"@es ;
+    solid-memo:back "good evening, good night"@en ,
+                    "god kväll, god natt"@sv .
+
+<#gracias>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "gracias"@es ;
+    solid-memo:back "thank you"@en ,
+                    "tack"@sv .
+
+<#por-favor>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "por favor"@es ;
+    solid-memo:back "please"@en ,
+                    "snälla"@sv ;
+    solid-memo:backNote "Swedish requests often end with tack instead: en kaffe, tack."@en ,
+                        "På svenska avslutar man ofta en begäran med tack i stället: en kaffe, tack."@sv .
+
+<#de-nada>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "de nada"@es ;
+    solid-memo:back "you’re welcome"@en ,
+                    "ingen orsak"@sv .
+
+<#si>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "sí"@es ;
+    solid-memo:back "yes"@en ,
+                    "ja"@sv ;
+    solid-memo:backNote "Without the accent, si means “if”."@en ,
+                        "Utan accent betyder si ”om”."@sv .
+
+<#lo-siento>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "lo siento"@es ;
+    solid-memo:back "I’m sorry"@en ,
+                    "jag är ledsen, förlåt"@sv ;
+    solid-memo:backNote "From sentir, “to feel; to regret”. Also said in sympathy, e.g. on hearing of a death."@en ,
+                        "Av sentir, ”känna; beklaga”. Sägs även för att visa medkänsla, t.ex. vid ett dödsfall."@sv .
+
+<#hasta-luego>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "hasta luego"@es ;
+    solid-memo:back "see you later"@en ,
+                    "vi ses"@sv .
+
+<#mucho-gusto>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "mucho gusto"@es ;
+    solid-memo:back "nice to meet you"@en ,
+                    "trevligt att träffas"@sv .
+
+<#ser>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ser"@es ;
+    solid-memo:back "to be"@en ,
+                    "att vara"@sv ;
+    solid-memo:backNote "Ser: what someone or something is (identity, origin, nature): es médico. Also where an event takes place: la fiesta es en casa."@en ,
+                        "Ser: vad någon eller något är (identitet, ursprung, natur): es médico. Även var något äger rum: la fiesta es en casa."@sv .
+
+<#estar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "estar"@es ;
+    solid-memo:back "to be"@en ,
+                    "att vara"@sv ;
+    solid-memo:backNote "Estar: where someone or something is located, and how it is right now: está en casa, está cansado."@en ,
+                        "Estar: var någon eller något befinner sig, och hur det är just nu: está en casa, está cansado."@sv .
+
+<#tener>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "tener"@es ;
+    solid-memo:back "to have"@en ,
+                    "att ha"@sv .
+
+<#hacer>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "hacer"@es ;
+    solid-memo:back "to do, to make"@en ,
+                    "att göra"@sv .
+
+<#ir>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ir"@es ;
+    solid-memo:back "to go"@en ,
+                    "att gå, att åka"@sv ;
+    solid-memo:backNote "Swedish distinguishes gå (on foot) and åka (by vehicle); ir covers both."@en ,
+                        "Ir täcker både gå (till fots) och åka (med fordon)."@sv .
+
+<#venir>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "venir"@es ;
+    solid-memo:back "to come"@en ,
+                    "att komma"@sv .
+
+<#hablar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "hablar"@es ;
+    solid-memo:back "to speak, to talk"@en ,
+                    "att tala, att prata"@sv .
+
+<#comer>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "comer"@es ;
+    solid-memo:back "to eat"@en ,
+                    "att äta"@sv .
+
+<#beber>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "beber"@es ;
+    solid-memo:back "to drink"@en ,
+                    "att dricka"@sv .
+
+<#vivir>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "vivir"@es ;
+    solid-memo:back "to live"@en ,
+                    "att leva, att bo"@sv .
+
+<#querer>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "querer"@es ;
+    solid-memo:back "to want"@en ,
+                    "att vilja"@sv ;
+    solid-memo:backNote "Also “to love” someone or something."@en ,
+                        "Även ”att älska” någon eller något."@sv .
+
+<#poder>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "poder"@es ;
+    solid-memo:back "to be able to, can"@en ,
+                    "att kunna"@sv .
+
+<#ver>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ver"@es ;
+    solid-memo:back "to see"@en ,
+                    "att se"@sv .
+
+<#decir>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "decir"@es ;
+    solid-memo:back "to say, to tell"@en ,
+                    "att säga"@sv .
+
+<#escribir>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "escribir"@es ;
+    solid-memo:back "to write"@en ,
+                    "att skriva"@sv .
+
+<#leer>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "leer"@es ;
+    solid-memo:back "to read"@en ,
+                    "att läsa"@sv .
+
+<#dormir>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "dormir"@es ;
+    solid-memo:back "to sleep"@en ,
+                    "att sova"@sv .
+
+<#trabajar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "trabajar"@es ;
+    solid-memo:back "to work"@en ,
+                    "att arbeta"@sv .
+
+<#comprar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "comprar"@es ;
+    solid-memo:back "to buy"@en ,
+                    "att köpa"@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

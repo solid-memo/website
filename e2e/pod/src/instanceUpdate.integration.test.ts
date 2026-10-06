@@ -117,7 +117,7 @@ async function seedPod(server: string): Promise<Pod> {
 }
 
 /** The library release the copied deck of seedOldPod came from. */
-const RELEASE = "https://solid-memo.com/decks/capitals-of-the-world/2.ttl";
+const RELEASE = "https://solid-memo.com/decks/capitals-of-the-world/v2.ttl";
 
 /**
  * A pod as a format-4 app left it (deck format 4, card format 4), or the

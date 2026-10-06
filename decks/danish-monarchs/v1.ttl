@@ -1,0 +1,392 @@
+@base <https://solid-memo.com/decks/danish-monarchs/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Monarchs of Denmark"@en ,
+                  "Danmarks regenter"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "The 22 monarchs of Denmark from Christian I, the first king of the House of Oldenburg (1448), to Frederik X, king since 14 January 2024, as of 4 October 2026. Front: the monarch's regnal name in English and Swedish; back: the years of the reign, counted from accession to death, deposition or abdication, with the royal house (Oldenburg or Glücksburg) and a short fact in a note. Taken from Wikidata (one note from the public-domain 1911 Encyclopædia Britannica) and checked against the Danish Royal House's list of monarchs (kongehuset.dk), Lex – Danmarks Nationalleksikon, Nationalencyklopedin and the Swedish Wikipedia."@en ,
+                        "Danmarks 22 regenter från Kristian I, den förste kungen av huset Oldenburg (1448), till Frederik X, kung sedan den 14 januari 2024, per den 4 oktober 2026. Framsida: regentens namn på engelska och svenska; baksida: regeringsåren, räknade från trontillträdet till regentens död, avsättning eller abdikation, med kungahuset (Oldenburg eller Glücksburg) och en kort upplysning i en anteckning. Uppgifterna är hämtade från Wikidata (en anteckning från Encyclopædia Britannica 1911, som är fri från upphovsrätt) och kontrollerade mot det danska kungahusets regentlängd (kongehuset.dk), Lex – Danmarks Nationalleksikon, Nationalencyklopedin och svenskspråkiga Wikipedia."@sv ;
+    prov:wasDerivedFrom <https://www.wikidata.org/wiki/Q18341329> ,
+                        <https://en.wikisource.org/wiki/1911_Encyclop%C3%A6dia_Britannica/Christian_IV.> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:history ;
+    dcat:keyword "Danish monarchs"@en ,
+                 "kings of Denmark"@en ,
+                 "Danish history"@en ,
+                 "House of Oldenburg"@en ,
+                 "House of Glücksburg"@en ,
+                 "danska monarker"@sv ,
+                 "Danmarks regenter"@sv ,
+                 "Danmarks historia"@sv ,
+                 "huset Oldenburg"@sv ,
+                 "huset Glücksburg"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:bidirectional ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#danish-monarchs> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#danish-monarchs> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/wiki/Q18341329> ,
+              <https://en.wikisource.org/wiki/1911_Encyclop%C3%A6dia_Britannica/Christian_IV.> ,
+              <https://www.kongehuset.dk/en/the-monarchy-in-denmark/the-royal-lineage/> ,
+              <https://lex.dk/kongerækken_i_Danmark> ,
+              <https://sv.wikipedia.org/wiki/Lista_%C3%B6ver_Danmarks_regenter> ,
+              <https://www.ne.se/uppslagsverk/encyklopedi/l%C3%A5ng/kristian-iv> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Finding the position: the Wikidata search API (query 6) returned Q18341329 \"Monarch of Denmark\" (\"monarchical head of state of the Kingdom of Denmark\")."@en ,
+                 "Selection and reign years: query 1 fetched as CSV from the Wikidata Query Service every non-deprecated P39 (position held) statement whose value is Q18341329, with its P580 (start time), P582 (end time), P1365 (replaces) and P1366 (replaced by) qualifiers, its rank, the holder's P53 (family) with the family's English and Swedish labels, and the holder's English and Swedish labels. The result runs from legendary kings to the present. The holders whose statement starts in 1448 or later are 22 people, Christian I (start 1448-10-07) to Frederik X (start 2024-01-14, preferred rank, no end time), each with one statement, linked into one unbroken chain by the replaces/replaced-by qualifiers; they became the cards. The back of each card is the year of P580 and the year of P582, joined by an en dash, and \"2024–\" for Frederik X, whose reign continues. No card's years come from anywhere else; the other sources only confirmed or differed (see quality control)."@en ,
+                 "Note facts: query 2 fetched for the 22 statements the end-cause qualifier (P1534), the holder's father (P22) and date of birth (P569); query 2b Frederik X's mother (P25); query 3 the properties of the House of Oldenburg (Q155594), the House of Glücksburg (Q155616) and its Danish branch item (Q111201485); query 4 the holders' other positions (P39 Monarch of Sweden, Monarch of Norway) with their start and end and the date of death (P570). Every note fact but one is a Wikidata statement or follows directly from two of them (that Christian II was Frederick I's nephew: Frederick I and Hans are both sons of Christian I, Christian II is the son of Hans; that the throne was vacant from 1533 to 1534: Frederick I's statement ends in April 1533 and Christian III's starts in July 1534; that Christian IV was ten at his accession: born 1577-04-22, king from 1588-04-14). The notes are the compiler's own wording, written directly in English and in Swedish. The exception is Christian IV's coming of age in 1596, which Wikidata does not hold (query 4b found no P793 significant-event statement on Q153586): it comes from the public-domain 1911 Encyclopædia Britannica article \"Christian IV.\" by Robert Nisbet Bain on Wikisource (query 15 fetched the article pages, which only transclude the scanned pages; query 16 the transcribed page that holds the article's opening, \"attaining his majority on the 17th of August 1596\"; query 17 its licence box), and Lex (\"Først 8 år senere i 1596 blev han kronet til dansk-norsk konge og dermed regent\") and Nationalencyklopedin (\"dröjde det till 1596 innan han blev myndig och kröntes\") confirm it. The years that the Royal House's list gives where it differs from the cards (Hans, Christian III, Christian IV) are recorded in those cards' evidence and in quality control, not in the notes."@en ,
+                 "Names: the Wikidata API (query 5) fetched the English, Swedish, Danish and multilingual labels and aliases and the English, Swedish and Danish Wikipedia sitelinks of the 22 monarchs and the three house items. English fronts: the Wikidata English label or alias without \"of Denmark\". The Christians are Christian I–X. The Fredericks follow one rule: Frederick (the English form) for the seven kings of the House of Oldenburg, Frederik (the Danish form) for the three of the House of Glücksburg, as Wikidata's English labels and aliases have them (aliases \"Frederick I\" … \"Frederick VII\"; labels \"Frederik VIII of Denmark\", \"Frederik IX of Denmark\", \"Frederik X of Denmark\"), and as the English Wikipedia titles do except for Frederick VIII. King Hans is \"Hans\" in English too: his Wikidata English label is \"John, King of Denmark\" but his English alias, the English Wikipedia title (\"Hans, King of Denmark\") and the Royal House's English page all use Hans. Swedish fronts: the Wikidata Swedish label or alias without \"av Danmark\": Kristian I–X, Fredrik I–IX, Hans, Margrethe II and Frederik X. That is also how the Swedish Wikipedia list names every one of them, and Nationalencyklopedin writes Kristian IV, V, VI, VIII, IX, X, Fredrik IV, Fredrik IX (\"danska Frederik IX\"), Margrethe II and Frederik X (queries 12–13): Swedish keeps the Swedish forms Kristian and Fredrik for the historical kings but the Danish form Frederik for the present king, so the deck does too. The house names in the notes are the Wikidata labels: House of Oldenburg / Huset Oldenburg (Q155594), House of Glücksburg (Q155616) / huset Glücksburg (Q111201485, capitalised at the start of a note)."@en ,
+                 "Official check: the Danish Royal House's English page \"The Royal Lineage\" was downloaded with curl and its text extracted with a small HTML-to-text script (query 7). It gives each monarch's years twice, in the entry heading and in the timeline; every card's years were compared with both. They agree for 19 monarchs; for Hans (1482–1513), Christian III (timeline 1534–1559, heading 1536–1559, and an interregnum 1533–1536) and Christian IV (1588/1596–1648) the page differs, see quality control. Its timeline shows \"Frederik X — Since 2024\", which together with Wikidata (no end time), Lex (\"2024-\", article last changed 15 September 2026) and Nationalencyklopedin (\"kung av Danmark sedan 2024\") confirms that Frederik X still reigned on 4 October 2026."@en ,
+                 "Independent check: the article \"kongerækken i Danmark\" in Lex – Danmarks Nationalleksikon (query 8) gives the years of every reign; it agrees with every card, including Hans 1481–1513, Christian III 1534–1559 (interregnum 1533–1534) and Christian IV 1588–1648. Its licence terms were read (query 9). The Swedish Wikipedia \"Lista över Danmarks regenter\" (query 10, wikitext of revision 59658833 through the MediaWiki API; query 11 for the licence footer) gives the Swedish name and the accession and end date of every reign; every card agrees with it. The comparison was done by reading the extracted texts side by side with the Wikidata CSV; each card's evidence quotes the row of each source."@en ,
+                 "Dossier: the script make_dossier.py (a working script, not published; everything it produced is in this dossier) wrote the first version of the cards. It holds a table with one row per monarch in order of accession: the card id, the English and Swedish fronts and the Wikidata label or alias each is checked against (chosen by the rule in the fifth step), the back (the P580 and P582 years read from q1.csv), and the readings of Lex, the Royal House's page and the Swedish Wikipedia typed in from the extracted texts; a second table holds each card's notes, written by hand from the facts listed in the fourth step, with the Wikidata statements they rely on, and a third the Nationalencyklopedin quotes. For each row it read the statement's start, end, rank and P53 houses from q1.csv and the label-or-alias kind and the sitelinks from names.json, and wrote the card, its evidence (the \"says\" texts) and its Wikidata checks. Later changes were made to the dossier directly and are logged under quality control. The 1911 Encyclopædia Britannica on Wikisource (query 15) was first considered for the note facts and set aside because its article pages only transclude scanned pages; in review round 3 the transcribed page for Christian IV was read (query 16) and supplies one note fact (fourth step)."@en ,
+                 "Machine checks: every card carries Wikidata checks run by the builder against live Wikidata: P39 = Q18341329 (the person held the position), P53 = the house named in the note (House of Oldenburg Q155594, House of Glücksburg Q155616 or its Danish branch item Q111201485, whichever the item holds), the English and Swedish front text as a label or alias (with the disambiguator where the front drops one), the house labels, and every statement a note relies on (P22, P25, P39 Monarch of Sweden / Norway, P569 and P570 years, P361, P53 of the neighbouring monarch, the aliases Kristian Tyrann, Johan II, Christian Frederick and Kristian Fredrik). The reign years are qualifiers, which the builder's checks cannot read; they rest on query 1 and the comparison in the sixth and seventh steps and are quoted in each card's evidence. The built deck was validated with the app's SHACL and DCAT-AP validators (validate_sources.ts)."@en ,
+                 "Selection: Every monarch of Denmark from Christian I, elected in 1448 as the first king of the House of Oldenburg, to Frederik X, king since 14 January 2024 and still reigning on 4 October 2026: 22 cards, among them one queen regnant, Margrethe II. A reign is counted from accession (succession on the predecessor's death or abdication, or election) to the monarch's death, deposition or abdication; coronations are not used (so Christian IV counts from 1588, not 1596), and only years are given. The throne was vacant between Frederick I's death in 1533 and Christian III's election in 1534; that interregnum gets no card. Left out: the monarchs before 1448 (Christopher of Bavaria and earlier, of other houses and, before Gorm the Old, of uncertain dates), regents who were not monarchs (Frederick VI as regent for his father from 1784 is not counted before 1808), and Christian VIII's and others' reigns in Norway and Sweden as cards of their own (they appear in notes). The years of the reigns of Hans, Christian III and Christian IV differ in some lists; the cards follow Wikidata, Lex and the Swedish Wikipedia, and the Royal House's differing figures are recorded in those cards' evidence."@en ,
+                 "Licensing: The content sources are Wikidata, whose structured data is CC0, and the 1911 Encyclopædia Britannica on Wikisource, which is in the public domain (published before 1931; its article on Christian IV is by Robert Nisbet Bain, who died in 1909). The selection of monarchs, the reign years, the English and Swedish names, the royal houses and every fact in the notes come from Wikidata, except Christian IV's coming of age in 1596, which comes from the Britannica article, so the deck is CC0 1.0 like the rest of the library. The Danish Royal House's website (all rights reserved), Lex – Danmarks Nationalleksikon (copyright, restricted reuse), Nationalencyklopedin (all rights reserved) and the Swedish Wikipedia (CC BY-SA 4.0) were used for verification only: they confirmed facts that the content sources gave, and no wording, table layout, name form, selection or fact was taken from them. The Royal House's differing years for three reigns are recorded only in the evidence and the quality-control log, where short quotations document the check. The selection is the complete line of Danish monarchs since 1448, which every list shares because it is the complete set, not a choice taken from any one list. The fronts and notes are the compiler's own wording of facts."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Sources, licences and machine checks: every card's monarch and years against Wikidata, the Royal House's list, Lex and the Swedish Wikipedia; the Swedish names against Wikidata sv labels, the Swedish Wikipedia and Nationalencyklopedin; the current monarch against all of them."@en ;
+    rdfs:comment "Scope: All 22 cards, the sources and the deck metadata."@en ,
+                 "Outcome: Wikidata, Lex and the Swedish Wikipedia agree on the monarch and the first and last year of all 22 reigns, and the Royal House's list agrees on 19. Its three different figures (Hans, Christian III, Christian IV) are named in those cards' notes (round 3 later took them out of the notes; they remain in the cards' evidence). No Wikidata check was skipped; the builder's checks all pass against live Wikidata. The other findings concern name forms and Wikidata modelling and change no card's facts."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 22 cards: reign years against a live Wikidata query of every P39 statement for Monarch of Denmark, the Royal House's page fetched afresh, the note facts against Wikidata P569/P570, and a web search for any change of monarch in 2026."@en ,
+                 "Outcome: No factual errors: every holder and every start and end year matches live Wikidata, the Royal House's page reads as the evidence says, and Frederik X still reigns. One optional suggestion, applied: a note on Frederik VIII's card that English also writes Frederick VIII."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 22 cards, the title, the description and the keywords: English and Swedish name forms against live Wikidata labels, aliases and sitelinks and Nationalencyklopedin, Swedish idiom and conventions, language tags and back uniqueness."@en ,
+                 "Outcome: No language errors; the Swedish name forms, lower-case conventions, zxx backs and bidirectional study all hold. Three minor findings, all resolved: the unclear 1536 sentence and the \"skriver 1588/1596\" sentence were removed together with the other Royal House sentences (see round 3), Christian IV's note now says he came of age in 1596, and Frederik VIII's note gives the English spelling Frederick VIII."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 22 cards and every source: licence and terms pages fetched afresh, every evidence quote compared with the live sources, the recorded queries compared with the scratch files, and the rendered report."@en ,
+                 "Outcome: Every source's licence is recorded correctly and CC0 is the right deck licence. Seven findings, all fixed: the Royal House's figures were taken out of three notes, Christian IV's coming of age now comes from a public-domain content source, Frederik X's P25 has its own recorded query, the Wikisource fetches are recorded, NE's author is named, truncated NE quotes are marked, and the method paragraphs lost their own numbers and describe make_dossier.py."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The nine cards changed in rounds 1–3 (hans, christian-iii, christian-iv, frederik-viii, frederik-x, christian-v, christian-vi, christian-viii, christian-ix) and every third card (christian-i, frederick-i, christian-iv, frederick-iv, christian-vii, frederick-vii, christian-x, frederik-x), 16 cards in all; the deck metadata, licensing and the quality-control log; the Royal House page, Lex, the Swedish Wikipedia revision, the 1911 Britannica on Wikisource and Nationalencyklopedin fetched afresh."@en ,
+                 "Outcome: No errors or warnings: the builder's check passes (22 cards, 130 Wikidata checks against live Wikidata), validate_sources reports the deck valid, the generated files match the dossier, every evidence quote matches the live sources, and every round-3 fix is in place. One suggestion, applied: round 0's summary described note sentences that round 3 removed."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: All 22 cards in full (fronts, backs, notes, evidence), the deck metadata (title, description, keywords, licence) and the quality-control log, with a live Wikidata query for the 20th- and 21st-century reigns."@en ,
+                 "Outcome: No errors or warnings: every card's monarch, reign years and note are correct, the backs are unique so both study directions work, the English and Swedish name forms follow the documented rule, and round 4's fix is in place. Two optional suggestions, both applied: a gender-neutral Swedish keyword, and naming the 1911 Britannica in the description. No card changed."@en .
+
+<https://www.wikidata.org/wiki/Q18341329>
+    dcterms:title "Wikidata: the holders of the position Monarch of Denmark (Q18341329), with the start and end of each reign, their royal houses, parents and other positions, and the English and Swedish labels and aliases of the monarchs and houses" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://en.wikisource.org/wiki/1911_Encyclop%C3%A6dia_Britannica/Christian_IV.>
+    dcterms:title "Encyclopædia Britannica, 11th edition (1911): \"Christian IV.\", as transcribed on Wikisource" ;
+    dcterms:creator "Robert Nisbet Bain (1854–1909); transcribed by Wikisource contributors" ;
+    rdfs:comment "https://en.wikisource.org/wiki/1911_Encyclop%C3%A6dia_Britannica — licence box: \"This work is in the public domain in the United States because it was published before January 1, 1931.\" The article's Wikisource header names its contributor (\"|contributor=Robert Nisbet Bain\"), whom Wikidata (Q2158388) describes as \"British linguist and historian (1854–1909)\", so it is out of copyright under life-plus-70 terms as well. Only a fact was taken, in the compiler's own words."@en .
+
+<https://www.kongehuset.dk/en/the-monarchy-in-denmark/the-royal-lineage/>
+    dcterms:title "The Royal Lineage (Kongehuset, the Danish Royal House)" ;
+    dcterms:creator "Kongehuset (the Danish Royal House)" ;
+    rdfs:comment "Footer of https://www.kongehuset.dk/en/the-monarchy-in-denmark/the-royal-lineage/: \"Copyright 2026 KONGEHUSET ©\"; the site links only a privacy policy (https://www.kongehuset.dk/en/privacy-policy/) and offers no licence. Verification only."@en .
+
+<https://lex.dk/kongerækken_i_Danmark>
+    dcterms:title "kongerækken i Danmark (Lex – Danmarks Nationalleksikon)" ;
+    dcterms:creator "Bjørn Poulsen (Aarhus Universitet); Lex – Danmarks Nationalleksikon" ;
+    rdfs:comment "The article is marked \"VILKÅR FOR GENBRUG: begrænset genbrug\", and https://lex.dk/.licenses/restricted says \"Indholdet på Lex er ophavsretligt beskyttet.\" Verification only."@en .
+
+<https://sv.wikipedia.org/wiki/Lista_%C3%B6ver_Danmarks_regenter>
+    dcterms:title "Svenskspråkiga Wikipedia: Lista över Danmarks regenter" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of the article: \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported\""@en .
+
+<https://www.ne.se/uppslagsverk/encyklopedi/l%C3%A5ng/kristian-iv>
+    dcterms:title "Nationalencyklopedin: Kristian IV; Frederik X (with the related-article teasers shown on those pages)" ;
+    dcterms:creator "Lennart Sjöstedt (Kristian IV); NE Nationalencyklopedin AB" ;
+    rdfs:comment "https://ne.se/info/hj%c3%a4lp/upphovsratt — \"Nästan allt material på NE.se omfattas av upphovsrättslagen. Den innebär att upphovspersonen ensam har rätt att bestämma hur verket ska användas eller spridas.\" Quoting is allowed only for non-commercial purposes; verification only."@en .
+
+<#christian-i>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Christian I"@en ,
+                     "Kristian I"@sv ;
+    solid-memo:back "1448–1481"@zxx ;
+    solid-memo:backNote "House of Oldenburg, its first king of Denmark. Also King of Norway and, 1457–1464, of Sweden."@en ,
+                        "Huset Oldenburg; husets förste kung i Danmark. Även kung av Norge och 1457–1464 av Sverige."@sv .
+
+<#hans>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hans"@en ,
+                     "Hans"@sv ;
+    solid-memo:back "1481–1513"@zxx ;
+    solid-memo:backNote "House of Oldenburg. Son of Christian I; also King of Sweden as John II (1497–1501)."@en ,
+                        "Huset Oldenburg. Son till Kristian I; även kung av Sverige som Johan II (1497–1501)."@sv .
+
+<#christian-ii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Christian II"@en ,
+                     "Kristian II"@sv ;
+    solid-memo:back "1513–1523"@zxx ;
+    solid-memo:backNote "House of Oldenburg. Son of Hans; also King of Sweden (1520–1521), where he is remembered as Christian the Tyrant. Lost the Danish throne in 1523; died in 1559."@en ,
+                        "Huset Oldenburg. Son till Hans; även kung av Sverige (1520–1521), där han kallas Kristian Tyrann. Förlorade den danska tronen 1523; död 1559."@sv .
+
+<#frederick-i>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Frederick I"@en ,
+                     "Fredrik I"@sv ;
+    solid-memo:back "1523–1533"@zxx ;
+    solid-memo:backNote "House of Oldenburg. Son of Christian I; succeeded his nephew Christian II."@en ,
+                        "Huset Oldenburg. Son till Kristian I; efterträdde sin brorson Kristian II."@sv .
+
+<#christian-iii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Christian III"@en ,
+                     "Kristian III"@sv ;
+    solid-memo:back "1534–1559"@zxx ;
+    solid-memo:backNote "House of Oldenburg. Son of Frederick I; the throne was vacant from 1533 to 1534."@en ,
+                        "Huset Oldenburg. Son till Fredrik I; tronen stod tom 1533–1534."@sv .
+
+<#frederick-ii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Frederick II"@en ,
+                     "Fredrik II"@sv ;
+    solid-memo:back "1559–1588"@zxx ;
+    solid-memo:backNote "House of Oldenburg. Son of Christian III."@en ,
+                        "Huset Oldenburg. Son till Kristian III."@sv .
+
+<#christian-iv>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Christian IV"@en ,
+                     "Kristian IV"@sv ;
+    solid-memo:back "1588–1648"@zxx ;
+    solid-memo:backNote "House of Oldenburg. Son of Frederick II; king at the age of ten, of age in 1596."@en ,
+                        "Huset Oldenburg. Son till Fredrik II; kung som tioåring, myndig 1596."@sv .
+
+<#frederick-iii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Frederick III"@en ,
+                     "Fredrik III"@sv ;
+    solid-memo:back "1648–1670"@zxx ;
+    solid-memo:backNote "House of Oldenburg. Son of Christian IV."@en ,
+                        "Huset Oldenburg. Son till Kristian IV."@sv .
+
+<#christian-v>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Christian V"@en ,
+                     "Kristian V"@sv ;
+    solid-memo:back "1670–1699"@zxx ;
+    solid-memo:backNote "House of Oldenburg. Son of Frederick III."@en ,
+                        "Huset Oldenburg. Son till Fredrik III."@sv .
+
+<#frederick-iv>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Frederick IV"@en ,
+                     "Fredrik IV"@sv ;
+    solid-memo:back "1699–1730"@zxx ;
+    solid-memo:backNote "House of Oldenburg. Son of Christian V."@en ,
+                        "Huset Oldenburg. Son till Kristian V."@sv .
+
+<#christian-vi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Christian VI"@en ,
+                     "Kristian VI"@sv ;
+    solid-memo:back "1730–1746"@zxx ;
+    solid-memo:backNote "House of Oldenburg. Son of Frederick IV."@en ,
+                        "Huset Oldenburg. Son till Fredrik IV."@sv .
+
+<#frederick-v>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Frederick V"@en ,
+                     "Fredrik V"@sv ;
+    solid-memo:back "1746–1766"@zxx ;
+    solid-memo:backNote "House of Oldenburg. Son of Christian VI."@en ,
+                        "Huset Oldenburg. Son till Kristian VI."@sv .
+
+<#christian-vii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Christian VII"@en ,
+                     "Kristian VII"@sv ;
+    solid-memo:back "1766–1808"@zxx ;
+    solid-memo:backNote "House of Oldenburg. Son of Frederick V."@en ,
+                        "Huset Oldenburg. Son till Fredrik V."@sv .
+
+<#frederick-vi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Frederick VI"@en ,
+                     "Fredrik VI"@sv ;
+    solid-memo:back "1808–1839"@zxx ;
+    solid-memo:backNote "House of Oldenburg. Son of Christian VII; also King of Norway until 1814."@en ,
+                        "Huset Oldenburg. Son till Kristian VII; även kung av Norge fram till 1814."@sv .
+
+<#christian-viii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Christian VIII"@en ,
+                     "Kristian VIII"@sv ;
+    solid-memo:back "1839–1848"@zxx ;
+    solid-memo:backNote "House of Oldenburg. As Christian Frederick, King of Norway in 1814."@en ,
+                        "Huset Oldenburg. Kung av Norge 1814 under namnet Kristian Fredrik."@sv .
+
+<#frederick-vii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Frederick VII"@en ,
+                     "Fredrik VII"@sv ;
+    solid-memo:back "1848–1863"@zxx ;
+    solid-memo:backNote "House of Oldenburg. Son of Christian VIII; succeeded by Christian IX of the House of Glücksburg."@en ,
+                        "Huset Oldenburg. Son till Kristian VIII; efterträddes av Kristian IX av huset Glücksburg."@sv .
+
+<#christian-ix>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Christian IX"@en ,
+                     "Kristian IX"@sv ;
+    solid-memo:back "1863–1906"@zxx ;
+    solid-memo:backNote "House of Glücksburg, a branch of the House of Oldenburg; its first king of Denmark."@en ,
+                        "Huset Glücksburg, en gren av huset Oldenburg; husets förste kung i Danmark."@sv .
+
+<#frederik-viii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Frederik VIII"@en ,
+                     "Fredrik VIII"@sv ;
+    solid-memo:back "1906–1912"@zxx ;
+    solid-memo:backNote "House of Glücksburg. Son of Christian IX. Also written Frederick VIII in English."@en ,
+                        "Huset Glücksburg. Son till Kristian IX. På engelska skrivs namnet även Frederick VIII."@sv .
+
+<#christian-x>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Christian X"@en ,
+                     "Kristian X"@sv ;
+    solid-memo:back "1912–1947"@zxx ;
+    solid-memo:backNote "House of Glücksburg. Son of Frederik VIII."@en ,
+                        "Huset Glücksburg. Son till Fredrik VIII."@sv .
+
+<#frederik-ix>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Frederik IX"@en ,
+                     "Fredrik IX"@sv ;
+    solid-memo:back "1947–1972"@zxx ;
+    solid-memo:backNote "House of Glücksburg. Son of Christian X."@en ,
+                        "Huset Glücksburg. Son till Kristian X."@sv .
+
+<#margrethe-ii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Margrethe II"@en ,
+                     "Margrethe II"@sv ;
+    solid-memo:back "1972–2024"@zxx ;
+    solid-memo:backNote "House of Glücksburg. Queen regnant, daughter of Frederik IX; abdicated in 2024."@en ,
+                        "Huset Glücksburg. Regerande drottning, dotter till Fredrik IX; abdikerade 2024."@sv .
+
+<#frederik-x>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Frederik X"@en ,
+                     "Frederik X"@sv ;
+    solid-memo:back "2024–"@zxx ;
+    solid-memo:backNote "House of Glücksburg. Son of Margrethe II; the reigning king (as of October 2026)."@en ,
+                        "Huset Glücksburg. Son till Margrethe II; regerande kung (i oktober 2026)."@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

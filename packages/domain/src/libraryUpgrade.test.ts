@@ -11,7 +11,7 @@ const podCard = (id: string, back: string): Card => ({ id, url: `${CARDS}#${id}`
 
 function release(version: number, cards: LibraryCard[], direction: Deck["direction"] = "front-to-back"): LibraryDeckContent {
   return {
-    url: `${DECKS}capitals/${version}.ttl`,
+    url: `${DECKS}capitals/v${version}.ttl`,
     title: { en: "Capitals" },
     formatVersion: 3,
     authors: [],
@@ -34,13 +34,13 @@ const deck: Deck = {
   formatVersion: 3,
   direction: "front-to-back",
   authors: [],
-  sourceUrl: `${DECKS}capitals/1.ttl`,
+  sourceUrl: `${DECKS}capitals/v1.ttl`,
 };
 
 const releases = [
-  { url: `${DECKS}capitals/1.ttl`, version: "1", notes: "First." },
-  { url: `${DECKS}capitals/2.ttl`, version: "2" },
-  { url: `${DECKS}capitals/3.ttl`, version: "3", notes: "Norway, and Sweden fixed." },
+  { url: `${DECKS}capitals/v1.ttl`, version: "1", notes: "First." },
+  { url: `${DECKS}capitals/v2.ttl`, version: "2" },
+  { url: `${DECKS}capitals/v3.ttl`, version: "3", notes: "Norway, and Sweden fixed." },
 ];
 
 describe("planLibraryUpgrade", () => {
@@ -73,7 +73,7 @@ describe("planLibraryUpgrade", () => {
     expect(planLibraryUpgrade({ deck, cards, from, to, releases })).toEqual({
       fromVersion: "1",
       toVersion: "3",
-      releaseUrl: `${DECKS}capitals/3.ttl`,
+      releaseUrl: `${DECKS}capitals/v3.ttl`,
       notes: [{ version: "3", notes: "Norway, and Sweden fixed." }],
       add: [libraryCard("no", "Oslo")],
       change: [libraryCard("se", "Stockholm")],
@@ -172,11 +172,11 @@ describe("upgradedCards", () => {
 
 describe("applyLibraryUpgrade", () => {
   it("moves the copy to the newer release, and to its direction when that changes", () => {
-    const plan = { fromVersion: "1", toVersion: "3", releaseUrl: `${DECKS}capitals/3.ttl`, notes: [], add: [], change: [], retire: [], restore: [], remove: [], kept: [] };
-    expect(applyLibraryUpgrade(deck, plan)).toEqual({ ...deck, sourceUrl: `${DECKS}capitals/3.ttl` });
+    const plan = { fromVersion: "1", toVersion: "3", releaseUrl: `${DECKS}capitals/v3.ttl`, notes: [], add: [], change: [], retire: [], restore: [], remove: [], kept: [] };
+    expect(applyLibraryUpgrade(deck, plan)).toEqual({ ...deck, sourceUrl: `${DECKS}capitals/v3.ttl` });
     expect(applyLibraryUpgrade(deck, { ...plan, direction: "bidirectional" })).toEqual({
       ...deck,
-      sourceUrl: `${DECKS}capitals/3.ttl`,
+      sourceUrl: `${DECKS}capitals/v3.ttl`,
       direction: "bidirectional",
     });
   });
