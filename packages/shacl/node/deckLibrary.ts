@@ -233,7 +233,29 @@ export function buildIndex(releases: readonly DeckRelease[]): string {
     const inUse = [...cards.values()].filter((retired) => !retired).length;
     add(latestUrl, `${SM_NS}cardCount`, literal(String(inUse), iri(`${XSD}integer`)));
   }
-  return writeIndex(out);
+  return writeIndex(distinct(out));
+}
+
+/**
+ * Each triple once: decks share nodes (a licence, a source, an agent),
+ * which every deck's release describes, and a graph is a set.
+ */
+function distinct(quads: readonly Quad[]): Quad[] {
+  const seen = new Set<string>();
+  return quads.filter((q) => {
+    const o = q.object;
+    const key = JSON.stringify([
+      q.subject.value,
+      q.predicate.value,
+      o.termType,
+      o.value,
+      o.termType === "Literal" ? o.language : "",
+      o.termType === "Literal" ? o.datatype.value : "",
+    ]);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 /** The index in the house style (@solid-memo/turtle/formatTurtle), its own address as its @base. */

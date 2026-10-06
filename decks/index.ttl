@@ -181,167 +181,10 @@
     foaf:mbox <mailto:antonwiklund91@gmail.com> .
 
 <https://creativecommons.org/licenses/by-sa/4.0/>
-    a dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument .
+    a dcterms:LicenseDocument .
 
 <https://creativecommons.org/publicdomain/zero/1.0/>
-    a dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument .
+    a dcterms:LicenseDocument .
 
 <https://solid-memo.com/decks/academy-award-best-picture/v1.ttl#compilation>
     a prov:Activity .
@@ -447,23 +290,7 @@
     foaf:mbox <mailto:antonwiklund91@gmail.com> .
 
 <https://creativecommons.org/licenses/by/4.0/>
-    a dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument .
+    a dcterms:LicenseDocument .
 
 <https://solid-memo.com/decks/brightest-stars/v1.ttl#compilation>
     a prov:Activity .
@@ -479,9 +306,6 @@
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> .
 
 <https://iauarchive.eso.org/public/themes/constellations/>
-    dcterms:title "The Constellations" ;
-    dcterms:creator "International Astronomical Union (IAU)" ;
-    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
     dcterms:title "The Constellations" ;
     dcterms:creator "International Astronomical Union (IAU)" ;
     dcterms:license <https://creativecommons.org/licenses/by/4.0/> .
@@ -660,188 +484,45 @@
     dcterms:title "Wikidata" ;
     dcterms:creator "Wikidata contributors" ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata" ;
-    dcterms:creator "Wikidata contributors" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata" ;
-    dcterms:creator "Wikidata contributors" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
     dcterms:title "Wikidata: the items of the 43 ions (one per PubChem CID), with their chemical formula (P274), PubChem CID (P662) and English and Swedish labels and aliases" ;
-    dcterms:creator "Wikidata contributors" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata" ;
-    dcterms:creator "Wikidata contributors" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata" ;
-    dcterms:creator "Wikidata contributors" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata" ;
     dcterms:creator "Wikidata contributors (Wikimedia Foundation)" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata" ;
-    dcterms:creator "Wikidata contributors" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata (Finnish lexemes and items)" ;
-    dcterms:creator "Wikidata contributors (Wikimedia Foundation)" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata (French lexemes and items)" ;
-    dcterms:creator "Wikidata contributors (Wikimedia Foundation)" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata: items of the geometric figures and theorems, their English and Swedish labels and their defining formulas (P2534)" ;
-    dcterms:creator "Wikidata contributors (Wikimedia Foundation)" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata (German lexemes and items)" ;
-    dcterms:creator "Wikidata contributors (Wikimedia Foundation)" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata" ;
-    dcterms:creator "Wikidata contributors" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata" ;
-    dcterms:creator "Wikidata contributors (Wikimedia Foundation)" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata" ;
-    dcterms:creator "Wikidata contributors" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata" ;
-    dcterms:creator "Wikidata contributors" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata" ;
-    dcterms:creator "Wikidata contributors" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata" ;
-    dcterms:creator "Wikidata contributors" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata" ;
-    dcterms:creator "Wikidata contributors (Wikimedia Foundation)" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata (Italian lexemes and items)" ;
-    dcterms:creator "Wikidata contributors (Wikimedia Foundation)" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata" ;
-    dcterms:creator "Wikidata contributors (Wikimedia Foundation)" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata: mathematical concepts, their symbols, labels and ISO 80000-2 records" ;
-    dcterms:creator "Wikidata contributors" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata: file formats with their MIME type (P1163) and file extension (P1195)" ;
-    dcterms:creator "Wikidata contributors" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata" ;
-    dcterms:creator "Wikidata contributors" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata" ;
-    dcterms:creator "Wikidata contributors" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata" ;
-    dcterms:creator "Wikidata contributors" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata" ;
-    dcterms:creator "Wikidata contributors" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata" ;
-    dcterms:creator "Wikidata contributors" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata: the items of the 46 species (taxon name P225, taxon common name P1843, Dyntaxa ID P1939, English and Swedish labels and aliases) and the item of Hedlundia intermedia" ;
-    dcterms:creator "Wikidata contributors" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata: items of the physical quantities and laws, with their English and Swedish labels, quantity symbols (P416) and defining formulas (P2534)" ;
-    dcterms:creator "Wikidata contributors" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata (Portuguese lexemes and items)" ;
-    dcterms:creator "Wikidata contributors (Wikimedia Foundation)" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata" ;
-    dcterms:creator "Wikidata contributors" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata (Spanish lexemes and items)" ;
-    dcterms:creator "Wikidata contributors (Wikimedia Foundation)" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata" ;
-    dcterms:creator "Wikidata contributors" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata" ;
-    dcterms:creator "Wikidata contributors" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata: items of the trigonometric functions, identities, laws and angle units, their labels, defining formulas (P2534) and conversion to SI unit (P2370)" ;
-    dcterms:creator "Wikidata contributors (Wikimedia Foundation)" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata" ;
-    dcterms:creator "Wikidata contributors" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata" ;
-    dcterms:creator "Wikidata contributors" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata: the mouth of the watercourse (P403) of each river, and the English and Swedish labels and aliases of the rivers and of the waters they flow into" ;
-    dcterms:creator "Wikidata contributors" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata" ;
-    dcterms:creator "Wikidata contributors" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> .
+    dcterms:title "Wikidata (Finnish lexemes and items)" ,
+                  "Wikidata (French lexemes and items)" ,
+                  "Wikidata: items of the geometric figures and theorems, their English and Swedish labels and their defining formulas (P2534)" ,
+                  "Wikidata (German lexemes and items)" ,
+                  "Wikidata (Italian lexemes and items)" ,
+                  "Wikidata: mathematical concepts, their symbols, labels and ISO 80000-2 records" ,
+                  "Wikidata: file formats with their MIME type (P1163) and file extension (P1195)" ,
+                  "Wikidata: the items of the 46 species (taxon name P225, taxon common name P1843, Dyntaxa ID P1939, English and Swedish labels and aliases) and the item of Hedlundia intermedia" ,
+                  "Wikidata: items of the physical quantities and laws, with their English and Swedish labels, quantity symbols (P416) and defining formulas (P2534)" ,
+                  "Wikidata (Portuguese lexemes and items)" ,
+                  "Wikidata (Spanish lexemes and items)" ,
+                  "Wikidata: items of the trigonometric functions, identities, laws and angle units, their labels, defining formulas (P2534) and conversion to SI unit (P2370)" ,
+                  "Wikidata: the mouth of the watercourse (P403) of each river, and the English and Swedish labels and aliases of the rivers and of the waters they flow into" .
 
 <https://pubchem.ncbi.nlm.nih.gov/>
     dcterms:title "PubChem" ;
     dcterms:creator "National Center for Biotechnology Information, US National Library of Medicine" ;
-    dcterms:title "PubChem: compound records of the 43 ions (molecular formula, charge, title and IUPAC name)" ;
-    dcterms:creator "National Center for Biotechnology Information, US National Library of Medicine" .
+    dcterms:title "PubChem: compound records of the 43 ions (molecular formula, charge, title and IUPAC name)" .
 
 <https://sv.wikipedia.org/>
     dcterms:title "Svenskspråkiga Wikipedia" ;
     dcterms:creator "Wikipedia contributors" ;
     dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "Svenskspråkiga Wikipedia" ;
-    dcterms:creator "Wikipedia contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "Svenska Wikipedia" ;
-    dcterms:creator "Wikipedia contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "Svenskspråkiga Wikipedia" ;
-    dcterms:creator "Wikipedia contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "Swedish Wikipedia: articles on the figures and formulas" ;
-    dcterms:creator "Wikipedia contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "Svenska Wikipedia (articles on the Greek and Roman gods)" ;
-    dcterms:creator "Wikipedia contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "Svenska Wikipedia" ;
-    dcterms:creator "Wikipedia contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "Svenska Wikipedia" ;
-    dcterms:creator "Wikipedia contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "Swedish Wikipedia: articles on the units (Tum, Fot (enhet), Yard, Engelsk mil, Nautisk mil, Famn, Chain, Furlong, Engelska tunnland, Gallon, Pint, Fluid ounce, Fat (mått), Grain, Uns, Pund (viktenhet), Stone (enhet), Short ton, Engelskt ton, Knop (enhet), Hästkraft, Btu, Grad Fahrenheit)" ;
-    dcterms:creator "Wikipedia contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "Swedish Wikipedia articles on the concepts (29 articles; titles and revision ids under \"used for\" and in each card's evidence)" ;
+    dcterms:title "Svenska Wikipedia" ,
+                  "Swedish Wikipedia: articles on the figures and formulas" ,
+                  "Svenska Wikipedia (articles on the Greek and Roman gods)" ,
+                  "Swedish Wikipedia: articles on the units (Tum, Fot (enhet), Yard, Engelsk mil, Nautisk mil, Famn, Chain, Furlong, Engelska tunnland, Gallon, Pint, Fluid ounce, Fat (mått), Grain, Uns, Pund (viktenhet), Stone (enhet), Short ton, Engelskt ton, Knop (enhet), Hästkraft, Btu, Grad Fahrenheit)" ,
+                  "Swedish Wikipedia articles on the concepts (29 articles; titles and revision ids under \"used for\" and in each card's evidence)" ;
     dcterms:creator "Wikipedias bidragsgivare" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "Svenskspråkiga Wikipedia" ;
-    dcterms:creator "Wikipedia contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "Svenska Wikipedia" ;
-    dcterms:creator "Wikipedia contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "Swedish Wikipedia: articles on the quantities and laws" ;
-    dcterms:creator "Wikipedia contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "Svenskspråkiga Wikipedia: the articles on the plays (Hamlet, Othello, En midsommarnattsdröm, Mycket väsen för ingenting, Som ni behagar, Cymbeline, Trettondagsafton (pjäs), Muntra fruarna i Windsor, Henrik VIII (pjäs), Lika för lika, Köpmannen i Venedig and others)" ;
-    dcterms:creator "Wikipedia contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "Svenskspråkiga Wikipedia (articles on the works)" ;
-    dcterms:creator "Wikipedia contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "Swedish Wikipedia: articles on the trigonometric functions, identities and laws" ;
-    dcterms:creator "Wikipedia contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "Svenskspråkiga Wikipedia (articles Paʻanga, Dobra (valuta), Guarani (valuta))" ;
-    dcterms:creator "Wikipedia contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "Swedish Wikipedia" ;
-    dcterms:creator "Wikipedia contributors" ;
+    dcterms:title "Swedish Wikipedia: articles on the quantities and laws" ,
+                  "Svenskspråkiga Wikipedia: the articles on the plays (Hamlet, Othello, En midsommarnattsdröm, Mycket väsen för ingenting, Som ni behagar, Cymbeline, Trettondagsafton (pjäs), Muntra fruarna i Windsor, Henrik VIII (pjäs), Lika för lika, Köpmannen i Venedig and others)" ,
+                  "Svenskspråkiga Wikipedia (articles on the works)" ,
+                  "Swedish Wikipedia: articles on the trigonometric functions, identities and laws" ,
+                  "Svenskspråkiga Wikipedia (articles Paʻanga, Dobra (valuta), Guarani (valuta))" ,
+                  "Swedish Wikipedia" ;
     dcterms:license <https://creativecommons.org/licenses/by-sa/3.0/> ;
-    dcterms:title "Swedish Wikipedia: the article on each river (infobox and text)" ;
-    dcterms:creator "Wikipedias bidragsgivare" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> .
+    dcterms:title "Swedish Wikipedia: the article on each river (infobox and text)" .
 
 <https://www.av.se/globalassets/filer/publikationer/foreskrifter/konsoliderade-foreskrifter/gransvarden-luftvagsexponering-arbetsmiljon-afs2023-14-konsoliderad.pdf>
     dcterms:title "Arbetsmiljöverkets föreskrifter och allmänna råd (AFS 2023:14) om gränsvärden för luftvägsexponering i arbetsmiljön (konsoliderad version, ändringar till och med AFS 2025:5)" ;
@@ -850,14 +531,8 @@
 <https://svenska.se/>
     dcterms:title "Svenska Akademiens ordböcker: Svenska Akademiens ordlista (SAOL) and Svensk ordbok (SO)" ;
     dcterms:creator "Svenska Akademien" ;
-    dcterms:title "Svensk ordbok (SO) and Svenska Akademiens ordlista (SAOL), via svenska.se" ;
-    dcterms:creator "Svenska Akademien" ;
-    dcterms:title "Svenska Akademiens ordböcker: Svenska Akademiens ordlista (SAOL) and Svensk ordbok (SO)" ;
-    dcterms:creator "Svenska Akademien" ;
-    dcterms:title "Svenska Akademiens ordböcker: Svenska Akademiens ordlista (SAOL) and Svensk ordbok (SO)" ;
-    dcterms:creator "Svenska Akademien" ;
-    dcterms:title "Svensk ordbok utgiven av Svenska Akademien (SO), via svenska.se" ;
-    dcterms:creator "Svenska Akademien" .
+    dcterms:title "Svensk ordbok (SO) and Svenska Akademiens ordlista (SAOL), via svenska.se" ,
+                  "Svensk ordbok utgiven av Svenska Akademien (SO), via svenska.se" .
 
 <https://docetp.mpa.se/LMF/Medicinsk%20Lustgas%20Air%20Liquide%20medicinal%20gas,%20liquefied%20SmPC_09001bee807a489a.pdf>
     dcterms:title "Produktresumé: Medicinsk Lustgas Air Liquide, medicinsk gas, kondenserad (Läkemedelsverket's product information database)" ;
@@ -1052,39 +727,18 @@
     dcterms:title "LIBRIS — the Swedish union catalogue (records of Swedish editions)" ;
     dcterms:creator "Kungliga biblioteket (National Library of Sweden)" ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "LIBRIS (Swedish union catalogue)" ;
-    dcterms:creator "Kungliga biblioteket (National Library of Sweden)" ;
-    dcterms:title "LIBRIS, the Swedish union catalogue: Swedish-language editions of the plays" ;
-    dcterms:creator "Kungliga biblioteket (National Library of Sweden)" ;
-    dcterms:title "LIBRIS — the Swedish union catalogue (xsearch API)" ;
-    dcterms:creator "Kungliga biblioteket (National Library of Sweden)" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> .
+    dcterms:title "LIBRIS (Swedish union catalogue)" ,
+                  "LIBRIS, the Swedish union catalogue: Swedish-language editions of the plays" ,
+                  "LIBRIS — the Swedish union catalogue (xsearch API)" .
 
 <https://en.wikipedia.org/>
     dcterms:title "English Wikipedia" ;
     dcterms:creator "Wikipedia contributors" ;
     dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "English Wikipedia" ;
-    dcterms:creator "Wikipedia contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "English Wikipedia: articles on the figures and formulas" ;
-    dcterms:creator "Wikipedia contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "English Wikipedia" ;
-    dcterms:creator "Wikipedia contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "English Wikipedia" ;
-    dcterms:creator "Wikipedia contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "English Wikipedia (articles on the works)" ;
-    dcterms:creator "Wikipedia contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "English Wikipedia: Trigonometric functions and Radian" ;
-    dcterms:creator "Wikipedia contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "English Wikipedia: the article on each river (infobox and text)" ;
-    dcterms:creator "Wikipedia contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> .
+    dcterms:title "English Wikipedia: articles on the figures and formulas" ,
+                  "English Wikipedia (articles on the works)" ,
+                  "English Wikipedia: Trigonometric functions and Radian" ,
+                  "English Wikipedia: the article on each river (infobox and text)" .
 
 <https://zh.wikisource.org/wiki/紅樓夢（程甲本）>
     dcterms:title "Prefaces to the first printed edition of Hongloumeng (Dream of the Red Chamber), 1791" ;
@@ -1354,12 +1008,8 @@
     dcterms:title "Wikidata" ;
     dcterms:creator "Wikidata contributors" ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata: Swedish labels and aliases of programming terms (list, string, integer, floating point, tuple, set, iterator, absolute value, computer file, function, standard output, list comprehension, associative array)" ;
-    dcterms:creator "Wikidata contributors" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata: literary works with a Swedish author, their labels, authors (P50), language (P407) and sitelinks" ;
-    dcterms:creator "Wikidata contributors" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> .
+    dcterms:title "Wikidata: Swedish labels and aliases of programming terms (list, string, integer, floating point, tuple, set, iterator, absolute value, computer file, function, standard output, list comprehension, associative array)" ,
+                  "Wikidata: literary works with a Swedish author, their labels, authors (P50), language (P407) and sitelinks" .
 
 <https://asd.gsfc.nasa.gov/archive/ircatalog/constel_names.html>
     dcterms:title "Three-Letter Constellation Abbreviations" ;
@@ -1387,8 +1037,7 @@
     dcterms:creator "Nationalencyklopedin (NE Nationalencyklopedin AB)" ;
     dcterms:title "Nationalencyklopedin (NE), uppslagsverket: free introductions of the articles on the constants" ;
     dcterms:creator "NE Nationalencyklopedin AB" ;
-    dcterms:title "Nationalencyklopedin (ne.se): the articles on the rivers" ;
-    dcterms:creator "NE Nationalencyklopedin AB" .
+    dcterms:title "Nationalencyklopedin (ne.se): the articles on the rivers" .
 
 <https://solid-memo.com/decks/constellations/v1.ttl#turtle>
     a dcat:Distribution ;
@@ -1483,10 +1132,6 @@
     dcterms:creator "North American Numbering Plan Administrator (NANPA), acting as a contractor to the US Federal Communications Commission" .
 
 <https://www.un.org/en/about-us/member-states>
-    dcterms:title "Member States" ;
-    dcterms:creator "United Nations" ;
-    dcterms:title "Member States" ;
-    dcterms:creator "United Nations" ;
     dcterms:title "Member States" ;
     dcterms:creator "United Nations" .
 
@@ -1770,10 +1415,6 @@
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> .
 
 <https://dlmf.nist.gov/>
-    dcterms:title "NIST Digital Library of Mathematical Functions, Release 1.2.8 (2026-09-15)" ;
-    dcterms:creator "F. W. J. Olver, A. B. Olde Daalhuis, D. W. Lozier, B. I. Schneider, R. F. Boisvert, C. W. Clark, B. R. Miller, B. V. Saunders, H. S. Cohl, M. A. McClain (eds.); National Institute of Standards and Technology" ;
-    dcterms:title "NIST Digital Library of Mathematical Functions, Release 1.2.8 (2026-09-15)" ;
-    dcterms:creator "F. W. J. Olver, A. B. Olde Daalhuis, D. W. Lozier, B. I. Schneider, R. F. Boisvert, C. W. Clark, B. R. Miller, B. V. Saunders, H. S. Cohl, M. A. McClain (eds.); National Institute of Standards and Technology" ;
     dcterms:title "NIST Digital Library of Mathematical Functions, Release 1.2.8 (2026-09-15)" ;
     dcterms:creator "F. W. J. Olver, A. B. Olde Daalhuis, D. W. Lozier, B. I. Schneider, R. F. Boisvert, C. W. Clark, B. R. Miller, B. V. Saunders, H. S. Cohl, M. A. McClain (eds.); National Institute of Standards and Technology" .
 
@@ -2317,13 +1958,7 @@
     foaf:mbox <mailto:antonwiklund91@gmail.com> .
 
 <https://creativecommons.org/publicdomain/mark/1.0/>
-    a dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument .
+    a dcterms:LicenseDocument .
 
 <https://solid-memo.com/decks/famous-paintings/v1.ttl#generation>
     a prov:Activity .
@@ -2415,9 +2050,7 @@
     foaf:mbox <mailto:antonwiklund91@gmail.com> .
 
 <https://creativecommons.org/licenses/by-sa/3.0/>
-    a dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument .
+    a dcterms:LicenseDocument .
 
 <https://solid-memo.com/decks/famous-sculptures/v1.ttl#compilation>
     a prov:Activity .
@@ -2585,10 +2218,8 @@
 <https://www.ne.se/uppslagsverk/>
     dcterms:title "Nationalencyklopedin (NE), the articles on the divisions and on some capitals" ;
     dcterms:creator "NE Nationalencyklopedin AB" ;
-    dcterms:title "Nationalencyklopedin (NE), uppslagsverket, entries for the Greek letter names" ;
-    dcterms:creator "NE Nationalencyklopedin AB" ;
-    dcterms:title "Nationalencyklopedin (NE), the articles on the 50 states" ;
-    dcterms:creator "NE Nationalencyklopedin AB" .
+    dcterms:title "Nationalencyklopedin (NE), uppslagsverket, entries for the Greek letter names" ,
+                  "Nationalencyklopedin (NE), the articles on the 50 states" .
 
 <https://solid-memo.com/decks/federal-states-and-capitals/v1.ttl#turtle>
     a dcat:Distribution ;
@@ -2770,15 +2401,7 @@
     foaf:mbox <mailto:antonwiklund91@gmail.com> .
 
 <https://creativecommons.org/licenses/by-sa/2.5/>
-    a dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument ,
-      dcterms:LicenseDocument .
+    a dcterms:LicenseDocument .
 
 <https://solid-memo.com/decks/finnish-basics/v1.ttl#compilation>
     a prov:Activity .
@@ -2797,79 +2420,30 @@
     dcterms:title "English Wiktionary (Finnish entries)" ;
     dcterms:creator "Wiktionary contributors" ;
     dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "English Wiktionary (French entries)" ;
-    dcterms:creator "Wiktionary contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "English Wiktionary (German entries)" ;
-    dcterms:creator "Wiktionary contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "English Wiktionary (Italian entries)" ;
-    dcterms:creator "Wiktionary contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "Wiktionary, the free dictionary (English edition)" ;
-    dcterms:creator "Wiktionary contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "Wiktionary, the free dictionary (English edition)" ;
-    dcterms:creator "Wiktionary contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "English Wiktionary (Portuguese entries)" ;
-    dcterms:creator "Wiktionary contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "English Wiktionary (Spanish entries)" ;
-    dcterms:creator "Wiktionary contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> .
+    dcterms:title "English Wiktionary (French entries)" ,
+                  "English Wiktionary (German entries)" ,
+                  "English Wiktionary (Italian entries)" ,
+                  "Wiktionary, the free dictionary (English edition)" ,
+                  "English Wiktionary (Portuguese entries)" ,
+                  "English Wiktionary (Spanish entries)" .
 
 <https://sv.wiktionary.org/>
     dcterms:title "Swedish Wiktionary (Finnish entries)" ;
     dcterms:creator "Wiktionary contributors" ;
     dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "Swedish Wiktionary (French entries)" ;
-    dcterms:creator "Wiktionary contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "Swedish Wiktionary (Italian entries)" ;
-    dcterms:creator "Wiktionary contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "Wiktionary, den fria ordlistan (Swedish edition)" ;
-    dcterms:creator "Wiktionary contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "Wiktionary, den fria ordlistan (Swedish edition)" ;
-    dcterms:creator "Wiktionary contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "Swedish Wiktionary (Spanish entries)" ;
-    dcterms:creator "Wiktionary contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> .
+    dcterms:title "Swedish Wiktionary (French entries)" ,
+                  "Swedish Wiktionary (Italian entries)" ,
+                  "Wiktionary, den fria ordlistan (Swedish edition)" ,
+                  "Swedish Wiktionary (Spanish entries)" .
 
 <https://folkets-lexikon.csc.kth.se/folkets/>
     dcterms:title "Folkets lexikon (English–Swedish and Swedish–English)" ;
     dcterms:creator "Viggo Kann and Joachim Hollman (Algoritmica HB) and the contributors of Folkets lexikon; hosted by KTH" ;
     dcterms:license <https://creativecommons.org/licenses/by-sa/2.5/> ;
-    dcterms:title "Folkets lexikon (English–Swedish and Swedish–English)" ;
-    dcterms:creator "Viggo Kann and Joachim Hollman (Algoritmica HB) and the contributors of Folkets lexikon; hosted by KTH" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/2.5/> ;
-    dcterms:title "Folkets lexikon (English–Swedish and Swedish–English)" ;
-    dcterms:creator "Viggo Kann and Joachim Hollman (Algoritmica HB) and the contributors of Folkets lexikon; hosted by KTH" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/2.5/> ;
-    dcterms:title "Folkets lexikon (English–Swedish and Swedish–English)" ;
-    dcterms:creator "Viggo Kann and Joachim Hollman (Algoritmica HB) and the contributors of Folkets lexikon; hosted by KTH" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/2.5/> ;
     dcterms:title "Folkets lexikon (Swedish–English dictionary, KTH)" ;
     dcterms:creator "Viggo Kann and Folkets lexikon contributors (KTH Royal Institute of Technology)" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/2.5/> ;
-    dcterms:title "Folkets lexikon (English–Swedish and Swedish–English)" ;
-    dcterms:creator "Viggo Kann and Joachim Hollman (Algoritmica HB) and the contributors of Folkets lexikon; hosted by KTH" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/2.5/> ;
-    dcterms:title "Folkets lexikon (English–Swedish and Swedish–English)" ;
-    dcterms:creator "Viggo Kann and Joachim Hollman (Algoritmica HB) and the contributors of Folkets lexikon; hosted by KTH" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/2.5/> ;
     dcterms:title "Folkets lexikon (Swedish–English)" ;
-    dcterms:creator "KTH Royal Institute of Technology and contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/2.5/> ;
-    dcterms:title "Folkets lexikon (Swedish–English)" ;
-    dcterms:creator "KTH Royal Institute of Technology and contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/2.5/> ;
-    dcterms:title "Folkets lexikon (Swedish–English)" ;
-    dcterms:creator "KTH Royal Institute of Technology and contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/2.5/> .
+    dcterms:creator "KTH Royal Institute of Technology and contributors" .
 
 <https://solid-memo.com/decks/finnish-basics/v1.ttl#turtle>
     a dcat:Distribution ;
@@ -3434,12 +3008,9 @@
 <https://svenska.se/saol/>
     dcterms:title "Svenska Akademiens ordlista (SAOL), on svenska.se" ;
     dcterms:creator "Svenska Akademien" ;
-    dcterms:title "Svenska Akademiens ordlista (SAOL), 14th edition, on svenska.se" ;
-    dcterms:creator "Svenska Akademien" .
+    dcterms:title "Svenska Akademiens ordlista (SAOL), 14th edition, on svenska.se" .
 
 <https://svenska.se/so/>
-    dcterms:title "Svensk ordbok utgiven av Svenska Akademien (SO), on svenska.se" ;
-    dcterms:creator "Svenska Akademien" ;
     dcterms:title "Svensk ordbok utgiven av Svenska Akademien (SO), on svenska.se" ;
     dcterms:creator "Svenska Akademien" .
 
@@ -3909,14 +3480,9 @@
 <https://mesh.kib.ki.se/>
     dcterms:title "Svensk MeSH 2026 (Swedish translation of Medical Subject Headings)" ;
     dcterms:creator "Karolinska Institutets Universitetsbibliotek (Swedish translation); U.S. National Library of Medicine (MeSH)" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Svensk MeSH 2026 (Swedish translation of Medical Subject Headings)" ;
-    dcterms:creator "Karolinska Institutets Universitetsbibliotek (Swedish translation); U.S. National Library of Medicine (MeSH)" ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> .
 
 <https://ifaa.unifr.ch/>
-    dcterms:title "Terminologia Anatomica (TA98), online entity pages" ;
-    dcterms:creator "Federative International Programme on Anatomical Terminologies (FIPAT), hosted by the University of Fribourg" ;
     dcterms:title "Terminologia Anatomica (TA98), online entity pages" ;
     dcterms:creator "Federative International Programme on Anatomical Terminologies (FIPAT), hosted by the University of Fribourg" .
 
@@ -4099,8 +3665,7 @@
 <https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication811e2008.pdf>
     dcterms:title "Guide for the Use of the International System of Units (SI), NIST Special Publication 811, 2008 edition (Appendix B: Conversion Factors)" ;
     dcterms:creator "Ambler Thompson and Barry N. Taylor, National Institute of Standards and Technology (NIST)" ;
-    dcterms:title "Guide for the Use of the International System of Units (SI), NIST Special Publication 811, 2008 edition" ;
-    dcterms:creator "Ambler Thompson and Barry N. Taylor, National Institute of Standards and Technology (NIST)" .
+    dcterms:title "Guide for the Use of the International System of Units (SI), NIST Special Publication 811, 2008 edition" .
 
 <https://www.legislation.gov.uk/ukpga/1985/72/schedule/1>
     dcterms:title "Weights and Measures Act 1985, Schedule 1: Definitions of Units of Measurement (legislation.gov.uk, revised text up to date to 30 September 2026; Open Government Licence v3.0)" ;
@@ -4374,8 +3939,7 @@
 <https://www.ne.se/>
     dcterms:title "Nationalencyklopedin (NE.se), encyclopedia articles" ;
     dcterms:creator "NE Nationalencyklopedin AB" ;
-    dcterms:title "Nationalencyklopedin (articles Götaland, Svealand, Norrland, Värmland)" ;
-    dcterms:creator "NE Nationalencyklopedin AB" .
+    dcterms:title "Nationalencyklopedin (articles Götaland, Svealand, Norrland, Värmland)" .
 
 <https://www.dictionary.com/>
     dcterms:title "Dictionary.com (based on the Random House Unabridged Dictionary)" ;
@@ -5085,15 +4649,9 @@
     dcterms:title "Nobel Prize API 2.1 (api.nobelprize.org): Nobel Peace Prizes and peace laureates (nobelPrizes and laureates endpoints)" ;
     dcterms:creator "Nobel Prize Outreach" ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Nobel Prize API 2.1 (api.nobelprize.org): Nobel Prizes in Chemistry and chemistry laureates (nobelPrizes and laureates endpoints)" ;
-    dcterms:creator "Nobel Prize Outreach" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Nobel Prize API 2.1 (api.nobelprize.org): Nobel Prizes and laureates in literature (nobelPrizes and laureate endpoints)" ;
-    dcterms:creator "Nobel Prize Outreach" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Nobel Prize API 2.1 (api.nobelprize.org): Nobel Prizes and laureates in physics (nobelPrizes and laureates endpoints)" ;
-    dcterms:creator "Nobel Prize Outreach" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> .
+    dcterms:title "Nobel Prize API 2.1 (api.nobelprize.org): Nobel Prizes in Chemistry and chemistry laureates (nobelPrizes and laureates endpoints)" ,
+                  "Nobel Prize API 2.1 (api.nobelprize.org): Nobel Prizes and laureates in literature (nobelPrizes and laureate endpoints)" ,
+                  "Nobel Prize API 2.1 (api.nobelprize.org): Nobel Prizes and laureates in physics (nobelPrizes and laureates endpoints)" .
 
 <https://www.wikidata.org/wiki/Q35637>
     dcterms:title "Wikidata" ;
@@ -5476,15 +5034,7 @@
     dcterms:title "Dyntaxa. Svensk taxonomisk databas (via GBIF)" ;
     dcterms:creator "SLU Artdatabanken (Backlund M)" ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Dyntaxa. Svensk taxonomisk databas (via GBIF)" ;
-    dcterms:creator "SLU Artdatabanken (Backlund M)" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Dyntaxa. Svensk taxonomisk databas (via GBIF)" ;
-    dcterms:creator "SLU Artdatabanken (Backlund M)" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Dyntaxa. Svensk taxonomisk databas (via GBIF, dataset version of 2026-09-29)" ;
-    dcterms:creator "SLU Artdatabanken (Backlund M)" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> .
+    dcterms:title "Dyntaxa. Svensk taxonomisk databas (via GBIF, dataset version of 2026-09-29)" .
 
 <https://doi.org/10.2173/avilist.v2025b>
     dcterms:title "AviList: The Global Avian Checklist, v2025b" ;
@@ -6277,13 +5827,9 @@
     dcterms:title "The International System of Units (SI), 9th edition 2019, V4.01 June 2026 (SI Brochure), DOI 10.59161/AUEZ1291" ;
     dcterms:creator "Bureau International des Poids et Mesures (BIPM)" ;
     dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
-    dcterms:title "The International System of Units (SI), 9th edition 2019, V4.01 June 2026 (SI Brochure)" ;
-    dcterms:creator "Bureau International des Poids et Mesures (BIPM)" ;
-    dcterms:license <https://creativecommons.org/licenses/by/4.0/> .
+    dcterms:title "The International System of Units (SI), 9th edition 2019, V4.01 June 2026 (SI Brochure)" .
 
 <https://regelverk.swedac.se/foreskrifter/swedac/stafs-2009-26-konsol.pdf>
-    dcterms:title "Styrelsen för ackreditering och teknisk kontrolls föreskrifter (STAFS 2009:26) om måttenheter, konsoliderad version t.o.m. STAFS 2020:2" ;
-    dcterms:creator "Swedac (Styrelsen för ackreditering och teknisk kontroll)" ;
     dcterms:title "Styrelsen för ackreditering och teknisk kontrolls föreskrifter (STAFS 2009:26) om måttenheter, konsoliderad version t.o.m. STAFS 2020:2" ;
     dcterms:creator "Swedac (Styrelsen för ackreditering och teknisk kontroll)" .
 
@@ -7604,30 +7150,14 @@
 
 <https://github.com/antwika/solid-memo/blob/57e8e028d6287265ae78a12ade7b75f8aed3b80b/scripts/generate_decks_for_swedish_learning.py>
     a prov:SoftwareAgent ;
-    dcterms:title "generate_decks_for_swedish_learning.py" ;
-    a prov:SoftwareAgent ;
-    dcterms:title "generate_decks_for_swedish_learning.py" ;
-    a prov:SoftwareAgent ;
     dcterms:title "generate_decks_for_swedish_learning.py" .
 
 <https://sprakbanken.se/resurser/flex>
     dcterms:title "Flex (word frequencies in novels, newspapers and web forums)" ;
     dcterms:creator "Språkbanken Text, University of Gothenburg" ;
-    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
-    dcterms:title "Flex (word frequencies in novels, newspapers and web forums)" ;
-    dcterms:creator "Språkbanken Text, University of Gothenburg" ;
-    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
-    dcterms:title "Flex (word frequencies in novels, newspapers and web forums)" ;
-    dcterms:creator "Språkbanken Text, University of Gothenburg" ;
     dcterms:license <https://creativecommons.org/licenses/by/4.0/> .
 
 <https://spraakbanken.gu.se/resurser/saldom>
-    dcterms:title "SALDO morphology" ;
-    dcterms:creator "Språkbanken Text, University of Gothenburg" ;
-    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
-    dcterms:title "SALDO morphology" ;
-    dcterms:creator "Språkbanken Text, University of Gothenburg" ;
-    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
     dcterms:title "SALDO morphology" ;
     dcterms:creator "Språkbanken Text, University of Gothenburg" ;
     dcterms:license <https://creativecommons.org/licenses/by/4.0/> .
@@ -9701,8 +9231,7 @@
 <https://snl.no/>
     dcterms:title "Store norske leksikon" ;
     dcterms:creator "Store norske leksikon and the named authors of each article" ;
-    dcterms:title "Store norske leksikon (articles)" ;
-    dcterms:creator "Store norske leksikon and the named authors of each article" .
+    dcterms:title "Store norske leksikon (articles)" .
 
 <https://solid-memo.com/decks/world-history-dates/v1.ttl#turtle>
     a dcat:Distribution ;
