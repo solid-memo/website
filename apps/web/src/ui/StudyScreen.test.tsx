@@ -255,6 +255,46 @@ describe("StudyScreen", () => {
     expect(document.activeElement).toHaveTextContent("Answer: water");
   });
 
+  it("leaves Space on an enlarged picture to the picture, which shrinks rather than revealing", () => {
+    renderScreen({
+      prompt: { card: { ...card, frontImageUrl: "https://flagcdn.com/af.svg" }, direction: "front-to-back" },
+    });
+    vi.spyOn(screen.getByRole("img"), "getBoundingClientRect").mockReturnValue({
+      left: 0,
+      top: 0,
+      width: 40,
+      height: 20,
+    } as DOMRect);
+    // A tap that does not focus the button, as in Safari: the focus is still on the question.
+    const enlarge = screen.getByRole("button", { name: "Enlarge picture" });
+    fireEvent.click(enlarge);
+    expect(enlarge).toHaveAttribute("aria-expanded", "true");
+    // Space goes to the button, so it presses it (keydown, then the click it makes).
+    fireEvent.keyDown(document.activeElement!, { key: " " });
+    fireEvent.click(document.activeElement!);
+    expect(enlarge).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByText("water")).toBeNull();
+  });
+
+  it("shrinks the answer's enlarged picture on Escape, leaving the card on screen", () => {
+    const { props } = renderScreen({
+      prompt: { card: { ...card, backImageUrl: "https://flagcdn.com/af.svg" }, direction: "front-to-back" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Reveal" }));
+    vi.spyOn(screen.getByRole("img"), "getBoundingClientRect").mockReturnValue({
+      left: 0,
+      top: 0,
+      width: 40,
+      height: 20,
+    } as DOMRect);
+    const enlarge = screen.getByRole("button", { name: "Enlarge picture" });
+    fireEvent.click(enlarge);
+    fireEvent.keyDown(enlarge, { key: "Escape" });
+    expect(enlarge).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByText("water")).toBeInTheDocument();
+    expect(props.onAnswer).not.toHaveBeenCalled();
+  });
+
   it("leaves Space on Reveal to the button itself", () => {
     renderScreen();
     fireEvent.keyDown(screen.getByRole("button", { name: "Reveal" }), { key: " " });

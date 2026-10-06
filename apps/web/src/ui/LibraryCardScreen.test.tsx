@@ -25,7 +25,8 @@ describe("LibraryCardScreen", () => {
       "href",
       "#/library-deck?deck=capitals",
     );
-    expect(screen.queryByRole("button")).toBeNull();
+    // The one button is the picture's, which enlarges it.
+    expect(screen.getAllByRole("button").map((button) => button.getAttribute("class"))).toEqual(["picture-zoom-button"]);
     expect(screen.queryByRole("textbox")).toBeNull();
   });
 

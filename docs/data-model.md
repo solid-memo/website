@@ -169,7 +169,14 @@ graph LR
   language-tagged), read to whoever cannot see it in its place; without
   one it is named by its side ("Picture on the front of the card"). The
   description is read while its side is asked, so it says what the
-  picture shows without giving the answer away.
+  picture shows without giving the answer away. Wherever a side is
+  shown whole (study, a library preview, a card's page, a library card),
+  a tap (or Enter or Space on the button over it) enlarges its picture to
+  the viewport's width or height, keeping its shape, and another tap,
+  Escape, the focus moving on or a scroll puts it back
+  ([ZoomableImage](../apps/web/src/ui/ZoomableImage.tsx)); in study,
+  Space on a picture's button does not reveal the answer, while a grade's
+  key still answers.
 - **Direction**: a deck's `sm:studyDirection` says how it is studied — a
   concept of `sm:StudyDirections`: `sm:frontToBack`, `sm:backToFront` or
   `sm:bidirectional` (every card asked both ways). Formats 1 and 2 said
