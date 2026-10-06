@@ -85,6 +85,7 @@
                        <#review-5> ;
     rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
                  "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
                  "The cards were checked by machine (a cross-checking script over three or four independent readings of every code, live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
                  "1. The standard: Recommendation ITU-R M.1677-1 (10/2009), International Morse code, was downloaded from the ITU (query 5); the recommendation's page gave \"Status : In force (Main)\" on 2026-10-04, so it is still the current version. Its text was extracted with pypdf (query 6). Annex 1, Part I, 1.1 defines the written characters: the letters a–z and \"accented e\" (1.1.1), the figures 1–0 (1.1.2) and, in 1.1.3, 13 punctuation marks and signs with a written sign (full stop, comma, colon, question mark, apostrophe, hyphen, fraction bar, left and right bracket, inverted commas, double hyphen, cross and commercial at), the multiplication sign × (the same signal as the letter X, which 3.2.1 says to send for it) and six procedural signals without a written sign (understood, error, invitation to transmit, wait, end of work, starting signal). The recommendation is © ITU, all rights reserved, so it is used for verification only: the deck takes no text from it."@en ,
                  "2. Wikidata (content): every statement of P3295 (code) whose value consists of dots and dashes was fetched with query 1; those with the qualifier P3294 (encoding) Morse code (Q79897) cover all 26 letters, the 10 digits, É, 12 of the 13 ITU punctuation marks (the full stop item Q172008 has no code statement), and a number of non-ITU characters (Ä, Ö, À, Ü, &, !, ;, $, _ and others). The items of the cards, and of SOS (Q214266), distress signal (Q2355426) and prosign for Morse code (Q7250609), were then fetched in full with wbgetentities (query 2, fetch_entities.py), keeping the raw responses (entities.json): the code statements with their qualifiers and ranks, and the English, Swedish and multilingual (mul) labels and aliases. SOS has no code statement; its English aliases include the code \"· · · – – – · · ·\". A later query (query 15) listed every item that shares the code of the cards with back notes: the × item (Q1900125, en label \"×\", sv label \"multiplikationstecken\") has −··− and the en dash item (Q13219273, en label \"–\", sv label \"vanligt tankstreck\") has −····−, both with encoding Morse code; no item for a division sign, a subtraction or minus sign or a fraction bar has a code, so the notes do not name them."@en ,
@@ -101,42 +102,42 @@
 
 <#review-0>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Machine checks and sources: every code read from three or four independent sources (ITU, Pub. 102, Wikidata, English Wikipedia; 33 CFR 87.01 for SOS) and compared by verify.py; uniqueness of every code and front; that every written ITU character has a card; licences of every source; the Wikidata checks against live Wikidata."@en ;
     rdfs:comment "Scope: All 51 cards, the sources and the deck metadata."@en ,
                  "Outcome: All 51 cards agree in every source that has them, no two codes or fronts are the same, and every written ITU character except × has a card. No Wikidata check was skipped and no source disagrees with another. Findings concern the scope of the sources and two parsing slips in the script, none a card."@en .
 
 <#review-1>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Factual accuracy"@en ;
     rdfs:comment "Scope: All 51 cards: every code re-derived from the ITU-R M.1677-1 PDF, SOS from Pub. 102, the notes against the ITU text, and every Wikidata check run against live Wikidata."@en ,
                  "Outcome: No factual errors: all 51 codes match the ITU recommendation (SOS matches Pub. 102 and 33 CFR 87.01), every Wikidata check passes, the notes are accurate and the counts and coverage agree with the description. Two optional suggestions: the SOS code check rests on a free-text alias, and the Swedish equals-sign note contains an English term. Both are resolved."@en .
 
 <#review-2>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Language, translation and language tags"@en ;
     rdfs:comment "Scope: All 51 cards, the title, the description and the keywords: language tags, Swedish names and idiom, uniqueness for bidirectional study."@en ,
                  "Outcome: The tags are sound (zxx for every character and code, en and sv for the SOS front and the notes), the Swedish names match Wikidata sv labels and Swedish Wikipedia, and fronts and backs are unique. One warning, that the description put SOS inside the ITU code, and two suggestions (an English term in the Swedish equals-sign note, \"Code\" capitalised in the title) were all fixed."@en .
 
 <#review-3>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Licensing, attribution and documentation"@en ;
     rdfs:comment "Scope: Every source's licence page, the cited revisions, evidence spot checks on 20 cards (A, B, C, K, X, É, the 13 punctuation marks and SOS), attribution in the built deck, the method, queries and licensing text."@en ,
                  "Outcome: Licences, revisions and quotes are recorded correctly and attribution is complete. The main problem was that back notes on nine cards stated facts given only by verification sources (the ITU recommendation and Wikipedia), which made the licensing text untrue. Each note now rests on a content source or was removed, and the licensing text and the ITU's usedFor say exactly how the sources were used, including that the punctuation set follows the ITU's list. The documentation slips (four readings, the elided query, the scratch paths, the history of Å) are fixed."@en .
 
 <#review-4>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
     rdfs:comment "Scope: The 10 cards changed in round 3, every third card (A, D, G, J, M, P, S, V, Y, 1, 4, 7, 0, comma, apostrophe, left parenthesis, equals sign, SOS), the deck metadata and the documentation; 24 cards in all, checked against the ITU PDF, live Wikidata, the eCFR, the archive.org record of Pub. 102 and the cited Swedish Wikipedia revisions, plus a run of the validators."@en ,
                  "Outcome: No errors or warnings: every code, Wikidata check, quote and licence statement was confirmed, and the round-3 fixes are all in place. Three documentation suggestions were checked against the ITU PDF (fetched again today) and applied: the description and selection now say that × is the one ITU sign left out, round 0 notes that the quotation-marks note was later removed, and the ITU's usedFor names the hyphen note."@en .
 
 <#review-5>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Final full-deck review (facts and language)"@en ;
     rdfs:comment "Scope: All 51 cards, the deck metadata and the documentation: every code compared with the ITU-R M.1677-1 PDF (fetched again today, Annex 1, 1.1.1–1.1.3), the back notes, language tags, Swedish notes, description, keywords, topics, study direction and the round-4 fixes."@en ,
                  "Outcome: No errors: all 51 codes match the ITU text, the back notes are confirmed by it, no two cards share a back, and the round-4 fixes are in place. One optional language suggestion was applied: the hyphen card's Swedish back note now uses the definite form, like the other Swedish notes."@en .

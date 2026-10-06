@@ -79,6 +79,7 @@
                        <#review-5> ;
     rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
                  "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
                  "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
                  "1. Candidates (Wikidata, 2026-10-04). Four queries were combined: query 1 (<scratch>/pool2.py) takes every item in Swedish (P407 Q9027) or from Sweden (P495 Q34) whose author (P50) is a Swedish citizen (P27 Q34) and that at least 2 Wikimedia sites cover (wikibase:sitelinks ≥ 2): 722 items. Query 2 lists the Swedish citizens whose occupation (P106) is writer, novelist, poet, playwright or children's writer with at least 15 sitelinks (310 people) and query 3 every item they are the author of (7,400 items, of which those with ≥ 2 sitelinks were kept), which adds works without a language statement. Query 4 adds works whose author is a group (not a human) whose members (P527) are Swedish citizens: for some of the Martin Beck novels the query service lists only the partnership Sjöwall and Wahlöö (Q2342834) as author, and Hypnotisören has the pen name Lars Kepler (Q1806270). Together: 853 items."@en ,
                  "2. Eligibility (script eligible.py). Dropped: 71 items whose type (P31) is not a single book (film, television, series of books or comics, songs, hymns and single poems, documents, manifestos, maps, scholarly articles and the like); 67 with a language statement that is not Swedish (Latin, English, German, French, Finnish …: Linnaeus's botanical works, Swedenborg, Munthe's The Story of San Michele, Peter Weiss's German plays, Strindberg's Inferno and En dåres försvarstal, written in French); 23 without a Swedish label; and 3 edition items duplicating a work (same Swedish label and authors). 689 works remained."@en ,
@@ -96,42 +97,42 @@
 
 <#review-0>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Selection rule, sources, licences and machine checks: every card's Swedish title and author against Wikidata, LIBRIS and Swedish Wikipedia (and English Wikipedia where there is an article); every English title against LIBRIS and Open Library."@en ;
     rdfs:comment "Scope: All 60 cards, the candidate pool and ranking, the sources and the deck metadata."@en ,
                  "Outcome: All 60 cards agree across Wikidata, LIBRIS and the Wikipedia leads on the author, and every Swedish title is the title of Swedish LIBRIS records of the work. All 361 Wikidata checks pass. The findings are about the selection measure, Wikidata's English labels and the modelling of the two author partnerships; no Wikidata check was skipped because Wikidata disagreed with a better source."@en .
 
 <#review-1>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Factual accuracy"@en ;
     rdfs:comment "Scope: All 60 cards: authors, Swedish and English titles against live Wikidata, LIBRIS and Open Library; the description's claims."@en ,
                  "Outcome: All authors and Swedish titles are correct and all 361 Wikidata checks passed. Two errors: Frithiofs saga kept its Swedish title although English editions as \"Frithiof's saga\" go back to 1833, and the description said the Swedish title appears only where no English edition was found, which was false for several cards. Two warnings (the Swedish Wikipedia check claimed for every card; the less established \"Ronja\" spelling) and two suggestions. All findings were confirmed against LIBRIS, Open Library and live Wikidata; five were fixed and one suggestion declined."@en .
 
 <#review-2>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Language, translation and language tags"@en ;
     rdfs:comment "Scope: All 60 cards' English and Swedish titles and author names, their language tags, notes, keywords and the description."@en ,
                  "Outcome: Swedish titles and author names are correct and consistent, and nothing is untagged. The main problem was the English front: three works with well-attested English editions (Frithiofs saga, Markurells i Wadköping, Det går an) showed the Swedish title tagged as English, contrary to the description; Ronja used the less established spelling; the Bellman collections kept their Swedish titles although English names are established; and the five same-title works had not been checked for English editions. All were confirmed and fixed. A frontNote on the four Swedish-only titles was declined."@en .
 
 <#review-3>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Licensing, attribution and documentation"@en ;
     rdfs:comment "Scope: Sources, licence evidence, licensing, method, selection, queries and the locators of 16 cards."@en ,
                  "Outcome: The licence quotes are accurate and the deck's CC0 licence is defensible; 16 card locators matched. Three errors (the Litteraturbanken coverage and licence claim, the description, the Swedish Wikipedia claim), four warnings (the LIBRIS licence argument, incomplete queries, step 1's count, reproducibility around the cut) and four suggestions. All were confirmed and fixed, the Litteraturbanken finding with one correction: its records carry varying licence values, not \"pd\" on every record."@en .
 
 <#review-4>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
     rdfs:comment "Scope: The 12 cards changed in rounds 1–3 plus every third card (29 cards), the metadata, documentation and quality-control log; all 363 Wikidata checks re-run live."@en ,
                  "Outcome: No errors; every fact checked was correct and all checks passed. Three warnings (the English Wikipedia licence-evidence URL redirected to a disambiguation page, method step 7's closing sentence overstated the edition backing, method step 10's count of English-title checks) and two suggestions (the Frithiof's saga record count, the English description's Swedish-only title). All five were confirmed against live sources (query 21) and fixed."@en .
 
 <#review-5>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
     rdfs:comment "Scope: The 6 cards changed in round 4 (kallocain, singoalla, aniara, roseanna, barabbas, frithiofs-saga) and every third card from the 2nd onward (24 cards in all), the metadata, documentation and quality-control log; Wikidata checks, LIBRIS and Open Library records, Wikipedia leads and licence pages re-fetched live."@en ,
                  "Outcome: No errors and no warnings; every fact checked was correct, all checks passed and every round-4 fix was found in the dossier. Two suggestions on documentation wording (method step 10's count of English-title checks, the description's \"as published in English\" for the Bellman collections). Both were confirmed (query 22 for the first) and fixed."@en .

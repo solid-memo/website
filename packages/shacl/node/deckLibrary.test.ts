@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
@@ -217,6 +217,31 @@ describe("buildIndex", () => {
         .filter((q) => q.subject.value === `${DECKS}capitals/v3.ttl` && q.predicate.value === `${SM}cardCount`)
         .map((q) => q.object.value),
     ).toEqual(["1"]);
+  });
+
+  it("leaves out how the current release was made: its activities and every comment", () => {
+    const turtle = `${releaseText("capitals", 1)}
+<> <http://www.w3.org/ns/prov#wasGeneratedBy> <#compilation> .
+
+<#compilation>
+    a <http://www.w3.org/ns/prov#Activity> ;
+    <http://www.w3.org/ns/prov#wasAssociatedWith> <#anton> ;
+    <http://www.w3.org/ns/prov#wasInformedBy> <#review> .
+
+<#review> a <http://www.w3.org/ns/prov#Activity> .
+
+<#anton> <http://www.w3.org/2000/01/rdf-schema#comment> "Compiled the deck." .
+`;
+    const made: DeckRelease = { deck: "capitals", version: 1, turtle, quads: parseTurtle(turtle, `${DECKS}capitals/v1.ttl`) };
+    const built = parseTurtle(buildIndex([made]), INDEX);
+    const current = `${DECKS}capitals/v1.ttl`;
+    expect(built.filter((q) => q.subject.value === `${current}#compilation`).map((q) => [q.predicate.value, q.object.value])).toEqual([
+      [RDF_TYPE, "http://www.w3.org/ns/prov#Activity"],
+    ]);
+    expect(built.filter((q) => q.subject.value === `${current}#review`)).toEqual([]);
+    expect(built.filter((q) => q.predicate.value === "http://www.w3.org/2000/01/rdf-schema#comment")).toEqual([]);
+    expect(built.some((q) => q.subject.value === current && q.object.value === `${current}#compilation`)).toBe(true);
+    expect(built.some((q) => q.subject.value === `${current}#anton` && q.object.value === "Anton")).toBe(true);
   });
 
   it("leaves out what a release does not say, for validation to name", () => {
@@ -494,6 +519,10 @@ describe("defaultIo", () => {
     );
     await expect(library.readFilesAt("HEAD~1")).resolves.toEqual(new Map());
     await expect(library.readFilesAt("no-such-ref")).rejects.toThrow();
+    await symlink(join(repo, "decks", "capitals", "v1.ttl"), join(repo, "decks", "capitals", "v3.ttl"));
+    await expect(library.readFiles()).rejects.toThrow(
+      "decks/capitals/v3.ttl is neither a file nor a folder: decks/ holds only index.ttl and <name>/v<N>.ttl, as plain files.",
+    );
     expect(library.loadValidators).toBe(loadValidators);
     const log = vi.spyOn(console, "log").mockImplementation(() => undefined);
     library.log("hello");

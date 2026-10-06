@@ -73,6 +73,7 @@
                        <#review-5> ;
     rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
                  "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
                  "The cards were checked by machine (a script asserting every name, order and age against the saved ICS chart, NE and SGU texts, live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
                  "1. Wikidata (query 1): the items whose English label is one of the four eon names (Hadean, Archean, Proterozoic, Phanerozoic), the three Phanerozoic era names and the twelve Phanerozoic period names were fetched with their instance of (P31), part of (P361), follows (P155), followed by (P156), start time (P580) and Swedish label. The geological units are the 19 items that are instances of period (Q392928), erathem (Q2464485) or eonothem (Q2669627) and part of the ICS Standard Global Chronostratigraphic (Geochronologic) Scale (Q63463770); the other rows (Wikimedia disambiguation pages and items of other kinds that share an English label, none of them part of Q63463770) were discarded. Query 2 fetched every English, Swedish and multilingual label and alias of the 19 items and of the items they point to; query 3 identified the units before the Cambrian and the Paleozoic (Q188654 Ediacaran, part of Q191935 Neoproterozoic, part of Q104162 Proterozoic). The chains of P155/P156 run unbroken Hadean → Archean → Proterozoic → Phanerozoic, Paleozoic → Mesozoic → Cenozoic and Cambrian → … → Quaternary, and each period is part of (P361) exactly one of the three eras."@en ,
                  "2. The International Chronostratigraphic Chart of the International Commission on Stratigraphy (ICS): stratigraphy.org/chart is a JavaScript application and returned no content to curl, so the chart's PDF was used. The address pattern https://stratigraphy.org/ICSchart/ChronostratChart<YYYY-MM>.pdf was probed for every month from 2024-12 to 2026-09 (query 5): 2024-12 and 2026-06 exist, and the home page of stratigraphy.org lists \"Chart update 2026/06\" as its latest chart news, so v2026/06 (dated \"(c) International Commission on Stratigraphy, June 2026\") is the current version. Both PDFs were downloaded, their text extracted with pypdf and the 2026/06 chart rendered to PNG with PyMuPDF and read (queries 6 and 7). Between v2024/12 and v2026/06 only three stage boundaries changed (259.51 → 259.857, 249.9 → 250.8 and 246.7 → 247.0 Ma); no eon, era or period name, order or base changed."@en ,
@@ -86,42 +87,42 @@
 
 <#review-0>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Sources, licences and machine checks: every name, order, era assignment and age against Wikidata, the ICS chart v2026/06, SGU and NE; the chart version; the Swedish names and their case."@en ;
     rdfs:comment "Scope: All cards, the sources and the deck metadata."@en ,
                  "Outcome: Wikidata, the ICS chart, SGU and NE agree on every name, every order and every period's era. The Swedish names agree in spelling everywhere; Wikidata capitalises 16 of the 19 sv labels where NE and SGU's running text write lower case. Wikidata's start times differ from the current chart for some periods (not on any card); the start of the Paleozoic differs between the current chart and older sources, which the note on that card states. No Wikidata check was skipped except the sv label checks on the 16 capitalised labels."@en .
 
 <#review-1>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Factual accuracy"@en ;
     rdfs:comment "Scope: All 37 cards, against live Wikidata (labels, P361, P155, P156, P580 of the 19 units) and the ICS chart v2026/06 (downloaded, text-extracted and its fonts inspected); the chart version; the notes."@en ,
                  "Outcome: Every order, every period's era and the three era base ages match the chart and Wikidata, all Wikidata checks hold live, v2026/06 is the newest chart and the Quaternary is still the current period. One warning: the Hadean note equated 4567 Ma with the Earth's formation, which is the age of the Solar System's oldest solids (USGS gives the Earth's age as 4.54 billion years). Fixed."@en .
 
 <#review-2>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Language, translation and language tags"@en ;
     rdfs:comment "Scope: All 37 cards, the title, the description and the keywords: language tags, Swedish names and idiom, English wording, typography."@en ,
                  "Outcome: Every text is correctly tagged and the Swedish names follow NE's lower-case forms consistently. One warning (title case in the English title) and five suggestions; the title, the description, the twelve era fronts, the Hadean and Carboniferous notes and the number spacing were changed; the article before \"Earth\" was left as it was."@en .
 
 <#review-3>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Licensing, attribution and documentation"@en ;
     rdfs:comment "Scope: The sources and their licence pages, the licensing paragraph, the method, the queries and every card's evidence; spot checks against freshly fetched sources."@en ,
                  "Outcome: The CC0 licence holds and all three closed sources are verification only, but some notes carried facts that only verification sources gave; they were rewritten to rest on Wikidata statements and descriptions (new evidence and 15 new checks), and the licensing paragraph now says so and names the right of quotation. The NE tertiär locator, the missing svenska.sh and fixgen.py commands, the NE quotation convention, the SGU figure caption and misprint, the NE article URLs and the deck's own script check in the statement of how the deck was made were all corrected."@en .
 
 <#review-4>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
     rdfs:comment "Scope: The 24 cards changed in round 3 and every third card (32 cards), the metadata, the licence and the documentation; every Wikidata check against live wbgetentities, the ICS chart v2026/06, the NE and SGU quotations."@en ,
                  "Outcome: Nothing wrong or misleading; all checks hold live, v2026/06 is still the newest chart, quotations are verbatim and the builds match the dossier. Three documentation suggestions were applied: the source of the Hadean note, a mark where an NE quotation breaks off, and a published reason for leaving out the Precambrian subdivisions, epochs and ages."@en .
 
 <#review-5>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Final full-deck review (facts and language)"@en ;
     rdfs:comment "Scope: All 37 cards, the title, description, keywords and notes; names, order, era assignments and era base ages against the ICS chart v2026/06 and live Wikidata; the Swedish text and the language tags."@en ,
                  "Outcome: No errors or warnings. Two optional wording suggestions were applied: the English fronts of the three \"current\" cards now say \"geologic\", so \"The current era\" cannot be read as the Common Era, and the English keyword \"geological periods\" became \"geologic periods\" to match the rest of the deck."@en .

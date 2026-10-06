@@ -76,6 +76,7 @@
                        <#review-5> ;
     rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
                  "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
                  "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
                  "Finding the Games in Wikidata: a first query (query 1) asked for items that are instances (P31) of Summer Olympic Games (Q159821) or Winter Olympic Games (Q82414) and returned nothing, because the editions are instances of edition classes (for example Q135976384 \"Summer Olympic Games edition\", as the entity API showed for the 1912 Games, Q8118, query 2). Query 3 instead selected every item whose P3450 (sports season of league or competition) is Q159821 or Q82414, with its start and end times (P580/P582), the truthy P276 (location) and P17 (country) values and the English and Swedish labels. The raw CSV was saved."@en ,
                  "Selection: of the items from query 3, those with a start time (the Games actually held) from 1896 to 2026 became the cards: 30 Summer Games (1896–2024) and 25 Winter Games (1924–2026), 55 in all. The items for 1916, 1940 and 1944 (Summer) and 1940 and 1944 (Winter) have no start time: they were cancelled and are left out. Future Games (2028 onward) are left out. The 1906 Intercalated Games are not an edition of either series in Wikidata and are not counted by the IOC; they are left out (see the selection)."@en ,
@@ -85,48 +86,48 @@
                  "Cross-check against the IOC: the list of Games on olympics.com could not be fetched from the research environment (connections timed out, query 10), so the Internet Archive's capture of 2026-09-23 was downloaded (query 11) and the edition names in its page data were extracted; every card's city matched the IOC's name for the edition (\"Stockholm 1912\", \"Turin 2006\", \"PyeongChang 2018\", \"Milano Cortina 2026\" …). The IOC's Melbourne 1956 page (capture of 2026-01-13, query 12) was read for the equestrian events in Stockholm."@en ,
                  "Cross-check against Olympedia: the Games overview (query 13) gives each edition's city, dates and status. All 55 cities agree with the cards (Olympedia writes local forms such as Athina, Roma, München, Torino and \"Milano-Cortina d'Ampezzo\"). It lists the 1956 equestrian Games in Stockholm in a separate row (10–17 June), the 1916, 1940 and 1944 Games as \"Not held due to war\", and the 1906 Games in a separate \"Intercalated Games\" table."@en ,
                  "Notes: a back note was written, in the compiler's own words, only where it helps to answer or to avoid a wrong answer: the 1956 equestrian events in Stockholm, Tokyo 2020 held in 2021, the commune name Chamonix-Mont-Blanc, the present names of Squaw Valley, Sarajevo then in Yugoslavia, the Italian name Torino, Pyeongchang County and the IOC's spelling, and the official name and other sites of Milano Cortina 2026. Each note's facts were checked against Wikidata and the English (for Pyeongchang also the Swedish) Wikipedia introduction (for 1924 the introduction of the article on Chamonix, and Wikidata's official name, P1448, of Q83236), and the 1956 note also against the IOC and Olympedia. Two notes give a reason that is not in a Wikidata label or main value: the 1956 quarantine rules for horses (IOC Melbourne 1956 page and the English Wikipedia; Wikidata gives only the June 1956 equestrian qualifiers on the Stockholm location) and the 2020 postponement (also recorded in Wikidata's P580 qualifiers)."@en ,
-                 "Machine checks: for every card the builder checks against live Wikidata the English and Swedish labels of the Games (the front), the P276 link from the Games to the city or venue, the P131 chain from the venue to the city where needed, an English alias of the Games naming the city where one exists, and the English and Swedish labels or aliases of the city (the back); for Turin also the Italian label \"Torino\" given in the note. The builder accepts a multilingual (mul) label for any language, so a check on a language the item lacks (Oslo, Q585, has no sv label) passes on the mul label; the evidence says where that happens. The deck was then validated with the app's SHACL and DCAT-AP validators (scripts/validate_sources.ts)."@en ,
+                 "Machine checks: for every card the builder checked against live Wikidata the English and Swedish labels of the Games (the front), the P276 link from the Games to the city or venue, the P131 chain from the venue to the city where needed, an English alias of the Games naming the city where one exists, and the English and Swedish labels or aliases of the city (the back); for Turin also the Italian label \"Torino\" given in the note. The builder accepts a multilingual (mul) label for any language, so a check on a language the item lacks (Oslo, Q585, has no sv label) passes on the mul label; the evidence says where that happens. The deck was then validated with the app's SHACL and DCAT-AP validators (scripts/validate_sources.ts)."@en ,
                  "Selection: All Olympic Games actually held, Summer and Winter, from the first modern Games (Athens 1896) to the most recent (Milano Cortina, February 2026): 30 Summer and 25 Winter Games. Left out: the Games cancelled because of the world wars (Summer 1916, 1940, 1944; Winter 1940, 1944), which were awarded but never held; the 1906 Intercalated Games in Athens, which the IOC does not count as Olympic Games (it is not in the IOC's list of editions, and Olympedia lists it apart from the Olympic Games); future Games (Los Angeles 2028 onward); the Youth Olympic Games, the Paralympic Games and the 1956 equestrian Games as a card of their own (they are part of the 1956 Summer Olympics and appear in that card's note). The back gives the host city, not the country or the venues; where events were spread over several places, the back names the host city the IOC names the Games after."@en ,
                  "Licensing: The only content source is Wikidata, whose structured data is CC0: the selection of Games, the English and Swedish names of the Games and of the host cities, and the link from each Games to its host city all come from it, so the deck can be CC0 1.0 like the rest of the library. The IOC's olympics.com and Olympedia (both all rights reserved) and the English and Swedish Wikipedia (CC BY-SA 4.0) were used for verification only: they confirmed facts the Wikidata data gave and supplied, as uncopyrightable facts restated in the compiler's own words, the reasons given in two notes (the 1956 quarantine rules for horses, from the IOC and the English Wikipedia; the 2020 postponement, which Wikidata also records); no wording, table or selection was copied from them. The selection is every held edition of two Wikidata series, which coincides with any complete list of Olympic Games because it is the complete set, not a choice taken from a list; the notes are the compiler's own wording of facts, and facts are not copyrightable. Quotations in the provenance report's evidence are not part of the CC0 deck: they remain under their sources' licences (Wikipedia text CC BY-SA 4.0, by Wikipedia contributors, each linked to the quoted revision; the IOC's text all rights reserved) and are short quotations given only to make the verification checkable."@en .
 
 <#review-0>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Sources, licences and machine checks: every card's host city against Wikidata, the IOC's list of editions and Olympedia; the Swedish names against Wikidata labels and the Swedish Wikipedia; the notes against Wikidata and the English Wikipedia."@en ;
     rdfs:comment "Scope: All 55 cards, the sources and the deck metadata."@en ,
                  "Outcome: Wikidata, the IOC and Olympedia agree on the host city of all 55 Games; no card follows a value that a better source contradicts, and no Wikidata check was skipped. The discrepancies are in how Wikidata models the location (14 Games have only venues as truthy P276 values, 1960's preferred P276 is the ski resort under its present name, 1956 has Stockholm as a second, normal-rank location), handled by checking the venue's P131 chain and an alias of the Games. Builder checks cover the front labels, the Games-to-city link and the back labels of every card."@en .
 
 <#review-1>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Factual accuracy"@en ;
     rdfs:comment "Scope: All 55 cards: every host city against Olympedia's editions tables, the English Wikipedia list of host cities and a SPARQL query of the edition items; notes; Wikidata checks spot-checked through the API."@en ,
                  "Outcome: No wrong facts. One documentation error (round 0 claimed a check on Q2182804's alias \"Squaw Valley\" that did not exist) and two suggestions on the 2018 Swedish note and the Swedish Oslo check. All three verified against the Wikidata API (query 17) and applied."@en .
 
 <#review-2>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Language and translation"@en ;
     rdfs:comment "Scope: All 55 cards in English and Swedish, plus the title, description and keywords."@en ,
                  "Outcome: Card text is idiomatic and uses established names. One real issue (the Swedish name of the 1906 Games) and three wording suggestions; all applied after checking the Swedish Wikipedia."@en .
 
 <#review-3>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Licensing, attribution and documentation"@en ;
     rdfs:comment "Scope: All 55 cards' evidence, every source's licence, the method, the queries and the licensing statement."@en ,
                  "Outcome: Licensing sound (Wikidata CC0 the only content source; deck CC0). Three warnings (IOC licence evidence quoted only the footer; query 9 recorded as templates; the 1956 quarantine reason misattributed in the licensing text) and five suggestions; all verified and applied."@en .
 
 <#review-4>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Final re-check (loop 1): the 55 cards changed in the last fix (all of them), checked for facts and language; plus metadata, description, licence decision and documentation"@en ;
     rdfs:comment "Scope: All 55 cards (host cities against Olympedia, the IOC list capture and live Wikidata P276 with ranks; notes; Swedish names; all 64 Wikipedia quotes against their pinned revisions), the metadata, the description, the licence decision and the documentation."@en ,
                  "Outcome: No factual errors found. Two warnings (six cards still described a single P276 venue as \"among them\"; method step 1 said further review rounds might be added later although three had been done) and two suggestions (the quote count 62 vs 64; thin evidence for the 1924 note). All four verified and fixed."@en .
 
 <#review-5>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Final full-deck review (facts and language)"@en ;
     rdfs:comment "Scope: all 55 cards."@en ,
                  "Outcome: All 55 host cities, notes, Swedish names and language tags were re-checked, and every builder check was re-run against live Wikidata; no factual errors were found and all round 4 fixes were confirmed in place. One language suggestion (winter-1960, \"skidorten\" for the ski resort) was verified and fixed."@en .

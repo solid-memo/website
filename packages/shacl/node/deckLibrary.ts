@@ -41,6 +41,8 @@ const XSD = "http://www.w3.org/2001/XMLSchema#";
 const DATA_THEMES = "http://publications.europa.eu/resource/authority/data-theme";
 const TOPICS = `${VOCAB_BASE}topics.ttl`;
 const OWL_DEPRECATED = "http://www.w3.org/2002/07/owl#deprecated";
+const PROV = "http://www.w3.org/ns/prov#";
+const RDFS_COMMENT = "http://www.w3.org/2000/01/rdf-schema#comment";
 
 /** Where the site publishes the library. Every IRI of it is under this: the index, its series and publisher, and every release. */
 export const DECKS_BASE = `${SITE}decks/`;
@@ -155,9 +157,10 @@ function literalsOf(quads: readonly Quad[], subject: string, predicate: string):
  * description, themes and keywords as the release has them; every older
  * release is summarised (a dcat:Dataset with its title, description,
  * version, issue time and notes), the current one described in full —
- * everything but its cards, plus sm:cardCount, the cards it has in use
- * (retired ones not counted) — so the library can be listed from the
- * index alone. The releases must be sorted by deck then version.
+ * everything but its cards and the record of how it was made (every
+ * rdfs:comment, and of its prov:Activity nodes all but the type of the
+ * one that generated it; the release itself carries them), plus sm:cardCount, the cards it has in use (retired
+ * ones not counted) — so the library can be listed from the index alone. The releases must be sorted by deck then version.
  */
 export function buildIndex(releases: readonly DeckRelease[]): string {
   const { namedNode, literal, quad } = DataFactory;
@@ -217,7 +220,16 @@ export function buildIndex(releases: readonly DeckRelease[]): string {
     }
 
     const cards = cardsOf(latest.quads);
-    out.push(...latest.quads.filter((q) => !cards.has(q.subject.value)));
+    const activities = new Set(
+      latest.quads.filter((q) => q.predicate.value === RDF_TYPE && q.object.value === `${PROV}Activity`).map((q) => q.subject.value),
+    );
+    // DCAT-AP wants the activity that generated the release typed as one: its type stays.
+    const generating = new Set(objectsOf(latest.quads, latestUrl, `${PROV}wasGeneratedBy`).map((o) => o.value));
+    const keep = (q: Quad) =>
+      !cards.has(q.subject.value) &&
+      q.predicate.value !== RDFS_COMMENT &&
+      (!activities.has(q.subject.value) || (generating.has(q.subject.value) && q.predicate.value === RDF_TYPE));
+    out.push(...latest.quads.filter(keep));
     const inUse = [...cards.values()].filter((retired) => !retired).length;
     add(latestUrl, `${SM_NS}cardCount`, literal(String(inUse), iri(`${XSD}integer`)));
   }
@@ -233,7 +245,7 @@ function writeIndex(quads: readonly Quad[]): string {
       dcterms: DCTERMS,
       adms: ADMS,
       foaf: FOAF,
-      prov: "http://www.w3.org/ns/prov#",
+      prov: PROV,
       topic: `${TOPICS}#`,
       xsd: XSD,
     },
@@ -460,10 +472,12 @@ export function defaultIo(repo: string): LibraryIo {
   return {
     readFiles: async () => {
       const entries = await readdir(dir, { recursive: true, withFileTypes: true }).catch(() => []);
-      const paths = entries
-        .filter((entry) => entry.isFile())
-        .map((entry) => relative(dir, join(entry.parentPath, entry.name)).replaceAll("\\", "/"))
-        .sort();
+      const pathOf = (entry: (typeof entries)[number]) => relative(dir, join(entry.parentPath, entry.name)).replaceAll("\\", "/");
+      const other = entries.find((entry) => !entry.isFile() && !entry.isDirectory());
+      if (other !== undefined) {
+        throw new Error(`decks/${pathOf(other)} is neither a file nor a folder: decks/ holds only index.ttl and <name>/v<N>.ttl, as plain files.`);
+      }
+      const paths = entries.filter((entry) => entry.isFile()).map(pathOf).sort();
       return new Map(await Promise.all(paths.map(async (path) => [path, await readFile(join(dir, path), "utf8")] as const)));
     },
     readFilesAt: async (ref) => {

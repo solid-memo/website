@@ -79,11 +79,12 @@
                        <#review-5> ;
     rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
                  "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
                  "The cards were checked by machine (a Python conversion script with an independent implementation, live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
                  "1. Convention: the deck uses the standard modern notation, the one in which every number from 1 to 3999 has exactly one numeral: a number is written digit by digit, from the thousands down, each digit by its fixed form (units I, II, III, IV, V, VI, VII, VIII, IX; tens X to XC and hundreds C to CM likewise; thousands M, MM, MMM), and a zero digit is left out. Subtraction therefore occurs only in the six pairs IV, IX, XL, XC, CD and CM. This is what makes the cards unambiguous and lets them be studied in both directions; older and non-standard forms (IIII, VIIII, XXXX, CCCC, IL, IC, MIM) are named in notes, never on a front or back."@en ,
                  "2. Selection: the 40 numbers were chosen by the compiler following the library editor's brief, not taken from a list: the seven symbols (I, V, X, L, C, D, M); the six subtractive pairs (IV, IX, XL, XC, CD, CM); and 27 further numbers chosen to practise each kind of construction: small numbers (2, 3, 6, 8, 12, 14, 19, 24), numbers that combine a subtractive pair with other symbols (39, 42, 49, 99, 444, 999), repeated and additive forms (80, 300, 800, 2000), MDCLXVI (1666, each symbol once), years often met in Roman numerals (1492, 1776, 1945, 1984, 1999 and the current year 2026), the longest numeral below 4000 (3888) and the largest (3999)."@en ,
                  "3. Fronts and backs: each front is the numeral in capital Latin letters (I, V, X, L, C, D, M; not the Unicode Roman numeral characters (U+2160–U+2188); the Swedish Wikipedia article, citing the Unicode Standard 5.0 for U+2160–U+2182, says these are meant mainly for text in Chinese characters and recommends ordinary letters instead) and each back the value in Arabic numerals without separators, both tagged zxx (text in no language). The backs are all different, so the deck is studied in both directions. The dossier nevertheless declares the back side as [\"en\", \"sv\"]: these are the languages of the back notes, and the builder takes the deck's languages (dcterms:language) only from the declared sides and the fronts and backs, so with both sides declared zxx it wrote an empty language list and the Turtle did not parse (QC round 0). Every front and back is still tagged zxx in the built deck."@en ,
-                 "4. Machine verification (query 13): verify_roman.py, run with `uv run --with roman==5.2 python3 <scratch>/verify_roman.py <dossier>`, reads this dossier and (a) converts every front with the compiler's own strict parser, which accepts only numerals in standard notation, and with roman.fromRoman, and every back with the compiler's converter and with roman.toRoman (roman 5.2, the PyPI package of Mark Pilgrim and the Zope Foundation, an independent implementation); all four results must agree with the card; (b) checks that the front is the concatenation of the place-table forms of the back's digits (printed per card, e.g. 3888 = MMM + DCCC + LXXX + VIII); (c) runs both implementations over every number from 1 to 3999 (all agree) and checks that 4000 has no standard numeral; (d) checks that 16 non-standard strings (IIII, VIIII, XXXX, CCCC, IL, IC, IM, XM, VX, LC, DM, MIM, VV, MMMM, IXI and the empty string) are rejected; (e) computes the facts used in notes: 3999 = MMMCMXCIX is the largest number, 3888 the only number with the longest numeral (15 symbols), and MDCLXVI uses each of the seven symbols once. All 40 cards passed; the results are in each card's evidence."@en ,
+                 "4. Machine verification (query 13): verify_roman.py, run with `uv run --with roman==5.2 python3 <scratch>/verify_roman.py <dossier>`, reads the dossier and (a) converts every front with the compiler's own strict parser, which accepts only numerals in standard notation, and with roman.fromRoman, and every back with the compiler's converter and with roman.toRoman (roman 5.2, the PyPI package of Mark Pilgrim and the Zope Foundation, an independent implementation); all four results must agree with the card; (b) checks that the front is the concatenation of the place-table forms of the back's digits (printed per card, e.g. 3888 = MMM + DCCC + LXXX + VIII); (c) runs both implementations over every number from 1 to 3999 (all agree) and checks that 4000 has no standard numeral; (d) checks that 16 non-standard strings (IIII, VIIII, XXXX, CCCC, IL, IC, IM, XM, VX, LC, DM, MIM, VV, MMMM, IXI and the empty string) are rejected; (e) computes the facts used in notes: 3999 = MMMCMXCIX is the largest number, 3888 the only number with the longest numeral (15 symbols), and MDCLXVI uses each of the seven symbols once. All 40 cards passed; the results are in each card's evidence."@en ,
                  "5. Wikidata (queries 1–4): a search for Wikidata items with a Unicode Roman numeral character (P487 in U+2160–U+2188, query 1) and for a Wikidata property holding Roman numerals (query 2: none exists) led to the class Roman numerals (Q38918); its instances (query 3) include one item per numeral for 1–12, 50, 100, 500 and 1000 (described \"Roman numeral N\", with the numeral in Latin letters as English alias and its value as P1181 numeric value). Their full data was fetched with wbgetentities (query 4, which also fetched the items for VII and XI, not in the deck, and two Unicode-character items, to understand a label anomaly). The 14 cards among these numerals have three builder checks each (P1181 value, P31 Q38918, English alias), run against live Wikidata on every build. No Wikidata item exists for the other 26 numerals."@en ,
                  "6. Second and third sources for every card: the English Wikipedia article Roman numerals (revision 1377908551 of 2026-10-01, the current revision on 2026-10-04; wikitext through the API, query 8, and the rendered page, query 9) states the standard form in a table of the numeral for each digit of each decimal place; every card's numeral was compared with the cells for its digits, and the article's own examples (39, 1776, 3999 and the current year, rendered by MediaWiki as MMXXVI) were compared where they exist. The English Wiktionary's Translingual entries (query 6 listed which exist, query 7 fetched them) give the value of 25 of the numerals. The Swedish Wikipedia article Romerska siffror (revision 59692021, query 10) states 19 of the numerals or the rules in their notes. All agree with the cards; no discrepancy was found."@en ,
                  "7. Swedish text: the notes were written in Swedish by the compiler, with the terms of the Swedish Wikipedia article (romerska siffror, tecken, subtraheras, urtavla) and Wikidata's Swedish alias \"Romerska siffror\" of Q38918 for the deck's title. Numbers and numerals are the same in both languages and are tagged zxx."@en ,
@@ -93,42 +94,42 @@
 
 <#review-0>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Machine checks and sources: every card computed and verified by verify_roman.py with two independent implementations; every card against the English Wikipedia standard-form table; the 14 numerals with Wikidata items against their numeric values; Wiktionary and the Swedish Wikipedia where they state a numeral; the facts in the notes."@en ;
     rdfs:comment "Scope: All 40 cards, the sources and the deck metadata."@en ,
                  "Outcome: All 40 cards pass the script (own converter and roman 5.2 agree on every card and on all of 1–3999; all 16 negative controls rejected) and agree with the Wikipedia table, Wikidata (14 cards), Wiktionary (25) and the Swedish Wikipedia (19). No Wikidata check was skipped. Findings concern Wikidata data quality and the reach of the sources, none a card."@en .
 
 <#review-1>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Factual accuracy"@en ;
-    rdfs:comment "Scope: All 40 cards, re-checked with the reviewer's own greedy converter, live Wikidata, the English Wikipedia (rev. 1377908551) and the Swedish Wikipedia (rev. 59692021); the description."@en ,
+    rdfs:comment "Scope: All 40 cards, re-checked with the review's own greedy converter, live Wikidata, the English Wikipedia (rev. 1377908551) and the Swedish Wikipedia (rev. 59692021); the description."@en ,
                  "Outcome: All 40 cards are correct; every front converts to its back and back, the backs are unique, and 3888 is the only number with the longest numeral. The 14 Wikidata items pass. Three findings, all applied: the description overstated the Wikidata and Wiktionary checks, and the notes of XLIX and XCIX stated the subtraction rule without saying it is the standard form's."@en .
 
 <#review-2>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Language, translation and language tags"@en ;
     rdfs:comment "Scope: All 40 cards in both languages, the title, description, keywords and language tags."@en ,
                  "Outcome: No language errors; every front and back is zxx, the notes are en and sv, the Swedish terms follow the Swedish Wikipedia. One warning about the declared back-side languages, documented in the method because the builder cannot take zxx on both sides; two wording suggestions applied."@en .
 
 <#review-3>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Licensing, attribution and documentation"@en ;
     rdfs:comment "Scope: Every source's licence and terms page, the licensing paragraph, the method and queries, and the evidence of 25 cards spot-checked against the cited revisions."@en ,
                  "Outcome: All recorded licences are right and the CC0 deck uses only its own derivation and CC0 Wikidata as content. One error (the Wiktionary footer was misquoted) and three warnings (the Unicode range attributed to the Swedish article, the description's checks, unrecorded scripts) were confirmed and fixed; the five suggestions were applied."@en .
 
 <#review-4>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
     rdfs:comment "Scope: The 7 cards changed in round 3's fixes (iv, ix, xl, cd, xlix, xcix, mmmcmxcix) and every third card (19 cards in all), checked against the cited English and Swedish Wikipedia and Wiktionary revisions and live Wikidata; the description, keywords, topics, method, licensing and the fixes claimed in rounds 1 to 3."@en ,
                  "Outcome: No errors: every sampled card, quote and Wikidata statement was confirmed and every earlier fix was found in place. Two suggestions: the paraphrase in the iv/xl/cd English Wikipedia evidence was replaced by the article's own words; the AI mention in the derivation source's creator was declined as a library-wide choice."@en .
 
 <#review-5>
     a prov:Activity ;
-    prov:endedAtTime "2026-10-04"^^xsd:date ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Final full-deck review (facts and language)"@en ;
     rdfs:comment "Scope: All 40 cards (fronts, backs, notes and evidence), with each numeral decomposed by decimal place and the 14 Wikidata-checked items confirmed by a live SPARQL query; the title, description (word count and counts), keywords, topics, method, licensing and the fixes claimed in rounds 1 to 4."@en ,
                  "Outcome: No errors or warnings: every card, note and Wikidata statement was confirmed, the Swedish was found idiomatic and every earlier fix was found in place. One suggestion: the licensing sentence on the overlap with the English article's worked examples explained why 1776 and 3999 were chosen but not 39; it was reworded."@en .
@@ -137,7 +138,7 @@
     dcterms:title "Conversion and machine checks for the Solid Memo Roman numerals deck" ;
     dcterms:creator "Anton Wiklund, with the help of AI" ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    rdfs:comment "Own work of the deck's compiler, dedicated to the public domain together with the deck: the deck's dcterms:license is https://creativecommons.org/publicdomain/zero/1.0/ (CC0 1.0 Universal). The value of a Roman numeral is a mathematical fact, which is not copyrightable; the selection of numbers and the wording of the notes are this dossier's own. The verification script is recorded verbatim under Queries (query 13)."@en .
+    rdfs:comment "Own work of the deck's compiler, dedicated to the public domain together with the deck: the deck's dcterms:license is https://creativecommons.org/publicdomain/zero/1.0/ (CC0 1.0 Universal). The value of a Roman numeral is a mathematical fact, which is not copyrightable; the selection of numbers and the wording of the notes are the compilation's own. The verification script is recorded verbatim in the dossier's Queries (query 13)."@en .
 
 <https://www.wikidata.org/wiki/Q38918>
     dcterms:title "Wikidata: the items for the Roman numerals 1–12, 50, 100, 500 and 1000 (instances of Roman numerals, Q38918), with their English labels and aliases and numeric values (P1181)" ;
