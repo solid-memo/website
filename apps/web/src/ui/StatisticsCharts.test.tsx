@@ -53,6 +53,16 @@ describe("ActivityCalendar", () => {
     expect(screen.getByText("September 15, 2026: nothing studied.")).toBeInTheDocument();
     expect(screen.getAllByRole("row")).toHaveLength(1 + days.length);
   });
+
+  it("shows a year of weeks by default, each week its own column across the full width", () => {
+    const { container } = render(<ActivityCalendar days={days} today="2026-09-21" />);
+    expect(screen.getByText("Activity, the last 52 weeks")).toBeInTheDocument();
+    const grid = container.querySelector<HTMLElement>(".calendar-grid")!;
+    expect(grid.style.getPropertyValue("--weeks")).toBe("52");
+    expect(container.querySelectorAll(".calendar-grid .calendar-day")).toHaveLength(51 * 7 + 1);
+    expect(container.querySelector<HTMLElement>('[data-day="2026-09-21"]')!.style.gridColumn).toMatch(/^52/);
+    expect(container.querySelector<HTMLElement>('[data-day="2026-09-14"]')!.style.gridColumn).toMatch(/^51/);
+  });
 });
 
 describe("DayBars", () => {
