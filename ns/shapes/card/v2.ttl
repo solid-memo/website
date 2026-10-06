@@ -1,0 +1,69 @@
+@base <https://solid-memo.com/ns/shapes/card/v2.ttl> .
+
+@prefix sh:         <http://www.w3.org/ns/shacl#> .
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+
+# Card format 2: a side is text, a picture (an IRI) or both.
+<#shape>
+    a sh:NodeShape ;
+    sh:name "CardV2" ;
+    rdfs:comment "Card format 2: each side has text, a picture or both; a picture is always an IRI." ;
+    sh:nodeKind sh:IRI ;
+    sh:class solid-memo:Card ;
+    sh:property <#formatVersion> ,
+                <#front> ,
+                <#back> ,
+                <#frontImage> ,
+                <#backImage> ,
+                <#created> ;
+    sh:or ( [ sh:path solid-memo:front ; sh:minCount 1 ] [ sh:path solid-memo:frontImage ; sh:minCount 1 ] ) ,
+          ( [ sh:path solid-memo:back ; sh:minCount 1 ] [ sh:path solid-memo:backImage ; sh:minCount 1 ] ) ;
+    sh:message "Each side of a card needs text or a picture."@en ,
+               "Varje sida av ett kort behöver text eller en bild."@sv .
+
+<#formatVersion>
+    a sh:PropertyShape ;
+    sh:path solid-memo:formatVersion ;
+    sh:datatype xsd:integer ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:hasValue 2 ;
+    sh:message "Card format 2 states its format version, 2."@en ,
+               "Kortformat 2 anger sin formatversion, 2."@sv .
+
+<#front>
+    a sh:PropertyShape ;
+    sh:path solid-memo:front ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 .
+
+<#back>
+    a sh:PropertyShape ;
+    sh:path solid-memo:back ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 .
+
+<#frontImage>
+    a sh:PropertyShape ;
+    sh:path solid-memo:frontImage ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+    sh:message "A picture is an IRI (<https://…>), never a string literal."@en ,
+               "En bild är en IRI (<https://…>), aldrig en strängliteral."@sv .
+
+<#backImage>
+    a sh:PropertyShape ;
+    sh:path solid-memo:backImage ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+    sh:message "A picture is an IRI (<https://…>), never a string literal."@en ,
+               "En bild är en IRI (<https://…>), aldrig en strängliteral."@sv .
+
+<#created>
+    a sh:PropertyShape ;
+    sh:path dcterms:created ;
+    sh:datatype xsd:dateTime ;
+    sh:maxCount 1 .

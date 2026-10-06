@@ -1,0 +1,56 @@
+@base <https://solid-memo.com/ns/shapes/distribution/v1.ttl> .
+
+@prefix sh:         <http://www.w3.org/ns/shacl#> .
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+
+# Where a deck's cards can be had, and in what format: a library
+# release's Turtle file, or in a pod the deck's cards document.
+<#shape>
+    a sh:NodeShape ;
+    sh:name "DistributionV1" ;
+    rdfs:comment "A deck's cards as a file: a dcat:Distribution." ;
+    sh:nodeKind sh:IRI ;
+    sh:class dcat:Distribution ;
+    sh:property <#formatVersion> ,
+                <#accessUrl> ,
+                <#downloadUrl> ,
+                <#mediaType> ,
+                <#format> .
+
+<#formatVersion>
+    a sh:PropertyShape ;
+    sh:path solid-memo:formatVersion ;
+    sh:datatype xsd:integer ;
+    sh:maxCount 1 ;
+    sh:in ( 1 ) .
+
+<#accessUrl>
+    a sh:PropertyShape ;
+    sh:path dcat:accessURL ;
+    sh:name "accessUrl" ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 .
+
+<#downloadUrl>
+    a sh:PropertyShape ;
+    sh:path dcat:downloadURL ;
+    sh:name "downloadUrl" ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 .
+
+<#mediaType>
+    a sh:PropertyShape ;
+    sh:path dcat:mediaType ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 .
+
+<#format>
+    a sh:PropertyShape ;
+    sh:path dcterms:format ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 .

@@ -9,16 +9,16 @@ import {
   type TurtleFile,
 } from "@solid-memo/turtle/rdf";
 import { GENERATED_HEADER, SM_NS } from "./vocab.ts";
-import { SHAPES_POD } from "../src/pods.ts";
+import { SHAPES_BASE } from "../src/ns.ts";
 
 /**
- * The SHACL shape documents (<SHAPES_POD><class>/v<N>) as the generators see
+ * The SHACL shape files (ns/shapes/<class>/v<N>.ttl) as the generators see
  * them, and the two TypeScript modules rendered from them: the record
  * types (domain) and the descriptors (infrastructure). See docs/shapes.md
  * for the conventions the parser relies on.
  */
 
-export const SHAPES_BASE = SHAPES_POD;
+export { SHAPES_BASE };
 const SH = "http://www.w3.org/ns/shacl#";
 const XSD = "http://www.w3.org/2001/XMLSchema#";
 const RDF_LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString";
@@ -69,7 +69,7 @@ export interface ShapeModel {
   /** Predicates a conforming subject never has (sh:maxCount 0). */
   absent: string[];
   shapeIri: string;
-  /** Path on the shapes' pod, e.g. "deck/v2". */
+  /** Path under ns/shapes/ (and SHAPES_BASE), e.g. "deck/v2.ttl". */
   shapeDocument: string;
   context: ShapeContext;
   comment: string;
@@ -112,10 +112,10 @@ function parseShapeFile(file: TurtleFile): ShapeModel[] {
   const base = `${SHAPES_BASE}${file.path}`;
   const quads = parseTurtle(file.turtle, base);
   const fail = (message: string): never => {
-    throw new Error(`${base}: ${message}`);
+    throw new Error(`ns/shapes/${file.path}: ${message}`);
   };
-  const pathVersion = /\/v(\d+)$/.exec(file.path);
-  if (pathVersion === null) fail("expected a path like <class>/v<N>.");
+  const pathVersion = /\/v(\d+)\.ttl$/.exec(file.path);
+  if (pathVersion === null) fail("expected a path like <class>/v<N>.ttl.");
   const fileVersion = Number(pathVersion![1]);
   return subjectsOfType(quads, `${SH}NodeShape`)
     .filter((iri) => objectsOf(quads, iri, `${SH}name`).length > 0)
@@ -321,7 +321,7 @@ export function renderDomainTypes(models: readonly ShapeModel[]): string {
   const groups = byShape(models);
   const shapes = [...groups.keys()];
   const lines = [
-    GENERATED_HEADER(`${SHAPES_POD}<class>/v<N>`),
+    GENERATED_HEADER("ns/shapes/<class>/v<N>.ttl"),
     "/**",
     " * A text in one or more languages (rdf:langString values): language tag,",
     " * lower case (\"en\", \"sv\", \"en-gb\"), to the text in that language.",
@@ -386,7 +386,7 @@ function upperFirst(text: string): string {
 export function renderDescriptors(models: readonly ShapeModel[]): string {
   const groups = byShape(models);
   const lines = [
-    GENERATED_HEADER(`${SHAPES_POD}<class>/v<N>`),
+    GENERATED_HEADER("ns/shapes/<class>/v<N>.ttl"),
     `import type { ShapeDescriptor } from "./shapeDescriptor.ts";`,
     "import type {",
     ...models.map((m) => `  ${m.name},`),

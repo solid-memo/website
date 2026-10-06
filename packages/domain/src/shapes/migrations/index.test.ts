@@ -4,7 +4,7 @@ import { LATEST_VERSION, type ShapeName } from "@solid-memo/vocab/types.generate
 import { MIGRATIONS, migrate, stepFor } from "./index";
 
 const CONTEXT = { subject: "https://pod.example/x.ttl#it" };
-const SM = "https://pod.solid-memo.com/vocab/v1#";
+const SM = "https://solid-memo.com/ns/vocab/v1.ttl#";
 const EDUC = "http://publications.europa.eu/resource/authority/data-theme/EDUC";
 /** The concept-valued fields of migrated preferences: the policy that blocks, the browser's theme. */
 const MIGRATED_CONCEPTS = { invalidDataPolicy: `${SM}blockInstance`, theme: `${SM}systemTheme` };

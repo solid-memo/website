@@ -33,8 +33,8 @@ const deck: Deck = {
   sourceUrl: "https://solid-memo.com/decks/capitals.ttl",
 };
 
-const SM = "https://pod.solid-memo.com/vocab/v1#";
-const TOPIC = "https://pod.solid-memo.com/vocab/topics#geography";
+const SM = "https://solid-memo.com/ns/vocab/v1.ttl#";
+const TOPIC = "https://solid-memo.com/ns/vocab/topics.ttl#geography";
 const ANTON = `${CATALOG}#agent-anton-wiklund`;
 const byAgent = (agent: string) => (agent === ANTON ? "Anton Wiklund" : agent);
 

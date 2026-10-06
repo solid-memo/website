@@ -48,6 +48,10 @@ describe("parseConceptSchemes", () => {
     expect(parseConceptSchemes(turtle, BASE)[0].name).toBe("STUDY_DIRECTIONS");
   });
 
+  it("names a scheme that is its document by the document's name, without its extension", () => {
+    expect(parseConceptSchemes(SCHEME, `${BASE}.ttl`)[0].name).toBe("COLOURS");
+  });
+
   it("requires English labels", () => {
     const turtle = `${HEAD} <> a skos:ConceptScheme ; dcterms:title "Färger"@sv ; skos:definition "x"@en .`;
     expect(() => parseConceptSchemes(turtle, BASE)).toThrow(

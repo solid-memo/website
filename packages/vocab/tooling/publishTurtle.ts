@@ -4,8 +4,9 @@ import { readTurtleTree } from "@solid-memo/turtle/rdf";
 /**
  * Publishing a folder of Turtle with the site: every `.ttl` under it is
  * served in dev and emitted into `dist/` under the same path. The site
- * publishes the vendored profiles (vendor/) this way; Solid Memo's own
- * vocabulary and shapes are on their pods (src/pods.ts), not the site.
+ * publishes Solid Memo's vocabulary and shapes (ns/), the deck library
+ * (decks/) and the vendored profiles (vendor/) this way, so their IRIs
+ * dereference to the documents in this repository.
  */
 
 const TURTLE = "text/turtle; charset=utf-8";

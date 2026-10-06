@@ -14,7 +14,7 @@ const INSTANCE = "https://pod.example/solid-memo/main/";
 const CARDS = `${INSTANCE}decks/deck-1.ttl`;
 const REVIEWS = `${INSTANCE}reviews/deck-1.ttl`;
 const DIGEST = `${INSTANCE}digest.ttl`;
-const SM = "https://pod.solid-memo.com/vocab/v1#";
+const SM = "https://solid-memo.com/ns/vocab/v1.ttl#";
 const PREFIXES = `@prefix sm: <${SM}> . @prefix dcterms: <http://purl.org/dc/terms/> . @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n`;
 
 const deck = {

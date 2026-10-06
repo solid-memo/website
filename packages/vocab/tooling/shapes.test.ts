@@ -8,7 +8,7 @@ import {
 
 const HEAD = `
 @prefix sh:      <http://www.w3.org/ns/shacl#> .
-@prefix sm:      <https://pod.solid-memo.com/vocab/v1#> .
+@prefix sm:      <https://solid-memo.com/ns/vocab/v1.ttl#> .
 @prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
@@ -59,30 +59,30 @@ const files = (...entries: [string, string][]) =>
 
 describe("parseShapes", () => {
   it("maps every property kind and cardinality, listing forbidden predicates apart", () => {
-    const [model] = parseShapes(files(["thing/v1", THING_V1]));
+    const [model] = parseShapes(files(["thing/v1.ttl", THING_V1]));
     expect(model).toEqual({
       name: "ThingV1",
       shape: "thing",
       version: 1,
-      targetClass: "https://pod.solid-memo.com/vocab/v1#Thing",
+      targetClass: "https://solid-memo.com/ns/vocab/v1.ttl#Thing",
       additionalTypes: ["http://www.w3.org/ns/dcat#Dataset"],
-      absent: ["https://pod.solid-memo.com/vocab/v1#gone"],
-      shapeIri: "https://pod.solid-memo.com/shapes/thing/v1#shape",
-      shapeDocument: "thing/v1",
+      absent: ["https://solid-memo.com/ns/vocab/v1.ttl#gone"],
+      shapeIri: "https://solid-memo.com/ns/shapes/thing/v1.ttl#shape",
+      shapeDocument: "thing/v1.ttl",
       context: "any",
       comment: "Thing one.",
       fields: [
         { name: "title", predicate: "http://purl.org/dc/terms/title", kind: "string", cardinality: "one" },
-        { name: "count", predicate: "https://pod.solid-memo.com/vocab/v1#count", kind: "integer", cardinality: "optional" },
-        { name: "mass", predicate: "https://pod.solid-memo.com/vocab/v1#weight", kind: "decimal", cardinality: "optional" },
+        { name: "count", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#count", kind: "integer", cardinality: "optional" },
+        { name: "mass", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#weight", kind: "decimal", cardinality: "optional" },
         { name: "created", predicate: "http://purl.org/dc/terms/created", kind: "dateTime", cardinality: "optional" },
-        { name: "flag", predicate: "https://pod.solid-memo.com/vocab/v1#flag", kind: "boolean", cardinality: "one" },
-        { name: "link", predicate: "https://pod.solid-memo.com/vocab/v1#link", kind: "iri", cardinality: "optional" },
-        { name: "mode", predicate: "https://pod.solid-memo.com/vocab/v1#mode", kind: "enum", cardinality: "optional", values: ["a", "b"] },
-        { name: "tag", predicate: "https://pod.solid-memo.com/vocab/v1#tag", kind: "string", cardinality: "many" },
-        { name: "modes", predicate: "https://pod.solid-memo.com/vocab/v1#modes", kind: "enum", cardinality: "many", values: ["x"] },
-        { name: "concept", predicate: "https://pod.solid-memo.com/vocab/v1#concept", kind: "iriEnum", cardinality: "optional", values: ["https://pod.solid-memo.com/vocab/v1#c1", "https://pod.solid-memo.com/vocab/v1#c2"] },
-        { name: "concepts", predicate: "https://pod.solid-memo.com/vocab/v1#concepts", kind: "iriEnum", cardinality: "many", values: ["https://pod.solid-memo.com/vocab/v1#c1"] },
+        { name: "flag", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#flag", kind: "boolean", cardinality: "one" },
+        { name: "link", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#link", kind: "iri", cardinality: "optional" },
+        { name: "mode", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#mode", kind: "enum", cardinality: "optional", values: ["a", "b"] },
+        { name: "tag", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#tag", kind: "string", cardinality: "many" },
+        { name: "modes", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#modes", kind: "enum", cardinality: "many", values: ["x"] },
+        { name: "concept", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#concept", kind: "iriEnum", cardinality: "optional", values: ["https://solid-memo.com/ns/vocab/v1.ttl#c1", "https://solid-memo.com/ns/vocab/v1.ttl#c2"] },
+        { name: "concepts", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#concepts", kind: "iriEnum", cardinality: "many", values: ["https://solid-memo.com/ns/vocab/v1.ttl#c1"] },
       ],
     });
   });
@@ -90,7 +90,7 @@ describe("parseShapes", () => {
   it("takes a shape's class from DCAT or FOAF too", () => {
     const [model] = parseShapes(
       files([
-        "catalog/v1",
+        "catalog/v1.ttl",
         `${HEAD} <#shape> a sh:NodeShape ; sh:name "CatalogV1" ; sh:class dcat:Catalog ; sh:property <#formatVersion> . ${V1_VERSION}`,
       ]),
     );
@@ -99,7 +99,7 @@ describe("parseShapes", () => {
   });
 
   it("tells pod and library shapes apart and sorts by kind then version", () => {
-    const models = parseShapes(files(["thing/v2", THING_V2], ["thing/v1", THING_V1]));
+    const models = parseShapes(files(["thing/v2.ttl", THING_V2], ["thing/v1.ttl", THING_V1]));
     expect(models.map((m) => [m.name, m.shape, m.version, m.context, m.comment])).toEqual([
       ["LibraryThingV2", "libraryThing", 2, "library", ""],
       ["ThingV1", "thing", 1, "any", "Thing one."],
@@ -111,31 +111,31 @@ describe("parseShapes", () => {
     expect(() => parseShapes(files([path, turtle]))).toThrow(message);
 
   it("rejects files and names that do not follow the conventions", () => {
-    rejects("thing.ttl", THING_V1, "https://pod.solid-memo.com/shapes/thing.ttl: expected a path like <class>/v<N>.");
+    rejects("thing.ttl", THING_V1, "ns/shapes/thing.ttl: expected a path like <class>/v<N>.ttl.");
     rejects(
-      "thing/v1",
+      "thing/v1.ttl",
       `${HEAD} <#shape> a sh:NodeShape ; sh:name "thing" ; sh:class sm:Thing ; sh:property <#formatVersion> . ${V1_VERSION}`,
       'sh:name "thing" is not <Kind>V<N>.',
     );
-    rejects("thing/v2", THING_V1, '"ThingV1" does not match the file\'s version 2.');
+    rejects("thing/v2.ttl", THING_V1, '"ThingV1" does not match the file\'s version 2.');
     rejects(
-      "thing/v1",
+      "thing/v1.ttl",
       `${HEAD} <#shape> a sh:NodeShape ; sh:name "ThingV1" ; sh:property <#formatVersion> . ${V1_VERSION}`,
       '"ThingV1" needs an sh:class in the Solid Memo, DCAT or FOAF vocabulary.',
     );
     rejects(
-      "thing/v1",
+      "thing/v1.ttl",
       `${HEAD} <#shape> a sh:NodeShape ; sh:name "ThingV1" ; sh:class <https://other.example/#Thing> ; sh:property <#formatVersion> . ${V1_VERSION}`,
       '"ThingV1" needs an sh:class in the Solid Memo, DCAT or FOAF vocabulary.',
     );
     rejects(
-      "thing/v1",
+      "thing/v1.ttl",
       `${HEAD} <#shape> a sh:NodeShape ; sh:name "ThingV1" ; sh:class sm:Thing ; sh:property <#p> .
        <#p> a sh:PropertyShape ; sh:path ( sm:a sm:b ) .`,
-      "<https://pod.solid-memo.com/shapes/thing/v1#p> has no sh:path IRI.",
+      "<https://solid-memo.com/ns/shapes/thing/v1.ttl#p> has no sh:path IRI.",
     );
     rejects(
-      "thing/v1",
+      "thing/v1.ttl",
       `${HEAD} <#shape> a sh:NodeShape ; sh:name "ThingV1" ; sh:class sm:Thing ; sh:property <#p> .
        <#p> a sh:PropertyShape ; sh:path sm:p ; sh:datatype xsd:string .`,
       '"ThingV1" does not assert sm:formatVersion.',
@@ -144,12 +144,12 @@ describe("parseShapes", () => {
 
   it("rejects a wrong version assertion", () => {
     rejects(
-      "thing/v1",
+      "thing/v1.ttl",
       `${HEAD} <#shape> a sh:NodeShape ; sh:name "ThingV1" ; sh:class sm:Thing ; sh:property <#formatVersion> . ${V2_VERSION}`,
       "format 1 asserts its version with sh:in ( 1 ).",
     );
     rejects(
-      "thing/v2",
+      "thing/v2.ttl",
       `${HEAD} <#shape> a sh:NodeShape ; sh:name "ThingV2" ; sh:class sm:Thing ; sh:property <#formatVersion> . ${V1_VERSION}`,
       "format 2 asserts its version with sh:hasValue 2.",
     );
@@ -159,24 +159,24 @@ describe("parseShapes", () => {
     const shape = (property: string) =>
       `${HEAD} <#shape> a sh:NodeShape ; sh:name "ThingV1" ; sh:class sm:Thing ; sh:property <#formatVersion>, <#p> .
        ${V1_VERSION} <#p> a sh:PropertyShape ; sh:path sm:p ; ${property} .`;
-    rejects("thing/v1", shape("sh:datatype xsd:date"), "<https://pod.solid-memo.com/shapes/thing/v1#p> has no supported sh:datatype or sh:nodeKind sh:IRI.");
-    rejects("thing/v1", shape("sh:nodeKind sh:Literal"), "has no supported sh:datatype");
-    rejects("thing/v1", shape("sh:or ( [ sh:datatype xsd:string ] [ sh:datatype xsd:integer ] )"), "has no supported sh:datatype");
-    rejects("thing/v1", shape("sh:or ( [ sh:datatype xsd:string ] )"), "has no supported sh:datatype");
-    rejects("thing/v1", shape("sh:datatype xsd:integer ; sh:in ( 1 2 )"), "uses sh:in, which is only supported for xsd:string and IRIs.");
-    rejects("thing/v1", shape('sh:nodeKind sh:IRI ; sh:in ( sm:a "b" )'), "lists sh:in values of another kind than the field's.");
-    rejects("thing/v1", shape("sh:datatype xsd:string ; sh:in ( sm:a )"), "lists sh:in values of another kind than the field's.");
+    rejects("thing/v1.ttl", shape("sh:datatype xsd:date"), "<https://solid-memo.com/ns/shapes/thing/v1.ttl#p> has no supported sh:datatype or sh:nodeKind sh:IRI.");
+    rejects("thing/v1.ttl", shape("sh:nodeKind sh:Literal"), "has no supported sh:datatype");
+    rejects("thing/v1.ttl", shape("sh:or ( [ sh:datatype xsd:string ] [ sh:datatype xsd:integer ] )"), "has no supported sh:datatype");
+    rejects("thing/v1.ttl", shape("sh:or ( [ sh:datatype xsd:string ] )"), "has no supported sh:datatype");
+    rejects("thing/v1.ttl", shape("sh:datatype xsd:integer ; sh:in ( 1 2 )"), "uses sh:in, which is only supported for xsd:string and IRIs.");
+    rejects("thing/v1.ttl", shape('sh:nodeKind sh:IRI ; sh:in ( sm:a "b" )'), "lists sh:in values of another kind than the field's.");
+    rejects("thing/v1.ttl", shape("sh:datatype xsd:string ; sh:in ( sm:a )"), "lists sh:in values of another kind than the field's.");
     const typed = (property: string) =>
       `${HEAD} <#shape> a sh:NodeShape ; sh:name "ThingV1" ; sh:class sm:Thing ; sh:property <#formatVersion>, <#p> .
        ${V1_VERSION} <#p> a sh:PropertyShape ; sh:path rdf:type ; ${property} .`;
-    rejects("thing/v1", typed("sh:minCount 1"), "<https://pod.solid-memo.com/shapes/thing/v1#p> constrains rdf:type without an sh:hasValue class.");
-    rejects("thing/v1", typed('sh:hasValue "Dataset"'), "constrains rdf:type without an sh:hasValue class.");
-    rejects("thing/v1", shape("sh:datatype xsd:integer"), "<https://pod.solid-memo.com/shapes/thing/v1#p> repeats a integer; only strings, IRIs and texts may repeat.");
+    rejects("thing/v1.ttl", typed("sh:minCount 1"), "<https://solid-memo.com/ns/shapes/thing/v1.ttl#p> constrains rdf:type without an sh:hasValue class.");
+    rejects("thing/v1.ttl", typed('sh:hasValue "Dataset"'), "constrains rdf:type without an sh:hasValue class.");
+    rejects("thing/v1.ttl", shape("sh:datatype xsd:integer"), "<https://solid-memo.com/ns/shapes/thing/v1.ttl#p> repeats a integer; only strings, IRIs and texts may repeat.");
   });
 
   it("rejects duplicate field names and duplicate shape names", () => {
     rejects(
-      "thing/v1",
+      "thing/v1.ttl",
       `${HEAD} <#shape> a sh:NodeShape ; sh:name "ThingV1" ; sh:class sm:Thing ; sh:property <#formatVersion>, <#p>, <#q> .
        ${V1_VERSION}
        <#p> a sh:PropertyShape ; sh:path sm:p ; sh:datatype xsd:string ; sh:name "same" .
@@ -184,7 +184,7 @@ describe("parseShapes", () => {
       '"ThingV1" has two fields named "same".',
     );
     expect(() =>
-      parseShapes(files(["thing/v1", THING_V1], ["other/v1", THING_V1])),
+      parseShapes(files(["thing/v1.ttl", THING_V1], ["other/v1.ttl", THING_V1])),
     ).toThrow('shapes: "ThingV1" is defined twice.');
   });
 
@@ -192,7 +192,7 @@ describe("parseShapes", () => {
     const LANG = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#langString>";
     const [model] = parseShapes(
       files([
-        "thing/v1",
+        "thing/v1.ttl",
         `${HEAD} <#shape> a sh:NodeShape ; sh:name "ThingV1" ; sh:class sm:Thing ; sh:property <#formatVersion>, <#title>, <#note> . ${V1_VERSION}
 <#title> a sh:PropertyShape ; sh:path dcterms:title ; sh:datatype ${LANG} ; sh:minCount 1 ; sh:uniqueLang true .
 <#note> a sh:PropertyShape ; sh:path dcterms:description ; sh:datatype ${LANG} ; sh:uniqueLang true .`,
@@ -208,15 +208,15 @@ describe("parseShapes", () => {
     const LANG = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#langString>";
     const [model] = parseShapes(
       files([
-        "thing/v1",
+        "thing/v1.ttl",
         `${HEAD} <#shape> a sh:NodeShape ; sh:name "ThingV1" ; sh:class sm:Thing ; sh:property <#formatVersion>, <#front>, <#back> . ${V1_VERSION}
 <#front> a sh:PropertyShape ; sh:path sm:front ; sh:or ( [ sh:datatype ${LANG} ] [ sh:datatype xsd:string ] ) ; sh:minCount 1 ; sh:uniqueLang true .
 <#back> a sh:PropertyShape ; sh:path sm:back ; sh:or ( [ sh:datatype xsd:string ] [ sh:datatype ${LANG} ] ) ; sh:uniqueLang true .`,
       ]),
     );
     expect(model.fields).toEqual([
-      { name: "front", predicate: "https://pod.solid-memo.com/vocab/v1#front", kind: "anyText", cardinality: "one" },
-      { name: "back", predicate: "https://pod.solid-memo.com/vocab/v1#back", kind: "anyText", cardinality: "optional" },
+      { name: "front", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#front", kind: "anyText", cardinality: "one" },
+      { name: "back", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#back", kind: "anyText", cardinality: "optional" },
     ]);
     expect(renderDomainTypes([model])).toContain("  readonly front: LangText;\n  readonly back?: LangText;");
   });
@@ -225,7 +225,7 @@ describe("parseShapes", () => {
     const LANG = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#langString>";
     const [model] = parseShapes(
       files([
-        "thing/v1",
+        "thing/v1.ttl",
         `${HEAD} <#shape> a sh:NodeShape ; sh:name "ThingV1" ; sh:class sm:Thing ; sh:property <#formatVersion>, <#keywords>, <#labels> . ${V1_VERSION}
 <#keywords> a sh:PropertyShape ; sh:path dcat:keyword ; sh:or ( [ sh:datatype xsd:string ] [ sh:datatype ${LANG} ] ) .
 <#labels> a sh:PropertyShape ; sh:path sm:label ; sh:datatype ${LANG} ; sh:minCount 1 .`,
@@ -233,22 +233,22 @@ describe("parseShapes", () => {
     );
     expect(model.fields).toEqual([
       { name: "keyword", predicate: "http://www.w3.org/ns/dcat#keyword", kind: "anyText", cardinality: "many" },
-      { name: "label", predicate: "https://pod.solid-memo.com/vocab/v1#label", kind: "text", cardinality: "many" },
+      { name: "label", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#label", kind: "text", cardinality: "many" },
     ]);
     expect(renderDomainTypes([model])).toContain("  readonly keyword: LangTexts;\n  readonly label: LangTexts;");
   });
 
   it("rejects a limit on text with several values per language", () => {
     rejects(
-      "thing/v1",
+      "thing/v1.ttl",
       `${HEAD} <#shape> a sh:NodeShape ; sh:name "ThingV1" ; sh:class sm:Thing ; sh:property <#formatVersion>, <#p> .
        ${V1_VERSION} <#p> a sh:PropertyShape ; sh:path sm:p ; sh:datatype <http://www.w3.org/1999/02/22-rdf-syntax-ns#langString> ; sh:maxCount 3 .`,
-      "<https://pod.solid-memo.com/shapes/thing/v1#p> limits a text with several values per language; drop sh:maxCount or add sh:uniqueLang true.",
+      "<https://solid-memo.com/ns/shapes/thing/v1.ttl#p> limits a text with several values per language; drop sh:maxCount or add sh:uniqueLang true.",
     );
   });
 
   it("requires versions to run without gaps when rendering", () => {
-    const models = parseShapes(files(["thing/v2", THING_V2]));
+    const models = parseShapes(files(["thing/v2.ttl", THING_V2]));
     expect(() => renderDomainTypes(models)).toThrow(
       'shapes: "libraryThing" versions must run 1, 2, … without gaps; found 2.',
     );
@@ -258,11 +258,11 @@ describe("parseShapes", () => {
 
 describe("renderers", () => {
   const models: ShapeModel[] = parseShapes(
-    files(["thing/v1", THING_V1], ["thing/v2", THING_V2_PLAIN]),
+    files(["thing/v1.ttl", THING_V1], ["thing/v2.ttl", THING_V2_PLAIN]),
   );
 
   it("renders the record types and unions", () => {
-    expect(renderDomainTypes(models)).toBe(`/* Generated from https://pod.solid-memo.com/shapes/<class>/v<N> by \`npm run generate\`. Do not edit: change the source and regenerate. */
+    expect(renderDomainTypes(models)).toBe(`/* Generated from ns/shapes/<class>/v<N>.ttl by \`npm run generate\`. Do not edit: change the source and regenerate. */
 
 /**
  * A text in one or more languages (rdf:langString values): language tag,
@@ -299,8 +299,8 @@ export interface ThingV1 {
   readonly mode?: "a" | "b";
   readonly tag: readonly string[];
   readonly modes: readonly ("x")[];
-  readonly concept?: "https://pod.solid-memo.com/vocab/v1#c1" | "https://pod.solid-memo.com/vocab/v1#c2";
-  readonly concepts: readonly ("https://pod.solid-memo.com/vocab/v1#c1")[];
+  readonly concept?: "https://solid-memo.com/ns/vocab/v1.ttl#c1" | "https://solid-memo.com/ns/vocab/v1.ttl#c2";
+  readonly concepts: readonly ("https://solid-memo.com/ns/vocab/v1.ttl#c1")[];
 }
 
 /**  */
@@ -329,16 +329,16 @@ export type LatestRecord = {
     expect(text).toContain(`export const THING_V1: ShapeDescriptor<ThingV1> = {
   shape: "thing",
   version: 1,
-  targetClass: "https://pod.solid-memo.com/vocab/v1#Thing",
+  targetClass: "https://solid-memo.com/ns/vocab/v1.ttl#Thing",
   additionalTypes: ["http://www.w3.org/ns/dcat#Dataset"],
-  absent: ["https://pod.solid-memo.com/vocab/v1#gone"],
-  shapeIri: "https://pod.solid-memo.com/shapes/thing/v1#shape",
-  shapeDocument: "thing/v1",
+  absent: ["https://solid-memo.com/ns/vocab/v1.ttl#gone"],
+  shapeIri: "https://solid-memo.com/ns/shapes/thing/v1.ttl#shape",
+  shapeDocument: "thing/v1.ttl",
   context: "any",
   fields: [
     { name: "title", predicate: "http://purl.org/dc/terms/title", kind: "string", cardinality: "one" },`);
     expect(text).toContain(
-      `    { name: "mode", predicate: "https://pod.solid-memo.com/vocab/v1#mode", kind: "enum", cardinality: "optional", values: ["a","b"] },`,
+      `    { name: "mode", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#mode", kind: "enum", cardinality: "optional", values: ["a","b"] },`,
     );
     expect(text).toContain(
       `    { name: "title", predicate: "http://purl.org/dc/terms/title", kind: "text", cardinality: "one" },\n  ],`,

@@ -64,6 +64,7 @@ export function parseConceptSchemes(turtle: string, baseIri: string): SchemeMode
     const languages = Object.keys(title);
     return {
       name: localName(iri)
+        .replace(/\.ttl$/, "")
         .replace(/([a-z])([A-Z])/g, "$1_$2")
         .toUpperCase(),
       iri,

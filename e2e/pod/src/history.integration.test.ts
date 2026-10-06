@@ -9,7 +9,7 @@
  */
 import { describe, expect, inject, it } from "vitest";
 import type { Answer } from "@solid-memo/domain/answer";
-import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/pod";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/sources";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
 import { createSolidAnswerLog } from "@solid-memo/solid/solidAnswerLog";
 

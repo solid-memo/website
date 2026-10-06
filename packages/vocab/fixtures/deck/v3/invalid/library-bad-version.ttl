@@ -1,6 +1,6 @@
 @base <https://solid-memo.com/decks/capitals/2.ttl> .
 
-@prefix solid-memo: <https://pod.solid-memo.com/vocab/v1#> .
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
 @prefix dcterms:    <http://purl.org/dc/terms/> .
 @prefix dcat:       <http://www.w3.org/ns/dcat#> .
 @prefix foaf:       <http://xmlns.com/foaf/0.1/> .
@@ -20,7 +20,7 @@
     dcterms:issued "2026-09-28T10:00:00Z"^^xsd:dateTime ;
     solid-memo:studyDirection solid-memo:frontToBack ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
-               <https://pod.solid-memo.com/vocab/topics#geography> ;
+               <https://solid-memo.com/ns/vocab/topics.ttl#geography> ;
     dcat:keyword "capitals" ;
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ;
     dcat:version "v2" ;

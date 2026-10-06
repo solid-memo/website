@@ -1,0 +1,123 @@
+@base <https://solid-memo.com/ns/shapes/deck-schedule/v1.ttl> .
+
+@prefix sh:         <http://www.w3.org/ns/shacl#> .
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+
+# A deck schedule, format 1: in the instance's digest document, how many
+# of a deck's prompts fall due on which study day and how many are new,
+# computed from given versions of its cards and reviews documents.
+<#shape>
+    a sh:NodeShape ;
+    sh:name "DeckScheduleV1" ;
+    rdfs:comment "Deck schedule format 1: the deck, the versions of its two documents it was computed from, the direction and day boundary it was computed with, the study day it was computed on, the prompts due by day, the new ones, and that day's reviews and introductions." ;
+    sh:nodeKind sh:IRI ;
+    sh:class solid-memo:DeckSchedule ;
+    sh:property <#formatVersion> ,
+                <#deck> ,
+                <#cardsVersion> ,
+                <#reviewsVersion> ,
+                <#direction> ,
+                <#dayBoundaryHour> ,
+                <#studyDay> ,
+                <#dueOnDay> ,
+                <#unreviewed> ,
+                <#reviewedOnDay> ,
+                <#introducedOnDay> .
+
+<#formatVersion>
+    a sh:PropertyShape ;
+    sh:path solid-memo:formatVersion ;
+    sh:datatype xsd:integer ;
+    sh:maxCount 1 ;
+    sh:in ( 1 ) .
+
+<#deck>
+    a sh:PropertyShape ;
+    sh:path solid-memo:scheduleOf ;
+    sh:name "deck" ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 .
+
+<#cardsVersion>
+    a sh:PropertyShape ;
+    sh:path solid-memo:cardsVersion ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 .
+
+<#reviewsVersion>
+    a sh:PropertyShape ;
+    sh:path solid-memo:reviewsVersion ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 .
+
+<#direction>
+    a sh:PropertyShape ;
+    sh:path solid-memo:scheduledDirection ;
+    sh:name "direction" ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:in ( solid-memo:frontToBack solid-memo:backToFront solid-memo:bidirectional ) ;
+    sh:message "A deck schedule states the study direction it was computed for, a concept of solid-memo:StudyDirections."@en ,
+               "Ett kortleksschema anger studieriktningen det beräknades för, ett begrepp i solid-memo:StudyDirections."@sv .
+
+<#dayBoundaryHour>
+    a sh:PropertyShape ;
+    sh:path solid-memo:scheduledDayBoundaryHour ;
+    sh:name "dayBoundaryHour" ;
+    sh:datatype xsd:integer ;
+    sh:minInclusive 0 ;
+    sh:maxInclusive 23 ;
+    sh:minCount 1 ;
+    sh:maxCount 1 .
+
+<#studyDay>
+    a sh:PropertyShape ;
+    sh:path solid-memo:scheduledOn ;
+    sh:name "studyDay" ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:pattern "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" ;
+    sh:message "The study day is a plain \"YYYY-MM-DD\" string."@en ,
+               "Studiedagen är en vanlig sträng \"YYYY-MM-DD\"."@sv .
+
+<#dueOnDay>
+    a sh:PropertyShape ;
+    sh:path solid-memo:dueOnDay ;
+    sh:datatype xsd:string ;
+    sh:pattern "^[0-9]{4}-[0-9]{2}-[0-9]{2} [1-9][0-9]*$" ;
+    sh:message "Prompts due on a day are \"YYYY-MM-DD count\", one value per day."@en ,
+               "Frågor som förfaller en dag anges som \"YYYY-MM-DD antal\", ett värde per dag."@sv .
+
+<#unreviewed>
+    a sh:PropertyShape ;
+    sh:path solid-memo:unreviewedCount ;
+    sh:name "unreviewed" ;
+    sh:datatype xsd:integer ;
+    sh:minInclusive 0 ;
+    sh:minCount 1 ;
+    sh:maxCount 1 .
+
+<#reviewedOnDay>
+    a sh:PropertyShape ;
+    sh:path solid-memo:reviewedOnDayCount ;
+    sh:name "reviewedOnDay" ;
+    sh:datatype xsd:integer ;
+    sh:minInclusive 0 ;
+    sh:minCount 1 ;
+    sh:maxCount 1 .
+
+<#introducedOnDay>
+    a sh:PropertyShape ;
+    sh:path solid-memo:introducedOnDayCount ;
+    sh:name "introducedOnDay" ;
+    sh:datatype xsd:integer ;
+    sh:minInclusive 0 ;
+    sh:minCount 1 ;
+    sh:maxCount 1 .

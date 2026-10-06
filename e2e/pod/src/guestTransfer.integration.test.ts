@@ -9,7 +9,7 @@
  */
 import { describe, expect, inject, it } from "vitest";
 import { Parser, Writer } from "n3";
-import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/pod";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/sources";
 import { createUseCases } from "@solid-memo/application/useCases";
 import { GUEST_ORIGIN, GUEST_SESSION } from "@solid-memo/domain/guest";
 import { createLocalGuestPod } from "@solid-memo/solid/localGuestPod";

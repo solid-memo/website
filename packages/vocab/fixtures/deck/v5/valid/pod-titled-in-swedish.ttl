@@ -1,4 +1,4 @@
-@prefix solid-memo: <https://pod.solid-memo.com/vocab/v1#> .
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
 @prefix dcterms:    <http://purl.org/dc/terms/> .
 @prefix dcat:       <http://www.w3.org/ns/dcat#> .
 @prefix foaf:       <http://xmlns.com/foaf/0.1/> .
@@ -11,7 +11,7 @@
     dcterms:title "Main" ;
     dcterms:description "My decks." ;
     dcterms:publisher <https://pod.example/profile/card#me> ;
-    dcat:themeTaxonomy <https://pod.solid-memo.com/vocab/topics> ;
+    dcat:themeTaxonomy <https://solid-memo.com/ns/vocab/topics.ttl> ;
     dcat:dataset <#deck-1> .
 
 <https://pod.example/profile/card#me>
@@ -27,7 +27,7 @@
                         "Kortlek: Huvudstäder."@sv ;
     dcterms:creator <#agent-anton> ;
     solid-memo:studyDirection solid-memo:bidirectional ;
-    dcat:theme <https://pod.solid-memo.com/vocab/topics#geography> ;
+    dcat:theme <https://solid-memo.com/ns/vocab/topics.ttl#geography> ;
     dcat:keyword "capitals" ;
     dcat:distribution <#deck-1-cards> ;
     solid-memo:cardsDocument <https://pod.example/solid-memo/main/decks/deck-1.ttl> ;

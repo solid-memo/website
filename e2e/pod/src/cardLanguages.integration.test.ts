@@ -9,7 +9,8 @@
  * on Community Solid Server's in-memory store: the write is one PUT.
  */
 import { beforeAll, describe, expect, inject, it } from "vitest";
-import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/pod";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/sources";
+import { SM_NS as SM } from "@solid-memo/vocab/vocab.generated";
 import { createUseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
@@ -25,7 +26,6 @@ import { createWriteFence } from "@solid-memo/solid/writeFence";
 import { ETAG_OUTLIVES_EDITS, etagMarksEveryEdit, preconditionsOf } from "./serverTraits";
 
 const SERVERS = inject("solidServers");
-const SM = "https://pod.solid-memo.com/vocab/v1#";
 
 /** A page of the app as main.tsx wires it; `beforeWrite` runs before each write it makes. */
 function page(beforeWrite: (url: string) => Promise<void> = async () => undefined) {

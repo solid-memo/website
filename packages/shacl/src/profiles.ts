@@ -22,9 +22,9 @@ export type ProfileName = keyof typeof PROFILES;
  * into the data graph next to the data being checked: a profile's
  * `sh:class` checks look for the type of a value in the data graph, as
  * DCAT-AP expects of its controlled vocabularies. Documents of the
- * vocabulary's pod, relative to it.
+ * vocabulary (ns/vocab/), relative to it.
  */
-export const REFERENCE_DATA = ["external", "topics"] as const;
+export const REFERENCE_DATA = ["external.ttl", "topics.ttl"] as const;
 
 const SH_SPARQL = "http://www.w3.org/ns/shacl#sparql";
 

@@ -1,14 +1,15 @@
 import { RDF_TYPE, localName, objectsOf, parseTurtle, subjectsOfType } from "@solid-memo/turtle/rdf";
-import { VOCAB_POD } from "../src/pods.ts";
+import { VOCAB_BASE } from "../src/ns.ts";
 
 /**
- * The vocabulary document (VOCAB_IRI, on the vocabulary's pod) as the generators see it: the
- * ontology's version and change note, and every term with its
- * annotations, in document order. Terms are classes and properties, and
- * the SKOS concept schemes of the vocabulary with their concepts.
+ * The vocabulary document (ns/vocab/v1.ttl, published at VOCAB_IRI) as
+ * the generators see it: the ontology's version and change note, and
+ * every term with its annotations, in document order. Terms are classes
+ * and properties, and the SKOS concept schemes of the vocabulary with
+ * their concepts.
  */
 
-export const VOCAB_IRI = `${VOCAB_POD}v1`;
+export const VOCAB_IRI = `${VOCAB_BASE}v1.ttl`;
 export const SM_NS = `${VOCAB_IRI}#`;
 const OWL = "http://www.w3.org/2002/07/owl#";
 const RDFS = "http://www.w3.org/2000/01/rdf-schema#";
@@ -115,7 +116,7 @@ export const GENERATED_HEADER = (source: string): string =>
 /** The TypeScript module of `SM` constants the app reads and writes with. */
 export function renderVocabConstants(vocab: Vocab): string {
   const lines = [
-    GENERATED_HEADER(VOCAB_IRI),
+    GENERATED_HEADER("ns/vocab/v1.ttl"),
     `/** Solid Memo's own vocabulary, version ${vocab.version} (see docs/vocab.md). */`,
     `export const SM_NS = ${JSON.stringify(SM_NS)};`,
     "",

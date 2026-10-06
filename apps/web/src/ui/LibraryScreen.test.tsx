@@ -98,8 +98,8 @@ describe("LibraryScreen", () => {
   });
 
   it("narrows the list to the chosen topics, broader ones included, and says how many are shown", () => {
-    const geography = { ...capitals, themes: ["https://pod.solid-memo.com/vocab/topics#geography"] };
-    const swedish = { ...rivers, title: { en: "Swedish nouns" }, themes: ["https://pod.solid-memo.com/vocab/topics#swedish"] };
+    const geography = { ...capitals, themes: ["https://solid-memo.com/ns/vocab/topics.ttl#geography"] };
+    const swedish = { ...rivers, title: { en: "Swedish nouns" }, themes: ["https://solid-memo.com/ns/vocab/topics.ttl#swedish"] };
     renderScreen({ decks: [geography, swedish] });
     const topics = screen.getByRole("group", { name: "Topics" });
     expect([...topics.querySelectorAll("label")].map((l) => l.textContent)).toEqual([
@@ -116,7 +116,7 @@ describe("LibraryScreen", () => {
   });
 
   it("names the topics in the language the user reads", () => {
-    const swedish = { ...rivers, title: { en: "Swedish nouns" }, themes: ["https://pod.solid-memo.com/vocab/topics#swedish"] };
+    const swedish = { ...rivers, title: { en: "Swedish nouns" }, themes: ["https://solid-memo.com/ns/vocab/topics.ttl#swedish"] };
     renderScreen({ decks: [swedish] }, "sv");
     const topics = screen.getByRole("group", { name: "Ämnen" });
     expect([...topics.querySelectorAll("label")].map((l) => l.textContent)).toEqual(["Språk", "Svenska"]);
@@ -258,7 +258,7 @@ describe("LibraryScreen", () => {
 
     it("says the count after a topic is ticked, and the whole library once it is cleared", () => {
       vi.useFakeTimers();
-      const geography = { ...capitals, themes: ["https://pod.solid-memo.com/vocab/topics#geography"] };
+      const geography = { ...capitals, themes: ["https://solid-memo.com/ns/vocab/topics.ttl#geography"] };
       renderScreen({ decks: [geography, rivers] });
       fireEvent.click(screen.getByRole("checkbox", { name: "Geography" }));
       act(() => {

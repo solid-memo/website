@@ -5,7 +5,7 @@ import { authFetch } from "@solid-memo/solid/authFetch";
 import { createWriteFence } from "@solid-memo/solid/writeFence";
 import { createSolidSessionGateway } from "@solid-memo/solid/solidSessionGateway";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
-import { SHAPES_POD, VOCAB_POD } from "@solid-memo/vocab/pods";
+import { SHAPES_BASE, SITE, VOCAB_BASE } from "@solid-memo/vocab/ns";
 import { createSolidDeckLibrary } from "@solid-memo/solid/solidDeckLibrary";
 import { createSolidDeckRepository } from "@solid-memo/solid/solidDeckRepository";
 import { createSolidDigestRepository } from "@solid-memo/solid/solidDigestRepository";
@@ -48,12 +48,24 @@ const guestFetch = createLocalPod({
 const writeFence = createWriteFence(routedFetch({ origin: GUEST_ORIGIN, local: guestFetch, remote: authFetch }));
 const podFetch = writeFence.fetch;
 
+/**
+ * Reads a document the site publishes (the shapes, the vocabulary, the
+ * deck library) from the site this page is served from: the same address
+ * in production, the dev or preview server's copy of the repository's
+ * otherwise. Its IRIs stay the published ones, which each document
+ * states as its @base; any other request is passed on as it is.
+ */
+const servedSite = new URL(".", document.baseURI).href;
+const siteFetch: typeof fetch = (input, init) => {
+  const url = String(input instanceof Request ? input.url : input);
+  return globalThis.fetch(url.startsWith(SITE) ? `${servedSite}${url.slice(SITE.length)}` : input, init);
+};
+
 const shapeValidator = createShaclShapeValidator({
   fetch: podFetch,
-  shapesFetch: (input, init) => globalThis.fetch(input, init),
-  // Solid Memo's shapes and vocabulary are on their own pods; the vendored profiles are published with the site.
-  shapesBaseUrl: SHAPES_POD,
-  vocabBaseUrl: VOCAB_POD,
+  shapesFetch: siteFetch,
+  shapesBaseUrl: SHAPES_BASE,
+  vocabBaseUrl: VOCAB_BASE,
   vendorBaseUrl: new URL("vendor/", document.baseURI).href,
 });
 /** Every write is checked against the shapes before it reaches the pod (docs/validation.md). */
@@ -78,7 +90,7 @@ const useCases = createUseCases({
     randomId: () => crypto.randomUUID(),
   }),
   deckLibrary: createSolidDeckLibrary({
-    fetch: (input, init) => globalThis.fetch(input, init),
+    fetch: siteFetch,
     // The library is published in the library pod by the decks repository
     // (docs/deck-library.md); VITE_LIBRARY_INDEX_URL points a build at
     // another copy, such as that repository's `npm run serve`.

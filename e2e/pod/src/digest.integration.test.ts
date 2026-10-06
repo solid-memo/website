@@ -11,7 +11,7 @@
  * there they are skipped (docs/data-model.md#the-digest).
  */
 import { beforeAll, describe, expect, inject, it, vi } from "vitest";
-import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/pod";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/sources";
 import { createUseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";

@@ -5,16 +5,17 @@ import type { ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
 
 /**
  * The shape documents, fetched once each and parsed the way pod
- * documents are: Solid Memo's shapes and the reference data from the
- * shapes' and the vocabulary's pods (@solid-memo/vocab/pods), where they
- * are published and nowhere else, and the vendored profiles as the site
- * publishes them (vendor/…).
+ * documents are: Solid Memo's shapes and the reference data where they
+ * are published (@solid-memo/vocab/ns), and the vendored profiles as the
+ * site publishes them (vendor/…). Each document of Solid Memo's states
+ * its own address as its `@base`, so its IRIs are the same wherever it
+ * is read from (the dev server, say).
  */
 export interface ShapeLoader {
   load(descriptor: ShapeDescriptor): Promise<DatasetCore>;
   /** A profile's shape files, each as the site publishes it. */
   loadProfile(profile: ProfileName): Promise<DatasetCore[]>;
-  /** The reference data profile checks load beside a document, from the vocabulary's pod. */
+  /** The reference data profile checks load beside a document, from the vocabulary. */
   loadReferenceData(): Promise<DatasetCore[]>;
 }
 
@@ -25,9 +26,9 @@ export function createShapeLoader({
   vendorBaseUrl,
 }: {
   fetch: typeof globalThis.fetch;
-  /** The shapes' pod, SHAPES_POD. */
+  /** Where the shapes are published, SHAPES_BASE. */
   shapesBaseUrl: string;
-  /** The vocabulary's pod, VOCAB_POD. */
+  /** Where the vocabulary is published, VOCAB_BASE. */
   vocabBaseUrl: string;
   /** Where the site publishes the vendored profiles, e.g. `new URL("vendor/", document.baseURI).href`. */
   vendorBaseUrl: string;

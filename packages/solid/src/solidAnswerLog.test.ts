@@ -142,7 +142,7 @@ describe("createSolidAnswerLog", () => {
     await expect(log.readMonth(INSTANCE, "2026-09")).resolves.toEqual([]);
     const given = answer("2026-09-21");
     await log.append(INSTANCE, given);
-    fake.documents.get(SEPTEMBER)!.add(`<${SEPTEMBER}#odd> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://pod.solid-memo.com/vocab/v1#Answer> .`);
+    fake.documents.get(SEPTEMBER)!.add(`<${SEPTEMBER}#odd> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://solid-memo.com/ns/vocab/v1.ttl#Answer> .`);
     await expect(log.readMonth(INSTANCE, "2026-09")).resolves.toEqual([given]);
   });
 

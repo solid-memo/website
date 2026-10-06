@@ -27,9 +27,9 @@ export interface ShaclShapeValidatorDeps {
   fetch: typeof globalThis.fetch;
   /** Fetches the shape documents, the reference data and the profiles, all public (plain). */
   shapesFetch: typeof globalThis.fetch;
-  /** The shapes' pod (SHAPES_POD). */
+  /** Where the shapes are published (SHAPES_BASE). */
   shapesBaseUrl: string;
-  /** The vocabulary's pod (VOCAB_POD), where the reference data is. */
+  /** Where the vocabulary is published (VOCAB_BASE), the reference data with it. */
   vocabBaseUrl: string;
   /** Where the site publishes the vendored profiles. */
   vendorBaseUrl: string;
