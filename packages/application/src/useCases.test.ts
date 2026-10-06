@@ -1338,6 +1338,20 @@ describe("createUseCases", () => {
     expect(deps.deckLibrary.fetchLibraryDeck).not.toHaveBeenCalled();
   });
 
+  it("planLibraryUpgrade offers nothing for a copy of the current release, or of none older, reading neither a release nor the copy's cards", async () => {
+    const deps = makeDeps();
+    const current: Deck = { ...deck, sourceUrl: libraryDeck.url };
+    await expect(createUseCases(deps).planLibraryUpgrade(current)).resolves.toBeNull();
+    // The index says the copy's release is v2 while its current one is still v1.
+    const v2 = "https://solid-memo.com/decks/capitals/v2.ttl";
+    vi.mocked(deps.deckLibrary.listLibraryDecks).mockResolvedValue([
+      { ...libraryDeck, releases: [...libraryDeck.releases, { url: v2, version: "2" }] },
+    ]);
+    await expect(createUseCases(deps).planLibraryUpgrade({ ...deck, sourceUrl: v2 })).resolves.toBeNull();
+    expect(deps.deckLibrary.fetchLibraryDeck).not.toHaveBeenCalled();
+    expect(deps.deckRepository.listCards).not.toHaveBeenCalled();
+  });
+
   it("addReleaseLanguages gives a copy the languages its release adds, and saves it; nothing for a home-made deck or nothing to add", async () => {
     const deps = makeDeps();
     const copy: Deck = { ...deck, title: { en: "Capitals" }, sourceUrl: libraryDeck.url };
