@@ -1,5 +1,7 @@
 # Solid Memo
 
+[![Solid Memo](apps/web/public/og-image.png)](https://solid-memo.com/)
+
 Spaced-repetition flashcards that live in your own Solid Pod.
 
 The app, its vocabulary and shapes ([`ns/`](ns/)) and the ready-made
