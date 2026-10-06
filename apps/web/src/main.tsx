@@ -58,7 +58,10 @@ const podFetch = writeFence.fetch;
 const servedSite = new URL(".", document.baseURI).href;
 const siteFetch: typeof fetch = (input, init) => {
   const url = String(input instanceof Request ? input.url : input);
-  return globalThis.fetch(url.startsWith(SITE) ? `${servedSite}${url.slice(SITE.length)}` : input, init);
+  if (!url.startsWith(SITE)) return globalThis.fetch(input, init);
+  const served = `${servedSite}${url.slice(SITE.length)}`;
+  // A Request keeps its method and headers at the served address.
+  return globalThis.fetch(input instanceof Request ? new Request(served, input) : served, init);
 };
 
 const shapeValidator = createShaclShapeValidator({
