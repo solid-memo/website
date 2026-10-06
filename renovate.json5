@@ -39,14 +39,12 @@
             matchDepNames: ['solidproject/community-server'],
             allowedVersions: '<8',
         },
-        // The advisory 8 follows its alphas to 8.0.0 (docs/testing.md); what
-        // it reports is for a person to look at, so nothing merges itself.
+        // The advisory 8 follows its alphas to 8.0.0 (docs/testing.md).
         {
             matchFileNames: ['e2e/pod/servers/css-8/compose.yml'],
             matchDepNames: ['solidproject/community-server'],
             allowedVersions: '>=8.0.0-0 <9',
             ignoreUnstable: false,
-            automerge: false,
         },
         {
             matchFileNames: ['e2e/pod/servers/nss/5/package.json'],
@@ -66,34 +64,19 @@
             matchDepNames: ['mcr.microsoft.com/devcontainers/typescript-node'],
             allowedVersions: '<25',
         },
-        // Pivot, advisory: what it reports is for a person to look at. Its
-        // image keeps to Node 22, which Pivot's own CI runs.
-        {
-            matchFileNames: ['e2e/pod/servers/pivot/**'],
-            automerge: false,
-        },
+        // Pivot's image keeps to Node 22, which Pivot's own CI runs.
         {
             matchFileNames: ['e2e/pod/servers/pivot/Dockerfile'],
             matchDepNames: ['node'],
             allowedVersions: '<23',
         },
-        // Solid-Nextcloud, advisory: what it reports is for a person to look
-        // at. Its app supports Nextcloud 30 at most.
-        {
-            matchFileNames: ['e2e/pod/servers/nextcloud/**'],
-            automerge: false,
-        },
+        // Solid-Nextcloud's app supports Nextcloud 30 at most.
         {
             matchFileNames: ['e2e/pod/servers/nextcloud/Dockerfile'],
             matchDepNames: ['nextcloud'],
             allowedVersions: '<31',
         },
-        // The JavaScript Solid Server, advisory and pre-1.0: every release
-        // may change what it does, so a person looks at each.
-        {
-            matchFileNames: ['e2e/pod/servers/jss/**'],
-            automerge: false,
-        },
+        // The JavaScript Solid Server's image keeps to Node 24.
         {
             matchFileNames: ['e2e/pod/servers/jss/Dockerfile'],
             matchDepNames: ['node'],

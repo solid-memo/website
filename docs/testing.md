@@ -50,7 +50,8 @@ and a job fails only on a test failing that
 no test ran ([compare.ts](../e2e/pod/compare.ts) says which in the job's
 summary, and what passes though listed, to take off the list). CI still
 checks that every advisory server starts and meets the contract, so a
-change that breaks one is not merged unnoticed. Solid-Nextcloud's SQLite
+change that breaks one is not merged unnoticed, and Renovate merges an
+advisory server's updates once that passes, as it does a blocking one's. Solid-Nextcloud's SQLite
 refuses writes made at once, so with it in a run the test files run one
 at a time (`serialFiles` in servers.ts); what it fails, and why, is its
 `expected-failures.json`. css-8 becomes blocking at
