@@ -144,11 +144,12 @@ what the versions make. Both check:
 With `-- --base <git ref>` they also compare with the library at that
 commit: a version published there that is gone or differs by a byte
 fails. `npm run check` runs `library:check` without a base, and so
-does CI; the [ns workflow](../.github/workflows/ns.yml) passes the pull
-request's base branch, the commit a push to the default branch moved it
-from, or, on a push to any other branch, the commit where that branch
-left the default branch, so an edit to a published version cannot be
-merged while a version not merged yet can still be fixed. To check a change locally before pushing:
+does CI; the [ns workflow](../.github/workflows/ns.yml), which runs on
+pushes (not on pull requests), passes the commit a push to the default
+branch moved it from or, on a push to any other branch, the commit where
+that branch left the default branch, so an edit to a published version
+is caught on the branch while a version not merged yet can still be
+fixed. To check a change locally before pushing:
 
 ```sh
 npm run library:check -- --base origin/main
