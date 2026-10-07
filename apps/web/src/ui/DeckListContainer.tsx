@@ -1,9 +1,10 @@
 import { useState } from "preact/hooks";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { hashKey, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import { applyDeckTreeEdit, type DeckTree, type DeckTreeEdit, type TreeNode } from "@solid-memo/domain/deckTree";
 import type { Instance } from "@solid-memo/domain/instance";
+import type { LangText } from "@solid-memo/domain/langText";
 import { DeckListScreen } from "./DeckListScreen";
 import { DeckStudyActionContainer } from "./DeckStudyAction";
 import { ErrorMessage } from "./ErrorMessage";
@@ -18,6 +19,17 @@ function groupUrls(nodes: readonly TreeNode[]): string[] {
   return nodes.flatMap((node) => (node.kind === "group" ? [node.group.url, ...groupUrls(node.children)] : []));
 }
 
+/** The nodes, the deck `url` names under its new title. */
+function retitled(nodes: readonly TreeNode[], url: string, title: LangText): TreeNode[] {
+  return nodes.map((node) =>
+    node.kind === "group"
+      ? { ...node, children: retitled(node.children, url, title) }
+      : node.deck.url === url
+        ? { ...node, deck: { ...node.deck, title } }
+        : node,
+  );
+}
+
 /**
  * Owns the deck list of one instance, as the user arranged it into
  * groups, and its edits. A deck set aside for invalid data
@@ -28,9 +40,17 @@ function groupUrls(nodes: readonly TreeNode[]): string[] {
  * regains focus, which would undo edits still on their way. An edit is
  * shown at once and written in turn after the ones before it (one
  * mutation scope per instance), each against the pod as it is then. One
- * that fails is taken back from the screen when none is waiting behind
- * it, the list is read afresh, and the screen says why; while edits are
- * waiting, a finished one leaves the screen to show theirs.
+ * that fails says why; when none is waiting behind it, it is taken back
+ * from the screen and the list is read afresh. While edits are waiting,
+ * a finished one leaves the screen to show theirs, and the last of them
+ * brings the list as the pod has it.
+ *
+ * A deck is renamed and removed here as on its preferences screen
+ * (DeckPreferencesContainer), in turn with the edits, since all of them
+ * write the catalog the arrangement is kept in; every query of the
+ * instance's decks is read afresh after. A new name shows at once, and
+ * only it is taken back when it fails; a removed deck goes once it is
+ * gone. Either says why it failed as an edit does.
  *
  * Which groups are folded shut is this device's own (remembered.ts),
  * never the pod's.
@@ -82,10 +102,53 @@ export function DeckListContainer({
       if (pending() === 1) queryClient.setQueryData(treeKey, tree);
     },
     onError: (error, _edit, context) => {
-      if (pending() === 1) queryClient.setQueryData(treeKey, context!.previous);
       setFailure(error);
+      // Read afresh by the last of the edits waiting, if any.
+      if (pending() > 1) return;
+      queryClient.setQueryData(treeKey, context!.previous);
       void queryClient.invalidateQueries({ queryKey: treeKey });
     },
+  });
+
+  /**
+   * Every query of the instance's decks, read afresh; the arrangement
+   * only when nothing is waiting behind (it brings its own, and a read
+   * now could come back after it, as the list was before it).
+   */
+  const refresh = () =>
+    queryClient.invalidateQueries({
+      queryKey: ["decks"],
+      predicate: (query) => pending() === 1 || query.queryHash !== hashKey(treeKey),
+    });
+
+  const retitle = (deck: Deck, title: LangText) => {
+    const tree = queryClient.getQueryData<DeckTree>(treeKey)!;
+    queryClient.setQueryData(treeKey, { ...tree, children: retitled(tree.children, deck.url, title) });
+  };
+
+  // In the arrangement's scope: both write the catalog it is kept in.
+  const renameMutation = useMutation({
+    scope: { id: scope },
+    mutationFn: ({ deck, title }: { deck: Deck; title: LangText }) => useCases.renameDeck(deck, title),
+    onMutate: async ({ deck, title }) => {
+      setFailure(null);
+      await queryClient.cancelQueries({ queryKey: treeKey });
+      retitle(deck, title);
+    },
+    // Only the name goes back: what was done since stays.
+    onError: (error, { deck }) => {
+      retitle(deck, deck.title);
+      setFailure(error);
+    },
+    onSettled: refresh,
+  });
+
+  const removeMutation = useMutation({
+    scope: { id: scope },
+    mutationFn: (deck: Deck) => useCases.removeDeck(deck),
+    onMutate: () => setFailure(null),
+    onSuccess: refresh,
+    onError: (error) => setFailure(error),
   });
 
   if (treeQuery.error) {
@@ -121,9 +184,19 @@ export function DeckListContainer({
           );
         }}
         newGroup={(title) => useCases.newDeckGroup(instance.url, title)}
+        onRenameDeck={(deck, title) => renameMutation.mutate({ deck, title })}
+        onRemoveDeck={(deck) =>
+          removeMutation.mutateAsync(deck).then(
+            () => true,
+            () => false,
+          )
+        }
         error={errorText(failure)}
         libraryHref={libraryHref(instance.url)}
         deckHref={(deck) => deckHref(instance.url, deck.url)}
+        preferencesHref={(deck) =>
+          routeToHash({ screen: "deckPreferences", instanceUrl: instance.url, deckUrl: deck.url })
+        }
         renderStudyAction={(deck) =>
           isSetAside(deck) ? (
             <span class="hint">{t("deckList.setAside")}</span>
