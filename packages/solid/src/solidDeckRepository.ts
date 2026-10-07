@@ -25,7 +25,8 @@ import { withStatedLanguages } from "@solid-memo/domain/deckLanguages";
 import { catalogUrlOf, documentsInUse, ensureTrailingSlash } from "@solid-memo/domain/instanceLayout";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { CARD_V5 } from "@solid-memo/vocab/descriptors.generated";
-import { deleteDataset, getSolidDatasetOrNull, saveDataset } from "./datasets";
+import { applyDeckTreeEdit, buildTree, treeChanges } from "@solid-memo/domain/deckTree";
+import { deleteDataset, getSolidDatasetOrNull, PreconditionFailedError, saveDataset } from "./datasets";
 import { DCTERMS } from "./vocab";
 import {
   deckSubjects,
@@ -36,6 +37,7 @@ import {
   withDeck,
   withoutDeck,
 } from "./mappers/deckMapper";
+import { toStoredLayout, withTreeChanges } from "./mappers/deckTreeMapper";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
 import { reviewSubjectUrl } from "./mappers/reviewStateMapper";
 import { recordThing } from "./records";
@@ -53,6 +55,13 @@ export interface SolidDeckRepositoryDeps {
   /** The IRI mapper an upgrade's new cards document is moved with; injected for tests. */
   loadEngine?: LoadEngine;
 }
+
+/**
+ * How often an edit of the deck arrangement is made, in all, while the
+ * catalog document keeps changing elsewhere (412). The edit is applied
+ * again to the document as it is then, so a retry keeps what changed.
+ */
+const TREE_ATTEMPTS = 3;
 
 export function createSolidDeckRepository({
   fetch,
@@ -130,6 +139,35 @@ export function createSolidDeckRepository({
       }
       if (dataset === null) return;
       await saveDataset(catalogUrl, withoutDeck(dataset, deck), fetch);
+    },
+
+    async readDeckTree(instanceUrl) {
+      const catalogUrl = catalogUrlOf(instanceUrl);
+      const dataset = await getSolidDatasetOrNull(catalogUrl, fetch);
+      return buildTree(toStoredLayout(dataset ?? createSolidDataset(), catalogUrl));
+    },
+
+    async editDeckTree(instanceUrl, edit) {
+      const catalogUrl = catalogUrlOf(instanceUrl);
+      for (let attempt = 1; ; attempt++) {
+        const dataset = (await getSolidDatasetOrNull(catalogUrl, fetch)) ?? createSolidDataset();
+        const stored = toStoredLayout(dataset, catalogUrl);
+        const before = buildTree(stored);
+        const after = applyDeckTreeEdit(before, edit);
+        if (after === before) return after;
+        const { dataset: updated, subjects } = withTreeChanges(dataset, catalogUrl, treeChanges(stored, after));
+        // Only the groups and the catalogue are checked: a deck's position is
+        // no shape's, and a deck set aside beside the moved one must not stop it.
+        await checkWrite(updated, subjects);
+        try {
+          // A PATCH, If-Match the read above: where the pod has no strong ETag
+          // to match, a whole PUT would undo what changed meanwhile.
+          await saveDataset(catalogUrl, updated, fetch);
+          return after;
+        } catch (error) {
+          if (!(error instanceof PreconditionFailedError) || attempt === TREE_ATTEMPTS) throw error;
+        }
+      }
     },
 
     async listCards(deck): Promise<Card[]> {

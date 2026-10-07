@@ -108,12 +108,22 @@ export function deckSubjects(deck: Deck): string[] {
   return [deck.url, distributionUrlOf(deck.url), ...deckAgents(deck).map((agent) => agent.url)];
 }
 
-/** The catalog document without a deck, its distribution, or agents only it named. */
+/**
+ * The catalog document without a deck, its distribution, or agents only
+ * it named, and with no deck group listing it any more. Its former
+ * siblings keep their positions: the gap is read as if it were not there
+ * (domain/deckTree.ts buildTree), and the next arrangement closes it.
+ */
 export function withoutDeck(dataset: SolidDataset, deck: Deck): SolidDataset {
-  const updated = removeThing(
+  let updated = removeThing(
     removeThing(dataset, deck.url),
     distributionUrlOf(deck.url),
   );
+  for (const thing of getThingAll(updated)) {
+    if (getUrlAll(thing, RDF.type).includes(SM.DeckGroup) && getUrlAll(thing, DCAT.dataset).includes(deck.url)) {
+      updated = setThing(updated, buildThing(thing).removeUrl(DCAT.dataset, deck.url).build());
+    }
+  }
   return withCatalogDatasets(withoutStrayAgents(updated, documentUrlOf(deck.url)), documentUrlOf(deck.url));
 }
 

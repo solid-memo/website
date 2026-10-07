@@ -93,6 +93,7 @@ def main() -> int:
         VOCAB / "fixtures/deck/v4/valid/pod.ttl",
         *sorted((VOCAB / "fixtures/deck/v5/valid").glob("pod*.ttl")),
         *sorted((VOCAB / "fixtures/deck/v6/valid").glob("pod*.ttl")),
+        *sorted((VOCAB / "fixtures/deck-group/v1/valid").glob("pod*.ttl")),
     ]
     for pod in pods:
         name = pod.relative_to(VOCAB / "fixtures").as_posix()

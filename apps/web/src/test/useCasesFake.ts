@@ -1,6 +1,7 @@
 import { vi } from "vitest";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { withAbout } from "@solid-memo/domain/deckAbout";
+import { applyDeckTreeEdit } from "@solid-memo/domain/deckTree";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import { statisticsOf } from "@solid-memo/domain/statistics";
 
@@ -61,6 +62,13 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
       throw new Error("createDeck fake not configured");
     }),
     renameDeck: vi.fn(async (deck, title) => ({ ...deck, title })),
+    // As the real ones relate to them: every listed deck at the top level, an edit made to that tree.
+    listDeckTree: vi.fn(async (instanceUrl) => ({
+      children: (await fake.listDecks(instanceUrl)).map((deck) => ({ kind: "deck" as const, deck })),
+      readOnly: false,
+    })),
+    newDeckGroup: vi.fn((instanceUrl, title) => ({ url: `${instanceUrl}catalog.ttl#group-fake`, title })),
+    editDeckTree: vi.fn(async (instanceUrl, edit) => applyDeckTreeEdit(await fake.listDeckTree(instanceUrl), edit)),
     setDeckDirection: vi.fn(async (deck, direction) => ({ ...deck, direction })),
     // As the real one does: keywords tidied, and left off when there are none.
     describeDeck: vi.fn(async (deck, about) => withAbout(deck, about)),

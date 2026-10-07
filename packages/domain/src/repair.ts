@@ -11,6 +11,7 @@ import { shown } from "./langText";
 
 const DCTERMS = "http://purl.org/dc/terms/";
 const FOAF = "http://xmlns.com/foaf/0.1/";
+const DCAT = "http://www.w3.org/ns/dcat#";
 
 export type RepairKind =
   /** Give a deck without a description the default one. */
@@ -23,6 +24,11 @@ export type RepairKind =
   | "recompute-due"
   /** Name an agent without a name after its IRI. */
   | "name-agent"
+  /**
+   * Drop the links of a catalogue or deck group to decks and groups the
+   * document no longer describes, as a removal elsewhere leaves them.
+   */
+  | "drop-dangling-members"
   /** Remove the subject: the user's choice, for what cannot be repaired. */
   | "remove-subject";
 
@@ -60,6 +66,13 @@ function repairFor(shape: ShapeName | null, violation: Violation): RepairKind | 
   if (shape === "reviewState" && constraint === "Xone") return "drop-snapshot";
   if (shape === "reviewState" && path === `${SM}due` && constraint === "Pattern") return "recompute-due";
   if (path === `${FOAF}name` && constraint === "MinCount") return "name-agent";
+  if (
+    (shape === "catalog" || shape === "deckGroup") &&
+    (path === `${DCAT}dataset` || path === `${DCAT}catalog`) &&
+    constraint === "Class"
+  ) {
+    return "drop-dangling-members";
+  }
   return null;
 }
 
@@ -116,6 +129,8 @@ export function describeRepair(repair: Repair): string {
       return "Recompute the review's due day";
     case "name-agent":
       return "Name the person or organisation after their address";
+    case "drop-dangling-members":
+      return "Drop the links to decks and groups that are gone";
     case "remove-subject":
       return "Remove it";
   }

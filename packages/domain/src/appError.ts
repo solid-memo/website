@@ -84,6 +84,10 @@ export const ERROR_TEMPLATES = {
     "Solid Memo is updating this deck and saves nothing to it until the update is done. Wait for the update to finish, then try again.",
   changedElsewhere:
     "This was changed elsewhere, perhaps in another tab or app, since Solid Memo read it, so nothing was saved. Reload the page and try again.",
+  deckTreeChanged:
+    "Your decks were rearranged elsewhere, perhaps in another tab or app, so this change was not made. The list now shows them as they are.",
+  deckTreeTooNew:
+    "A newer version of Solid Memo arranged these decks, so this one cannot rearrange them. Reload the page to get the latest version.",
   createdElsewhere:
     "This was created elsewhere, perhaps in another tab or app, just as Solid Memo was about to create it, so nothing was saved. Reload the page and try again.",
   alreadyExists: "Something is already kept at that place in your Pod. Choose another place.",

@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { defaultDeckDescription, defaultDeckDescriptionText, descriptionInFormat4, isDefaultDeckDescription } from "./dcat";
+import {
+  defaultDeckDescription,
+  defaultDeckDescriptionText,
+  defaultDeckGroupDescription,
+  descriptionInFormat4,
+  isDefaultDeckDescription,
+  isDefaultDeckGroupDescription,
+} from "./dcat";
 
 describe("a deck's default description", () => {
   it("is English before format 4", () => {
@@ -67,5 +74,28 @@ describe("isDefaultDeckDescription", () => {
     const retagged = { en: "Capitals", de: "Huvudstäder" };
     expect(isDefaultDeckDescription(capitals, [retagged])).toBe(false);
     expect(isDefaultDeckDescription(capitals, [retagged, { en: "Capitals", sv: "Huvudstäder" }])).toBe(true);
+  });
+});
+
+describe("a deck group's default description", () => {
+  it("is English and Swedish, naming the group by its Swedish name when it has one", () => {
+    expect(defaultDeckGroupDescription({ en: "Languages" })).toEqual({
+      en: "Deck group: Languages.",
+      sv: "Kortleksgrupp: Languages.",
+    });
+    expect(defaultDeckGroupDescription({ sv: "Språk" })).toEqual({ en: "Deck group: Språk.", sv: "Kortleksgrupp: Språk." });
+    expect(defaultDeckGroupDescription({ en: "Languages", sv: "Språk" })).toEqual({
+      en: "Deck group: Languages.",
+      sv: "Kortleksgrupp: Språk.",
+    });
+  });
+
+  it("is known as the default for the group's name, with or without its Swedish, and nothing else is", () => {
+    const title = { sv: "Språk" };
+    expect(isDefaultDeckGroupDescription({ en: "Deck group: Språk.", sv: "Kortleksgrupp: Språk." }, title)).toBe(true);
+    expect(isDefaultDeckGroupDescription({ en: "Deck group: Språk." }, title)).toBe(true);
+    expect(isDefaultDeckGroupDescription({ en: "Deck group: Språk.", sv: "Mina språk." }, title)).toBe(false);
+    expect(isDefaultDeckGroupDescription({ en: "Deck group: Languages." }, title)).toBe(false);
+    expect(isDefaultDeckGroupDescription({ sv: "Kortleksgrupp: Språk." }, title)).toBe(false);
   });
 });

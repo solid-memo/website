@@ -3,15 +3,17 @@ import { describe, expect, it } from "vitest";
 import { readVersioned, recordThing } from "./records";
 import { LATEST_VERSION, type ShapeName } from "@solid-memo/vocab/types.generated";
 import { MIGRATIONS, migrate, stepFor } from "@solid-memo/domain/shapes/migrations";
-import { toRdfJsDataset, mockSolidDatasetFrom, setThing, buildThing, createThing, getSolidDataset, getThingAll, getUrlAll } from "@inrupt/solid-client";
+import { toRdfJsDataset, mockSolidDatasetFrom, setThing, buildThing, createThing, getSolidDataset, getThing, getThingAll, getUrlAll } from "@inrupt/solid-client";
 import { createEngine, mergeDatasets } from "@solid-memo/shacl/engine";
 import { coreOnly, PROFILES, REFERENCE_DATA } from "@solid-memo/shacl/profiles";
 import { datasetFromTurtle, turtleFetch } from "@solid-memo/shacl/testing/turtle";
 import { withCatalog, withDeck } from "./mappers/deckMapper";
+import { toStoredLayout, withTreeChanges } from "./mappers/deckTreeMapper";
+import { applyDeckTreeEdit, buildTree, treeChanges } from "@solid-memo/domain/deckTree";
 import type { Deck } from "@solid-memo/domain/deck";
 import { createShapeLoader } from "@solid-memo/shacl/shapeLoader";
 import { SHAPES } from "@solid-memo/vocab/descriptors.generated";
-import { RDF, SM, SM_NS } from "./vocab";
+import { DCAT, RDF, SM, SM_NS } from "./vocab";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/sources";
 import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
 
@@ -58,6 +60,9 @@ const FIXTURES: Record<ShapeName, Record<number, object>> = {
   },
   catalog: {
     1: { title: "Main", description: "My decks.", publisher: "https://pod.example/profile/card#me", themeTaxonomy: ["https://solid-memo.com/ns/vocab/topics.ttl"], dataset: ["https://pod.example/c.ttl#deck-1"] },
+  },
+  deckGroup: {
+    1: { title: { sv: "Språk" }, description: { en: "Deck group: Språk.", sv: "Kortleksgrupp: Språk." }, publisher: "https://pod.example/profile/card#me", dataset: ["https://pod.example/c.ttl#deck-1"], catalog: ["https://pod.example/c.ttl#group-2"], position: 0 },
   },
   agent: {
     1: { name: "Anton", mbox: "mailto:anton@example.com" },
@@ -214,39 +219,79 @@ async function sourceDataset(url: string) {
 }
 
 describe("what the app writes, under DCAT-AP", () => {
-  it("conforms: a catalog document with its catalogue, a deck, its creators and its distribution", async () => {
+  const CATALOG = "https://pod.example/solid-memo/a/catalog.ttl";
+  const PUBLISHER = "https://alice.example/profile/card#me";
+  const deck: Deck = {
+    id: "deck-1",
+    url: `${CATALOG}#deck-1`,
+    title: { en: "Capitals" },
+    cardsDocumentUrl: "https://pod.example/solid-memo/a/decks/deck-1.ttl",
+    reviewsDocumentUrl: "https://pod.example/solid-memo/a/reviews/deck-1.ttl",
+    createdAt: "2026-09-21T10:00:00.000Z",
+    formatVersion: 3,
+    direction: "bidirectional",
+    authors: ["Anton Wiklund <anton@example.com>", "A friend"],
+    license: "https://creativecommons.org/publicdomain/zero/1.0/",
+    sourceUrl: "https://solid-memo.com/decks/capitals/v1.ttl",
+    themes: ["https://solid-memo.com/ns/vocab/topics.ttl#geography"],
+    keywords: { en: ["capitals", "countries"], sv: ["huvudstäder"] },
+  };
+  const catalogDocument = () =>
+    withCatalog(withDeck(mockSolidDatasetFrom(CATALOG), deck), CATALOG, {
+      title: "Main",
+      description: "Flashcard decks of the Solid Memo instance Main.",
+      publisher: { webId: PUBLISHER, name: "Alice" },
+    });
+
+  /** The DCAT-AP violations of a catalog document, with the reference data and the deck's licence beside it. */
+  async function profileViolations(written: ReturnType<typeof toRdfJsDataset>) {
     const shapes = await Promise.all(PROFILES["dcat-ap"].map((path) => sourceDataset(`${SHAPE_SOURCES.vendorBaseUrl}${path}`)));
     const engine = createEngine(mergeDatasets(coreOnly(shapes.flatMap((d) => [...d]))));
-    const CATALOG = "https://pod.example/solid-memo/a/catalog.ttl";
-    const deck: Deck = {
-      id: "deck-1",
-      url: `${CATALOG}#deck-1`,
-      title: { en: "Capitals" },
-      cardsDocumentUrl: "https://pod.example/solid-memo/a/decks/deck-1.ttl",
-      reviewsDocumentUrl: "https://pod.example/solid-memo/a/reviews/deck-1.ttl",
-      createdAt: "2026-09-21T10:00:00.000Z",
-      formatVersion: 3,
-      direction: "bidirectional",
-      authors: ["Anton Wiklund <anton@example.com>", "A friend"],
-      license: "https://creativecommons.org/publicdomain/zero/1.0/",
-      sourceUrl: "https://solid-memo.com/decks/capitals/v1.ttl",
-      themes: ["https://solid-memo.com/ns/vocab/topics.ttl#geography"],
-      keywords: { en: ["capitals", "countries"], sv: ["huvudstäder"] },
-    };
-    const written = toRdfJsDataset(
-      withCatalog(withDeck(mockSolidDatasetFrom(CATALOG), deck), CATALOG, {
-        title: "Main",
-        description: "Flashcard decks of the Solid Memo instance Main.",
-        publisher: { webId: "https://alice.example/profile/card#me", name: "Alice" },
-      }),
-    );
     const reference = await Promise.all(REFERENCE_DATA.map((path) => sourceDataset(`${SHAPE_SOURCES.vocabBaseUrl}${path}`)));
     const licence = await datasetFromTurtle(
       "<https://creativecommons.org/publicdomain/zero/1.0/> a <http://purl.org/dc/terms/LicenseDocument> .",
       CATALOG,
     );
     const data = mergeDatasets(written, ...reference, licence);
-    const violations = (await engine.validate(data)).filter((v) => v.severity === "violation");
-    expect(violations).toEqual([]);
+    return (await engine.validate(data)).filter((v) => v.severity === "violation");
+  }
+
+  it("conforms: a catalog document with its catalogue, a deck, its creators and its distribution", async () => {
+    await expect(profileViolations(toRdfJsDataset(catalogDocument()))).resolves.toEqual([]);
+  });
+
+  it("conforms: a catalogue the app arranged into nested deck groups, each group also conforming to its own shape", async () => {
+    const outer = { url: `${CATALOG}#group-1`, title: { sv: "Språk" } };
+    const inner = { url: `${CATALOG}#group-2`, title: { en: "Scripts" } };
+    const other: Deck = { ...deck, id: "deck-2", url: `${CATALOG}#deck-2`, title: { en: "Greek" } };
+    let dataset = withDeck(catalogDocument(), other);
+    // The two decks grouped, then grouped again inside that group.
+    for (const group of [outer, inner]) {
+      const stored = toStoredLayout(dataset, CATALOG);
+      const after = applyDeckTreeEdit(buildTree(stored), { kind: "combine", dragged: other.url, target: deck.url, group });
+      dataset = withTreeChanges(dataset, CATALOG, treeChanges(stored, after)).dataset;
+    }
+    expect(getUrlAll(getThing(dataset, outer.url)!, DCAT.catalog)).toEqual([inner.url]);
+    const written = toRdfJsDataset(dataset);
+    await expect(profileViolations(written)).resolves.toEqual([]);
+    const engine = createEngine(await loader.load(SHAPES.deckGroup[1]));
+    for (const url of [outer.url, inner.url]) {
+      await expect(engine.validateNode(written, url, SHAPES.deckGroup[1].shapeIri), url).resolves.toEqual([]);
+    }
+  });
+
+  it("conforms: a group stored with a negative position, renamed, without it", async () => {
+    const group = { url: `${CATALOG}#group-1`, title: { en: "Languages" } };
+    const other: Deck = { ...deck, id: "deck-2", url: `${CATALOG}#deck-2`, title: { en: "Greek" } };
+    let dataset = withDeck(catalogDocument(), other);
+    const stored = toStoredLayout(dataset, CATALOG);
+    const combined = applyDeckTreeEdit(buildTree(stored), { kind: "combine", dragged: other.url, target: deck.url, group });
+    dataset = withTreeChanges(dataset, CATALOG, treeChanges(stored, combined)).dataset;
+    dataset = setThing(dataset, buildThing(getThing(dataset, group.url)!).setInteger(SM.position, -1).build());
+    const negative = toStoredLayout(dataset, CATALOG);
+    const renamed = applyDeckTreeEdit(buildTree(negative), { kind: "rename", group: group.url, title: { en: "Words" } });
+    const written = toRdfJsDataset(withTreeChanges(dataset, CATALOG, treeChanges(negative, renamed)).dataset);
+    const engine = createEngine(await loader.load(SHAPES.deckGroup[1]));
+    await expect(engine.validateNode(written, group.url, SHAPES.deckGroup[1].shapeIri)).resolves.toEqual([]);
   });
 });

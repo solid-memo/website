@@ -1,0 +1,17 @@
+@prefix dcat:    <http://www.w3.org/ns/dcat#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf:    <http://xmlns.com/foaf/0.1/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+
+# The catalogue lists a deck group that the document does not describe,
+# as a removed group's dangling link would leave it.
+<#catalog>
+    a dcat:Catalog ;
+    dcterms:title "Main"@en ;
+    dcterms:description "My decks."@en ;
+    dcterms:publisher <#me> ;
+    dcat:catalog <#group-languages> .
+
+<#me>
+    a foaf:Agent ;
+    foaf:name "Anton" .

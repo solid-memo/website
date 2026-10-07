@@ -91,7 +91,11 @@ string, so other applications can look up what it means:
   study caps (`sm:deckNewCardsPerDay`, `sm:deckMaxReviewsPerDay`, 1.7)
   and the description of a card's pictures (`sm:frontImageDescription`,
   `sm:backImageDescription`, 1.12) are such terms. The vocabulary still
-  moves to the next 1.x.
+  moves to the next 1.x. A term may also be written on a subject outside
+  its shape, which neither owns nor checks it: `sm:position` (1.13), a
+  deck's place on the [arranged deck list](data-model.md#deck-groups),
+  is kept by every writer of a deck because `DeckV6` does not own it, so
+  the deck format did not move.
 - **A breaking change is a new namespace** (`ns/vocab/v2.ttl#`, with
   `owl:priorVersion` pointing back), never an edit of v1: the v1 IRIs
   are baked into every pod that ever wrote them.

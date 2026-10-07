@@ -5,6 +5,7 @@ import type { ThemeChoice } from "@solid-memo/domain/theme";
 import type { Repair } from "@solid-memo/domain/repair";
 import type { Card, CardContent, Deck } from "@solid-memo/domain/deck";
 import type { StatedLanguages } from "@solid-memo/domain/deckLanguages";
+import type { DeckTree, DeckTreeEdit } from "@solid-memo/domain/deckTree";
 import type {
   Instance,
   InstanceMeta,
@@ -139,8 +140,28 @@ export interface DeckRepository {
    * Cards and review state are untouched.
    */
   saveDeck(deck: Deck): Promise<Deck>;
-  /** Removes the deck's catalog entry, cards document and reviews document. */
+  /**
+   * Removes the deck's catalog entry, cards document and reviews
+   * document, and the deck from its group, in the same write.
+   */
   removeDeck(deck: Deck): Promise<void>;
+  /**
+   * The instance's decks as the user arranged them into groups
+   * (domain/deckTree.ts buildTree); an empty tree when it has no catalog
+   * document.
+   */
+  readDeckTree(instanceUrl: string): Promise<DeckTree>;
+  /**
+   * Make one edit of the arrangement to the catalog document as it is
+   * now: read it, apply the edit to the tree it states, and write what
+   * changed in ONE save, made only if the document is as it was read
+   * (If-Match); when it changed meanwhile, read it and apply the edit
+   * again, a few times, then throw changedElsewhere. An edit that
+   * changes nothing writes nothing. Returns the tree as written.
+   * Throws deckTreeChanged when the edit no longer fits the tree, and
+   * deckTreeTooNew when a newer app arranged it.
+   */
+  editDeckTree(instanceUrl: string, edit: DeckTreeEdit): Promise<DeckTree>;
   /**
    * Create a deck with all its cards at once — one write of the cards
    * document rather than one per card — remembering the library deck it

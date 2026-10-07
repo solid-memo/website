@@ -4,6 +4,8 @@ import {
   getInteger,
   getStringNoLocale,
   getThing,
+  getThingAll,
+  getUrlAll,
   removeThing,
   setThing,
   type SolidDataset,
@@ -14,7 +16,7 @@ import { defaultDeckDescription, defaultDeckDescriptionText } from "@solid-memo/
 import type { Repair, RepairKind } from "@solid-memo/domain/repair";
 import { getSolidDatasetOrNull, saveDataset } from "./datasets";
 import { readText } from "./records";
-import { DCTERMS, SM } from "./vocab";
+import { DCAT, DCTERMS, RDF, SM } from "./vocab";
 
 const FOAF_NAME = "http://xmlns.com/foaf/0.1/name";
 const SNAPSHOT = [
@@ -50,16 +52,60 @@ export function createSolidRepairRepository({
   };
 }
 
+/**
+ * The links that make a deck or deck group a member of a catalogue or
+ * group, and the classes of what they link to: the DCAT class, or the
+ * Solid Memo one alone (a deck that lost its DCAT class is still listed,
+ * so the catalogue keeps listing every deck).
+ */
+const MEMBERSHIP = [
+  { link: DCAT.dataset, types: [DCAT.Dataset, SM.Deck] },
+  { link: DCAT.catalog, types: [DCAT.Catalog, SM.DeckGroup] },
+];
+
 function applyRepair(dataset: SolidDataset, repair: Repair): SolidDataset {
   const thing = getThing(dataset, repair.subjectUrl);
   if (thing === null) return dataset;
-  if (repair.kind === "remove-subject") return removeThing(dataset, thing);
+  if (repair.kind === "remove-subject") {
+    return withoutMembershipsOf(removeThing(dataset, thing), repair.documentUrl, repair.subjectUrl);
+  }
+  if (repair.kind === "drop-dangling-members") return setThing(dataset, withoutDanglingMembers(dataset, thing));
   return setThing(dataset, repairedThing(thing, { ...repair, kind: repair.kind }));
+}
+
+/**
+ * A removed subject is no member of the catalogue (`#catalog`) or of a
+ * deck group any more. Only those links go: who else names it — a deck
+ * its creator, the catalogue its publisher — is left as it is.
+ */
+function withoutMembershipsOf(dataset: SolidDataset, documentUrl: string, url: string): SolidDataset {
+  return getThingAll(dataset)
+    .filter((thing) => thing.url === `${documentUrl}#catalog` || getUrlAll(thing, RDF.type).includes(SM.DeckGroup))
+    .reduce(
+      (current, parent) =>
+        setThing(current, MEMBERSHIP.reduce((builder, { link }) => builder.removeUrl(link, url), buildThing(parent)).build()),
+      dataset,
+    );
+}
+
+/** A catalogue or deck group without its links to decks and groups the document does not describe as such. */
+function withoutDanglingMembers(dataset: SolidDataset, thing: Thing): Thing {
+  const describes = (url: string, types: string[]) => {
+    const member = getThing(dataset, url);
+    return member !== null && getUrlAll(member, RDF.type).some((type) => types.includes(type));
+  };
+  return MEMBERSHIP.reduce(
+    (builder, { link, types }) =>
+      getUrlAll(thing, link)
+        .filter((url) => !describes(url, types))
+        .reduce((b, url) => b.removeUrl(link, url), builder),
+    buildThing(thing),
+  ).build();
 }
 
 function repairedThing(
   thing: Thing,
-  repair: Repair & { kind: Exclude<RepairKind, "remove-subject"> },
+  repair: Repair & { kind: Exclude<RepairKind, "remove-subject" | "drop-dangling-members"> },
 ): Thing {
   const builder = buildThing(thing);
   switch (repair.kind) {

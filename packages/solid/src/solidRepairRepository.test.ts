@@ -6,6 +6,7 @@ import {
   getStringWithLocale,
   getThing,
   getUrl,
+  getUrlAll,
   mockSolidDatasetFrom,
   saveSolidDatasetAt,
   setThing,
@@ -15,7 +16,7 @@ import {
 import type { Repair } from "@solid-memo/domain/repair";
 import { getSolidDatasetOrNull } from "./datasets";
 import { createSolidRepairRepository } from "./solidRepairRepository";
-import { DCTERMS, RDF, SM } from "./vocab";
+import { DCAT, DCTERMS, RDF, SM } from "./vocab";
 
 vi.mock("@inrupt/solid-client", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@inrupt/solid-client")>();
@@ -173,6 +174,87 @@ describe("applyRepairs", () => {
       "https://alice.example/profile/card",
     );
     expect(getThing(saved(), `${CATALOG}#broken`)).toBeNull();
+  });
+
+  it("removes a subject from the catalogue and its deck group, keeping every other link to it", async () => {
+    const deck = `${CATALOG}#deck-1`;
+    const agent = `${CATALOG}#agent-x`;
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      documentOf(
+        CATALOG,
+        buildThing(createThing({ url: `${CATALOG}#catalog` }))
+          .addIri(RDF.type, DCAT.Catalog)
+          .addUrl(DCTERMS.publisher, agent)
+          .addUrl(DCAT.dataset, deck)
+          .addUrl(DCAT.dataset, `${CATALOG}#deck-2`)
+          .addUrl(DCAT.catalog, `${CATALOG}#group-1`)
+          .addUrl(DCAT.catalog, `${CATALOG}#group-2`)
+          .build(),
+        buildThing(createThing({ url: `${CATALOG}#group-1` }))
+          .addIri(RDF.type, SM.DeckGroup)
+          .addIri(RDF.type, DCAT.Catalog)
+          .addUrl(DCAT.dataset, deck)
+          .addUrl(DCAT.catalog, `${CATALOG}#group-2`)
+          .build(),
+        buildThing(createThing({ url: `${CATALOG}#group-2` })).addIri(RDF.type, SM.DeckGroup).addIri(RDF.type, DCAT.Catalog).build(),
+        buildThing(createThing({ url: `${CATALOG}#other` })).addIri(RDF.type, DCAT.Catalog).addUrl(DCAT.dataset, deck).build(),
+        buildThing(createThing({ url: deck })).addIri(RDF.type, SM.Deck).addUrl(DCTERMS.creator, agent).build(),
+        buildThing(createThing({ url: agent })).addIri(RDF.type, "http://xmlns.com/foaf/0.1/Agent").build(),
+      ),
+    );
+    await repository().applyRepairs([
+      repair("remove-subject", deck),
+      repair("remove-subject", agent),
+      repair("remove-subject", `${CATALOG}#group-2`),
+    ]);
+    const catalog = getThing(saved(), `${CATALOG}#catalog`)!;
+    expect(getUrlAll(catalog, DCAT.dataset)).toEqual([`${CATALOG}#deck-2`]);
+    expect(getUrlAll(catalog, DCAT.catalog)).toEqual([`${CATALOG}#group-1`]);
+    expect(getUrl(catalog, DCTERMS.publisher)).toBe(agent);
+    const group1 = getThing(saved(), `${CATALOG}#group-1`)!;
+    expect(getUrlAll(group1, DCAT.dataset)).toEqual([]);
+    expect(getUrlAll(group1, DCAT.catalog)).toEqual([]);
+    // Only the catalogue and the deck groups list the decks.
+    expect(getUrlAll(getThing(saved(), `${CATALOG}#other`)!, DCAT.dataset)).toEqual([deck]);
+  });
+
+  it("drops a catalogue's and a deck group's links to decks and groups the document does not describe", async () => {
+    const group = (url: string) => buildThing(createThing({ url })).addIri(RDF.type, SM.DeckGroup).addIri(RDF.type, DCAT.Catalog);
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      documentOf(
+        CATALOG,
+        buildThing(createThing({ url: `${CATALOG}#catalog` }))
+          .addIri(RDF.type, DCAT.Catalog)
+          .addUrl(DCAT.dataset, `${CATALOG}#deck-1`)
+          .addUrl(DCAT.dataset, `${CATALOG}#deck-old`)
+          .addUrl(DCAT.catalog, `${CATALOG}#group-1`)
+          .addUrl(DCAT.catalog, `${CATALOG}#group-gone`)
+          .addUrl(DCAT.catalog, `${CATALOG}#group-old`)
+          .build(),
+        group(`${CATALOG}#group-1`)
+          .addUrl(DCAT.dataset, `${CATALOG}#deck-1`)
+          .addUrl(DCAT.dataset, `${CATALOG}#deck-gone`)
+          .addUrl(DCAT.dataset, `${CATALOG}#group-2`)
+          .addUrl(DCAT.catalog, `${CATALOG}#group-2`)
+          .addUrl(DCAT.catalog, `${CATALOG}#deck-1`)
+          .build(),
+        group(`${CATALOG}#group-2`).build(),
+        buildThing(createThing({ url: `${CATALOG}#deck-1` })).addIri(RDF.type, SM.Deck).addIri(RDF.type, DCAT.Dataset).build(),
+        // A deck or group that lost its DCAT class is still one: the catalogue keeps it.
+        buildThing(createThing({ url: `${CATALOG}#deck-old` })).addIri(RDF.type, SM.Deck).build(),
+        buildThing(createThing({ url: `${CATALOG}#group-old` })).addIri(RDF.type, SM.DeckGroup).build(),
+      ),
+    );
+    await repository().applyRepairs([
+      repair("drop-dangling-members", `${CATALOG}#catalog`, 1),
+      repair("drop-dangling-members", `${CATALOG}#group-1`, 1),
+    ]);
+    const catalog = getThing(saved(), `${CATALOG}#catalog`)!;
+    expect(getUrlAll(catalog, DCAT.dataset)).toEqual([`${CATALOG}#deck-1`, `${CATALOG}#deck-old`]);
+    expect(getUrlAll(catalog, DCAT.catalog)).toEqual([`${CATALOG}#group-1`, `${CATALOG}#group-old`]);
+    const group1 = getThing(saved(), `${CATALOG}#group-1`)!;
+    expect(getUrlAll(group1, DCAT.dataset)).toEqual([`${CATALOG}#deck-1`]);
+    expect(getUrlAll(group1, DCAT.catalog)).toEqual([`${CATALOG}#group-2`]);
   });
 
   it("skips a document that is gone", async () => {

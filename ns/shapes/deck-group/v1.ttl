@@ -1,0 +1,94 @@
+@base <https://solid-memo.com/ns/shapes/deck-group/v1.ttl> .
+
+@prefix sh:         <http://www.w3.org/ns/shacl#> .
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+
+# A deck group, format 1: a named group of decks and deck groups that the
+# user arranged on the deck list, a subject of the instance's catalog
+# document beside the decks. It is a dcat:Catalog of its decks
+# (dcat:dataset) and sub-groups (dcat:catalog), and is listed by the one
+# catalogue or group it is in, where solid-memo:position orders it among
+# that parent's members. The catalogue itself still lists every deck.
+<#inPod>
+    a sh:NodeShape ;
+    sh:name "DeckGroupV1" ;
+    rdfs:comment "Deck group format 1: a dcat:Catalog of decks and deck groups, with a language-tagged name and description, the catalogue's publisher, and its place among its parent's members." ;
+    sh:nodeKind sh:IRI ;
+    sh:class solid-memo:DeckGroup ;
+    sh:property <#formatVersion> ,
+                <#catalog> ,
+                <#title> ,
+                <#description> ,
+                <#publisher> ,
+                <#datasets> ,
+                <#catalogs> ,
+                <#position> .
+
+<#formatVersion>
+    a sh:PropertyShape ;
+    sh:path solid-memo:formatVersion ;
+    sh:datatype xsd:integer ;
+    sh:maxCount 1 ;
+    sh:in ( 1 ) .
+
+<#catalog>
+    a sh:PropertyShape ;
+    sh:path rdf:type ;
+    sh:hasValue dcat:Catalog ;
+    sh:message "A deck group is a dcat:Catalog."@en ,
+               "En kortleksgrupp är en dcat:Catalog."@sv .
+
+<#title>
+    a sh:PropertyShape ;
+    sh:path dcterms:title ;
+    sh:datatype rdf:langString ;
+    sh:minCount 1 ;
+    sh:uniqueLang true ;
+    sh:message "A deck group's name is language-tagged text in any language, one per language (\"…\"@sv)."@en ,
+               "En kortleksgrupps namn är språktaggad text på valfritt språk, ett per språk (\"…\"@sv)."@sv .
+
+<#description>
+    a sh:PropertyShape ;
+    sh:path dcterms:description ;
+    sh:datatype rdf:langString ;
+    sh:minCount 1 ;
+    sh:uniqueLang true ;
+    sh:message "A deck group's description is language-tagged text in any language, one per language (\"…\"@sv)."@en ,
+               "En kortleksgrupps beskrivning är språktaggad text på valfritt språk, en per språk (\"…\"@sv)."@sv .
+
+<#publisher>
+    a sh:PropertyShape ;
+    sh:path dcterms:publisher ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "A deck group names its publisher, the catalogue's: a foaf:Agent, in a pod the owner's WebID."@en ,
+               "En kortleksgrupp anger sin utgivare, katalogens: en foaf:Agent, i en Pod ägarens WebID."@sv .
+
+<#datasets>
+    a sh:PropertyShape ;
+    sh:path dcat:dataset ;
+    sh:nodeKind sh:IRI ;
+    sh:message "A deck group lists its decks as IRIs (<#deck-…>), never as string literals."@en ,
+               "En kortleksgrupp listar sina kortlekar som IRI:er (<#deck-…>), aldrig som strängliteraler."@sv .
+
+<#catalogs>
+    a sh:PropertyShape ;
+    sh:path dcat:catalog ;
+    sh:nodeKind sh:IRI ;
+    sh:message "A deck group lists its sub-groups as IRIs (<#group-…>), never as string literals."@en ,
+               "En kortleksgrupp listar sina undergrupper som IRI:er (<#group-…>), aldrig som strängliteraler."@sv .
+
+<#position>
+    a sh:PropertyShape ;
+    sh:path solid-memo:position ;
+    sh:datatype xsd:integer ;
+    sh:minInclusive 0 ;
+    sh:maxCount 1 ;
+    sh:message "A deck group's position among its parent's members is one whole number, 0 or more."@en ,
+               "En kortleksgrupps plats bland förälderns medlemmar är ett heltal, 0 eller mer."@sv .

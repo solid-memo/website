@@ -1,11 +1,14 @@
-import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/preact";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { DeckListContainer } from "./DeckListContainer";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Card, Deck, Prompt } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { StudyQueue } from "@solid-memo/domain/scheduling";
+import type { DeckTree, DeckTreeEdit, TreeNode } from "@solid-memo/domain/deckTree";
+import { alertTexts, statusTexts } from "../test/liveRegions";
+import { AppError } from "@solid-memo/domain/appError";
 import { makeUseCasesFake } from "../test/useCasesFake";
 import { deckHref, routeToHash } from "./router";
 
@@ -45,7 +48,7 @@ function renderContainer(
   });
   seed(queryClient);
   const onStudyDeck = vi.fn();
-  render(
+  const view = render(
     <QueryClientProvider client={queryClient}>
       <DeckListContainer
         useCases={useCases}
@@ -54,7 +57,7 @@ function renderContainer(
       />
     </QueryClientProvider>,
   );
-  return { onStudyDeck };
+  return { ...view, onStudyDeck, queryClient };
 }
 
 describe("DeckListContainer", () => {
@@ -215,5 +218,249 @@ describe("DeckListContainer", () => {
       ).toBeNull();
     });
     expect(screen.queryByText("reviews unreachable")).toBeNull();
+  });
+});
+
+const second: Deck = { ...deck, id: "deck-2", url: `${instance.url}catalog.ttl#deck-2`, title: { en: "Kana" } };
+const groupUrl = `${instance.url}catalog.ttl#group-1`;
+const treeKey = ["decks", instance.url, "tree"];
+const node = (d: Deck): TreeNode => ({ kind: "deck", deck: d });
+const flat: DeckTree = { readOnly: false, children: [node(deck), node(second)] };
+const grouped: DeckTree = {
+  readOnly: false,
+  children: [{ kind: "group", group: { url: groupUrl, title: { en: "Japanese" } }, children: [node(deck)] }, node(second)],
+};
+
+/** The deck names in the order the list shows them. */
+function order(): string[] {
+  return [...document.querySelectorAll(".deck-open")].map((link) => link.textContent!);
+}
+
+/** An editDeckTree whose writes the test settles, one by one. */
+function deferredEdits() {
+  const writes: { edit: DeckTreeEdit; resolve: (tree: DeckTree) => void; reject: (error: Error) => void }[] = [];
+  const editDeckTree = vi.fn(
+    (_url: string, edit: DeckTreeEdit) =>
+      new Promise<DeckTree>((resolve, reject) => writes.push({ edit, resolve, reject })),
+  );
+  return { editDeckTree, writes };
+}
+
+function moveDown(name: string) {
+  fireEvent.click(screen.getByRole("button", { name: `Move ${name}` }));
+  fireEvent.click(screen.getByRole("button", { name: "Move down" }));
+}
+
+describe("DeckListContainer, arranging decks", () => {
+  beforeEach(() => localStorage.clear());
+
+  it("lists the decks as arranged, under the instance's decks", async () => {
+    const useCases = makeUseCasesFake({ listDeckTree: vi.fn(async () => grouped) });
+    const { queryClient } = renderContainer(useCases);
+    expect(await screen.findByRole("button", { name: "Japanese 1 deck" })).toBeInTheDocument();
+    expect(useCases.listDeckTree).toHaveBeenCalledWith(instance.url);
+    // Whatever refreshes the instance's decks refreshes their arrangement.
+    await queryClient.invalidateQueries({ queryKey: ["decks", instance.url] });
+    expect(useCases.listDeckTree).toHaveBeenCalledTimes(2);
+  });
+
+  it("shows an edit at once, and the pod's tree once it is written", async () => {
+    const { editDeckTree, writes } = deferredEdits();
+    const useCases = makeUseCasesFake({ listDecks: vi.fn(async () => [deck, second]), editDeckTree });
+    renderContainer(useCases);
+    await screen.findByRole("link", { name: "Kana" });
+    moveDown("Kanji N5");
+    await waitFor(() => {
+      expect(order()).toEqual(["Kana", "Kanji N5"]);
+    });
+    expect(editDeckTree).toHaveBeenCalledWith(instance.url, {
+      kind: "move",
+      node: deck.url,
+      to: { parent: null, after: second.url },
+    });
+    writes[0]!.resolve({ readOnly: false, children: [node(second), node({ ...deck, title: { en: "Kanji N4" } })] });
+    expect(await screen.findByRole("link", { name: "Kanji N4" })).toBeInTheDocument();
+  });
+
+  it("takes a failed edit back, says why, and reads the list afresh", async () => {
+    const { editDeckTree, writes } = deferredEdits();
+    const useCases = makeUseCasesFake({ listDecks: vi.fn(async () => [deck, second]), editDeckTree });
+    renderContainer(useCases);
+    await screen.findByRole("link", { name: "Kana" });
+    moveDown("Kanji N5");
+    await waitFor(() => {
+      expect(order()).toEqual(["Kana", "Kanji N5"]);
+    });
+    writes[0]!.reject(new AppError("deckTreeChanged"));
+    await waitFor(() => {
+      expect(order()).toEqual(["Kanji N5", "Kana"]);
+    });
+    expect(alertTexts()).toEqual([expect.stringContaining("Your decks were rearranged elsewhere")]);
+    await waitFor(() => {
+      expect(useCases.listDeckTree).toHaveBeenCalledTimes(2);
+    });
+
+    // The next edit clears what the last one said.
+    moveDown("Kanji N5");
+    await waitFor(() => {
+      expect(alertTexts()).toEqual([]);
+    });
+  });
+
+  it("writes edits one after another, showing all of them meanwhile", async () => {
+    const { editDeckTree, writes } = deferredEdits();
+    const third: Deck = { ...deck, id: "deck-3", url: `${instance.url}catalog.ttl#deck-3`, title: { en: "Verbs" } };
+    const useCases = makeUseCasesFake({ listDecks: vi.fn(async () => [deck, second, third]), editDeckTree });
+    renderContainer(useCases);
+    await screen.findByRole("link", { name: "Verbs" });
+    moveDown("Kanji N5");
+    await waitFor(() => {
+      expect(order()).toEqual(["Kana", "Kanji N5", "Verbs"]);
+    });
+    moveDown("Kanji N5");
+    await waitFor(() => {
+      expect(order()).toEqual(["Kana", "Verbs", "Kanji N5"]);
+    });
+    expect(editDeckTree).toHaveBeenCalledOnce();
+
+    // The first write's tree would undo the second edit on screen: it waits for it.
+    writes[0]!.resolve({ readOnly: false, children: [node(second), node(deck), node(third)] });
+    await waitFor(() => {
+      expect(editDeckTree).toHaveBeenCalledTimes(2);
+    });
+    expect(order()).toEqual(["Kana", "Verbs", "Kanji N5"]);
+    expect(writes[1]!.edit).toEqual({ kind: "move", node: deck.url, to: { parent: null, after: third.url } });
+    writes[1]!.resolve({ readOnly: false, children: [node(second), node(third), node(deck)] });
+    await waitFor(() => {
+      expect(useCases.listDeckTree).toHaveBeenCalledOnce();
+    });
+  });
+
+  it("leaves an edit waiting on screen when one before it fails", async () => {
+    const { editDeckTree, writes } = deferredEdits();
+    const third: Deck = { ...deck, id: "deck-3", url: `${instance.url}catalog.ttl#deck-3`, title: { en: "Verbs" } };
+    const useCases = makeUseCasesFake({ listDecks: vi.fn(async () => [deck, second, third]), editDeckTree });
+    renderContainer(useCases);
+    await screen.findByRole("link", { name: "Verbs" });
+    moveDown("Kanji N5");
+    await waitFor(() => {
+      expect(order()).toEqual(["Kana", "Kanji N5", "Verbs"]);
+    });
+    moveDown("Kanji N5");
+    await waitFor(() => {
+      expect(order()).toEqual(["Kana", "Verbs", "Kanji N5"]);
+    });
+    writes[0]!.reject(new Error("pod unreachable"));
+    await waitFor(() => {
+      expect(editDeckTree).toHaveBeenCalledTimes(2);
+    });
+    expect(alertTexts()).toEqual([expect.stringContaining("pod unreachable")]);
+    writes[1]!.resolve({ readOnly: false, children: [node(second), node(third), node(deck)] });
+    await waitFor(() => {
+      expect(order()).toEqual(["Kana", "Verbs", "Kanji N5"]);
+    });
+  });
+
+  it("leaves an edit the list no longer allows to the pod's tree", async () => {
+    const editDeckTree = vi.fn(async () => ({ readOnly: false, children: [node(second), node(deck)] }));
+    const useCases = makeUseCasesFake({ listDecks: vi.fn(async () => [deck, second]), editDeckTree });
+    const { queryClient } = renderContainer(useCases);
+    await screen.findByRole("link", { name: "Kana" });
+    fireEvent.click(screen.getByRole("button", { name: "Move Kanji N5" }));
+    // Changed meanwhile, before the screen shows it.
+    queryClient.setQueryData(treeKey, { readOnly: false, children: [node(second)] });
+    fireEvent.click(screen.getByRole("button", { name: "Move down" }));
+    await waitFor(() => {
+      expect(editDeckTree).toHaveBeenCalledOnce();
+    });
+    await waitFor(() => {
+      expect(order()).toEqual(["Kana", "Kanji N5"]);
+    });
+  });
+
+  it("makes a new group, then names it, in that order", async () => {
+    const { editDeckTree, writes } = deferredEdits();
+    const useCases = makeUseCasesFake({ listDecks: vi.fn(async () => [deck, second]), editDeckTree });
+    renderContainer(useCases);
+    await screen.findByRole("link", { name: "Kana" });
+    fireEvent.click(screen.getByRole("button", { name: "Move Kana" }));
+    fireEvent.click(screen.getByRole("button", { name: "Group with the one above" }));
+    expect(useCases.newDeckGroup).toHaveBeenCalledWith(instance.url, { en: "New group" });
+    const field = await screen.findByRole("textbox", { name: "Group name" });
+    expect(field).toHaveFocus();
+    fireEvent.input(field, { target: { value: "Japanese" } });
+    fireEvent.submit(field.closest("form")!);
+    expect(await screen.findByRole("button", { name: "Japanese 2 decks" })).toBeInTheDocument();
+    expect(editDeckTree).toHaveBeenCalledOnce();
+    expect(writes[0]!.edit.kind).toBe("combine");
+
+    const groupOf = (title: string): DeckTree => ({
+      readOnly: false,
+      children: [
+        {
+          kind: "group",
+          group: { url: `${instance.url}catalog.ttl#group-fake`, title: { en: title } },
+          children: [node(deck), node(second)],
+        },
+      ],
+    });
+    writes[0]!.resolve(groupOf("New group"));
+    await waitFor(() => {
+      expect(editDeckTree).toHaveBeenCalledTimes(2);
+    });
+    expect(writes[1]!.edit).toEqual({
+      kind: "rename",
+      group: `${instance.url}catalog.ttl#group-fake`,
+      title: { en: "Japanese" },
+    });
+    expect(screen.getByRole("button", { name: "Japanese 2 decks" })).toBeInTheDocument();
+    writes[1]!.resolve(groupOf("Japanese"));
+    await waitFor(() => {
+      expect(statusTexts()).toEqual(['Renamed the group to "Japanese".']);
+    });
+  });
+
+  it("folds groups as this device remembers, forgetting those gone", async () => {
+    localStorage.setItem(
+      `solid-memo:collapsedGroups.${instance.url}`,
+      JSON.stringify([groupUrl, `${instance.url}catalog.ttl#group-gone`]),
+    );
+    renderContainer(makeUseCasesFake({ listDeckTree: vi.fn(async () => grouped) }));
+    const toggle = await screen.findByRole("button", { name: "Japanese 1 deck" });
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(toggle);
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+    expect(JSON.parse(localStorage.getItem(`solid-memo:collapsedGroups.${instance.url}`)!)).toEqual([]);
+    fireEvent.click(toggle);
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(JSON.parse(localStorage.getItem(`solid-memo:collapsedGroups.${instance.url}`)!)).toEqual([groupUrl]);
+  });
+
+  it("opens a group folded shut as something is moved into it", async () => {
+    localStorage.setItem(`solid-memo:collapsedGroups.${instance.url}`, JSON.stringify([groupUrl]));
+    renderContainer(makeUseCasesFake({ listDeckTree: vi.fn(async () => grouped) }));
+    fireEvent.click(await screen.findByRole("button", { name: `Move ${second.title.en}` }));
+    fireEvent.click(within(screen.getByRole("group", { name: "Move into" })).getByRole("button", { name: "Japanese" }));
+    expect(await screen.findByRole("button", { name: "Japanese 2 decks" })).toHaveAttribute("aria-expanded", "true");
+    expect(JSON.parse(localStorage.getItem(`solid-memo:collapsedGroups.${instance.url}`)!)).toEqual([]);
+  });
+
+  it("forgets a deleted group's folding", async () => {
+    vi.stubGlobal("confirm", vi.fn(() => true));
+    const useCases = makeUseCasesFake({
+      listDeckTree: vi.fn(async () => grouped),
+      editDeckTree: vi.fn(async () => flat),
+    });
+    renderContainer(useCases);
+    fireEvent.click(await screen.findByRole("button", { name: "Japanese 1 deck" }));
+    fireEvent.click(screen.getByRole("button", { name: "Delete group Japanese" }));
+    // Once its header has folded away.
+    fireEvent.animationEnd(document.querySelector(".deck-group.leaving")!, { animationName: "group-leave" });
+    expect(JSON.parse(localStorage.getItem(`solid-memo:collapsedGroups.${instance.url}`)!)).toEqual([]);
+    await waitFor(() => {
+      expect(useCases.editDeckTree).toHaveBeenCalledWith(instance.url, { kind: "removeGroup", group: groupUrl });
+    });
+    expect(within(document.querySelector(".deck-tree")!).queryByRole("button", { name: /Japanese/ })).toBeNull();
+    vi.unstubAllGlobals();
   });
 });

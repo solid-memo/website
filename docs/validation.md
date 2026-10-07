@@ -48,7 +48,10 @@ flowchart LR
 - [shaclShapeValidator.ts](../packages/solid/src/shaclShapeValidator.ts)
   fetches the document, converts it to an RDF/JS dataset
   (`toRdfJsDataset`) and, for every subject, picks the shape by class
-  and stored version exactly as the mappers do (`pickShape`). A subject
+  and stored version exactly as the mappers do (`pickShape`); a subject
+  with a Solid Memo class is checked against that class's shapes only,
+  so a deck group, also a `dcat:Catalog`, is never checked as the
+  catalogue. A subject
   is then `checked` (with its violations), `newer` (a format this app
   does not know: skipped, reported) or `untyped` (no Solid Memo class:
   listed so strays are visible). A document that does not exist is
@@ -100,7 +103,10 @@ checks) and published with the site at `/vendor/`:
   writes: title and description on a catalogue, dataset and dataset
   series, a publisher on a catalogue, an access URL on a distribution,
   a name on an agent, and the class of `dcterms:source`, `dcat:theme`
-  and `dcterms:language` values.
+  and `dcterms:language` values, and of the members a catalogue or deck
+  group lists: a deck (`dcat:dataset`) must be a `dcat:Dataset` and a
+  group (`dcat:catalog`) a `dcat:Catalog`, so a member the document does
+  not describe fails.
 
 ## The report
 
@@ -156,9 +162,13 @@ the subject's own stored format:
 | A review state with half an undo snapshot | The snapshot dropped (as the review-state 1 → 2 migration does) |
 | A malformed due day | Recomputed from the last review and the interval |
 | An agent without a name | Named after its IRI |
+| A catalogue or [deck group](data-model.md#deck-groups) listing a deck or group the document does not describe (DCAT-AP's class check on `dcat:dataset` or `dcat:catalog`) | Those links dropped (a member typed `sm:Deck` or `sm:DeckGroup` alone is kept) |
 
 Every other problem is listed with its document linked, to be fixed
-there or removed (after a confirmation). `applyRepairs`
+there or removed (after a confirmation). Removing a subject also drops
+the catalogue's and the deck groups' membership links to it
+(`dcat:dataset`, `dcat:catalog`), and only those: who else names it, a
+deck its creator or the catalogue its publisher, is left as it is. `applyRepairs`
 ([solidRepairRepository.ts](../packages/solid/src/solidRepairRepository.ts))
 reads each document once, applies its repairs, writes it once, and the
 instance is checked again.
@@ -171,7 +181,8 @@ Solid Memo publishes again with an independent SHACL engine, pySHACL
 constraints: [scripts/shacl_crosscheck.py](../scripts/shacl_crosscheck.py)
 holds the [deck library](deck-library.md)'s index and every version,
 and the pod catalog documents of the deck format 4, 5 and 6 fixtures (format 5 titles a deck in any
-language, English or not; format 6 tags its keywords), to DCAT-AP, and the vocabulary's concept schemes to
+language, English or not; format 6 tags its keywords) and of the deck group 1 fixtures (nested
+groups), to DCAT-AP, and the vocabulary's concept schemes to
 SkoHub's SKOS shapes, best practice included. A disagreement between the
 engines, or a constraint the browser's engine cannot run, fails CI. It
 reads `ns/` and `decks/` from the repository, each file at the IRI the
