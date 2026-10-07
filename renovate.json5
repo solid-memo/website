@@ -70,11 +70,12 @@
             matchDepNames: ['node'],
             allowedVersions: '<23',
         },
-        // Solid-Nextcloud's app supports Nextcloud 30 at most.
+        // Solid-Nextcloud's app is tested on Nextcloud 31 to 35, but only 31
+        // and 32 must pass its CI.
         {
             matchFileNames: ['e2e/pod/servers/nextcloud/Dockerfile'],
             matchDepNames: ['nextcloud'],
-            allowedVersions: '<31',
+            allowedVersions: '<33',
         },
         // The JavaScript Solid Server's image keeps to Node 24.
         {
