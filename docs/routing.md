@@ -58,7 +58,11 @@ flowchart LR
 ```
 
 - The deck lookup shares the `["decks", instanceUrl]` query cache with
-  the deck list, so in-app navigation resolves without a refetch. A
+  the home screen, so in-app navigation resolves without a refetch. The
+  deck list itself reads the decks as arranged into groups, under
+  `["decks", instanceUrl, "tree"]`, so whatever refreshes the decks
+  refreshes their arrangement too; on the home screen, the decks in that
+  arrangement fill `["decks", instanceUrl]`, so the catalog is read once. A
   library deck is resolved the same way from the `["library"]` cache the
   library screen reads.
 - The header logotype links to `#/` — deliberately not a route — so it

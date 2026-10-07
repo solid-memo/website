@@ -114,6 +114,55 @@ export function FlameIcon() {
   );
 }
 
+/** A deck group, folded shut: a folder. */
+export function FolderIcon() {
+  return (
+    <Icon>
+      <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+    </Icon>
+  );
+}
+
+/** A deck group, open: a folder with its front tipped down. */
+export function FolderOpenIcon() {
+  return (
+    <Icon>
+      <path d="M3 17V7a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v1" />
+      <path d="M3 17l2.5-6a1.5 1.5 0 0 1 1.4-1H21l-2.6 7.1a1.5 1.5 0 0 1-1.4.9H4a1 1 0 0 1-1-1z" />
+    </Icon>
+  );
+}
+
+/** A chevron pointing right; turned down (style.css) when what it folds is open. */
+export function ChevronIcon() {
+  return (
+    <Icon>
+      <path d="m9 6 6 6-6 6" />
+    </Icon>
+  );
+}
+
+/** A pencil: rename. */
+export function PencilIcon() {
+  return (
+    <Icon>
+      <path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z" />
+      <path d="m13.5 6.5 4 4" />
+    </Icon>
+  );
+}
+
+/** Arrows up and down: move to another place in a list. */
+export function MoveIcon() {
+  return (
+    <Icon>
+      <path d="M12 3v18" />
+      <path d="m8 7 4-4 4 4" />
+      <path d="m8 17 4 4 4-4" />
+    </Icon>
+  );
+}
+
 /** Sun: the light theme. */
 export function SunIcon() {
   return (

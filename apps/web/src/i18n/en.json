@@ -264,7 +264,36 @@
     },
     "empty": "No decks yet. Create your first deck below, or import one from the deck library.",
     "createButton": "Create deck",
-    "libraryLink": "Deck library"
+    "libraryLink": "Deck library",
+    "emptyGroup": "Nothing in this group yet.",
+    "readOnly": "A newer version of Solid Memo arranged these decks, so they cannot be rearranged here. Reload the page to get the latest version.",
+    "newGroupName": "New group",
+    "groupName": "Group name",
+    "saveName": "Save name",
+    "renameGroup": "Rename group {name}",
+    "deleteGroup": "Delete group {name}",
+    "deleteGroupConfirm": {
+      "one": "Delete the group \"{name}\"? Its {count} deck is kept, one level up.",
+      "other": "Delete the group \"{name}\"? Its {count} decks are kept, one level up."
+    },
+    "deleteGroupOfGroupsConfirm": "Delete the group \"{name}\"? The groups in it are kept, one level up.",
+    "deleteEmptyGroupConfirm": "Delete the empty group \"{name}\"?",
+    "move": "Move {name}",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "moveOut": "Move out of {group}",
+    "moveInto": "Move into",
+    "groupWithPrevious": "Group with the one above",
+    "groupWithNext": "Group with the one below",
+    "atTopLevel": "at the top level",
+    "inGroup": "in {group}",
+    "moved": "Moved {name}: {position} of {count} {place}.",
+    "combined": "Put {name} and {other} in a new group. Name it, or press Escape to keep \"{group}\".",
+    "deleted": "Deleted the group \"{name}\"; what it held moved up one level.",
+    "deletedEmpty": "Deleted the group \"{name}\".",
+    "renamed": "Renamed the group to \"{name}\".",
+    "afterGroup": "after {group}",
+    "dragCancelled": "Move cancelled: the deck or group stays where it was."
   },
   "studyPace": {
     "startSmall": "Every new card comes back for reviews in the days that follow, so a high number now piles up reviews later. Better to start small and be consistent: you can always raise it."
@@ -775,6 +804,7 @@
       "dropSnapshot": "Drop the review's half-written undo snapshot",
       "recomputeDue": "Recompute the review's due day",
       "nameAgent": "Name the person or organisation after their address",
+      "dropDanglingMembers": "Drop the links to decks and groups that are gone",
       "removeSubject": "Remove it"
     }
   },
@@ -957,6 +987,8 @@
     "deckChangedDuringUpgrade": "The deck changed while it was being updated, perhaps in another tab or app. Try again.",
     "deckBeingUpgraded": "Solid Memo is updating this deck and saves nothing to it until the update is done. Wait for the update to finish, then try again.",
     "changedElsewhere": "This was changed elsewhere, perhaps in another tab or app, since Solid Memo read it, so nothing was saved. Reload the page and try again.",
+    "deckTreeChanged": "Your decks were rearranged elsewhere, perhaps in another tab or app, so this change was not made. The list now shows them as they are.",
+    "deckTreeTooNew": "A newer version of Solid Memo arranged these decks, so this one cannot rearrange them. Reload the page to get the latest version.",
     "createdElsewhere": "This was created elsewhere, perhaps in another tab or app, just as Solid Memo was about to create it, so nothing was saved. Reload the page and try again.",
     "alreadyExists": "Something is already kept at that place in your Pod. Choose another place.",
     "cannotCheck": "Solid Memo could not check your Pod. Check your connection and try again.",

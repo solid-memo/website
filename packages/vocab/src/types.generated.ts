@@ -17,7 +17,7 @@ export type LangText = Readonly<Record<string, string>>;
 export type LangTexts = Readonly<Record<string, readonly string[]>>;
 
 /** The record kinds the shapes describe (see docs/shapes.md). */
-export type ShapeName = "agent" | "answer" | "card" | "catalog" | "deck" | "deckSchedule" | "distribution" | "documentReceipt" | "instance" | "libraryDeck" | "libraryDeckSeries" | "preferences" | "reviewState";
+export type ShapeName = "agent" | "answer" | "card" | "catalog" | "deck" | "deckGroup" | "deckSchedule" | "distribution" | "documentReceipt" | "instance" | "libraryDeck" | "libraryDeckSeries" | "preferences" | "reviewState";
 
 /** The shape version this app writes for each kind. */
 export const LATEST_VERSION = {
@@ -26,6 +26,7 @@ export const LATEST_VERSION = {
   card: 5,
   catalog: 1,
   deck: 6,
+  deckGroup: 1,
   deckSchedule: 1,
   distribution: 1,
   documentReceipt: 1,
@@ -224,6 +225,16 @@ export interface DeckV6 {
   readonly source?: string;
   readonly newCardsPerDay?: number;
   readonly maxReviewsPerDay?: number;
+}
+
+/** Deck group format 1: a dcat:Catalog of decks and deck groups, with a language-tagged name and description, the catalogue's publisher, and its place among its parent's members. */
+export interface DeckGroupV1 {
+  readonly title: LangText;
+  readonly description: LangText;
+  readonly publisher: string;
+  readonly dataset: readonly string[];
+  readonly catalog: readonly string[];
+  readonly position?: number;
 }
 
 /** Deck schedule format 1: the deck, the versions of its two documents it was computed from, the direction and day boundary it was computed with, the study day it was computed on, the prompts due by day, the new ones, and that day's reviews and introductions. */
@@ -477,6 +488,7 @@ export type AnswerRecord = { version: 1; data: AnswerV1 };
 export type CardRecord = { version: 1; data: CardV1 } | { version: 2; data: CardV2 } | { version: 3; data: CardV3 } | { version: 4; data: CardV4 } | { version: 5; data: CardV5 };
 export type CatalogRecord = { version: 1; data: CatalogV1 };
 export type DeckRecord = { version: 1; data: DeckV1 } | { version: 2; data: DeckV2 } | { version: 3; data: DeckV3 } | { version: 4; data: DeckV4 } | { version: 5; data: DeckV5 } | { version: 6; data: DeckV6 };
+export type DeckGroupRecord = { version: 1; data: DeckGroupV1 };
 export type DeckScheduleRecord = { version: 1; data: DeckScheduleV1 };
 export type DistributionRecord = { version: 1; data: DistributionV1 };
 export type DocumentReceiptRecord = { version: 1; data: DocumentReceiptV1 };
@@ -493,6 +505,7 @@ export type VersionedRecord = {
   card: CardRecord;
   catalog: CatalogRecord;
   deck: DeckRecord;
+  deckGroup: DeckGroupRecord;
   deckSchedule: DeckScheduleRecord;
   distribution: DistributionRecord;
   documentReceipt: DocumentReceiptRecord;
@@ -510,6 +523,7 @@ export type LatestRecord = {
   card: CardV5;
   catalog: CatalogV1;
   deck: DeckV6;
+  deckGroup: DeckGroupV1;
   deckSchedule: DeckScheduleV1;
   distribution: DistributionV1;
   documentReceipt: DocumentReceiptV1;

@@ -79,3 +79,37 @@ export function rememberLanguage(
     // Without storage the choice is not offered again; nothing else depends on it.
   }
 }
+
+const collapsedKey = (instanceUrl: string) => `solid-memo:collapsedGroups.${instanceUrl}`;
+
+/**
+ * The deck groups of an instance the user folded shut on this device,
+ * by URL. Kept in the browser's storage, never in the pod: how the list
+ * is folded is this device's view of it. Storage that is missing,
+ * refuses or holds something else folds none.
+ */
+export function collapsedGroups(
+  instanceUrl: string,
+  storage: () => Storage = () => globalThis.localStorage,
+): string[] {
+  let stored: unknown;
+  try {
+    stored = JSON.parse(storage().getItem(collapsedKey(instanceUrl)) ?? "[]");
+  } catch {
+    return [];
+  }
+  return Array.isArray(stored) ? stored.filter((url): url is string => typeof url === "string") : [];
+}
+
+/** Notes which of an instance's deck groups are folded shut on this device. */
+export function rememberCollapsed(
+  instanceUrl: string,
+  urls: readonly string[],
+  storage: () => Storage = () => globalThis.localStorage,
+): void {
+  try {
+    storage().setItem(collapsedKey(instanceUrl), JSON.stringify(urls));
+  } catch {
+    // Without storage the list unfolds again on the next visit; nothing else depends on it.
+  }
+}

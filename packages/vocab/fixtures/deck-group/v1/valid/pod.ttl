@@ -1,0 +1,90 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+
+# A catalogue arranged into deck groups: "Languages" first, holding two
+# decks and the group "Scripts", then a deck in no group. The catalogue
+# still lists every deck; each group and deck states its position among
+# the members of the one catalogue or group it is in.
+<#catalog>
+    a dcat:Catalog ;
+    dcterms:title "Main" ;
+    dcterms:description "My decks." ;
+    dcterms:publisher <https://pod.example/profile/card#me> ;
+    dcat:dataset <#deck-japanese> ,
+                 <#deck-swedish> ,
+                 <#deck-greek> ,
+                 <#deck-loose> ;
+    dcat:catalog <#group-languages> .
+
+<https://pod.example/profile/card#me>
+    a foaf:Agent ;
+    foaf:name "Anton" .
+
+<#group-languages>
+    a solid-memo:DeckGroup ,
+      dcat:Catalog ;
+    solid-memo:formatVersion 1 ;
+    dcterms:title "Languages"@en ;
+    dcterms:description "Deck group: Languages."@en ;
+    dcterms:publisher <https://pod.example/profile/card#me> ;
+    dcat:dataset <#deck-japanese> ,
+                 <#deck-swedish> ;
+    dcat:catalog <#group-scripts> ;
+    solid-memo:position 0 .
+
+<#group-scripts>
+    a solid-memo:DeckGroup ,
+      dcat:Catalog ;
+    solid-memo:formatVersion 1 ;
+    dcterms:title "Skrift"@sv ;
+    dcterms:description "Kortleksgrupp: Skrift."@sv ;
+    dcterms:publisher <https://pod.example/profile/card#me> ;
+    dcat:dataset <#deck-greek> ;
+    solid-memo:position 2 .
+
+<#deck-japanese>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    solid-memo:formatVersion 6 ;
+    dcterms:title "Japanese"@en ;
+    dcterms:description "Flashcards: Japanese."@en ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:cardsDocument <https://pod.example/solid-memo/main/decks/deck-japanese.ttl> ;
+    solid-memo:reviewsDocument <https://pod.example/solid-memo/main/reviews/deck-japanese.ttl> ;
+    solid-memo:position 0 .
+
+<#deck-swedish>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    solid-memo:formatVersion 6 ;
+    dcterms:title "Swedish"@en ;
+    dcterms:description "Flashcards: Swedish."@en ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:cardsDocument <https://pod.example/solid-memo/main/decks/deck-swedish.ttl> ;
+    solid-memo:reviewsDocument <https://pod.example/solid-memo/main/reviews/deck-swedish.ttl> ;
+    solid-memo:position 1 .
+
+<#deck-greek>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    solid-memo:formatVersion 6 ;
+    dcterms:title "Greek"@en ;
+    dcterms:description "Flashcards: Greek."@en ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:cardsDocument <https://pod.example/solid-memo/main/decks/deck-greek.ttl> ;
+    solid-memo:reviewsDocument <https://pod.example/solid-memo/main/reviews/deck-greek.ttl> ;
+    solid-memo:position 0 .
+
+<#deck-loose>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    solid-memo:formatVersion 6 ;
+    dcterms:title "Capitals"@en ;
+    dcterms:description "Flashcards: Capitals."@en ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:cardsDocument <https://pod.example/solid-memo/main/decks/deck-loose.ttl> ;
+    solid-memo:reviewsDocument <https://pod.example/solid-memo/main/reviews/deck-loose.ttl> ;
+    solid-memo:position 1 .

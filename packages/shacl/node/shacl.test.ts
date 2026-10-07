@@ -81,6 +81,10 @@ const EXPECTED: Record<string, { path?: string; message: string }> = {
   "deck-series/v3/invalid/library-with-keyword-iri.ttl": { path: "http://www.w3.org/ns/dcat#keyword", message: "A keyword is language-tagged text (\"…\"@sv), several per language, or untagged as copied from an older release." },
   "deck-series/v2/invalid/library-with-untagged-description.ttl": { path: `${DC}description`, message: "A description is language-tagged text, one per language, and one of them English" },
   "deck-series/v1/invalid/library-without-current-version.ttl": { path: "http://www.w3.org/ns/dcat#hasCurrentVersion", message: "A deck series names its current release." },
+  "deck-group/v1/invalid/pod-without-title.ttl": { path: `${DC}title`, message: "A deck group's name is language-tagged text in any language, one per language" },
+  "deck-group/v1/invalid/pod-with-untagged-title.ttl": { path: `${DC}title`, message: "A deck group's name is language-tagged text in any language, one per language" },
+  "deck-group/v1/invalid/pod-without-publisher.ttl": { path: `${DC}publisher`, message: "A deck group names its publisher" },
+  "deck-group/v1/invalid/pod-with-negative-position.ttl": { path: `${SM}position`, message: "A deck group's position among its parent's members is one whole number, 0 or more." },
   "catalog/v1/invalid/without-publisher.ttl": { path: `${DC}publisher`, message: "A catalogue names its publisher" },
   "agent/v1/invalid/without-name.ttl": { path: "http://xmlns.com/foaf/0.1/name", message: "An agent has a name." },
   "agent/v1/invalid/mbox-not-mailto.ttl": { path: "http://xmlns.com/foaf/0.1/mbox", message: "An agent's mailbox is a mailto: IRI." },
@@ -167,6 +171,7 @@ const SKOS = "http://www.w3.org/2004/02/skos/core#";
  */
 const PROFILE_EXPECTED: Record<string, { path: string; message: string }> = {
   "dcat-ap/invalid/agent-without-name.ttl": { path: `${FOAF}name`, message: "Less than 1 values" },
+  "dcat-ap/invalid/catalog-lists-untyped-group.ttl": { path: `${DCAT}catalog`, message: "Class constraint failed." },
   "dcat-ap/invalid/catalog-without-publisher.ttl": { path: `${DC}publisher`, message: "Less than 1 values" },
   "dcat-ap/invalid/dataset-without-description.ttl": { path: `${DC}description`, message: "Less than 1 values" },
   "dcat-ap/invalid/distribution-without-access-url.ttl": { path: `${DCAT}accessURL`, message: "Less than 1 values" },
@@ -251,7 +256,7 @@ describe("the vendored profiles over their fixtures", async () => {
     );
   });
 
-  it("accept the valid decks, catalogue and series, which Solid Memo writes, whatever the title's language", async () => {
+  it("accept the valid decks, catalogue, deck groups and series, which Solid Memo writes, whatever the title's language", async () => {
     const fixture = async (path: string) => {
       const { turtle } = (await readTurtleTree(`${ROOT}fixtures`)).find((f) => f.path === path)!;
       return parseTurtle(turtle, `https://pod.example/${path}`);
@@ -260,7 +265,7 @@ describe("the vendored profiles over their fixtures", async () => {
     await expect(
       validateProfile("pod", await fixture("deck/v4/valid/pod.ttl"), engines["dcat-ap"], reference),
     ).resolves.toBeUndefined();
-    for (const path of ["deck/v5/valid/pod-titled-in-swedish.ttl", "deck/v5/valid/pod-titled-in-japanese-and-english.ttl", "deck/v5/valid/pod-with-stand-in.ttl", "deck/v6/valid/pod.ttl"]) {
+    for (const path of ["deck/v5/valid/pod-titled-in-swedish.ttl", "deck/v5/valid/pod-titled-in-japanese-and-english.ttl", "deck/v5/valid/pod-with-stand-in.ttl", "deck/v6/valid/pod.ttl", "deck-group/v1/valid/pod.ttl"]) {
       await expect(validateProfile(path, await fixture(path), engines["dcat-ap"], reference), path).resolves.toBeUndefined();
     }
     await expect(

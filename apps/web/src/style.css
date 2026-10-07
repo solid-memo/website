@@ -1210,7 +1210,7 @@ dl.facts .sources {
 
 .storage-list li,
 .instance-list li,
-.deck-list li {
+.deck-list>li.deck-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -1224,7 +1224,7 @@ dl.facts .sources {
 
 .storage-list li:hover,
 .instance-list li:hover,
-.deck-list li:hover {
+.deck-list>li.deck-row:hover {
   border-color: var(--border-strong);
   background: var(--surface-hover);
 }
@@ -1236,17 +1236,17 @@ dl.facts .sources {
   font-size: 0.8rem;
 }
 
-.deck-list li {
+.deck-list>li.deck-row {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
   column-gap: 0.75rem;
 }
 
-/* Two columns: the name with what is due below it, and the study action
-   beside both, so the name wraps before the action. The
-   action's parts are laid out by the row itself. */
+/* Three columns: the name with what is due below it, then the study
+   action and the Move button beside both, so the name wraps before
+   them. The action's parts are laid out by the row itself. */
 .deck-list .deck-meta {
   display: contents;
 }
@@ -1276,6 +1276,402 @@ dl.facts .sources {
 .deck-list .deck-meta>button {
   position: relative;
   z-index: 1;
+}
+
+/* Above the row's link, like the study button, so a press moves the
+   deck rather than opening it; a 44px target, its icon centred. */
+.deck-list .row-move {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  position: relative;
+  z-index: 1;
+}
+
+.deck-list .row-move,
+.group-actions button {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0.5rem;
+}
+
+.deck-list .row-move svg.icon,
+.group-actions svg.icon {
+  margin: 0;
+}
+
+/* Where a pointer can hover, a deck's Move button shows on the row it
+   points at (or one focused), so the list stays calm; on touch, and
+   while its moves are open, it always shows. */
+@media (hover: hover) {
+  .deck-list>li.deck-row:not(:hover, :focus-within)>.row-move:not([aria-expanded="true"]) {
+    opacity: 0;
+  }
+}
+
+/* A row's moves open under it, across its width, above its link. */
+.move-panel {
+  grid-column: 1 / -1;
+  flex-basis: 100%;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0 0.15rem;
+}
+
+.move-into {
+  flex-basis: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+.move-into button {
+  margin-inline-start: calc(var(--depth, 0) * 1rem);
+  overflow-wrap: anywhere;
+}
+
+/* A group: its header, then what it holds, a level in. Not a row
+   itself, so it has no row's box. */
+.deck-list>li.deck-group {
+  display: block;
+}
+
+.deck-group-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  padding: 0.25rem 0.35rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.deck-group-header .group-toggle {
+  flex: 1 1 12rem;
+  min-width: 0;
+  min-height: 2.75rem;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 0 0.5rem;
+  padding: 0.35rem 0.4rem;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  text-align: start;
+  font-size: 1rem;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+.deck-group-header .group-toggle:hover:not(:disabled) {
+  background: var(--surface-hover);
+  transform: none;
+}
+
+.group-toggle svg.icon {
+  margin-right: 0;
+}
+
+.group-toggle svg.icon:first-child {
+  transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+.group-toggle[aria-expanded="true"] svg.icon:first-child {
+  transform: rotate(90deg);
+}
+
+.group-toggle .group-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.group-toggle .hint {
+  font-weight: 400;
+}
+
+/* Right-aligned beside the name, Delete last. */
+.group-actions {
+  margin-inline-start: auto;
+  display: flex;
+  gap: 0.25rem;
+}
+
+.group-name-form {
+  flex: 1 1 12rem;
+  flex-direction: row;
+  align-items: center;
+  min-width: 0;
+  margin: 0;
+}
+
+.group-name-form input {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.group-name-form button[type="submit"] {
+  flex: none;
+  align-self: center;
+  margin: 0;
+}
+
+/* What a group holds folds away to nothing: its row shrinks to 0fr and,
+   once shut, it is hidden (and inert, from the markup). The clip's
+   padding leaves room for focus rings, its margin takes it back. */
+.deck-group-body {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition:
+    grid-template-rows 0.22s cubic-bezier(0.2, 0.8, 0.3, 1),
+    visibility 0s;
+}
+
+.deck-group-body[data-collapsed] {
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  transition-delay: 0s, 0.22s;
+}
+
+.deck-group-clip {
+  min-height: 0;
+  overflow: hidden;
+  padding: 0.25rem;
+  margin: -0.25rem;
+}
+
+/* A level in, by a rule on its left; from the fifth level on no further,
+   so a deep tree keeps its width (the rule still marks the level). */
+.deck-group-clip>.deck-list {
+  margin: 0.5rem 0 0;
+  margin-inline-start: calc(1.25rem * clamp(0, 5 - var(--depth, 1), 1));
+  padding-inline-start: 0.5rem;
+  border-inline-start: 2px solid var(--border);
+}
+
+.deck-group-empty {
+  margin: 0.5rem 0 0;
+  padding-inline-start: 1.75rem;
+}
+
+/* Dragging rows (ui/deckTree/useDragReorder.ts). A row is a handle: a
+   long press on it must not select its text, show a link's callout or
+   drag the link the browser's way. The page still pans as usual; a
+   touchmove is cancelled only while a row is lifted. */
+.deck-list>li.deck-row,
+.deck-group-header {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.deck-list .deck-open {
+  -webkit-user-drag: none;
+}
+
+html.drag-active {
+  cursor: grabbing;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* The line a drop would land on, indented as deep as the place it
+   stands for (as the lists are: 1.25rem to the fifth level, then the
+   rule's .5rem and 2px), and labelled with its group past that. */
+.deck-tree {
+  position: relative;
+}
+
+.drop-line {
+  position: absolute;
+  top: 0;
+  inset-inline: calc(min(var(--line-depth, 0), 4) * 1.25rem + var(--line-depth, 0) * (0.5rem + 2px)) 0;
+  z-index: 2;
+  height: 3px;
+  margin-top: -1.5px;
+  border-radius: 2px;
+  background: var(--primary);
+  pointer-events: none;
+  transition: transform 0.08s ease;
+}
+
+.drop-line::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: -4px;
+  top: -3.5px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
+.drop-line[data-label]::after {
+  content: attr(data-label);
+  position: absolute;
+  inset-inline-end: 0;
+  bottom: 5px;
+  max-width: 80%;
+  overflow: hidden;
+  padding: 0 0.45rem;
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  color: var(--on-primary);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* While a row is lifted, each open group ends in room enough to aim
+   past it, the rows stay as they are under the pointer, and they no
+   longer slide in as they come once moved. */
+.deck-tree[data-dragging] .deck-group-body:not([data-collapsed])>.deck-group-clip {
+  padding-bottom: calc(0.25rem + 20px);
+}
+
+.deck-tree[data-dragging] .deck-list>li.deck-row:hover {
+  border-color: var(--border);
+  background: var(--surface-sunken);
+}
+
+.deck-tree[data-arranged] .deck-list li {
+  animation: none;
+}
+
+/* A row an edit brings into the list, a new group's header say, comes
+   in with a bounce; the rows already there slide to their new places
+   (ui/deckTree/useFlip.ts, which takes the class off again). */
+.deck-tree[data-arranged] .deck-list .row-enter {
+  animation: bounce-in 0.26s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+/* A group deleted: its header folds away and fades, and what it held
+   then takes its place (ui/DeckListScreen.tsx, which waits for this
+   animation's end by its name). Out of reach of the pointer meanwhile. */
+.deck-list>li.deck-group.leaving {
+  pointer-events: none;
+}
+
+.deck-group.leaving>.deck-group-header {
+  overflow: hidden;
+  animation: group-leave 0.22s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+
+@keyframes group-leave {
+  from {
+    max-height: 8rem;
+  }
+
+  to {
+    max-height: 0;
+    padding-block: 0;
+    border-width: 0;
+    opacity: 0;
+  }
+}
+
+/* Held by a finger or pen: it gives a little until it lifts. The scale
+   property, not a transform, so it never fights a row's movement. */
+.deck-list>li.deck-row,
+.deck-group-header {
+  transition:
+    border-color 0.12s ease,
+    background 0.12s ease,
+    scale 0.4s linear;
+}
+
+.press-pending {
+  scale: 0.98;
+}
+
+/* Lifted: what it leaves behind, faded and dashed. */
+.deck-list>li.drag-source {
+  opacity: 0.35;
+}
+
+.drag-source {
+  border-style: dashed;
+}
+
+.drop-combine {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  background: var(--primary-soft);
+  scale: 1.02;
+}
+
+/* In a group, whose clip leaves 0.25rem round its rows, the outline
+   just fits, and the row grows no wider. */
+.deck-group-clip .drop-combine {
+  outline-offset: 0;
+  scale: none;
+}
+
+.deck-list>li.deck-row.drop-combine {
+  background: var(--primary-soft);
+}
+
+.drop-into {
+  outline: 2px dashed var(--primary);
+  outline-offset: 2px;
+  background: var(--primary-soft);
+}
+
+/* The copy that follows the pointer, placed by a transform from the
+   viewport's top left. */
+.drag-ghost {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  scale: 1.03;
+  overflow-wrap: anywhere;
+  pointer-events: none;
+  animation: lift 0.12s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+.drag-ghost svg.icon {
+  margin-right: 0;
+}
+
+@keyframes lift {
+  from {
+    scale: 1;
+    box-shadow: none;
+  }
+}
+
+/* Takes the focus for a moment as a drop makes a group, so a phone
+   brings its keyboard up for the name. Out of sight, but 16px, so that
+   focusing it does not zoom the page. */
+.focus-proxy {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  font-size: 16px;
+  pointer-events: none;
 }
 
 .deck-list .study-counts {
@@ -2275,6 +2671,12 @@ h2 {
 .provider-list li,
 .card-table tbody tr {
   animation: row-in 0.32s cubic-bezier(0.2, 0.8, 0.3, 1) backwards;
+}
+
+/* A group comes in whole: what it holds does not slide in again, nor
+   each time it moves to another level. */
+.deck-group-body .deck-list li {
+  animation: none;
 }
 
 :is(.storage-list, .instance-list, .deck-list, .provider-list) li:nth-child(2),

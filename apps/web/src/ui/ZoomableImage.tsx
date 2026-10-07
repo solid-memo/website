@@ -1,6 +1,7 @@
 import { createPortal } from "preact";
 import { useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
 import { useI18n } from "./i18n";
+import { reducedMotion } from "./motion";
 
 /** A box on the screen, in CSS pixels from the viewport's top left. */
 type Box = { left: number; top: number; width: number; height: number };
@@ -60,10 +61,6 @@ function fitted({ width, height }: Box): Box {
 /** The transform that puts a picture laid out at `to` over `from` instead. */
 function transformFrom(from: Box, to: Box): string {
   return `translate(${from.left - to.left}px, ${from.top - to.top}px) scale(${from.width / to.width})`;
-}
-
-function reducedMotion(): boolean {
-  return matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
 /**

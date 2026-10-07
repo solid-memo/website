@@ -1,6 +1,6 @@
 /* Generated from ns/vocab/v1.ttl by `npm run generate`. Do not edit: change the source and regenerate. */
 
-/** Solid Memo's own vocabulary, version 1.12 (see docs/vocab.md). */
+/** Solid Memo's own vocabulary, version 1.13 (see docs/vocab.md). */
 export const SM_NS = "https://solid-memo.com/ns/vocab/v1.ttl#";
 
 export const SM = {
@@ -20,8 +20,12 @@ export const SM = {
   DeckSchedule: `${SM_NS}DeckSchedule`,
   /** One grade given to one prompt (a card, studied one way) during study: an entry of the instance's answer log, one document per study month, which the study statistics are computed from. Appended, never edited; resetting a study day removes that day's answers. (Added in 1.10.) */
   Answer: `${SM_NS}Answer`,
+  /** A named group of decks and deck groups that the user arranged on the deck list. A subject of the instance's catalog document: a dcat:Catalog of its decks (dcat:dataset) and sub-groups (dcat:catalog), listed by the one catalogue or group it is in. (Added in 1.13.) */
+  DeckGroup: `${SM_NS}DeckGroup`,
   /** Which version of its class's shape the subject conforms to. Absent means 1, the format that predates the field. Every subject Solid Memo writes carries it. (Since 1.0.) */
   formatVersion: `${SM_NS}formatVersion`,
+  /** Where a deck or deck group stands among the members of the one catalogue or group it is in, 0 first; the decks and groups of one parent share one sequence. Absent means after every member that has one. (Added in 1.13. On a deck it is outside the deck format, without a version bump: an older reader ignores it and an older writer keeps it.) */
+  position: `${SM_NS}position`,
   /** The document holding the deck's cards, one sm:Card per hash fragment. (Since 1.0.) */
   cardsDocument: `${SM_NS}cardsDocument`,
   /** The document holding the deck's review states, joined to its cards by fragment id. (Since 1.0.) */

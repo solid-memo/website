@@ -3,6 +3,7 @@ import type { Deck } from "./deck";
 import {
   catalogNodeUrlOf,
   catalogUrlOf,
+  deckGroupUrlOf,
   documentsInUse,
   instanceUrlOfDeck,
   digestSubjectOf,
@@ -39,6 +40,12 @@ describe("instance layout", () => {
       `${INSTANCE}/decks/deck-1.ttl`,
       `${INSTANCE}/reviews/deck-1.ttl`,
     ]);
+  });
+});
+
+describe("deckGroupUrlOf", () => {
+  it("is a group subject of the catalog document", () => {
+    expect(deckGroupUrlOf(INSTANCE, "x1")).toBe(`${INSTANCE}/catalog.ttl#group-x1`);
   });
 });
 

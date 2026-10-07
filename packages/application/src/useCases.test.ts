@@ -131,6 +131,8 @@ function makeDeps() {
     renameDeck: vi.fn(async () => deck),
     saveDeck: vi.fn(async (saved) => saved),
     removeDeck: vi.fn(async () => undefined),
+    readDeckTree: vi.fn(async () => ({ children: [{ kind: "deck" as const, deck }], readOnly: false })),
+    editDeckTree: vi.fn(async () => ({ children: [{ kind: "deck" as const, deck }], readOnly: false })),
     listCards: vi.fn(async () => [card]),
     addCard: vi.fn(async () => card),
     updateCard: vi.fn(async () => card),
@@ -706,6 +708,32 @@ describe("createUseCases", () => {
       webId: session.webId,
       instance,
     });
+  });
+
+  it("deck tree use cases name a new group with a fresh id, and tidy a group's name", async () => {
+    const deps = makeDeps();
+    const useCases = createUseCases(deps);
+
+    await expect(useCases.listDeckTree(instance.url)).resolves.toEqual({ children: [{ kind: "deck", deck }], readOnly: false });
+    expect(deps.deckRepository.readDeckTree).toHaveBeenCalledWith(instance.url);
+
+    const group = useCases.newDeckGroup(instance.url, { sv: " Språk " });
+    expect(group).toEqual({ url: `${instance.url}catalog.ttl#group-0f3a`, title: { sv: "Språk" } });
+    expect(() => useCases.newDeckGroup(instance.url, { en: " " })).toThrow("A deck group needs a name");
+
+    const combine = { kind: "combine" as const, dragged: deck.url, target: `${deck.url}-2`, group };
+    await expect(useCases.editDeckTree(instance.url, combine)).resolves.toEqual({ children: [{ kind: "deck", deck }], readOnly: false });
+    expect(deps.deckRepository.editDeckTree).toHaveBeenLastCalledWith(instance.url, combine);
+    await useCases.editDeckTree(instance.url, { kind: "rename", group: group.url, title: { en: " Languages ", sv: "" } });
+    expect(deps.deckRepository.editDeckTree).toHaveBeenLastCalledWith(instance.url, {
+      kind: "rename",
+      group: group.url,
+      title: { en: "Languages" },
+    });
+    await expect(useCases.editDeckTree(instance.url, { kind: "rename", group: group.url, title: {} })).rejects.toThrow(
+      "A deck group needs a name",
+    );
+    expect(deps.deckRepository.editDeckTree).toHaveBeenCalledTimes(2);
   });
 
   it("deck use cases delegate to the deck repository", async () => {

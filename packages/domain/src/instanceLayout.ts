@@ -79,6 +79,14 @@ export function catalogNodeUrlOf(instanceUrl: string): string {
   return `${catalogUrlOf(instanceUrl)}#catalog`;
 }
 
+/**
+ * A deck group of the instance (domain/deckTree.ts): a subject of its
+ * catalog document beside the decks, `#group-<id>`.
+ */
+export function deckGroupUrlOf(instanceUrl: string, id: string): string {
+  return `${catalogUrlOf(instanceUrl)}#group-${id}`;
+}
+
 /** Every document an instance may hold, given its decks: fixed ones first. */
 export function instanceDocumentUrls(instanceUrl: string, decks: readonly Deck[]): string[] {
   return [

@@ -3,6 +3,7 @@ import { useEffect } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { cardLabel, cardLabelText, type Deck } from "@solid-memo/domain/deck";
+import { decksOf } from "@solid-memo/domain/deckTree";
 import { DEFAULT_INVALID_DATA_POLICY } from "@solid-memo/domain/invalidDataPolicy";
 import { setAsideDecks } from "@solid-memo/domain/validation";
 import type { Instance, RegistrationTarget } from "@solid-memo/domain/instance";
@@ -219,18 +220,24 @@ export function Workspace({
     enabled: activeInstance !== null,
     staleTime: Infinity,
   });
-  // The deck list's counts are fetched while the instance is checked, not after.
-  const homeDecksQuery = useQuery({
-    queryKey: ["decks", instanceUrl],
-    queryFn: () => useCases.listDecks(instanceUrl!),
+  // The deck list's arrangement (DeckListContainer's query) and counts are
+  // fetched while the instance is checked, not after. Its decks are the
+  // deck lookup's too, so the catalog is read once, and a deck opened
+  // from the list resolves without a refetch.
+  const homeTreeQuery = useQuery({
+    queryKey: ["decks", instanceUrl, "tree"],
+    queryFn: () => useCases.listDeckTree(instanceUrl!),
     enabled: activeInstance !== null && route?.screen === "home",
+    refetchOnWindowFocus: false,
   });
   useEffect(() => {
-    if (instanceUrl === null || homeDecksQuery.data === undefined) return;
-    for (const deck of homeDecksQuery.data) {
+    if (instanceUrl === null || homeTreeQuery.data === undefined) return;
+    const decks = decksOf(homeTreeQuery.data.children);
+    queryClient.setQueryData(["decks", instanceUrl], decks);
+    for (const deck of decks) {
       void queryClient.prefetchQuery(studyCountsQuery(useCases, instanceUrl, deck));
     }
-  }, [homeDecksQuery.data, instanceUrl]);
+  }, [homeTreeQuery.data, instanceUrl]);
   const policy = preferencesQuery.data?.invalidDataPolicy ?? DEFAULT_INVALID_DATA_POLICY;
   const invalidReport =
     checkQuery.data !== undefined && !checkQuery.data.conforms ? checkQuery.data : null;

@@ -68,8 +68,12 @@ export const PROV = {
 export const DCAT = {
   /** A catalogue: an instance's catalog.ttl#catalog, the library index. */
   Catalog: "http://www.w3.org/ns/dcat#Catalog",
+  /** A dataset: in a pod, a deck (SM.Deck). */
+  Dataset: "http://www.w3.org/ns/dcat#Dataset",
   /** A catalogue's datasets: in the library index, the decks' series. */
   dataset: "http://www.w3.org/ns/dcat#dataset",
+  /** A catalogue's sub-catalogues: in a pod, the deck groups (SM.DeckGroup) it lists. */
+  catalog: "http://www.w3.org/ns/dcat#catalog",
   /** A release's version within its deck: "1", "2", … */
   version: "http://www.w3.org/ns/dcat#version",
 } as const;

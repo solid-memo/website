@@ -264,7 +264,36 @@
     },
     "empty": "Inga kortlekar än. Skapa din första kortlek nedan, eller importera en från kortleksbiblioteket.",
     "createButton": "Skapa kortlek",
-    "libraryLink": "Kortleksbiblioteket"
+    "libraryLink": "Kortleksbiblioteket",
+    "emptyGroup": "Inget i den här gruppen än.",
+    "readOnly": "En nyare version av Solid Memo har ordnat kortlekarna, så de kan inte ordnas om här. Läs in sidan igen för att få den senaste versionen.",
+    "newGroupName": "Ny grupp",
+    "groupName": "Gruppens namn",
+    "saveName": "Spara namnet",
+    "renameGroup": "Byt namn på gruppen {name}",
+    "deleteGroup": "Ta bort gruppen {name}",
+    "deleteGroupConfirm": {
+      "one": "Ta bort gruppen ”{name}”? Dess {count} kortlek behålls, en nivå upp.",
+      "other": "Ta bort gruppen ”{name}”? Dess {count} kortlekar behålls, en nivå upp."
+    },
+    "deleteGroupOfGroupsConfirm": "Ta bort gruppen ”{name}”? Grupperna i den behålls, en nivå upp.",
+    "deleteEmptyGroupConfirm": "Ta bort den tomma gruppen ”{name}”?",
+    "move": "Flytta {name}",
+    "moveUp": "Flytta upp",
+    "moveDown": "Flytta ned",
+    "moveOut": "Flytta ut ur {group}",
+    "moveInto": "Flytta in i",
+    "groupWithPrevious": "Gruppera med den ovanför",
+    "groupWithNext": "Gruppera med den nedanför",
+    "atTopLevel": "på översta nivån",
+    "inGroup": "i {group}",
+    "moved": "Flyttade {name}: {position} av {count} {place}.",
+    "combined": "Lade {name} och {other} i en ny grupp. Ge den ett namn, eller tryck Escape för att behålla ”{group}”.",
+    "deleted": "Tog bort gruppen ”{name}”; det den innehöll flyttades upp en nivå.",
+    "deletedEmpty": "Tog bort gruppen ”{name}”.",
+    "renamed": "Bytte gruppens namn till ”{name}”.",
+    "afterGroup": "efter {group}",
+    "dragCancelled": "Flytten avbröts: kortleken eller gruppen ligger kvar där den låg."
   },
   "studyPace": {
     "startSmall": "Varje nytt kort kommer tillbaka för repetition de följande dagarna, så ett högt antal nu ger en hög med repetitioner senare. Börja hellre smått och var regelbunden: du kan alltid öka sen."
@@ -772,6 +801,7 @@
       "dropSnapshot": "Ta bort repetitionens halvskrivna ångra-ögonblicksbild",
       "recomputeDue": "Räkna om när kortet ska repeteras nästa gång",
       "nameAgent": "Namnge personen eller organisationen efter dess adress",
+      "dropDanglingMembers": "Ta bort länkarna till kortlekar och grupper som inte finns kvar",
       "removeSubject": "Ta bort det"
     }
   },
@@ -954,6 +984,8 @@
     "deckChangedDuringUpgrade": "Kortleken ändrades medan den uppdaterades, kanske i en annan flik eller app. Försök igen.",
     "deckBeingUpgraded": "Solid Memo uppdaterar den här kortleken och sparar inget i den förrän uppdateringen är klar. Vänta tills uppdateringen är klar och försök sedan igen.",
     "changedElsewhere": "Det här ändrades någon annanstans, kanske i en annan flik eller app, efter att Solid Memo läste det, så inget sparades. Läs in sidan igen och försök på nytt.",
+    "deckTreeChanged": "Dina kortlekar ordnades om någon annanstans, kanske i en annan flik eller app, så ändringen gjordes inte. Listan visar dem nu som de är.",
+    "deckTreeTooNew": "En nyare version av Solid Memo ordnade de här kortlekarna, så den här versionen kan inte ordna om dem. Läs in sidan igen för att få den senaste versionen.",
     "createdElsewhere": "Det här skapades någon annanstans, kanske i en annan flik eller app, just när Solid Memo skulle skapa det, så inget sparades. Läs in sidan igen och försök på nytt.",
     "alreadyExists": "Något finns redan på den platsen i din Pod. Välj en annan plats.",
     "cannotCheck": "Solid Memo kunde inte kontrollera din Pod. Kontrollera anslutningen och försök igen.",

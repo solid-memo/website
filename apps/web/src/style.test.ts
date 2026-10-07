@@ -86,6 +86,32 @@ describe("focus styles", () => {
     expect(focused(html, selector).outlineColor).toBe("#f7f6f1");
   });
 
+  it.each([
+    ["a deck's Move button", `<ul class="deck-list"><li class="deck-row"><button class="row-move icon">x</button></li></ul>`, "button"],
+    ["a group's fold button", `<div class="deck-group-header"><button class="group-toggle">x</button></div>`, "button"],
+    ["a group's actions", `<div class="deck-group-header"><span class="group-actions"><button class="danger icon">x</button></span></div>`, "button"],
+  ])("rings %s in the primary colour", (_, html, selector) => {
+    const style = focused(html, selector);
+    expect(style.outlineStyle).toBe("solid");
+    expect(style.outlineColor).toBe("#2c6b3d");
+  });
+
+  it("shows a deck's Move button, hidden until a pointer is over its row, while focused or open", () => {
+    document.body.innerHTML = `<ul class="deck-list"><li class="deck-row"><a href="#/">x</a><button class="row-move icon">x</button></li></ul>`;
+    const hidden = [...document.styleSheets]
+      .flatMap((sheet) => [...sheet.cssRules])
+      .filter((rule): rule is CSSMediaRule => rule instanceof CSSMediaRule && rule.conditionText === "(hover: hover)")
+      .flatMap((rule) => [...rule.cssRules])
+      .find((rule): rule is CSSStyleRule => rule instanceof CSSStyleRule && rule.selectorText.includes(".row-move"))!;
+    expect(hidden.style.getPropertyValue("opacity")).toBe("0");
+    // The test DOM matches no :focus-within, so the rule is read for it.
+    expect(hidden.selectorText).toContain(":not(:hover, :focus-within)");
+    const button = document.querySelector("button")!;
+    expect(button.matches(hidden.selectorText)).toBe(true);
+    button.setAttribute("aria-expanded", "true");
+    expect(button.matches(hidden.selectorText)).toBe(false);
+  });
+
   it("draws a card table link's ring inside its cell, clear of the table's clipping", () => {
     const style = focused(`<table><tr><td class="clickable"><a href="#/">x</a></td></tr></table>`, "a");
     expect(style.outlineOffset).toBe("-4px");
@@ -109,7 +135,9 @@ describe("reflow", () => {
     ["the wordmark", `<div class="masthead"><h1><a class="brand" href="#/"><span class="wordmark">x</span></a></h1></div>`, "h1"],
     ["the session line", `<div class="masthead"><p class="session-line">x</p></div>`, "p"],
     ["a breadcrumb", `<nav class="breadcrumbs"><ol><li><a href="#/">x</a></li></ol></nav>`, "a"],
-    ["a deck's name", `<ul class="deck-list"><li><a class="deck-open" href="#/">x</a></li></ul>`, "a"],
+    ["a deck's name", `<ul class="deck-list"><li class="deck-row"><a class="deck-open" href="#/">x</a></li></ul>`, "a"],
+    ["a group's name", `<div class="deck-group-header"><button class="group-toggle"><span class="group-name">x</span></button></div>`, "span"],
+    ["a group to move into", `<div class="move-into"><button>x</button></div>`, "button"],
     ["a library deck's name", `<ul class="library-list"><li><a class="library-deck-name" href="#/">x</a></li></ul>`, "a"],
     ["the instance's name", `<div class="instance-bar-identity"><strong>x</strong></div>`, "strong"],
     ["the instance's address", `<div class="instance-bar-identity"><span class="hint">x</span></div>`, "span"],
@@ -123,10 +151,30 @@ describe("reflow", () => {
 
   it.each([
     ["the session line", `<div class="masthead"><p class="session-line">x</p></div>`, "p"],
-    ["a deck's name", `<ul class="deck-list"><li><a class="deck-open" href="#/">x</a></li></ul>`, "a"],
+    ["a deck's name", `<ul class="deck-list"><li class="deck-row"><a class="deck-open" href="#/">x</a></li></ul>`, "a"],
+    ["a group's name", `<div class="deck-group-header"><button class="group-toggle"><span class="group-name">x</span></button></div>`, "span"],
     ["a storage's address", `<ul class="storage-list"><li><span class="hint">x</span></li></ul>`, "span"],
   ])("breaks %s anywhere, so a long WebID or name fits the width", (_, html, selector) => {
     expect(styled(html, selector).overflowWrap).toBe("anywhere");
+  });
+
+  it("lets a group's header wrap its actions under its name", () => {
+    expect(styled(`<div class="deck-group-header"></div>`, "div").flexWrap).toBe("wrap");
+    expect(parseFloat(styled(`<div class="deck-group-header"><button class="group-toggle">x</button></div>`, "button").minWidth)).toBe(0);
+  });
+
+  it("gives a group no row's box: its header and members are rows of their own", () => {
+    const style = styled(`<ul class="deck-list"><li class="deck-group"></li></ul>`, "li");
+    expect(style.display).toBe("block");
+    expect(style.borderTopStyle).not.toBe("solid");
+  });
+
+  it("indents a level of the deck list, but no further from the fifth level on", () => {
+    const css = readFileSync(join(import.meta.dirname, "style.css"), "utf8");
+    const start = css.indexOf(".deck-group-clip>.deck-list {");
+    expect(css.slice(start, css.indexOf("}", start))).toContain(
+      "margin-inline-start: calc(1.25rem * clamp(0, 5 - var(--depth, 1), 1));",
+    );
   });
 
   it("lets the masthead wrap, and never clips what is in it", () => {
@@ -231,5 +279,102 @@ describe("target size", () => {
       .find((r): r is CSSStyleRule => r instanceof CSSStyleRule && r.selectorText === ".library-list .library-deck-name::after")!;
     expect(stretch.style.getPropertyValue("position")).toBe("absolute");
     expect(stretch.style.getPropertyValue("z-index")).toBe("");
+  });
+
+  it("gives a deck's Move button a 44px target above the row's link", () => {
+    document.body.innerHTML = `
+      <ul class="deck-list"><li class="deck-row">
+        <a class="deck-open" href="#/">x</a>
+        <button class="row-move icon">m</button>
+      </li></ul>`;
+    const move = getComputedStyle(document.querySelector(".row-move")!);
+    expect(parseFloat(move.minWidth)).toBeGreaterThanOrEqual(44);
+    expect(parseFloat(move.minHeight)).toBeGreaterThanOrEqual(44);
+    expect(move.position).toBe("relative");
+    expect(Number(move.zIndex)).toBeGreaterThan(0);
+    expect(move.gridColumn).toBe("3");
+  });
+
+  it("puts a row's moves above the row's link", () => {
+    document.body.innerHTML = `<ul class="deck-list"><li class="deck-row"><div class="move-panel"></div></li></ul>`;
+    const panel = getComputedStyle(document.querySelector(".move-panel")!);
+    expect(panel.position).toBe("relative");
+    expect(Number(panel.zIndex)).toBeGreaterThan(0);
+  });
+
+  it.each(["", "danger "])("gives a group's %sactions 44px targets", (kind) => {
+    document.body.innerHTML = `<div class="deck-group-header"><span class="group-actions"><button class="${kind}icon">x</button></span></div>`;
+    const button = getComputedStyle(document.querySelector("button")!);
+    expect(parseFloat(button.minWidth)).toBeGreaterThanOrEqual(44);
+    expect(parseFloat(button.minHeight)).toBeGreaterThanOrEqual(44);
+  });
+
+  it("gives a group's fold button a 44px target", () => {
+    document.body.innerHTML = `<div class="deck-group-header"><button class="group-toggle">x</button></div>`;
+    expect(parseFloat(getComputedStyle(document.querySelector("button")!).minHeight)).toBeGreaterThanOrEqual(44);
+  });
+});
+
+describe("dragging the deck list", () => {
+  it("keeps the dragged copy and the drop line out of the pointer's way, the copy above all", () => {
+    document.body.innerHTML = `<div class="deck-tree"><div class="drop-line"></div></div><div class="drag-ghost"></div>`;
+    const ghost = getComputedStyle(document.querySelector(".drag-ghost")!);
+    expect(ghost.position).toBe("fixed");
+    expect(ghost.pointerEvents).toBe("none");
+    expect(Number(ghost.zIndex)).toBeGreaterThanOrEqual(100);
+    expect(getComputedStyle(document.querySelector(".drop-line")!).pointerEvents).toBe("none");
+    expect(getComputedStyle(document.querySelector(".deck-tree")!).position).toBe("relative");
+  });
+
+  it("indents the drop line as the lists are, level by level", () => {
+    document.body.innerHTML = `<div class="drop-line"></div>`;
+    expect(lastMatching(document.querySelector(".drop-line")!, "inset-inline")).toBe(
+      "calc(min(var(--line-depth, 0), 4) * 1.25rem + var(--line-depth, 0) * (0.5rem + 2px)) 0",
+    );
+  });
+
+  it("gives the focus proxy a 16px font, so focusing it does not zoom a phone's page", () => {
+    document.body.innerHTML = `<input class="focus-proxy">`;
+    expect(getComputedStyle(document.querySelector("input")!).fontSize).toBe("16px");
+  });
+
+  it("lets a group's name be typed into, though its header cannot be selected", () => {
+    document.body.innerHTML = `<div class="deck-group-header"><form class="group-name-form"><input></form></div>`;
+    expect(lastMatching(document.querySelector(".deck-group-header")!, "user-select")).toBe("none");
+    expect(lastMatching(document.querySelector("input")!, "user-select")).toBe("text");
+  });
+
+  it("keeps the new-group highlight of a row in a group inside the group's clip", () => {
+    document.body.innerHTML = `<div class="drop-combine"></div><div class="deck-group-clip"><div class="drop-combine"></div></div>`;
+    const [top, nested] = document.querySelectorAll(".drop-combine");
+    expect(lastMatching(top!, "scale")).toBe("1.02");
+    expect(lastMatching(top!, "outline-offset")).toBe("2px");
+    expect(lastMatching(nested!, "scale")).toBe("none");
+    expect(lastMatching(nested!, "outline-offset")).toBe("0");
+  });
+
+  it("makes room at an open group's end while a row is lifted, none when folded shut", () => {
+    const html = (collapsed: string) =>
+      `<div class="deck-tree" data-dragging><div class="deck-group-body" ${collapsed}><div class="deck-group-clip"></div></div></div>`;
+    document.body.innerHTML = html("");
+    expect(lastMatching(document.querySelector(".deck-group-clip")!, "padding-bottom")).toBe("calc(0.25rem + 20px)");
+    document.body.innerHTML = html("data-collapsed");
+    expect(lastMatching(document.querySelector(".deck-group-clip")!, "padding-bottom")).toBe("0.25rem");
+  });
+});
+
+describe("moving the deck list's rows", () => {
+  it("brings in a header or an empty group's note an edit adds", () => {
+    document.body.innerHTML = `<div class="deck-tree" data-arranged><ul class="deck-list"><li class="deck-group">
+      <div class="deck-group-header row-enter"></div><p class="deck-group-empty row-enter"></p></li></ul></div>`;
+    for (const element of document.querySelectorAll(".row-enter")) {
+      expect(lastMatching(element, "animation")).toMatch(/^bounce-in /);
+    }
+  });
+
+  it("folds a deleted group's header away, keeps it folded till the group goes, and out of the pointer's way", () => {
+    document.body.innerHTML = `<ul class="deck-list"><li class="deck-group leaving"><div class="deck-group-header"></div></li></ul>`;
+    expect(lastMatching(document.querySelector(".deck-group-header")!, "animation")).toMatch(/^group-leave .* forwards$/);
+    expect(getComputedStyle(document.querySelector("li")!).pointerEvents).toBe("none");
   });
 });
