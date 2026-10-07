@@ -127,22 +127,27 @@ async function violationsOf(shape: ShapeName, version: number, record: object) {
   return engine.validateNode(data, URL_, descriptor.shapeIri);
 }
 
+/** Every version of every shape, 1 to the latest. */
+const SHAPE_VERSIONS = (Object.keys(LATEST_VERSION) as ShapeName[]).flatMap((shape) =>
+  Array.from({ length: LATEST_VERSION[shape] }, (_, i) => [shape, i + 1] as const),
+);
+
+// One test per shape version and per migration step, each in its own
+// time: loading and running one shape engine after another, in one test,
+// outgrew the test timeout as the shapes grew.
 describe("shapes, descriptors and migrations", () => {
-  it("agree: a record written through each descriptor conforms to its shape", async () => {
-    for (const shape of Object.keys(LATEST_VERSION) as ShapeName[]) {
-      for (let version = 1; version <= LATEST_VERSION[shape]; version += 1) {
-        expect(FIXTURES[shape][version], `${shape} v${version} fixture`).toBeDefined();
-        await expect(violationsOf(shape, version, FIXTURES[shape][version]), `${shape} v${version}`).resolves.toEqual([]);
-      }
-    }
+  it.each(SHAPE_VERSIONS)("agree: a %s record written through the v%i descriptor conforms to its shape", async (shape, version) => {
+    expect(FIXTURES[shape][version], `${shape} v${version} fixture`).toBeDefined();
+    await expect(violationsOf(shape, version, FIXTURES[shape][version])).resolves.toEqual([]);
   });
 
-  it("agree: every migration step's output conforms to the shape it moves to", async () => {
-    for (const step of MIGRATIONS) {
-      const migrated = step.up(FIXTURES[step.shape][step.from], { subject: "https://pod.example/x.ttl#it" }) as object;
-      await expect(violationsOf(step.shape, step.to, migrated), `${step.shape} ${step.from}→${step.to}`).resolves.toEqual([]);
-    }
-  });
+  it.each(MIGRATIONS.map((step) => [step.shape, step.from, step.to, step] as const))(
+    "agree: the %s %i→%i migration's output conforms to the shape it moves to",
+    async (shape, from, to, step) => {
+      const migrated = step.up(FIXTURES[shape][from], { subject: "https://pod.example/x.ttl#it" }) as object;
+      await expect(violationsOf(shape, to, migrated)).resolves.toEqual([]);
+    },
+  );
 
   it("report a subject that breaks its shape", async () => {
     const thing = buildThing(createThing({ url: URL_ }))
