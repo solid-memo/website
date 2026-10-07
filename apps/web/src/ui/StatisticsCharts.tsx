@@ -1,4 +1,4 @@
-import { useState } from "preact/hooks";
+import { useId, useState } from "preact/hooks";
 import { shiftStudyDay, type DayActivity, type Recall } from "@solid-memo/domain/statistics";
 import { useI18n } from "./i18n";
 
@@ -10,11 +10,14 @@ import { useI18n } from "./i18n";
  * each, in one hue: more answers, a stronger green.
  */
 
-/** A headline number with what it counts. */
+/** A headline number with what it counts, named by that label as a group. */
 export function StatTile({ label, value, detail }: { label: string; value: string; detail?: string }) {
+  const labelId = useId();
   return (
-    <div class="stat-tile">
-      <span class="stat-label">{label}</span>
+    <div class="stat-tile" role="group" aria-labelledby={labelId}>
+      <span class="stat-label" id={labelId}>
+        {label}
+      </span>
       <strong class="stat-value">{value}</strong>
       {detail !== undefined && <span class="stat-detail hint">{detail}</span>}
     </div>

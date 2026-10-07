@@ -8,7 +8,7 @@ and [testing.md](testing.md).
 - [architecture.md](architecture.md) — the hexagonal layers, one npm workspace package each, and the Turbo tasks that check them.
 - [boundaries.md](boundaries.md) — the import rules between packages, and the vendor libraries each may use, as `npm run check:boundaries` enforces them.
 - [vendor-code.md](vendor-code.md) — which third-party technology the app depends on, where each is confined, and what replacing one would cost.
-- [testing.md](testing.md) — unit tests at 100% coverage per package, the end-to-end tests against Solid servers in Docker, and the commands.
+- [testing.md](testing.md) — unit tests at 100% coverage per package, the end-to-end tests against Solid servers in Docker, the user journeys in a browser (and how to debug and add one), and the commands.
 - [deployment.md](deployment.md) — the static build, deployed to GitHub Pages by CI, or published by hand to any web space.
 
 ## The data

@@ -75,6 +75,7 @@ describe("DeckProvenance", () => {
     expect(container.querySelector(".deck-description")).toHaveTextContent(
       "Just a deck.",
     );
+    expect(screen.getByRole("group", { name: "Description" })).toHaveTextContent("Just a deck.");
     expect(screen.queryByRole("link")).toBeNull();
   });
 
@@ -89,6 +90,7 @@ describe("DeckProvenance", () => {
     expect(english).toHaveAttribute("lang", "en");
     expect(swedish).toHaveTextContent("En kortlek.");
     expect(swedish).not.toHaveAttribute("lang");
+    expect(screen.getAllByRole("group", { name: "Beskrivning" })).toEqual([english, swedish]);
   });
 
   it("renders nothing when nothing is stated", () => {

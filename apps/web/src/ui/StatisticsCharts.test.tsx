@@ -29,7 +29,8 @@ describe("tiles", () => {
         <RecallTile label="Mogna kort" recall={{ reviews: 0, recalled: 0 }} />
       </I18nProvider>,
     );
-    expect(screen.getByText("51")).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Svar" })).toHaveTextContent("51");
+    expect(screen.getByRole("group", { name: "Unga kort" })).toHaveTextContent("75 %");
     expect(screen.getByText("75 %")).toBeInTheDocument();
     expect(screen.getByText("av 8 repetitioner")).toBeInTheDocument();
     expect(screen.getByText("Inga repetitioner än")).toBeInTheDocument();

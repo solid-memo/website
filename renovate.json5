@@ -39,6 +39,12 @@
             matchDepNames: ['solidproject/community-server'],
             allowedVersions: '<8',
         },
+        // The user journeys log in to 7 (e2e/journeys/css/compose.yml).
+        {
+            matchFileNames: ['e2e/journeys/css/compose.yml'],
+            matchDepNames: ['solidproject/community-server'],
+            allowedVersions: '<8',
+        },
         // The advisory 8 follows its alphas to 8.0.0 (docs/testing.md).
         {
             matchFileNames: ['e2e/pod/servers/css-8/compose.yml'],
@@ -89,6 +95,13 @@
             matchDepNames: ['solidproject/community-server'],
             matchUpdateTypes: ['digest'],
             automerge: false,
+        },
+        // Playwright and the browser it downloads move together: one pinned
+        // version (e2e/journeys/package.json), which CI keys its browser
+        // cache by.
+        {
+            matchDepNames: ['@playwright/test'],
+            rangeStrategy: 'pin',
         },
         // The images the end-to-end tests build themselves are in no registry.
         {

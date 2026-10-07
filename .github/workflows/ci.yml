@@ -3,6 +3,11 @@ name: CI
 on:
   push:
   workflow_dispatch:
+    inputs:
+      trace:
+        description: Keep the user journeys' traces, videos and screenshots even when they pass
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -107,4 +112,53 @@ jobs:
         with:
           name: contract-logs-${{ matrix.server }}
           path: e2e/pod/logs/
+          retention-days: 7
+
+  # The user journeys (e2e/journeys, docs/testing.md): the built app in
+  # Chromium, logging in to a Community Solid Server 7 behind TLS that the
+  # harness starts in Docker, each journey with an account and pod of its
+  # own. When one fails, the job's summary names the step it failed in, and
+  # its artifact holds the trace to replay it step by step (`npx playwright
+  # show-trace`), the report, a video, and the server's log.
+  journeys:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      JOURNEY_TRACE: ${{ inputs.trace && 'on' || '' }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: actions/cache@v6
+        with:
+          path: .turbo/cache
+          key: turbo-${{ github.sha }}
+          restore-keys: turbo-
+      - run: npm ci
+      - id: playwright
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v6
+        id: browsers
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+      - if: steps.browsers.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+      - if: steps.browsers.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+      - run: npx turbo run build --filter=@solid-memo/web
+      - run: npm run css:prepare -w @solid-memo/e2e-journeys
+      - run: npm run journeys
+      - if: always()
+        run: node e2e/journeys/harness/summary.ts journeys-${{ github.run_attempt }}
+      - if: failure() || env.JOURNEY_TRACE == 'on'
+        uses: actions/upload-artifact@v7
+        with:
+          name: journeys-${{ github.run_attempt }}
+          path: |
+            e2e/journeys/playwright-report/
+            e2e/journeys/test-results/
+            e2e/journeys/logs/
           retention-days: 7

@@ -29,6 +29,8 @@ const LAYERS: Record<string, string[]> = {
   browser: ["application", "domain"],
   web: ["application", "domain", "vocab", "solid", "browser"],
   "e2e-pod": ["application", "domain", "vocab", "solid"],
+  // The journeys drive the built app in a browser; they read only its text.
+  "e2e-journeys": ["web"],
 };
 
 /** Within a package, files that alone may use some of its allowed packages. */
@@ -39,6 +41,8 @@ const ONLY_FROM: Record<string, Record<string, RegExp>> = {
   vocab: { turtle: /^tooling\// },
   // The browser-side engine never needs the node tooling.
   shacl: { turtle: /^node\// },
+  // The app's messages (apps/web/src/i18n), which the page objects find text by.
+  "e2e-journeys": { web: /^harness\/strings\.ts$/ },
 };
 
 /** Code that ends up in the browser bundle (tests aside). */

@@ -1,0 +1,14 @@
+# TLS for the Community Solid Server (compose.yml), with Caddy's own CA:
+# no port 80, no attempt to install the CA, and a certificate for the
+# address the browser asks for (an IP: browsers send no name for it).
+{
+	auto_https disable_redirects
+	skip_install_trust
+	default_sni 127.0.0.1
+	admin off
+}
+
+https://127.0.0.1:{$E2E_PORT} {
+	tls internal
+	reverse_proxy 127.0.0.1:3000
+}

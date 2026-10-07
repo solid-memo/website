@@ -35,6 +35,7 @@ configs may also use the shared test tooling of the root `package.json`.
 | `browser` | `application`, `domain` | |
 | `web` | `application`, `domain`, `vocab`, `solid`, `browser` | `solid`, `browser`: `src/main.tsx` only |
 | `e2e-pod` | `application`, `domain`, `vocab`, `solid` | |
+| `e2e-journeys` | `web` | `web`: `harness/strings.ts` only, for the app's messages |
 
 Browser code: `src/` of `vocab`, `domain`, `application`, `shacl`,
 `solid`, `browser` and `web`; `vocab`'s `tooling/` is node-only.
@@ -52,6 +53,7 @@ used nowhere else):
 | `rdf-validate-shacl` | `shacl` | `src/engine.ts` only, loaded lazily |
 | `n3` | `turtle`, the node tooling of `shacl`, and `e2e-pod` | never in the browser; in `e2e-pod`, the server contract and the tests |
 | `fake-indexeddb` | `browser` | tests only: IndexedDB in node, for the guest's pod's store |
+| `@playwright/test` | `e2e-journeys` | drives the built app in Chromium; the harness also talks to the Solid server with its request API |
 
 ## Further rules
 
