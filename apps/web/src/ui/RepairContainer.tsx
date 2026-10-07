@@ -17,6 +17,7 @@ function repairLabels(t: I18n["t"]): Record<RepairKind, string> {
     "drop-snapshot": t("repair.action.dropSnapshot"),
     "recompute-due": t("repair.action.recomputeDue"),
     "name-agent": t("repair.action.nameAgent"),
+    "drop-dangling-members": t("repair.action.dropDanglingMembers"),
     "remove-subject": t("repair.action.removeSubject"),
   };
 }

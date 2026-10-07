@@ -1,6 +1,13 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
-import { forget, recentLanguages, rememberLanguage, useRemembered } from "./remembered";
+import {
+  collapsedGroups,
+  forget,
+  recentLanguages,
+  rememberCollapsed,
+  rememberLanguage,
+  useRemembered,
+} from "./remembered";
 
 function Counter({ memoryKey }: { memoryKey: string }) {
   const [count, setCount] = useRemembered(memoryKey, 0);
@@ -78,5 +85,39 @@ describe("recent languages", () => {
     };
     expect(recentLanguages("deck", refusing)).toEqual([]);
     expect(() => rememberLanguage("deck", "sv", refusing)).not.toThrow();
+  });
+});
+
+describe("collapsed deck groups", () => {
+  const a = "https://pod.example/solid-memo/a/";
+  const b = "https://pod.example/solid-memo/b/";
+  beforeEach(() => localStorage.clear());
+
+  it("are none at first", () => {
+    expect(collapsedGroups(a)).toEqual([]);
+  });
+
+  it("are kept on this device, for each instance apart", () => {
+    rememberCollapsed(a, [`${a}catalog.ttl#group-1`]);
+    expect(collapsedGroups(a)).toEqual([`${a}catalog.ttl#group-1`]);
+    expect(collapsedGroups(b)).toEqual([]);
+    expect(JSON.parse(localStorage.getItem(`solid-memo:collapsedGroups.${a}`)!)).toEqual([`${a}catalog.ttl#group-1`]);
+  });
+
+  it("leave out what is not a URL as the app stores it", () => {
+    localStorage.setItem(`solid-memo:collapsedGroups.${a}`, JSON.stringify(["x", 7]));
+    expect(collapsedGroups(a)).toEqual(["x"]);
+    localStorage.setItem(`solid-memo:collapsedGroups.${a}`, "{not json");
+    expect(collapsedGroups(a)).toEqual([]);
+    localStorage.setItem(`solid-memo:collapsedGroups.${a}`, JSON.stringify({ x: true }));
+    expect(collapsedGroups(a)).toEqual([]);
+  });
+
+  it("are none, and are not kept, when the browser's storage refuses", () => {
+    const refusing = () => {
+      throw new Error("SecurityError");
+    };
+    expect(collapsedGroups(a, refusing)).toEqual([]);
+    expect(() => rememberCollapsed(a, ["x"], refusing)).not.toThrow();
   });
 });

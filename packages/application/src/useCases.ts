@@ -66,7 +66,9 @@ import {
   upgradeReviewState,
   type MigrationPlan,
 } from "@solid-memo/domain/migration";
+import type { DeckGroup, DeckTree, DeckTreeEdit } from "@solid-memo/domain/deckTree";
 import {
+  deckGroupUrlOf,
   digestUrlOf,
   documentsInUse,
   ensureTrailingSlash,
@@ -252,6 +254,20 @@ export interface UseCases {
    * a language left out or cleared removed, as createDeck.
    */
   renameDeck(deck: Deck, title: LangText): Promise<Deck>;
+  /** The instance's decks as the user arranged them into groups (domain/deckTree.ts). */
+  listDeckTree(instanceUrl: string): Promise<DeckTree>;
+  /**
+   * A new group's identity, before anything is written (a `combine` edit
+   * writes it): a fresh URL in the instance's catalog document, and its
+   * name as entered, tidied as a deck's (see createDeck). Synchronous, so
+   * the screen can show the group, and the edit naming it, at once.
+   */
+  newDeckGroup(instanceUrl: string, title: LangText): DeckGroup;
+  /**
+   * Make one edit of the arrangement (DeckRepository.editDeckTree); a
+   * rename's name is tidied as a deck's. Returns the tree as written.
+   */
+  editDeckTree(instanceUrl: string, edit: DeckTreeEdit): Promise<DeckTree>;
   /**
    * Change how the deck is studied. Review state is kept: a card's
    * front→back state waits, unused, while the deck is studied back→front.
@@ -486,6 +502,13 @@ const NO_GUEST_POD: GuestPod = {
 function deckTitle(title: LangText): LangText {
   const tidied = tidiedStated(title);
   if (Object.keys(tidied).length === 0) throw new Error("A deck needs a name");
+  return tidied;
+}
+
+/** A deck group's name as entered, tidied as a deck's: the app requires one before it saves. */
+function groupTitle(title: LangText): LangText {
+  const tidied = tidiedStated(title);
+  if (Object.keys(tidied).length === 0) throw new Error("A deck group needs a name");
   return tidied;
 }
 
@@ -1172,6 +1195,18 @@ export function createUseCases({
     },
     async renameDeck(deck, title) {
       return deckRepository.renameDeck(deck, deckTitle(title));
+    },
+    listDeckTree(instanceUrl) {
+      return deckRepository.readDeckTree(instanceUrl);
+    },
+    newDeckGroup(instanceUrl, title) {
+      return { url: deckGroupUrlOf(instanceUrl, newId()), title: groupTitle(title) };
+    },
+    async editDeckTree(instanceUrl, edit) {
+      return deckRepository.editDeckTree(
+        instanceUrl,
+        edit.kind === "rename" ? { ...edit, title: groupTitle(edit.title) } : edit,
+      );
     },
     setDeckDirection(deck, direction) {
       return deckRepository.saveDeck({ ...deck, direction });

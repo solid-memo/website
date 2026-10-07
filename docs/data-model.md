@@ -82,7 +82,9 @@ flowchart LR
 │                        (sm:deckNewCardsPerDay/MaxReviewsPerDay);
 │                        beside each deck its
 │                        dcat:Distribution (#deck-X-cards) and the
-│                        foaf:Agent nodes of its creators (#agent-…)
+│                        foaf:Agent nodes of its creators (#agent-…);
+│                        and the deck groups (#group-…), a sm:DeckGroup
+│                        and dcat:Catalog each: sm:formatVersion 1
 ├── decks/<deckId>.ttl    card corpus: one sm:Card per fragment (slow churn),
 │                        sm:front/back text and/or sm:frontImage/backImage
 │                        IRIs, optional sm:frontImageDescription/
@@ -263,6 +265,86 @@ checked and stored in their canonical form ("iw" → "he"); a language tag
 the deck already has, even one another app wrote that the app would not
 accept from the user, is kept as stored.
 
+## Deck groups
+
+The user arranges the deck list into named groups that can nest. A group
+is a subject of `catalog.ttl` beside the decks, a `sm:DeckGroup` and a
+`dcat:Catalog` (shape `DeckGroupV1`), never a `dcat:Dataset`: DCAT
+nests catalogues, and DCAT-AP lets a catalogue list sub-catalogues with
+`dcat:catalog` and datasets with `dcat:dataset`. DCAT has no ordered
+membership (`dcat:prev`/`next` are series versions, which the library
+uses as such), so the order is Solid Memo's own `sm:position`.
+
+```turtle
+<#catalog> a dcat:Catalog ; …
+    dcat:dataset <#deck-a>, <#deck-b>, <#deck-c> ;   # still every deck
+    dcat:catalog <#group-x1> .                       # the top-level groups
+<#group-x1> a sm:DeckGroup, dcat:Catalog ;
+    sm:formatVersion 1 ;
+    dcterms:title "Languages"@en ;                   # one name, in the UI's language
+    dcterms:description "Deck group: Languages."@en, "Kortleksgrupp: Languages."@sv ;   # generated
+    dcterms:publisher <https://alice.example/profile/card#me> ;   # the catalogue's
+    dcat:dataset <#deck-a>, <#deck-b> ;
+    dcat:catalog <#group-y2> ;
+    sm:position 0 .
+<#deck-a> sm:position 0 .
+```
+
+- **The catalogue still lists every deck** with `dcat:dataset`; a group
+  lists only its own members. The catalogue's `dcat:catalog` lists the
+  top-level groups.
+- **A deck or group is in one parent**: the catalogue (top level) or one
+  group. A deck no group lists is at the top level.
+- **Positions count within one parent**, and the decks and groups of a
+  parent share one sequence, 0 first. Members sort by position, those
+  without one last, in document order. The first arrangement of a level
+  writes positions 0…n−1 for every member at that level; new and
+  imported decks get none.
+- **An empty group stays** until the user removes it; removing a group
+  moves its members, in order, into its place in its parent.
+- `sm:position` on a deck and the catalogue's `dcat:catalog` belong to
+  no shape (`DeckV6` and `CatalogV1` are unchanged), so writing a deck or
+  the catalogue keeps them, and no deck format version was needed.
+
+What is not one valid tree is read as one, rather than refused. A link
+to nothing, from a group to itself, or of the wrong kind (a
+`dcat:dataset` link to a group, a `dcat:catalog` link to a deck) is
+ignored. A node several parents list goes to the group with the lowest
+URL, except a group the catalogue's `dcat:catalog` lists, which stays at
+the top level. A cycle is broken by moving the lowest-URL group in it to
+the top level. A negative position counts as none, and on a tie of
+positions decks come before groups, each kind in document order. A
+group in a format newer than the app's makes the arrangement read-only,
+and a group the app cannot read is never edited: its members show at
+the top level, and the catalogue's `dcat:catalog` keeps its link.
+
+**Writing an arrangement.** The screen sends an edit, not a finished
+layout (`DeckTreeEdit` in
+[deckTree.ts](../packages/domain/src/deckTree.ts): move a node after a
+sibling, combine two into a new group, rename or remove a group), and
+the repository (`editDeckTree` in
+[solidDeckRepository.ts](../packages/solid/src/solidDeckRepository.ts))
+applies it to `catalog.ttl` as the pod holds it then:
+
+- **read, apply, write once**: the document is read, the edit applied to
+  the tree it states, and what changed written in one PATCH with
+  `If-Match` ([write discipline](#write-discipline)); an edit that
+  changes nothing sends nothing;
+- **on 412 the edit is applied again** to the document as it is now,
+  three attempts in all, so another tab's change is kept, not undone. A
+  move names its neighbour, not an index, and a new group's URL is
+  minted by the screen (`newDeckGroup`), so an edit means the same on
+  the fresh tree and a retried combine is a no-op. An edit that no
+  longer fits (its group or node gone) fails with `deckTreeChanged`;
+- **a PATCH, never a whole PUT**: where the pod has no strong ETag, a PUT
+  would undo what changed since the read, and a PATCH keeps it;
+- **only the groups written and the catalogue are checked** before the
+  write (`checkWrite`): a deck's `sm:position` belongs to no shape, and a
+  deck that is set aside beside the one moved must not stop the move;
+- **removing a deck** also removes it from every group's `dcat:dataset`,
+  in the same write; its siblings keep their positions, and the next
+  arrangement closes the gap.
+
 ## The answer log
 
 Every grade given in study is kept, so statistics can be computed
@@ -398,7 +480,10 @@ sequenceDiagram
 
   A 412 surfaces as a `PreconditionFailedError` naming the document
   ("changed elsewhere … Reload and try again"); nothing retries on its
-  own. Weak ETags (`W/"…"`) are never sent in `If-Match`, whose
+  own, except the writes that re-apply a change to the document as it
+  is then: [the digest](#the-digest) and an edit of the
+  [deck groups](#deck-groups), which is read, applied and written again,
+  three times in all, before the 412 surfaces. Weak ETags (`W/"…"`) are never sent in `If-Match`, whose
   comparison is strong; a document the pod gives no ETag, or one saved
   since it was read (pods need not return the new ETag), is written
   without `If-Match`. node-solid-server gives no ETag on a read and

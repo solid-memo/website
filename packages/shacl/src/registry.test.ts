@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { pickShape } from "./registry";
-import { CARD_V1, CARD_V2, DECK_V2, DECK_V6, LIBRARY_DECK_V1, LIBRARY_DECK_V5, SHAPES } from "@solid-memo/vocab/descriptors.generated";
+import { CARD_V1, CARD_V2, CATALOG_V1, DECK_GROUP_V1, DECK_V2, DECK_V6, LIBRARY_DECK_V1, LIBRARY_DECK_V5, SHAPES } from "@solid-memo/vocab/descriptors.generated";
+
+const DCAT_CATALOG = "http://www.w3.org/ns/dcat#Catalog";
+const DCAT_DATASET = "http://www.w3.org/ns/dcat#Dataset";
 
 describe("the generated registry", () => {
   it("has every version from 1 to the latest of each kind", () => {
@@ -62,5 +65,19 @@ describe("pickShape", () => {
     expect(pickShape(["https://other.example/#Thing"], 1, "library")).toEqual({
       kind: "untyped",
     });
+  });
+
+  it("checks a deck group as a deck group, not as the catalogue it also is", () => {
+    for (const types of [[SM.DeckGroup, DCAT_CATALOG], [DCAT_CATALOG, SM.DeckGroup]]) {
+      expect(pickShape(types, 1, "pod"), types.join(" ")).toEqual({ kind: "shape", descriptor: DECK_GROUP_V1 });
+    }
+    expect(pickShape([DCAT_CATALOG], 1, "pod")).toEqual({ kind: "shape", descriptor: CATALOG_V1 });
+    expect(pickShape([DCAT_CATALOG, SM.DeckGroup], 2, "pod")).toEqual({
+      kind: "unknown-version",
+      shape: "deckGroup",
+      version: 2,
+      latest: 1,
+    });
+    expect(pickShape([SM.Deck, DCAT_DATASET], 6, "pod")).toEqual({ kind: "shape", descriptor: DECK_V6 });
   });
 });

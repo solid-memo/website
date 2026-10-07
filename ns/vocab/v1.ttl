@@ -6,6 +6,7 @@
 @prefix skos:       <http://www.w3.org/2004/02/skos/core#> .
 @prefix dcterms:    <http://purl.org/dc/terms/> .
 @prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
 
 # The Solid Memo vocabulary. Terms are only ever ADDED within this
 # namespace; a term's meaning or range never changes. A breaking change is
@@ -16,8 +17,8 @@
     a owl:Ontology ;
     dcterms:title "Solid Memo vocabulary, v1" ;
     dcterms:description "Terms for spaced-repetition flashcards stored in a Solid pod: instances, decks, cards, SM-2 review state and study preferences." ;
-    owl:versionInfo "1.12" ;
-    skos:changeNote "1.0: Instance, Deck, Card, ReviewState, Preferences, formatVersion, cardsDocument, reviewsDocument, front, back, the SM-2 fields and the study caps. 1.1: developerMode. 1.2: the previous* snapshot. 1.3: frontImage, backImage (card format 2). 1.4: cardCount (library index). 1.5: direction (deck format 2). 1.6: the StudyDirections and InvalidDataPolicies concept schemes, studyDirection (deck format 3) and invalidDataPolicy (preferences format 3); direction deprecated. 1.7: deckNewCardsPerDay, deckMaxReviewsPerDay (a deck's own study caps). 1.8: frontNote, backLabel, backNote (card format 3). 1.9: DocumentReceipt and DeckSchedule, the instance digest that lets a visit skip documents that have not changed. 1.10: Answer, the answer log the study statistics are computed from. 1.11: the Themes concept scheme and theme (preferences format 4). 1.12: frontImageDescription, backImageDescription (card format 4, without a version bump)." .
+    owl:versionInfo "1.13" ;
+    skos:changeNote "1.0: Instance, Deck, Card, ReviewState, Preferences, formatVersion, cardsDocument, reviewsDocument, front, back, the SM-2 fields and the study caps. 1.1: developerMode. 1.2: the previous* snapshot. 1.3: frontImage, backImage (card format 2). 1.4: cardCount (library index). 1.5: direction (deck format 2). 1.6: the StudyDirections and InvalidDataPolicies concept schemes, studyDirection (deck format 3) and invalidDataPolicy (preferences format 3); direction deprecated. 1.7: deckNewCardsPerDay, deckMaxReviewsPerDay (a deck's own study caps). 1.8: frontNote, backLabel, backNote (card format 3). 1.9: DocumentReceipt and DeckSchedule, the instance digest that lets a visit skip documents that have not changed. 1.10: Answer, the answer log the study statistics are computed from. 1.11: the Themes concept scheme and theme (preferences format 4). 1.12: frontImageDescription, backImageDescription (card format 4, without a version bump). 1.13: DeckGroup and position, the user's arrangement of the deck list (deck group format 1; on a deck, position needs no deck format bump)." .
 
 #################### Classes ####################
 
@@ -77,6 +78,14 @@ solid-memo:Answer
     rdfs:isDefinedBy <> ;
     skos:historyNote "Added in 1.10." .
 
+solid-memo:DeckGroup
+    a owl:Class ;
+    rdfs:subClassOf dcat:Catalog ;
+    rdfs:label "Deck group" ;
+    rdfs:comment "A named group of decks and deck groups that the user arranged on the deck list. A subject of the instance's catalog document: a dcat:Catalog of its decks (dcat:dataset) and sub-groups (dcat:catalog), listed by the one catalogue or group it is in." ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.13." .
+
 #################### Shared ####################
 
 solid-memo:formatVersion
@@ -86,6 +95,14 @@ solid-memo:formatVersion
     rdfs:range xsd:integer ;
     rdfs:isDefinedBy <> ;
     skos:historyNote "Since 1.0." .
+
+solid-memo:position
+    a owl:DatatypeProperty ;
+    rdfs:label "position" ;
+    rdfs:comment "Where a deck or deck group stands among the members of the one catalogue or group it is in, 0 first; the decks and groups of one parent share one sequence. Absent means after every member that has one." ;
+    rdfs:range xsd:integer ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.13. On a deck it is outside the deck format, without a version bump: an older reader ignores it and an older writer keeps it." .
 
 #################### Deck ####################
 

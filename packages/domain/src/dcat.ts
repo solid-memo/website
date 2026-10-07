@@ -1,4 +1,4 @@
-import { english, inEnglish, shown, type LangText } from "./langText";
+import { english, inEnglish, sameText, shown, type LangText } from "./langText";
 /**
  * The DCAT side of Solid Memo's data (see docs/data-model.md): the
  * terms of the EU vocabularies it uses, and what a deck states when the
@@ -59,4 +59,25 @@ export function isDefaultDeckDescription(description: LangText, titles: readonly
  */
 export function descriptionInFormat4(description: string, title: string): LangText {
   return description === defaultDeckDescription(title) ? defaultDeckDescriptionText({ en: title }) : inEnglish(description);
+}
+
+/**
+ * The description a deck group gets: DCAT-AP asks one of every
+ * catalogue, and the user only names a group. In English and Swedish, as
+ * a deck's, the Swedish naming the group by its Swedish name when it has
+ * one, both by its English name, else the one shown.
+ */
+export function defaultDeckGroupDescription(title: LangText): LangText {
+  const name = english(title) ?? shown(title);
+  return { en: `Deck group: ${name}.`, sv: `Kortleksgrupp: ${title.sv ?? name}.` };
+}
+
+/**
+ * Whether a group's description is the default one for its name (in
+ * English, with or without its Swedish): not text the user wrote, so a
+ * rename may give the group the default for its new name.
+ */
+export function isDefaultDeckGroupDescription(description: LangText, title: LangText): boolean {
+  const generated = defaultDeckGroupDescription(title);
+  return sameText(description, generated) || sameText(description, { en: generated.en! });
 }

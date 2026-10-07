@@ -17,6 +17,7 @@ card/v1.ttl … v5.ttl
 review-state/v1.ttl, v2.ttl
 preferences/v1.ttl … v4.ttl
 document-receipt/v1.ttl, deck-schedule/v1.ttl   (the digest)
+deck-group/v1.ttl             …/deck-group/v1.ttl#inPod  (the arranged deck list)
 ```
 
 Each file's address is its IRI and its `@base`. The IRIs keep `.ttl` on
@@ -43,6 +44,9 @@ since a shape's `sh:name` version must match its file's.
   `sh:class` and `sh:nodeKind sh:IRI` instead. The class is Solid
   Memo's own or, for the standard classes it writes, DCAT's or FOAF's
   (`CLASS_NAMESPACES` in [packages/vocab/tooling/shapes.ts](../packages/vocab/tooling/shapes.ts)).
+  A subject with a Solid Memo class is checked against that class's
+  shapes only: a deck group is a `dcat:Catalog` too, but is never
+  checked as `CatalogV1`.
 - **Further types are stated.** A subject that is also, say, a
   `dcat:Dataset` says so with `sh:property [ sh:path rdf:type ;
   sh:hasValue dcat:Dataset ]`; the shape is still picked by its
@@ -94,6 +98,7 @@ since a shape's `sh:name` version must match its file's.
 | Library deck series 2 | Library deck series 1 with the version stated (`sh:hasValue 2`) and the title and description as language-tagged text, as in deck format 4 |
 | Library deck series 3 | Library deck series 2, but the keywords, copied from the current release, are language-tagged text, several per language, or untagged as a library deck 4 release has them |
 | Catalog 1 | A `dcat:Catalog` (an instance's `catalog.ttl#catalog`, the library index): title, description, `dcterms:publisher` 1..1; licence, modification time 0..1; `dcat:themeTaxonomy`, `dcat:dataset` 0..n |
+| Deck group 1 | In a pod (`DeckGroupV1`, beside the decks in `catalog.ttl`): a [deck group](data-model.md#deck-groups), a `sm:DeckGroup` and a `dcat:Catalog`; `dcterms:title` and `dcterms:description` 1..n language-tagged text, one per language (`sh:uniqueLang`); `dcterms:publisher` 1..1 IRI (the catalogue's); `dcat:dataset` (its decks) and `dcat:catalog` (its sub-groups) 0..n IRIs; `sm:position` 0..1, an integer ≥ 0. That a deck or group has one parent is not a shape rule: the reader decides one. A deck's `sm:position` and the catalogue's `dcat:catalog` belong to no shape, so `DeckV6` and `CatalogV1` keep them untouched |
 | Agent 1 | A `foaf:Agent`: `foaf:name` 1..1, `foaf:mbox` 0..1 (a `mailto:` IRI) |
 | Distribution 1 | A `dcat:Distribution`: `dcat:accessURL` 1..1; `dcat:downloadURL`, `dcat:mediaType`, `dcterms:format` 0..1 |
 | Document receipt 1 | In an instance's [digest](data-model.md#the-digest): `sm:receiptOf` (the document) and `sm:documentVersion` (its ETag) 1..1; `sm:conformedTo` (the rules it conformed to) and `sm:latestFormat` 0..1 |

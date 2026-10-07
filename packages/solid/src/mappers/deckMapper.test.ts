@@ -6,10 +6,10 @@ import {
   type ThingPersisted,
 } from "@inrupt/solid-client";
 import { mockSolidDatasetFrom, setThing } from "@inrupt/solid-client";
-import { getThing, getUrlAll, getStringNoLocale } from "@inrupt/solid-client";
+import { getInteger, getThing, getUrlAll, getStringNoLocale } from "@inrupt/solid-client";
 import { fragmentIdOf, toCard, toCatalog, toDeck, toDecks, withCatalog, withDeck, withoutDeck } from "./deckMapper";
 import type { Deck } from "@solid-memo/domain/deck";
-import { DCTERMS, RDF, SM } from "../vocab";
+import { DCAT, DCTERMS, RDF, SM } from "../vocab";
 
 const CATALOG = "https://pod.example/solid-memo/a/catalog.ttl";
 const CARDS_DOC = "https://pod.example/solid-memo/a/decks/deck-1.ttl";
@@ -364,5 +364,56 @@ describe("the catalogue node", () => {
       buildThing(createThing({ url: `${CATALOG}#catalog` })).addIri(RDF.type, "http://www.w3.org/ns/dcat#Catalog").build(),
     );
     expect(toCatalog(broken, CATALOG)).toBeNull();
+  });
+});
+
+describe("the arrangement's triples (deck groups)", () => {
+  const catalog = {
+    title: "Main",
+    description: "My decks.",
+    publisher: { webId: "https://alice.example/profile/card#me", name: "Alice" },
+  };
+  const deck: Deck = {
+    id: "deck-1",
+    url: `${CATALOG}#deck-1`,
+    title: { en: "Capitals" },
+    cardsDocumentUrl: CARDS_DOC,
+    reviewsDocumentUrl: REVIEWS_DOC,
+    createdAt: "",
+    formatVersion: 3,
+    direction: "front-to-back",
+    authors: [],
+  };
+  const other = { ...deck, id: "deck-2", url: `${CATALOG}#deck-2` };
+  const GROUP = `${CATALOG}#group-1`;
+
+  /** A catalog document of two decks, the first in a group with a position, the group listed by the catalogue. */
+  function arranged() {
+    let dataset = withCatalog(withDeck(withDeck(mockSolidDatasetFrom(CATALOG), deck), other), CATALOG, catalog);
+    dataset = setThing(
+      dataset,
+      buildThing(createThing({ url: GROUP }))
+        .addIri(RDF.type, SM.DeckGroup)
+        .addIri(DCAT.dataset, deck.url)
+        .addIri(DCAT.dataset, other.url)
+        .build(),
+    );
+    dataset = setThing(dataset, buildThing(getThing(dataset, deck.url)!).addInteger(SM.position, 3).build());
+    return setThing(dataset, buildThing(getThing(dataset, `${CATALOG}#catalog`)!).addIri(DCAT.catalog, GROUP).build());
+  }
+
+  it("survive a deck's rewrite (rename, switch, upgrade) and the catalogue's", () => {
+    let dataset = withDeck(arranged(), { ...deck, title: { en: "Renamed" }, formatVersion: 6 });
+    dataset = withCatalog(dataset, CATALOG, { ...catalog, title: "Renamed" });
+    expect(getInteger(getThing(dataset, deck.url)!, SM.position)).toBe(3);
+    expect(getUrlAll(getThing(dataset, `${CATALOG}#catalog`)!, DCAT.catalog)).toEqual([GROUP]);
+  });
+
+  it("lose a removed deck from every group that listed it, the rest left as they are", () => {
+    const dataset = withoutDeck(arranged(), deck);
+    expect(getUrlAll(getThing(dataset, GROUP)!, DCAT.dataset)).toEqual([other.url]);
+    expect(getUrlAll(getThing(dataset, `${CATALOG}#catalog`)!, DCAT.catalog)).toEqual([GROUP]);
+    // A group that did not list it is not touched.
+    expect(withoutDeck(dataset, deck)).toEqual(dataset);
   });
 });

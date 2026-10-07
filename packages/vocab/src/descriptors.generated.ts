@@ -16,6 +16,7 @@ import type {
   DeckV4,
   DeckV5,
   DeckV6,
+  DeckGroupV1,
   DeckScheduleV1,
   DistributionV1,
   DocumentReceiptV1,
@@ -350,6 +351,25 @@ export const DECK_V6: ShapeDescriptor<DeckV6> = {
     { name: "source", predicate: "http://www.w3.org/ns/prov#wasDerivedFrom", kind: "iri", cardinality: "optional" },
     { name: "newCardsPerDay", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#deckNewCardsPerDay", kind: "integer", cardinality: "optional" },
     { name: "maxReviewsPerDay", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#deckMaxReviewsPerDay", kind: "integer", cardinality: "optional" },
+  ],
+};
+
+export const DECK_GROUP_V1: ShapeDescriptor<DeckGroupV1> = {
+  shape: "deckGroup",
+  version: 1,
+  targetClass: "https://solid-memo.com/ns/vocab/v1.ttl#DeckGroup",
+  additionalTypes: ["http://www.w3.org/ns/dcat#Catalog"],
+  absent: [],
+  shapeIri: "https://solid-memo.com/ns/shapes/deck-group/v1.ttl#inPod",
+  shapeDocument: "deck-group/v1.ttl",
+  context: "pod",
+  fields: [
+    { name: "title", predicate: "http://purl.org/dc/terms/title", kind: "text", cardinality: "one" },
+    { name: "description", predicate: "http://purl.org/dc/terms/description", kind: "text", cardinality: "one" },
+    { name: "publisher", predicate: "http://purl.org/dc/terms/publisher", kind: "iri", cardinality: "one" },
+    { name: "dataset", predicate: "http://www.w3.org/ns/dcat#dataset", kind: "iri", cardinality: "many" },
+    { name: "catalog", predicate: "http://www.w3.org/ns/dcat#catalog", kind: "iri", cardinality: "many" },
+    { name: "position", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#position", kind: "integer", cardinality: "optional" },
   ],
 };
 
@@ -777,6 +797,7 @@ export const SHAPES = {
   card: { 1: CARD_V1, 2: CARD_V2, 3: CARD_V3, 4: CARD_V4, 5: CARD_V5 },
   catalog: { 1: CATALOG_V1 },
   deck: { 1: DECK_V1, 2: DECK_V2, 3: DECK_V3, 4: DECK_V4, 5: DECK_V5, 6: DECK_V6 },
+  deckGroup: { 1: DECK_GROUP_V1 },
   deckSchedule: { 1: DECK_SCHEDULE_V1 },
   distribution: { 1: DISTRIBUTION_V1 },
   documentReceipt: { 1: DOCUMENT_RECEIPT_V1 },
@@ -803,6 +824,7 @@ export const ALL_SHAPES: readonly ShapeDescriptor[] = [
   DECK_V4,
   DECK_V5,
   DECK_V6,
+  DECK_GROUP_V1,
   DECK_SCHEDULE_V1,
   DISTRIBUTION_V1,
   DOCUMENT_RECEIPT_V1,

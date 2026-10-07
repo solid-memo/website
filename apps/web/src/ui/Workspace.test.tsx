@@ -251,6 +251,16 @@ describe("Workspace", () => {
     expect(screen.getByRole("link", { name: "Open in your Pod (opens in a new tab)" })).toHaveAttribute("href", instanceA.url);
   });
 
+  it("reads the home screen's decks once, for the list and its counts", async () => {
+    const useCases = makeUseCases({ listInstances: vi.fn(async () => [instanceA]) });
+    renderWorkspace(useCases);
+    await screen.findByRole("heading", { name: "Decks" });
+    await waitFor(() => {
+      expect(useCases.listDeckTree).toHaveBeenCalledOnce();
+    });
+    expect(useCases.listDecks).toHaveBeenCalledOnce();
+  });
+
   it("offers the instance picker with several instances, then opens one", async () => {
     renderWorkspace(
       makeUseCases({
@@ -578,15 +588,17 @@ describe("Workspace", () => {
       formatVersion: 1,
       authors: [],
     };
-    const listDecks = vi
-      .fn<() => Promise<Deck[]>>()
-      .mockResolvedValueOnce([])
-      .mockResolvedValue([deck]);
+    // None until it is added: the deck list and its arrangement each read them.
+    let added = false;
+    const listDecks = vi.fn(async (): Promise<Deck[]> => (added ? [deck] : []));
     renderWorkspace(
       makeUseCases({
         listInstances: vi.fn(async () => [instanceA]),
         listDecks,
-        createDeck: vi.fn(async () => deck),
+        createDeck: vi.fn(async () => {
+          added = true;
+          return deck;
+        }),
       }),
     );
 
@@ -627,10 +639,9 @@ describe("Workspace", () => {
       authors: [],
       sourceUrl: "https://solid-memo.com/decks/capitals/v1.ttl",
     };
-    const listDecks = vi
-      .fn<() => Promise<Deck[]>>()
-      .mockResolvedValueOnce([])
-      .mockResolvedValue([deck]);
+    // None until it is added: the deck list and its arrangement each read them.
+    let added = false;
+    const listDecks = vi.fn(async (): Promise<Deck[]> => (added ? [deck] : []));
     renderWorkspace(
       makeUseCases({
         listInstances: vi.fn(async () => [instanceA]),
@@ -646,7 +657,10 @@ describe("Workspace", () => {
             sources: [],
           },
         ]),
-        importLibraryDeck: vi.fn(async () => deck),
+        importLibraryDeck: vi.fn(async () => {
+          added = true;
+          return deck;
+        }),
       }),
     );
 
@@ -685,10 +699,9 @@ describe("Workspace", () => {
       authors: [],
       sourceUrl: libraryUrl,
     };
-    const listDecks = vi
-      .fn<() => Promise<Deck[]>>()
-      .mockResolvedValueOnce([])
-      .mockResolvedValue([deck]);
+    // None until it is added: the deck list and its arrangement each read them.
+    let added = false;
+    const listDecks = vi.fn(async (): Promise<Deck[]> => (added ? [deck] : []));
     renderWorkspace(
       makeUseCases({
         listInstances: vi.fn(async () => [instanceA]),
@@ -705,7 +718,10 @@ describe("Workspace", () => {
             sources: [],
           },
         ]),
-        importLibraryDeck: vi.fn(async () => deck),
+        importLibraryDeck: vi.fn(async () => {
+          added = true;
+          return deck;
+        }),
       }),
     );
 

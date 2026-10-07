@@ -84,6 +84,11 @@ deck has keywords in English and Swedish); older releases stay frozen
 with untagged keywords, and an import of one writes them untagged into
 the format-6 copy.
 
+[Deck groups](data-model.md#deck-groups) (deck group format 1) need no
+migration: groups are new subjects, and a deck's `sm:position` and the
+catalogue's `dcat:catalog` belong to no shape, so the deck and catalogue
+formats are unchanged.
+
 Rules that hold across versions:
 
 - **Readers never refuse older data.** A subject is read with the shape
