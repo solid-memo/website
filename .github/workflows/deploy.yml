@@ -9,6 +9,8 @@ on:
 
 permissions:
   contents: read
+  # To download the user journeys' report from the CI run.
+  actions: read
   pages: write
   id-token: write
 
@@ -32,6 +34,16 @@ jobs:
       - run: npm run build
       # The artifact is the whole site: the app, and beside it what Vite
       # copies from ns/, decks/ and the vendored shapes (docs/deployment.md).
+      # The user journeys' report of the CI run deployed from, its traces
+      # viewable step by step, at /journeys/ (docs/deployment.md). A run by
+      # hand has no CI run, so no report.
+      - if: github.event_name == 'workflow_run'
+        uses: actions/download-artifact@v8
+        with:
+          name: journeys-report
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+          path: apps/web/dist/journeys
       - name: The vocabulary and the deck library are in the artifact
         run: test -f apps/web/dist/ns/vocab/v1.ttl && test -f apps/web/dist/decks/index.ttl
       - uses: actions/configure-pages@v6

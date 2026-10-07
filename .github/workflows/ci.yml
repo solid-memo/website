@@ -119,12 +119,14 @@ jobs:
   # harness starts in Docker, each journey with an account and pod of its
   # own. When one fails, the job's summary names the step it failed in, and
   # its artifact holds the trace to replay it step by step (`npx playwright
-  # show-trace`), the report, a video, and the server's log.
+  # show-trace`), the report, a video, and the server's log. On main the
+  # traces are kept always: the deploy publishes the report, trace viewer
+  # and all, at /journeys/ (docs/deployment.md).
   journeys:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
-      JOURNEY_TRACE: ${{ inputs.trace && 'on' || '' }}
+      JOURNEY_TRACE: ${{ (inputs.trace || github.ref == 'refs/heads/main') && 'on' || '' }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -161,4 +163,10 @@ jobs:
             e2e/journeys/playwright-report/
             e2e/journeys/test-results/
             e2e/journeys/logs/
+          retention-days: 7
+      - if: always() && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v7
+        with:
+          name: journeys-report
+          path: e2e/journeys/playwright-report/
           retention-days: 7

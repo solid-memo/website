@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /journeys/
 
 Sitemap: https://solid-memo.com/sitemap.xml
