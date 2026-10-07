@@ -142,23 +142,13 @@ export function ChevronIcon() {
   );
 }
 
-/** A pencil: rename. */
-export function PencilIcon() {
+/** Three dots, one above another: a menu of what can be done with a thing. */
+export function MoreIcon() {
   return (
     <Icon>
-      <path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z" />
-      <path d="m13.5 6.5 4 4" />
-    </Icon>
-  );
-}
-
-/** Arrows up and down: move to another place in a list. */
-export function MoveIcon() {
-  return (
-    <Icon>
-      <path d="M12 3v18" />
-      <path d="m8 7 4-4 4 4" />
-      <path d="m8 17 4 4 4-4" />
+      <circle cx="12" cy="5" r="1" />
+      <circle cx="12" cy="12" r="1" />
+      <circle cx="12" cy="19" r="1" />
     </Icon>
   );
 }

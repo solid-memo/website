@@ -87,29 +87,64 @@ describe("focus styles", () => {
   });
 
   it.each([
-    ["a deck's Move button", `<ul class="deck-list"><li class="deck-row"><button class="row-move icon">x</button></li></ul>`, "button"],
+    ["a deck's menu button", `<ul class="deck-list"><li class="deck-row"><button class="icon row-menu">x</button></li></ul>`, "button"],
     ["a group's fold button", `<div class="deck-group-header"><button class="group-toggle">x</button></div>`, "button"],
-    ["a group's actions", `<div class="deck-group-header"><span class="group-actions"><button class="danger icon">x</button></span></div>`, "button"],
+    ["a group's menu button", `<div class="deck-group-header"><button class="icon row-menu">x</button></div>`, "button"],
+    ["a menu's item", `<div class="actions-menu" role="menu"><button role="menuitem">x</button></div>`, "button"],
+    ["a menu's link", `<div class="actions-menu" role="menu"><a role="menuitem" href="#/">x</a></div>`, "a"],
   ])("rings %s in the primary colour", (_, html, selector) => {
     const style = focused(html, selector);
     expect(style.outlineStyle).toBe("solid");
     expect(style.outlineColor).toBe("#2c6b3d");
   });
 
-  it("shows a deck's Move button, hidden until a pointer is over its row, while focused or open", () => {
-    document.body.innerHTML = `<ul class="deck-list"><li class="deck-row"><a href="#/">x</a><button class="row-move icon">x</button></li></ul>`;
-    const hidden = [...document.styleSheets]
+  it("always shows a deck's menu button, the pointer over its row or not", () => {
+    document.body.innerHTML = `<ul class="deck-list"><li class="deck-row"><a href="#/">x</a><button class="icon row-menu">x</button></li></ul>`;
+    const button = document.querySelector("button")!;
+    expect(getComputedStyle(button).opacity).not.toBe("0");
+    const hovering = [...document.styleSheets]
       .flatMap((sheet) => [...sheet.cssRules])
       .filter((rule): rule is CSSMediaRule => rule instanceof CSSMediaRule && rule.conditionText === "(hover: hover)")
       .flatMap((rule) => [...rule.cssRules])
-      .find((rule): rule is CSSStyleRule => rule instanceof CSSStyleRule && rule.selectorText.includes(".row-move"))!;
-    expect(hidden.style.getPropertyValue("opacity")).toBe("0");
-    // The test DOM matches no :focus-within, so the rule is read for it.
-    expect(hidden.selectorText).toContain(":not(:hover, :focus-within)");
-    const button = document.querySelector("button")!;
-    expect(button.matches(hidden.selectorText)).toBe(true);
-    button.setAttribute("aria-expanded", "true");
-    expect(button.matches(hidden.selectorText)).toBe(false);
+      .filter((rule): rule is CSSStyleRule => rule instanceof CSSStyleRule && rule.selectorText.includes("row-menu"));
+    expect(hovering).toEqual([]);
+  });
+
+  it("mutes a menu's item that cannot be done now, unhighlighted when focused, but not faded under its ring", () => {
+    const style = focused(
+      `<div class="actions-menu" role="menu"><button role="menuitem" aria-disabled="true">x</button></div>`,
+      "button",
+    );
+    const item = document.querySelector("button")!;
+    expect(style.color).toBe("#545c68");
+    expect(lastMatching(item, "opacity")).toBe("1");
+    expect(lastMatching(item, "background")).not.toContain("--surface-hover");
+    expect(lastMatching(item, "outline-color")).toBe("var(--primary)");
+    item.removeAttribute("aria-disabled");
+    expect(lastMatching(item, "background")).toBe("var(--surface-hover)");
+    expect(getComputedStyle(item).color).not.toBe("#545c68");
+  });
+
+  it("gives a menu's link no link highlight under the pointer, as a link elsewhere has", () => {
+    /** The box shadows the rules for `element` under the pointer give it. */
+    const hovered = (element: Element) =>
+      [...document.styleSheets]
+        .flatMap((sheet) => [...sheet.cssRules])
+        .filter((rule): rule is CSSStyleRule => rule instanceof CSSStyleRule && rule.selectorText.includes(":hover"))
+        .filter((rule) => element.matches(rule.selectorText.replaceAll(":hover", "")))
+        .map((rule) => rule.style.getPropertyValue("box-shadow"))
+        .filter((shadow) => shadow !== "");
+    document.body.innerHTML = `
+      <p><a href="#/">x</a></p>
+      <div class="actions-menu" role="menu"><a role="menuitem" href="#/">p</a></div>`;
+    const [link, item] = document.querySelectorAll("a");
+    expect(hovered(link)).not.toEqual([]);
+    expect(hovered(item)).toEqual([]);
+  });
+
+  it("rings a menu's item inside it, clear of its clipping", () => {
+    const style = focused(`<div class="actions-menu" role="menu"><button role="menuitem">x</button></div>`, "button");
+    expect(style.outlineOffset).toBe("-2px");
   });
 
   it("draws a card table link's ring inside its cell, clear of the table's clipping", () => {
@@ -281,32 +316,47 @@ describe("target size", () => {
     expect(stretch.style.getPropertyValue("z-index")).toBe("");
   });
 
-  it("gives a deck's Move button a 44px target above the row's link", () => {
+  it("gives a deck's menu button a 44px target above the row's link, last in the row", () => {
     document.body.innerHTML = `
       <ul class="deck-list"><li class="deck-row">
         <a class="deck-open" href="#/">x</a>
-        <button class="row-move icon">m</button>
+        <button class="icon row-menu">m</button>
       </li></ul>`;
-    const move = getComputedStyle(document.querySelector(".row-move")!);
-    expect(parseFloat(move.minWidth)).toBeGreaterThanOrEqual(44);
-    expect(parseFloat(move.minHeight)).toBeGreaterThanOrEqual(44);
-    expect(move.position).toBe("relative");
-    expect(Number(move.zIndex)).toBeGreaterThan(0);
-    expect(move.gridColumn).toBe("3");
+    const menu = getComputedStyle(document.querySelector(".row-menu")!);
+    expect(parseFloat(menu.minWidth)).toBeGreaterThanOrEqual(44);
+    expect(parseFloat(menu.minHeight)).toBeGreaterThanOrEqual(44);
+    expect(menu.position).toBe("relative");
+    expect(Number(menu.zIndex)).toBeGreaterThan(0);
+    expect(menu.gridColumn).toBe("3");
   });
 
-  it("puts a row's moves above the row's link", () => {
-    document.body.innerHTML = `<ul class="deck-list"><li class="deck-row"><div class="move-panel"></div></li></ul>`;
-    const panel = getComputedStyle(document.querySelector(".move-panel")!);
-    expect(panel.position).toBe("relative");
-    expect(Number(panel.zIndex)).toBeGreaterThan(0);
-  });
-
-  it.each(["", "danger "])("gives a group's %sactions 44px targets", (kind) => {
-    document.body.innerHTML = `<div class="deck-group-header"><span class="group-actions"><button class="${kind}icon">x</button></span></div>`;
+  it("gives a group's menu button a 44px target, right-aligned", () => {
+    document.body.innerHTML = `<div class="deck-group-header"><button class="icon row-menu">x</button></div>`;
     const button = getComputedStyle(document.querySelector("button")!);
     expect(parseFloat(button.minWidth)).toBeGreaterThanOrEqual(44);
     expect(parseFloat(button.minHeight)).toBeGreaterThanOrEqual(44);
+    expect(button.marginInlineStart).toBe("auto");
+  });
+
+  it("lays a row's menu over the page, within the viewport, its items 44px tall and not to select", () => {
+    document.body.innerHTML = `
+      <div class="actions-menu" role="menu">
+        <a role="menuitem" href="#/">p</a>
+        <button role="menuitem">r</button>
+        <button role="menuitem" class="danger">d</button>
+      </div>`;
+    const menu = getComputedStyle(document.querySelector(".actions-menu")!);
+    expect(menu.position).toBe("fixed");
+    expect(Number(menu.zIndex)).toBeGreaterThan(1);
+    // Its size is capped by the script, by the viewport as shown (ActionsMenu.tsx).
+    expect(menu.overflowY).toBe("auto");
+    expect(menu.backgroundColor).toBe("#ffffff");
+    for (const item of document.querySelectorAll("[role=menuitem]")) {
+      const style = getComputedStyle(item);
+      expect(parseFloat(style.minHeight)).toBeGreaterThanOrEqual(44);
+      expect(style.userSelect).toBe("none");
+    }
+    expect(getComputedStyle(document.querySelector(".danger")!).color).toBe("#c42d18");
   });
 
   it("gives a group's fold button a 44px target", () => {
@@ -338,10 +388,19 @@ describe("dragging the deck list", () => {
     expect(getComputedStyle(document.querySelector("input")!).fontSize).toBe("16px");
   });
 
-  it("lets a group's name be typed into, though its header cannot be selected", () => {
-    document.body.innerHTML = `<div class="deck-group-header"><form class="group-name-form"><input></form></div>`;
-    expect(lastMatching(document.querySelector(".deck-group-header")!, "user-select")).toBe("none");
+  it.each([
+    ["a group's", `<div class="deck-group-header"><form class="name-form"><input></form></div>`, ".deck-group-header"],
+    ["a deck's", `<ul class="deck-list"><li class="deck-row"><form class="name-form"><input></form></li></ul>`, ".deck-row"],
+  ])("lets %s name be typed into, though its row cannot be selected", (_, html, selector) => {
+    document.body.innerHTML = html;
+    expect(lastMatching(document.querySelector(selector)!, "user-select")).toBe("none");
     expect(lastMatching(document.querySelector("input")!, "user-select")).toBe("text");
+  });
+
+  it("puts a deck's name field where its name was", () => {
+    document.body.innerHTML = `<ul class="deck-list"><li class="deck-row"><form class="name-form"><input></form></li></ul>`;
+    const form = getComputedStyle(document.querySelector("form")!);
+    expect([form.gridColumn, form.gridRow]).toEqual(["1", "1"]);
   });
 
   it("keeps the new-group highlight of a row in a group inside the group's clip", () => {

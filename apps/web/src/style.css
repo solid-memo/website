@@ -399,15 +399,16 @@ a:hover {
 }
 
 /* A link laid over its whole row (a deck's name) marks the row, not
-   itself, so it takes no highlight of its own. */
-a:not(.button, .brand, .wordmark, .deck-open, .library-deck-name) {
+   itself, so it takes no highlight of its own; nor does a menu's, which
+   shows as its items do. */
+a:not(.button, .brand, .wordmark, .deck-open, .library-deck-name, [role="menuitem"]) {
   border-radius: 0.35em;
   transition:
     background-color 0.12s ease,
     box-shadow 0.12s ease;
 }
 
-a:not(.button, .brand, .wordmark, .deck-open, .library-deck-name):hover {
+a:not(.button, .brand, .wordmark, .deck-open, .library-deck-name, [role="menuitem"]):hover {
   background-color: var(--link-hover-bg);
   box-shadow:
     0 0 0 0.22em var(--link-hover-bg),
@@ -1253,7 +1254,7 @@ dl.facts .sources {
 }
 
 /* Three columns: the name with what is due below it, then the study
-   action and the Move button beside both, so the name wraps before
+   action and the menu button beside both, so the name wraps before
    them. The action's parts are laid out by the row itself. */
 .deck-list .deck-meta {
   display: contents;
@@ -1286,60 +1287,126 @@ dl.facts .sources {
   z-index: 1;
 }
 
-/* Above the row's link, like the study button, so a press moves the
-   deck rather than opening it; a 44px target, its icon centred. */
-.deck-list .row-move {
+/* Above the row's link, like the study button, so a press opens the
+   deck's menu rather than the deck; a 44px target, its icon centred.
+   It always shows, on every row, so what a deck offers is never
+   hidden behind a hover. */
+.deck-list .row-menu {
   grid-column: 3;
   grid-row: 1 / span 2;
   position: relative;
   z-index: 1;
 }
 
-.deck-list .row-move,
-.group-actions button {
+.row-menu {
   min-width: 2.75rem;
   min-height: 2.75rem;
   padding: 0.5rem;
 }
 
-.deck-list .row-move svg.icon,
-.group-actions svg.icon {
+.row-menu svg.icon {
   margin: 0;
 }
 
-/* Where a pointer can hover, a deck's Move button shows on the row it
-   points at (or one focused), so the list stays calm; on touch, and
-   while its moves are open, it always shows. */
-@media (hover: hover) {
-  .deck-list>li.deck-row:not(:hover, :focus-within)>.row-move:not([aria-expanded="true"]) {
-    opacity: 0;
-  }
-}
-
-/* A row's moves open under it, across its width, above its link. */
-.move-panel {
-  grid-column: 1 / -1;
-  flex-basis: 100%;
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.5rem 0 0.15rem;
-}
-
-.move-into {
-  flex-basis: 100%;
+/* A row's actions (ui/ActionsMenu.tsx), laid over the page, fixed where
+   the script places it under or above its button: no group's clip cuts
+   it off, and it never runs past the viewport (the script caps its size
+   too, by the viewport as shown), scrolling within itself when the
+   viewport is too short for it. */
+.actions-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 50;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 0.35rem;
+  min-width: 12rem;
+  overflow-y: auto;
+  padding: 0.3rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  animation: fade-in 0.12s ease;
 }
 
-.move-into button {
-  margin-inline-start: calc(var(--depth, 0) * 1rem);
+/* An item: a row the menu's width, 44px tall, its text not to select
+   (a link's neither). */
+.actions-menu [role="menuitem"] {
+  justify-content: flex-start;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem;
+  padding-inline-start: calc(0.75rem + var(--depth, 0) * 1rem);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  box-shadow: none;
+  color: var(--text);
+  font-weight: 500;
+  text-align: start;
+  text-decoration: none;
   overflow-wrap: anywhere;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+a[role="menuitem"] {
+  display: flex;
+  align-items: center;
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+.actions-menu [role="menuitem"]:hover:not([aria-disabled="true"]),
+.actions-menu [role="menuitem"]:focus {
+  background: var(--surface-hover);
+  transform: none;
+}
+
+/* Ringed inside, clear of the menu's own clipping. */
+.actions-menu [role="menuitem"]:focus-visible {
+  outline-offset: -2px;
+}
+
+.actions-menu [role="menuitem"].danger {
+  color: var(--danger);
+}
+
+.actions-menu [role="menuitem"].danger:hover:not([aria-disabled="true"]),
+.actions-menu [role="menuitem"].danger:focus {
+  background: var(--danger-soft);
+}
+
+/* One that cannot be done now: muted, never highlighted, in full
+   opacity all the same, so that its focus ring shows at full strength
+   (the fade of a busy button is undone as it is focused). */
+.actions-menu [role="menuitem"][aria-disabled="true"] {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+.actions-menu [role="menuitem"][aria-disabled="true"]:focus {
+  background: none;
+}
+
+.menu-separator {
+  flex: none;
+  height: 1px;
+  margin: 0.3rem 0.25rem;
+  background: var(--border);
+}
+
+.menu-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-heading {
+  padding: 0.3rem 0.75rem 0.15rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 /* A group: its header, then what it holds, a level in. Not a row
@@ -1402,14 +1469,14 @@ dl.facts .sources {
   font-weight: 400;
 }
 
-/* Right-aligned beside the name, Delete last. */
-.group-actions {
+/* Right-aligned beside the name. */
+.deck-group-header .row-menu {
   margin-inline-start: auto;
-  display: flex;
-  gap: 0.25rem;
 }
 
-.group-name-form {
+/* A name edited in place (ui/NameEditor.tsx): a group's, in place of
+   its fold button, or a deck's, in place of its link. */
+.name-form {
   flex: 1 1 12rem;
   flex-direction: row;
   align-items: center;
@@ -1417,7 +1484,7 @@ dl.facts .sources {
   margin: 0;
 }
 
-.group-name-form input {
+.name-form input {
   flex: 1;
   min-width: 0;
   margin: 0;
@@ -1425,7 +1492,7 @@ dl.facts .sources {
   user-select: text;
 }
 
-.group-name-form button[type="submit"] {
+.name-form button[type="submit"] {
   flex: none;
   align-self: center;
   margin: 0;
@@ -1462,6 +1529,11 @@ dl.facts .sources {
   margin-inline-start: calc(1.25rem * clamp(0, 5 - var(--depth, 1), 1));
   padding-inline-start: 0.5rem;
   border-inline-start: 2px solid var(--border);
+}
+
+.deck-list .name-form {
+  grid-column: 1;
+  grid-row: 1;
 }
 
 .deck-group-empty {

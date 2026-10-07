@@ -11,7 +11,8 @@ import {
   type DeckTreeEdit,
   type TreeNode,
 } from "@solid-memo/domain/deckTree";
-import type { LangText } from "@solid-memo/domain/langText";
+import { shownTag, type LangText } from "@solid-memo/domain/langText";
+import { ActionsMenu, MenuItem, MenuLink, MenuSeparator } from "./ActionsMenu";
 import { DeckRow, type RowDrag } from "./DeckRow";
 import type { DropTarget } from "./deckTree/dragMachine";
 import type { GapLabel } from "./deckTree/dropZones";
@@ -23,7 +24,7 @@ import { GroupHeader } from "./GroupHeader";
 import { CollectionIcon, DeckIcon, FolderIcon, LibraryIcon } from "./icons";
 import { useI18n, type ErrorText } from "./i18n";
 import { reducedMotion } from "./motion";
-import { MovePanel } from "./MovePanel";
+import { MoveItems } from "./MoveItems";
 import { ReaderText } from "./ReaderText";
 
 type GroupNode = Extract<TreeNode, { kind: "group" }>;
@@ -32,7 +33,7 @@ type GroupNode = Extract<TreeNode, { kind: "group" }>;
 export const LEAVE_FALLBACK_MS = 300;
 
 /**
- * Where focus goes once the list shows an edit: a row's Move button, a
+ * Where focus goes once the list shows an edit: a row's menu button, a
  * group's fold button, or (`key` null) the heading. An edit can remount
  * the row it moves, more than once (shown at once, then as written, or
  * taken back), which drops focus to the page: so focus is put back each
@@ -41,19 +42,23 @@ export const LEAVE_FALLBACK_MS = 300;
  */
 interface FocusRequest {
   key: string | null;
-  part: "move" | "toggle";
+  part: "menu" | "toggle";
   met: boolean;
 }
 
 /**
  * Decks to open or study, as the user arranged them into groups (see
- * domain/deckTree.ts): a group folds open and shut, and is renamed,
- * moved and deleted from its header; each deck and group has a Move
- * button with the moves it can make, a new group among them, and is
- * dragged to a new place (deckTree/useDragReorder.ts): between rows,
- * into a group by its header, or onto another deck or group to make a
- * new group of the two. Deleting a group keeps what it holds. Decks are
- * renamed and removed in the Browser.
+ * domain/deckTree.ts): a group folds open and shut. Each deck and
+ * group has, last in its row, a menu of what can be done with it
+ * (ActionsMenu): a deck's preferences, renaming it in place, the moves
+ * it can make (MoveItems), a new group among them, and deleting it,
+ * last. A deck or group is also dragged to a new place
+ * (deckTree/useDragReorder.ts): between rows, into a group by its
+ * header, or onto another deck or group to make a new group of the two.
+ * Deleting a group keeps what it holds; deleting a deck, once the user
+ * confirms, takes its cards with it. A list arranged by a newer version
+ * cannot be rearranged, nor its groups renamed or deleted, but its
+ * decks can still be renamed and deleted: that is the deck's own data.
  *
  * While a row is dragged the list stays as it was when it was lifted,
  * whatever comes in meanwhile, so that what the user aims at stays put;
@@ -72,9 +77,12 @@ export function DeckListScreen({
   onUnfold,
   onEdit,
   newGroup,
+  onRenameDeck,
+  onRemoveDeck,
   error,
   libraryHref,
   deckHref,
+  preferencesHref,
   renderStudyAction,
   createDeckHref,
 }: {
@@ -91,12 +99,18 @@ export function DeckListScreen({
   onEdit: (edit: DeckTreeEdit) => Promise<boolean>;
   /** A new group's URL and name, for a combine (UseCases.newDeckGroup). */
   newGroup: (title: LangText) => DeckGroup;
+  /** Renames the deck, which the list shows at once (the container says why it failed, through `error`). */
+  onRenameDeck: (deck: Deck, title: LangText) => void;
+  /** Removes the deck and its cards; resolves to whether it did (the container says why not, through `error`). */
+  onRemoveDeck: (deck: Deck) => Promise<boolean>;
   /** Why the last edit was not made. */
   error: ErrorText | null;
   /** URL of the deck library, where ready-made decks are imported from. */
   libraryHref: string;
   /** URL of a deck's page; wherever the UI names a deck, it links there. */
   deckHref: (deck: Deck) => string;
+  /** URL of a deck's preferences. */
+  preferencesHref: (deck: Deck) => string;
   /**
    * What the row offers for the deck today (Study, or nothing). Supplied
    * by the container: it depends on each deck's queue.
@@ -106,11 +120,16 @@ export function DeckListScreen({
   createDeckHref: string;
 }) {
   const { t, locale, readerText } = useI18n();
-  /** The group whose name field is open. */
+  /** The deck or group whose name field is open. */
   const [naming, setNaming] = useState<string | null>(null);
-  /** The deck or group whose moves are open. */
-  const [moving, setMoving] = useState<string | null>(null);
+  /** The deck or group whose actions menu is open. */
+  const [menu, setMenu] = useState<string | null>(null);
   const [announcement, setAnnouncement] = useState("");
+  /** The decks being removed, by URL: until they are gone or stay, nothing more is done with them. */
+  const [removing, setRemoving] = useState<ReadonlySet<string>>(new Set());
+  /** The tree as last shown, for what is done once a removal is through. */
+  const latest = useRef(tree);
+  latest.current = tree;
   /** The groups deleted, whose headers fold away (until the list no longer shows them). */
   const [leaving, setLeaving] = useState<ReadonlySet<string>>(new Set());
   /** What each deleted group does once its header has folded away, by URL. */
@@ -137,7 +156,7 @@ export function DeckListScreen({
   useLayoutEffect(() => {
     const request = focusRequest.current;
     if (request === null) return;
-    const control = request.part === "move" ? ".row-move" : ".group-toggle";
+    const control = request.part === "menu" ? ".row-menu" : ".group-toggle";
     const target =
       request.key === null
         ? headingRef.current!
@@ -145,7 +164,11 @@ export function DeckListScreen({
             (element) => element.closest<HTMLElement>("[data-row-key]")!.dataset.rowKey === request.key,
           );
     // Not there (yet): a row that is gone takes no focus.
-    if (target === undefined || document.activeElement === target) return;
+    if (target === undefined) return;
+    if (document.activeElement === target) {
+      request.met = true;
+      return;
+    }
     if (request.met && document.activeElement !== document.body) {
       focusRequest.current = null;
       return;
@@ -176,7 +199,7 @@ export function DeckListScreen({
 
   /**
    * `from`: dropped there by a pointer, which leaves focus where it is;
-   * a keyboard move puts it back on the node's Move button.
+   * a keyboard move puts it back on the node's menu button.
    */
   function move(node: TreeNode, to: DeckTreeEdit & { kind: "move" }, from?: DOMRect) {
     const next = applyDeckTreeEdit(tree, to);
@@ -188,8 +211,7 @@ export function DeckListScreen({
       if (collapsed.has(up)) shut.push(up);
     }
     if (shut.length > 0) onUnfold(shut);
-    setMoving(null);
-    if (from === undefined) focusLater(nodeId(node), "move");
+    if (from === undefined) focusLater(nodeId(node), "menu");
     void edit(
       to,
       t("deckList.moved", {
@@ -209,7 +231,6 @@ export function DeckListScreen({
     group = newGroup({ [locale]: t("deckList.newGroupName") }),
     from?: DOMRect,
   ) {
-    setMoving(null);
     setNaming(group.url);
     void edit(
       { kind: "combine", dragged: nodeId(dragged), target: nodeId(target), group },
@@ -219,7 +240,7 @@ export function DeckListScreen({
       if (written) return;
       // The group is not there to name: back to where the user was.
       setNaming((current) => (current === group.url ? null : current));
-      focusLater(nodeId(target), "move");
+      focusLater(nodeId(target), "menu");
     });
   }
 
@@ -244,9 +265,8 @@ export function DeckListScreen({
     if (!window.confirm(question)) return;
     // Focus goes to what took the group's place, or to the group it was in.
     const first = node.children[0];
-    if (first !== undefined) focusLater(nodeId(first), "move");
+    if (first !== undefined) focusLater(nodeId(first), "menu");
     else focusLater(parent?.url ?? null, "toggle");
-    setMoving(null);
     const url = node.group.url;
     const removeGroup = () =>
       void edit(
@@ -263,6 +283,44 @@ export function DeckListScreen({
     afterLeaving.current.set(url, removeGroup);
     setLeaving((all) => new Set([...all, url]));
     setTimeout(() => left(url), LEAVE_FALLBACK_MS);
+  }
+
+  /**
+   * The deck's new name, in the language it is shown in, its other
+   * languages kept as they are.
+   */
+  function renamedDeck(deck: Deck, name: string | null, refocus: boolean) {
+    setNaming(null);
+    if (refocus) focusLater(deck.url, "menu");
+    if (name === null) return;
+    setAnnouncement(t("deckList.deckRenamed", { name }));
+    onRenameDeck(deck, { ...deck.title, [shownTag(deck.title, [locale, ...navigator.languages])!]: name });
+  }
+
+  /**
+   * Once it is gone, focus goes to what took its place, else to the one
+   * before it, else to the group it was in, else to the heading, of
+   * those still there; unless the user took it elsewhere meanwhile.
+   */
+  function removeDeck(deck: Deck) {
+    const name = readerText(deck.title);
+    if (!window.confirm(t("deckPreferences.removeConfirm", { title: name }))) return;
+    // The deck's menu button, the menu closed back on it.
+    const from = document.activeElement;
+    const at = locate(tree, deck.url)!;
+    const siblings = at.parent === null ? tree.children : (locate(tree, at.parent)!.node as GroupNode).children;
+    const near = [siblings[at.index + 1], siblings[at.index - 1]].filter((node) => node !== undefined);
+    setRemoving((all) => new Set([...all, deck.url]));
+    void onRemoveDeck(deck).then((removed) => {
+      setRemoving((all) => new Set([...all].filter((url) => url !== deck.url)));
+      if (!removed) return;
+      setAnnouncement(t("deckList.deckDeleted", { name }));
+      if (document.activeElement !== from && document.activeElement !== document.body) return;
+      const there = (key: string) => locate(latest.current, key) !== undefined;
+      const next = near.map(nodeId).find(there);
+      if (next !== undefined) focusLater(next, "menu");
+      else focusLater(at.parent !== null && there(at.parent) ? at.parent : null, "toggle");
+    });
   }
 
   /** The deleted group's header has folded away (or been given time enough to): the group goes. */
@@ -333,23 +391,44 @@ export function DeckListScreen({
     return into === key ? "into" : undefined;
   }
 
-  function movePanel(node: TreeNode) {
-    return (id: string) => (
-      <MovePanel
-        id={id}
-        tree={shown}
-        nodeKey={nodeId(node)}
-        onMove={(to) => move(node, { kind: "move", node: nodeId(node), to })}
-        onCombine={(dragged, target) => combine(locate(tree, dragged)!.node, locate(tree, target)!.node)}
-        onClose={() => {
-          setMoving(null);
-          focusLater(nodeId(node), "move");
-        }}
-      />
+  /** The menu of what can be done with the node, last in its row. */
+  function actionsMenu(node: TreeNode, parent: DeckGroup | null) {
+    const key = nodeId(node);
+    const busy = removing.has(key);
+    return (
+      <ActionsMenu
+        label={t("deckList.actions", { name: nameOf(node) })}
+        buttonClass="row-menu"
+        open={menu === key}
+        onOpen={() => setMenu(key)}
+        onClose={() => setMenu(null)}
+      >
+        {node.kind === "deck" && <MenuLink href={preferencesHref(node.deck)}>{t("deckList.preferences")}</MenuLink>}
+        {/* A group's name is the arrangement's, a deck's its own. */}
+        <MenuItem disabled={busy || (node.kind === "group" && tree.readOnly)} onSelect={() => setNaming(key)}>
+          {t("deckList.rename")}
+        </MenuItem>
+        <MenuSeparator />
+        <MoveItems
+          tree={shown}
+          nodeKey={key}
+          readOnly={tree.readOnly || busy}
+          onMove={(to) => move(node, { kind: "move", node: key, to })}
+          onCombine={(dragged, target) => combine(locate(tree, dragged)!.node, locate(tree, target)!.node)}
+        />
+        <MenuSeparator />
+        {node.kind === "deck" ? (
+          <MenuItem danger disabled={busy} onSelect={() => removeDeck(node.deck)}>
+            {t("deckList.deleteDeck")}
+          </MenuItem>
+        ) : (
+          <MenuItem danger disabled={tree.readOnly} onSelect={() => remove(node, parent)}>
+            {t("deckList.deleteGroup")}
+          </MenuItem>
+        )}
+      </ActionsMenu>
     );
   }
-
-  const toggleMoving = (key: string) => setMoving((current) => (current === key ? null : key));
 
   function renderNodes(nodes: readonly TreeNode[], parent: DeckGroup | null, depth: number) {
     return nodes.map((node) =>
@@ -361,10 +440,9 @@ export function DeckListScreen({
           drag={dragOf(node.deck.url)}
           href={deckHref(node.deck)}
           action={renderStudyAction(node.deck)}
-          moving={moving === node.deck.url}
-          readOnly={tree.readOnly}
-          onMoveToggle={() => toggleMoving(node.deck.url)}
-          movePanel={movePanel(node)}
+          naming={naming === node.deck.url}
+          onNamed={(name, refocus) => renamedDeck(node.deck, name, refocus)}
+          menu={actionsMenu(node, parent)}
         />
       ) : (
         <DeckGroupItem
@@ -385,17 +463,9 @@ export function DeckListScreen({
               expanded={expanded}
               bodyId={bodyId}
               naming={naming === node.group.url}
-              moving={moving === node.group.url}
-              readOnly={tree.readOnly}
               onToggle={() => onToggle(node.group.url)}
-              onRename={() => {
-                setMoving(null);
-                setNaming(node.group.url);
-              }}
               onNamed={(name, refocus) => named(node.group, name, refocus)}
-              onMoveToggle={() => toggleMoving(node.group.url)}
-              onDelete={() => remove(node, parent)}
-              movePanel={movePanel(node)}
+              menu={actionsMenu(node, parent)}
             />
           )}
         >

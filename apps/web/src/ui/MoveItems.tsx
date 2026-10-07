@@ -1,5 +1,4 @@
 import type { ComponentChildren } from "preact";
-import { useLayoutEffect, useRef } from "preact/hooks";
 import {
   locate,
   nodeId,
@@ -8,6 +7,7 @@ import {
   type DeckTree,
   type TreeNode,
 } from "@solid-memo/domain/deckTree";
+import { MenuGroup, MenuItem, MenuSeparator } from "./ActionsMenu";
 import { useI18n } from "./i18n";
 import { ReaderText } from "./ReaderText";
 
@@ -37,30 +37,28 @@ function destinations(nodes: readonly TreeNode[], key: string, parent: string | 
 
 /**
  * The keyboard's and screen reader's way to arrange the deck list, the
- * same moves a drag makes: up or down among its neighbours, out of its
- * group, into another group (at its end), or into a new group with the
- * neighbour above or below. A disclosure opened in place by a row's
- * Move button, not a menu: focus goes to its first move as it opens (a
- * group's Delete button comes between, in a header), Tab goes through
- * its buttons, Escape closes it. A move that the node's place rules out (up from the top) is
- * marked so and does nothing, rather than leaving the list of moves.
+ * same moves a drag makes, as items of a row's ActionsMenu: up or down
+ * among its neighbours, out of its group, into a new group with the
+ * neighbour above or below, or into another group (at its end), each
+ * group indented as deep as it is. A move that the node's place rules
+ * out (up from the top), or that the list cannot take (`readOnly`), is
+ * marked so and does nothing, rather than leaving the menu.
  */
-export function MovePanel({
-  id,
+export function MoveItems({
   tree,
   nodeKey,
+  readOnly,
   onMove,
   onCombine,
-  onClose,
 }: {
-  id: string;
   tree: DeckTree;
   /** The deck's or group's URL. */
   nodeKey: string;
+  /** The list cannot be rearranged here (DeckTree.readOnly), or the node is being removed. */
+  readOnly: boolean;
   onMove: (to: Anchor) => void;
   /** Puts `dragged` with `target` in a new group, at target's place. */
   onCombine: (dragged: string, target: string) => void;
-  onClose: () => void;
 }) {
   const { t, readerText } = useI18n();
   const at = locate(tree, nodeKey)!;
@@ -70,58 +68,45 @@ export function MovePanel({
   const above = siblings[at.index - 1];
   const below = siblings[at.index + 1];
   const into = destinations(tree.children, nodeKey, at.parent);
-  const panel = useRef<HTMLDivElement>(null);
-
-  useLayoutEffect(() => {
-    panel.current!.querySelector("button")!.focus();
-  }, []);
 
   function action(label: ComponentChildren, next: TreeNode | undefined, act: (next: TreeNode) => void) {
     return (
-      <button type="button" aria-disabled={next === undefined} onClick={() => next !== undefined && act(next)}>
+      <MenuItem disabled={readOnly || next === undefined} onSelect={() => act(next!)}>
         {label}
-      </button>
+      </MenuItem>
     );
   }
 
   return (
-    <div
-      ref={panel}
-      id={id}
-      class="move-panel"
-      data-no-drag
-      onKeyDown={(event) => {
-        if (event.key === "Escape") onClose();
-      }}
-    >
+    <>
       {action(t("deckList.moveUp"), above, () =>
         onMove({ parent: at.parent, after: at.index < 2 ? null : nodeId(siblings[at.index - 2]!) }),
       )}
       {action(t("deckList.moveDown"), below, (next) => onMove({ parent: at.parent, after: nodeId(next) }))}
       {holder !== null && (
-        <button type="button" onClick={() => onMove({ parent: holder.parent, after: at.parent })}>
+        <MenuItem disabled={readOnly} onSelect={() => onMove({ parent: holder.parent, after: at.parent })}>
           {t("deckList.moveOut", { group: readerText(holderGroup!.group.title) })}
-        </button>
+        </MenuItem>
       )}
       {action(t("deckList.groupWithPrevious"), above, (next) => onCombine(nodeKey, nodeId(next)))}
       {action(t("deckList.groupWithNext"), below, (next) => onCombine(nodeId(next), nodeKey))}
       {into.length > 0 && (
-        <div class="move-into" role="group" aria-labelledby={`${id}-into`}>
-          <span id={`${id}-into`} class="hint">
-            {t("deckList.moveInto")}
-          </span>
-          {into.map(({ group, depth, last }) => (
-            <button
-              key={group.url}
-              type="button"
-              style={`--depth: ${depth}`}
-              onClick={() => onMove({ parent: group.url, after: last })}
-            >
-              <ReaderText text={group.title} />
-            </button>
-          ))}
-        </div>
+        <>
+          <MenuSeparator />
+          <MenuGroup label={t("deckList.moveInto")}>
+            {into.map(({ group, depth, last }) => (
+              <MenuItem
+                key={group.url}
+                disabled={readOnly}
+                style={`--depth: ${depth}`}
+                onSelect={() => onMove({ parent: group.url, after: last })}
+              >
+                <ReaderText text={group.title} />
+              </MenuItem>
+            ))}
+          </MenuGroup>
+        </>
       )}
-    </div>
+    </>
   );
 }
