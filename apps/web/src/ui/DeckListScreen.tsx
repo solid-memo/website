@@ -50,9 +50,9 @@ interface FocusRequest {
  * Decks to open or study, as the user arranged them into groups (see
  * domain/deckTree.ts): a group folds open and shut. Each deck and
  * group has, last in its row, a menu of what can be done with it
- * (ActionsMenu): a deck's preferences, renaming it in place, the moves
- * it can make (MoveItems), a new group among them, and deleting it,
- * last. A deck or group is also dragged to a new place
+ * (ActionsMenu): going on with a deck's course, a deck's preferences,
+ * renaming it in place, the moves it can make (MoveItems), a new group
+ * among them, and deleting it, last. A deck or group is also dragged to a new place
  * (deckTree/useDragReorder.ts): between rows, into a group by its
  * header, or onto another deck or group to make a new group of the two.
  * Deleting a group keeps what it holds; deleting a deck, once the user
@@ -83,6 +83,7 @@ export function DeckListScreen({
   libraryHref,
   deckHref,
   preferencesHref,
+  courseHref = () => undefined,
   renderStudyAction,
   createDeckHref,
 }: {
@@ -111,6 +112,8 @@ export function DeckListScreen({
   deckHref: (deck: Deck) => string;
   /** URL of a deck's preferences. */
   preferencesHref: (deck: Deck) => string;
+  /** URL of the course a deck is the copy of; undefined for a deck that is none. */
+  courseHref?: (deck: Deck) => string | undefined;
   /**
    * What the row offers for the deck today (Study, or nothing). Supplied
    * by the container: it depends on each deck's queue.
@@ -403,6 +406,9 @@ export function DeckListScreen({
         onOpen={() => setMenu(key)}
         onClose={() => setMenu(null)}
       >
+        {node.kind === "deck" && courseHref(node.deck) !== undefined && (
+          <MenuLink href={courseHref(node.deck)!}>{t("deckList.continueCourse")}</MenuLink>
+        )}
         {node.kind === "deck" && <MenuLink href={preferencesHref(node.deck)}>{t("deckList.preferences")}</MenuLink>}
         {/* A group's name is the arrangement's, a deck's its own. */}
         <MenuItem disabled={busy || (node.kind === "group" && tree.readOnly)} onSelect={() => setNaming(key)}>

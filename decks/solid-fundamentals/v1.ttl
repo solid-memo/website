@@ -1,0 +1,1031 @@
+@base <https://solid-memo.com/decks/solid-fundamentals/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+@prefix schema:     <https://schema.org/> .
+
+# A course as well as a deck: its chapters and steps are subjects of this
+# document beside the cards, and every card is a multiple-choice question
+# whose back is the correct option and whose distractors are the wrong ones.
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ,
+      schema:Course ;
+    dcterms:title "Solid fundamentals"@en ,
+                  "Grunderna i Solid"@sv ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "A course on the ideas Solid is built on. This version has two chapters, Linked data and IRIs, and RDF and Turtle. Each step is a short piece of theory followed by a multiple-choice question, and each chapter ends with a review; every question you answer becomes a card in your deck. The facts come from the W3C recommendations RDF 1.1 Concepts and Abstract Syntax and RDF 1.1 Turtle, RFC 3987, Tim Berners-Lee's note Linked Data and the Solid Protocol."@en ,
+                        "En kurs om idéerna som Solid bygger på. Den här versionen har två kapitel, Länkade data och IRI:er samt RDF och Turtle. Varje steg är en kort teoritext följd av en flervalsfråga, och varje kapitel avslutas med en repetition; varje fråga du besvarar blir ett kort i din kortlek. Fakta kommer från W3C-rekommendationerna RDF 1.1 Concepts and Abstract Syntax och RDF 1.1 Turtle, RFC 3987, Tim Berners-Lees anteckning Linked Data och Solid Protocol."@sv ;
+    prov:wasDerivedFrom <https://www.w3.org/TR/2014/REC-rdf11-concepts-20140225/> ,
+                        <https://www.w3.org/TR/2014/REC-turtle-20140225/> ,
+                        <https://www.rfc-editor.org/rfc/rfc3987> ,
+                        <https://www.w3.org/DesignIssues/LinkedData.html> ,
+                        <https://solidproject.org/TR/2024/protocol-20240512> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-07T00:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:computing ,
+               topic:linked-data ;
+    dcat:keyword "Solid"@en ,
+                 "linked data"@en ,
+                 "RDF"@en ,
+                 "Turtle"@en ,
+                 "IRI"@en ,
+                 "semantic web"@en ,
+                 "Solid"@sv ,
+                 "länkade data"@sv ,
+                 "RDF"@sv ,
+                 "Turtle"@sv ,
+                 "IRI"@sv ,
+                 "semantiska webben"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-07T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#solid-fundamentals> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#solid-fundamentals> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this course was made (W3C PROV-O): written from the primary sources
+# below, each fact checked against the passage it comes from, then in the
+# review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-07T00:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.w3.org/TR/2014/REC-rdf11-concepts-20140225/> ,
+              <https://www.w3.org/TR/2014/REC-turtle-20140225/> ,
+              <https://www.rfc-editor.org/rfc/rfc3987> ,
+              <https://www.w3.org/DesignIssues/LinkedData.html> ,
+              <https://solidproject.org/TR/2024/protocol-20240512> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the course was written by the authoring agent (an AI) directly, without a dossier. The comments on this compilation, its review rounds and its sources say how; there are no further working notes."@en ,
+                 "The course was checked by machine (the app's SHACL and DCAT-AP validators) and by the authoring agent against the cited specifications; it has had no human review."@en ,
+                 "Sources: the five sources below were fetched on 2026-10-07 from the addresses given, as HTML or plain text, and read at the passages each step relies on. Linked data and its four rules come from Berners-Lee's note; resources, what an IRI denotes, IRI equality (simple string comparison, no further normalization, IRIs absolute), the relation between IRIs, URIs and URLs, namespace IRIs and prefixes, triples, graphs and their nodes, literals (lexical form, datatype IRI, rdf:langString, simple literals as xsd:string) and blank nodes (disjoint from IRIs and literals, identifiers locally scoped) from RDF 1.1 Concepts and Abstract Syntax; the IRI character repertoire, the IRI-to-URI mapping (UTF-8, then %HH per octet) and the case-insensitivity of the scheme and an ASCII-only host from RFC 3987 (sections 1, 3.1, 5.3.1 and 5.3.2.1); the syntax of triples, prefixed names, the keyword a, predicate and object lists, blank node labels and [ ], and the media type text/turtle from RDF 1.1 Turtle; and that a Solid server must answer a GET for an RDF source with Turtle when the client asks for text/turtle from the Solid Protocol, version 0.11.0."@en ,
+                 "Structure: two chapters of five steps each. Each step is a theory text of two to four sentences and one or two multiple-choice questions on it; each chapter has two review questions that combine its steps and are asked only in its final review. Every question was written to be answerable from the theory just read, has exactly one correct option (the card's back) and three wrong options (its distractors) of similar length and form, each with a note on why it is wrong; no option is \"all of the above\" or \"none of the above\". The examples (example.org IRIs, <#deck>, ex:Deck, the Greek alphabet deck's title) are the course's own."@en ,
+                 "Selection: version 1 covers what the rest of the course needs first: what linked data is and how IRIs name things (chapter 1), and the RDF data model and its Turtle syntax (chapter 2). Left out for later versions: LDP, WebID and Solid-OIDC, access control (WAC and ACP), type indexes, SHACL, JSON-LD and other RDF syntaxes, RDF datasets and named graphs, collections, and RDF 1.2."@en ,
+                 "Swedish text: every theory text, question, option and note was written by the authoring agent in Swedish as well as English. The Swedish uses the Swedish terms where they are established (länkade data, trippel, subjekt, predikat, objekt, literal, blank nod, namnrymd, prefix, medietyp) and keeps the names of standards and formats, and the terms of vocabularies, in their English form (RDF, Turtle, IRI, rdf:langString), as they are written in code."@en ,
+                 "Licensing: The course is CC0 1.0, like most of the library. Its sources are specifications and a design note whose texts are not openly licensed for derivative works: the W3C recommendations are \"All Rights Reserved\" under the W3C document licence, which allows copying them unmodified but grants no right to make derivatives outside software and its documentation; RFC 3987 is subject to BCP 78, under which the authors retain their rights; Berners-Lee's note states no licence; and the Solid Protocol's contributors license their contributions under the W3C Community Contributor License Agreement. The course therefore takes only facts from them: what a triple is, how IRIs are compared, what the Turtle keyword a stands for. Facts, and the names of terms and syntax needed to state them (rdf:type, text/turtle, @prefix), are not protected expression. Every theory text, question, option and note is the authoring agent's own wording, not a translation or close paraphrase of a source sentence; the one exception is the four rules of linked data, which the first step gives in a short paraphrase, since the rules themselves are the fact being taught, with Berners-Lee named as their author. So no source's licence imposes conditions on the course, though every source is credited in it."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-07T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Machine checks"@en ;
+    rdfs:comment "Scope: the whole release, with the library checker (npm run library:check), which validates it against Solid Memo's shapes (library deck format 5, card format 5, chapter, step and distractor format 1), DCAT-AP and SKOS, with the reference data."@en ,
+                 "Outcome: The release conforms to every shape and profile the checker applies to it."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-07T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Facts, questions and language (AI)"@en ;
+    rdfs:comment "Scope: every theory text, question, option and note in English and Swedish, re-read by the authoring agent (an AI) against the passages of the sources they rely on; not a human review."@en ,
+                 "Outcome: Every statement agrees with its source. Each question has one defensible answer: an option that could also be read as correct was replaced (in the review question about an HTTP URI whose lookup returns nothing, the rule about links to other URIs, which such a dataset may also break, gave way to an option that is no rule at all). The Swedish was checked for grammar and for consistent terms."@en .
+
+<https://www.w3.org/TR/2014/REC-rdf11-concepts-20140225/>
+    dcterms:title "RDF 1.1 Concepts and Abstract Syntax, W3C Recommendation 25 February 2014" ;
+    dcterms:creator "Richard Cyganiak, David Wood, Markus Lanthaler (editors); W3C RDF Working Group" ;
+    rdfs:comment "The document's header: \"Copyright © 2004-2014 W3C® (MIT, ERCIM, Keio, Beihang), All Rights Reserved. W3C liability, trademark and document use rules apply.\" Its document use link, https://www.w3.org/Consortium/Legal/copyright-documents, now redirects to the W3C Document License (2023 version, https://www.w3.org/copyright/document-license-2023/): \"Permission to copy, and distribute the contents of this document … in any medium for any purpose and without fee or royalty is hereby granted\", but \"No right to create modifications or derivatives of W3C documents is granted pursuant to this license\", except in software and its documentation. Used for facts only: nothing copied."@en .
+
+<https://www.w3.org/TR/2014/REC-turtle-20140225/>
+    dcterms:title "RDF 1.1 Turtle: Terse RDF Triple Language, W3C Recommendation 25 February 2014" ;
+    dcterms:creator "David Beckett, Tim Berners-Lee, Eric Prud'hommeaux, Gavin Carothers (editors); W3C RDF Working Group" ;
+    rdfs:comment "The document's header: \"Copyright © 2008-2014 W3C® (MIT, ERCIM, Keio, Beihang), All Rights Reserved. W3C liability, trademark and document use rules apply.\" The same W3C Document License as RDF 1.1 Concepts applies (see that source): copying unmodified is allowed, derivatives are not. Used for facts only: nothing copied but the syntax needed to state them (@prefix, a, the semicolon and comma, _:b1, [ ], text/turtle)."@en .
+
+<https://www.rfc-editor.org/rfc/rfc3987>
+    dcterms:title "RFC 3987: Internationalized Resource Identifiers (IRIs), January 2005" ;
+    dcterms:creator "M. Duerst, M. Suignard" ;
+    rdfs:comment "The RFC's Full Copyright Statement: \"Copyright (C) The Internet Society (2005). This document is subject to the rights, licenses and restrictions contained in BCP 78, and except as set forth therein, the authors retain all their rights.\" No licence to modify it outside the IETF is given. Used for facts only: nothing copied."@en .
+
+<https://www.w3.org/DesignIssues/LinkedData.html>
+    dcterms:title "Linked Data (Design Issues), 2006-07-27, last changed 2009-06-18" ;
+    dcterms:creator "Tim Berners-Lee" ;
+    rdfs:comment "The page says \"Status: personal view only. Editing status: imperfect but published.\" and carries no licence or copyright notice; it is treated as all rights reserved. Used for facts only: the four rules are given in a short paraphrase and attributed to Berners-Lee."@en .
+
+<https://solidproject.org/TR/2024/protocol-20240512>
+    dcterms:title "Solid Protocol, version 0.11.0, Draft Community Group Report, 12 May 2024" ;
+    dcterms:creator "Sarven Capadisli, Tim Berners-Lee, Kjetil Kjernsmo (editors); W3C Solid Community Group" ;
+    rdfs:comment "The document's header: \"Copyright © 2019–2024 the Contributors to Solid Protocol, Version 0.11.0, published by the Solid Community Group under the W3C Community Contributor License Agreement (CLA).\" The CLA (https://www.w3.org/community/about/process/cla/), section 2.1, has each contributor grant \"a perpetual (for the duration of the applicable copyright), worldwide, non-exclusive, no-charge, royalty-free, copyright license … to reproduce, prepare derivative works of, publicly display, publicly perform, sublicense, distribute, and implement any Contribution\". Used for one fact only (that a server returns an RDF source as Turtle when asked for text/turtle): nothing copied."@en .
+
+# Chapter 1: Linked data and IRIs.
+<#ch-linked-data>
+    a solid-memo:Chapter ,
+      schema:Syllabus ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <> ;
+    schema:position 0 ;
+    dcterms:title "Linked data and IRIs"@en ,
+                  "Länkade data och IRI:er"@sv ;
+    dcterms:description "How linked data names things with IRIs and links them into a web of data, following Tim Berners-Lee's four rules."@en ,
+                        "Hur länkade data namnger saker med IRI:er och länkar ihop dem till en webb av data, enligt Tim Berners-Lees fyra regler."@sv ;
+    solid-memo:reviewQuestion <#q-lookup-returns-nothing> ,
+                              <#q-cafe-iri> .
+
+<#ch-linked-data-1>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <#ch-linked-data> ;
+    schema:position 0 ;
+    solid-memo:theory "Linked data is data published on the web so that people and machines can follow links from one thing to related things. Tim Berners-Lee's note Linked Data (2006) gives four rules: use URIs as names for things; use HTTP URIs so that people can look those names up; when someone looks a name up, provide useful information, using standards such as RDF; and include links to other URIs, so that they can discover more things."@en ,
+                      "Länkade data är data som publiceras på webben så att människor och maskiner kan följa länkar från en sak till andra, relaterade saker. Tim Berners-Lees anteckning Linked Data (2006) ger fyra regler: använd URI:er som namn på saker; använd HTTP-URI:er så att man kan slå upp namnen; ge användbar information med hjälp av standarder som RDF när någon slår upp ett namn; och ta med länkar till andra URI:er så att man kan upptäcka fler saker."@sv ;
+    solid-memo:checkedBy <#q-four-rules> ,
+                         <#q-http-uris> .
+
+<#q-four-rules>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-07T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Which of these is one of the four rules in Tim Berners-Lee's note Linked Data?"@en ,
+                     "Vilken av dessa är en av de fyra reglerna i Tim Berners-Lees anteckning Linked Data?"@sv ;
+    solid-memo:back "Include links to other URIs"@en ,
+                    "Ta med länkar till andra URI:er"@sv ;
+    solid-memo:backNote "The fourth rule: links to other URIs let people and machines discover more things."@en ,
+                        "Den fjärde regeln: länkar till andra URI:er gör att människor och maskiner kan upptäcka fler saker."@sv ;
+    solid-memo:distractor <#q-four-rules-d1> ,
+                          <#q-four-rules-d2> ,
+                          <#q-four-rules-d3> .
+
+<#q-four-rules-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Keep all data in one central database"@en ,
+                              "Samla all data i en central databas"@sv ;
+    solid-memo:distractorNote "Linked data is spread over the web and joined by links, not gathered in one place."@en ,
+                              "Länkade data är utspridda över webben och sammanfogade med länkar, inte samlade på ett ställe."@sv .
+
+<#q-four-rules-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Name things with short local labels"@en ,
+                              "Namnge saker med korta lokala etiketter"@sv ;
+    solid-memo:distractorNote "The first rule is to name things with URIs, which work across the whole web."@en ,
+                              "Den första regeln är att namnge saker med URI:er, som fungerar över hela webben."@sv .
+
+<#q-four-rules-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Publish data only as HTML pages"@en ,
+                              "Publicera data enbart som HTML-sidor"@sv ;
+    solid-memo:distractorNote "The third rule asks for useful information in standards such as RDF, which machines can read too."@en ,
+                              "Den tredje regeln ber om användbar information i standarder som RDF, som även maskiner kan läsa."@sv .
+
+<#q-http-uris>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-07T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Why does the second rule of linked data ask for HTTP URIs?"@en ,
+                     "Varför ber den andra regeln för länkade data om HTTP-URI:er?"@sv ;
+    solid-memo:back "So that people can look the names up"@en ,
+                    "Så att man kan slå upp namnen"@sv ;
+    solid-memo:backNote "An HTTP URI can be looked up on the web, and the answer gives information about the thing it names."@en ,
+                        "En HTTP-URI kan slås upp på webben, och svaret ger information om saken den namnger."@sv ;
+    solid-memo:distractor <#q-http-uris-d1> ,
+                          <#q-http-uris-d2> ,
+                          <#q-http-uris-d3> .
+
+<#q-http-uris-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "So that the names are always short"@en ,
+                              "Så att namnen alltid blir korta"@sv ;
+    solid-memo:distractorNote "The rule is about looking names up, not about how long they are."@en ,
+                              "Regeln handlar om att kunna slå upp namnen, inte om hur långa de är."@sv .
+
+<#q-http-uris-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "So that the data is always encrypted"@en ,
+                              "Så att data alltid krypteras"@sv ;
+    solid-memo:distractorNote "The rules say nothing about encryption; HTTP URIs are asked for so that names can be looked up."@en ,
+                              "Reglerna säger inget om kryptering; HTTP-URI:er behövs för att namnen ska kunna slås upp."@sv .
+
+<#q-http-uris-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "So that nobody else can use the names"@en ,
+                              "Så att ingen annan kan använda namnen"@sv ;
+    solid-memo:distractorNote "The point is the opposite: anyone should be able to look the names up and link to them."@en ,
+                              "Poängen är den motsatta: vem som helst ska kunna slå upp namnen och länka till dem."@sv .
+
+<#ch-linked-data-2>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <#ch-linked-data> ;
+    schema:position 1 ;
+    solid-memo:theory "In RDF, every IRI denotes something in the world, which RDF calls a resource. A resource can be anything: a person, a city, an idea or a document. Berners-Lee stresses that HTTP URIs are names, not just addresses: looking one up should tell you about the thing it names."@en ,
+                      "I RDF betecknar varje IRI något i världen, som RDF kallar en resurs. En resurs kan vara vad som helst: en person, en stad, en idé eller ett dokument. Berners-Lee betonar att HTTP-URI:er är namn, inte bara adresser: slår man upp en ska man få veta något om det den namnger."@sv ;
+    solid-memo:checkedBy <#q-iri-denotes> .
+
+<#q-iri-denotes>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-07T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "In RDF, what can an IRI denote?"@en ,
+                     "Vad kan en IRI beteckna i RDF?"@sv ;
+    solid-memo:back "Anything: a person, a city, an idea or a document"@en ,
+                    "Vad som helst: en person, en stad, en idé eller ett dokument"@sv ;
+    solid-memo:backNote "What an IRI denotes is called a resource, and a resource can be anything."@en ,
+                        "Det en IRI betecknar kallas en resurs, och en resurs kan vara vad som helst."@sv ;
+    solid-memo:distractor <#q-iri-denotes-d1> ,
+                          <#q-iri-denotes-d2> ,
+                          <#q-iri-denotes-d3> .
+
+<#q-iri-denotes-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Only a document that can be downloaded"@en ,
+                              "Bara ett dokument som kan laddas ned"@sv ;
+    solid-memo:distractorNote "Documents are resources too, but an IRI can also name people, places and ideas."@en ,
+                              "Dokument är också resurser, men en IRI kan även namnge personer, platser och idéer."@sv .
+
+<#q-iri-denotes-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Only a server that is connected to the internet"@en ,
+                              "Bara en server som är ansluten till internet"@sv ;
+    solid-memo:distractorNote "An IRI is a name for any resource, not the address of a machine."@en ,
+                              "En IRI är ett namn på vilken resurs som helst, inte adressen till en maskin."@sv .
+
+<#q-iri-denotes-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Only a file that is stored in a folder"@en ,
+                              "Bara en fil som ligger i en mapp"@sv ;
+    solid-memo:distractorNote "Files can be resources, but so can things that are not stored anywhere, such as a city."@en ,
+                              "Filer kan vara resurser, men det kan även saker som inte lagras någonstans, till exempel en stad."@sv .
+
+<#ch-linked-data-3>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <#ch-linked-data> ;
+    schema:position 2 ;
+    solid-memo:theory "An IRI (Internationalized Resource Identifier, RFC 3987) is like a URI, but it may use characters from all of Unicode, such as å or é, where a URI is limited to a subset of ASCII. Every absolute URI and URL is also an IRI, but not every IRI is a URI. Where only a URI will do, as when fetching over HTTP, an IRI is mapped to one: a character such as å in the path is encoded as UTF-8 and each byte written as % and two hexadecimal digits, so å becomes %C3%A5."@en ,
+                      "En IRI (Internationalized Resource Identifier, RFC 3987) är som en URI, men den får innehålla tecken från hela Unicode, som å eller é, medan en URI är begränsad till en delmängd av ASCII. Varje absolut URI och URL är också en IRI, men alla IRI:er är inte URI:er. Där bara en URI duger, som vid hämtning över HTTP, översätts IRI:n till en URI: ett tecken som å i sökvägen kodas som UTF-8 och varje byte skrivs som % följt av två hexadecimala siffror, så å blir %C3%A5."@sv ;
+    solid-memo:checkedBy <#q-iri-vs-uri> ,
+                         <#q-iri-to-uri> .
+
+<#q-iri-vs-uri>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-07T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "How does an IRI differ from a URI?"@en ,
+                     "Hur skiljer sig en IRI från en URI?"@sv ;
+    solid-memo:back "It may contain characters from all of Unicode"@en ,
+                    "Den får innehålla tecken från hela Unicode"@sv ;
+    solid-memo:backNote "A URI is limited to a subset of ASCII; an IRI may also contain letters such as å or é."@en ,
+                        "En URI är begränsad till en delmängd av ASCII; en IRI får även innehålla bokstäver som å eller é."@sv ;
+    solid-memo:distractor <#q-iri-vs-uri-d1> ,
+                          <#q-iri-vs-uri-d2> ,
+                          <#q-iri-vs-uri-d3> .
+
+<#q-iri-vs-uri-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "It must always begin with https://"@en ,
+                              "Den måste alltid börja med https://"@sv ;
+    solid-memo:distractorNote "An IRI can have any scheme; nothing requires https."@en ,
+                              "En IRI kan ha vilket schema som helst; inget kräver https."@sv .
+
+<#q-iri-vs-uri-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "It can never contain a fragment (#)"@en ,
+                              "Den får aldrig innehålla ett fragment (#)"@sv ;
+    solid-memo:distractorNote "IRIs, like URIs, may end in a fragment such as #me."@en ,
+                              "IRI:er får, precis som URI:er, sluta med ett fragment som #me."@sv .
+
+<#q-iri-vs-uri-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "It can only name pages on the web"@en ,
+                              "Den kan bara namnge sidor på webben"@sv ;
+    solid-memo:distractorNote "IRIs and URIs alike can name any resource."@en ,
+                              "Både IRI:er och URI:er kan namnge vilken resurs som helst."@sv .
+
+<#q-iri-to-uri>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-07T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "When an IRI is mapped to a URI, what does the character å in its path become?"@en ,
+                     "Vad blir tecknet å i sökvägen när en IRI översätts till en URI?"@sv ;
+    solid-memo:back "%C3%A5" ;
+    solid-memo:backNote "å is the character U+00E5; in UTF-8 it is the two bytes C3 and A5, each written as % and two hexadecimal digits."@en ,
+                        "å är tecknet U+00E5; i UTF-8 är det de två byten C3 och A5, som var och en skrivs som % följt av två hexadecimala siffror."@sv ;
+    solid-memo:distractor <#q-iri-to-uri-d1> ,
+                          <#q-iri-to-uri-d2> ,
+                          <#q-iri-to-uri-d3> .
+
+<#q-iri-to-uri-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "%E5" ;
+    solid-memo:distractorNote "E5 is å in Latin-1; the mapping always uses UTF-8, in which å takes two bytes."@en ,
+                              "E5 är å i Latin-1; översättningen använder alltid UTF-8, där å tar två byte."@sv .
+
+<#q-iri-to-uri-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "&aring;" ;
+    solid-memo:distractorNote "That is an HTML character reference, which is not part of URI syntax."@en ,
+                              "Det är en teckenreferens i HTML, som inte ingår i URI-syntaxen."@sv .
+
+<#q-iri-to-uri-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "%00E5" ;
+    solid-memo:distractorNote "That writes the character's code point; the mapping encodes its UTF-8 bytes, one %HH each."@en ,
+                              "Det skriver tecknets kodpunkt; översättningen kodar dess UTF-8-byte, med ett %HH för varje."@sv .
+
+<#ch-linked-data-4>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <#ch-linked-data> ;
+    schema:position 3 ;
+    solid-memo:theory "In RDF, IRIs must be absolute, and two IRIs are the same only if they are the same string, character for character: RFC 3987's simple string comparison, with no further normalization. So HTTP://example.org/ and http://example.org/ are two different IRIs in RDF, even though URI syntax treats the scheme and the host name as case-insensitive."@en ,
+                      "I RDF måste IRI:er vara absoluta, och två IRI:er är samma bara om de är samma sträng, tecken för tecken: enkel strängjämförelse enligt RFC 3987, utan ytterligare normalisering. Därför är HTTP://example.org/ och http://example.org/ två olika IRI:er i RDF, trots att URI-syntaxen inte skiljer på stora och små bokstäver i schemat och värdnamnet."@sv ;
+    solid-memo:checkedBy <#q-iri-equality> .
+
+<#q-iri-equality>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-07T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "When are two IRIs the same IRI in RDF?"@en ,
+                     "När är två IRI:er samma IRI i RDF?"@sv ;
+    solid-memo:back "When they are the same string, character for character"@en ,
+                    "När de är samma sträng, tecken för tecken"@sv ;
+    solid-memo:backNote "RDF compares IRIs as strings and normalizes nothing, not even the case of the scheme or host."@en ,
+                        "RDF jämför IRI:er som strängar och normaliserar ingenting, inte ens skiftläget i schema eller värdnamn."@sv ;
+    solid-memo:distractor <#q-iri-equality-d1> ,
+                          <#q-iri-equality-d2> ,
+                          <#q-iri-equality-d3> .
+
+<#q-iri-equality-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "When they lead to the same web page"@en ,
+                              "När de leder till samma webbsida"@sv ;
+    solid-memo:distractorNote "RDF never fetches IRIs to compare them; it compares the strings."@en ,
+                              "RDF hämtar aldrig IRI:er för att jämföra dem; den jämför strängarna."@sv .
+
+<#q-iri-equality-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "When they differ only in upper and lower case"@en ,
+                              "När de bara skiljer sig i stora och små bokstäver"@sv ;
+    solid-memo:distractorNote "Any difference in case makes two different IRIs in RDF, because nothing is normalized."@en ,
+                              "Varje skillnad i stora och små bokstäver ger två olika IRI:er i RDF, eftersom ingenting normaliseras."@sv .
+
+<#q-iri-equality-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "When they have the same domain name"@en ,
+                              "När de har samma domännamn"@sv ;
+    solid-memo:distractorNote "Many different IRIs share a domain name; only identical strings are the same IRI."@en ,
+                              "Många olika IRI:er har samma domännamn; bara identiska strängar är samma IRI."@sv .
+
+<#ch-linked-data-5>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <#ch-linked-data> ;
+    schema:position 4 ;
+    solid-memo:theory "An RDF vocabulary is a collection of IRIs meant for use in RDF graphs. Its IRIs often begin with a common string, the namespace IRI, which by convention has a short name, the namespace prefix. For example, the prefix rdf: stands for the namespace IRI http://www.w3.org/1999/02/22-rdf-syntax-ns#, the start of the RDF vocabulary's own IRIs."@en ,
+                      "En RDF-vokabulär är en samling IRI:er som är avsedda att användas i RDF-grafer. Dess IRI:er börjar ofta med en gemensam sträng, namnrymds-IRI:n, som enligt konvention har ett kort namn, namnrymdsprefixet. Till exempel står prefixet rdf: för namnrymds-IRI:n http://www.w3.org/1999/02/22-rdf-syntax-ns#, början på RDF-vokabulärens egna IRI:er."@sv ;
+    solid-memo:checkedBy <#q-namespace-iri> .
+
+<#q-namespace-iri>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-07T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "What is the namespace IRI of an RDF vocabulary?"@en ,
+                     "Vad är namnrymds-IRI:n för en RDF-vokabulär?"@sv ;
+    solid-memo:back "The common start of the vocabulary's IRIs"@en ,
+                    "Den gemensamma början på vokabulärens IRI:er"@sv ;
+    solid-memo:backNote "For the RDF vocabulary it is http://www.w3.org/1999/02/22-rdf-syntax-ns#, usually written with the prefix rdf:."@en ,
+                        "För RDF-vokabulären är den http://www.w3.org/1999/02/22-rdf-syntax-ns#, som oftast skrivs med prefixet rdf:."@sv ;
+    solid-memo:distractor <#q-namespace-iri-d1> ,
+                          <#q-namespace-iri-d2> ,
+                          <#q-namespace-iri-d3> .
+
+<#q-namespace-iri-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "The IRI of the server that stores the data"@en ,
+                              "IRI:n för servern som lagrar data"@sv ;
+    solid-memo:distractorNote "A namespace IRI is part of the vocabulary's names; it says nothing about where data is stored."@en ,
+                              "En namnrymds-IRI är en del av vokabulärens namn; den säger inget om var data lagras."@sv .
+
+<#q-namespace-iri-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "The shortest IRI in a document"@en ,
+                              "Den kortaste IRI:n i ett dokument"@sv ;
+    solid-memo:distractorNote "Length has nothing to do with it: the namespace IRI is the start the vocabulary's IRIs share."@en ,
+                              "Längden har inget med saken att göra: namnrymds-IRI:n är början som vokabulärens IRI:er har gemensamt."@sv .
+
+<#q-namespace-iri-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "The prefix's short name, such as rdf:"@en ,
+                              "Prefixets korta namn, till exempel rdf:"@sv ;
+    solid-memo:distractorNote "rdf: is the prefix; the namespace IRI is the string it stands for."@en ,
+                              "rdf: är prefixet; namnrymds-IRI:n är strängen som det står för."@sv .
+
+# The review questions of chapter 1, asked only in its final review.
+<#q-lookup-returns-nothing>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-07T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A dataset names a city with an HTTP URI, but looking that URI up returns nothing. Which rule of linked data does it break?"@en ,
+                     "En datamängd namnger en stad med en HTTP-URI, men när man slår upp URI:n får man ingenting tillbaka. Vilken regel för länkade data bryter den mot?"@sv ;
+    solid-memo:back "Provide useful information when a name is looked up"@en ,
+                    "Ge användbar information när ett namn slås upp"@sv ;
+    solid-memo:backNote "This is the third rule: a lookup should return useful information about the thing, using standards such as RDF."@en ,
+                        "Det är den tredje regeln: en uppslagning ska ge användbar information om saken, med hjälp av standarder som RDF."@sv ;
+    solid-memo:distractor <#q-lookup-returns-nothing-d1> ,
+                          <#q-lookup-returns-nothing-d2> ,
+                          <#q-lookup-returns-nothing-d3> .
+
+<#q-lookup-returns-nothing-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Use URIs as names for things"@en ,
+                              "Använd URI:er som namn på saker"@sv ;
+    solid-memo:distractorNote "The dataset keeps this rule: the city is named with a URI."@en ,
+                              "Datamängden följer den här regeln: staden namnges med en URI."@sv .
+
+<#q-lookup-returns-nothing-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Use HTTP URIs so that names can be looked up"@en ,
+                              "Använd HTTP-URI:er så att namnen kan slås upp"@sv ;
+    solid-memo:distractorNote "It keeps this rule too: the URI is an HTTP URI. It is the lookup that gives nothing back."@en ,
+                              "Den följer även den här regeln: URI:n är en HTTP-URI. Det är uppslagningen som inte ger något tillbaka."@sv .
+
+<#q-lookup-returns-nothing-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Publish all the data in a single file"@en ,
+                              "Publicera all data i en enda fil"@sv ;
+    solid-memo:distractorNote "That is not one of the four rules."@en ,
+                              "Det är inte en av de fyra reglerna."@sv .
+
+<#q-cafe-iri>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-07T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "In RDF, are http://example.org/café and http://example.org/caf%C3%A9 the same IRI?"@en ,
+                     "Är http://example.org/café och http://example.org/caf%C3%A9 samma IRI i RDF?"@sv ;
+    solid-memo:back "No: they are different strings"@en ,
+                    "Nej: de är olika strängar"@sv ;
+    solid-memo:backNote "The second is the URI the first is mapped to, but RDF compares IRIs character for character, so they are two IRIs."@en ,
+                        "Den andra är den URI som den första översätts till, men RDF jämför IRI:er tecken för tecken, så de är två IRI:er."@sv ;
+    solid-memo:distractor <#q-cafe-iri-d1> ,
+                          <#q-cafe-iri-d2> ,
+                          <#q-cafe-iri-d3> .
+
+<#q-cafe-iri-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Yes: the second is the first one's URI form"@en ,
+                              "Ja: den andra är den förstas URI-form"@sv ;
+    solid-memo:distractorNote "It is its URI form, but RDF does no such mapping when it compares IRIs."@en ,
+                              "Den är dess URI-form, men RDF gör ingen sådan översättning när den jämför IRI:er."@sv .
+
+<#q-cafe-iri-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Yes: percent-encoding never changes an IRI"@en ,
+                              "Ja: procentkodning ändrar aldrig en IRI"@sv ;
+    solid-memo:distractorNote "Percent-encoding changes the characters, and RDF compares characters."@en ,
+                              "Procentkodning ändrar tecknen, och RDF jämför tecken."@sv .
+
+<#q-cafe-iri-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Only if both lead to the same web page"@en ,
+                              "Bara om båda leder till samma webbsida"@sv ;
+    solid-memo:distractorNote "RDF never looks IRIs up to compare them."@en ,
+                              "RDF slår aldrig upp IRI:er för att jämföra dem."@sv .
+
+# Chapter 2: RDF and Turtle.
+<#ch-rdf-turtle>
+    a solid-memo:Chapter ,
+      schema:Syllabus ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <> ;
+    schema:position 1 ;
+    dcterms:title "RDF and Turtle"@en ,
+                  "RDF och Turtle"@sv ;
+    dcterms:description "How RDF describes things with triples of IRIs, literals and blank nodes, and how Turtle writes them down."@en ,
+                        "Hur RDF beskriver saker med tripplar av IRI:er, literaler och blanka noder, och hur Turtle skriver ned dem."@sv ;
+    solid-memo:reviewQuestion <#q-count-triples> ,
+                              <#q-valid-triple> .
+
+<#ch-rdf-turtle-1>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <#ch-rdf-turtle> ;
+    schema:position 0 ;
+    solid-memo:theory "RDF describes things with triples. A triple has a subject, a predicate and an object, as in 'this deck – has the title – Greek alphabet': the subject is an IRI or a blank node, the predicate is always an IRI, and the object is an IRI, a literal or a blank node. A set of triples is an RDF graph, whose nodes are the subjects and objects of its triples."@en ,
+                      "RDF beskriver saker med tripplar. En trippel har ett subjekt, ett predikat och ett objekt, som i ”den här kortleken – har titeln – Grekiska alfabetet”: subjektet är en IRI eller en blank nod, predikatet är alltid en IRI och objektet är en IRI, en literal eller en blank nod. En mängd tripplar är en RDF-graf, vars noder är tripplarnas subjekt och objekt."@sv ;
+    solid-memo:checkedBy <#q-predicate-iri> ,
+                         <#q-rdf-graph> .
+
+<#q-predicate-iri>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-07T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Which part of an RDF triple is always an IRI?"@en ,
+                     "Vilken del av en RDF-trippel är alltid en IRI?"@sv ;
+    solid-memo:back "The predicate"@en ,
+                    "Predikatet"@sv ;
+    solid-memo:backNote "The subject may also be a blank node, and the object a literal or a blank node; the predicate is always an IRI."@en ,
+                        "Subjektet kan även vara en blank nod och objektet en literal eller en blank nod; predikatet är alltid en IRI."@sv ;
+    solid-memo:distractor <#q-predicate-iri-d1> ,
+                          <#q-predicate-iri-d2> ,
+                          <#q-predicate-iri-d3> .
+
+<#q-predicate-iri-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "The subject"@en ,
+                              "Subjektet"@sv ;
+    solid-memo:distractorNote "A subject can also be a blank node."@en ,
+                              "Ett subjekt kan även vara en blank nod."@sv .
+
+<#q-predicate-iri-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "The object"@en ,
+                              "Objektet"@sv ;
+    solid-memo:distractorNote "An object can also be a literal or a blank node."@en ,
+                              "Ett objekt kan även vara en literal eller en blank nod."@sv .
+
+<#q-predicate-iri-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Both the subject and the object"@en ,
+                              "Både subjektet och objektet"@sv ;
+    solid-memo:distractorNote "Both can be blank nodes, and the object can be a literal."@en ,
+                              "Båda kan vara blanka noder, och objektet kan vara en literal."@sv .
+
+<#q-rdf-graph>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-07T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "What is an RDF graph?"@en ,
+                     "Vad är en RDF-graf?"@sv ;
+    solid-memo:back "A set of RDF triples"@en ,
+                    "En mängd RDF-tripplar"@sv ;
+    solid-memo:backNote "Its nodes are the subjects and objects of its triples."@en ,
+                        "Dess noder är tripplarnas subjekt och objekt."@sv ;
+    solid-memo:distractor <#q-rdf-graph-d1> ,
+                          <#q-rdf-graph-d2> ,
+                          <#q-rdf-graph-d3> .
+
+<#q-rdf-graph-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "A chart drawn from RDF data"@en ,
+                              "Ett diagram som ritats utifrån RDF-data"@sv ;
+    solid-memo:distractorNote "A graph here is a structure of nodes, not a picture of the data."@en ,
+                              "En graf är här en struktur av noder, inte en bild av data."@sv .
+
+<#q-rdf-graph-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "A list of triples in a fixed order"@en ,
+                              "En lista med tripplar i en bestämd ordning"@sv ;
+    solid-memo:distractorNote "A graph is a set: its triples have no order, and none of them is in it twice."@en ,
+                              "En graf är en mängd: dess tripplar har ingen ordning, och ingen av dem finns med två gånger."@sv .
+
+<#q-rdf-graph-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "A file that holds a single triple"@en ,
+                              "En fil som innehåller en enda trippel"@sv ;
+    solid-memo:distractorNote "A graph can hold any number of triples, and it is a set, not a file."@en ,
+                              "En graf kan innehålla hur många tripplar som helst, och den är en mängd, inte en fil."@sv .
+
+<#ch-rdf-turtle-2>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <#ch-rdf-turtle> ;
+    schema:position 1 ;
+    solid-memo:theory "A literal is a value such as a text, a number or a date. It has a lexical form, the text itself, and a datatype IRI, such as xsd:integer, that says how to read it. A text with a language tag, such as \"Grekiska alfabetet\"@sv, has the datatype rdf:langString, and a text with neither a tag nor a datatype is an xsd:string. In a triple, a literal can only be the object."@en ,
+                      "En literal är ett värde som en text, ett tal eller ett datum. Den har en lexikal form, själva texten, och en datatyp-IRI, till exempel xsd:integer, som säger hur den ska läsas. En text med en språktagg, som \"Grekiska alfabetet\"@sv, har datatypen rdf:langString, och en text utan både tagg och datatyp är en xsd:string. I en trippel kan en literal bara vara objektet."@sv ;
+    solid-memo:checkedBy <#q-langstring> ,
+                         <#q-literal-position> .
+
+<#q-langstring>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-07T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "What is the datatype of the literal \"Grekiska alfabetet\"@sv?"@en ,
+                     "Vilken datatyp har literalen \"Grekiska alfabetet\"@sv?"@sv ;
+    solid-memo:back "rdf:langString" ;
+    solid-memo:backNote "Every literal with a language tag has the datatype rdf:langString."@en ,
+                        "Varje literal med en språktagg har datatypen rdf:langString."@sv ;
+    solid-memo:distractor <#q-langstring-d1> ,
+                          <#q-langstring-d2> ,
+                          <#q-langstring-d3> .
+
+<#q-langstring-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "xsd:string" ;
+    solid-memo:distractorNote "That is the datatype of a text with no language tag."@en ,
+                              "Det är datatypen för en text utan språktagg."@sv .
+
+<#q-langstring-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "xsd:language" ;
+    solid-memo:distractorNote "That datatype is for language tags themselves, such as \"sv\", not for tagged texts."@en ,
+                              "Den datatypen är till för själva språktaggarna, som \"sv\", inte för taggade texter."@sv .
+
+<#q-langstring-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "xsd:normalizedString" ;
+    solid-memo:distractorNote "A text with a language tag has rdf:langString, whatever it contains."@en ,
+                              "En text med språktagg har rdf:langString, vad den än innehåller."@sv .
+
+<#q-literal-position>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-07T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Where in an RDF triple can a literal be?"@en ,
+                     "Var i en RDF-trippel kan en literal stå?"@sv ;
+    solid-memo:back "Only as the object"@en ,
+                    "Bara som objekt"@sv ;
+    solid-memo:backNote "The subject is an IRI or a blank node and the predicate an IRI, so a literal can only be the object."@en ,
+                        "Subjektet är en IRI eller en blank nod och predikatet en IRI, så en literal kan bara vara objektet."@sv ;
+    solid-memo:distractor <#q-literal-position-d1> ,
+                          <#q-literal-position-d2> ,
+                          <#q-literal-position-d3> .
+
+<#q-literal-position-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Only as the subject"@en ,
+                              "Bara som subjekt"@sv ;
+    solid-memo:distractorNote "A subject is an IRI or a blank node, never a literal."@en ,
+                              "Ett subjekt är en IRI eller en blank nod, aldrig en literal."@sv .
+
+<#q-literal-position-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "As the subject or the object"@en ,
+                              "Som subjekt eller objekt"@sv ;
+    solid-memo:distractorNote "Only the object can be a literal; a subject cannot."@en ,
+                              "Bara objektet kan vara en literal; ett subjekt kan inte det."@sv .
+
+<#q-literal-position-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "In any of the three positions"@en ,
+                              "På vilken av de tre platserna som helst"@sv ;
+    solid-memo:distractorNote "The subject and the predicate can never be literals."@en ,
+                              "Subjektet och predikatet kan aldrig vara literaler."@sv .
+
+<#ch-rdf-turtle-3>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <#ch-rdf-turtle> ;
+    schema:position 2 ;
+    solid-memo:theory "A blank node is a node without an IRI, for a thing that needs no global name, such as the postal address of one person. Blank nodes are neither IRIs nor literals. In Turtle a blank node is written _:b1 or [ ], and such an identifier is local to its file or store: it is not a name that another document can use to point to the same node."@en ,
+                      "En blank nod är en nod utan IRI, för en sak som inte behöver något globalt namn, till exempel en persons postadress. Blanka noder är varken IRI:er eller literaler. I Turtle skrivs en blank nod _:b1 eller [ ], och en sådan identifierare gäller bara i sin fil eller databas: den är inte ett namn som ett annat dokument kan använda för att peka på samma nod."@sv ;
+    solid-memo:checkedBy <#q-blank-node> .
+
+<#q-blank-node>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-07T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Why can't another document point to a blank node in your file?"@en ,
+                     "Varför kan inte ett annat dokument peka på en blank nod i din fil?"@sv ;
+    solid-memo:back "Its identifier is local to the file or store"@en ,
+                    "Dess identifierare gäller bara i filen eller databasen"@sv ;
+    solid-memo:backNote "A blank node has no IRI, and an identifier like _:b1 is not a name that is valid outside its own file or store."@en ,
+                        "En blank nod har ingen IRI, och en identifierare som _:b1 är inget namn som gäller utanför den egna filen eller databasen."@sv ;
+    solid-memo:distractor <#q-blank-node-d1> ,
+                          <#q-blank-node-d2> ,
+                          <#q-blank-node-d3> .
+
+<#q-blank-node-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "It has no predicate or object"@en ,
+                              "Den har inget predikat eller objekt"@sv ;
+    solid-memo:distractorNote "A blank node can be the subject of as many triples as you like."@en ,
+                              "En blank nod kan vara subjekt i hur många tripplar som helst."@sv .
+
+<#q-blank-node-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "It can only hold literal values"@en ,
+                              "Den kan bara innehålla literaler"@sv ;
+    solid-memo:distractorNote "A blank node is a node like any other; triples about it can have any objects."@en ,
+                              "En blank nod är en nod som alla andra; tripplar om den kan ha vilka objekt som helst."@sv .
+
+<#q-blank-node-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Its IRI is kept secret by the server"@en ,
+                              "Dess IRI hålls hemlig av servern"@sv ;
+    solid-memo:distractorNote "A blank node has no IRI at all."@en ,
+                              "En blank nod har ingen IRI alls."@sv .
+
+<#ch-rdf-turtle-4>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <#ch-rdf-turtle> ;
+    schema:position 3 ;
+    solid-memo:theory "Turtle is a text format for RDF graphs, with the media type text/turtle; a Solid server must return an RDF document as Turtle when a client asks for text/turtle. A triple is written as its subject, predicate and object followed by a full stop, with IRIs in angle brackets. After @prefix ex: <http://example.org/ns#> . you can write ex:title for <http://example.org/ns#title>: the prefix's IRI followed by the local part."@en ,
+                      "Turtle är ett textformat för RDF-grafer, med medietypen text/turtle; en Solid-server måste returnera ett RDF-dokument som Turtle när en klient ber om text/turtle. En trippel skrivs som subjekt, predikat och objekt följt av en punkt, med IRI:er inom vinkelparenteser. Efter @prefix ex: <http://example.org/ns#> . kan man skriva ex:title i stället för <http://example.org/ns#title>: prefixets IRI följt av den lokala delen."@sv ;
+    solid-memo:checkedBy <#q-turtle-prefix> .
+
+<#q-turtle-prefix>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-07T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "After @prefix ex: <http://example.org/ns#> . which IRI does ex:title stand for?"@en ,
+                     "Vilken IRI står ex:title för efter @prefix ex: <http://example.org/ns#> . ?"@sv ;
+    solid-memo:back "<http://example.org/ns#title>" ;
+    solid-memo:backNote "A prefixed name is the prefix's IRI followed by the local part, here title."@en ,
+                        "Ett prefixat namn är prefixets IRI följt av den lokala delen, här title."@sv ;
+    solid-memo:distractor <#q-turtle-prefix-d1> ,
+                          <#q-turtle-prefix-d2> ,
+                          <#q-turtle-prefix-d3> .
+
+<#q-turtle-prefix-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "<http://example.org/title>" ;
+    solid-memo:distractorNote "The local part goes after the whole prefix IRI, ns# included."@en ,
+                              "Den lokala delen läggs efter hela prefixets IRI, ns# inräknat."@sv .
+
+<#q-turtle-prefix-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "<http://example.org/ns#ex:title>" ;
+    solid-memo:distractorNote "The prefix label ex: is replaced by the IRI, not kept."@en ,
+                              "Prefixet ex: ersätts med IRI:n, det behålls inte."@sv .
+
+<#q-turtle-prefix-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "<ex:title>" ;
+    solid-memo:distractorNote "In angle brackets, ex:title is not expanded: it would be read as an IRI with the scheme ex."@en ,
+                              "Inom vinkelparenteser expanderas inte ex:title: det skulle läsas som en IRI med schemat ex."@sv .
+
+<#ch-rdf-turtle-5>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <#ch-rdf-turtle> ;
+    schema:position 4 ;
+    solid-memo:theory "Turtle has shortcuts for common patterns. The keyword a, written as a predicate, stands for rdf:type, so <#deck> a ex:Deck . says that the deck has the type ex:Deck. A semicolon repeats the subject for a new predicate and object, and a comma repeats both the subject and the predicate for a new object."@en ,
+                      "Turtle har förkortningar för vanliga mönster. Nyckelordet a, skrivet som predikat, står för rdf:type, så <#deck> a ex:Deck . säger att kortleken har typen ex:Deck. Ett semikolon upprepar subjektet för ett nytt predikat och objekt, och ett kommatecken upprepar både subjektet och predikatet för ett nytt objekt."@sv ;
+    solid-memo:checkedBy <#q-turtle-a> ,
+                         <#q-turtle-semicolon> .
+
+<#q-turtle-a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-07T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "In Turtle, what does the keyword a stand for when written as a predicate?"@en ,
+                     "Vad står nyckelordet a för i Turtle när det skrivs som predikat?"@sv ;
+    solid-memo:back "rdf:type" ;
+    solid-memo:backNote "a is short for rdf:type, the IRI http://www.w3.org/1999/02/22-rdf-syntax-ns#type."@en ,
+                        "a är en förkortning av rdf:type, IRI:n http://www.w3.org/1999/02/22-rdf-syntax-ns#type."@sv ;
+    solid-memo:distractor <#q-turtle-a-d1> ,
+                          <#q-turtle-a-d2> ,
+                          <#q-turtle-a-d3> .
+
+<#q-turtle-a-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "rdfs:label" ;
+    solid-memo:distractorNote "rdfs:label gives a thing a readable name; Turtle has no shortcut for it."@en ,
+                              "rdfs:label ger en sak ett läsbart namn; Turtle har ingen förkortning för den."@sv .
+
+<#q-turtle-a-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "rdf:value" ;
+    solid-memo:distractorNote "rdf:value is another term of the RDF vocabulary, with no shortcut in Turtle."@en ,
+                              "rdf:value är en annan term i RDF-vokabulären, utan förkortning i Turtle."@sv .
+
+<#q-turtle-a-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "owl:sameAs" ;
+    solid-memo:distractorNote "owl:sameAs comes from OWL, and Turtle has no shortcut for it."@en ,
+                              "owl:sameAs kommer från OWL, och Turtle har ingen förkortning för den."@sv .
+
+<#q-turtle-semicolon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-07T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "In Turtle, what does a semicolon after an object mean?"@en ,
+                     "Vad betyder ett semikolon efter ett objekt i Turtle?"@sv ;
+    solid-memo:back "The next triple has the same subject"@en ,
+                    "Nästa trippel har samma subjekt"@sv ;
+    solid-memo:backNote "A semicolon repeats the subject; a new predicate and object follow."@en ,
+                        "Ett semikolon upprepar subjektet; ett nytt predikat och objekt följer."@sv ;
+    solid-memo:distractor <#q-turtle-semicolon-d1> ,
+                          <#q-turtle-semicolon-d2> ,
+                          <#q-turtle-semicolon-d3> .
+
+<#q-turtle-semicolon-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "The next triple has the same object"@en ,
+                              "Nästa trippel har samma objekt"@sv ;
+    solid-memo:distractorNote "No punctuation in Turtle repeats only the object."@en ,
+                              "Inget skiljetecken i Turtle upprepar bara objektet."@sv .
+
+<#q-turtle-semicolon-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "The next triple has the same subject and predicate"@en ,
+                              "Nästa trippel har samma subjekt och predikat"@sv ;
+    solid-memo:distractorNote "That is what a comma does."@en ,
+                              "Det är vad ett kommatecken gör."@sv .
+
+<#q-turtle-semicolon-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "The statement ends after this triple"@en ,
+                              "Påståendet slutar efter den här trippeln"@sv ;
+    solid-memo:distractorNote "A full stop ends a statement; a semicolon continues it."@en ,
+                              "En punkt avslutar ett påstående; ett semikolon fortsätter det."@sv .
+
+# The review questions of chapter 2, asked only in its final review.
+<#q-count-triples>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-07T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "How many triples does this Turtle state? <#deck> a ex:Deck ; ex:title \"Memo\"@en , \"Memo\"@sv ."@en ,
+                     "Hur många tripplar anger den här Turtle-koden? <#deck> a ex:Deck ; ex:title \"Memo\"@en , \"Memo\"@sv ."@sv ;
+    solid-memo:back "Three"@en ,
+                    "Tre"@sv ;
+    solid-memo:backNote "One for a ex:Deck, then the semicolon and the comma give one ex:title triple for each of the two literals."@en ,
+                        "En för a ex:Deck, sedan ger semikolonet och kommatecknet en ex:title-trippel för var och en av de två literalerna."@sv ;
+    solid-memo:distractor <#q-count-triples-d1> ,
+                          <#q-count-triples-d2> ,
+                          <#q-count-triples-d3> .
+
+<#q-count-triples-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "One"@en ,
+                              "En"@sv ;
+    solid-memo:distractorNote "The semicolon and the comma each start a new triple about the same subject."@en ,
+                              "Semikolonet och kommatecknet inleder var sin ny trippel om samma subjekt."@sv .
+
+<#q-count-triples-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Two"@en ,
+                              "Två"@sv ;
+    solid-memo:distractorNote "The two titles differ in their language tags, so they are two literals and two triples."@en ,
+                              "De två titlarna har olika språktaggar, så de är två literaler och två tripplar."@sv .
+
+<#q-count-triples-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Four"@en ,
+                              "Fyra"@sv ;
+    solid-memo:distractorNote "Only three subject, predicate and object combinations are written."@en ,
+                              "Bara tre kombinationer av subjekt, predikat och objekt skrivs."@sv .
+
+<#q-valid-triple>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-07T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Which of these Turtle statements is a valid RDF triple?"@en ,
+                     "Vilket av dessa Turtle-påståenden är en giltig RDF-trippel?"@sv ;
+    solid-memo:back "<#a> <#b> \"text\" ." ;
+    solid-memo:backNote "An IRI subject, an IRI predicate and a literal object: every part is allowed where it stands."@en ,
+                        "Ett IRI-subjekt, ett IRI-predikat och ett literalobjekt: varje del är tillåten där den står."@sv ;
+    solid-memo:distractor <#q-valid-triple-d1> ,
+                          <#q-valid-triple-d2> ,
+                          <#q-valid-triple-d3> .
+
+<#q-valid-triple-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "\"text\" <#b> <#a> ." ;
+    solid-memo:distractorNote "A literal cannot be the subject of a triple."@en ,
+                              "En literal kan inte vara subjekt i en trippel."@sv .
+
+<#q-valid-triple-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "<#a> _:b <#c> ." ;
+    solid-memo:distractorNote "A blank node cannot be the predicate; the predicate is always an IRI."@en ,
+                              "En blank nod kan inte vara predikat; predikatet är alltid en IRI."@sv .
+
+<#q-valid-triple-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "<#a> \"b\" <#c> ." ;
+    solid-memo:distractorNote "A literal cannot be the predicate; the predicate is always an IRI."@en ,
+                              "En literal kan inte vara predikat; predikatet är alltid en IRI."@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

@@ -15,8 +15,10 @@ import { ReaderText, ReaderTexts } from "./ReaderText";
  * and under what terms, when it was made and last changed, which
  * release it is and what changed in it, and what it was compiled from —
  * with a look at its cards and an import button for this deck alone.
- * Everything shown comes from the library index, so any link in it goes
- * through ExternalLink.
+ * A course (docs/courses.md) is started instead of imported: its cards
+ * join the learner's deck as its questions are answered. Everything
+ * shown comes from the library index, so any link in it goes through
+ * ExternalLink.
  */
 export function LibraryDeckScreen({
   deck,
@@ -26,18 +28,24 @@ export function LibraryDeckScreen({
   busy,
   error,
   onImport,
+  onStartCourse,
 }: {
   deck: LibraryDeck;
   /** URL of the deck's card list. */
   browseHref: string;
   /** URL of the deck's preview, which tries its cards before import. */
   previewHref: string;
-  /** The instance already holds a copy; a second one is still allowed. */
+  /**
+   * The instance already holds a copy; a second one is still allowed,
+   * but a course is started once: it is continued.
+   */
   imported: boolean;
-  /** The import is in progress. */
+  /** The import, or the start of a course, is in progress. */
   busy: boolean;
   error: ErrorText | null;
   onImport: () => void;
+  /** Starts the course, or goes on with it (a course only). */
+  onStartCourse: () => void;
 }) {
   const { t, locale, readerText, readerLang, formatDate, directionLabel } = useI18n();
   const topics = topicLabels(deck.themes);
@@ -60,6 +68,7 @@ export function LibraryDeckScreen({
           {linkify(readerText(deck.description))}
         </p>
       )}
+      {deck.isCourse === true && <p class="hint">{t("libraryDeck.courseChapters")}</p>}
       <dl class="facts">
         <dt>{t("libraryDeck.size")}</dt>
         <dd>{t("common.cardCount", { count: deck.cardCount })}</dd>
@@ -144,13 +153,23 @@ export function LibraryDeckScreen({
         )}
       </dl>
       <div class="actions">
-        <button class="primary" onClick={onImport} disabled={busy}>
-          {busy ? t("libraryDeck.importing") : t("libraryDeck.import")}
-        </button>
+        {deck.isCourse === true ? (
+          <button class="primary" onClick={onStartCourse} disabled={busy}>
+            {busy
+              ? t("libraryDeck.starting")
+              : imported
+                ? t("libraryDeck.continueCourse")
+                : t("libraryDeck.startCourse")}
+          </button>
+        ) : (
+          <button class="primary" onClick={onImport} disabled={busy}>
+            {busy ? t("libraryDeck.importing") : t("libraryDeck.import")}
+          </button>
+        )}
         <a class="button" href={previewHref}>
           {t("libraryDeck.preview")}
         </a>
-        {imported && (
+        {imported && deck.isCourse !== true && (
           <span class="hint library-imported">{t("libraryDeck.alreadyImported")}</span>
         )}
       </div>

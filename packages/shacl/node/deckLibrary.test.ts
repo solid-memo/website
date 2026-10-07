@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   baseProblems,
   buildIndex,
+  courseProblems,
   defaultIo,
   INDEX_URL,
   loadValidators,
@@ -17,6 +18,7 @@ import {
   type DeckRelease,
   type LibraryIo,
 } from "./deckLibrary.ts";
+import { DataFactory } from "n3";
 import { formatTurtle } from "@solid-memo/turtle/formatTurtle";
 import { parseTurtle, RDF_TYPE } from "@solid-memo/turtle/rdf";
 import { SM_NS as SM } from "@solid-memo/vocab/tooling/vocab";
@@ -37,6 +39,8 @@ interface Fixture {
   issued?: string | null;
   /** Replaces what follows the deck's metadata on the deck subject. */
   release?: string;
+  /** A course's outline, cards and distractors, in Turtle: the release is then a schema:Course too. */
+  course?: string;
 }
 
 /** A release of `deck` in library deck format 5, as decks/<deck>/v<version>.ttl holds it. */
@@ -67,10 +71,11 @@ function releaseText(deck: string, version: number, fixture: Fixture = {}): stri
 @prefix adms:       <http://www.w3.org/ns/adms#> .
 @prefix owl:        <http://www.w3.org/2002/07/owl#> .
 @prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix schema:     <https://schema.org/> .
 
 <>
     a solid-memo:Deck ,
-      dcat:Dataset ;
+      dcat:Dataset${fixture.course === undefined ? "" : " ,\n      schema:Course"} ;
     solid-memo:formatVersion 5 ;
     dcterms:title "${title}"@en ;
     dcterms:description "${title} of the world."@en ;
@@ -107,7 +112,7 @@ ${Object.entries(cards)
     solid-memo:back "${back}"${retired.includes(id) ? " ;\n    owl:deprecated true" : ""} .
 `,
   )
-  .join("")}`;
+  .join("")}${fixture.course ?? ""}`;
 }
 
 function release(deck: string, version: number, fixture?: Fixture): DeckRelease {
@@ -119,6 +124,77 @@ const NORWAY: Fixture = { cards: { se: ["Sweden", "Stockholm"], no: ["Norway", "
 const CAPITALS = [release("capitals", 1), release("capitals", 2, NORWAY)];
 const RIVERS = release("rivers", 1, { title: "Rivers" });
 const LIBRARY = [...CAPITALS, RIVERS];
+
+/** What a course's subject states to be retired. */
+const RETIRED = " ;\n    owl:deprecated true";
+
+function chapter(id: string, position: number, extra = ""): string {
+  return `
+<#${id}>
+    a solid-memo:Chapter ,
+      schema:Syllabus ;
+    solid-memo:formatVersion 1 ;
+    dcterms:title "Chapter ${id}"@en ;
+    schema:isPartOf <> ;
+    schema:position ${position}${extra} .
+`;
+}
+
+function step(id: string, of: string, position: number, checks: readonly string[], extra = ""): string {
+  return `
+<#${id}>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:theory "Theory ${id}."@en ;
+    schema:isPartOf <#${of}> ;
+    schema:position ${position} ;
+    solid-memo:checkedBy ${checks.map((card) => `<#${card}>`).join(" , ")}${extra} .
+`;
+}
+
+/** A card a course asks, naming its distractors; `back` replaces its English back. */
+function question(id: string, distractors: readonly string[], extra = "", back = `solid-memo:back "Answer ${id}"@en ;`): string {
+  const named = distractors.length === 0 ? "" : ` ;\n    solid-memo:distractor ${distractors.map((d) => `<#${d}>`).join(" , ")}`;
+  return `
+<#${id}>
+    a solid-memo:Card ;
+    solid-memo:front "Question ${id}"@en ;
+    ${back}
+    solid-memo:formatVersion 5${named}${extra} .
+`;
+}
+
+function distractor(id: string, extra = "", text = `"Wrong ${id}"@en`): string {
+  return `
+<#${id}>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText ${text}${extra} .
+`;
+}
+
+/** A card a course asks with its two distractors. */
+function asked(id: string): string {
+  return question(id, [`${id}-a`, `${id}-b`]) + distractor(`${id}-a`) + distractor(`${id}-b`);
+}
+
+/** Two chapters: the first with a step and a review question, the second with a step. */
+const OUTLINE = [
+  chapter("ch-1", 0, " ;\n    solid-memo:reviewQuestion <#q-2>"),
+  chapter("ch-2", 1),
+  step("s-1", "ch-1", 0, ["q-1"]),
+  step("s-2", "ch-2", 0, ["q-3"]),
+  asked("q-1"),
+  asked("q-2"),
+  asked("q-3"),
+].join("");
+
+/** A version of the course "solid", its outline and cards beside the fixture's one card. */
+function course(version: number, outline = OUTLINE): DeckRelease {
+  return release("solid", version, { title: "Solid", course: outline });
+}
 
 /** The library's files for these releases, its index built from them. */
 function filesOf(releases: readonly DeckRelease[], index = buildIndex(releases)): Map<string, string> {
@@ -244,6 +320,25 @@ describe("buildIndex", () => {
     expect(built.some((q) => q.subject.value === `${current}#anton` && q.object.value === "Anton")).toBe(true);
   });
 
+  it("keeps a course's type but leaves out its chapters, steps and distractors, counting its cards in use", () => {
+    const built = parseTurtle(buildIndex([course(1)]), INDEX);
+    const current = `${DECKS}solid/v1.ttl`;
+    expect(built.filter((q) => q.subject.value === current && q.predicate.value === RDF_TYPE).map((q) => q.object.value)).toContain(
+      "https://schema.org/Course",
+    );
+    expect(built.filter((q) => q.subject.value.startsWith(`${current}#`)).map((q) => q.subject.value)).toEqual([
+      `${current}#anton`,
+      `${current}#anton`,
+      `${current}#turtle`,
+      `${current}#turtle`,
+      `${current}#turtle`,
+      `${current}#turtle`,
+    ]);
+    expect(
+      built.filter((q) => q.subject.value === current && q.predicate.value === `${SM}cardCount`).map((q) => q.object.value),
+    ).toEqual(["4"]);
+  });
+
   it("states a node the decks share once", () => {
     const built = parseTurtle(index, INDEX);
     const keys = built.map((q) => JSON.stringify([q.subject.value, q.predicate.value, q.object.value, q.object.termType]));
@@ -346,6 +441,53 @@ describe("validateLibrary", () => {
     await expect(validateLibrary(retired, buildIndex(retired), validators)).resolves.toEqual([]);
   });
 
+  it("accepts a course, and names what its outline does not hold together", async () => {
+    await expect(validateLibrary([course(1)], buildIndex([course(1)]), validators)).resolves.toEqual([]);
+    const empty = [course(1, "")];
+    expect(await validateLibrary(empty, buildIndex(empty), validators)).toEqual([
+      "decks/solid/v1.ttl: is a schema:Course without a chapter: a course has at least one solid-memo:Chapter.",
+    ]);
+  });
+
+  it("names a release that drops a chapter, step or distractor of the version before it, and accepts one that retires them", async () => {
+    const v1 = [
+      chapter("ch-1", 0),
+      chapter("ch-2", 1),
+      step("s-1", "ch-1", 0, ["q-1"]),
+      step("s-2", "ch-2", 0, ["q-2"]),
+      question("q-1", ["q-1-a", "q-1-b", "q-1-c"]),
+      distractor("q-1-a"),
+      distractor("q-1-b"),
+      distractor("q-1-c"),
+      asked("q-2"),
+    ];
+    const dropped = [
+      course(1, v1.join("")),
+      course(2, [v1[0], step("s-1", "ch-1", 0, ["q-1"]), question("q-1", ["q-1-a", "q-1-b"]), v1[5], v1[6], asked("q-2")].join("")),
+    ];
+    expect(await validateLibrary(dropped, buildIndex(dropped), validators)).toEqual([
+      "decks/solid/v2.ttl: drops <#ch-2>, <#s-2>, <#q-1-c>, which v1.ttl has. A chapter, step or distractor is never removed: retire it (owl:deprecated true), so the copies that follow the course keep their place in it.",
+    ]);
+    const retired = [
+      course(1, v1.join("")),
+      course(
+        2,
+        [
+          v1[0],
+          chapter("ch-2", 1, RETIRED),
+          v1[2],
+          step("s-2", "ch-2", 0, ["q-2"], RETIRED),
+          question("q-1", ["q-1-a", "q-1-b", "q-1-c"]),
+          v1[5],
+          v1[6],
+          distractor("q-1-c", RETIRED),
+          asked("q-2"),
+        ].join(""),
+      ),
+    ];
+    await expect(validateLibrary(retired, buildIndex(retired), validators)).resolves.toEqual([]);
+  });
+
   it("names a release whose metadata is not what its path says", async () => {
     const moved = { ...CAPITALS[0], version: 2, quads: parseTurtle(CAPITALS[0].turtle, `${DECKS}capitals/v2.ttl`) };
     expect(await validateLibrary([moved], buildIndex([moved]), validators)).toContain(
@@ -383,6 +525,188 @@ describe("validateLibrary", () => {
     const problems = await validateLibrary([], `<${INDEX}> a <${DCAT}Catalog> .`, validators);
     expect(problems).toHaveLength(2);
     for (const problem of problems) expect(problem).toMatch(/^decks\/index\.ttl:\n/);
+  });
+});
+
+describe("courseProblems", () => {
+  const L = "decks/solid/v1.ttl";
+  /** The problems of version 1 of a course with this outline. */
+  const problemsOf = (outline: string) => courseProblems(course(1, outline));
+
+  it("accepts a course whose outline holds together, and a deck that is no course", () => {
+    expect(problemsOf(OUTLINE)).toEqual([]);
+    for (const r of LIBRARY) expect(courseProblems(r)).toEqual([]);
+  });
+
+  it("names chapters or steps in a release that is no schema:Course", () => {
+    const deck = release("solid", 1, { title: "Solid", course: OUTLINE });
+    deck.quads = deck.quads.filter((q) => q.object.value !== "https://schema.org/Course");
+    expect(courseProblems(deck)).toEqual([
+      `${L}: has chapters or steps but is no schema:Course: type the release itself schema:Course.`,
+    ]);
+  });
+
+  it("names a course without a chapter", () => {
+    expect(problemsOf("")).toEqual([
+      `${L}: is a schema:Course without a chapter: a course has at least one solid-memo:Chapter.`,
+    ]);
+  });
+
+  it("names a course that does not study front to back", () => {
+    const backwards = course(1);
+    backwards.quads = backwards.quads.map((q) =>
+      q.object.value === `${SM}frontToBack` ? DataFactory.quad(q.subject, q.predicate, DataFactory.namedNode(`${SM}backToFront`)) : q,
+    );
+    expect(courseProblems(backwards)).toEqual([
+      `${L}: states solid-memo:studyDirection <${SM}backToFront>; a course studies solid-memo:frontToBack.`,
+    ]);
+    const unstated = course(1);
+    unstated.quads = unstated.quads.filter((q) => q.predicate.value !== `${SM}studyDirection`);
+    expect(courseProblems(unstated)).toEqual([
+      `${L}: states solid-memo:studyDirection nothing; a course studies solid-memo:frontToBack.`,
+    ]);
+  });
+
+  it("names a chapter that is part of something else than its release, and a step that is part of no chapter of it", () => {
+    expect(
+      problemsOf(`${OUTLINE}
+<#ch-2> schema:isPartOf <https://example.com/other> .
+<#s-2> schema:isPartOf <#q-1> .
+`),
+    ).toEqual([
+      `${L}: chapter <#ch-2> is part of <${DECKS}solid/v1.ttl>, <https://example.com/other>; a chapter is part of the release it is in (schema:isPartOf <>).`,
+      `${L}: step <#s-2> is part of <#q-1>, which is no chapter of this release.`,
+    ]);
+  });
+
+  it("names a card a step checks or a chapter reviews that is no card of the release, or retired, but not one a retired one names", () => {
+    expect(
+      problemsOf(
+        [
+          chapter("ch-1", 0, " ;\n    solid-memo:reviewQuestion <#q-2> , <https://example.com/card>"),
+          chapter("ch-2", 1, " ;\n    solid-memo:reviewQuestion <#q-4>"),
+          chapter("ch-3", 2, ` ;\n    solid-memo:reviewQuestion <#q-4>${RETIRED}`),
+          step("s-1", "ch-1", 0, ["q-1", "nothing"]),
+          step("s-2", "ch-2", 0, ["q-3"]),
+          step("s-3", "ch-2", 1, ["q-4"], RETIRED),
+          asked("q-1"),
+          asked("q-2"),
+          asked("q-3"),
+          question("q-4", [], RETIRED),
+        ].join(""),
+      ),
+    ).toEqual([
+      `${L}: <#s-1> names <#nothing> by solid-memo:checkedBy, which is no card of this release.`,
+      `${L}: <#ch-1> names <https://example.com/card> by solid-memo:reviewQuestion, which is no card of this release.`,
+      `${L}: <#ch-2> names <#q-4> by solid-memo:reviewQuestion, which is retired: name a card in use, or retire <#ch-2> too.`,
+    ]);
+  });
+
+  it("names a distractor of any card that is no distractor of the release", () => {
+    expect(
+      problemsOf(`${OUTLINE}
+<#se> solid-memo:distractor <#q-1> .
+<#q-1> solid-memo:distractor <#nowhere> .
+`),
+    ).toEqual([
+      `${L}: <#se> names <#q-1> by solid-memo:distractor, which is no solid-memo:Distractor of this release.`,
+      `${L}: <#q-1> names <#nowhere> by solid-memo:distractor, which is no solid-memo:Distractor of this release.`,
+    ]);
+  });
+
+  it("names a distractor that more than one card names", () => {
+    expect(
+      problemsOf(`${OUTLINE}
+<#q-2> solid-memo:distractor <#q-1-a> .
+<#se> solid-memo:distractor <#q-1-a> .
+`),
+    ).toEqual([`${L}: distractor <#q-1-a> is named by <#q-1>, <#q-2>, <#se>; a distractor is one card's: give each card its own.`]);
+  });
+
+  it("names a card checked by two steps, or both checked by a step and reviewed by a chapter", () => {
+    expect(
+      problemsOf(`${OUTLINE}
+<#s-2> solid-memo:checkedBy <#q-1> , <#q-2> .
+`),
+    ).toEqual([
+      `${L}: <#q-1> is checked by <#s-1>, <#s-2>; a card is checked by one step at most.`,
+      `${L}: <#q-2> is checked by <#s-2> and a review question of <#ch-1>; a card is the one or the other.`,
+    ]);
+  });
+
+  it("names a card a course asks without text on its back, or with too few distractors in use", () => {
+    expect(
+      problemsOf(
+        [
+          chapter("ch-1", 0, " ;\n    solid-memo:reviewQuestion <#q-2>"),
+          step("s-1", "ch-1", 0, ["q-1"]),
+          question("q-1", ["q-1-a", "q-1-b"], "", ""),
+          distractor("q-1-a", "", '"Wrong"'),
+          distractor("q-1-b", RETIRED, '"Wrong"'),
+          question("q-2", []),
+        ].join(""),
+      ),
+    ).toEqual([
+      `${L}: <#q-1> has no text on its back (solid-memo:back), the right one among the options a course offers.`,
+      `${L}: <#q-1> has too few distractors (1); a card a course asks has at least 2.`,
+      `${L}: <#q-2> has too few distractors (0); a card a course asks has at least 2.`,
+    ]);
+  });
+
+  it("names a distractor without text in a language of its card's back, untagged text included", () => {
+    expect(
+      problemsOf(
+        [
+          chapter("ch-1", 0),
+          step("s-1", "ch-1", 0, ["q-1", "q-2"]),
+          question("q-1", ["q-1-a", "q-1-b"], "", 'solid-memo:back "Answer"@en , "Svar"@sv ;'),
+          distractor("q-1-a", "", '"Wrong"@en , "Fel"@sv'),
+          distractor("q-1-b"),
+          question("q-2", ["q-2-a", "q-2-b"], "", 'solid-memo:back "42" ;'),
+          distractor("q-2-a", "", '"41"'),
+          distractor("q-2-b", "", '"43"@en'),
+        ].join(""),
+      ),
+    ).toEqual([
+      `${L}: distractor <#q-1-b> has no text @sv, which the back of <#q-1> has.`,
+      `${L}: distractor <#q-2-b> has no text untagged, which the back of <#q-2> has.`,
+    ]);
+  });
+
+  it("names chapters, and a chapter's steps, in use that share a position, but not retired ones", () => {
+    expect(
+      problemsOf(
+        [
+          chapter("ch-1", 0),
+          chapter("ch-2", 0),
+          chapter("ch-3", 0, RETIRED),
+          step("s-1", "ch-1", 0, ["q-1"]),
+          step("s-2", "ch-1", 0, ["q-2"]),
+          step("s-3", "ch-1", 0, ["q-3"], RETIRED),
+          step("s-4", "ch-2", 0, ["q-3"], RETIRED),
+          step("s-5", "ch-2", 1, ["q-3"]),
+          asked("q-1"),
+          asked("q-2"),
+          asked("q-3"),
+        ].join(""),
+      ),
+    ).toEqual([
+      `${L}: chapters <#ch-1>, <#ch-2> share schema:position 0; a course's chapters each have their own.`,
+      `${L}: steps <#s-1>, <#s-2> of <#ch-1> share schema:position 0; a chapter's steps each have their own.`,
+    ]);
+  });
+
+  it("names a chapter in use without a step in use, but not a retired one", () => {
+    expect(
+      problemsOf(
+        [
+          chapter("ch-1", 0),
+          chapter("ch-2", 1, RETIRED),
+          step("s-1", "ch-1", 0, ["q-1"], RETIRED),
+          question("q-1", [], RETIRED),
+        ].join(""),
+      ),
+    ).toEqual([`${L}: chapter <#ch-1> has no step in use; a chapter in use has at least one step that is not retired.`]);
   });
 });
 

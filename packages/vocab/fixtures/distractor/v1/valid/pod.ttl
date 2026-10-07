@@ -1,0 +1,48 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix schema:     <https://schema.org/> .
+@prefix owl:        <http://www.w3.org/2002/07/owl#> .
+
+<#q-iri-identifies>
+    a solid-memo:Card ;
+    solid-memo:front "In linked data, what can an IRI name?"@en ,
+                     "Vad kan en IRI namnge i länkade data?"@sv ;
+    solid-memo:back "Any thing at all"@en ,
+                    "Vad som helst"@sv ;
+    solid-memo:distractor <#q-iri-identifies-d1> ,
+                          <#q-iri-identifies-d2> ;
+    solid-memo:formatVersion 5 .
+
+<#q-iri-identifies-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:distractorText "Only web pages"@en ,
+                              "Bara webbsidor"@sv ;
+    solid-memo:distractorNote "A web page's URL is one kind of IRI, but an IRI can name anything."@en ;
+    solid-memo:formatVersion 1 .
+
+<#q-iri-identifies-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:distractorText "Only people"@en ,
+                              "Bara personer"@sv ;
+    solid-memo:formatVersion 1 .
+
+<#http-404>
+    a solid-memo:Card ;
+    solid-memo:front "Not Found"@en ;
+    solid-memo:back "404"@zxx ;
+    solid-memo:distractor <#http-404-d1> ;
+    solid-memo:formatVersion 5 .
+
+<#http-404-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:distractorText "410" ;
+    solid-memo:formatVersion 1 .
+
+<#http-404-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:distractorText "500" ;
+    owl:deprecated true ;
+    solid-memo:formatVersion 1 .

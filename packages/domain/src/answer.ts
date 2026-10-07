@@ -25,7 +25,21 @@ export interface Answer {
   priorIntervalDays?: number;
   /** The prompt's interval after the answer. */
   nextIntervalDays: number;
+  /**
+   * How it was answered (vocabulary 1.14): recalled and graded by the
+   * learner, or chosen among options, as a course asks. Absent means
+   * recalled, as every answer before 1.14 was.
+   */
+  mode?: AnswerMode;
+  /**
+   * For a wrong multiple-choice answer, the wrong option chosen: the
+   * distractor's subject in the deck's cards document. Absent otherwise.
+   */
+  chosenDistractor?: string;
 }
+
+/** How an answer was given; the notations of the AnswerModes scheme's concepts. */
+export type AnswerMode = "recall" | "multiple-choice";
 
 /** An entry's fragment id: its time without separators and a random part, so tabs and devices never collide. */
 export function answerIdOf(answeredAt: string, random: string): string {

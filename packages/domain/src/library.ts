@@ -40,6 +40,12 @@ export interface LibraryDeck {
   modifiedAt?: string;
   /** Where its content came from, as the deck states. */
   sources: LibrarySource[];
+  /**
+   * Set when the current release is a course (also typed schema:Course,
+   * see docs/courses.md): chapters of steps whose questions are its
+   * cards, studied through the course before they join the learner's deck.
+   */
+  isCourse?: true;
 }
 
 /** One release of a library deck, as the index describes it. */
@@ -92,6 +98,8 @@ export interface LibraryDeckContent {
    */
   keywords: LangTexts;
   cards: LibraryCard[];
+  /** Set when the release is a course (see LibraryDeck.isCourse); its outline is read with DeckLibrary.fetchCourseOutline. */
+  isCourse?: true;
 }
 
 export interface LibraryCard extends CardContent {

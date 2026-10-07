@@ -3,11 +3,12 @@ import {
   buildThing,
   createThing,
   getSolidDataset,
+  getThing,
   mockSolidDatasetFrom,
   setThing,
 } from "@inrupt/solid-client";
 import { createSolidDeckLibrary } from "./solidDeckLibrary";
-import { DCTERMS, RDF, SM } from "./vocab";
+import { DCTERMS, RDF, SCHEMA, SM } from "./vocab";
 
 vi.mock("@inrupt/solid-client", async (importOriginal) => {
   const actual =
@@ -103,5 +104,56 @@ describe("fetchLibraryDeck", () => {
     await expect(library.fetchLibraryDeck(DOC)).rejects.toThrow("offline");
     await expect(library.fetchLibraryDeck(DOC)).resolves.toMatchObject({ url: DOC });
     expect(getSolidDataset).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("fetchCourseOutline", () => {
+  /** The release, a course of one chapter of one step. */
+  function courseDocument() {
+    const chapter = buildThing(createThing({ url: `${DOC}#ch-1` }))
+      .addIri(RDF.type, SM.Chapter)
+      .addStringWithLocale(DCTERMS.title, "Nordic capitals", "en")
+      .addIri("https://schema.org/isPartOf", DOC)
+      .addInteger("https://schema.org/position", 0)
+      .build();
+    const step = buildThing(createThing({ url: `${DOC}#ch-1-1` }))
+      .addIri(RDF.type, SM.Step)
+      .addStringWithLocale(SM.theory, "Stockholm is the capital of Sweden.", "en")
+      .addIri(SM.checkedBy, `${DOC}#sweden`)
+      .addIri("https://schema.org/isPartOf", `${DOC}#ch-1`)
+      .addInteger("https://schema.org/position", 0)
+      .build();
+    const document = deckDocument();
+    const deck = buildThing(getThing(document, DOC)!).addIri(RDF.type, SCHEMA.Course).build();
+    return setThing(setThing(setThing(document, chapter), step), deck);
+  }
+
+  it("reads the outline from the same read of the release as its content", async () => {
+    vi.mocked(getSolidDataset).mockResolvedValue(courseDocument());
+    const library = makeLibrary();
+    const [outline, content] = await Promise.all([library.fetchCourseOutline(DOC), library.fetchLibraryDeck(DOC)]);
+    expect(outline).toEqual({
+      releaseUrl: DOC,
+      chapters: [
+        {
+          id: "ch-1",
+          url: `${DOC}#ch-1`,
+          position: 0,
+          title: { en: "Nordic capitals" },
+          steps: [{ id: "ch-1-1", url: `${DOC}#ch-1-1`, position: 0, theory: { en: "Stockholm is the capital of Sweden." }, questionIds: ["sweden"] }],
+          reviewQuestionIds: [],
+        },
+      ],
+    });
+    expect(content.isCourse).toBe(true);
+    expect(await library.fetchCourseOutline(DOC)).toBe(outline);
+    expect(getSolidDataset).toHaveBeenCalledTimes(1);
+  });
+
+  it("reads the release again after a failed read", async () => {
+    vi.mocked(getSolidDataset).mockRejectedValueOnce(new Error("offline")).mockResolvedValue(deckDocument());
+    const library = makeLibrary();
+    await expect(library.fetchCourseOutline(DOC)).rejects.toThrow("offline");
+    await expect(library.fetchCourseOutline(DOC)).resolves.toEqual({ releaseUrl: DOC, chapters: [] });
   });
 });

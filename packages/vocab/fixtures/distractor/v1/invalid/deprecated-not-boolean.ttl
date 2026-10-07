@@ -1,0 +1,10 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix schema:     <https://schema.org/> .
+@prefix owl:        <http://www.w3.org/2002/07/owl#> .
+
+<#d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:distractorText "Only web pages"@en ;
+    owl:deprecated "yes" ;
+    solid-memo:formatVersion 1 .

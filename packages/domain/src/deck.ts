@@ -191,6 +191,14 @@ export interface Deck {
   newCardsPerDay?: number;
   /** The deck's own cap on reviews per study day, likewise. */
   maxReviewsPerDay?: number;
+  /**
+   * For a course's deck, the chapters of its release (their subjects'
+   * URLs) the learner has completed: `sm:completedChapter` on the catalog
+   * entry. Like a deck's `sm:position`, a triple outside the deck's shape
+   * that every write of the entry keeps; only completing a chapter
+   * (DeckRepository.completeChapter) adds one. Absent when there is none.
+   */
+  completedChapters?: string[];
 }
 
 /** What is on a card: its editable content, without identity. */
@@ -237,6 +245,26 @@ export interface CardContent {
    * format 5). Card format 3.
    */
   backNote?: LangText;
+  /**
+   * The wrong options shown next to the back when the card is asked as a
+   * multiple-choice question, as a course does (vocabulary 1.14, card
+   * format 5 without a bump): the back's text is the right one. Absent
+   * when the card has none.
+   */
+  distractors?: readonly Distractor[];
+}
+
+/**
+ * A wrong option of a card asked as a multiple-choice question: a
+ * subject of the document that holds the card (`#<id>`), copied with it.
+ */
+export interface Distractor {
+  /** Fragment id, kept from the library release the card came from. */
+  id: string;
+  /** Its text: untagged under the empty tag, or per language, as the back's is. */
+  text: LangText;
+  /** Why it is wrong, shown to whoever chose it: per language. */
+  note?: LangText;
 }
 
 export interface Card extends CardContent {

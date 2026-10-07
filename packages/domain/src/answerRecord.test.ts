@@ -32,4 +32,13 @@ describe("answer records", () => {
     expect(answerFromRecord("answer-1", answerToRecord(review))).toEqual(review);
     expect(answerFromRecord("answer-1", answerToRecord(first))).toEqual(first);
   });
+
+  it("name how a course answer was given by its concept, and the wrong option chosen; both read back", () => {
+    const chosen: Answer = { ...first, grade: 1, mode: "multiple-choice", chosenDistractor: "https://pod.example/i/decks/deck-1.ttl#se-d1" };
+    expect(answerToRecord(chosen)).toMatchObject({ mode: `${SM}multipleChoice`, chosenDistractor: chosen.chosenDistractor });
+    expect(answerFromRecord("answer-1", answerToRecord(chosen))).toEqual(chosen);
+    const recalled: Answer = { ...first, mode: "recall" };
+    expect(answerToRecord(recalled)).toMatchObject({ mode: `${SM}recall` });
+    expect(answerFromRecord("answer-1", answerToRecord(recalled))).toEqual(recalled);
+  });
 });

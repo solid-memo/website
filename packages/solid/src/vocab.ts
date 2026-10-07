@@ -82,3 +82,8 @@ export const ADMS = {
   /** What changed in a release. */
   versionNotes: "http://www.w3.org/ns/adms#versionNotes",
 } as const;
+
+export const SCHEMA = {
+  /** A library release that is also a course (docs/courses.md): chapters of steps whose questions are its cards. */
+  Course: "https://schema.org/Course",
+} as const;

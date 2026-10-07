@@ -140,6 +140,42 @@ describe("planLibraryUpgrade", () => {
     expect(planLibraryUpgrade({ deck, cards, from, to: backDescribed, releases })?.change).toHaveLength(1);
   });
 
+  it("takes changed wrong options (distractors) for a changed card: their text, note, number or ids, but not their order", () => {
+    const options = [
+      { id: "dk-d1", text: { en: "Aarhus" } },
+      { id: "dk-d2", text: { en: "Odense" }, note: { en: "The third city." } },
+    ];
+    const was = release(1, from.cards.map((card) => (card.id === "dk" ? { ...card, distractors: options } : card)));
+    const mine = cards.map((card) => (card.id === "dk" ? { ...card, distractors: options } : card));
+    const changed = (distractors: typeof options) =>
+      planLibraryUpgrade({ deck, cards: mine, from: was, to: release(2, was.cards.map((card) => (card.id === "dk" ? { ...card, distractors } : card))), releases })?.change;
+    expect(changed(options)).toBeUndefined();
+    expect(changed([options[0]!, { ...options[1]!, text: { en: "Aalborg" } }])).toHaveLength(1);
+    expect(changed([options[0]!, { ...options[1]!, note: { en: "An island city." } }])).toHaveLength(1);
+    // RDF keeps no order among a card's sm:distractor: the same ones listed otherwise are no change.
+    expect(changed([options[1]!, options[0]!])).toBeUndefined();
+    expect(changed([options[0]!, { ...options[1]!, id: "dk-d3" }])).toHaveLength(1);
+    expect(changed([options[0]!])).toHaveLength(1);
+  });
+
+  it("adds no card to a course's deck, which holds only those the learner reached, but changes and retires those it holds", () => {
+    const now = release(2, [
+      libraryCard("se", "Stockholm"),
+      { ...libraryCard("dk", "Copenhagen"), retired: true },
+      ...from.cards.filter((card) => card.id !== "se" && card.id !== "dk"),
+      libraryCard("no", "Oslo"),
+    ]);
+    const reached = [podCard("se", "Stockholm?"), podCard("dk", "Copenhagen")];
+    expect(planLibraryUpgrade({ deck, cards: reached, from, to: now, releases, course: true })).toMatchObject({
+      add: [],
+      change: [libraryCard("se", "Stockholm")],
+      retire: [podCard("dk", "Copenhagen")],
+    });
+    // A release that only adds cards offers a course's deck nothing.
+    const added = release(2, [...from.cards, libraryCard("no", "Oslo")]);
+    expect(planLibraryUpgrade({ deck, cards: reached, from, to: added, releases, course: true })).toBeNull();
+  });
+
   it("takes a retirement the copy already has as done", () => {
     const now = release(2, from.cards.map((card) => (card.id === "dk" ? { ...card, retired: true as const } : card)));
     const mine = cards.map((card) => (card.id === "dk" ? { ...card, retired: true as const } : card));

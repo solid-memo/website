@@ -44,13 +44,13 @@ describe("the migration chain", () => {
 
 describe("migrate", () => {
   it("returns a latest record untouched", () => {
-    const data = { front: { en: "Sweden" }, back: { "": "Stockholm" } };
+    const data = { front: { en: "Sweden" }, back: { "": "Stockholm" }, distractor: [] };
     expect(migrate("card", { version: 5, data }, CONTEXT)).toBe(data);
   });
 
   it("restamps a format-4 deck and card, changing nothing but the deck's keywords' form: no language guessed, stand-ins and untagged sides kept", () => {
     const card = { front: { "": "Sweden" }, back: { en: "Stockholm", sv: "Stockholm" }, backNote: { en: "Huvudstad.", sv: "Huvudstad." } };
-    expect(migrate("card", { version: 4, data: card }, CONTEXT)).toEqual(card);
+    expect(migrate("card", { version: 4, data: card }, CONTEXT)).toEqual({ ...card, distractor: [] });
     const deck = {
       title: { en: "Japanska glosor", sv: "Japanska glosor" },
       description: { en: "Flashcards: Japanska glosor.", sv: "Kortlek: Japanska glosor." },
@@ -98,14 +98,17 @@ describe("migrate", () => {
     expect(migrate("card", { version: 1, data: { front: "Sweden", back: "Stockholm" } }, CONTEXT)).toEqual({
       front: { "": "Sweden" },
       back: { "": "Stockholm" },
+      distractor: [],
     });
     expect(migrate("card", { version: 3, data: { frontImage: "https://flagcdn.com/se.svg", back: "Sweden" } }, CONTEXT)).toEqual({
       frontImage: "https://flagcdn.com/se.svg",
       back: { "": "Sweden" },
+      distractor: [],
     });
     expect(migrate("card", { version: 3, data: { front: "Sweden", backImage: "https://flagcdn.com/se.svg" } }, CONTEXT)).toEqual({
       front: { "": "Sweden" },
       backImage: "https://flagcdn.com/se.svg",
+      distractor: [],
     });
     const deck = { title: "Own", creator: ["Anton"], cardsDocument: "d", reviewsDocument: "r" };
     expect(migrate("deck", { version: 1, data: deck }, CONTEXT)).toEqual({

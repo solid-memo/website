@@ -156,6 +156,26 @@ describe("LibraryScreen", () => {
     expect(screen.getByRole("checkbox", { name: "Rivers" })).toBeEnabled();
   });
 
+  it("marks the decks that are courses", () => {
+    renderScreen({ decks: [capitals, { ...rivers, isCourse: true }] });
+    expect(screen.getByText("Course").closest("li")).toHaveTextContent(/^Rivers/);
+    expect(screen.getAllByText("Course")).toHaveLength(1);
+  });
+
+  it("offers no tick for a course, which is started from its page, never imported", () => {
+    const first = renderScreen();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Rivers" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "Capitals of the world" }));
+    first.unmount();
+    // Ticked before the release became a course: still not imported.
+    const { props } = renderScreen({ decks: [capitals, { ...rivers, isCourse: true }], memoryKey: first.props.memoryKey });
+    expect(screen.queryByRole("checkbox", { name: "Rivers" })).toBeNull();
+    expect(screen.getByRole("link", { name: "Rivers" })).toBeInTheDocument();
+    expect(importButton()).toHaveTextContent("Import 1 deck");
+    fireEvent.submit(importButton().closest("form")!);
+    expect(props.onImport).toHaveBeenCalledWith([capitals]);
+  });
+
   it("imports the ticked decks, counting them on the button", () => {
     const { props } = renderScreen();
     expect(importButton()).toHaveTextContent("Import selected");

@@ -105,6 +105,23 @@ describe("createSolidAnswerLog", () => {
     await expect(log.readMonth(INSTANCE, "2026-09")).resolves.toEqual(expect.arrayContaining([first, second]));
   });
 
+  it("adds a course's multiple-choice answer with its mode and the wrong option chosen, and reads them back", async () => {
+    const fake = pod();
+    const log = createSolidAnswerLog({ fetch: fake.fetch });
+    const chosen: Answer = {
+      ...answer("2026-09-21"),
+      grade: 1,
+      mode: "multiple-choice",
+      chosenDistractor: `${INSTANCE}decks/deck-1.ttl#q-iri-d1`,
+    };
+    await log.append(INSTANCE, chosen);
+    expect(fake.requests[0]!.body).toContain(
+      `<https://solid-memo.com/ns/vocab/v1.ttl#answerMode> <https://solid-memo.com/ns/vocab/v1.ttl#multipleChoice>`,
+    );
+    expect(fake.requests[0]!.body).toContain(`<https://solid-memo.com/ns/vocab/v1.ttl#chosenDistractor> <${chosen.chosenDistractor}>`);
+    await expect(log.readMonth(INSTANCE, "2026-09")).resolves.toEqual([chosen]);
+  });
+
   it("checks an answer before adding it, and adds nothing the check refuses", async () => {
     const fake = pod();
     const checkWrite = vi.fn<WriteCheck>(async () => {

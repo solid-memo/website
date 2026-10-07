@@ -79,7 +79,9 @@ flowchart LR
 │                        dcterms:creator/license, dcat:theme,
 │                        dcat:keyword (language-tagged),
 │                        prov:wasDerivedFrom, the deck's own study caps
-│                        (sm:deckNewCardsPerDay/MaxReviewsPerDay);
+│                        (sm:deckNewCardsPerDay/MaxReviewsPerDay), and
+│                        for a course the chapters completed
+│                        (sm:completedChapter);
 │                        beside each deck its
 │                        dcat:Distribution (#deck-X-cards) and the
 │                        foaf:Agent nodes of its creators (#agent-…);
@@ -92,7 +94,10 @@ flowchart LR
 │                        sm:frontNote/backNote under each
 │                        side and sm:backLabel above the back, each with
 │                        sm:formatVersion; a retired card
-│                        (owl:deprecated true) is kept but not studied
+│                        (owl:deprecated true) is kept but not studied;
+│                        a course's card names its wrong options
+│                        (sm:distractor), sm:Distractor subjects
+│                        beside it
 ├── reviews/<deckId>.ttl  SM-2 state: one sm:ReviewState per card and
 │                        direction (fast churn) — #<cardId> front→back,
 │                        #<cardId>@back-to-front the other way; optional
@@ -100,8 +105,8 @@ flowchart LR
 │                        first review (restored by "reset the day");
 │                        sm:formatVersion 2
 ├── history/<YYYY-MM>.ttl  the answer log (below): one sm:Answer per grade
-│                        given in study that month, appended, never
-│                        edited; sm:formatVersion 1
+│                        given in study or a course that month,
+│                        appended, never edited; sm:formatVersion 1
 └── digest.ttl      derived data (below): a sm:DocumentReceipt per document
                          (#receipt-<path>) and a sm:DeckSchedule per deck
                          (#schedule-<path>), each stamped with the versions
@@ -345,6 +350,39 @@ applies it to `catalog.ttl` as the pod holds it then:
   in the same write; its siblings keep their positions, and the next
   arrangement closes the gap.
 
+## Courses
+
+A [course](courses.md) is a library release with an outline of chapters
+and steps. Its state in the pod uses the documents above and no new
+type-index entries:
+
+- **The outline stays in the release.** Chapters and steps are never
+  copied: the app reads them from the release the deck's
+  `prov:wasDerivedFrom` names.
+- **The deck holds only the cards answered.** Starting a course writes
+  an empty deck. A question answered for the first time writes its card,
+  its `sm:Distractor` subjects and its first review state, under the
+  release's fragment ids (`#q-iri-denotes`, `#q-iri-denotes-d1`).
+  Removing a card removes the distractors it names.
+- **Completed chapters are on the catalog entry**: one
+  `sm:completedChapter <release#ch-…>` per chapter whose final review
+  was passed. Like a deck's `sm:position`, it belongs to no shape, so
+  every write of the entry keeps it and the deck format did not move. It
+  is added with an If-Match PATCH, read and added again on a 412, three
+  attempts in all, as a [deck group](#deck-groups) edit is.
+- **Answers** go to the [answer log](#the-answer-log), with
+  `sm:answerMode`.
+- **Everything else is derived**: a step is done when each card it is
+  checked by has a review state, and a chapter opens when the one
+  before it is completed.
+
+```turtle
+# catalog.ttl
+<#deck-x> a solid-memo:Deck , dcat:Dataset ; …
+    prov:wasDerivedFrom <https://solid-memo.com/decks/solid-fundamentals/v1.ttl> ;
+    solid-memo:completedChapter <https://solid-memo.com/decks/solid-fundamentals/v1.ttl#ch-linked-data> .
+```
+
 ## The answer log
 
 Every grade given in study is kept, so statistics can be computed
@@ -368,7 +406,12 @@ data, since nothing could rebuild it.
   grade (whichever answer scale gave it), when it was given and the study
   day it counts towards, fixed then so a later day-boundary change does
   not move it, and the prompt's interval before (absent on its first
-  answer, which introduced it) and after.
+  answer, which introduced it) and after. An answer to a
+  [course](courses.md) question also says how it was given
+  (`sm:answerMode sm:multipleChoice`) and, when it was wrong, which
+  wrong option was chosen (`sm:chosenDistractor`, the distractor in the
+  deck's cards document). An answer given in study says neither, which
+  means recalled, so study writes its answers as before.
 - **Added without reading** (`appendToDocument`): one insert-only PATCH,
   without a precondition, since an answer names a subject no other writer
   does. Every server tested creates the document and its container when

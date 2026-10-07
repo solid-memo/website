@@ -1,0 +1,14 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+
+<#answer-20261007T091200000Z-c0ur5e>
+    a solid-memo:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:answeredDeck <https://pod.example/solid-memo/main/catalog.ttl#deck-2> ;
+    solid-memo:answeredCard <https://pod.example/solid-memo/main/decks/deck-2.ttl#q> ;
+    solid-memo:answeredDirection solid-memo:frontToBack ;
+    solid-memo:grade 3 ;
+    solid-memo:answeredAt "2026-10-07T09:12:00.000Z"^^xsd:dateTime ;
+    solid-memo:answeredOn "2026-10-07" ;
+    solid-memo:nextIntervalDays 1 ;
+    solid-memo:answerMode solid-memo:frontToBack .

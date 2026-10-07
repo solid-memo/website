@@ -1943,7 +1943,8 @@ html.drag-active {
   margin-top: 0.15rem;
 }
 
-.library-imported {
+.library-imported,
+.library-course {
   padding: 0.1rem 0.5rem;
   border: 1px solid var(--border-strong);
   border-radius: 999px;
@@ -2415,6 +2416,262 @@ form.card-edit {
   .quality-buttons.minimal {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+/* Courses (docs/courses.md): the chapter list, a step's theory and its
+   multiple-choice questions. */
+.library-course {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.course-finished {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.course-chapters {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1.25rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.course-chapter {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 0.25rem 0.75rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.course-chapter h3 {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.course-chapter > p {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.course-chapter.locked {
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+}
+
+.course-chapter-number {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.course-state {
+  padding: 0.1rem 0.5rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.course-state.open {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.course-state.done {
+  border-color: var(--primary-fill);
+  background: var(--primary-fill);
+  color: var(--on-primary);
+}
+
+.course-step h3 {
+  margin: 0 0 0.5rem;
+  color: var(--text-muted);
+}
+
+.course-progress {
+  display: block;
+  width: 100%;
+  height: 0.4rem;
+  margin: 0 0 1rem;
+  accent-color: var(--primary);
+}
+
+/* A step's theory: prose to read, at a comfortable measure. */
+.course-theory {
+  max-width: 40rem;
+  padding: 1rem 1.25rem;
+  border-left: 4px solid var(--accent-blue);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: 1.1rem;
+  line-height: 1.65;
+}
+
+.course-theory p:last-child {
+  margin-bottom: 0;
+}
+
+.course-check-heading {
+  margin: 1.5rem 0 0.5rem;
+}
+
+.course-question {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 40rem;
+}
+
+/* A question is a sentence, not a word to recall: set as large text, not
+   at a study card's size. */
+.course-question .card-question p {
+  font-size: 1.3rem;
+  font-weight: 600;
+  text-align: left;
+}
+
+.course-question .card-face {
+  align-items: flex-start;
+}
+
+.multiple-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.choices {
+  display: grid;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+/* Each option is its radio's label: the whole row, 44px tall at least, is
+   its target. */
+.choice {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.choice:hover:not(:has(input:disabled)) {
+  background: var(--surface-hover);
+}
+
+.choice:has(input:checked) {
+  border-color: var(--primary);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+
+.choice:has(input:disabled) {
+  cursor: default;
+}
+
+.choice-number {
+  flex: none;
+  min-width: 1.5rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.choice-text {
+  flex: 1;
+}
+
+.choice-mark {
+  flex: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.choice.choice-right {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+
+.choice.choice-right .choice-mark {
+  color: var(--primary);
+}
+
+.choice.choice-wrong {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+  box-shadow: inset 0 0 0 1px var(--danger);
+}
+
+.choice.choice-wrong .choice-mark {
+  color: var(--danger);
+}
+
+.course-verdict {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.course-verdict.right {
+  color: var(--primary);
+}
+
+.course-verdict.wrong {
+  color: var(--danger);
+}
+
+.course-feedback,
+.course-review-end {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  border-radius: var(--radius-sm);
+}
+
+.course-feedback:focus-visible,
+.course-review-end:focus-visible {
+  outline-offset: 0.5rem;
+}
+
+.course-why {
+  margin: 0;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--danger-border);
+  border-radius: var(--radius-sm);
+  background: var(--danger-soft);
+}
+
+.course-right-answer {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+}
+
+.course-right-answer .card-answer {
+  align-items: flex-start;
+  padding-top: 0;
+  border-top: none;
+}
+
+.course-right-answer .card-answer p {
+  font-size: 1.15rem;
+  text-align: left;
 }
 
 fieldset label.radio-option .hint {

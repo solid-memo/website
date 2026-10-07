@@ -1,6 +1,6 @@
 /* Generated from ns/vocab/v1.ttl by `npm run generate`. Do not edit: change the source and regenerate. */
 
-/** Solid Memo's own vocabulary, version 1.13 (see docs/vocab.md). */
+/** Solid Memo's own vocabulary, version 1.14 (see docs/vocab.md). */
 export const SM_NS = "https://solid-memo.com/ns/vocab/v1.ttl#";
 
 export const SM = {
@@ -22,6 +22,12 @@ export const SM = {
   Answer: `${SM_NS}Answer`,
   /** A named group of decks and deck groups that the user arranged on the deck list. A subject of the instance's catalog document: a dcat:Catalog of its decks (dcat:dataset) and sub-groups (dcat:catalog), listed by the one catalogue or group it is in. (Added in 1.13.) */
   DeckGroup: `${SM_NS}DeckGroup`,
+  /** A chapter of a course: a library deck that is also a schema:Course. A subject of the deck's release beside its cards, part of the course (schema:isPartOf) at its place (schema:position), made of steps that each teach a piece of theory and check it with questions, and ending with a review of all its questions. Never copied into a pod: a copy reads it from the release it came from. (Added in 1.14.) */
+  Chapter: `${SM_NS}Chapter`,
+  /** One step of a course chapter: a short piece of theory, then the multiple-choice questions (cards) that check it. A subject of the deck's release, part of its chapter (schema:isPartOf) at its place (schema:position). (Added in 1.14.) */
+  Step: `${SM_NS}Step`,
+  /** A wrong option of a card asked as a multiple-choice question, the card's back being the right one. A subject of the document that holds its card, which names it with solid-memo:distractor; copied with the card. (Added in 1.14.) */
+  Distractor: `${SM_NS}Distractor`,
   /** Which version of its class's shape the subject conforms to. Absent means 1, the format that predates the field. Every subject Solid Memo writes carries it. (Since 1.0.) */
   formatVersion: `${SM_NS}formatVersion`,
   /** Where a deck or deck group stands among the members of the one catalogue or group it is in, 0 first; the decks and groups of one parent share one sequence. Absent means after every member that has one. (Added in 1.13. On a deck it is outside the deck format, without a version bump: an older reader ignores it and an older writer keeps it.) */
@@ -58,6 +64,8 @@ export const SM = {
   backLabel: `${SM_NS}backLabel`,
   /** A short note under the back's text, smaller, shown once the answer is revealed: when or why something changed, where it comes from. The back's text stays the answer itself. Language-tagged text in any language, one per language. (Added in 1.8 for card format 3.) */
   backNote: `${SM_NS}backNote`,
+  /** A wrong option to show next to the card's back when the card is asked as a multiple-choice question; a subject of the same document. A card with distractors has text on its back, the right option. (Added in 1.14. Outside the card format's version: an older reader ignores it and studies the card front to back.) */
+  distractor: `${SM_NS}distractor`,
   /** SM-2 easiness factor, never below 1.3. (Since 1.0.) */
   easeFactor: `${SM_NS}easeFactor`,
   /** Days between the last review and the next due day. (Since 1.0.) */
@@ -122,6 +130,18 @@ export const SM = {
   reviewedOnDayCount: `${SM_NS}reviewedOnDayCount`,
   /** How many prompts were first reviewed on the study day the schedule was computed on. (Added in 1.9.) */
   introducedOnDayCount: `${SM_NS}introducedOnDayCount`,
+  /** The short piece of theory a course step teaches, read before its questions: language-tagged text, one per language. (Added in 1.14.) */
+  theory: `${SM_NS}theory`,
+  /** A card of the same release, asked as a multiple-choice question right after the step's theory; answering it puts it among the cards the learner studies. A card is checked by one step at most. (Added in 1.14.) */
+  checkedBy: `${SM_NS}checkedBy`,
+  /** A card of the same release asked only in the chapter's final review, next to every card its steps check. (Added in 1.14.) */
+  reviewQuestion: `${SM_NS}reviewQuestion`,
+  /** The text of a wrong option: untagged, its language unknown, or language-tagged, one per language, as the back of its card is. (Added in 1.14.) */
+  distractorText: `${SM_NS}distractorText`,
+  /** Why the option is wrong, shown to a learner who chose it: language-tagged text, one per language. (Added in 1.14.) */
+  distractorNote: `${SM_NS}distractorNote`,
+  /** A chapter of the course the deck was copied from (its prov:wasDerivedFrom release) whose final review the learner has passed. (Added in 1.14. On a deck it is outside the deck format, without a version bump: an older reader ignores it and an older writer keeps it.) */
+  completedChapter: `${SM_NS}completedChapter`,
   /** The deck the answer was given in: its catalog entry, which may since have been removed. (Added in 1.10.) */
   answeredDeck: `${SM_NS}answeredDeck`,
   /** The card the answer was given to, which may since have been removed. (Added in 1.10.) */
@@ -138,6 +158,10 @@ export const SM = {
   priorIntervalDays: `${SM_NS}priorIntervalDays`,
   /** The prompt's interval after the answer: the days until it is due again. (Added in 1.10.) */
   nextIntervalDays: `${SM_NS}nextIntervalDays`,
+  /** How the prompt was answered: a concept of solid-memo:AnswerModes. Absent means recalled, as every answer was before 1.14. (Added in 1.14. Outside the answer format's version: an older reader ignores it.) */
+  answerMode: `${SM_NS}answerMode`,
+  /** The wrong option chosen, when a multiple-choice answer was wrong. Absent when the right option was chosen. (Added in 1.14. Outside the answer format's version: an older reader ignores it.) */
+  chosenDistractor: `${SM_NS}chosenDistractor`,
   /** The ways a deck can be studied. (Added in 1.6.) */
   StudyDirections: `${SM_NS}StudyDirections`,
   /** Each card is shown by its front and answered with its back. (Added in 1.6.) */
@@ -162,4 +186,10 @@ export const SM = {
   lightTheme: `${SM_NS}lightTheme`,
   /** The app is shown dark, whatever the browser prefers. (Added in 1.11.) */
   darkTheme: `${SM_NS}darkTheme`,
+  /** How a prompt is answered during study. (Added in 1.14.) */
+  AnswerModes: `${SM_NS}AnswerModes`,
+  /** The learner recalls the answer, sees it, and grades how well they knew it. (Added in 1.14.) */
+  recall: `${SM_NS}recall`,
+  /** The learner chooses the answer among the card's back and its distractors; the choice is graded right or wrong. (Added in 1.14.) */
+  multipleChoice: `${SM_NS}multipleChoice`,
 } as const;

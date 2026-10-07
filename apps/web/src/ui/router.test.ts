@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { act, renderHook } from "@testing-library/preact";
 import {
+  courseHref,
   deckHref,
   decksHref,
   libraryDeckHref,
@@ -106,6 +107,23 @@ const roundTrips: RouteRef[] = [
     instanceUrl: "https://pod.example/solid-memo/a/",
     deckUrl: "https://pod.example/solid-memo/a/decks.ttl#deck-1",
   },
+  {
+    screen: "course",
+    instanceUrl: "https://pod.example/solid-memo/a/",
+    deckUrl: "https://pod.example/solid-memo/a/decks.ttl#deck-1",
+  },
+  {
+    screen: "courseChapter",
+    instanceUrl: "https://pod.example/solid-memo/a/",
+    deckUrl: "https://pod.example/solid-memo/a/decks.ttl#deck-1",
+    chapterUrl: "https://solid-memo.com/decks/solid-fundamentals/v1.ttl#ch-linked-data",
+  },
+  {
+    screen: "courseReview",
+    instanceUrl: "https://pod.example/solid-memo/a/",
+    deckUrl: "https://pod.example/solid-memo/a/decks.ttl#deck-1",
+    chapterUrl: "https://solid-memo.com/decks/solid-fundamentals/v1.ttl#ch-linked-data",
+  },
   { screen: "preferences", instanceUrl: "https://pod.example/solid-memo/a/" },
   { screen: "statistics", instanceUrl: "https://pod.example/solid-memo/a/" },
   { screen: "validation", instanceUrl: "https://pod.example/solid-memo/a/" },
@@ -202,6 +220,11 @@ describe("routeToHash / parseHash", () => {
     "#/study",
     "#/study?instance=a",
     "#/study?deck=b",
+    "#/course?instance=a",
+    "#/course?deck=b",
+    "#/course-chapter?instance=a&deck=b",
+    "#/course-chapter?instance=a&chapter=c",
+    "#/course-review?deck=b&chapter=c",
     "#/preferences",
     "#/statistics",
     "#/validate",
@@ -236,6 +259,16 @@ describe("deckHref", () => {
     const href = deckHref("https://pod.example/a/", "https://pod.example/a/c#d");
     expect(parseHash(href)).toEqual({
       screen: "deckDetail",
+      instanceUrl: "https://pod.example/a/",
+      deckUrl: "https://pod.example/a/c#d",
+    });
+  });
+});
+
+describe("courseHref", () => {
+  it("is the hash URL of the course a deck is the copy of", () => {
+    expect(parseHash(courseHref("https://pod.example/a/", "https://pod.example/a/c#d"))).toEqual({
+      screen: "course",
       instanceUrl: "https://pod.example/a/",
       deckUrl: "https://pod.example/a/c#d",
     });

@@ -65,6 +65,30 @@ card format 4:
 [`decks/greek-alphabet/v1.ttl`](../decks/greek-alphabet/v1.ttl) is a
 small, complete example.
 
+## Courses
+
+A version may be a [course](courses.md): a deck whose cards are taught
+in chapters of steps, each card asked as a multiple-choice question.
+Beside what every version has, a course has:
+
+- the extra type `schema:Course` on the release itself, and
+  `sm:studyDirection sm:frontToBack`;
+- its chapters (`sm:Chapter`, chapter format 1) and steps (`sm:Step`,
+  step format 1), subjects of the release beside its cards;
+- on each card it asks, `sm:distractor` links to its wrong options,
+  `sm:Distractor` subjects (distractor format 1) of the release.
+
+The index leaves the chapters, steps and distractors out, as it leaves
+the cards out. It keeps the release's `schema:Course` type, so the app
+can tell a course from a deck by the index alone (`LibraryDeck.isCourse`).
+The app reads the outline from the release when the learner opens the
+course. [`decks/solid-fundamentals/v1.ttl`](../decks/solid-fundamentals/v1.ttl)
+is the first course.
+
+A course's chapters, steps and distractors are never removed, as its
+cards are not: one that should go is retired (`owl:deprecated true`), so
+the learners' decks that follow the course keep their place in it.
+
 ## Provenance
 
 Each authored deck says how it was made, in
@@ -137,9 +161,40 @@ what the versions make. Both check:
   the document itself, `dcat:version`, series, publisher, and
   `dcat:prev` / `dcat:previousVersion` naming the version before (none
   for version 1);
-- that no version drops a card of the one before it;
+- that no version drops a card, chapter, step or distractor of the one
+  before it;
+- a course's outline, by the rules below;
 - every version and the index against Solid Memo's shapes, DCAT-AP (a
   version with the index beside it) and SKOS, with the reference data.
+
+### Course rules
+
+`courseProblems` checks what the shapes cannot say about a course. It
+runs on every version, and finds nothing in a plain deck:
+
+- A release with chapters or steps is typed `schema:Course`, and a
+  course has at least one chapter. It studies `sm:frontToBack`.
+- A chapter is part of the release it is in (`schema:isPartOf <>`), and
+  a step is part of a chapter of the release.
+- Chapters each have their own `schema:position`, and so do the steps of
+  one chapter.
+- Each card named by `sm:checkedBy` or `sm:reviewQuestion` is a card of
+  the release, and not a retired one. A retired step or chapter may
+  still name a retired card, so a card can be retired without editing
+  the step that checked it.
+- A card is checked by one step at most, and is either checked by a step
+  or a review question of a chapter, never both.
+- A card a step or chapter in use asks has text on its back (the right
+  option) and at least two distractors in use. Each of those has text in
+  every language of the back, exactly: an untagged back needs untagged
+  distractor text, a `zxx` back `zxx` text.
+- A chapter in use has at least one step in use.
+- Every `sm:distractor` link, in any release, names a `sm:Distractor` of
+  the release, and no two cards name the same one: a copy writes and
+  removes a card's distractors with the card.
+
+Retired steps and chapters do not count toward the rules on positions
+or on how a card is asked.
 
 With `-- --base <git ref>` they also compare with the library at that
 commit: a version published there that is gone or differs by a byte
@@ -231,6 +286,10 @@ flowchart LR
   refused at import rather than silently stripped.
 - Several decks can be ticked and imported at once, one at a time; a
   failure part-way leaves the earlier ones imported and reports the error.
+- A course is started rather than imported (the list offers no tick for
+  it, only its page): its copy starts with no
+  cards, and a card joins it when its question is answered
+  ([courses.md](courses.md)).
 - When the library publishes a newer release of an imported deck, the
   deck's page offers to update the copy card by card, keeping what the
   user changed and their review history

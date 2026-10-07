@@ -10,6 +10,7 @@ import type {
   CardV4,
   CardV5,
   CatalogV1,
+  ChapterV1,
   DeckV1,
   DeckV2,
   DeckV3,
@@ -18,6 +19,7 @@ import type {
   DeckV6,
   DeckGroupV1,
   DeckScheduleV1,
+  DistractorV1,
   DistributionV1,
   DocumentReceiptV1,
   InstanceV1,
@@ -36,6 +38,7 @@ import type {
   PreferencesV4,
   ReviewStateV1,
   ReviewStateV2,
+  StepV1,
 } from "./types.generated.ts";
 
 export const AGENT_V1: ShapeDescriptor<AgentV1> = {
@@ -71,6 +74,8 @@ export const ANSWER_V1: ShapeDescriptor<AnswerV1> = {
     { name: "studyDay", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#answeredOn", kind: "string", cardinality: "one" },
     { name: "priorIntervalDays", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#priorIntervalDays", kind: "integer", cardinality: "optional" },
     { name: "nextIntervalDays", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#nextIntervalDays", kind: "integer", cardinality: "one" },
+    { name: "mode", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#answerMode", kind: "iriEnum", cardinality: "optional", values: ["https://solid-memo.com/ns/vocab/v1.ttl#recall","https://solid-memo.com/ns/vocab/v1.ttl#multipleChoice"] },
+    { name: "chosenDistractor", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#chosenDistractor", kind: "iri", cardinality: "optional" },
   ],
 };
 
@@ -175,6 +180,7 @@ export const CARD_V5: ShapeDescriptor<CardV5> = {
     { name: "backNote", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#backNote", kind: "text", cardinality: "optional" },
     { name: "created", predicate: "http://purl.org/dc/terms/created", kind: "dateTime", cardinality: "optional" },
     { name: "deprecated", predicate: "http://www.w3.org/2002/07/owl#deprecated", kind: "boolean", cardinality: "optional" },
+    { name: "distractor", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#distractor", kind: "iri", cardinality: "many" },
   ],
 };
 
@@ -195,6 +201,25 @@ export const CATALOG_V1: ShapeDescriptor<CatalogV1> = {
     { name: "modified", predicate: "http://purl.org/dc/terms/modified", kind: "dateTime", cardinality: "optional" },
     { name: "themeTaxonomy", predicate: "http://www.w3.org/ns/dcat#themeTaxonomy", kind: "iri", cardinality: "many" },
     { name: "dataset", predicate: "http://www.w3.org/ns/dcat#dataset", kind: "iri", cardinality: "many" },
+  ],
+};
+
+export const CHAPTER_V1: ShapeDescriptor<ChapterV1> = {
+  shape: "chapter",
+  version: 1,
+  targetClass: "https://solid-memo.com/ns/vocab/v1.ttl#Chapter",
+  additionalTypes: ["https://schema.org/Syllabus"],
+  absent: [],
+  shapeIri: "https://solid-memo.com/ns/shapes/chapter/v1.ttl#inLibrary",
+  shapeDocument: "chapter/v1.ttl",
+  context: "library",
+  fields: [
+    { name: "title", predicate: "http://purl.org/dc/terms/title", kind: "text", cardinality: "one" },
+    { name: "description", predicate: "http://purl.org/dc/terms/description", kind: "text", cardinality: "optional" },
+    { name: "course", predicate: "https://schema.org/isPartOf", kind: "iri", cardinality: "one" },
+    { name: "position", predicate: "https://schema.org/position", kind: "integer", cardinality: "one" },
+    { name: "reviewQuestion", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#reviewQuestion", kind: "iri", cardinality: "many" },
+    { name: "deprecated", predicate: "http://www.w3.org/2002/07/owl#deprecated", kind: "boolean", cardinality: "optional" },
   ],
 };
 
@@ -393,6 +418,22 @@ export const DECK_SCHEDULE_V1: ShapeDescriptor<DeckScheduleV1> = {
     { name: "unreviewed", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#unreviewedCount", kind: "integer", cardinality: "one" },
     { name: "reviewedOnDay", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#reviewedOnDayCount", kind: "integer", cardinality: "one" },
     { name: "introducedOnDay", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#introducedOnDayCount", kind: "integer", cardinality: "one" },
+  ],
+};
+
+export const DISTRACTOR_V1: ShapeDescriptor<DistractorV1> = {
+  shape: "distractor",
+  version: 1,
+  targetClass: "https://solid-memo.com/ns/vocab/v1.ttl#Distractor",
+  additionalTypes: ["https://schema.org/Answer"],
+  absent: [],
+  shapeIri: "https://solid-memo.com/ns/shapes/distractor/v1.ttl#shape",
+  shapeDocument: "distractor/v1.ttl",
+  context: "any",
+  fields: [
+    { name: "text", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#distractorText", kind: "anyText", cardinality: "one" },
+    { name: "note", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#distractorNote", kind: "text", cardinality: "optional" },
+    { name: "deprecated", predicate: "http://www.w3.org/2002/07/owl#deprecated", kind: "boolean", cardinality: "optional" },
   ],
 };
 
@@ -790,15 +831,35 @@ export const REVIEW_STATE_V2: ShapeDescriptor<ReviewStateV2> = {
   ],
 };
 
+export const STEP_V1: ShapeDescriptor<StepV1> = {
+  shape: "step",
+  version: 1,
+  targetClass: "https://solid-memo.com/ns/vocab/v1.ttl#Step",
+  additionalTypes: ["https://schema.org/LearningResource"],
+  absent: [],
+  shapeIri: "https://solid-memo.com/ns/shapes/step/v1.ttl#inLibrary",
+  shapeDocument: "step/v1.ttl",
+  context: "library",
+  fields: [
+    { name: "theory", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#theory", kind: "text", cardinality: "one" },
+    { name: "checkedBy", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#checkedBy", kind: "iri", cardinality: "many" },
+    { name: "chapter", predicate: "https://schema.org/isPartOf", kind: "iri", cardinality: "one" },
+    { name: "position", predicate: "https://schema.org/position", kind: "integer", cardinality: "one" },
+    { name: "deprecated", predicate: "http://www.w3.org/2002/07/owl#deprecated", kind: "boolean", cardinality: "optional" },
+  ],
+};
+
 /** Every descriptor by kind and version. */
 export const SHAPES = {
   agent: { 1: AGENT_V1 },
   answer: { 1: ANSWER_V1 },
   card: { 1: CARD_V1, 2: CARD_V2, 3: CARD_V3, 4: CARD_V4, 5: CARD_V5 },
   catalog: { 1: CATALOG_V1 },
+  chapter: { 1: CHAPTER_V1 },
   deck: { 1: DECK_V1, 2: DECK_V2, 3: DECK_V3, 4: DECK_V4, 5: DECK_V5, 6: DECK_V6 },
   deckGroup: { 1: DECK_GROUP_V1 },
   deckSchedule: { 1: DECK_SCHEDULE_V1 },
+  distractor: { 1: DISTRACTOR_V1 },
   distribution: { 1: DISTRIBUTION_V1 },
   documentReceipt: { 1: DOCUMENT_RECEIPT_V1 },
   instance: { 1: INSTANCE_V1, 2: INSTANCE_V2 },
@@ -806,6 +867,7 @@ export const SHAPES = {
   libraryDeckSeries: { 1: LIBRARY_DECK_SERIES_V1, 2: LIBRARY_DECK_SERIES_V2, 3: LIBRARY_DECK_SERIES_V3 },
   preferences: { 1: PREFERENCES_V1, 2: PREFERENCES_V2, 3: PREFERENCES_V3, 4: PREFERENCES_V4 },
   reviewState: { 1: REVIEW_STATE_V1, 2: REVIEW_STATE_V2 },
+  step: { 1: STEP_V1 },
 } as const;
 
 /** Every descriptor, for selection by class, version and context. */
@@ -818,6 +880,7 @@ export const ALL_SHAPES: readonly ShapeDescriptor[] = [
   CARD_V4,
   CARD_V5,
   CATALOG_V1,
+  CHAPTER_V1,
   DECK_V1,
   DECK_V2,
   DECK_V3,
@@ -826,6 +889,7 @@ export const ALL_SHAPES: readonly ShapeDescriptor[] = [
   DECK_V6,
   DECK_GROUP_V1,
   DECK_SCHEDULE_V1,
+  DISTRACTOR_V1,
   DISTRIBUTION_V1,
   DOCUMENT_RECEIPT_V1,
   INSTANCE_V1,
@@ -844,4 +908,5 @@ export const ALL_SHAPES: readonly ShapeDescriptor[] = [
   PREFERENCES_V4,
   REVIEW_STATE_V1,
   REVIEW_STATE_V2,
+  STEP_V1,
 ];

@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { STUDY_DIRECTIONS, TOPICS } from "@solid-memo/vocab/concepts.generated";
 import {
+  answerModeOfConcept,
+  conceptOfAnswerMode,
   conceptByIri,
   conceptByNotation,
   conceptOfDirection,
@@ -66,5 +68,15 @@ describe("theme choices as concepts", () => {
     }
     expect(conceptOfTheme("system")).toBe(`${SM}systemTheme`);
     expect(themeOfConcept(`${SM}warnOnly`)).toBeUndefined();
+  });
+});
+
+describe("answer modes as concepts", () => {
+  it("map each mode to its concept and back; another IRI names none", () => {
+    expect(conceptOfAnswerMode("recall")).toBe(`${SM}recall`);
+    expect(conceptOfAnswerMode("multiple-choice")).toBe(`${SM}multipleChoice`);
+    expect(answerModeOfConcept(`${SM}multipleChoice`)).toBe("multiple-choice");
+    expect(answerModeOfConcept(`${SM}recall`)).toBe("recall");
+    expect(answerModeOfConcept(`${SM}frontToBack`)).toBeUndefined();
   });
 });

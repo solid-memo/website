@@ -89,6 +89,27 @@ migration: groups are new subjects, and a deck's `sm:position` and the
 catalogue's `dcat:catalog` belong to no shape, so the deck and catalogue
 formats are unchanged.
 
+[Courses](courses.md) (vocabulary 1.14) need no migration and moved no
+format version:
+
+- Chapter, step and distractor format 1 are new classes, so nothing old
+  is in their format.
+- `sm:distractor` joined card format 5, and `sm:answerMode` and
+  `sm:chosenDistractor` answer format 1, each optional. A reader that
+  ignores them loses nothing: an older app studies a course's card front
+  to back as any card, and reads a multiple-choice answer as an answer.
+  Absent, they mean what every card and answer before meant: no wrong
+  options, and recalled.
+- `sm:completedChapter` on a deck belongs to no shape, as `sm:position`
+  does, so `DeckV6` is unchanged and every writer of the deck keeps it.
+
+An older app that edits a course's card keeps its `sm:distractor`
+links, as it keeps any triple its shape does not own. One that removes
+the card leaves its `sm:Distractor` subjects behind, which this app
+ignores, since no card names them. An older app's
+[check](validation.md) lists an `sm:Distractor` as `untyped`, a
+subject of no class it knows: visible, never a violation.
+
 Rules that hold across versions:
 
 - **Readers never refuse older data.** A subject is read with the shape
@@ -313,6 +334,13 @@ the user changed too: nothing of theirs is lost. A library release never
 removes a card any more (the build refuses one that drops a card of the
 release before it); the removal rows are for releases made before cards
 could be retired.
+
+A card's distractors are part of its content: a release that changes a
+wrong option, its note or their order changes the card. A
+[course](courses.md)'s deck (either release is a course) holds only the
+cards the learner has answered, so its upgrade adds none; the learner
+reaches them through the course. It changes, retires and restores the
+cards it holds as above.
 
 A new study direction is taken up when the copy is still studied the old
 release's way. So are the deck's title, description, keywords and

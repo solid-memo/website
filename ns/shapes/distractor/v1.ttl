@@ -1,0 +1,79 @@
+@base <https://solid-memo.com/ns/shapes/distractor/v1.ttl> .
+
+@prefix sh:         <http://www.w3.org/ns/shacl#> .
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl:        <http://www.w3.org/2002/07/owl#> .
+@prefix schema:     <https://schema.org/> .
+
+# A distractor, format 1: a wrong option of a card asked as a
+# multiple-choice question, a subject of the document that holds the card
+# (a library release, or a deck's cards document in a pod), which names
+# it with solid-memo:distractor.
+<#shape>
+    a sh:NodeShape ;
+    sh:name "DistractorV1" ;
+    rdfs:comment "Distractor format 1: a schema:Answer, a wrong option of a card, its text untagged, its language unknown, or language-tagged, one per language, never both, and a note on why it is wrong, language-tagged, one per language." ;
+    sh:nodeKind sh:IRI ;
+    sh:class solid-memo:Distractor ;
+    sh:property <#formatVersion> ,
+                <#answer> ,
+                <#text> ,
+                <#note> ,
+                <#deprecated> ;
+    sh:or ( [ sh:path solid-memo:distractorText ; sh:qualifiedValueShape <#untagged> ; sh:qualifiedMaxCount 0 ] [ sh:path solid-memo:distractorText ; sh:qualifiedValueShape <#tagged> ; sh:qualifiedMaxCount 0 ] ) ;
+    sh:message "A distractor's text is either untagged or language-tagged, never both."@en ,
+               "En distraktors text är antingen otaggad eller språktaggad, aldrig båda."@sv .
+
+<#untagged>
+    a sh:NodeShape ;
+    sh:datatype xsd:string .
+
+<#tagged>
+    a sh:NodeShape ;
+    sh:datatype rdf:langString .
+
+<#formatVersion>
+    a sh:PropertyShape ;
+    sh:path solid-memo:formatVersion ;
+    sh:datatype xsd:integer ;
+    sh:maxCount 1 ;
+    sh:in ( 1 ) .
+
+<#answer>
+    a sh:PropertyShape ;
+    sh:path rdf:type ;
+    sh:hasValue schema:Answer ;
+    sh:message "A distractor is a schema:Answer."@en ,
+               "En distraktor är en schema:Answer."@sv .
+
+<#text>
+    a sh:PropertyShape ;
+    sh:path solid-memo:distractorText ;
+    sh:name "text" ;
+    sh:or ( <#untagged> <#tagged> ) ;
+    sh:minCount 1 ;
+    sh:uniqueLang true ;
+    sh:qualifiedValueShape <#untagged> ;
+    sh:qualifiedMaxCount 1 ;
+    sh:message "A distractor's text is one untagged text (\"…\"), or language-tagged text, one per language (\"…\"@en)."@en ,
+               "En distraktors text är en otaggad text (\"…\") eller språktaggad text, en per språk (\"…\"@en)."@sv .
+
+<#note>
+    a sh:PropertyShape ;
+    sh:path solid-memo:distractorNote ;
+    sh:name "note" ;
+    sh:datatype rdf:langString ;
+    sh:uniqueLang true ;
+    sh:message "A note on why an option is wrong is language-tagged text, one per language (\"…\"@en)."@en ,
+               "En anteckning om varför ett alternativ är fel är språktaggad text, en per språk (\"…\"@en)."@sv .
+
+<#deprecated>
+    a sh:PropertyShape ;
+    sh:path owl:deprecated ;
+    sh:datatype xsd:boolean ;
+    sh:maxCount 1 ;
+    sh:message "A retired distractor states owl:deprecated true, a boolean."@en ,
+               "En distraktor som tagits ur bruk anger owl:deprecated true, ett booleskt värde."@sv .

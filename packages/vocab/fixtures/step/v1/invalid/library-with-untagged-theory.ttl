@@ -1,0 +1,11 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix schema:     <https://schema.org/> .
+
+<#s-1>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    schema:isPartOf <#ch-1> ;
+    schema:position 0 ;
+    solid-memo:theory "Every thing is named by an IRI." ;
+    solid-memo:checkedBy <#q-1> ;
+    solid-memo:formatVersion 1 .

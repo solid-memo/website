@@ -13,6 +13,9 @@ import { Breadcrumbs, breadcrumbsFor } from "./Breadcrumbs";
 import { BrowserContainer } from "./BrowserContainer";
 import { CardContainer } from "./CardContainer";
 import { CardCreatorContainer } from "./CardCreatorContainer";
+import { ChapterPlayerContainer } from "./ChapterPlayerContainer";
+import { ChapterReviewContainer } from "./ChapterReviewContainer";
+import { CourseContainer, courseKey } from "./CourseContainer";
 import { DeckCreatorContainer } from "./DeckCreatorContainer";
 import { DeckDetailContainer } from "./DeckDetailContainer";
 import { DeckPreferencesContainer } from "./DeckPreferencesContainer";
@@ -203,6 +206,37 @@ export function Workspace({
     }
   }, [needsLibraryCard, libraryCardsQuery.data, libraryCardId, instanceUrl, libraryDeckUrl]);
 
+  // A course's routes name the learner's deck of it; the course itself
+  // (its release's outline and cards, and the learner's progress) is read
+  // through the deck. A chapter that is not in it, or not open yet, falls
+  // back to the course; a deck that is no library copy, to its page.
+  const isCourseRoute =
+    route?.screen === "course" || route?.screen === "courseChapter" || route?.screen === "courseReview";
+  const needsCourse = isCourseRoute && activeDeck !== null;
+  const courseQuery = useQuery({
+    queryKey: courseKey(deckUrl!),
+    queryFn: () => useCases.getCourse(activeDeck!),
+    enabled: needsCourse && activeDeck.sourceUrl !== undefined,
+  });
+  const activeCourse = needsCourse ? (courseQuery.data ?? null) : null;
+  const chapterUrl =
+    route?.screen === "courseChapter" || route?.screen === "courseReview" ? route.chapterUrl : null;
+  const chapterIndex =
+    activeCourse === null ? -1 : activeCourse.outline.chapters.findIndex((c) => c.url === chapterUrl);
+  const activeChapter =
+    chapterIndex >= 0 && activeCourse!.progress.chapters[chapterIndex]!.state !== "locked"
+      ? activeCourse!.outline.chapters[chapterIndex]!
+      : null;
+
+  useEffect(() => {
+    if (!needsCourse) return;
+    if (activeDeck.sourceUrl === undefined) {
+      replace({ screen: "deckDetail", instanceUrl: instanceUrl!, deckUrl: deckUrl! });
+    } else if (chapterUrl !== null && activeCourse !== null && activeChapter === null) {
+      replace({ screen: "course", instanceUrl: instanceUrl!, deckUrl: deckUrl! });
+    }
+  }, [needsCourse, activeDeck, activeCourse, activeChapter, chapterUrl, instanceUrl, deckUrl]);
+
   const preferencesQuery = useQuery({
     queryKey: ["preferences", instanceUrl],
     queryFn: () => useCases.getPreferences(instanceUrl!),
@@ -328,10 +362,12 @@ export function Workspace({
           card: activeCard === null ? "" : cardLabel(activeCard, readerText),
           libraryDeck: activeLibraryDeck === null ? "" : readerText(activeLibraryDeck.title),
           libraryCard: activeLibraryCard === null ? "" : cardLabel(activeLibraryCard, readerText),
+          chapter: activeChapter === null ? "" : readerText(activeChapter.title),
           deckLang: activeDeck === null ? undefined : readerLang(activeDeck.title),
           cardLang: activeCard === null ? undefined : readerLang(cardLabelText(activeCard)),
           libraryDeckLang: activeLibraryDeck === null ? undefined : readerLang(activeLibraryDeck.title),
           libraryCardLang: activeLibraryCard === null ? undefined : readerLang(cardLabelText(activeLibraryCard)),
+          chapterLang: activeChapter === null ? undefined : readerLang(activeChapter.title),
         }, t);
   // The page and what it is in, as the trail ends: "Study – Kanji N5 – Solid Memo".
   useDocumentTitle(
@@ -372,6 +408,14 @@ export function Workspace({
       }
       if (activeCard === null) {
         return <Loading label={t("workspace.loadingCard")} />;
+      }
+    }
+    if (needsCourse) {
+      if (courseQuery.error) {
+        return <ErrorMessage error={errorText(courseQuery.error)} />;
+      }
+      if (activeCourse === null || (chapterUrl !== null && activeChapter === null)) {
+        return <Loading label={t("workspace.loadingCourse")} />;
       }
     }
     if (needsLibraryDeck) {
@@ -495,6 +539,9 @@ export function Workspace({
             deck={activeLibraryDeck!}
             onDone={() =>
               navigate({ screen: "home", instanceUrl: instanceUrl! })
+            }
+            onCourseStarted={(started) =>
+              navigate({ screen: "course", instanceUrl: instanceUrl!, deckUrl: started.url })
             }
           />
         );
@@ -640,6 +687,29 @@ export function Workspace({
             onExit={() =>
               navigate({ screen: "home", instanceUrl: instanceUrl! })
             }
+          />
+        );
+      case "course":
+        return <CourseContainer instanceUrl={instanceUrl!} course={activeCourse!} />;
+      case "courseChapter":
+        return (
+          <ChapterPlayerContainer
+            key={route.chapterUrl}
+            useCases={useCases}
+            instance={activeInstance!}
+            course={activeCourse!}
+            chapter={activeChapter!}
+            onReview={() => navigate({ ...route, screen: "courseReview" })}
+          />
+        );
+      case "courseReview":
+        return (
+          <ChapterReviewContainer
+            key={route.chapterUrl}
+            useCases={useCases}
+            instance={activeInstance!}
+            course={activeCourse!}
+            chapter={activeChapter!}
           />
         );
       case "preferences":

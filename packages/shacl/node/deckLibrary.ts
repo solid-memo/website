@@ -2,10 +2,10 @@ import { execFile } from "node:child_process";
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import { join, relative } from "node:path";
 import { promisify } from "node:util";
-import { DataFactory, Writer, type Quad, type Quad_Object } from "n3";
+import { DataFactory, Writer, type Literal, type Quad, type Quad_Object } from "n3";
 import type { ShapeEngine } from "../src/engine.ts";
 import { formatTurtle } from "@solid-memo/turtle/formatTurtle";
-import { objectsOf, parseTurtle, RDF_TYPE } from "@solid-memo/turtle/rdf";
+import { objectsOf, parseTurtle, RDF_TYPE, subjectsOfType } from "@solid-memo/turtle/rdf";
 import { SITE, VOCAB_BASE } from "@solid-memo/vocab/tooling/sources";
 import { SM_NS } from "@solid-memo/vocab/tooling/vocab";
 import { DECKS_ROOT, VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
@@ -27,8 +27,9 @@ import {
  * it is out of date. Both check the library: the layout (nothing but the
  * index and the releases, each deck's versions numbered 1, 2, …), each
  * release's metadata against its path, Solid Memo's shapes, DCAT-AP and
- * SKOS with the reference data, and that no version drops a card of the
- * one before it. With `--base <git ref>`, a version published at that
+ * SKOS with the reference data, a course's outline (courseProblems), and
+ * that no version drops a card, chapter, step or distractor of the one
+ * before it. With `--base <git ref>`, a version published at that
  * ref must be there still, byte for byte: a published version is never
  * edited or removed, only followed by the next.
  */
@@ -43,6 +44,7 @@ const TOPICS = `${VOCAB_BASE}topics.ttl`;
 const OWL_DEPRECATED = "http://www.w3.org/2002/07/owl#deprecated";
 const PROV = "http://www.w3.org/ns/prov#";
 const RDFS_COMMENT = "http://www.w3.org/2000/01/rdf-schema#comment";
+const SCHEMA = "https://schema.org/";
 
 /** Where the site publishes the library. Every IRI of it is under this: the index, its series and publisher, and every release. */
 export const DECKS_BASE = `${SITE}decks/`;
@@ -128,23 +130,28 @@ function sortReleases(releases: readonly DeckRelease[]): DeckRelease[] {
   return [...releases].sort((a, b) => a.deck.localeCompare(b.deck) || a.version - b.version);
 }
 
-/** A release's cards by subject, each with whether it is retired (owl:deprecated true). */
-function cardsOf(quads: readonly Quad[]): Map<string, boolean> {
-  const cards = quads
-    .filter((q) => q.predicate.value === RDF_TYPE && q.object.value === `${SM_NS}Card`)
-    .map((q) => q.subject.value);
-  const retired = new Set(
+/** The subjects of a release that state owl:deprecated true: retired. */
+function retiredOf(quads: readonly Quad[]): Set<string> {
+  return new Set(
     quads
       .filter((q) => q.predicate.value === OWL_DEPRECATED && q.object.termType === "Literal" && q.object.value === "true")
       .map((q) => q.subject.value),
   );
-  return new Map(cards.map((subject) => [subject, retired.has(subject)]));
 }
 
-/** The fragment ids of a release's cards: a card's identity from one version to the next. */
-function cardIdsOf(quads: readonly Quad[]): string[] {
-  return [...cardsOf(quads).keys()].map((subject) => subject.slice(subject.indexOf("#") + 1));
+/** A release's cards by subject, each with whether it is retired (owl:deprecated true). */
+function cardsOf(quads: readonly Quad[]): Map<string, boolean> {
+  const retired = retiredOf(quads);
+  return new Map(subjectsOfType(quads, `${SM_NS}Card`).map((subject) => [subject, retired.has(subject)]));
 }
+
+/** The fragment ids of a release's subjects of a class: a card's, chapter's, step's or distractor's identity from one version to the next. */
+function idsOf(quads: readonly Quad[], type: string): string[] {
+  return subjectsOfType(quads, type).map((subject) => subject.slice(subject.indexOf("#") + 1));
+}
+
+/** What a course's outline and wrong options are: subjects the index leaves out, and a later version never drops. */
+const OUTLINE_TYPES = [`${SM_NS}Chapter`, `${SM_NS}Step`, `${SM_NS}Distractor`];
 
 function literalsOf(quads: readonly Quad[], subject: string, predicate: string): Quad_Object[] {
   return objectsOf(quads, subject, predicate).filter((o) => o.termType === "Literal");
@@ -157,7 +164,8 @@ function literalsOf(quads: readonly Quad[], subject: string, predicate: string):
  * description, themes and keywords as the release has them; every older
  * release is summarised (a dcat:Dataset with its title, description,
  * version, issue time and notes), the current one described in full —
- * everything but its cards and the record of how it was made (every
+ * everything but its cards, a course's chapters, steps and distractors
+ * (its schema:Course type stays, which tells a course) and the record of how it was made (every
  * rdfs:comment, and of its prov:Activity nodes all but the type of the
  * one that generated it; the release itself carries them), plus sm:cardCount, the cards it has in use (retired
  * ones not counted) — so the library can be listed from the index alone. The releases must be sorted by deck then version.
@@ -225,8 +233,10 @@ export function buildIndex(releases: readonly DeckRelease[]): string {
     );
     // DCAT-AP wants the activity that generated the release typed as one: its type stays.
     const generating = new Set(objectsOf(latest.quads, latestUrl, `${PROV}wasGeneratedBy`).map((o) => o.value));
+    const outline = new Set(OUTLINE_TYPES.flatMap((type) => subjectsOfType(latest.quads, type)));
     const keep = (q: Quad) =>
       !cards.has(q.subject.value) &&
+      !outline.has(q.subject.value) &&
       q.predicate.value !== RDFS_COMMENT &&
       (!activities.has(q.subject.value) || (generating.has(q.subject.value) && q.predicate.value === RDF_TYPE));
     out.push(...latest.quads.filter(keep));
@@ -351,6 +361,158 @@ export function metadataProblems(release: DeckRelease): string[] {
   return problems;
 }
 
+/**
+ * What the shapes cannot say about a course: a release with chapters or
+ * steps is a schema:Course, with at least one chapter, studied front to
+ * back; its chapters are part of it and its steps part of its chapters,
+ * each at its own position; what a step in use checks and a chapter in
+ * use reviews is a card of the release in use, asked once, with text on
+ * its back and at least two distractors that have text in each of its
+ * back's languages (retired ones not counted); and a chapter in use has
+ * a step in use. Every card's
+ * distractors, in a course or not, are distractors of the release, each
+ * named by that card alone.
+ * Retired chapters and steps keep what they named.
+ */
+export function courseProblems(release: DeckRelease): string[] {
+  const { deck, version, quads } = release;
+  const label = labelOf(deck, version);
+  const url = releaseUrlOf(deck, version);
+  const problems: string[] = [];
+  const retired = retiredOf(quads);
+  const inUse = (subject: string) => !retired.has(subject);
+  const cards = cardsOf(quads);
+  const chapters = subjectsOfType(quads, `${SM_NS}Chapter`);
+  const steps = subjectsOfType(quads, `${SM_NS}Step`);
+  const distractors = new Set(subjectsOfType(quads, `${SM_NS}Distractor`));
+  const shown = (iri: string) => (iri.startsWith(`${url}#`) ? `<${iri.slice(url.length)}>` : `<${iri}>`);
+  const named = (subject: string, predicate: string) =>
+    objectsOf(quads, subject, predicate).filter((o) => o.termType === "NamedNode").map((o) => o.value);
+  const partOf = (subject: string) => named(subject, `${SCHEMA}isPartOf`);
+
+  const course = objectsOf(quads, url, RDF_TYPE).some((o) => o.value === `${SCHEMA}Course`);
+  if (!course && chapters.length + steps.length > 0) {
+    problems.push(`${label}: has chapters or steps but is no schema:Course: type the release itself schema:Course.`);
+  }
+  if (course && chapters.length === 0) {
+    problems.push(`${label}: is a schema:Course without a chapter: a course has at least one solid-memo:Chapter.`);
+  }
+  const direction = objectsOf(quads, url, `${SM_NS}studyDirection`);
+  if (course && (direction.length !== 1 || direction[0].value !== `${SM_NS}frontToBack`)) {
+    problems.push(`${label}: states solid-memo:studyDirection ${shownValues(direction)}; a course studies solid-memo:frontToBack.`);
+  }
+
+  for (const chapter of chapters) {
+    const parts = partOf(chapter);
+    if (parts.some((part) => part !== url)) {
+      problems.push(
+        `${label}: chapter ${shown(chapter)} is part of ${parts.map(shown).join(", ")}; a chapter is part of the release it is in (schema:isPartOf <>).`,
+      );
+    }
+  }
+  for (const step of steps) {
+    for (const part of partOf(step).filter((part) => !chapters.includes(part))) {
+      problems.push(`${label}: step ${shown(step)} is part of ${shown(part)}, which is no chapter of this release.`);
+    }
+  }
+
+  // The cards the steps and chapters in use ask, each with the steps that check it and the chapters that review it.
+  const asked = new Map<string, { checkedBy: string[]; reviewedBy: string[] }>();
+  const ask = (asker: string, term: "checkedBy" | "reviewQuestion") => {
+    for (const card of named(asker, `${SM_NS}${term}`)) {
+      if (!cards.has(card)) {
+        problems.push(`${label}: ${shown(asker)} names ${shown(card)} by solid-memo:${term}, which is no card of this release.`);
+      } else if (cards.get(card) === true) {
+        problems.push(`${label}: ${shown(asker)} names ${shown(card)} by solid-memo:${term}, which is retired: name a card in use, or retire ${shown(asker)} too.`);
+      } else {
+        const entry = asked.get(card) ?? { checkedBy: [], reviewedBy: [] };
+        entry[term === "checkedBy" ? "checkedBy" : "reviewedBy"].push(asker);
+        asked.set(card, entry);
+      }
+    }
+  };
+  for (const step of steps.filter(inUse)) ask(step, "checkedBy");
+  for (const chapter of chapters.filter(inUse)) ask(chapter, "reviewQuestion");
+  for (const q of quads.filter((q) => q.predicate.value === `${SM_NS}distractor` && !distractors.has(q.object.value))) {
+    problems.push(
+      `${label}: ${shown(q.subject.value)} names ${shown(q.object.value)} by solid-memo:distractor, which is no solid-memo:Distractor of this release.`,
+    );
+  }
+  // A card's distractors are its own: a copy writes and removes them with it, so one two cards share would go with either.
+  const namers = new Map<string, Set<string>>();
+  for (const q of quads.filter((q) => q.predicate.value === `${SM_NS}distractor`)) {
+    namers.set(q.object.value, (namers.get(q.object.value) ?? new Set()).add(q.subject.value));
+  }
+  for (const [distractor, by] of namers) {
+    if (by.size > 1) {
+      problems.push(
+        `${label}: distractor ${shown(distractor)} is named by ${[...by].map(shown).join(", ")}; a distractor is one card's: give each card its own.`,
+      );
+    }
+  }
+
+  // Languages of text, "" for untagged.
+  const languagesOf = (subject: string, predicate: string) =>
+    new Set(
+      objectsOf(quads, subject, predicate)
+        .filter((o): o is Literal => o.termType === "Literal")
+        .map((o) => o.language),
+    );
+  for (const [card, { checkedBy, reviewedBy }] of asked) {
+    if (checkedBy.length > 1) {
+      problems.push(`${label}: ${shown(card)} is checked by ${checkedBy.map(shown).join(", ")}; a card is checked by one step at most.`);
+    }
+    if (checkedBy.length > 0 && reviewedBy.length > 0) {
+      problems.push(
+        `${label}: ${shown(card)} is checked by ${checkedBy.map(shown).join(", ")} and a review question of ${reviewedBy.map(shown).join(", ")}; a card is the one or the other.`,
+      );
+    }
+    const back = languagesOf(card, `${SM_NS}back`);
+    if (back.size === 0) {
+      problems.push(`${label}: ${shown(card)} has no text on its back (solid-memo:back), the right one among the options a course offers.`);
+    }
+    const options = named(card, `${SM_NS}distractor`).filter((d) => distractors.has(d) && inUse(d));
+    if (options.length < 2) {
+      problems.push(`${label}: ${shown(card)} has too few distractors (${options.length}); a card a course asks has at least 2.`);
+    }
+    for (const option of options) {
+      const text = languagesOf(option, `${SM_NS}distractorText`);
+      const missing = [...back].filter((language) => !text.has(language));
+      if (missing.length > 0) {
+        problems.push(
+          `${label}: distractor ${shown(option)} has no text ${missing.map((l) => (l === "" ? "untagged" : `@${l}`)).join(", ")}, which the back of ${shown(card)} has.`,
+        );
+      }
+    }
+  }
+
+  // Members of the same list that share a schema:position.
+  const clashes = (members: readonly string[]) => {
+    const at = new Map<string, string[]>();
+    for (const member of members) {
+      for (const position of literalsOf(quads, member, `${SCHEMA}position`)) {
+        at.set(position.value, [...(at.get(position.value) ?? []), member]);
+      }
+    }
+    return [...at].filter(([, sharing]) => sharing.length > 1);
+  };
+  for (const [position, sharing] of clashes(chapters.filter(inUse))) {
+    problems.push(`${label}: chapters ${sharing.map(shown).join(", ")} share schema:position ${position}; a course's chapters each have their own.`);
+  }
+  for (const chapter of chapters) {
+    const ofChapter = steps.filter((step) => inUse(step) && partOf(step).includes(chapter));
+    for (const [position, sharing] of clashes(ofChapter)) {
+      problems.push(
+        `${label}: steps ${sharing.map(shown).join(", ")} of ${shown(chapter)} share schema:position ${position}; a chapter's steps each have their own.`,
+      );
+    }
+    if (inUse(chapter) && ofChapter.length === 0) {
+      problems.push(`${label}: chapter ${shown(chapter)} has no step in use; a chapter in use has at least one step that is not retired.`);
+    }
+  }
+  return problems;
+}
+
 /** The problems a check that throws one Error per document reports, or none. */
 async function problemsOf(check: Promise<void>): Promise<string[]> {
   try {
@@ -363,9 +525,10 @@ async function problemsOf(check: Promise<void>): Promise<string[]> {
 
 /**
  * Every problem with the releases and their index: each release's
- * metadata against its path, its cards against the version before it (a
- * card the deck no longer uses is retired, owl:deprecated true, never
- * removed, so the copies that have it keep it and its review history),
+ * metadata against its path, its cards, chapters, steps and distractors
+ * against the version before it (one the deck no longer uses is retired,
+ * owl:deprecated true, never removed, so the copies that have it keep it
+ * and its review history), its course outline (courseProblems),
  * and Solid Memo's shapes, DCAT-AP (a release with the index beside it,
  * where its series and publisher are described) and SKOS, with the
  * reference data; then the index, to the shapes and the profiles too.
@@ -382,14 +545,24 @@ export async function validateLibrary(
     problems.push(...metadataProblems(release));
     const before = releases.find((r) => r.deck === release.deck && r.version === release.version - 1);
     if (before !== undefined) {
-      const cards = new Set(cardIdsOf(release.quads));
-      const dropped = cardIdsOf(before.quads).filter((id) => !cards.has(id));
-      if (dropped.length > 0) {
+      const droppedOf = (types: readonly string[]) => {
+        const now = new Set(types.flatMap((type) => idsOf(release.quads, type)));
+        return types.flatMap((type) => idsOf(before.quads, type)).filter((id) => !now.has(id));
+      };
+      const cards = droppedOf([`${SM_NS}Card`]);
+      if (cards.length > 0) {
         problems.push(
-          `${label}: drops ${dropped.map((id) => `<#${id}>`).join(", ")}, which v${before.version}.ttl has. A card is never removed: retire it (owl:deprecated true), so the copies that have it keep it and its review history.`,
+          `${label}: drops ${cards.map((id) => `<#${id}>`).join(", ")}, which v${before.version}.ttl has. A card is never removed: retire it (owl:deprecated true), so the copies that have it keep it and its review history.`,
+        );
+      }
+      const outline = droppedOf(OUTLINE_TYPES);
+      if (outline.length > 0) {
+        problems.push(
+          `${label}: drops ${outline.map((id) => `<#${id}>`).join(", ")}, which v${before.version}.ttl has. A chapter, step or distractor is never removed: retire it (owl:deprecated true), so the copies that follow the course keep their place in it.`,
         );
       }
     }
+    problems.push(...courseProblems(release));
     problems.push(
       ...(await problemsOf(validateTurtleDocument(label, release.quads, validators.shapes, "library"))),
       ...(await problemsOf(validateProfile(label, release.quads, validators.dcatAp, [...validators.reference, ...indexQuads]))),

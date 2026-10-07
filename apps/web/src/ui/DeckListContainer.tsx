@@ -2,9 +2,10 @@ import { useState } from "preact/hooks";
 import { hashKey, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
-import { applyDeckTreeEdit, type DeckTree, type DeckTreeEdit, type TreeNode } from "@solid-memo/domain/deckTree";
+import { applyDeckTreeEdit, decksOf, type DeckTree, type DeckTreeEdit, type TreeNode } from "@solid-memo/domain/deckTree";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { LangText } from "@solid-memo/domain/langText";
+import { librarySeriesUrlOf } from "@solid-memo/domain/libraryLayout";
 import { DeckListScreen } from "./DeckListScreen";
 import { DeckStudyActionContainer } from "./DeckStudyAction";
 import { ErrorMessage } from "./ErrorMessage";
@@ -12,7 +13,7 @@ import { useI18n } from "./i18n";
 import { Loading } from "./Loading";
 import { collapsedGroups, rememberCollapsed } from "./remembered";
 import { TodaySummaryContainer } from "./TodaySummaryContainer";
-import { deckHref, libraryHref, routeToHash } from "./router";
+import { courseHref, deckHref, libraryHref, routeToHash } from "./router";
 
 /** Every group's URL in the nodes, at any depth. */
 function groupUrls(nodes: readonly TreeNode[]): string[] {
@@ -54,6 +55,10 @@ function retitled(nodes: readonly TreeNode[], url: string, title: LangText): Tre
  *
  * Which groups are folded shut is this device's own (remembered.ts),
  * never the pod's.
+ *
+ * A deck copied from a course (docs/courses.md) is continued from its
+ * menu: which library decks are courses, the library says, read once
+ * some deck is a library copy.
  */
 export function DeckListContainer({
   useCases,
@@ -143,6 +148,17 @@ export function DeckListContainer({
     onSettled: refresh,
   });
 
+  const isCopy = decksOf(treeQuery.data?.children ?? []).some((deck) => deck.sourceUrl !== undefined);
+  const libraryQuery = useQuery({
+    queryKey: ["library"],
+    queryFn: () => useCases.listLibraryDecks(),
+    enabled: isCopy,
+    refetchOnWindowFocus: false,
+  });
+  const courses = new Set(
+    (libraryQuery.data ?? []).filter((deck) => deck.isCourse === true).map((deck) => deck.seriesUrl),
+  );
+
   const removeMutation = useMutation({
     scope: { id: scope },
     mutationFn: (deck: Deck) => useCases.removeDeck(deck),
@@ -194,6 +210,11 @@ export function DeckListContainer({
         error={errorText(failure)}
         libraryHref={libraryHref(instance.url)}
         deckHref={(deck) => deckHref(instance.url, deck.url)}
+        courseHref={(deck) =>
+          deck.sourceUrl !== undefined && courses.has(librarySeriesUrlOf(deck.sourceUrl))
+            ? courseHref(instance.url, deck.url)
+            : undefined
+        }
         preferencesHref={(deck) =>
           routeToHash({ screen: "deckPreferences", instanceUrl: instance.url, deckUrl: deck.url })
         }

@@ -100,6 +100,26 @@ export const THEMES = {
   ],
 } as const satisfies ConceptScheme;
 
+/** How a prompt is answered during study. */
+export const ANSWER_MODES = {
+  iri: "https://solid-memo.com/ns/vocab/v1.ttl#AnswerModes",
+  title: "Answer modes",
+  concepts: [
+    {
+      iri: "https://solid-memo.com/ns/vocab/v1.ttl#recall",
+      label: { en: "Recall" },
+      definition: { en: "The learner recalls the answer, sees it, and grades how well they knew it." },
+      notation: "recall",
+    },
+    {
+      iri: "https://solid-memo.com/ns/vocab/v1.ttl#multipleChoice",
+      label: { en: "Multiple choice" },
+      definition: { en: "The learner chooses the answer among the card's back and its distractors; the choice is graded right or wrong." },
+      notation: "multiple-choice",
+    },
+  ],
+} as const satisfies ConceptScheme;
+
 /** What a deck of flashcards is about. */
 export const TOPICS = {
   iri: "https://solid-memo.com/ns/vocab/topics.ttl",
@@ -125,6 +145,12 @@ export const TOPICS = {
       iri: "https://solid-memo.com/ns/vocab/topics.ttl#computing",
       label: { en: "Computing", sv: "Datorer" },
       definition: { en: "Computers, software and the protocols of the web.", sv: "Datorer, mjukvara och webbens protokoll." },
+    },
+    {
+      iri: "https://solid-memo.com/ns/vocab/topics.ttl#linked-data",
+      label: { en: "Linked data", sv: "Länkade data" },
+      definition: { en: "Data on the web described with RDF and named and linked by IRIs, and the Solid specifications built on it.", sv: "Data på webben som beskrivs med RDF och namnges och länkas med IRI:er, och Solid-specifikationerna som bygger på det." },
+      broader: "https://solid-memo.com/ns/vocab/topics.ttl#computing",
     },
     {
       iri: "https://solid-memo.com/ns/vocab/topics.ttl#science",

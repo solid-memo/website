@@ -1,0 +1,22 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix schema:     <https://schema.org/> .
+
+<#ch-linked-data-0>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    schema:isPartOf <#ch-linked-data> ;
+    schema:position 0 ;
+    solid-memo:theory "In linked data every thing is named by an IRI, a global identifier."@en ,
+                      "I länkade data namnges allt med en IRI, en global identifierare."@sv ;
+    solid-memo:checkedBy <#q-iri-identifies> ;
+    solid-memo:formatVersion 1 .
+
+<#ch-linked-data-1>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    schema:isPartOf <#ch-linked-data> ;
+    schema:position 1 ;
+    solid-memo:theory "An IRI may be dereferenced to learn about what it names."@en ;
+    solid-memo:checkedBy <#q-dereference> ,
+                         <#q-hash> ;
+    solid-memo:formatVersion 1 .

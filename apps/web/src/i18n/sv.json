@@ -119,7 +119,9 @@
     "browser": "Bläddra",
     "cardCreator": "Nytt kort",
     "study": "Studera",
-    "statistics": "Statistik"
+    "statistics": "Statistik",
+    "course": "Kurs",
+    "courseReview": "Slutrepetition"
   },
   "browser": {
     "heading": "Bläddra: {deck}",
@@ -187,6 +189,55 @@
     "back": "Baksida",
     "question": "Fråga",
     "answer": "Svar"
+  },
+  "course": {
+    "chaptersDone": {
+      "one": "{done} av {count} kapitel klart",
+      "other": "{done} av {count} kapitel klara"
+    },
+    "start": "Börja kursen",
+    "continue": "Fortsätt",
+    "finished": "Du har gått klart kursen. Dess kort finns i din kortlek, att studera som alla andra.",
+    "chapterNumber": "Kapitel {number}:",
+    "locked": "Låst",
+    "open": "Öppet",
+    "done": "Klart",
+    "stepsDone": {
+      "one": "{done} av {count} steg klart",
+      "other": "{done} av {count} steg klara"
+    }
+  },
+  "chapterPlayer": {
+    "step": "Steg {number} av {count}",
+    "progress": "Klara steg i kapitlet",
+    "check": "Kontrollera att du förstått",
+    "checkNumbered": "Kontrollera att du förstått: fråga {number} av {count}",
+    "next": "Nästa",
+    "toReview": "Vidare till slutrepetitionen"
+  },
+  "chapterReview": {
+    "heading": "Slutrepetition: {chapter}",
+    "intro": "Kapitlets alla frågor en gång till. En fråga du svarar fel på kommer tillbaka tills du svarar rätt.",
+    "position": "Fråga {position} av {total}",
+    "next": "Nästa",
+    "completing": "Avslutar kapitlet…",
+    "retry": "Försök igen",
+    "chapterDone": "Kapitlet är klart. Nästa kapitel är öppet.",
+    "courseDone": "Kapitlet är klart. Du har gått klart kursen.",
+    "nextChapter": "Nästa kapitel: {chapter}"
+  },
+  "courseQuestion": {
+    "right": "Rätt!",
+    "wrong": "Inte riktigt.",
+    "added": "Tillagt i din kortlek.",
+    "why": "Varför inte:"
+  },
+  "multipleChoice": {
+    "check": "Kontrollera",
+    "checking": "Kontrollerar…",
+    "keys": "Tryck 1 till {last} för att välja och sedan Enter för att kontrollera.",
+    "right": "Rätt svar",
+    "chosen": "Ditt svar"
   },
   "dataCheckNotice": {
     "region": "Datakontroll",
@@ -298,7 +349,8 @@
     "deckRenamed": "Bytte kortlekens namn till ”{name}”.",
     "deckDeleted": "Tog bort kortleken ”{name}”.",
     "afterGroup": "efter {group}",
-    "dragCancelled": "Flytten avbröts: kortleken eller gruppen ligger kvar där den låg."
+    "dragCancelled": "Flytten avbröts: kortleken eller gruppen ligger kvar där den låg.",
+    "continueCourse": "Fortsätt kursen"
   },
   "studyPace": {
     "startSmall": "Varje nytt kort kommer tillbaka för repetition de följande dagarna, så ett högt antal nu ger en hög med repetitioner senare. Börja hellre smått och var regelbunden: du kan alltid öka sen."
@@ -471,7 +523,8 @@
       "other": "Importera {count} kortlekar"
     },
     "importing": "Importerar…",
-    "loading": "Läser in kortleksbiblioteket…"
+    "loading": "Läser in kortleksbiblioteket…",
+    "course": "Kurs"
   },
   "libraryBrowser": {
     "heading": "Kort: {deck}",
@@ -518,7 +571,11 @@
     "import": "Importera kortleken",
     "importing": "Importerar…",
     "preview": "Förhandsvisa",
-    "alreadyImported": "Redan importerad"
+    "alreadyImported": "Redan importerad",
+    "courseChapters": "En kurs: korta avsnitt teori, vart och ett följt av en fråga. Varje fråga du besvarar blir ett kort i din kortlek.",
+    "startCourse": "Börja kursen",
+    "continueCourse": "Fortsätt kursen",
+    "starting": "Startar…"
   },
   "libraryPreview": {
     "heading": "Förhandsvisning: {deck}",
@@ -941,7 +998,8 @@
     "deckSetAside": "Kortleken är lagd åt sidan: dess data uppfyller inte formerna. Reparera den ovan för att använda den igen.",
     "checkFailed": "Det gick inte att kontrollera instansens data: {error}",
     "developerTools": "Utvecklarverktyg",
-    "validateInstance": "Kontrollera den här instansen"
+    "validateInstance": "Kontrollera den här instansen",
+    "loadingCourse": "Läser in kursen…"
   },
   "errors": {
     "cardFrontImageNotWebUrl": "Bilden på framsidan måste vara en http(s)-adress.",

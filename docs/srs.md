@@ -75,6 +75,52 @@ passing grade — recording 2 would make Hard a lapse, indistinguishable from
 Again. So on the minimal scale only Again repeats in the session
 ([answerScale.ts](../packages/domain/src/answerScale.ts)).
 
+## Multiple-choice answers in a course
+
+A [course](courses.md) asks a card as a multiple-choice question: its
+back among its distractors. The answer is right or wrong, not graded by
+the learner, and `gradeOfChoice` in
+[course.ts](../packages/domain/src/course.ts) maps it to SM-2:
+
+| Choice | Grade | Why |
+|---|---|---|
+| right | 3 | The lowest passing grade: a choice says that the answer was known, not how well. |
+| wrong | 1 | A lapse. |
+
+That function is the only place a choice becomes a grade, so another
+scheduler (FSRS) replaces this map alone. The grade then goes through
+the same transition as a study review (`applyGrade` in
+[useCases.ts](../packages/application/src/useCases.ts), which
+`recordReview` uses too). Course answers are front→back.
+
+Whether an answer is graded at all depends on the card's state
+(`courseAnswerEffect`):
+
+| The card | Right | Wrong |
+|---|---|---|
+| no state: answered for the first time, in a step | introduced, grade 3: 1 repetition, ease 2.36, due the next study day | introduced, grade 1: 0 repetitions, due the next study day |
+| graded earlier the same study day, as in the final review after its step | nothing written: the day's grade stands | grade 1 |
+| due this study day or earlier, not graded today | grade 3 | grade 1 |
+| due on a later study day: a step revisited or a chapter retaken | nothing written: practice | nothing written: practice |
+
+- **A step** introduces each card the first time its question is
+  answered. The card is written into the deck first, then graded. A
+  retry the same day writes nothing when it is right, and is another
+  lapse when it is wrong.
+- **The final review** asks every question of the chapter, usually the
+  same day. A right answer leaves the day's grade as it is, so the card
+  is not pushed further out by an answer it was just shown. A wrong one
+  is a lapse. A question answered wrongly comes back until it is
+  answered right.
+- **Revisiting** writes nothing while the card is not due, since grading
+  a card early would cut its interval short. A card that is due is
+  reviewed, as in study.
+- **No daily limit** applies: the learner reached the card in the
+  course. A card introduced there still counts as introduced that day,
+  so it uses up the deck's new-card budget in study (below).
+- **Afterwards** the cards are studied by flip-and-grade, with the
+  instance's answer scale.
+
 ## Study days and the queue
 
 Scheduling works in *study days*, not calendar days. `studyDayOf` shifts an
@@ -207,3 +253,15 @@ The day's answers of that deck then leave the
 match the cards: answers still on their way to the log are added first,
 then removed with the rest.
 "Today" honours the instance's `dayBoundaryHour`, like the queue.
+
+In a [course](courses.md)'s deck, a reset treats the day's course
+answers like study answers:
+
+- A card introduced today loses its state but stays in the deck, with
+  its distractors. Study then shows it as new, and the course counts its
+  step as not done again. Answering its question in the course
+  introduces it again.
+- A card reviewed today gets its snapshot back.
+- The day's multiple-choice answers leave the answer log.
+- A chapter completed today stays completed: `sm:completedChapter` is
+  on the catalog entry, which a reset does not touch.

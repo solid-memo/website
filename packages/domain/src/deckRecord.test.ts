@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Deck } from "./deck";
+import type { Deck, Distractor } from "./deck";
 import {
   cardContentFromRecord,
   cardFromRecord,
@@ -9,6 +9,8 @@ import {
   deckFromRecord,
   deckToRecord,
   libraryCardFromRecord,
+  distractorFromRecord,
+  distractorToRecord,
   libraryDeckFromRecord,
 } from "./deckRecord";
 
@@ -137,6 +139,7 @@ describe("card records", () => {
     const record = cardToRecord(
       { front: { "": "Flag" }, back: { "": "Sweden" }, frontImageUrl: FLAG, backImageUrl: FLAG },
       "2026-09-21T10:00:00.000Z",
+      CARDS,
     );
     expect(record).toEqual({
       front: { "": "Flag" },
@@ -144,6 +147,7 @@ describe("card records", () => {
       frontImage: FLAG,
       backImage: FLAG,
       created: "2026-09-21T10:00:00.000Z",
+      distractor: [],
     });
     expect(cardFromRecord(`${CARDS}#se`, 2, record)).toEqual({
       id: "se",
@@ -158,11 +162,12 @@ describe("card records", () => {
   });
 
   it("leave out empty text, missing pictures and an unknown creation time", () => {
-    expect(cardToRecord({ front: {}, back: { "": "Sweden" }, frontImageUrl: FLAG }, "")).toEqual({
+    expect(cardToRecord({ front: {}, back: { "": "Sweden" }, frontImageUrl: FLAG }, "", CARDS)).toEqual({
       back: { "": "Sweden" },
       frontImage: FLAG,
+      distractor: [],
     });
-    expect(cardFromRecord(`${CARDS}#se`, 1, { back: { "": "Sweden" }, frontImage: FLAG })).toEqual({
+    expect(cardFromRecord(`${CARDS}#se`, 1, { back: { "": "Sweden" }, frontImage: FLAG, distractor: [] })).toEqual({
       id: "se",
       url: `${CARDS}#se`,
       front: {},
@@ -174,9 +179,9 @@ describe("card records", () => {
   });
 
   it("round-trip a card of text only", () => {
-    const record = cardToRecord({ front: { "": "Sweden" }, back: { "": "Stockholm" } }, "");
-    expect(record).toEqual({ front: { "": "Sweden" }, back: { "": "Stockholm" } });
-    expect(cardToRecord({ front: { "": "Sweden" }, back: {}, backImageUrl: FLAG }, "")).toEqual({ front: { "": "Sweden" }, backImage: FLAG });
+    const record = cardToRecord({ front: { "": "Sweden" }, back: { "": "Stockholm" } }, "", CARDS);
+    expect(record).toEqual({ front: { "": "Sweden" }, back: { "": "Stockholm" }, distractor: [] });
+    expect(cardToRecord({ front: { "": "Sweden" }, back: {}, backImageUrl: FLAG }, "", CARDS)).toEqual({ front: { "": "Sweden" }, backImage: FLAG, distractor: [] });
     expect(cardFromRecord(`${CARDS}#se`, 2, record)).toEqual({
       id: "se",
       url: `${CARDS}#se`,
@@ -195,8 +200,8 @@ describe("card records", () => {
       back: { "": "Finansmäklare" },
       backNote: { en: "Version 30." },
     };
-    const record = cardToRecord(content, "");
-    expect(record).toEqual(content);
+    const record = cardToRecord(content, "", CARDS);
+    expect(record).toEqual({ ...content, distractor: [] });
     expect(cardFromRecord(`${CARDS}#a`, 3, record)).toMatchObject(content);
   });
 
@@ -209,42 +214,71 @@ describe("card records", () => {
       backImageUrl: "https://example.org/stockholm.jpg",
       backImageDescription: { sv: "Stockholms stadshus" },
     };
-    const record = cardToRecord(content, "");
+    const record = cardToRecord(content, "", CARDS);
     expect(record).toEqual({
       frontImage: content.frontImageUrl,
       frontImageDescription: content.frontImageDescription,
       back: content.back,
       backImage: content.backImageUrl,
       backImageDescription: content.backImageDescription,
+      distractor: [],
     });
     expect(cardFromRecord(`${CARDS}#se`, 4, record)).toMatchObject(content);
   });
 
   it("round-trip a retired card, and leave the retirement out of a card in use", () => {
-    const record = cardToRecord({ front: { "": "Yugoslavia" }, back: { "": "Belgrade" }, retired: true }, "");
-    expect(record).toEqual({ front: { "": "Yugoslavia" }, back: { "": "Belgrade" }, deprecated: true });
+    const record = cardToRecord({ front: { "": "Yugoslavia" }, back: { "": "Belgrade" }, retired: true }, "", CARDS);
+    expect(record).toEqual({ front: { "": "Yugoslavia" }, back: { "": "Belgrade" }, deprecated: true, distractor: [] });
     expect(cardFromRecord(`${CARDS}#yu`, 3, record)).toMatchObject({ id: "yu", retired: true });
     expect(cardFromRecord(`${CARDS}#yu`, 3, { ...record, deprecated: false })).not.toHaveProperty("retired");
-    expect(cardToRecord({ front: { "": "Sweden" }, back: { "": "Stockholm" } }, "")).not.toHaveProperty("deprecated");
+    expect(cardToRecord({ front: { "": "Sweden" }, back: { "": "Stockholm" } }, "", CARDS)).not.toHaveProperty("deprecated");
   });
 
   it("have no content when a side has neither text nor a picture", () => {
-    expect(cardContentFromRecord({ back: { "": "Sweden" } })).toBeNull();
-    expect(cardContentFromRecord({ front: { "": "Sweden" } })).toBeNull();
-    expect(cardFromRecord(`${CARDS}#se`, 2, { front: { "": "x" } })).toBeNull();
-    expect(libraryCardFromRecord(`${CARDS}#se`, 2, { front: { "": "x" } })).toBeNull();
+    expect(cardContentFromRecord({ back: { "": "Sweden" }, distractor: [] })).toBeNull();
+    expect(cardContentFromRecord({ front: { "": "Sweden" }, distractor: [] })).toBeNull();
+    expect(cardFromRecord(`${CARDS}#se`, 2, { front: { "": "x" }, distractor: [] })).toBeNull();
+    expect(libraryCardFromRecord(`${CARDS}#se`, 2, { front: { "": "x" }, distractor: [] })).toBeNull();
   });
 
   it("read a library card, retired or not, keeping its fragment id", () => {
-    expect(libraryCardFromRecord("https://solid-memo.com/decks/x/v2.ttl#se", 3, { front: { "": "Sweden" }, back: { "": "Stockholm" } })).toEqual({
+    expect(libraryCardFromRecord("https://solid-memo.com/decks/x/v2.ttl#se", 3, { front: { "": "Sweden" }, back: { "": "Stockholm" }, distractor: [] })).toEqual({
       id: "se",
       front: { "": "Sweden" },
       back: { "": "Stockholm" },
       formatVersion: 3,
     });
     expect(
-      libraryCardFromRecord("https://solid-memo.com/decks/x/v2.ttl#yu", 3, { front: { "": "Yugoslavia" }, back: { "": "Belgrade" }, deprecated: true }),
+      libraryCardFromRecord("https://solid-memo.com/decks/x/v2.ttl#yu", 3, { front: { "": "Yugoslavia" }, back: { "": "Belgrade" }, deprecated: true, distractor: [] }),
     ).toEqual({ id: "yu", front: { "": "Yugoslavia" }, back: { "": "Belgrade" }, formatVersion: 3, retired: true });
+  });
+
+  it("name a card's distractors as subjects of its document, and read them back as the document has them", () => {
+    const distractors: Distractor[] = [
+      { id: "q-d1", text: { en: "Only web pages", sv: "Bara webbsidor" }, note: { en: "A URL is one kind of IRI." } },
+      { id: "q-d2", text: { "": "404" } },
+    ];
+    const record = cardToRecord({ front: { en: "What can an IRI name?" }, back: { en: "Anything" }, distractors }, "", CARDS);
+    expect(record.distractor).toEqual([`${CARDS}#q-d1`, `${CARDS}#q-d2`]);
+    expect(cardFromRecord(`${CARDS}#q`, 5, record, distractors)).toMatchObject({ id: "q", distractors });
+    expect(cardFromRecord(`${CARDS}#q`, 5, record)).not.toHaveProperty("distractors");
+    expect(libraryCardFromRecord("https://solid-memo.com/decks/x/v1.ttl#q", 5, record, distractors)).toMatchObject({ distractors });
+  });
+});
+
+describe("distractor records", () => {
+  it("round-trip the text and the note, keeping the fragment id", () => {
+    const distractor = { id: "q-d1", text: { en: "Only web pages" }, note: { en: "A URL is one kind of IRI." } };
+    expect(distractorToRecord(distractor)).toEqual({ text: distractor.text, note: distractor.note });
+    expect(distractorFromRecord(`${CARDS}#q-d1`, distractorToRecord(distractor))).toEqual(distractor);
+    expect(distractorToRecord({ id: "q-d2", text: { "": "404" } })).toEqual({ text: { "": "404" } });
+  });
+
+  it("leave out an empty note, and have none when the text is empty or the distractor is retired", () => {
+    expect(distractorFromRecord(`${CARDS}#d`, { text: { en: "x" }, note: {} })).toEqual({ id: "d", text: { en: "x" } });
+    expect(distractorFromRecord(`${CARDS}#d`, { text: {} })).toBeNull();
+    expect(distractorFromRecord(`${CARDS}#d`, { text: { en: "x" }, deprecated: true })).toBeNull();
+    expect(distractorFromRecord(`${CARDS}#d`, { text: { en: "x" }, deprecated: false })).toEqual({ id: "d", text: { en: "x" } });
   });
 });
 

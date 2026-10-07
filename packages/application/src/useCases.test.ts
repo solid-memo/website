@@ -34,6 +34,7 @@ import { firstRelease } from "@solid-memo/domain/testing/libraryDeck";
 import { librarySeriesUrlOf } from "@solid-memo/domain/libraryLayout";
 import { sameDeckState, withDeckChanges, type DeckUpgradeProgress } from "@solid-memo/domain/deckUpgrade";
 import type { LibraryCard } from "@solid-memo/domain/library";
+import type { CourseOutline } from "@solid-memo/domain/course";
 
 const session: Session = { webId: "https://alice.example/profile/card#me" };
 const document: WebIdDocument = {
@@ -146,10 +147,15 @@ function makeDeps() {
     stageCardChanges: vi.fn(async () => undefined),
     switchDeck: vi.fn(async (_current, next) => next),
     deleteDocument: vi.fn(async () => undefined),
+    completeChapter: vi.fn(async (completed, chapterUrl) => ({
+      ...completed,
+      completedChapters: [...(completed.completedChapters ?? []), chapterUrl],
+    })),
   };
   const deckLibrary: DeckLibrary = {
     listLibraryDecks: vi.fn(async () => [libraryDeck]),
     fetchLibraryDeck: vi.fn(async () => libraryContent),
+    fetchCourseOutline: vi.fn(async (releaseUrl) => ({ releaseUrl, chapters: [] })),
   };
   const preferencesRepository: PreferencesRepository = {
     getPreferences: vi.fn(async () => null),
@@ -2781,5 +2787,232 @@ describe("library deck upgrade", () => {
       ).toEqual({ ok: false, step: "copy", error: "offline", cleanedUp: false, leftoverUrl: TARGET });
       expect(deps.updateJournal.end).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe("courses", () => {
+  const RELEASE = "https://solid-memo.com/decks/solid-fundamentals/v1.ttl";
+  const at = (id: string) => `${RELEASE}#${id}`;
+  const course: LibraryDeck = {
+    ...libraryDeck,
+    url: RELEASE,
+    ...firstRelease(RELEASE),
+    title: { en: "Solid fundamentals" },
+    isCourse: true,
+  };
+  const question: LibraryCard = {
+    id: "q-iri",
+    front: { en: "What can an IRI name?" },
+    back: { en: "Any thing at all" },
+    formatVersion: 5,
+    distractors: [{ id: "q-iri-d1", text: { en: "Only web pages" } }],
+  };
+  const release: LibraryDeckContent = {
+    ...libraryContent,
+    url: RELEASE,
+    title: course.title,
+    seriesUrl: course.seriesUrl,
+    isCourse: true,
+    cards: [question, { id: "q-rdf", front: { en: "RDF?" }, back: { en: "Triples" }, formatVersion: 5 }],
+  };
+  const outline: CourseOutline = {
+    releaseUrl: RELEASE,
+    chapters: [
+      {
+        id: "ch-1",
+        url: at("ch-1"),
+        position: 0,
+        title: { en: "Linked data" },
+        steps: [{ id: "s-1", url: at("s-1"), position: 0, theory: { en: "IRIs name things." }, questionIds: ["q-iri"] }],
+        reviewQuestionIds: [],
+      },
+      {
+        id: "ch-2",
+        url: at("ch-2"),
+        position: 1,
+        title: { en: "RDF" },
+        steps: [{ id: "s-2", url: at("s-2"), position: 0, theory: { en: "Triples." }, questionIds: ["q-rdf"] }],
+        reviewQuestionIds: [],
+      },
+    ],
+  };
+  const courseDeck: Deck = { ...deck, title: course.title, sourceUrl: RELEASE };
+  const noon = new Date(2026, 9, 7, 12, 0);
+  const stateOf = (lastReviewedAt: Date, due: string): ReviewState => ({
+    cardId: question.id,
+    direction: "front-to-back",
+    easeFactor: 2.36,
+    intervalDays: 1,
+    repetitions: 1,
+    due,
+    firstReviewedAt: lastReviewedAt.toISOString(),
+    lastReviewedAt: lastReviewedAt.toISOString(),
+    formatVersion: 2,
+  });
+
+  function setup() {
+    const deps = makeDeps();
+    vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockResolvedValue(release);
+    vi.mocked(deps.deckLibrary.fetchCourseOutline).mockResolvedValue(outline);
+    vi.mocked(deps.deckRepository.readDeck).mockResolvedValue(courseDeck);
+    const appended: Answer[] = [];
+    const answerLog: AnswerLog = {
+      append: vi.fn(async (_instanceUrl, answer) => {
+        appended.push(answer);
+      }),
+      months: vi.fn(async () => []),
+      readMonth: vi.fn(async () => []),
+      removeDay: vi.fn(async () => undefined),
+    };
+    let id = 0;
+    const useCases = createUseCases({ ...deps, answerLog, newId: () => `id${++id}-0000-0000` });
+    return { deps, useCases, appended };
+  }
+
+  it("startCourse copies the release without its cards, or returns the copy the instance has", async () => {
+    const { deps, useCases } = setup();
+    vi.mocked(deps.deckRepository.listDecks).mockResolvedValueOnce([deck]);
+    await useCases.startCourse(instance.url, course);
+    expect(deps.deckLibrary.fetchLibraryDeck).toHaveBeenCalledWith(RELEASE);
+    expect(deps.deckRepository.importDeck).toHaveBeenCalledWith(instance.url, { ...release, cards: [] });
+    vi.mocked(deps.deckRepository.listDecks).mockResolvedValueOnce([deck, courseDeck]);
+    await expect(useCases.startCourse(instance.url, course)).resolves.toBe(courseDeck);
+    expect(deps.deckRepository.importDeck).toHaveBeenCalledOnce();
+  });
+
+  it("getCourse reads the deck as it is now, the release's outline and cards, and the progress its review states and completed chapters make", async () => {
+    const { deps, useCases } = setup();
+    const completed: Deck = { ...courseDeck, completedChapters: [at("ch-1")] };
+    vi.mocked(deps.deckRepository.readDeck).mockResolvedValueOnce(completed);
+    vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValueOnce([
+      stateOf(noon, "2026-10-08"),
+      { ...stateOf(noon, "2026-10-08"), cardId: "q-rdf", direction: "back-to-front" },
+    ]);
+    const got = await useCases.getCourse(courseDeck);
+    expect(deps.deckRepository.readDeck).toHaveBeenCalledWith(courseDeck.url);
+    expect(deps.deckLibrary.fetchCourseOutline).toHaveBeenCalledWith(RELEASE);
+    expect(got).toEqual({
+      deck: completed,
+      release,
+      outline,
+      cards: { "q-iri": question, "q-rdf": release.cards[1] },
+      answeredCardIds: ["q-iri"],
+      progress: {
+        chapters: [
+          { url: at("ch-1"), state: "done", doneStepIds: ["s-1"] },
+          { url: at("ch-2"), state: "open", doneStepIds: [], resumeStepId: "s-2" },
+        ],
+        currentChapterUrl: at("ch-2"),
+        done: false,
+      },
+    });
+    // A deck with no chapter completed has the first open.
+    expect((await useCases.getCourse(courseDeck)).progress.chapters[0]!.state).toBe("open");
+  });
+
+  it("getCourse keeps a chapter completed in an older release completed in the one the deck now follows", async () => {
+    const { deps, useCases } = setup();
+    const older = at("ch-1").replace("/v1.ttl#", "/v0.ttl#");
+    vi.mocked(deps.deckRepository.readDeck).mockResolvedValueOnce({ ...courseDeck, completedChapters: [older] });
+    expect((await useCases.getCourse(courseDeck)).progress.chapters.map((chapter) => chapter.state)).toEqual(["done", "open"]);
+  });
+
+  it("getCourse refuses a deck that is gone, and one that is no library copy", async () => {
+    const { deps, useCases } = setup();
+    vi.mocked(deps.deckRepository.readDeck).mockResolvedValueOnce(null);
+    await expect(useCases.getCourse(courseDeck)).rejects.toMatchObject({ code: "deckGone" });
+    vi.mocked(deps.deckRepository.readDeck).mockResolvedValueOnce(deck);
+    await expect(useCases.getCourse(deck)).rejects.toThrow("names the release");
+  });
+
+  it("answerCourseQuestion writes a card answered for the first time into the deck, then grades it, logging a multiple-choice answer", async () => {
+    const { deps, useCases, appended } = setup();
+    const answered = await useCases.answerCourseQuestion(instance.url, courseDeck, question, { correct: true }, noon);
+    expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledWith(courseDeck, { save: [question], remove: [] });
+    expect(vi.mocked(deps.deckRepository.applyCardChanges).mock.invocationCallOrder[0]).toBeLessThan(
+      vi.mocked(deps.reviewStateRepository.saveReviewState).mock.invocationCallOrder[0]!,
+    );
+    expect(answered).toEqual({
+      effect: "introduce",
+      state: {
+        cardId: "q-iri",
+        direction: "front-to-back",
+        easeFactor: 2.36,
+        intervalDays: 1,
+        repetitions: 1,
+        due: "2026-10-08",
+        firstReviewedAt: noon.toISOString(),
+        lastReviewedAt: noon.toISOString(),
+        formatVersion: 2,
+      },
+    });
+    await useCases.refreshStudyDigest(instance.url, courseDeck);
+    expect(appended).toEqual([
+      expect.objectContaining({
+        cardUrl: `${courseDeck.cardsDocumentUrl}#q-iri`,
+        direction: "front-to-back",
+        grade: 3,
+        mode: "multiple-choice",
+        nextIntervalDays: 1,
+      }),
+    ]);
+    expect(appended[0]).not.toHaveProperty("chosenDistractor");
+  });
+
+  it("answerCourseQuestion grades a wrong first answer 1 and names the wrong option chosen, in the deck's copy", async () => {
+    const { useCases, appended } = setup();
+    const answered = await useCases.answerCourseQuestion(
+      instance.url,
+      courseDeck,
+      question,
+      { correct: false, distractorId: "q-iri-d1" },
+      noon,
+    );
+    expect(answered).toMatchObject({ effect: "introduce", state: { repetitions: 0, intervalDays: 1, due: "2026-10-08" } });
+    await useCases.refreshStudyDigest(instance.url, courseDeck);
+    expect(appended).toEqual([
+      expect.objectContaining({ grade: 1, mode: "multiple-choice", chosenDistractor: `${courseDeck.cardsDocumentUrl}#q-iri-d1` }),
+    ]);
+  });
+
+  it("answerCourseQuestion writes nothing for a right answer on a card graded today, and lapses it on a wrong one, without writing the card again", async () => {
+    const { deps, useCases } = setup();
+    const morning = stateOf(new Date(2026, 9, 7, 9, 0), "2026-10-08");
+    vi.mocked(deps.reviewStateRepository.getReviewState).mockResolvedValue(morning);
+    await expect(useCases.answerCourseQuestion(instance.url, courseDeck, question, { correct: true }, noon)).resolves.toEqual({
+      effect: "none",
+      state: morning,
+    });
+    expect(deps.reviewStateRepository.saveReviewState).not.toHaveBeenCalled();
+    // A wrong answer naming no option names none.
+    await expect(
+      useCases.answerCourseQuestion(instance.url, courseDeck, question, { correct: false }, noon),
+    ).resolves.toMatchObject({ effect: "review", state: { repetitions: 0, firstReviewedAt: morning.firstReviewedAt } });
+    expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
+  });
+
+  it("completeChapter notes the chapter completed on the deck", async () => {
+    const { deps, useCases } = setup();
+    await expect(useCases.completeChapter(courseDeck, at("ch-1"))).resolves.toMatchObject({ completedChapters: [at("ch-1")] });
+    expect(deps.deckRepository.completeChapter).toHaveBeenCalledWith(courseDeck, at("ch-1"));
+  });
+
+  it("planLibraryUpgrade adds no card to a course's deck, whichever release says it is a course", async () => {
+    const { deps, useCases } = setup();
+    const v2 = "https://solid-memo.com/decks/solid-fundamentals/v2.ttl";
+    const plain = { ...release, isCourse: undefined };
+    const next = { ...plain, url: v2, version: "2", cards: [...release.cards, { id: "q-new", front: { en: "New?" }, back: { en: "Yes" }, formatVersion: 5 }] };
+    vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) => (url === v2 ? next : plain));
+    vi.mocked(deps.deckRepository.listCards).mockResolvedValue([]);
+    const series = { ...course, url: v2, version: "2", releases: [...course.releases, { url: v2, version: "2" }] };
+    vi.mocked(deps.deckLibrary.listLibraryDecks).mockResolvedValue([series]);
+    await expect(useCases.planLibraryUpgrade(courseDeck)).resolves.toBeNull();
+    // Only the release copied says it is a course.
+    vi.mocked(deps.deckLibrary.listLibraryDecks).mockResolvedValue([{ ...series, isCourse: undefined }]);
+    vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) => (url === v2 ? next : release));
+    await expect(useCases.planLibraryUpgrade(courseDeck)).resolves.toBeNull();
+    // Neither: a plain deck's upgrade adds the card.
+    vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) => (url === v2 ? next : plain));
+    await expect(useCases.planLibraryUpgrade(courseDeck)).resolves.toMatchObject({ add: [{ id: "q-new" }] });
   });
 });

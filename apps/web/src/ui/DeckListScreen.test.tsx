@@ -246,6 +246,17 @@ describe("DeckListScreen", () => {
     expect(body).not.toHaveAttribute("inert");
   });
 
+  it("offers to continue a deck's course first in its menu, for a deck copied from a course only", () => {
+    renderScreen(flat, { courseHref: (d) => (d === kana ? `#/course?deck=${d.id}` : undefined) });
+    openMenu("Kana");
+    const item = screen.getByRole("menuitem", { name: "Continue course" });
+    expect(item).toHaveAttribute("href", "#/course?deck=deck-2");
+    expect(item).toHaveFocus();
+    fireEvent.keyDown(item, { key: "Escape" });
+    openMenu("Kanji N5");
+    expect(screen.queryByRole("menuitem", { name: "Continue course" })).toBeNull();
+  });
+
   it("opens a deck's menu over the page: preferences, rename, the moves, and delete last", () => {
     renderScreen();
     const button = screen.getByRole("button", { name: "Actions for Kana" });

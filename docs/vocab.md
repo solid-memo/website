@@ -50,7 +50,8 @@ string, so other applications can look up what it means:
 | `sm:StudyDirections` | [`v1.ttl`](../ns/vocab/v1.ttl) | `sm:frontToBack`, `sm:backToFront`, `sm:bidirectional` | `sm:studyDirection` on a deck |
 | `sm:InvalidDataPolicies` | [`v1.ttl`](../ns/vocab/v1.ttl) | `sm:blockInstance` (default), `sm:blockSubject`, `sm:warnOnly` | `sm:invalidDataPolicy` in preferences |
 | `sm:Themes` | [`v1.ttl`](../ns/vocab/v1.ttl) | `sm:systemTheme` (default), `sm:lightTheme`, `sm:darkTheme` | `sm:theme` in preferences ([theme.md](theme.md)) |
-| Topics (`https://solid-memo.com/ns/vocab/topics.ttl`) | [`topics.ttl`](../ns/vocab/topics.ttl) | languages (swedish), geography, computing, science (chemistry), art, labour-market | `dcat:theme` on a deck, next to the EU data theme `EDUC` |
+| `sm:AnswerModes` | [`v1.ttl`](../ns/vocab/v1.ttl) | `sm:recall` (absent means this), `sm:multipleChoice` | `sm:answerMode` on an answer in the [answer log](data-model.md#the-answer-log) |
+| Topics (`https://solid-memo.com/ns/vocab/topics.ttl`) | [`topics.ttl`](../ns/vocab/topics.ttl) | languages (swedish), geography, computing (linked-data), science (chemistry), art, labour-market | `dcat:theme` on a deck, next to the EU data theme `EDUC` |
 
 - Every scheme has a `dcterms:title` and a `skos:definition`; every
   concept a `skos:prefLabel` and `skos:definition` in each language the
@@ -64,7 +65,7 @@ string, so other applications can look up what it means:
   so the mapping between them is data.
 - `npm run generate` renders every scheme into
   `packages/vocab/src/concepts.generated.ts` (`STUDY_DIRECTIONS`,
-  `INVALID_DATA_POLICIES`, `TOPICS`), which the app lists and labels
+  `INVALID_DATA_POLICIES`, `ANSWER_MODES`, `TOPICS`), which the app lists and labels
   from, in the language the user reads; [concepts.ts](../packages/domain/src/concepts.ts) looks concepts up by
   IRI or notation.
 - Concepts are only ever added. One that should go is deprecated
@@ -95,19 +96,56 @@ string, so other applications can look up what it means:
   its shape, which neither owns nor checks it: `sm:position` (1.13), a
   deck's place on the [arranged deck list](data-model.md#deck-groups),
   is kept by every writer of a deck because `DeckV6` does not own it, so
-  the deck format did not move.
+  the deck format did not move. 1.14 added both kinds: `sm:distractor`
+  joined card format 5 and `sm:answerMode` and `sm:chosenDistractor`
+  answer format 1, each optional, and `sm:completedChapter` is written
+  on a deck outside `DeckV6`, as `sm:position` is
+  ([courses.md](courses.md)).
 - **A breaking change is a new namespace** (`ns/vocab/v2.ttl#`, with
   `owl:priorVersion` pointing back), never an edit of v1: the v1 IRIs
   are baked into every pod that ever wrote them.
 - The [shapes](shapes.md) say which terms a subject of a given class and
   format version uses; the vocabulary only says what each term means.
 
+## Courses
+
+Version 1.14 added the terms of a [course](courses.md): a library
+release that is also a `schema:Course`, with chapters of steps whose
+questions are its cards.
+
+| Term | Kind | Domain → range | Alignment |
+|---|---|---|---|
+| `sm:Chapter` | class | | subclass of `schema:Syllabus` |
+| `sm:Step` | class | | subclass of `schema:LearningResource` |
+| `sm:Distractor` | class | | subclass of `schema:Answer` |
+| `sm:theory` | datatype property | Step → language-tagged text | subproperty of `schema:text` |
+| `sm:checkedBy` | object property | Step → Card | |
+| `sm:reviewQuestion` | object property | Chapter → Card | |
+| `sm:distractor` | object property | Card → Distractor | see also `schema:suggestedAnswer` |
+| `sm:distractorText` | datatype property | Distractor → text, untagged or tagged as `sm:back` is | subproperty of `schema:text` |
+| `sm:distractorNote` | datatype property | Distractor → language-tagged text | see also `schema:answerExplanation` |
+| `sm:completedChapter` | object property | Deck → Chapter | |
+| `sm:answerMode` | object property | Answer → a concept of `sm:AnswerModes` | |
+| `sm:chosenDistractor` | object property | Answer → Distractor | |
+
+- **Every new class has an `sm:` class beside the schema.org one.** A
+  shape is picked by a Solid Memo, DCAT or FOAF class
+  ([shapes.md](shapes.md#conventions)), so the schema.org types are
+  extra types that the shapes state. A course needs no `sm:Course`: the
+  release is an `sm:Deck` already.
+- **External terms are reused where they mean the same:**
+  `schema:isPartOf` and `schema:position` place a chapter in its course
+  and a step in its chapter. `sm:position` keeps its one meaning, a
+  place on the arranged deck list.
+- **The vocabulary's `schema:` prefix is `https://schema.org/`.**
+
 ## The language of text
 
 Solid Memo's text properties (`sm:front`, `sm:back`, `sm:frontNote`,
 `sm:backLabel`, `sm:backNote`, `sm:frontImageDescription`,
-`sm:backImageDescription`, and `dcterms:title` and
-`dcterms:description` on a deck) say their language with the literal's
+`sm:backImageDescription`, a course's `sm:theory`,
+`sm:distractorText` and `sm:distractorNote`, and `dcterms:title` and
+`dcterms:description` on a deck or chapter) say their language with the literal's
 own language tag (`"Huvudstäder"@sv`), one value per language, not
 with a term of ours. A deck's keywords (`dcat:keyword`) are tagged the
 same way, the one text with several values per language
