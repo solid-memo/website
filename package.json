@@ -24,6 +24,7 @@
     "test:pod": "npm run test:pod -w @solid-memo/e2e-pod",
     "pod": "npm run pod -w @solid-memo/e2e-pod",
     "pod:clean": "npm run pod:clean -w @solid-memo/e2e-pod",
+    "journeys": "npm run test:journeys -w @solid-memo/e2e-journeys --",
     "generate": "npm run generate -w @solid-memo/vocab",
     "generate:check": "turbo run generate:check",
     "library": "node -e \"import('@solid-memo/shacl/node/deckLibrary').then((m) => m.run(process))\" --",

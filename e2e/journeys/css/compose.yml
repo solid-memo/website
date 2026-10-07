@@ -1,0 +1,39 @@
+# Community Solid Server 7 behind TLS, for the user journeys (docs/testing.md).
+# The app only logs in with https WebIDs and issuers, so Caddy serves the
+# server at https://127.0.0.1:E2E_PORT/ with a certificate of its own CA,
+# which the browser is told to accept. The server shares Caddy's network,
+# so that address reaches Caddy from the server too: it dereferences the
+# WebIDs it verifies tokens of, which are there. The server stores its
+# pods in files (tmpfs): its in-memory store mangles PATCHed text that is
+# not ASCII. The harness (../harness/cssServer.ts) sets E2E_PORT; Renovate
+# keeps the server on 7.
+services:
+  tls:
+    image: caddy:2.11.7@sha256:f2a1290d0463aad60660d4ec134943f183ee2a5f6c3eb7bf32dd984f2f020772
+    command: ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
+    environment: { E2E_PORT: "${E2E_PORT:?}" }
+    volumes: ["./Caddyfile:/etc/caddy/Caddyfile:ro"]
+    tmpfs: ["/data:uid=1000,gid=1000", "/config:uid=1000,gid=1000"]
+    ports: ["127.0.0.1:${E2E_PORT:?}:${E2E_PORT:?}"]
+    user: "1000:1000"
+    cap_drop: [ALL]
+    # Its binary carries this file capability, without which it cannot run.
+    cap_add: [NET_BIND_SERVICE]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 256m
+    pids_limit: 256
+  server:
+    image: solidproject/community-server:7.2.0@sha256:73465522db316ec2c7c0417bdf5b1b2eab432c70fab44fb25ba2f2098e21b9e5
+    command: ["-c", "config/file.json", "-f", "/data", "-b", "https://127.0.0.1:${E2E_PORT:?}/", "-l", "info"]
+    network_mode: "service:tls"
+    depends_on: [tls]
+    # Caddy's CA is made as it starts, and this server is thrown away after
+    # the run: it trusts whatever certificate its own requests meet.
+    environment: { NODE_TLS_REJECT_UNAUTHORIZED: "0" }
+    tmpfs: ["/data:uid=1000,gid=1000,mode=0700"]
+    user: node
+    init: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 1g
+    pids_limit: 512

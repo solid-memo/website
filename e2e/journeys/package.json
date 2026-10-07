@@ -1,0 +1,26 @@
+{
+  "name": "@solid-memo/e2e-journeys",
+  "private": true,
+  "license": "MIT",
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p .",
+    "test": "vitest run -c vitest.unit.config.ts",
+    "test:unit": "vitest run -c vitest.unit.config.ts",
+    "test:journeys": "playwright test",
+    "journeys:ui": "playwright test --ui",
+    "journeys:headed": "playwright test --headed",
+    "journeys:report": "playwright show-report",
+    "browsers": "playwright install --with-deps chromium",
+    "css": "node harness/cssServer.ts",
+    "css:prepare": "node harness/cssServer.ts prepare",
+    "css:clean": "node harness/cssServer.ts clean"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0"
+  },
+  "dependencies": {
+    "@solid-memo/web": "*"
+  }
+}

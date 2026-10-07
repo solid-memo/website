@@ -7,8 +7,9 @@
 
   "features": {
     "ghcr.io/devcontainers/features/git:1": {},
-    // Docker for the end-to-end tests' servers (`npm run test:pod`), which
-    // ask for Docker Engine 28.3.3 or later (docs/testing.md).
+    // Docker for the end-to-end tests' servers (`npm run test:pod`, `npm
+    // run journeys`), which ask for Docker Engine 28.3.3 or later
+    // (docs/testing.md).
     "ghcr.io/devcontainers/features/docker-in-docker:4": {},
     // Python for pySHACL's cross-check (`npm run crosscheck`), the version
     // CI runs it on.
@@ -37,7 +38,8 @@
     5173
   ],
 
-  "postCreateCommand": "npm ci && pip install -r scripts/requirements-ci.txt",
+  // Chromium for the user journeys (`npm run journeys`).
+  "postCreateCommand": "npm ci && pip install -r scripts/requirements-ci.txt && npm run browsers -w @solid-memo/e2e-journeys",
 
   "remoteUser": "node"
 }

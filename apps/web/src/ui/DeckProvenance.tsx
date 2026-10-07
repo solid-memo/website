@@ -50,7 +50,12 @@ export function DeckProvenance({
         </>
       ))}
       {description !== undefined && (
-        <span class="deck-description" lang={readerLang(description)}>
+        <span
+          class="deck-description"
+          role="group"
+          aria-label={t("deckAbout.description")}
+          lang={readerLang(description)}
+        >
           {linkify(readerText(description))}
         </span>
       )}

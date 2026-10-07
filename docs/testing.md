@@ -20,6 +20,12 @@ npm run test:pod  # the end-to-end tests, against the Solid servers they start i
 npm run servers -w @solid-memo/e2e-pod   # pull or build those servers' images ahead (`-- css-6` for one)
 npm run pod       # a Community Solid Server at http://127.0.0.1:3999/, in memory, to poke at by hand
 npm run pod:clean # take down the servers an interrupted run left
+npm run journeys  # the user journeys: the built app in Chromium, against a Community Solid Server 7 started in Docker
+npm run journeys -- --ui  # the same in Playwright's UI mode: watch, pick, step through and time-travel a journey
+npm run journeys -- -g smoke   # only the journeys whose title matches (or --repeat-each=10, or any other Playwright option)
+npm run css -w @solid-memo/e2e-journeys   # keep such a server up; JOURNEY_SERVER_URL=<its url> npm run journeys reuses it
+npm run journeys:report -w @solid-memo/e2e-journeys   # open the last run's report
+npm run css:clean -w @solid-memo/e2e-journeys   # take down the servers an interrupted run left
 ```
 
 `npm run test:pod` runs `e2e/pod/` once against each Solid server
@@ -138,8 +144,99 @@ The vocabulary, the deck library and the pod catalog fixtures are also
 cross-checked by pySHACL in CI (`npm run crosscheck`;
 see [validation.md](validation.md#the-ci-cross-check)).
 
-Apart from the end-to-end tests' Docker images, nothing needs the
-network: the vocabulary, the shapes and the deck library are read from
+## User journeys
+
+`e2e/journeys/` drives the built app (`npm run build -w @solid-memo/web`,
+served by `vite preview` at http://127.0.0.1:4173/) in Chromium with
+[Playwright](https://playwright.dev/), through whole journeys a user
+takes: logging in with a WebID at a real identity provider, setting
+preferences, making and studying decks, grouping them, importing from
+the library, describing a deck in two languages, validating the
+instance, logging out. Each journey runs against a fresh account, pod
+and WebID on a Community Solid Server 7
+([css/compose.yml](../e2e/journeys/css/compose.yml)) that the global
+setup starts in Docker and takes down after. The app logs in only with
+https WebIDs and issuers, so the server sits behind Caddy at
+`https://127.0.0.1:<port>/` with Caddy's own certificate, which the
+browser is told to accept. The server shares Caddy's network, so it
+reaches its own https address too (to read the WebIDs it checks tokens
+for). It keeps its pods in files, not in memory, because the journeys
+PATCH Swedish text (see above). The journeys need Docker and Chromium
+(`npm run browsers -w @solid-memo/e2e-journeys` installs it), and CI
+runs them on every push. They block, as the blocking servers do.
+
+The journeys must run the same way every time. Each page's
+`Math.random` is seeded (the seed is in the report; `JOURNEY_SEED=<n>`
+replays it). The browser's time zone is one where it is about noon, far
+from the day boundary. Requests to any host other than 127.0.0.1 fail
+the journey (the language selector's flags are stubbed). A journey
+never asserts which card a shuffled queue shows, only how many there
+are.
+
+**When a journey fails**, the CI job's summary names it, the step it
+failed in (the spec's numbered step › the page object's action) and the
+error. The job's `journeys-<attempt>` artifact holds everything else:
+
+- `test-results/<journey>/trace.zip`: the whole journey, replayable step
+  by step. Each step shows the page before and after every action, the
+  network (the login's redirects included) and the console. Open it with
+  `npx playwright show-trace <trace.zip>` or at
+  https://trace.playwright.dev. Traces hold the throwaway account's
+  password and tokens, which is harmless.
+- `playwright-report/`: the steps as a tree, with a screenshot at the
+  end of each journey step, a video, and these attachments:
+  - `diagnostics.json`: console, page errors, failed and refused
+    requests, the seed, the time zone;
+  - `css.log`: the server's log for the journey's time;
+  - `pod-dump.ttl`: every document in the journey's pod when it failed.
+  Open the report with `npx playwright show-report <dir>`.
+- `logs/css.log`: the server's whole log.
+
+A run by hand (Actions › CI › Run workflow) with *trace* ticked keeps all
+of this for passing journeys too. Locally, `JOURNEY_TRACE=on npm run
+journeys` does the same.
+
+### Writing a journey
+
+A journey is one file, `e2e/journeys/journeys/<name>.journey.ts`, with
+one `test` whose steps are numbered as the journey's spec words them:
+
+```ts
+test("a learner's first deck @smoke", async ({ app, account, runId }) => {
+  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit());
+  await app.step("02 · Log in with a WebID", () => logInAndCreateInstance(app, account, `Instance ${runId}`));
+  await app.step("03 · Create a deck", async () => {
+    await app.decks.openDeckCreator();
+    await app.deckCreator.create(`Deck ${runId}`);
+  });
+});
+```
+
+- **Fixtures** ([fixtures.ts](../e2e/journeys/fixtures.ts)): `account`
+  is a fresh account, pod and WebID; `runId` names what the run makes;
+  `app` is the app as page objects.
+- **Page objects** ([pages/](../e2e/journeys/pages/)): one per screen,
+  registered on [App.ts](../e2e/journeys/pages/App.ts). Their methods
+  are what a user does, and each is a step of its own in the report.
+  They find elements by role and accessible name, with the app's own text
+  ([harness/strings.ts](../e2e/journeys/harness/strings.ts) reads
+  `apps/web/src/i18n/`), so a journey follows the language it switches
+  to. They never use CSS classes; where the app gives no accessible
+  name, the app gets one.
+- **Flows** ([flows/](../e2e/journeys/flows/)): the steps many journeys
+  share, such as logging in.
+- **Dialogs**: a step that expects a `confirm` names it with
+  `app.expectDialog(pattern)`; any other dialog fails the journey.
+
+The harness's own code (`harness/`) has unit tests (`npm test`, so `npm
+run check`). The page objects and journeys are themselves tests, run by
+`npm run journeys`, and have no coverage of their own, as with
+`e2e/pod`.
+
+## Without the network
+
+Apart from the end-to-end tests' Docker images and the journeys'
+browser, nothing needs the network: the vocabulary, the shapes and the deck library are read from
 the repository's `ns/` and `decks/`, at the IRIs the site publishes
 them under.
 
@@ -154,6 +251,10 @@ documented exclusions:
 - `src/test/` and `src/testing/` — test setup and helpers other
   packages' tests import (`@solid-memo/domain/testing/libraryDeck`,
   `@solid-memo/shacl/testing/turtle`), not product code.
+- `e2e/pod/` and `e2e/journeys/` — they are tests. Their harnesses'
+  logic is unit-tested (what they make of a server's answers, the
+  journeys' time zone, seed, text and CI summary), but no threshold
+  applies.
 
 Code that cannot reach 100% is restructured until it can (e.g. an
 unreachable defensive branch is removed rather than excluded). New code
@@ -173,6 +274,7 @@ Dependency inversion gives every layer a seam that makes mocks trivial:
 | Shapes (`packages/shacl/`, `packages/solid/src/conformance.test.ts`) | the real engine | The real `rdf-validate-shacl` over the real shapes in `ns/shapes/`: fixture documents under `packages/vocab/fixtures/` pass or fail as a table says; a record written through every descriptor, and every migration step's output, conforms (`conformance.test.ts`). Every library deck passes too, by `npm run library:check` ([deck-library.md](deck-library.md#checks)). Shape documents are read through a `fetch` that serves the repository's files at their IRIs (`shapesFetch` in [sources.ts](../packages/vocab/tooling/sources.ts), a `Response` with its `url` set), exactly as the browser reads them. |
 | Generated code | drift test | `packages/vocab/tooling/generate.test.ts` renders the generators' output and compares it with the committed files; generated modules are data only, so importing them covers them (`packages/vocab/src/generated.test.ts`). |
 | End to end | real Solid servers | `e2e/pod/` wires the real use cases and Solid adapters as `main.tsx` does, over a fetch that records every request, against Community Solid Server 7 and 6 and node-solid-server 6 and 5. |
+| User journeys | the built app in a browser | `e2e/journeys/` drives the app in Chromium (Playwright) through whole journeys, logging in at a real identity provider (Community Solid Server 7 behind TLS) ([User journeys](#user-journeys)). |
 
 ```mermaid
 graph LR
