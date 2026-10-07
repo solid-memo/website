@@ -398,14 +398,16 @@ a:hover {
   text-decoration-thickness: 2px;
 }
 
-a:not(.button, .brand, .wordmark) {
+/* A link laid over its whole row (a deck's name) marks the row, not
+   itself, so it takes no highlight of its own. */
+a:not(.button, .brand, .wordmark, .deck-open, .library-deck-name) {
   border-radius: 0.35em;
   transition:
     background-color 0.12s ease,
     box-shadow 0.12s ease;
 }
 
-a:not(.button, .brand, .wordmark):hover {
+a:not(.button, .brand, .wordmark, .deck-open, .library-deck-name):hover {
   background-color: var(--link-hover-bg);
   box-shadow:
     0 0 0 0.22em var(--link-hover-bg),
@@ -544,6 +546,8 @@ h2 a:hover {
 .masthead a.brand {
   color: inherit;
   text-decoration: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .masthead img.logo {
@@ -786,6 +790,10 @@ a.button {
   box-shadow: var(--shadow-sm);
   text-decoration: none;
   cursor: pointer;
+  /* A label is pressed, not copied: a drag or a double-click over it
+     must not select it. */
+  -webkit-user-select: none;
+  user-select: none;
   transition:
     background 0.12s ease,
     border-color 0.12s ease,
@@ -1708,11 +1716,14 @@ html.drag-active {
   transform: scale(0.7);
 }
 
+/* A name that wraps goes on under its first word, past the icon (1em
+   and its 0.35em margin), where the hint under it starts too. */
 .deck-list .deck-open {
   grid-column: 1;
   grid-row: 1;
   overflow-wrap: anywhere;
-  padding: 0.15rem 0.4rem 0;
+  padding: 0.15rem 0.4rem 0 calc(0.4rem + 1.35em);
+  text-indent: -1.35em;
   font-weight: 650;
   font-size: 1rem;
   color: inherit;
