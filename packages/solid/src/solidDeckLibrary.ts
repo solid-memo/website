@@ -1,7 +1,9 @@
 import type { DeckLibrary } from "@solid-memo/application/ports";
+import type { SolidDataset } from "@inrupt/solid-client";
+import type { CourseOutline } from "@solid-memo/domain/course";
 import type { LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
 import { getSolidDatasetLinear } from "./linearDataset";
-import { toLibraryDeckContent, toLibraryDecks } from "./mappers/libraryMapper";
+import { toCourseOutline, toLibraryDeckContent, toLibraryDecks } from "./mappers/libraryMapper";
 
 export interface SolidDeckLibraryDeps {
   /**
@@ -20,28 +22,46 @@ export interface SolidDeckLibraryDeps {
  * worth showing, not an empty library. Documents are read in one pass
  * (getSolidDatasetLinear): a release of 3,000 cards otherwise takes
  * seconds to read, each time. A release never changes, so each is read
- * once and its content kept, shared by every reader of it, concurrent or
- * later; a failed read is not kept, so the next one tries again. The
- * index is read afresh each time, as new releases come with the site.
+ * once and what is made of it — its content, a course's outline — kept,
+ * shared by every reader of it, concurrent or later; a failed read is not
+ * kept, so the next one tries again. The index is read afresh each time,
+ * as new releases come with the site.
  */
 export function createSolidDeckLibrary({
   fetch,
   indexUrl,
 }: SolidDeckLibraryDeps): DeckLibrary {
-  const releases = new Map<string, Promise<LibraryDeckContent>>();
+  const releases = new Map<string, Promise<SolidDataset>>();
+  const contents = new Map<string, Promise<LibraryDeckContent>>();
+  const outlines = new Map<string, Promise<CourseOutline>>();
+
+  /** The release's document, read once. */
+  function release(url: string): Promise<SolidDataset> {
+    return kept(releases, url, () => getSolidDatasetLinear(url, { fetch }));
+  }
+
   return {
     async listLibraryDecks(): Promise<LibraryDeck[]> {
       return toLibraryDecks(await getSolidDatasetLinear(indexUrl, { fetch }));
     },
 
     fetchLibraryDeck(url) {
-      let release = releases.get(url);
-      if (release === undefined) {
-        release = getSolidDatasetLinear(url, { fetch }).then((dataset) => toLibraryDeckContent(url, dataset));
-        releases.set(url, release);
-        release.catch(() => releases.delete(url));
-      }
-      return release;
+      return kept(contents, url, () => release(url).then((dataset) => toLibraryDeckContent(url, dataset)));
+    },
+
+    fetchCourseOutline(url) {
+      return kept(outlines, url, () => release(url).then((dataset) => toCourseOutline(url, dataset)));
     },
   };
+}
+
+/** What `make` makes for the URL, made once and kept; a failure is forgotten, so the next call tries again. */
+function kept<T>(cache: Map<string, Promise<T>>, url: string, make: () => Promise<T>): Promise<T> {
+  let made = cache.get(url);
+  if (made === undefined) {
+    made = make();
+    cache.set(url, made);
+    made.catch(() => cache.delete(url));
+  }
+  return made;
 }

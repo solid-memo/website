@@ -119,7 +119,9 @@
     "browser": "Browser",
     "cardCreator": "New card",
     "study": "Study",
-    "statistics": "Statistics"
+    "statistics": "Statistics",
+    "course": "Course",
+    "courseReview": "Final review"
   },
   "browser": {
     "heading": "Browser: {deck}",
@@ -187,6 +189,55 @@
     "back": "Back",
     "question": "Question",
     "answer": "Answer"
+  },
+  "course": {
+    "chaptersDone": {
+      "one": "{done} of {count} chapter done",
+      "other": "{done} of {count} chapters done"
+    },
+    "start": "Start the course",
+    "continue": "Continue",
+    "finished": "You have finished this course. Its cards are in your deck, to study like any other.",
+    "chapterNumber": "Chapter {number}:",
+    "locked": "Locked",
+    "open": "Open",
+    "done": "Done",
+    "stepsDone": {
+      "one": "{done} of {count} step done",
+      "other": "{done} of {count} steps done"
+    }
+  },
+  "chapterPlayer": {
+    "step": "Step {number} of {count}",
+    "progress": "Steps done in this chapter",
+    "check": "Check your understanding",
+    "checkNumbered": "Check your understanding: question {number} of {count}",
+    "next": "Next",
+    "toReview": "On to the final review"
+  },
+  "chapterReview": {
+    "heading": "Final review: {chapter}",
+    "intro": "Every question of the chapter once more. One you answer wrongly comes back until you get it right.",
+    "position": "Question {position} of {total}",
+    "next": "Next",
+    "completing": "Completing the chapter…",
+    "retry": "Try again",
+    "chapterDone": "Chapter complete. The next one is open.",
+    "courseDone": "Chapter complete. You have finished the course.",
+    "nextChapter": "Next chapter: {chapter}"
+  },
+  "courseQuestion": {
+    "right": "Right!",
+    "wrong": "Not quite.",
+    "added": "Added to your deck.",
+    "why": "Why not:"
+  },
+  "multipleChoice": {
+    "check": "Check",
+    "checking": "Checking…",
+    "keys": "Press 1 to {last} to choose, then Enter to check.",
+    "right": "Right answer",
+    "chosen": "Your answer"
   },
   "dataCheckNotice": {
     "region": "Data check",
@@ -298,7 +349,8 @@
     "deckRenamed": "Renamed the deck to \"{name}\".",
     "deckDeleted": "Deleted the deck \"{name}\".",
     "afterGroup": "after {group}",
-    "dragCancelled": "Move cancelled: the deck or group stays where it was."
+    "dragCancelled": "Move cancelled: the deck or group stays where it was.",
+    "continueCourse": "Continue course"
   },
   "studyPace": {
     "startSmall": "Every new card comes back for reviews in the days that follow, so a high number now piles up reviews later. Better to start small and be consistent: you can always raise it."
@@ -474,7 +526,8 @@
       "other": "Import {count} decks"
     },
     "importing": "Importing…",
-    "loading": "Loading the deck library…"
+    "loading": "Loading the deck library…",
+    "course": "Course"
   },
   "libraryBrowser": {
     "heading": "Cards: {deck}",
@@ -521,7 +574,11 @@
     "import": "Import this deck",
     "importing": "Importing…",
     "preview": "Preview",
-    "alreadyImported": "Already imported"
+    "alreadyImported": "Already imported",
+    "courseChapters": "A course: short pieces of theory, each checked by a question. Every question you answer becomes a card in your deck.",
+    "startCourse": "Start course",
+    "continueCourse": "Continue course",
+    "starting": "Starting…"
   },
   "libraryPreview": {
     "heading": "Preview: {deck}",
@@ -944,7 +1001,8 @@
     "deckSetAside": "This deck is set aside: its data does not conform. Repair it above to use it again.",
     "checkFailed": "Could not check this instance's data: {error}",
     "developerTools": "Developer tools",
-    "validateInstance": "Validate this instance"
+    "validateInstance": "Validate this instance",
+    "loadingCourse": "Loading the course…"
   },
   "errors": {
     "cardFrontImageNotWebUrl": "The front image must be an http(s) URL.",

@@ -70,8 +70,10 @@ export function LibraryScreen({
   const [query, setQuery] = useRemembered(`${memoryKey}:query`, "");
   const shown = filterLibraryDecks(decks, { topics, query });
   // A deck the filters hide stays ticked for when it shows again, but is
-  // not imported: the import never includes what the user cannot see.
-  const selected = shown.filter((deck) => selectedUrls.includes(deck.url));
+  // not imported: the import never includes what the user cannot see. A
+  // course is never imported: it is started from its page, and its cards
+  // join the deck as the learner answers them (docs/courses.md).
+  const selected = shown.filter((deck) => deck.isCourse !== true && selectedUrls.includes(deck.url));
   const available = topicsOf(decks);
   const count =
     shown.length === decks.length
@@ -160,21 +162,27 @@ export function LibraryScreen({
               {shown.map((deck) => (
                 <li key={deck.url}>
                   {/* A 44px target above the row's link, so a near miss
-                      ticks the deck instead of leaving the screen. */}
-                  <label class="library-pick">
-                    <input
-                      type="checkbox"
-                      aria-label={readerText(deck.title)}
-                      checked={selectedUrls.includes(deck.url)}
-                      disabled={busy}
-                      onChange={(e) => toggle(deck, e.currentTarget.checked)}
-                    />
-                  </label>
+                      ticks the deck instead of leaving the screen. A course
+                      has none, only its place: it is started from its page. */}
+                  {deck.isCourse === true ? (
+                    <span class="library-pick" aria-hidden="true" />
+                  ) : (
+                    <label class="library-pick">
+                      <input
+                        type="checkbox"
+                        aria-label={readerText(deck.title)}
+                        checked={selectedUrls.includes(deck.url)}
+                        disabled={busy}
+                        onChange={(e) => toggle(deck, e.currentTarget.checked)}
+                      />
+                    </label>
+                  )}
                   <a class="library-deck-name" href={deckHref(deck)}>
                     <ReaderText text={deck.title} />
                   </a>
                   <span class="library-deck-meta">
                     <span class="hint">{t("common.cardCount", { count: deck.cardCount })}</span>
+                    {deck.isCourse === true && <span class="hint library-course">{t("library.course")}</span>}
                     {isImported(deck) && (
                       <span class="hint library-imported">{t("library.alreadyImported")}</span>
                     )}

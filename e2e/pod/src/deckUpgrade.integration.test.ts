@@ -81,6 +81,7 @@ const library: DeckLibrary = {
     },
   ],
   fetchLibraryDeck: async (url) => (url === V2.url ? V2 : V1),
+  fetchCourseOutline: async (releaseUrl) => ({ releaseUrl, chapters: [] }),
 };
 
 const review = (cardId: string, intervalDays: number): ReviewState => ({

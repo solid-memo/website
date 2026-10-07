@@ -1,0 +1,9 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix schema:     <https://schema.org/> .
+
+<#d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:distractorText "Only web pages" ,
+                              "Only web pages"@en ;
+    solid-memo:formatVersion 1 .

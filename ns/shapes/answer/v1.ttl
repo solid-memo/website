@@ -10,7 +10,7 @@
 <#shape>
     a sh:NodeShape ;
     sh:name "AnswerV1" ;
-    rdfs:comment "Answer format 1: the deck and card answered, the way it was asked, the SM-2 grade, when it was given and the study day it counts towards, and the prompt's interval before (absent on its first answer) and after." ;
+    rdfs:comment "Answer format 1: the deck and card answered, the way it was asked, the SM-2 grade, when it was given and the study day it counts towards, and the prompt's interval before (absent on its first answer) and after; since vocabulary 1.14, without a format bump, how it was answered (absent: recalled) and, for a wrong multiple-choice answer, the wrong option chosen." ;
     sh:nodeKind sh:IRI ;
     sh:class solid-memo:Answer ;
     sh:property <#formatVersion> ,
@@ -21,7 +21,9 @@
                 <#answeredAt> ,
                 <#studyDay> ,
                 <#priorIntervalDays> ,
-                <#nextIntervalDays> .
+                <#nextIntervalDays> ,
+                <#mode> ,
+                <#chosenDistractor> .
 
 <#formatVersion>
     a sh:PropertyShape ;
@@ -110,3 +112,21 @@
     sh:maxCount 1 ;
     sh:message "An interval is one whole number of days, 0 or more."@en ,
                "Ett intervall är ett heltal dagar, 0 eller fler."@sv .
+
+<#mode>
+    a sh:PropertyShape ;
+    sh:path solid-memo:answerMode ;
+    sh:name "mode" ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+    sh:in ( solid-memo:recall solid-memo:multipleChoice ) ;
+    sh:message "An answer states how it was given, at most once: solid-memo:recall or solid-memo:multipleChoice."@en ,
+               "Ett svar anger hur det gavs, högst en gång: solid-memo:recall eller solid-memo:multipleChoice."@sv .
+
+<#chosenDistractor>
+    a sh:PropertyShape ;
+    sh:path solid-memo:chosenDistractor ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+    sh:message "A wrong multiple-choice answer names the one wrong option chosen, an IRI."@en ,
+               "Ett felaktigt flervalssvar anger det felaktiga alternativ som valdes, en IRI."@sv .

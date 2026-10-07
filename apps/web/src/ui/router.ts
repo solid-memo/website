@@ -55,6 +55,14 @@ export type RouteRef =
   | { screen: "card"; instanceUrl: string; deckUrl: string; cardUrl: string }
   /** A study session over the deck's due and new prompts. */
   | { screen: "study"; instanceUrl: string; deckUrl: string }
+  /** The course a deck is the learner's copy of: its chapters and progress. */
+  | { screen: "course"; instanceUrl: string; deckUrl: string }
+  /** One chapter of the deck's course, its steps taken in turn. `chapterUrl`
+      is the chapter's subject in the release; the step to take is derived
+      from the learner's progress, not carried in the URL. */
+  | { screen: "courseChapter"; instanceUrl: string; deckUrl: string; chapterUrl: string }
+  /** A chapter's final review, which completes it. */
+  | { screen: "courseReview"; instanceUrl: string; deckUrl: string; chapterUrl: string }
   | { screen: "preferences"; instanceUrl: string }
   /** The instance's study statistics. */
   | { screen: "statistics"; instanceUrl: string }
@@ -149,6 +157,20 @@ export function routeToHash(ref: RouteRef): string {
         instance: ref.instanceUrl,
         deck: ref.deckUrl,
       })}`;
+    case "course":
+      return `#/course${params({ instance: ref.instanceUrl, deck: ref.deckUrl })}`;
+    case "courseChapter":
+      return `#/course-chapter${params({
+        instance: ref.instanceUrl,
+        deck: ref.deckUrl,
+        chapter: ref.chapterUrl,
+      })}`;
+    case "courseReview":
+      return `#/course-review${params({
+        instance: ref.instanceUrl,
+        deck: ref.deckUrl,
+        chapter: ref.chapterUrl,
+      })}`;
     case "preferences":
       return `#/preferences${params({ instance: ref.instanceUrl })}`;
     case "statistics":
@@ -206,6 +228,11 @@ export function libraryPreviewHref(
  */
 export function deckHref(instanceUrl: string, deckUrl: string): string {
   return routeToHash({ screen: "deckDetail", instanceUrl, deckUrl });
+}
+
+/** Hash URL of the course a deck is the learner's copy of. */
+export function courseHref(instanceUrl: string, deckUrl: string): string {
+  return routeToHash({ screen: "course", instanceUrl, deckUrl });
 }
 
 /** Parse a location hash; null for anything that isn't a valid route. */
@@ -294,6 +321,17 @@ export function parseHash(hash: string): RouteRef | null {
       return instanceUrl === null || deckUrl === null
         ? null
         : { screen: "study", instanceUrl, deckUrl };
+    case "/course":
+      return instanceUrl === null || deckUrl === null
+        ? null
+        : { screen: "course", instanceUrl, deckUrl };
+    case "/course-chapter":
+    case "/course-review": {
+      const chapterUrl = query.get("chapter");
+      if (instanceUrl === null || deckUrl === null || chapterUrl === null) return null;
+      const screen = path === "/course-chapter" ? "courseChapter" : "courseReview";
+      return { screen, instanceUrl, deckUrl, chapterUrl };
+    }
     case "/preferences":
       return instanceUrl === null
         ? null

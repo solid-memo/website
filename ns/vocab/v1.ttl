@@ -7,6 +7,7 @@
 @prefix dcterms:    <http://purl.org/dc/terms/> .
 @prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
 @prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix schema:     <https://schema.org/> .
 
 # The Solid Memo vocabulary. Terms are only ever ADDED within this
 # namespace; a term's meaning or range never changes. A breaking change is
@@ -17,8 +18,8 @@
     a owl:Ontology ;
     dcterms:title "Solid Memo vocabulary, v1" ;
     dcterms:description "Terms for spaced-repetition flashcards stored in a Solid pod: instances, decks, cards, SM-2 review state and study preferences." ;
-    owl:versionInfo "1.13" ;
-    skos:changeNote "1.0: Instance, Deck, Card, ReviewState, Preferences, formatVersion, cardsDocument, reviewsDocument, front, back, the SM-2 fields and the study caps. 1.1: developerMode. 1.2: the previous* snapshot. 1.3: frontImage, backImage (card format 2). 1.4: cardCount (library index). 1.5: direction (deck format 2). 1.6: the StudyDirections and InvalidDataPolicies concept schemes, studyDirection (deck format 3) and invalidDataPolicy (preferences format 3); direction deprecated. 1.7: deckNewCardsPerDay, deckMaxReviewsPerDay (a deck's own study caps). 1.8: frontNote, backLabel, backNote (card format 3). 1.9: DocumentReceipt and DeckSchedule, the instance digest that lets a visit skip documents that have not changed. 1.10: Answer, the answer log the study statistics are computed from. 1.11: the Themes concept scheme and theme (preferences format 4). 1.12: frontImageDescription, backImageDescription (card format 4, without a version bump). 1.13: DeckGroup and position, the user's arrangement of the deck list (deck group format 1; on a deck, position needs no deck format bump)." .
+    owl:versionInfo "1.14" ;
+    skos:changeNote "1.0: Instance, Deck, Card, ReviewState, Preferences, formatVersion, cardsDocument, reviewsDocument, front, back, the SM-2 fields and the study caps. 1.1: developerMode. 1.2: the previous* snapshot. 1.3: frontImage, backImage (card format 2). 1.4: cardCount (library index). 1.5: direction (deck format 2). 1.6: the StudyDirections and InvalidDataPolicies concept schemes, studyDirection (deck format 3) and invalidDataPolicy (preferences format 3); direction deprecated. 1.7: deckNewCardsPerDay, deckMaxReviewsPerDay (a deck's own study caps). 1.8: frontNote, backLabel, backNote (card format 3). 1.9: DocumentReceipt and DeckSchedule, the instance digest that lets a visit skip documents that have not changed. 1.10: Answer, the answer log the study statistics are computed from. 1.11: the Themes concept scheme and theme (preferences format 4). 1.12: frontImageDescription, backImageDescription (card format 4, without a version bump). 1.13: DeckGroup and position, the user's arrangement of the deck list (deck group format 1; on a deck, position needs no deck format bump). 1.14: Chapter, Step and Distractor, the outline of a course (a library deck that is also a schema:Course), its theory and the wrong options of its multiple-choice questions (chapter, step and distractor format 1; distractor on a card without a card format bump); completedChapter, a course's progress on the user's copy; the AnswerModes concept scheme, answerMode and chosenDistractor (on an answer, without an answer format bump)." .
 
 #################### Classes ####################
 
@@ -85,6 +86,30 @@ solid-memo:DeckGroup
     rdfs:comment "A named group of decks and deck groups that the user arranged on the deck list. A subject of the instance's catalog document: a dcat:Catalog of its decks (dcat:dataset) and sub-groups (dcat:catalog), listed by the one catalogue or group it is in." ;
     rdfs:isDefinedBy <> ;
     skos:historyNote "Added in 1.13." .
+
+solid-memo:Chapter
+    a owl:Class ;
+    rdfs:subClassOf schema:Syllabus ;
+    rdfs:label "Chapter" ;
+    rdfs:comment "A chapter of a course: a library deck that is also a schema:Course. A subject of the deck's release beside its cards, part of the course (schema:isPartOf) at its place (schema:position), made of steps that each teach a piece of theory and check it with questions, and ending with a review of all its questions. Never copied into a pod: a copy reads it from the release it came from." ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.14." .
+
+solid-memo:Step
+    a owl:Class ;
+    rdfs:subClassOf schema:LearningResource ;
+    rdfs:label "Step" ;
+    rdfs:comment "One step of a course chapter: a short piece of theory, then the multiple-choice questions (cards) that check it. A subject of the deck's release, part of its chapter (schema:isPartOf) at its place (schema:position)." ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.14." .
+
+solid-memo:Distractor
+    a owl:Class ;
+    rdfs:subClassOf schema:Answer ;
+    rdfs:label "Distractor" ;
+    rdfs:comment "A wrong option of a card asked as a multiple-choice question, the card's back being the right one. A subject of the document that holds its card, which names it with solid-memo:distractor; copied with the card." ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.14." .
 
 #################### Shared ####################
 
@@ -253,6 +278,16 @@ solid-memo:backNote
     rdfs:range xsd:string ;
     rdfs:isDefinedBy <> ;
     skos:historyNote "Added in 1.8 for card format 3." .
+
+solid-memo:distractor
+    a owl:ObjectProperty ;
+    rdfs:label "distractor" ;
+    rdfs:comment "A wrong option to show next to the card's back when the card is asked as a multiple-choice question; a subject of the same document. A card with distractors has text on its back, the right option." ;
+    rdfs:domain solid-memo:Card ;
+    rdfs:range solid-memo:Distractor ;
+    rdfs:seeAlso schema:suggestedAnswer ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.14. Outside the card format's version: an older reader ignores it and studies the card front to back." .
 
 #################### Review state ####################
 
@@ -548,6 +583,65 @@ solid-memo:introducedOnDayCount
     rdfs:isDefinedBy <> ;
     skos:historyNote "Added in 1.9." .
 
+#################### Course ####################
+
+solid-memo:theory
+    a owl:DatatypeProperty ;
+    rdfs:subPropertyOf schema:text ;
+    rdfs:label "theory" ;
+    rdfs:comment "The short piece of theory a course step teaches, read before its questions: language-tagged text, one per language." ;
+    rdfs:domain solid-memo:Step ;
+    rdfs:range xsd:string ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.14." .
+
+solid-memo:checkedBy
+    a owl:ObjectProperty ;
+    rdfs:label "checked by" ;
+    rdfs:comment "A card of the same release, asked as a multiple-choice question right after the step's theory; answering it puts it among the cards the learner studies. A card is checked by one step at most." ;
+    rdfs:domain solid-memo:Step ;
+    rdfs:range solid-memo:Card ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.14." .
+
+solid-memo:reviewQuestion
+    a owl:ObjectProperty ;
+    rdfs:label "review question" ;
+    rdfs:comment "A card of the same release asked only in the chapter's final review, next to every card its steps check." ;
+    rdfs:domain solid-memo:Chapter ;
+    rdfs:range solid-memo:Card ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.14." .
+
+solid-memo:distractorText
+    a owl:DatatypeProperty ;
+    rdfs:subPropertyOf schema:text ;
+    rdfs:label "distractor text" ;
+    rdfs:comment "The text of a wrong option: untagged, its language unknown, or language-tagged, one per language, as the back of its card is." ;
+    rdfs:domain solid-memo:Distractor ;
+    rdfs:range xsd:string ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.14." .
+
+solid-memo:distractorNote
+    a owl:DatatypeProperty ;
+    rdfs:label "distractor note" ;
+    rdfs:comment "Why the option is wrong, shown to a learner who chose it: language-tagged text, one per language." ;
+    rdfs:domain solid-memo:Distractor ;
+    rdfs:range xsd:string ;
+    rdfs:seeAlso schema:answerExplanation ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.14." .
+
+solid-memo:completedChapter
+    a owl:ObjectProperty ;
+    rdfs:label "completed chapter" ;
+    rdfs:comment "A chapter of the course the deck was copied from (its prov:wasDerivedFrom release) whose final review the learner has passed." ;
+    rdfs:domain solid-memo:Deck ;
+    rdfs:range solid-memo:Chapter ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.14. On a deck it is outside the deck format, without a version bump: an older reader ignores it and an older writer keeps it." .
+
 #################### Answer log ####################
 
 solid-memo:answeredDeck
@@ -621,6 +715,24 @@ solid-memo:nextIntervalDays
     rdfs:range xsd:integer ;
     rdfs:isDefinedBy <> ;
     skos:historyNote "Added in 1.10." .
+
+solid-memo:answerMode
+    a owl:ObjectProperty ;
+    rdfs:label "answer mode" ;
+    rdfs:comment "How the prompt was answered: a concept of solid-memo:AnswerModes. Absent means recalled, as every answer was before 1.14." ;
+    rdfs:domain solid-memo:Answer ;
+    rdfs:range skos:Concept ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.14. Outside the answer format's version: an older reader ignores it." .
+
+solid-memo:chosenDistractor
+    a owl:ObjectProperty ;
+    rdfs:label "chosen distractor" ;
+    rdfs:comment "The wrong option chosen, when a multiple-choice answer was wrong. Absent when the right option was chosen." ;
+    rdfs:domain solid-memo:Answer ;
+    rdfs:range solid-memo:Distractor ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.14. Outside the answer format's version: an older reader ignores it." .
 
 #################### Concept schemes ####################
 
@@ -743,3 +855,32 @@ solid-memo:darkTheme
     skos:topConceptOf solid-memo:Themes ;
     rdfs:isDefinedBy <> ;
     skos:historyNote "Added in 1.11." .
+
+solid-memo:AnswerModes
+    a skos:ConceptScheme ;
+    dcterms:title "Answer modes"@en ;
+    skos:definition "How a prompt is answered during study."@en ;
+    skos:hasTopConcept solid-memo:recall ,
+                       solid-memo:multipleChoice ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.14." .
+
+solid-memo:recall
+    a skos:Concept ;
+    skos:prefLabel "Recall"@en ;
+    skos:definition "The learner recalls the answer, sees it, and grades how well they knew it."@en ;
+    skos:notation "recall" ;
+    skos:inScheme solid-memo:AnswerModes ;
+    skos:topConceptOf solid-memo:AnswerModes ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.14." .
+
+solid-memo:multipleChoice
+    a skos:Concept ;
+    skos:prefLabel "Multiple choice"@en ;
+    skos:definition "The learner chooses the answer among the card's back and its distractors; the choice is graded right or wrong."@en ;
+    skos:notation "multiple-choice" ;
+    skos:inScheme solid-memo:AnswerModes ;
+    skos:topConceptOf solid-memo:AnswerModes ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.14." .

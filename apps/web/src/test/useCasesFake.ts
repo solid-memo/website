@@ -81,6 +81,17 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
     listLibraryCards: vi.fn(async () => []),
     planLibraryUpgrade: vi.fn(async () => null),
     getStatistics: vi.fn(async () => statisticsOf([], "2026-09-21")),
+    startCourse: vi.fn(async () => {
+      throw new Error("startCourse fake not configured");
+    }),
+    getCourse: vi.fn(async () => {
+      throw new Error("getCourse fake not configured");
+    }),
+    answerCourseQuestion: vi.fn(async () => ({ effect: "none" as const, state: null })),
+    completeChapter: vi.fn(async (deck, chapterUrl) => ({
+      ...deck,
+      completedChapters: [...(deck.completedChapters ?? []), chapterUrl],
+    })),
     addReleaseLanguages: vi.fn(async () => null),
     deckRelease: vi.fn(async () => null),
     applyLibraryUpgrade: vi.fn(async (deck, plan) => ({

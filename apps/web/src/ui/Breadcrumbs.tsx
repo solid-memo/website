@@ -19,11 +19,14 @@ export interface CrumbNames {
   libraryDeck: string;
   /** Front of the route's library card; read for a library card's page. */
   libraryCard?: string;
+  /** Title of the route's course chapter; read for a chapter and its final review. */
+  chapter?: string;
   /** The language each name above is in, when not the page's. */
   deckLang?: string;
   cardLang?: string;
   libraryDeckLang?: string;
   libraryCardLang?: string;
+  chapterLang?: string;
 }
 
 /**
@@ -133,6 +136,19 @@ export function breadcrumbsFor(route: RouteRef, names: CrumbNames, t: I18n["t"])
     case "study":
       return [decks, deck, { label: t("breadcrumbs.study"), route }];
   }
+  const course: Crumb = {
+    label: t("breadcrumbs.course"),
+    route: { screen: "course", instanceUrl: route.instanceUrl, deckUrl: route.deckUrl },
+  };
+  if (route.screen === "course") return [decks, deck, course];
+  const chapter: Crumb = {
+    label: names.chapter ?? "",
+    lang: names.chapterLang,
+    route: { ...route, screen: "courseChapter" },
+  };
+  return route.screen === "courseChapter"
+    ? [decks, deck, course, chapter]
+    : [decks, deck, course, chapter, { label: t("breadcrumbs.courseReview"), route }];
 }
 
 export function Breadcrumbs({ crumbs }: { crumbs: Crumb[] }) {

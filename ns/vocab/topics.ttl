@@ -16,14 +16,15 @@
 # and every concept says in its history note when it arrived.
 <>
     a skos:ConceptScheme ;
-    owl:versionInfo "1.6" ;
+    owl:versionInfo "1.7" ;
     skos:changeNote "1.0: languages, swedish, geography, computing, science, chemistry." ,
                     "1.1: art." ,
                     "1.2: labour-market." ,
                     "1.3: every topic named and defined in Swedish as well as English." ,
                     "1.4: history, literature, music, mythology, mathematics, sports, economics, astronomy, biology, physics, greek, latin, spanish (for the authored decks)." ,
                     "1.5: french, german." ,
-                    "1.6: film, finnish, italian, portuguese." ;
+                    "1.6: film, finnish, italian, portuguese." ,
+                    "1.7: linked-data." ;
     dcterms:title "Solid Memo topics"@en ,
                   "Solid Memo-ämnen"@sv ;
     skos:definition "What a deck of flashcards is about."@en ,
@@ -90,7 +91,18 @@ topic:computing
                     "Datorer, mjukvara och webbens protokoll."@sv ;
     skos:inScheme <> ;
     skos:topConceptOf <> ;
+    skos:narrower topic:linked-data ;
     skos:historyNote "Since 1.0." .
+
+topic:linked-data
+    a skos:Concept ;
+    skos:prefLabel "Linked data"@en ,
+                   "Länkade data"@sv ;
+    skos:definition "Data on the web described with RDF and named and linked by IRIs, and the Solid specifications built on it."@en ,
+                    "Data på webben som beskrivs med RDF och namnges och länkas med IRI:er, och Solid-specifikationerna som bygger på det."@sv ;
+    skos:inScheme <> ;
+    skos:broader topic:computing ;
+    skos:historyNote "Since 1.7." .
 
 topic:science
     a skos:Concept ;

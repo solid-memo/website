@@ -173,6 +173,32 @@ describe("breadcrumbsFor", () => {
       { label: "Study", route: study },
     ]);
   });
+
+  it("puts a course under its deck, a chapter under the course, and a final review under its chapter", () => {
+    const chapterUrl = "https://solid-memo.com/decks/solid-fundamentals/v1.ttl#ch-1";
+    const course: RouteRef = { screen: "course", instanceUrl, deckUrl };
+    const chapter: RouteRef = { screen: "courseChapter", instanceUrl, deckUrl, chapterUrl };
+    const review: RouteRef = { screen: "courseReview", instanceUrl, deckUrl, chapterUrl };
+    const names = { deck: "Solid", card: "", libraryDeck: "", chapter: "Länkade data", chapterLang: "sv" };
+    expect(breadcrumbsFor(course, names)).toEqual([
+      { label: "Decks", route: home },
+      { label: "Solid", route: deckDetail },
+      { label: "Course", route: course },
+    ]);
+    expect(breadcrumbsFor(chapter, names)).toEqual([
+      { label: "Decks", route: home },
+      { label: "Solid", route: deckDetail },
+      { label: "Course", route: course },
+      { label: "Länkade data", lang: "sv", route: chapter },
+    ]);
+    expect(breadcrumbsFor(review, NO_NAMES)).toEqual([
+      { label: "Decks", route: home },
+      { label: "", route: deckDetail },
+      { label: "Course", route: course },
+      { label: "", route: chapter },
+      { label: "Final review", route: review },
+    ]);
+  });
 });
 
 describe("Breadcrumbs", () => {

@@ -23,3 +23,16 @@
     solid-memo:answeredOn "2026-10-03" ;
     solid-memo:priorIntervalDays 25 ;
     solid-memo:nextIntervalDays 1 .
+
+<#answer-20261007T091200000Z-c0ur5e>
+    a solid-memo:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:answeredDeck <https://pod.example/solid-memo/main/catalog.ttl#deck-2> ;
+    solid-memo:answeredCard <https://pod.example/solid-memo/main/decks/deck-2.ttl#q-iri-identifies> ;
+    solid-memo:answeredDirection solid-memo:frontToBack ;
+    solid-memo:grade 1 ;
+    solid-memo:answeredAt "2026-10-07T09:12:00.000Z"^^xsd:dateTime ;
+    solid-memo:answeredOn "2026-10-07" ;
+    solid-memo:nextIntervalDays 1 ;
+    solid-memo:answerMode solid-memo:multipleChoice ;
+    solid-memo:chosenDistractor <https://pod.example/solid-memo/main/decks/deck-2.ttl#q-iri-identifies-d1> .

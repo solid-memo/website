@@ -21,6 +21,7 @@ import { routeToHash, statisticsHref } from "./router";
 import { CARDS_PER_PAGE } from "./BrowserScreen";
 import { firstRelease } from "@solid-memo/domain/testing/libraryDeck";
 import { librarySeriesUrlOf } from "@solid-memo/domain/libraryLayout";
+import { CH1, CH2, courseDeck, courseLibraryDeck, makeCourse } from "../test/course";
 
 const session: Session = { webId: "https://alice.example/profile/card#me" };
 const storageA: Storage = { url: "https://pod.example/", source: "profile" };
@@ -1981,5 +1982,118 @@ describe("Workspace", () => {
     expect(
       await screen.findByText("catalog unreachable"),
     ).toBeInTheDocument();
+  });
+
+  describe("courses", () => {
+    const courseRoute = { screen: "course", instanceUrl: instanceA.url, deckUrl: courseDeck.url } as const;
+    const chapterRoute = { ...courseRoute, screen: "courseChapter", chapterUrl: CH1 } as const;
+    const reviewRoute = { ...courseRoute, screen: "courseReview", chapterUrl: CH1 } as const;
+
+    function courseUseCases(overrides: Partial<UseCases> = {}) {
+      return makeUseCases({
+        listInstances: vi.fn(async () => [instanceA]),
+        listDecks: vi.fn(async () => [courseDeck]),
+        getCourse: vi.fn(async () => makeCourse()),
+        ...overrides,
+      });
+    }
+
+    it("starts a course from its library page and opens it, under its deck in the trail", async () => {
+      let started = false;
+      const useCases = courseUseCases({
+        listDecks: vi.fn(async () => (started ? [courseDeck] : [])),
+        listLibraryDecks: vi.fn(async () => [courseLibraryDeck]),
+        startCourse: vi.fn(async () => {
+          started = true;
+          return courseDeck;
+        }),
+      });
+      window.history.replaceState(
+        null,
+        "",
+        routeToHash({ screen: "libraryDeck", instanceUrl: instanceA.url, libraryDeckUrl: courseLibraryDeck.seriesUrl }),
+      );
+      renderWorkspace(useCases);
+      fireEvent.click(await screen.findByRole("button", { name: "Start course" }));
+
+      expect(await screen.findByRole("link", { name: "Start the course" })).toBeInTheDocument();
+      expect(window.location.hash).toBe(routeToHash(courseRoute));
+      expect(useCases.getCourse).toHaveBeenCalledWith(courseDeck);
+      const nav = screen.getByRole("navigation", { name: "Breadcrumb" });
+      expect(within(nav).getAllByRole("link").map((link) => link.textContent)).toEqual([
+        "Decks",
+        "Solid fundamentals",
+        "Course",
+      ]);
+      expect(document.title).toBe("Course – Solid fundamentals – Solid Memo");
+    });
+
+    it("takes a chapter from the course, named in the trail, and goes on to its final review", async () => {
+      window.history.replaceState(null, "", routeToHash(courseRoute));
+      renderWorkspace(
+        courseUseCases({ answerCourseQuestion: vi.fn(async () => ({ effect: "introduce" as const, state: null })) }),
+      );
+      fireEvent.click(await screen.findByRole("link", { name: "Start the course" }));
+      expect(await screen.findByRole("heading", { name: "Step 1 of 2" })).toBeInTheDocument();
+      expect(window.location.hash).toBe(routeToHash(chapterRoute));
+      const nav = screen.getByRole("navigation", { name: "Breadcrumb" });
+      expect(within(nav).getByRole("link", { name: "Linked data" })).toHaveAttribute("aria-current", "page");
+
+      const answer = async (option: string, next: string) => {
+        fireEvent.click(screen.getByRole("radio", { name: option }));
+        fireEvent.click(screen.getByRole("button", { name: "Check" }));
+        fireEvent.click(await screen.findByRole("button", { name: next }));
+      };
+      // The options are shuffled: the right one is found by its text.
+      await answer("An IRI", "Next");
+      await answer("Three terms", "Next");
+      await answer("A syntax", "On to the final review");
+      expect(await screen.findByRole("heading", { name: "Final review: Linked data" })).toBeInTheDocument();
+      expect(window.location.hash).toBe(routeToHash(reviewRoute));
+      expect(within(screen.getByRole("navigation", { name: "Breadcrumb" })).getAllByRole("link").map((l) => l.textContent)).toEqual([
+        "Decks",
+        "Solid fundamentals",
+        "Course",
+        "Linked data",
+        "Final review",
+      ]);
+    });
+
+    it("falls back to the course for a chapter it does not have, or one still locked", async () => {
+      window.history.replaceState(null, "", routeToHash({ ...chapterRoute, chapterUrl: `${CH1}-gone` }));
+      const { unmount } = renderWorkspace(courseUseCases());
+      expect(await screen.findByRole("link", { name: "Start the course" })).toBeInTheDocument();
+      expect(window.location.hash).toBe(routeToHash(courseRoute));
+      unmount();
+
+      window.history.replaceState(null, "", routeToHash({ ...reviewRoute, chapterUrl: CH2 }));
+      renderWorkspace(courseUseCases());
+      expect(await screen.findByRole("link", { name: "Start the course" })).toBeInTheDocument();
+      expect(window.location.hash).toBe(routeToHash(courseRoute));
+    });
+
+    it("falls back to the deck's page for a deck that is no copy of a course", async () => {
+      const useCases = courseUseCases({ listDecks: vi.fn(async () => [{ ...courseDeck, sourceUrl: undefined }]) });
+      window.history.replaceState(null, "", routeToHash(courseRoute));
+      renderWorkspace(useCases);
+      await waitFor(() => expect(window.location.hash).toBe(routeToHash({ ...courseRoute, screen: "deckDetail" })));
+      expect(useCases.getCourse).not.toHaveBeenCalled();
+    });
+
+    it("shows a loading state while the course is read, and why it could not be", async () => {
+      window.history.replaceState(null, "", routeToHash(courseRoute));
+      const { unmount } = renderWorkspace(courseUseCases({ getCourse: vi.fn(() => new Promise<never>(() => undefined)) }));
+      expect(await screen.findByText("Loading the course…")).toBeInTheDocument();
+      unmount();
+
+      renderWorkspace(
+        courseUseCases({
+          getCourse: vi.fn(async () => {
+            throw new Error("release unreachable");
+          }),
+        }),
+      );
+      expect(await screen.findByText("release unreachable")).toBeInTheDocument();
+    });
   });
 });

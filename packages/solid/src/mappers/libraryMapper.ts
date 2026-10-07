@@ -21,11 +21,12 @@ import type {
   LibraryRelease,
   LibrarySource,
 } from "@solid-memo/domain/library";
-import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
+import { LATEST_VERSION, type ChapterV1, type StepV1 } from "@solid-memo/vocab/types.generated";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { readVersioned, storedVersionOf } from "../records";
-import { agentNamesOf } from "./deckMapper";
-import { ADMS, DCAT, DCTERMS, RDF, SM } from "../vocab";
+import { agentNamesOf, distractorsOf } from "./deckMapper";
+import { ADMS, DCAT, DCTERMS, RDF, SCHEMA, SM } from "../vocab";
+import { courseOutlineFromRecords, type CourseOutline } from "@solid-memo/domain/course";
 import { AppError } from "@solid-memo/domain/appError";
 
 /**
@@ -83,7 +84,13 @@ function toLibraryDeck(
     sources: release.wasDerivedFrom.map((sourceUrl) =>
       toLibrarySource(sourceUrl, getThing(index, sourceUrl)),
     ),
+    ...courseOf(currentThing!),
   };
+}
+
+/** `isCourse` for a release that is also typed schema:Course. */
+function courseOf(release: Thing): { isCourse?: true } {
+  return getUrlAll(release, RDF.type).includes(SCHEMA.Course) ? { isCourse: true } : {};
 }
 
 /** A release by URL, with what the index says about it (maybe nothing). */
@@ -138,25 +145,47 @@ export function toLibraryDeckContent(
     throw new AppError("notADeck", { url });
   }
   const cards = things
-    .map((thing) => toLibraryCard(url, thing))
+    .map((thing) => toLibraryCard(url, thing, dataset))
     .filter((card): card is LibraryCard => card !== null);
   const subject = asUrl(deck!);
   const names = agentNamesOf(dataset);
   if (read.record.version < 3) {
     for (const author of read.record.data.creator) names.set(agentUrlOf(subject, author), author);
   }
-  return libraryDeckFromRecord(
-    url,
-    read.storedVersion,
-    migrate("libraryDeck", read.record, { subject }),
-    cards,
-    (agent) => names.get(agent) ?? agent,
-  );
+  return {
+    ...libraryDeckFromRecord(
+      url,
+      read.storedVersion,
+      migrate("libraryDeck", read.record, { subject }),
+      cards,
+      (agent) => names.get(agent) ?? agent,
+    ),
+    ...courseOf(deck!),
+  };
+}
+
+/**
+ * A fetched release's course outline (see domain/course.ts): its
+ * chapter and step subjects, each read with its format's shape (one that
+ * does not fit is left out) and brought up to the current format. A
+ * release with none — no course — has an empty outline.
+ */
+export function toCourseOutline(releaseUrl: string, dataset: SolidDataset): CourseOutline {
+  const chapters: { url: string; data: ChapterV1 }[] = [];
+  const steps: { url: string; data: StepV1 }[] = [];
+  for (const thing of getThingAll(dataset)) {
+    const url = asUrl(thing);
+    const chapter = readVersioned(thing, "chapter");
+    if (chapter !== null) chapters.push({ url, data: migrate("chapter", chapter.record, { subject: url }) });
+    const step = readVersioned(thing, "step");
+    if (step !== null) steps.push({ url, data: migrate("step", step.record, { subject: url }) });
+  }
+  return courseOutlineFromRecords(releaseUrl, chapters, steps);
 }
 
 type LibraryDeckContentOf = ReturnType<typeof libraryDeckFromRecord>;
 
-function toLibraryCard(url: string, thing: Thing): LibraryCard | null {
+function toLibraryCard(url: string, thing: Thing, dataset: SolidDataset): LibraryCard | null {
   if (!getUrlAll(thing, RDF.type).includes(SM.Card)) return null;
   const formatVersion = storedVersionOf(thing);
   if (formatVersion > LATEST_VERSION.card) {
@@ -169,5 +198,6 @@ function toLibraryCard(url: string, thing: Thing): LibraryCard | null {
   }
   const read = readVersioned(thing, "card");
   if (read === null) return null;
-  return libraryCardFromRecord(asUrl(thing), formatVersion, migrate("card", read.record, { subject: asUrl(thing) }));
+  const data = migrate("card", read.record, { subject: asUrl(thing) });
+  return libraryCardFromRecord(asUrl(thing), formatVersion, data, distractorsOf(dataset, data.distractor));
 }

@@ -1,0 +1,22 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix schema:     <https://schema.org/> .
+
+<#ch-linked-data>
+    a solid-memo:Chapter ,
+      schema:Syllabus ;
+    schema:isPartOf <> ;
+    schema:position 0 ;
+    dcterms:title "Linked data and IRIs"@en ,
+                  "Länkade data och IRI:er"@sv ;
+    dcterms:description "Why the web of data names things with IRIs."@en ;
+    solid-memo:reviewQuestion <#q-iri-vs-url> ;
+    solid-memo:formatVersion 1 .
+
+<#ch-rdf>
+    a solid-memo:Chapter ,
+      schema:Syllabus ;
+    schema:isPartOf <> ;
+    schema:position 1 ;
+    dcterms:title "RDF"@en ;
+    solid-memo:formatVersion 1 .

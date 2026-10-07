@@ -16,12 +16,26 @@ import { SM_NS as SM } from "@solid-memo/vocab/vocab.generated";
 
 const ROOT = VOCAB_ROOT;
 const DC = "http://purl.org/dc/terms/";
+const SCHEMA = "https://schema.org/";
 
 /** What each invalid fixture must be rejected for. */
 const EXPECTED: Record<string, { path?: string; message: string }> = {
   "answer/v1/invalid/grade-out-of-range.ttl": { path: `${SM}grade`, message: "An answer's grade is one whole number, 0 to 5." },
   "answer/v1/invalid/both-ways.ttl": { path: `${SM}answeredDirection`, message: "An answer states the way the card was asked" },
   "answer/v1/invalid/study-day-as-date.ttl": { path: `${SM}answeredOn`, message: "The study day an answer counts towards" },
+  "answer/v1/invalid/unknown-mode.ttl": { path: `${SM}answerMode`, message: "An answer states how it was given, at most once" },
+  "card/v5/invalid/distractor-as-literal.ttl": { path: `${SM}distractor`, message: "A card's distractors, its wrong options, are IRIs" },
+  "chapter/v1/invalid/library-without-english-title.ttl": { path: `${DC}title`, message: "A chapter's title is language-tagged text, one per language, and one of them English" },
+  "chapter/v1/invalid/library-with-negative-position.ttl": { path: `${SCHEMA}position`, message: "A chapter's place among the course's chapters is one whole number, 0 or more" },
+  "chapter/v1/invalid/library-without-course.ttl": { path: `${SCHEMA}isPartOf`, message: "A chapter is part of one course" },
+  "distractor/v1/invalid/tagged-and-untagged-text.ttl": { message: "A distractor's text is either untagged or language-tagged, never both." },
+  "distractor/v1/invalid/without-text.ttl": { path: `${SM}distractorText`, message: "A distractor's text is one untagged text" },
+  "distractor/v1/invalid/untagged-note.ttl": { path: `${SM}distractorNote`, message: "A note on why an option is wrong is language-tagged text" },
+  "distractor/v1/invalid/not-an-answer.ttl": { path: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", message: "A distractor is a schema:Answer." },
+  "distractor/v1/invalid/deprecated-not-boolean.ttl": { path: "http://www.w3.org/2002/07/owl#deprecated", message: "A retired distractor states owl:deprecated true" },
+  "step/v1/invalid/library-without-theory.ttl": { path: `${SM}theory`, message: "A step's theory is language-tagged text, one per language, and one of them English" },
+  "step/v1/invalid/library-with-untagged-theory.ttl": { path: `${SM}theory`, message: "A step's theory is language-tagged text, one per language, and one of them English" },
+  "step/v1/invalid/library-without-question.ttl": { path: `${SM}checkedBy`, message: "A step is checked by one or more cards of the release" },
   "card/v1/invalid/missing-back.ttl": { path: `${SM}back`, message: "A format-1 card has text on its back." },
   "card/v2/invalid/image-as-literal.ttl": { path: `${SM}frontImage`, message: "A picture is an IRI" },
   "card/v2/invalid/side-without-content.ttl": { message: "Each side of a card needs text or a picture." },

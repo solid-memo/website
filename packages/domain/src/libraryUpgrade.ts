@@ -136,9 +136,13 @@ export function withReleaseLanguages(deck: Deck, release: LibraryDeckContent): D
   return { ...deck, ...(title === undefined ? {} : { title }), ...(description === undefined ? {} : { description }) };
 }
 
-/** Whether two cards say the same, on both sides; ids, versions and retirement aside. */
+/**
+ * Whether two cards say the same, on both sides, with the same wrong
+ * options (distractors, in order); ids, versions and retirement aside.
+ */
 export function sameContent(a: CardContent, b: CardContent): boolean {
   return (
+    sameDistractors(a, b) &&
     sameText(a.front, b.front) &&
     sameText(a.back, b.back) &&
     a.frontImageUrl === b.frontImageUrl &&
@@ -151,10 +155,26 @@ export function sameContent(a: CardContent, b: CardContent): boolean {
   );
 }
 
+/** Whether two cards have the same distractors, matched by id: RDF keeps no order among a card's sm:distractor. */
+function sameDistractors(a: CardContent, b: CardContent): boolean {
+  const mine = a.distractors ?? [];
+  const theirs = new Map((b.distractors ?? []).map((distractor) => [distractor.id, distractor]));
+  return (
+    mine.length === theirs.size &&
+    mine.every((distractor) => {
+      const other = theirs.get(distractor.id);
+      return other !== undefined && sameText(distractor.text, other.text) && sameText(distractor.note, other.note);
+    })
+  );
+}
+
 /**
  * What upgrading the copy to the newer release would do; null — no
  * offer — when the release is not newer, uses a card format this app
- * does not know, or would change nothing.
+ * does not know, or would change nothing. A course's deck (`course`)
+ * holds only the cards the learner has reached, each joining it when
+ * its question is first answered: its upgrade adds none, but changes,
+ * retires and restores those it holds as any copy's.
  */
 export function planLibraryUpgrade({
   deck,
@@ -162,6 +182,7 @@ export function planLibraryUpgrade({
   from,
   to,
   releases,
+  course = false,
 }: {
   deck: Deck;
   /** The copy's cards, as the pod holds them. */
@@ -172,6 +193,8 @@ export function planLibraryUpgrade({
   to: LibraryDeckContent;
   /** Every release of the deck, as the index describes them. */
   releases: readonly LibraryRelease[];
+  /** Whether the copy is a course's deck (either release is a course). */
+  course?: boolean;
 }): LibraryUpgradePlan | null {
   if (Number(to.version) <= Number(from.version)) return null;
   if (to.cards.some((card) => card.formatVersion > CARD_FORMAT_VERSION)) return null;
@@ -179,7 +202,7 @@ export function planLibraryUpgrade({
   const after = new Map(to.cards.map((card) => [card.id, card]));
   const copy = new Map(cards.map((card) => [card.id, card]));
 
-  const add = to.cards.filter((card) => !before.has(card.id) && !copy.has(card.id));
+  const add = course ? [] : to.cards.filter((card) => !before.has(card.id) && !copy.has(card.id));
   const change: LibraryCard[] = [];
   const retire: Card[] = [];
   const restore: Card[] = [];

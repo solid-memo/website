@@ -37,22 +37,24 @@ const importedDeck: Deck = {
   sourceUrl: capitals.url,
 };
 
-function renderContainer(useCases: UseCases) {
+function renderContainer(useCases: UseCases, deck: LibraryDeck = capitals) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
   const onDone = vi.fn();
+  const onCourseStarted = vi.fn();
   render(
     <QueryClientProvider client={queryClient}>
       <LibraryDeckContainer
         useCases={useCases}
         instance={instance}
-        deck={capitals}
+        deck={deck}
         onDone={onDone}
+        onCourseStarted={onCourseStarted}
       />
     </QueryClientProvider>,
   );
-  return { onDone, queryClient };
+  return { onDone, onCourseStarted, queryClient };
 }
 
 describe("LibraryDeckContainer", () => {
@@ -92,6 +94,35 @@ describe("LibraryDeckContainer", () => {
     await waitFor(() => expect(onDone).toHaveBeenCalledOnce());
     expect(importLibraryDeck).toHaveBeenCalledWith(instance.url, capitals);
     await waitFor(() => expect(useCases.listDecks).toHaveBeenCalledTimes(2));
+  });
+
+  it("starts a course, refreshes the deck list and opens the instance's deck of it", async () => {
+    const course = { ...capitals, isCourse: true as const };
+    const started = { ...importedDeck, completedChapters: [] };
+    const startCourse = vi.fn(async () => started);
+    const useCases = makeUseCasesFake({ startCourse });
+    const { onCourseStarted, onDone } = renderContainer(useCases, course);
+
+    fireEvent.click(screen.getByRole("button", { name: "Start course" }));
+
+    await waitFor(() => expect(onCourseStarted).toHaveBeenCalledWith(started));
+    expect(startCourse).toHaveBeenCalledWith(instance.url, course);
+    expect(useCases.listDecks).toHaveBeenCalledTimes(2);
+    expect(onDone).not.toHaveBeenCalled();
+  });
+
+  it("shows the error when a course cannot be started", async () => {
+    const { onCourseStarted } = renderContainer(
+      makeUseCasesFake({
+        startCourse: vi.fn(async () => {
+          throw new Error("pod refused");
+        }),
+      }),
+      { ...capitals, isCourse: true },
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Start course" }));
+    expect((await screen.findByText("pod refused")).closest(".error")).toBeInTheDocument();
+    expect(onCourseStarted).not.toHaveBeenCalled();
   });
 
   it("shows the error when the import fails", async () => {

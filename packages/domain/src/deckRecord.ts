@@ -1,10 +1,10 @@
 import { agentToRecord, agentUrlOf } from "./agentRecord";
 import { directionOfConcept, conceptOfDirection } from "./concepts";
 import { defaultDeckDescriptionText, distributionUrlOf, TURTLE_MEDIA_TYPE } from "./dcat";
-import { isEmptyText, type Card, type CardContent, type Deck } from "./deck";
+import { isEmptyText, type Card, type CardContent, type Deck, type Distractor } from "./deck";
 import type { LibraryCard, LibraryDeckContent } from "./library";
 import { copyKeywords, noKeywords } from "./keywords";
-import type { AgentV1, CardV5, DeckV6, DistributionV1, LibraryDeckV5 } from "@solid-memo/vocab/types.generated";
+import type { AgentV1, CardV5, DeckV6, DistractorV1, DistributionV1, LibraryDeckV5 } from "@solid-memo/vocab/types.generated";
 import { fragmentIdOf } from "./subjectUrl";
 
 /**
@@ -83,10 +83,12 @@ export function deckDistribution(deck: Deck): { url: string; record: Distributio
 }
 
 /**
- * The content of a card record; null when a side has neither text nor a
- * picture — the one rule of the card shape a record cannot carry.
+ * The content of a card record, with the distractors it names as the
+ * document has them (the reader resolves them: a record holds only their
+ * IRIs); null when a side has neither text nor a picture — the one rule
+ * of the card shape a record cannot carry.
  */
-export function cardContentFromRecord(data: CardV5): CardContent | null {
+export function cardContentFromRecord(data: CardV5, distractors: readonly Distractor[] = []): CardContent | null {
   const front = data.front ?? {};
   const back = data.back ?? {};
   if (isEmptyText(front) && data.frontImage === undefined) return null;
@@ -101,11 +103,17 @@ export function cardContentFromRecord(data: CardV5): CardContent | null {
     ...(data.frontNote === undefined ? {} : { frontNote: data.frontNote }),
     ...(data.backLabel === undefined ? {} : { backLabel: data.backLabel }),
     ...(data.backNote === undefined ? {} : { backNote: data.backNote }),
+    ...(distractors.length === 0 ? {} : { distractors }),
   };
 }
 
-export function cardFromRecord(url: string, storedVersion: number, data: CardV5): Card | null {
-  const content = cardContentFromRecord(data);
+export function cardFromRecord(
+  url: string,
+  storedVersion: number,
+  data: CardV5,
+  distractors: readonly Distractor[] = [],
+): Card | null {
+  const content = cardContentFromRecord(data, distractors);
   if (content === null) return null;
   return {
     id: fragmentIdOf(url),
@@ -118,8 +126,13 @@ export function cardFromRecord(url: string, storedVersion: number, data: CardV5)
 }
 
 /** A card of a library release; null as for cardContentFromRecord. */
-export function libraryCardFromRecord(url: string, storedVersion: number, data: CardV5): LibraryCard | null {
-  const content = cardContentFromRecord(data);
+export function libraryCardFromRecord(
+  url: string,
+  storedVersion: number,
+  data: CardV5,
+  distractors: readonly Distractor[] = [],
+): LibraryCard | null {
+  const content = cardContentFromRecord(data, distractors);
   if (content === null) return null;
   return { id: fragmentIdOf(url), ...content, formatVersion: storedVersion, ...retiredOf(data) };
 }
@@ -128,8 +141,13 @@ function retiredOf(data: CardV5): { retired?: true } {
   return data.deprecated === true ? { retired: true } : {};
 }
 
-/** Empty text, a missing picture, picture description, label or note leave their fields out, as does a card in use its retirement. */
-export function cardToRecord(card: CardContent & { retired?: true }, createdAt: string): CardV5 {
+/**
+ * Empty text, a missing picture, picture description, label or note leave
+ * their fields out, as does a card in use its retirement. Its distractors
+ * are named as subjects of `documentUrl`, the document that holds the
+ * card; distractorToRecord writes each.
+ */
+export function cardToRecord(card: CardContent & { retired?: true }, createdAt: string, documentUrl: string): CardV5 {
   return {
     ...(isEmptyText(card.front) ? {} : { front: card.front }),
     ...(isEmptyText(card.back) ? {} : { back: card.back }),
@@ -142,6 +160,27 @@ export function cardToRecord(card: CardContent & { retired?: true }, createdAt: 
     ...(card.backNote === undefined ? {} : { backNote: card.backNote }),
     ...(createdAt === "" ? {} : { created: createdAt }),
     ...(card.retired === true ? { deprecated: true } : {}),
+    distractor: (card.distractors ?? []).map((distractor) => `${documentUrl}#${distractor.id}`),
+  };
+}
+
+/**
+ * A distractor subject's content; null when its text is empty, or it is
+ * retired (owl:deprecated true): a withdrawn option is never offered.
+ */
+export function distractorFromRecord(url: string, data: DistractorV1): Distractor | null {
+  if (data.deprecated === true || isEmptyText(data.text)) return null;
+  return {
+    id: fragmentIdOf(url),
+    text: data.text,
+    ...(data.note === undefined || isEmptyText(data.note) ? {} : { note: data.note }),
+  };
+}
+
+export function distractorToRecord(distractor: Distractor): DistractorV1 {
+  return {
+    text: distractor.text,
+    ...(distractor.note === undefined ? {} : { note: distractor.note }),
   };
 }
 

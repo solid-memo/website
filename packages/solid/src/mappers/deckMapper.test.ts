@@ -7,9 +7,11 @@ import {
 } from "@inrupt/solid-client";
 import { mockSolidDatasetFrom, setThing } from "@inrupt/solid-client";
 import { getInteger, getThing, getUrlAll, getStringNoLocale } from "@inrupt/solid-client";
-import { fragmentIdOf, toCard, toCatalog, toDeck, toDecks, withCatalog, withDeck, withoutDeck } from "./deckMapper";
+import { fragmentIdOf, toCard, toCards, toCatalog, toDeck, toDecks, toDistractor, withCatalog, withDeck, withDistractors, withoutDeck } from "./deckMapper";
 import type { Deck } from "@solid-memo/domain/deck";
 import { DCAT, DCTERMS, RDF, SM } from "../vocab";
+
+const OWL_DEPRECATED = "http://www.w3.org/2002/07/owl#deprecated";
 
 const CATALOG = "https://pod.example/solid-memo/a/catalog.ttl";
 const CARDS_DOC = "https://pod.example/solid-memo/a/decks/deck-1.ttl";
@@ -51,6 +53,24 @@ describe("toDeck", () => {
       authors: [],
       description: { en: "Flashcards: Kanji N5.", sv: "Kortlek: Kanji N5." },
     });
+  });
+
+  it("reads the course chapters a deck completed, and the deck keeps them when it is written again", () => {
+    const chapters = ["https://solid-memo.com/decks/solid/v1.ttl#ch-1", "https://solid-memo.com/decks/solid/v1.ttl#ch-2"];
+    const thing = deckThing((t) =>
+      t
+        .addIri(RDF.type, SM.Deck)
+        .addStringNoLocale(DCTERMS.title, "Solid")
+        .addIri(SM.cardsDocument, CARDS_DOC)
+        .addIri(SM.reviewsDocument, REVIEWS_DOC)
+        .addIri(SM.completedChapter, chapters[0]!)
+        .addIri(SM.completedChapter, chapters[1]!),
+    );
+    const deck = toDeck(thing)!;
+    expect(deck.completedChapters).toEqual(chapters);
+    const rewritten = withDeck(setThing(mockSolidDatasetFrom(CATALOG), thing), { ...deck, title: { en: "Solid, renamed" } });
+    expect(getUrlAll(getThing(rewritten, deck.url)!, SM.completedChapter)).toEqual(chapters);
+    expect(toDecks(rewritten)[0]).toMatchObject({ title: { en: "Solid, renamed" }, completedChapters: chapters });
   });
 
   it("keeps the provenance of an imported deck", () => {
@@ -189,6 +209,9 @@ describe("toDeck", () => {
 });
 
 describe("toCard", () => {
+  /** The card a subject is, alone in its document. */
+  const cardOf = (thing: ThingPersisted) => toCard(thing, mockSolidDatasetFrom(CARDS_DOC));
+
   function cardThing(
     build: (t: ThingBuilder<ThingPersisted>) => ThingBuilder<ThingPersisted>,
   ) {
@@ -205,7 +228,7 @@ describe("toCard", () => {
         .addStringNoLocale(SM.back, "water (mizu)")
         .addDatetime(DCTERMS.created, new Date("2026-09-21T10:00:00.000Z")),
     );
-    expect(toCard(thing)).toEqual({
+    expect(cardOf(thing)).toEqual({
       id: "card-1",
       url: `${CARDS_DOC}#card-1`,
       front: { "": "水" },
@@ -222,8 +245,8 @@ describe("toCard", () => {
         .addStringNoLocale(SM.front, "f")
         .addStringNoLocale(SM.back, "b"),
     );
-    expect(toCard(thing)!.createdAt).toBe("");
-    expect(toCard(thing)!.formatVersion).toBe(1);
+    expect(cardOf(thing)!.createdAt).toBe("");
+    expect(cardOf(thing)!.formatVersion).toBe(1);
   });
 
   it("reads a stored format version", () => {
@@ -234,7 +257,7 @@ describe("toCard", () => {
         .addStringNoLocale(SM.back, "b")
         .addInteger(SM.formatVersion, 2),
     );
-    expect(toCard(thing)!.formatVersion).toBe(2);
+    expect(cardOf(thing)!.formatVersion).toBe(2);
   });
 
   it("reads pictures on either side, with or without text", () => {
@@ -246,7 +269,7 @@ describe("toCard", () => {
         .addIri(SM.backImage, MAP)
         .addInteger(SM.formatVersion, 2),
     );
-    expect(toCard(thing)).toMatchObject({
+    expect(cardOf(thing)).toMatchObject({
       front: {},
       back: { "": "Afghanistan" },
       frontImageUrl: FLAG,
@@ -257,7 +280,7 @@ describe("toCard", () => {
 
   it("ignores a picture given as a string literal instead of an IRI", () => {
     expect(
-      toCard(
+      cardOf(
         cardThing((t) =>
           t
             .addIri(RDF.type, SM.Card)
@@ -267,7 +290,7 @@ describe("toCard", () => {
       ),
     ).toBeNull();
     expect(
-      toCard(
+      cardOf(
         cardThing((t) =>
           t
             .addIri(RDF.type, SM.Card)
@@ -280,26 +303,26 @@ describe("toCard", () => {
   });
 
   it("rejects subjects that are not sm:Card", () => {
-    expect(toCard(cardThing((t) => t.addIri(RDF.type, SM.Deck)))).toBeNull();
+    expect(cardOf(cardThing((t) => t.addIri(RDF.type, SM.Deck)))).toBeNull();
   });
 
   it("rejects cards with a side that has neither text nor a picture", () => {
     expect(
-      toCard(
+      cardOf(
         cardThing((t) =>
           t.addIri(RDF.type, SM.Card).addStringNoLocale(SM.front, "f"),
         ),
       ),
     ).toBeNull();
     expect(
-      toCard(
+      cardOf(
         cardThing((t) =>
           t.addIri(RDF.type, SM.Card).addStringNoLocale(SM.back, "b"),
         ),
       ),
     ).toBeNull();
     expect(
-      toCard(
+      cardOf(
         cardThing((t) =>
           t
             .addIri(RDF.type, SM.Card)
@@ -308,6 +331,53 @@ describe("toCard", () => {
         ),
       ),
     ).toBeNull();
+  });
+
+  it("reads the distractors a card names from its document, by id, leaving out one that is missing, does not fit or is retired", () => {
+    const distractor = (id: string, build: (t: ThingBuilder<ThingPersisted>) => ThingBuilder<ThingPersisted>) =>
+      build(buildThing(createThing({ url: `${CARDS_DOC}#${id}` })).addIri(RDF.type, SM.Distractor)).build();
+    const card = cardThing((t) =>
+      t
+        .addIri(RDF.type, SM.Card)
+        .addInteger(SM.formatVersion, 5)
+        .addStringWithLocale(SM.front, "What can an IRI name?", "en")
+        .addStringWithLocale(SM.back, "Anything", "en")
+        .addIri(SM.distractor, `${CARDS_DOC}#d2`)
+        .addIri(SM.distractor, `${CARDS_DOC}#d1`)
+        .addIri(SM.distractor, `${CARDS_DOC}#gone`)
+        .addIri(SM.distractor, `${CARDS_DOC}#empty`)
+        .addIri(SM.distractor, `${CARDS_DOC}#retired`),
+    );
+    const dataset = [
+      card,
+      distractor("d1", (t) => t.addStringWithLocale(SM.distractorText, "Only web pages", "en").addStringWithLocale(SM.distractorNote, "A URL is one kind of IRI.", "en")),
+      distractor("d2", (t) => t.addStringNoLocale(SM.distractorText, "404")),
+      distractor("empty", (t) => t),
+      distractor("retired", (t) => t.addStringNoLocale(SM.distractorText, "500").addBoolean(OWL_DEPRECATED, true)),
+    ].reduce((current, thing) => setThing(current, thing), mockSolidDatasetFrom(CARDS_DOC));
+    expect(toCard(card, dataset)!.distractors).toEqual([
+      { id: "d1", text: { en: "Only web pages" }, note: { en: "A URL is one kind of IRI." } },
+      { id: "d2", text: { "": "404" } },
+    ]);
+    expect(toCards(dataset)).toHaveLength(1);
+    expect(toDistractor(card)).toBeNull();
+  });
+});
+
+describe("withDistractors", () => {
+  it("writes a card's distractors beside it and removes those it named before and no longer does", () => {
+    const before = [`${CARDS_DOC}#d1`, `${CARDS_DOC}#old`];
+    const first = withDistractors(mockSolidDatasetFrom(CARDS_DOC), CARDS_DOC, [{ id: "d1", text: { en: "One" } }, { id: "old", text: { en: "Old" } }], []);
+    expect(first.subjects).toEqual(before);
+    const kept = setThing(first.dataset, buildThing(getThing(first.dataset, before[0])!).addStringNoLocale("https://example.org/other", "kept").build());
+    const second = withDistractors(kept, CARDS_DOC, [{ id: "d1", text: { en: "One, again" }, note: { sv: "Fel." } }], before);
+    expect(second.subjects).toEqual([before[0]]);
+    expect(getThing(second.dataset, before[1])).toBeNull();
+    const d1 = getThing(second.dataset, before[0])!;
+    expect(toDistractor(d1)).toEqual({ id: "d1", text: { en: "One, again" }, note: { sv: "Fel." } });
+    expect(getInteger(d1, SM.formatVersion)).toBe(1);
+    expect(getUrlAll(d1, RDF.type)).toEqual([SM.Distractor, "https://schema.org/Answer"]);
+    expect(getStringNoLocale(d1, "https://example.org/other")).toBe("kept");
   });
 });
 

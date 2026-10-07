@@ -4,6 +4,7 @@ import type { LangText } from "@solid-memo/domain/langText";
 import type { ThemeChoice } from "@solid-memo/domain/theme";
 import type { Repair } from "@solid-memo/domain/repair";
 import type { Card, CardContent, Deck } from "@solid-memo/domain/deck";
+import type { CourseOutline } from "@solid-memo/domain/course";
 import type { StatedLanguages } from "@solid-memo/domain/deckLanguages";
 import type { DeckTree, DeckTreeEdit } from "@solid-memo/domain/deckTree";
 import type {
@@ -226,6 +227,17 @@ export interface DeckRepository {
   switchDeck(current: Deck, next: Deck): Promise<Deck>;
   /** Delete one of a deck's documents (an upgrade's leftovers); one that is gone counts as deleted. */
   deleteDocument(url: string): Promise<void>;
+  /**
+   * Note a course chapter completed: add `sm:completedChapter
+   * <chapterUrl>` to the deck's catalog entry, as it is now, in ONE save
+   * made only if the catalog document is as it was read (If-Match); when
+   * it changed meanwhile, read it and add it again, a few times, then
+   * throw changedElsewhere. A chapter already completed, in this release
+   * or another (same fragment id), writes nothing.
+   * Returns the deck as its entry says then; throws deckGone when it has
+   * no entry.
+   */
+  completeChapter(deck: Deck, chapterUrl: string): Promise<Deck>;
 }
 
 /** Driven port: the app's read-only library of ready-made decks. */
@@ -234,6 +246,12 @@ export interface DeckLibrary {
   listLibraryDecks(): Promise<LibraryDeck[]>;
   /** The deck document with its cards. */
   fetchLibraryDeck(url: string): Promise<LibraryDeckContent>;
+  /**
+   * A course release's outline: its chapters and their steps (see
+   * domain/course.ts), from the same read of the release as its cards.
+   * Empty for a release that is no course.
+   */
+  fetchCourseOutline(releaseUrl: string): Promise<CourseOutline>;
 }
 
 /** Driven port: SM-2 review state, stored separately from card content. */

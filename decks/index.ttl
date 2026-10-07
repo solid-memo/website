@@ -14,7 +14,7 @@
     dcterms:title "Solid Memo deck library" ;
     dcterms:description "Ready-made flashcard decks to import into your own Solid pod." ;
     dcterms:publisher <#solid-memo> ;
-    dcterms:modified "2026-10-06T00:00:00Z"^^xsd:dateTime ;
+    dcterms:modified "2026-10-07T00:00:00Z"^^xsd:dateTime ;
     dcat:themeTaxonomy <http://publications.europa.eu/resource/authority/data-theme> ,
                        <https://solid-memo.com/ns/vocab/topics.ttl> ;
     dcat:dataset <#academy-award-best-picture> ,
@@ -81,6 +81,7 @@
                  <#shakespeare-plays> ,
                  <#si-units> ,
                  <#solar-system> ,
+                 <#solid-fundamentals> ,
                  <#space-exploration> ,
                  <#spanish-basics> ,
                  <#spelling-alphabets> ,
@@ -6555,6 +6556,115 @@
     a dcat:Distribution ;
     dcat:accessURL <https://solid-memo.com/decks/solar-system/v1.ttl> ;
     dcat:downloadURL <https://solid-memo.com/decks/solar-system/v1.ttl> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
+
+<#solid-fundamentals>
+    a dcat:DatasetSeries ,
+      dcat:Dataset ;
+    solid-memo:formatVersion 3 ;
+    dcterms:title "Solid fundamentals"@en ,
+                  "Grunderna i Solid"@sv ;
+    dcterms:description "A course on the ideas Solid is built on. This version has two chapters, Linked data and IRIs, and RDF and Turtle. Each step is a short piece of theory followed by a multiple-choice question, and each chapter ends with a review; every question you answer becomes a card in your deck. The facts come from the W3C recommendations RDF 1.1 Concepts and Abstract Syntax and RDF 1.1 Turtle, RFC 3987, Tim Berners-Lee's note Linked Data and the Solid Protocol."@en ,
+                        "En kurs om idéerna som Solid bygger på. Den här versionen har två kapitel, Länkade data och IRI:er samt RDF och Turtle. Varje steg är en kort teoritext följd av en flervalsfråga, och varje kapitel avslutas med en repetition; varje fråga du besvarar blir ett kort i din kortlek. Fakta kommer från W3C-rekommendationerna RDF 1.1 Concepts and Abstract Syntax och RDF 1.1 Turtle, RFC 3987, Tim Berners-Lees anteckning Linked Data och Solid Protocol."@sv ;
+    dcterms:publisher <#solid-memo> ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:computing ,
+               topic:linked-data ;
+    dcat:keyword "Solid"@en ,
+                 "linked data"@en ,
+                 "RDF"@en ,
+                 "Turtle"@en ,
+                 "IRI"@en ,
+                 "semantic web"@en ,
+                 "Solid"@sv ,
+                 "länkade data"@sv ,
+                 "RDF"@sv ,
+                 "Turtle"@sv ,
+                 "IRI"@sv ,
+                 "semantiska webben"@sv ;
+    dcat:first <https://solid-memo.com/decks/solid-fundamentals/v1.ttl> ;
+    dcat:last <https://solid-memo.com/decks/solid-fundamentals/v1.ttl> ;
+    dcat:hasVersion <https://solid-memo.com/decks/solid-fundamentals/v1.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/solid-fundamentals/v1.ttl> .
+
+<https://solid-memo.com/decks/solid-fundamentals/v1.ttl>
+    a solid-memo:Deck ,
+      dcat:Dataset ,
+      <https://schema.org/Course> ;
+    dcterms:title "Solid fundamentals"@en ,
+                  "Grunderna i Solid"@sv ;
+    dcterms:creator <https://solid-memo.com/decks/solid-fundamentals/v1.ttl#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "A course on the ideas Solid is built on. This version has two chapters, Linked data and IRIs, and RDF and Turtle. Each step is a short piece of theory followed by a multiple-choice question, and each chapter ends with a review; every question you answer becomes a card in your deck. The facts come from the W3C recommendations RDF 1.1 Concepts and Abstract Syntax and RDF 1.1 Turtle, RFC 3987, Tim Berners-Lee's note Linked Data and the Solid Protocol."@en ,
+                        "En kurs om idéerna som Solid bygger på. Den här versionen har två kapitel, Länkade data och IRI:er samt RDF och Turtle. Varje steg är en kort teoritext följd av en flervalsfråga, och varje kapitel avslutas med en repetition; varje fråga du besvarar blir ett kort i din kortlek. Fakta kommer från W3C-rekommendationerna RDF 1.1 Concepts and Abstract Syntax och RDF 1.1 Turtle, RFC 3987, Tim Berners-Lees anteckning Linked Data och Solid Protocol."@sv ;
+    prov:wasDerivedFrom <https://www.w3.org/TR/2014/REC-rdf11-concepts-20140225/> ,
+                        <https://www.w3.org/TR/2014/REC-turtle-20140225/> ,
+                        <https://www.rfc-editor.org/rfc/rfc3987> ,
+                        <https://www.w3.org/DesignIssues/LinkedData.html> ,
+                        <https://solidproject.org/TR/2024/protocol-20240512> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/solid-fundamentals/v1.ttl#compilation> ;
+    dcterms:created "2026-10-07T00:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:computing ,
+               topic:linked-data ;
+    dcat:keyword "Solid"@en ,
+                 "linked data"@en ,
+                 "RDF"@en ,
+                 "Turtle"@en ,
+                 "IRI"@en ,
+                 "semantic web"@en ,
+                 "Solid"@sv ,
+                 "länkade data"@sv ,
+                 "RDF"@sv ,
+                 "Turtle"@sv ,
+                 "IRI"@sv ,
+                 "semantiska webben"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-07T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <#solid-memo> ;
+    dcat:inSeries <#solid-fundamentals> ;
+    dcat:isVersionOf <#solid-fundamentals> ;
+    dcat:distribution <https://solid-memo.com/decks/solid-fundamentals/v1.ttl#turtle> ;
+    solid-memo:cardCount 19 .
+
+<https://solid-memo.com/decks/solid-fundamentals/v1.ttl#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://solid-memo.com/decks/solid-fundamentals/v1.ttl#compilation>
+    a prov:Activity .
+
+<https://www.w3.org/TR/2014/REC-rdf11-concepts-20140225/>
+    dcterms:title "RDF 1.1 Concepts and Abstract Syntax, W3C Recommendation 25 February 2014" ;
+    dcterms:creator "Richard Cyganiak, David Wood, Markus Lanthaler (editors); W3C RDF Working Group" .
+
+<https://www.w3.org/TR/2014/REC-turtle-20140225/>
+    dcterms:title "RDF 1.1 Turtle: Terse RDF Triple Language, W3C Recommendation 25 February 2014" ;
+    dcterms:creator "David Beckett, Tim Berners-Lee, Eric Prud'hommeaux, Gavin Carothers (editors); W3C RDF Working Group" .
+
+<https://www.rfc-editor.org/rfc/rfc3987>
+    dcterms:title "RFC 3987: Internationalized Resource Identifiers (IRIs), January 2005" ;
+    dcterms:creator "M. Duerst, M. Suignard" .
+
+<https://www.w3.org/DesignIssues/LinkedData.html>
+    dcterms:title "Linked Data (Design Issues), 2006-07-27, last changed 2009-06-18" ;
+    dcterms:creator "Tim Berners-Lee" .
+
+<https://solidproject.org/TR/2024/protocol-20240512>
+    dcterms:title "Solid Protocol, version 0.11.0, Draft Community Group Report, 12 May 2024" ;
+    dcterms:creator "Sarven Capadisli, Tim Berners-Lee, Kjetil Kjernsmo (editors); W3C Solid Community Group" .
+
+<https://solid-memo.com/decks/solid-fundamentals/v1.ttl#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <https://solid-memo.com/decks/solid-fundamentals/v1.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/solid-fundamentals/v1.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 

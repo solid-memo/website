@@ -1,8 +1,9 @@
 import {
+  buildThing,
   createSolidDataset,
   getDatetime,
   getThing,
-  getThingAll,
+  getUrlAll,
   removeThing,
   setThing,
   type SolidDataset,
@@ -23,18 +24,20 @@ import {
 import { cardToRecord } from "@solid-memo/domain/deckRecord";
 import { withStatedLanguages } from "@solid-memo/domain/deckLanguages";
 import { catalogUrlOf, documentsInUse, ensureTrailingSlash } from "@solid-memo/domain/instanceLayout";
-import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
+import { documentUrlOf, fragmentIdOf } from "@solid-memo/domain/subjectUrl";
 import { CARD_V5 } from "@solid-memo/vocab/descriptors.generated";
 import { applyDeckTreeEdit, buildTree, treeChanges } from "@solid-memo/domain/deckTree";
 import { deleteDataset, getSolidDatasetOrNull, PreconditionFailedError, saveDataset } from "./datasets";
-import { DCTERMS } from "./vocab";
+import { DCTERMS, SM } from "./vocab";
 import {
   deckSubjects,
   toCard,
+  toCards,
   toCatalog,
   toDecks,
   withCatalog,
   withDeck,
+  withDistractors,
   withoutDeck,
 } from "./mappers/deckMapper";
 import { toStoredLayout, withTreeChanges } from "./mappers/deckTreeMapper";
@@ -57,9 +60,10 @@ export interface SolidDeckRepositoryDeps {
 }
 
 /**
- * How often an edit of the deck arrangement is made, in all, while the
- * catalog document keeps changing elsewhere (412). The edit is applied
- * again to the document as it is then, so a retry keeps what changed.
+ * How often an edit of the deck arrangement, or a chapter's completion,
+ * is made, in all, while the catalog document keeps changing elsewhere
+ * (412). The edit is applied again to the document as it is then, so a
+ * retry keeps what changed.
  */
 const TREE_ATTEMPTS = 3;
 
@@ -112,14 +116,13 @@ export function createSolidDeckRepository({
     async importDeck(instanceUrl, content): Promise<Deck> {
       const deck = newDeck(instanceUrl, content.title, content);
       let cards = createSolidDataset();
+      const subjects: string[] = [];
       for (const card of content.cards) {
-        cards = setThing(cards, cardThing(deck, card, null));
+        const written = withCard(cards, deck, card, null);
+        cards = written.dataset;
+        subjects.push(...written.subjects);
       }
-      await save(
-        deck.cardsDocumentUrl,
-        cards,
-        content.cards.map((card) => `${deck.cardsDocumentUrl}#${card.id}`),
-      );
+      await save(deck.cardsDocumentUrl, cards, subjects);
       return registerDeck(deck);
     },
 
@@ -176,14 +179,12 @@ export function createSolidDeckRepository({
         fetch,
       );
       if (dataset === null) return [];
-      return getThingAll(dataset)
-        .map(toCard)
-        .filter((card): card is Card => card !== null);
+      return toCards(dataset);
     },
 
     async readCardsSince(deck, version) {
       return mapSince(await readSince(deck.cardsDocumentUrl, version, fetch), (dataset) =>
-        dataset === null ? [] : getThingAll(dataset).map(toCard).filter((card): card is Card => card !== null),
+        dataset === null ? [] : toCards(dataset),
       );
     },
 
@@ -199,8 +200,8 @@ export function createSolidDeckRepository({
       const dataset =
         (await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch)) ??
         createSolidDataset();
-      const updated = setThing(dataset, cardThing(deck, card, null));
-      await save(deck.cardsDocumentUrl, updated, [card.url]);
+      const written = withCard(dataset, deck, card, null);
+      await save(deck.cardsDocumentUrl, written.dataset, written.subjects);
       return card;
     },
 
@@ -216,19 +217,19 @@ export function createSolidDeckRepository({
       if (thing === null) {
         throw new AppError("cardGone", { card: card.url });
       }
+      // An edit that does not state distractors (the card editor has none) keeps the card's.
+      const distractors = content.distractors ?? card.distractors;
       const updated: Card = {
         id: card.id,
         url: card.url,
         createdAt: card.createdAt,
         ...content,
+        ...(distractors === undefined ? {} : { distractors }),
         formatVersion: CARD_FORMAT_VERSION,
         ...(card.retired === true ? { retired: true } : {}),
       };
-      await save(
-        deck.cardsDocumentUrl,
-        setThing(dataset, cardThing(deck, updated, thing)),
-        [updated.url],
-      );
+      const written = withCard(dataset, deck, updated, thing);
+      await save(deck.cardsDocumentUrl, written.dataset, written.subjects);
       return updated;
     },
 
@@ -238,26 +239,29 @@ export function createSolidDeckRepository({
         fetch,
       );
       if (dataset === null) return;
-      const updated = cards.reduce((current, card) => {
-        const thing = getThing(current, card.url);
-        return thing === null
-          ? current
-          : setThing(current, cardThing(deck, card, thing));
-      }, dataset);
-      await save(deck.cardsDocumentUrl, updated, cards.map((card) => card.url));
+      let updated: SolidDataset = dataset;
+      const subjects: string[] = [];
+      for (const card of cards) {
+        const thing = getThing(updated, card.url);
+        if (thing === null) continue;
+        const written = withCard(updated, deck, card, thing);
+        updated = written.dataset;
+        subjects.push(...written.subjects);
+      }
+      await save(deck.cardsDocumentUrl, updated, subjects);
     },
 
     async stateCardLanguages(deck, cardIds, languages): Promise<number> {
       const dataset = await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch);
       if (dataset === null) return 0;
-      let updated = dataset;
+      let updated: SolidDataset = dataset;
       const stated: string[] = [];
       for (const id of cardIds) {
         const thing = getThing(updated, `${deck.cardsDocumentUrl}#${id}`);
-        const card = thing === null ? null : toCard(thing);
+        const card = thing === null ? null : toCard(thing, updated);
         const restated = card === null ? null : withStatedLanguages(card, languages);
         if (restated === null) continue;
-        updated = setThing(updated, cardThing(deck, restated, thing));
+        updated = withCard(updated, deck, restated, thing).dataset;
         stated.push(restated.url);
       }
       // One PUT of the whole document, If-Match the read above: a cards document changed
@@ -269,11 +273,8 @@ export function createSolidDeckRepository({
     async applyCardChanges(deck, changes): Promise<void> {
       const dataset =
         (await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch)) ?? createSolidDataset();
-      await save(
-        deck.cardsDocumentUrl,
-        withCardChanges(dataset, deck, changes),
-        changes.save.map((card) => `${deck.cardsDocumentUrl}#${card.id}`),
-      );
+      const changed = withCardChanges(dataset, deck, changes);
+      await save(deck.cardsDocumentUrl, changed.dataset, changed.subjects);
     },
 
     async readDeck(deckUrl) {
@@ -285,11 +286,12 @@ export function createSolidDeckRepository({
       const original =
         (await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch)) ?? createSolidDataset();
       const staged = { ...deck, cardsDocumentUrl: stagedUrl };
-      await save(
-        stagedUrl,
-        withCardChanges(await movedDataset(original, deck.cardsDocumentUrl, stagedUrl, loadEngine), staged, changes),
-        changes.save.map((card) => `${stagedUrl}#${card.id}`),
+      const changed = withCardChanges(
+        await movedDataset(original, deck.cardsDocumentUrl, stagedUrl, loadEngine),
+        staged,
+        changes,
       );
+      await save(stagedUrl, changed.dataset, changed.subjects);
     },
 
     async switchDeck(current, next): Promise<Deck> {
@@ -309,13 +311,34 @@ export function createSolidDeckRepository({
       return deleteDocumentIfPresent(url, fetch);
     },
 
+    async completeChapter(deck, chapterUrl) {
+      const catalogUrl = documentUrlOf(deck.url);
+      for (let attempt = 1; ; attempt++) {
+        const dataset = await getSolidDatasetOrNull(catalogUrl, fetch);
+        const stored = dataset === null ? undefined : toDecks(dataset).find((candidate) => candidate.url === deck.url);
+        if (stored === undefined) throw new AppError("deckGone", { deck: deck.title });
+        // Completed in any release: a chapter keeps its fragment id from one release to the next.
+        if (stored.completedChapters?.some((url) => fragmentIdOf(url) === fragmentIdOf(chapterUrl)) === true) return stored;
+        // sm:completedChapter is no shape's (like a deck's sm:position): nothing a shape owns changes, so nothing is checked.
+        const thing = buildThing(getThing(dataset!, deck.url)!).addIri(SM.completedChapter, chapterUrl).build();
+        const updated = setThing(dataset!, thing);
+        try {
+          // A PATCH adding the one triple, If-Match the read above.
+          await saveDataset(catalogUrl, updated, fetch);
+          return { ...stored, completedChapters: [...(stored.completedChapters ?? []), chapterUrl] };
+        } catch (error) {
+          if (!(error instanceof PreconditionFailedError) || attempt === TREE_ATTEMPTS) throw error;
+        }
+      }
+    },
+
     async removeCard(deck, card): Promise<void> {
       const dataset = await getSolidDatasetOrNull(
         deck.cardsDocumentUrl,
         fetch,
       );
       if (dataset !== null) {
-        await saveDataset(deck.cardsDocumentUrl, removeThing(dataset, card.url), fetch);
+        await saveDataset(deck.cardsDocumentUrl, withoutCard(dataset, card.url), fetch);
       }
       const reviews = await getSolidDatasetOrNull(
         deck.reviewsDocumentUrl,
@@ -404,25 +427,48 @@ export function createSolidDeckRepository({
   /**
    * The cards document with cards written by fragment id, new or
    * existing (an existing card keeps its creation time and triples this
-   * app does not know), and others removed.
+   * app does not know), and others removed, each with its distractors.
+   * Returns the subjects written, for the write check.
    */
   function withCardChanges(
     dataset: SolidDataset,
     deck: Deck,
     { save: saved, remove }: { save: (CardContent & { id: string; retired?: true })[]; remove: string[] },
-  ): SolidDataset {
+  ): { dataset: SolidDataset; subjects: string[] } {
     const urlOf = (id: string) => `${deck.cardsDocumentUrl}#${id}`;
     let updated = dataset;
+    const subjects: string[] = [];
     for (const card of saved) {
       const existing = getThing(updated, urlOf(card.id));
       const createdAt = existing === null ? undefined : getDatetime(existing, DCTERMS.created)?.toISOString();
-      updated = setThing(
-        updated,
-        cardThing(deck, { ...card, ...(createdAt === undefined ? {} : { createdAt }) }, existing),
-      );
+      const written = withCard(updated, deck, { ...card, ...(createdAt === undefined ? {} : { createdAt }) }, existing);
+      updated = written.dataset;
+      subjects.push(...written.subjects);
     }
-    for (const id of remove) updated = removeThing(updated, urlOf(id));
-    return updated;
+    for (const id of remove) updated = withoutCard(updated, urlOf(id));
+    return { dataset: updated, subjects };
+  }
+
+  /**
+   * The cards document with the card written (cardThing) and its
+   * distractors beside it, those it named before and no longer does
+   * removed. Returns the subjects written: the card's, then its
+   * distractors'.
+   */
+  function withCard(
+    dataset: SolidDataset,
+    deck: Deck,
+    card: CardContent & { id: string; createdAt?: string; retired?: true },
+    existing: ThingPersisted | null,
+  ): { dataset: SolidDataset; subjects: string[] } {
+    const thing = cardThing(deck, card, existing);
+    const written = withDistractors(
+      setThing(dataset, thing),
+      deck.cardsDocumentUrl,
+      card.distractors ?? [],
+      existing === null ? [] : getUrlAll(existing, SM.distractor),
+    );
+    return { dataset: written.dataset, subjects: [`${deck.cardsDocumentUrl}#${card.id}`, ...written.subjects] };
   }
 
   /** Add a deck's catalog entry. */
@@ -450,10 +496,17 @@ export function createSolidDeckRepository({
     return recordThing(
       `${deck.cardsDocumentUrl}#${card.id}`,
       CARD_V5,
-      cardToRecord(card, card.createdAt ?? now().toISOString()),
+      cardToRecord(card, card.createdAt ?? now().toISOString(), deck.cardsDocumentUrl),
       existing,
     );
   }
+}
+
+/** The cards document without the card and the distractors it names. */
+function withoutCard(dataset: SolidDataset, cardUrl: string): SolidDataset {
+  const card = getThing(dataset, cardUrl);
+  const distractors = card === null ? [] : getUrlAll(card, SM.distractor);
+  return [cardUrl, ...distractors].reduce((current, url) => removeThing(current, url), dataset);
 }
 
 async function deleteDocumentIfPresent(

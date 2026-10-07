@@ -371,6 +371,31 @@ describe("importDeck", () => {
     );
   });
 
+  it("copies a card's distractors beside it, keeping their fragment ids, and checks them with the cards", async () => {
+    const checkWrite = vi.fn(async () => undefined);
+    const imported = await makeRepository(checkWrite).importDeck(INSTANCE, {
+      ...content,
+      cards: [
+        {
+          id: "q",
+          front: { en: "What can an IRI name?" },
+          back: { en: "Anything" },
+          distractors: [{ id: "q-d1", text: { en: "Only web pages" }, note: { en: "A URL is one kind of IRI." } }],
+          formatVersion: 5,
+        },
+      ],
+    });
+
+    const doc = imported.cardsDocumentUrl;
+    expect(checkWrite).toHaveBeenNthCalledWith(1, expect.anything(), [`${doc}#q`, `${doc}#q-d1`]);
+    const cards = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as SolidDataset;
+    expect(getUrlAll(getThing(cards, `${doc}#q`)!, SM.distractor)).toEqual([`${doc}#q-d1`]);
+    const distractor = getThing(cards, `${doc}#q-d1`)!;
+    expect(getUrlAll(distractor, RDF.type)).toContain(SM.Distractor);
+    expect(getStringWithLocale(distractor, SM.distractorText, "en")).toBe("Only web pages");
+    expect(getStringWithLocale(distractor, SM.distractorNote, "en")).toBe("A URL is one kind of IRI.");
+  });
+
   it("copies the release's title and description in every language it states them in", async () => {
     const imported = await makeRepository().importDeck(INSTANCE, {
       ...content,
@@ -723,6 +748,25 @@ describe("updateCard", () => {
     ).toBe("kept");
   });
 
+  it("keeps a card's distractors when the edit states none, and replaces them when it does", async () => {
+    const distractors = [{ id: "card-1-d1", text: { en: "Fire" } }, { id: "card-1-d2", text: { en: "Earth" } }];
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(cardsDoc());
+
+    const kept = await makeRepository().updateCard(deck, { ...card, distractors }, { front: { "": "水" }, back: { "": "water" } });
+
+    expect(kept.distractors).toEqual(distractors);
+    const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as SolidDataset;
+    expect(getUrlAll(getThing(saved, card.url)!, SM.distractor)).toEqual(distractors.map((d) => `${deck.cardsDocumentUrl}#${d.id}`));
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(saved as Awaited<ReturnType<typeof getSolidDatasetOrNull>>);
+
+    const replaced = await makeRepository().updateCard(deck, kept, { front: { "": "水" }, back: { "": "water" }, distractors: [distractors[1]] });
+
+    expect(replaced.distractors).toEqual([distractors[1]]);
+    const again = vi.mocked(saveSolidDatasetAt).mock.calls[1][1] as SolidDataset;
+    expect(getThing(again, `${deck.cardsDocumentUrl}#card-1-d1`)).toBeNull();
+    expect(getStringWithLocale(getThing(again, `${deck.cardsDocumentUrl}#card-1-d2`)!, SM.distractorText, "en")).toBe("Earth");
+  });
+
   it("keeps a retired card retired when it is edited", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(cardsDoc());
 
@@ -921,6 +965,25 @@ describe("removeCard", () => {
         `${deck.reviewsDocumentUrl}#card-1@back-to-front`,
       ),
     ).toBeNull();
+  });
+
+  it("removes the distractors the card names with it, and leaves a document without the card as it was", async () => {
+    const distractor = `${deck.cardsDocumentUrl}#card-1-d1`;
+    const cardsDoc = [
+      buildThing(createThing({ url: card.url })).addIri(RDF.type, SM.Card).addIri(SM.distractor, distractor).build(),
+      buildThing(createThing({ url: distractor })).addIri(RDF.type, SM.Distractor).build(),
+      buildThing(createThing({ url: `${deck.cardsDocumentUrl}#other` })).addIri(RDF.type, SM.Card).build(),
+    ].reduce((dataset, thing) => setThing(dataset, thing), mockSolidDatasetFrom(deck.cardsDocumentUrl));
+    vi.mocked(getSolidDatasetOrNull).mockImplementation(async (url) => (url === deck.cardsDocumentUrl ? cardsDoc : null));
+
+    await makeRepository().removeCard(deck, card);
+    await makeRepository().removeCard(deck, { ...card, id: "gone", url: `${deck.cardsDocumentUrl}#gone` });
+
+    const [first, second] = vi.mocked(saveSolidDatasetAt).mock.calls.map((call) => call[1] as SolidDataset);
+    expect(getThing(first, card.url)).toBeNull();
+    expect(getThing(first, distractor)).toBeNull();
+    expect(getThing(first, `${deck.cardsDocumentUrl}#other`)).not.toBeNull();
+    expect(getThing(second, distractor)).not.toBeNull();
   });
 
   it("does nothing when neither document exists", async () => {

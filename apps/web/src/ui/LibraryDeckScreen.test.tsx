@@ -45,6 +45,7 @@ function renderScreen(
     busy: false,
     error: null,
     onImport: vi.fn(),
+    onStartCourse: vi.fn(),
     ...overrides,
   };
   const view = render(<LibraryDeckScreen {...props} />);
@@ -98,6 +99,7 @@ describe("LibraryDeckScreen", () => {
           busy={false}
           error={null}
           onImport={vi.fn()}
+          onStartCourse={vi.fn()}
         />
       </I18nProvider>,
     );
@@ -252,6 +254,23 @@ describe("LibraryDeckScreen", () => {
     renderScreen({ imported: true });
     expect(screen.getByText("Already imported")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Import this deck" })).toBeEnabled();
+  });
+
+  it("starts a course instead of importing it, saying what a course is", () => {
+    const { props } = renderScreen({ deck: { ...capitals, isCourse: true } });
+    expect(screen.getByText(/^A course: short pieces of theory/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Import this deck" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Start course" }));
+    expect(props.onStartCourse).toHaveBeenCalledOnce();
+    expect(props.onImport).not.toHaveBeenCalled();
+  });
+
+  it("continues a course the instance has started, and locks the button while it starts", () => {
+    const { rerender, props } = renderScreen({ deck: { ...capitals, isCourse: true }, imported: true });
+    expect(screen.getByRole("button", { name: "Continue course" })).toBeEnabled();
+    expect(screen.queryByText("Already imported")).toBeNull();
+    rerender(<LibraryDeckScreen {...props} busy />);
+    expect(screen.getByRole("button", { name: "Starting…" })).toBeDisabled();
   });
 
   it("shows an import error", () => {

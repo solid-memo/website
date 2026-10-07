@@ -1,0 +1,8 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+
+<#q>
+    a solid-memo:Card ;
+    solid-memo:front "What can an IRI name?"@en ;
+    solid-memo:back "Any thing at all"@en ;
+    solid-memo:distractor "Only web pages"@en ;
+    solid-memo:formatVersion 5 .

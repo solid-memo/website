@@ -16,18 +16,20 @@ import {
   publisherToRecord,
   type Catalog,
 } from "@solid-memo/domain/catalog";
-import type { Card, Deck } from "@solid-memo/domain/deck";
+import type { Card, Deck, Distractor } from "@solid-memo/domain/deck";
 import {
   cardFromRecord,
   deckAgents,
   deckDistribution,
   deckFromRecord,
   deckToRecord,
+  distractorFromRecord,
+  distractorToRecord,
 } from "@solid-memo/domain/deckRecord";
 import { distributionUrlOf } from "@solid-memo/domain/dcat";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
-import { AGENT_V1, CATALOG_V1, DECK_V6, DISTRIBUTION_V1 } from "@solid-memo/vocab/descriptors.generated";
+import { AGENT_V1, CATALOG_V1, DECK_V6, DISTRACTOR_V1, DISTRIBUTION_V1 } from "@solid-memo/vocab/descriptors.generated";
 import { readVersioned, recordThing } from "../records";
 import { DCAT, DCTERMS, RDF, SM } from "../vocab";
 
@@ -57,6 +59,7 @@ export function toDecks(dataset: SolidDataset): Deck[] {
  * Map a catalog subject to a Deck; null when the subject is not an
  * sm:Deck that fits its format's shape. An older format is brought up to
  * the current one in memory; the stored version stays on the model. A
+ * course's deck also has the chapters it completed (sm:completedChapter). A
  * deck from before format 3 names its creators itself ("Name <email>"),
  * which name the agents the migration gives it.
  */
@@ -68,12 +71,17 @@ export function toDeck(thing: Thing, agentNames: ReadonlyMap<string, string> = n
   if (read.record.version < 3) {
     for (const author of read.record.data.creator) names.set(agentUrlOf(url, author), author);
   }
-  return deckFromRecord(
-    url,
-    read.storedVersion,
-    migrate("deck", read.record, { subject: url }),
-    (agent) => names.get(agent) ?? agent,
-  );
+  const completedChapters = getUrlAll(thing, SM.completedChapter);
+  return {
+    ...deckFromRecord(
+      url,
+      read.storedVersion,
+      migrate("deck", read.record, { subject: url }),
+      (agent) => names.get(agent) ?? agent,
+    ),
+    // Outside the deck's shape, like sm:position: every write of the entry keeps it (recordThing).
+    ...(completedChapters.length === 0 ? {} : { completedChapters }),
+  };
 }
 
 /**
@@ -189,12 +197,66 @@ function withoutStrayAgents(dataset: SolidDataset, documentUrl: string): SolidDa
 }
 
 /**
- * Map a cards-document subject to a Card; null when the subject is not
- * an sm:Card that fits its format's shape, or a side has neither text
- * nor a picture.
+ * Map a cards-document subject to a Card, with the distractors it names
+ * from the same document; null when the subject is not an sm:Card that
+ * fits its format's shape, or a side has neither text nor a picture.
  */
-export function toCard(thing: Thing): Card | null {
+export function toCard(thing: Thing, dataset: SolidDataset): Card | null {
   const read = readVersioned(thing, "card");
   if (read === null) return null;
-  return cardFromRecord(asUrl(thing), read.storedVersion, migrate("card", read.record, { subject: asUrl(thing) }));
+  const data = migrate("card", read.record, { subject: asUrl(thing) });
+  return cardFromRecord(asUrl(thing), read.storedVersion, data, distractorsOf(dataset, data.distractor));
+}
+
+/** Every card of a cards document. */
+export function toCards(dataset: SolidDataset): Card[] {
+  return getThingAll(dataset)
+    .map((thing) => toCard(thing, dataset))
+    .filter((card): card is Card => card !== null);
+}
+
+/** A distractor subject; null when it is not an sm:Distractor that fits its shape, its text is empty, or it is retired. */
+export function toDistractor(thing: Thing): Distractor | null {
+  const read = readVersioned(thing, "distractor");
+  if (read === null) return null;
+  return distractorFromRecord(asUrl(thing), migrate("distractor", read.record, { subject: asUrl(thing) }));
+}
+
+/**
+ * The distractors a card names, ordered by id (RDF keeps no order among
+ * a card's sm:distractor, so every reader gets the same one), as the
+ * document has them: one that is missing, does not fit its shape or is
+ * retired (owl:deprecated true) is left out.
+ */
+export function distractorsOf(dataset: SolidDataset, urls: readonly string[]): Distractor[] {
+  return urls
+    .map((url) => getThing(dataset, url))
+    .map((thing) => (thing === null ? null : toDistractor(thing)))
+    .filter((distractor): distractor is Distractor => distractor !== null)
+    .sort((a, b) => a.id.localeCompare(b.id));
+}
+
+/**
+ * The document with a card's distractors written beside it, as subjects
+ * of `documentUrl` (an existing one keeps triples this app does not
+ * know), and those it named before (`before`, their URLs) but names no
+ * longer removed. Returns the URLs written, for the write check.
+ */
+export function withDistractors(
+  dataset: SolidDataset,
+  documentUrl: string,
+  distractors: readonly Distractor[],
+  before: readonly string[],
+): { dataset: SolidDataset; subjects: string[] } {
+  const subjects = distractors.map((distractor) => `${documentUrl}#${distractor.id}`);
+  let updated = before
+    .filter((url) => !subjects.includes(url))
+    .reduce((current, url) => removeThing(current, url), dataset);
+  for (const [i, distractor] of distractors.entries()) {
+    updated = setThing(
+      updated,
+      recordThing(subjects[i], DISTRACTOR_V1, distractorToRecord(distractor), getThing(updated, subjects[i])),
+    );
+  }
+  return { dataset: updated, subjects };
 }

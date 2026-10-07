@@ -10,7 +10,8 @@ import type { DeckTree, DeckTreeEdit, TreeNode } from "@solid-memo/domain/deckTr
 import { alertTexts, statusTexts } from "../test/liveRegions";
 import { AppError } from "@solid-memo/domain/appError";
 import { makeUseCasesFake } from "../test/useCasesFake";
-import { deckHref, routeToHash } from "./router";
+import { courseHref, deckHref, routeToHash } from "./router";
+import { courseLibraryDeck } from "../test/course";
 
 const instance: Instance = {
   url: "https://pod.example/solid-memo/a/",
@@ -84,6 +85,38 @@ describe("DeckListContainer", () => {
     expect(
       await screen.findByText("catalog unreachable"),
     ).toBeInTheDocument();
+  });
+
+  it("offers to continue the course of a deck copied from one, the library read for it only", async () => {
+    const course = { ...courseLibraryDeck };
+    const plain = { ...courseLibraryDeck, url: "https://solid-memo.com/decks/rivers/v1.ttl", seriesUrl: "https://solid-memo.com/decks/index.ttl#rivers", isCourse: undefined };
+    const fromCourse = { ...deck, id: "deck-2", url: `${instance.url}catalog.ttl#deck-2`, title: { en: "Solid" }, sourceUrl: course.url };
+    const fromPlain = { ...deck, id: "deck-3", url: `${instance.url}catalog.ttl#deck-3`, title: { en: "Rivers" }, sourceUrl: plain.url };
+    const useCases = makeUseCasesFake({
+      listDecks: vi.fn(async () => [deck, fromCourse, fromPlain]),
+      listLibraryDecks: vi.fn(async () => [course, plain]),
+    });
+    renderContainer(useCases);
+    await screen.findByRole("link", { name: "Solid" });
+    await waitFor(() => expect(useCases.listLibraryDecks).toHaveBeenCalledOnce());
+    fireEvent.click(screen.getByRole("button", { name: "Actions for Solid" }));
+    expect(await screen.findByRole("menuitem", { name: "Continue course" })).toHaveAttribute(
+      "href",
+      courseHref(instance.url, fromCourse.url),
+    );
+    fireEvent.keyDown(screen.getByRole("menuitem", { name: "Continue course" }), { key: "Escape" });
+    for (const name of ["Rivers", "Kanji N5"]) {
+      fireEvent.click(screen.getByRole("button", { name: `Actions for ${name}` }));
+      expect(screen.queryByRole("menuitem", { name: "Continue course" })).toBeNull();
+      fireEvent.keyDown(screen.getByRole("menuitem", { name: "Preferences" }), { key: "Escape" });
+    }
+  });
+
+  it("reads no library when no deck is copied from it", async () => {
+    const useCases = makeUseCasesFake({ listDecks: vi.fn(async () => [deck]) });
+    renderContainer(useCases);
+    await screen.findByRole("link", { name: "Kanji N5" });
+    expect(useCases.listLibraryDecks).not.toHaveBeenCalled();
   });
 
   it("links to this instance's deck creator", async () => {

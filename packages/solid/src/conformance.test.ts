@@ -71,7 +71,7 @@ const FIXTURES: Record<ShapeName, Record<number, object>> = {
     1: { accessUrl: "https://pod.example/d.ttl", mediaType: "https://www.iana.org/assignments/media-types/text/turtle" },
   },
   answer: {
-    1: { deck: "https://pod.example/c.ttl#deck-1", card: "https://pod.example/d.ttl#se", direction: `${SM_NS}backToFront`, grade: 4, answeredAt: "2026-10-03T08:15:30.123Z", studyDay: "2026-10-03", priorIntervalDays: 6, nextIntervalDays: 15 },
+    1: { deck: "https://pod.example/c.ttl#deck-1", card: "https://pod.example/d.ttl#se", direction: `${SM_NS}backToFront`, grade: 4, answeredAt: "2026-10-03T08:15:30.123Z", studyDay: "2026-10-03", priorIntervalDays: 6, nextIntervalDays: 15, mode: `${SM_NS}multipleChoice`, chosenDistractor: "https://pod.example/d.ttl#q-d1" },
   },
   card: {
     1: { front: "Sweden", back: "Stockholm" },
@@ -79,7 +79,16 @@ const FIXTURES: Record<ShapeName, Record<number, object>> = {
     3: { front: "Yugoslavia", frontNote: { en: "Dissolved in 1992." }, backLabel: { en: "Capital" }, back: "Belgrade", backNote: { en: "The capital until 1992." }, deprecated: true },
     // Card format 4 gained the picture descriptions without a version bump: an older reader ignores them.
     4: { front: { en: "Mona Lisa", sv: "Mona Lisa" }, back: { "": "Leonardo da Vinci" }, frontNote: { en: "In the Louvre." }, frontImage: "https://example.org/mona-lisa.jpg", frontImageDescription: { sv: "Ett porträtt av en kvinna med knäppta händer" }, backImage: "https://example.org/leonardo.jpg", backImageDescription: { en: "A drawing of an old man with a long beard", sv: "En teckning av en gammal man med långt skägg" } },
-    5: { front: { zxx: "404" }, back: { en: "Not Found", fi: "Ei löydy" }, frontNote: { fi: "HTTP-tilakoodi." }, backLabel: { sv: "Betydelse" }, backNote: { en: "The page is gone.", sv: "The page is gone." } },
+    5: { front: { zxx: "404" }, back: { en: "Not Found", fi: "Ei löydy" }, frontNote: { fi: "HTTP-tilakoodi." }, backLabel: { sv: "Betydelse" }, backNote: { en: "The page is gone.", sv: "The page is gone." }, distractor: ["https://pod.example/d.ttl#q-d1"] },
+  },
+  chapter: {
+    1: { title: { en: "Linked data", sv: "Länkade data" }, description: { en: "Why the web of data names things with IRIs." }, course: "https://solid-memo.com/decks/x/v1.ttl", position: 0, reviewQuestion: ["https://solid-memo.com/decks/x/v1.ttl#q2"] },
+  },
+  step: {
+    1: { theory: { en: "Linked data names every thing with an IRI.", sv: "Länkade data namnger allt med en IRI." }, checkedBy: ["https://solid-memo.com/decks/x/v1.ttl#q1"], chapter: "https://solid-memo.com/decks/x/v1.ttl#ch-1", position: 0 },
+  },
+  distractor: {
+    1: { text: { en: "Only web pages", sv: "Bara webbsidor" }, note: { en: "A web page's URL is one kind of IRI." } },
   },
   reviewState: {
     1: { easeFactor: 2.5, intervalDays: 1, repetitions: 1, due: "2026-09-22", firstReviewedAt: "2026-09-21T10:00:00.000Z", lastReviewedAt: "2026-09-21T10:00:00.000Z", previousDue: "2026-09-21" },
@@ -177,9 +186,10 @@ describe("format 5 over the format-4 fixtures", () => {
         const read = readVersioned(thing, shape)!;
         expect(read.storedVersion, name).toBe(4);
         const migrated = stepFor(shape, 4).up(read.record.data, { subject: thing.url });
-        // Nothing guessed, nothing dropped: the data is the format-4 data, restamped.
-        expect(migrated, `${name} ${thing.url}`).toEqual(read.record.data);
-        const written = toRdfJsDataset(setThing(dataset, recordThing(thing.url, descriptor, migrated as never, thing)));
+        // Nothing guessed, nothing dropped: the data is the format-4 data, restamped
+        // (a card with no distractors, which joined format 5 later).
+        expect(migrated, `${name} ${thing.url}`).toEqual(shape === "card" ? { ...read.record.data, distractor: [] } : read.record.data);
+        const written = toRdfJsDataset(setThing(dataset, recordThing(thing.url, descriptor as never, migrated as never, thing)));
         await expect(engine.validateNode(written, thing.url, descriptor.shapeIri), `${name} ${thing.url}`).resolves.toEqual([]);
       }
     }
@@ -258,6 +268,16 @@ describe("what the app writes, under DCAT-AP", () => {
 
   it("conforms: a catalog document with its catalogue, a deck, its creators and its distribution", async () => {
     await expect(profileViolations(toRdfJsDataset(catalogDocument()))).resolves.toEqual([]);
+  });
+
+  it("conforms: a course's deck with the chapters it completed, to DCAT-AP and its own shape", async () => {
+    const chapter = "https://solid-memo.com/decks/solid-fundamentals/v1.ttl#ch-linked-data";
+    const document = catalogDocument();
+    const dataset = setThing(document, buildThing(getThing(document, deck.url)!).addIri(SM.completedChapter, chapter).build());
+    const written = toRdfJsDataset(dataset);
+    await expect(profileViolations(written)).resolves.toEqual([]);
+    const engine = createEngine(await loader.load(SHAPES.deck[6]));
+    await expect(engine.validateNode(written, deck.url, SHAPES.deck[6].shapeIri)).resolves.toEqual([]);
   });
 
   it("conforms: a catalogue the app arranged into nested deck groups, each group also conforming to its own shape", async () => {

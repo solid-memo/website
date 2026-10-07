@@ -1,0 +1,92 @@
+@base <https://solid-memo.com/ns/shapes/step/v1.ttl> .
+
+@prefix sh:         <http://www.w3.org/ns/shacl#> .
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl:        <http://www.w3.org/2002/07/owl#> .
+@prefix schema:     <https://schema.org/> .
+
+# A step of a course chapter, format 1: a subject of a library deck
+# release beside its cards. Its theory is read first, then the cards it
+# is checked by are asked as multiple-choice questions.
+<#inLibrary>
+    a sh:NodeShape ;
+    sh:name "StepV1" ;
+    rdfs:comment "Step format 1: a schema:LearningResource of a course release, part of a chapter at its place among the chapter's steps, with a short theory in language-tagged text, one of them English, the cards that check it, and owl:deprecated true once retired." ;
+    sh:nodeKind sh:IRI ;
+    sh:class solid-memo:Step ;
+    sh:property <#formatVersion> ,
+                <#learningResource> ,
+                <#theory> ,
+                <#checkedBy> ,
+                <#chapter> ,
+                <#position> ,
+                <#deprecated> .
+
+<#formatVersion>
+    a sh:PropertyShape ;
+    sh:path solid-memo:formatVersion ;
+    sh:datatype xsd:integer ;
+    sh:maxCount 1 ;
+    sh:in ( 1 ) .
+
+<#learningResource>
+    a sh:PropertyShape ;
+    sh:path rdf:type ;
+    sh:hasValue schema:LearningResource ;
+    sh:message "A step is a schema:LearningResource."@en ,
+               "Ett steg är en schema:LearningResource."@sv .
+
+<#theory>
+    a sh:PropertyShape ;
+    sh:path solid-memo:theory ;
+    sh:datatype rdf:langString ;
+    sh:minCount 1 ;
+    sh:uniqueLang true ;
+    sh:qualifiedValueShape <#english> ;
+    sh:qualifiedMinCount 1 ;
+    sh:qualifiedMaxCount 1 ;
+    sh:message "A step's theory is language-tagged text, one per language, and one of them English (\"…\"@en)."@en ,
+               "Ett stegs teori är språktaggad text, en per språk, och en av dem på engelska (\"…\"@en)."@sv .
+
+<#english>
+    a sh:NodeShape ;
+    sh:languageIn ( "en" ) .
+
+<#checkedBy>
+    a sh:PropertyShape ;
+    sh:path solid-memo:checkedBy ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:message "A step is checked by one or more cards of the release, IRIs (<#…>)."@en ,
+               "Ett steg kontrolleras av ett eller flera kort i utgåvan, IRI:er (<#…>)."@sv .
+
+<#chapter>
+    a sh:PropertyShape ;
+    sh:path schema:isPartOf ;
+    sh:name "chapter" ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "A step is part of one chapter (schema:isPartOf <#…>)."@en ,
+               "Ett steg är del av ett kapitel (schema:isPartOf <#…>)."@sv .
+
+<#position>
+    a sh:PropertyShape ;
+    sh:path schema:position ;
+    sh:datatype xsd:integer ;
+    sh:minInclusive 0 ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "A step's place among its chapter's steps is one whole number, 0 or more, 0 first."@en ,
+               "Ett stegs plats bland kapitlets steg är ett heltal, 0 eller mer, 0 först."@sv .
+
+<#deprecated>
+    a sh:PropertyShape ;
+    sh:path owl:deprecated ;
+    sh:datatype xsd:boolean ;
+    sh:maxCount 1 ;
+    sh:message "A retired step states owl:deprecated true, a boolean."@en ,
+               "Ett steg som tagits ur bruk anger owl:deprecated true, ett booleskt värde."@sv .

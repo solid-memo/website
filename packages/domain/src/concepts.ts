@@ -1,10 +1,12 @@
 import {
+  ANSWER_MODES,
   INVALID_DATA_POLICIES,
   STUDY_DIRECTIONS,
   THEMES as THEME_SCHEME,
   type Concept,
   type ConceptScheme,
 } from "@solid-memo/vocab/concepts.generated";
+import type { AnswerMode } from "./answer";
 import { isDeckDirection, type DeckDirection } from "./deck";
 import { isInvalidDataPolicy, type InvalidDataPolicy } from "./invalidDataPolicy";
 import { isThemeChoice, type ThemeChoice } from "./theme";
@@ -14,6 +16,9 @@ export type StudyDirectionConcept = (typeof STUDY_DIRECTIONS.concepts)[number]["
 
 /** The IRI of a concept of the InvalidDataPolicies scheme. */
 export type InvalidDataPolicyConcept = (typeof INVALID_DATA_POLICIES.concepts)[number]["iri"];
+
+/** The IRI of a concept of the AnswerModes scheme. */
+export type AnswerModeConcept = (typeof ANSWER_MODES.concepts)[number]["iri"];
 
 /** The IRI of a concept of the Themes scheme. */
 export type ThemeConcept = (typeof THEME_SCHEME.concepts)[number]["iri"];
@@ -67,4 +72,14 @@ export function themeOfConcept(iri: string): ThemeChoice | undefined {
 /** The concept of the Themes scheme that names a theme choice. */
 export function conceptOfTheme(choice: ThemeChoice): ThemeConcept {
   return conceptByNotation(THEME_SCHEME, choice)!.iri as ThemeConcept;
+}
+
+/** The answer mode a concept of the AnswerModes scheme names. */
+export function answerModeOfConcept(iri: string): AnswerMode | undefined {
+  return conceptByIri(ANSWER_MODES, iri)?.notation as AnswerMode | undefined;
+}
+
+/** The concept of the AnswerModes scheme that names an answer mode. */
+export function conceptOfAnswerMode(mode: AnswerMode): AnswerModeConcept {
+  return conceptByNotation(ANSWER_MODES, mode)!.iri as AnswerModeConcept;
 }

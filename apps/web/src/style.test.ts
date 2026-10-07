@@ -142,6 +142,12 @@ describe("focus styles", () => {
     expect(hovered(item)).toEqual([]);
   });
 
+  it("rings a course question's radio in the primary colour", () => {
+    const style = focused(`<div class="choices"><label class="choice"><input type="radio"></label></div>`, "input");
+    expect(style.outlineStyle).toBe("solid");
+    expect(style.outlineColor).toBe("#2c6b3d");
+  });
+
   it("rings a menu's item inside it, clear of its clipping", () => {
     const style = focused(`<div class="actions-menu" role="menu"><button role="menuitem">x</button></div>`, "button");
     expect(style.outlineOffset).toBe("-2px");
@@ -328,6 +334,15 @@ describe("target size", () => {
     expect(menu.position).toBe("relative");
     expect(Number(menu.zIndex)).toBeGreaterThan(0);
     expect(menu.gridColumn).toBe("3");
+  });
+
+  it("makes a course question's whole option its radio's target, 44px tall", () => {
+    document.body.innerHTML = `
+      <div class="choices"><label class="choice"><input type="radio"><span class="choice-text">x</span></label></div>`;
+    const option = getComputedStyle(document.querySelector(".choice")!);
+    expect(parseFloat(option.minHeight)).toBeGreaterThanOrEqual(44);
+    expect(option.display).toBe("flex");
+    expect(option.cursor).toBe("pointer");
   });
 
   it("gives a group's menu button a 44px target, right-aligned", () => {

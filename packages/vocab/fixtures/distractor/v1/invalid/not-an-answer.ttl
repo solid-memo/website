@@ -1,0 +1,6 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+
+<#d1>
+    a solid-memo:Distractor ;
+    solid-memo:distractorText "Only web pages"@en ;
+    solid-memo:formatVersion 1 .

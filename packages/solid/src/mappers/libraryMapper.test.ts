@@ -8,7 +8,7 @@ import {
   type ThingBuilder,
   type ThingPersisted,
 } from "@inrupt/solid-client";
-import { toLibraryDeckContent, toLibraryDecks } from "./libraryMapper";
+import { toCourseOutline, toLibraryDeckContent, toLibraryDecks } from "./libraryMapper";
 import { getSolidDataset } from "@inrupt/solid-client";
 import { turtleFetch } from "@solid-memo/shacl/testing/turtle";
 import { DCTERMS, RDF, SM } from "../vocab";
@@ -128,6 +128,28 @@ describe("toLibraryDecks", () => {
     expect(toLibraryDecks(index)).toEqual([
       expect.objectContaining({ keywords: { en: ["capitals", "countries"], sv: ["huvudstäder", "länder"] } }),
     ]);
+  });
+
+  it("tells a course by its current release's type, schema:Course", async () => {
+    const turtle = (types: string) => `
+@prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix schema: <https://schema.org/> .
+<> a dcat:Catalog ; dcterms:title "Library" ; dcterms:description "Decks." ; dcterms:publisher <#solid-memo> ; dcat:dataset <#solid> .
+<#solid> a dcat:DatasetSeries, dcat:Dataset ; sm:formatVersion 3 ;
+   dcterms:title "Solid"@en ; dcterms:description "Solid."@en ;
+   dcterms:publisher <#solid-memo> ; dcat:first <solid/v1.ttl> ; dcat:last <solid/v1.ttl> ;
+   dcat:hasVersion <solid/v1.ttl> ; dcat:hasCurrentVersion <solid/v1.ttl> .
+<solid/v1.ttl> a ${types} ; sm:formatVersion 5 ;
+   dcterms:title "Solid"@en ; dcterms:description "Solid fundamentals."@en ;
+   dcterms:publisher <#solid-memo> ; sm:studyDirection sm:frontToBack ; dcat:theme <${EDUC}> ;
+   dcat:version "1" ; dcat:inSeries <#solid> ; dcat:isVersionOf <#solid> ; dcat:distribution <solid/v1.ttl#turtle> .
+`;
+    const [course] = toLibraryDecks(await datasetFromIndex(turtle("sm:Deck, dcat:Dataset, schema:Course")));
+    expect(course).toMatchObject({ isCourse: true });
+    const [deck] = toLibraryDecks(await datasetFromIndex(turtle("sm:Deck, dcat:Dataset")));
+    expect(deck).not.toHaveProperty("isCourse");
   });
 
   it("keeps the title and description of a deck of format 4 in every language", async () => {
@@ -359,5 +381,45 @@ describe("toLibraryDeckContent", () => {
         deckDocument(thing(DOC, (t) => t.addIri(RDF.type, SM.Deck))),
       ),
     ).toThrow(`That is not a Solid Memo deck, so it cannot be added. Choose another deck.\nurl: ${DOC}`);
+  });
+});
+
+describe("toCourseOutline", () => {
+  it("reads a release's chapters and steps that fit their shapes, leaving out retired ones and other subjects", async () => {
+    const dataset = await datasetOf(
+      `
+@prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix schema: <https://schema.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+<#ch-1> a sm:Chapter, schema:Syllabus ; sm:formatVersion 1 ; schema:isPartOf <> ; schema:position 0 ;
+   dcterms:title "Linked data"@en, "Länkade data"@sv ; dcterms:description "IRIs."@en ; sm:reviewQuestion <#q-2> .
+<#ch-old> a sm:Chapter ; schema:isPartOf <> ; schema:position 1 ; dcterms:title "Old"@en ; owl:deprecated true .
+<#ch-broken> a sm:Chapter ; schema:position 2 .
+<#ch-1-2> a sm:Step, schema:LearningResource ; schema:isPartOf <#ch-1> ; schema:position 1 ;
+   sm:theory "Second."@en ; sm:checkedBy <#q-3> .
+<#ch-1-1> a sm:Step ; schema:isPartOf <#ch-1> ; schema:position 0 ; sm:theory "First."@en ; sm:checkedBy <#q-1>, <#q-2> .
+<#ch-1-broken> a sm:Step ; schema:isPartOf <#ch-1> ; schema:position 2 ; sm:checkedBy <#q-1> .
+<#q-1> a sm:Card ; sm:front "Q"@en ; sm:back "A"@en .
+`,
+      DOC,
+    );
+    expect(toCourseOutline(DOC, dataset)).toEqual({
+      releaseUrl: DOC,
+      chapters: [
+        {
+          id: "ch-1",
+          url: `${DOC}#ch-1`,
+          position: 0,
+          title: { en: "Linked data", sv: "Länkade data" },
+          description: { en: "IRIs." },
+          steps: [
+            { id: "ch-1-1", url: `${DOC}#ch-1-1`, position: 0, theory: { en: "First." }, questionIds: ["q-1", "q-2"] },
+            { id: "ch-1-2", url: `${DOC}#ch-1-2`, position: 1, theory: { en: "Second." }, questionIds: ["q-3"] },
+          ],
+          reviewQuestionIds: ["q-2"],
+        },
+      ],
+    });
   });
 });

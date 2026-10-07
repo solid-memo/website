@@ -1,0 +1,103 @@
+@base <https://solid-memo.com/ns/shapes/chapter/v1.ttl> .
+
+@prefix sh:         <http://www.w3.org/ns/shacl#> .
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl:        <http://www.w3.org/2002/07/owl#> .
+@prefix schema:     <https://schema.org/> .
+
+# A chapter of a course, format 1: a subject of a library deck release
+# that is also a schema:Course, beside its cards. Its steps name it with
+# schema:isPartOf; its final review asks every card its steps check, and
+# its review questions. It stays in the release: a copy in a pod reads it
+# from there.
+<#inLibrary>
+    a sh:NodeShape ;
+    sh:name "ChapterV1" ;
+    rdfs:comment "Chapter format 1: a schema:Syllabus of a course release, part of it at its place among its chapters, with a language-tagged title, one of them English, and description, the cards asked only in its final review, and owl:deprecated true once retired." ;
+    sh:nodeKind sh:IRI ;
+    sh:class solid-memo:Chapter ;
+    sh:property <#formatVersion> ,
+                <#syllabus> ,
+                <#title> ,
+                <#description> ,
+                <#course> ,
+                <#position> ,
+                <#reviewQuestion> ,
+                <#deprecated> .
+
+<#formatVersion>
+    a sh:PropertyShape ;
+    sh:path solid-memo:formatVersion ;
+    sh:datatype xsd:integer ;
+    sh:maxCount 1 ;
+    sh:in ( 1 ) .
+
+<#syllabus>
+    a sh:PropertyShape ;
+    sh:path rdf:type ;
+    sh:hasValue schema:Syllabus ;
+    sh:message "A chapter is a schema:Syllabus."@en ,
+               "Ett kapitel är en schema:Syllabus."@sv .
+
+<#title>
+    a sh:PropertyShape ;
+    sh:path dcterms:title ;
+    sh:datatype rdf:langString ;
+    sh:minCount 1 ;
+    sh:uniqueLang true ;
+    sh:qualifiedValueShape <#english> ;
+    sh:qualifiedMinCount 1 ;
+    sh:qualifiedMaxCount 1 ;
+    sh:message "A chapter's title is language-tagged text, one per language, and one of them English (\"…\"@en)."@en ,
+               "Ett kapitels titel är språktaggad text, en per språk, och en av dem på engelska (\"…\"@en)."@sv .
+
+<#description>
+    a sh:PropertyShape ;
+    sh:path dcterms:description ;
+    sh:datatype rdf:langString ;
+    sh:uniqueLang true ;
+    sh:message "A chapter's description is language-tagged text, one per language (\"…\"@en)."@en ,
+               "Ett kapitels beskrivning är språktaggad text, en per språk (\"…\"@en)."@sv .
+
+<#english>
+    a sh:NodeShape ;
+    sh:languageIn ( "en" ) .
+
+<#course>
+    a sh:PropertyShape ;
+    sh:path schema:isPartOf ;
+    sh:name "course" ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "A chapter is part of one course, the release it is in (schema:isPartOf <>)."@en ,
+               "Ett kapitel är del av en kurs, utgåvan det står i (schema:isPartOf <>)."@sv .
+
+<#position>
+    a sh:PropertyShape ;
+    sh:path schema:position ;
+    sh:datatype xsd:integer ;
+    sh:minInclusive 0 ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "A chapter's place among the course's chapters is one whole number, 0 or more, 0 first."@en ,
+               "Ett kapitels plats bland kursens kapitel är ett heltal, 0 eller mer, 0 först."@sv .
+
+<#reviewQuestion>
+    a sh:PropertyShape ;
+    sh:path solid-memo:reviewQuestion ;
+    sh:nodeKind sh:IRI ;
+    sh:message "A chapter's review questions are cards of the release, IRIs (<#…>)."@en ,
+               "Ett kapitels repetitionsfrågor är kort i utgåvan, IRI:er (<#…>)."@sv .
+
+<#deprecated>
+    a sh:PropertyShape ;
+    sh:path owl:deprecated ;
+    sh:datatype xsd:boolean ;
+    sh:maxCount 1 ;
+    sh:message "A retired chapter states owl:deprecated true, a boolean."@en ,
+               "Ett kapitel som tagits ur bruk anger owl:deprecated true, ett booleskt värde."@sv .

@@ -22,6 +22,7 @@ import {
   type Deck,
   type DeckDirection,
   type Prompt,
+  type StudyDirection,
 } from "@solid-memo/domain/deck";
 import type {
   Instance,
@@ -104,7 +105,14 @@ import {
   studyDayOf,
   type StudyQueue,
 } from "@solid-memo/domain/scheduling";
-import { answerIdOf, type Answer } from "@solid-memo/domain/answer";
+import { answerIdOf, type Answer, type AnswerMode } from "@solid-memo/domain/answer";
+import {
+  courseAnswerEffect,
+  courseProgress,
+  type CourseAnswerEffect,
+  type CourseOutline,
+  type CourseProgress,
+} from "@solid-memo/domain/course";
 import { statisticsOf, type Statistics } from "@solid-memo/domain/statistics";
 import type { EstablishedSession, Session } from "@solid-memo/domain/session";
 import { applySm2, INITIAL_SM2_STATE } from "@solid-memo/domain/sm2";
@@ -433,6 +441,78 @@ export interface UseCases {
    * still waiting to be added to the log are added first.
    */
   getStatistics(instanceUrl: string, now: Date, options?: { months?: number; deckUrl?: string }): Promise<Statistics>;
+  /**
+   * Start a course (a library deck whose release is a course, see
+   * docs/courses.md): the instance's deck of it, a copy of the current
+   * release with its title, description, authors and the rest, but no
+   * cards — a card joins it when its question is first answered
+   * (answerCourseQuestion). The copy the instance already has, of any
+   * release (isCopyOf), when it has one: a course is started once.
+   */
+  startCourse(instanceUrl: string, course: LibraryDeck): Promise<Deck>;
+  /**
+   * A course as the learner has it: the deck's catalog entry as it is
+   * now, the release it was copied from (its outline and cards) and the
+   * learner's progress through it. Throws deckGone when the deck is gone;
+   * a deck that is no library copy is a mistake of the caller (a plain
+   * Error). Writes nothing.
+   */
+  getCourse(deck: Deck): Promise<Course>;
+  /**
+   * Answer one of a course's multiple-choice questions (domain/course.ts
+   * choicesOf): what the answer does to the card's schedule follows
+   * courseAnswerEffect. A card introduced is first written into the deck,
+   * as its release has it (distractors and fragment id included), then
+   * graded; a review is graded as in study; either way the answer is
+   * logged as a multiple-choice one, naming the wrong option chosen. No
+   * daily limit applies: the learner reached the card. Writes nothing
+   * when the answer is practice ("none").
+   */
+  answerCourseQuestion(
+    instanceUrl: string,
+    deck: Deck,
+    card: LibraryCard,
+    choice: CourseChoice,
+    now: Date,
+  ): Promise<CourseAnswer>;
+  /**
+   * Note a chapter of the deck's course completed (its final review
+   * passed), unlocking the next (DeckRepository.completeChapter). The
+   * deck as its entry says then.
+   */
+  completeChapter(deck: Deck, chapterUrl: string): Promise<Deck>;
+}
+
+/** A course as the learner has it (UseCases.getCourse). */
+export interface Course {
+  /** The course's deck in the instance, as its catalog entry says now. */
+  deck: Deck;
+  /** The release the deck was copied from: the course's content. */
+  release: LibraryDeckContent;
+  /** The release's chapters and steps. */
+  outline: CourseOutline;
+  /** The release's cards (the questions, with their distractors) by id. */
+  cards: Readonly<Record<string, LibraryCard>>;
+  /** The cards the learner has answered: those with review state in the deck. */
+  answeredCardIds: string[];
+  progress: CourseProgress;
+}
+
+/** The option a learner chose: right or wrong, and which wrong one (a distractor's id). */
+export interface CourseChoice {
+  correct: boolean;
+  distractorId?: string;
+}
+
+/** What answering a course question did (UseCases.answerCourseQuestion). */
+export interface CourseAnswer {
+  /**
+   * "introduce": the card joined the deck ("Added to your deck"), graded;
+   * "review": it was graded; "none": nothing was written.
+   */
+  effect: CourseAnswerEffect["kind"];
+  /** The card's review state after the answer; null for a card that has none. */
+  state: ReviewState | null;
 }
 
 export interface Dependencies {
@@ -632,7 +712,15 @@ export function createUseCases({
       deckLibrary.fetchLibraryDeck(series.url),
       cards(),
     ]);
-    return planLibraryUpgrade({ deck, cards: copy, from, to, releases: series.releases });
+    return planLibraryUpgrade({
+      deck,
+      cards: copy,
+      from,
+      to,
+      releases: series.releases,
+      // A course's deck holds only the cards the learner reached: an upgrade adds none.
+      course: series.isCourse === true || from.isCourse === true,
+    });
   }
 
   /**
@@ -891,6 +979,63 @@ export function createUseCases({
       }
     });
     return logging;
+  }
+
+  /**
+   * Apply one grade to a prompt of the deck: transition its state (or the
+   * initial one) by SM-2, persist it, and queue its answer for the log,
+   * saying how it was given (`how`; a study session says nothing: recall).
+   * The instance's preferences and the prompt's current state are read
+   * unless `known` brings them.
+   */
+  async function applyGrade(
+    instanceUrl: string,
+    deck: Deck,
+    prompt: { cardId: string; cardUrl: string; direction: StudyDirection },
+    quality: ReviewQuality,
+    now: Date,
+    how: { mode?: AnswerMode; chosenDistractor?: string } = {},
+    known?: { prefs: StudyPreferences; current: ReviewState | null },
+  ): Promise<ReviewState> {
+    const key = { cardId: prompt.cardId, direction: prompt.direction };
+    const [prefs, current] =
+      known === undefined
+        ? await Promise.all([getPreferences(instanceUrl), reviewStateRepository.getReviewState(deck, key)])
+        : [known.prefs, known.current];
+    const next = applySm2(current ?? INITIAL_SM2_STATE, quality);
+    const previous = snapshotBeforeReview(
+      current,
+      now,
+      prefs.dayBoundaryHour,
+    );
+    const state: ReviewState = {
+      ...key,
+      ...next,
+      due: nextDueDate(now, next.intervalDays, prefs.dayBoundaryHour),
+      firstReviewedAt: current?.firstReviewedAt ?? now.toISOString(),
+      lastReviewedAt: now.toISOString(),
+      formatVersion: REVIEW_STATE_FORMAT_VERSION,
+      ...(previous === undefined ? {} : { previous }),
+    };
+    await reviewStateRepository.saveReviewState(deck, state);
+    unlogged.push({
+      instanceUrl,
+      answer: {
+        id: answerIdOf(state.lastReviewedAt, newId().slice(0, 8)),
+        deckUrl: deck.url,
+        cardUrl: prompt.cardUrl,
+        direction: prompt.direction,
+        grade: quality,
+        answeredAt: state.lastReviewedAt,
+        studyDay: studyDayOf(now, prefs.dayBoundaryHour),
+        ...(current === null ? {} : { priorIntervalDays: current.intervalDays }),
+        nextIntervalDays: next.intervalDays,
+        ...(how.mode === undefined ? {} : { mode: how.mode }),
+        ...(how.chosenDistractor === undefined ? {} : { chosenDistractor: how.chosenDistractor }),
+      },
+    });
+    void logAnswers();
+    return state;
   }
 
   /**
@@ -1561,44 +1706,14 @@ export function createUseCases({
         remember(instanceUrl, noting(deck.reviewsDocumentUrl, checked.version, { conformedTo: ruleset }));
       }
     },
-    async recordReview(instanceUrl, deck, prompt, quality, now) {
-      const key = { cardId: prompt.card.id, direction: prompt.direction };
-      const [prefs, current] = await Promise.all([
-        getPreferences(instanceUrl),
-        reviewStateRepository.getReviewState(deck, key),
-      ]);
-      const next = applySm2(current ?? INITIAL_SM2_STATE, quality);
-      const previous = snapshotBeforeReview(
-        current,
-        now,
-        prefs.dayBoundaryHour,
-      );
-      const state: ReviewState = {
-        ...key,
-        ...next,
-        due: nextDueDate(now, next.intervalDays, prefs.dayBoundaryHour),
-        firstReviewedAt: current?.firstReviewedAt ?? now.toISOString(),
-        lastReviewedAt: now.toISOString(),
-        formatVersion: REVIEW_STATE_FORMAT_VERSION,
-        ...(previous === undefined ? {} : { previous }),
-      };
-      await reviewStateRepository.saveReviewState(deck, state);
-      unlogged.push({
+    recordReview(instanceUrl, deck, prompt, quality, now) {
+      return applyGrade(
         instanceUrl,
-        answer: {
-          id: answerIdOf(state.lastReviewedAt, newId().slice(0, 8)),
-          deckUrl: deck.url,
-          cardUrl: prompt.card.url,
-          direction: prompt.direction,
-          grade: quality,
-          answeredAt: state.lastReviewedAt,
-          studyDay: studyDayOf(now, prefs.dayBoundaryHour),
-          ...(current === null ? {} : { priorIntervalDays: current.intervalDays }),
-          nextIntervalDays: next.intervalDays,
-        },
-      });
-      void logAnswers();
-      return state;
+        deck,
+        { cardId: prompt.card.id, cardUrl: prompt.card.url, direction: prompt.direction },
+        quality,
+        now,
+      );
     },
     async resetStudyDay(instanceUrl, deck, now) {
       const [prefs, reviews] = await Promise.all([
@@ -1630,6 +1745,57 @@ export function createUseCases({
       );
       const answers = read.flat().filter((answer) => deckUrl === undefined || answer.deckUrl === deckUrl);
       return statisticsOf(answers, today);
+    },
+    async startCourse(instanceUrl, course) {
+      const started = (await deckRepository.listDecks(instanceUrl)).find((deck) => isCopyOf(deck, course));
+      if (started !== undefined) return started;
+      const release = await deckLibrary.fetchLibraryDeck(course.url);
+      return deckRepository.importDeck(instanceUrl, { ...release, cards: [] });
+    },
+    async getCourse(offered) {
+      const deck = await deckRepository.readDeck(offered.url);
+      if (deck === null) throw new AppError("deckGone", { deck: offered.title });
+      if (deck.sourceUrl === undefined) throw new Error("A course's deck names the release it was copied from");
+      const [release, outline, reviews] = await Promise.all([
+        deckLibrary.fetchLibraryDeck(deck.sourceUrl),
+        deckLibrary.fetchCourseOutline(deck.sourceUrl),
+        reviewStateRepository.listReviewStates(deck),
+      ]);
+      // A course asks front to back: a card is answered once it has that state.
+      const answeredCardIds = reviews.filter((state) => state.direction === "front-to-back").map((state) => state.cardId);
+      return {
+        deck,
+        release,
+        outline,
+        cards: Object.fromEntries(release.cards.map((card) => [card.id, card])),
+        answeredCardIds,
+        progress: courseProgress(outline, answeredCardIds, deck.completedChapters ?? []),
+      };
+    },
+    async answerCourseQuestion(instanceUrl, deck, card, choice, now) {
+      const prompt = { cardId: card.id, cardUrl: `${deck.cardsDocumentUrl}#${card.id}`, direction: "front-to-back" as const };
+      const [prefs, current] = await Promise.all([
+        getPreferences(instanceUrl),
+        reviewStateRepository.getReviewState(deck, { cardId: card.id, direction: prompt.direction }),
+      ]);
+      const effect = courseAnswerEffect(current, choice.correct, now, prefs.dayBoundaryHour);
+      if (effect.kind === "none") return { effect: "none", state: current };
+      // The card joins the deck before its first state, so no state is ever without its card.
+      if (effect.kind === "introduce") await deckRepository.applyCardChanges(deck, { save: [card], remove: [] });
+      const chosen = choice.correct || choice.distractorId === undefined ? undefined : `${deck.cardsDocumentUrl}#${choice.distractorId}`;
+      const state = await applyGrade(
+        instanceUrl,
+        deck,
+        prompt,
+        effect.grade,
+        now,
+        { mode: "multiple-choice", ...(chosen === undefined ? {} : { chosenDistractor: chosen }) },
+        { prefs, current },
+      );
+      return { effect: effect.kind, state };
+    },
+    completeChapter(deck, chapterUrl) {
+      return deckRepository.completeChapter(deck, chapterUrl);
     },
   };
 }

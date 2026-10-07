@@ -117,8 +117,8 @@ export function interleave<T>(due: T[], fresh: T[]): T[] {
   return result;
 }
 
-/** Fisher–Yates; returns a new array. */
-function shuffle<T>(items: T[], random: () => number): T[] {
+/** Fisher–Yates over the injected `random` source; returns a new array. */
+export function shuffle<T>(items: readonly T[], random: () => number): T[] {
   const result = [...items];
   for (let i = result.length - 1; i > 0; i--) {
     const j = Math.floor(random() * (i + 1));
