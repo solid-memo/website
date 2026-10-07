@@ -131,7 +131,7 @@ function dockerfileArg(id: string, name: string): string {
   return value;
 }
 
-/** The tag of the image a server's Dockerfile builds on: "30.0.17-apache" says "30.0.17". */
+/** The tag of the image a server's Dockerfile builds on: "32.0.15-apache" says "32.0.15". */
 function baseImageTag(id: string): string {
   const tag = /^FROM [^\s:]+:(\d[\w.]*?)(-[\w]+)?@sha256:/m.exec(readFileSync(join(HERE, "servers", id, "Dockerfile"), "utf8"))?.[1];
   if (tag === undefined) throw new Error(`servers/${id}/Dockerfile builds on no image pinned by tag and digest.`);
