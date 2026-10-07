@@ -192,9 +192,21 @@ error. The job's `journeys-<attempt>` artifact holds everything else:
   Open the report with `npx playwright show-report <dir>`.
 - `logs/css.log`: the server's whole log.
 
-A run by hand (Actions › CI › Run workflow) with *trace* ticked keeps all
-of this for passing journeys too. Locally, `JOURNEY_TRACE=on npm run
-journeys` does the same.
+**The latest report is online** at https://solid-memo.com/journeys/,
+published with each deploy (`main`, CI green). It shows every journey's
+steps and screenshots, and its **Trace** link opens the step-by-step
+timeline in the browser (the trace viewer is part of the report and
+needs it served, as it is there, not opened as a file). On `main` the
+journeys always keep their traces for this. The report is public and
+holds the throwaway accounts' passwords and tokens, which die with the
+run's server, and it is kept out of search engines (`robots.txt`).
+Since only a green run deploys, a failure on `main` is read from the
+run's artifact.
+
+A run by hand (Actions › CI › Run workflow) with *trace* ticked keeps
+traces for passing journeys on any branch. Locally, `JOURNEY_TRACE=on
+npm run journeys` does the same, and `npm run journeys:report -w
+@solid-memo/e2e-journeys` serves the report so its traces open.
 
 ### Writing a journey
 
