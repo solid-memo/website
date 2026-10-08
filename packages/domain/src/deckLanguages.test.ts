@@ -71,6 +71,16 @@ describe("stating the language of a deck's untagged sides", () => {
     expect(unlikeRelease([released])).toEqual([released]);
   });
 
+  it("leaves out a card that only lost its release's text format, which the next release brings back", () => {
+    const MARKDOWN = "https://solid-memo.com/ns/vocab/v1.ttl#markdown";
+    const PLAIN = "https://solid-memo.com/ns/vocab/v1.ttl#plainText";
+    const copy = card("a", { front: { "": "`Fe`" }, back: { en: "iron" } });
+    const release = [{ ...copy, textFormat: MARKDOWN }];
+    expect(unlikeRelease([copy], release)).toEqual([]);
+    // Switched to plain text, the card is the user's.
+    expect(unlikeRelease([{ ...copy, textFormat: PLAIN }], release)).toEqual([{ ...copy, textFormat: PLAIN }]);
+  });
+
   it("moves an untagged side's text under the language stated, touching nothing else", () => {
     const untagged = card("a", { front: { "": "hund" }, back: { "": "dog" }, frontNote: { sv: "Vanligt" } });
     expect(withStatedLanguages(untagged, { front: "sv" })).toEqual({ ...untagged, front: { sv: "hund" } });

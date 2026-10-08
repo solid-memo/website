@@ -18,8 +18,8 @@
     a owl:Ontology ;
     dcterms:title "Solid Memo vocabulary, v1" ;
     dcterms:description "Terms for spaced-repetition flashcards stored in a Solid pod: instances, decks, cards, SM-2 review state and study preferences." ;
-    owl:versionInfo "1.14" ;
-    skos:changeNote "1.0: Instance, Deck, Card, ReviewState, Preferences, formatVersion, cardsDocument, reviewsDocument, front, back, the SM-2 fields and the study caps. 1.1: developerMode. 1.2: the previous* snapshot. 1.3: frontImage, backImage (card format 2). 1.4: cardCount (library index). 1.5: direction (deck format 2). 1.6: the StudyDirections and InvalidDataPolicies concept schemes, studyDirection (deck format 3) and invalidDataPolicy (preferences format 3); direction deprecated. 1.7: deckNewCardsPerDay, deckMaxReviewsPerDay (a deck's own study caps). 1.8: frontNote, backLabel, backNote (card format 3). 1.9: DocumentReceipt and DeckSchedule, the instance digest that lets a visit skip documents that have not changed. 1.10: Answer, the answer log the study statistics are computed from. 1.11: the Themes concept scheme and theme (preferences format 4). 1.12: frontImageDescription, backImageDescription (card format 4, without a version bump). 1.13: DeckGroup and position, the user's arrangement of the deck list (deck group format 1; on a deck, position needs no deck format bump). 1.14: Chapter, Step and Distractor, the outline of a course (a library deck that is also a schema:Course), its theory and the wrong options of its multiple-choice questions (chapter, step and distractor format 1; distractor on a card without a card format bump); completedChapter, a course's progress on the user's copy; the AnswerModes concept scheme, answerMode and chosenDistractor (on an answer, without an answer format bump)." .
+    owl:versionInfo "1.15" ;
+    skos:changeNote "1.0: Instance, Deck, Card, ReviewState, Preferences, formatVersion, cardsDocument, reviewsDocument, front, back, the SM-2 fields and the study caps. 1.1: developerMode. 1.2: the previous* snapshot. 1.3: frontImage, backImage (card format 2). 1.4: cardCount (library index). 1.5: direction (deck format 2). 1.6: the StudyDirections and InvalidDataPolicies concept schemes, studyDirection (deck format 3) and invalidDataPolicy (preferences format 3); direction deprecated. 1.7: deckNewCardsPerDay, deckMaxReviewsPerDay (a deck's own study caps). 1.8: frontNote, backLabel, backNote (card format 3). 1.9: DocumentReceipt and DeckSchedule, the instance digest that lets a visit skip documents that have not changed. 1.10: Answer, the answer log the study statistics are computed from. 1.11: the Themes concept scheme and theme (preferences format 4). 1.12: frontImageDescription, backImageDescription (card format 4, without a version bump). 1.13: DeckGroup and position, the user's arrangement of the deck list (deck group format 1; on a deck, position needs no deck format bump). 1.14: Chapter, Step and Distractor, the outline of a course (a library deck that is also a schema:Course), its theory and the wrong options of its multiple-choice questions (chapter, step and distractor format 1; distractor on a card without a card format bump); completedChapter, a course's progress on the user's copy; the AnswerModes concept scheme, answerMode and chosenDistractor (on an answer, without an answer format bump). 1.15: the TextFormats concept scheme and textFormat, how the texts of a card, a course step or a chapter are written, plain or Markdown (on each without a format bump)." .
 
 #################### Classes ####################
 
@@ -128,6 +128,14 @@ solid-memo:position
     rdfs:range xsd:integer ;
     rdfs:isDefinedBy <> ;
     skos:historyNote "Added in 1.13. On a deck it is outside the deck format, without a version bump: an older reader ignores it and an older writer keeps it." .
+
+solid-memo:textFormat
+    a owl:ObjectProperty ;
+    rdfs:label "text format" ;
+    rdfs:comment "How a subject's texts are written: a concept of solid-memo:TextFormats. On a card (solid-memo:Card) it covers exactly solid-memo:front, back, frontNote, backNote and backLabel, and the distractorText and distractorNote of the card's distractors, which carry no text format of their own; on a course step (solid-memo:Step), its solid-memo:theory; on a course chapter (solid-memo:Chapter), its dcterms:description, never its title. These lists are fixed for 1.x: a new text predicate needs its own decision. A picture's description and every other text are always plain. Absent means plain text, shown as written. Each language's value is its own document, and its language tag still says what language the prose is in. A concept this reader does not know is read as plain text." ;
+    rdfs:range skos:Concept ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.15. On a card, step or chapter it is outside the format's version: an older reader ignores it and shows the text as written; an older writer keeps it through an edit, but drops it when it copies a card from the library, which the library upgrade repairs." .
 
 #################### Deck ####################
 
@@ -884,3 +892,33 @@ solid-memo:multipleChoice
     skos:topConceptOf solid-memo:AnswerModes ;
     rdfs:isDefinedBy <> ;
     skos:historyNote "Added in 1.14." .
+
+solid-memo:TextFormats
+    a skos:ConceptScheme ;
+    dcterms:title "Text formats"@en ;
+    skos:definition "How the texts of a card, a course step or a course chapter are written."@en ;
+    skos:hasTopConcept solid-memo:plainText ,
+                       solid-memo:markdown ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.15." .
+
+solid-memo:plainText
+    a skos:Concept ;
+    skos:prefLabel "Plain text"@en ;
+    skos:definition "Text shown as written. The same as no text format; stated where a person chose it."@en ;
+    skos:notation "plain" ;
+    skos:inScheme solid-memo:TextFormats ;
+    skos:topConceptOf solid-memo:TextFormats ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.15." .
+
+solid-memo:markdown
+    a skos:Concept ;
+    skos:prefLabel "Markdown"@en ;
+    skos:definition "CommonMark 0.31.2, with GitHub Flavored Markdown pipe tables as its one extension."@en ;
+    skos:notation "markdown" ;
+    skos:broadMatch <https://www.iana.org/assignments/media-types/text/markdown> ;
+    skos:inScheme solid-memo:TextFormats ;
+    skos:topConceptOf solid-memo:TextFormats ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.15." .

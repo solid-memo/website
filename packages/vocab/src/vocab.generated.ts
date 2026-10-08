@@ -1,6 +1,6 @@
 /* Generated from ns/vocab/v1.ttl by `npm run generate`. Do not edit: change the source and regenerate. */
 
-/** Solid Memo's own vocabulary, version 1.14 (see docs/vocab.md). */
+/** Solid Memo's own vocabulary, version 1.15 (see docs/vocab.md). */
 export const SM_NS = "https://solid-memo.com/ns/vocab/v1.ttl#";
 
 export const SM = {
@@ -32,6 +32,8 @@ export const SM = {
   formatVersion: `${SM_NS}formatVersion`,
   /** Where a deck or deck group stands among the members of the one catalogue or group it is in, 0 first; the decks and groups of one parent share one sequence. Absent means after every member that has one. (Added in 1.13. On a deck it is outside the deck format, without a version bump: an older reader ignores it and an older writer keeps it.) */
   position: `${SM_NS}position`,
+  /** How a subject's texts are written: a concept of solid-memo:TextFormats. On a card (solid-memo:Card) it covers exactly solid-memo:front, back, frontNote, backNote and backLabel, and the distractorText and distractorNote of the card's distractors, which carry no text format of their own; on a course step (solid-memo:Step), its solid-memo:theory; on a course chapter (solid-memo:Chapter), its dcterms:description, never its title. These lists are fixed for 1.x: a new text predicate needs its own decision. A picture's description and every other text are always plain. Absent means plain text, shown as written. Each language's value is its own document, and its language tag still says what language the prose is in. A concept this reader does not know is read as plain text. (Added in 1.15. On a card, step or chapter it is outside the format's version: an older reader ignores it and shows the text as written; an older writer keeps it through an edit, but drops it when it copies a card from the library, which the library upgrade repairs.) */
+  textFormat: `${SM_NS}textFormat`,
   /** The document holding the deck's cards, one sm:Card per hash fragment. (Since 1.0.) */
   cardsDocument: `${SM_NS}cardsDocument`,
   /** The document holding the deck's review states, joined to its cards by fragment id. (Since 1.0.) */
@@ -192,4 +194,10 @@ export const SM = {
   recall: `${SM_NS}recall`,
   /** The learner chooses the answer among the card's back and its distractors; the choice is graded right or wrong. (Added in 1.14.) */
   multipleChoice: `${SM_NS}multipleChoice`,
+  /** How the texts of a card, a course step or a course chapter are written. (Added in 1.15.) */
+  TextFormats: `${SM_NS}TextFormats`,
+  /** Text shown as written. The same as no text format; stated where a person chose it. (Added in 1.15.) */
+  plainText: `${SM_NS}plainText`,
+  /** CommonMark 0.31.2, with GitHub Flavored Markdown pipe tables as its one extension. (Added in 1.15.) */
+  markdown: `${SM_NS}markdown`,
 } as const;

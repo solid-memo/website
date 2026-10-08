@@ -15,28 +15,35 @@ export function ExternalLink({
   url,
   class: className,
   title,
+  dir,
   children,
 }: {
   url: string;
   class?: string;
   title?: string;
+  /** The link's own direction, isolating it from the text around it. */
+  dir?: "ltr";
   /** Link text; defaults to the URL itself. */
   children?: ComponentChildren;
 }) {
   const { t } = useI18n();
   const text = children ?? url;
   if (!isLinkableUrl(url)) {
-    return <span class={className}>{text}</span>;
+    return (
+      <span class={className} dir={dir}>
+        {text}
+      </span>
+    );
   }
   if (!isHttpUrl(url)) {
     return (
-      <a class={className} href={url} title={title}>
+      <a class={className} href={url} title={title} dir={dir}>
         {text}
       </a>
     );
   }
   return (
-    <a class={className} href={url} title={title} target="_blank" rel="noopener noreferrer">
+    <a class={className} href={url} title={title} dir={dir} target="_blank" rel="noopener noreferrer">
       {text}
       <ExternalIcon />
       <span class="visually-hidden"> {t("common.opensInNewTab")}</span>

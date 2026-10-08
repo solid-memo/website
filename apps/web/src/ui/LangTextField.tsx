@@ -47,13 +47,20 @@ export function draftOf(
  * text clears the text in every language: empty. The entry, instead,
  * when text in it has no language chosen yet, for the app asks the user
  * for one rather than guess it.
+ *
+ * With `trim` false each value is kept as typed, for a caller that tidies
+ * it itself: a card's text, whose leading spaces may be a Markdown code
+ * block (validateCardContent).
  */
-export function textOfDraft(draft: LangTextDraft): { text: LangText } | { missing: DraftEntry } {
+export function textOfDraft(
+  draft: LangTextDraft,
+  { trim = true }: { trim?: boolean } = {},
+): { text: LangText } | { missing: DraftEntry } {
   if (draft[0]!.value.trim() === "") return { text: {} };
   const written = draft.filter((entry) => entry.value.trim() !== "");
   const missing = written.find((entry) => entry.tag === null);
   if (missing !== undefined) return { missing };
-  return { text: Object.fromEntries(written.map(({ value, tag }) => [tag!, value.trim()])) };
+  return { text: Object.fromEntries(written.map(({ value, tag }) => [tag!, trim ? value.trim() : value])) };
 }
 
 /**
@@ -69,6 +76,17 @@ export function rememberLanguages(
   for (const entry of [...draft].reverse()) {
     if (entry.tag !== null && entry.tag in text) rememberLanguage(kind, entry.tag);
   }
+}
+
+/**
+ * Submits a textarea's form on Ctrl+Enter or ⌘+Enter: Enter itself starts
+ * a new line. Not while an input method composes text (Japanese, say),
+ * whose keys are its own.
+ */
+function submitOnCtrlEnter(event: KeyboardEvent) {
+  if (event.key !== "Enter" || !(event.ctrlKey || event.metaKey) || event.isComposing) return;
+  event.preventDefault();
+  (event.currentTarget as HTMLTextAreaElement).form?.requestSubmit();
 }
 
 /** The id of the picker of a field's entry: a form moves focus to it when the entry needs its language. */
@@ -112,6 +130,15 @@ export function useMissingLanguage(fieldId: string) {
  * stated, and asks for it. `hint`, a field's hint, goes right under the
  * main text, which it is about; the picker sits in a row with the
  * Translations button (or a translation's remove button) under that.
+ *
+ * A `multiline` text is a textarea, where Enter starts a new line, so
+ * Ctrl+Enter (⌘+Enter) submits its form, as Enter does a single line.
+ *
+ * `entryHints` gives each entry's own hints, about that one text (its
+ * Markdown, say): a list right under it, which describes it alone, so a
+ * hint about a translation sits by the translation and is read with it.
+ * They are read as the text is reached, never announced as they change,
+ * which as the user types would be noise.
  */
 export function LangTextField({
   id,
@@ -122,6 +149,7 @@ export function LangTextField({
   multiline = false,
   placeholder,
   hint,
+  entryHints,
   translationsOpen = false,
   required = false,
   disabled = false,
@@ -142,6 +170,8 @@ export function LangTextField({
   placeholder?: string;
   /** Shown under the main text: its hint, listed in `describedBy` by its id. */
   hint?: ComponentChildren;
+  /** Hints about one entry's text, listed under it and describing it. */
+  entryHints?: (entry: DraftEntry) => readonly string[];
   translationsOpen?: boolean;
   required?: boolean;
   disabled?: boolean;
@@ -210,7 +240,13 @@ export function LangTextField({
   function entryFields(entry: DraftEntry, entryLabel: string, control: ComponentChildren) {
     const textId = textIdOf(entry);
     const pickerId = languageButtonId(id, entry);
-    const describers = [languageTextId(pickerId), entry === main ? describedBy : undefined].filter(Boolean);
+    const hints = entryHints?.(entry) ?? [];
+    const hintsId = `${textId}-hints`;
+    const describers = [
+      languageTextId(pickerId),
+      entry === main ? describedBy : undefined,
+      hints.length > 0 ? hintsId : undefined,
+    ].filter(Boolean);
     const props = {
       id: textId,
       lang: partLang(entry.tag ?? undefined),
@@ -226,7 +262,12 @@ export function LangTextField({
       <>
         <label for={textId}>{entryLabel}</label>
         {multiline ? (
-          <textarea ref={entry === main ? (inputRef as { current: HTMLTextAreaElement | null }) : undefined} {...props} />
+          <textarea
+            ref={entry === main ? (inputRef as { current: HTMLTextAreaElement | null }) : undefined}
+            {...props}
+            aria-keyshortcuts="Control+Enter Meta+Enter"
+            onKeyDown={submitOnCtrlEnter}
+          />
         ) : (
           <input
             ref={entry === main ? (inputRef as { current: HTMLInputElement | null }) : undefined}
@@ -235,6 +276,13 @@ export function LangTextField({
           />
         )}
         {entry === main && hint}
+        {hints.length > 0 && (
+          <ul id={hintsId} class="hint field-hint entry-hints">
+            {hints.map((text) => (
+              <li key={text}>{text}</li>
+            ))}
+          </ul>
+        )}
         <div class="language-controls">
           <LanguagePicker
             id={pickerId}

@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { join } from "node:path";
 import { defineConfig } from "vitest/config";
 import preact from "@preact/preset-vite";
@@ -61,6 +62,10 @@ export default defineConfig({
     alias: {
       react: "preact/compat",
       "react-dom": "preact/compat",
+      // The Markdown parser's entity decoder has a browser build that decodes
+      // by writing to an element's innerHTML. Its plain one, a lookup table,
+      // keeps the bundle free of HTML sinks (docs/markdown.md, src/build.test.ts).
+      "decode-named-character-reference": createRequire(import.meta.url).resolve("decode-named-character-reference"),
     },
   },
   test: {

@@ -26,7 +26,7 @@ import { createSolidReviewStateRepository } from "@solid-memo/solid/solidReviewS
 import { createSolidWebIdDocumentRepository } from "@solid-memo/solid/solidWebIdDocumentRepository";
 
 const SERVERS = inject("solidServers");
-const RELEASE = "https://solid-memo.test/decks/solid-fundamentals/v1.ttl";
+const RELEASE = "https://solid-memo.test/decks/solid/v1.ttl";
 const at = (id: string) => `${RELEASE}#${id}`;
 
 const question = (id: string, back: string, wrong: string[]): LibraryCard => ({

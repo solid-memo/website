@@ -452,3 +452,61 @@ describe("moving the deck list's rows", () => {
     expect(getComputedStyle(document.querySelector("li")!).pointerEvents).toBe("none");
   });
 });
+
+describe("Markdown from data", () => {
+  it("scrolls a code block sideways, its white space as written, in the mono stack on the sunken surface", () => {
+    document.body.innerHTML = `<div class="md"><div class="md-code"><pre class="md-region" tabindex="0"><code>x</code></pre></div></div>`;
+    const pre = document.querySelector("pre")!;
+    expect(lastMatching(pre, "white-space")).toBe("pre");
+    expect(lastMatching(pre, "overflow-x")).toBe("auto");
+    expect(lastMatching(pre, "background")).toBe("var(--surface-sunken)");
+    expect(lastMatching(document.querySelector("code")!, "font-family")).toBe("var(--font-mono)");
+    document.body.innerHTML = `<p><code class="md-inline-code">x</code></p><details class="error-detail"><code>y</code></details>`;
+    const [span, detail] = document.querySelectorAll("code");
+    expect(lastMatching(span!, "font-family")).toBe("var(--font-mono)");
+    expect(lastMatching(span!, "background")).toBe("var(--surface-sunken)");
+    expect(lastMatching(detail!, "font-family")).toBeUndefined();
+  });
+
+  it("scrolls a table sideways in its region, the table itself no longer clipped", () => {
+    document.body.innerHTML = `<div class="md"><div class="md-table md-region" tabindex="0"><table><tr><th class="md-align-right">x</th></tr></table></div></div>`;
+    expect(lastMatching(document.querySelector(".md-table")!, "overflow-x")).toBe("auto");
+    expect(lastMatching(document.querySelector("table")!, "overflow")).toBe("visible");
+    expect(lastMatching(document.querySelector("th")!, "text-align")).toBe("right");
+    expect(lastMatching(document.querySelector("th")!, "text-transform")).toBe("none");
+  });
+
+  it("rings a code block or table region taking the focus", () => {
+    const style = focused(`<div class="md"><pre class="md-region" tabindex="0"><code>x</code></pre></div>`, "pre");
+    expect(style.outlineStyle).toBe("solid");
+  });
+
+  it("sizes a face's own paragraph as the face, and Markdown blocks in it at a reading size", () => {
+    document.body.innerHTML = `<div class="card-face card-front card-question"><p>big</p><div class="md"><p>read</p></div></div>`;
+    const [own, inBlocks] = document.querySelectorAll("p");
+    expect(lastMatching(own!, "font-weight")).toBe("700");
+    expect(lastMatching(inBlocks!, "font-weight")).toBeUndefined();
+    expect(lastMatching(document.querySelector(".md")!, "font-size")).toBe("1.15rem");
+    expect(lastMatching(document.querySelector(".md")!, "text-align")).toBe("left");
+  });
+
+  it("keeps a note's blocks as quiet as its paragraph, but left-aligned", () => {
+    document.body.innerHTML = `<div class="card-face card-back"><p class="card-note">one</p><div class="md card-note"><ul><li>two</li></ul></div></div>`;
+    const [paragraph, blocks] = document.querySelectorAll(".card-note");
+    expect(lastMatching(paragraph!, "text-align")).toBe("center");
+    expect(lastMatching(blocks!, "text-align")).toBe("left");
+    expect(lastMatching(blocks!, "font-size")).toBe("0.95rem");
+  });
+
+  it("leaves Markdown outside a card's face at the size of the place it is in", () => {
+    document.body.innerHTML = `<div class="course-why"><div class="md"><p>why</p></div></div>`;
+    expect(lastMatching(document.querySelector(".md")!, "font-size")).toBeUndefined();
+  });
+
+  it("spans a chapter's description in blocks across its card, as a paragraph does", () => {
+    document.body.innerHTML = `<li class="course-chapter"><h3>One</h3><span class="course-state">Done</span><div class="md"><ul><li>a</li></ul></div></li>`;
+    const blocks = document.querySelector(".md")!;
+    expect(lastMatching(blocks, "grid-column")).toBe("1 / -1");
+    expect(lastMatching(blocks, "font-size")).toBeUndefined();
+  });
+});

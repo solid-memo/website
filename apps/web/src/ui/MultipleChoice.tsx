@@ -1,7 +1,7 @@
 import { useId, useRef, useState } from "preact/hooks";
 import type { LangText } from "@solid-memo/domain/langText";
+import { DataLine } from "./DataText";
 import { useI18n } from "./i18n";
-import { ReaderText } from "./ReaderText";
 
 /** One option offered: its key (domain/course.ts Choice) and its text. */
 export interface ChoiceOption {
@@ -22,21 +22,30 @@ export interface ChoiceOption {
  * Once checked (`answered`), the options stay, fixed, each marked in
  * words as well as colour: the right answer, and the one chosen when it
  * was not.
+ *
+ * Options in Markdown (`markdown`, the card's format) show as one line
+ * of it each, for a label holds no blocks or links (DataLine).
  */
 export function MultipleChoice({
   labelledBy,
+  describedBy,
   choices,
   answered,
   busy,
+  markdown = false,
   onCheck,
 }: {
-  /** Id of the question the options answer. */
+  /** Id of the question the options answer, or of its name. */
   labelledBy: string;
+  /** Id of the whole question, when `labelledBy` names it only. */
+  describedBy?: string;
   choices: readonly ChoiceOption[];
   /** Once checked: the option chosen and the right one. */
   answered?: { chosen: string; correct: string };
   /** The answer is being saved. */
   busy: boolean;
+  /** The options are written in Markdown. */
+  markdown?: boolean;
   onCheck: (key: string) => void;
 }) {
   const { t } = useI18n();
@@ -67,7 +76,7 @@ export function MultipleChoice({
 
   return (
     <div class="multiple-choice" onKeyDown={onKeyDown}>
-      <div ref={groupRef} role="radiogroup" aria-labelledby={labelledBy} class="choices">
+      <div ref={groupRef} role="radiogroup" aria-labelledby={labelledBy} aria-describedby={describedBy} class="choices">
         {choices.map((choice, index) => {
           const right = fixed && choice.key === answered.correct;
           const wrong = fixed && choice.key === answered.chosen && !right;
@@ -89,7 +98,7 @@ export function MultipleChoice({
                 {index + 1}
               </span>
               <span class="choice-text">
-                <ReaderText text={choice.text} breaks />
+                <DataLine text={choice.text} markdown={markdown} />
               </span>
               {right && <span class="choice-mark">{t("multipleChoice.right")}</span>}
               {wrong && <span class="choice-mark">{t("multipleChoice.chosen")}</span>}

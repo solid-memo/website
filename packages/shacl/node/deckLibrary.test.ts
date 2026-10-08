@@ -11,6 +11,7 @@ import {
   INDEX_URL,
   loadValidators,
   main,
+  markdownProblems,
   metadataProblems,
   releasesOf,
   run,
@@ -449,6 +450,17 @@ describe("validateLibrary", () => {
     ]);
   });
 
+  it("names text in Markdown that would not show as written", async () => {
+    const outline = OUTLINE.replace(
+      'solid-memo:front "Question q-1"@en ;',
+      'solid-memo:front "Question <q-1>"@en ;\n    solid-memo:textFormat solid-memo:markdown ;',
+    );
+    const marked = [course(1, outline)];
+    expect(await validateLibrary(marked, buildIndex(marked), validators)).toEqual([
+      `decks/solid/v1.ttl: <#q-1> solid-memo:front@en has raw HTML, "<q-1>", which is shown as its source: write it as code, or escape its "<" (\\<).`,
+    ]);
+  });
+
   it("names a release that drops a chapter, step or distractor of the version before it, and accepts one that retires them", async () => {
     const v1 = [
       chapter("ch-1", 0),
@@ -707,6 +719,109 @@ describe("courseProblems", () => {
         ].join(""),
       ),
     ).toEqual([`${L}: chapter <#ch-1> has no step in use; a chapter in use has at least one step that is not retired.`]);
+  });
+});
+
+describe("markdownProblems", () => {
+  const L = "decks/solid/v1.ttl";
+  const MD = " ;\n    solid-memo:textFormat solid-memo:markdown";
+  const problemsOf = (outline: string) => markdownProblems(course(1, outline));
+  /** A marked card with `fields` (Turtle) beside its front and back, and its two distractors. */
+  const marked = (id: string, fields: string, distractors = [distractor(`${id}-a`), distractor(`${id}-b`)]) =>
+    question(id, distractors.length === 0 ? [] : [`${id}-a`, `${id}-b`], `${MD}${fields}`) + distractors.join("");
+
+  it("accepts Markdown that shows as written, and finds nothing in text that is not marked", () => {
+    const good = [
+      chapter("ch-1", 0, `${MD} ;\n    dcterms:description "Read *this* first, from [the spec](https://solidproject.org/TR/protocol)."@en`),
+      step(
+        "s-1",
+        "ch-1",
+        0,
+        ["q-1"],
+        `${MD} ;\n    solid-memo:theory """Create with \`PUT\`:\n\n\`\`\`http\nPUT /notes/a HTTP/1.1\n\`\`\`\n\n| Method | Target |\n|---|---|\n| \`PUT\` | the resource |"""@en`,
+      ),
+      marked("q-1", ` ;\n    solid-memo:backNote "See [solidproject.org](https://solidproject.org/)."@en`),
+      question("q-2", [], `${MD} ;\n    solid-memo:backLabel "Status"@en`, `solid-memo:back """\`201\`\n\nor \`200\`"""@en ;`),
+      step("s-2", "ch-1", 1, ["q-3"], ` ;\n    solid-memo:theory "git clone <url> &aring; [x](http://x.example)"@en`),
+      question("q-3", [], ` ;\n    solid-memo:textFormat solid-memo:plainText ;\n    solid-memo:frontNote "<b>&aring;</b>"@en`),
+      // Only a marked card's distractors are Markdown, and only the fields of docs/markdown.md: no title, no picture's description.
+      question("q-4", ["q-4-a", "q-4-b"]),
+      distractor("q-4-a", ` ;\n    solid-memo:distractorNote "<b>&aring;</b>"@en`, `"<b>"@en`),
+      distractor("q-4-b", "", `"""&aring;\n\n- a"""@en`),
+      chapter("ch-2", 1, `${MD} ;\n    dcterms:title "<x> &aring;"@en`),
+      marked("q-5", ` ;\n    solid-memo:frontImageDescription "<x> &aring;"@en ;\n    solid-memo:backImageDescription "&aring;"@en`),
+    ].join("");
+    expect(problemsOf(good)).toEqual([]);
+    for (const r of LIBRARY) expect(markdownProblems(r)).toEqual([]);
+  });
+
+  it("names, field by field, what a card's text, its distractors', a step's theory and a chapter's description would not show as meant", () => {
+    const bad = [
+      chapter("ch-1", 0, `${MD} ;\n    dcterms:description "Run \`ls‮\`."@en`),
+      step("s-1", "ch-1", 0, ["q-1"], `${MD} ;\n    solid-memo:theory "See [example.org](https://evil.example/) [it](https://x.example/\u200B)."@en`),
+      marked(
+        "q-1",
+        ` ;\n    solid-memo:frontNote "&aring;"@en ;\n    solid-memo:backNote "![a](https://a.example/a.png) [b](http://b.example)"@en`,
+        [
+          distractor("q-1-a", ` ;\n    solid-memo:distractorNote "[c](mailto:c@c.example)"@en`, `"<ex:title>"@en`),
+          distractor("q-1-b", "", `"""a\n\nb"""@en`),
+        ],
+      ),
+      question("q-2", [], `${MD} ;\n    solid-memo:backLabel "[d](https://d.example)"`, `solid-memo:back "git clone <url>"@en , "x"@sv ;`),
+    ].join("");
+    expect(problemsOf(bad)).toEqual([
+      `${L}: <#q-1> solid-memo:frontNote@en has the character reference &aring;, which Markdown shows decoded: write it as code, or escape its "&" (\\&aring;).`,
+      `${L}: <#q-1> solid-memo:backNote@en has a picture, "![a](https://a.example/a.png)", which is never shown, only its description: a card shows a picture by solid-memo:frontImage or backImage.`,
+      `${L}: <#q-1> solid-memo:backNote@en links to "http://b.example", which the app does not follow: only an https: address without a user name or password is.`,
+      `${L}: <#q-1-a> solid-memo:distractorText@en has a link, "<ex:title>", where none may be (a card's sides, its label and its options): an autolink loses its angle brackets; write it as code to show it as written.`,
+      `${L}: <#q-1-a> solid-memo:distractorNote@en links to "mailto:c@c.example", which the app does not follow: only an https: address without a user name or password is.`,
+      `${L}: <#q-1-b> solid-memo:distractorText@en is an option but not one paragraph: the right option and the wrong ones must look alike.`,
+      `${L}: <#q-2> solid-memo:back@en has raw HTML, "<url>", which is shown as its source: write it as code, or escape its "<" (\\<).`,
+      `${L}: <#q-2> solid-memo:backLabel has a link, "[d](https://d.example)", where none may be (a card's sides, its label and its options): write it as code to show it as written.`,
+      `${L}: <#s-1> solid-memo:theory@en has link text that reads as the host name or address "example.org", but the link leads to evil.example: name that host, or word the text otherwise (a file's name, such as package.json, reads as a host name too).`,
+      `${L}: <#s-1> solid-memo:theory@en has ⟨U+200B⟩ in a link, which would show as markers: such controls make text read other than it is.`,
+      `${L}: <#ch-1> dcterms:description@en has ⟨U+202E⟩ in code, which would show as markers: such controls make text read other than it is.`,
+    ]);
+  });
+
+  it("holds the back of a card with distractors to one paragraph, as its options", () => {
+    expect(problemsOf(marked("q-1", "").replace(`solid-memo:back "Answer q-1"@en`, `solid-memo:back "- a"@en`))).toEqual([
+      `${L}: <#q-1> solid-memo:back@en is an option but not one paragraph: the right option and the wrong ones must look alike.`,
+    ]);
+  });
+
+  it("names text the app would not read as Markdown, or would show in part as its source", () => {
+    const theory = (id: string, position: number, text: string) =>
+      step(id, "ch-1", position, ["q-1"], `${MD} ;\n    solid-memo:theory ${JSON.stringify(text)}@en`);
+    const outline = [
+      chapter("ch-1", 0),
+      theory("s-1", 0, "a".repeat(20_001)),
+      theory("s-2", 1, "*".repeat(2_001)),
+      theory("s-3", 2, `${"> ".repeat(8)}*a*`),
+      theory("s-4", 3, `|${" a |".repeat(21)}\n|${"-|".repeat(21)}`),
+    ].join("");
+    expect(problemsOf(outline)).toEqual([
+      `${L}: <#s-1> solid-memo:theory@en is 20001 characters, more than the 20000 the app reads as Markdown: it would be shown as plain text. Make it shorter.`,
+      `${L}: <#s-2> solid-memo:theory@en nests or marks up more than the app reads as Markdown (docs/markdown.md, Limits): it would be shown as plain text.`,
+      `${L}: <#s-3> solid-memo:theory@en nests "*a*" past the 8 levels of blocks and markup the app reads (each quote, list item, paragraph, emphasis and link is one): it would be shown as its source.`,
+      `${L}: <#s-4> solid-memo:theory@en has a table of more than 20 columns or 2000 cells: it would be shown as its source.`,
+    ]);
+  });
+
+  it("names a text format on what has none of its own, and one that is no concept of solid-memo:TextFormats", () => {
+    const outline = [
+      chapter("ch-1", 0),
+      step("s-1", "ch-1", 0, ["q-1"], ` ;\n    solid-memo:textFormat <https://example.org/rst>`),
+      question("q-1", ["q-1-a", "q-1-b"]),
+      distractor("q-1-a", MD),
+      distractor("q-1-b"),
+      "\n<> solid-memo:textFormat solid-memo:markdown .\n",
+    ].join("");
+    expect(problemsOf(outline)).toEqual([
+      `${L}: <#s-1> states solid-memo:textFormat <https://example.org/rst>, no concept of solid-memo:TextFormats: the app shows its text as plain text.`,
+      `${L}: <#q-1-a> states solid-memo:textFormat, which only a card, a step or a chapter does: a distractor's text is written as its card's.`,
+      `${L}: <https://solid-memo.com/decks/solid/v1.ttl> states solid-memo:textFormat, which only a card, a step or a chapter does: its text is plain text.`,
+    ]);
   });
 });
 

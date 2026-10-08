@@ -1,10 +1,12 @@
 import { AppError } from "./appError";
 import { describe, expect, it } from "vitest";
+import { SM } from "@solid-memo/vocab/vocab.generated";
 import {
   cardLabel,
   cardLabelText,
   isDeckDirection,
   promptSides,
+  isMarkdown,
   promptsOf,
   studyDirections,
   validateCardContent,
@@ -23,6 +25,36 @@ describe("validateCardContent", () => {
         backImageUrl: "",
       }),
     ).toEqual({ ok: true, content: { front: { ja: "水" }, back: { en: "water" } } });
+  });
+
+  it("keeps the card's text format", () => {
+    const MARKDOWN = "https://solid-memo.com/ns/vocab/v1.ttl#markdown";
+    expect(validateCardContent({ front: { en: "**a**" }, back: { en: "b" }, textFormat: MARKDOWN })).toEqual({
+      ok: true,
+      content: { front: { en: "**a**" }, back: { en: "b" }, textFormat: MARKDOWN },
+    });
+  });
+
+  it("keeps the spaces a formatted text starts with, a Markdown code block, through an edit of another field", () => {
+    const MARKDOWN = "https://solid-memo.com/ns/vocab/v1.ttl#markdown";
+    const PLAIN = "https://solid-memo.com/ns/vocab/v1.ttl#plainText";
+    const saved = { front: { "": "    code\n" }, back: { en: "b" }, textFormat: MARKDOWN };
+    // The editor states no text format: the saved card's is kept, and with it the code block.
+    expect(validateCardContent({ front: { "": "\n  \n    code  \n" }, back: { en: "the b" } }, saved)).toEqual({
+      ok: true,
+      content: { front: { "": "    code" }, back: { en: "the b" } },
+    });
+    expect(
+      validateCardContent({ front: { en: "    code" }, back: { en: " b" }, backNote: { en: "\n    note" }, textFormat: MARKDOWN }),
+    ).toEqual({
+      ok: true,
+      content: { front: { en: "    code" }, back: { en: " b" }, backNote: { en: "    note" }, textFormat: MARKDOWN },
+    });
+    // Plain text, stated or not, is trimmed as ever.
+    expect(validateCardContent({ front: { en: "    code" }, back: { en: "b" }, textFormat: PLAIN })).toEqual({
+      ok: true,
+      content: { front: { en: "code" }, back: { en: "b" }, textFormat: PLAIN },
+    });
   });
 
   it("keeps a note under the answer, trimmed, and drops an empty one", () => {
@@ -265,6 +297,20 @@ describe("deck directions", () => {
       question: { side: "front", text: { "": "Sweden" }, imageUrl: FLAG },
       answer: { side: "back", text: { "": "Stockholm" } },
     });
+    const marked = { ...sweden, textFormat: SM.markdown };
+    expect(promptSides({ card: marked, direction: "back-to-front" })).toEqual({
+      question: { side: "back", text: { "": "Stockholm" }, imageUrl: FLAG, textFormat: SM.markdown },
+      answer: { side: "front", text: { "": "Sweden" }, textFormat: SM.markdown },
+    });
+  });
+});
+
+describe("isMarkdown", () => {
+  it("is true of sm:markdown alone", () => {
+    expect(isMarkdown(SM.markdown)).toBe(true);
+    expect(isMarkdown(SM.plainText)).toBe(false);
+    expect(isMarkdown("https://example.org/formats#asciidoc")).toBe(false);
+    expect(isMarkdown(undefined)).toBe(false);
   });
 });
 

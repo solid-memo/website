@@ -3,6 +3,7 @@ import { fireEvent, render, screen } from "@testing-library/preact";
 import { StudyScreen } from "./StudyScreen";
 import { I18nProvider } from "./i18n";
 import type { Card, Prompt } from "@solid-memo/domain/deck";
+import { SM } from "@solid-memo/vocab/vocab.generated";
 
 const card: Card = {
   id: "card-1",
@@ -292,6 +293,27 @@ describe("StudyScreen", () => {
     fireEvent.keyDown(enlarge, { key: "Escape" });
     expect(enlarge).toHaveAttribute("aria-expanded", "false");
     expect(screen.getByText("water")).toBeInTheDocument();
+    expect(props.onAnswer).not.toHaveBeenCalled();
+  });
+
+  it("leaves the keys on a code block or link in a card in Markdown to them", () => {
+    const { props } = renderScreen({
+      prompt: {
+        card: {
+          ...card,
+          textFormat: SM.markdown,
+          front: { en: "Which [command](https://git-scm.com/docs)?\n\n```\ngit diff --staged\n```" },
+          back: { en: "`git diff --staged`" },
+        },
+        direction: "front-to-back",
+      },
+    });
+    fireEvent.keyDown(screen.getByRole("region", { name: "Code" }), { key: " " });
+    fireEvent.keyDown(screen.getByRole("link", { name: /command/ }), { key: " " });
+    expect(screen.queryByRole("button", { name: "Reveal" })).toBeInTheDocument();
+    fireEvent.keyDown(document.activeElement!, { key: " " });
+    expect(screen.queryByRole("button", { name: "Reveal" })).toBeNull();
+    fireEvent.keyDown(screen.getByRole("region", { name: "Code" }), { key: "4" });
     expect(props.onAnswer).not.toHaveBeenCalled();
   });
 

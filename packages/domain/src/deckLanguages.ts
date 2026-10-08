@@ -1,6 +1,6 @@
 import type { CardContent } from "./deck";
 import { usualTag, type LangText } from "./langText";
-import { sameContent } from "./libraryUpgrade";
+import { untouched } from "./libraryUpgrade";
 
 /**
  * What a deck's cards say of their languages: the tags they usually state
@@ -54,13 +54,15 @@ export function deckLanguages(cards: readonly DeckCard[], release: readonly Deck
 /**
  * The cards the user may settle the languages of: every card but one
  * still as its library release has it (`release`, the release an
- * imported deck was copied from), which is the library's to change.
+ * imported deck was copied from), which is the library's to change; one
+ * that only lost the release's text format too (see untouched), which
+ * the next release brings back.
  */
 export function unlikeRelease<T extends DeckCard>(cards: readonly T[], release: readonly DeckCard[] = []): T[] {
   const released = new Map(release.map((card) => [card.id, card]));
   return cards.filter((card) => {
     const theirs = released.get(card.id);
-    return theirs === undefined || !sameContent(card, theirs);
+    return theirs === undefined || !untouched(card, theirs);
   });
 }
 

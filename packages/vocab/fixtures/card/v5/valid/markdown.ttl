@@ -1,0 +1,38 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix schema:     <https://schema.org/> .
+
+<#staged>
+    a solid-memo:Card ;
+    solid-memo:textFormat solid-memo:markdown ;
+    solid-memo:front "Which Git command shows **staged** changes?"@en ,
+                     "Vilket Git-kommando visar **köade** ändringar?"@sv ;
+    solid-memo:back "`git diff --staged`"@zxx ;
+    solid-memo:backNote """Without `--staged`, `git diff` compares the working tree with the index:
+
+| Command | Compares |
+|---|---|
+| `git diff` | working tree and index |
+| `git diff --staged` | index and `HEAD` |"""@en ;
+    solid-memo:distractor <#staged-d1> ;
+    solid-memo:formatVersion 5 .
+
+<#staged-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:distractorText "`git status`"@zxx ;
+    solid-memo:distractorNote "That lists the *files*, not their changes."@en ;
+    solid-memo:formatVersion 1 .
+
+<#plain>
+    a solid-memo:Card ;
+    solid-memo:textFormat solid-memo:plainText ;
+    solid-memo:front "2 * 3 * 4"@zxx ;
+    solid-memo:back "24"@zxx ;
+    solid-memo:formatVersion 5 .
+
+<#later>
+    a solid-memo:Card ;
+    solid-memo:textFormat <https://example.org/formats#asciidoc> ;
+    solid-memo:front "A format this app does not know yet"@en ;
+    solid-memo:back "Read as plain text"@en ;
+    solid-memo:formatVersion 5 .

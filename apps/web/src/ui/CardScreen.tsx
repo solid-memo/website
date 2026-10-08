@@ -1,5 +1,6 @@
 import { useLayoutEffect, useMemo, useRef, useState } from "preact/hooks";
-import { cardLabel, type Card, type CardContent } from "@solid-memo/domain/deck";
+import { isMarkdown, type Card, type CardContent } from "@solid-memo/domain/deck";
+import { cardName } from "./DataText";
 import type { DeckLanguages } from "@solid-memo/domain/deckLanguages";
 import type { LangText } from "@solid-memo/domain/langText";
 import {
@@ -62,13 +63,14 @@ export function CardScreen({
 
   // What is known of the deck (its cards' languages) may come
   // after the page opens: an editor not yet touched — no text, no
-  // picture's URL changed — starts again from it.
+  // picture's URL, nor Markdown switched — starts again from it.
   const started = useRef(false);
   useLayoutEffect(() => {
     const untouched =
       draft.touched.length === 0 &&
       draft.frontImageUrl === (card.frontImageUrl ?? "") &&
-      draft.backImageUrl === (card.backImageUrl ?? "");
+      draft.backImageUrl === (card.backImageUrl ?? "") &&
+      draft.markdown === isMarkdown(card.textFormat);
     if (started.current && untouched) setDraft(startDraft());
     started.current = true;
   }, [hints]);
@@ -98,7 +100,7 @@ export function CardScreen({
   function handleRemove() {
     if (busy) return;
     if (
-      window.confirm(t("card.removeConfirm", { card: cardLabel(card, readerText) }))
+      window.confirm(t("card.removeConfirm", { card: cardName(card, readerText) }))
     ) {
       onRemove();
     }
@@ -119,6 +121,7 @@ export function CardScreen({
           imageUrl={card.frontImageUrl}
           imageDescription={card.frontImageDescription}
           note={card.frontNote}
+          textFormat={card.textFormat}
         />
         <CardFace
           side="back"
@@ -127,12 +130,14 @@ export function CardScreen({
           imageDescription={card.backImageDescription}
           label={card.backLabel}
           note={card.backNote}
+          textFormat={card.textFormat}
         />
       </div>
       {card.retired && <RetiredNotice />}
       <form onSubmit={handleSubmit} noValidate>
         <CardContentFields
           draft={draft}
+          saved={card}
           busy={busy}
           invalid={invalid}
           suggestions={hints.suggestions}

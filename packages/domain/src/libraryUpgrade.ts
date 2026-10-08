@@ -4,6 +4,7 @@ import {
   type CardContent,
   type Deck,
   type DeckDirection,
+  textFormatOf,
 } from "./deck";
 import type { LibraryCard, LibraryDeckContent, LibraryRelease } from "./library";
 import { isDefaultDeckDescription } from "./dcat";
@@ -34,7 +35,11 @@ export interface LibraryUpgradePlan {
   notes: { version: string; notes: string }[];
   /** Cards the library added; retired ones too, kept retired, so a later release can bring them back. */
   add: LibraryCard[];
-  /** Cards the library changed that the user has not, as the release has them, retired or not. */
+  /**
+   * Cards the library changed that the user has not, as the release has
+   * them, retired or not; and cards the library left as they were whose
+   * copy lost their text format (see untouched), which it brings back.
+   */
   change: LibraryCard[];
   /** Cards the library retired: kept with their review state, as the user has them, but no longer studied. */
   retire: Card[];
@@ -138,10 +143,12 @@ export function withReleaseLanguages(deck: Deck, release: LibraryDeckContent): D
 
 /**
  * Whether two cards say the same, on both sides, with the same wrong
- * options (distractors, in order); ids, versions and retirement aside.
+ * options (distractors, in order), written the same way (text format,
+ * none being plain text); ids, versions and retirement aside.
  */
 export function sameContent(a: CardContent, b: CardContent): boolean {
   return (
+    textFormatOf(a) === textFormatOf(b) &&
     sameDistractors(a, b) &&
     sameText(a.front, b.front) &&
     sameText(a.back, b.back) &&
@@ -153,6 +160,18 @@ export function sameContent(a: CardContent, b: CardContent): boolean {
     sameText(a.backLabel, b.backLabel) &&
     sameText(a.backNote, b.backNote)
   );
+}
+
+/**
+ * Whether the user has left the copy's card as the release it came from
+ * has it: the same content, or the same but for a text format the copy
+ * lacks. An app that predates text formats drops the marker as it
+ * imports or writes the card, which is not the user's doing; a copy
+ * that states one of its own (`sm:plainText` against a Markdown
+ * release, Markdown switched off) was changed on purpose.
+ */
+export function untouched(mine: CardContent, release: CardContent): boolean {
+  return sameContent(mine.textFormat === undefined ? { ...mine, textFormat: release.textFormat } : mine, release);
 }
 
 /** Whether two cards have the same distractors, matched by id: RDF keeps no order among a card's sm:distractor. */
@@ -213,12 +232,15 @@ export function planLibraryUpgrade({
     const next = after.get(old.id);
     if (mine === undefined) continue;
     if (next === undefined) {
-      (sameContent(mine, old) ? remove : kept).push(mine);
+      (untouched(mine, old) ? remove : kept).push(mine);
       continue;
     }
     if (!sameContent(old, next)) {
-      if (sameContent(mine, old)) change.push(next);
+      if (untouched(mine, old)) change.push(next);
       else kept.push(mine);
+    } else if (!sameContent(mine, next) && untouched(mine, old)) {
+      // The copy lost the release's text format: the newer release brings it back.
+      change.push(next);
     }
     const retired = next.retired === true;
     if (retired !== (old.retired === true) && retired !== (mine.retired === true)) {

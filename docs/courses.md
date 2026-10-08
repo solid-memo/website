@@ -36,40 +36,50 @@ in [useCases.ts](../packages/application/src/useCases.ts).
 - **A chapter** has a title and description, and may name cards asked
   only in its final review (`sm:reviewQuestion`), questions that combine
   its steps.
+- **Text is plain unless its subject says otherwise.** A step, a
+  chapter and a card may each state `sm:textFormat sm:markdown`
+  (vocabulary 1.15): then the step's theory, the chapter's description
+  (never its title) or the card's texts and its distractors' are
+  Markdown ([vocab.md](vocab.md#text-formats)).
 
 ```turtle
 <> a solid-memo:Deck , dcat:Dataset , schema:Course ;
     solid-memo:studyDirection solid-memo:frontToBack ; … .
 
-<#ch-linked-data> a solid-memo:Chapter , schema:Syllabus ;
+<#ch-why-solid> a solid-memo:Chapter , schema:Syllabus ;
     solid-memo:formatVersion 1 ;
     schema:isPartOf <> ;
     schema:position 0 ;
-    dcterms:title "Linked data and IRIs"@en , "Länkade data och IRI:er"@sv ;
-    solid-memo:reviewQuestion <#q-cafe-iri> .          # asked only in the final review
+    dcterms:title "Why Solid"@en ;
+    dcterms:description "Why Solid exists: the data-silo problem, …"@en ;
+    solid-memo:reviewQuestion <#q-why-solid-r01> , … .  # asked only in the final review
 
-<#ch-linked-data-2> a solid-memo:Step , schema:LearningResource ;
+<#ch-why-solid-2> a solid-memo:Step , schema:LearningResource ;
     solid-memo:formatVersion 1 ;
-    schema:isPartOf <#ch-linked-data> ;
+    schema:isPartOf <#ch-why-solid> ;
     schema:position 1 ;
-    solid-memo:theory "In RDF, every IRI denotes something in the world …"@en , "…"@sv ;
-    solid-memo:checkedBy <#q-iri-denotes> .
+    solid-memo:textFormat solid-memo:markdown ;
+    solid-memo:theory """## Separation creates choice
 
-<#q-iri-denotes> a solid-memo:Card ;
+When one company holds both your data and the app, …"""@en ;
+    solid-memo:checkedBy <#q-why-solid-2a> , <#q-why-solid-2b> .
+
+<#q-why-solid-2a> a solid-memo:Card ;
     solid-memo:formatVersion 5 ;
-    solid-memo:front "In RDF, what can an IRI denote?"@en , "…"@sv ;
-    solid-memo:back "Anything: a person, a city, an idea or a document"@en , "…"@sv ;
-    solid-memo:backNote "What an IRI denotes is called a resource …"@en , "…"@sv ;
-    solid-memo:distractor <#q-iri-denotes-d1> , <#q-iri-denotes-d2> , <#q-iri-denotes-d3> .
+    solid-memo:front "In the argument for Solid, why would separating data storage from apps create more competition?"@en ;
+    solid-memo:back "Storage and apps can each be chosen and replaced separately"@en ;
+    solid-memo:backNote "Once data does not belong to the app, users can switch apps …"@en ;
+    solid-memo:distractor <#q-why-solid-2a-d1> , <#q-why-solid-2a-d2> , <#q-why-solid-2a-d3> .
 
-<#q-iri-denotes-d1> a solid-memo:Distractor , schema:Answer ;
+<#q-why-solid-2a-d1> a solid-memo:Distractor , schema:Answer ;
     solid-memo:formatVersion 1 ;
-    solid-memo:distractorText "Only a document that can be downloaded"@en , "…"@sv ;
-    solid-memo:distractorNote "Documents are resources too, but an IRI can also name people …"@en , "…"@sv .
+    solid-memo:distractorText "Users can install more apps on the same device"@en ;
+    solid-memo:distractorNote "How many apps fit on a device has nothing to do with it; …"@en .
 ```
 
 [`decks/solid-fundamentals/v1.ttl`](../decks/solid-fundamentals/v1.ttl),
-the first course, is the complete example. The terms are in
+the first course, written in Markdown, is the complete example. The
+terms are in
 [vocab.md](vocab.md#courses), the shapes in [shapes.md](shapes.md), and
 the rules the shapes cannot state in
 [deck-library.md](deck-library.md#course-rules).
@@ -80,7 +90,8 @@ the rules the shapes cannot state in
   which the library check refuses, is broken by fragment id.
 - RDF keeps no order among the values of one predicate. So a step's
   questions and a chapter's review questions are ordered by fragment id.
-  A release orders them by how it names them (`q-iri-1`, `q-iri-2`).
+  A release orders them by how it names them (`q-why-solid-2a`,
+  `q-why-solid-2b`).
 - The final review has no subject of its own. It asks every card the
   chapter's steps check, plus its review questions, each once, shuffled
   (`finalReviewQueue`).
@@ -122,8 +133,8 @@ new type-index entries ([data-model.md](data-model.md#courses)):
   - Only a chapter's completion is written: the final review passed.
   - A completion counts by the chapter's fragment id, so it holds in
     whichever release the deck follows: an upgrade from `v1.ttl` to
-    `v2.ttl` keeps `sm:completedChapter <v1.ttl#ch-…>` and its chapter
-    stays done.
+    `v2.ttl` keeps `sm:completedChapter <v1.ttl#ch-…>`, and a chapter
+    `v2.ttl` keeps under that id stays done.
 
 ## The learner's flow
 
@@ -207,17 +218,43 @@ these additions:
    Write wrong options that are plausible and of the same form as the
    right one, never "all of the above".
 5. Name the subjects so their order reads from the ids: chapters
-   `ch-<topic>`, steps `ch-<topic>-<n>`, questions `q-<topic>`,
-   distractors `q-<topic>-d<n>`.
-6. Keep the attribution and the review rounds as every authored deck
+   `ch-<topic>`, steps `ch-<topic>-<n>`, a step's questions
+   `q-<topic>-<n><letter>` (`q-why-solid-2a`, `q-why-solid-2b`), review
+   questions `q-<topic>-r<nn>` (`q-why-solid-r01`) and distractors
+   `<question>-d<n>` (`q-why-solid-2a-d1`).
+6. To write theory, a chapter's description or a question in Markdown
+   (code, tables, lists), state `sm:textFormat sm:markdown` on that
+   step, chapter or card ([deck-library.md](deck-library.md#authoring-markdown)).
+   A question's options are then one paragraph each, its back included,
+   and hold no links.
+7. Keep the attribution and the review rounds as every authored deck
    does ([deck-library.md](deck-library.md#provenance)).
-7. `npm run format:turtle`, then `npm run library`, which runs the
-   course checks ([deck-library.md](deck-library.md#course-rules)).
+8. `npm run format:turtle`, then `npm run library`, which runs the
+   course checks ([deck-library.md](deck-library.md#course-rules)) and
+   the Markdown checks ([deck-library.md](deck-library.md#markdown-rules)).
 
 **A new version** follows the library's rule. Nothing published is
 removed: a chapter, step, card or distractor that should go is retired
 (`owl:deprecated true`). Ids are never reused, since learners' decks
-keep them. Each learner's deck follows the release it was copied or
+keep them:
+
+- **A chapter keeps its id** only while it teaches what it did. One that
+  grows into far more gets a new id, and the old one is retired;
+  otherwise a learner who completed it would count as done with steps
+  they never saw, and the course would not lead them there.
+- **A step's id carries nothing over**: its progress comes from its
+  cards.
+- **A card asked again keeps its id**, and with it the learners' review
+  history, even when its text is rewritten.
+- **A distractor keeps its id only while it is the same wrong answer**,
+  since a learner's history names the option they chose by its id
+  (`sm:chosenDistractor`). A wrong answer that changed is retired, and
+  the new one gets a new id (`<question>-d4`, …).
+- **The order still reads from the ids**: in a step that asks a kept
+  card beside new ones, name the new ones so the ids sort in the order
+  the step asks them.
+
+Each learner's deck follows the release it was copied or
 last upgraded to, and its outline with it. An upgrade of a course's deck
 adds no cards: the learner reaches new questions through the course.
 It still changes, retires and restores the cards the deck holds, their

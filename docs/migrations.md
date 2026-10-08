@@ -110,6 +110,43 @@ ignores, since no card names them. An older app's
 [check](validation.md) lists an `sm:Distractor` as `untyped`, a
 subject of no class it knows: visible, never a violation.
 
+[Text formats](vocab.md#text-formats) (vocabulary 1.15) need no
+migration and moved no format version. `sm:textFormat` joined card
+format 5, step format 1 and chapter format 1, optional. This is a
+judgment call, recorded here with its reasoning:
+
+- **What a reader that ignores it loses** is the rendering only: it
+  shows the Markdown source, which is readable by design, and keeps the
+  triple through an edit, since the shapes are not closed and the
+  writer keeps every predicate it does not own. Absent, the marker
+  means what every text before meant: plain. A bump would instead have
+  older apps restamp the subject at the old version and every user run
+  a pod migration, for a meaning an older app would lose anyway.
+- **Who runs an older app.** The app has no service worker, and the
+  library index comes from the same deployment, so an older app is a tab
+  opened before the deploy, or a fork. Such a tab has one real loss: an
+  edit of a multi-line text in a single-line field drops its line feeds,
+  which is content, not just the ignored term. (Since vocabulary 1.15,
+  the app edits any card text saved with a line break in a textarea;
+  see [i18n.md](i18n.md).)
+- **An older app's import drops the marker**, as it writes the card
+  through its own card record. The
+  [library upgrade](#catching-up-with-the-library) counts a copy that
+  differs from its release only by lacking the release's text format as
+  left alone by the user, so the next release brings the marker back,
+  with any change of the card's text; until then the card stays the
+  library's, its languages too. A copy that states `sm:plainText`
+  against a Markdown release was switched off on purpose and is kept.
+  There is no repair within one release.
+- **A new concept of `sm:TextFormats` needs no bump either**: the shape
+  lists none, so an unknown one is read as plain text and kept.
+- **One full re-check.** The property shapes changed the shape files,
+  so the rules' hash (`__SHAPES_RULESET__`, see
+  [validation.md](validation.md)) changed: every instance is checked in
+  full once on its next opening, and its documents get new receipts.
+  Outside validators of `card/v5.ttl`, `step/v1.ttl` and `chapter/v1.ttl`
+  see one new constraint, which data without the marker meets.
+
 Rules that hold across versions:
 
 - **Readers never refuse older data.** A subject is read with the shape
@@ -341,6 +378,19 @@ wrong option, its note or their order changes the card. A
 cards the learner has answered, so its upgrade adds none; the learner
 reaches them through the course. It changes, retires and restores the
 cards it holds as above.
+
+A card's [text format](vocab.md#text-formats) is part of its content
+too: a release that only marks a card as Markdown changes it. No text
+format and `sm:plainText` compare the same, as the vocabulary defines
+them, so a card switched to Markdown and back is still the library's.
+One exception tells an older app's doing from the user's: a copy that
+is as the old release had it but for lacking the release's text format,
+as an app before vocabulary 1.15 imports or writes it, counts as left
+alone, both here and when the user settles the deck's languages. The
+newer release then brings the marker back, whether or not it changes
+the card otherwise. A copy that states a format other than the
+release's, `sm:plainText` against `sm:markdown` included, was changed
+by the user and is kept.
 
 A new study direction is taken up when the copy is still studied the old
 release's way. So are the deck's title, description, keywords and

@@ -15,6 +15,13 @@ and the [DCAT-AP profile](#profiles-dcat-ap-and-skos), in the browser:
   while developer mode (a per-instance [preference](data-model.md#instance-layout))
   is on, shows it in full.
 
+Text in Markdown is never invalid: CommonMark has no invalid document,
+so no shape constrains it, and the app shows any text safely
+([markdown.md](markdown.md#safety)). A library release is held to more
+when it is published, by `npm run library:check`'s
+[Markdown rules](deck-library.md#markdown-rules), which are about how
+its text shows, not whether it conforms.
+
 ## Flow
 
 ```mermaid

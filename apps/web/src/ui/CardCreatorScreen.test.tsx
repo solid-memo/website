@@ -5,6 +5,7 @@ import { I18nProvider } from "./i18n";
 import type { Deck } from "@solid-memo/domain/deck";
 import { alertTexts, statusTexts } from "../test/liveRegions";
 import { recentLanguages, rememberLanguage } from "./remembered";
+import { SM } from "@solid-memo/vocab/vocab.generated";
 
 beforeEach(() => localStorage.clear());
 
@@ -343,5 +344,127 @@ describe("CardCreatorScreen", () => {
     expect(screen.getByLabelText("Front")).toBeDisabled();
     expect(screen.getByRole("button", { name: "Add card" })).toHaveAttribute("aria-disabled", "true");
     expect(screen.getByText("add failed")).toBeInTheDocument();
+  });
+
+  describe("in Markdown", () => {
+    const NEWH_TEXT =
+      "When on, the card's text is Markdown: code, lists, tables and more. When off, it shows exactly as typed.";
+    const toggle = () => screen.getByRole("checkbox", { name: "Format with Markdown" });
+
+    it("is off for a new card, with no help, preview or hints, and the sides single lines", () => {
+      const { container } = renderScreen();
+      expect(toggle()).not.toBeChecked();
+      expect(toggle()).toHaveAccessibleDescription(
+        "When on, the card's text is Markdown: code, lists, tables and more. When off, it shows exactly as typed.",
+      );
+      fireEvent.input(screen.getByLabelText("Front"), { target: { value: "git clone <url>" } });
+      expect(screen.getByLabelText("Front").tagName).toBe("INPUT");
+      expect(screen.queryByText("Formatting help")).toBeNull();
+      expect(container.querySelector(".card-preview")).toBeNull();
+      expect(container.querySelector(".entry-hints")).toBeNull();
+    });
+
+    it("edits the sides and notes in textareas, with help, hints and a preview, and adds the card in Markdown", () => {
+      const { container, props } = renderScreen({ languages: { front: "en", back: "en", own: "en", unstatedCounts: { front: 0, back: 0 } } });
+      fireEvent.click(toggle());
+      expect(toggle()).toBeChecked();
+      for (const label of ["Front", "Back", "Front note (optional)", "Back note (optional)"]) {
+        expect(screen.getByLabelText(label).tagName).toBe("TEXTAREA");
+      }
+      expect(screen.getByLabelText("Label (optional)").tagName).toBe("INPUT");
+      expect(screen.getByLabelText("Front picture description (optional)").tagName).toBe("INPUT");
+      expect(screen.getByText("Formatting help").tagName).toBe("SUMMARY");
+
+      fireEvent.input(screen.getByLabelText("Front"), { target: { value: "git clone <url>" } });
+      expect(screen.getByLabelText("Front")).toHaveAccessibleDescription(
+        "Language: English Each side needs text, a picture, or both. HTML such as <url> shows as typed. Put it in backticks to show it as code.",
+      );
+      fireEvent.input(screen.getByLabelText("Front"), { target: { value: "Clone with:\n\n    git clone URL\n" } });
+      expect(container.querySelector(".entry-hints")).toBeNull();
+      fireEvent.input(screen.getByLabelText("Back"), { target: { value: "*a copy*" } });
+      fireEvent.input(screen.getByLabelText("Back note (optional)"), { target: { value: "[docs](https://git-scm.com/)" } });
+      expect(container.querySelector(".card-preview .card-front pre")).toHaveTextContent("git clone URL");
+      expect(container.querySelector(".card-preview .card-back em")).toHaveTextContent("a copy");
+      expect(container.querySelector(".card-preview-option")).toBeNull();
+
+      fireEvent.click(screen.getByRole("button", { name: "Add card" }));
+      expect(props.onAdd).toHaveBeenCalledWith(
+        {
+          front: { en: "Clone with:\n\n    git clone URL" },
+          back: { en: "*a copy*" },
+          backNote: { en: "[docs](https://git-scm.com/)" },
+          textFormat: SM.markdown,
+        },
+        expect.any(Function),
+      );
+      act(() => vi.mocked(props.onAdd).mock.lastCall![1]());
+      // The next card starts as every new card does: plain text.
+      expect(toggle()).not.toBeChecked();
+      expect(screen.getByLabelText("Front")).toHaveValue("");
+    });
+
+    it("says, as a status, when text typed before Markdown was switched on reads differently, until it is changed", () => {
+      renderScreen();
+      fireEvent.input(screen.getByLabelText("Back"), { target: { value: "M87* **b**" } });
+      fireEvent.click(toggle());
+      const differs = "Some of this card's text reads differently as Markdown: check the preview.";
+      expect(statusTexts()).toContain(differs);
+      expect(toggle()).toHaveAccessibleDescription(`${NEWH_TEXT} ${differs}`);
+      fireEvent.input(screen.getByLabelText("Back"), { target: { value: "M87* b" } });
+      expect(statusTexts()).not.toContain(differs);
+      expect(toggle()).toHaveAccessibleDescription(NEWH_TEXT);
+    });
+
+    it("says nothing of reading differently for Markdown typed after it was switched on", () => {
+      renderScreen();
+      fireEvent.click(toggle());
+      fireEvent.input(screen.getByLabelText("Back"), { target: { value: "**b**\n\n- one\n- two" } });
+      expect(screen.queryByText(/reads differently/)).toBeNull();
+      expect(toggle()).toHaveAccessibleDescription(NEWH_TEXT);
+    });
+
+    it("says when only a translation reads differently, without pointing to the preview, which shows the main text", () => {
+      renderScreen();
+      fireEvent.input(screen.getByLabelText("Front"), { target: { value: "M87*" } });
+      fireEvent.click(screen.getAllByRole("button", { name: "Translations (0)" })[0]!);
+      fireEvent.click(screen.getAllByRole("button", { name: "Add a translation" })[0]!);
+      fireEvent.input(screen.getByLabelText("Translation, its language not chosen"), { target: { value: "*M87*" } });
+      fireEvent.click(toggle());
+      expect(statusTexts()).toContain(
+        "Some of this card's translations read differently as Markdown: check them before you save.",
+      );
+    });
+
+    it("hints at a translation's Markdown under the translation, describing it alone", () => {
+      const { container } = renderScreen();
+      fireEvent.click(toggle());
+      fireEvent.input(screen.getByLabelText("Front"), { target: { value: "Clone it" } });
+      fireEvent.click(screen.getAllByRole("button", { name: "Translations (0)" })[0]!);
+      fireEvent.click(screen.getAllByRole("button", { name: "Add a translation" })[0]!);
+      const translation = screen.getByLabelText("Translation, its language not chosen");
+      fireEvent.input(translation, { target: { value: "git clone <url>" } });
+      const hint = "HTML such as <url> shows as typed. Put it in backticks to show it as code.";
+      expect(container.querySelector("#card-front-hints")).toBeNull();
+      expect(container.querySelector(`#${translation.id}-hints`)).toHaveTextContent(hint);
+      expect(translation).toHaveAccessibleDescription(expect.stringContaining(hint));
+      expect(screen.getByLabelText("Front")).not.toHaveAccessibleDescription(expect.stringContaining(hint));
+    });
+
+    it("hints at a link where none may be, and saves the label of a card in Markdown trimmed", () => {
+      const { props } = renderScreen({ languages: { front: "en", back: "en", own: "en", unstatedCounts: { front: 0, back: 0 } } });
+      fireEvent.click(toggle());
+      fireEvent.input(screen.getByLabelText("Label (optional)"), { target: { value: "<https://a.example>" } });
+      expect(screen.getByLabelText("Label (optional)")).toHaveAccessibleDescription(
+        "Language: English Shown above the back, e.g. what kind of answer it is. <https://a.example> reads as a link, shown without its angle brackets. Put it in backticks to show it as typed.",
+      );
+      fireEvent.input(screen.getByLabelText("Front"), { target: { value: "a" } });
+      fireEvent.input(screen.getByLabelText("Back"), { target: { value: "b" } });
+      fireEvent.input(screen.getByLabelText("Label (optional)"), { target: { value: " Replaced by" } });
+      fireEvent.click(screen.getByRole("button", { name: "Add card" }));
+      expect(props.onAdd).toHaveBeenCalledWith(
+        { front: { en: "a" }, back: { en: "b" }, backLabel: { en: "Replaced by" }, textFormat: SM.markdown },
+        expect.any(Function),
+      );
+    });
   });
 });

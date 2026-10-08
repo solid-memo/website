@@ -19,6 +19,7 @@ and [testing.md](testing.md).
 - [validation.md](validation.md) — checking data against the shapes and DCAT-AP in the browser, and the pySHACL cross-check in CI.
 - [migrations.md](migrations.md) — format versions, and how the app brings a pod up to the format it writes.
 - [deck-library.md](deck-library.md) — the ready-made decks in `decks/`, described with DCAT, how to add a version, and their checks.
+- [markdown.md](markdown.md) — text written in Markdown: the dialect, which texts may be in it, how each place shows it, why showing it is safe whatever the data holds, and writing it in the card editor.
 - [courses.md](courses.md) — a library deck with chapters and steps, whose multiple-choice questions join the learner's deck as they are answered.
 
 ## The app

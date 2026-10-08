@@ -1,0 +1,13 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix schema:     <https://schema.org/> .
+
+<#ch-ldp>
+    a solid-memo:Chapter ,
+      schema:Syllabus ;
+    schema:isPartOf <> ;
+    schema:position 4 ;
+    solid-memo:textFormat solid-memo:markdown ,
+                          solid-memo:plainText ;
+    dcterms:title "Linked Data Platform"@en ;
+    solid-memo:formatVersion 1 .

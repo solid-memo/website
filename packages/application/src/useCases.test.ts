@@ -2791,7 +2791,7 @@ describe("library deck upgrade", () => {
 });
 
 describe("courses", () => {
-  const RELEASE = "https://solid-memo.com/decks/solid-fundamentals/v1.ttl";
+  const RELEASE = "https://solid-memo.com/decks/solid/v1.ttl";
   const at = (id: string) => `${RELEASE}#${id}`;
   const course: LibraryDeck = {
     ...libraryDeck,
@@ -2999,7 +2999,7 @@ describe("courses", () => {
 
   it("planLibraryUpgrade adds no card to a course's deck, whichever release says it is a course", async () => {
     const { deps, useCases } = setup();
-    const v2 = "https://solid-memo.com/decks/solid-fundamentals/v2.ttl";
+    const v2 = "https://solid-memo.com/decks/solid/v2.ttl";
     const plain = { ...release, isCourse: undefined };
     const next = { ...plain, url: v2, version: "2", cards: [...release.cards, { id: "q-new", front: { en: "New?" }, back: { en: "Yes" }, formatVersion: 5 }] };
     vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) => (url === v2 ? next : plain));

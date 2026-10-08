@@ -14,7 +14,7 @@
     dcterms:title "Solid Memo deck library" ;
     dcterms:description "Ready-made flashcard decks to import into your own Solid pod." ;
     dcterms:publisher <#solid-memo> ;
-    dcterms:modified "2026-10-07T00:00:00Z"^^xsd:dateTime ;
+    dcterms:modified "2026-10-08T00:00:00Z"^^xsd:dateTime ;
     dcat:themeTaxonomy <http://publications.europa.eu/resource/authority/data-theme> ,
                        <https://solid-memo.com/ns/vocab/topics.ttl> ;
     dcat:dataset <#academy-award-best-picture> ,
@@ -6565,8 +6565,8 @@
     solid-memo:formatVersion 3 ;
     dcterms:title "Solid fundamentals"@en ,
                   "Grunderna i Solid"@sv ;
-    dcterms:description "A course on the ideas Solid is built on. This version has two chapters, Linked data and IRIs, and RDF and Turtle. Each step is a short piece of theory followed by a multiple-choice question, and each chapter ends with a review; every question you answer becomes a card in your deck. The facts come from the W3C recommendations RDF 1.1 Concepts and Abstract Syntax and RDF 1.1 Turtle, RFC 3987, Tim Berners-Lee's note Linked Data and the Solid Protocol."@en ,
-                        "En kurs om idéerna som Solid bygger på. Den här versionen har två kapitel, Länkade data och IRI:er samt RDF och Turtle. Varje steg är en kort teoritext följd av en flervalsfråga, och varje kapitel avslutas med en repetition; varje fråga du besvarar blir ett kort i din kortlek. Fakta kommer från W3C-rekommendationerna RDF 1.1 Concepts and Abstract Syntax och RDF 1.1 Turtle, RFC 3987, Tim Berners-Lees anteckning Linked Data och Solid Protocol."@sv ;
+    dcterms:description "A course on Solid for people who want to build apps with it: why Solid exists, the linked data and RDF it is built on, vocabularies, pods and containers, reading and writing resources, identity and login, access control and sharing, notifications, designing an app's data, building, securing and publishing an app, a minimal app and Solid Memo itself read piece by piece, Solid's open problems, and the Linked Web Storage drafts that may succeed it. 17 chapters of short steps, each a piece of theory, with code and tables where they help, followed by multiple-choice questions; each chapter ends with a review, and every question you answer becomes a card in your deck. The facts come from the Solid specifications, the W3C standards around RDF, the servers' and libraries' documentation and code, and requests recorded on Community Solid Server 7.2, as of October 2026."@en ,
+                        "En kurs om Solid för dig som vill bygga appar med det: varför Solid finns, länkade data och RDF som det bygger på, vokabulärer, poddar och behållare, att läsa och skriva resurser, identitet och inloggning, åtkomstkontroll och delning, notiser, hur en app lägger upp sina data, att bygga, säkra och publicera en app, en minimal app och Solid Memo självt lästa bit för bit, Solids öppna problem och Linked Web Storage, som kan efterträda det. 17 kapitel med korta steg av teori följda av flervalsfrågor; varje fråga du besvarar blir ett kort i din kortlek. Kursen finns bara på engelska."@sv ;
     dcterms:publisher <#solid-memo> ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:computing ,
@@ -6577,12 +6577,28 @@
                  "Turtle"@en ,
                  "IRI"@en ,
                  "semantic web"@en ,
+                 "Solid Protocol"@en ,
+                 "pod"@en ,
+                 "WebID"@en ,
+                 "Solid-OIDC"@en ,
+                 "Web Access Control"@en ,
+                 "ACP"@en ,
+                 "JSON-LD"@en ,
+                 "Linked Web Storage"@en ,
                  "Solid"@sv ,
                  "länkade data"@sv ,
                  "RDF"@sv ,
                  "Turtle"@sv ,
                  "IRI"@sv ,
-                 "semantiska webben"@sv ;
+                 "semantiska webben"@sv ,
+                 "Solid-protokollet"@sv ,
+                 "pod"@sv ,
+                 "WebID"@sv ,
+                 "Solid-OIDC"@sv ,
+                 "Web Access Control"@sv ,
+                 "ACP"@sv ,
+                 "JSON-LD"@sv ,
+                 "Linked Web Storage"@sv ;
     dcat:first <https://solid-memo.com/decks/solid-fundamentals/v1.ttl> ;
     dcat:last <https://solid-memo.com/decks/solid-fundamentals/v1.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/solid-fundamentals/v1.ttl> ;
@@ -6596,13 +6612,256 @@
                   "Grunderna i Solid"@sv ;
     dcterms:creator <https://solid-memo.com/decks/solid-fundamentals/v1.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:description "A course on the ideas Solid is built on. This version has two chapters, Linked data and IRIs, and RDF and Turtle. Each step is a short piece of theory followed by a multiple-choice question, and each chapter ends with a review; every question you answer becomes a card in your deck. The facts come from the W3C recommendations RDF 1.1 Concepts and Abstract Syntax and RDF 1.1 Turtle, RFC 3987, Tim Berners-Lee's note Linked Data and the Solid Protocol."@en ,
-                        "En kurs om idéerna som Solid bygger på. Den här versionen har två kapitel, Länkade data och IRI:er samt RDF och Turtle. Varje steg är en kort teoritext följd av en flervalsfråga, och varje kapitel avslutas med en repetition; varje fråga du besvarar blir ett kort i din kortlek. Fakta kommer från W3C-rekommendationerna RDF 1.1 Concepts and Abstract Syntax och RDF 1.1 Turtle, RFC 3987, Tim Berners-Lees anteckning Linked Data och Solid Protocol."@sv ;
-    prov:wasDerivedFrom <https://www.w3.org/TR/2014/REC-rdf11-concepts-20140225/> ,
-                        <https://www.w3.org/TR/2014/REC-turtle-20140225/> ,
+    dcterms:description "A course on Solid for people who want to build apps with it: why Solid exists, the linked data and RDF it is built on, vocabularies, pods and containers, reading and writing resources, identity and login, access control and sharing, notifications, designing an app's data, building, securing and publishing an app, a minimal app and Solid Memo itself read piece by piece, Solid's open problems, and the Linked Web Storage drafts that may succeed it. 17 chapters of short steps, each a piece of theory, with code and tables where they help, followed by multiple-choice questions; each chapter ends with a review, and every question you answer becomes a card in your deck. The facts come from the Solid specifications, the W3C standards around RDF, the servers' and libraries' documentation and code, and requests recorded on Community Solid Server 7.2, as of October 2026."@en ,
+                        "En kurs om Solid för dig som vill bygga appar med det: varför Solid finns, länkade data och RDF som det bygger på, vokabulärer, poddar och behållare, att läsa och skriva resurser, identitet och inloggning, åtkomstkontroll och delning, notiser, hur en app lägger upp sina data, att bygga, säkra och publicera en app, en minimal app och Solid Memo självt lästa bit för bit, Solids öppna problem och Linked Web Storage, som kan efterträda det. 17 kapitel med korta steg av teori följda av flervalsfrågor; varje fråga du besvarar blir ett kort i din kortlek. Kursen finns bara på engelska."@sv ;
+    prov:wasDerivedFrom <http://xmlns.com/foaf/spec/> ,
+                        <https://5stardata.info/en/> ,
+                        <https://archives.iw3c2.org/www2016/WWW2016-Proceedings/companion/p223.pdf> ,
+                        <https://arxiv.org/abs/2302.06933> ,
+                        <https://blog.ldodds.com/2024/03/12/baffled-by-solid/> ,
+                        <https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html> ,
+                        <https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html> ,
+                        <https://communitysolidserver.github.io/CommunitySolidServer/latest/usage/authorization-methods/> ,
+                        <https://communitysolidserver.github.io/CommunitySolidServer/latest/usage/client-credentials/> ,
+                        <https://communitysolidserver.github.io/CommunitySolidServer/latest/usage/example-requests/> ,
+                        <https://communitysolidserver.github.io/CommunitySolidServer/latest/usage/identity-provider/> ,
+                        <https://communitysolidserver.github.io/CommunitySolidServer/latest/usage/metadata/> ,
+                        <https://communitysolidserver.github.io/CommunitySolidServer/latest/usage/notifications/> ,
+                        <https://communitysolidserver.github.io/CommunitySolidServer/latest/usage/seeding-pods/> ,
+                        <https://communitysolidserver.github.io/CommunitySolidServer/latest/usage/starting-server/> ,
+                        <https://comunica.dev/docs/query/advanced/solid/> ,
+                        <https://comunica.dev/research/link_traversal/> ,
+                        <https://dapsi.ngi.eu/success-story-pds-pod-migrator-migrating-your-solid-data/> ,
+                        <https://dev.solidproject.org/> ,
+                        <https://dev.solidproject.org/guides/authenticating_with_a_script/> ,
+                        <https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS> ,
+                        <https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS/Errors> ,
+                        <https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS/Errors/CORSDidNotSucceed> ,
+                        <https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CSP> ,
+                        <https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Expose-Headers> ,
+                        <https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy> ,
+                        <https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy> ,
+                        <https://docs.activitypods.org/architecture/application-interoperability/> ,
+                        <https://docs.inrupt.com/ess/2.7/services/service-notification/service-websocket> ,
+                        <https://docs.inrupt.com/ess/2.7/services/service-webid> ,
+                        <https://docs.inrupt.com/ess/latest/> ,
+                        <https://docs.inrupt.com/ess/releases.md> ,
+                        <https://docs.inrupt.com/ess/services/service-access-grant> ,
+                        <https://docs.inrupt.com/ess/services/service-access-grant/issue-endpoint> ,
+                        <https://docs.inrupt.com/guides/access-control-policies> ,
+                        <https://docs.inrupt.com/guides/authentication-in-solid/authentication-from-browser.md> ,
+                        <https://docs.inrupt.com/guides/authentication-in-solid/authentication-from-browser/session-restore-upon-browser-refresh.md> ,
+                        <https://docs.inrupt.com/guides/authentication-in-solid/authentication-server-side.md> ,
+                        <https://docs.inrupt.com/guides/authentication-in-solid/authentication-single-user-application.md> ,
+                        <https://docs.inrupt.com/guides/universal-api> ,
+                        <https://docs.inrupt.com/guides/webid-document-best-practices/managing-webid-profiles> ,
+                        <https://docs.inrupt.com/podspaces/podspaces.md> ,
+                        <https://docs.inrupt.com/sdk/javascript-sdk/authentication.md> ,
+                        <https://docs.inrupt.com/sdk/javascript-sdk/read-and-write-rdf-data.md> ,
+                        <https://docs.inrupt.com/sdk/javascript-sdk/tutorial> ,
+                        <https://docs.inrupt.com/security/authorization> ,
+                        <https://docs.inrupt.com/security/authorization/access-requests-grants.md> ,
+                        <https://docs.netlify.com/manage/routing/headers/> ,
+                        <https://forum.solidproject.org/t/acl-format-for-authorising-new-apps/1655> ,
+                        <https://forum.solidproject.org/t/how-to-authenticate-an-app-with-its-own-identity-e-g-webid/5946> ,
+                        <https://forum.solidproject.org/t/solid-interop-in-practice/7701> ,
+                        <https://forum.solidproject.org/t/upcoming-software-switch-for-solidcommunity-net/8608> ,
+                        <https://forum.solidproject.org/t/why-deprecate-direct-webid-tls/2953> ,
+                        <https://forum.solidproject.org/t/why-is-acl-trustedapp-visible-for-everyone-on-css/5603> ,
+                        <https://gdpr-info.eu/art-20-gdpr/> ,
+                        <https://github.com/CommunitySolidServer/CommunitySolidServer> ,
+                        <https://github.com/CommunitySolidServer/CommunitySolidServer/blob/main/RELEASE_NOTES.md> ,
+                        <https://github.com/CommunitySolidServer/CommunitySolidServer/blob/main/config/util/auxiliary/strategies/acl.json> ,
+                        <https://github.com/CommunitySolidServer/CommunitySolidServer/blob/v7.2.0/config/http/middleware/handlers/cors.json> ,
+                        <https://github.com/CommunitySolidServer/CommunitySolidServer/blob/v7.2.0/config/identity/handler/base/provider-factory.json> ,
+                        <https://github.com/CommunitySolidServer/CommunitySolidServer/blob/v7.2.0/src/authorization/OwnerPermissionReader.ts> ,
+                        <https://github.com/CommunitySolidServer/CommunitySolidServer/blob/v7.2.0/src/http/input/body/N3PatchBodyParser.ts> ,
+                        <https://github.com/CommunitySolidServer/CommunitySolidServer/blob/v7.2.0/src/identity/interaction/oidc/ConsentHandler.ts> ,
+                        <https://github.com/CommunitySolidServer/CommunitySolidServer/blob/v7.2.0/src/identity/interaction/webid/LinkWebIdHandler.ts> ,
+                        <https://github.com/CommunitySolidServer/CommunitySolidServer/blob/v7.2.0/src/identity/ownership/TokenOwnershipValidator.ts> ,
+                        <https://github.com/CommunitySolidServer/CommunitySolidServer/blob/v7.2.0/src/identity/storage/ClientIdAdapterFactory.ts> ,
+                        <https://github.com/CommunitySolidServer/CommunitySolidServer/blob/v7.2.0/src/init/SeededAccountInitializer.ts> ,
+                        <https://github.com/CommunitySolidServer/CommunitySolidServer/blob/v7.2.0/templates/identity/account/link-webid.html.ejs> ,
+                        <https://github.com/CommunitySolidServer/CommunitySolidServer/tree/main/templates/pod> ,
+                        <https://github.com/CommunitySolidServer/CommunitySolidServer/tree/v7.2.0> ,
+                        <https://github.com/CommunitySolidServer/CommunitySolidServer/tree/v7.2.0/src/server/notifications/WebhookChannel2023> ,
+                        <https://github.com/CommunitySolidServer/access-token-verifier> ,
+                        <https://github.com/CommunitySolidServer/access-token-verifier/blob/v2.1.1/src/config/index.ts> ,
+                        <https://github.com/NoelDeMartin/media-kraken> ,
+                        <https://github.com/NoelDeMartin/umai> ,
+                        <https://github.com/SolidOS/mashlib> ,
+                        <https://github.com/SolidOS/solidos> ,
+                        <https://github.com/digitalbazaar/jsonld.js> ,
+                        <https://github.com/inrupt/solid-client-authn-js> ,
+                        <https://github.com/inrupt/solid-client-authn-js/blob/main/ARCHITECTURE.md> ,
+                        <https://github.com/inrupt/solid-client-authn-js/blob/main/packages/browser/src/Session.ts> ,
+                        <https://github.com/inrupt/solid-client-js/blob/main/CHANGELOG.md> ,
+                        <https://github.com/linkeddata/rdflib.js> ,
+                        <https://github.com/nodeSolidServer/node-solid-server> ,
+                        <https://github.com/nodeSolidServer/node-solid-server/releases> ,
+                        <https://github.com/nodeSolidServer/node-solid-server/tree/v6.0.0> ,
+                        <https://github.com/panva/node-oidc-provider/blob/v8.4.3/lib/helpers/defaults.js> ,
+                        <https://github.com/pdsinterop/solid-nextcloud> ,
+                        <https://github.com/rdf-ext/rdf-ext> ,
+                        <https://github.com/rdfjs/N3.js> ,
+                        <https://github.com/shapetrees/specification> ,
+                        <https://github.com/solid-contrib/conformance-test-harness> ,
+                        <https://github.com/solid-contrib/data-modules> ,
+                        <https://github.com/solid-contrib/pivot> ,
+                        <https://github.com/solid-contrib/pivot/tree/4bf3123ecab6f7e54f2471b8d014e8dffd7da7cb> ,
+                        <https://github.com/solid-contrib/specification-tests> ,
+                        <https://github.com/solid-memo/website> ,
+                        <https://github.com/solid/node-solid-server/blob/v6.0.0/lib/requests/create-account-request.mjs> ,
+                        <https://github.com/solid/solid-auth-client> ,
+                        <https://github.com/solid/solid-spec/blob/master/api-rest.md> ,
+                        <https://github.com/solid/solid-spec/blob/master/api-websockets.md> ,
+                        <https://github.com/solid/solidproject.org/wiki/Create-your-own-vocabulary> ,
+                        <https://github.com/solid/solidproject.org/wiki/Vocabularies-essential-to-solid> ,
+                        <https://github.com/solid/vocab> ,
+                        <https://github.com/solid/web-access-control-spec/issues/81> ,
+                        <https://github.com/solid/webid-oidc-spec> ,
+                        <https://imec-publications.be/entities/publication/60bf893e-54d1-4dd7-a596-6793b1e42ba5/full> ,
+                        <https://inrupt.com/blog/solid-achieves-major-milestone-in-web-standardization-process> ,
+                        <https://inrupt.com/blog/why-agentic-wallets> ,
+                        <https://inrupt.com/case-study/flanders-strengthens-trusted-data-economy> ,
+                        <https://inrupt.com/one-small-step-for-the-web> ,
+                        <https://ldkit.io/> ,
+                        <https://ldo.js.org/latest/> ,
+                        <https://lists.w3.org/Archives/Public/public-solid/2024Oct/0007.html> ,
+                        <https://lists.w3.org/Archives/Public/public-solid/2026Feb/0008.html> ,
+                        <https://lov.linkeddata.es/dataset> ,
+                        <https://lov.linkeddata.es/dataset/lov/vocabs/schema> ,
+                        <https://noeldemartin.com/blog/interoperable-serendipity> ,
+                        <https://noeldemartin.com/tasks/implementing-a-recipes-manager-using-solid> ,
+                        <https://openid.net/specs/openid-connect-core-1_0.html> ,
+                        <https://openid.net/specs/openid-connect-rpinitiated-1_0.html> ,
+                        <https://penny.vincenttunru.com/> ,
+                        <https://prefix.cc/> ,
+                        <https://registry.npmjs.org/> ,
+                        <https://registry.npmjs.org/solid-auth-client> ,
+                        <https://ruben.verborgh.org/articles/redecentralizing-the-web/> ,
+                        <https://ruben.verborgh.org/blog/2019/06/17/shaping-linked-data-apps/> ,
+                        <https://ruben.verborgh.org/blog/2022/12/30/lets-talk-about-pods/> ,
+                        <https://rubenverborgh.github.io/RDF-for-Solid-2022/> ,
+                        <https://sagroups.ieee.org/p3330> ,
+                        <https://schema.org/children> ,
+                        <https://schema.org/docs/datamodel.html> ,
+                        <https://schema.org/docs/faq.html> ,
+                        <https://schema.org/docs/schemas.html> ,
+                        <https://schema.org/height> ,
+                        <https://semantic-web-journal.net/content/community-solid-server-supporting-research-development-evolving-ecosystem-0> ,
+                        <https://shapetrees.github.io/specification/> ,
+                        <https://shex.io/shex-semantics/> ,
+                        <https://solid.github.io/authorization-panel/acp-specification/> ,
+                        <https://solid.github.io/data-interoperability-panel/primer/application.html> ,
+                        <https://solid.github.io/data-interoperability-panel/specification/> ,
+                        <https://solid.github.io/notifications/streaming-http-channel-2023> ,
+                        <https://solid.github.io/notifications/webhook-channel-2023> ,
+                        <https://solid.github.io/notifications/websocket-channel-2023> ,
+                        <https://solid.github.io/solid-oidc/> ,
+                        <https://solid.github.io/solid-oidc/primer/> ,
+                        <https://solid.github.io/type-indexes/> ,
+                        <https://solid.github.io/webid-profile/> ,
+                        <https://solidproject.org/ED/protocol> ,
+                        <https://solidproject.org/TR/> ,
+                        <https://solidproject.org/TR/2021/protocol-20211217> ,
+                        <https://solidproject.org/TR/2022/protocol-20221231> ,
+                        <https://solidproject.org/TR/acp> ,
+                        <https://solidproject.org/TR/notifications-protocol> ,
+                        <https://solidproject.org/TR/oidc> ,
+                        <https://solidproject.org/TR/protocol> ,
+                        <https://solidproject.org/TR/wac> ,
+                        <https://solidproject.org/about> ,
+                        <https://solidproject.org/apps> ,
+                        <https://solidproject.org/users/get-a-pod> ,
+                        <https://soukai.js.org/> ,
+                        <https://soukai.js.org/guide/advanced/interoperability.html> ,
+                        <https://strathprints.strath.ac.uk/92706> ,
+                        <https://thenextweb.com/news/web-inventor-tim-berners-lee-screw-web3-my-decentralized-internet-doesnt-need-blockchain> ,
+                        <https://theodi.org/news-and-events/news/odi-and-solid-come-together-to-give-individuals-greater-control-over-personal-data/> ,
+                        <https://url.spec.whatwg.org/> ,
+                        <https://w3c-cg.github.io/N3/spec/> ,
+                        <https://webfoundation.org/2019/03/web-birthday-30/> ,
+                        <https://www.dublincore.org/specifications/dublin-core/dcmi-terms/> ,
+                        <https://www.ietf.org/archive/id/draft-ietf-oauth-client-id-metadata-document-02.html> ,
+                        <https://www.inrupt.com/blog/inrupt-gives-support-as-the-open-data-institute-commits-to-the-solid-movement> ,
+                        <https://www.inrupt.com/case-study/bbc-embraces-future-of-personal-data-access-and-consent> ,
+                        <https://www.npmjs.com/package/@inrupt/solid-client-authn-browser/v/5.0.1> ,
+                        <https://www.npmjs.com/package/@inrupt/solid-client-authn-core/v/5.0.1> ,
+                        <https://www.rfc-editor.org/rfc/rfc3986> ,
                         <https://www.rfc-editor.org/rfc/rfc3987> ,
+                        <https://www.rfc-editor.org/rfc/rfc5023> ,
+                        <https://www.rfc-editor.org/rfc/rfc5789> ,
+                        <https://www.rfc-editor.org/rfc/rfc6455> ,
+                        <https://www.rfc-editor.org/rfc/rfc6749> ,
+                        <https://www.rfc-editor.org/rfc/rfc7636> ,
+                        <https://www.rfc-editor.org/rfc/rfc8288> ,
+                        <https://www.rfc-editor.org/rfc/rfc9110> ,
+                        <https://www.rfc-editor.org/rfc/rfc9112> ,
+                        <https://www.rfc-editor.org/rfc/rfc9207> ,
+                        <https://www.rfc-editor.org/rfc/rfc9449> ,
+                        <https://www.rfc-editor.org/rfc/rfc9700> ,
+                        <https://www.w3.org/2005/Incubator/webid/spec/identity/> ,
+                        <https://www.w3.org/2005/Incubator/webid/spec/tls/> ,
+                        <https://www.w3.org/2024/09/linked-web-storage-wg-charter> ,
+                        <https://www.w3.org/2026/09/14-lws-minutes.html> ,
+                        <https://www.w3.org/2026/09/21-lws-minutes.html> ,
+                        <https://www.w3.org/DesignIssues/CloudStorage.html> ,
                         <https://www.w3.org/DesignIssues/LinkedData.html> ,
-                        <https://solidproject.org/TR/2024/protocol-20240512> ;
+                        <https://www.w3.org/DesignIssues/ReadWriteLinkedData.html> ,
+                        <https://www.w3.org/TR/2026/WD-lws10-authn-ssi-cid-20260423/> ,
+                        <https://www.w3.org/TR/activitystreams-vocabulary/> ,
+                        <https://www.w3.org/TR/cooluris/> ,
+                        <https://www.w3.org/TR/dwbp/> ,
+                        <https://www.w3.org/TR/json-ld11-api/> ,
+                        <https://www.w3.org/TR/json-ld11-framing/> ,
+                        <https://www.w3.org/TR/json-ld11/> ,
+                        <https://www.w3.org/TR/ldn/> ,
+                        <https://www.w3.org/TR/ldp/> ,
+                        <https://www.w3.org/TR/lws10-authn-openid/> ,
+                        <https://www.w3.org/TR/lws10-core/> ,
+                        <https://www.w3.org/TR/n-quads/> ,
+                        <https://www.w3.org/TR/n-triples/> ,
+                        <https://www.w3.org/TR/owl2-primer/> ,
+                        <https://www.w3.org/TR/owl2-syntax/> ,
+                        <https://www.w3.org/TR/prov-o/> ,
+                        <https://www.w3.org/TR/rdf-schema/> ,
+                        <https://www.w3.org/TR/rdf-syntax-grammar/> ,
+                        <https://www.w3.org/TR/rdf11-concepts/> ,
+                        <https://www.w3.org/TR/rdf11-mt/> ,
+                        <https://www.w3.org/TR/rdf11-primer/> ,
+                        <https://www.w3.org/TR/rdf12-concepts/> ,
+                        <https://www.w3.org/TR/rdf12-primer/> ,
+                        <https://www.w3.org/TR/rdf12-schema/> ,
+                        <https://www.w3.org/TR/rdf12-semantics/> ,
+                        <https://www.w3.org/TR/rdf12-turtle/> ,
+                        <https://www.w3.org/TR/rdfa-primer/> ,
+                        <https://www.w3.org/TR/shacl/> ,
+                        <https://www.w3.org/TR/shacl12-core/> ,
+                        <https://www.w3.org/TR/skos-reference/> ,
+                        <https://www.w3.org/TR/sparql11-query/> ,
+                        <https://www.w3.org/TR/sparql11-update/> ,
+                        <https://www.w3.org/TR/sparql12-query/> ,
+                        <https://www.w3.org/TR/swbp-vocab-pub/> ,
+                        <https://www.w3.org/TR/trig/> ,
+                        <https://www.w3.org/TR/turtle/> ,
+                        <https://www.w3.org/TR/vcard-rdf/> ,
+                        <https://www.w3.org/TR/vocab-dcat-3/> ,
+                        <https://www.w3.org/TR/webarch/> ,
+                        <https://www.w3.org/TeamSubmission/n3/> ,
+                        <https://www.w3.org/community/solid/> ,
+                        <https://www.w3.org/groups/wg/lws/charters/active/> ,
+                        <https://www.w3.org/groups/wg/rdf-star/publications/> ,
+                        <https://www.w3.org/news/2026/first-public-working-draft-linked-web-storage-protocol-1-0/> ,
+                        <https://www.w3.org/news/2026/first-public-working-drafts-for-the-linked-web-storage-lws-1-0-authentication-suite/> ,
+                        <https://www.w3.org/ns/auth/acl> ,
+                        <https://www.w3.org/ns/pim/space> ,
+                        <https://www.w3.org/ns/solid/oidc-context.jsonld> ,
+                        <https://www.w3.org/ns/solid/terms> ,
+                        <https://www.w3.org/standards/history/lws10-authn-openid/> ,
+                        <https://www.w3.org/standards/history/lws10-core/> ,
+                        <https://www.w3.org/standards/history/rdf12-concepts/> ,
+                        <https://zenodo.org/records/7641620> ;
     prov:wasGeneratedBy <https://solid-memo.com/decks/solid-fundamentals/v1.ttl#compilation> ;
     dcterms:created "2026-10-07T00:00:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
@@ -6614,24 +6873,39 @@
                  "Turtle"@en ,
                  "IRI"@en ,
                  "semantic web"@en ,
+                 "Solid Protocol"@en ,
+                 "pod"@en ,
+                 "WebID"@en ,
+                 "Solid-OIDC"@en ,
+                 "Web Access Control"@en ,
+                 "ACP"@en ,
+                 "JSON-LD"@en ,
+                 "Linked Web Storage"@en ,
                  "Solid"@sv ,
                  "länkade data"@sv ,
                  "RDF"@sv ,
                  "Turtle"@sv ,
                  "IRI"@sv ,
-                 "semantiska webben"@sv ;
-    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
-                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+                 "semantiska webben"@sv ,
+                 "Solid-protokollet"@sv ,
+                 "pod"@sv ,
+                 "WebID"@sv ,
+                 "Solid-OIDC"@sv ,
+                 "Web Access Control"@sv ,
+                 "ACP"@sv ,
+                 "JSON-LD"@sv ,
+                 "Linked Web Storage"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ;
     solid-memo:studyDirection solid-memo:frontToBack ;
     solid-memo:formatVersion 5 ;
     dcat:version "1" ;
-    dcterms:issued "2026-10-07T00:00:00Z"^^xsd:dateTime ;
+    dcterms:issued "2026-10-08T00:00:00Z"^^xsd:dateTime ;
     adms:versionNotes "First release." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#solid-fundamentals> ;
     dcat:isVersionOf <#solid-fundamentals> ;
     dcat:distribution <https://solid-memo.com/decks/solid-fundamentals/v1.ttl#turtle> ;
-    solid-memo:cardCount 19 .
+    solid-memo:cardCount 466 .
 
 <https://solid-memo.com/decks/solid-fundamentals/v1.ttl#anton-wiklund>
     a foaf:Agent ;
@@ -6641,25 +6915,1005 @@
 <https://solid-memo.com/decks/solid-fundamentals/v1.ttl#compilation>
     a prov:Activity .
 
-<https://www.w3.org/TR/2014/REC-rdf11-concepts-20140225/>
-    dcterms:title "RDF 1.1 Concepts and Abstract Syntax, W3C Recommendation 25 February 2014" ;
-    dcterms:creator "Richard Cyganiak, David Wood, Markus Lanthaler (editors); W3C RDF Working Group" .
+<http://xmlns.com/foaf/spec/>
+    dcterms:title "FOAF Vocabulary Specification 0.99" ;
+    dcterms:creator "Brickley & Miller" .
 
-<https://www.w3.org/TR/2014/REC-turtle-20140225/>
-    dcterms:title "RDF 1.1 Turtle: Terse RDF Triple Language, W3C Recommendation 25 February 2014" ;
-    dcterms:creator "David Beckett, Tim Berners-Lee, Eric Prud'hommeaux, Gavin Carothers (editors); W3C RDF Working Group" .
+<https://5stardata.info/en/>
+    dcterms:title "5 ★ Open Data" ;
+    dcterms:creator "originally LATC project; maintained by James G. Kim and Michael Hausenblas" .
+
+<https://archives.iw3c2.org/www2016/WWW2016-Proceedings/companion/p223.pdf>
+    dcterms:title "A Demonstration of the Solid Platform for Social Web Applications" ;
+    dcterms:creator "Mansour, Sambra, Hawke, Zereba, Capadisli, Ghanem, Aboulnaga, Berners-Lee; WWW 2016 Companion, ACM" .
+
+<https://arxiv.org/abs/2302.06933>
+    dcterms:title "Evaluation of Link Traversal Query Execution over Decentralized Environments with Structural Assumptions" ;
+    dcterms:creator "Taelman, Verborgh; arXiv" .
+
+<https://blog.ldodds.com/2024/03/12/baffled-by-solid/>
+    dcterms:title "Baffled by Solid" ;
+    dcterms:creator "Leigh Dodds" .
+
+<https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html>
+    dcterms:title "OWASP Cross Site Scripting Prevention Cheat Sheet" ;
+    dcterms:creator "OWASP" .
+
+<https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html>
+    dcterms:title "OWASP Server-Side Request Forgery Prevention Cheat Sheet" ;
+    dcterms:creator "OWASP" .
+
+<https://communitysolidserver.github.io/CommunitySolidServer/latest/usage/authorization-methods/>
+    dcterms:title "CSS documentation: Authorization methods" ;
+    dcterms:creator "Community Solid Server" .
+
+<https://communitysolidserver.github.io/CommunitySolidServer/latest/usage/client-credentials/>
+    dcterms:title "CSS docs: Client credentials" ;
+    dcterms:creator "CSS project" .
+
+<https://communitysolidserver.github.io/CommunitySolidServer/latest/usage/example-requests/>
+    dcterms:title "Community Solid Server: Example HTTP requests" ;
+    dcterms:creator "CSS project / imec" .
+
+<https://communitysolidserver.github.io/CommunitySolidServer/latest/usage/identity-provider/>
+    dcterms:title "Community Solid Server docs: Identity Provider" ;
+    dcterms:creator "CSS project" .
+
+<https://communitysolidserver.github.io/CommunitySolidServer/latest/usage/metadata/>
+    dcterms:title "Community Solid Server: Editing metadata of resources" ;
+    dcterms:creator "CSS project" .
+
+<https://communitysolidserver.github.io/CommunitySolidServer/latest/usage/notifications/>
+    dcterms:title "Community Solid Server: Receiving notifications" ;
+    dcterms:creator "CSS project" .
+
+<https://communitysolidserver.github.io/CommunitySolidServer/latest/usage/seeding-pods/>
+    dcterms:title "CSS docs: Seeding pods" ;
+    dcterms:creator "CSS project" .
+
+<https://communitysolidserver.github.io/CommunitySolidServer/latest/usage/starting-server/>
+    dcterms:title "CSS docs: Starting the server" ;
+    dcterms:creator "CSS project" .
+
+<https://comunica.dev/docs/query/advanced/solid/>
+    dcterms:title "Comunica — Querying Solid" ;
+    dcterms:creator "Comunica" .
+
+<https://comunica.dev/research/link_traversal/>
+    dcterms:title "Comunica — Link Traversal research" ;
+    dcterms:creator "Comunica / IDLab" .
+
+<https://dapsi.ngi.eu/success-story-pds-pod-migrator-migrating-your-solid-data/>
+    dcterms:title "Success Story: PDS Pod Migrator – Migrating your Solid data" ;
+    dcterms:creator "NGI DAPSI, c. 2022" .
+
+<https://dev.solidproject.org/>
+    dcterms:title "Solid Developer Documentation, incl. \"Building your first Solid App with LDO & React\"" ;
+    dcterms:creator "Solid Project" .
+
+<https://dev.solidproject.org/guides/authenticating_with_a_script/>
+    dcterms:title "\"Authenticating with a Node.js Script\"" ;
+    dcterms:creator "Solid Project" .
+
+<https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS>
+    dcterms:title "Cross-Origin Resource Sharing (CORS)" ;
+    dcterms:creator "MDN Web Docs" .
+
+<https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS/Errors>
+    dcterms:title "CORS errors" ;
+    dcterms:creator "MDN Web Docs" .
+
+<https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS/Errors/CORSDidNotSucceed>
+    dcterms:title "Reason: CORS request did not succeed" ;
+    dcterms:creator "MDN Web Docs" .
+
+<https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CSP>
+    dcterms:title "Content Security Policy (CSP) guide" ;
+    dcterms:creator "MDN Web Docs" .
+
+<https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Expose-Headers>
+    dcterms:title "Access-Control-Expose-Headers" ;
+    dcterms:creator "MDN Web Docs" .
+
+<https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy>
+    dcterms:title "Content-Security-Policy" ;
+    dcterms:creator "MDN Web Docs" .
+
+<https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy>
+    dcterms:title "Same-origin policy" ;
+    dcterms:creator "MDN Web Docs" .
+
+<https://docs.activitypods.org/architecture/application-interoperability/>
+    dcterms:title "ActivityPods: Application interoperability" ;
+    dcterms:creator "ActivityPods" .
+
+<https://docs.inrupt.com/ess/2.7/services/service-notification/service-websocket>
+    dcterms:title "ESS WebSocket Notification Service" ;
+    dcterms:creator "Inrupt, ESS 2.7 docs" .
+
+<https://docs.inrupt.com/ess/2.7/services/service-webid>
+    dcterms:title "ESS 2.7 WebID Service" ;
+    dcterms:creator "Inrupt" .
+
+<https://docs.inrupt.com/ess/latest/>
+    dcterms:title "Inrupt ESS 3.3 docs and Services" ;
+    dcterms:creator "Inrupt" .
+
+<https://docs.inrupt.com/ess/releases.md>
+    dcterms:title "ESS Release Notes" ;
+    dcterms:creator "Inrupt, ESS 3.3.0 released 2026-09-10" .
+
+<https://docs.inrupt.com/ess/services/service-access-grant>
+    dcterms:title "ESS Access Grant Service" ;
+    dcterms:creator "Inrupt" .
+
+<https://docs.inrupt.com/ess/services/service-access-grant/issue-endpoint>
+    dcterms:title "ESS Access Grant Service: issue endpoint" ;
+    dcterms:creator "Inrupt" .
+
+<https://docs.inrupt.com/guides/access-control-policies>
+    dcterms:title "Access Control Policies (guide)" ;
+    dcterms:creator "Inrupt" .
+
+<https://docs.inrupt.com/guides/authentication-in-solid/authentication-from-browser.md>
+    dcterms:title "Inrupt: Authentication from the browser" ;
+    dcterms:creator "Inrupt" .
+
+<https://docs.inrupt.com/guides/authentication-in-solid/authentication-from-browser/session-restore-upon-browser-refresh.md>
+    dcterms:title "Inrupt: Session restore upon browser refresh" ;
+    dcterms:creator "Inrupt" .
+
+<https://docs.inrupt.com/guides/authentication-in-solid/authentication-server-side.md>
+    dcterms:title "Inrupt: Authentication Server Side" ;
+    dcterms:creator "Inrupt" .
+
+<https://docs.inrupt.com/guides/authentication-in-solid/authentication-single-user-application.md>
+    dcterms:title "Inrupt: Authentication for single-user applications (client credentials)" ;
+    dcterms:creator "Inrupt" .
+
+<https://docs.inrupt.com/guides/universal-api>
+    dcterms:title "Universal API (guide)" ;
+    dcterms:creator "Inrupt" .
+
+<https://docs.inrupt.com/guides/webid-document-best-practices/managing-webid-profiles>
+    dcterms:title "Managing WebID Profiles" ;
+    dcterms:creator "Inrupt" .
+
+<https://docs.inrupt.com/podspaces/podspaces.md>
+    dcterms:title "Inrupt PodSpaces docs" ;
+    dcterms:creator "Inrupt" .
+
+<https://docs.inrupt.com/sdk/javascript-sdk/authentication.md>
+    dcterms:title "Inrupt JavaScript SDK: Authentication (and \"Authentication in Solid\" overview https://docs.inrupt.com/guides/authentication-in-solid.md)" ;
+    dcterms:creator "Inrupt" .
+
+<https://docs.inrupt.com/sdk/javascript-sdk/read-and-write-rdf-data.md>
+    dcterms:title "Read and Write RDF Data (Inrupt JavaScript SDK docs)" ;
+    dcterms:creator "Inrupt" .
+
+<https://docs.inrupt.com/sdk/javascript-sdk/tutorial>
+    dcterms:title "Inrupt JavaScript SDK tutorial" ;
+    dcterms:creator "Inrupt" .
+
+<https://docs.inrupt.com/security/authorization>
+    dcterms:title "Authorization (ESS)" ;
+    dcterms:creator "Inrupt" .
+
+<https://docs.inrupt.com/security/authorization/access-requests-grants.md>
+    dcterms:title "Access Requests and Grants (security overview)" ;
+    dcterms:creator "Inrupt" .
+
+<https://docs.netlify.com/manage/routing/headers/>
+    dcterms:title "Custom headers (Netlify) and Headers (Cloudflare Pages)" ;
+    dcterms:creator "Netlify and Cloudflare" .
+
+<https://forum.solidproject.org/t/acl-format-for-authorising-new-apps/1655>
+    dcterms:title "\".acl format for authorising new apps\" (forum thread)" ;
+    dcterms:creator "Solid Community Forum" .
+
+<https://forum.solidproject.org/t/how-to-authenticate-an-app-with-its-own-identity-e-g-webid/5946>
+    dcterms:title "\"How to authenticate an App with its own identity (e.g. WebID)?\" forum thread" ;
+    dcterms:creator "Solid Community Forum" .
+
+<https://forum.solidproject.org/t/solid-interop-in-practice/7701>
+    dcterms:title "Solid Interop in Practice" ;
+    dcterms:creator "Solid Forum, Rosano" .
+
+<https://forum.solidproject.org/t/upcoming-software-switch-for-solidcommunity-net/8608>
+    dcterms:title "\"Upcoming software switch for solidcommunity.net\"" ;
+    dcterms:creator "Solid forum, Michiel de Jong" .
+
+<https://forum.solidproject.org/t/why-deprecate-direct-webid-tls/2953>
+    dcterms:title "\"Why deprecate direct webid-tls?\" forum thread" ;
+    dcterms:creator "Solid Community Forum" .
+
+<https://forum.solidproject.org/t/why-is-acl-trustedapp-visible-for-everyone-on-css/5603>
+    dcterms:title "\"Why is ACL:TrustedApp visible for everyone? (on CSS)\" (forum thread)" ;
+    dcterms:creator "Solid Community Forum" .
+
+<https://gdpr-info.eu/art-20-gdpr/>
+    dcterms:title "Art. 20 GDPR – Right to data portability" ;
+    dcterms:creator "Regulation (EU) 2016/679, via gdpr-info.eu" .
+
+<https://github.com/CommunitySolidServer/access-token-verifier>
+    dcterms:title "@solid/access-token-verifier README, plus CSS source DPoPWebIdExtractor.ts / BearerWebIdExtractor.ts" ;
+    dcterms:creator "CSS project" .
+
+<https://github.com/CommunitySolidServer/access-token-verifier/blob/v2.1.1/src/config/index.ts>
+    dcterms:title "@solid/access-token-verifier 2.1.1: cache and DPoP settings" ;
+    dcterms:creator "CommunitySolidServer" .
+
+<https://github.com/CommunitySolidServer/CommunitySolidServer>
+    dcterms:title "CommunitySolidServer README" ;
+    dcterms:creator "imec / Inrupt" .
+
+<https://github.com/CommunitySolidServer/CommunitySolidServer/blob/main/config/util/auxiliary/strategies/acl.json>
+    dcterms:title "Community Solid Server default config: ACL auxiliary strategy (config/util/auxiliary/strategies/acl.json)" ;
+    dcterms:creator "CSS project" .
+
+<https://github.com/CommunitySolidServer/CommunitySolidServer/blob/main/RELEASE_NOTES.md>
+    dcterms:title "CSS release notes and GitHub releases" ;
+    dcterms:creator "CSS project" .
+
+<https://github.com/CommunitySolidServer/CommunitySolidServer/blob/v7.2.0/config/http/middleware/handlers/cors.json>
+    dcterms:title "CSS 7.2.0 CORS handler and configuration" ;
+    dcterms:creator "Community Solid Server" .
+
+<https://github.com/CommunitySolidServer/CommunitySolidServer/blob/v7.2.0/config/identity/handler/base/provider-factory.json>
+    dcterms:title "CSS 7.2.0 config: provider-factory.json" ;
+    dcterms:creator "Community Solid Server" .
+
+<https://github.com/CommunitySolidServer/CommunitySolidServer/blob/v7.2.0/src/authorization/OwnerPermissionReader.ts>
+    dcterms:title "CSS 7.2.0 OwnerPermissionReader, WebAclReader and storage-location configs" ;
+    dcterms:creator "CSS project" .
+
+<https://github.com/CommunitySolidServer/CommunitySolidServer/blob/v7.2.0/src/http/input/body/N3PatchBodyParser.ts>
+    dcterms:title "CSS 7.2.0 source: N3PatchBodyParser.ts" ;
+    dcterms:creator "Community Solid Server" .
+
+<https://github.com/CommunitySolidServer/CommunitySolidServer/blob/v7.2.0/src/identity/interaction/oidc/ConsentHandler.ts>
+    dcterms:title "CSS 7.2.0 source: ConsentHandler.ts" ;
+    dcterms:creator "CSS project" .
+
+<https://github.com/CommunitySolidServer/CommunitySolidServer/blob/v7.2.0/src/identity/interaction/webid/LinkWebIdHandler.ts>
+    dcterms:title "CSS 7.2.0 source: LinkWebIdHandler.ts" ;
+    dcterms:creator "Community Solid Server" .
+
+<https://github.com/CommunitySolidServer/CommunitySolidServer/blob/v7.2.0/src/identity/ownership/TokenOwnershipValidator.ts>
+    dcterms:title "CSS 7.2.0 source: TokenOwnershipValidator.ts" ;
+    dcterms:creator "Community Solid Server" .
+
+<https://github.com/CommunitySolidServer/CommunitySolidServer/blob/v7.2.0/src/identity/storage/ClientIdAdapterFactory.ts>
+    dcterms:title "CSS 7.2.0 source: ClientIdAdapterFactory.ts" ;
+    dcterms:creator "Community Solid Server" .
+
+<https://github.com/CommunitySolidServer/CommunitySolidServer/blob/v7.2.0/src/init/SeededAccountInitializer.ts>
+    dcterms:title "CSS 7.2.0 source: SeededAccountInitializer.ts" ;
+    dcterms:creator "Community Solid Server" .
+
+<https://github.com/CommunitySolidServer/CommunitySolidServer/blob/v7.2.0/templates/identity/account/link-webid.html.ejs>
+    dcterms:title "CSS 7.2.0 account page templates (link-webid.html.ejs, resource.html.ejs)" ;
+    dcterms:creator "Community Solid Server" .
+
+<https://github.com/CommunitySolidServer/CommunitySolidServer/tree/main/templates/pod>
+    dcterms:title "CSS pod templates (templates/pod/wac/.acl.hbs, templates/pod/wac/profile/card.acl.hbs, templates/pod/acp/.acr.hbs) and latest release v7.2.0" ;
+    dcterms:creator "CommunitySolidServer on GitHub" .
+
+<https://github.com/CommunitySolidServer/CommunitySolidServer/tree/v7.2.0>
+    dcterms:title "Community Solid Server v7.2.0 source tree (notifications, quota)" ;
+    dcterms:creator "CSS project" .
+
+<https://github.com/CommunitySolidServer/CommunitySolidServer/tree/v7.2.0/src/server/notifications/WebhookChannel2023>
+    dcterms:title "CSS 7.2.0 source: WebhookChannel2023" ;
+    dcterms:creator "Community Solid Server" .
+
+<https://github.com/digitalbazaar/jsonld.js>
+    dcterms:title "jsonld.js README" ;
+    dcterms:creator "Digital Bazaar" .
+
+<https://github.com/inrupt/solid-client-authn-js>
+    dcterms:title "inrupt/solid-client-authn-js repository, README and CHANGELOG (v5.0.1; npm registry metadata)" ;
+    dcterms:creator "Inrupt" .
+
+<https://github.com/inrupt/solid-client-authn-js/blob/main/ARCHITECTURE.md>
+    dcterms:title "solid-client-authn-js ARCHITECTURE.md" ;
+    dcterms:creator "Inrupt" .
+
+<https://github.com/inrupt/solid-client-authn-js/blob/main/packages/browser/src/Session.ts>
+    dcterms:title "solid-client-authn-js: browser Session.ts" ;
+    dcterms:creator "Inrupt" .
+
+<https://github.com/inrupt/solid-client-js/blob/main/CHANGELOG.md>
+    dcterms:title "solid-client-js CHANGELOG" ;
+    dcterms:creator "Inrupt" .
+
+<https://github.com/linkeddata/rdflib.js>
+    dcterms:title "rdflib.js README" ;
+    dcterms:creator "linkeddata" .
+
+<https://github.com/nodeSolidServer/node-solid-server>
+    dcterms:title "Node Solid Server README" ;
+    dcterms:creator "NSS project" .
+
+<https://github.com/nodeSolidServer/node-solid-server/releases>
+    dcterms:title "node-solid-server releases" ;
+    dcterms:creator "NSS project" .
+
+<https://github.com/nodeSolidServer/node-solid-server/tree/v6.0.0>
+    dcterms:title "node-solid-server v6.0.0 source" ;
+    dcterms:creator "NSS project" .
+
+<https://github.com/NoelDeMartin/media-kraken>
+    dcterms:title "Media Kraken repository" ;
+    dcterms:creator "Noel De Martin" .
+
+<https://github.com/NoelDeMartin/umai>
+    dcterms:title "Umai repository" ;
+    dcterms:creator "Noel De Martin" .
+
+<https://github.com/panva/node-oidc-provider/blob/v8.4.3/lib/helpers/defaults.js>
+    dcterms:title "node-oidc-provider 8.4.3: rotateRefreshToken()" ;
+    dcterms:creator "Filip Skokan" .
+
+<https://github.com/pdsinterop/solid-nextcloud>
+    dcterms:title "solid-nextcloud README" ;
+    dcterms:creator "PDS Interop" .
+
+<https://github.com/rdf-ext/rdf-ext>
+    dcterms:title "rdf-ext README" ;
+    dcterms:creator "RDF-Ext" .
+
+<https://github.com/rdfjs/N3.js>
+    dcterms:title "N3.js README" ;
+    dcterms:creator "RDF/JS" .
+
+<https://github.com/shapetrees/specification>
+    dcterms:title "shapetrees/specification repository" ;
+    dcterms:creator "GitHub" .
+
+<https://github.com/solid-contrib/conformance-test-harness>
+    dcterms:title "Conformance Test Harness" ;
+    dcterms:creator "solid-contrib" .
+
+<https://github.com/solid-contrib/data-modules>
+    dcterms:title "Solid Data Modules" ;
+    dcterms:creator "solid-contrib, NLnet/NGI0" .
+
+<https://github.com/solid-contrib/pivot>
+    dcterms:title "Pivot README" ;
+    dcterms:creator "solid-contrib" .
+
+<https://github.com/solid-contrib/pivot/tree/4bf3123ecab6f7e54f2471b8d014e8dffd7da7cb>
+    dcterms:title "Pivot source and configuration (v1.8.2)" ;
+    dcterms:creator "solid-contrib" .
+
+<https://github.com/solid-contrib/specification-tests>
+    dcterms:title "Solid specification-tests" ;
+    dcterms:creator "solid-contrib" .
+
+<https://github.com/solid-memo/website>
+    dcterms:title "Solid Memo repository: README, docs and source" ;
+    dcterms:creator "Solid Memo" .
+
+<https://github.com/solid/node-solid-server/blob/v6.0.0/lib/requests/create-account-request.mjs>
+    dcterms:title "node-solid-server 6.0.0 source: create-account-request.mjs" ;
+    dcterms:creator "Solid project" .
+
+<https://github.com/solid/solid-auth-client>
+    dcterms:title "solid-auth-client README" ;
+    dcterms:creator "Solid project" .
+
+<https://github.com/solid/solid-spec/blob/master/api-rest.md>
+    dcterms:title "Solid HTTPS REST API Spec (legacy solid-spec, archived)" ;
+    dcterms:creator "Solid" .
+
+<https://github.com/solid/solid-spec/blob/master/api-websockets.md>
+    dcterms:title "Solid WebSockets API (legacy, solid-0.1)" ;
+    dcterms:creator "Solid" .
+
+<https://github.com/solid/solidproject.org/wiki/Create-your-own-vocabulary>
+    dcterms:title "Create your own vocabulary" ;
+    dcterms:creator "solidproject.org wiki" .
+
+<https://github.com/solid/solidproject.org/wiki/Vocabularies-essential-to-solid>
+    dcterms:title "Vocabularies essential to Solid" ;
+    dcterms:creator "solidproject.org wiki" .
+
+<https://github.com/solid/vocab>
+    dcterms:title "solid/vocab repository" ;
+    dcterms:creator "Solid project, GitHub" .
+
+<https://github.com/solid/web-access-control-spec/issues/81>
+    dcterms:title "Client identification, issue #81" ;
+    dcterms:creator "solid/web-access-control-spec on GitHub" .
+
+<https://github.com/solid/webid-oidc-spec>
+    dcterms:title "solid/webid-oidc-spec repository (archived)" ;
+    dcterms:creator "Solid project" .
+
+<https://github.com/SolidOS/mashlib>
+    dcterms:title "mashlib README and v3.0.0 release" ;
+    dcterms:creator "SolidOS team" .
+
+<https://github.com/SolidOS/solidos>
+    dcterms:title "SolidOS README" ;
+    dcterms:creator "SolidOS team" .
+
+<https://imec-publications.be/entities/publication/60bf893e-54d1-4dd7-a596-6793b1e42ba5/full>
+    dcterms:title "Solid-enabled personal online data stores: uncovering UX implications for online data management" ;
+    dcterms:creator "Theys, Haegemans, Mechant, Bourgeus, Saldien; IHSED 2024, doi:10.54941/ahfe1005533" .
+
+<https://inrupt.com/blog/solid-achieves-major-milestone-in-web-standardization-process>
+    dcterms:title "Solid achieves major milestone in web standardization process" ;
+    dcterms:creator "Inrupt" .
+
+<https://inrupt.com/blog/why-agentic-wallets>
+    dcterms:title "Why Agentic Wallets" ;
+    dcterms:creator "Inrupt" .
+
+<https://inrupt.com/case-study/flanders-strengthens-trusted-data-economy>
+    dcterms:title "Flanders Government strengthens a trusted data economy with Inrupt's Enterprise Solid Server" ;
+    dcterms:creator "Inrupt" .
+
+<https://inrupt.com/one-small-step-for-the-web>
+    dcterms:title "One Small Step for the Web" ;
+    dcterms:creator "Tim Berners-Lee / Inrupt" .
+
+<https://ldkit.io/>
+    dcterms:title "LDkit" ;
+    dcterms:creator "Karel Klíma" .
+
+<https://ldo.js.org/latest/>
+    dcterms:title "LDO — Linked Data Objects" ;
+    dcterms:creator "O.team, NLnet/NGI Zero Entrust" .
+
+<https://lists.w3.org/Archives/Public/public-solid/2024Oct/0007.html>
+    dcterms:title "Tim Berners-Lee, message to public-solid on ODI stewardship" ;
+    dcterms:creator "W3C public-solid mailing list" .
+
+<https://lists.w3.org/Archives/Public/public-solid/2026Feb/0008.html>
+    dcterms:title "Melvin Carvalho, JavaScript Solid Server announcement" ;
+    dcterms:creator "W3C public-solid list" .
+
+<https://lov.linkeddata.es/dataset>
+    dcterms:title "Linked Open Vocabularies (LOV)" ;
+    dcterms:creator "LOV" .
+
+<https://lov.linkeddata.es/dataset/lov/vocabs/schema>
+    dcterms:title "LOV: schema.org vocabulary page" ;
+    dcterms:creator "LOV" .
+
+<https://noeldemartin.com/blog/interoperable-serendipity>
+    dcterms:title "Interoperable Serendipity" ;
+    dcterms:creator "Noel De Martin" .
+
+<https://noeldemartin.com/tasks/implementing-a-recipes-manager-using-solid>
+    dcterms:title "Noel De Martin, \"Implementing a Recipes Manager using Solid\"" ;
+    dcterms:creator "Noel De Martin, development journal for Umai" .
+
+<https://openid.net/specs/openid-connect-core-1_0.html>
+    dcterms:title "OpenID Connect Core 1.0" ;
+    dcterms:creator "OpenID Foundation" .
+
+<https://openid.net/specs/openid-connect-rpinitiated-1_0.html>
+    dcterms:title "OpenID Connect RP-Initiated Logout 1.0" ;
+    dcterms:creator "OpenID Foundation" .
+
+<https://penny.vincenttunru.com/>
+    dcterms:title "Penny" ;
+    dcterms:creator "Vincent Tunru" .
+
+<https://prefix.cc/>
+    dcterms:title "prefix.cc" ;
+    dcterms:creator "prefix.cc" .
+
+<https://registry.npmjs.org/>
+    dcterms:title "npm registry and GitHub REST API metadata for the packages and repositories named above" ;
+    dcterms:creator "npm, Inc. and GitHub, Inc." .
+
+<https://registry.npmjs.org/solid-auth-client>
+    dcterms:title "solid-auth-client on the npm registry" ;
+    dcterms:creator "npm" .
+
+<https://ruben.verborgh.org/articles/redecentralizing-the-web/>
+    dcterms:title "Re-decentralizing the Web, for good this time" ;
+    dcterms:creator "Ruben Verborgh" .
+
+<https://ruben.verborgh.org/blog/2019/06/17/shaping-linked-data-apps/>
+    dcterms:title "Shaping Linked Data apps" ;
+    dcterms:creator "Ruben Verborgh" .
+
+<https://ruben.verborgh.org/blog/2022/12/30/lets-talk-about-pods/>
+    dcterms:title "Ruben Verborgh, \"Let's talk about pods\"" ;
+    dcterms:creator "personal blog" .
+
+<https://rubenverborgh.github.io/RDF-for-Solid-2022/>
+    dcterms:title "In order to simplify: A pragmatic introduction to the power of RDF for Solid" ;
+    dcterms:creator "Ruben Verborgh, Ghent University – imec, talk slides" .
+
+<https://sagroups.ieee.org/p3330>
+    dcterms:title "IEEE P3330 Shape Expression Schemas Working Group" ;
+    dcterms:creator "IEEE SA; PAR approved 2022-12-03; see also https://standards.ieee.org/ieee/3330/11119" .
+
+<https://schema.org/children>
+    dcterms:title "schema:children" ;
+    dcterms:creator "schema.org" .
+
+<https://schema.org/docs/datamodel.html>
+    dcterms:title "Schema.org Data Model" ;
+    dcterms:creator "schema.org" .
+
+<https://schema.org/docs/faq.html>
+    dcterms:title "Schema.org FAQ (\"http or https?\")" ;
+    dcterms:creator "schema.org" .
+
+<https://schema.org/docs/schemas.html>
+    dcterms:title "Schemas (Organization of Schemas)" ;
+    dcterms:creator "schema.org" .
+
+<https://schema.org/height>
+    dcterms:title "schema:height" ;
+    dcterms:creator "schema.org" .
+
+<https://semantic-web-journal.net/content/community-solid-server-supporting-research-development-evolving-ecosystem-0>
+    dcterms:title "Van Herwegen & Verborgh, \"The Community Solid Server: Supporting Research & Development in an Evolving Ecosystem\"" ;
+    dcterms:creator "Semantic Web journal" .
+
+<https://shapetrees.github.io/specification/>
+    dcterms:title "Shape Trees Specification (Draft CG Report)" ;
+    dcterms:creator "Solid Community Group" .
+
+<https://shex.io/shex-semantics/>
+    dcterms:title "Shape Expressions Language 2.1" ;
+    dcterms:creator "W3C ShEx Community Group" .
+
+<https://solid.github.io/authorization-panel/acp-specification/>
+    dcterms:title "ACP Editor's Draft" ;
+    dcterms:creator "Solid CG authorization panel" .
+
+<https://solid.github.io/data-interoperability-panel/primer/application.html>
+    dcterms:title "Solid Application Interoperability — Application Primer" ;
+    dcterms:creator "Solid Community Group" .
+
+<https://solid.github.io/data-interoperability-panel/specification/>
+    dcterms:title "Solid Application Interoperability (Draft CG Report, v0.2)" ;
+    dcterms:creator "Solid Community Group" .
+
+<https://solid.github.io/notifications/streaming-http-channel-2023>
+    dcterms:title "StreamingHTTPChannel2023 (Draft Community Group Report)" ;
+    dcterms:creator "W3C Solid Community Group" .
+
+<https://solid.github.io/notifications/webhook-channel-2023>
+    dcterms:title "WebhookChannel2023 (Draft Community Group Report v0.1)" ;
+    dcterms:creator "W3C Solid Community Group" .
+
+<https://solid.github.io/notifications/websocket-channel-2023>
+    dcterms:title "WebSocketChannel2023 (Editor's Draft)" ;
+    dcterms:creator "W3C Solid Community Group" .
+
+<https://solid.github.io/solid-oidc/>
+    dcterms:title "Solid-OIDC, Editor's Draft (Draft Community Group Report)" ;
+    dcterms:creator "W3C Solid Community Group" .
+
+<https://solid.github.io/solid-oidc/primer/>
+    dcterms:title "Solid-OIDC Primer (Editor's Draft; also v0.1.0 at https://solidproject.org/TR/oidc-primer)" ;
+    dcterms:creator "W3C Solid Community Group" .
+
+<https://solid.github.io/type-indexes/>
+    dcterms:title "Type Indexes (v1.0.0, Editor's Draft)" ;
+    dcterms:creator "Solid Community Group" .
+
+<https://solid.github.io/webid-profile/>
+    dcterms:title "Solid WebID Profile, Draft Community Group Report" ;
+    dcterms:creator "W3C Solid Community Group" .
+
+<https://solidproject.org/about>
+    dcterms:title "About Solid" ;
+    dcterms:creator "Solid Project / ODI" .
+
+<https://solidproject.org/apps>
+    dcterms:title "Solid Apps" ;
+    dcterms:creator "Solid Project / ODI" .
+
+<https://solidproject.org/ED/protocol>
+    dcterms:title "Solid Protocol, Editor's Draft (v0.12.0)" ;
+    dcterms:creator "W3C Solid Community Group" .
+
+<https://solidproject.org/TR/>
+    dcterms:title "Solid Technical Reports" ;
+    dcterms:creator "W3C Solid Community Group" .
+
+<https://solidproject.org/TR/2021/protocol-20211217>
+    dcterms:title "Solid Protocol, Version 0.9.0" ;
+    dcterms:creator "W3C Solid Community Group" .
+
+<https://solidproject.org/TR/2022/protocol-20221231>
+    dcterms:title "Solid Protocol, Version 0.10.0" ;
+    dcterms:creator "W3C Solid Community Group" .
+
+<https://solidproject.org/TR/acp>
+    dcterms:title "Access Control Policy (ACP), Version 0.9.0" ;
+    dcterms:creator "W3C Solid Community Group" .
+
+<https://solidproject.org/TR/notifications-protocol>
+    dcterms:title "Solid Notifications Protocol, Version 0.3.0" ;
+    dcterms:creator "W3C Solid Community Group" .
+
+<https://solidproject.org/TR/oidc>
+    dcterms:title "Solid-OIDC, Version 0.1.0" ;
+    dcterms:creator "W3C Solid Community Group" .
+
+<https://solidproject.org/TR/protocol>
+    dcterms:title "Solid Protocol, Version 0.11.0 (Draft Community Group Report)" ;
+    dcterms:creator "W3C Solid Community Group" .
+
+<https://solidproject.org/TR/wac>
+    dcterms:title "Web Access Control, Version 1.0.0 (Draft Community Group Report)" ;
+    dcterms:creator "W3C Solid Community Group" .
+
+<https://solidproject.org/users/get-a-pod>
+    dcterms:title "Get a Pod" ;
+    dcterms:creator "Solid Project / ODI" .
+
+<https://soukai.js.org/>
+    dcterms:title "Soukai" ;
+    dcterms:creator "Noel De Martin" .
+
+<https://soukai.js.org/guide/advanced/interoperability.html>
+    dcterms:title "Soukai guide: Interoperability" ;
+    dcterms:creator "Soukai / Noel De Martin" .
+
+<https://strathprints.strath.ac.uk/92706>
+    dcterms:title "Forsyth & Horne, \"Clark-Wilson policies in ACP: controlling information flow between Solid apps\"" ;
+    dcterms:creator "University of Strathclyde / CEUR-WS Vol. 3947, Solid Symposium 2024 proceedings" .
+
+<https://thenextweb.com/news/web-inventor-tim-berners-lee-screw-web3-my-decentralized-internet-doesnt-need-blockchain>
+    dcterms:title "Web inventor Tim Berners-Lee: Screw Web3 — my decentralized internet doesn't need blockchain" ;
+    dcterms:creator "The Next Web" .
+
+<https://theodi.org/news-and-events/news/odi-and-solid-come-together-to-give-individuals-greater-control-over-personal-data/>
+    dcterms:title "ODI and Solid come together to give individuals greater control over personal data" ;
+    dcterms:creator "Open Data Institute" .
+
+<https://url.spec.whatwg.org/>
+    dcterms:title "URL Standard" ;
+    dcterms:creator "WHATWG Living Standard" .
+
+<https://w3c-cg.github.io/N3/spec/>
+    dcterms:title "Notation3 Language" ;
+    dcterms:creator "W3C Notation3 (N3) Community Group" .
+
+<https://webfoundation.org/2019/03/web-birthday-30/>
+    dcterms:title "30 years on, what's next #ForTheWeb?" ;
+    dcterms:creator "Tim Berners-Lee / World Wide Web Foundation" .
+
+<https://www.dublincore.org/specifications/dublin-core/dcmi-terms/>
+    dcterms:title "DCMI Metadata Terms" ;
+    dcterms:creator "DCMI Recommendation" .
+
+<https://www.ietf.org/archive/id/draft-ietf-oauth-client-id-metadata-document-02.html>
+    dcterms:title "OAuth Client ID Metadata Document, draft-ietf-oauth-client-id-metadata-document-02" ;
+    dcterms:creator "IETF OAuth WG" .
+
+<https://www.inrupt.com/blog/inrupt-gives-support-as-the-open-data-institute-commits-to-the-solid-movement>
+    dcterms:title "Inrupt gives support as the Open Data Institute commits to the Solid movement" ;
+    dcterms:creator "Inrupt" .
+
+<https://www.inrupt.com/case-study/bbc-embraces-future-of-personal-data-access-and-consent>
+    dcterms:title "The BBC shows its audience the future of personal data access and consent" ;
+    dcterms:creator "Inrupt, c. 2022" .
+
+<https://www.npmjs.com/package/@inrupt/solid-client-authn-browser/v/5.0.1>
+    dcterms:title "@inrupt/solid-client-authn-browser 5.0.1: Session (dist)" ;
+    dcterms:creator "Inrupt" .
+
+<https://www.npmjs.com/package/@inrupt/solid-client-authn-core/v/5.0.1>
+    dcterms:title "@inrupt/solid-client-authn-core 5.0.1: buildAuthenticatedFetch (dist)" ;
+    dcterms:creator "Inrupt" .
+
+<https://www.rfc-editor.org/rfc/rfc3986>
+    dcterms:title "RFC 3986: Uniform Resource Identifier (URI): Generic Syntax" ;
+    dcterms:creator "IETF, Berners-Lee/Fielding/Masinter" .
 
 <https://www.rfc-editor.org/rfc/rfc3987>
-    dcterms:title "RFC 3987: Internationalized Resource Identifiers (IRIs), January 2005" ;
-    dcterms:creator "M. Duerst, M. Suignard" .
+    dcterms:title "RFC 3987: Internationalized Resource Identifiers (IRIs)" ;
+    dcterms:creator "IETF, Dürst & Suignard" .
+
+<https://www.rfc-editor.org/rfc/rfc5023>
+    dcterms:title "RFC 5023: The Atom Publishing Protocol (§9.7 defines the Slug header, which LDP and Solid v0.10 reuse)" ;
+    dcterms:creator "IETF, Proposed Standard" .
+
+<https://www.rfc-editor.org/rfc/rfc5789>
+    dcterms:title "RFC 5789: PATCH Method for HTTP (§2: \"The server MUST apply the entire set of changes atomically\")" ;
+    dcterms:creator "IETF, Proposed Standard" .
+
+<https://www.rfc-editor.org/rfc/rfc6455>
+    dcterms:title "RFC 6455: The WebSocket Protocol (§4.1 and §11.3.4, Sec-WebSocket-Protocol token syntax)" ;
+    dcterms:creator "IETF" .
+
+<https://www.rfc-editor.org/rfc/rfc6749>
+    dcterms:title "RFC 6749: The OAuth 2.0 Authorization Framework" ;
+    dcterms:creator "IETF" .
+
+<https://www.rfc-editor.org/rfc/rfc7636>
+    dcterms:title "RFC 7636: Proof Key for Code Exchange by OAuth Public Clients (PKCE)" ;
+    dcterms:creator "IETF" .
+
+<https://www.rfc-editor.org/rfc/rfc8288>
+    dcterms:title "RFC 8288: Web Linking" ;
+    dcterms:creator "IETF, Proposed Standard" .
+
+<https://www.rfc-editor.org/rfc/rfc9110>
+    dcterms:title "RFC 9110: HTTP Semantics (§8.8 validators, §13.1 conditional requests)" ;
+    dcterms:creator "IETF" .
+
+<https://www.rfc-editor.org/rfc/rfc9112>
+    dcterms:title "RFC 9112: HTTP/1.1" ;
+    dcterms:creator "IETF" .
+
+<https://www.rfc-editor.org/rfc/rfc9207>
+    dcterms:title "RFC 9207: OAuth 2.0 Authorization Server Issuer Identification" ;
+    dcterms:creator "IETF" .
+
+<https://www.rfc-editor.org/rfc/rfc9449>
+    dcterms:title "RFC 9449: OAuth 2.0 Demonstrating Proof of Possession (DPoP)" ;
+    dcterms:creator "IETF" .
+
+<https://www.rfc-editor.org/rfc/rfc9700>
+    dcterms:title "RFC 9700: Best Current Practice for OAuth 2.0 Security" ;
+    dcterms:creator "IETF, BCP 240" .
+
+<https://www.w3.org/2005/Incubator/webid/spec/identity/>
+    dcterms:title "WebID 1.0: Web Identity and Discovery" ;
+    dcterms:creator "W3C WebID Community Group" .
+
+<https://www.w3.org/2005/Incubator/webid/spec/tls/>
+    dcterms:title "WebID Authentication over TLS (WebID-TLS)" ;
+    dcterms:creator "W3C WebID Community Group" .
+
+<https://www.w3.org/2024/09/linked-web-storage-wg-charter>
+    dcterms:title "Linked Web Storage Working Group Charter" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/2026/09/14-lws-minutes.html>
+    dcterms:title "LWS WG minutes, 14 September 2026" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/2026/09/21-lws-minutes.html>
+    dcterms:title "LWS WG minutes, 21 September 2026" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/community/solid/>
+    dcterms:title "Solid Community Group" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/DesignIssues/CloudStorage.html>
+    dcterms:title "Socially Aware Cloud Storage (Design Issues)" ;
+    dcterms:creator "Tim Berners-Lee / W3C" .
 
 <https://www.w3.org/DesignIssues/LinkedData.html>
-    dcterms:title "Linked Data (Design Issues), 2006-07-27, last changed 2009-06-18" ;
-    dcterms:creator "Tim Berners-Lee" .
+    dcterms:title "Linked Data (Design Issues)" ;
+    dcterms:creator "Tim Berners-Lee / W3C" .
 
-<https://solidproject.org/TR/2024/protocol-20240512>
-    dcterms:title "Solid Protocol, version 0.11.0, Draft Community Group Report, 12 May 2024" ;
-    dcterms:creator "Sarven Capadisli, Tim Berners-Lee, Kjetil Kjernsmo (editors); W3C Solid Community Group" .
+<https://www.w3.org/DesignIssues/ReadWriteLinkedData.html>
+    dcterms:title "Read-Write Linked Data (Design Issues)" ;
+    dcterms:creator "Tim Berners-Lee / W3C" .
+
+<https://www.w3.org/groups/wg/lws/charters/active/>
+    dcterms:title "Linked Web Storage Working Group Charter (active, with extension)" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/groups/wg/rdf-star/publications/>
+    dcterms:title "RDF & SPARQL Working Group — Publications" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/news/2026/first-public-working-draft-linked-web-storage-protocol-1-0/>
+    dcterms:title "First Public Working Draft: Linked Web Storage Protocol 1.0" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/news/2026/first-public-working-drafts-for-the-linked-web-storage-lws-1-0-authentication-suite/>
+    dcterms:title "First Public Working Drafts for the Linked Web Storage (LWS) 1.0 Authentication Suite" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/ns/auth/acl>
+    dcterms:title "ACL ontology (acl: namespace document)" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/ns/pim/space>
+    dcterms:title "Workspace (PIM space) ontology" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/ns/solid/oidc-context.jsonld>
+    dcterms:title "Solid-OIDC JSON-LD context" ;
+    dcterms:creator "W3C Solid CG" .
+
+<https://www.w3.org/ns/solid/terms>
+    dcterms:title "Solid Terms vocabulary" ;
+    dcterms:creator "Solid CG / W3C namespace, terms dated 2015–2024" .
+
+<https://www.w3.org/standards/history/lws10-authn-openid/>
+    dcterms:title "LWS authentication suites and vocabulary, publication histories" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/standards/history/lws10-core/>
+    dcterms:title "Linked Web Storage Protocol 1.0, publication history" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/standards/history/rdf12-concepts/>
+    dcterms:title "W3C publication histories for RDF 1.2 Concepts, RDF 1.2 Semantics, SPARQL 1.2 Query and SHACL 1.2 Core" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TeamSubmission/n3/>
+    dcterms:title "Notation3 (N3): A readable RDF syntax" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/2026/WD-lws10-authn-ssi-cid-20260423/>
+    dcterms:title "LWS 1.0 Authentication Suite: Self-signed Identity using Controlled Identifiers (FPWD)" ;
+    dcterms:creator "W3C LWS WG" .
+
+<https://www.w3.org/TR/activitystreams-vocabulary/>
+    dcterms:title "Activity Vocabulary" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/cooluris/>
+    dcterms:title "Cool URIs for the Semantic Web" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/dwbp/>
+    dcterms:title "Data on the Web Best Practices" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/json-ld11-api/>
+    dcterms:title "JSON-LD 1.1 Processing Algorithms and API" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/json-ld11-framing/>
+    dcterms:title "JSON-LD 1.1 Framing" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/json-ld11/>
+    dcterms:title "JSON-LD 1.1" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/ldn/>
+    dcterms:title "Linked Data Notifications" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/ldp/>
+    dcterms:title "Linked Data Platform 1.0" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/lws10-authn-openid/>
+    dcterms:title "LWS 1.0 Authentication Suite: OpenID Connect (Working Draft)" ;
+    dcterms:creator "W3C LWS WG" .
+
+<https://www.w3.org/TR/lws10-core/>
+    dcterms:title "Linked Web Storage Protocol 1.0 (W3C Working Draft)" ;
+    dcterms:creator "W3C LWS WG" .
+
+<https://www.w3.org/TR/n-quads/>
+    dcterms:title "RDF 1.1 N-Quads" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/n-triples/>
+    dcterms:title "RDF 1.1 N-Triples" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/owl2-primer/>
+    dcterms:title "OWL 2 Web Ontology Language Primer (Second Edition)" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/owl2-syntax/>
+    dcterms:title "OWL 2 Web Ontology Language Structural Specification and Functional-Style Syntax" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/prov-o/>
+    dcterms:title "PROV-O: The PROV Ontology" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/rdf-schema/>
+    dcterms:title "RDF Schema 1.1" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/rdf-syntax-grammar/>
+    dcterms:title "RDF 1.1 XML Syntax" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/rdf11-concepts/>
+    dcterms:title "RDF 1.1 Concepts and Abstract Syntax" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/rdf11-mt/>
+    dcterms:title "RDF 1.1 Semantics" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/rdf11-primer/>
+    dcterms:title "RDF 1.1 Primer" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/rdf12-concepts/>
+    dcterms:title "RDF 1.2 Concepts and Abstract Data Model" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/rdf12-primer/>
+    dcterms:title "RDF 1.2 Primer" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/rdf12-schema/>
+    dcterms:title "RDF 1.2 Schema" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/rdf12-semantics/>
+    dcterms:title "RDF 1.2 Semantics" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/rdf12-turtle/>
+    dcterms:title "RDF 1.2 Turtle" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/rdfa-primer/>
+    dcterms:title "RDFa 1.1 Primer – Third Edition" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/shacl/>
+    dcterms:title "Shapes Constraint Language (SHACL)" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/shacl12-core/>
+    dcterms:title "SHACL 1.2 Core" ;
+    dcterms:creator "W3C Data Shapes WG" .
+
+<https://www.w3.org/TR/skos-reference/>
+    dcterms:title "SKOS Simple Knowledge Organization System Reference" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/sparql11-query/>
+    dcterms:title "SPARQL 1.1 Query Language" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/sparql11-update/>
+    dcterms:title "SPARQL 1.1 Update" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/sparql12-query/>
+    dcterms:title "SPARQL 1.2 Query Language" ;
+    dcterms:creator "W3C RDF-star WG" .
+
+<https://www.w3.org/TR/swbp-vocab-pub/>
+    dcterms:title "Best Practice Recipes for Publishing RDF Vocabularies" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/trig/>
+    dcterms:title "RDF 1.1 TriG" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/turtle/>
+    dcterms:title "RDF 1.1 Turtle" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/vcard-rdf/>
+    dcterms:title "vCard Ontology — for describing People and Organizations" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/vocab-dcat-3/>
+    dcterms:title "Data Catalog Vocabulary (DCAT) – Version 3" ;
+    dcterms:creator "W3C" .
+
+<https://www.w3.org/TR/webarch/>
+    dcterms:title "Architecture of the World Wide Web, Volume One" ;
+    dcterms:creator "W3C" .
+
+<https://zenodo.org/records/7641620>
+    dcterms:title "Making Sense of Solid for Data Governance and GDPR" ;
+    dcterms:creator "Harshvardhan J. Pandit; Information 14(2):114, MDPI" .
+
+<https://github.com/CommunitySolidServer/CommunitySolidServer/releases/tag/v7.2.0>
+    dcterms:title "Community Solid Server v7.2.0" ;
+    dcterms:creator "Community Solid Server project (imec, Inrupt)" .
+
+<https://github.com/nodeSolidServer/node-solid-server/releases/tag/v6.0.0>
+    dcterms:title "node-solid-server v6.0.0" ;
+    dcterms:creator "node-solid-server project" .
 
 <https://solid-memo.com/decks/solid-fundamentals/v1.ttl#turtle>
     a dcat:Distribution ;

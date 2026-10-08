@@ -181,6 +181,7 @@ export const CARD_V5: ShapeDescriptor<CardV5> = {
     { name: "created", predicate: "http://purl.org/dc/terms/created", kind: "dateTime", cardinality: "optional" },
     { name: "deprecated", predicate: "http://www.w3.org/2002/07/owl#deprecated", kind: "boolean", cardinality: "optional" },
     { name: "distractor", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#distractor", kind: "iri", cardinality: "many" },
+    { name: "textFormat", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#textFormat", kind: "iri", cardinality: "optional" },
   ],
 };
 
@@ -220,6 +221,7 @@ export const CHAPTER_V1: ShapeDescriptor<ChapterV1> = {
     { name: "position", predicate: "https://schema.org/position", kind: "integer", cardinality: "one" },
     { name: "reviewQuestion", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#reviewQuestion", kind: "iri", cardinality: "many" },
     { name: "deprecated", predicate: "http://www.w3.org/2002/07/owl#deprecated", kind: "boolean", cardinality: "optional" },
+    { name: "textFormat", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#textFormat", kind: "iri", cardinality: "optional" },
   ],
 };
 
@@ -846,6 +848,7 @@ export const STEP_V1: ShapeDescriptor<StepV1> = {
     { name: "chapter", predicate: "https://schema.org/isPartOf", kind: "iri", cardinality: "one" },
     { name: "position", predicate: "https://schema.org/position", kind: "integer", cardinality: "one" },
     { name: "deprecated", predicate: "http://www.w3.org/2002/07/owl#deprecated", kind: "boolean", cardinality: "optional" },
+    { name: "textFormat", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#textFormat", kind: "iri", cardinality: "optional" },
   ],
 };
 

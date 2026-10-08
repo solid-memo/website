@@ -120,6 +120,26 @@ export const ANSWER_MODES = {
   ],
 } as const satisfies ConceptScheme;
 
+/** How the texts of a card, a course step or a course chapter are written. */
+export const TEXT_FORMATS = {
+  iri: "https://solid-memo.com/ns/vocab/v1.ttl#TextFormats",
+  title: "Text formats",
+  concepts: [
+    {
+      iri: "https://solid-memo.com/ns/vocab/v1.ttl#plainText",
+      label: { en: "Plain text" },
+      definition: { en: "Text shown as written. The same as no text format; stated where a person chose it." },
+      notation: "plain",
+    },
+    {
+      iri: "https://solid-memo.com/ns/vocab/v1.ttl#markdown",
+      label: { en: "Markdown" },
+      definition: { en: "CommonMark 0.31.2, with GitHub Flavored Markdown pipe tables as its one extension." },
+      notation: "markdown",
+    },
+  ],
+} as const satisfies ConceptScheme;
+
 /** What a deck of flashcards is about. */
 export const TOPICS = {
   iri: "https://solid-memo.com/ns/vocab/topics.ttl",

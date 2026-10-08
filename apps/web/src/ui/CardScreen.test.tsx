@@ -5,6 +5,7 @@ import type { Card } from "@solid-memo/domain/deck";
 import { alertTexts, statusTexts } from "../test/liveRegions";
 import { I18nProvider } from "./i18n";
 import { recentLanguages } from "./remembered";
+import { SM } from "@solid-memo/vocab/vocab.generated";
 
 beforeEach(() => localStorage.clear());
 
@@ -256,6 +257,66 @@ describe("CardScreen", () => {
     });
   });
 
+  it("edits a text saved with a line break, in any of its languages, in a textarea that keeps it", () => {
+    const { props } = renderScreen({
+      card: {
+        ...card,
+        back: { en: "water\nH₂O" },
+        backNote: { en: "An element.", sv: "Ett av\nde fem elementen." },
+        frontNote: { en: "Kanji" },
+      },
+    });
+    expect(screen.getByLabelText("Back").tagName).toBe("TEXTAREA");
+    expect(screen.getByLabelText("Back")).toHaveValue("water\nH₂O");
+    expect(screen.getByLabelText("Back note (optional)").tagName).toBe("TEXTAREA");
+    expect(screen.getByLabelText("Front").tagName).toBe("INPUT");
+    expect(screen.getByLabelText("Front note (optional)").tagName).toBe("INPUT");
+    expect(screen.getByLabelText("Label (optional)").tagName).toBe("INPUT");
+    // What was saved decides, so the field stays a textarea as its breaks are typed away.
+    fireEvent.input(screen.getByLabelText("Back note (optional)"), { target: { value: "An element.\n\nOne of five." } });
+    fireEvent.input(screen.getByLabelText("Back"), { target: { value: "water" } });
+    expect(screen.getByLabelText("Back").tagName).toBe("TEXTAREA");
+    fireEvent.input(screen.getByLabelText("Back"), { target: { value: "water\n\n  H₂O\n" } });
+    fireEvent.keyDown(screen.getByLabelText("Back"), { key: "Enter", ctrlKey: true });
+    expect(props.onSave).toHaveBeenCalledWith({
+      front: { ja: "水" },
+      frontNote: { en: "Kanji" },
+      back: { en: "water\n\n  H₂O" },
+      backNote: { en: "An element.\n\nOne of five.", sv: "Ett av\nde fem elementen." },
+    });
+  });
+
+  it("edits any text saved with a break in a textarea, the label and a picture's description too, a carriage return alone a break", () => {
+    renderScreen({
+      card: {
+        ...card,
+        front: { ja: "水\r火" },
+        backLabel: { en: "Element,\nnoun" },
+        frontImageUrl: FLAG,
+        frontImageDescription: { en: "A flag\nwaving" },
+        backImageUrl: MAP,
+        backImageDescription: { en: "A map" },
+      },
+    });
+    expect(screen.getByLabelText("Front").tagName).toBe("TEXTAREA");
+    expect(screen.getByLabelText("Label (optional)").tagName).toBe("TEXTAREA");
+    expect(screen.getByLabelText("Front picture description (optional)").tagName).toBe("TEXTAREA");
+    expect(screen.getByLabelText("Back picture description (optional)").tagName).toBe("INPUT");
+  });
+
+  it("keeps a textarea, and its focus, once the text is saved without its breaks", () => {
+    const { props, rerender } = renderScreen({ card: { ...card, back: { en: "water\nH₂O" } } });
+    const back = screen.getByLabelText("Back");
+    back.focus();
+    fireEvent.input(back, { target: { value: "water" } });
+    fireEvent.keyDown(back, { key: "Enter", ctrlKey: true });
+    expect(props.onSave).toHaveBeenCalledWith({ front: { ja: "水" }, back: { en: "water" } });
+    rerender(<CardScreen {...props} card={{ ...card, back: { en: "water" } }} saved />);
+    expect(screen.getByLabelText("Back")).toBe(back);
+    expect(back.tagName).toBe("TEXTAREA");
+    expect(document.activeElement).toBe(back);
+  });
+
   it("shows a picture card and prefills its picture fields", () => {
     const { container } = renderScreen({
       card: {
@@ -393,10 +454,11 @@ describe("CardScreen", () => {
 
   it("confirms each save in a status line mounted throughout", () => {
     const { rerender, props } = renderScreen();
-    const status = screen.getByRole("status");
-    expect(status.textContent).toBe("");
+    // The save's line is the screen's last status, after the form's own (its Markdown's).
+    const status = screen.getAllByRole("status").at(-1)!;
+    expect(statusTexts()).toEqual([]);
     rerender(<CardScreen {...props} saved />);
-    expect(screen.getByRole("status")).toBe(status);
+    expect(screen.getAllByRole("status").at(-1)).toBe(status);
     expect(status).toHaveTextContent("Saved.");
   });
 
@@ -424,5 +486,58 @@ describe("CardScreen", () => {
     expect(confirm).not.toHaveBeenCalled();
     expect(props.onRemove).not.toHaveBeenCalled();
     vi.unstubAllGlobals();
+  });
+
+  describe("in Markdown", () => {
+    const toggle = () => screen.getByRole("checkbox", { name: "Format with Markdown" });
+    const marked: Card = { ...card, back: { en: "`H2O`" }, textFormat: SM.markdown };
+
+    it("shows a card in Markdown with the toggle on, and saves it unchanged without stating its format again", () => {
+      const { props } = renderScreen({ card: marked });
+      expect(toggle()).toBeChecked();
+      expect(screen.getByLabelText("Back").tagName).toBe("TEXTAREA");
+      fireEvent.click(screen.getByRole("button", { name: "Save" }));
+      expect(props.onSave).toHaveBeenCalledWith({ front: { ja: "水" }, back: { en: "`H2O`" } });
+    });
+
+    it("saves a card in Markdown switched off as plain text, keeping its textareas", () => {
+      const { props, container } = renderScreen({ card: marked });
+      fireEvent.click(toggle());
+      expect(screen.getByLabelText("Back").tagName).toBe("TEXTAREA");
+      expect(container.querySelector(".card-preview")).toBeNull();
+      fireEvent.click(screen.getByRole("button", { name: "Save" }));
+      expect(props.onSave).toHaveBeenCalledWith({ front: { ja: "水" }, back: { en: "`H2O`" }, textFormat: SM.plainText });
+    });
+
+    it("says when a plain card switched on reads differently, and saves it in Markdown", () => {
+      const { props } = renderScreen({ card: { ...card, back: { en: "H*2*O" } } });
+      fireEvent.click(toggle());
+      expect(screen.getByText("Some of this card's text reads differently as Markdown: check the preview.")).toBeInTheDocument();
+      fireEvent.click(screen.getByRole("button", { name: "Save" }));
+      expect(props.onSave).toHaveBeenCalledWith({ front: { ja: "水" }, back: { en: "H*2*O" }, textFormat: SM.markdown });
+    });
+
+    it("says nothing of reading differently for a card already in Markdown", () => {
+      renderScreen({ card: { ...marked, back: { en: "**H2O**" } } });
+      expect(screen.queryByText(/reads differently/)).toBeNull();
+    });
+
+    it("holds the back of a card with wrong options to one paragraph, and previews it as an option", () => {
+      const { container } = renderScreen({
+        card: { ...marked, distractors: [{ id: "card-1-d1", text: { en: "`CO2`" } }] },
+      });
+      expect(container.querySelector(".card-preview-option")).toHaveTextContent("As an option: H2O");
+      fireEvent.input(screen.getByLabelText("Back"), { target: { value: "H2O\n\nwater" } });
+      expect(container.querySelector("#card-back-hints")).toHaveTextContent(
+        "This card's back is one of the options of a question: keep it to one paragraph, as the others are.",
+      );
+    });
+
+    it("keeps Markdown switched before what is known of the deck comes", () => {
+      const { props, rerender } = renderScreen();
+      fireEvent.click(toggle());
+      rerender(<CardScreen {...props} languages={{ own: "sv", unstatedCounts: { front: 0, back: 0 } }} />);
+      expect(toggle()).toBeChecked();
+    });
   });
 });

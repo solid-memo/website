@@ -1,5 +1,7 @@
 import type { ChapterState, CourseChapter, CourseOutline, CourseProgress } from "@solid-memo/domain/course";
+import { isMarkdown } from "@solid-memo/domain/deck";
 import type { LangText } from "@solid-memo/domain/langText";
+import { DataText } from "./DataText";
 import { CheckIcon } from "./icons";
 import { useI18n, type I18n } from "./i18n";
 import { linkify } from "./linkify";
@@ -22,7 +24,9 @@ function stateLabel(state: ChapterState, t: I18n["t"]): string {
  * step to resume at, or the final review once a chapter's steps are
  * done), and its chapters in order, each locked until the one before it
  * is completed, open, or done, with how many of its steps are done. An
- * open or done chapter's title links to it; a locked one's does not.
+ * open or done chapter's title links to it; a locked one's does not. A
+ * chapter's description may be in Markdown (its `textFormat`); its title
+ * is always plain.
  */
 export function CourseScreen({
   title,
@@ -90,7 +94,7 @@ export function CourseScreen({
               </h3>
               <span class={`course-state ${state}`}>{stateLabel(state, t)}</span>
               {chapter.description !== undefined && (
-                <p lang={readerLang(chapter.description)}>{readerText(chapter.description)}</p>
+                <DataText text={chapter.description} markdown={isMarkdown(chapter.textFormat)} />
               )}
               <p class="hint">
                 {t("course.stepsDone", { done: doneStepIds.length, count: chapter.steps.length })}

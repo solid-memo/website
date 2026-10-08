@@ -1,7 +1,8 @@
 import { useLayoutEffect, useRef } from "preact/hooks";
 import type { Choice, CourseChapter } from "@solid-memo/domain/course";
-import type { CardContent } from "@solid-memo/domain/deck";
+import { isMarkdown, type CardContent } from "@solid-memo/domain/deck";
 import { CourseQuestion, type CheckedAnswer } from "./CourseQuestion";
+import { DataProse } from "./DataText";
 import { useI18n, type ErrorText } from "./i18n";
 import { ReaderText } from "./ReaderText";
 
@@ -15,6 +16,9 @@ import { ReaderText } from "./ReaderText";
  * As a new step comes up, its heading takes the focus, so its theory is
  * read before its question; a second question of the same step takes the
  * focus itself.
+ *
+ * Theory in Markdown (the step's `textFormat`) is shown as its blocks;
+ * plain theory as paragraphs, split at its blank lines (DataProse).
  */
 export function ChapterPlayerScreen({
   chapter,
@@ -42,7 +46,7 @@ export function ChapterPlayerScreen({
   onCheck: (choice: Choice) => void;
   onNext: () => void;
 }) {
-  const { t, readerText, readerLang } = useI18n();
+  const { t } = useI18n();
   const step = chapter.steps[stepIndex]!;
   const stepRef = useRef<HTMLHeadingElement>(null);
   const shownStep = useRef(stepIndex);
@@ -54,10 +58,6 @@ export function ChapterPlayerScreen({
     stepRef.current!.focus();
   }, [stepIndex]);
 
-  const theory = readerText(step.theory)
-    .split(/\n\s*\n/)
-    .map((paragraph) => paragraph.trim())
-    .filter((paragraph) => paragraph !== "");
   return (
     <section class="course-player">
       <header>
@@ -75,11 +75,7 @@ export function ChapterPlayerScreen({
           max={chapter.steps.length}
           aria-label={t("chapterPlayer.progress")}
         />
-        <div class="course-theory" lang={readerLang(step.theory)}>
-          {theory.map((paragraph, index) => (
-            <p key={index}>{paragraph}</p>
-          ))}
-        </div>
+        <DataProse class="course-theory" text={step.theory} markdown={isMarkdown(step.textFormat)} />
       </article>
       <h3 class="course-check-heading">
         {step.questionIds.length > 1

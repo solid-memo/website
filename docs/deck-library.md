@@ -83,7 +83,7 @@ the cards out. It keeps the release's `schema:Course` type, so the app
 can tell a course from a deck by the index alone (`LibraryDeck.isCourse`).
 The app reads the outline from the release when the learner opens the
 course. [`decks/solid-fundamentals/v1.ttl`](../decks/solid-fundamentals/v1.ttl)
-is the first course.
+is the first course, and the first release written in Markdown.
 
 A course's chapters, steps and distractors are never removed, as its
 cards are not: one that should go is retired (`owl:deprecated true`), so
@@ -148,6 +148,61 @@ next. To change a deck `<name>` whose latest version is `N`:
 A new deck is the same with `decks/<name>/v1.ttl`, without `dcat:prev`
 and `dcat:previousVersion`, its notes "First release.".
 
+**Text over several lines.** `npm run format:turtle` writes a literal
+whose text has a line feed as a long string, `"""…"""` with its language
+tag, its lines verbatim and never indented (leading spaces can matter).
+A backslash and every control character but a tab or a line feed are
+escaped (a carriage return as `\r`), and so is any quote that would end
+or run into a delimiter, so the text reads back the same. Every other
+literal stays on one line.
+
+## Authoring Markdown
+
+A card, a course step or a chapter may be written in Markdown
+([markdown.md](markdown.md)): CommonMark with pipe tables, for code,
+tables and lists. Text is plain unless its subject says otherwise, so
+a release that says nothing reads exactly as before.
+
+- **The marker.** State `solid-memo:textFormat solid-memo:markdown` on
+  each card, step and chapter written in it, and on nothing else
+  ([vocab.md](vocab.md#text-formats)). On a card it covers its sides,
+  notes and label, and its distractors' text and notes, which carry no
+  marker of their own; on a step its theory; on a chapter its
+  description, never its title. A picture's description, a deck's title,
+  description and keywords, and the version notes are always plain.
+- **One marker per subject, not per deck.** A card copied alone keeps
+  its meaning. Mark only what needs Markdown: a card whose text is plain
+  stays unmarked.
+- **Several lines** are a Turtle long string, `"""…"""@en`, which
+  `npm run format:turtle` writes with its lines verbatim and never
+  indented, as a code block needs ([above](#publishing-a-new-version)).
+- **Each language is its own document.** A code block in `@en` text
+  stays `@en`; a back that is code alone may be untagged or `@zxx`, its
+  distractors' text then the same.
+- **Plain-text habits read otherwise in Markdown**: `<url>` is raw HTML,
+  `&aring;` is "å", `*` and `_` may emphasise, `<ex:title>` is a link.
+  Write such text as code (`` `git clone <url>` ``).
+- **A published version is never marked afterwards.** A deck takes
+  Markdown in its next version; the library upgrade brings the marker
+  to the copies ([migrations.md](migrations.md#catching-up-with-the-library)).
+
+```turtle
+<#q-staged> a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    solid-memo:textFormat solid-memo:markdown ;
+    solid-memo:front "Which Git command shows **staged** changes?"@en ;
+    solid-memo:back "`git diff --staged`"@zxx ;
+    solid-memo:backNote """Without `--staged`, `git diff` compares the working tree with the index:
+
+| Command | Compares |
+|---|---|
+| `git diff` | working tree and index |
+| `git diff --staged` | index and `HEAD` |"""@en .
+```
+
+`npm run library` checks what is written in Markdown by the
+[Markdown rules](#markdown-rules).
+
 ## Checks
 
 [`packages/shacl/node/deckLibrary.ts`](../packages/shacl/node/deckLibrary.ts)
@@ -163,7 +218,8 @@ what the versions make. Both check:
   for version 1);
 - that no version drops a card, chapter, step or distractor of the one
   before it;
-- a course's outline, by the rules below;
+- a course's outline, by the [course rules](#course-rules);
+- text in Markdown, by the [Markdown rules](#markdown-rules);
 - every version and the index against Solid Memo's shapes, DCAT-AP (a
   version with the index beside it) and SKOS, with the reference data.
 
@@ -196,6 +252,41 @@ runs on every version, and finds nothing in a plain deck:
 Retired steps and chapters do not count toward the rules on positions
 or on how a card is asked.
 
+### Markdown rules
+
+`markdownProblems` checks, field by field, the text of every card, step
+and chapter that states `sm:textFormat sm:markdown`, by the
+[rules for a release](markdown.md#rules-for-a-release). In short:
+
+- no raw HTML and no pictures;
+- no link in a card's `front`, `back` or `backLabel`, or in a
+  `distractorText`, an autolink (`<ex:title>`, `<http://…>`) included;
+  elsewhere only links the app follows (`https:`, without a user name
+  or password), whose text, when it reads as an address or a host
+  name, names the very host the link leads to, give or take a `www.`
+  (not a domain it is in, such as `github.io`). Any dotted word ending
+  in letters reads as a host name: "Node.js", and file names such as
+  `package.json`, `v1.ttl` or `README.md`, even as code, so word such
+  link text otherwise;
+- no bidi control, zero-width or other hidden character in code or a link (docs/markdown.md lists them);
+- no character reference (`&aring;`) outside code;
+- on a card with distractors, its `back` and each `distractorText` one
+  paragraph, not a heading, as options are;
+- nothing past the limits the app reads Markdown within: 20,000
+  characters, 8 levels of blocks and markup (each quote, list item,
+  paragraph, emphasis and link is one; plain text that shows as written
+  anyway passes), a table of 20 columns or 2,000 cells.
+
+It also checks that only a card, a step or a chapter states
+`sm:textFormat` (a distractor's text is written as its card's, and any
+other subject's is plain), and
+only a concept of `sm:TextFormats`. A text not marked is not checked:
+plain text is shown as written.
+
+None of this is what keeps the app safe, which shows any text safely
+([markdown.md](markdown.md#safety)): it is that the text shows as its
+author meant.
+
 With `-- --base <git ref>` they also compare with the library at that
 commit: a version published there that is gone or differs by a byte
 fails. `npm run check` runs `library:check` without a base, and so
@@ -213,7 +304,10 @@ npm run library:check -- --base origin/main
 ```
 
 pySHACL checks the index and every version against DCAT-AP once more
-([validation.md](validation.md#the-ci-cross-check)).
+([validation.md](validation.md#the-ci-cross-check)), and
+[libraryReleases.test.ts](../packages/solid/src/libraryReleases.test.ts)
+reads every version as the app does, its cards and a course's outline
+([testing.md](testing.md#strategy-per-layer)).
 
 ## Reading it
 

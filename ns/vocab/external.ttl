@@ -97,3 +97,7 @@
 <https://www.iana.org/assignments/media-types/text/turtle>
     a dcterms:MediaType ;
     rdfs:label "text/turtle" .
+
+<https://www.iana.org/assignments/media-types/text/markdown>
+    a dcterms:MediaType ;
+    rdfs:label "text/markdown" .

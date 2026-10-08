@@ -276,7 +276,7 @@ describe("what the app writes, under DCAT-AP", () => {
   });
 
   it("conforms: a course's deck with the chapters it completed, to DCAT-AP and its own shape", async () => {
-    const chapter = "https://solid-memo.com/decks/solid-fundamentals/v1.ttl#ch-linked-data";
+    const chapter = "https://solid-memo.com/decks/solid/v1.ttl#ch-linked-data";
     const document = catalogDocument();
     const dataset = setThing(document, buildThing(getThing(document, deck.url)!).addIri(SM.completedChapter, chapter).build());
     const written = toRdfJsDataset(dataset);

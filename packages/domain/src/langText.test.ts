@@ -71,6 +71,12 @@ describe("a card side's text", () => {
     expect(tidiedSideText({ "": "  " })).toEqual({});
     expect(tidiedSideText({})).toEqual({});
   });
+
+  it("keeps the spaces a formatted text's first line starts with, losing only blank lines before and white space after", () => {
+    expect(tidiedSideText({ en: " \n\t\r\n    code \n", sv: "\n " }, true)).toEqual({ en: "    code" });
+    expect(tidiedTagged({ en: "  - item\n" }, true)).toEqual({ en: "  - item" });
+    expect(tidiedTagged({ en: "  - item\n" })).toEqual({ en: "- item" });
+  });
 });
 
 describe("language-tagged text that needs no English", () => {

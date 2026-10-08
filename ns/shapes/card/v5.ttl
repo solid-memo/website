@@ -12,7 +12,7 @@
 <#shape>
     a sh:NodeShape ;
     sh:name "CardV5" ;
-    rdfs:comment "Card format 5: each side has text, a picture or both (a picture is always an IRI); a side's text is untagged, its language unknown, or language-tagged, one text per language; a side's picture may have a description, its text alternative, language-tagged text, one per language; each side may have a note under it, shown once the answer is revealed, and the back a label above it that says how the answer relates to the front, all three language-tagged text in any language, one per language; a retired card, which is kept but no longer studied, states owl:deprecated true; a card asked as a multiple-choice question names its wrong options, distractors of the same document (since vocabulary 1.14, without a format bump)." ;
+    rdfs:comment "Card format 5: each side has text, a picture or both (a picture is always an IRI); a side's text is untagged, its language unknown, or language-tagged, one text per language; a side's picture may have a description, its text alternative, language-tagged text, one per language; each side may have a note under it, shown once the answer is revealed, and the back a label above it that says how the answer relates to the front, all three language-tagged text in any language, one per language; a retired card, which is kept but no longer studied, states owl:deprecated true; a card asked as a multiple-choice question names its wrong options, distractors of the same document (since vocabulary 1.14, without a format bump); a card may say how its texts are written, solid-memo:textFormat, plain or Markdown (since vocabulary 1.15, without a format bump)." ;
     sh:nodeKind sh:IRI ;
     sh:class solid-memo:Card ;
     sh:property <#formatVersion> ,
@@ -27,7 +27,8 @@
                 <#backNote> ,
                 <#created> ,
                 <#deprecated> ,
-                <#distractor> ;
+                <#distractor> ,
+                <#textFormat> ;
     sh:or ( [ sh:path solid-memo:front ; sh:minCount 1 ] [ sh:path solid-memo:frontImage ; sh:minCount 1 ] ) ,
           ( [ sh:path solid-memo:back ; sh:minCount 1 ] [ sh:path solid-memo:backImage ; sh:minCount 1 ] ) ,
           ( [ sh:path solid-memo:front ; sh:qualifiedValueShape <#untagged> ; sh:qualifiedMaxCount 0 ] [ sh:path solid-memo:front ; sh:qualifiedValueShape <#tagged> ; sh:qualifiedMaxCount 0 ] ) ,
@@ -149,3 +150,11 @@
     sh:nodeKind sh:IRI ;
     sh:message "A card's distractors, its wrong options, are IRIs (<#…>) of solid-memo:Distractor subjects, never string literals."@en ,
                "Ett korts distraktorer, dess felaktiga alternativ, är IRI:er (<#…>) till solid-memo:Distractor-subjekt, aldrig strängliteraler."@sv .
+
+<#textFormat>
+    a sh:PropertyShape ;
+    sh:path solid-memo:textFormat ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+    sh:message "A card's text format is at most one IRI, a concept of solid-memo:TextFormats."@en ,
+               "Ett korts textformat är högst en IRI, ett begrepp i solid-memo:TextFormats."@sv .

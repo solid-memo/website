@@ -14,8 +14,10 @@ import {
   getUrl,
   getUrlAll,
   mockSolidDatasetFrom,
+  responseToSolidDataset,
   saveSolidDatasetAt,
   setThing,
+  solidDatasetAsTurtle,
   type SolidDataset,
 } from "@inrupt/solid-client";
 import { createSolidDeckRepository } from "./solidDeckRepository";
@@ -765,6 +767,53 @@ describe("updateCard", () => {
     const again = vi.mocked(saveSolidDatasetAt).mock.calls[1][1] as SolidDataset;
     expect(getThing(again, `${deck.cardsDocumentUrl}#card-1-d1`)).toBeNull();
     expect(getStringWithLocale(getThing(again, `${deck.cardsDocumentUrl}#card-1-d2`)!, SM.distractorText, "en")).toBe("Earth");
+  });
+
+  it("keeps a card's text format when the edit states none, and writes the one it states", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(cardsDoc());
+
+    const kept = await makeRepository().updateCard(deck, { ...card, textFormat: SM.markdown }, { front: { "": "水" }, back: { "": "**water**" } });
+
+    expect(kept.textFormat).toBe(SM.markdown);
+    const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as SolidDataset;
+    expect(getUrlAll(getThing(saved, card.url)!, SM.textFormat)).toEqual([SM.markdown]);
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(saved as Awaited<ReturnType<typeof getSolidDatasetOrNull>>);
+
+    const plain = await makeRepository().updateCard(deck, kept, { front: { "": "水" }, back: { "": "**water**" }, textFormat: SM.plainText });
+
+    expect(plain.textFormat).toBe(SM.plainText);
+    const again = vi.mocked(saveSolidDatasetAt).mock.calls[1][1] as SolidDataset;
+    expect(getUrlAll(getThing(again, card.url)!, SM.textFormat)).toEqual([SM.plainText]);
+  });
+
+  it("keeps a text format this app does not know through an edit, and writes none for a card that has none", async () => {
+    const unknown = "https://example.org/formats#asciidoc";
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(cardsDoc());
+
+    await makeRepository().updateCard(deck, { ...card, textFormat: unknown }, { front: { "": "水" }, back: { "": "water" } });
+    await makeRepository().updateCard(deck, card, { front: { "": "水" }, back: { "": "water" } });
+
+    const [first, second] = vi.mocked(saveSolidDatasetAt).mock.calls.map((call) => call[1] as SolidDataset);
+    expect(getUrlAll(getThing(first!, card.url)!, SM.textFormat)).toEqual([unknown]);
+    expect(getUrlAll(getThing(second!, card.url)!, SM.textFormat)).toEqual([]);
+  });
+
+  it("keeps a text's line breaks and leading spaces through the pod's Turtle and back", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(cardsDoc());
+    const content = {
+      front: { en: "Run it" },
+      back: { en: "a\n\n  b", sv: "a\r\nb\n" },
+      backNote: { en: "# Not a comment\n\"quoted\"\n" },
+    };
+
+    await makeRepository().updateCard(deck, card, content);
+
+    const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as SolidDataset;
+    const response = new Response(await solidDatasetAsTurtle(saved), { headers: { "Content-Type": "text/turtle" } });
+    Object.defineProperty(response, "url", { value: deck.cardsDocumentUrl });
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(await responseToSolidDataset(response));
+    const [read] = await makeRepository().listCards(deck);
+    expect(read).toMatchObject(content);
   });
 
   it("keeps a retired card retired when it is edited", async () => {

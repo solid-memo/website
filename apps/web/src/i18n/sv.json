@@ -173,7 +173,13 @@
     "backImageDescription": "Bildbeskrivning på baksidan (valfritt)",
     "backNote": "Anteckning på baksidan (valfritt)",
     "backNoteHint": "Visas under baksidan när svaret har visats.",
-    "sidesHint": "Varje sida behöver text, en bild eller båda."
+    "sidesHint": "Varje sida behöver text, en bild eller båda.",
+    "markdown": "Formatera med Markdown",
+    "markdownHint": "När det är på är kortets text Markdown: kod, listor, tabeller och mer. När det är av visas texten precis som den skrivits.",
+    "markdownDiffers": "En del av kortets text läses annorlunda som Markdown: titta i förhandsvisningen.",
+    "markdownDiffersTranslation": "En del av kortets översättningar läses annorlunda som Markdown: titta på dem innan du sparar.",
+    "preview": "Förhandsvisning",
+    "previewOption": "Som svarsalternativ:"
   },
   "cardCreator": {
     "heading": "Nytt kort",
@@ -231,6 +237,43 @@
     "wrong": "Inte riktigt.",
     "added": "Tillagt i din kortlek.",
     "why": "Varför inte:"
+  },
+  "markdown": {
+    "code": "Kod",
+    "table": "Tabell",
+    "linkHost": "({host})"
+  },
+  "markdownHelp": {
+    "summary": "Hjälp med formatering",
+    "intro": "En tom rad börjar ett nytt stycke. Länkar följs bara i anteckningarna.",
+    "write": "Skriv",
+    "gives": "Ger",
+    "emphasis": "betoning",
+    "strong": "stark betoning",
+    "code": "kod inom en rad",
+    "codeBlock": "ett kodblock, dess rader som de skrivits",
+    "list": "en lista",
+    "numbered": "en numrerad lista",
+    "quote": "ett citat",
+    "table": "en tabell",
+    "link": "en länk, i en anteckning",
+    "escape": "ett tecken som visas som det skrivits"
+  },
+  "markdownProblem": {
+    "tooLong": "För lång för att läsas som Markdown ({length} tecken): den visas som vanlig text.",
+    "tooComplex": "För invecklad för att läsas som Markdown: den visas som vanlig text.",
+    "tooDeep": "För djupt nästlad: den innersta delen visas som den skrivits.",
+    "largeTable": "En så stor tabell visas som den skrivits: högst 20 kolumner och 2 000 celler.",
+    "html": "HTML som {source} visas som den skrivits. Sätt den inom bakåtfnuttar för att visa den som kod.",
+    "image": "Bilder i Markdown visas inte, bara deras beskrivning: lägg till en i sidans bildfält.",
+    "link": "Inga länkar här, där de skulle vara i vägen när du pluggar: {source} visas som sin text. Lägg en länk i en anteckning.",
+    "autolink": "{source} läses som en länk, som visas utan sina vinkelparenteser. Sätt den inom bakåtfnuttar för att visa den som den skrivits.",
+    "linkNotFollowed": "Bara https-länkar följs: {url} visas som text.",
+    "linkHost": "Länktexten ”{text}” namnger en annan webbplats än den länken leder till, {host}.",
+    "hiddenControl": "Dolda tecken i kod eller en länk visas som markörer: {controls}.",
+    "characterReference": "{source} visas som tecknet den namnger. Skriv \\{source} för att visa den som den skrivits.",
+    "notOneParagraph": "Kortets baksida är ett av svarsalternativen i en fråga: håll den till ett stycke, som de andra.",
+    "noText": "Det här visar ingen text som Markdown."
   },
   "multipleChoice": {
     "check": "Kontrollera",

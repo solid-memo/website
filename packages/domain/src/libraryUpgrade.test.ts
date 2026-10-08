@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Card, Deck } from "./deck";
 import type { LibraryCard, LibraryDeckContent } from "./library";
-import { applyLibraryUpgrade, planLibraryUpgrade, upgradedCards, withReleaseLanguages } from "./libraryUpgrade";
+import { applyLibraryUpgrade, planLibraryUpgrade, sameContent, upgradedCards, withReleaseLanguages } from "./libraryUpgrade";
 
 const DECKS = "https://solid-memo.com/decks/";
 const CARDS = "https://pod.example/solid-memo/a/decks/deck-1.ttl";
@@ -156,6 +156,60 @@ describe("planLibraryUpgrade", () => {
     expect(changed([options[1]!, options[0]!])).toBeUndefined();
     expect(changed([options[0]!, { ...options[1]!, id: "dk-d3" }])).toHaveLength(1);
     expect(changed([options[0]!])).toHaveLength(1);
+  });
+
+  describe("text formats", () => {
+    const MARKDOWN = "https://solid-memo.com/ns/vocab/v1.ttl#markdown";
+    const PLAIN = "https://solid-memo.com/ns/vocab/v1.ttl#plainText";
+    const marked = (card: LibraryCard): LibraryCard => (card.id === "dk" ? { ...card, textFormat: MARKDOWN } : card);
+    const was = release(1, from.cards.map(marked));
+    const withFormat = (textFormat?: string) =>
+      cards.map((card) => (card.id === "dk" && textFormat !== undefined ? { ...card, textFormat } : card));
+
+    it("takes a release that only marks a card's text as Markdown as a change", () => {
+      const now = release(2, from.cards.map(marked));
+      expect(planLibraryUpgrade({ deck, cards, from, to: now, releases })?.change).toEqual([
+        { ...libraryCard("dk", "Copenhagen"), textFormat: MARKDOWN },
+      ]);
+    });
+
+    it("brings a text format the copy lost back with the newer release, and its fixes, but keeps a copy switched to plain text", () => {
+      // The newer release fixes the card's text: a copy that only lost the marker takes it, marker and all.
+      const fixed = release(2, was.cards.map((card) => (card.id === "dk" ? { ...card, back: { "": "**Copenhagen**" } } : card)));
+      expect(planLibraryUpgrade({ deck, cards: withFormat(), from: was, to: fixed, releases })?.change).toEqual([
+        { ...libraryCard("dk", "**Copenhagen**"), textFormat: MARKDOWN },
+      ]);
+      // A copy the user switched to plain text was changed on purpose: it is kept, which alone is no offer.
+      expect(planLibraryUpgrade({ deck, cards: withFormat(PLAIN), from: was, to: fixed, releases })).toBeNull();
+      // The newer release leaves the card as it was: a copy that lost the marker still gets it back.
+      const same = release(2, was.cards);
+      expect(planLibraryUpgrade({ deck, cards: withFormat(), from: was, to: same, releases })?.change).toEqual([
+        { ...libraryCard("dk", "Copenhagen"), textFormat: MARKDOWN },
+      ]);
+      expect(planLibraryUpgrade({ deck, cards: withFormat(PLAIN), from: was, to: same, releases })).toBeNull();
+      expect(planLibraryUpgrade({ deck, cards: withFormat(MARKDOWN), from: was, to: same, releases })).toBeNull();
+    });
+
+    it("takes a copy that states plain text as the same as a release with no text format", () => {
+      // The user switched the card to Markdown and back: it says what the release says.
+      const fixed = release(2, from.cards.map((card) => (card.id === "dk" ? { ...card, back: { "": "København" } } : card)));
+      expect(planLibraryUpgrade({ deck, cards: withFormat(PLAIN), from, to: fixed, releases })?.change).toEqual([
+        libraryCard("dk", "København"),
+      ]);
+      expect(sameContent({ front: {}, back: {}, textFormat: PLAIN }, { front: {}, back: {} })).toBe(true);
+      expect(sameContent({ front: {}, back: {}, textFormat: PLAIN }, { front: {}, back: {}, textFormat: MARKDOWN })).toBe(
+        false,
+      );
+    });
+
+    it("removes a card the release drops when its copy only lost the text format, and keeps one switched to plain text", () => {
+      const dropped = release(2, was.cards.filter((card) => card.id !== "dk"));
+      expect(planLibraryUpgrade({ deck, cards: withFormat(), from: was, to: dropped, releases })).toMatchObject({
+        remove: [podCard("dk", "Copenhagen")],
+        kept: [],
+      });
+      expect(planLibraryUpgrade({ deck, cards: withFormat(PLAIN), from: was, to: dropped, releases })).toBeNull();
+    });
   });
 
   it("adds no card to a course's deck, which holds only those the learner reached, but changes and retires those it holds", () => {

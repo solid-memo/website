@@ -1,0 +1,8 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+
+<#q>
+    a solid-memo:Card ;
+    solid-memo:textFormat "text/markdown" ;
+    solid-memo:front "Which Git command shows **staged** changes?"@en ;
+    solid-memo:back "`git diff --staged`"@zxx ;
+    solid-memo:formatVersion 5 .

@@ -19,6 +19,7 @@ on:
       - packages/shacl/**
       - packages/turtle/**
       - packages/domain/**
+      - packages/markdown/**
       - package.json
       - package-lock.json
       - .nvmrc
@@ -77,4 +78,4 @@ jobs:
           echo "Comparing the library with $base"
           npm run library:check -- --base "$base"
       - run: npm run generate:check
-      - run: npx turbo run test --filter=@solid-memo/vocab --filter=@solid-memo/shacl --filter=@solid-memo/turtle
+      - run: npx turbo run test --filter=@solid-memo/vocab --filter=@solid-memo/shacl --filter=@solid-memo/turtle --filter=@solid-memo/markdown

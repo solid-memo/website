@@ -16,9 +16,10 @@ where the layers meet.
 | `@solid-memo/domain` | `packages/domain/` | Pure types and pure functions: the app's vocabulary, SRS, migrations. |
 | `@solid-memo/vocab` | `packages/vocab/` | The data contract: the TypeScript generated (`src/*.generated.ts`) from the RDF vocabulary and SHACL shapes in the repository's `ns/` ([vocab.md](vocab.md), [shapes.md](shapes.md)), with the generator (`tooling/`); vendored profiles (`vendor/`) and fixtures. |
 | `@solid-memo/solid` | `packages/solid/` | Adapters for Solid pods (Inrupt): repositories, the type index, the instance copier, the write fence, the pod-reading shape validator, and the guest's pod kept in the browser ([guest-mode.md](guest-mode.md)). |
-| `@solid-memo/shacl` | `packages/shacl/` | The SHACL engine (rdf-validate-shacl, loaded lazily), profiles and shape loading (`src/`); node-side validation of Turtle files and the deck library's index and checks (`node/`, `npm run library`). |
+| `@solid-memo/shacl` | `packages/shacl/` | The SHACL engine (rdf-validate-shacl, loaded lazily), profiles and shape loading (`src/`); node-side validation of Turtle files and the deck library's index and checks, its Markdown rules among them (`node/`, `npm run library`). |
 | `@solid-memo/browser` | `packages/browser/` | Adapters for browser storage: the update journal, the language, the guest's pod's store (IndexedDB). |
 | `@solid-memo/turtle` | `packages/turtle/` | Node-only Turtle tooling (n3): parsing and the house-style formatter. |
+| `@solid-memo/markdown` | `packages/markdown/` | Markdown in data, read into a tree of its own, folded to what the app shows and bounded at every entry point, derived as plain text, and checked by the rules for a release ([markdown.md](markdown.md)). Imports nothing of the app's. |
 | `@solid-memo/e2e-pod` | `e2e/pod/` | End-to-end tests of the app's use cases and Solid adapters against real Solid servers, started in Docker ([testing.md](testing.md)). |
 
 ## Dependency rule
@@ -31,12 +32,13 @@ owns the interfaces, adapters conform to them.
 graph TD
     web["apps/web<br/>UI + main.tsx"] --> application
     web -. main.tsx only .-> solid & browser
+    web -. src/ui/ only .-> markdown
     application --> domain --> vocab["vocab<br/>the data contract"]
     solid -. implements ports .-> application
     solid --> domain & vocab & shacl
     browser -. implements ports .-> application
     shacl --> domain & vocab
-    shacl -. node/ only .-> turtle
+    shacl -. node/ only .-> turtle & markdown
     vocab -. tooling/ only .-> turtle
     e2e["e2e/pod"] --> application & solid
 ```
