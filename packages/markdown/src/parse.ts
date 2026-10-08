@@ -69,6 +69,17 @@ export const MAX_DELIMITERS = 2_000;
  */
 export const MAX_UNDERLINES = 200;
 
+/**
+ * The most block quotes and list items a text may open inside a list
+ * item (`- - a`, `- > a`, a list item indented under another), and the
+ * most lines in a row that continue a paragraph inside a block quote or
+ * list item without its `>` or indentation (lazy continuation lines).
+ * The parser takes time quadratic in either, so a text past them is
+ * shown as plain text.
+ */
+export const MAX_NESTED_LINES = 300;
+export const MAX_LAZY_LINES = 200;
+
 /** A table wider than this, or with more cells than MAX_TABLE_CELLS, is shown as its source. */
 export const MAX_TABLE_COLUMNS = 20;
 export const MAX_TABLE_CELLS = 2_000;
@@ -159,20 +170,40 @@ const CONTAINER_OPENER = /[ \t]*(?:>|(?:[-+*]|\d{1,9}[.)])(?=[ \t]|$))[ \t]?/y;
 /** A thematic break, whose `* * *` would otherwise count as list items. */
 const THEMATIC_BREAK = /^ {0,3}([-*_])(?:[ \t]*\1){2,}[ \t]*$/;
 
+/** A code fence, which ends a paragraph, so no line after it is lazy. */
+const FENCE = /^ {0,3}(?:`{3,}|~{3,})/;
+
 /** A line that could underline a heading. */
 const UNDERLINE = /^ {0,3}(?:=+|-+)[ \t]*$/gm;
 
-/** Whether the parser would take too long on the text: see MAX_LINE_NESTING, MAX_DELIMITERS and MAX_UNDERLINES. */
+/**
+ * Whether the parser would take too long on the text: see
+ * MAX_LINE_NESTING, MAX_NESTED_LINES, MAX_LAZY_LINES, MAX_DELIMITERS and MAX_UNDERLINES.
+ */
 function tooCostly(text: string): boolean {
   if ((text.match(/[*_]/g)?.length ?? 0) > MAX_DELIMITERS) return true;
   if ((text.match(UNDERLINE)?.length ?? 0) > MAX_UNDERLINES) return true;
-  return text.split("\n").some((line) => {
-    if (THEMATIC_BREAK.test(line)) return false;
+  let nested = 0;
+  let lazy = -1; // lines continuing the paragraph of a container opened above; -1: none open
+  for (const line of text.split("\n")) {
+    if (line.trim() === "" || FENCE.test(line)) {
+      lazy = -1;
+      continue;
+    }
+    if (THEMATIC_BREAK.test(line)) continue;
     CONTAINER_OPENER.lastIndex = 0;
     let opened = 0;
-    while (CONTAINER_OPENER.test(line)) if (++opened > MAX_LINE_NESTING) return true;
-    return false;
-  });
+    // An opener is nested after a list marker on its line, or on an indented line.
+    let inItem = /^[ \t]/.test(line);
+    for (let opener = CONTAINER_OPENER.exec(line); opener !== null; opener = CONTAINER_OPENER.exec(line)) {
+      if (++opened > MAX_LINE_NESTING) return true;
+      if (inItem && ++nested > MAX_NESTED_LINES) return true;
+      if (!opener[0].includes(">")) inItem = true;
+    }
+    if (opened > 0) lazy = 0;
+    else if (lazy >= 0 && !/^[ \t]/.test(line) && ++lazy > MAX_LAZY_LINES) return true;
+  }
+  return false;
 }
 
 /**

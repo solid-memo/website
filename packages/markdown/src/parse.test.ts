@@ -3,7 +3,9 @@ import {
   MAX_CHARS,
   MAX_DELIMITERS,
   MAX_DEPTH,
+  MAX_LAZY_LINES,
   MAX_LINE_NESTING,
+  MAX_NESTED_LINES,
   MAX_TABLE_CELLS,
   MAX_TABLE_COLUMNS,
   MAX_UNDERLINES,
@@ -198,6 +200,26 @@ describe("parseMarkdown", () => {
     expect(parseMarkdown(`${"-".repeat(MAX_LINE_NESTING + 1)}a`)).not.toBeNull();
   });
 
+  it("reads nothing past MAX_NESTED_LINES quotes and list items opened inside a list item", () => {
+    expect(parseMarkdown("- - a\n".repeat(MAX_NESTED_LINES))).not.toBeNull();
+    expect(parseMarkdown("- - a\n".repeat(MAX_NESTED_LINES + 1))).toBeNull();
+    expect(parseMarkdown(`${"- > a\n".repeat(MAX_NESTED_LINES)}  - b`)).toBeNull();
+    expect(parseMarkdown(`${"- a\n".repeat(MAX_NESTED_LINES)}${"   1. b\n".repeat(MAX_NESTED_LINES + 1)}`)).toBeNull();
+    expect(parseMarkdown("> - a\n> > b\n".repeat(MAX_NESTED_LINES))).not.toBeNull();
+  });
+
+  it("reads nothing past MAX_LAZY_LINES lines in a row that continue a quote's or item's paragraph without its markers", () => {
+    const run = (lines: number) => "b\n".repeat(lines);
+    expect(parseMarkdown(`- a\n${run(MAX_LAZY_LINES)}`)).not.toBeNull();
+    expect(parseMarkdown(`- a\n${run(MAX_LAZY_LINES + 1)}`)).toBeNull();
+    expect(parseMarkdown(`> a\n${run(MAX_LAZY_LINES + 1)}`)).toBeNull();
+    expect(parseMarkdown(`- a\n${run(MAX_LAZY_LINES)}- c\n${run(MAX_LAZY_LINES)}`)).not.toBeNull();
+    expect(parseMarkdown(`- a\n${run(MAX_LAZY_LINES)}\n${run(MAX_LAZY_LINES)}`)).not.toBeNull();
+    expect(parseMarkdown(`- a\n${"  b\n".repeat(MAX_LAZY_LINES + 1)}`)).not.toBeNull();
+    expect(parseMarkdown(`- a\n\`\`\`\n${run(MAX_LAZY_LINES + 1)}\`\`\``)).not.toBeNull();
+    expect(parseMarkdown(run(MAX_LAZY_LINES + 1))).not.toBeNull();
+  });
+
   it("reads nothing past MAX_DELIMITERS asterisks and underscores", () => {
     expect(parseMarkdown("*_".repeat(MAX_DELIMITERS / 2))).not.toBeNull();
     expect(parseMarkdown(`${"*_".repeat(MAX_DELIMITERS / 2)}*`)).toBeNull();
@@ -342,6 +364,11 @@ describe("pathological input", () => {
     ["nested lists", fill("- ", "", "a")],
     ["nested ordered lists", fill("1. ", "", "a")],
     ["block quotes and lists nested at the cap, line after line", fill(`${"> - ".repeat(MAX_LINE_NESTING / 2)}a\n`)],
+    ["items holding a list or quote, at the cap", fill("b\n", `${"- - a\n".repeat(MAX_NESTED_LINES / 2)}${"- > a\n".repeat(MAX_NESTED_LINES / 2)}`)],
+    ["items holding a list or quote, past the cap", fill("- - a\n")],
+    ["lazy lines at the cap, run after run", fill(`- a\n${"b\n".repeat(MAX_LAZY_LINES)}`)],
+    ["lazy lines in a nested quote, run after run", fill(`> - > - a\n${"b\n".repeat(MAX_LAZY_LINES)}`)],
+    ["lazy lines past the cap", fill("b\n", "- a\n")],
     ["lists nested by indentation", Array.from({ length: 139 }, (_, level) => `${"  ".repeat(level)}- a`).join("\n")],
     ["sibling list items", fill("- a\n")],
     ["emphasis delimiters at the cap", fill("a", "*_".repeat(MAX_DELIMITERS / 2))],

@@ -75,6 +75,12 @@ Every entry point is bounded, for a pod or library may hold anything:
   time quadratic in either (`- - - - …` at 20,000 characters takes it
   tens of seconds), so a text past them is plain. No text people write
   comes near them, and its source still reads.
+- **`MAX_NESTED_LINES`, 300 quotes or list items opened inside a list
+  item** (`- - a`, `- > a`, or an item indented under another), and
+  **`MAX_LAZY_LINES`, 200 lines in a row that continue a quote's or
+  item's paragraph without its `>` or indentation.** The parser is
+  quadratic in both (`- a` followed by 10,000 such lines takes it over a
+  second), so a text past them is plain.
 - **`MAX_UNDERLINES`, 200 lines that could underline a heading** (`===`,
   `---`, with up to three spaces before and white space after). The
   parser is quadratic in setext headings too (`a\n=\n…` at 20,000
