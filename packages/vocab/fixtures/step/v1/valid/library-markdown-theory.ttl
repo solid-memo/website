@@ -1,0 +1,22 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix schema:     <https://schema.org/> .
+
+<#ch-ldp-3>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    schema:isPartOf <#ch-ldp> ;
+    schema:position 3 ;
+    solid-memo:textFormat solid-memo:markdown ;
+    solid-memo:theory """**Creating** a resource takes one of two methods:
+
+| Method | Who picks the URL |
+|---|---|
+| `PUT` | you |
+| `POST` | the server |
+
+```http
+POST /notes/ HTTP/1.1
+Slug: today
+```"""@en ;
+    solid-memo:checkedBy <#q-ldp-create> ;
+    solid-memo:formatVersion 1 .

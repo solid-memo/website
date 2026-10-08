@@ -3,6 +3,14 @@
 
 <head>
   <meta charset="UTF-8" />
+  <!-- What the page may load and run (docs/markdown.md). GitHub Pages sets no
+       headers, so the policy is a meta tag, first, before anything it covers.
+       Script only from the site itself, and the theme script below by its
+       hash (src/build.test.ts checks it still matches); no plugins, no
+       <base>, no form posted anywhere. Pictures come from pods, so img-src
+       stays open; style-src waits on the inline styles of src/ui. -->
+  <meta http-equiv="Content-Security-Policy"
+    content="script-src 'self' 'sha256-GA9xjX8xIwJkNnm+B1POrvr6HWF6KTLvZlHcOcEBr3I='; object-src 'none'; base-uri 'none'; form-action 'none'" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Spaced-repetition flashcards that live in your own Solid pod." />
   <meta name="theme-color" content="#f7f6f1" media="(prefers-color-scheme: light)" />

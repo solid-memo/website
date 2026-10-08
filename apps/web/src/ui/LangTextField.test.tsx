@@ -192,6 +192,31 @@ describe("LangTextField", () => {
     expect(screen.getByLabelText("Name").tagName).toBe("TEXTAREA");
   });
 
+  it("submits a textarea's form on Ctrl+Enter or ⌘+Enter, Enter itself starting a new line", () => {
+    const onSubmit = vi.fn((event: Event) => event.preventDefault());
+    render(
+      <I18nProvider locale="en" onChoose={() => undefined}>
+        <form onSubmit={onSubmit}>
+          <Field initial={draftOf({ en: "Line one" }, ["en"])} multiline />
+        </form>
+      </I18nProvider>,
+    );
+    const text = screen.getByLabelText("Name");
+    expect(text).toHaveAttribute("aria-keyshortcuts", "Control+Enter Meta+Enter");
+    expect(fireEvent.keyDown(text, { key: "Enter" })).toBe(true);
+    expect(fireEvent.keyDown(text, { key: "a", ctrlKey: true })).toBe(true);
+    expect(fireEvent.keyDown(text, { key: "Enter", ctrlKey: true, isComposing: true })).toBe(true);
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(fireEvent.keyDown(text, { key: "Enter", ctrlKey: true })).toBe(false);
+    expect(fireEvent.keyDown(text, { key: "Enter", metaKey: true })).toBe(false);
+    expect(onSubmit).toHaveBeenCalledTimes(2);
+  });
+
+  it("does nothing on Ctrl+Enter in a textarea outside a form", () => {
+    renderField({ initial: draftOf({ en: "Alone" }, ["en"]), multiline: true });
+    expect(fireEvent.keyDown(screen.getByLabelText("Name"), { key: "Enter", ctrlKey: true })).toBe(false);
+  });
+
   it("retags the text without retyping it", () => {
     const { text } = renderField({ initial: draftOf({ en: "Huvudstäder" }, ["en"]) });
     choose("Language: English", "Swedish — svenska (sv)");

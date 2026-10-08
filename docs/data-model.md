@@ -176,7 +176,16 @@ graph LR
   language-tagged), read to whoever cannot see it in its place; without
   one it is named by its side ("Picture on the front of the card"). The
   description is read while its side is asked, so it says what the
-  picture shows without giving the answer away. Wherever a side is
+  picture shows without giving the answer away. A card may say how its
+  texts are written, `sm:textFormat` (`sm:markdown` or `sm:plainText`,
+  [vocab.md](vocab.md#text-formats)): it covers the sides, the notes,
+  the label and the card's distractors, never the pictures'
+  descriptions. Without it the text is plain. The app keeps the marker
+  through every edit and copy, an import or a course question joining
+  the deck included. An edit trims plain text; text in any other
+  format loses only the blank lines before it and the white space
+  after it, so the spaces that start a Markdown code block survive an
+  edit of another field. Wherever a side is
   shown whole (study, a library preview, a card's page, a library card),
   a tap (or Enter or Space on the button over it) enlarges its picture to
   the viewport's width or height, keeping its shape, and another tap,
@@ -362,7 +371,8 @@ type-index entries:
 - **The deck holds only the cards answered.** Starting a course writes
   an empty deck. A question answered for the first time writes its card,
   its `sm:Distractor` subjects and its first review state, under the
-  release's fragment ids (`#q-iri-denotes`, `#q-iri-denotes-d1`).
+  release's fragment ids (`#q-why-solid-1a`, `#q-why-solid-1a-d1`),
+  with its `sm:textFormat` when the release states one.
   Removing a card removes the distractors it names.
 - **Completed chapters are on the catalog entry**: one
   `sm:completedChapter <release#ch-…>` per chapter whose final review
@@ -380,7 +390,7 @@ type-index entries:
 # catalog.ttl
 <#deck-x> a solid-memo:Deck , dcat:Dataset ; …
     prov:wasDerivedFrom <https://solid-memo.com/decks/solid-fundamentals/v1.ttl> ;
-    solid-memo:completedChapter <https://solid-memo.com/decks/solid-fundamentals/v1.ttl#ch-linked-data> .
+    solid-memo:completedChapter <https://solid-memo.com/decks/solid-fundamentals/v1.ttl#ch-why-solid> .
 ```
 
 ## The answer log

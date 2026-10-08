@@ -19,6 +19,7 @@
     "@solid-memo/application": "*",
     "@solid-memo/browser": "*",
     "@solid-memo/domain": "*",
+    "@solid-memo/markdown": "*",
     "@solid-memo/solid": "*",
     "@solid-memo/vocab": "*",
     "@tanstack/react-query": "^5.103.2",

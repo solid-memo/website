@@ -104,7 +104,7 @@ export interface CardV4 {
   readonly deprecated?: boolean;
 }
 
-/** Card format 5: each side has text, a picture or both (a picture is always an IRI); a side's text is untagged, its language unknown, or language-tagged, one text per language; a side's picture may have a description, its text alternative, language-tagged text, one per language; each side may have a note under it, shown once the answer is revealed, and the back a label above it that says how the answer relates to the front, all three language-tagged text in any language, one per language; a retired card, which is kept but no longer studied, states owl:deprecated true; a card asked as a multiple-choice question names its wrong options, distractors of the same document (since vocabulary 1.14, without a format bump). */
+/** Card format 5: each side has text, a picture or both (a picture is always an IRI); a side's text is untagged, its language unknown, or language-tagged, one text per language; a side's picture may have a description, its text alternative, language-tagged text, one per language; each side may have a note under it, shown once the answer is revealed, and the back a label above it that says how the answer relates to the front, all three language-tagged text in any language, one per language; a retired card, which is kept but no longer studied, states owl:deprecated true; a card asked as a multiple-choice question names its wrong options, distractors of the same document (since vocabulary 1.14, without a format bump); a card may say how its texts are written, solid-memo:textFormat, plain or Markdown (since vocabulary 1.15, without a format bump). */
 export interface CardV5 {
   readonly front?: LangText;
   readonly back?: LangText;
@@ -118,6 +118,7 @@ export interface CardV5 {
   readonly created?: string;
   readonly deprecated?: boolean;
   readonly distractor: readonly string[];
+  readonly textFormat?: string;
 }
 
 /** A catalogue of decks: a dcat:Catalog. */
@@ -131,7 +132,7 @@ export interface CatalogV1 {
   readonly dataset: readonly string[];
 }
 
-/** Chapter format 1: a schema:Syllabus of a course release, part of it at its place among its chapters, with a language-tagged title, one of them English, and description, the cards asked only in its final review, and owl:deprecated true once retired. */
+/** Chapter format 1: a schema:Syllabus of a course release, part of it at its place among its chapters, with a language-tagged title, one of them English, and description, the cards asked only in its final review, and owl:deprecated true once retired; a chapter may say how its description is written, solid-memo:textFormat, plain or Markdown (since vocabulary 1.15, without a format bump). */
 export interface ChapterV1 {
   readonly title: LangText;
   readonly description?: LangText;
@@ -139,6 +140,7 @@ export interface ChapterV1 {
   readonly position: number;
   readonly reviewQuestion: readonly string[];
   readonly deprecated?: boolean;
+  readonly textFormat?: string;
 }
 
 /** Deck format 1 as a catalog entry in a pod. */
@@ -506,13 +508,14 @@ export interface ReviewStateV2 {
   readonly previousLastReviewedAt?: string;
 }
 
-/** Step format 1: a schema:LearningResource of a course release, part of a chapter at its place among the chapter's steps, with a short theory in language-tagged text, one of them English, the cards that check it, and owl:deprecated true once retired. */
+/** Step format 1: a schema:LearningResource of a course release, part of a chapter at its place among the chapter's steps, with a short theory in language-tagged text, one of them English, the cards that check it, and owl:deprecated true once retired; a step may say how its theory is written, solid-memo:textFormat, plain or Markdown (since vocabulary 1.15, without a format bump). */
 export interface StepV1 {
   readonly theory: LangText;
   readonly checkedBy: readonly string[];
   readonly chapter: string;
   readonly position: number;
   readonly deprecated?: boolean;
+  readonly textFormat?: string;
 }
 
 export type AgentRecord = { version: 1; data: AgentV1 };

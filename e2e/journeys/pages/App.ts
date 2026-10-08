@@ -2,6 +2,7 @@ import { expect, test, type Page, type TestInfo } from "@playwright/test";
 import type { Diagnostics } from "../fixtures.ts";
 import { text, textPattern, type Locale } from "../harness/strings.ts";
 import { CardCreator } from "./CardCreator.ts";
+import { CardEditor } from "./CardEditor.ts";
 import { Chrome } from "./Chrome.ts";
 import { CssLogin } from "./CssLogin.ts";
 import { DeckBrowser } from "./DeckBrowser.ts";
@@ -39,6 +40,7 @@ export class App {
   readonly deckDetail = new DeckDetail(this);
   readonly deckBrowser = new DeckBrowser(this);
   readonly cardCreator = new CardCreator(this);
+  readonly cardEditor = new CardEditor(this);
   readonly study = new Study(this);
   readonly preferences = new Preferences(this);
   readonly statistics = new Statistics(this);

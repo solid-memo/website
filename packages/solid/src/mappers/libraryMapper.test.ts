@@ -422,4 +422,24 @@ describe("toCourseOutline", () => {
       ],
     });
   });
+  it("reads how a chapter's description and a step's theory are written", async () => {
+    const dataset = await datasetOf(
+      `
+@prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix schema: <https://schema.org/> .
+<#ch-1> a sm:Chapter, schema:Syllabus ; schema:isPartOf <> ; schema:position 0 ; sm:textFormat sm:markdown ;
+   dcterms:title "Linked data"@en ; dcterms:description "**IRIs**."@en .
+<#ch-1-1> a sm:Step ; schema:isPartOf <#ch-1> ; schema:position 0 ; sm:textFormat sm:markdown ;
+   sm:theory """A list:
+
+- one
+- two"""@en ; sm:checkedBy <#q-1> .
+`,
+      DOC,
+    );
+    expect(toCourseOutline(DOC, dataset).chapters).toMatchObject([
+      { id: "ch-1", textFormat: SM.markdown, steps: [{ id: "ch-1-1", textFormat: SM.markdown, theory: { en: "A list:\n\n- one\n- two" } }] },
+    ]);
+  });
 });

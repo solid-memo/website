@@ -27,17 +27,18 @@ configs may also use the shared test tooling of the root `package.json`.
 | Package | May import | Only from |
 |---|---|---|
 | `turtle` | — | |
+| `markdown` | — | |
 | `vocab` | `turtle` | `turtle`: `tooling/` only |
 | `domain` | `vocab` | |
 | `application` | `domain`, `vocab` | |
-| `shacl` | `domain`, `vocab`, `turtle` | `turtle`: `node/` only |
+| `shacl` | `domain`, `vocab`, `turtle`, `markdown` | `turtle`, `markdown`: `node/` only |
 | `solid` | `application`, `domain`, `vocab`, `shacl` | |
 | `browser` | `application`, `domain` | |
-| `web` | `application`, `domain`, `vocab`, `solid`, `browser` | `solid`, `browser`: `src/main.tsx` only |
+| `web` | `application`, `domain`, `vocab`, `solid`, `browser`, `markdown` | `solid`, `browser`: `src/main.tsx` only; `markdown`: `src/ui/` only |
 | `e2e-pod` | `application`, `domain`, `vocab`, `solid` | |
 | `e2e-journeys` | `web` | `web`: `harness/strings.ts` only, for the app's messages |
 
-Browser code: `src/` of `vocab`, `domain`, `application`, `shacl`,
+Browser code: `src/` of `markdown`, `vocab`, `domain`, `application`, `shacl`,
 `solid`, `browser` and `web`; `vocab`'s `tooling/` is node-only.
 
 ## Vendor libraries
@@ -51,6 +52,7 @@ used nowhere else):
 | `@tanstack/react-query`, `preact` | `web` | UI and `main.tsx` |
 | `@fontsource/*`, `@fontsource-variable/*` | `web` | `src/style.css` only |
 | `rdf-validate-shacl` | `shacl` | `src/engine.ts` only, loaded lazily |
+| `mdast-util-from-markdown`, `micromark-extension-gfm-table`, `mdast-util-gfm-table` | `markdown` | `src/parse.ts` only; the package's API is its own types, never `mdast`'s ([markdown.md](markdown.md)) |
 | `n3` | `turtle`, the node tooling of `shacl`, and `e2e-pod` | never in the browser; in `e2e-pod`, the server contract and the tests |
 | `fake-indexeddb` | `browser` | tests only: IndexedDB in node, for the guest's pod's store |
 | `@playwright/test` | `e2e-journeys` | drives the built app in Chromium; the harness also talks to the Solid server with its request API |

@@ -173,7 +173,13 @@
     "backImageDescription": "Back picture description (optional)",
     "backNote": "Back note (optional)",
     "backNoteHint": "Shown under the back once the answer is revealed.",
-    "sidesHint": "Each side needs text, a picture, or both."
+    "sidesHint": "Each side needs text, a picture, or both.",
+    "markdown": "Format with Markdown",
+    "markdownHint": "When on, the card's text is Markdown: code, lists, tables and more. When off, it shows exactly as typed.",
+    "markdownDiffers": "Some of this card's text reads differently as Markdown: check the preview.",
+    "markdownDiffersTranslation": "Some of this card's translations read differently as Markdown: check them before you save.",
+    "preview": "Preview",
+    "previewOption": "As an option:"
   },
   "cardCreator": {
     "heading": "New card",
@@ -231,6 +237,43 @@
     "wrong": "Not quite.",
     "added": "Added to your deck.",
     "why": "Why not:"
+  },
+  "markdown": {
+    "code": "Code",
+    "table": "Table",
+    "linkHost": "({host})"
+  },
+  "markdownHelp": {
+    "summary": "Formatting help",
+    "intro": "A blank line starts a new paragraph. Links are followed in the notes only.",
+    "write": "Type",
+    "gives": "Gives",
+    "emphasis": "emphasis",
+    "strong": "strong emphasis",
+    "code": "code within a line",
+    "codeBlock": "a block of code, its lines as typed",
+    "list": "a list",
+    "numbered": "a numbered list",
+    "quote": "a quote",
+    "table": "a table",
+    "link": "a link, in a note",
+    "escape": "a mark shown as typed"
+  },
+  "markdownProblem": {
+    "tooLong": "Too long to read as Markdown ({length} characters): it shows as plain text.",
+    "tooComplex": "Too complex to read as Markdown: it shows as plain text.",
+    "tooDeep": "Nested too deeply: the innermost part shows as typed.",
+    "largeTable": "A table this large shows as typed: at most 20 columns and 2,000 cells.",
+    "html": "HTML such as {source} shows as typed. Put it in backticks to show it as code.",
+    "image": "Pictures in Markdown are not shown, only their description: add one with the side's picture field.",
+    "link": "No links here, where they would be in the way of studying: {source} shows as its text. Put a link in a note.",
+    "autolink": "{source} reads as a link, shown without its angle brackets. Put it in backticks to show it as typed.",
+    "linkNotFollowed": "Only https links are followed: {url} shows as text.",
+    "linkHost": "The link text \"{text}\" names another site than the one it leads to, {host}.",
+    "hiddenControl": "Hidden characters in code or a link show as markers: {controls}.",
+    "characterReference": "{source} shows as the character it names. Write \\{source} to show it as typed.",
+    "notOneParagraph": "This card's back is one of the options of a question: keep it to one paragraph, as the others are.",
+    "noText": "This shows no text as Markdown."
   },
   "multipleChoice": {
     "check": "Check",

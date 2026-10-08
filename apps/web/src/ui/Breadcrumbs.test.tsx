@@ -175,7 +175,7 @@ describe("breadcrumbsFor", () => {
   });
 
   it("puts a course under its deck, a chapter under the course, and a final review under its chapter", () => {
-    const chapterUrl = "https://solid-memo.com/decks/solid-fundamentals/v1.ttl#ch-1";
+    const chapterUrl = "https://solid-memo.com/decks/solid/v1.ttl#ch-1";
     const course: RouteRef = { screen: "course", instanceUrl, deckUrl };
     const chapter: RouteRef = { screen: "courseChapter", instanceUrl, deckUrl, chapterUrl };
     const review: RouteRef = { screen: "courseReview", instanceUrl, deckUrl, chapterUrl };

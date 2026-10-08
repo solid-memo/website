@@ -12,7 +12,7 @@ import {
 import type { CardContent } from "./deck";
 import type { ReviewState } from "./review";
 
-const RELEASE = "https://solid-memo.com/decks/solid-fundamentals/v1.ttl";
+const RELEASE = "https://solid-memo.com/decks/solid/v1.ttl";
 const at = (id: string) => `${RELEASE}#${id}`;
 
 const chapter = (position: number, extra: Partial<ChapterV1> = {}): ChapterV1 => ({
@@ -73,6 +73,21 @@ describe("a course's outline", () => {
     });
   });
 
+  it("says how a chapter's description and a step's theory are written, when they say", () => {
+    const MARKDOWN = "https://solid-memo.com/ns/vocab/v1.ttl#markdown";
+    const marked = courseOutlineFromRecords(
+      RELEASE,
+      [{ url: at("ch-a"), data: chapter(0, { description: { en: "**First.**" }, textFormat: MARKDOWN }) }],
+      [
+        { url: at("a-1"), data: step("ch-a", 0, ["q1"], { textFormat: MARKDOWN }) },
+        { url: at("a-2"), data: step("ch-a", 1, ["q2"]) },
+      ],
+    );
+    expect(marked.chapters[0]).toMatchObject({ textFormat: MARKDOWN, steps: [{ id: "a-1", textFormat: MARKDOWN }, { id: "a-2" }] });
+    expect(marked.chapters[0]!.steps[1]).not.toHaveProperty("textFormat");
+    expect(outline.chapters[0]).not.toHaveProperty("textFormat");
+  });
+
   it("leaves out retired chapters and steps, and the steps of a retired chapter; ties go by id", () => {
     const retired = courseOutlineFromRecords(
       RELEASE,
@@ -126,10 +141,10 @@ describe("a learner's progress", () => {
   });
 
   it("keeps a chapter completed in an earlier release completed in the release the deck now follows", () => {
-    const v1 = "https://solid-memo.com/decks/solid-fundamentals/v1.ttl#ch-a";
+    const v1 = "https://solid-memo.com/decks/solid/v1.ttl#ch-a";
     const v2 = courseOutlineFromRecords(
-      "https://solid-memo.com/decks/solid-fundamentals/v2.ttl",
-      [{ url: "https://solid-memo.com/decks/solid-fundamentals/v2.ttl#ch-a", data: chapter(0) }],
+      "https://solid-memo.com/decks/solid/v2.ttl",
+      [{ url: "https://solid-memo.com/decks/solid/v2.ttl#ch-a", data: chapter(0) }],
       [],
     );
     expect(courseProgress(v2, [], [v1])).toMatchObject({ chapters: [{ state: "done" }], done: true });

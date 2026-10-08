@@ -37,6 +37,7 @@ export function LibraryCardScreen({
           imageUrl={card.frontImageUrl}
           imageDescription={card.frontImageDescription}
           note={card.frontNote}
+          textFormat={card.textFormat}
         />
         <CardFace
           side="back"
@@ -45,6 +46,7 @@ export function LibraryCardScreen({
           imageDescription={card.backImageDescription}
           label={card.backLabel}
           note={card.backNote}
+          textFormat={card.textFormat}
         />
       </div>
       {card.retired && <RetiredNotice />}

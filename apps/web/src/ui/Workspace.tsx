@@ -2,7 +2,8 @@ import type { ComponentChildren } from "preact";
 import { useEffect } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
-import { cardLabel, cardLabelText, type Deck } from "@solid-memo/domain/deck";
+import type { Deck } from "@solid-memo/domain/deck";
+import { cardName, cardNameText } from "./DataText";
 import { decksOf } from "@solid-memo/domain/deckTree";
 import { DEFAULT_INVALID_DATA_POLICY } from "@solid-memo/domain/invalidDataPolicy";
 import { setAsideDecks } from "@solid-memo/domain/validation";
@@ -359,14 +360,14 @@ export function Workspace({
       ? []
       : breadcrumbsFor(route, {
           deck: activeDeck === null ? "" : readerText(activeDeck.title),
-          card: activeCard === null ? "" : cardLabel(activeCard, readerText),
+          card: activeCard === null ? "" : cardName(activeCard, readerText),
           libraryDeck: activeLibraryDeck === null ? "" : readerText(activeLibraryDeck.title),
-          libraryCard: activeLibraryCard === null ? "" : cardLabel(activeLibraryCard, readerText),
+          libraryCard: activeLibraryCard === null ? "" : cardName(activeLibraryCard, readerText),
           chapter: activeChapter === null ? "" : readerText(activeChapter.title),
           deckLang: activeDeck === null ? undefined : readerLang(activeDeck.title),
-          cardLang: activeCard === null ? undefined : readerLang(cardLabelText(activeCard)),
+          cardLang: activeCard === null ? undefined : readerLang(cardNameText(activeCard, readerText)),
           libraryDeckLang: activeLibraryDeck === null ? undefined : readerLang(activeLibraryDeck.title),
-          libraryCardLang: activeLibraryCard === null ? undefined : readerLang(cardLabelText(activeLibraryCard)),
+          libraryCardLang: activeLibraryCard === null ? undefined : readerLang(cardNameText(activeLibraryCard, readerText)),
           chapterLang: activeChapter === null ? undefined : readerLang(activeChapter.title),
         }, t);
   // The page and what it is in, as the trail ends: "Study – Kanji N5 – Solid Memo".

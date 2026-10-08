@@ -54,6 +54,10 @@
 
   --heading-pop: var(--accent-yellow);
 
+  --font-mono:
+    ui-monospace, "SFMono-Regular", "Cascadia Mono", "Menlo", "Consolas",
+    "Liberation Mono", monospace;
+
   --font-display:
     "Bangers", "Fredoka Variable", ui-rounded,
     "Hiragino Maru Gothic ProN", "Arial Rounded MT Bold", system-ui,
@@ -2185,7 +2189,10 @@ form.card-edit {
   width: 100%;
 }
 
-.card-face p {
+/* A face's own paragraphs: not those inside Markdown blocks (.md), which
+   have their own sizes below. */
+.card-face>p,
+.card-face>.md {
   margin: 0;
   overflow-wrap: anywhere;
   /* Fredoka kerns "A" into "V", "T", "Y"…, and "Å" and "Ä" share those pairs,
@@ -2194,7 +2201,7 @@ form.card-edit {
   font-kerning: none;
 }
 
-.card-question p {
+.card-question>p {
   font-size: clamp(2rem, 9vw, 3.25rem);
   font-weight: 700;
   line-height: 1.2;
@@ -2206,16 +2213,16 @@ form.card-edit {
   border-top: 1px dashed var(--border-strong);
 }
 
-.card-answer p {
+.card-answer>p {
   font-size: clamp(1.4rem, 5.5vw, 1.8rem);
 }
 
-.card-face p.hint {
+.card-face>p.hint {
   font-size: 0.9em;
 }
 
 /* The back's label: how the answer relates to the front, a small caption above it. */
-.card-face p.card-label {
+.card-face>p.card-label {
   margin-bottom: -0.5rem;
   color: var(--text-muted);
   font-size: 0.95rem;
@@ -2224,7 +2231,7 @@ form.card-edit {
 }
 
 /* A side's note: what holds of it, set under its text, quieter than it. */
-.card-face p.card-note {
+.card-face>.card-note {
   margin-top: -0.4rem;
   max-width: 36rem;
   color: var(--text-muted);
@@ -2455,7 +2462,8 @@ form.card-edit {
   overflow-wrap: anywhere;
 }
 
-.course-chapter > p {
+.course-chapter > p,
+.course-chapter > .md {
   grid-column: 1 / -1;
   margin: 0;
 }
@@ -2530,7 +2538,7 @@ form.card-edit {
 
 /* A question is a sentence, not a word to recall: set as large text, not
    at a study card's size. */
-.course-question .card-question p {
+.course-question .card-question>p {
   font-size: 1.3rem;
   font-weight: 600;
   text-align: left;
@@ -2655,6 +2663,18 @@ form.card-edit {
   background: var(--danger-soft);
 }
 
+/* Why an option in Markdown is wrong: "Why not:" on a line of its own, the
+   note's blocks under it. */
+.course-why-label {
+  display: block;
+  font-weight: 600;
+}
+
+.course-why>p,
+.course-why>.md {
+  margin: 0.25rem 0 0;
+}
+
 .course-right-answer {
   width: 100%;
   padding: 0.75rem 1rem;
@@ -2669,7 +2689,7 @@ form.card-edit {
   border-top: none;
 }
 
-.course-right-answer .card-answer p {
+.course-right-answer .card-answer>p {
   font-size: 1.15rem;
   text-align: left;
 }
@@ -3383,4 +3403,205 @@ table.deck-statistics td {
 
 .guest-moved p {
   margin: 0;
+}
+
+/* Text from data in Markdown (ui/Markdown.tsx, docs/markdown.md): blocks
+   left-aligned, at the size of the place they are in; on a card's face, at
+   a reading size however large the face's own text, and a note's blocks
+   as quiet as its paragraph, but left-aligned as all blocks are. */
+.md {
+  max-width: 40rem;
+  line-height: 1.55;
+  text-align: left;
+}
+
+.card-face>.md {
+  width: 100%;
+  font-size: 1.15rem;
+}
+
+.card-face>.card-note.md {
+  font-size: 0.95rem;
+  text-align: left;
+}
+
+.course-theory.md {
+  line-height: 1.65;
+}
+
+.md> :first-child {
+  margin-top: 0;
+}
+
+.md> :last-child {
+  margin-bottom: 0;
+}
+
+.md p,
+.md ul,
+.md ol,
+.md blockquote,
+.md hr,
+.md .md-code,
+.md .md-table {
+  margin: 0 0 0.75rem;
+}
+
+.md ul,
+.md ol {
+  padding-inline-start: 1.5rem;
+}
+
+.md li>ul,
+.md li>ol {
+  margin-bottom: 0;
+}
+
+.md blockquote {
+  padding-inline-start: 0.9rem;
+  border-inline-start: 4px solid var(--border-strong);
+  color: var(--text-muted);
+}
+
+.md hr {
+  border: none;
+  border-top: 1px solid var(--border-strong);
+}
+
+/* A code span from data; a code block's code is styled with its block. */
+.md-inline-code {
+  padding: 0.05em 0.3em;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface-sunken);
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  overflow-wrap: anywhere;
+}
+
+/* A code block: its white space as written, scrolled sideways rather than
+   wrapped, for in code a line break means something. */
+.md-code {
+  position: relative;
+}
+
+.md-code-lang {
+  display: block;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.md pre {
+  margin: 0;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  font-size: 0.95rem;
+  line-height: 1.45;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.md pre code {
+  font-family: var(--font-mono);
+}
+
+/* A table scrolls sideways in its own region, as wide as its columns. */
+.md-table {
+  overflow-x: auto;
+  border-radius: var(--radius);
+}
+
+.md-table table {
+  width: auto;
+  min-width: 100%;
+  margin: 0;
+  overflow: visible;
+}
+
+.md-table th {
+  color: var(--text);
+  font-size: inherit;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.md-table th,
+.md-table td {
+  vertical-align: top;
+}
+
+.md-table .md-align-left {
+  text-align: left;
+}
+
+.md-table .md-align-center {
+  text-align: center;
+}
+
+.md-table .md-align-right {
+  text-align: right;
+}
+
+/* Where a link whose text is not its address leads. */
+.md-link-host {
+  color: var(--text-muted);
+  font-size: 0.9em;
+}
+
+/* The card editor's Markdown toggle, its hint under it, and the cheat
+   sheet behind a disclosure: what to type, as code, beside what it gives. */
+.markdown-toggle {
+  margin: 0.5rem 0 1rem;
+}
+
+.markdown-toggle > label {
+  margin-bottom: 0.4rem;
+}
+
+.markdown-toggle .field-hint {
+  margin: 0 0 0.4rem;
+}
+
+.markdown-help {
+  margin-top: 0.25rem;
+}
+
+.markdown-help p {
+  margin: 0.4rem 0;
+}
+
+.markdown-help td {
+  vertical-align: top;
+}
+
+.markdown-help pre {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  white-space: pre;
+}
+
+/* A text's own hints (what of its Markdown would not show as meant), under it. */
+.entry-hints {
+  padding-inline-start: 1.25rem;
+}
+
+.entry-hints li {
+  margin: 0.15rem 0;
+}
+
+/* The card being written, as it will be studied, under the fields. */
+.card-preview .practice-card {
+  margin-top: 0.5rem;
+}
+
+.card-preview-option {
+  margin: 0.75rem 0 0;
+}
+
+.card-preview-option-name {
+  color: var(--text-muted);
 }

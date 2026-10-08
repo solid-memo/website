@@ -2,7 +2,7 @@
 
 Unit tests with [Vitest](https://vitest.dev/) in every package, in node
 unless the package runs in the browser: `apps/web`, `solid` and `browser`
-run in `happy-dom`, and the UI's tests use `@testing-library/preact`
+run in `happy-dom` (but for the test of the built site, in node), and the UI's tests use `@testing-library/preact`
 ([vitest.shared.ts](../vitest.shared.ts)). Coverage is enforced at
 **100%** (statements, branches, functions, lines) per package: each
 package's own tests cover its own code — `npm test` fails below that.
@@ -284,6 +284,9 @@ Dependency inversion gives every layer a seam that makes mocks trivial:
 | Infrastructure mappers | none needed | Pure `SolidDataset`/`Thing` → domain functions; feed in-memory datasets built with `mockSolidDatasetFrom`/`buildThing`. |
 | Infrastructure I/O shells | injected `fetch` + `vi.mock` | Mock `@inrupt/*` module functions; assert the shell orchestrates fetch → map → return. |
 | Shapes (`packages/shacl/`, `packages/solid/src/conformance.test.ts`) | the real engine | The real `rdf-validate-shacl` over the real shapes in `ns/shapes/`: fixture documents under `packages/vocab/fixtures/` pass or fail as a table says; a record written through every descriptor, and every migration step's output, conforms (`conformance.test.ts`). Every library deck passes too, by `npm run library:check` ([deck-library.md](deck-library.md#checks)). Shape documents are read through a `fetch` that serves the repository's files at their IRIs (`shapesFetch` in [sources.ts](../packages/vocab/tooling/sources.ts), a `Response` with its `url` set), exactly as the browser reads them. |
+| The library (`packages/solid/src/libraryReleases.test.ts`) | the real library adapter | Every release in `decks/` and the index, read through `createSolidDeckLibrary` over a fetch that serves the repository's files at their IRIs, as the app reads them: the index lists every deck, each release reads with every card it has (its retired ones retired), and a course's outline has every chapter and step it has in use, each asking cards the app can ask (a back and at least two distractors). The library check validates the releases; this is what the app makes of them. |
+| Markdown (`packages/markdown/`) | none needed | Pure functions over strings: every node in both profiles, the folds, each rule for a release (`markdownProblems`), the limits at every entry point, and the cmark and commonmark.js pathological inputs at the length cap within a time budget ([markdown.md](markdown.md)). |
+| The built site (`apps/web/src/build.test.ts`) | Vite's build API | Builds the app as `vite build` does, without writing it, and checks the bundle has no HTML sink but Preact's own and the page's Content Security Policy still lets its inline script run ([markdown.md](markdown.md#safety)). |
 | Generated code | drift test | `packages/vocab/tooling/generate.test.ts` renders the generators' output and compares it with the committed files; generated modules are data only, so importing them covers them (`packages/vocab/src/generated.test.ts`). |
 | End to end | real Solid servers | `e2e/pod/` wires the real use cases and Solid adapters as `main.tsx` does, over a fetch that records every request, against Community Solid Server 7 and 6 and node-solid-server 6 and 5. |
 | User journeys | the built app in a browser | `e2e/journeys/` drives the app in Chromium (Playwright) through whole journeys, logging in at a real identity provider (Community Solid Server 7 behind TLS) ([User journeys](#user-journeys)). |

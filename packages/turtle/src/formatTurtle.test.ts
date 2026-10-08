@@ -1,6 +1,7 @@
 import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { Parser } from "n3";
 import { describe, expect, it, vi } from "vitest";
 import {
   defaultIo,
@@ -129,6 +130,89 @@ ${PREFIXES}<> a ex:Thing ; ex:name "A \\"quoted\\" name", "B"@en ; ex:count 2 ; 
                                  <#b> ,
                                  <https://other.example/x> .
 `);
+  });
+
+  it("writes a literal with a line feed as a long string, its lines verbatim", () => {
+    const source = String.raw`<#a> ex:text "Run:\n\n    npm test\n\n| a | b |"@en , "x\ny" , "1\n2"^^xsd:token ; ex:one "no\\nfeed" .`;
+    const formatted = formatTurtle(`${PREFIXES}${source}`, BASE);
+    expect(formatted).toBe(`@prefix ex:  <https://example.com/ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<#a>
+    ex:text """Run:
+
+    npm test
+
+| a | b |"""@en ,
+            """x
+y""" ,
+            """1
+2"""^^xsd:token ;
+    ex:one "no\\\\nfeed" .
+`);
+    expect(formatTurtle(formatted, BASE)).toBe(formatted);
+  });
+
+  it("escapes in a long string what would end it early or be lost, so it reads back the same text", () => {
+    const values = [
+      'say "hi"\nthen ""go""',
+      '"quoted"\nlines"',
+      'a """ b\nc """" d',
+      "back\\slash\\n and \\\nend\\",
+      "crlf\r\nline\r\n",
+      "tab\there\nbell\u0007 and form\f",
+      "''' single\n'",
+    ];
+    const source = `${PREFIXES}<#a> ex:text ${values.map((v) => JSON.stringify(v)).join(" , ")} .`;
+    const formatted = formatTurtle(source, BASE);
+    const read = new Parser({ baseIRI: BASE }).parse(formatted).map((quad) => quad.object.value);
+    expect(read).toEqual(values);
+    expect(formatted).toContain(String.raw`"""\"quoted"` + "\n" + String.raw`lines\""""`);
+    expect(formatted).toContain(String.raw`"""a ""\" b` + "\n" + String.raw`c ""\"" d"""`);
+    expect(formatted).toContain(String.raw`"""crlf\r` + "\n" + String.raw`line\r` + "\n" + `"""`);
+    expect(formatted).toContain(`"""tab\there\nbell${String.raw`\u0007`} and form${String.raw`\f`}"""`);
+    expect(formatTurtle(formatted, BASE)).toBe(formatted);
+  });
+
+  it("reads no comment or directive in a long string's lines, whichever quotes delimit it", () => {
+    const source = `${PREFIXES}
+# About a.
+<#a> ex:text """# Not a comment
+@prefix no: <https://no.example/> .
+<#not-a-subject> \\"""" ; ex:more '''#also text
+''' ; ex:link <https://example.com/x#y> ; ex:short "#\\"#" .
+
+# About b.
+<#b> ex:name "b" .
+`;
+    const formatted = formatTurtle(source, BASE);
+    expect(formatted).toBe(`@prefix ex:  <https://example.com/ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# About a.
+<#a>
+    ex:text """# Not a comment
+@prefix no: <https://no.example/> .
+<#not-a-subject> \\"""" ;
+    ex:more """#also text
+""" ;
+    ex:link <https://example.com/x#y> ;
+    ex:short "#\\"#" .
+
+# About b.
+<#b>
+    ex:name "b" .
+`);
+    expect(formatTurtle(formatted, BASE)).toBe(formatted);
+  });
+
+  it("reads an escaped # in a prefixed name as part of the name, not a comment", () => {
+    const formatted = formatTurtle(`${PREFIXES}<#a> ex:te\\#xt """Intro\n# Heading\n""" .`, BASE);
+    expect(formatted).toContain(`<https://example.com/ns#te#xt> """Intro\n# Heading\n""" .`);
+  });
+
+  it("refuses Turtle it cannot read, an IRI left open among it", () => {
+    expect(() => formatTurtle(`<#a> <https://example.com/ns#name "a" .`, BASE)).toThrow();
   });
 
   it("is idempotent, and handles a document without prefixes", () => {

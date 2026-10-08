@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CardContainer } from "./CardContainer";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Card, Deck } from "@solid-memo/domain/deck";
+import { statusTexts } from "../test/liveRegions";
 import { makeUseCasesFake } from "../test/useCasesFake";
 
 const deck: Deck = {
@@ -60,7 +61,7 @@ describe("CardContainer", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
 
-    await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("Saved."));
+    await waitFor(() => expect(statusTexts()).toEqual(["Saved."]));
     expect(useCases.updateCard).toHaveBeenCalledWith(deck, card, {
       front: { ja: "水" },
       back: { en: "water (mizu)" },

@@ -1,5 +1,4 @@
 import {
-  cardLabel,
   DECK_DIRECTIONS,
   type Card,
   type Deck,
@@ -9,6 +8,7 @@ import type { DeckAbout } from "@solid-memo/domain/deckAbout";
 import { hasUnstatedSide } from "@solid-memo/domain/deckLanguages";
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
 import { CardRowBack, CardRowFront } from "./CardFace";
+import { cardName } from "./DataText";
 import { DeckAboutSection } from "./DeckAboutSection";
 import { ErrorMessage } from "./ErrorMessage";
 import { BrowserIcon, TrashIcon } from "./icons";
@@ -119,7 +119,7 @@ export function BrowserScreen({
 
   function handleRemove(card: Card) {
     if (busy) return;
-    const label = cardLabel(card, readerText);
+    const label = cardName(card, readerText);
     if (window.confirm(t("browser.removeConfirm", { card: label }))) {
       removing.current = { url: card.url, page: currentPage, row: pageCards.indexOf(card), label };
       setRemoved("");
@@ -224,6 +224,7 @@ export function BrowserScreen({
                         back={card.back}
                         imageUrl={card.frontImageUrl}
                         imageDescription={card.frontImageDescription}
+                        textFormat={card.textFormat}
                       />
                       {card.retired && <RetiredTag />}
                     </a>
@@ -242,6 +243,7 @@ export function BrowserScreen({
                       back={card.back}
                       imageUrl={card.backImageUrl}
                       imageDescription={card.backImageDescription}
+                      textFormat={card.textFormat}
                     />
                     <a
                       class="cell-overlay"
@@ -254,7 +256,7 @@ export function BrowserScreen({
                     <button
                       class="danger icon"
                       aria-label={t("browser.removeCardLabel", {
-                        card: cardLabel(card, readerText),
+                        card: cardName(card, readerText),
                       })}
                       title={t("browser.removeButton")}
                       onClick={() => handleRemove(card)}

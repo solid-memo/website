@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
-import { CardFace, CardRowBack, CardRowFront, CardThumbnail } from "./CardFace";
+import { CardFace, CardRowBack, CardRowFront, CardThumbnail, ROW_TEXT_MAX } from "./CardFace";
 import { I18nProvider } from "./i18n";
+import { SM } from "@solid-memo/vocab/vocab.generated";
 
 const FLAG = "https://flagcdn.com/af.svg";
 
@@ -259,5 +260,65 @@ describe("CardRowBack", () => {
   it("names a picture-only back by its side when the card gives no description", () => {
     render(<CardRowBack back={{}} imageUrl={FLAG} />);
     expect(screen.getByRole("img", { name: "Picture on the back of the card" })).not.toHaveAttribute("lang");
+  });
+});
+
+describe("a card in Markdown", () => {
+  it("shows a one-paragraph text as the face's own paragraph, more as Markdown blocks, and its label as one line", () => {
+    const { container } = render(
+      <CardFace
+        side="back"
+        text={{ en: "`git diff --staged`" }}
+        label={{ en: "*Command*\n\n- x" }}
+        note={{ en: "Without `--staged`:\n\n| Command | Compares |\n|-|-|\n| `git diff` | tree ↔ index |" }}
+        textFormat={SM.markdown}
+      />,
+    );
+    const face = container.querySelector(".card-face")!;
+    expect(face.querySelector(":scope > p:not(.card-label) > code")).toHaveTextContent("git diff --staged");
+    expect(face.querySelector(":scope > p.card-label")!.innerHTML).toBe("<em>Command</em> x");
+    expect(face.querySelector(":scope > div.md.card-note")).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Table" })).toHaveTextContent("tree ↔ index");
+  });
+
+  it("shows a row's text as its plain label, cut to fit, marked with its language", () => {
+    const long = `**${"word ".repeat(40).trim()}**\n\n\`\`\`\nmore\n\`\`\``;
+    const { container } = render(
+      <table>
+        <tbody>
+          <tr>
+            <td>
+              <CardRowFront front={{ sv: long }} back={{ en: "b" }} textFormat={SM.markdown} />
+            </td>
+            <td>
+              <CardRowBack back={{ en: "`ls` *now*" }} textFormat={SM.markdown} />
+            </td>
+          </tr>
+        </tbody>
+      </table>,
+    );
+    const [front, back] = container.querySelectorAll("td");
+    const frontText = front!.querySelector("span[lang=sv]")!.textContent!;
+    expect(frontText.length).toBeLessThanOrEqual(ROW_TEXT_MAX);
+    expect(frontText).toMatch(/^word word .*word…$/);
+    expect(back!.innerHTML).toBe("ls now");
+  });
+
+  it("names a picture-only front's picture after the back's label", () => {
+    render(
+      <CardRowFront front={{}} back={{ en: "**Kabul**\n\nThe capital" }} imageUrl={FLAG} textFormat={SM.markdown} />,
+    );
+    expect(screen.getByRole("img")).toHaveAccessibleName("Picture for: Kabul");
+  });
+
+  it("shows a row's front past a rule, and names its picture when the front shows no text", () => {
+    const { container, unmount } = render(
+      <CardRowFront front={{ en: "---\nWhat is X?" }} back={{ en: "b" }} imageUrl={FLAG} textFormat={SM.markdown} />,
+    );
+    expect(container).toHaveTextContent("What is X?");
+    expect(container.querySelector("img")).toHaveAttribute("alt", "");
+    unmount();
+    render(<CardRowFront front={{ en: "* * *" }} back={{ en: "Kabul" }} imageUrl={FLAG} textFormat={SM.markdown} />);
+    expect(screen.getByRole("img")).toHaveAccessibleName("Picture for: Kabul");
   });
 });

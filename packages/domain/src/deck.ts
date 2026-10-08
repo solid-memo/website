@@ -1,7 +1,8 @@
 import { AppError } from "./appError";
 import type { LangTexts } from "./keywords";
-import { shown, tidiedSideText, tidiedTagged, type LangText } from "./langText";
+import { shown, tidied, tidiedSideText, tidiedTagged, type LangText } from "./langText";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
+import { SM } from "@solid-memo/vocab/vocab.generated";
 import { isHttpUrl } from "./webId";
 
 /**
@@ -109,6 +110,8 @@ export interface CardSide {
   label?: LangText;
   /** The side's note, under its text: shown once the answer is revealed, never while asking. */
   note?: LangText;
+  /** How the side's text, label and note are written: the card's `textFormat`. */
+  textFormat?: string;
 }
 
 /**
@@ -123,12 +126,14 @@ export function promptSides(prompt: {
   answer: CardSide;
 } {
   const { card } = prompt;
+  const format = card.textFormat === undefined ? {} : { textFormat: card.textFormat };
   const front: CardSide = {
     side: "front",
     text: card.front,
     ...(card.frontImageUrl === undefined ? {} : { imageUrl: card.frontImageUrl }),
     ...(card.frontImageDescription === undefined ? {} : { imageDescription: card.frontImageDescription }),
     ...(card.frontNote === undefined ? {} : { note: card.frontNote }),
+    ...format,
   };
   const back: CardSide = {
     side: "back",
@@ -137,6 +142,7 @@ export function promptSides(prompt: {
     ...(card.backImageDescription === undefined ? {} : { imageDescription: card.backImageDescription }),
     ...(card.backLabel === undefined ? {} : { label: card.backLabel }),
     ...(card.backNote === undefined ? {} : { note: card.backNote }),
+    ...format,
   };
   return prompt.direction === "front-to-back"
     ? { question: front, answer: back }
@@ -252,6 +258,15 @@ export interface CardContent {
    * when the card has none.
    */
   distractors?: readonly Distractor[];
+  /**
+   * How the card's texts are written (`sm:textFormat`, vocabulary 1.15,
+   * card format 5 without a bump): the IRI of a concept of the
+   * TextFormats scheme, `sm:markdown` or `sm:plainText`, or one this app
+   * does not know, which reads as plain text. It covers the sides, the
+   * notes and the label, and the card's distractors, never the pictures'
+   * descriptions. Absent means plain text, shown as written.
+   */
+  textFormat?: string;
 }
 
 /**
@@ -318,6 +333,33 @@ export type CardContentValidation =
   | { ok: false; error: AppError; part?: CardTextPart };
 
 /**
+ * A text format as it compares: absent and `sm:plainText` are the same,
+ * plain text shown as written.
+ */
+export function textFormatOf(content: Pick<CardContent, "textFormat">): string {
+  return content.textFormat ?? SM.plainText;
+}
+
+/**
+ * Whether text in this format is read as Markdown (`sm:markdown`): any
+ * other format, one this app does not know too, and none are shown as
+ * plain text.
+ */
+export function isMarkdown(textFormat: string | undefined): boolean {
+  return textFormat === SM.markdown;
+}
+
+/**
+ * Whether text in this format keeps what plain text loses when tidied:
+ * the spaces its first line starts with (a Markdown code block). Any
+ * format but plain text, one this app does not know too, for it may give
+ * them meaning.
+ */
+function isFormatted(textFormat: string | undefined): boolean {
+  return textFormat !== undefined && textFormat !== SM.plainText;
+}
+
+/**
  * Validate and normalize card content as entered: text is trimmed, an
  * empty image field is none, an empty note or label is none, as is a
  * picture description with no text or no picture to describe, and each
@@ -337,16 +379,17 @@ export function validateCardContent(
   input: CardContent,
   saved?: CardContent,
 ): CardContentValidation {
-  const front = tidiedSideText(input.front);
-  const back = tidiedSideText(input.back);
+  const formatted = isFormatted(input.textFormat ?? saved?.textFormat);
+  const front = tidiedSideText(input.front, formatted);
+  const back = tidiedSideText(input.back, formatted);
   const frontImageUrl = normalizeImageUrl(input.frontImageUrl);
   const backImageUrl = normalizeImageUrl(input.backImageUrl);
   const own = {
     frontImageDescription: frontImageUrl === undefined ? undefined : tidiedTagged(input.frontImageDescription),
-    frontNote: tidiedTagged(input.frontNote),
-    backLabel: tidiedTagged(input.backLabel),
+    frontNote: tidiedTagged(input.frontNote, formatted),
+    backLabel: tidiedTagged(input.backLabel, formatted),
     backImageDescription: backImageUrl === undefined ? undefined : tidiedTagged(input.backImageDescription),
-    backNote: tidiedTagged(input.backNote),
+    backNote: tidiedTagged(input.backNote, formatted),
   };
   if (frontImageUrl !== undefined && !isHttpUrl(frontImageUrl)) {
     return { ok: false, error: new AppError("cardFrontImageNotWebUrl") };
@@ -354,7 +397,7 @@ export function validateCardContent(
   if (backImageUrl !== undefined && !isHttpUrl(backImageUrl)) {
     return { ok: false, error: new AppError("cardBackImageNotWebUrl") };
   }
-  const unstated = unstatedSide("front", front, saved) ?? unstatedSide("back", back, saved);
+  const unstated = unstatedSide("front", front, saved, formatted) ?? unstatedSide("back", back, saved, formatted);
   if (unstated !== undefined) return unstated;
   for (const part of ["frontImageDescription", "frontNote", "backLabel", "backImageDescription", "backNote"] as const) {
     if (own[part] !== undefined && "" in own[part]) return needsLanguage(part);
@@ -377,6 +420,7 @@ export function validateCardContent(
       ...(own.frontNote === undefined ? {} : { frontNote: own.frontNote }),
       ...(own.backLabel === undefined ? {} : { backLabel: own.backLabel }),
       ...(own.backNote === undefined ? {} : { backNote: own.backNote }),
+      ...(input.textFormat === undefined ? {} : { textFormat: input.textFormat }),
     },
   };
 }
@@ -394,10 +438,12 @@ function unstatedSide(
   part: "front" | "back",
   text: LangText,
   saved: CardContent | undefined,
+  formatted: boolean,
 ): CardContentValidation | undefined {
   if (!("" in text)) return undefined;
   if (Object.keys(text).length > 1) return { ok: false, error: new AppError("textMixesUnstated"), part };
-  return saved?.[part][""]?.trim() === text[""] ? undefined : needsLanguage(part);
+  const was = saved?.[part][""];
+  return was !== undefined && tidied(was, formatted) === text[""] ? undefined : needsLanguage(part);
 }
 
 function normalizeImageUrl(value: string | undefined): string | undefined {

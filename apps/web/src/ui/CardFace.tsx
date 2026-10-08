@@ -1,6 +1,7 @@
+import { isMarkdown } from "@solid-memo/domain/deck";
 import { isHttpUrl } from "@solid-memo/domain/webId";
 import type { LangText } from "@solid-memo/domain/langText";
-import { breakable } from "./breakable";
+import { DataLineContent, DataText, plainDataText } from "./DataText";
 import { useI18n } from "./i18n";
 import { ReaderText } from "./ReaderText";
 import { ZoomableImage } from "./ZoomableImage";
@@ -25,6 +26,10 @@ import { ZoomableImage } from "./ZoomableImage";
  * Size and place say which face is which only to the eye, so each face
  * also starts with a hidden name for screen readers: "Question" and
  * "Answer" in study, where a role is given, "Front" and "Back" elsewhere.
+ *
+ * A card in Markdown (`textFormat`) shows its text and note as Markdown
+ * and its label as one line of it (DataText); its pictures'
+ * descriptions are always plain.
  */
 export function CardFace({
   side,
@@ -34,6 +39,7 @@ export function CardFace({
   imageDescription,
   label,
   note,
+  textFormat,
 }: {
   side: "front" | "back";
   role?: "question" | "answer";
@@ -46,8 +52,11 @@ export function CardFace({
   label?: LangText;
   /** What holds of this side, e.g. "Out of use", in the reader's language. */
   note?: LangText;
+  /** How the card's texts are written (`sm:textFormat`); absent is plain text. */
+  textFormat?: string;
 }) {
   const { t, readerText, readerLang } = useI18n();
+  const markdown = isMarkdown(textFormat);
   const role = givenRole ?? (side === "front" ? "question" : "answer");
   const shownText = readerText(text);
   const description = imageDescription === undefined ? "" : readerText(imageDescription);
@@ -81,15 +90,11 @@ export function CardFace({
         ))}
       {label !== undefined && (
         <p class="card-label" lang={readerLang(label)}>
-          {breakable(readerText(label))}
+          <DataLineContent text={label} markdown={markdown} />
         </p>
       )}
-      {shownText !== "" && <p lang={readerLang(text)}>{breakable(shownText)}</p>}
-      {note !== undefined && (
-        <p class="card-note" lang={readerLang(note)}>
-          {breakable(readerText(note))}
-        </p>
-      )}
+      {shownText !== "" && <DataText text={text} markdown={markdown} breaks />}
+      {note !== undefined && <DataText class="card-note" text={note} markdown={markdown} breaks />}
     </div>
   );
 }
@@ -125,16 +130,21 @@ export function CardRowFront({
   back,
   imageUrl,
   imageDescription,
+  textFormat,
 }: {
   front: LangText;
   back: LangText;
   imageUrl?: string;
   /** What the picture shows, when the card says. */
   imageDescription?: LangText;
+  /** How the card's texts are written (`sm:textFormat`); absent is plain text. */
+  textFormat?: string;
 }) {
   const { t, readerText, readerLang } = useI18n();
-  const frontText = readerText(front);
-  const backText = readerText(back);
+  const markdown = isMarkdown(textFormat);
+  // A Markdown front that shows no text (a rule alone) leaves the picture to name the row.
+  const frontText = plainDataText(readerText(front), markdown);
+  const backText = plainDataText(readerText(back), markdown);
   const description = imageDescription === undefined ? "" : readerText(imageDescription);
   const alt =
     frontText !== ""
@@ -148,7 +158,7 @@ export function CardRowFront({
   return (
     <>
       <CardThumbnail imageUrl={imageUrl} alt={alt} lang={lang} />
-      <ReaderText text={front} breaks />
+      <RowText text={front} markdown={markdown} />
     </>
   );
 }
@@ -163,11 +173,14 @@ export function CardRowBack({
   back,
   imageUrl,
   imageDescription,
+  textFormat,
 }: {
   back: LangText;
   imageUrl?: string;
   /** What the picture shows, when the card says. */
   imageDescription?: LangText;
+  /** How the card's texts are written (`sm:textFormat`); absent is plain text. */
+  textFormat?: string;
 }) {
   const { t, readerText, readerLang } = useI18n();
   const backText = readerText(back);
@@ -177,7 +190,23 @@ export function CardRowBack({
   return (
     <>
       <CardThumbnail imageUrl={imageUrl} alt={alt} lang={lang} />
-      <ReaderText text={back} breaks />
+      <RowText text={back} markdown={isMarkdown(textFormat)} />
     </>
   );
+}
+
+/** How long a Markdown text shown in a Browser row may be. */
+export const ROW_TEXT_MAX = 120;
+
+/**
+ * A side's text in a Browser row, inside the row's link: as written, or
+ * for a card in Markdown its label (labelText), cut to ROW_TEXT_MAX
+ * characters, for a row holds neither blocks nor links.
+ */
+function RowText({ text, markdown }: { text: LangText; markdown: boolean }) {
+  const { readerText, readerLang } = useI18n();
+  if (!markdown) return <ReaderText text={text} breaks />;
+  const shown = plainDataText(readerText(text), true, ROW_TEXT_MAX);
+  const lang = readerLang(text);
+  return lang === undefined ? <>{shown}</> : <span lang={lang}>{shown}</span>;
 }

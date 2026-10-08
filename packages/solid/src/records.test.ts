@@ -12,7 +12,8 @@ import {
 } from "@inrupt/solid-client";
 import { describe, expect, it } from "vitest";
 import type { ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
-import { CARD_V2, CARD_V4, DECK_V2, DECK_V4, DECK_V6, LIBRARY_DECK_V5, PREFERENCES_V2, REVIEW_STATE_V2 } from "@solid-memo/vocab/descriptors.generated";
+import type { CardV5 } from "@solid-memo/vocab/types.generated";
+import { CARD_V2, CARD_V4, CARD_V5, DECK_V2, DECK_V4, DECK_V6, LIBRARY_DECK_V5, PREFERENCES_V2, REVIEW_STATE_V2 } from "@solid-memo/vocab/descriptors.generated";
 import { applyRecord, readRecord, readVersioned, recordThing, storedVersionOf } from "./records";
 import { DCTERMS, RDF, SM } from "./vocab";
 
@@ -104,6 +105,28 @@ describe("recordThing and readRecord", () => {
     expect(getStringNoLocale(thing, `${EX}foreign`)).toBe("kept");
     expect(getStringNoLocale(thing, `${EX}gone`)).toBeNull();
     expect(getInteger(thing, SM.formatVersion)).toBe(1);
+  });
+});
+
+describe("a card's text format", () => {
+  const CARD = "https://pod.example/cards.ttl#q";
+  const marked = () =>
+    recordThing(CARD, CARD_V5, { front: { en: "**a**" }, back: { en: "b" }, distractor: [], textFormat: SM.markdown }, null);
+
+  it("is read, and written in place, with the card", () => {
+    expect(readRecord(marked(), CARD_V5)).toMatchObject({ textFormat: SM.markdown });
+    const edited = recordThing(CARD, CARD_V5, { front: { en: "a" }, back: { en: "b" }, distractor: [] }, marked());
+    expect(getUrlAll(edited, SM.textFormat)).toEqual([]);
+  });
+
+  it("survives an edit by an app whose card shape predates it, as any predicate the shape does not own", () => {
+    const older = {
+      ...CARD_V5,
+      fields: CARD_V5.fields.filter((field) => field.name !== "textFormat"),
+    } as ShapeDescriptor<Omit<CardV5, "textFormat">>;
+    const edited = recordThing(CARD, older, { front: { en: "a" }, back: { en: "b" }, distractor: [] }, marked());
+    expect(getUrlAll(edited, SM.textFormat)).toEqual([SM.markdown]);
+    expect(readRecord(edited, CARD_V5)).toMatchObject({ front: { en: "a" }, textFormat: SM.markdown });
   });
 });
 

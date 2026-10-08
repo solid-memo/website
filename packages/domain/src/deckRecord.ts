@@ -104,6 +104,7 @@ export function cardContentFromRecord(data: CardV5, distractors: readonly Distra
     ...(data.backLabel === undefined ? {} : { backLabel: data.backLabel }),
     ...(data.backNote === undefined ? {} : { backNote: data.backNote }),
     ...(distractors.length === 0 ? {} : { distractors }),
+    ...(data.textFormat === undefined ? {} : { textFormat: data.textFormat }),
   };
 }
 
@@ -161,6 +162,7 @@ export function cardToRecord(card: CardContent & { retired?: true }, createdAt: 
     ...(createdAt === "" ? {} : { created: createdAt }),
     ...(card.retired === true ? { deprecated: true } : {}),
     distractor: (card.distractors ?? []).map((distractor) => `${documentUrl}#${distractor.id}`),
+    ...(card.textFormat === undefined ? {} : { textFormat: card.textFormat }),
   };
 }
 

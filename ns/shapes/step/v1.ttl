@@ -14,7 +14,7 @@
 <#inLibrary>
     a sh:NodeShape ;
     sh:name "StepV1" ;
-    rdfs:comment "Step format 1: a schema:LearningResource of a course release, part of a chapter at its place among the chapter's steps, with a short theory in language-tagged text, one of them English, the cards that check it, and owl:deprecated true once retired." ;
+    rdfs:comment "Step format 1: a schema:LearningResource of a course release, part of a chapter at its place among the chapter's steps, with a short theory in language-tagged text, one of them English, the cards that check it, and owl:deprecated true once retired; a step may say how its theory is written, solid-memo:textFormat, plain or Markdown (since vocabulary 1.15, without a format bump)." ;
     sh:nodeKind sh:IRI ;
     sh:class solid-memo:Step ;
     sh:property <#formatVersion> ,
@@ -23,7 +23,8 @@
                 <#checkedBy> ,
                 <#chapter> ,
                 <#position> ,
-                <#deprecated> .
+                <#deprecated> ,
+                <#textFormat> .
 
 <#formatVersion>
     a sh:PropertyShape ;
@@ -90,3 +91,11 @@
     sh:maxCount 1 ;
     sh:message "A retired step states owl:deprecated true, a boolean."@en ,
                "Ett steg som tagits ur bruk anger owl:deprecated true, ett booleskt värde."@sv .
+
+<#textFormat>
+    a sh:PropertyShape ;
+    sh:path solid-memo:textFormat ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+    sh:message "A step's text format is at most one IRI, a concept of solid-memo:TextFormats."@en ,
+               "Ett stegs textformat är högst en IRI, ett begrepp i solid-memo:TextFormats."@sv .

@@ -85,6 +85,7 @@ export function LibraryBrowserScreen({
                         back={card.back}
                         imageUrl={card.frontImageUrl}
                         imageDescription={card.frontImageDescription}
+                        textFormat={card.textFormat}
                       />
                       {card.retired && <RetiredTag />}
                     </a>
@@ -97,6 +98,7 @@ export function LibraryBrowserScreen({
                       back={card.back}
                       imageUrl={card.backImageUrl}
                       imageDescription={card.backImageDescription}
+                      textFormat={card.textFormat}
                     />
                     <a
                       class="cell-overlay"

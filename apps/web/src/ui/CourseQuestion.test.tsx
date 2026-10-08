@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
 import { choicesOf } from "@solid-memo/domain/course";
+import type { CardContent } from "@solid-memo/domain/deck";
+import { SM } from "@solid-memo/vocab/vocab.generated";
 import { CourseQuestion, type CheckedAnswer } from "./CourseQuestion";
 import { courseCards, noShuffle } from "../test/course";
 import { statusTexts } from "../test/liveRegions";
@@ -96,5 +98,83 @@ describe("CourseQuestion", () => {
   it("shows why an answer could not be saved", () => {
     renderQuestion({ error: "pod refused" });
     expect(screen.getByText("pod refused")).toHaveClass("error");
+  });
+
+  describe("in Markdown", () => {
+    const marked: CardContent = {
+      textFormat: SM.markdown,
+      front: { en: "What does it answer?\n\n```http\nDELETE /notes/ HTTP/1.1\n```" },
+      frontImageUrl: "https://example.org/server.png",
+      frontImageDescription: { en: "A server" },
+      back: { en: "`409 Conflict`" },
+      backNote: { en: "See [the spec](https://solidproject.org/TR/protocol).\n\n```\nHTTP/1.1 409 Conflict\n```" },
+      distractors: [{ id: "d1", text: { en: "`205 Reset Content`" }, note: { en: "That is for an *empty* container." } }],
+    };
+    const markedChoices = choicesOf(marked, noShuffle);
+
+    it("names the options by the question's label and picture, and describes them by the whole question", () => {
+      renderQuestion({ card: marked, choices: markedChoices });
+      const group = screen.getByRole("radiogroup", { name: "Question: A server What does it answer?" });
+      expect(document.getElementById(group.getAttribute("aria-describedby")!)).toHaveTextContent("DELETE /notes/ HTTP/1.1");
+      expect(screen.getByRole("radio", { name: "409 Conflict" }).closest("label")!.querySelector("code")).toBeInTheDocument();
+    });
+
+    it("keeps the name out of the reading order, so the question is read once", () => {
+      renderQuestion({ card: marked, choices: markedChoices });
+      const name = document.getElementById(screen.getByRole("radiogroup").getAttribute("aria-labelledby")!)!;
+      expect(name).toHaveAttribute("hidden");
+      expect(name).not.toBeVisible();
+    });
+
+    it("leaves a picture out of the name when the question has none, and a one-paragraph question undescribed", () => {
+      const noPicture = { ...marked, front: { en: "What does `DELETE` *answer*?" }, frontImageUrl: undefined, frontImageDescription: undefined };
+      renderQuestion({ card: noPicture, choices: choicesOf(noPicture, noShuffle) });
+      const group = screen.getByRole("radiogroup", { name: "Question: What does DELETE answer?" });
+      expect(group).not.toHaveAttribute("aria-describedby");
+    });
+
+    it("names an undescribed picture as the question shows it", () => {
+      const undescribed = { ...marked, frontImageDescription: undefined };
+      renderQuestion({ card: undescribed, choices: choicesOf(undescribed, noShuffle) });
+      expect(
+        screen.getByRole("radiogroup", { name: "Question: Picture on the front of the card What does it answer?" }),
+      ).toBeInTheDocument();
+      expect(screen.getByRole("img")).toHaveAccessibleName("Picture on the front of the card");
+    });
+
+    it("names a picture that is not shown by the hint shown in its place", () => {
+      const notWeb = { ...marked, frontImageUrl: "file:///server.png" };
+      renderQuestion({ card: notWeb, choices: choicesOf(notWeb, noShuffle) });
+      expect(
+        screen.getByRole("radiogroup", {
+          name: "Question: Picture not shown: its address is not a web URL. What does it answer?",
+        }),
+      ).toBeInTheDocument();
+    });
+
+    it("describes a question too long to read as Markdown by the whole of it", () => {
+      const costly = { ...marked, front: { en: `${"- ".repeat(20)}a\n\nmore` } };
+      renderQuestion({ card: costly, choices: choicesOf(costly, noShuffle) });
+      expect(screen.getByRole("radiogroup")).toHaveAttribute("aria-describedby");
+    });
+
+    it("says why an option is wrong under its own heading, and leaves Enter on a link to the link", () => {
+      const { onNext } = renderQuestion({
+        card: marked,
+        choices: markedChoices,
+        answer: { choice: markedChoices[1]!, effect: "review" },
+      });
+      const why = document.querySelector(".course-why")!;
+      expect(why.tagName).toBe("DIV");
+      expect(why.querySelector(".course-why-label")).toHaveTextContent("Why not:");
+      expect(why.querySelector("em")).toHaveTextContent("empty");
+      fireEvent.keyDown(screen.getByRole("link", { name: /the spec/ }), { key: "Enter" });
+      const answerCode = screen.getAllByRole("region", { name: "Code" })[1]!;
+      expect(answerCode.closest(".course-feedback")).toBe(why.closest(".course-feedback"));
+      fireEvent.keyDown(answerCode, { key: "Enter" });
+      expect(onNext).not.toHaveBeenCalled();
+      fireEvent.keyDown(why, { key: "Enter" });
+      expect(onNext).toHaveBeenCalledOnce();
+    });
   });
 });

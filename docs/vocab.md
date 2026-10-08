@@ -51,6 +51,7 @@ string, so other applications can look up what it means:
 | `sm:InvalidDataPolicies` | [`v1.ttl`](../ns/vocab/v1.ttl) | `sm:blockInstance` (default), `sm:blockSubject`, `sm:warnOnly` | `sm:invalidDataPolicy` in preferences |
 | `sm:Themes` | [`v1.ttl`](../ns/vocab/v1.ttl) | `sm:systemTheme` (default), `sm:lightTheme`, `sm:darkTheme` | `sm:theme` in preferences ([theme.md](theme.md)) |
 | `sm:AnswerModes` | [`v1.ttl`](../ns/vocab/v1.ttl) | `sm:recall` (absent means this), `sm:multipleChoice` | `sm:answerMode` on an answer in the [answer log](data-model.md#the-answer-log) |
+| `sm:TextFormats` | [`v1.ttl`](../ns/vocab/v1.ttl) | `sm:plainText` (absent means this), `sm:markdown` | `sm:textFormat` on a card, a course step or a chapter ([Text formats](#text-formats)) |
 | Topics (`https://solid-memo.com/ns/vocab/topics.ttl`) | [`topics.ttl`](../ns/vocab/topics.ttl) | languages (swedish), geography, computing (linked-data), science (chemistry), art, labour-market | `dcat:theme` on a deck, next to the EU data theme `EDUC` |
 
 - Every scheme has a `dcterms:title` and a `skos:definition`; every
@@ -65,7 +66,7 @@ string, so other applications can look up what it means:
   so the mapping between them is data.
 - `npm run generate` renders every scheme into
   `packages/vocab/src/concepts.generated.ts` (`STUDY_DIRECTIONS`,
-  `INVALID_DATA_POLICIES`, `ANSWER_MODES`, `TOPICS`), which the app lists and labels
+  `INVALID_DATA_POLICIES`, `ANSWER_MODES`, `TEXT_FORMATS`, `TOPICS`), which the app lists and labels
   from, in the language the user reads; [concepts.ts](../packages/domain/src/concepts.ts) looks concepts up by
   IRI or notation.
 - Concepts are only ever added. One that should go is deprecated
@@ -100,7 +101,16 @@ string, so other applications can look up what it means:
   joined card format 5 and `sm:answerMode` and `sm:chosenDistractor`
   answer format 1, each optional, and `sm:completedChapter` is written
   on a deck outside `DeckV6`, as `sm:position` is
-  ([courses.md](courses.md)).
+  ([courses.md](courses.md)). 1.15's `sm:textFormat` joined card format
+  5, step format 1 and chapter format 1 the first way
+  ([Text formats](#text-formats)).
+- **A new concept of a scheme whose property shape lists no `sh:in`
+  needs no format bump.** `sm:textFormat` is such a property: its shape
+  says only "at most one IRI", so a reader that meets a concept it does
+  not know reads the value, keeps it through an edit and treats the text
+  as plain, rather than erasing it or calling the subject invalid. A
+  scheme whose shape does list its concepts (`sm:studyDirection`,
+  `sm:theme`) is an `iriEnum`, and there a new concept is a new format.
 - **A breaking change is a new namespace** (`ns/vocab/v2.ttl#`, with
   `owl:priorVersion` pointing back), never an edit of v1: the v1 IRIs
   are baked into every pod that ever wrote them.
@@ -138,6 +148,48 @@ questions are its cards.
   and a step in its chapter. `sm:position` keeps its one meaning, a
   place on the arranged deck list.
 - **The vocabulary's `schema:` prefix is `https://schema.org/`.**
+
+## Text formats
+
+Version 1.15 added how a text is written: `sm:textFormat`, a concept of
+`sm:TextFormats`, on the subject that holds the text.
+
+| Concept | Notation | Meaning |
+|---|---|---|
+| `sm:plainText` | `plain` | Shown as written. The same as no text format; the app writes it where a person chose it, so a deliberate choice is told from a marker an older app lost. |
+| `sm:markdown` | `markdown` | CommonMark 0.31.2, with GitHub Flavored Markdown pipe tables as its one extension (`skos:broadMatch` IANA `text/markdown`). |
+
+- **What it covers is fixed for 1.x**, by the subject's class: on an
+  `sm:Card` its `sm:front`, `sm:back`, `sm:frontNote`, `sm:backNote` and
+  `sm:backLabel`, and the `sm:distractorText` and `sm:distractorNote` of
+  its distractors, which carry no format of their own (they are read
+  and written only with their card); on an `sm:Step` its `sm:theory`;
+  on an `sm:Chapter` its `dcterms:description`. A picture's description,
+  a chapter's title and every deck-level text are always plain: they
+  serve as `alt` text, headings and DCAT metadata. A new text predicate
+  needs its own decision.
+- **Opt-in on every subject, never inherited.** Absent means plain
+  text, exactly as before 1.15: published text already holds strings
+  Markdown would misread (`&aring;`, `git clone <url>`, `M87*`), and
+  frozen releases are never retro-marked. A card copied or imported
+  alone keeps its meaning, since the marker is on the card, not the
+  deck. Theory and chapter descriptions are not Markdown by definition
+  for the same reason: 1.14 published them as plain.
+- **The definition is syntax only.** How the app shows it (raw HTML as
+  text, pictures as their alt text, which links are live) is render
+  policy ([markdown.md](markdown.md)), which may change without touching
+  data.
+- **A wider dialect is a new concept** (strikethrough or autolinks would
+  change how existing Markdown text reads); an older app reads it as
+  plain text and keeps it (see the versioning policy above).
+- **Not `dcterms:format` or `schema:encodingFormat`.** Both describe a
+  resource's media, not its text: a card also carries pictures, and a
+  `schema:LearningResource`'s encoding format names its own media.
+  Other schema.org or DCAT readers see the Markdown source as the
+  literal's value.
+- Literals stay `rdf:langString` (or untagged `xsd:string` where a
+  shape allows it): each language's value is its own document, and the
+  [language rules](#the-language-of-text) are unchanged.
 
 ## The language of text
 

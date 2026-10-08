@@ -4,6 +4,15 @@ import { join, relative } from "node:path";
 import { promisify } from "node:util";
 import { DataFactory, Writer, type Literal, type Quad, type Quad_Object } from "n3";
 import type { ShapeEngine } from "../src/engine.ts";
+import {
+  markdownProblems as textProblems,
+  OPTION,
+  PROSE,
+  SIDE,
+  type FieldRule,
+  type MarkdownProblem,
+} from "@solid-memo/markdown/problems";
+import { MAX_CHARS, MAX_DEPTH, MAX_TABLE_CELLS, MAX_TABLE_COLUMNS } from "@solid-memo/markdown/parse";
 import { formatTurtle } from "@solid-memo/turtle/formatTurtle";
 import { objectsOf, parseTurtle, RDF_TYPE, subjectsOfType } from "@solid-memo/turtle/rdf";
 import { SITE, VOCAB_BASE } from "@solid-memo/vocab/tooling/sources";
@@ -27,11 +36,12 @@ import {
  * it is out of date. Both check the library: the layout (nothing but the
  * index and the releases, each deck's versions numbered 1, 2, …), each
  * release's metadata against its path, Solid Memo's shapes, DCAT-AP and
- * SKOS with the reference data, a course's outline (courseProblems), and
- * that no version drops a card, chapter, step or distractor of the one
- * before it. With `--base <git ref>`, a version published at that
- * ref must be there still, byte for byte: a published version is never
- * edited or removed, only followed by the next.
+ * SKOS with the reference data, a course's outline (courseProblems), its
+ * text written in Markdown (markdownProblems), and that no version drops
+ * a card, chapter, step or distractor of the one before it. With
+ * `--base <git ref>`, a version published at that ref must be there
+ * still, byte for byte: a published version is never edited or removed,
+ * only followed by the next.
  */
 
 const DCAT = "http://www.w3.org/ns/dcat#";
@@ -513,6 +523,104 @@ export function courseProblems(release: DeckRelease): string[] {
   return problems;
 }
 
+const TEXT_FORMAT = `${SM_NS}textFormat`;
+const MARKDOWN = `${SM_NS}markdown`;
+/** The concepts of solid-memo:TextFormats. */
+const TEXT_FORMATS = new Set([`${SM_NS}plainText`, MARKDOWN]);
+
+/** What a Markdown problem means for a release's author, after the subject and field it is in. */
+function problemText(problem: MarkdownProblem): string {
+  const code = (source: string) => JSON.stringify(source);
+  switch (problem.code) {
+    case "tooLong":
+      return `is ${problem.length} characters, more than the ${MAX_CHARS} the app reads as Markdown: it would be shown as plain text. Make it shorter.`;
+    case "tooComplex":
+      return "nests or marks up more than the app reads as Markdown (docs/markdown.md, Limits): it would be shown as plain text.";
+    case "tooDeep":
+      return `nests ${code(problem.source)} past the ${MAX_DEPTH} levels of blocks and markup the app reads (each quote, list item, paragraph, emphasis and link is one): it would be shown as its source.`;
+    case "largeTable":
+      return `has a table of more than ${MAX_TABLE_COLUMNS} columns or ${MAX_TABLE_CELLS} cells: it would be shown as its source.`;
+    case "html":
+      return `has raw HTML, ${code(problem.source)}, which is shown as its source: write it as code, or escape its "<" (\\<).`;
+    case "image":
+      return `has a picture, ${code(problem.source)}, which is never shown, only its description: a card shows a picture by solid-memo:frontImage or backImage.`;
+    case "link":
+      return `has a link, ${code(problem.source)}, where none may be (a card's sides, its label and its options): ${problem.autolink ? "an autolink loses its angle brackets; " : ""}write it as code to show it as written.`;
+    case "linkNotFollowed":
+      return `links to ${code(problem.url)}, which the app does not follow: only an https: address without a user name or password is.`;
+    case "linkHost":
+      return `has link text that reads as the host name or address ${code(problem.text)}, but the link leads to ${problem.host}: name that host, or word the text otherwise (a file's name, such as package.json, reads as a host name too).`;
+    case "hiddenControl":
+      return `has ${problem.controls.join(", ")} in ${problem.in === "code" ? "code" : "a link"}, which would show as markers: such controls make text read other than it is.`;
+    case "characterReference":
+      return `has the character reference ${problem.source}, which Markdown shows decoded: write it as code, or escape its "&" (\\${problem.source}).`;
+    case "notOneParagraph":
+      return "is an option but not one paragraph: the right option and the wrong ones must look alike.";
+  }
+}
+
+/**
+ * The text of a release written in Markdown, by the rules for a release
+ * (docs/markdown.md, docs/deck-library.md): raw HTML, pictures, links
+ * where none may be or that the app does not follow or that name another
+ * host, hidden controls, character references and what the app would not
+ * read as Markdown, field by field, of each card, step and chapter that
+ * states solid-memo:textFormat solid-memo:markdown; on a card, its
+ * distractors' text too, its back and every distractor's text one
+ * paragraph when it has distractors, as options are. Only those subjects
+ * state a text format, and only a concept of solid-memo:TextFormats.
+ * None of this keeps the app safe, which shows any text safely: it is
+ * that the text shows as its author meant.
+ */
+export function markdownProblems(release: DeckRelease): string[] {
+  const { deck, version, quads } = release;
+  const label = labelOf(deck, version);
+  const url = releaseUrlOf(deck, version);
+  const problems: string[] = [];
+  const shown = (iri: string) => (iri.startsWith(`${url}#`) ? `<${iri.slice(url.length)}>` : `<${iri}>`);
+  const cards = subjectsOfType(quads, `${SM_NS}Card`);
+  const steps = subjectsOfType(quads, `${SM_NS}Step`);
+  const chapters = subjectsOfType(quads, `${SM_NS}Chapter`);
+  const formatted = new Set([...cards, ...steps, ...chapters]);
+
+  const distractors = new Set(subjectsOfType(quads, `${SM_NS}Distractor`));
+  for (const q of quads.filter((q) => q.predicate.value === TEXT_FORMAT)) {
+    if (!formatted.has(q.subject.value)) {
+      const why = distractors.has(q.subject.value) ? "a distractor's text is written as its card's" : "its text is plain text";
+      problems.push(
+        `${label}: ${shown(q.subject.value)} states solid-memo:textFormat, which only a card, a step or a chapter does: ${why}.`,
+      );
+    } else if (!TEXT_FORMATS.has(q.object.value)) {
+      problems.push(
+        `${label}: ${shown(q.subject.value)} states solid-memo:textFormat ${shownValues([q.object])}, no concept of solid-memo:TextFormats: the app shows its text as plain text.`,
+      );
+    }
+  }
+
+  const marked = (subject: string) => objectsOf(quads, subject, TEXT_FORMAT).some((o) => o.value === MARKDOWN);
+  const check = (subject: string, predicate: string, name: string, rule: FieldRule) => {
+    for (const text of literalsOf(quads, subject, predicate) as Literal[]) {
+      const field = `${name}${text.language === "" ? "" : `@${text.language}`}`;
+      for (const problem of textProblems(text.value, rule)) problems.push(`${label}: ${shown(subject)} ${field} ${problemText(problem)}`);
+    }
+  };
+  for (const card of cards.filter(marked)) {
+    const options = objectsOf(quads, card, `${SM_NS}distractor`).map((o) => o.value);
+    check(card, `${SM_NS}front`, "solid-memo:front", SIDE);
+    check(card, `${SM_NS}back`, "solid-memo:back", options.length > 0 ? OPTION : SIDE);
+    check(card, `${SM_NS}backLabel`, "solid-memo:backLabel", SIDE);
+    check(card, `${SM_NS}frontNote`, "solid-memo:frontNote", PROSE);
+    check(card, `${SM_NS}backNote`, "solid-memo:backNote", PROSE);
+    for (const option of options) {
+      check(option, `${SM_NS}distractorText`, "solid-memo:distractorText", OPTION);
+      check(option, `${SM_NS}distractorNote`, "solid-memo:distractorNote", PROSE);
+    }
+  }
+  for (const step of steps.filter(marked)) check(step, `${SM_NS}theory`, "solid-memo:theory", PROSE);
+  for (const chapter of chapters.filter(marked)) check(chapter, `${DCTERMS}description`, "dcterms:description", PROSE);
+  return problems;
+}
+
 /** The problems a check that throws one Error per document reports, or none. */
 async function problemsOf(check: Promise<void>): Promise<string[]> {
   try {
@@ -528,10 +636,11 @@ async function problemsOf(check: Promise<void>): Promise<string[]> {
  * metadata against its path, its cards, chapters, steps and distractors
  * against the version before it (one the deck no longer uses is retired,
  * owl:deprecated true, never removed, so the copies that have it keep it
- * and its review history), its course outline (courseProblems),
- * and Solid Memo's shapes, DCAT-AP (a release with the index beside it,
- * where its series and publisher are described) and SKOS, with the
- * reference data; then the index, to the shapes and the profiles too.
+ * and its review history), its course outline (courseProblems), its
+ * text written in Markdown (markdownProblems), and Solid Memo's shapes,
+ * DCAT-AP (a release with the index beside it, where its series and
+ * publisher are described) and SKOS, with the reference data; then the
+ * index, to the shapes and the profiles too.
  */
 export async function validateLibrary(
   releases: readonly DeckRelease[],
@@ -562,7 +671,7 @@ export async function validateLibrary(
         );
       }
     }
-    problems.push(...courseProblems(release));
+    problems.push(...courseProblems(release), ...markdownProblems(release));
     problems.push(
       ...(await problemsOf(validateTurtleDocument(label, release.quads, validators.shapes, "library"))),
       ...(await problemsOf(validateProfile(label, release.quads, validators.dcatAp, [...validators.reference, ...indexQuads]))),

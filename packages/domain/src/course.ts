@@ -37,6 +37,12 @@ export interface CourseChapter {
   position: number;
   title: LangText;
   description?: LangText;
+  /**
+   * How the description is written (`sm:textFormat`, vocabulary 1.15): a
+   * concept IRI of the TextFormats scheme; absent means plain text. The
+   * title is always plain.
+   */
+  textFormat?: string;
   /** The steps in use, by position; retired ones left out. */
   steps: CourseStep[];
   /** Cards (fragment ids) asked only in the chapter's final review, in the order of their ids. */
@@ -50,6 +56,8 @@ export interface CourseStep {
   position: number;
   /** The theory, in every language it is stated in (one of them English). */
   theory: LangText;
+  /** How the theory is written (`sm:textFormat`, vocabulary 1.15), as a chapter's description is. */
+  textFormat?: string;
   /**
    * The cards (fragment ids) whose questions check the theory, in the
    * order of their ids: RDF keeps no order among a step's sm:checkedBy,
@@ -82,6 +90,7 @@ export function courseOutlineFromRecords(
         position: data.position,
         title: data.title,
         ...(data.description === undefined ? {} : { description: data.description }),
+        ...(data.textFormat === undefined ? {} : { textFormat: data.textFormat }),
         steps: byPosition(
           inUse(steps)
             .filter((step) => step.data.chapter === url)
@@ -90,6 +99,7 @@ export function courseOutlineFromRecords(
               url: step.url,
               position: step.data.position,
               theory: step.data.theory,
+              ...(step.data.textFormat === undefined ? {} : { textFormat: step.data.textFormat }),
               questionIds: idsOf(step.data.checkedBy),
             })),
         ),

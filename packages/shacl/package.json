@@ -18,6 +18,7 @@
   "dependencies": {
     "@inrupt/solid-client": "^4.0.0",
     "@solid-memo/domain": "*",
+    "@solid-memo/markdown": "*",
     "@solid-memo/turtle": "*",
     "@solid-memo/vocab": "*",
     "n3": "^2.0.0",

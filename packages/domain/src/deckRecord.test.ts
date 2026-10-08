@@ -266,6 +266,21 @@ describe("card records", () => {
   });
 });
 
+describe("a card's text format", () => {
+  const MARKDOWN = "https://solid-memo.com/ns/vocab/v1.ttl#markdown";
+  it("is written and read back as the card has it, absent when it has none", () => {
+    const record = cardToRecord({ front: { en: "**Staged**" }, back: { zxx: "`git diff --staged`" }, textFormat: MARKDOWN }, "", CARDS);
+    expect(record).toEqual({ front: { en: "**Staged**" }, back: { zxx: "`git diff --staged`" }, distractor: [], textFormat: MARKDOWN });
+    expect(cardFromRecord(`${CARDS}#q`, 5, record)).toMatchObject({ id: "q", textFormat: MARKDOWN });
+    expect(libraryCardFromRecord("https://solid-memo.com/decks/x/v2.ttl#q", 5, record)).toMatchObject({ textFormat: MARKDOWN });
+    // A concept this app does not know is kept as it is: it reads as plain text.
+    expect(cardContentFromRecord({ ...record, textFormat: "https://example.org/formats#asciidoc" })).toMatchObject({
+      textFormat: "https://example.org/formats#asciidoc",
+    });
+    expect(cardContentFromRecord({ front: { en: "a" }, back: { en: "b" }, distractor: [] })).not.toHaveProperty("textFormat");
+  });
+});
+
 describe("distractor records", () => {
   it("round-trip the text and the note, keeping the fragment id", () => {
     const distractor = { id: "q-d1", text: { en: "Only web pages" }, note: { en: "A URL is one kind of IRI." } };

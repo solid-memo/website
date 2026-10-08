@@ -1,0 +1,9 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+
+<#q>
+    a solid-memo:Card ;
+    solid-memo:textFormat solid-memo:markdown ,
+                          solid-memo:plainText ;
+    solid-memo:front "Which is it?"@en ;
+    solid-memo:back "Only one"@en ;
+    solid-memo:formatVersion 5 .

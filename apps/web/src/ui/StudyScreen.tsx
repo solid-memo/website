@@ -11,6 +11,7 @@ import type { ReviewQuality } from "@solid-memo/domain/review";
 import { CardFace } from "./CardFace";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type I18n, type ErrorText } from "./i18n";
+import { inDataRegion } from "./Markdown";
 
 function qualityLabel(quality: ReviewQuality, t: I18n["t"]): string {
   switch (quality) {
@@ -157,7 +158,9 @@ export function StudyScreen({
  *
  * While the focus is in the card, Space reveals and a grade's key answers,
  * as a hint under the card says. The keys work only there, so they never
- * catch typing or a screen reader's own keys elsewhere on the page.
+ * catch typing or a screen reader's own keys elsewhere on the page, nor
+ * on a link or a code block or table in the card's text (inDataRegion),
+ * where Space scrolls or follows as it would anywhere.
  * A grade button is never focused itself, so a repeated key press cannot
  * grade by accident. While an answer saves, the buttons are only
  * aria-disabled, so the one pressed keeps the focus if saving fails.
@@ -182,7 +185,7 @@ function StudyCard({
   const buttons = answerButtons(answerScale, t);
 
   function onKeyDown(event: KeyboardEvent) {
-    if (busy || event.ctrlKey || event.altKey || event.metaKey) return;
+    if (busy || event.ctrlKey || event.altKey || event.metaKey || inDataRegion(event.target as Element)) return;
     if (!revealed) {
       // Space on Reveal itself already presses it.
       if (event.key !== " " || (event.target as Element).closest("button")) return;

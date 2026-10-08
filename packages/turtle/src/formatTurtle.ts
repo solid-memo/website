@@ -18,6 +18,11 @@ import { readTurtleTree, type TurtleFile } from "./rdf.ts";
  * would lose comments, so comment blocks are carried over to the subject
  * they precede — and a file whose comments cannot all be placed that way
  * is refused rather than rewritten.
+ *
+ * A literal whose text has a line feed (Markdown, say) is written as a
+ * long string, `"""…"""`, its lines verbatim and never indented, for
+ * leading spaces can matter in them; every other literal is written on
+ * one line, as before.
  */
 
 const RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
@@ -40,7 +45,7 @@ export function formatTurtle(
   fallbackBase: string,
   { relativeTo }: { relativeTo?: string } = {},
 ): string {
-  const lines = source.split("\n");
+  const lines = turtleLines(source);
   let base = fallbackBase;
   let declaresBase = false;
   const prefixes: [string, string][] = [];
@@ -98,7 +103,7 @@ export function formatTurtle(
   const term = (t: Term): string => {
     if (t.termType === "NamedNode") return iri(t.value);
     if (t.termType === "Literal") {
-      const text = JSON.stringify(t.value);
+      const text = t.value.includes("\n") ? longString(t.value) : JSON.stringify(t.value);
       if (t.language !== "") return `${text}@${t.language}`;
       const datatype = t.datatype.value;
       if (BARE_DATATYPES.includes(datatype)) return t.value;
@@ -148,13 +153,68 @@ export function formatTurtle(
   }
   const formatted = output.join("\n");
   const commentLines = (text: string) =>
-    text.split("\n").filter((line) => line.trimStart().startsWith("#")).length;
+    turtleLines(text).filter((line) => line.trimStart().startsWith("#")).length;
   if (commentLines(formatted) !== commentLines(source)) {
     throw new Error(
       "a comment does not directly precede a subject and would be lost; move it or format by hand.",
     );
   }
   return formatted;
+}
+
+/**
+ * A literal's text as a long string: a backslash and each control
+ * character but a tab or a line feed escaped (a carriage return as
+ * `\r`, so a file's line ends say nothing of its text), and a double
+ * quote escaped where it would end or run into a delimiter: at either
+ * end, and every third of a run.
+ */
+function longString(value: string): string {
+  const escaped = value
+    // A backslash, and each control character but a tab (\u0009) or a line feed (\u000a).
+    .replace(/[\\\u0000-\u0008\u000b-\u001f]/g, (c) => (c === "\\" ? "\\\\" : JSON.stringify(c).slice(1, -1)))
+    .replace(/"+/g, (run, offset: number, whole: string) =>
+      offset === 0 || offset + run.length === whole.length
+        ? '\\"'.repeat(run.length)
+        : [...run].map((quote, i) => (i % 3 === 2 ? '\\"' : quote)).join(""),
+    );
+  return `"""${escaped}"""`;
+}
+
+/**
+ * The lines of a Turtle document that are its own: a line that begins
+ * inside a long string is a literal's text (a Markdown heading's `#`
+ * there is no comment), so it is given as an empty line, and nothing it
+ * says is read as a comment or a directive. Only a long string runs on
+ * past a line's end: a comment, an IRI or a short string ends with it.
+ */
+function turtleLines(source: string): string[] {
+  /** The delimiter of the long string open as the line begins, if any. */
+  let open: string | null = null;
+  return source.split("\n").map((line) => {
+    const own = open === null ? line : "";
+    let quote = open;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i]!;
+      if (quote !== null) {
+        if (c === "\\") i++;
+        else if (line.startsWith(quote, i)) {
+          i += quote.length - 1;
+          quote = null;
+        }
+      } else if (c === "\\") i++; // An escape in a prefixed name, `ex:a\#b`: its `#` begins no comment.
+      else if (c === "#") break;
+      else if (c === "<") {
+        const end = line.indexOf(">", i);
+        i = end === -1 ? line.length : end;
+      } else if (c === '"' || c === "'") {
+        quote = line.startsWith(c.repeat(3), i) ? c.repeat(3) : c;
+        i += quote.length - 1;
+      }
+    }
+    open = quote?.length === 3 ? quote : null;
+    return own;
+  });
 }
 
 /**

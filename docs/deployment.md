@@ -69,6 +69,11 @@ site is served.
 - The Solid OIDC redirect URL derives from `window.location` at
   runtime; no per-origin auth configuration. HTTPS is required, which
   GitHub Pages provides.
+- The Content Security Policy is a meta tag in `index.html`, not a
+  header, for GitHub Pages sets none: it travels with the page to any
+  host ([markdown.md](markdown.md#safety)). A host that can set headers
+  may add the directives a meta tag cannot carry, such as
+  `frame-ancestors`.
 
 ## Custom domain (solid-memo.com via one.com DNS)
 

@@ -61,14 +61,22 @@ export function shown(text: LangText, languages: readonly string[] = []): string
  * Text as entered, its languages as the form states them: every
  * language's text trimmed and an empty one left out, for clearing a
  * language's text removes that language. A card side may keep untagged
- * text (""), but only as it was saved (see validateCardContent).
+ * text (""), but only as it was saved (see validateCardContent). Text
+ * written in a format (`formatted`, Markdown) keeps the spaces its first
+ * line starts with, which may make it a code block, and loses only the
+ * blank lines before it and the white space after it.
  */
-export function tidiedSideText(text: LangText): LangText {
+export function tidiedSideText(text: LangText, formatted = false): LangText {
   return Object.fromEntries(
     Object.entries(text)
-      .map(([tag, value]) => [tag, value.trim()])
+      .map(([tag, value]) => [tag, tidied(value, formatted)])
       .filter(([, value]) => value !== ""),
   );
+}
+
+/** One text trimmed, or for text in a format only its blank lines before and white space after (see tidiedSideText). */
+export function tidied(value: string, formatted = false): string {
+  return formatted ? value.replace(/^(?:[ \t]*\r?\n)+/, "").trimEnd() : value.trim();
 }
 
 /** Whether two texts say the same in the same languages. */
@@ -90,9 +98,9 @@ export function inEnglish(value: string): LangText {
  * state its language, and validateCardContent, meeting it, asks the user
  * for the language of that very part (textNeedsLanguage).
  */
-export function tidiedTagged(text: LangText | undefined): LangText | undefined {
+export function tidiedTagged(text: LangText | undefined, formatted = false): LangText | undefined {
   if (text === undefined) return undefined;
-  const kept = tidiedSideText(text);
+  const kept = tidiedSideText(text, formatted);
   return Object.keys(kept).length === 0 ? undefined : kept;
 }
 
