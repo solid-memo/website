@@ -355,10 +355,11 @@ describe("visibleControls", () => {
  * commonmark.js pathological tests, and micromark's own), each at the
  * length cap, read in time linear in their length: within `slowest`
  * times what plain prose of the same length takes on the same machine,
- * the best of three each. A wall-clock budget would depend on the
+ * the better of two each. A wall-clock budget would depend on the
  * machine: CI runs these tests about twenty times slower than a laptop.
  * Text people write reads within about 11 times the prose; a quadratic
- * case at the cap takes 40 times or more.
+ * case at the cap takes 40 times or more. A case near the caps takes
+ * seconds on CI, past vitest's default timeout, so the suite sets its own.
  */
 describe("pathological input", () => {
   const slowest = 25;
@@ -395,12 +396,12 @@ describe("pathological input", () => {
     ["setext headings", fill("a\n-\n")],
     ["long setext underlines", fill("a\n==\n")],
     ["setext headings at the cap among long lines", fill(`${"a".repeat(80)}\n`, `${"a".repeat(80)}\n=\n`.repeat(MAX_UNDERLINES))],
-  ])("reads %s in time", (_, input) => {
+  ])("reads %s in time", { timeout: 60_000 }, (_, input) => {
     expect(input.length).toBeLessThanOrEqual(MAX_CHARS);
     const baseline = fill("Plain words in a paragraph.\n");
     let base = Infinity;
     let took = Infinity;
-    for (let round = 0; round < 3; round++) {
+    for (let round = 0; round < 2; round++) {
       let started = performance.now();
       parseMarkdown(baseline);
       base = Math.min(base, performance.now() - started);
