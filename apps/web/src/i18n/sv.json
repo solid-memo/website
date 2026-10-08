@@ -216,6 +216,11 @@
   "chapterPlayer": {
     "step": "Steg {number} av {count}",
     "progress": "Klara steg i kapitlet",
+    "theoryHidden": "Teorin visas inte medan du svarar på frågorna.",
+    "toQuestions": {
+      "one": "Vidare till frågan",
+      "other": "Vidare till frågorna"
+    },
     "check": "Kontrollera att du förstått",
     "checkNumbered": "Kontrollera att du förstått: fråga {number} av {count}",
     "next": "Nästa",

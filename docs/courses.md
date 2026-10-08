@@ -144,18 +144,31 @@ new type-index entries ([data-model.md](data-model.md#courses)):
    (`importDeck` with no cards). An instance that already has a copy of
    any release of the course gets that copy back: a course is started
    once.
-2. **A step.** The learner reads the theory, then answers each question.
-   After an answer the app says whether it was right. A wrong choice
-   shows its distractor's note. The right answer is shown as the card's
-   back, with its `sm:backNote`. The first answer to a question adds the
-   card to the deck ("Added to your deck").
+2. **A step.** A step comes in two phases. First the learner reads the
+   theory, with no question shown. Below it, a button goes on to the
+   step's question(s); it is described by a hint that the theory is not
+   shown while answering. The step's questions are then asked one at a
+   time, with the theory not rendered at all: the answer checks what
+   was understood, not what can be read off the screen. After each
+   answer the app says whether it was right. A wrong choice shows its
+   distractor's note. The right answer is shown as the card's back,
+   with its `sm:backNote`. The first answer to a question adds the card
+   to the deck ("Added to your deck"). After the step's last question,
+   Next goes to the next step's theory, or, after the chapter's last
+   step, to the final review. There is no way back to the theory while
+   answering; every step starts on its theory, the one the chapter
+   resumes at included, so leaving and coming back shows it again.
 3. **The final review.** Once every step is done, the chapter's final
-   review asks all its questions, shuffled. A question answered wrongly
-   comes back until it is answered right. Then the chapter is completed
-   (`completeChapter`), which opens the next.
+   review asks all its questions, shuffled and again without the theory.
+   A question answered wrongly comes back until it is answered right.
+   Then the chapter is completed (`completeChapter`), which opens the
+   next.
 4. **Afterwards.** The cards are studied like any deck's, by
-   flip-and-grade ([srs.md](srs.md)). A step can be revisited and a
-   chapter retaken at any time, as practice.
+   flip-and-grade ([srs.md](srs.md)). A chapter can be retaken at any
+   time, as practice: a chapter whose steps are all done opens at its
+   first step, and each step shows its theory again. No single earlier
+   step can be picked to reread its theory: the step a chapter opens at
+   is derived from the progress, not chosen.
 
 How each answer is graded, and when it is graded at all, is in
 [srs.md](srs.md#multiple-choice-answers-in-a-course). The screens and

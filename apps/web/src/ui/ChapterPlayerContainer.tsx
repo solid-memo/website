@@ -4,7 +4,7 @@ import type { Course, UseCases } from "@solid-memo/application/useCases";
 import { choicesOf, type Choice, type CourseChapter } from "@solid-memo/domain/course";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { LibraryCard } from "@solid-memo/domain/library";
-import { ChapterPlayerScreen } from "./ChapterPlayerScreen";
+import { ChapterPlayerScreen, type StepPhase } from "./ChapterPlayerScreen";
 import { courseKey } from "./CourseContainer";
 import type { CheckedAnswer } from "./CourseQuestion";
 import { useI18n } from "./i18n";
@@ -47,8 +47,9 @@ export function useCourseAnswer(useCases: UseCases, instance: Instance, course: 
  * step the learner's progress says to resume at (the first not done; the
  * first, for a chapter whose steps are all done), then goes on step by
  * step and question by question as the learner does, whatever the
- * progress says meanwhile. Each question's options are shuffled once, as
- * it comes up.
+ * progress says meanwhile. Every step, the one opened at included,
+ * starts with its theory; its questions follow, without it. Each
+ * question's options are shuffled once, as it comes up.
  */
 export function ChapterPlayerContainer({
   useCases,
@@ -68,9 +69,9 @@ export function ChapterPlayerContainer({
   random?: () => number;
 }) {
   const { errorText } = useI18n();
-  const [at, setAt] = useState(() => {
+  const [at, setAt] = useState<{ step: number; phase: StepPhase; question: number }>(() => {
     const resume = course.progress.chapters.find((entry) => entry.url === chapter.url)!.resumeStepId;
-    return { step: Math.max(chapter.steps.findIndex((step) => step.id === resume), 0), question: 0 };
+    return { step: Math.max(chapter.steps.findIndex((step) => step.id === resume), 0), phase: "read", question: 0 };
   });
   const [answer, setAnswer] = useState<CheckedAnswer | null>(null);
   const step = chapter.steps[at.step]!;
@@ -82,9 +83,9 @@ export function ChapterPlayerContainer({
     answerMutation.reset();
     setAnswer(null);
     if (at.question + 1 < step.questionIds.length) {
-      setAt({ step: at.step, question: at.question + 1 });
+      setAt({ ...at, question: at.question + 1 });
     } else if (at.step + 1 < chapter.steps.length) {
-      setAt({ step: at.step + 1, question: 0 });
+      setAt({ step: at.step + 1, phase: "read", question: 0 });
     } else {
       onReview();
     }
@@ -94,12 +95,14 @@ export function ChapterPlayerContainer({
     <ChapterPlayerScreen
       chapter={chapter}
       stepIndex={at.step}
+      phase={at.phase}
       questionIndex={at.question}
       card={card}
       choices={choices}
       answer={answer}
       busy={answerMutation.isPending}
       error={errorText(answerMutation.error)}
+      onAnswerPhase={() => setAt({ ...at, phase: "answer" })}
       onCheck={(choice) => answerMutation.mutate({ card, choice })}
       onNext={next}
     />

@@ -2525,6 +2525,20 @@ form.card-edit {
   margin-bottom: 0;
 }
 
+/* On from a step's theory to its questions, which are asked without it. */
+.course-to-questions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  max-width: 40rem;
+  margin-top: 1.5rem;
+}
+
+.course-to-questions .hint {
+  margin: 0;
+}
+
 .course-check-heading {
   margin: 1.5rem 0 0.5rem;
 }

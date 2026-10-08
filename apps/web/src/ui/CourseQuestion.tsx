@@ -28,9 +28,9 @@ export interface CheckedAnswer {
  *
  * Keyed by the caller, so each question starts unanswered. The focus
  * goes to the question as it comes up when `focusQuestion` (not when the
- * screen's heading, or a step's theory, should be read first), and to
- * the feedback once checked, where Enter goes on as Next does — but not
- * on a link, or a code block or table being scrolled.
+ * screen's heading should be read first), and to the feedback once
+ * checked, where Enter goes on as Next does — but not on a link, or a
+ * code block or table being scrolled.
  *
  * The options are named by the question. A question in Markdown may
  * hold a code block or a table, too much for a name, so its options are
