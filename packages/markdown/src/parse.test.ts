@@ -352,11 +352,16 @@ describe("visibleControls", () => {
 
 /**
  * Inputs known to make Markdown parsers slow (the cmark and
- * commonmark.js pathological tests), each at the length cap, read
- * within a budget generous enough for a slow CI machine.
+ * commonmark.js pathological tests, and micromark's own), each at the
+ * length cap, read in time linear in their length: within `slowest`
+ * times what plain prose of the same length takes on the same machine,
+ * the best of three each. A wall-clock budget would depend on the
+ * machine: CI runs these tests about twenty times slower than a laptop.
+ * Text people write reads within about 11 times the prose; a quadratic
+ * case at the cap takes 40 times or more.
  */
 describe("pathological input", () => {
-  const budget = 2_000;
+  const slowest = 25;
   const fill = (unit: string, head = "", tail = "") =>
     head + unit.repeat(Math.floor((MAX_CHARS - head.length - tail.length) / unit.length)) + tail;
   it.each([
@@ -364,7 +369,7 @@ describe("pathological input", () => {
     ["nested lists", fill("- ", "", "a")],
     ["nested ordered lists", fill("1. ", "", "a")],
     ["block quotes and lists nested at the cap, line after line", fill(`${"> - ".repeat(MAX_LINE_NESTING / 2)}a\n`)],
-    ["items holding a list or quote, at the cap", fill("b\n", `${"- - a\n".repeat(MAX_NESTED_LINES / 2)}${"- > a\n".repeat(MAX_NESTED_LINES / 2)}`)],
+    ["items holding a list or quote, at the cap", fill("\nb", `${"- - a\n".repeat(MAX_NESTED_LINES / 2)}${"- > a\n".repeat(MAX_NESTED_LINES / 2)}`)],
     ["items holding a list or quote, past the cap", fill("- - a\n")],
     ["lazy lines at the cap, run after run", fill(`- a\n${"b\n".repeat(MAX_LAZY_LINES)}`)],
     ["lazy lines in a nested quote, run after run", fill(`> - > - a\n${"b\n".repeat(MAX_LAZY_LINES)}`)],
@@ -392,8 +397,17 @@ describe("pathological input", () => {
     ["setext headings at the cap among long lines", fill(`${"a".repeat(80)}\n`, `${"a".repeat(80)}\n=\n`.repeat(MAX_UNDERLINES))],
   ])("reads %s in time", (_, input) => {
     expect(input.length).toBeLessThanOrEqual(MAX_CHARS);
-    const started = performance.now();
-    parseMarkdown(input);
-    expect(performance.now() - started).toBeLessThan(budget);
+    const baseline = fill("Plain words in a paragraph.\n");
+    let base = Infinity;
+    let took = Infinity;
+    for (let round = 0; round < 3; round++) {
+      let started = performance.now();
+      parseMarkdown(baseline);
+      base = Math.min(base, performance.now() - started);
+      started = performance.now();
+      parseMarkdown(input);
+      took = Math.min(took, performance.now() - started);
+    }
+    expect(took, `${Math.round(took)} ms against ${Math.round(base)} ms`).toBeLessThan(base * slowest);
   });
 });
