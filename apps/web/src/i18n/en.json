@@ -216,6 +216,11 @@
   "chapterPlayer": {
     "step": "Step {number} of {count}",
     "progress": "Steps done in this chapter",
+    "theoryHidden": "The theory is not shown while you answer the questions.",
+    "toQuestions": {
+      "one": "On to the question",
+      "other": "On to the questions"
+    },
     "check": "Check your understanding",
     "checkNumbered": "Check your understanding: question {number} of {count}",
     "next": "Next",

@@ -41,7 +41,7 @@ full URLs, carried URL-encoded in hash query parameters.
 | `#/card?instance=…&deck=…&card=…` | one card's own page: the card, its editor, remove (opened by clicking a Browser row; an unknown card falls back to the Browser) |
 | `#/study?instance=…&deck=…` | study session: the deck's due and new prompts for today, interleaved |
 | `#/course?instance=…&deck=…` | the [course](courses.md) `deck` is the learner's copy of: its chapters, each locked, open or done, with its steps done, and a button to go on where the learner left off. A deck that is no library copy falls back to its page |
-| `#/course-chapter?instance=…&deck=…&chapter=…` | one chapter of the course (`chapter` is its subject in the release), a step at a time: the theory, then its questions. The step to take is derived from the learner's progress (the first not done), not carried in the URL; a chapter the course does not have, or one still locked, falls back to the course |
+| `#/course-chapter?instance=…&deck=…&chapter=…` | one chapter of the course (`chapter` is its subject in the release), a step at a time: the theory, then its questions without it. The step to take is derived from the learner's progress (the first not done), not carried in the URL; a chapter the course does not have, or one still locked, falls back to the course |
 | `#/course-review?instance=…&deck=…&chapter=…` | a chapter's final review, which completes it; falls back as `course-chapter` does |
 | `#/preferences?instance=…` | preferences |
 | `#/validate?instance=…` | developer tool: the instance's documents checked against the shapes ([validation.md](validation.md)); shows how to turn developer mode on when it is off |

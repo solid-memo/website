@@ -47,6 +47,9 @@ describe("ChapterReviewContainer", () => {
 
     expect(screen.getByRole("heading", { level: 2, name: "Final review: Linked data" })).toBeInTheDocument();
     expect(screen.getByText("Question 1 of 4")).toBeInTheDocument();
+    // Like a step's questions, the review's are asked without the theory.
+    expect(document.querySelector(".course-theory")).toBeNull();
+    expect(screen.queryByText("Things are named by IRIs.")).toBeNull();
     expect(screen.getByText("What names a thing?").closest(".study-face")).not.toHaveFocus();
     await answer("Hardly An IRI");
     expect(screen.getByText("Question 2 of 5")).toBeInTheDocument();

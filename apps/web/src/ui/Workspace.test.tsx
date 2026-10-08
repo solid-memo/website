@@ -2044,11 +2044,17 @@ describe("Workspace", () => {
         fireEvent.click(screen.getByRole("button", { name: "Check" }));
         fireEvent.click(await screen.findByRole("button", { name: next }));
       };
-      // The options are shuffled: the right one is found by its text.
+      // Each step's theory comes first. The options are shuffled: the right one is found by its text.
+      expect(document.querySelector(".course-theory")).not.toBeNull();
+      fireEvent.click(screen.getByRole("button", { name: "On to the question" }));
+      // The question is asked without the theory.
+      expect(document.querySelector(".course-theory")).toBeNull();
       await answer("An IRI", "Next");
+      fireEvent.click(screen.getByRole("button", { name: "On to the questions" }));
       await answer("Three terms", "Next");
       await answer("A syntax", "On to the final review");
       expect(await screen.findByRole("heading", { name: "Final review: Linked data" })).toBeInTheDocument();
+      expect(document.querySelector(".course-theory")).toBeNull();
       expect(window.location.hash).toBe(routeToHash(reviewRoute));
       expect(within(screen.getByRole("navigation", { name: "Breadcrumb" })).getAllByRole("link").map((l) => l.textContent)).toEqual([
         "Decks",
