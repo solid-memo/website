@@ -1,14 +1,24 @@
 import { useState } from "preact/hooks";
 import { AppError } from "@solid-memo/domain/appError";
 import type { CardEdit, CardEditPlan, StatedSide } from "@solid-memo/domain/cardBulk";
-import type { Card } from "@solid-memo/domain/deck";
+import type { Card, Deck } from "@solid-memo/domain/deck";
 import { canonicalTag } from "@solid-memo/domain/languageTag";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { FindReplaceDialog } from "./FindReplaceDialog";
+import { TransferCardsDialog, type CardTransfer } from "./TransferCardsDialog";
 
 /** The form an edit opens, to say how. */
-type Form = "language" | "replace" | "reschedule";
+type Form = "language" | "replace" | "reschedule" | "move" | "copy";
+
+/** The button that opens each form. */
+const FORM_LABELS = {
+  language: "stateLanguage",
+  replace: "findReplace",
+  reschedule: "reschedule",
+  move: "moveTo",
+  copy: "copyTo",
+} as const satisfies Record<Form, string>;
 
 /** An edit of the selected cards' review states: forget them, or set the day they are due. */
 export type ReviewEdit = { kind: "reset" } | { kind: "reschedule"; due: string };
@@ -23,7 +33,9 @@ export type ReviewEdit = { kind: "reset" } | { kind: "reschedule"; due: string }
  * made; an edit that would change none of them is not made, and says
  * so. Their review states can be forgotten, once the user confirms, or
  * set due on a day, today to start with (`onReviewEdit`, which resolves
- * to whether it was made). Only one is made at a time (`busy`).
+ * to whether it was made). They can be moved or copied to another deck
+ * of the instance (TransferCardsDialog, `onTransfer`, which resolves to
+ * whether it was made). Only one is made at a time (`busy`).
  */
 export function CardBulkActions({
   cards,
@@ -33,6 +45,8 @@ export function CardBulkActions({
   onEdit,
   today,
   onReviewEdit,
+  decks,
+  onTransfer,
 }: {
   /** The selected cards the table shows. */
   cards: readonly Card[];
@@ -44,6 +58,9 @@ export function CardBulkActions({
   /** Today's study day, the due day offered. */
   today: string;
   onReviewEdit: (edit: ReviewEdit) => Promise<boolean>;
+  /** The decks the cards can be moved or copied to: the instance's others. */
+  decks: readonly Deck[];
+  onTransfer: (transfer: CardTransfer) => Promise<boolean>;
 }) {
   const { t, errorText } = useI18n();
   const [form, setForm] = useState<Form | null>(null);
@@ -77,6 +94,13 @@ export function CardBulkActions({
   function reviewEdit(change: ReviewEdit) {
     setNothing(false);
     void onReviewEdit(change).then((ok) => {
+      if (ok) setForm(null);
+    });
+  }
+
+  function transfer(change: CardTransfer) {
+    setNothing(false);
+    void onTransfer(change).then((ok) => {
       if (ok) setForm(null);
     });
   }
@@ -116,9 +140,9 @@ export function CardBulkActions({
         {simple(t("studio.cardBulk.restore"), { kind: "restore" })}
         {simple(t("studio.cardBulk.markdownOn"), { kind: "setTextFormat", markdown: true })}
         {simple(t("studio.cardBulk.markdownOff"), { kind: "setTextFormat", markdown: false })}
-        {(["language", "replace", "reschedule"] as const).map((which) => (
+        {(["language", "replace", "reschedule", "move", "copy"] as const).map((which) => (
           <button key={which} type="button" aria-expanded={form === which} disabled={busy} onClick={() => toggle(which)}>
-            {t(`studio.cardBulk.${which === "language" ? "stateLanguage" : which === "replace" ? "findReplace" : "reschedule"}`)}
+            {t(`studio.cardBulk.${FORM_LABELS[which]}`)}
           </button>
         ))}
         <button type="button" disabled={busy} onClick={reset}>
@@ -181,6 +205,18 @@ export function CardBulkActions({
             </button>
           </p>
         </form>
+      )}
+      {(form === "move" || form === "copy") && (
+        <TransferCardsDialog
+          // Another mode: its choices start afresh.
+          key={form}
+          mode={form}
+          count={cards.length}
+          decks={decks}
+          busy={busy}
+          onConfirm={transfer}
+          onCancel={() => setForm(null)}
+        />
       )}
       {form === "replace" && (
         <FindReplaceDialog

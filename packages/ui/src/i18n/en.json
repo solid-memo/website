@@ -1185,6 +1185,7 @@
     "distractorPublished": "This wrong option is in the release the deck came from, so it cannot be deleted. Retire it instead.",
     "dailyLimitInvalid": "A daily limit is a whole number, 0 or more.",
     "dueDayInvalid": "“{day}” is not a day. Choose the day the card is due.",
+    "cardTransferSameDeck": "The cards are in this deck already. Choose another deck.",
     "licenseUnknown": "Choose one of the licences offered.",
     "authorEmpty": "An author needs a name.",
     "authorTwice": "{author} is named twice. Name each author once.",
@@ -1586,7 +1587,40 @@
         "other": "{count} cards were left as they were."
       },
       "undo": "Undo",
-      "undone": "Undone: the cards are as they were."
+      "undone": "Undone: the cards are as they were.",
+      "moveTo": "Move to deck…",
+      "copyTo": "Copy to deck…",
+      "transfer": {
+        "deck": "To the deck",
+        "keepProgress": "Keep their progress",
+        "moveHint": "The cards leave this deck once the other deck has them. Their past answers stay with this deck, so their history starts again there.",
+        "copyHint": "This deck keeps the cards. The copies' history starts in the other deck.",
+        "noDeck": "This instance has no other deck to put the cards in.",
+        "move": {
+          "one": "Move {count} card",
+          "other": "Move {count} cards"
+        },
+        "copy": {
+          "one": "Copy {count} card",
+          "other": "Copy {count} cards"
+        },
+        "moved": {
+          "one": "Moved {count} card to {deck}.",
+          "other": "Moved {count} cards to {deck}."
+        },
+        "copied": {
+          "one": "Copied {count} card to {deck}.",
+          "other": "Copied {count} cards to {deck}."
+        },
+        "renamed": {
+          "one": "{count} card got a new id: the deck already had one with its id.",
+          "other": "{count} cards got a new id: the deck already had cards with their ids."
+        },
+        "present": {
+          "one": "{count} card was there already.",
+          "other": "{count} cards were there already."
+        }
+      }
     },
     "license": {
       "label": "Licence",

@@ -3,10 +3,12 @@ import { fireEvent, render, screen, waitFor, within } from "@testing-library/pre
 import { planCardEdit, type CardEdit } from "@solid-memo/domain/cardBulk";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { CardBulkActions, type ReviewEdit } from "./CardBulkActions";
+import type { CardTransfer } from "./TransferCardsDialog";
 import { choose } from "../test/choose";
 import { makeCard, makeDeck } from "../test/fixtures";
 
 const deck = makeDeck("deck-1", { en: "Kanji N5" });
+const nouns = makeDeck("nouns", { en: "Nouns" });
 const water = { ...makeCard(deck, "water"), front: { "": "水" }, back: { en: "water" } };
 const fire = { ...makeCard(deck, "fire", true), front: { ja: "火" }, back: { en: "fire" }, textFormat: SM.markdown };
 const cards = [water, fire];
@@ -15,6 +17,7 @@ function renderActions(
   onEdit = vi.fn(async (_edit: CardEdit, _plan: unknown) => true),
   busy = false,
   onReviewEdit = vi.fn(async (_edit: ReviewEdit) => true),
+  onTransfer = vi.fn(async (_transfer: CardTransfer) => true),
 ) {
   const plan = vi.fn((edit: CardEdit) => planCardEdit(cards, ["water", "fire"], edit));
   render(
@@ -26,9 +29,11 @@ function renderActions(
       onEdit={onEdit}
       today="2026-10-09"
       onReviewEdit={onReviewEdit}
+      decks={[nouns]}
+      onTransfer={onTransfer}
     />,
   );
-  return { plan, onEdit, onReviewEdit };
+  return { plan, onEdit, onReviewEdit, onTransfer };
 }
 
 const bulk = () => screen.getByRole("group", { name: "Selected cards" });
@@ -54,7 +59,7 @@ describe("CardBulkActions", () => {
     const { onEdit } = renderActions();
     const markdownOnly = vi.fn((edit: CardEdit) => planCardEdit([fire], ["fire"], edit));
     render(
-      <CardBulkActions cards={[fire]} languages={[]} busy={false} plan={markdownOnly} onEdit={onEdit} today="2026-10-09" onReviewEdit={vi.fn()} />,
+      <CardBulkActions cards={[fire]} languages={[]} busy={false} plan={markdownOnly} onEdit={onEdit} today="2026-10-09" onReviewEdit={vi.fn()} decks={[]} onTransfer={vi.fn()} />,
     );
     fireEvent.click(within(screen.getAllByRole("group", { name: "Selected cards" })[1]!).getByRole("button", { name: "Retire" }));
     expect(onEdit).not.toHaveBeenCalled();
@@ -152,7 +157,7 @@ describe("CardBulkActions", () => {
   });
 
   it("takes no due day while an edit is being made", () => {
-    const props = { cards, languages: [], plan: vi.fn(), onEdit: vi.fn(), today: "2026-10-09", onReviewEdit: vi.fn() };
+    const props = { cards, languages: [], plan: vi.fn(), onEdit: vi.fn(), today: "2026-10-09", onReviewEdit: vi.fn(), decks: [], onTransfer: vi.fn() };
     const { rerender } = render(<CardBulkActions {...props} busy={false} />);
     press("Set due date");
     rerender(<CardBulkActions {...props} busy={true} />);
@@ -162,8 +167,28 @@ describe("CardBulkActions", () => {
 
   it("makes nothing while an edit is being made", () => {
     renderActions(undefined, true);
-    for (const name of ["Retire", "Restore", "Write in Markdown", "Write as plain text", "State language", "Find and replace", "Set due date", "Forget progress", "Delete"]) {
+    for (const name of ["Retire", "Restore", "Write in Markdown", "Write as plain text", "State language", "Find and replace", "Set due date", "Forget progress", "Move to deck…", "Copy to deck…", "Delete"]) {
       expect(within(bulk()).getByRole("button", { name })).toBeDisabled();
     }
+  });
+
+  it("moves or copies the cards to another deck, the form closing once it is done", async () => {
+    const onTransfer = vi.fn(async (_transfer: CardTransfer) => false);
+    renderActions(undefined, false, undefined, onTransfer);
+    press("Move to deck…");
+    expect(within(bulk()).getByRole("button", { name: "Move to deck…" })).toHaveAttribute("aria-expanded", "true");
+    fireEvent.click(screen.getByRole("button", { name: "Move 2 cards" }));
+    expect(onTransfer).toHaveBeenCalledWith({ to: nouns, mode: "move", keepProgress: true });
+    // Not made: the form stays.
+    await waitFor(() => expect(screen.getByRole("button", { name: "Move 2 cards" })).toBeInTheDocument());
+
+    onTransfer.mockResolvedValue(true);
+    press("Copy to deck…");
+    fireEvent.click(screen.getByRole("button", { name: "Copy 2 cards" }));
+    expect(onTransfer).toHaveBeenLastCalledWith({ to: nouns, mode: "copy", keepProgress: true });
+    await waitFor(() => expect(screen.queryByRole("button", { name: "Copy 2 cards" })).toBeNull());
+    press("Move to deck…");
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(screen.queryByRole("button", { name: "Move 2 cards" })).toBeNull();
   });
 });

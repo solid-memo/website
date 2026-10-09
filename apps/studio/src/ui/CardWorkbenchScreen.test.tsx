@@ -9,6 +9,7 @@ import { choose } from "../test/choose";
 import { makeCard, makeDeck } from "../test/fixtures";
 
 const deck = makeDeck("deck-1", { en: "Kanji N5" });
+const nouns = makeDeck("nouns", { en: "Nouns" });
 const water = { ...makeCard(deck, "water"), front: { ja: "水" }, back: { en: "**Water**" }, textFormat: SM.markdown };
 const fire = { ...makeCard(deck, "fire", true), front: { ja: "火" }, back: { en: "Fire" } };
 const tree = { ...makeCard(deck, "tree"), front: { ja: "木" }, back: { en: "Tree" } };
@@ -46,6 +47,9 @@ function Harness({ initial = DEFAULT_CARD_QUERY, onQuery, ...overrides }: Partia
       today="2026-10-09"
       onReviewEdit={async () => true}
       reviewDone={null}
+      decks={[nouns]}
+      onTransfer={async () => true}
+      transferDone={null}
       busy={false}
       error={null}
       {...overrides}
@@ -286,6 +290,43 @@ describe("CardWorkbenchScreen", () => {
     expect(screen.getByText("Set 1 card due on October 20, 2026.")).toBeInTheDocument();
     rerender(<Harness reviewDone={{ edit: { kind: "reschedule", due: "2026-10-20" }, count: 0 }} />);
     expect(screen.getByText("None of the selected cards has been studied yet.")).toBeInTheDocument();
+  });
+
+  it("moves or copies the selected cards, a move clearing them from the selection, and says what it did", async () => {
+    const onTransfer = vi.fn(async () => true);
+    const { rerender } = render(<Harness onTransfer={onTransfer} />);
+    fireEvent.click(screen.getByRole("checkbox", { name: "Select 木" }));
+    const bulk = () => within(screen.getByRole("group", { name: "Selected cards" }));
+    fireEvent.click(bulk().getByRole("button", { name: "Copy to deck…" }));
+    fireEvent.click(screen.getByRole("button", { name: "Copy 1 card" }));
+    expect(onTransfer).toHaveBeenCalledWith(["tree"], { to: nouns, mode: "copy", keepProgress: true });
+    await waitFor(() => expect(screen.queryByRole("button", { name: "Copy 1 card" })).toBeNull());
+    expect(screen.getAllByRole("status")[0]).toHaveTextContent("1 card selected");
+    fireEvent.click(bulk().getByRole("button", { name: "Move to deck…" }));
+    fireEvent.click(screen.getByRole("button", { name: "Move 1 card" }));
+    await waitFor(() => expect(screen.getAllByRole("status")[0]).toHaveTextContent("0 cards selected"));
+
+    const plan = {
+      cards: [
+        { from: "tree", to: "tree", present: false },
+        { from: "fire", to: "fire", present: false },
+      ],
+      missing: [],
+      target: { save: [], reviewSaves: [], reviewRemovals: [] },
+      source: { remove: [], reviewRemovals: [] },
+    };
+    rerender(<Harness transferDone={{ transfer: { to: nouns, mode: "move", keepProgress: false }, plan }} />);
+    expect(screen.getByText("Moved 2 cards to Nouns.")).toBeInTheDocument();
+  });
+
+  it("keeps the selection when a move fails", async () => {
+    const onTransfer = vi.fn(async () => false);
+    render(<Harness onTransfer={onTransfer} />);
+    fireEvent.click(screen.getByRole("checkbox", { name: "Select 木" }));
+    fireEvent.click(within(screen.getByRole("group", { name: "Selected cards" })).getByRole("button", { name: "Move to deck…" }));
+    fireEvent.click(screen.getByRole("button", { name: "Move 1 card" }));
+    await waitFor(() => expect(onTransfer).toHaveBeenCalled());
+    expect(screen.getAllByRole("status")[0]).toHaveTextContent("1 card selected");
   });
 
   it("keeps the selection when a deletion fails", async () => {

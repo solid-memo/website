@@ -734,6 +734,13 @@ data, since nothing could rebuild it.
   tab closes is lost; the review it belongs to is not.
 - **Resetting the day removes that deck's answers of the day**
   (`removeDay`: read, remove, save with If-Match, again on 412).
+- **A card moved to another deck leaves its answers behind.** The
+  [Studio](studio.md#moving-and-copying-cards) moves or copies cards
+  between decks of an instance. The log is never rewritten: past
+  answers keep naming the deck and the card they were given to, in the
+  source. In the target the card's history starts again, though its
+  review state may come along. A copy's history starts in the target;
+  the original keeps its own.
 - Checked in the full check only ([validation.md](validation.md)): the
   current month changes every session, so checking it on every visit
   would download it every time.
@@ -809,8 +816,9 @@ in Solid Memo; the [Studio](studio.md) closes the gaps one by one.
 - **Edited in the Studio**: a deck's authors and licence, its course
   progress (a chapter marked not done, the course restarted), the
   instance's name and the catalogue's description and licence, a
-  card's wrong options, edits of many cards at once, and a card's
-  review state (forgotten, or given a due day).
+  card's wrong options, edits of many cards at once, a card's review
+  state (forgotten, or given a due day), and the deck a card is in
+  (moved or copied to another).
 - **Shown only**: the answer log, as statistics; the schedule in the
   digest, as counts.
 - **Not shown**: a catalogue's `dcterms:modified`, which the app keeps
@@ -828,6 +836,11 @@ in Solid Memo; the [Studio](studio.md) closes the gaps one by one.
 - The [answer log](#the-answer-log) is the one exception: answers are
   added unread, with an insert-only PATCH, since adding a new subject
   cannot undo anyone else's write.
+- A card moved to another deck in the [Studio](studio.md#moving-and-copying-cards)
+  keeps only what Solid Memo knows of it. It is written afresh in the
+  target, and its subject and its wrong options' are removed from the
+  source, triples another app put on them included. A copy leaves
+  them in the source, and does not carry them over either.
 - **Every write states what it expects to find**, as an HTTP precondition,
   so a write never silently undoes someone else's (another tab, device or
   app):

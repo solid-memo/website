@@ -1182,6 +1182,7 @@
     "distractorPublished": "Det här felaktiga alternativet finns i utgåvan som kortleken kommer från, så det kan inte tas bort. Ta det ur bruk i stället.",
     "dailyLimitInvalid": "En daglig gräns är ett heltal, 0 eller mer.",
     "dueDayInvalid": "”{day}” är ingen dag. Välj dagen då kortet ska repeteras.",
+    "cardTransferSameDeck": "Korten finns redan i den här kortleken. Välj en annan kortlek.",
     "licenseUnknown": "Välj en av licenserna som erbjuds.",
     "authorEmpty": "En upphovsperson behöver ett namn.",
     "authorTwice": "{author} nämns två gånger. Nämn varje upphovsperson en gång.",
@@ -1583,7 +1584,40 @@
         "other": "{count} kort lämnades som de var."
       },
       "undo": "Ångra",
-      "undone": "Ångrat: korten är som de var."
+      "undone": "Ångrat: korten är som de var.",
+      "moveTo": "Flytta till kortlek…",
+      "copyTo": "Kopiera till kortlek…",
+      "transfer": {
+        "deck": "Till kortleken",
+        "keepProgress": "Behåll deras framsteg",
+        "moveHint": "Korten lämnar den här kortleken när den andra kortleken har dem. Deras tidigare svar stannar hos den här kortleken, så deras historik börjar om där.",
+        "copyHint": "Den här kortleken behåller korten. Kopiornas historik börjar i den andra kortleken.",
+        "noDeck": "Den här instansen har ingen annan kortlek att lägga korten i.",
+        "move": {
+          "one": "Flytta {count} kort",
+          "other": "Flytta {count} kort"
+        },
+        "copy": {
+          "one": "Kopiera {count} kort",
+          "other": "Kopiera {count} kort"
+        },
+        "moved": {
+          "one": "Flyttade {count} kort till {deck}.",
+          "other": "Flyttade {count} kort till {deck}."
+        },
+        "copied": {
+          "one": "Kopierade {count} kort till {deck}.",
+          "other": "Kopierade {count} kort till {deck}."
+        },
+        "renamed": {
+          "one": "{count} kort fick ett nytt id: kortleken hade redan ett kort med samma id.",
+          "other": "{count} kort fick nya id: kortleken hade redan kort med samma id."
+        },
+        "present": {
+          "one": "{count} kort fanns redan där.",
+          "other": "{count} kort fanns redan där."
+        }
+      }
     },
     "license": {
       "label": "Licens",

@@ -7,8 +7,8 @@ import { Screen } from "./Screen.ts";
  * landing page (the same login as Solid Memo's, under the Studio's name),
  * its instance picker, Home's table of decks (its filter, sort and bulk
  * actions), its Groups screen, the card workbench (its search, sort,
- * selection and bulk edits, with their Undo, and its edits of review
- * states), the card inspector (a card's content, its wrong options and
+ * selection and bulk edits, with their Undo, its edits of review
+ * states, and its moves to another deck), the card inspector (a card's content, its wrong options and
  * its schedule), a deck's about screen (its
  * authors and licence), the instance's name and catalogue, and its way
  * back to Solid Memo.
@@ -335,6 +335,22 @@ export class Studio extends Screen {
       await expect(this.cardBulk.getByLabel(this.t("studio.cardBulk.dueLabel"))).not.toHaveValue("");
       await this.cardBulk.getByRole("button", { name: this.t("studio.bulk.apply") }).click();
       await expect(this.page.getByRole("status").filter({ hasText: this.tp("studio.cardBulk.done.reschedule", { count }) })).toHaveCount(1);
+    });
+  }
+
+  /**
+   * Moves the selected cards to another deck of the instance, with their
+   * progress (ticked to start with): the status line says how many went
+   * where, and the workbench lists the fronts left.
+   */
+  async moveSelectedCards(deck: string, to: string, count: number, left: string[]): Promise<void> {
+    await this.intent(`Move the selected cards to ${to}`, async () => {
+      await this.cardBulk.getByRole("button", { name: this.t("studio.cardBulk.moveTo") }).click();
+      await this.cardBulk.getByRole("combobox", { name: this.t("studio.cardBulk.transfer.deck") }).selectOption({ label: to });
+      await expect(this.cardBulk.getByRole("checkbox", { name: this.t("studio.cardBulk.transfer.keepProgress") })).toBeChecked();
+      await this.cardBulk.getByRole("button", { name: this.t("studio.cardBulk.transfer.move", { count }) }).click();
+      await this.expectStatus(this.t("studio.cardBulk.transfer.moved", { count, deck: to }));
+      await expect(this.cards(deck).getByRole("rowheader")).toHaveText(left);
     });
   }
 

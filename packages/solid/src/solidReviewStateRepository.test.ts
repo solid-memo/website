@@ -255,13 +255,21 @@ describe("applyReviewChanges", () => {
     );
   });
 
-  it("does nothing when the reviews document does not exist", async () => {
+  it("does nothing when the reviews document does not exist and there is nothing to save", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
     await makeRepository().applyReviewChanges(deck, {
-      save: [state],
+      save: [],
       remove: [{ cardId: "card-2", direction: "front-to-back" }],
     });
     expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+  });
+
+  it("creates the reviews document for states to save, as a card moved in with its progress brings", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await makeRepository().applyReviewChanges(deck, { save: [state], remove: [] });
+    const [url, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    expect(url).toBe(deck.reviewsDocumentUrl);
+    expect(toReviewState(getThing(saved as SolidDataset, `${deck.reviewsDocumentUrl}#card-1`)!, deck)).toEqual(state);
   });
 });
 

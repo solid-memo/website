@@ -107,6 +107,7 @@ import {
   type ReviewState,
 } from "@solid-memo/domain/review";
 import { isStudyDay, rescheduleStates, resetStates } from "@solid-memo/domain/reviewStateEdits";
+import { planCardTransfer, type CardTransferPlan, type TransferOptions } from "@solid-memo/domain/cardTransfer";
 import {
   buildStudyQueue,
   nextDueDate,
@@ -502,6 +503,32 @@ export interface UseCases {
     due: string,
     direction?: StudyDirection,
   ): Promise<number>;
+  /**
+   * Move or copy the cards of these ids from the deck `from` to the deck
+   * `to` of the same instance (domain/cardTransfer.ts,
+   * planCardTransfer), with their review states when `keepProgress`.
+   * The target is written first: its cards document in ONE write made
+   * only if it is still as read (If-Match), then its reviews document;
+   * for a move, then the source's reviews document, and its cards
+   * document, likewise If-Match. A document changed meanwhile (or made
+   * since it was read as absent) has the whole transfer planned again on
+   * the decks as they are, up to three times in all, then
+   * changedElsewhere. A transfer stopped half way (the
+   * target written, the source not, or only its reviews) is finished by
+   * making it again: cards the target holds already are not written
+   * twice, and keep the states they have there. Then the
+   * target's schedule in the digest is brought up to date, and for a
+   * move the source's. The answer log is untouched. Refuses a transfer
+   * to `from` itself (cardTransferSameDeck) before any read. Resolves to
+   * the plan as written.
+   */
+  transferCards(
+    instanceUrl: string,
+    from: Deck,
+    to: Deck,
+    ids: readonly string[],
+    options: TransferOptions,
+  ): Promise<CardTransferPlan>;
   /**
    * What bringing the instance's cards up to this app's format would
    * touch — reads every deck's cards, writes nothing. Empty when there is
@@ -1198,6 +1225,47 @@ export function createUseCases({
     // The edit is made: a digest left behind is brought up to date by the next deck list.
     await refreshStudyDigest(instanceUrl, deck).catch(() => undefined);
     return cards.size;
+  }
+
+  /**
+   * One attempt at a transfer (transferCards): read both decks, plan,
+   * write the target's documents, then for a move the source's (its
+   * reviews before its cards), each cards document If-Match its read.
+   */
+  async function transferOnce(
+    from: Deck,
+    to: Deck,
+    ids: readonly string[],
+    options: TransferOptions,
+  ): Promise<CardTransferPlan> {
+    const [sourceCards, sourceStates, targetCards, targetStates] = await Promise.all([
+      readNow(deckRepository.readCardsSince(from, undefined)),
+      reviewStateRepository.listReviewStates(from),
+      readNow(deckRepository.readCardsSince(to, undefined)),
+      reviewStateRepository.listReviewStates(to),
+    ]);
+    const plan = planCardTransfer(
+      { url: from.url, cards: sourceCards.value, states: sourceStates },
+      { url: to.url, cards: targetCards.value, states: targetStates },
+      ids,
+      options,
+    );
+    // The target first: a move stopped here leaves the cards in both decks, never in neither.
+    if (plan.target.save.length > 0) {
+      await deckRepository.applyCardChanges(to, { save: plan.target.save, remove: [] }, wholeAt(targetCards.version));
+    }
+    if (plan.target.reviewSaves.length > 0 || plan.target.reviewRemovals.length > 0) {
+      await reviewStateRepository.applyReviewChanges(to, { save: plan.target.reviewSaves, remove: plan.target.reviewRemovals });
+    }
+    // The source's states before its cards: a move stopped between leaves the cards in the
+    // source without progress, which the target has, and making it again finishes it.
+    if (plan.source.reviewRemovals.length > 0) {
+      await reviewStateRepository.applyReviewChanges(from, { save: [], remove: plan.source.reviewRemovals });
+    }
+    if (plan.source.remove.length > 0) {
+      await deckRepository.applyCardChanges(from, { save: [], remove: plan.source.remove }, wholeAt(sourceCards.version));
+    }
+    return plan;
   }
 
   async function refreshStudyDigest(instanceUrl: string, deck: Deck): Promise<void> {
@@ -2054,6 +2122,20 @@ export function createUseCases({
       if (!isStudyDay(due)) throw new AppError("dueDayInvalid", { day: due });
       const save = rescheduleStates(await reviewStateRepository.listReviewStates(deck), ids, due, direction);
       return writeReviewEdit(instanceUrl, deck, { save, remove: [] });
+    },
+    async transferCards(instanceUrl, from, to, ids, options) {
+      if (from.url === to.url) throw new AppError("cardTransferSameDeck");
+      for (let attempt = 1; ; attempt++) {
+        try {
+          const plan = await transferOnce(from, to, ids, options);
+          // The cards are where they go: a digest left behind is brought up to date by the next deck list.
+          await refreshStudyDigest(instanceUrl, to).catch(() => undefined);
+          if (options.mode === "move") await refreshStudyDigest(instanceUrl, from).catch(() => undefined);
+          return plan;
+        } catch (error) {
+          if (!cardsChangedElsewhere(error) || attempt === CARD_EDIT_ATTEMPTS) throw error;
+        }
+      }
     },
     planMigration: (instanceUrl) => planOf(instanceUrl),
     async updateInstance(session, instance, onProgress = () => undefined) {
