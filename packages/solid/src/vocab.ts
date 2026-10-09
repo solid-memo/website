@@ -46,6 +46,8 @@ export const DCTERMS = {
   license: "http://purl.org/dc/terms/license",
   /** A deck's blurb: what it covers, where its content came from. */
   description: "http://purl.org/dc/terms/description",
+  /** On a deck's cards document itself (`<>`): the deck's catalog entry, whose cards it holds. */
+  isPartOf: "http://purl.org/dc/terms/isPartOf",
 } as const;
 
 export const RDF = {
@@ -86,4 +88,6 @@ export const ADMS = {
 export const SCHEMA = {
   /** A library release that is also a course (docs/courses.md): chapters of steps whose questions are its cards. */
   Course: "https://schema.org/Course",
+  /** On a card, beside each sm:distractor: the wrong option, for readers who know schema.org's questions. */
+  suggestedAnswer: "https://schema.org/suggestedAnswer",
 } as const;

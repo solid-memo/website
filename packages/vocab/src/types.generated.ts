@@ -493,7 +493,7 @@ export interface ReviewStateV1 {
   readonly previousLastReviewedAt?: string;
 }
 
-/** Review-state format 2: SM-2 fields, an all-or-nothing previous* snapshot, per-direction subjects. */
+/** Review-state format 2: SM-2 fields, an all-or-nothing previous* snapshot, per-direction subjects; the card, direction and scheduler may be named (since vocabulary 1.16, without a format bump), and a state that names its card may have any subject. */
 export interface ReviewStateV2 {
   readonly easeFactor: number;
   readonly intervalDays: number;
@@ -506,6 +506,9 @@ export interface ReviewStateV2 {
   readonly previousRepetitions?: number;
   readonly previousDue?: string;
   readonly previousLastReviewedAt?: string;
+  readonly reviewOf?: string;
+  readonly direction?: "https://solid-memo.com/ns/vocab/v1.ttl#frontToBack" | "https://solid-memo.com/ns/vocab/v1.ttl#backToFront";
+  readonly scheduler?: string;
 }
 
 /** Step format 1: a schema:LearningResource of a course release, part of a chapter at its place among the chapter's steps, with a short theory in language-tagged text, one of them English, the cards that check it, and owl:deprecated true once retired; a step may say how its theory is written, solid-memo:textFormat, plain or Markdown (since vocabulary 1.15, without a format bump). */

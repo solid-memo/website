@@ -11,6 +11,7 @@ import {
   sameCards,
   sameDeckState,
   sameReviewStates,
+  isCardsDocumentOf,
   stagedDocumentUrl,
   upgradedCardList,
   withDeckChanges,
@@ -62,6 +63,24 @@ describe("stagedDocumentUrl", () => {
     expect(stagedDocumentUrl("https://pod.example/a/decks/deck-1-u1.ttl", "deck-1", "u2")).toBe(
       "https://pod.example/a/decks/deck-1-u2.ttl",
     );
+  });
+});
+
+describe("isCardsDocumentOf", () => {
+  const deck = { id: "deck-1", cardsDocumentUrl: "https://pod.example/a/decks/deck-1-u2.ttl" };
+
+  it("is the deck's cards document, or one beside it an upgrade or the deck's creation named", () => {
+    expect(isCardsDocumentOf(deck.cardsDocumentUrl, deck)).toBe(true);
+    expect(isCardsDocumentOf(CARDS, deck)).toBe(true);
+    expect(isCardsDocumentOf("https://pod.example/a/decks/deck-1-u1.ttl", deck)).toBe(true);
+  });
+
+  it("is not another deck's, one elsewhere, or one in a container below", () => {
+    expect(isCardsDocumentOf("https://pod.example/a/decks/deck-10.ttl", deck)).toBe(false);
+    expect(isCardsDocumentOf("https://pod.example/a/decks/deck-2.ttl", deck)).toBe(false);
+    expect(isCardsDocumentOf("https://pod.example/b/decks/deck-1.ttl", deck)).toBe(false);
+    expect(isCardsDocumentOf("https://pod.example/a/decks/deck-1-x/y.ttl", deck)).toBe(false);
+    expect(isCardsDocumentOf("https://pod.example/a/decks/deck-1-u1.json", deck)).toBe(false);
   });
 });
 

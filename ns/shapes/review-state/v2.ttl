@@ -9,17 +9,21 @@
 # Review-state format 2: the same fields as format 1, now with the format
 # version stated, the previous* snapshot written all together or not at
 # all, and the per-direction subject naming (#<cardId> for front-to-back,
-# #<cardId>@back-to-front for the other way) part of the contract.
+# #<cardId>@back-to-front for the other way) part of the contract. Since
+# vocabulary 1.16, without a format bump, a state may name its card
+# (solid-memo:reviewOf), its direction (solid-memo:reviewDirection) and its
+# scheduler (solid-memo:scheduler); a state that names its card may have
+# any subject.
 <#shape>
     a sh:NodeShape ;
     sh:name "ReviewStateV2" ;
-    rdfs:comment "Review-state format 2: SM-2 fields, an all-or-nothing previous* snapshot, per-direction subjects." ;
+    rdfs:comment "Review-state format 2: SM-2 fields, an all-or-nothing previous* snapshot, per-direction subjects; the card, direction and scheduler may be named (since vocabulary 1.16, without a format bump), and a state that names its card may have any subject." ;
     sh:nodeKind sh:IRI ;
     sh:class solid-memo:ReviewState ;
-    sh:pattern "#[^#@]+(@back-to-front)?$" ;
+    sh:or ( [ sh:pattern "#[^#@]+(@back-to-front)?$" ] [ sh:path solid-memo:reviewOf ; sh:minCount 1 ] ) ;
     sh:xone ( <#noSnapshot> <#fullSnapshot> ) ;
-    sh:message "A review state is named #<cardId> or #<cardId>@back-to-front, and its previous* snapshot is all five triples or none."@en ,
-               "Ett repetitionstillstånd heter #<cardId> eller #<cardId>@back-to-front, och dess ögonblicksbild previous* består av alla fem trippler eller ingen."@sv ;
+    sh:message "A review state names its card with solid-memo:reviewOf or is named #<cardId> or #<cardId>@back-to-front, and its previous* snapshot is all five triples or none."@en ,
+               "Ett repetitionstillstånd anger sitt kort med solid-memo:reviewOf eller heter #<cardId> eller #<cardId>@back-to-front, och dess ögonblicksbild previous* består av alla fem trippler eller ingen."@sv ;
     sh:property <#formatVersion> ,
                 <#easeFactor> ,
                 <#intervalDays> ,
@@ -31,7 +35,10 @@
                 <#previousIntervalDays> ,
                 <#previousRepetitions> ,
                 <#previousDue> ,
-                <#previousLastReviewedAt> .
+                <#previousLastReviewedAt> ,
+                <#reviewOf> ,
+                <#reviewDirection> ,
+                <#scheduler> .
 
 # The snapshot is all five previous* triples or none of them: a partial
 # snapshot could only restore a state that never existed.
@@ -138,3 +145,31 @@
     sh:path solid-memo:previousLastReviewedAt ;
     sh:datatype xsd:dateTime ;
     sh:maxCount 1 .
+
+<#reviewOf>
+    a sh:PropertyShape ;
+    sh:path solid-memo:reviewOf ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+    sh:message "A review state names at most one card, an IRI (<…#cardId>), never a string literal."@en ,
+               "Ett repetitionstillstånd anger högst ett kort, en IRI (<…#cardId>), aldrig en strängliteral."@sv .
+
+<#reviewDirection>
+    a sh:PropertyShape ;
+    sh:path solid-memo:reviewDirection ;
+    sh:name "direction" ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+    sh:in ( solid-memo:frontToBack solid-memo:backToFront ) ;
+    sh:message "A review state's direction is at most one of solid-memo:frontToBack or solid-memo:backToFront."@en ,
+               "Ett repetitionstillstånds riktning är högst en av solid-memo:frontToBack och solid-memo:backToFront."@sv .
+
+# No sh:in: a scheduler this app does not know is read and kept, never a
+# violation; the app leaves such a state alone (see docs/data-model.md).
+<#scheduler>
+    a sh:PropertyShape ;
+    sh:path solid-memo:scheduler ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+    sh:message "A review state's scheduler is at most one IRI, a concept of solid-memo:Schedulers."@en ,
+               "Ett repetitionstillstånds schemaläggare är högst en IRI, ett begrepp i solid-memo:Schedulers."@sv .

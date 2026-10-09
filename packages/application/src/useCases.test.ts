@@ -2234,7 +2234,7 @@ describe("library deck upgrade", () => {
         ? { unchanged: true }
         : { unchanged: false, value: pod.reviews.get(d.reviewsDocumentUrl) ?? [], version: versionOf(d.reviewsDocumentUrl) },
     );
-    vi.mocked(reviewRepo.stageReviewChanges).mockImplementation(async (d, url, remove) => {
+    vi.mocked(reviewRepo.stageReviewChanges).mockImplementation(async (d, { reviewsDocumentUrl: url }, remove) => {
       const dropped = new Set(remove.map((key) => `${key.cardId} ${key.direction}`));
       pod.reviews.set(url, (pod.reviews.get(d.reviewsDocumentUrl) ?? []).filter((s) => !dropped.has(`${s.cardId} ${s.direction}`)));
       wrote(url);
@@ -2266,6 +2266,12 @@ describe("library deck upgrade", () => {
     ]);
     expect([...pod.reviews.keys()]).toEqual([STAGED_REVIEWS]);
     expect(pod.reviews.get(STAGED_REVIEWS)!.map((s) => s.cardId)).toEqual(["sweden"]);
+    // The states' links to their cards move with the cards document.
+    expect(deps.reviewStateRepository.stageReviewChanges).toHaveBeenCalledWith(
+      copy,
+      expect.objectContaining({ cardsDocumentUrl: STAGED_CARDS, reviewsDocumentUrl: STAGED_REVIEWS }),
+      [reviewOf("latvia")],
+    );
     expect(progress.map((p) => [p.step, p.done, p.part])).toEqual([
       ["read", 0, { done: 0, total: 3 }],
       ["read", 0, { done: 1, total: 3 }],
@@ -2384,7 +2390,7 @@ describe("library deck upgrade", () => {
 
   it("deletes the new documents when the review states do not read back as written", async () => {
     const { deps, pod, copy, plan, useCases } = await world();
-    vi.mocked(deps.reviewStateRepository.stageReviewChanges).mockImplementationOnce(async (_d, url) => {
+    vi.mocked(deps.reviewStateRepository.stageReviewChanges).mockImplementationOnce(async (_d, { reviewsDocumentUrl: url }) => {
       pod.reviews.set(url, []);
     });
     await expect(useCases.applyLibraryUpgrade(copy, plan)).resolves.toMatchObject({

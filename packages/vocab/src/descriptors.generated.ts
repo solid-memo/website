@@ -830,6 +830,9 @@ export const REVIEW_STATE_V2: ShapeDescriptor<ReviewStateV2> = {
     { name: "previousRepetitions", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#previousRepetitions", kind: "integer", cardinality: "optional" },
     { name: "previousDue", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#previousDue", kind: "string", cardinality: "optional" },
     { name: "previousLastReviewedAt", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#previousLastReviewedAt", kind: "dateTime", cardinality: "optional" },
+    { name: "reviewOf", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#reviewOf", kind: "iri", cardinality: "optional" },
+    { name: "direction", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#reviewDirection", kind: "iriEnum", cardinality: "optional", values: ["https://solid-memo.com/ns/vocab/v1.ttl#frontToBack","https://solid-memo.com/ns/vocab/v1.ttl#backToFront"] },
+    { name: "scheduler", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#scheduler", kind: "iri", cardinality: "optional" },
   ],
 };
 

@@ -281,11 +281,17 @@ export interface ReviewStateRepository {
   ): Promise<void>;
   /**
    * For a library upgrade: write the deck's reviews document without the
-   * given states as a NEW document at `stagedUrl` (only if nothing is
-   * there yet), every IRI of the original moved to it. The original is
-   * only read; a deck without one gets an empty document.
+   * states of the given cards and directions as a NEW document at
+   * `staged.reviewsDocumentUrl` (only if nothing is there yet), every IRI
+   * of the original moved to it, and every IRI of the deck's cards
+   * document (a state's link to its card) to `staged.cardsDocumentUrl`.
+   * The original is only read; a deck without one gets an empty document.
    */
-  stageReviewChanges(deck: Deck, stagedUrl: string, remove: ReviewKey[]): Promise<void>;
+  stageReviewChanges(
+    deck: Deck,
+    staged: Pick<Deck, "cardsDocumentUrl" | "reviewsDocumentUrl">,
+    remove: ReviewKey[],
+  ): Promise<void>;
 }
 
 /** Driven port: per-instance study preferences. */

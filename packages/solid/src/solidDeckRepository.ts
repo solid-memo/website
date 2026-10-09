@@ -1,6 +1,7 @@
 import {
   buildThing,
   createSolidDataset,
+  createThing,
   getDatetime,
   getThing,
   getUrlAll,
@@ -39,10 +40,11 @@ import {
   withDeck,
   withDistractors,
   withoutDeck,
+  withSuggestedAnswers,
 } from "./mappers/deckMapper";
 import { toStoredLayout, withTreeChanges } from "./mappers/deckTreeMapper";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
-import { reviewSubjectUrl } from "./mappers/reviewStateMapper";
+import { withoutReviewStates } from "./mappers/reviewStateMapper";
 import { recordThing } from "./records";
 import { mapSince, readSince } from "./readSince";
 import { AppError } from "@solid-memo/domain/appError";
@@ -85,6 +87,16 @@ export function createSolidDeckRepository({
     await saveDataset(url, dataset, fetch, options);
   }
 
+  /** Save a deck's cards document, saying whose it is (partOfDeck), once the subjects the write touched are checked. */
+  function saveCardsDocument(
+    deck: Deck,
+    dataset: SolidDataset,
+    subjects: readonly string[],
+    options?: { whole?: boolean },
+  ): Promise<void> {
+    return save(deck.cardsDocumentUrl, partOfDeck(dataset, deck), subjects, options);
+  }
+
   return {
     async listDecks(instanceUrl): Promise<Deck[]> {
       const catalogUrl = catalogUrlOf(instanceUrl);
@@ -122,7 +134,7 @@ export function createSolidDeckRepository({
         cards = written.dataset;
         subjects.push(...written.subjects);
       }
-      await save(deck.cardsDocumentUrl, cards, subjects);
+      await saveCardsDocument(deck, cards, subjects);
       return registerDeck(deck);
     },
 
@@ -201,7 +213,7 @@ export function createSolidDeckRepository({
         (await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch)) ??
         createSolidDataset();
       const written = withCard(dataset, deck, card, null);
-      await save(deck.cardsDocumentUrl, written.dataset, written.subjects);
+      await saveCardsDocument(deck, written.dataset, written.subjects);
       return card;
     },
 
@@ -232,7 +244,7 @@ export function createSolidDeckRepository({
         ...(card.retired === true ? { retired: true } : {}),
       };
       const written = withCard(dataset, deck, updated, thing);
-      await save(deck.cardsDocumentUrl, written.dataset, written.subjects);
+      await saveCardsDocument(deck, written.dataset, written.subjects);
       return updated;
     },
 
@@ -251,7 +263,7 @@ export function createSolidDeckRepository({
         updated = written.dataset;
         subjects.push(...written.subjects);
       }
-      await save(deck.cardsDocumentUrl, updated, subjects);
+      await saveCardsDocument(deck, updated, subjects);
     },
 
     async stateCardLanguages(deck, cardIds, languages): Promise<number> {
@@ -269,7 +281,7 @@ export function createSolidDeckRepository({
       }
       // One PUT of the whole document, If-Match the read above: a cards document changed
       // meanwhile is not overwritten, and no PATCH of text is cut short (saveDataset's `whole`).
-      if (stated.length > 0) await save(deck.cardsDocumentUrl, updated, stated, { whole: true });
+      if (stated.length > 0) await saveCardsDocument(deck, updated, stated, { whole: true });
       return stated.length;
     },
 
@@ -277,7 +289,7 @@ export function createSolidDeckRepository({
       const dataset =
         (await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch)) ?? createSolidDataset();
       const changed = withCardChanges(dataset, deck, changes);
-      await save(deck.cardsDocumentUrl, changed.dataset, changed.subjects);
+      await saveCardsDocument(deck, changed.dataset, changed.subjects);
     },
 
     async readDeck(deckUrl) {
@@ -290,11 +302,11 @@ export function createSolidDeckRepository({
         (await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch)) ?? createSolidDataset();
       const staged = { ...deck, cardsDocumentUrl: stagedUrl };
       const changed = withCardChanges(
-        await movedDataset(original, deck.cardsDocumentUrl, stagedUrl, loadEngine),
+        await movedDataset(original, [{ from: deck.cardsDocumentUrl, to: stagedUrl }], loadEngine),
         staged,
         changes,
       );
-      await save(stagedUrl, changed.dataset, changed.subjects);
+      await saveCardsDocument(staged, changed.dataset, changed.subjects);
     },
 
     async switchDeck(current, next): Promise<Deck> {
@@ -341,23 +353,18 @@ export function createSolidDeckRepository({
         fetch,
       );
       if (dataset !== null) {
-        await saveDataset(deck.cardsDocumentUrl, withoutCard(dataset, card.url), fetch);
+        await saveDataset(deck.cardsDocumentUrl, partOfDeck(withoutCard(dataset, card.url), deck), fetch);
       }
       const reviews = await getSolidDatasetOrNull(
         deck.reviewsDocumentUrl,
         fetch,
       );
       if (reviews !== null) {
-        let updated = reviews;
-        for (const direction of ["front-to-back", "back-to-front"] as const) {
-          updated = removeThing(
-            updated,
-            reviewSubjectUrl(deck.reviewsDocumentUrl, {
-              cardId: card.id,
-              direction,
-            }),
-          );
-        }
+        // Its states both ways, whether they name it (sm:reviewOf) or are named after it.
+        const updated = withoutReviewStates(reviews, deck, [
+          { cardId: card.id, direction: "front-to-back" },
+          { cardId: card.id, direction: "back-to-front" },
+        ]);
         await saveDataset(deck.reviewsDocumentUrl, updated, fetch);
       }
     },
@@ -464,13 +471,14 @@ export function createSolidDeckRepository({
     card: CardContent & { id: string; createdAt?: string; retired?: true },
     existing: ThingPersisted | null,
   ): { dataset: SolidDataset; subjects: string[] } {
-    const thing = cardThing(deck, card, existing);
-    const written = withDistractors(
-      setThing(dataset, thing),
-      deck.cardsDocumentUrl,
-      card.distractors ?? [],
-      existing === null ? [] : getUrlAll(existing, SM.distractor),
+    const before = existing === null ? [] : getUrlAll(existing, SM.distractor);
+    const distractors = card.distractors ?? [];
+    const thing = withSuggestedAnswers(
+      cardThing(deck, card, existing),
+      before,
+      distractors.map((distractor) => `${deck.cardsDocumentUrl}#${distractor.id}`),
     );
+    const written = withDistractors(setThing(dataset, thing), deck.cardsDocumentUrl, distractors, before);
     return { dataset: written.dataset, subjects: [`${deck.cardsDocumentUrl}#${card.id}`, ...written.subjects] };
   }
 
@@ -503,6 +511,18 @@ export function createSolidDeckRepository({
       existing,
     );
   }
+}
+
+/**
+ * The cards document saying whose it is: the document itself (`<>`)
+ * dcterms:isPartOf the deck's catalog entry, added once, so another app
+ * finds the deck from its cards. Any other dcterms:isPartOf stays (another
+ * app may point two decks at one document).
+ */
+function partOfDeck(dataset: SolidDataset, deck: Pick<Deck, "url" | "cardsDocumentUrl">): SolidDataset {
+  const document = getThing(dataset, deck.cardsDocumentUrl) ?? createThing({ url: deck.cardsDocumentUrl });
+  if (getUrlAll(document, DCTERMS.isPartOf).includes(deck.url)) return dataset;
+  return setThing(dataset, buildThing(document).addUrl(DCTERMS.isPartOf, deck.url).build());
 }
 
 /** The cards document without the card and the distractors it names. */

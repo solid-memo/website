@@ -52,6 +52,7 @@ string, so other applications can look up what it means:
 | `sm:Themes` | [`v1.ttl`](../ns/vocab/v1.ttl) | `sm:systemTheme` (default), `sm:lightTheme`, `sm:darkTheme` | `sm:theme` in preferences ([theme.md](theme.md)) |
 | `sm:AnswerModes` | [`v1.ttl`](../ns/vocab/v1.ttl) | `sm:recall` (absent means this), `sm:multipleChoice` | `sm:answerMode` on an answer in the [answer log](data-model.md#the-answer-log) |
 | `sm:TextFormats` | [`v1.ttl`](../ns/vocab/v1.ttl) | `sm:plainText` (absent means this), `sm:markdown` | `sm:textFormat` on a card, a course step or a chapter ([Text formats](#text-formats)) |
+| `sm:Schedulers` | [`v1.ttl`](../ns/vocab/v1.ttl) | `sm:sm2` (absent means this) | `sm:scheduler` on a review state ([Review states](#review-states)) |
 | Topics (`https://solid-memo.com/ns/vocab/topics.ttl`) | [`topics.ttl`](../ns/vocab/topics.ttl) | languages (swedish), geography, computing (linked-data), science (chemistry), art, labour-market | `dcat:theme` on a deck, next to the EU data theme `EDUC` |
 
 - Every scheme has a `dcterms:title` and a `skos:definition`; every
@@ -66,7 +67,7 @@ string, so other applications can look up what it means:
   so the mapping between them is data.
 - `npm run generate` renders every scheme into
   `packages/vocab/src/concepts.generated.ts` (`STUDY_DIRECTIONS`,
-  `INVALID_DATA_POLICIES`, `ANSWER_MODES`, `TEXT_FORMATS`, `TOPICS`), which the app lists and labels
+  `INVALID_DATA_POLICIES`, `ANSWER_MODES`, `TEXT_FORMATS`, `SCHEDULERS`, `TOPICS`), which the app lists and labels
   from, in the language the user reads; [concepts.ts](../packages/domain/src/concepts.ts) looks concepts up by
   IRI or notation.
 - Concepts are only ever added. One that should go is deprecated
@@ -103,14 +104,20 @@ string, so other applications can look up what it means:
   on a deck outside `DeckV6`, as `sm:position` is
   ([courses.md](courses.md)). 1.15's `sm:textFormat` joined card format
   5, step format 1 and chapter format 1 the first way
-  ([Text formats](#text-formats)).
+  ([Text formats](#text-formats)), and 1.16's `sm:reviewOf`,
+  `sm:reviewDirection` and `sm:scheduler` review-state format 2
+  ([Review states](#review-states)).
 - **A new concept of a scheme whose property shape lists no `sh:in`
   needs no format bump.** `sm:textFormat` is such a property: its shape
   says only "at most one IRI", so a reader that meets a concept it does
   not know reads the value, keeps it through an edit and treats the text
   as plain, rather than erasing it or calling the subject invalid. A
   scheme whose shape does list its concepts (`sm:studyDirection`,
-  `sm:theme`) is an `iriEnum`, and there a new concept is a new format.
+  `sm:theme`, `sm:reviewDirection`) is an `iriEnum`, and there a new
+  concept is a new format. `sm:scheduler` lists none either, but a
+  concept the app does not know is not taken for the default: it says
+  the state's fields belong to another algorithm, so the state is
+  another app's ([Review states](#review-states)).
 - **Which concept is the app's default is the app's, not the
   vocabulary's.** A scheme's default concept says "The default." in its
   definition, a note on what the app does where data states no concept,
@@ -198,6 +205,40 @@ Version 1.15 added how a text is written: `sm:textFormat`, a concept of
 - Literals stay `rdf:langString` (or untagged `xsd:string` where a
   shape allows it): each language's value is its own document, and the
   [language rules](#the-language-of-text) are unchanged.
+
+## Review states
+
+Version 1.16 added what a review state is of, so an app that does not
+know Solid Memo's naming rule can join a state to its card, and one that
+schedules by another algorithm can keep its states beside Solid Memo's.
+
+| Term | Kind | Domain → range | Absent means |
+|---|---|---|---|
+| `sm:reviewOf` | object property | ReviewState → Card | the card the subject is named after: `#<cardId>` or `#<cardId>@back-to-front` |
+| `sm:reviewDirection` | object property | ReviewState → `sm:frontToBack` or `sm:backToFront` | back to front when the subject ends in `@back-to-front`, else front to back |
+| `sm:scheduler` | object property | ReviewState → a concept of `sm:Schedulers` | `sm:sm2`, as every state was before 1.16 |
+
+- **Optional, in review-state format 2 without a bump.** A reader that
+  ignores them finds every state at the subject the naming rule gives
+  as before: the app writes a new state there (unless that subject is
+  another's, then at `#review-<uuid>`). A state it has read it writes
+  back at its own subject, so one another app named its own way stays
+  where it is, and an older reader ignores it
+  ([migrations.md](migrations.md#versions)). Format 1 and 2 accept any
+  subject for a state that names its card, as another app may write one.
+- **`sm:reviewDirection` is not `sm:answeredDirection`**, which has an
+  answer as its domain, nor `sm:studyDirection`, a deck's, which may be
+  `sm:bidirectional`: a state is of one way only.
+- **What the app writes and how it reads them** is in
+  [data-model.md](data-model.md#decks-and-cards): what a state says wins
+  over its name, one state per card and direction counts, and a state of
+  another scheduler is never read, written over or removed.
+- **Other apps' terms, written beside Solid Memo's own**: a card names
+  each of its distractors with `schema:suggestedAnswer` as well as
+  `sm:distractor` (whose `rdfs:seeAlso` points at it), and a deck's
+  cards document states `dcterms:isPartOf` the deck's catalog entry on
+  the document itself. Neither belongs to a shape, so neither moved a
+  format; Solid Memo reads neither.
 
 ## The language of text
 

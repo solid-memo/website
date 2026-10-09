@@ -1480,7 +1480,7 @@ export function createUseCases({
         if (note.reviews !== undefined) {
           await reviewStateRepository.stageReviewChanges(
             deck,
-            note.reviews.to,
+            staged,
             reviews!.value.filter((state) => removed.has(state.cardId)),
           );
           progress.stepped();

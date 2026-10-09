@@ -37,4 +37,18 @@ describe("foreignSubjects", () => {
   it("finds nothing foreign in an empty document", () => {
     expect(foreignSubjects(documentOf())).toEqual(new Set());
   });
+
+  it("counts a review state of another scheduler as another app's, stamped or not", () => {
+    const fsrs = "https://fsrs.example/ns#fsrs";
+    const dataset = documentOf(
+      subject("card-1").addIri(RDF.type, SM.ReviewState).addInteger(SM.formatVersion, 2).addIri(SM.scheduler, SM.sm2).build(),
+      subject("card-2").addIri(RDF.type, SM.ReviewState).build(),
+      subject("rs-1").addIri(RDF.type, SM.ReviewState).addIri(SM.scheduler, fsrs).build(),
+      subject("rs-2").addIri(RDF.type, SM.ReviewState).addInteger(SM.formatVersion, 2).addIri(SM.scheduler, fsrs).build(),
+      // A scheduler named by a literal, even one spelling SM-2's IRI, is not SM-2.
+      subject("rs-3").addIri(RDF.type, SM.ReviewState).addStringNoLocale(SM.scheduler, "fsrs").build(),
+      subject("rs-4").addIri(RDF.type, SM.ReviewState).addIri(SM.scheduler, SM.sm2).addStringNoLocale(SM.scheduler, SM.sm2).build(),
+    );
+    expect(foreignSubjects(dataset)).toEqual(new Set([`${DOC}#rs-1`, `${DOC}#rs-2`, `${DOC}#rs-3`, `${DOC}#rs-4`]));
+  });
 });

@@ -6,9 +6,12 @@
  * folder and the folder with them, and deletes the whole folder, access
  * rules and all, when nothing else is in it; a dataset another app listed
  * in the catalogue stays listed through every deck save, and the instance
- * stays valid; and what is wrong with another app's subjects is only
- * warned about (docs/validation.md "Data another app wrote"). The app's own use cases and Solid adapters, wired as in
- * main.tsx.
+ * stays valid; what is wrong with another app's subjects is only
+ * warned about (docs/validation.md "Data another app wrote"); and a
+ * review state another app named its own way is read by what it says it
+ * is of, while another scheduler's is left alone (docs/data-model.md
+ * "Decks and cards"). The app's own use cases and Solid adapters, wired
+ * as in main.tsx.
  */
 import { describe, expect, inject, it } from "vitest";
 import { Parser, Writer } from "n3";
@@ -221,5 +224,44 @@ describe.each(SERVERS)("what another app wrote, on $name", ({ url: server }) => 
     expect(arrangementSetAside(report)).toBe(false);
     // Opening the instance checks it the same way.
     expect((await useCases.checkInstance(instance.url)).conforms).toBe(true);
+  }, 60_000);
+
+  it("reads a review state by the card it names and reviews it in place, leaving another scheduler's alone", async () => {
+    const { instance, decks, useCases } = await seed(server);
+    const capitals = decks[0]!;
+    const [card] = await useCases.listCards(capitals);
+    // The cards document says whose it is.
+    expect(await triples(capitals.cardsDocumentUrl)).toContain(
+      `<${capitals.cardsDocumentUrl}> <http://purl.org/dc/terms/isPartOf> <${capitals.url}> .`,
+    );
+    const reviews = capitals.reviewsDocumentUrl;
+    const patch = await fetch(reviews, {
+      method: "PATCH",
+      headers: { "content-type": "application/sparql-update" },
+      body: `INSERT DATA {
+        <${reviews}#theirs> a <${SM}ReviewState> ; <${SM}reviewOf> <${card!.url}> ; <${SM}reviewDirection> <${SM}backToFront> ;
+          <${SM}easeFactor> 2.5 ; <${SM}intervalDays> 1 ; <${SM}repetitions> 1 ; <${SM}due> "2026-10-10" ;
+          <${SM}firstReviewedAt> "2026-10-09T10:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+          <${SM}lastReviewedAt> "2026-10-09T10:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+        <${reviews}#${card!.id}@back-to-front> a <${SM}ReviewState> ; <${SM}reviewOf> <${card!.url}> ;
+          <${SM}scheduler> <https://fsrs.example/ns#fsrs> ; <https://fsrs.example/ns#stability> 4.2 .
+      }`,
+    });
+    expect(patch.ok, `PATCH ${reviews}: ${patch.status}`).toBe(true);
+
+    const reviewed = await useCases.recordReview(instance.url, capitals, { card: card!, direction: "back-to-front" }, 4, new Date());
+
+    expect(reviewed).toMatchObject({ cardId: card!.id, direction: "back-to-front", repetitions: 2 });
+    const after = await triples(reviews);
+    expect(after).toContain(`<${reviews}#theirs> <${SM}repetitions> "2"^^<http://www.w3.org/2001/XMLSchema#integer> .`);
+    expect(after).toContain(`<${reviews}#theirs> <${SM}scheduler> <${SM}sm2> .`);
+    // Another scheduler's state, at the subject Solid Memo's naming rule gives, untouched.
+    expect(after).toContain(`<${reviews}#${card!.id}@back-to-front> <https://fsrs.example/ns#stability>`);
+    expect(after).not.toContain(`<${reviews}#${card!.id}@back-to-front> <${SM}easeFactor>`);
+    const report = await page().validateInstance(instance.url);
+    expect(report.conforms).toBe(true);
+    expect(report.documents.flatMap((document) => document.subjects).find((subject) => subject.url === `${reviews}#${card!.id}@back-to-front`)).toMatchObject({
+      foreign: true,
+    });
   }, 60_000);
 });

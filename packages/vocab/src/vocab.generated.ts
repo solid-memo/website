@@ -1,6 +1,6 @@
 /* Generated from ns/vocab/v1.ttl by `npm run generate`. Do not edit: change the source and regenerate. */
 
-/** Solid Memo's own vocabulary, version 1.15 (see docs/vocab.md). */
+/** Solid Memo's own vocabulary, version 1.16 (see docs/vocab.md). */
 export const SM_NS = "https://solid-memo.com/ns/vocab/v1.ttl#";
 
 export const SM = {
@@ -10,7 +10,7 @@ export const SM = {
   Deck: `${SM_NS}Deck`,
   /** A flashcard: a front and a back, each text, a picture, or both. (Since 1.0.) */
   Card: `${SM_NS}Card`,
-  /** SM-2 scheduling state of one card in one study direction. Its subject is named after the card: #<cardId> for front-to-back, #<cardId>@back-to-front for the other way. (Since 1.0.) */
+  /** SM-2 scheduling state of one card in one study direction. It names its card with reviewOf and the direction with reviewDirection (since 1.16); without them, its subject is named after the card: #<cardId> for front-to-back, #<cardId>@back-to-front for the other way. (Since 1.0.) */
   ReviewState: `${SM_NS}ReviewState`,
   /** Study preferences of one instance: daily caps, the day boundary, the answer scale and developer mode. (Since 1.0.) */
   Preferences: `${SM_NS}Preferences`,
@@ -90,6 +90,12 @@ export const SM = {
   previousDue: `${SM_NS}previousDue`,
   /** Snapshot: lastReviewedAt before the first review of the study day. (Added in 1.2 for resetting the study day.) */
   previousLastReviewedAt: `${SM_NS}previousLastReviewedAt`,
+  /** The card the review state is of, a subject of its deck's cards document. Where it is absent, the card is named by the state's subject: #<cardId> or #<cardId>@back-to-front. (Added in 1.16, in review-state format 2 without a version bump: an older reader names the card by the subject, as before.) */
+  reviewOf: `${SM_NS}reviewOf`,
+  /** The way the card is asked in the review state: solid-memo:frontToBack or solid-memo:backToFront, a concept of solid-memo:StudyDirections (never solid-memo:bidirectional: each way has its own state). Where it is absent, the direction is named by the state's subject: back to front when it ends in @back-to-front, else front to back. (Added in 1.16, in review-state format 2 without a version bump: an older reader names the direction by the subject, as before.) */
+  reviewDirection: `${SM_NS}reviewDirection`,
+  /** The scheduling algorithm the review state's fields belong to: a concept of solid-memo:Schedulers. Absent means solid-memo:sm2, as every state was before 1.16. (Added in 1.16, in review-state format 2 without a version bump: an older reader takes every state for SM-2, as before.) */
+  scheduler: `${SM_NS}scheduler`,
   /** Maximum unseen cards introduced per study day. (Since 1.0.) */
   newCardsPerDay: `${SM_NS}newCardsPerDay`,
   /** Maximum due-card reviews per study day. (Since 1.0.) */
@@ -200,4 +206,8 @@ export const SM = {
   plainText: `${SM_NS}plainText`,
   /** CommonMark 0.31.2, with GitHub Flavored Markdown pipe tables as its one extension. (Added in 1.15.) */
   markdown: `${SM_NS}markdown`,
+  /** The spaced-repetition algorithms a review state's fields may belong to. (Added in 1.16.) */
+  Schedulers: `${SM_NS}Schedulers`,
+  /** The SuperMemo 2 algorithm: an ease factor, an interval in days, a count of successful repetitions in a row and a due day. The same as no scheduler. (Added in 1.16.) */
+  sm2: `${SM_NS}sm2`,
 } as const;

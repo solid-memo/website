@@ -147,6 +147,52 @@ judgment call, recorded here with its reasoning:
   Outside validators of `card/v5.ttl`, `step/v1.ttl` and `chapter/v1.ttl`
   see one new constraint, which data without the marker meets.
 
+What a review state is of, and the other links of vocabulary 1.16 (see
+[vocab.md](vocab.md#review-states)), need no migration and moved no
+format version:
+
+- **`sm:reviewOf`, `sm:reviewDirection` and `sm:scheduler` joined
+  review-state format 2**, optional. The app writes them on every state
+  it writes (a review, a reset of the day, a course's answer, the format
+  update's step of an outdated state). A state it has already read is
+  written back at its own subject, whatever that is called; a new one
+  goes to the subject the old rule names, so an older reader finds it as
+  before, or, where that subject is another's, to `#review-<uuid>`. An
+  older reader takes a state at any subject but the old rule's (another
+  app's `#state-7f3a`, or `#review-<uuid>`) for a state of a card the
+  deck does not have: it ignores it, studies the card as new and writes
+  `#<cardId>`, which this app then reads instead, one state counting per
+  card and direction. States written before stay as they are until they
+  are next written: without the links, they are read by their subject,
+  as ever.
+- **Review-state formats 1 and 2 accept any subject for a state that
+  names its card**, a relaxation: what conformed still conforms. A tab
+  opened before the deploy fetches its shapes from the site, so it
+  checks with these, but reads such a state by its subject, which names
+  no card of the deck: it ignores it.
+- **A state of another scheduler** has no SM-2 fields to read. It is
+  another app's to the [check](validation.md#data-another-app-wrote),
+  so it sets no deck aside, and this app never reads, writes over or
+  removes it. Any value of `sm:scheduler` but the `sm:sm2` IRI counts,
+  a literal too. An older app takes it for SM-2's: it cannot read it either
+  (no ease factor), and would write over it only at the subject the old
+  rule names for a card.
+- **`schema:suggestedAnswer` on a card and `dcterms:isPartOf` on a cards
+  document belong to no shape**, so no format moved, every writer keeps
+  them, and the app reads neither. An older app that changes a card's
+  distractors keeps its suggested answers as they were, naming
+  distractors it removed; this app cannot tell those from another app's,
+  and keeps them.
+- **A link to a card outlives a library upgrade.** An
+  [upgrade](#how-an-upgrade-is-applied) moves the cards to a new
+  document and, unless a removed card has states, keeps the reviews
+  document, whose links still name the old one. The app reads a link
+  into any cards document the deck has had (`decks/<deckId>.ttl` or
+  `decks/<deckId>-<uuid>.ttl`) by its fragment, so an upgrade by this
+  app or an older one loses no state.
+- **One full re-check.** The shape files changed, so the rules' hash
+  changed: every instance is checked in full once on its next opening.
+
 Rules that hold across versions:
 
 - **Readers never refuse older data.** A subject is read with the shape
@@ -468,7 +514,12 @@ flowchart TD
   entry: whichever documents it points at stay, the others are deleted.
 - **Review states move only when they must.** When no removed card has
   review states the deck keeps its reviews document, and reviews saved
-  meanwhile on another device land where they always did.
+  meanwhile on another device land where they always did. Its states
+  still name their cards (`sm:reviewOf`) in the old cards document,
+  which the app reads as the deck's ([data-model.md](data-model.md#decks-and-cards))
+  and names anew on the state's next write. When the reviews document
+  does move, every link to a card moves with it to the new cards
+  document.
 - **Nothing written meanwhile is lost.** While it runs, the write fence
   refuses this tab's writes to the documents being replaced; the verify
   step catches another device's. On a server whose ETag outlives an edit

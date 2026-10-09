@@ -92,7 +92,7 @@ const FIXTURES: Record<ShapeName, Record<number, object>> = {
   },
   reviewState: {
     1: { easeFactor: 2.5, intervalDays: 1, repetitions: 1, due: "2026-09-22", firstReviewedAt: "2026-09-21T10:00:00.000Z", lastReviewedAt: "2026-09-21T10:00:00.000Z", previousDue: "2026-09-21" },
-    2: { easeFactor: 2.5, intervalDays: 1, repetitions: 1, due: "2026-09-22", firstReviewedAt: "2026-09-21T10:00:00.000Z", lastReviewedAt: "2026-09-21T10:00:00.000Z", previousEaseFactor: 2.4, previousIntervalDays: 1, previousRepetitions: 1, previousDue: "2026-09-21", previousLastReviewedAt: "2026-09-20T10:00:00.000Z" },
+    2: { easeFactor: 2.5, intervalDays: 1, repetitions: 1, due: "2026-09-22", firstReviewedAt: "2026-09-21T10:00:00.000Z", lastReviewedAt: "2026-09-21T10:00:00.000Z", previousEaseFactor: 2.4, previousIntervalDays: 1, previousRepetitions: 1, previousDue: "2026-09-21", previousLastReviewedAt: "2026-09-20T10:00:00.000Z", reviewOf: "https://pod.example/d.ttl#it", direction: `${SM_NS}backToFront`, scheduler: `${SM_NS}sm2` },
   },
   preferences: {
     1: { newCardsPerDay: 20 },

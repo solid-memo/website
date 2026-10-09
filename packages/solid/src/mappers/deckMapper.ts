@@ -8,6 +8,7 @@ import {
   setThing,
   type SolidDataset,
   type Thing,
+  type ThingPersisted,
 } from "@inrupt/solid-client";
 import { agentUrlOf, authorFromAgentRecord } from "@solid-memo/domain/agentRecord";
 import {
@@ -32,7 +33,7 @@ import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { AGENT_V1, CATALOG_V1, DECK_V6, DISTRACTOR_V1, DISTRIBUTION_V1 } from "@solid-memo/vocab/descriptors.generated";
 import { foreignSubjects } from "../ownership";
 import { readVersioned, recordThing } from "../records";
-import { DCAT, DCTERMS, RDF, SM } from "../vocab";
+import { DCAT, DCTERMS, RDF, SCHEMA, SM } from "../vocab";
 
 export { fragmentIdOf } from "@solid-memo/domain/subjectUrl";
 
@@ -279,4 +280,23 @@ export function withDistractors(
     );
   }
   return { dataset: updated, subjects };
+}
+
+/**
+ * A card naming each of its distractors (`distractors`, their URLs) as a
+ * schema:suggestedAnswer too, beside sm:distractor, for readers who know
+ * schema.org's questions and not Solid Memo's. Those it named before
+ * (`before`) and names no longer leave it; any other suggested answer,
+ * another app's, stays. Readers go by sm:distractor alone.
+ */
+export function withSuggestedAnswers(
+  card: ThingPersisted,
+  before: readonly string[],
+  distractors: readonly string[],
+): ThingPersisted {
+  const builder = buildThing(card);
+  for (const url of before) if (!distractors.includes(url)) builder.removeUrl(SCHEMA.suggestedAnswer, url);
+  const suggested = getUrlAll(card, SCHEMA.suggestedAnswer);
+  for (const url of distractors) if (!suggested.includes(url)) builder.addUrl(SCHEMA.suggestedAnswer, url);
+  return builder.build();
 }

@@ -11,17 +11,28 @@ export function movedIri(iri: string, from: string, to: string): string {
   return iri.startsWith(`${from}#`) ? `${to}${iri.slice(from.length)}` : iri;
 }
 
+/** One document moved: its IRI and its fragments' from `from` to `to`. */
+export interface DocumentMove {
+  from: string;
+  to: string;
+}
+
 /**
  * A document's dataset as a new dataset for another document: every IRI
- * of the old document (its fragments) moved to the new one, all else as
- * it is. A new dataset is saved as a creation (If-None-Match: *).
+ * of each moved document (its own first, then any it links to that moves
+ * with it) taken to its new one, all else as it is. A new dataset is
+ * saved as a creation (If-None-Match: *).
  */
 export async function movedDataset(
   dataset: SolidDataset,
-  from: string,
-  to: string,
+  moves: readonly DocumentMove[],
   load: LoadEngine = loadEngine,
 ): Promise<SolidDataset> {
   const { mapIris } = await load();
-  return fromRdfJsDataset(mapIris(toRdfJsDataset(dataset), (iri) => movedIri(iri, from, to)));
+  return fromRdfJsDataset(
+    mapIris(toRdfJsDataset(dataset), (iri) => {
+      const move = moves.find(({ from }) => iri === from || iri.startsWith(`${from}#`));
+      return move === undefined ? iri : movedIri(iri, move.from, move.to);
+    }),
+  );
 }
