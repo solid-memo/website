@@ -77,6 +77,15 @@ not know the URL it is reached at, fails there, saying so, not in every
 test. What a server prints goes to `e2e/pod/logs/<id>.log`, which CI
 keeps when a job fails.
 
+The tests' fetch sends every request with `Connection: close`
+([setup.ts](../e2e/pod/setup.ts)). Node 24's fetch can write a request
+onto a pooled connection the server closed while a long synchronous
+stretch (a big update, on a slow runner) kept it from noticing, and
+then fails it without resending it; a browser resends it, so the app
+needs no retry. The Fetch standard forbids the header, but Node's fetch
+honours it, and `npm test` checks that it still does
+([connections.test.ts](../e2e/pod/connections.test.ts)).
+
 `SOLID_SERVERS=css-7,nss-5` runs the suite against some only (`all`
 against every one; unset, the blocking ones; `css-8` for the advisory);
 `SOLID_SERVER_URL` against a server of your own instead, which must let

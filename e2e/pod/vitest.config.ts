@@ -24,5 +24,7 @@ export default defineConfig({
     testTimeout: 60_000,
     hookTimeout: 90_000,
     globalSetup: ["./globalSetup.ts"],
+    // No request on a pooled connection the server may have closed (connections.ts).
+    setupFiles: ["./setup.ts"],
   },
 });
