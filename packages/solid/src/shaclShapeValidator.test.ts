@@ -3,13 +3,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildThing,
   createThing,
+  getThing,
   mockSolidDatasetFrom,
   setThing,
   type ThingBuilder,
   type ThingPersisted,
 } from "@inrupt/solid-client";
 import { getSolidDatasetOrNull } from "./datasets";
-import { DCTERMS, RDF, SM } from "./vocab";
+import { DCAT, DCTERMS, RDF, SM } from "./vocab";
+import { withCatalog } from "./mappers/deckMapper";
 import type { ShapeEngine } from "@solid-memo/shacl/engine";
 import { createShaclShapeValidator } from "./shaclShapeValidator";
 import type { ShapeLoader } from "@solid-memo/shacl/shapeLoader";
@@ -255,6 +257,22 @@ describe("createShaclShapeValidator", () => {
         ].join("\n"),
       );
     });
+
+    it("holds a catalogue's members of its own document to their class, not those another document describes", async () => {
+      const written = withCatalog(mockSolidDatasetFrom(DOC), DOC, {
+        title: "Main",
+        description: "My decks.",
+        publisher: { webId: "https://alice.example/profile/card#me", name: "Alice" },
+      });
+      const listing = (member: string) =>
+        setThing(written, buildThing(getThing(written, `${DOC}#catalog`)!).addIri(DCAT.dataset, member).build());
+      await expect(
+        validator.checkSubjects(listing("https://pod.example/recipes/index.ttl#cookbook"), [`${DOC}#catalog`]),
+      ).resolves.toBeUndefined();
+      await expect(validator.checkSubjects(listing(`${DOC}#deck-gone`), [`${DOC}#catalog`])).rejects.toThrow(
+        `<${DOC}#catalog> (${DCAT.dataset}): DCAT-AP:`,
+      );
+    }, 30_000);
 
     it("checks only the subjects a write touches, leaving untyped and newer ones alone", async () => {
       const dataset = setThing(

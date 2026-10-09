@@ -8,14 +8,16 @@ import type {
 import { ErrorMessage } from "./ErrorMessage";
 import { RegistrationTargetChooser } from "./RegistrationTargetChooser";
 import { ExternalLink } from "./ExternalLink";
+import { KeptFolderNotice } from "./KeptFolderNotice";
 import { useI18n, type ErrorText } from "./i18n";
 
 /**
  * The user's instances, to open, delete or add to. Deleting one takes
  * its row, and the button pressed, off the page: the focus goes to the
  * instance now in that row (the last one, if it was last), or to New
- * instance when none is left, and a status line says it is gone. While
- * it is deleted, the button keeps the focus (aria-disabled).
+ * instance when none is left, and a status line says it is gone; when
+ * its folder was kept, holding another app's files, a notice says so.
+ * While it is deleted, the button keeps the focus (aria-disabled).
  */
 export function InstancePicker({
   instances,
@@ -26,6 +28,7 @@ export function InstancePicker({
   newInstanceHref,
   onAttach,
   onDelete,
+  keptFolder = null,
 }: {
   instances: Instance[];
   options: RegistrationOptions | null;
@@ -36,6 +39,8 @@ export function InstancePicker({
   newInstanceHref: string;
   onAttach: (url: string, target: RegistrationTarget) => void;
   onDelete: (instance: Instance) => void;
+  /** The folder the last deletion kept, as it holds another app's files; null when none. */
+  keptFolder?: string | null;
 }) {
   const { t } = useI18n();
   const [attachUrl, setAttachUrl] = useState("");
@@ -134,6 +139,7 @@ export function InstancePicker({
       <p class="visually-hidden" role="status">
         {deleted}
       </p>
+      <KeptFolderNotice url={keptFolder} />
       <ErrorMessage error={error} />
     </section>
   );

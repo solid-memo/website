@@ -403,11 +403,19 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
     }
     expect(await fetch(await aclOf(`${target}reviews/deck-1.ttl`)).then((r) => r.status)).toBe(404);
 
-    // The backup is the original; restoring it switches back and removes the copy.
+    // The backup is the original; restoring it switches back and deletes
+    // what the copy holds of Solid Memo's. The copy's folder is kept, as
+    // it holds what Solid Memo did not write: the copy of the picture.
     await expect(useCases.readBackup({ url: target, name: "Main" })).resolves.toMatchObject({ url: pod.source });
-    await expect(useCases.restoreBackup(session, { url: target, name: "Main" })).resolves.toEqual(pod.instance);
+    await expect(useCases.restoreBackup(session, { url: target, name: "Main" })).resolves.toEqual({
+      instance: pod.instance,
+      keptFolder: target,
+    });
     expect(await registeredContainers(pod)).toContain(pod.source);
-    expect(await fetch(target).then((r) => r.status)).toBe(404);
+    for (const url of ["meta.ttl", "catalog.ttl", "preferences.ttl", "decks/deck-1.ttl", "reviews/deck-1.ttl", "decks/", "reviews/"]) {
+      expect(await fetch(`${target}${url}`, { method: "HEAD" }).then((r) => r.status), url).toBe(404);
+    }
+    expect(new Uint8Array(await (await fetch(`${target}attachments/picture.png`)).arrayBuffer())).toEqual(PICTURE);
     expect(await snapshot(pod.source)).toEqual(before);
   }, 60_000);
 
@@ -479,6 +487,23 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
     },
     60_000,
   );
+
+  it("deletes of the backup only what Solid Memo wrote: another app's file stays, and the folder with it", async () => {
+    const pod = await seedPod(server);
+    const { useCases, session } = app(pod);
+    const outcome = await useCases.updateInstance(session, pod.instance);
+    expect(outcome, JSON.stringify(outcome)).toMatchObject({ ok: true });
+    const updated = { url: (outcome as { instanceUrl: string }).instanceUrl, name: "Main" };
+
+    await expect(useCases.deleteBackup(updated)).resolves.toEqual({ keptFolder: pod.source });
+
+    for (const url of ["meta.ttl", "catalog.ttl", "preferences.ttl", "decks/deck-1.ttl", "reviews/deck-1.ttl", "decks/", "reviews/"]) {
+      expect(await fetch(`${pod.source}${url}`, { method: "HEAD" }).then((r) => r.status), url).toBe(404);
+    }
+    expect(new Uint8Array(await (await fetch(`${pod.source}attachments/picture.png`)).arrayBuffer())).toEqual(PICTURE);
+    await expect(useCases.readBackup(updated)).resolves.toBeNull();
+    expect((await useCases.validateInstance(updated.url)).conforms).toBe(true);
+  }, 60_000);
 
   it("refuses, in this tab, any write to the original while the update runs", async () => {
     const pod = await seedPod(server);

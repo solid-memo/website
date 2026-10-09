@@ -32,3 +32,13 @@ export interface RegistrationOptions {
   privateIndexExists: boolean;
   publicIndexExists: boolean;
 }
+
+/**
+ * What deleting an instance's data left (docs/data-model.md "Deleting an
+ * instance"): only what Solid Memo wrote is deleted, so a folder that
+ * also holds what another app put there is kept.
+ */
+export interface InstanceDeletion {
+  /** The instance's folder, when it was kept for what else it holds; null when it is gone. */
+  keptFolder: string | null;
+}

@@ -339,8 +339,10 @@ describe("listResources and deleteRecursively", () => {
     await expect(copier().listResources(TO)).resolves.toEqual([]);
   });
 
-  it("delete everything below the container, then the container", async () => {
+  it("delete everything below the container, then the container; one that is gone counts as deleted", async () => {
     vi.mocked(getSolidDatasetOrNull).mockImplementation((async (url: string) => tree[url] ?? null) as never);
+    await copier().deleteRecursively(TO);
+    expect(deleteContainer).not.toHaveBeenCalled();
     await copier().deleteRecursively(FROM);
     expect(vi.mocked(deleteFile).mock.calls.map((c) => c[0])).toEqual([
       `${FROM}decks/deck-1.ttl`,

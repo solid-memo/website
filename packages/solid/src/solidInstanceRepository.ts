@@ -12,8 +12,8 @@ import {
   type InstanceMeta,
 } from "@solid-memo/domain/instance";
 import { catalogNodeUrlOf, metaUrlOf } from "@solid-memo/domain/instanceLayout";
-import { deleteContainerRecursively } from "./containers";
 import { getSolidDatasetOrNull, readDataset, saveDataset } from "./datasets";
+import { deleteInstanceData } from "./instanceData";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
 import {
   toInstance,
@@ -194,7 +194,7 @@ export function createSolidInstanceRepository({
 
     async deleteInstance({ webId, instance }) {
       const url = ensureTrailingSlash(instance.url);
-      await deleteContainerRecursively(url, fetch);
+      const deletion = await deleteInstanceData(url, fetch);
       const locations = await locateTypeIndexes(webId, fetch);
       for (const indexUrl of [
         locations.privateIndexUrl,
@@ -203,6 +203,11 @@ export function createSolidInstanceRepository({
         if (indexUrl === null) continue;
         await removeInstanceRegistrations(indexUrl, url, fetch);
       }
+      return deletion;
+    },
+
+    deleteInstanceData(instanceUrl) {
+      return deleteInstanceData(instanceUrl, fetch);
     },
   };
 }

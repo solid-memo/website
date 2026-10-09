@@ -69,7 +69,9 @@ function applyRepair(dataset: SolidDataset, repair: Repair): SolidDataset {
   if (repair.kind === "remove-subject") {
     return withoutMembershipsOf(removeThing(dataset, thing), repair.documentUrl, repair.subjectUrl);
   }
-  if (repair.kind === "drop-dangling-members") return setThing(dataset, withoutDanglingMembers(dataset, thing));
+  if (repair.kind === "drop-dangling-members") {
+    return setThing(dataset, withoutDanglingMembers(dataset, repair.documentUrl, thing));
+  }
   return setThing(dataset, repairedThing(thing, { ...repair, kind: repair.kind }));
 }
 
@@ -88,8 +90,13 @@ function withoutMembershipsOf(dataset: SolidDataset, documentUrl: string, url: s
     );
 }
 
-/** A catalogue or deck group without its links to decks and groups the document does not describe as such. */
-function withoutDanglingMembers(dataset: SolidDataset, thing: Thing): Thing {
+/**
+ * A catalogue or deck group without its links to subjects of its own
+ * document that the document does not describe as decks or groups. A
+ * member in another document (a dataset another app listed) is described
+ * there, and its link stays.
+ */
+function withoutDanglingMembers(dataset: SolidDataset, documentUrl: string, thing: Thing): Thing {
   const describes = (url: string, types: string[]) => {
     const member = getThing(dataset, url);
     return member !== null && getUrlAll(member, RDF.type).some((type) => types.includes(type));
@@ -97,7 +104,7 @@ function withoutDanglingMembers(dataset: SolidDataset, thing: Thing): Thing {
   return MEMBERSHIP.reduce(
     (builder, { link, types }) =>
       getUrlAll(thing, link)
-        .filter((url) => !describes(url, types))
+        .filter((url) => url.startsWith(`${documentUrl}#`) && !describes(url, types))
         .reduce((b, url) => b.removeUrl(link, url), builder),
     buildThing(thing),
   ).build();

@@ -101,6 +101,15 @@ checks) and published with the site at `/vendor/`:
   [ns/vocab/external.ttl](../ns/vocab/external.ttl) (the EU authority-table
   entries and media types Solid Memo uses) is loaded next to the data
   being checked. Add a term there before data uses it.
+- A member a catalogue or deck group lists from another document
+  (`dcat:dataset`, `dcat:catalog`), such as a dataset another app added
+  to the catalogue, is described in that document, which a check of this
+  one cannot see. In the browser (`isMemberElsewhere` in
+  [shaclShapeValidator.ts](../packages/solid/src/shaclShapeValidator.ts))
+  DCAT-AP's class check on such a link says nothing: neither the data
+  check nor the [write check](#the-write-check) holds it to its class. A
+  member of the same document still must be a `dcat:Dataset` or
+  `dcat:Catalog`.
 - In node (`npm run library`, the tests) `validateProfile` ([packages/shacl/node/shacl.ts](../packages/shacl/node/shacl.ts))
   fails on any violation about a subject of the document. Warnings (a
   profile's recommendations) fail too for Solid Memo's own concept
@@ -169,7 +178,7 @@ the subject's own stored format:
 | A review state with half an undo snapshot | The snapshot dropped (as the review-state 1 → 2 migration does) |
 | A malformed due day | Recomputed from the last review and the interval |
 | An agent without a name | Named after its IRI |
-| A catalogue or [deck group](data-model.md#deck-groups) listing a deck or group the document does not describe (DCAT-AP's class check on `dcat:dataset` or `dcat:catalog`) | Those links dropped (a member typed `sm:Deck` or `sm:DeckGroup` alone is kept) |
+| A catalogue or [deck group](data-model.md#deck-groups) listing a deck or group the document does not describe (DCAT-AP's class check on `dcat:dataset` or `dcat:catalog`) | Those links dropped (a member typed `sm:Deck` or `sm:DeckGroup` alone is kept, and so is every link to another document) |
 
 Every other problem is listed with its document linked, to be fixed
 there or removed (after a confirmation). Removing a subject also drops

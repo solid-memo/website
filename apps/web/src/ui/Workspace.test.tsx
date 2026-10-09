@@ -450,6 +450,7 @@ describe("Workspace", () => {
       ),
       deleteInstance: vi.fn(async () => {
         deleted = true;
+        return { keptFolder: null };
       }),
     });
     renderWorkspace(useCases);
@@ -467,6 +468,28 @@ describe("Workspace", () => {
       ).not.toBeInTheDocument();
     });
     expect(screen.getByRole("button", { name: "Deck set A" })).toBeInTheDocument();
+  });
+
+  it("says when deleting an instance kept its folder, which holds another app's files", async () => {
+    vi.stubGlobal("confirm", vi.fn(() => true));
+    let deleted = false;
+    const useCases = makeUseCases({
+      listInstances: vi.fn(async () => (deleted ? [instanceA] : [instanceA, instanceB])),
+      deleteInstance: vi.fn(async () => {
+        deleted = true;
+        return { keptFolder: instanceB.url };
+      }),
+    });
+    renderWorkspace(useCases);
+
+    fireEvent.click(await screen.findByRole("button", { name: "Delete instance Deck set B" }));
+
+    const notice = await screen.findByText(/Solid Memo deleted its own data and kept/);
+    expect(notice).toHaveTextContent("another app put files there.");
+    expect(within(notice).getByRole("link", { name: "the folder in your Pod (opens in a new tab)" })).toHaveAttribute(
+      "href",
+      instanceB.url,
+    );
   });
 
   it("shows the error when deleting an instance fails", async () => {
@@ -534,7 +557,7 @@ describe("Workspace", () => {
         readBackup: vi.fn(async () => ({ url: instanceB.url })),
         restoreBackup: vi.fn(async () => {
           instances = [instanceB];
-          return instanceB;
+          return { instance: instanceB, keptFolder: null };
         }),
       }),
     );
@@ -542,6 +565,28 @@ describe("Workspace", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Restore previous version" }));
     expect(await screen.findByRole("heading", { name: "Decks" })).toBeInTheDocument();
     expect(screen.getByText("Deck set B")).toBeInTheDocument();
+    expect(screen.queryByText(/Solid Memo deleted its own data/)).not.toBeInTheDocument();
+    vi.unstubAllGlobals();
+  });
+
+  it("says, on the restored instance, that the updated instance's folder was kept for another app's files", async () => {
+    vi.stubGlobal("confirm", vi.fn(() => true));
+    let instances = [instanceA];
+    renderWorkspace(
+      makeUseCases({
+        listInstances: vi.fn(async () => instances),
+        readBackup: vi.fn(async () => ({ url: instanceB.url })),
+        restoreBackup: vi.fn(async () => {
+          instances = [instanceB];
+          return { instance: instanceB, keptFolder: instanceA.url };
+        }),
+      }),
+    );
+    fireEvent.click(await screen.findByRole("link", { name: "Preferences" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Restore previous version" }));
+    expect(await screen.findByRole("heading", { name: "Decks" })).toBeInTheDocument();
+    const notice = await screen.findByText(/Solid Memo deleted its own data and kept/);
+    expect(within(notice).getByRole("link")).toHaveAttribute("href", instanceA.url);
     vi.unstubAllGlobals();
   });
 

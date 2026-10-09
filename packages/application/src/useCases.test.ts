@@ -118,7 +118,8 @@ function makeDeps() {
     })),
     createInstance: vi.fn(async () => instance),
     attachInstance: vi.fn(async () => instance),
-    deleteInstance: vi.fn(async () => undefined),
+    deleteInstance: vi.fn(async () => ({ keptFolder: null })),
+    deleteInstanceData: vi.fn(async () => ({ keptFolder: null })),
     readMeta: vi.fn(async () => null),
     saveMeta: vi.fn(async () => undefined),
     registerCatalog: vi.fn(async () => undefined),
@@ -706,10 +707,11 @@ describe("createUseCases", () => {
     });
   });
 
-  it("deleteInstance passes the WebID and the instance", async () => {
+  it("deleteInstance passes the WebID and the instance, and says what it kept", async () => {
     const deps = makeDeps();
+    vi.mocked(deps.instanceRepository.deleteInstance).mockResolvedValue({ keptFolder: instance.url });
     const useCases = createUseCases(deps);
-    await useCases.deleteInstance(session, instance);
+    await expect(useCases.deleteInstance(session, instance)).resolves.toEqual({ keptFolder: instance.url });
     expect(deps.instanceRepository.deleteInstance).toHaveBeenCalledWith({
       webId: session.webId,
       instance,
@@ -1230,52 +1232,101 @@ describe("createUseCases", () => {
         replacedAt: "2026-09-28T10:00:00.000Z",
       };
 
-      it("is read from what the instance replaces, and forgotten once it is gone", async () => {
+      const backupMeta = { name: "Main", createdAt: meta.createdAt, formatVersion: 1 };
+      const forgotten = { name: "Main", createdAt: meta.createdAt, formatVersion: 2 };
+      /** The updated instance's meta, and the backup's (null when its meta document is gone). */
+      function metas(deps: ReturnType<typeof makeDeps>, updatedMeta: typeof meta | Omit<typeof meta, "replacedAt">, backup: typeof backupMeta | null) {
+        vi.mocked(deps.instanceRepository.readMeta).mockImplementation(async (url) =>
+          url === COPY ? updatedMeta : backup,
+        );
+      }
+
+      it("is read from what the instance replaces, and forgotten once its meta document is gone", async () => {
         const deps = makeDeps();
         const useCases = createUseCases(deps);
         await expect(useCases.readBackup(updated)).resolves.toBeNull();
-        vi.mocked(deps.instanceRepository.readMeta).mockResolvedValue(meta);
-        vi.mocked(deps.instanceCopier.ensureAbsent).mockRejectedValueOnce(new Error("exists"));
+        metas(deps, meta, backupMeta);
         await expect(useCases.readBackup(updated)).resolves.toEqual({ url: instance.url, replacedAt: meta.replacedAt });
         const { replacedAt: _r, ...undated } = meta;
-        vi.mocked(deps.instanceRepository.readMeta).mockResolvedValue(undated);
-        vi.mocked(deps.instanceCopier.ensureAbsent).mockRejectedValueOnce(new Error("exists"));
+        metas(deps, undated, backupMeta);
         await expect(useCases.readBackup(updated)).resolves.toEqual({ url: instance.url });
-        await expect(useCases.readBackup(updated)).resolves.toBeNull();
-        expect(deps.instanceRepository.saveMeta).toHaveBeenCalledWith(COPY, {
-          name: "Main",
-          createdAt: meta.createdAt,
-          formatVersion: 2,
+        expect(deps.instanceRepository.saveMeta).not.toHaveBeenCalled();
+        // A pod that cannot say leaves the backup offered.
+        vi.mocked(deps.instanceRepository.readMeta).mockImplementation(async (url) => {
+          if (url === COPY) return meta;
+          throw new Error("503");
         });
+        await expect(useCases.readBackup(updated)).resolves.toEqual({ url: instance.url, replacedAt: meta.replacedAt });
+        // The folder may still be there, kept for another app's files: without its meta document it is no backup.
+        metas(deps, meta, null);
+        await expect(useCases.readBackup(updated)).resolves.toBeNull();
+        expect(deps.instanceRepository.saveMeta).toHaveBeenCalledWith(COPY, forgotten);
       });
 
-      it("is restored by switching back to it, then deleting the updated instance", async () => {
+      it("is restored by switching back to it, then deleting what the updated instance holds of Solid Memo's", async () => {
         const deps = makeDeps();
-        vi.mocked(deps.instanceRepository.readMeta).mockResolvedValue(meta);
-        await expect(createUseCases(deps).restoreBackup(session, updated)).resolves.toEqual(instance);
+        metas(deps, meta, backupMeta);
+        vi.mocked(deps.instanceRepository.deleteInstanceData).mockImplementation(async () => {
+          // The switch comes first: the deletion never leaves the instance registered nowhere.
+          expect(deps.instanceRepository.switchInstance).toHaveBeenCalled();
+          return { keptFolder: COPY };
+        });
+        await expect(createUseCases(deps).restoreBackup(session, updated)).resolves.toEqual({ instance, keptFolder: COPY });
         expect(deps.instanceRepository.switchInstance).toHaveBeenCalledWith({
           webId: session.webId,
           from: COPY,
           to: instance.url,
           title: "Main",
         });
-        expect(deps.instanceCopier.deleteRecursively).toHaveBeenCalledWith(COPY);
+        expect(deps.instanceRepository.deleteInstanceData).toHaveBeenCalledWith(COPY);
+        expect(deps.instanceCopier.deleteRecursively).not.toHaveBeenCalled();
         vi.mocked(deps.instanceRepository.readMeta).mockResolvedValue(null);
         await expect(createUseCases(deps).restoreBackup(session, updated)).rejects.toThrow("Main has no backup to restore.");
       });
 
-      it("is deleted, then forgotten; with none, nothing happens", async () => {
+      it("is not restored once its data is gone, so the updated instance's data stays", async () => {
         const deps = makeDeps();
-        await createUseCases(deps).deleteBackup(updated);
-        expect(deps.instanceCopier.deleteRecursively).not.toHaveBeenCalled();
-        vi.mocked(deps.instanceRepository.readMeta).mockResolvedValue(meta);
-        await createUseCases(deps).deleteBackup(updated);
-        expect(deps.instanceCopier.deleteRecursively).toHaveBeenCalledWith(instance.url);
-        expect(deps.instanceRepository.saveMeta).toHaveBeenCalledWith(COPY, {
-          name: "Main",
-          createdAt: meta.createdAt,
-          formatVersion: 2,
+        metas(deps, meta, null);
+        await expect(createUseCases(deps).restoreBackup(session, updated)).rejects.toThrow("Main has no backup to restore.");
+        expect(deps.instanceRepository.switchInstance).not.toHaveBeenCalled();
+        expect(deps.instanceRepository.deleteInstanceData).not.toHaveBeenCalled();
+        expect(deps.instanceRepository.saveMeta).toHaveBeenCalledWith(COPY, forgotten);
+      });
+
+      it("is deleted after it is forgotten, what it holds of Solid Memo's; with none, nothing happens", async () => {
+        const deps = makeDeps();
+        await expect(createUseCases(deps).deleteBackup(updated)).resolves.toEqual({ keptFolder: null });
+        expect(deps.instanceRepository.deleteInstanceData).not.toHaveBeenCalled();
+        metas(deps, meta, backupMeta);
+        vi.mocked(deps.instanceRepository.deleteInstanceData).mockImplementation(async () => {
+          expect(deps.instanceRepository.saveMeta).toHaveBeenCalledWith(COPY, forgotten);
+          return { keptFolder: instance.url };
         });
+        await expect(createUseCases(deps).deleteBackup(updated)).resolves.toEqual({ keptFolder: instance.url });
+        expect(deps.instanceRepository.deleteInstanceData).toHaveBeenCalledWith(instance.url);
+        expect(deps.instanceCopier.deleteRecursively).not.toHaveBeenCalled();
+      });
+
+      it("deletes nothing when it cannot be forgotten, and is never offered again once its deletion was cut off", async () => {
+        const deps = makeDeps();
+        const useCases = createUseCases(deps);
+        metas(deps, meta, backupMeta);
+        vi.mocked(deps.instanceRepository.saveMeta).mockRejectedValueOnce(new Error("412"));
+        await expect(useCases.deleteBackup(updated)).rejects.toThrow("412");
+        expect(deps.instanceRepository.deleteInstanceData).not.toHaveBeenCalled();
+
+        // Forgotten, then the deletion fails half-way: the updated instance no longer names a backup.
+        let current: typeof meta | typeof forgotten = meta;
+        vi.mocked(deps.instanceRepository.readMeta).mockImplementation(async (url) => (url === COPY ? current : backupMeta));
+        vi.mocked(deps.instanceRepository.saveMeta).mockImplementation(async (_url, saved) => {
+          current = saved as typeof forgotten;
+        });
+        vi.mocked(deps.instanceRepository.deleteInstanceData).mockRejectedValueOnce(new Error("500"));
+        await expect(useCases.deleteBackup(updated)).rejects.toThrow("500");
+        await expect(useCases.readBackup(updated)).resolves.toBeNull();
+        await expect(useCases.restoreBackup(session, updated)).rejects.toThrow("Main has no backup to restore.");
+        expect(deps.instanceRepository.switchInstance).not.toHaveBeenCalled();
+        expect(deps.instanceRepository.deleteInstanceData).toHaveBeenCalledOnce();
       });
     });
   });
@@ -2687,6 +2738,7 @@ describe("library deck upgrade", () => {
       const { deps, guestPod } = guestDeps();
       vi.mocked(deps.instanceRepository.deleteInstance).mockImplementation(async () => {
         vi.mocked(deps.instanceRepository.listInstances).mockResolvedValue([]);
+        return { keptFolder: null };
       });
       await createUseCases(deps).transferGuestStudy(session, guestInstance, { containerUrl: TARGET, registrationTarget: "public" });
       expect(guestPod.discard).toHaveBeenCalledOnce();

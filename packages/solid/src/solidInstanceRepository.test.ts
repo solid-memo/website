@@ -3,13 +3,11 @@ import {
   buildThing,
   createThing,
   deleteContainer,
-  deleteFile,
   deleteSolidDataset,
   getInteger,
   getSolidDataset,
   getStringNoLocale,
   getThing,
-  mockContainerFrom,
   mockSolidDatasetFrom,
   saveSolidDatasetAt,
   setThing,
@@ -26,6 +24,7 @@ import {
   switchInstanceRegistrations,
 } from "./typeIndex";
 import { DCTERMS, SM } from "./vocab";
+import { deleteInstanceData } from "./instanceData";
 
 vi.mock("@inrupt/solid-client", async (importOriginal) => {
   const actual =
@@ -36,10 +35,10 @@ vi.mock("@inrupt/solid-client", async (importOriginal) => {
     saveSolidDatasetAt: vi.fn(),
     deleteSolidDataset: vi.fn(),
     deleteContainer: vi.fn(),
-    deleteFile: vi.fn(),
   };
 });
 vi.mock("./typeIndex");
+vi.mock("./instanceData");
 
 const WEBID = "https://alice.example/profile/card#me";
 const PRIVATE_INDEX = "https://alice.example/settings/privateTypeIndex.ttl";
@@ -59,7 +58,6 @@ beforeEach(() => {
   vi.mocked(saveSolidDatasetAt).mockReset();
   vi.mocked(deleteSolidDataset).mockReset();
   vi.mocked(deleteContainer).mockReset();
-  vi.mocked(deleteFile).mockReset();
   vi.mocked(locateTypeIndexes).mockReset();
   vi.mocked(ensureTypeIndex).mockReset();
   vi.mocked(readInstanceRegistrations).mockReset();
@@ -67,6 +65,7 @@ beforeEach(() => {
   vi.mocked(addCatalogRegistration).mockReset();
   vi.mocked(switchInstanceRegistrations).mockReset();
   vi.mocked(removeInstanceRegistrations).mockReset();
+  vi.mocked(deleteInstanceData).mockReset();
 });
 
 describe("listInstances", () => {
@@ -353,112 +352,56 @@ describe("attachInstance", () => {
 });
 
 describe("deleteInstance", () => {
-  const instance = { url: CONTAINER, name: "Main" };
+  const instance = { url: "https://alice.example/solid-memo/main", name: "Main" };
 
-  /** A container dataset listing `children` via ldp:contains. */
-  function containerDataset(url: string, children: string[]) {
-    let thing = buildThing(createThing({ url }));
-    for (const child of children) {
-      thing = thing.addIri("http://www.w3.org/ns/ldp#contains", child);
-    }
-    return setThing(mockContainerFrom(url), thing.build());
-  }
-
-  function notFound() {
-    return Object.assign(new Error("404"), { statusCode: 404 });
-  }
-
-  /** Record every delete (file or container) in the order it was made. */
-  function recordDeletions(): string[] {
-    const log: string[] = [];
-    vi.mocked(deleteFile).mockImplementation((async (url: string) => {
-      log.push(url);
-    }) as never);
-    vi.mocked(deleteContainer).mockImplementation((async (url: string) => {
-      log.push(url);
-    }) as never);
-    return log;
-  }
-
-  it("deletes the container contents depth-first, meta.ttl last, then unregisters", async () => {
-    const datasets: Record<string, SolidDataset> = {
-      [CONTAINER]: containerDataset(CONTAINER, [
-        `${CONTAINER}meta.ttl`,
-        `${CONTAINER}catalog.ttl`,
-        `${CONTAINER}decks/`,
-        `${CONTAINER}reviews/`,
-      ]),
-      [`${CONTAINER}decks/`]: containerDataset(`${CONTAINER}decks/`, [
-        `${CONTAINER}decks/deck-1.ttl`,
-      ]),
-      [`${CONTAINER}reviews/`]: containerDataset(`${CONTAINER}reviews/`, []),
-    };
-    vi.mocked(getSolidDataset).mockImplementation((async (url: string) => {
-      const dataset = datasets[url];
-      if (dataset === undefined) throw notFound();
-      return dataset;
-    }) as never);
+  it("deletes the instance's data, then unregisters it from both indexes, saying what it kept", async () => {
+    const order: string[] = [];
+    vi.mocked(deleteInstanceData).mockImplementation(async (url) => {
+      order.push(`data ${url}`);
+      return { keptFolder: CONTAINER };
+    });
+    vi.mocked(removeInstanceRegistrations).mockImplementation(async (index) => {
+      order.push(`unregister ${index}`);
+    });
     vi.mocked(locateTypeIndexes).mockResolvedValue({
       privateIndexUrl: PRIVATE_INDEX,
       publicIndexUrl: PUBLIC_INDEX,
     });
-    const deletions = recordDeletions();
 
-    await makeRepository().deleteInstance({ webId: WEBID, instance });
+    await expect(makeRepository().deleteInstance({ webId: WEBID, instance })).resolves.toEqual({ keptFolder: CONTAINER });
 
-    expect(deletions).toEqual([
-      `${CONTAINER}catalog.ttl`,
-      `${CONTAINER}decks/deck-1.ttl`,
-      `${CONTAINER}decks/`,
-      `${CONTAINER}reviews/`,
-      `${CONTAINER}meta.ttl`,
-      CONTAINER,
-    ]);
-    expect(removeInstanceRegistrations).toHaveBeenCalledTimes(2);
-    expect(removeInstanceRegistrations).toHaveBeenCalledWith(
-      PRIVATE_INDEX,
-      CONTAINER,
-      expect.anything(),
-    );
-    expect(removeInstanceRegistrations).toHaveBeenCalledWith(
-      PUBLIC_INDEX,
-      CONTAINER,
-      expect.anything(),
-    );
+    expect(order).toEqual([`data ${CONTAINER}`, `unregister ${PRIVATE_INDEX}`, `unregister ${PUBLIC_INDEX}`]);
+    expect(removeInstanceRegistrations).toHaveBeenCalledWith(PRIVATE_INDEX, CONTAINER, expect.anything());
   });
 
-  it("still unregisters a container that is already gone", async () => {
-    vi.mocked(getSolidDataset).mockRejectedValue(notFound());
+  it("unregisters it from the one index there is", async () => {
+    vi.mocked(deleteInstanceData).mockResolvedValue({ keptFolder: null });
     vi.mocked(locateTypeIndexes).mockResolvedValue({
-      privateIndexUrl: PRIVATE_INDEX,
-      publicIndexUrl: null,
+      privateIndexUrl: null,
+      publicIndexUrl: PUBLIC_INDEX,
     });
 
-    await makeRepository().deleteInstance({
-      webId: WEBID,
-      instance: { url: "https://alice.example/solid-memo/main", name: "Main" },
-    });
+    await expect(makeRepository().deleteInstance({ webId: WEBID, instance })).resolves.toEqual({ keptFolder: null });
 
-    expect(deleteContainer).not.toHaveBeenCalled();
     expect(removeInstanceRegistrations).toHaveBeenCalledOnce();
-    expect(removeInstanceRegistrations).toHaveBeenCalledWith(
-      PRIVATE_INDEX,
-      CONTAINER,
-      expect.anything(),
-    );
+    expect(removeInstanceRegistrations).toHaveBeenCalledWith(PUBLIC_INDEX, CONTAINER, expect.anything());
   });
 
   it("keeps the registration when deleting the data fails", async () => {
-    vi.mocked(getSolidDataset).mockResolvedValue(
-      containerDataset(CONTAINER, [`${CONTAINER}catalog.ttl`]),
-    );
-    vi.mocked(deleteFile).mockRejectedValue(new Error("403"));
+    vi.mocked(deleteInstanceData).mockRejectedValue(new Error("403"));
 
-    await expect(
-      makeRepository().deleteInstance({ webId: WEBID, instance }),
-    ).rejects.toThrow("403");
+    await expect(makeRepository().deleteInstance({ webId: WEBID, instance })).rejects.toThrow("403");
 
-    expect(deleteContainer).not.toHaveBeenCalled();
+    expect(removeInstanceRegistrations).not.toHaveBeenCalled();
+  });
+
+  it("deletes an instance's data alone, its registrations left as they are", async () => {
+    vi.mocked(deleteInstanceData).mockResolvedValue({ keptFolder: null });
+
+    await expect(makeRepository().deleteInstanceData(CONTAINER)).resolves.toEqual({ keptFolder: null });
+
+    expect(deleteInstanceData).toHaveBeenCalledWith(CONTAINER, expect.anything());
+    expect(locateTypeIndexes).not.toHaveBeenCalled();
     expect(removeInstanceRegistrations).not.toHaveBeenCalled();
   });
 });

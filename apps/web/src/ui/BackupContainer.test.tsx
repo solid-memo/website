@@ -39,7 +39,7 @@ describe("BackupContainer", () => {
     vi.stubGlobal("confirm", confirm);
     const useCases = makeUseCasesFake({
       readBackup: vi.fn(async () => ({ url: previous.url, replacedAt: "2026-09-28T10:00:00.000Z" })),
-      restoreBackup: vi.fn(async () => previous),
+      restoreBackup: vi.fn(async () => ({ instance: previous, keptFolder: instance.url })),
     });
     const { onRestored } = renderContainer(useCases);
     const section = await screen.findByRole("region", { name: "Previous version" });
@@ -48,7 +48,7 @@ describe("BackupContainer", () => {
     fireEvent.click(screen.getByRole("button", { name: "Restore previous version" }));
     expect(useCases.restoreBackup).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "Restore previous version" }));
-    await waitFor(() => expect(onRestored).toHaveBeenCalledWith(previous));
+    await waitFor(() => expect(onRestored).toHaveBeenCalledWith(previous, instance.url));
     expect(useCases.restoreBackup).toHaveBeenCalledWith(session, instance);
   });
 
@@ -56,8 +56,8 @@ describe("BackupContainer", () => {
     vi.stubGlobal("confirm", vi.fn(() => true));
     const useCases = makeUseCasesFake({
       readBackup: vi.fn(async () => ({ url: previous.url })),
-      restoreBackup: vi.fn(() => new Promise<Instance>(() => undefined)),
-      deleteBackup: vi.fn(() => new Promise<void>(() => undefined)),
+      restoreBackup: vi.fn(() => new Promise<never>(() => undefined)),
+      deleteBackup: vi.fn(() => new Promise<never>(() => undefined)),
     });
     renderContainer(useCases);
     fireEvent.click(await screen.findByRole("button", { name: "Restore previous version" }));
@@ -80,6 +80,7 @@ describe("BackupContainer", () => {
         .mockRejectedValueOnce(new Error("not allowed"))
         .mockImplementation(async () => {
           backup = null;
+          return { keptFolder: null };
         }),
     });
     const { container } = renderContainer(useCases);
@@ -92,6 +93,24 @@ describe("BackupContainer", () => {
     fireEvent.click(screen.getByRole("button", { name: "Delete backup" }));
     await waitFor(() => expect(container).toBeEmptyDOMElement());
     expect(useCases.deleteBackup).toHaveBeenCalledWith(instance);
+  });
+
+  it("says when deleting the backup kept its folder, which holds another app's files", async () => {
+    vi.stubGlobal("confirm", vi.fn(() => true));
+    let backup: { url: string } | null = { url: previous.url };
+    const useCases = makeUseCasesFake({
+      readBackup: vi.fn(async () => backup),
+      deleteBackup: vi.fn(async () => {
+        backup = null;
+        return { keptFolder: previous.url };
+      }),
+    });
+    renderContainer(useCases);
+    fireEvent.click(await screen.findByRole("button", { name: "Delete backup" }));
+    const notice = await screen.findByRole("status");
+    expect(notice).toHaveTextContent("Solid Memo deleted its own data and kept the folder in your Pod");
+    expect(within(notice).getByRole("link")).toHaveAttribute("href", previous.url);
+    expect(screen.queryByRole("region", { name: "Previous version" })).not.toBeInTheDocument();
   });
 
   it("speaks Swedish", async () => {

@@ -513,7 +513,7 @@
     "heading": "Choose a Solid Memo instance",
     "intro": "An instance is one collection of your decks and study, kept in a folder in your Pod. Most people need only one.",
     "empty": "No instances are registered yet.",
-    "deleteConfirm": "Delete the instance \"{name}\" and all its decks and cards? This cannot be undone.",
+    "deleteConfirm": "Delete the instance \"{name}\" and all its decks and cards? This cannot be undone. Files another app put in its folder are kept.",
     "deleteLabel": "Delete instance {name}",
     "delete": "Delete…",
     "newInstance": "New instance…",
@@ -521,6 +521,10 @@
     "attachUrl": "Instance container URL",
     "attach": "Attach",
     "deleted": "Deleted the instance \"{name}\"."
+  },
+  "keptFolder": {
+    "text": "Solid Memo deleted its own data and kept {link}: another app put files there.",
+    "folder": "the folder in your Pod"
   },
   "instanceUpdate": {
     "confirmRegion": "Start the update",

@@ -26,6 +26,8 @@ import {
 } from "@solid-memo/domain/deck";
 import type {
   Instance,
+  InstanceDeletion,
+  InstanceMeta,
   RegistrationOptions,
   RegistrationTarget,
 } from "@solid-memo/domain/instance";
@@ -247,8 +249,13 @@ export interface UseCases {
     instanceUrl: string,
     registrationTarget: RegistrationTarget,
   ): Promise<Instance>;
-  /** Permanently delete an instance and all its decks and cards. */
-  deleteInstance(session: Session, instance: Instance): Promise<void>;
+  /**
+   * Permanently delete an instance: all its decks and cards, and every
+   * other document Solid Memo wrote there, then its registrations. Its
+   * folder goes too unless it holds what another app put there, which is
+   * kept, and the result says so.
+   */
+  deleteInstance(session: Session, instance: Instance): Promise<InstanceDeletion>;
   listDecks(instanceUrl: string): Promise<Deck[]>;
   /**
    * A new deck by `title`: its name in every language it is given in,
@@ -393,10 +400,17 @@ export interface UseCases {
   removeInterruptedUpdate(instance: Instance): Promise<void>;
   /** The instance an update replaced, kept as a backup; null when there is none (any more). */
   readBackup(instance: Instance): Promise<{ url: string; replacedAt?: string } | null>;
-  /** Switch back to the backup, then delete the updated instance. Returns the backup. */
-  restoreBackup(session: Session, instance: Instance): Promise<Instance>;
-  /** Delete the backup, and forget it. */
-  deleteBackup(instance: Instance): Promise<void>;
+  /**
+   * Switch back to the backup, then delete the updated instance's data
+   * (its folder kept when it holds what another app put there). Returns
+   * the backup, and what the deletion kept.
+   */
+  restoreBackup(session: Session, instance: Instance): Promise<{ instance: Instance } & InstanceDeletion>;
+  /**
+   * Delete the backup's data (its folder kept when it holds what another
+   * app put there), and forget it.
+   */
+  deleteBackup(instance: Instance): Promise<InstanceDeletion>;
   /** Stored preferences overlaid on the defaults. */
   getPreferences(instanceUrl: string): Promise<StudyPreferences>;
   savePreferences(
@@ -1081,7 +1095,31 @@ export function createUseCases({
     }
   }
 
-  /** Delete a copy that failed half-way, when one was made; whether nothing is left of it. */
+  /**
+   * Whether the backup an instance replaces is gone: its meta document,
+   * deleted last of all it holds, is no longer there. A folder that is
+   * still there, kept for what another app put in it, is no backup. When
+   * the pod cannot say, the backup is taken to be there.
+   */
+  async function backupGone(backupUrl: string): Promise<boolean> {
+    return instanceRepository.readMeta(backupUrl).then(
+      (backup) => backup === null,
+      () => false,
+    );
+  }
+
+  /** Clear what an instance's meta says it replaces. */
+  async function forgetBackup(instanceUrl: string, meta: InstanceMeta): Promise<void> {
+    const { replaces: _replaces, replacedAt: _replacedAt, ...rest } = meta;
+    await instanceRepository.saveMeta(instanceUrl, rest);
+  }
+
+  /**
+   * Delete a copy that failed half-way, when one was made; whether nothing
+   * is left of it. Whole: the copy's container was free when this app
+   * created it, and nothing names it yet, so all it holds is this app's
+   * copies, the originals left where they were.
+   */
   async function removeCopy(source: string, target: string, created: boolean): Promise<boolean> {
     let cleanedUp = !created;
     if (created) {
@@ -1638,13 +1676,8 @@ export function createUseCases({
     async readBackup(instance) {
       const meta = await instanceRepository.readMeta(instance.url);
       if (meta?.replaces === undefined) return null;
-      const gone = await instanceCopier.ensureAbsent(meta.replaces).then(
-        () => true,
-        () => false,
-      );
-      if (gone) {
-        const { replaces: _replaces, replacedAt: _replacedAt, ...rest } = meta;
-        await instanceRepository.saveMeta(instance.url, rest);
+      if (await backupGone(meta.replaces)) {
+        await forgetBackup(instance.url, meta);
         return null;
       }
       return { url: meta.replaces, ...(meta.replacedAt === undefined ? {} : { replacedAt: meta.replacedAt }) };
@@ -1652,21 +1685,28 @@ export function createUseCases({
     async restoreBackup(session, instance) {
       const meta = await instanceRepository.readMeta(instance.url);
       if (meta?.replaces === undefined) throw new AppError("noBackup", { instance: instance.name });
+      // Never switch to a backup that is no longer whole: the deletion below would leave nothing.
+      if ((await instanceRepository.readMeta(meta.replaces)) === null) {
+        await forgetBackup(instance.url, meta);
+        throw new AppError("noBackup", { instance: instance.name });
+      }
       await instanceRepository.switchInstance({
         webId: session.webId,
         from: instance.url,
         to: meta.replaces,
         title: instance.name,
       });
-      await instanceCopier.deleteRecursively(instance.url);
-      return { url: meta.replaces, name: instance.name };
+      // The updated instance has been the one in use since the update: what else is in it now is not ours.
+      const { keptFolder } = await instanceRepository.deleteInstanceData(instance.url);
+      return { instance: { url: meta.replaces, name: instance.name }, keptFolder };
     },
     async deleteBackup(instance) {
       const meta = await instanceRepository.readMeta(instance.url);
-      if (meta?.replaces === undefined) return;
-      await instanceCopier.deleteRecursively(meta.replaces);
-      const { replaces: _replaces, replacedAt: _replacedAt, ...rest } = meta;
-      await instanceRepository.saveMeta(instance.url, rest);
+      if (meta?.replaces === undefined) return { keptFolder: null };
+      // Forgotten first: a deletion cut off half-way must not leave a backup that can still be restored.
+      await forgetBackup(instance.url, meta);
+      // The backup is the folder as it was, where other apps may have put files, and may still.
+      return instanceRepository.deleteInstanceData(meta.replaces);
     },
     getPreferences,
     savePreferences(instanceUrl, preferences) {

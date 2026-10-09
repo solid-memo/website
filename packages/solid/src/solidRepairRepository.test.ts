@@ -218,7 +218,10 @@ describe("applyRepairs", () => {
     expect(getUrlAll(getThing(saved(), `${CATALOG}#other`)!, DCAT.dataset)).toEqual([deck]);
   });
 
-  it("drops a catalogue's and a deck group's links to decks and groups the document does not describe", async () => {
+  // Another app's dataset, described in its own document.
+  const FOREIGN_DATASET = "https://pod.example/recipes/index.ttl#cookbook";
+
+  it("drops a catalogue's and a deck group's links to decks and groups the document does not describe, never one to another document", async () => {
     const group = (url: string) => buildThing(createThing({ url })).addIri(RDF.type, SM.DeckGroup).addIri(RDF.type, DCAT.Catalog);
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
       documentOf(
@@ -227,6 +230,7 @@ describe("applyRepairs", () => {
           .addIri(RDF.type, DCAT.Catalog)
           .addUrl(DCAT.dataset, `${CATALOG}#deck-1`)
           .addUrl(DCAT.dataset, `${CATALOG}#deck-old`)
+          .addUrl(DCAT.dataset, FOREIGN_DATASET)
           .addUrl(DCAT.catalog, `${CATALOG}#group-1`)
           .addUrl(DCAT.catalog, `${CATALOG}#group-gone`)
           .addUrl(DCAT.catalog, `${CATALOG}#group-old`)
@@ -250,7 +254,7 @@ describe("applyRepairs", () => {
       repair("drop-dangling-members", `${CATALOG}#group-1`, 1),
     ]);
     const catalog = getThing(saved(), `${CATALOG}#catalog`)!;
-    expect(getUrlAll(catalog, DCAT.dataset)).toEqual([`${CATALOG}#deck-1`, `${CATALOG}#deck-old`]);
+    expect(getUrlAll(catalog, DCAT.dataset)).toEqual([`${CATALOG}#deck-1`, `${CATALOG}#deck-old`, FOREIGN_DATASET]);
     expect(getUrlAll(catalog, DCAT.catalog)).toEqual([`${CATALOG}#group-1`, `${CATALOG}#group-old`]);
     const group1 = getThing(saved(), `${CATALOG}#group-1`)!;
     expect(getUrlAll(group1, DCAT.dataset)).toEqual([`${CATALOG}#deck-1`]);

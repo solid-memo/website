@@ -418,6 +418,41 @@ describe("the catalogue node", () => {
     expect(getUrlAll(getThing(dataset, `${CATALOG}#catalog`)!, DATASET)).toEqual([other.url]);
   });
 
+  it("keeps the datasets another app listed through every deck save, removal and catalogue write", () => {
+    const FOREIGN = "https://pod.example/recipes/index.ttl#cookbook";
+    const LOCAL = `${CATALOG}#their-dataset`;
+    let dataset = withCatalog(mockSolidDatasetFrom(CATALOG), CATALOG, catalog);
+    dataset = setThing(
+      dataset,
+      buildThing(getThing(dataset, `${CATALOG}#catalog`)!).addIri(DATASET, FOREIGN).addIri(DATASET, LOCAL).build(),
+    );
+    dataset = setThing(dataset, buildThing(createThing({ url: LOCAL })).addIri(RDF.type, DCAT.Dataset).build());
+    const listed = () => [...getUrlAll(getThing(dataset, `${CATALOG}#catalog`)!, DATASET)].sort();
+
+    dataset = withDeck(dataset, deck);
+    expect(listed()).toEqual([FOREIGN, LOCAL, deck.url].sort());
+    dataset = withDeck(dataset, { ...deck, title: { en: "Renamed" } });
+    expect(listed()).toEqual([FOREIGN, LOCAL, deck.url].sort());
+    dataset = withCatalog(dataset, CATALOG, { ...catalog, title: "Renamed" });
+    expect(listed()).toEqual([FOREIGN, LOCAL, deck.url].sort());
+    dataset = withoutDeck(dataset, deck);
+    expect(listed()).toEqual([FOREIGN, LOCAL].sort());
+  });
+
+  it("drops, when written whole, only a link to a subject of its own document that is no dataset", () => {
+    let dataset = withCatalog(withDeck(mockSolidDatasetFrom(CATALOG), deck), CATALOG, catalog);
+    dataset = setThing(
+      dataset,
+      buildThing(getThing(dataset, `${CATALOG}#catalog`)!).addIri(DATASET, `${CATALOG}#deck-gone`).build(),
+    );
+    // A deck save leaves it…
+    dataset = withDeck(dataset, deck);
+    expect(getUrlAll(getThing(dataset, `${CATALOG}#catalog`)!, DATASET)).toContain(`${CATALOG}#deck-gone`);
+    // …the catalogue, written whole and checked, cannot keep it.
+    dataset = withCatalog(dataset, CATALOG, catalog);
+    expect(getUrlAll(getThing(dataset, `${CATALOG}#catalog`)!, DATASET)).toEqual([deck.url]);
+  });
+
   it("names its publisher by the WebID when no agent node describes them", () => {
     const written = withCatalog(mockSolidDatasetFrom(CATALOG), CATALOG, catalog);
     const withoutAgent = setThing(
