@@ -5,7 +5,7 @@ Solid Memo Studio is a second app beside Solid Memo, at
 Later it is also where creators build decks and courses and publish
 them. For now it shows the decks of an instance in a table, changes
 several of them at once, arranges them into groups, and lists a deck's
-cards to search, filter, sort and select.
+cards to search, filter, sort, select and edit at once.
 
 ## What it shares with Solid Memo
 
@@ -167,10 +167,65 @@ rows, **x** selects one, and **Enter** opens it. They work wherever the
 focus is: from outside the table, **j** goes to the first row. The keys
 are left to the search and the filters while they have the focus.
 
+The selected cards can be edited at once ([below](#bulk-edits)).
+
 A card opens in Solid Memo's card editor (`../#/card?…`), for now. The
 workbench reads the cards and the review states with the same queries
 as Solid Memo, and the instance's preferences for today's study day.
 A time-budget test keeps a query over 5,000 cards fast.
+
+## Bulk edits
+
+The selected cards the query keeps can be edited at once, on any page
+([`CardBulkActions`](../apps/studio/src/ui/CardBulkActions.tsx)). A
+selected card the query hides stays selected, but is left alone. The
+edits are:
+
+- **Retire** and **Restore**. A retired card keeps its review state.
+- **Write in Markdown** and **Write as plain text**. Plain text is
+  written as `sm:plainText`, a choice of its own
+  ([markdown.md](markdown.md)).
+- **State language**: the language of the sides whose language is not
+  stated yet, both or one of them. The text stays as it is.
+- **Find and replace**
+  ([`FindReplaceDialog`](../apps/studio/src/ui/FindReplaceDialog.tsx)):
+  text as written (Markdown as its source), never a pattern. It looks in
+  the fields ticked (the front, the back, the notes, the label, the wrong
+  options and their notes), in one language or all, matching case and
+  whole words when asked. A preview lists every text it changes, before
+  and after, and every card it leaves as it is, and why. Nothing is
+  written until the user confirms.
+- **Delete**, with the cards' review states, once the user confirms.
+
+The domain plans each edit
+([cardBulk.ts](../packages/domain/src/cardBulk.ts), `planCardEdit`). A
+card it would change must pass the card editor's validation
+(`validateCardContent`), else it is left as it is. So is a card the
+edit does not change, and one whose side or wrong option a replace
+would leave empty. A note or a label left empty is removed, as in the
+card editor. Text whose language is not stated cannot be changed
+before its language is.
+
+The use case `editCards` plans the edit again on the cards as they are
+now. It writes it in one write of the cards document, made only if the
+document is still as read (If-Match, one PUT:
+[data-model.md](data-model.md#write-discipline)). Then it writes the
+review states of deleted cards in one write of the reviews document,
+and brings the deck's schedule in the digest up to date. When the cards
+document changed meanwhile, or was made since it was read as absent, it
+reads it and plans again, three times in all. Once that plan is not the
+one the user previewed, it stops with "changed elsewhere", and nothing
+is written. The deck's catalog entry
+is untouched, as when a card is saved in Solid Memo. The end-to-end
+tests hold this against real servers, a change made by another app
+during the edit included
+([cardEdits.integration.test.ts](../e2e/pod/src/cardEdits.integration.test.ts)).
+
+After an edit, the status line says what it did, and **Undo** undoes
+it: `undoCardEdit` writes the plan's inverse the same way, the deleted
+cards' review states included. It does so only while the cards are as
+the edit left them. The plan is kept in the page, never stored, so
+Undo goes with the next edit, another deck, or leaving the page.
 
 ## Groups
 

@@ -1394,6 +1394,103 @@
         "other": "{count} days"
       },
       "notStudied": "Not studied yet"
+    },
+    "cardBulk": {
+      "label": "Selected cards",
+      "retire": "Retire",
+      "restore": "Restore",
+      "markdownOn": "Write in Markdown",
+      "markdownOff": "Write as plain text",
+      "stateLanguage": "State language",
+      "findReplace": "Find and replace",
+      "remove": "Delete",
+      "removeConfirm": {
+        "one": "Delete {count} card and its progress? You can undo it until your next edit or until you leave this page.",
+        "other": "Delete {count} cards and their progress? You can undo it until your next edit or until you leave this page."
+      },
+      "nothing": "None of the selected cards would change.",
+      "tag": "Language code",
+      "side": "Of",
+      "sides": {
+        "both": "Both sides",
+        "front": "The front",
+        "back": "The back"
+      },
+      "stateHint": "Only a side whose language is not stated yet changes. Its text stays as it is.",
+      "find": "Find",
+      "replaceWith": "Replace with",
+      "fields": "In",
+      "lang": "In the language",
+      "caseSensitive": "Match case",
+      "wholeWord": "Whole words only",
+      "preview": "Preview",
+      "previewEmpty": "Type the text to find. Nothing changes until you confirm.",
+      "noChange": "None of the selected cards has this text.",
+      "changes": {
+        "one": "{count} card changes:",
+        "other": "{count} cards change:"
+      },
+      "skippedHeading": {
+        "one": "{count} card is left as it is:",
+        "other": "{count} cards are left as they are:"
+      },
+      "reasons": {
+        "missing": "it is no longer in the deck",
+        "unchanged": "nothing in it changes",
+        "wouldEmpty": "a side or a wrong option would be left empty",
+        "unstatedLanguage": "its text states no language; state it first",
+        "invalid": "the card is not valid as it is; fix it in the card editor"
+      },
+      "part": {
+        "front": "Front",
+        "back": "Back",
+        "frontNote": "Note under the front",
+        "backNote": "Note under the back",
+        "backLabel": "Label",
+        "distractor": "Wrong option",
+        "distractorNote": "Note of a wrong option"
+      },
+      "removed": "(removed)",
+      "confirmReplace": {
+        "one": "Replace in {count} card",
+        "other": "Replace in {count} cards"
+      },
+      "done": {
+        "retire": {
+          "one": "Retired {count} card.",
+          "other": "Retired {count} cards."
+        },
+        "restore": {
+          "one": "Restored {count} card.",
+          "other": "Restored {count} cards."
+        },
+        "remove": {
+          "one": "Deleted {count} card.",
+          "other": "Deleted {count} cards."
+        },
+        "replaceText": {
+          "one": "Replaced text in {count} card.",
+          "other": "Replaced text in {count} cards."
+        },
+        "markdownOn": {
+          "one": "Wrote {count} card in Markdown.",
+          "other": "Wrote {count} cards in Markdown."
+        },
+        "markdownOff": {
+          "one": "Wrote {count} card as plain text.",
+          "other": "Wrote {count} cards as plain text."
+        },
+        "stateLanguage": {
+          "one": "Stated the language of {count} card.",
+          "other": "Stated the language of {count} cards."
+        }
+      },
+      "skipped": {
+        "one": "{count} card was left as it was.",
+        "other": "{count} cards were left as they were."
+      },
+      "undo": "Undo",
+      "undone": "Undone: the cards are as they were."
     }
   }
 }

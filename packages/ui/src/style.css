@@ -1427,6 +1427,47 @@ table.studio-cards tbody td p {
   margin-bottom: 0.6rem;
 }
 
+.studio-bulk .studio-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 1rem 0.5rem 0;
+}
+
+.studio-bulk .studio-check input {
+  display: inline;
+  min-height: 0;
+  margin: 0;
+}
+
+.studio-bulk fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0 0 0.6rem;
+}
+
+.studio-preview {
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  overflow-wrap: anywhere;
+}
+
+.studio-preview h4 {
+  margin: 0 0 0.5rem;
+}
+
+.studio-preview del {
+  color: var(--text-muted);
+}
+
+.studio-preview ins {
+  text-decoration: none;
+  font-weight: 600;
+}
+
 .breadcrumbs ol {
   display: flex;
   flex-wrap: wrap;

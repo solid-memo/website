@@ -1394,6 +1394,103 @@
         "other": "{count}일"
       },
       "notStudied": "아직 학습하지 않음"
+    },
+    "cardBulk": {
+      "label": "선택한 카드",
+      "retire": "사용 중지",
+      "restore": "복원",
+      "markdownOn": "Markdown으로 쓰기",
+      "markdownOff": "일반 텍스트로 쓰기",
+      "stateLanguage": "언어 지정",
+      "findReplace": "찾아 바꾸기",
+      "remove": "삭제",
+      "removeConfirm": {
+        "one": "카드 {count}장과 진행 상황을 삭제할까요? 다음에 편집하거나 이 페이지를 떠나기 전까지는 되돌릴 수 있어요.",
+        "other": "카드 {count}장과 진행 상황을 삭제할까요? 다음에 편집하거나 이 페이지를 떠나기 전까지는 되돌릴 수 있어요."
+      },
+      "nothing": "선택한 카드 중 바뀌는 카드가 없어요.",
+      "tag": "언어 코드",
+      "side": "대상",
+      "sides": {
+        "both": "양면",
+        "front": "앞면",
+        "back": "뒷면"
+      },
+      "stateHint": "아직 언어가 지정되지 않은 면만 바뀌어요. 텍스트는 그대로 유지돼요.",
+      "find": "찾기",
+      "replaceWith": "바꿀 내용",
+      "fields": "범위",
+      "lang": "언어",
+      "caseSensitive": "대소문자 구분",
+      "wholeWord": "단어 단위로만",
+      "preview": "미리보기",
+      "previewEmpty": "찾을 텍스트를 입력해 주세요. 확인하기 전까지는 아무것도 바뀌지 않아요.",
+      "noChange": "선택한 카드 중 이 텍스트가 있는 카드가 없어요.",
+      "changes": {
+        "one": "바뀌는 카드 {count}장:",
+        "other": "바뀌는 카드 {count}장:"
+      },
+      "skippedHeading": {
+        "one": "그대로 두는 카드 {count}장:",
+        "other": "그대로 두는 카드 {count}장:"
+      },
+      "reasons": {
+        "missing": "더 이상 덱에 없어요",
+        "unchanged": "바뀌는 내용이 없어요",
+        "wouldEmpty": "면이나 오답 선택지가 비게 돼요",
+        "unstatedLanguage": "텍스트의 언어가 지정되지 않았어요. 먼저 언어를 지정해 주세요",
+        "invalid": "카드가 지금 상태로는 올바르지 않아요. 카드 편집기에서 고쳐 주세요"
+      },
+      "part": {
+        "front": "앞면",
+        "back": "뒷면",
+        "frontNote": "앞면 아래 메모",
+        "backNote": "뒷면 아래 메모",
+        "backLabel": "레이블",
+        "distractor": "오답 선택지",
+        "distractorNote": "오답 선택지의 메모"
+      },
+      "removed": "(삭제됨)",
+      "confirmReplace": {
+        "one": "카드 {count}장에서 바꾸기",
+        "other": "카드 {count}장에서 바꾸기"
+      },
+      "done": {
+        "retire": {
+          "one": "카드 {count}장을 사용 중지했어요.",
+          "other": "카드 {count}장을 사용 중지했어요."
+        },
+        "restore": {
+          "one": "카드 {count}장을 복원했어요.",
+          "other": "카드 {count}장을 복원했어요."
+        },
+        "remove": {
+          "one": "카드 {count}장을 삭제했어요.",
+          "other": "카드 {count}장을 삭제했어요."
+        },
+        "replaceText": {
+          "one": "카드 {count}장의 텍스트를 바꿨어요.",
+          "other": "카드 {count}장의 텍스트를 바꿨어요."
+        },
+        "markdownOn": {
+          "one": "카드 {count}장을 Markdown으로 썼어요.",
+          "other": "카드 {count}장을 Markdown으로 썼어요."
+        },
+        "markdownOff": {
+          "one": "카드 {count}장을 일반 텍스트로 썼어요.",
+          "other": "카드 {count}장을 일반 텍스트로 썼어요."
+        },
+        "stateLanguage": {
+          "one": "카드 {count}장의 언어를 지정했어요.",
+          "other": "카드 {count}장의 언어를 지정했어요."
+        }
+      },
+      "skipped": {
+        "one": "카드 {count}장은 그대로 두었어요.",
+        "other": "카드 {count}장은 그대로 두었어요."
+      },
+      "undo": "실행 취소",
+      "undone": "실행 취소했어요. 카드가 원래대로 돌아갔어요."
     }
   }
 }

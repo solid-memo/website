@@ -6,8 +6,8 @@ import { Screen } from "./Screen.ts";
  * Solid Memo Studio, at studio/ of the same site (docs/studio.md): its
  * landing page (the same login as Solid Memo's, under the Studio's name),
  * its instance picker, Home's table of decks (its filter, sort and bulk
- * actions), its Groups screen, the card workbench (its search, sort and
- * selection), and its way back to Solid Memo.
+ * actions), its Groups screen, the card workbench (its search, sort,
+ * selection and bulk edits, with their Undo), and its way back to Solid Memo.
  */
 export class Studio extends Screen {
   /** Home's table of the instance's decks ("The decks of {instance}"). */
@@ -196,6 +196,62 @@ export class Studio extends Screen {
       }
       await this.expectStatus(this.t("studio.cards.selected", { count }));
     });
+  }
+
+  /**
+   * Finds and replaces in the selected cards: the preview shows the text
+   * before and after, and the status line says how many cards changed
+   * once the user confirms.
+   */
+  async findAndReplace(find: string, replace: string, changes: number): Promise<void> {
+    await this.intent(`Replace ${find} with ${replace} in the selected cards`, async () => {
+      await this.cardBulk.getByRole("button", { name: this.t("studio.cardBulk.findReplace") }).click();
+      const form = this.page.getByRole("form", { name: this.t("studio.cardBulk.findReplace") });
+      await form.getByRole("textbox", { name: this.t("studio.cardBulk.find") }).fill(find);
+      await form.getByRole("textbox", { name: this.t("studio.cardBulk.replaceWith") }).fill(replace);
+      const preview = form.getByRole("region", { name: this.t("studio.cardBulk.preview") });
+      await expect(preview.getByText(this.t("studio.cardBulk.changes", { count: changes }))).toBeVisible();
+      await expect(preview.locator("del").first()).toHaveText(find);
+      await expect(preview.locator("ins").first()).toHaveText(replace);
+      await form.getByRole("button", { name: this.t("studio.cardBulk.confirmReplace", { count: changes }) }).click();
+      await this.expectStatus(this.t("studio.cardBulk.done.replaceText", { count: changes }));
+    });
+  }
+
+  /** The workbench shows the card of this front with this back. */
+  async expectBack(deck: string, front: string, back: string): Promise<void> {
+    await this.intent(`See ${front}'s back as ${back}`, async () => {
+      const row = this.cards(deck).getByRole("row").filter({ has: this.page.getByRole("rowheader", { name: front, exact: true }) });
+      await expect(row.getByRole("cell").nth(1)).toHaveText(back);
+    });
+  }
+
+  /** Retires the selected cards: they say so in the table. */
+  async retireSelectedCards(deck: string, fronts: string[]): Promise<void> {
+    await this.intent(`Retire ${fronts.join(", ")}`, async () => {
+      await this.cardBulk.getByRole("button", { name: this.t("studio.cardBulk.retire") }).click();
+      await this.expectStatus(this.t("studio.cardBulk.done.retire", { count: fronts.length }));
+      const tag = this.t("retiredCards.tag");
+      for (const front of fronts) {
+        await expect(this.cards(deck).getByRole("rowheader").filter({ hasText: front }).filter({ hasText: tag })).toHaveCount(1);
+      }
+    });
+  }
+
+  /** Undoes the last edit of the cards: the cards are as they were, the fronts named in use again. */
+  async undoCardEdit(deck: string, fronts: string[]): Promise<void> {
+    await this.intent("Undo the last edit of the cards", async () => {
+      await this.page.getByRole("button", { name: this.t("studio.cardBulk.undo") }).click();
+      await this.expectStatus(this.t("studio.cardBulk.undone"));
+      for (const front of fronts) {
+        await expect(this.cards(deck).getByRole("rowheader", { name: front, exact: true })).toBeVisible();
+      }
+    });
+  }
+
+  /** What can be done with the selected cards. */
+  private get cardBulk(): Locator {
+    return this.page.getByRole("group", { name: this.t("studio.cardBulk.label") });
   }
 
   /** What can be done with the selected decks. */

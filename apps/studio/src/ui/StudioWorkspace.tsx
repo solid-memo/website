@@ -123,6 +123,8 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
           learnerApp(routeToHash({ screen: "card", instanceUrl: activeInstance!.url, deckUrl: route.deckUrl, cardUrl: card.url }));
         return (
           <CardWorkbenchContainer
+            // Another deck's cards: a new page, its selection and its Undo gone.
+            key={route.deckUrl}
             useCases={useCases}
             instance={activeInstance!}
             deck={activeDeck!}

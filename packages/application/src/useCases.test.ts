@@ -39,6 +39,7 @@ import {
 } from "@solid-memo/domain/deckUpgrade";
 import type { LibraryCard } from "@solid-memo/domain/library";
 import type { CourseOutline } from "@solid-memo/domain/course";
+import { planCardEdit } from "@solid-memo/domain/cardBulk";
 import type { Locale } from "@solid-memo/domain/locale";
 
 const session: Session = { webId: "https://alice.example/profile/card#me" };
@@ -674,6 +675,158 @@ describe("createUseCases", () => {
       );
       const useCases = createUseCases(deps);
       await expect(useCases.stateCardLanguages(deck, { front: "ja" })).rejects.toMatchObject({ code: "changedElsewhere" });
+    });
+  });
+
+  describe("editCards and undoCardEdit", () => {
+    const tagged = (id: string, extra: Partial<Card> = {}): Card => ({
+      ...card,
+      id,
+      url: `${deck.cardsDocumentUrl}#${id}`,
+      front: { en: id },
+      back: { sv: id },
+      ...extra,
+    });
+    const one = tagged("one");
+    const two = tagged("two");
+    const reviewed: ReviewState = {
+      cardId: "one",
+      direction: "front-to-back",
+      easeFactor: 2.5,
+      intervalDays: 1,
+      repetitions: 1,
+      due: "2026-09-27",
+      firstReviewedAt: "2026-09-26T10:00:00.000Z",
+      lastReviewedAt: "2026-09-26T10:00:00.000Z",
+      formatVersion: 2,
+    };
+    const changed = () => new AppError("changedElsewhere", { url: deck.cardsDocumentUrl });
+
+    /** A deck of the two cards, its cards document at version "v1" (then v2, v3…, as it is read again). */
+    function setup(cards: Card[] = [one, two]) {
+      const deps = makeDeps();
+      let version = 0;
+      vi.mocked(deps.deckRepository.readCardsSince).mockImplementation(async () => ({
+        unchanged: false as const,
+        value: cards,
+        version: `v${++version}`,
+      }));
+      vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue([reviewed]);
+      return { deps, useCases: createUseCases(deps) };
+    }
+
+    it("writes the edit previewed in one write of the cards document, at the version it was planned on, then refreshes the digest", async () => {
+      const { deps, useCases } = setup();
+      const previewed = planCardEdit([one, two], ["one", "two"], { kind: "retire" });
+      const written = await useCases.editCards(instance.url, deck, ["one", "two"], { kind: "retire" }, previewed);
+      expect(written.save.map((saved) => saved.retired)).toEqual([true, true]);
+      expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledOnce();
+      expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledWith(deck, { save: written.save, remove: [] }, { whole: true, version: "v1" });
+      expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
+      // The digest's refresh reads the reviews document as it is now.
+      expect(deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledWith(deck, undefined);
+    });
+
+    it("writes the edit whole and unchecked where the pod gave the cards document no version", async () => {
+      const { deps, useCases } = setup();
+      vi.mocked(deps.deckRepository.readCardsSince).mockResolvedValue({ unchanged: false, value: [one, two], version: null });
+      const previewed = planCardEdit([one, two], ["one"], { kind: "retire" });
+      const written = await useCases.editCards(instance.url, deck, ["one"], { kind: "retire" }, previewed);
+      expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledWith(deck, { save: written.save, remove: [] }, { whole: true });
+    });
+
+    it("removes cards and their review states, one write each, and undoes that, the states written back", async () => {
+      const { deps, useCases } = setup();
+      const edit = { kind: "remove" } as const;
+      const previewed = planCardEdit([one, two], ["one"], edit);
+      const written = await useCases.editCards(instance.url, deck, ["one"], edit, previewed);
+      expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledWith(deck, { save: [], remove: ["one"] }, { whole: true, version: "v1" });
+      expect(deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledWith(deck, {
+        save: [],
+        remove: [
+          { cardId: "one", direction: "front-to-back" },
+          { cardId: "one", direction: "back-to-front" },
+        ],
+      });
+      expect(written.inverse.reviewSaves).toEqual([reviewed]);
+
+      const after = setup([two]);
+      await after.useCases.undoCardEdit(instance.url, deck, written);
+      expect(after.deps.deckRepository.applyCardChanges).toHaveBeenCalledWith(deck, { save: [one], remove: [] }, { whole: true, version: "v1" });
+      expect(after.deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledWith(deck, { save: [reviewed], remove: [] });
+    });
+
+    it("writes nothing when the edit changes no card", async () => {
+      const { deps, useCases } = setup();
+      const edit = { kind: "restore" } as const;
+      await useCases.editCards(instance.url, deck, ["one"], edit, planCardEdit([one, two], ["one"], edit));
+      expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
+      expect(deps.reviewStateRepository.readReviewStatesSince).not.toHaveBeenCalled();
+    });
+
+    it("plans the edit again on a cards document changed meanwhile, and writes it while it is the one previewed", async () => {
+      const { deps, useCases } = setup();
+      vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValueOnce(changed());
+      const edit = { kind: "retire" } as const;
+      await useCases.editCards(instance.url, deck, ["one"], edit, planCardEdit([one, two], ["one"], edit));
+      expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledTimes(2);
+      expect(deps.deckRepository.applyCardChanges).toHaveBeenLastCalledWith(deck, expect.anything(), { whole: true, version: "v2" });
+    });
+
+    it("plans the edit again on a cards document made since it was read as absent", async () => {
+      const { deps, useCases } = setup();
+      vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValueOnce(new AppError("createdElsewhere", { url: deck.cardsDocumentUrl }));
+      const edit = { kind: "retire" } as const;
+      await useCases.editCards(instance.url, deck, ["one"], edit, planCardEdit([one, two], ["one"], edit));
+      expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledTimes(2);
+      expect(deps.deckRepository.applyCardChanges).toHaveBeenLastCalledWith(deck, expect.anything(), { whole: true, version: "v2" });
+    });
+
+    it("gives up after three attempts on a cards document that keeps changing", async () => {
+      const { deps, useCases } = setup();
+      vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValue(changed());
+      const edit = { kind: "retire" } as const;
+      await expect(useCases.editCards(instance.url, deck, ["one"], edit, planCardEdit([one, two], ["one"], edit))).rejects.toMatchObject({
+        code: "changedElsewhere",
+      });
+      expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledTimes(3);
+    });
+
+    it("stops, writing nothing, once the edit planned again is not the one previewed", async () => {
+      const { deps, useCases } = setup([tagged("one", { front: { en: "edited elsewhere" } }), two]);
+      const edit = { kind: "retire" } as const;
+      await expect(useCases.editCards(instance.url, deck, ["one"], edit, planCardEdit([one, two], ["one"], edit))).rejects.toMatchObject({
+        code: "changedElsewhere",
+      });
+      expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
+    });
+
+    it("passes on any other failure at once", async () => {
+      const { deps, useCases } = setup();
+      vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValue(new Error("offline"));
+      const edit = { kind: "retire" } as const;
+      await expect(useCases.editCards(instance.url, deck, ["one"], edit, planCardEdit([one, two], ["one"], edit))).rejects.toThrow("offline");
+      expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledOnce();
+    });
+
+    it("keeps an edit made when the digest cannot be refreshed", async () => {
+      const { deps, useCases } = setup();
+      vi.mocked(deps.reviewStateRepository.readReviewStatesSince).mockRejectedValue(new Error("offline"));
+      const edit = { kind: "retire" } as const;
+      await expect(useCases.editCards(instance.url, deck, ["one"], edit, planCardEdit([one, two], ["one"], edit))).resolves.toMatchObject({
+        save: [expect.objectContaining({ id: "one", retired: true })],
+      });
+    });
+
+    it("undoes an edit only while the cards are as it left them", async () => {
+      const edit = { kind: "retire" } as const;
+      const plan = planCardEdit([one, two], ["one"], edit);
+      const { deps, useCases } = setup([tagged("one", { retired: true, front: { en: "edited elsewhere" } }), two]);
+      await expect(useCases.undoCardEdit(instance.url, deck, plan)).rejects.toMatchObject({ code: "changedElsewhere" });
+      expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
+      const asLeft = setup([plan.save[0]!, two]);
+      await asLeft.useCases.undoCardEdit(instance.url, deck, plan);
+      expect(asLeft.deps.deckRepository.applyCardChanges).toHaveBeenCalledWith(deck, { save: [one], remove: [] }, { whole: true, version: "v1" });
     });
   });
 

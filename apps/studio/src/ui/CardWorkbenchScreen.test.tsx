@@ -1,7 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { useState } from "preact/hooks";
-import { fireEvent, render, screen, within } from "@testing-library/preact";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { SM } from "@solid-memo/vocab/vocab.generated";
+import { planCardEdit } from "@solid-memo/domain/cardBulk";
 import { DEFAULT_CARD_QUERY, type CardQuery, type CardRow } from "@solid-memo/domain/cardQuery";
 import { CardWorkbenchScreen } from "./CardWorkbenchScreen";
 import { choose } from "../test/choose";
@@ -37,6 +38,13 @@ function Harness({ initial = DEFAULT_CARD_QUERY, onQuery, ...overrides }: Partia
       }}
       cardHref={(card) => `../#/card?card=${card.id}`}
       onOpen={() => undefined}
+      plan={(ids, edit) => planCardEdit(rows.map((row) => row.card), ids, edit)}
+      onEdit={async () => true}
+      lastEdit={null}
+      undone={false}
+      onUndo={() => undefined}
+      busy={false}
+      error={null}
       {...overrides}
     />
   );
@@ -243,5 +251,52 @@ describe("CardWorkbenchScreen", () => {
     key(screen.getByRole("heading", { level: 2 }), "j", { ctrlKey: true });
     key(screen.getByRole("heading", { level: 2 }), "q");
     expect(document.activeElement).not.toBe(link("水"));
+  });
+
+  it("edits the selected cards the query keeps, deleted ones leaving the selection", async () => {
+    vi.stubGlobal("confirm", () => true);
+    const onEdit = vi.fn(async () => true);
+    render(<Harness onEdit={onEdit} />);
+    expect(screen.queryByRole("group", { name: "Selected cards" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Select 木" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "Select 水" }));
+    const bulk = screen.getByRole("group", { name: "Selected cards" });
+    fireEvent.click(within(bulk).getByRole("button", { name: "Retire" }));
+    // In the table's order.
+    expect(onEdit).toHaveBeenCalledWith(["water", "tree"], { kind: "retire" }, expect.objectContaining({ inverse: expect.anything() }));
+    fireEvent.click(within(bulk).getByRole("button", { name: "Delete" }));
+    await waitFor(() => expect(screen.getAllByRole("status")[0]).toHaveTextContent("0 cards selected"));
+    vi.unstubAllGlobals();
+  });
+
+  it("keeps the selection when a deletion fails", async () => {
+    vi.stubGlobal("confirm", () => true);
+    const onEdit = vi.fn(async () => false);
+    render(<Harness onEdit={onEdit} />);
+    fireEvent.click(screen.getByRole("checkbox", { name: "Select 木" }));
+    fireEvent.click(within(screen.getByRole("group", { name: "Selected cards" })).getByRole("button", { name: "Delete" }));
+    await waitFor(() => expect(onEdit).toHaveBeenCalled());
+    expect(screen.getAllByRole("status")[0]).toHaveTextContent("1 card selected");
+    vi.unstubAllGlobals();
+  });
+
+  it("says what the last edit did, and undoes it", () => {
+    const onUndo = vi.fn();
+    const plan = planCardEdit([water, fire], ["water", "fire"], { kind: "setTextFormat", markdown: false });
+    const { rerender } = render(<Harness lastEdit={{ edit: { kind: "setTextFormat", markdown: false }, plan }} onUndo={onUndo} />);
+    expect(screen.getByText("Wrote 1 card as plain text. 1 card was left as it was.")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Undo" }));
+    expect(onUndo).toHaveBeenCalled();
+    const markdown = planCardEdit([water, fire], ["fire"], { kind: "setTextFormat", markdown: true });
+    rerender(<Harness lastEdit={{ edit: { kind: "setTextFormat", markdown: true }, plan: markdown }} busy />);
+    expect(screen.getByText("Wrote 1 card in Markdown.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Undo" })).toBeDisabled();
+    const removal = planCardEdit([water, fire], ["water", "fire"], { kind: "remove" });
+    rerender(<Harness lastEdit={{ edit: { kind: "remove" }, plan: removal }} total={0} />);
+    // Even with no card left.
+    expect(screen.getByText("Deleted 2 cards.")).toBeInTheDocument();
+    rerender(<Harness undone error="The cards changed elsewhere." />);
+    expect(screen.getByText("Undone: the cards are as they were.")).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("The cards changed elsewhere.");
   });
 });
