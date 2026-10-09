@@ -2869,7 +2869,7 @@
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
     dcterms:description "A short course for people new to Solid Memo, guests trying it out included: how studying works and how to grade yourself honestly, where your decks and study are kept (in your own Solid Pod, or only in this browser as a guest) and how to keep what you studied as a guest, ready-made decks and courses from the deck library, making your own decks and cards, and setting a daily pace and following your progress. 5 chapters of short steps, each a piece of theory followed by multiple-choice questions; each chapter ends with a review, and every question you answer becomes a card in your deck. Take about one chapter a day, since every answer comes back as a card on the next study day. The facts come from the Solid Memo app and its documentation, as of October 2026."@en ,
                         "En kort kurs för dig som är ny i Solid Memo, även om du bara provar som gäst: hur studierna går till och hur du betygsätter dig själv ärligt, var dina kortlekar och studier sparas (i din egen Solid Pod, eller bara i den här webbläsaren som gäst) och hur du behåller det du studerat som gäst, färdiga kortlekar och kurser från kortleksbiblioteket, att göra egna kortlekar och kort, och att sätta en takt för varje dag och följa dina framsteg. 5 kapitel med korta steg av teori följda av flervalsfrågor; varje kapitel avslutas med en repetition, och varje fråga du besvarar blir ett kort i din kortlek. Ta ungefär ett kapitel om dagen, eftersom varje svar kommer tillbaka som ett kort nästa studiedag. Fakta kommer från appen Solid Memo och dess dokumentation, så som de var i oktober 2026."@sv ;
-    prov:wasDerivedFrom <https://github.com/solid-memo/website/tree/2a2bfaaf3635a39d2f34559d3053deb64d052770> ,
+    prov:wasDerivedFrom <https://github.com/solid-memo/website> ,
                         <https://solid-memo.com/> ;
     prov:wasGeneratedBy <https://solid-memo.com/decks/getting-started/v1.ttl#compilation> ;
     dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
@@ -2909,8 +2909,8 @@
 <https://solid-memo.com/decks/getting-started/v1.ttl#compilation>
     a prov:Activity .
 
-<https://github.com/solid-memo/website/tree/2a2bfaaf3635a39d2f34559d3053deb64d052770>
-    dcterms:title "Solid Memo repository: docs and source, at the commit the course describes" ;
+<https://github.com/solid-memo/website>
+    dcterms:title "Solid Memo repository: README, docs and source" ;
     dcterms:creator "Solid Memo" .
 
 <https://solid-memo.com/>
@@ -7394,10 +7394,6 @@
 <https://github.com/solid-contrib/specification-tests>
     dcterms:title "Solid specification-tests" ;
     dcterms:creator "solid-contrib" .
-
-<https://github.com/solid-memo/website>
-    dcterms:title "Solid Memo repository: README, docs and source" ;
-    dcterms:creator "Solid Memo" .
 
 <https://github.com/solid/node-solid-server/blob/v6.0.0/lib/requests/create-account-request.mjs>
     dcterms:title "node-solid-server 6.0.0 source: create-account-request.mjs" ;

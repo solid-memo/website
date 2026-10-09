@@ -23,7 +23,7 @@
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
     dcterms:description "A short course for people new to Solid Memo, guests trying it out included: how studying works and how to grade yourself honestly, where your decks and study are kept (in your own Solid Pod, or only in this browser as a guest) and how to keep what you studied as a guest, ready-made decks and courses from the deck library, making your own decks and cards, and setting a daily pace and following your progress. 5 chapters of short steps, each a piece of theory followed by multiple-choice questions; each chapter ends with a review, and every question you answer becomes a card in your deck. Take about one chapter a day, since every answer comes back as a card on the next study day. The facts come from the Solid Memo app and its documentation, as of October 2026."@en ,
                         "En kort kurs för dig som är ny i Solid Memo, även om du bara provar som gäst: hur studierna går till och hur du betygsätter dig själv ärligt, var dina kortlekar och studier sparas (i din egen Solid Pod, eller bara i den här webbläsaren som gäst) och hur du behåller det du studerat som gäst, färdiga kortlekar och kurser från kortleksbiblioteket, att göra egna kortlekar och kort, och att sätta en takt för varje dag och följa dina framsteg. 5 kapitel med korta steg av teori följda av flervalsfrågor; varje kapitel avslutas med en repetition, och varje fråga du besvarar blir ett kort i din kortlek. Ta ungefär ett kapitel om dagen, eftersom varje svar kommer tillbaka som ett kort nästa studiedag. Fakta kommer från appen Solid Memo och dess dokumentation, så som de var i oktober 2026."@sv ;
-    prov:wasDerivedFrom <https://github.com/solid-memo/website/tree/2a2bfaaf3635a39d2f34559d3053deb64d052770> ,
+    prov:wasDerivedFrom <https://github.com/solid-memo/website> ,
                         <https://solid-memo.com/> ;
     prov:wasGeneratedBy <#compilation> ;
     dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
@@ -67,7 +67,7 @@
 <#compilation>
     a prov:Activity ;
     prov:endedAtTime "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
-    prov:used <https://github.com/solid-memo/website/tree/2a2bfaaf3635a39d2f34559d3053deb64d052770> ,
+    prov:used <https://github.com/solid-memo/website> ,
               <https://solid-memo.com/> ,
               <http://augmentingcognition.com/ltm.html> ,
               <https://docs.ankiweb.net/studying.html> ;
@@ -75,7 +75,8 @@
     prov:wasInformedBy <#review-0> ,
                        <#review-1> ,
                        <#review-2> ,
-                       <#review-3> ;
+                       <#review-3> ,
+                       <#review-4> ;
     rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
                  "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
                  "About this record: the course was planned by AI agents from an inventory of the app's user-facing features, read from its code and its English and Swedish texts, and from research on how to introduce an app and spaced repetition to newcomers; three outlines were drafted from different angles and merged into one, and its chapters were then written in English and Swedish. The working notes and the outline are kept with the course's sources, not in the library."@en ,
@@ -112,10 +113,17 @@
     rdfs:comment "Scope: the five chapters read together by an AI agent, in both languages, for terms used differently, contradictions, facts explained twice, and theory that relies on a later chapter; not a human review."@en ,
                  "Outcome: a few terms were aligned with the app's labels, a step that repeated an earlier one was shortened, and two notes were corrected to say a reset is per deck."@en .
 
-<https://github.com/solid-memo/website/tree/2a2bfaaf3635a39d2f34559d3053deb64d052770>
-    dcterms:title "Solid Memo repository: docs and source, at the commit the course describes" ;
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-09T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Recheck against the app's later changes (AI)"@en ;
+    rdfs:comment "Scope: every chapter, in both languages, checked again by AI agents against the app's code after it changed how guest study is kept (added to an instance one has, rather than always moved into a new one), how instances are updated and deleted, and how the deck list offers the library's course for newcomers, then the edits checked once more by another; not a human review."@en ,
+                 "Outcome: the step on keeping guest study, the questions on it and on deleting an instance, and a few sentences on courses and daily limits were rewritten to match; the other chapters held as they were."@en .
+
+<https://github.com/solid-memo/website>
+    dcterms:title "Solid Memo repository: README, docs and source" ;
     dcterms:creator "Solid Memo" ;
-    rdfs:comment "The repository's licence file, LICENSE, is the MIT License: \"Copyright (c) 2026 Anton Wiklund\". Used for facts only: nothing copied; the course describes the app's behaviour in its own words, and its few button and page names are the app's own English and Swedish labels. Reliability: authoritative (first-hand, this project). Used for: every fact about the app: scheduling and grading, study sessions and days, guest mode and moving guest study, instances, the deck library and its updates, courses, the card editor and its Browser, preferences, the streak and statistics."@en .
+    rdfs:comment "The repository's licence file, LICENSE, is the MIT License: \"Copyright (c) 2026 Anton Wiklund\". Used for facts only: nothing copied; the course describes the app's behaviour in its own words, and its few button and page names are the app's own English and Swedish labels. Reliability: authoritative (first-hand, this project). Read in October 2026, at the commit that added this course to the library. Used for: every fact about the app: scheduling and grading, study sessions and days, guest mode and moving guest study, instances, the deck library and its updates, courses, the card editor and its Browser, preferences, the streak and statistics."@en .
 
 <https://solid-memo.com/>
     dcterms:title "Solid Memo" ;
@@ -650,18 +658,18 @@ Eftersom allt läses från din Pod visar varje enhet du loggar in på samma kort
     solid-memo:textFormat solid-memo:markdown ;
     solid-memo:theory """## Studying as a guest, and keeping it
 
-You can use Solid Memo without an account. A guest gets the same features, but the study is kept only in this web browser on this device. Another browser or device does not see it, and clearing the site's data in your browser erases it.
+You can use Solid Memo without an account. A guest gets the same features, but the study is kept only in this web browser on this device. Another browser or device does not see it, and clearing the site's data erases it.
 
-To keep your study, choose to log in from the guest bar at the top. Logging in alone moves nothing: once you are in, Solid Memo offers to move your guest study into your Pod. It copies the study, checks the copy, and removes the study from the browser only when every check passes. If anything fails, your study stays in the browser.
+To keep your study, choose to log in from the guest bar at the top. Logging in alone moves nothing: once you are in, Solid Memo offers to move it into your Pod. It writes the study into your Pod, checking it along the way, and removes it from the browser only when everything is in and every check passes. If anything fails, your study stays in the browser.
 
-The moved study, this course's deck included, arrives as an instance of its own: a separate collection in its own folder, never merged into decks you already have. Putting the offer off brings it back on your next visit; discarding deletes the guest study for good."""@en ,
+If you already have an instance (a collection of decks in your Pod), each deck you studied, this course's included, is added to it as a new deck with its progress, beside your own and never merged into one. With several instances, you pick one. Only if you have none does the study become a new instance in its own folder. Putting the offer off brings it back on your next visit; discarding deletes the guest study for good."""@en ,
                       """## Studera som gäst och behåll dina studier
 
-Du kan använda Solid Memo utan konto. Som gäst får du samma funktioner, men det du studerar sparas bara i den här webbläsaren på den här enheten. En annan webbläsare eller enhet ser det inte, och om du rensar webbplatsens data i webbläsaren försvinner det.
+Du kan använda Solid Memo utan konto. Som gäst får du samma funktioner, men det du studerar sparas bara i den här webbläsaren på den här enheten. En annan webbläsare eller enhet ser det inte, och om du rensar webbplatsens data försvinner det.
 
-Vill du behålla dina studier loggar du in via gästraden högst upp. Att bara logga in flyttar ingenting: när du är inne erbjuder Solid Memo att flytta dina studier som gäst till din Pod. Appen kopierar studierna, kontrollerar kopian och tar bort studierna ur webbläsaren först när alla kontroller har gått igenom. Går något fel stannar dina studier i webbläsaren.
+Vill du behålla dina studier loggar du in via gästraden högst upp. Att bara logga in flyttar ingenting: när du är inne erbjuder Solid Memo att flytta dem till din Pod. Appen skriver in studierna i din Pod och kontrollerar dem på vägen, och tar bort dem ur webbläsaren först när allt är på plats och alla kontroller har gått igenom. Går något fel stannar dina studier i webbläsaren.
 
-De flyttade studierna, den här kursens kortlek medräknad, hamnar i en egen instans: en separat samling i en egen mapp, som aldrig slås ihop med kortlekar du redan har. Skjuter du upp erbjudandet kommer det tillbaka nästa gång; slänger du studierna raderas de för gott."""@sv ;
+Har du redan en instans (en samling kortlekar i din Pod) läggs varje kortlek du studerat, den här kursens medräknad, till i den som en ny kortlek med sina framsteg, bredvid dina egna och aldrig ihopslagen med någon av dem. Har du flera instanser väljer du en. Bara om du inte har någon blir studierna en ny instans i en egen mapp. Skjuter du upp erbjudandet kommer det tillbaka nästa gång; slänger du studierna raderas de för gott."""@sv ;
     solid-memo:checkedBy <#q-your-data-2a> ,
                          <#q-your-data-2b> .
 
@@ -710,12 +718,12 @@ De flyttade studierna, den här kursens kortlek medräknad, hamnar i en egen ins
     a solid-memo:Card ;
     solid-memo:formatVersion 5 ;
     dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
-    solid-memo:front "Eva moves her guest study into her Pod, but one of the checks on the copy fails. What happens to her study?"@en ,
-                     "Eva flyttar sina studier som gäst till sin Pod, men en av kontrollerna av kopian misslyckas. Vad händer med hennes studier?"@sv ;
+    solid-memo:front "Eva tries to keep her guest study in her Pod, but a check fails along the way. What happens to the study in her browser?"@en ,
+                     "Eva försöker behålla sina studier som gäst i sin Pod, men en kontroll misslyckas på vägen. Vad händer med studierna i hennes webbläsare?"@sv ;
     solid-memo:back "It stays in the browser, as it was"@en ,
                     "De finns kvar i webbläsaren, som de var"@sv ;
-    solid-memo:backNote "Solid Memo removes the study from the browser only after every check on the copy has passed, so a failed move leaves it untouched."@en ,
-                        "Solid Memo tar bort studierna ur webbläsaren först när alla kontroller av kopian har gått igenom, så en misslyckad flytt lämnar dem orörda."@sv ;
+    solid-memo:backNote "Solid Memo removes the study from the browser only after everything is in her Pod and every check has passed, so a failed move leaves it as it was."@en ,
+                        "Solid Memo tar bort studierna ur webbläsaren först när allt finns i hennes Pod och alla kontroller har gått igenom, så en misslyckad flytt lämnar dem som de var."@sv ;
     solid-memo:distractor <#q-your-data-2b-d1> ,
                           <#q-your-data-2b-d2> ,
                           <#q-your-data-2b-d3> .
@@ -733,10 +741,10 @@ De flyttade studierna, den här kursens kortlek medräknad, hamnar i en egen ins
     a solid-memo:Distractor ,
       schema:Answer ;
     solid-memo:formatVersion 1 ;
-    solid-memo:distractorText "It is merged into her Pod's decks"@en ,
-                              "De slås ihop med kortlekarna i hennes Pod"@sv ;
-    solid-memo:distractorNote "Guest study is never merged into existing decks; it moves only as an instance of its own, and here the move failed."@en ,
-                              "Studier som gäst slås aldrig ihop med befintliga kortlekar; de flyttas bara som en egen instans, och här misslyckades flytten."@sv .
+    solid-memo:distractorText "It is kept only in her Pod from now on"@en ,
+                              "De finns hädanefter bara i hennes Pod"@sv ;
+    solid-memo:distractorNote "Nothing leaves the browser until every check has passed; after a failure the study is still there, and Eva can try again."@en ,
+                              "Ingenting lämnar webbläsaren förrän alla kontroller har gått igenom; efter ett fel finns studierna kvar där, och Eva kan försöka igen."@sv .
 
 <#q-your-data-2b-d3>
     a solid-memo:Distractor ,
@@ -756,18 +764,18 @@ De flyttade studierna, den här kursens kortlek medräknad, hamnar i en egen ins
     solid-memo:textFormat solid-memo:markdown ;
     solid-memo:theory """## Instances, logging out and deleting
 
-Your decks, study and settings live together in an instance: one folder in your Pod or, for a guest, in this browser. Most people need only one, and a single instance opens by itself. With two, for example after moving guest study beside decks you already had, you pick one when you open Solid Memo and can switch at any time.
+Your decks, study and settings live together in an instance: one folder in your Pod or, for a guest, in this browser. Most people need only one, and a single instance opens by itself. With two, for example after making one more with "New instance…", you pick one when you open Solid Memo and can switch at any time.
 
 The bar at the top names the open instance and leads to its Statistics and Preferences. With a Pod it also links to the instance's folder there; for a guest, it says the instance is kept in this browser.
 
-Logging out signs you out of Solid Memo in this browser and deletes nothing in your Pod. Deleting an instance removes all its decks, cards and study from your Pod and cannot be undone, and Solid Memo has no copy on servers of its own. Your data is ordinary files in your Pod, so backups are for you and your Pod provider to look after."""@en ,
+Logging out signs you out of Solid Memo in this browser and deletes nothing in your Pod. Deleting an instance removes all its decks, cards and study from your Pod and cannot be undone; only files another app put in its folder are kept. Solid Memo has no copy on servers of its own. Your data is ordinary files in your Pod, so backups are for you and your Pod provider to look after."""@en ,
                       """## Instanser, utloggning och radering
 
-Dina kortlekar, studier och inställningar hör ihop i en instans: en mapp i din Pod eller, om du är gäst, i den här webbläsaren. De flesta behöver bara en, och har du en enda öppnas den av sig själv. Har du två, till exempel efter att ha flyttat dina studier som gäst till en Pod där du redan hade kortlekar, väljer du en när du öppnar Solid Memo och kan byta när du vill.
+Dina kortlekar, studier och inställningar hör ihop i en instans: en mapp i din Pod eller, om du är gäst, i den här webbläsaren. De flesta behöver bara en, och har du en enda öppnas den av sig själv. Har du två, till exempel efter att ha skapat en till med ”Ny instans…”, väljer du en när du öppnar Solid Memo och kan byta när du vill.
 
 Raden högst upp visar namnet på den öppna instansen och leder till dess Statistik och Inställningar. Med en Pod länkar den också till instansens mapp; för en gäst står det i stället att instansen sparas i webbläsaren.
 
-När du loggar ut från Solid Memo i den här webbläsaren raderas ingenting i din Pod. Att ta bort en instans raderar alla dess kortlekar, kort och studier från din Pod och går inte att ångra. Solid Memo har heller ingen kopia på egna servrar. Dina data är vanliga filer i din Pod, så säkerhetskopior är något du och din Pod-leverantör tar hand om."""@sv ;
+När du loggar ut från Solid Memo i den här webbläsaren raderas ingenting i din Pod. Att ta bort en instans raderar alla dess kortlekar, kort och studier från din Pod och går inte att ångra; bara filer som en annan app har lagt i dess mapp behålls. Solid Memo har heller ingen kopia på egna servrar. Dina data är vanliga filer i din Pod, så säkerhetskopior är något du och din Pod-leverantör tar hand om."""@sv ;
     solid-memo:checkedBy <#q-your-data-3a> ,
                          <#q-your-data-3b> .
 
@@ -816,12 +824,12 @@ När du loggar ut från Solid Memo i den här webbläsaren raderas ingenting i d
     a solid-memo:Card ;
     solid-memo:formatVersion 5 ;
     dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
-    solid-memo:front "Ines deletes one of her Solid Memo instances. What happens to its folder in her Pod?"@en ,
-                     "Ines tar bort en av sina instanser i Solid Memo. Vad händer med dess mapp i hennes Pod?"@sv ;
-    solid-memo:back "It is deleted, with all its decks and study"@en ,
-                    "Den raderas, med alla kortlekar och studier"@sv ;
-    solid-memo:backNote "Deleting an instance deletes its folder and everything in it from her Pod after a warning that it cannot be undone, and Solid Memo has no servers holding a copy."@en ,
-                        "Att ta bort en instans raderar dess mapp och allt i den från hennes Pod, efter en varning om att det inte går att ångra, och Solid Memo har inga servrar med någon kopia."@sv ;
+    solid-memo:front "Ines deletes one of her Solid Memo instances. What happens to its decks and study in her Pod?"@en ,
+                     "Ines tar bort en av sina instanser i Solid Memo. Vad händer med dess kortlekar och studier i hennes Pod?"@sv ;
+    solid-memo:back "They are deleted, and cannot be brought back"@en ,
+                    "De raderas och går inte att få tillbaka"@sv ;
+    solid-memo:backNote "Deleting an instance deletes everything Solid Memo wrote in it, after a warning that it cannot be undone; only files another app put in its folder are kept, and Solid Memo has no servers holding a copy."@en ,
+                        "Att ta bort en instans raderar allt Solid Memo har skrivit i den, efter en varning om att det inte går att ångra; bara filer som en annan app har lagt i dess mapp behålls, och Solid Memo har inga servrar med någon kopia."@sv ;
     solid-memo:distractor <#q-your-data-3b-d1> ,
                           <#q-your-data-3b-d2> ,
                           <#q-your-data-3b-d3> .
@@ -830,10 +838,10 @@ När du loggar ut från Solid Memo i den här webbläsaren raderas ingenting i d
     a solid-memo:Distractor ,
       schema:Answer ;
     solid-memo:formatVersion 1 ;
-    solid-memo:distractorText "It stays, only unlinked from the app"@en ,
-                              "Den finns kvar, bara bortkopplad från appen"@sv ;
-    solid-memo:distractorNote "Deleting removes the instance's folder and everything in it from the Pod, not just its link to the app."@en ,
-                              "Att ta bort raderar instansens mapp och allt i den från din Pod, inte bara dess koppling till appen."@sv .
+    solid-memo:distractorText "They stay, only unlinked from the app"@en ,
+                              "De finns kvar, bara bortkopplade från appen"@sv ;
+    solid-memo:distractorNote "Deleting removes the instance's decks and study from her Pod, not just its link to the app."@en ,
+                              "Att ta bort raderar instansens kortlekar och studier från hennes Pod, inte bara kopplingen till appen."@sv .
 
 <#q-your-data-3b-d2>
     a solid-memo:Distractor ,
@@ -848,8 +856,8 @@ När du loggar ut från Solid Memo i den här webbläsaren raderas ingenting i d
     a solid-memo:Distractor ,
       schema:Answer ;
     solid-memo:formatVersion 1 ;
-    solid-memo:distractorText "It goes to a trash folder first"@en ,
-                              "Den hamnar först i en papperskorg"@sv ;
+    solid-memo:distractorText "They go to a trash folder first"@en ,
+                              "De hamnar först i en papperskorg"@sv ;
     solid-memo:distractorNote "Solid Memo has no trash folder; before you delete an instance, it warns that this cannot be undone."@en ,
                               "Solid Memo har ingen papperskorg; innan du tar bort en instans varnar den för att det inte går att ångra."@sv .
 
@@ -859,10 +867,10 @@ När du loggar ut från Solid Memo i den här webbläsaren raderas ingenting i d
     dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
     solid-memo:front "Mia already has decks in her Pod and then moves her guest study there too. How does the guest study arrive?"@en ,
                      "Mia har redan kortlekar i sin Pod och flyttar sedan dit det hon studerat som gäst. Hur hamnar hennes studier som gäst där?"@sv ;
-    solid-memo:back "As a separate instance, beside her decks"@en ,
-                    "Som en egen instans, bredvid hennes kortlekar"@sv ;
-    solid-memo:backNote "Moved guest study always becomes an instance of its own, in its own folder; with two instances, Mia picks one when she opens Solid Memo and can switch between them."@en ,
-                        "Flyttade studier som gäst blir alltid en egen instans, i en egen mapp; med två instanser väljer Mia en när hon öppnar Solid Memo och kan byta mellan dem."@sv ;
+    solid-memo:back "As new decks in her instance, beside her own"@en ,
+                    "Som nya kortlekar i hennes instans, bredvid hennes egna"@sv ;
+    solid-memo:backNote "Solid Memo adds each guest deck to the instance she has (she picks one if she has several) as a new deck with its cards, progress and answers; a new instance is made only when she has none."@en ,
+                        "Solid Memo lägger till varje kortlek hon studerat som gäst i instansen hon har (har hon flera väljer hon en) som en ny kortlek med sina kort, framsteg och svar; en ny instans skapas bara när hon inte har någon."@sv ;
     solid-memo:distractor <#q-your-data-r01-d1> ,
                           <#q-your-data-r01-d2> ,
                           <#q-your-data-r01-d3> .
@@ -871,10 +879,10 @@ När du loggar ut från Solid Memo i den här webbläsaren raderas ingenting i d
     a solid-memo:Distractor ,
       schema:Answer ;
     solid-memo:formatVersion 1 ;
-    solid-memo:distractorText "Merged into the decks she already has"@en ,
-                              "Ihopslagna med kortlekarna hon redan har"@sv ;
-    solid-memo:distractorNote "Solid Memo never merges guest study into an existing instance; it arrives beside it."@en ,
-                              "Solid Memo slår aldrig ihop studier som gäst med en befintlig instans; de hamnar bredvid den."@sv .
+    solid-memo:distractorText "As a separate instance, beside her own"@en ,
+                              "Som en egen instans, bredvid hennes egen"@sv ;
+    solid-memo:distractorNote "A new instance is made only when she has none; since she has one, the guest decks are added to it."@en ,
+                              "En ny instans skapas bara när hon inte har någon; eftersom hon har en läggs kortlekarna hon studerat som gäst till i den."@sv .
 
 <#q-your-data-r01-d2>
     a solid-memo:Distractor ,
@@ -882,8 +890,8 @@ När du loggar ut från Solid Memo i den här webbläsaren raderas ingenting i d
     solid-memo:formatVersion 1 ;
     solid-memo:distractorText "In place of the decks she already has"@en ,
                               "I stället för kortlekarna hon redan har"@sv ;
-    solid-memo:distractorNote "Nothing she already has is replaced; the move needs a free folder and leaves her other decks as they are."@en ,
-                              "Ingenting hon redan har ersätts; flytten kräver en ledig mapp och lämnar hennes andra kortlekar som de är."@sv .
+    solid-memo:distractorNote "Nothing she already has is replaced; each guest deck is added beside her decks, and the instance keeps its own preferences."@en ,
+                              "Ingenting hon redan har ersätts; varje kortlek hon studerat som gäst läggs till bredvid hennes andra, och instansen behåller sina egna inställningar."@sv .
 
 <#q-your-data-r01-d3>
     a solid-memo:Distractor ,
@@ -891,8 +899,8 @@ När du loggar ut från Solid Memo i den här webbläsaren raderas ingenting i d
     solid-memo:formatVersion 1 ;
     solid-memo:distractorText "Joined to her decks that have matching names"@en ,
                               "Ihopkopplade med hennes kortlekar som har samma namn"@sv ;
-    solid-memo:distractorNote "No decks are matched by name; the guest's decks stay in their own instance."@en ,
-                              "Inga kortlekar matchas på namn; gästens kortlekar stannar i sin egen instans."@sv .
+    solid-memo:distractorNote "No decks are matched by name, or even by library release: each guest deck is added as a deck of its own."@en ,
+                              "Inga kortlekar matchas på namn, inte ens på utgåva i biblioteket: varje kortlek hon studerat som gäst läggs till som en egen kortlek."@sv .
 
 # Chapter 3: The deck library and courses.
 <#ch-library>
@@ -988,18 +996,18 @@ Prova efter det här kapitlet: öppna Kortleksbiblioteket och förhandsvisa en k
     solid-memo:textFormat solid-memo:markdown ;
     solid-memo:theory """## A deck that grows as you learn
 
-Some entries in the library are courses, like this one: short pieces of theory, each checked by multiple-choice questions. You start a course from its library page instead of importing it.
+Some entries in the library are courses, like this one: short pieces of theory, each checked by multiple-choice questions. You start a course instead of importing it: from its library page, or, for the course offered to newcomers, from an empty deck list.
 
-Starting a course creates an empty deck in your deck list, and, as you have seen in this course, each question joins it as a card the first time you answer it. You start a course only once per instance: after that, its library page offers to continue it instead.
+Starting a course creates an empty deck in your deck list, and, as you have seen in this course, each question joins it as a card the first time you answer it. Once you have started a course, its library page offers to continue it instead of starting it again.
 
 That first answer is also the card's first grade. A right answer counts as a 3, Hard, the lowest pass, and a wrong one as a fail. Either way, the new card is first due on the next study day.
 
 From then on, the course's cards are studied like any other card: you recall the answer, reveal it and grade yourself, with no options to pick from."""@en ,
                       """## En kortlek som växer medan du lär dig
 
-En del av det som finns i biblioteket är kurser, som den här: korta teoriavsnitt, vart och ett följt av flervalsfrågor. En kurs importeras inte, utan du börjar den från kursens sida i biblioteket.
+En del av det som finns i biblioteket är kurser, som den här: korta teoriavsnitt, vart och ett följt av flervalsfrågor. En kurs importeras inte, utan du börjar den: från kursens sida i biblioteket, eller, för kursen för nybörjare, från en tom lista med kortlekar.
 
-När du börjar en kurs skapas en tom kortlek i din lista med kortlekar, och som du har sett i den här kursen läggs varje fråga till i kortleken som ett kort första gången du svarar på den. Du börjar en kurs bara en gång per instans: sedan erbjuder kursens sida i biblioteket att du fortsätter den i stället.
+När du börjar en kurs skapas en tom kortlek i din lista med kortlekar, och som du har sett i den här kursen läggs varje fråga till i kortleken som ett kort första gången du svarar på den. När du har börjat en kurs erbjuder kursens sida i biblioteket att du fortsätter den i stället för att börja om.
 
 Det första svaret är också kortets första betyg. Ett rätt svar räknas som en 3:a, Svårt, det lägsta godkända betyget, och ett fel svar som underkänt. I båda fallen ska det nya kortet repeteras först nästa studiedag.
 
@@ -1400,20 +1408,20 @@ Markdown, ett sätt att skriva kod, listor och tabeller som vanlig text, kan sl�
     solid-memo:textFormat solid-memo:markdown ;
     solid-memo:theory """## A few new cards a day
 
-Solid Memo sets two limits for each study day: how many new cards a deck may bring, and how many reviews it may ask. By default they are 5 new cards and 200 reviews. You change them in Preferences, in the bar at the top.
+Solid Memo sets two limits for each study day: how many new cards a deck may bring to your study, and how many reviews it may ask. By default they are 5 new cards and 200 reviews. You change them in Preferences, in the bar at the top.
 
 Why so few new cards? Every new card comes back for reviews in the days that follow. Take on many today and the reviews pile up later. Start small and stay steady; you can always raise the number when it feels easy.
 
-The limits count per study day, not per session. Study twice on the same day and the second session gets only what is left.
+The limits count per study day, not per session. Study twice on the same day and the second session gets only what is left. A course's questions are not held to them: each card you answer joins its deck right away.
 
 A deck can also have limits of its own, higher or lower than yours, in that deck's preferences. A field left empty there follows your study preferences. In a deck studied both ways, each direction counts on its own toward the new-card limit, so one new card can use up two of the day's places."""@en ,
                       """## Några nya kort om dagen
 
-Solid Memo har två gränser för varje studiedag: hur många nya kort en kortlek får introducera och hur många repetitioner den får ge dig. Som standard är det 5 nya kort och 200 repetitioner. Du ändrar dem under Inställningar, i raden högst upp.
+Solid Memo har två gränser för varje studiedag: hur många nya kort en kortlek får introducera i dina studier och hur många repetitioner den får ge dig. Som standard är det 5 nya kort och 200 repetitioner. Du ändrar dem under Inställningar, i raden högst upp.
 
 Varför så få nya kort? Varje nytt kort kommer tillbaka för repetition under de följande dagarna. Tar du dig an många idag, hopar sig repetitionerna längre fram. Börja smått och håll en jämn takt; du kan alltid höja antalet när det känns lätt.
 
-Gränserna gäller per studiedag, inte per studiepass. Studerar du två gånger samma dag, får det andra passet bara det som är kvar.
+Gränserna gäller per studiedag, inte per studiepass. Studerar du två gånger samma dag, får det andra passet bara det som är kvar. Frågorna i en kurs omfattas inte av dem: varje fråga du besvarar läggs till i kortleken som ett kort direkt.
 
 En kortlek kan också ha egna gränser, högre eller lägre än dina, i kortlekens inställningar. Ett fält som lämnas tomt där följer dina studieinställningar. I en kortlek som studeras åt båda hållen räknas varje riktning för sig mot gränsen för nya kort, så ett nytt kort kan ta upp två av dagens platser."""@sv ;
     solid-memo:checkedBy <#q-pace-1a> .
@@ -1474,7 +1482,7 @@ Graded a deck carelessly today? Its page lets you reset today's study of that de
 
 After your first answer of the day, a strip above your decks shows today's cards, the share you remembered and your streak: study days in a row, today included. Missing a day starts the streak over. Statistics, in the bar at the top, adds a year of activity and how well you remember in reviews.
 
-Your figures come from a log of your answers kept with your decks, so with a Pod they are the same on every device you log in on. The app's language is set per device. The app never translates your cards, but a card written in several languages is shown in the language you chose."""@en ,
+Your figures come from a log of your answers kept with your decks, so with a Pod they are the same on every device you log in on. The app's language is set per device. The app never translates your cards, but a card written in several languages is shown in the language you chose, when it has it."""@en ,
                       """## Studiedagar och dina framsteg
 
 Solid Memo räknar studiedagar, inte kalenderdagar. Som standard börjar en ny studiedag klockan 04:00, så ett studiepass sent på natten räknas fortfarande till dagen innan. Du kan ändra timmen under Inställningar.
@@ -1483,7 +1491,7 @@ Betygsatte du en kortlek slarvigt idag? På kortlekens sida kan du återställa 
 
 Efter dagens första svar visar en remsa ovanför dina kortlekar dagens kort, hur stor del du kom ihåg och din svit: hur många dagar i rad du har studerat, inklusive idag. Missar du en dag, börjar sviten om. Statistik, i raden högst upp, visar dessutom ett års aktivitet och hur väl du minns vid repetition.
 
-Siffrorna bygger på en logg över dina svar som sparas tillsammans med dina kortlekar, så med en Pod är de desamma på alla enheter du loggar in på. Appens språk väljs per enhet. Appen översätter aldrig dina kort, men ett kort som är skrivet på flera språk visas på det språk du har valt."""@sv ;
+Siffrorna bygger på en logg över dina svar som sparas tillsammans med dina kortlekar, så med en Pod är de desamma på alla enheter du loggar in på. Appens språk väljs per enhet. Appen översätter aldrig dina kort, men ett kort som är skrivet på flera språk visas på det språk du har valt, om kortet finns på det."""@sv ;
     solid-memo:checkedBy <#q-pace-2a> ,
                          <#q-pace-2b> .
 
@@ -1532,8 +1540,8 @@ Siffrorna bygger på en logg över dina svar som sparas tillsammans med dina kor
     a solid-memo:Card ;
     solid-memo:formatVersion 5 ;
     dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
-    solid-memo:front "Ana studies in Solid Memo every day from Monday to Friday, skips Saturday, and studies again on Sunday. What streak does Solid Memo show her on Sunday?"@en ,
-                     "Ana studerar i Solid Memo varje dag från måndag till fredag, hoppar över lördagen och studerar igen på söndagen. Hur många dagar i rad visar Solid Memo för henne på söndagen?"@sv ;
+    solid-memo:front "Ana studies in Solid Memo every day from Monday to Friday, skips Saturday, and studies again on Sunday. Once she has studied on Sunday, what streak does Solid Memo show her?"@en ,
+                     "Ana studerar i Solid Memo varje dag från måndag till fredag, hoppar över lördagen och studerar igen på söndagen. Hur många dagar i rad visar Solid Memo för henne när hon har studerat på söndagen?"@sv ;
     solid-memo:back "One day, as the missed day broke the streak"@en ,
                     "En dag, eftersom den missade dagen bröt sviten"@sv ;
     solid-memo:backNote "A streak counts study days in a row, today included, so after a missed day it starts again from Sunday alone."@en ,
@@ -1555,10 +1563,10 @@ Siffrorna bygger på en logg över dina svar som sparas tillsammans med dina kor
     a solid-memo:Distractor ,
       schema:Answer ;
     solid-memo:formatVersion 1 ;
-    solid-memo:distractorText "Five days, paused while she was away"@en ,
-                              "Fem dagar, sviten pausades medan hon var borta"@sv ;
-    solid-memo:distractorNote "A streak cannot be paused; a missed day breaks it, and Sunday starts a new one."@en ,
-                              "Sviten kan inte pausas; en missad dag bryter den, och söndagen börjar en ny."@sv .
+    solid-memo:distractorText "Seven days, as Saturday is counted in"@en ,
+                              "Sju dagar, eftersom lördagen räknas med"@sv ;
+    solid-memo:distractorNote "A streak counts only days you studied: Saturday without study breaks it, so Sunday starts a new one."@en ,
+                              "Sviten räknar bara dagar du har studerat: lördagen utan studier bryter den, så söndagen börjar en ny."@sv .
 
 <#q-pace-2b-d3>
     a solid-memo:Distractor ,
