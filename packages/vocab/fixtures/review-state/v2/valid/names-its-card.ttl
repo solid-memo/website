@@ -1,0 +1,31 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+
+# What the app writes since vocabulary 1.16: the state names its card,
+# direction and scheduler beside the fragment rule's subject.
+<#card-1@back-to-front>
+    a solid-memo:ReviewState ;
+    solid-memo:formatVersion 2 ;
+    solid-memo:easeFactor 2.5 ;
+    solid-memo:intervalDays 6 ;
+    solid-memo:repetitions 2 ;
+    solid-memo:due "2026-09-28" ;
+    solid-memo:firstReviewedAt "2026-09-20T10:00:00Z"^^xsd:dateTime ;
+    solid-memo:lastReviewedAt "2026-09-22T10:00:00Z"^^xsd:dateTime ;
+    solid-memo:reviewOf <https://pod.example/decks/deck-1.ttl#card-1> ;
+    solid-memo:reviewDirection solid-memo:backToFront ;
+    solid-memo:scheduler solid-memo:sm2 .
+
+# Another app's: any subject, since it names its card; and a scheduler
+# this app does not know is no violation.
+<#state-7f3a>
+    a solid-memo:ReviewState ;
+    solid-memo:formatVersion 2 ;
+    solid-memo:easeFactor 2.5 ;
+    solid-memo:intervalDays 6 ;
+    solid-memo:repetitions 2 ;
+    solid-memo:due "2026-09-28" ;
+    solid-memo:firstReviewedAt "2026-09-20T10:00:00Z"^^xsd:dateTime ;
+    solid-memo:lastReviewedAt "2026-09-22T10:00:00Z"^^xsd:dateTime ;
+    solid-memo:reviewOf <https://pod.example/decks/deck-1.ttl#card-2> ;
+    solid-memo:scheduler <https://scheduler.example/ns#fsrs> .

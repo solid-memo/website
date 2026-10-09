@@ -10,14 +10,18 @@
 # The direction is not a triple: it is in the subject's name, #<cardId>
 # for front-to-back and #<cardId>@back-to-front for the other way. States
 # written before the format was versioned may already carry the previous*
-# snapshot, so format 1 admits it.
+# snapshot, so format 1 admits it. Since vocabulary 1.16 a state that
+# names its card (solid-memo:reviewOf), as another app may write one
+# without a format version, may have any subject.
 <#shape>
     a sh:NodeShape ;
     sh:name "ReviewStateV1" ;
     rdfs:comment "Review-state format 1: the SM-2 fields; the previous* snapshot is admitted." ;
     sh:nodeKind sh:IRI ;
     sh:class solid-memo:ReviewState ;
-    sh:pattern "#[^#@]+(@back-to-front)?$" ;
+    sh:or ( [ sh:pattern "#[^#@]+(@back-to-front)?$" ] [ sh:path solid-memo:reviewOf ; sh:minCount 1 ] ) ;
+    sh:message "A review state names its card with solid-memo:reviewOf or is named #<cardId> or #<cardId>@back-to-front."@en ,
+               "Ett repetitionstillstånd anger sitt kort med solid-memo:reviewOf eller heter #<cardId> eller #<cardId>@back-to-front."@sv ;
     sh:property <#formatVersion> ,
                 <#easeFactor> ,
                 <#intervalDays> ,

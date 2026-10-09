@@ -18,7 +18,8 @@ writers never delete triples they don't understand. Every subject
 Solid Memo writes carries `sm:formatVersion`; a subject with neither
 that stamp nor a Solid Memo class, that is not the catalogue and that
 no subject of Solid Memo's names as its creator, publisher or
-distribution, is another app's, which the data check only warns about
+distribution, is another app's, and so is a review state of another
+scheduler; the data check only warns about them
 ([validation.md](validation.md#data-another-app-wrote)).
 
 ```mermaid
@@ -130,14 +131,17 @@ flowchart LR
 │                        sm:formatVersion; a retired card
 │                        (owl:deprecated true) is kept but not studied;
 │                        a course's card names its wrong options
-│                        (sm:distractor), sm:Distractor subjects
-│                        beside it
+│                        (sm:distractor, and schema:suggestedAnswer),
+│                        sm:Distractor subjects beside it; the document
+│                        itself (<>) dcterms:isPartOf the deck's entry
 ├── reviews/<deckId>.ttl  SM-2 state: one sm:ReviewState per card and
 │                        direction (fast churn) — #<cardId> front→back,
-│                        #<cardId>@back-to-front the other way; optional
-│                        sm:previous* snapshot = state before the day's
-│                        first review (restored by "reset the day");
-│                        sm:formatVersion 2
+│                        #<cardId>@back-to-front the other way — naming
+│                        its card (sm:reviewOf), its direction
+│                        (sm:reviewDirection) and sm:scheduler sm:sm2;
+│                        optional sm:previous* snapshot = state before
+│                        the day's first review (restored by "reset the
+│                        day"); sm:formatVersion 2
 ├── history/<YYYY-MM>.ttl  the answer log (below): one sm:Answer per grade
 │                        given in study or a course that month,
 │                        appended, never edited; sm:formatVersion 1
@@ -166,10 +170,11 @@ graph LR
     C -->|dcterms:creator| A
     C -->|dcat:distribution| X
     D["decks/deck-X.ttl#card-N<br/>a sm:Card<br/>sm:front / sm:back<br/>sm:frontImage / sm:backImage<br/>sm:formatVersion<br/>owl:deprecated (retired)"]
-    R["reviews/deck-X.ttl#card-N<br/>reviews/deck-X.ttl#card-N@back-to-front<br/>a sm:ReviewState<br/>SM-2 fields"]
+    R["reviews/deck-X.ttl#card-N<br/>reviews/deck-X.ttl#card-N@back-to-front<br/>a sm:ReviewState<br/>SM-2 fields<br/>sm:reviewDirection, sm:scheduler"]
     C -->|sm:cardsDocument| D
     C -->|sm:reviewsDocument| R
-    D -. same fragment id, per direction .- R
+    D -.->|the document: dcterms:isPartOf| C
+    R -->|sm:reviewOf, else the same fragment id| D
 ```
 
 - The **catalog** holds one subject per deck with its title and links to the
@@ -253,15 +258,78 @@ graph LR
 - **Cards** are hash-fragment subjects (`#card-<uuid>`, or the library's
   own ids such as `#sweden` for imported decks) inside one document per
   deck. Fragment ids are generated once at creation and never re-derived.
-- **Review state** lives in a separate document per deck, joined to cards
-  by the same fragment id — one subject per card *and direction*:
-  `#<cardId>` for front→back (every state written before directions
-  existed, which is what they all were) and `#<cardId>@back-to-front` for
-  the other way. Card edits and review updates never touch each other's
-  documents; removing a card removes both of its states.
+- **Review state** lives in a separate document per deck, one subject per
+  card *and direction*, at `#<cardId>` for front→back (every state
+  written before directions existed, which is what they all were) and
+  `#<cardId>@back-to-front` for the other way. Since vocabulary 1.16
+  every state the app writes also says what it is of, so another app
+  needs no naming rule to join it to its card: `sm:reviewOf` names the
+  card (`<cards document>#<cardId>`), `sm:reviewDirection` the direction
+  (`sm:frontToBack` or `sm:backToFront`) and `sm:scheduler sm:sm2` the
+  algorithm its fields belong to. A reader joins a state to its card in
+  [reviewStateMapper.ts](../packages/solid/src/mappers/reviewStateMapper.ts)
+  and [reviewRecord.ts](../packages/domain/src/reviewRecord.ts):
+  - **What the state says wins.** The card is the one `sm:reviewOf`
+    names and the direction the one `sm:reviewDirection` names, whatever
+    the subject is called; each one the state leaves out comes from the
+    fragment rule above (no `@back-to-front` suffix: front→back). So a
+    state another app named `#state-7f3a` is read when it names its card,
+    and `#card-1` naming card 2 is a state of card 2.
+  - **A link into a cards document the deck had** names its card too.
+    A [library upgrade](migrations.md#how-an-upgrade-is-applied) moves
+    the cards to `decks/<deckId>-<uuid>.ttl` and may keep the reviews
+    document, whose links still name the old document; so `sm:reviewOf`
+    into any document beside the cards named `<deckId>.ttl` or
+    `<deckId>-<…>.ttl` is read by its fragment, and the state's next
+    write names the current cards document.
+  - **What is not read**: a state whose `sm:reviewOf` names a subject
+    outside the deck's cards documents (a card of another deck, or the
+    document itself), one whose direction is neither way (say
+    `sm:bidirectional`), and one of another scheduler (any value of
+    `sm:scheduler` but the `sm:sm2` IRI, a literal too; absent means
+    SM-2, as every state was before 1.16). Another scheduler's state is another app's data: it is
+    never read as SM-2, never written over and never removed, and the
+    [check](validation.md#data-another-app-wrote) only warns about it.
+    It does not stop the app scheduling the card itself, beside it.
+  - **One state per card and direction.** Where several are of the
+    same, the one at the subject the fragment rule names counts, else
+    the first by subject IRI (code-unit order); the others stay in the
+    document, unread.
+  - **Writing** a state goes onto the subject read for it, so a review
+    of another app's `#state-7f3a` edits it in place. A state not yet in
+    the document goes to the subject the fragment rule names, unless that
+    subject is another's (a state of another card, another scheduler's,
+    any other app's subject): then to a new `#review-<uuid>`, which names
+    its card. A subject the fragment rule names for the same card and
+    direction that cannot be read (half a snapshot, say) is written over,
+    as before. A review of a state another app named its own way, beside
+    another scheduler's state, is held against real servers in
+    [foreignData.integration.test.ts](../e2e/pod/src/foreignData.integration.test.ts).
+
+  - **Resetting the day** removes only the state read for each card and
+    direction it undoes. A second state of the same, which the app never
+    read, stays, and is the one read from then on.
+
+  Card edits and review updates never touch each other's documents.
 - Cards/reviews documents are created lazily on first write; deck removal
-  deletes both documents and the catalog subject; card removal also removes
-  the card's review state.
+  deletes both documents and the catalog subject; card removal also
+  removes the card's review states, both ways: every `sm:ReviewState` of
+  the reviews document that is of it, by its `sm:reviewOf` or the
+  fragment rule, read or not, and no other subject (another scheduler's
+  state stays).
+- **The cards document says whose it is.** Every write of a deck's cards
+  document by the deck's own operations (import, adding, editing or
+  removing a card, stating its languages, a course's question joining
+  the deck, the format update's rewrite of outdated cards, a library
+  upgrade's new document) adds `<> dcterms:isPartOf
+  <catalog.ttl#deck-X>` once, on the document itself, so an app that
+  finds a cards document finds its deck. A [repair](validation.md#repair)
+  from the data check and a copy of the instance (the format
+  update's, a guest's transfer) leave the document as it was, so one
+  untouched since vocabulary 1.16 does not say it yet. Another
+  `dcterms:isPartOf` there stays: another app may point two decks at one
+  document. The subject has no class, so no shape checks it, and the
+  [data check](validation.md#flow) lists it as not a Solid Memo subject.
 
 Registration in the type index:
 
@@ -434,7 +502,14 @@ type-index entries:
   an empty deck. A question answered for the first time writes its card,
   its `sm:Distractor` subjects and its first review state, under the
   release's fragment ids (`#q-why-solid-1a`, `#q-why-solid-1a-d1`),
-  with its `sm:textFormat` when the release states one.
+  with its `sm:textFormat` when the release states one. The card names
+  each distractor with `schema:suggestedAnswer` too (since vocabulary
+  1.16), for an app that knows schema.org's questions but not Solid
+  Memo's; the app reads only `sm:distractor`, and a write of the card
+  adds or removes only the suggested answers that are its own
+  distractors, so another app's stay. `schema:suggestedAnswer` belongs
+  to no shape, as `sm:position` does. Library releases are frozen and
+  do not state it: only the copy in the pod does.
   Removing a card removes the distractors it names.
 - **Completed chapters are on the catalog entry**: one
   `sm:completedChapter <release#ch-…>` per chapter whose final review

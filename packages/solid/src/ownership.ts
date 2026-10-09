@@ -1,4 +1,5 @@
 import { getInteger, getThing, getThingAll, getUrlAll, type SolidDataset } from "@inrupt/solid-client";
+import { namesAnotherScheduler } from "./mappers/reviewStateMapper";
 import { DCTERMS, RDF, SM, SM_NS } from "./vocab";
 
 /**
@@ -14,16 +15,19 @@ const WRITTEN_BESIDE = [DCTERMS.creator, DCTERMS.publisher, "http://www.w3.org/n
  * stamp, the catalogue at `#catalog`, and whatever these name as their
  * creator, publisher or distribution — a catalogue, an agent and a
  * distribution have no class of Solid Memo's own, and they stay Solid
- * Memo's when another app's rewrite has dropped their stamp. Every other
- * subject of the document is another app's.
+ * Memo's when another app's rewrite has dropped their stamp. A subject
+ * naming another scheduler (any sm:scheduler but the sm:sm2 IRI) is
+ * never Solid Memo's. Every
+ * other subject of the document is another app's.
  */
 function solidMemoSubjects(dataset: SolidDataset): Set<string> {
   const pending = getThingAll(dataset)
     .filter(
       (thing) =>
-        thing.url.endsWith("#catalog") ||
-        getInteger(thing, SM.formatVersion) !== null ||
-        getUrlAll(thing, RDF.type).some((type) => type.startsWith(SM_NS)),
+        !namesAnotherScheduler(thing) &&
+        (thing.url.endsWith("#catalog") ||
+          getInteger(thing, SM.formatVersion) !== null ||
+          getUrlAll(thing, RDF.type).some((type) => type.startsWith(SM_NS))),
     )
     .map((thing) => thing.url);
   const owned = new Set(pending);

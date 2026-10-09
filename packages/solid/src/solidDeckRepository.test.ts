@@ -22,7 +22,7 @@ import {
 } from "@inrupt/solid-client";
 import { createSolidDeckRepository } from "./solidDeckRepository";
 import { getSolidDatasetOrNull } from "./datasets";
-import { DCTERMS, PROV, RDF, SM } from "./vocab";
+import { DCTERMS, PROV, RDF, SCHEMA, SM } from "./vocab";
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
 
@@ -646,6 +646,8 @@ describe("addCard", () => {
     expect(getStringNoLocale(thing, SM.back)).toBe("fire");
     expect(getUrl(thing, SM.frontImage)).toBeNull();
     expect(getInteger(thing, SM.formatVersion)).toBe(5);
+    // The document itself says whose cards it holds.
+    expect(getUrlAll(getThing(saved as SolidDataset, deck.cardsDocumentUrl)!, DCTERMS.isPartOf)).toEqual([deck.url]);
   });
 
   it("writes a picture as an IRI and no text triple for an empty side", async () => {
@@ -767,6 +769,30 @@ describe("updateCard", () => {
     const again = vi.mocked(saveSolidDatasetAt).mock.calls[1][1] as SolidDataset;
     expect(getThing(again, `${deck.cardsDocumentUrl}#card-1-d1`)).toBeNull();
     expect(getStringWithLocale(getThing(again, `${deck.cardsDocumentUrl}#card-1-d2`)!, SM.distractorText, "en")).toBe("Earth");
+  });
+
+  it("names each distractor a schema:suggestedAnswer too, keeping another app's suggested answers", async () => {
+    const distractors = [{ id: "card-1-d1", text: { en: "Fire" } }, { id: "card-1-d2", text: { en: "Earth" } }];
+    const theirs = "https://quiz.example/answers#a1";
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(
+        cardsDoc(),
+        buildThing(getThing(cardsDoc(), card.url)!).addUrl(SCHEMA.suggestedAnswer, theirs).build(),
+      ) as never,
+    );
+    const kept = await makeRepository().updateCard(deck, card, { front: { "": "水" }, back: { "": "water" }, distractors });
+    const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as SolidDataset;
+    expect(getUrlAll(getThing(saved, card.url)!, SCHEMA.suggestedAnswer).sort()).toEqual(
+      [theirs, ...distractors.map((d) => `${deck.cardsDocumentUrl}#${d.id}`)].sort(),
+    );
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(saved as never);
+
+    await makeRepository().updateCard(deck, kept, { front: { "": "水" }, back: { "": "water" }, distractors: [distractors[1]] });
+
+    const again = vi.mocked(saveSolidDatasetAt).mock.calls[1][1] as SolidDataset;
+    expect(getUrlAll(getThing(again, card.url)!, SCHEMA.suggestedAnswer).sort()).toEqual(
+      [theirs, `${deck.cardsDocumentUrl}#card-1-d2`].sort(),
+    );
   });
 
   it("keeps a card's text format when the edit states none, and writes the one it states", async () => {
@@ -1016,6 +1042,28 @@ describe("removeCard", () => {
     ).toBeNull();
   });
 
+  it("removes the card's states that name it, whatever their subject, and keeps another card's and another scheduler's", async () => {
+    const reviewState = (id: string, cardId: string, scheduler?: string) => {
+      const thing = buildThing(createThing({ url: `${deck.reviewsDocumentUrl}#${id}` }))
+        .addIri(RDF.type, SM.ReviewState)
+        .addIri(SM.reviewOf, `${deck.cardsDocumentUrl}#${cardId}`);
+      return (scheduler === undefined ? thing : thing.addIri(SM.scheduler, scheduler)).build();
+    };
+    const reviewsDoc = [
+      reviewState("rs-1", "card-1"),
+      reviewState("card-1", "card-2"),
+      reviewState("rs-2", "card-1", "https://fsrs.example/ns#fsrs"),
+    ].reduce((dataset, thing) => setThing(dataset, thing), mockSolidDatasetFrom(deck.reviewsDocumentUrl));
+    vi.mocked(getSolidDatasetOrNull).mockImplementation(async (url) => (url === deck.reviewsDocumentUrl ? reviewsDoc : null));
+
+    await makeRepository().removeCard(deck, card);
+
+    const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as SolidDataset;
+    expect(getThing(saved, `${deck.reviewsDocumentUrl}#rs-1`)).toBeNull();
+    expect(getThing(saved, `${deck.reviewsDocumentUrl}#card-1`)).not.toBeNull();
+    expect(getThing(saved, `${deck.reviewsDocumentUrl}#rs-2`)).not.toBeNull();
+  });
+
   it("removes the distractors the card names with it, and leaves a document without the card as it was", async () => {
     const distractor = `${deck.cardsDocumentUrl}#card-1-d1`;
     const cardsDoc = [
@@ -1086,6 +1134,7 @@ describe("library upgrade writes", () => {
     expect(getUrl(se, "https://example.org/seeAlso")).toBe(`${STAGED}#is`);
     expect(getThing(saved as SolidDataset, `${STAGED}#is`)).toBeNull();
     expect(getThing(saved as SolidDataset, `${deck.cardsDocumentUrl}#se`)).toBeNull();
+    expect(getUrlAll(getThing(saved as SolidDataset, STAGED)!, DCTERMS.isPartOf)).toEqual([deck.url]);
   });
 
   it("stageCardChanges writes a deck without a cards document the new cards alone", async () => {
@@ -1134,5 +1183,25 @@ describe("library upgrade writes", () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
     await makeRepository().deleteDocument(STAGED);
     expect(deleteSolidDataset).not.toHaveBeenCalled();
+  });
+});
+
+describe("the cards document itself", () => {
+  it("is part of the deck once, keeping what else it is part of, through every write", async () => {
+    const other = `${CATALOG}#deck-2`;
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(
+        mockSolidDatasetFrom(deck.cardsDocumentUrl),
+        buildThing(createThing({ url: deck.cardsDocumentUrl })).addUrl(DCTERMS.isPartOf, other).build(),
+      ) as never,
+    );
+    await makeRepository().addCard(deck, { front: { "": "火" }, back: { "": "fire" } });
+    const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as SolidDataset;
+    expect(getUrlAll(getThing(saved, deck.cardsDocumentUrl)!, DCTERMS.isPartOf)).toEqual([other, deck.url]);
+
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(saved as never);
+    await makeRepository().removeCard(deck, { ...card, id: "card-fixed", url: `${deck.cardsDocumentUrl}#card-fixed` });
+    const again = vi.mocked(saveSolidDatasetAt).mock.calls[1][1] as SolidDataset;
+    expect(getUrlAll(getThing(again, deck.cardsDocumentUrl)!, DCTERMS.isPartOf)).toEqual([other, deck.url]);
   });
 });

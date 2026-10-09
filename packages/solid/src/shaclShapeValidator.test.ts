@@ -15,6 +15,7 @@ import {
 import { getSolidDatasetOrNull } from "./datasets";
 import { DCAT, DCTERMS, RDF, SM } from "./vocab";
 import { withCatalog } from "./mappers/deckMapper";
+import { toReviewStateThing } from "./mappers/reviewStateMapper";
 import type { ShapeEngine } from "@solid-memo/shacl/engine";
 import { createShaclShapeValidator } from "./shaclShapeValidator";
 import type { ShapeLoader } from "@solid-memo/shacl/shapeLoader";
@@ -289,6 +290,66 @@ describe("createShaclShapeValidator", () => {
       "http://www.w3.org/ns/dcat#theme",
     ]);
     await validator.validateDocument(DOC);
+  }, 30_000);
+
+  it("finds nothing wrong with a deck's documents as the app writes them, another scheduler's state warned about only", async () => {
+    const CARDS = "https://pod.example/solid-memo/a/decks/deck-1.ttl";
+    const REVIEWS = "https://pod.example/solid-memo/a/reviews/deck-1.ttl";
+    const cards = [
+      // The document itself, part of its deck: no class, so no shape and nothing to check.
+      buildThing(createThing({ url: CARDS })).addIri(DCTERMS.isPartOf, `${DOC}#deck-1`).build(),
+      buildThing(createThing({ url: `${CARDS}#card-1` }))
+        .addIri(RDF.type, SM.Card)
+        .addInteger(SM.formatVersion, 5)
+        .addStringWithLocale(SM.front, "Water", "en")
+        .addStringWithLocale(SM.back, "水", "ja")
+        .addIri(SM.distractor, `${CARDS}#card-1-d1`)
+        .addIri("https://schema.org/suggestedAnswer", `${CARDS}#card-1-d1`)
+        .build(),
+      buildThing(createThing({ url: `${CARDS}#card-1-d1` }))
+        .addIri(RDF.type, SM.Distractor)
+        .addIri(RDF.type, "https://schema.org/Answer")
+        .addInteger(SM.formatVersion, 1)
+        .addStringWithLocale(SM.distractorText, "火", "ja")
+        .build(),
+    ].reduce<SolidDataset>((dataset, thing) => setThing(dataset, thing), mockSolidDatasetFrom(CARDS));
+    const state = {
+      cardId: "card-1",
+      direction: "front-to-back" as const,
+      easeFactor: 2.5,
+      intervalDays: 1,
+      repetitions: 1,
+      due: "2026-09-22",
+      firstReviewedAt: "2026-09-21T10:00:00.000Z",
+      lastReviewedAt: "2026-09-21T10:00:00.000Z",
+      formatVersion: 2,
+    };
+    const documents = { id: "deck-1", cardsDocumentUrl: CARDS, reviewsDocumentUrl: REVIEWS };
+    const reviews = [
+      toReviewStateThing(documents, state, null, `${REVIEWS}#card-1`),
+      // Another app's name for a state of the card's other direction: it names its card.
+      toReviewStateThing(documents, { ...state, direction: "back-to-front" }, null, `${REVIEWS}#state-7f3a`),
+      // Another scheduler's state: none of SM-2's fields.
+      buildThing(createThing({ url: `${REVIEWS}#fsrs-1` }))
+        .addIri(RDF.type, SM.ReviewState)
+        .addIri(SM.reviewOf, `${CARDS}#card-1`)
+        .addIri(SM.scheduler, "https://fsrs.example/ns#fsrs")
+        .build(),
+    ].reduce<SolidDataset>((dataset, thing) => setThing(dataset, thing), mockSolidDatasetFrom(REVIEWS));
+    vi.mocked(getSolidDatasetOrNull).mockImplementation(async (url) => (url === CARDS ? cards : reviews) as never);
+    const validator = createShaclShapeValidator({
+      fetch: vi.fn() as unknown as typeof fetch,
+      shapesFetch,
+      ...SHAPE_SOURCES,
+    });
+    const cardsReport = await validator.validateDocument(CARDS);
+    expect(cardsReport.subjects.find((subject) => subject.url === CARDS)).toEqual({ url: CARDS, status: "untyped" });
+    expect(cardsReport.subjects.flatMap((subject) => ("violations" in subject ? subject.violations : []))).toEqual([]);
+    const reviewsReport = await validator.validateDocument(REVIEWS);
+    const results = reviewsReport.subjects.flatMap((subject) => ("violations" in subject ? subject.violations : []));
+    expect(results.length).toBeGreaterThan(0);
+    expect(results.every((v) => v.severity === "warning")).toBe(true);
+    expect(reviewsReport.subjects.find((subject) => subject.url === `${REVIEWS}#fsrs-1`)).toMatchObject({ foreign: true });
   }, 30_000);
 
   it("checks a write with the engine it has: pathless results named by subject, warnings and results about other subjects passed over", async () => {

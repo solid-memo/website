@@ -55,6 +55,23 @@ export function stagedDocumentUrl(documentUrl: string, deckId: string, uuid: str
   return `${documentUrl.slice(0, documentUrl.lastIndexOf("/") + 1)}${deckId}-${uuid}.ttl`;
 }
 
+/**
+ * Whether `documentUrl` is, or was, the deck's cards document: the one it
+ * has now, or one beside it that an upgrade names (stagedDocumentUrl) or
+ * the deck was created with, `…/decks/<deckId>.ttl` or
+ * `…/decks/<deckId>-<uuid>.ttl`. A link written to a card before an
+ * upgrade moved the cards still names its card by its fragment.
+ */
+export function isCardsDocumentOf(documentUrl: string, deck: Pick<Deck, "id" | "cardsDocumentUrl">): boolean {
+  if (documentUrl === deck.cardsDocumentUrl) return true;
+  const container = deck.cardsDocumentUrl.slice(0, deck.cardsDocumentUrl.lastIndexOf("/") + 1);
+  if (!documentUrl.startsWith(container)) return false;
+  const name = documentUrl.slice(container.length);
+  if (!name.startsWith(deck.id)) return false;
+  const rest = name.slice(deck.id.length);
+  return rest === ".ttl" || /^-[^/]+\.ttl$/.test(rest);
+}
+
 /** A document an upgrade replaces (`from`) and the one it writes in its place (`to`). */
 export interface DocumentMove {
   from: string;

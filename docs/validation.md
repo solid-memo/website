@@ -64,7 +64,8 @@ flowchart LR
   catalogue. A subject
   is then `checked` (with its violations), `newer` (a format this app
   does not know: skipped, reported) or `untyped` (no Solid Memo class:
-  listed so strays are visible). A document that does not exist is
+  listed so strays are visible; a cards document's own subject, which
+  only says which deck the document is part of, is one). A document that does not exist is
   `missing`, which is normal, not a problem. A subject another app
   wrote is marked `foreign` and its results are warnings
   ([below](#data-another-app-wrote)).
@@ -188,7 +189,12 @@ Solid Memo's subjects as its `dcterms:creator`, `dcterms:publisher` or
 `dcat:distribution`: the catalogue, a deck's agents and its
 distribution have no Solid Memo class, and they stay Solid Memo's when
 another app's rewrite has dropped their stamp
-([ownership.ts](../packages/solid/src/ownership.ts)). Any other subject
+([ownership.ts](../packages/solid/src/ownership.ts)). A review state
+of another scheduler (any value of `sm:scheduler` but the `sm:sm2`
+IRI, a literal too) is
+never Solid Memo's, whatever its class or stamp: its fields are another
+algorithm's, which need not fit the review-state shape, so it is only
+warned about ([data-model.md](data-model.md#decks-and-cards)). Any other subject
 is another app's, and
 [shaclShapeValidator.ts](../packages/solid/src/shaclShapeValidator.ts)
 marks it `foreign`: it is still checked, against the shape its class

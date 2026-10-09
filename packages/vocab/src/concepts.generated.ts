@@ -140,6 +140,20 @@ export const TEXT_FORMATS = {
   ],
 } as const satisfies ConceptScheme;
 
+/** The spaced-repetition algorithms a review state's fields may belong to. */
+export const SCHEDULERS = {
+  iri: "https://solid-memo.com/ns/vocab/v1.ttl#Schedulers",
+  title: "Schedulers",
+  concepts: [
+    {
+      iri: "https://solid-memo.com/ns/vocab/v1.ttl#sm2",
+      label: { en: "SM-2" },
+      definition: { en: "The SuperMemo 2 algorithm: an ease factor, an interval in days, a count of successful repetitions in a row and a due day. The same as no scheduler." },
+      notation: "sm2",
+    },
+  ],
+} as const satisfies ConceptScheme;
+
 /** What a deck of flashcards is about. */
 export const TOPICS = {
   iri: "https://solid-memo.com/ns/vocab/topics.ttl",

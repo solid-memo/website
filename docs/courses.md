@@ -114,8 +114,8 @@ new type-index entries ([data-model.md](data-model.md#courses)):
 | Where | What |
 |---|---|
 | `catalog.ttl` | The course's deck: `prov:wasDerivedFrom <release>`, and one `sm:completedChapter <release#ch-…>` per chapter completed. |
-| `decks/<deckId>.ttl` | The cards answered so far, each with its `sm:Distractor` subjects, under the release's fragment ids. |
-| `reviews/<deckId>.ttl` | An ordinary front→back review state per card answered. |
+| `decks/<deckId>.ttl` | The cards answered so far, each with its `sm:Distractor` subjects, under the release's fragment ids; each card names them with `schema:suggestedAnswer` too. |
+| `reviews/<deckId>.ttl` | An ordinary front→back review state per card answered, naming its card (`sm:reviewOf`). |
 | `history/<YYYY-MM>.ttl` | An `sm:Answer` per graded answer, with `sm:answerMode sm:multipleChoice` and, when the answer was wrong, `sm:chosenDistractor <…#d1>`. |
 
 - **A card joins the deck when its question is answered.** Starting a
@@ -301,5 +301,7 @@ too.
   `schema:suggestedAnswer` and `schema:answerExplanation` with
   `rdfs:seeAlso`. They are terms of their own because their values
   follow Solid Memo's rules for text ([vocab.md](vocab.md#the-language-of-text)).
+  A card in a pod names its distractors with `schema:suggestedAnswer` as
+  well (since vocabulary 1.16); the frozen releases do not.
 - **No `rdf:List`.** Order is a position on each subject, which a
   version can change one triple at a time, and which SHACL can check.
