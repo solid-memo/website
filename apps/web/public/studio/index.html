@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <!-- The Studio's old address (docs/studio.md). It now lives in the site's
+       page, at the hashes under #/studio, so this sends /studio/#/x on to
+       ../#/studio/x. The policy is the site page's, but the one script it
+       lets run is the one below, by its hash (src/studioRedirect.test.ts
+       checks it still matches). -->
+  <meta http-equiv="Content-Security-Policy"
+    content="script-src 'sha256-yHDQMXBIX6u0eV6xds1d/iKh58A1jq3JXyyolq9q3Pw='; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>Solid Memo Studio</title>
+  <script>
+    location.replace("../#/studio" + (location.hash.indexOf("#/") === 0 ? location.hash.slice(1) : ""));
+  </script>
+</head>
+
+<body>
+  <p><a href="../#/studio">Solid Memo Studio</a></p>
+</body>
+
+</html>

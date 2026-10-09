@@ -33,7 +33,7 @@ stateDiagram-v2
 |---|---|
 | Choose, WebID | `OnboardingFlow` + `WebIdForm` |
 | Discovering, Connected, NoPod, Failed | `PodConnectionScreen` |
-| Orchestration (session, account query) | `AppShell` (in `App.tsx`), which Solid Memo's `App` and the [Studio](studio.md)'s `StudioApp` both are |
+| Orchestration (session, account query) | `AppShell` (in `App.tsx`), the one shell of the site's page around Solid Memo and the [Studio](studio.md) alike |
 
 A user who logged out or whose session expired starts at **WebID**, not
 **Choose**. A guest studies in a pod kept in the browser until they log in

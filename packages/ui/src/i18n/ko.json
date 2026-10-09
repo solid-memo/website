@@ -1294,6 +1294,8 @@
     "tagline": "Solid Pod에 있는 덱을 관리해요.",
     "backToApp": "Solid Memo로 돌아가기",
     "open": "스튜디오에서 열기",
+    "loading": "스튜디오를 여는 중…",
+    "loadFailed": "스튜디오를 열 수 없어요. 페이지를 새로고침하고 다시 시도해 주세요.",
     "decks": {
       "heading": "덱",
       "caption": "{instance}의 덱",

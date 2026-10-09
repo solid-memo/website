@@ -19,7 +19,7 @@ function renderContainer(useCases: UseCases, deck: Deck = kanji, instance = inst
   const invalidate = vi.spyOn(queryClient, "invalidateQueries");
   render(
     <QueryClientProvider client={queryClient}>
-      <DeckAboutContainer useCases={useCases} instance={instance} deck={deck} appHref="../#/deck" />
+      <DeckAboutContainer useCases={useCases} instance={instance} deck={deck} appHref="#/deck" />
     </QueryClientProvider>,
   );
   return { invalidate };
@@ -32,13 +32,13 @@ describe("DeckAboutContainer", () => {
     renderContainer(makeUseCasesFake());
     expect(screen.getByText("Loading preferences…")).toBeInTheDocument();
     expect(await screen.findByRole("heading", { name: "About: Kanji N5" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Open this deck in Solid Memo" })).toHaveAttribute("href", "../#/deck");
+    expect(screen.getByRole("link", { name: "Open this deck in Solid Memo" })).toHaveAttribute("href", "#/deck");
     expect(screen.getByText("Characters.")).toBeInTheDocument();
     expect(screen.getByText("No authors or licence stated.")).toBeInTheDocument();
     expect(screen.getByRole("radio", { name: "Front → back" })).toBeChecked();
     expect(screen.getByRole("link", { name: "study preferences" })).toHaveAttribute(
       "href",
-      `../#/preferences?instance=${encodeURIComponent(instanceA.url)}`,
+      `#/preferences?instance=${encodeURIComponent(instanceA.url)}`,
     );
     expect(await screen.findByText("Every card says which language its text is in.")).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Course progress" })).toBeNull();

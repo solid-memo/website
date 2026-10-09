@@ -108,7 +108,7 @@ function Harness({
       libraryHref="#/library?instance=a"
       deckHref={(d) => `#/deck?deck=${d.id}`}
       preferencesHref={(d) => `#/deck-preferences?deck=${d.id}`}
-      studioHref="studio/#/?instance=a"
+      studioHref="#/studio?instance=a"
       renderStudyAction={(d) => <span>action for {d.title.en}</span>}
       createDeckHref="#/new-deck?instance=a"
       {...overrides}
@@ -284,7 +284,7 @@ describe("DeckListScreen", () => {
     );
     expect(within(menu).getByRole("menuitem", { name: "Open in Studio" })).toHaveAttribute(
       "href",
-      "studio/#/?instance=a",
+      "#/studio?instance=a",
     );
     expect(within(menu).getAllByRole("menuitem").map((item) => item.textContent)).toEqual([
       "Preferences",
@@ -707,7 +707,7 @@ describe("DeckListScreen", () => {
       libraryHref: "#/library?instance=a",
       deckHref: (d) => `#/deck?deck=${d.id}`,
       preferencesHref: (d) => `#/deck-preferences?deck=${d.id}`,
-      studioHref: "studio/#/?instance=a",
+      studioHref: "#/studio?instance=a",
       renderStudyAction: () => null,
       createDeckHref: "#/new-deck?instance=a",
     });
@@ -944,7 +944,7 @@ describe("DeckListScreen", () => {
       libraryHref: "#/library?instance=a",
       deckHref: (d) => `#/deck?deck=${d.id}`,
       preferencesHref: (d) => `#/deck-preferences?deck=${d.id}`,
-      studioHref: "studio/#/?instance=a",
+      studioHref: "#/studio?instance=a",
       renderStudyAction: () => null,
       createDeckHref: "#/new-deck?instance=a",
     };
@@ -1546,7 +1546,7 @@ describe("DeckListScreen dragging while the list changes", () => {
       libraryHref: "#/library?instance=a",
       deckHref: (d) => `#/deck?deck=${d.id}`,
       preferencesHref: (d) => `#/deck-preferences?deck=${d.id}`,
-      studioHref: "studio/#/?instance=a",
+      studioHref: "#/studio?instance=a",
       renderStudyAction: () => null,
       createDeckHref: "#/new-deck?instance=a",
     });

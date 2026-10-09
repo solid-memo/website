@@ -16,7 +16,7 @@ function renderWorkspace(useCases: UseCases) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={queryClient}>
-      {/* As the shell names the app (StudioApp). */}
+      {/* As the site's shell names the app at the Studio's routes (STUDIO in ui's App.tsx). */}
       <AppName.Provider value="studio.name">
         <StudioWorkspace useCases={useCases} session={session} banner={<p>The masthead</p>}>
           <p>A notice</p>
@@ -44,7 +44,7 @@ describe("StudioWorkspace", () => {
     await waitFor(() => expect(document.title).toBe("Decks – Solid Memo Studio"));
     expect(useCases.listInstances).toHaveBeenCalledWith(session);
     const trail = screen.getByRole("navigation", { name: "Breadcrumb" });
-    expect(within(trail).getByRole("link", { name: "Instances" })).toHaveAttribute("href", "#/instances");
+    expect(within(trail).getByRole("link", { name: "Instances" })).toHaveAttribute("href", "#/studio/instances");
     expect(within(trail).getByRole("link", { name: "Decks" })).toHaveAttribute("aria-current", "page");
     // The site's header (Home's own heading row is one too, in the test DOM's eyes).
     expect(screen.getByText("The masthead").closest("header")).toHaveClass("site-header");
@@ -54,7 +54,7 @@ describe("StudioWorkspace", () => {
   it("goes back to Solid Memo at the open instance's decks", async () => {
     renderWorkspace(makeUseCasesFake({ listInstances: vi.fn(async () => [instanceA]) }));
     const back = await screen.findByRole("link", { name: "Back to Solid Memo" });
-    await waitFor(() => expect(back).toHaveAttribute("href", `../#/decks?instance=${encodeURIComponent(instanceA.url)}`));
+    await waitFor(() => expect(back).toHaveAttribute("href", `#/decks?instance=${encodeURIComponent(instanceA.url)}`));
     // No decks yet: Solid Memo makes them.
     expect(await screen.findByRole("link", { name: "Solid Memo" })).toHaveAttribute("href", back.getAttribute("href"));
   });
@@ -69,8 +69,8 @@ describe("StudioWorkspace", () => {
     expect(parseStudioHash(window.location.hash)).toEqual({ screen: "instances" });
     await waitFor(() => expect(document.title).toBe("Instances – Solid Memo Studio"));
     // Solid Memo's own way back, and its way to a new instance, with no instance open.
-    expect(screen.getByRole("link", { name: "Back to Solid Memo" })).toHaveAttribute("href", "../#/");
-    expect(screen.getByRole("link", { name: "New instance…" })).toHaveAttribute("href", "../#/storages");
+    expect(screen.getByRole("link", { name: "Back to Solid Memo" })).toHaveAttribute("href", "#/");
+    expect(screen.getByRole("link", { name: "New instance…" })).toHaveAttribute("href", "#/storages");
     fireEvent.click(screen.getByRole("button", { name: instanceB.name }));
     expect(await screen.findByRole("table", { name: "The decks of Deck set B" })).toBeInTheDocument();
     expect(useCases.listDecks).toHaveBeenCalledWith(instanceB.url);
@@ -94,9 +94,9 @@ describe("StudioWorkspace", () => {
     expect(window.history.length).toBe(length);
     const instance = encodeURIComponent(instanceA.url);
     const deck = encodeURIComponent(verbs.url);
-    expect(screen.getByRole("link", { name: "Verbs" })).toHaveAttribute("href", `#/about?deck=${deck}`);
-    expect(await screen.findByRole("link", { name: /cards of Verbs/ })).toHaveAttribute("href", `#/cards?deck=${deck}`);
-    expect(screen.getByRole("link", { name: "Name and catalogue" })).toHaveAttribute("href", `#/instance?instance=${instance}`);
+    expect(screen.getByRole("link", { name: "Verbs" })).toHaveAttribute("href", `#/studio/about?deck=${deck}`);
+    expect(await screen.findByRole("link", { name: /cards of Verbs/ })).toHaveAttribute("href", `#/studio/cards?deck=${deck}`);
+    expect(screen.getByRole("link", { name: "Name and catalogue" })).toHaveAttribute("href", `#/studio/instance?instance=${instance}`);
   });
 
   it("opens what a deck says of itself from Home: its trail and title, its page in Solid Memo", async () => {
@@ -111,7 +111,7 @@ describe("StudioWorkspace", () => {
     expect(within(trail).getByRole("link", { name: "About Kanji N5" })).toHaveAttribute("aria-current", "page");
     expect(screen.getByRole("link", { name: "Open this deck in Solid Memo" })).toHaveAttribute(
       "href",
-      `../#/deck?instance=${encodeURIComponent(instanceA.url)}&deck=${encodeURIComponent(kanji.url)}`,
+      `#/deck?instance=${encodeURIComponent(instanceA.url)}&deck=${encodeURIComponent(kanji.url)}`,
     );
   });
 
@@ -139,7 +139,7 @@ describe("StudioWorkspace", () => {
     expect(within(trail).getByRole("link", { name: "Groups" })).toHaveAttribute("aria-current", "page");
     expect(screen.getByRole("link", { name: "Kanji N5" })).toHaveAttribute(
       "href",
-      `../#/deck?instance=${encodeURIComponent(instanceA.url)}&deck=${encodeURIComponent(kanji.url)}`,
+      `#/deck?instance=${encodeURIComponent(instanceA.url)}&deck=${encodeURIComponent(kanji.url)}`,
     );
   });
 
@@ -200,7 +200,7 @@ describe("StudioWorkspace", () => {
     expect(within(trail).getByRole("link", { name: "water" })).toHaveAttribute("aria-current", "page");
     expect(screen.getByRole("link", { name: "Open this card in Solid Memo" })).toHaveAttribute(
       "href",
-      `../#/card?instance=${encodeURIComponent(instanceA.url)}&deck=${encodeURIComponent(kanji.url)}&card=${encodeURIComponent(card.url)}`,
+      `#/card?instance=${encodeURIComponent(instanceA.url)}&deck=${encodeURIComponent(kanji.url)}&card=${encodeURIComponent(card.url)}`,
     );
     expect(screen.getByLabelText("Front")).toHaveValue("water");
 

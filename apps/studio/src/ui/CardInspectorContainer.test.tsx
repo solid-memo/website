@@ -29,7 +29,7 @@ function renderContainer(useCases: UseCases, { tab = "distractors" as CardTab, o
         tab={tab}
         tabHref={(each) => `#${each}`}
         onTab={vi.fn()}
-        appHref="../#/card"
+        appHref="#/card"
         onRemoved={onRemoved}
       />
     </QueryClientProvider>,

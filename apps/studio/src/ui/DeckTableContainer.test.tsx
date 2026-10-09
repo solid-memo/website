@@ -25,11 +25,11 @@ function renderContainer(useCases: UseCases) {
         instance={instanceA}
         view={{ filter: "" }}
         onView={() => undefined}
-        appHref="../#/decks"
+        appHref="#/decks"
         groupsHref="#/groups"
         instanceHref="#/instance"
-        deckHref={(deck) => `../#/deck?deck=${deck.id}`}
-        cardsHref={(deck) => `../#/browse?deck=${deck.id}`}
+        deckHref={(deck) => `#/deck?deck=${deck.id}`}
+        cardsHref={(deck) => `#/browse?deck=${deck.id}`}
       />
     </QueryClientProvider>,
   );

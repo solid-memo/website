@@ -36,7 +36,7 @@ describe("InstanceAboutContainer", () => {
     expect(publisher).toHaveTextContent(`Alice (${session.webId}`);
     expect(screen.getByRole("link", { name: "Study preferences in Solid Memo" })).toHaveAttribute(
       "href",
-      `../#/preferences?instance=${encodeURIComponent(instanceA.url)}`,
+      `#/preferences?instance=${encodeURIComponent(instanceA.url)}`,
     );
     expect(screen.getByLabelText("Description")).toHaveValue("My decks.");
     expect(screen.getByRole("combobox", { name: "Licence" })).toHaveValue("");

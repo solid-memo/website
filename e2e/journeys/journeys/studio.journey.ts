@@ -1,13 +1,14 @@
 import { test } from "../fixtures.ts";
-import { logInAndCreateInstance } from "../flows/logIn.ts";
-import type { App } from "../pages/App.ts";
-import type { CssAccount } from "../harness/cssAccount.ts";
 
 /**
- * Solid Memo Studio beside Solid Memo, on one origin (docs/studio.md): a
- * learner with two decks, one with two cards studied once, opens the instance in the
- * Studio from Solid Memo's instance bar, logs in to it at the Solid server
- * (the session is Solid Memo's, which restores only there), and sees the
+ * Solid Memo Studio in Solid Memo's page (docs/studio.md): a visitor
+ * opens the Studio's old address, /studio/, which lands on the Studio's
+ * landing page at #/studio, and logs in there: the identity provider
+ * sends them back to the Studio. From there they go back to Solid Memo,
+ * still logged in, create an instance, make two decks, one with two
+ * cards studied once, and open the instance in the Studio from the
+ * instance bar: the same page and the same session, so no second
+ * login. They see the
  * instance's decks in its table. In the card workbench they find a card
  * by its back (accents aside), sort the cards and select them with the
  * keyboard, the URL holding the view; they replace a word in the
@@ -23,20 +24,30 @@ import type { CssAccount } from "../harness/cssAccount.ts";
  * both decks a pace and moves them back to the top level at once, and
  * deletes one of them, once the user confirms. They rename the instance
  * and describe its catalogue, under a licence, then pick it, by its new
- * name, from the picker, and go back to Solid Memo, which takes a login
- * of its own again (docs/authentication.md) and lists the deck that is
- * left.
+ * name, from the picker, and go back to Solid Memo, still logged in,
+ * which lists the deck that is left.
  */
-test("log in to the Studio and manage an instance's decks @studio", async ({ app, account, runId }) => {
+test("open the Studio from Solid Memo and manage an instance's decks @studio", async ({ app, account, runId }) => {
   const instance = `Studio ${runId}`;
   const alpha = `Alpha ${runId}`;
   const beta = `Beta ${runId}`;
   const group = `Pair ${runId}`;
   const renamed = `Renamed ${runId}`;
 
-  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit());
-  await app.step("02 · Log in with a WebID", () => logInAndCreateInstance(app, account, instance));
-  await app.step("03 · Create two decks, one with two cards, and study those", async () => {
+  await app.step("01 · Visit the Studio's old address: the Studio's landing page", () => app.studio.visitOldAddress());
+  await app.step("02 · Log in from the Studio's landing page: back in the Studio", async () => {
+    await app.onboarding.logInWithWebId(account.webId);
+    await app.cssLogin.logIn(account);
+    await app.cssLogin.authorize(account.webId);
+    await app.onboarding.continueConnected(account.pod);
+    await app.studio.expectBackAfterLogin();
+  });
+  await app.step("03 · Go back to Solid Memo, still logged in, and create an instance", async () => {
+    await app.studio.backToInstanceCreator();
+    await app.instanceCreator.create(instance);
+    await app.chrome.expectLoggedInAs(account.webId);
+  });
+  await app.step("04 · Create two decks, one with two cards, and study those", async () => {
     await app.decks.openDeckCreator();
     await app.deckCreator.create(alpha);
     await app.decks.openDeckCreator();
@@ -52,8 +63,7 @@ test("log in to the Studio and manage an instance's decks @studio", async ({ app
     await app.study.endSession();
   });
 
-  await app.step("04 · Open the instance in Solid Memo Studio: its own login", () => app.studio.openFromApp());
-  await app.step("05 · Log in to the Studio with the WebID", () => logInAgain(app, account));
+  await app.step("05 · Open the instance in Solid Memo Studio: no second login", () => app.studio.openFromApp());
   await app.step("06 · See the instance's decks", async () => {
     await app.studio.expectDeck(instance, alpha, { cards: 2, due: 0 });
     await app.studio.expectDeck(instance, beta, { cards: 0, due: 0 });
@@ -154,20 +164,9 @@ test("log in to the Studio and manage an instance's decks @studio", async ({ app
     await app.studio.expectDeck(renamed, alpha, { cards: 1, due: 0 });
   });
 
-  await app.step("20 · Go back to Solid Memo and log in to it again", async () => {
+  await app.step("20 · Go back to Solid Memo, still logged in", async () => {
     await app.studio.backToApp();
-    await logInAgain(app, account);
+    await app.chrome.expectLoggedInAs(account.webId);
     await app.decks.expectDeck(alpha);
   });
 });
-
-/**
- * Logs in from the landing page, as a user already logged in at the Solid
- * server: it asks only to let the app (Solid Memo, or the Studio) use the Pod.
- */
-async function logInAgain(app: App, account: CssAccount): Promise<void> {
-  await app.onboarding.logInWithWebId(account.webId);
-  await app.cssLogin.authorize(account.webId);
-  await app.onboarding.continueConnected(account.pod);
-  await app.chrome.expectLoggedInAs(account.webId);
-}

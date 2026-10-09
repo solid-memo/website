@@ -7,7 +7,6 @@ import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { routeToHash } from "@solid-memo/ui/router";
 import { InstanceAboutScreen } from "./InstanceAboutScreen";
-import { learnerApp } from "./learnerApp";
 
 /**
  * The instance screen's data: the instance's catalogue (UseCases.readCatalog).
@@ -38,7 +37,7 @@ export function InstanceAboutContainer({ useCases, session, instance }: { useCas
     <InstanceAboutScreen
       instance={instance}
       catalog={catalogQuery.data}
-      preferencesHref={learnerApp(routeToHash({ screen: "preferences", instanceUrl: instance.url }))}
+      preferencesHref={routeToHash({ screen: "preferences", instanceUrl: instance.url })}
       busy={save.isPending}
       saved={save.isSuccess}
       error={errorText(save.error)}

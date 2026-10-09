@@ -11,7 +11,6 @@ import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { routeToHash } from "@solid-memo/ui/router";
 import { DeckAboutScreen } from "./DeckAboutScreen";
-import { learnerApp } from "./learnerApp";
 
 /** One save of the screen: the write, and the queries it changes beside the decks'. */
 interface Save {
@@ -87,7 +86,7 @@ export function DeckAboutContainer({
       deck={deck}
       appHref={appHref}
       preferences={preferencesQuery.data}
-      preferencesHref={learnerApp(routeToHash({ screen: "preferences", instanceUrl: instance.url }))}
+      preferencesHref={routeToHash({ screen: "preferences", instanceUrl: instance.url })}
       languages={languages}
       languagesUnreadable={languages === undefined ? errorText(cardsQuery.error ?? releaseError) : null}
       stated={stateLanguages.data ?? null}

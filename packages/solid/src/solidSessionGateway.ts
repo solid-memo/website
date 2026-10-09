@@ -38,64 +38,65 @@ async function discoverOidcIssuer(webId: string): Promise<string> {
 }
 
 /**
- * The app the session was logged in from, which the identity provider
- * sends the user back to: on a silent restore too, for the authn library
- * keeps one session per origin, wherever it was logged in.
+ * The hash the page had when a login set off. The identity provider
+ * sends the user back to the page without it (a redirect URL may have
+ * no hash), so it is kept here, in this tab, until the login completes.
  */
-const SESSION_PAGE_KEY = "solid-memo:session-page";
-
-/** This page, as the identity provider is told to send the user back to it. */
-function thisPage(): string {
-  return new URL(window.location.pathname, window.location.origin).toString();
-}
+const LOGIN_HASH_KEY = "solid-memo:login-hash";
 
 /**
- * The app this page belongs to, as its directory: `/` and `/index.html`
- * are one app, and so are `/studio` and `/studio/`.
+ * Takes the page back to a route the redirect dropped: the Studio's, say,
+ * not the default one. The hashchange tells the routers, as a link would.
  */
-function thisApp(): string {
-  const path = window.location.pathname.replace(/index\.html$/, "");
-  return new URL(
-    path.endsWith("/") ? path : `${path}/`,
-    window.location.origin,
-  ).toString();
+function returnTo(hash: string): void {
+  if (hash === "") return;
+  window.history.replaceState(null, "", hash);
+  window.dispatchEvent(new HashChangeEvent("hashchange"));
 }
 
-/**
- * `clientName` is the name the app gives itself at login. `defaultApp` is
- * the directory of the app a session with no app kept was logged in from:
- * Solid Memo's, for a session from before the Studio could only have
- * been logged in there.
- */
-export function createSolidSessionGateway(clientName: string, defaultApp: string): SessionGateway {
+export function createSolidSessionGateway(clientName: string): SessionGateway {
   /** Redirects the browser to the identity provider; does not return. */
   async function startLogin(oidcIssuer: string): Promise<void> {
-    window.localStorage.setItem(SESSION_PAGE_KEY, thisApp());
-    await login({ oidcIssuer, redirectUrl: thisPage(), clientName });
+    window.sessionStorage.setItem(LOGIN_HASH_KEY, window.location.hash);
+    await login({
+      oidcIssuer,
+      redirectUrl: new URL(
+        window.location.pathname,
+        window.location.origin,
+      ).toString(),
+      clientName,
+    });
   }
 
   return {
     async restore() {
-      let origin: SessionOrigin = "restored";
+      // Set by the listener below, so not narrowed to its first value.
+      let origin = "restored" as SessionOrigin;
       const onLogin = () => {
         origin = "login";
       };
+      // A silent restore leaves the page for the identity provider and
+      // comes back without its hash; the library reports the page it left.
+      let restoredFrom = "";
+      const onRestored = (url: string) => {
+        restoredFrom = new URL(url).hash;
+      };
       events().on(EVENTS.LOGIN, onLogin);
+      events().on(EVENTS.SESSION_RESTORED, onRestored);
       try {
-        // A session logged in from another app of the site (Solid Memo and
-        // the Studio share an origin) is restored only there: a silent
-        // restore here would send the user to that app. This app takes a
-        // login of its own instead (docs/authentication.md).
-        const sessionPage = window.localStorage.getItem(SESSION_PAGE_KEY) ?? defaultApp;
         const info = await handleIncomingRedirect({
-          restorePreviousSession: sessionPage === thisApp(),
+          restorePreviousSession: true,
         });
+        const loginHash = window.sessionStorage.getItem(LOGIN_HASH_KEY) ?? "";
+        window.sessionStorage.removeItem(LOGIN_HASH_KEY);
         if (info?.isLoggedIn && info.webId) {
+          returnTo(origin === "login" ? loginHash : restoredFrom);
           return { session: { webId: info.webId }, origin };
         }
         return null;
       } finally {
         events().off(EVENTS.LOGIN, onLogin);
+        events().off(EVENTS.SESSION_RESTORED, onRestored);
       }
     },
 

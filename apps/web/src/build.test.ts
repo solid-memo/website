@@ -6,8 +6,8 @@ import { beforeAll, describe, expect, it } from "vitest";
 
 /*
  * The production build itself, as the site ships it (docs/markdown.md):
- * no way for data to become markup, and a Content Security Policy that
- * lets the page's own scripts run.
+ * no way for data to become markup, the Studio in a chunk of its own,
+ * and a Content Security Policy that lets the page's own scripts run.
  */
 
 /** Ways script can turn a string into markup. */
@@ -52,6 +52,30 @@ describe("the bundle", () => {
     const ids = chunks.flatMap((chunk) => Object.keys(chunk.modules));
     expect(ids).toContainEqual(expect.stringMatching(/decode-named-character-reference\/index\.js$/));
     expect(ids).not.toContainEqual(expect.stringMatching(/decode-named-character-reference\/index\.dom\.js$/));
+  });
+});
+
+describe("the Studio", () => {
+  const isStudio = (id: string) => id.includes("/apps/studio/src/");
+  const chunkNamed = (fileName: string) => chunks.find((chunk) => chunk.fileName === fileName)!;
+
+  it("is a chunk of its own, which the page fetches only when a Studio route opens (docs/studio.md)", () => {
+    const studio = chunks.filter((chunk) => Object.keys(chunk.modules).some(isStudio));
+    expect(studio).toHaveLength(1);
+    expect(studio[0]!.isDynamicEntry).toBe(true);
+    expect(studio[0]!.isEntry).toBe(false);
+    // What the page loads up front: its entry, and what that imports, statically.
+    const upFront = new Set<string>();
+    const visit = (fileName: string) => {
+      if (upFront.has(fileName)) return;
+      upFront.add(fileName);
+      chunkNamed(fileName).imports.forEach(visit);
+    };
+    const entry = chunks.find((chunk) => chunk.isEntry)!;
+    visit(entry.fileName);
+    expect(upFront.has(studio[0]!.fileName)).toBe(false);
+    for (const fileName of upFront) expect(Object.keys(chunkNamed(fileName).modules).filter(isStudio)).toEqual([]);
+    expect(html).not.toContain(studio[0]!.fileName);
   });
 });
 

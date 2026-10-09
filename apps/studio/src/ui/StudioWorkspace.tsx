@@ -21,7 +21,6 @@ import { DeckAboutContainer } from "./DeckAboutContainer";
 import { DeckTableContainer } from "./DeckTableContainer";
 import { GroupsContainer } from "./GroupsContainer";
 import { InstanceAboutContainer } from "./InstanceAboutContainer";
-import { learnerApp } from "./learnerApp";
 import { instanceOfRoute, studioRouteToHash, useStudioRoute, type StudioRoute } from "./router";
 
 /**
@@ -127,7 +126,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             session={session}
             instances={instances!}
             // Instances are made in Solid Memo, from a storage in the user's Pod.
-            newInstanceHref={learnerApp(routeToHash({ screen: "storagePicker" }))}
+            newInstanceHref={routeToHash({ screen: "storagePicker" })}
             onOpen={(instance) => navigate({ screen: "home", instanceUrl: instance.url })}
           />
         );
@@ -139,7 +138,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             view={route.view ?? DEFAULT_DECK_TABLE_VIEW}
             // How the table is looked at is no Back stop: the screen stays the same.
             onView={(view) => replace({ ...route, view })}
-            appHref={learnerApp(decksHref(route.instanceUrl))}
+            appHref={decksHref(route.instanceUrl)}
             groupsHref={studioRouteToHash({ screen: "groups", instanceUrl: route.instanceUrl })}
             instanceHref={studioRouteToHash({ screen: "instance", instanceUrl: route.instanceUrl })}
             deckHref={(deck) => studioRouteToHash({ screen: "about", deckUrl: deck.url })}
@@ -159,7 +158,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             useCases={useCases}
             instance={activeInstance!}
             deck={activeDeck!}
-            appHref={learnerApp(deckHref(activeInstance!.url, route.deckUrl))}
+            appHref={deckHref(activeInstance!.url, route.deckUrl)}
           />
         );
       case "cards": {
@@ -192,7 +191,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             tabHref={(tab) => studioRouteToHash({ ...route, tab })}
             // Like the workbench's query, the tab is no Back stop.
             onTab={(tab) => replace({ ...route, tab })}
-            appHref={learnerApp(routeToHash({ screen: "card", instanceUrl: activeInstance!.url, deckUrl: route.deckUrl, cardUrl: route.cardUrl }))}
+            appHref={routeToHash({ screen: "card", instanceUrl: activeInstance!.url, deckUrl: route.deckUrl, cardUrl: route.cardUrl })}
             onRemoved={() => replace({ screen: "cards", deckUrl: route.deckUrl })}
           />
         );
@@ -204,7 +203,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
       <header class="site-header">
         {banner}
         <p class="header-link">
-          <a href={learnerApp(instanceUrl === null ? "#/" : decksHref(instanceUrl))}>{t("studio.backToApp")}</a>
+          <a href={instanceUrl === null ? "#/" : decksHref(instanceUrl)}>{t("studio.backToApp")}</a>
         </p>
       </header>
       <main id={MAIN_ID} tabIndex={-1} class="workspace">

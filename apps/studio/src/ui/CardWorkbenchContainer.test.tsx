@@ -42,7 +42,7 @@ function renderContainer(useCases: UseCases, query: CardQuery = DEFAULT_CARD_QUE
         decks={[deck, nouns]}
         query={query}
         onQuery={() => undefined}
-        cardHref={(card) => `../#/card?card=${card.id}`}
+        cardHref={(card) => `#/card?card=${card.id}`}
         onOpen={() => undefined}
       />
     </QueryClientProvider>,

@@ -57,24 +57,19 @@ previous session (`restorePreviousSession: true`). It returns a domain
 completed) and `"restored"` otherwise; the UI shows the "Pod connected"
 onboarding step only for the former.
 
-### Two apps on one origin
-
-Solid Memo and the [Studio](studio.md) are two pages of one site. The
-authn library keeps one session per origin, and a silent restore
-always sends the user back to the page the session was logged in from.
-Left alone, opening the Studio after logging in to Solid Memo would
-land the user back in Solid Memo, and the other way round.
-
-So `login` keeps the app it was started from in localStorage
-(`solid-memo:session-page`), and `restore()` restores a previous session
-only in that app. A session that keeps no app, as one from before the
-Studio, can only have been logged in from Solid Memo, so it counts as
-Solid Memo's: composition hands the gateway the site's root as that
-default app. An app is its page's directory: `/`, `/index.html` and
-`/studio` count as `/`, `/` and `/studio/`. Elsewhere the app shows its
-landing page and takes a login of its own, which then becomes the
-session's app. The identity provider
-still knows the user, so this login usually asks only for consent.
+Solid Memo and the Studio are one page, so they share this one session
+([studio.md](studio.md)): a login in either is a login in both. A
+redirect URL may carry no hash, so the identity provider sends the user
+back to the site's root, without the route they left from. The gateway
+puts that route back before `restore()` returns. On a login, `startLogin`
+keeps the hash in `sessionStorage` (`solid-memo:login-hash`) and
+`restore()` takes it from there. On a silent restore, the library
+reports the page it left (its `SESSION_RESTORED` event) and `restore()`
+takes the hash from that. Either way it replaces the page's hash and
+fires `hashchange`, so the routers follow, as after a link. So a reload
+comes back to the screen it left, and a login set off at the Studio's
+landing page (`#/studio`) comes back to the Studio, not to Solid Memo's
+decks.
 
 ## Authenticated requests
 

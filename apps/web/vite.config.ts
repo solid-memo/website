@@ -1,15 +1,10 @@
 import { existsSync } from "node:fs";
 import { createRequire } from "node:module";
-import { resolve } from "node:path";
-import { defineConfig } from "vitest/config";
+import { defineConfig } from "vite";
 import preact from "@preact/preset-vite";
-import { builtAppPlugin } from "@solid-memo/vocab/tooling/publishApp";
 import { turtleDirectoryPlugin } from "@solid-memo/vocab/tooling/publishTurtle";
 import { DECKS_ROOT, NS_ROOT, VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
 import { siteDefines } from "@solid-memo/vocab/tooling/siteBuild";
-
-/** The Studio's build (apps/studio), which turbo runs before this one (turbo.json). */
-const STUDIO_DIST = resolve(import.meta.dirname, "../studio/dist");
 
 export default defineConfig({
   define: siteDefines(),
@@ -22,10 +17,6 @@ export default defineConfig({
     turtleDirectoryPlugin({ dir: NS_ROOT, publicPath: "ns" }),
     ...(existsSync(DECKS_ROOT) ? [turtleDirectoryPlugin({ dir: DECKS_ROOT, publicPath: "decks" })] : []),
     turtleDirectoryPlugin({ dir: `${VOCAB_ROOT}vendor`, publicPath: "vendor" }),
-    // The Studio, at studio/, on the same origin (docs/studio.md). A build
-    // of this app outside turbo copies whatever Studio build is there, or
-    // warns that there is none; the deploy checks it is there.
-    builtAppPlugin({ dir: STUDIO_DIST, publicPath: "studio" }),
   ],
   resolve: {
     alias: {
@@ -35,19 +26,6 @@ export default defineConfig({
       // by writing to an element's innerHTML. Its plain one, a lookup table,
       // keeps the bundle free of HTML sinks (docs/markdown.md, src/build.test.ts).
       "decode-named-character-reference": createRequire(import.meta.url).resolve("decode-named-character-reference"),
-    },
-  },
-  test: {
-    coverage: {
-      provider: "v8",
-      include: ["src/**/*.{ts,tsx}"],
-      exclude: ["src/main.tsx", "src/vite-env.d.ts"],
-      thresholds: {
-        lines: 100,
-        functions: 100,
-        branches: 100,
-        statements: 100,
-      },
     },
   },
 });

@@ -42,12 +42,17 @@ export class Chrome extends Screen {
 
   /**
    * Reloads the app, everything it showed read again from the pod: the
-   * session is restored and the app opens at Decks.
+   * session is restored and the app opens at the screen it showed, its
+   * URL and its trail's last step as before.
    */
   async reload(): Promise<void> {
     await this.intent("Reload the app", async () => {
+      const here = this.breadcrumbs.locator('[aria-current="page"]');
+      const url = this.page.url();
+      const step = await here.innerText();
       await this.page.reload();
-      await this.expectBreadcrumbHere("breadcrumbs.decks");
+      await expect(this.page).toHaveURL(url);
+      await expect(here).toHaveText(step);
     });
   }
 

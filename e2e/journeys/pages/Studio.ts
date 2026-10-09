@@ -3,8 +3,9 @@ import { escapeRegExp } from "../harness/strings.ts";
 import { Screen } from "./Screen.ts";
 
 /**
- * Solid Memo Studio, at studio/ of the same site (docs/studio.md): its
- * landing page (the same login as Solid Memo's, under the Studio's name),
+ * Solid Memo Studio, in Solid Memo's page at #/studio (docs/studio.md):
+ * its old address, its landing page (the same login as Solid Memo's,
+ * under the Studio's name, which comes back to the Studio),
  * its instance picker, Home's table of decks (its filter, sort and bulk
  * actions), its Groups screen, the card workbench (its search, sort,
  * selection and bulk edits, with their Undo, its edits of review
@@ -20,15 +21,53 @@ export class Studio extends Screen {
   }
 
   /**
-   * Follows Solid Memo's "Open in Studio" in the instance bar. The Studio
-   * shows its landing page, unless the session was logged in from the Studio.
+   * Visits the Studio's old address, /studio/, which sends the visitor on
+   * to the Studio in Solid Memo's page: its landing page, before anyone is
+   * logged in.
+   */
+  async visitOldAddress(): Promise<void> {
+    await this.intent("Visit the Studio's old address", async () => {
+      await this.page.goto("studio/#/");
+      await expect(this.page).toHaveURL(/\/#\/studio\/$/);
+      await expect(this.page.getByRole("heading", { level: 1, name: this.t("studio.name") })).toBeVisible();
+      await expect(this.page.getByText(this.t("studio.tagline"))).toBeVisible();
+      await expect(this.page.getByRole("button", { name: this.t("onboardingFlow.havePod") })).toBeVisible();
+    });
+  }
+
+  /**
+   * Back from a login set off at the Studio's landing page: the Studio
+   * again, at the route the login left from, not Solid Memo.
+   */
+  async expectBackAfterLogin(): Promise<void> {
+    await this.intent("Come back to the Studio after the login", async () => {
+      await expect(this.page).toHaveURL(/\/#\/studio\/$/);
+      await expect(this.page.getByRole("banner").getByRole("link", { name: this.t("studio.name"), exact: true })).toBeVisible();
+    });
+  }
+
+  /**
+   * Follows the header's link back to Solid Memo for a user with no
+   * instance yet: the same session, so still logged in, at Solid Memo's
+   * instance creator.
+   */
+  async backToInstanceCreator(): Promise<void> {
+    await this.intent("Go back to Solid Memo to create an instance", async () => {
+      await this.page.getByRole("banner").getByRole("link", { name: this.t("studio.backToApp") }).click();
+      await expect(this.page.getByRole("heading", { name: this.t("instanceCreator.heading") })).toBeVisible();
+    });
+  }
+
+  /**
+   * Follows Solid Memo's "Open in Studio" in the instance bar: the Studio
+   * opens in the same page, in the same session, so with no login of its own.
    */
   async openFromApp(): Promise<void> {
     await this.intent("Open Solid Memo Studio from Solid Memo", async () => {
       await this.app.chrome.instanceNav.getByRole("link", { name: this.t("studio.open") }).click();
-      await expect(this.page).toHaveURL(/\/studio\/#\/\?instance=/);
-      await expect(this.page.getByRole("heading", { level: 1, name: this.t("studio.name") })).toBeVisible();
-      await expect(this.page.getByRole("button", { name: this.t("onboardingFlow.havePod") })).toBeVisible();
+      await expect(this.page).toHaveURL(/\/#\/studio\?instance=/);
+      await expect(this.page.getByRole("banner").getByRole("link", { name: this.t("studio.name"), exact: true })).toBeVisible();
+      await expect(this.page.getByRole("banner").getByRole("link", { name: this.t("studio.backToApp") })).toBeVisible();
     });
   }
 
@@ -148,7 +187,7 @@ export class Studio extends Screen {
       const name = new RegExp(escapeRegExp(this.t("studio.decks.cardsOf", { deck })));
       await this.row(instance, deck).getByRole("link", { name }).click();
       await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.cards.heading", { deck }) })).toBeVisible();
-      await expect(this.page).toHaveURL(/#\/cards\?deck=/);
+      await expect(this.page).toHaveURL(/#\/studio\/cards\?deck=/);
       await expect(this.cards(deck).getByRole("rowheader")).toHaveText(fronts);
     });
   }
@@ -258,7 +297,7 @@ export class Studio extends Screen {
     await this.intent(`Inspect the card ${front}`, async () => {
       await this.cards(deck).getByRole("rowheader", { name: front, exact: true }).getByRole("link").click();
       await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.card.heading", { card: front }) })).toBeVisible();
-      await expect(this.page).toHaveURL(/#\/card\?deck=/);
+      await expect(this.page).toHaveURL(/#\/studio\/card\?deck=/);
       await expect(this.page.getByLabel(this.t("cardContentFields.front"), { exact: true })).toHaveValue(front);
     });
   }
@@ -364,7 +403,7 @@ export class Studio extends Screen {
     await this.intent(`Open what ${deck} says of itself`, async () => {
       await this.row(instance, deck).getByRole("rowheader").getByRole("link", { name: deck, exact: true }).click();
       await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.about.heading", { deck }) })).toBeVisible();
-      await expect(this.page).toHaveURL(/#\/about\?deck=/);
+      await expect(this.page).toHaveURL(/#\/studio\/about\?deck=/);
     });
   }
 
@@ -447,15 +486,15 @@ export class Studio extends Screen {
   }
 
   /**
-   * Follows the header's link back to Solid Memo. The session is the
-   * Studio's now, which restores only in the Studio, so Solid Memo opens
-   * on its landing page, to log in to.
+   * Follows the header's link back to Solid Memo, at the open instance's
+   * decks: the same page and the same session, so still logged in.
    */
   async backToApp(): Promise<void> {
     await this.intent("Go back to Solid Memo", async () => {
       await this.page.getByRole("banner").getByRole("link", { name: this.t("studio.backToApp") }).click();
-      await expect(this.page.getByRole("heading", { level: 1, name: this.t("app.documentTitle") })).toBeVisible();
-      await expect(this.page.getByRole("button", { name: this.t("onboardingFlow.havePod") })).toBeVisible();
+      await expect(this.page).toHaveURL(/\/#\/decks\?instance=/);
+      await expect(this.page.getByRole("banner").getByRole("link", { name: this.t("app.documentTitle"), exact: true })).toBeVisible();
+      await this.app.chrome.expectBreadcrumbHere("breadcrumbs.decks");
     });
   }
 }

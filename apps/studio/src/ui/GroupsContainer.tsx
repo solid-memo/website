@@ -7,7 +7,6 @@ import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { courseHref, deckHref, libraryHref, routeToHash } from "@solid-memo/ui/router";
-import { learnerApp } from "./learnerApp";
 
 /**
  * Groups: the instance's decks as the user arranged them into groups,
@@ -28,14 +27,14 @@ export function GroupsContainer({ useCases, instance }: { useCases: UseCases; in
     <DeckListScreen
       {...editor}
       heading={t("studio.groups.heading")}
-      libraryHref={learnerApp(libraryHref(instance.url))}
-      deckHref={(deck) => learnerApp(deckHref(instance.url, deck.url))}
-      courseHref={(deck) => (isCourse(deck) ? learnerApp(courseHref(instance.url, deck.url)) : undefined)}
+      libraryHref={libraryHref(instance.url)}
+      deckHref={(deck) => deckHref(instance.url, deck.url)}
+      courseHref={(deck) => (isCourse(deck) ? courseHref(instance.url, deck.url) : undefined)}
       preferencesHref={(deck) =>
-        learnerApp(routeToHash({ screen: "deckPreferences", instanceUrl: instance.url, deckUrl: deck.url }))
+        routeToHash({ screen: "deckPreferences", instanceUrl: instance.url, deckUrl: deck.url })
       }
       renderStudyAction={() => null}
-      createDeckHref={learnerApp(routeToHash({ screen: "deckCreator", instanceUrl: instance.url }))}
+      createDeckHref={routeToHash({ screen: "deckCreator", instanceUrl: instance.url })}
     />
   );
 }

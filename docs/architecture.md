@@ -11,8 +11,8 @@ where the layers meet.
 
 | Package | Folder | Responsibility |
 |---|---|---|
-| `@solid-memo/web` | `apps/web/` | The site: its entry point (`src/main.tsx`), which renders the app over the use cases `composition` wires, and the Vite build that also publishes `ns/` (the vocabulary and shapes) and `decks/` (the [deck library](deck-library.md)) with the app ([deployment.md](deployment.md)). |
-| `@solid-memo/studio` | `apps/studio/` | Solid Memo Studio ([studio.md](studio.md)): its entry point (`src/main.tsx`), its screens and router (`src/ui/`), and the Vite build that Solid Memo's build publishes at `studio/`. |
+| `@solid-memo/web` | `apps/web/` | The site's one page: its entry point (`src/main.tsx`), which renders the app over the use cases `composition` wires, the page (`src/App.tsx`) that shows Solid Memo, or the Studio at its routes, loaded lazily, and the Vite build that also publishes `ns/` (the vocabulary and shapes) and `decks/` (the [deck library](deck-library.md)) with the app ([deployment.md](deployment.md)). |
+| `@solid-memo/studio` | `apps/studio/` | Solid Memo Studio ([studio.md](studio.md)): its screens and router (`src/ui/`), and its entry point, `StudioWorkspace`, which the site's page loads as a chunk of its own at the hashes under `#/studio`. |
 | `@solid-memo/composition` | `packages/composition/` | The composition root (`createAppUseCases` in `src/appUseCases.ts`): every adapter behind its port, the guest's pod, the write fence, the site's documents read from where it is served, and the use cases over them. An app passes what is its own: its name, where it is served, the build's values. |
 | `@solid-memo/ui` | `packages/ui/` | The Preact UI: the components and the router (`src/ui/`), the messages in each language (`src/i18n/`), the theme and the styles (`src/style.css`). It receives `UseCases` and knows no adapter. |
 | `@solid-memo/application` | `packages/application/` | Use cases (what the app does) and ports (what the app needs). |
@@ -33,11 +33,11 @@ owns the interfaces, adapters conform to them.
 
 ```mermaid
 graph TD
-    web["apps/web<br/>main.tsx"] --> ui["ui<br/>the components"]
-    studio["apps/studio<br/>its screens"] --> ui
+    web["apps/web<br/>the page"] --> ui["ui<br/>the components"]
+    web -. main.tsx only, lazily .-> studio["apps/studio<br/>its screens"]
+    studio --> ui
     ui --> application
     web -. main.tsx only .-> composition["composition<br/>the composition root"]
-    studio -. main.tsx only .-> composition
     composition --> application & solid & browser
     ui -. src/ui/ only .-> markdown
     application --> domain --> vocab["vocab<br/>the data contract"]
@@ -65,14 +65,13 @@ cached by input. A task's inputs are its package's files and those of the
 packages it depends on; the few that also read `ns/` or `decks/` add them
 in their package's own `turbo.json` (`vocab`, `shacl`, `solid`,
 `composition`, `apps/web` and `apps/studio`), so a deck edit reruns only the tasks that
-read the library. Solid Memo's `build` also waits for the Studio's,
-whose files it publishes at `studio/` ([studio.md](studio.md)).
+read the library. The Studio has no build of its own: Solid Memo's
+bundles it ([studio.md](studio.md)).
 
 ```sh
 npm run check     # every package: typecheck, tests (100% coverage), drift, formatting, the deck library; then boundaries
-npm run build     # the site, the Studio at studio/ included, into apps/web/dist/
-npm run dev       # the site, from source
-npm run dev:studio # the Studio, from source
+npm run build     # the site, the Studio included, into apps/web/dist/
+npm run dev       # the site, from source; the Studio at #/studio
 npm start         # the site as deployed: built, then served at http://localhost:4173
 npm run test:unit # every package's tests in one run, without coverage (a file or two: `-- <path>`)
 npm run test:watch # the same, in watch mode
@@ -90,8 +89,9 @@ npm run crosscheck # the pySHACL cross-check CI runs (Python, scripts/requiremen
 - `UseCases` ([useCases.ts](../packages/application/src/useCases.ts)) —
   the UI's only entry point. Created once by the composition root,
   `createAppUseCases` ([appUseCases.ts](../packages/composition/src/appUseCases.ts)),
-  which each app's `src/main.tsx` calls (`apps/web`, `apps/studio`), and passed to
-  its top component (`App`, `StudioApp`) as a prop.
+  which the site's `apps/web/src/main.tsx` calls, and passed to its top
+  component (`App`) as a prop, and from there to Solid Memo's screens
+  and the Studio's alike.
 - Ports ([ports.ts](../packages/application/src/ports.ts)) — narrow
   interfaces (one per external capability) implemented by factories in
   `packages/solid/src/` and `packages/browser/src/`.
