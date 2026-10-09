@@ -21,6 +21,6 @@
     "@playwright/test": "1.64.0"
   },
   "dependencies": {
-    "@solid-memo/web": "*"
+    "@solid-memo/ui": "*"
   }
 }

@@ -1,9 +1,9 @@
-import en from "@solid-memo/web/src/i18n/en.json" with { type: "json" };
-import sv from "@solid-memo/web/src/i18n/sv.json" with { type: "json" };
-import ko from "@solid-memo/web/src/i18n/ko.json" with { type: "json" };
+import en from "@solid-memo/ui/i18n/en.json" with { type: "json" };
+import sv from "@solid-memo/ui/i18n/sv.json" with { type: "json" };
+import ko from "@solid-memo/ui/i18n/ko.json" with { type: "json" };
 
 /**
- * The app's own text, as its i18n files have it (apps/web/src/i18n), so
+ * The app's own text, as its i18n files have it (packages/ui/src/i18n), so
  * a journey finds buttons and messages by what the user reads, in any of its
  * languages, and a change of wording changes the journeys with it.
  */
@@ -30,7 +30,7 @@ export function text(locale: Locale, key: string, vars: Record<string, string | 
   for (const part of key.split(".")) node = (node as Messages | undefined)?.[part];
   const form = isPlural(node) ? new Intl.PluralRules(locale).select(Number(vars.count)) : undefined;
   const message = isPlural(node) ? (form === "one" ? node.one : node.other) : node;
-  if (typeof message !== "string") throw new Error(`apps/web/src/i18n/${locale}.json has no message ${key}.`);
+  if (typeof message !== "string") throw new Error(`packages/ui/src/i18n/${locale}.json has no message ${key}.`);
   return message.replace(/\{(\w+)\}/g, (whole, name: string) => (name in vars ? String(vars[name]) : whole));
 }
 

@@ -1,7 +1,7 @@
 # Onboarding
 
 How a signed-out visitor ends up with a connected Pod. The UI lives in
-[apps/web/src/ui/onboarding/](../apps/web/src/ui/onboarding/); everything Solid-specific
+[packages/ui/src/ui/onboarding/](../packages/ui/src/ui/onboarding/); everything Solid-specific
 stays behind use cases (see [boundaries.md](boundaries.md)).
 
 ## Flow

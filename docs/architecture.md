@@ -11,7 +11,8 @@ where the layers meet.
 
 | Package | Folder | Responsibility |
 |---|---|---|
-| `@solid-memo/web` | `apps/web/` | The site: Preact UI (`src/ui/`), the composition root (`src/main.tsx`), the Vite build that also publishes `ns/` (the vocabulary and shapes) and `decks/` (the [deck library](deck-library.md)) with the app ([deployment.md](deployment.md)). |
+| `@solid-memo/web` | `apps/web/` | The site: the composition root (`src/main.tsx`), the Vite build that also publishes `ns/` (the vocabulary and shapes) and `decks/` (the [deck library](deck-library.md)) with the app ([deployment.md](deployment.md)). |
+| `@solid-memo/ui` | `packages/ui/` | The Preact UI: the components and the router (`src/ui/`), the messages in each language (`src/i18n/`), the theme and the styles (`src/style.css`). It receives `UseCases` and knows no adapter. |
 | `@solid-memo/application` | `packages/application/` | Use cases (what the app does) and ports (what the app needs). |
 | `@solid-memo/domain` | `packages/domain/` | Pure types and pure functions: the app's vocabulary, SRS, migrations. |
 | `@solid-memo/vocab` | `packages/vocab/` | The data contract: the TypeScript generated (`src/*.generated.ts`) from the RDF vocabulary and SHACL shapes in the repository's `ns/` ([vocab.md](vocab.md), [shapes.md](shapes.md)), with the generator (`tooling/`); vendored profiles (`vendor/`) and fixtures. |
@@ -30,9 +31,10 @@ owns the interfaces, adapters conform to them.
 
 ```mermaid
 graph TD
-    web["apps/web<br/>UI + main.tsx"] --> application
+    web["apps/web<br/>main.tsx"] --> ui["ui<br/>the components"] & application
+    ui --> application
     web -. main.tsx only .-> solid & browser
-    web -. src/ui/ only .-> markdown
+    ui -. src/ui/ only .-> markdown
     application --> domain --> vocab["vocab<br/>the data contract"]
     solid -. implements ports .-> application
     solid --> domain & vocab & shacl
@@ -46,6 +48,9 @@ graph TD
 Packages are consumed as TypeScript source (`exports` maps
 `@solid-memo/<package>/<module>` to `src/<module>.ts`): there is no
 build step between packages, and Vite bundles the app from source.
+`ui` maps `@solid-memo/ui/<module>` to `src/ui/<module>.tsx`, lists its
+few `.ts` modules one by one, and exports `style.css` and the message
+files (`i18n/<locale>.json`).
 
 ## Tasks
 

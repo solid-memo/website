@@ -153,7 +153,7 @@ a note or a chapter's description it shows as a rule.
 
 ## Where it is shown: the profiles
 
-The renderer is `apps/web/src/ui/Markdown.tsx`, reached through
+The renderer is `packages/ui/src/ui/Markdown.tsx`, reached through
 `DataText.tsx` (`DataText`, `DataProse` for a step's theory, `DataLine`);
 nothing else in the app renders text from data as Markdown. Which profile a text gets depends only on the place, never on
 the deck or course it comes from.
@@ -226,14 +226,15 @@ Two checks of the built site hold this (`apps/web/src/build.test.ts`):
   `document.write` is Preact's own diff, which only a
   `dangerouslySetInnerHTML` prop reaches, and no other module names one.
   The parser's entity decoder has a browser build that decodes `&name;`
-  by writing to `innerHTML`; `vite.config.ts` aliases it to its plain
-  build, a lookup table.
+  by writing to `innerHTML`; `apps/web/vite.config.ts` aliases it to
+  its plain build, a lookup table, and so does
+  `packages/ui/vitest.config.ts` for the component tests.
 - **A Content Security Policy**, as a meta tag in `index.html` (GitHub
   Pages sets no headers): `script-src 'self'` and the inline theme
   script by its hash, `object-src 'none'`, `base-uri 'none'`,
   `form-action 'none'`. The test checks the hash still matches the
   script. `img-src` stays open, since card pictures come from pods;
-  `style-src` waits until the inline styles in `src/ui` are reviewed.
+  `style-src` waits until the inline styles in `packages/ui/src/ui` are reviewed.
 
 ## Rules for a release
 

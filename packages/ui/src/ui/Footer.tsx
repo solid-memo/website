@@ -4,9 +4,9 @@ import { useI18n } from "./i18n";
 /** Site-wide attribution and build version, shown under every screen. */
 export function Footer({
   /** Full commit hash of the build; the line is left out when unknown. */
-  commitSha = __COMMIT_SHA__,
+  commitSha,
 }: {
-  commitSha?: string | null;
+  commitSha: string | null;
 }) {
   const { tx } = useI18n();
   return (

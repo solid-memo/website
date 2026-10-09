@@ -34,12 +34,13 @@ configs may also use the shared test tooling of the root `package.json`.
 | `shacl` | `domain`, `vocab`, `turtle`, `markdown` | `turtle`, `markdown`: `node/` only |
 | `solid` | `application`, `domain`, `vocab`, `shacl` | |
 | `browser` | `application`, `domain` | |
-| `web` | `application`, `domain`, `vocab`, `solid`, `browser`, `markdown` | `solid`, `browser`: `src/main.tsx` only; `markdown`: `src/ui/` only |
+| `ui` | `application`, `domain`, `vocab`, `markdown` | `markdown`: `src/ui/` only |
+| `web` | `application`, `domain`, `vocab`, `solid`, `browser`, `ui` | `solid`, `browser`: `src/main.tsx` only |
 | `e2e-pod` | `application`, `domain`, `vocab`, `solid` | |
-| `e2e-journeys` | `web` | `web`: `harness/strings.ts` only, for the app's messages |
+| `e2e-journeys` | `ui` | `ui`: `harness/strings.ts` only, for the app's messages |
 
 Browser code: `src/` of `markdown`, `vocab`, `domain`, `application`, `shacl`,
-`solid`, `browser` and `web`; `vocab`'s `tooling/` is node-only.
+`solid`, `browser`, `ui` and `web`; `vocab`'s `tooling/` is node-only.
 
 ## Vendor libraries
 
@@ -49,8 +50,8 @@ used nowhere else):
 | Library | Package | Notes |
 |---|---|---|
 | `@inrupt/solid-client`, `@inrupt/solid-client-authn-browser` | `solid` | `shacl` also uses `@inrupt/solid-client` to parse shape documents |
-| `@tanstack/react-query`, `preact` | `web` | UI and `main.tsx` |
-| `@fontsource/*`, `@fontsource-variable/*` | `web` | `src/style.css` only |
+| `@tanstack/react-query`, `preact` | `ui`, `web` | the components; in `web`, `main.tsx` only, to render the app |
+| `@fontsource/*`, `@fontsource-variable/*` | `ui` | `src/style.css` only |
 | `rdf-validate-shacl` | `shacl` | `src/engine.ts` only, loaded lazily |
 | `mdast-util-from-markdown`, `micromark-extension-gfm-table`, `mdast-util-gfm-table`, `micromark-extension-cjk-friendly` | `markdown` | `src/parse.ts` only; the package's API is its own types, never `mdast`'s ([markdown.md](markdown.md)) |
 | `n3` | `turtle`, the node tooling of `shacl`, and `e2e-pod` | never in the browser; in `e2e-pod`, the server contract and the tests |

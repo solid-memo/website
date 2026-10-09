@@ -5,7 +5,7 @@ the format the current app writes. The formats are the
 [shapes](shapes.md); the steps between them are the migration modules
 in [domain/shapes/migrations](../packages/domain/src/shapes/migrations/); the
 plan is in [domain/migration.ts](../packages/domain/src/migration.ts); the notice
-the user sees in [ui/MigrationContainer.tsx](../apps/web/src/ui/MigrationContainer.tsx).
+the user sees in [MigrationContainer.tsx](../packages/ui/src/ui/MigrationContainer.tsx).
 
 ## Versions
 
@@ -471,7 +471,7 @@ release it came from (`prov:wasDerivedFrom <…/decks/name/vN.ttl>`). When the
 library publishes a newer release, the deck page (and a course's page)
 offers to bring the copy up to it (`planLibraryUpgrade` in
 [domain/libraryUpgrade.ts](../packages/domain/src/libraryUpgrade.ts), shown by
-[ui/LibraryUpgradeContainer.tsx](../apps/web/src/ui/LibraryUpgradeContainer.tsx)).
+[LibraryUpgradeContainer.tsx](../packages/ui/src/ui/LibraryUpgradeContainer.tsx)).
 
 The plan compares three sets of cards by fragment id — the release the
 copy came from, the current release, and the copy — so the library's

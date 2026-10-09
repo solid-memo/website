@@ -36,9 +36,4 @@ describe("Footer", () => {
     expect(screen.getByRole("contentinfo")).not.toHaveTextContent("Version");
     expect(screen.getAllByRole("link")).toHaveLength(1);
   });
-
-  it("defaults to the commit baked in at build time", () => {
-    render(<Footer />);
-    expect(screen.getByRole("contentinfo")).toHaveTextContent(/Version [0-9a-f]{7}/);
-  });
 });

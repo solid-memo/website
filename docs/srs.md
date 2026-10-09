@@ -170,7 +170,7 @@ it.
 
 ## Study sessions
 
-A deck offers one session, **Study** ([StudyContainer](../apps/web/src/ui/StudyContainer.tsx)):
+A deck offers one session, **Study** ([StudyContainer](../packages/ui/src/ui/StudyContainer.tsx)):
 today's due prompts plus new ones up to the daily new-card budget, the
 new ones spread evenly among the due (`interleave`) rather than queued
 after them, so a deck with a backlog still introduces something new

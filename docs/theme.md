@@ -38,7 +38,7 @@ what they hold.
 The stylesheet's dark colours hang off `<html data-theme="dark">`. A small
 script in `apps/web/index.html` sets the attribute from the device's
 choice, else the browser's, before the first paint, so a page never
-flashes in the other theme; `ui/theme.tsx` takes over from there and also
+flashes in the other theme; `packages/ui/src/ui/theme.tsx` takes over from there and also
 sets the `theme-color` meta tags for the browser's own chrome.
 
 ## Korean text

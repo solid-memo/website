@@ -26,8 +26,8 @@ import { createSolidRepairRepository } from "@solid-memo/solid/solidRepairReposi
 import { createSolidReviewStateRepository } from "@solid-memo/solid/solidReviewStateRepository";
 import { createSolidStorageGateway } from "@solid-memo/solid/solidStorageGateway";
 import { createSolidWebIdDocumentRepository } from "@solid-memo/solid/solidWebIdDocumentRepository";
-import { App } from "./ui/App";
-import "./style.css";
+import { App } from "@solid-memo/ui/App";
+import "@solid-memo/ui/style.css";
 
 /**
  * A guest's pod, kept in this browser (docs/guest-mode.md); in memory, for
@@ -124,7 +124,7 @@ const queryClient = new QueryClient();
 
 render(
   <QueryClientProvider client={queryClient}>
-    <App useCases={useCases} />
+    <App useCases={useCases} commitSha={__COMMIT_SHA__} />
   </QueryClientProvider>,
   document.getElementById("app")!,
 );

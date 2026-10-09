@@ -27,9 +27,9 @@ import { Workspace } from "./Workspace";
  * The app in whichever state it is in, between a link past the header
  * to the main content and the site-wide footer, in the language the user chose
  * (else their browser's, else English) and the theme they chose (else
- * their browser's).
+ * their browser's). `commitSha` is the build's, shown in the footer.
  */
-export function App({ useCases }: { useCases: UseCases }) {
+export function App({ useCases, commitSha }: { useCases: UseCases; commitSha: string | null }) {
   const [locale, setLocale] = useState<Locale>(() => useCases.language(navigator.languages));
 
   useEffect(() => {
@@ -90,7 +90,7 @@ export function App({ useCases }: { useCases: UseCases }) {
       >
         <SkipLink />
         <AppContent useCases={useCases} />
-        <Footer />
+        <Footer commitSha={commitSha} />
       </ThemeProvider>
     </I18nProvider>
   );

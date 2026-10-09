@@ -28,23 +28,26 @@ const LAYERS: Record<string, string[]> = {
   shacl: ["domain", "vocab", "turtle", "markdown"],
   solid: ["application", "domain", "vocab", "shacl"],
   browser: ["application", "domain"],
-  web: ["application", "domain", "vocab", "solid", "browser", "markdown"],
+  // The components receive use cases and never reach solid or browser.
+  ui: ["application", "domain", "vocab", "markdown"],
+  web: ["application", "domain", "vocab", "solid", "browser", "ui"],
   "e2e-pod": ["application", "domain", "vocab", "solid"],
   // The journeys drive the built app in a browser; they read only its text.
-  "e2e-journeys": ["web"],
+  "e2e-journeys": ["ui"],
 };
 
 /** Within a package, files that alone may use some of its allowed packages. */
 const ONLY_FROM: Record<string, Record<string, RegExp>> = {
-  // The UI talks to use cases; only the composition root knows the adapters.
-  // Data text is rendered by the UI alone (docs/markdown.md).
-  web: { solid: /^src\/main\.tsx$/, browser: /^src\/main\.tsx$/, markdown: /^src\/ui\// },
+  // Only the composition root wires the adapters; the build test imports none.
+  web: { solid: /^src\/main\.tsx$/, browser: /^src\/main\.tsx$/ },
+  // Data text is rendered by the components alone (docs/markdown.md).
+  ui: { markdown: /^src\/ui\// },
   // The generators read Turtle; the vocabulary the browser loads never does.
   vocab: { turtle: /^tooling\// },
   // The browser-side engine never needs the node tooling, nor the library check's Markdown rules.
   shacl: { turtle: /^node\//, markdown: /^node\// },
-  // The app's messages (apps/web/src/i18n), which the page objects find text by.
-  "e2e-journeys": { web: /^harness\/strings\.ts$/ },
+  // The app's messages (packages/ui/src/i18n), which the page objects find text by.
+  "e2e-journeys": { ui: /^harness\/strings\.ts$/ },
 };
 
 /** Code that ends up in the browser bundle (tests aside). */
@@ -56,6 +59,7 @@ const BROWSER: Record<string, RegExp> = {
   shacl: /^src\//,
   solid: /^src\//,
   browser: /^src\//,
+  ui: /^src\//,
   web: /^src\//,
 };
 const NODE_ONLY = [/^node:/, /^n3$/, /^@solid-memo\/turtle(\/|$)/, /^@solid-memo\/[a-z-]+\/(tooling|node)\//];
