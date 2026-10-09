@@ -56,11 +56,40 @@ flowchart LR
   index document already at the target URL is adopted, not overwritten. If
   registration fails, instance creation fails loudly and the created
   container is cleaned up; there is no local fallback.
-- **Deleting an instance** wipes the container recursively (children
-  first, `meta.ttl` last, so a half-deleted instance still attaches by
-  URL), then removes its registrations from both type indexes. Data goes
+- **Deleting an instance** deletes what Solid Memo wrote in its
+  container and nothing else (`deleteInstanceData` in
+  [instanceData.ts](../packages/solid/src/instanceData.ts)), then removes
+  its registrations from both type indexes. What it wrote: every deck's
+  cards and reviews documents as the catalogue names them (only those
+  below the container: the catalogue is data, and one naming a document
+  elsewhere must not lead a delete there), the answer log's months
+  (`history/<YYYY-MM>.ttl`), `preferences.ttl`, `digest.ttl` and
+  `catalog.ttl`, in that order, so a delete that fails before the
+  catalogue goes can be retried and find the decks again (a catalogue
+  the pod serves but that cannot be read, as another app might leave
+  it, is kept, and so are the decks' documents, which nothing else
+  names; the rest goes as ever); then
+  `decks/`, `reviews/` and `history/`, each only if it is then empty;
+  then `meta.ttl`, last of the documents, so a half-deleted instance
+  still attaches by URL; and the container itself only if it is then
+  empty. A document's access control goes with it: the Solid Protocol
+  has the server delete a resource's ACL with it. Whether each document
+  is there is asked first (HEAD), since node-solid-server answers a
+  DELETE of what is not there with 401; what is gone counts as deleted.
+  Anything else in the folder, which another app put there, is kept, and
+  so is every container on its path: the user is told the folder was
+  kept, and why, with a link to it (`KeptFolderNotice`). Data goes
   before registration so a failure leaves the instance listed and the
-  delete retryable.
+  delete retryable. Restoring a format update's backup deletes the
+  updated instance, and deleting the backup the original, the same way
+  ([migrations.md](migrations.md#the-backup)). Every blocking server
+  the end-to-end tests start ([testing.md](testing.md#commands)), and
+  Pivot and Community Solid Server 8, keeps another app's file and its
+  folder, and deletes a folder holding only Solid Memo's documents with
+  its access rules ([foreignData.integration.test.ts](../e2e/pod/src/foreignData.integration.test.ts)).
+  Solid-Nextcloud lists a folder's ACL among what the folder contains, so
+  there such a folder is kept, its access rules in it; what the advisory
+  servers fail, and why, is their `expected-failures.json`.
 
 ## Instance layout
 
@@ -250,7 +279,15 @@ so other applications find its decks without knowing Solid Memo:
 
 `meta.ttl` makes a container self-describing: attach-by-URL reads it to
 recover an instance that lost its registration. Deleting an instance
-removes both registrations.
+removes both registrations: the `sm:Instance` one by its container, the
+`dcat:Catalog` one by the catalogue's exact IRI,
+`<container>catalog.ttl#catalog`, never by what lies under the
+container, where another app may have registered a catalogue of its
+own. A registration that also registers something else keeps it, and
+loses only the link to the instance. Switching the registrations to
+another container, as the format update and a restore do, likewise
+replaces only the links to the instance: the other things a shared
+registration names, and its title, stay as they were.
 
 An instance's URL is not permanent: the [format update](migrations.md#the-pod-migration)
 writes an updated copy at `<name>-<uuid>/` and switches the type index
@@ -266,7 +303,18 @@ instance's decks: a `dcterms:title` (the instance's name), a
 described in the same document as a `foaf:Agent` with the `foaf:name`
 of their profile), the topics scheme and the EU data themes as
 `dcat:themeTaxonomy`, and a `dcat:dataset` per deck, kept in step as
-decks are added and removed. It is written when an instance is created,
+decks are added and removed. Saving a deck adds only that deck's link,
+and removing a deck removes only its own: a dataset another app listed
+in the catalogue stays listed through every deck save, and writing the
+catalogue itself keeps it too, beside every deck of the document. The
+one link the catalogue loses when it is written whole is one to a
+subject of its own document that is no `dcat:Dataset` (left by a deck
+removed some other way): it would fail DCAT-AP's class check, and the
+catalogue could not be written. A dataset in another document is
+described there, so that class check does not hold it to its class
+([validation.md](validation.md#profiles-dcat-ap-and-skos)), and an
+instance listing one stays valid (held against real servers in
+[foreignData.integration.test.ts](../e2e/pod/src/foreignData.integration.test.ts)). It is written when an instance is created,
 and by the [format update](migrations.md) for an instance made before
 there were catalogues; its registration is written when the update switches over. The whole document
 conforms to DCAT-AP (a test holds what the app writes to it).
@@ -306,7 +354,10 @@ uses as such), so the order is Solid Memo's own `sm:position`.
 
 - **The catalogue still lists every deck** with `dcat:dataset`; a group
   lists only its own members. The catalogue's `dcat:catalog` lists the
-  top-level groups.
+  top-level groups. An edit writes again only the links to the decks
+  and groups the arrangement places: a member link to a dataset or
+  catalogue in another document, or to one the document describes as
+  such but the app cannot read, stays as it is.
 - **A deck or group is in one parent**: the catalogue (top level) or one
   group. A deck no group lists is at the top level.
 - **Positions count within one parent**, and the decks and groups of a
@@ -529,7 +580,10 @@ sequenceDiagram
   - a creation is sent with `If-None-Match: *` (by
     `@inrupt/solid-client` for datasets and containers, by the copier for
     files); had something appeared there meanwhile, 412;
-  - deleting a document read before sends `If-Match` too.
+  - deleting a document read before sends `If-Match` too. Deleting an
+    instance sends none: its documents go whatever they hold. A deck
+    another tab adds meanwhile is missed, and its documents keep the
+    folder in place, as another app's file would.
 
   A 412 surfaces as a `PreconditionFailedError` naming the document
   ("changed elsewhere … Reload and try again"); nothing retries on its
@@ -567,6 +621,18 @@ sequenceDiagram
   took 9 s for a deck of 3,000 cards.
 - 404 is a normal state for not-yet-created documents; repositories treat it
   as empty, not as an error.
+- **What Solid Memo did not write, it does not delete or unlink.** A
+  write touches only the triples it changes (a deck save adds or
+  removes its own `dcat:dataset` link, never another app's), and a
+  delete only resources Solid Memo knows it wrote: an instance, a
+  format update's backup, or the updated instance a restore replaces,
+  is deleted document by document, its folder only once empty
+  ([deleting an instance](#discovery-chain)). Only a copy Solid Memo
+  made whole and nothing names yet is deleted recursively, the format
+  update's or the guest's study moved, when it fails half-way or a
+  closed tab left it behind: Solid Memo created its container at a URL
+  it found free, and all it holds is copies whose originals stay where
+  they were.
 - No `.acl`/`.acr` resource is ever written except as a rebased copy of
   one that exists, by the [format update](migrations.md#the-pod-migration):
   a resource without its own ACL safely inherits its ancestors' access,

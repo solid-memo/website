@@ -274,14 +274,18 @@ flowchart TD
   version — a HEAD with `If-None-Match: <ETag>` (or `If-Modified-Since`),
   which answers 304 when it is. A review saved in another tab during the
   copy stops the run, so no study is lost.
-- **One commit point.** `switchInstance` rewrites the `sm:Instance`
-  registration (and the `dcat:Catalog` one, adding it if missing) in
+- **One commit point.** `switchInstance` points the `sm:Instance`
+  registration (and the `dcat:Catalog` one, adding it if missing) at
+  the copy, changing only their links to the original, in
   each type index that registers the original, one save per index, each
   with `If-Match`: an index another app changed since it was read is
   not overwritten (412), and the switch is undone. If a
   later index fails, the ones already switched are switched back. Until
   this step nothing is visible to the user or to other apps.
-- **Failure leaves nothing behind.** Any error deletes the copy and
+- **Failure leaves nothing behind.** Any error deletes the copy, whole
+  (a recursive delete, as of every copy Solid Memo made whole: it
+  created the copy's container where nothing was, and nothing names it
+  yet; see [Write discipline](data-model.md#write-discipline)), and
   reports the step, the error and "No changes were made to your data".
   If the delete fails too, the copy's address is shown with **Try
   removing it again**.
@@ -316,6 +320,8 @@ and checks that:
   (412) and keeps the other tab's change; read again, it goes through;
 - the copy is updated and conforms, keeps the unknown file byte for
   byte, and has its ACLs rebased;
+- restoring the backup, or deleting it, deletes what the folder holds
+  of Solid Memo's and keeps the unknown file, and the folder with it;
 - a write to the original from the same tab during the update is
   refused by the fence;
 - a failure while copying a document, copying access control, updating
@@ -333,12 +339,28 @@ write. `npm test` does not run them.
 The original is left untouched and unregistered. Preferences show it
 under **Previous version** while the instance's meta names it:
 
-- **Restore previous version** switches the type indexes back and
-  deletes the updated instance; what was studied since the update is
-  lost with it (the confirmation says so).
-- **Delete backup** deletes the original and clears `dcterms:replaces`.
+- **Restore previous version** switches the type indexes back, then
+  deletes what the updated instance holds of Solid Memo's; what was
+  studied since the update is lost with it (the confirmation says so).
+- **Delete backup** clears `dcterms:replaces`, then deletes what the
+  original holds of Solid Memo's. Forgetting comes first, so a deletion
+  cut off half-way never leaves a backup that can still be restored;
+  what it did not get to stays in the folder.
 
-A backup that is gone (deleted by another app) is forgotten quietly.
+Both delete as deleting an instance does
+([data-model.md](data-model.md#discovery-chain)): document by document,
+the folder only once empty. A folder that holds what Solid Memo did not
+write is kept, and the user is told so, with a link to it. The original
+is where other apps may have put files, and may still; the updated
+instance has been in use since the update, and holds the copies of
+those files besides, which stay with it.
+
+A backup whose `meta.ttl` is gone (deleted by another app, or by a
+deletion that cut off after it) is forgotten quietly, even when its
+folder is still there: `meta.ttl` is the last document a deletion
+removes, so without it the folder is no longer a whole instance. Restore
+checks this again before it switches, and refuses a backup that is no
+longer there, leaving the updated instance as it was.
 Repairs still edit in place. Library upgrades copy the deck's own
 documents and switch the deck over to them
 ([below](#how-an-upgrade-is-applied)).

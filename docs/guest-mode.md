@@ -88,12 +88,15 @@ these steps:
    copied. The write fence keeps it read-only meanwhile.
 6. **register:** `attachInstance` in the type index the user chose.
    From here on the study is theirs.
-7. **tidy:** register the catalogue, then delete the guest's instance,
+7. **tidy:** register the catalogue, then delete the guest's instance
+   as any instance is deleted ([data-model.md](data-model.md#discovery-chain)),
    and the whole guest pod once no instance is left. A failure here
    only means `tidied: false`.
 
-A failure before **register** deletes the copy and leaves the guest's
-study exactly as it was. As with an [instance update](migrations.md),
+A failure before **register** deletes the copy, whole, and leaves the
+guest's study exactly as it was: Solid Memo created the target's
+container where nothing was, and nothing names it before **register**,
+so all it holds is Solid Memo's copies. As with an [instance update](migrations.md),
 the update journal finds a copy left behind by a closed tab. A guest's
 instance has no access control of its own, so the copy inherits the
 user's pod's defaults, the same as a newly created instance.

@@ -22,6 +22,7 @@ import {
   hasStorageLink,
 } from "./solidStorageGateway";
 import { AppError } from "@solid-memo/domain/appError";
+import { catalogNodeUrlOf } from "@solid-memo/domain/instanceLayout";
 
 type Fetch = typeof globalThis.fetch;
 export type TypeIndexKind = "private" | "public";
@@ -301,9 +302,12 @@ export async function addCatalogRegistration(
 
 /**
  * Remove every registration of an instance from a type index document:
- * its sm:Instance registration and the dcat:Catalog registration of any
- * catalogue inside the container. Matching ignores a missing trailing
- * slash, as reading does. Saves only when something was removed.
+ * its sm:Instance registration (matching ignores a missing trailing
+ * slash, as reading does) and the dcat:Catalog registration of its
+ * catalogue, `<container>catalog.ttl#catalog` exactly: a catalogue
+ * anywhere else below the container is not this instance's to unlist. A
+ * registration that names something else besides keeps it, and loses
+ * only the link to the instance. Saves only when something was removed.
  */
 export async function removeInstanceRegistrations(
   indexUrl: string,
@@ -312,26 +316,37 @@ export async function removeInstanceRegistrations(
 ): Promise<void> {
   const dataset = await readDataset(indexUrl, fetch);
   const target = ensureTrailingSlash(containerUrl);
+  const catalog = catalogNodeUrlOf(target);
   let updated = dataset;
   for (const thing of getThingAll(dataset)) {
     if (!getUrlAll(thing, RDF.type).includes(SOLID.TypeRegistration)) continue;
     const classes = getUrlAll(thing, SOLID.forClass);
+    const ours = (match: (url: string) => boolean) => registeredUrls(thing).filter(match);
     if (classes.includes(SM.Instance)) {
-      const registered = [
-        ...getUrlAll(thing, SOLID.instanceContainer),
-        ...getUrlAll(thing, SOLID.instance),
-      ].map(ensureTrailingSlash);
-      if (registered.includes(target)) updated = removeThing(updated, thing);
-    } else if (
-      classes.includes(DCAT.Catalog) &&
-      getUrlAll(thing, SOLID.instance).some((url) => url.startsWith(target))
-    ) {
-      updated = removeThing(updated, thing);
+      updated = withoutRegistered(updated, thing, ours((url) => ensureTrailingSlash(url) === target));
+    } else if (classes.includes(DCAT.Catalog)) {
+      updated = withoutRegistered(updated, thing, ours((url) => url === catalog));
     }
   }
   if (updated !== dataset) {
     await saveDataset(indexUrl, updated, fetch);
   }
+}
+
+/** What a registration registers, under either predicate. */
+function registeredUrls(registration: Thing): string[] {
+  return [...getUrlAll(registration, SOLID.instanceContainer), ...getUrlAll(registration, SOLID.instance)];
+}
+
+/** The index without the registration's links to `urls`: the whole registration when it registers nothing else. */
+function withoutRegistered<T extends SolidDataset>(dataset: T, registration: Thing, urls: readonly string[]): T {
+  if (urls.length === 0) return dataset;
+  if (registeredUrls(registration).every((url) => urls.includes(url))) return removeThing(dataset, registration);
+  const builder = urls.reduce(
+    (current, url) => current.removeUrl(SOLID.instanceContainer, url).removeUrl(SOLID.instance, url),
+    buildThing(registration),
+  );
+  return setThing(dataset, builder.build());
 }
 
 /**
@@ -360,8 +375,9 @@ async function findStorageRoot(
  * Point an instance's registrations in a type index document at another
  * container, in one save: the sm:Instance registration's container (and
  * title), and the dcat:Catalog registration's catalogue, which is added
- * when missing. False, and nothing saved, when the index does not
- * register the instance.
+ * when missing. Only the links to the instance change: a registration
+ * that names something else besides keeps it (and its title). False, and
+ * nothing saved, when the index does not register the instance.
  */
 export async function switchInstanceRegistrations(
   indexUrl: string,
@@ -378,22 +394,16 @@ export async function switchInstanceRegistrations(
   for (const thing of getThingAll(dataset)) {
     if (!getUrlAll(thing, RDF.type).includes(SOLID.TypeRegistration)) continue;
     const classes = getUrlAll(thing, SOLID.forClass);
-    const registered = [
-      ...getUrlAll(thing, SOLID.instanceContainer),
-      ...getUrlAll(thing, SOLID.instance),
-    ];
-    if (classes.includes(SM.Instance) && registered.map(ensureTrailingSlash).includes(source)) {
-      updated = setThing(
-        updated,
-        buildThing(thing)
-          .removeAll(SOLID.instance)
-          .setIri(SOLID.instanceContainer, target)
-          .setStringNoLocale(DCTERMS.title, title)
-          .build(),
-      );
+    const registered = registeredUrls(thing);
+    if (classes.includes(SM.Instance)) {
+      const ours = registered.filter((url) => ensureTrailingSlash(url) === source);
+      if (ours.length === 0) continue;
+      const shared = registered.some((url) => !ours.includes(url) && ensureTrailingSlash(url) !== target);
+      const builder = replaceRegistered(thing, ours, SOLID.instanceContainer, target);
+      updated = setThing(updated, (shared ? builder : builder.setStringNoLocale(DCTERMS.title, title)).build());
       switched = true;
     } else if (classes.includes(DCAT.Catalog) && registered.includes(catalogOf(source))) {
-      updated = setThing(updated, buildThing(thing).setIri(SOLID.instance, catalogOf(target)).build());
+      updated = setThing(updated, replaceRegistered(thing, [catalogOf(source)], SOLID.instance, catalogOf(target)).build());
       catalogSwitched = true;
     }
   }
@@ -411,4 +421,15 @@ export async function switchInstanceRegistrations(
   }
   await saveDataset(indexUrl, updated, fetch);
   return true;
+}
+
+/** The registration with its links to `urls`, under either predicate, replaced by one to `replacement` under `predicate`. */
+function replaceRegistered(registration: Thing, urls: readonly string[], predicate: string, replacement: string) {
+  return urls
+    .reduce(
+      (current, url) => current.removeUrl(SOLID.instanceContainer, url).removeUrl(SOLID.instance, url),
+      buildThing(registration),
+    )
+    .removeUrl(predicate, replacement)
+    .addIri(predicate, replacement);
 }

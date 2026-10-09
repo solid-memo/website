@@ -87,8 +87,8 @@ export function toDeck(thing: Thing, agentNames: ReadonlyMap<string, string> = n
 /**
  * The catalog document with a deck written in this app's format, onto
  * its existing subject when there is one (so unknown triples survive),
- * with its creators' agent nodes and its distribution beside it. Agents
- * no deck names any more are removed.
+ * with its creators' agent nodes and its distribution beside it, and
+ * listed by the catalogue. Agents no deck names any more are removed.
  */
 export function withDeck(dataset: SolidDataset, deck: Deck): SolidDataset {
   let updated = setThing(
@@ -108,7 +108,7 @@ export function withDeck(dataset: SolidDataset, deck: Deck): SolidDataset {
       getThing(updated, distribution.url),
     ),
   );
-  return withCatalogDatasets(withoutStrayAgents(updated, documentUrlOf(deck.url)), documentUrlOf(deck.url));
+  return withCatalogDataset(withoutStrayAgents(updated, documentUrlOf(deck.url)), deck.url, "add");
 }
 
 /** The subjects a deck is written as: its entry, its distribution and its agents. */
@@ -132,7 +132,12 @@ export function withoutDeck(dataset: SolidDataset, deck: Deck): SolidDataset {
       updated = setThing(updated, buildThing(thing).removeUrl(DCAT.dataset, deck.url).build());
     }
   }
-  return withCatalogDatasets(withoutStrayAgents(updated, documentUrlOf(deck.url)), documentUrlOf(deck.url));
+  return withCatalogDataset(withoutStrayAgents(updated, documentUrlOf(deck.url)), deck.url, "remove");
+}
+
+function isTyped(dataset: SolidDataset, url: string, type: string): boolean {
+  const thing = getThing(dataset, url);
+  return thing !== null && getUrlAll(thing, RDF.type).includes(type);
 }
 
 function deckUrlsOf(dataset: SolidDataset): string[] {
@@ -141,13 +146,19 @@ function deckUrlsOf(dataset: SolidDataset): string[] {
     .map(asUrl);
 }
 
-/** The catalogue node, when the document has one, listing exactly its decks. */
-function withCatalogDatasets(dataset: SolidDataset, documentUrl: string): SolidDataset {
-  const catalog = getThing(dataset, `${documentUrl}#catalog`);
+/**
+ * The catalogue node, when the document has one, with the one deck's
+ * `dcat:dataset` link added or removed. Every other link stays as it is:
+ * a dataset another app listed in the catalogue is not this app's to
+ * drop (docs/data-model.md "Write discipline").
+ */
+function withCatalogDataset(dataset: SolidDataset, deckUrl: string, change: "add" | "remove"): SolidDataset {
+  const catalog = getThing(dataset, `${documentUrlOf(deckUrl)}#catalog`);
   if (catalog === null) return dataset;
-  let builder = buildThing(catalog).removeAll(DCAT.dataset);
-  for (const url of deckUrlsOf(dataset)) builder = builder.addIri(DCAT.dataset, url);
-  return setThing(dataset, builder.build());
+  const listed = getUrlAll(catalog, DCAT.dataset).includes(deckUrl);
+  if (listed === (change === "add")) return dataset;
+  const builder = buildThing(catalog);
+  return setThing(dataset, (change === "add" ? builder.addIri(DCAT.dataset, deckUrl) : builder.removeUrl(DCAT.dataset, deckUrl)).build());
 }
 
 /**
@@ -166,15 +177,21 @@ export function toCatalog(dataset: SolidDataset, documentUrl: string): Catalog |
 
 /**
  * The catalog document with its catalogue written, onto the existing
- * subject when there is one, listing every deck of the document, with
- * its publisher described beside it.
+ * subject when there is one, listing every deck of the document besides
+ * the datasets it already lists: one in another document (another app's)
+ * or one this document describes as a dataset. Only a link to a subject
+ * of this document that is no dataset (left by a deck removed) goes, as
+ * the catalogue could not be written with it. Its publisher is described
+ * beside it.
  */
 export function withCatalog(dataset: SolidDataset, documentUrl: string, catalog: Catalog): SolidDataset {
   const url = `${documentUrl}#catalog`;
-  const withNode = setThing(
-    dataset,
-    recordThing(url, CATALOG_V1, catalogToRecord(catalog, deckUrlsOf(dataset)), getThing(dataset, url)),
+  const existing = getThing(dataset, url);
+  const kept = (existing === null ? [] : getUrlAll(existing, DCAT.dataset)).filter(
+    (link) => documentUrlOf(link) !== documentUrl || isTyped(dataset, link, DCAT.Dataset),
   );
+  const datasets = [...new Set([...kept, ...deckUrlsOf(dataset)])];
+  const withNode = setThing(dataset, recordThing(url, CATALOG_V1, catalogToRecord(catalog, datasets), existing));
   const publisher = catalog.publisher.webId;
   return setThing(
     withNode,

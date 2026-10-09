@@ -9,6 +9,7 @@ import type { StatedLanguages } from "@solid-memo/domain/deckLanguages";
 import type { DeckTree, DeckTreeEdit } from "@solid-memo/domain/deckTree";
 import type {
   Instance,
+  InstanceDeletion,
   InstanceMeta,
   RegistrationOptions,
   RegistrationTarget,
@@ -87,13 +88,21 @@ export interface InstanceRepository {
     registrationTarget: RegistrationTarget;
   }): Promise<Instance>;
   /**
-   * Delete the instance container with everything in it (decks, cards,
-   * review state, preferences) and drop its type index registrations.
-   * Data goes first: a failure part-way leaves the instance registered,
-   * so the user can retry rather than lose track of a half-deleted pod
-   * container.
+   * Delete the instance's data (deleteInstanceData), then drop its type
+   * index registrations. Data goes first: a failure part-way leaves the
+   * instance registered, so the user can retry rather than lose track of
+   * a half-deleted pod container.
    */
-  deleteInstance(args: { webId: string; instance: Instance }): Promise<void>;
+  deleteInstance(args: { webId: string; instance: Instance }): Promise<InstanceDeletion>;
+  /**
+   * Delete what the instance's container holds of Solid Memo's (its
+   * meta, preferences, catalogue and digest documents, every deck's cards
+   * and reviews documents, the answer log's months), its sub-containers
+   * and the container itself only once empty. Anything else, another
+   * app's, is kept, and so is the container holding it. Its
+   * registrations are left as they are.
+   */
+  deleteInstanceData(instanceUrl: string): Promise<InstanceDeletion>;
   /**
    * Register the instance's catalogue (a dcat:Catalog) beside the
    * instance in every type index that registers the instance, so other
@@ -376,7 +385,14 @@ export interface InstanceCopier {
   isUnchanged(url: string, version: string): Promise<boolean>;
   /** Whether the resource's content holds `text` anywhere (a URL, as an IRI or in a literal). */
   mentions(url: string, text: string): Promise<boolean>;
-  /** Delete a container and everything below it; one that is gone counts as deleted. */
+  /**
+   * Delete a container and everything below it; one that is gone counts
+   * as deleted. Only for a copy this app made whole, at a URL it found
+   * free and created (`ensureAbsent`, `createContainer`), before anything
+   * names it: every resource in it is a copy whose original stays where
+   * it was. An instance in use is deleted by what it holds of Solid
+   * Memo's (InstanceRepository.deleteInstanceData), never whole.
+   */
   deleteRecursively(url: string): Promise<void>;
 }
 

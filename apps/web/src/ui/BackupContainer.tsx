@@ -4,13 +4,15 @@ import type { Instance } from "@solid-memo/domain/instance";
 import type { Session } from "@solid-memo/domain/session";
 import { ErrorMessage } from "./ErrorMessage";
 import { ExternalLink } from "./ExternalLink";
+import { KeptFolderNotice } from "./KeptFolderNotice";
 import { useI18n } from "./i18n";
 
 /**
  * The previous version of an instance, kept by its last update as a
  * backup (docs/migrations.md): restore it — switch back to it and delete
- * the updated instance — or delete it. Each is confirmed first. Renders
- * nothing when there is no backup (any more).
+ * the updated instance's data — or delete it. Each is confirmed first.
+ * Renders nothing when there is no backup (any more), unless deleting it
+ * kept its folder, which holds another app's files: then a notice says so.
  */
 export function BackupContainer({
   useCases,
@@ -21,8 +23,11 @@ export function BackupContainer({
   useCases: UseCases;
   session: Session;
   instance: Instance;
-  /** Switched back: the instance lives at the backup's address again. */
-  onRestored: (instance: Instance) => void;
+  /**
+   * Switched back: the instance lives at the backup's address again; the
+   * updated instance's folder, when it was kept for another app's files.
+   */
+  onRestored: (instance: Instance, keptFolder: string | null) => void;
 }) {
   const { t, tx, formatDate, errorText } = useI18n();
   const queryClient = useQueryClient();
@@ -35,7 +40,7 @@ export function BackupContainer({
     mutationFn: () => useCases.restoreBackup(session, instance),
     onSuccess: async (restored) => {
       await queryClient.invalidateQueries({ queryKey: ["instances"] });
-      onRestored(restored);
+      onRestored(restored.instance, restored.keptFolder);
     },
   });
 
@@ -45,7 +50,9 @@ export function BackupContainer({
   });
 
   const backup = backupQuery.data;
-  if (backup === undefined || backup === null) return null;
+  if (backup === undefined || backup === null) {
+    return <KeptFolderNotice url={deleteMutation.data?.keptFolder ?? null} />;
+  }
   const busy = restoreMutation.isPending || deleteMutation.isPending;
   const folder = <ExternalLink url={backup.url}>{t("backup.folder")}</ExternalLink>;
   return (

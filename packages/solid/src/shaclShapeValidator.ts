@@ -53,6 +53,25 @@ const PROFILED_CLASSES = [
   "http://xmlns.com/foaf/0.1/Agent",
 ];
 
+/** The links by which a catalogue or deck group lists its members. */
+const MEMBER_LINKS: readonly (string | undefined)[] = ["http://www.w3.org/ns/dcat#dataset", "http://www.w3.org/ns/dcat#catalog"];
+
+/**
+ * DCAT-AP's class check on a member a catalogue or deck group lists from
+ * another document (a dataset another app added): the member's class is
+ * stated where it is described, which this document cannot show, so the
+ * check says nothing about it. A member of the same document is still
+ * held to its class.
+ */
+function isMemberElsewhere(focusNode: string, violation: Violation): boolean {
+  return (
+    violation.constraint === "Class" &&
+    MEMBER_LINKS.includes(violation.path) &&
+    violation.value !== undefined &&
+    violation.value.split("#")[0] !== focusNode.split("#")[0]
+  );
+}
+
 /**
  * The ShapeValidator port over the SHACL engine: every subject of a
  * document with a Solid Memo class is checked against the shape of its
@@ -104,7 +123,7 @@ export function createShaclShapeValidator({
     for (const { focusNode, ...violation } of await engine.validate(
       mergeDatasets(data as Iterable<Quad>, ...(reference as Iterable<Quad>[])),
     )) {
-      if (violation.severity !== "violation" || !subjects.has(focusNode)) continue;
+      if (violation.severity !== "violation" || !subjects.has(focusNode) || isMemberElsewhere(focusNode, violation)) continue;
       bySubject.set(focusNode, [...(bySubject.get(focusNode) ?? []), { ...violation, profile: "dcat-ap" }]);
     }
     return bySubject;

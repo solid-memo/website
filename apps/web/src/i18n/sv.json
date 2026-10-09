@@ -510,7 +510,7 @@
     "heading": "Välj en instans av Solid Memo",
     "intro": "En instans är en samling av dina kortlekar och studier, sparad i en mapp i din Pod. De flesta behöver bara en.",
     "empty": "Inga instanser är registrerade än.",
-    "deleteConfirm": "Ta bort instansen ”{name}” med alla dess kortlekar och kort? Det går inte att ångra.",
+    "deleteConfirm": "Ta bort instansen ”{name}” med alla dess kortlekar och kort? Det går inte att ångra. Filer som en annan app har lagt i dess mapp behålls.",
     "deleteLabel": "Ta bort instansen {name}",
     "delete": "Ta bort…",
     "newInstance": "Ny instans…",
@@ -518,6 +518,10 @@
     "attachUrl": "URL till instansens container",
     "attach": "Lägg till",
     "deleted": "Tog bort instansen ”{name}”."
+  },
+  "keptFolder": {
+    "text": "Solid Memo tog bort sina egna data och behöll {link}: en annan app har lagt filer där.",
+    "folder": "mappen i din Pod"
   },
   "instanceUpdate": {
     "confirmRegion": "Starta uppdateringen",

@@ -1,5 +1,5 @@
 import type { ComponentChildren } from "preact";
-import { useEffect } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
@@ -27,6 +27,7 @@ import { InstanceBar } from "./InstanceBar";
 import { InstanceCreator } from "./InstanceCreator";
 import { InstancePicker } from "./InstancePicker";
 import { BackupContainer } from "./BackupContainer";
+import { KeptFolderNotice } from "./KeptFolderNotice";
 import { DataCheckNotice } from "./DataCheckNotice";
 import { LibraryBrowserContainer } from "./LibraryBrowserContainer";
 import { LibraryCardScreen } from "./LibraryCardScreen";
@@ -76,6 +77,8 @@ export function Workspace({
   const queryClient = useQueryClient();
   const { route, change, navigate, replace } = useHashRoute();
   const screenRef = useScreenFocus(route, change);
+  /** The updated instance's folder a restore kept for another app's files, shown on the restored instance. */
+  const [restoredKeptFolder, setRestoredKeptFolder] = useState<{ instanceUrl: string; folder: string } | null>(null);
   const webId = session.webId;
 
   const instancesQuery = useQuery({
@@ -484,6 +487,7 @@ export function Workspace({
               attachInstanceMutation.mutate({ url, target })
             }
             onDelete={(instance) => deleteInstanceMutation.mutate(instance)}
+            keptFolder={deleteInstanceMutation.data?.keptFolder ?? null}
           />
         );
       case "instanceCreator":
@@ -727,7 +731,10 @@ export function Workspace({
             useCases={useCases}
             session={session}
             instance={activeInstance!}
-            onRestored={(restored) => replace({ screen: "home", instanceUrl: restored.url })}
+            onRestored={(restored, keptFolder) => {
+              setRestoredKeptFolder(keptFolder === null ? null : { instanceUrl: restored.url, folder: keptFolder });
+              replace({ screen: "home", instanceUrl: restored.url });
+            }}
           />
           </>
         );
@@ -785,6 +792,9 @@ export function Workspace({
               instance={activeInstance}
               onUpdated={(updated) => replace({ screen: "home", instanceUrl: updated.url })}
             />
+            {restoredKeptFolder?.instanceUrl === activeInstance.url && (
+              <KeptFolderNotice url={restoredKeptFolder.folder} />
+            )}
             {checkQuery.error && (
               // A div: the error may bring its technical details, a block.
               <div class="warning">

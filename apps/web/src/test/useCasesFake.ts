@@ -56,7 +56,7 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
       url: "https://pod.example/solid-memo/main/",
       name: "Main",
     })),
-    deleteInstance: vi.fn(async () => undefined),
+    deleteInstance: vi.fn(async () => ({ keptFolder: null })),
     listDecks: vi.fn(async () => []),
     createDeck: vi.fn(async () => {
       throw new Error("createDeck fake not configured");
@@ -128,8 +128,8 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
     findInterruptedUpdate: vi.fn(async () => null),
     removeInterruptedUpdate: vi.fn(async () => undefined),
     readBackup: vi.fn(async () => null),
-    restoreBackup: vi.fn(async (_session, instance) => instance),
-    deleteBackup: vi.fn(async () => undefined),
+    restoreBackup: vi.fn(async (_session, instance) => ({ instance, keptFolder: null })),
+    deleteBackup: vi.fn(async () => ({ keptFolder: null })),
     getPreferences: vi.fn(async () => DEFAULT_PREFERENCES),
     savePreferences: vi.fn(async () => undefined),
     getStudyQueue: vi.fn(async () => ({

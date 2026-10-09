@@ -1,5 +1,6 @@
 import {
   createSolidDataset,
+  deleteFile,
   deleteSolidDataset,
   getSolidDataset,
   saveSolidDatasetAt,
@@ -261,6 +262,23 @@ export async function deleteDataset(
   } catch (error) {
     if (statusOf(error) === 412) throw new PreconditionFailedError(url, "unchanged");
     throw error;
+  }
+}
+
+/**
+ * Delete a resource without reading it whole; one that is gone counts as
+ * deleted. For removing documents Solid Memo wrote whole, where no edit
+ * made since is to be kept: an instance being deleted (instanceData.ts).
+ * Whether it is there is asked first (HEAD): node-solid-server answers a
+ * DELETE of what is not there with 401, not 404.
+ */
+export async function deleteIfPresent(url: string, fetch: typeof globalThis.fetch): Promise<void> {
+  forgetRead(url, fetch);
+  if ((await fetch(url, { method: "HEAD" })).status === 404) return;
+  try {
+    await deleteFile(url, { fetch });
+  } catch (error) {
+    if (statusOf(error) !== 404) throw error;
   }
 }
 
