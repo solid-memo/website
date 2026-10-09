@@ -120,6 +120,28 @@ describe("createEngine", () => {
     expect(await e.validateNode(good, `${DATA_URL}#a`, `${SHAPES_URL}#shape`)).toEqual([]);
   });
 
+  it("gives each of several checks at once its own results, on a fresh engine and on a used one", async () => {
+    const e = await engine();
+    const data = await datasetFromTurtle(
+      `@prefix ex: <https://example.com/ns#> .
+       <#named> ex:name "Ann" . <#nameless> ex:age 3 .`,
+      DATA_URL,
+    );
+    const check = async (node: string) =>
+      (await e.validateNode(data, `${DATA_URL}#${node}`, `${SHAPES_URL}#shape`)).map((v) => v.constraint);
+    expect(await Promise.all([check("named"), check("nameless")])).toEqual([[], ["MinCount"]]);
+    expect(await Promise.all([check("nameless"), check("named")])).toEqual([["MinCount"], []]);
+  });
+
+  it("goes on checking after a check fails", async () => {
+    const e = await engine();
+    const good = await datasetFromTurtle(`<#a> <https://example.com/ns#name> "Ann" .`, DATA_URL);
+    const failed = e.validateNode(undefined as never, `${DATA_URL}#a`, `${SHAPES_URL}#shape`);
+    const next = e.validateNode(good, `${DATA_URL}#a`, `${SHAPES_URL}#shape`);
+    await expect(failed).rejects.toThrow();
+    expect(await next).toEqual([]);
+  });
+
   it("checks a whole graph against shapes that pick their own targets, sorted by focus node", async () => {
     const targeted = await datasetFromTurtle(
       `@prefix sh: <http://www.w3.org/ns/shacl#> .

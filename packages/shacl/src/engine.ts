@@ -107,28 +107,40 @@ function byPathThenMessage(a: Violation, b: Violation): number {
 export function createEngine(shapes: DatasetCore): ShapeEngine {
   const validator = new SHACLValidator(shapes);
   const { namedNode } = validator.factory;
+  // The validator keeps one report and one data graph, and a check yields
+  // (to load owl:imports) before it runs: two checks at once would share
+  // the report, the later one returning the earlier one's results as its
+  // own. So an engine runs one check at a time, in the order asked.
+  let queue: Promise<unknown> = Promise.resolve();
+  function oneAtATime<T>(check: () => Promise<T>): Promise<T> {
+    const next = queue.then(check);
+    queue = next.catch(() => undefined);
+    return next;
+  }
   return {
-    async validateNode(data, focusNode, shapeIri) {
-      // validateNode keeps adding to one report; start each check afresh.
-      validator.validationEngine.initReport();
-      const report = await validator.validateNode(
-        data,
-        namedNode(focusNode),
-        namedNode(shapeIri),
-      );
-      return report.results.map(toViolation).sort(byPathThenMessage);
-    },
-    async validate(data) {
-      validator.validationEngine.initReport();
-      const report = await validator.validate(data);
-      return report.results
-        .map((result): FocusedViolation => ({
-          focusNode: result.focusNode.value,
-          ...toViolation(result),
-        }))
-        .sort(
-          (a, b) => a.focusNode.localeCompare(b.focusNode) || byPathThenMessage(a, b),
+    validateNode: (data, focusNode, shapeIri) =>
+      oneAtATime(async () => {
+        // validateNode keeps adding to one report; start each check afresh.
+        validator.validationEngine.initReport();
+        const report = await validator.validateNode(
+          data,
+          namedNode(focusNode),
+          namedNode(shapeIri),
         );
-    },
+        return report.results.map(toViolation).sort(byPathThenMessage);
+      }),
+    validate: (data) =>
+      oneAtATime(async () => {
+        validator.validationEngine.initReport();
+        const report = await validator.validate(data);
+        return report.results
+          .map((result): FocusedViolation => ({
+            focusNode: result.focusNode.value,
+            ...toViolation(result),
+          }))
+          .sort(
+            (a, b) => a.focusNode.localeCompare(b.focusNode) || byPathThenMessage(a, b),
+          );
+      }),
   };
 }
