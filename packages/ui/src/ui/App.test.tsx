@@ -37,7 +37,7 @@ function renderApp(useCases: UseCases) {
   });
   return render(
     <QueryClientProvider client={queryClient}>
-      <App useCases={useCases} />
+      <App useCases={useCases} commitSha="8faa7e1bd2e6de2b6570d692fd2865bb4b3217ad" />
     </QueryClientProvider>,
   );
 }
@@ -239,6 +239,7 @@ describe("App", () => {
     expect(screen.getByRole("contentinfo")).toHaveTextContent(
       "Created by antwika",
     );
+    expect(screen.getByRole("contentinfo")).toHaveTextContent("Version 8faa7e1");
   });
 
   it("starts the Pod onboarding when no session is restored", async () => {

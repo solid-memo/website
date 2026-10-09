@@ -6,7 +6,7 @@ Back/Forward.
 
 ## Where it lives
 
-Routing is a UI concern: [`apps/web/src/ui/router.ts`](../apps/web/src/ui/router.ts)
+Routing is a UI concern: [`packages/ui/src/ui/router.ts`](../packages/ui/src/ui/router.ts)
 defines the serializable `RouteRef` union, the `routeToHash` /
 `parseHash` pair, and the `useHashRoute` hook. `Workspace` owns the
 mapping from a `RouteRef` to a rendered screen.
@@ -82,7 +82,7 @@ flowchart LR
 ## Breadcrumbs
 
 `breadcrumbsFor(route, names)` in
-[apps/web/src/ui/Breadcrumbs.tsx](../apps/web/src/ui/Breadcrumbs.tsx) derives a trail from
+[packages/ui/src/ui/Breadcrumbs.tsx](../packages/ui/src/ui/Breadcrumbs.tsx) derives a trail from
 the current route alone — Decks › *deck* › Browser › *card* — and
 `Workspace` renders it above every screen. Every crumb — the current page
 included, marked `aria-current="page"` — is a plain `<a href="#/…">` link

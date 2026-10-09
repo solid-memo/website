@@ -344,7 +344,7 @@ graph LR
   a tap (or Enter or Space on the button over it) enlarges its picture to
   the viewport's width or height, keeping its shape, and another tap,
   Escape, the focus moving on or a scroll puts it back
-  ([ZoomableImage](../apps/web/src/ui/ZoomableImage.tsx)); in study,
+  ([ZoomableImage](../packages/ui/src/ui/ZoomableImage.tsx)); in study,
   Space on a picture's button does not reveal the answer, while a grade's
   key still answers.
 - **Direction**: a deck's `sm:studyDirection` says how it is studied — a

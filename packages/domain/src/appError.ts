@@ -1,7 +1,7 @@
 /**
  * Errors the user may see, each named by a code, so the app can show it in
  * the reader's language: the message catalogues hold every code under
- * `errors.<code>` (apps/web/src/i18n), the English one exactly as here, which
+ * `errors.<code>` (packages/ui/src/i18n), the English one exactly as here, which
  * a test holds them to. A text says what went wrong in plain words and
  * what to do about it; the values it leaves out — addresses, statuses, a
  * check's findings — are the error's technical `detail`, for whoever looks

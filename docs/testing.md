@@ -1,8 +1,8 @@
 # Testing
 
 Unit tests with [Vitest](https://vitest.dev/) in every package, in node
-unless the package runs in the browser: `apps/web`, `solid` and `browser`
-run in `happy-dom` (but for the test of the built site, in node), and the UI's tests use `@testing-library/preact`
+unless the package runs in the browser: `ui`, `solid` and `browser`
+run in `happy-dom`, and the UI's tests use `@testing-library/preact`
 ([vitest.shared.ts](../vitest.shared.ts)). Coverage is enforced at
 **100%** (statements, branches, functions, lines) per package: each
 package's own tests cover its own code — `npm test` fails below that.
@@ -12,7 +12,7 @@ package's own tests cover its own code — `npm test` fails below that.
 ```sh
 npm test          # every package's tests, with coverage thresholds (turbo)
 npm run check     # the same, plus typecheck, drift, formatting, boundaries
-npm run test:unit -- apps/web/src/ui/App.test.tsx   # some files, or all with none, without coverage (root vitest.config.ts)
+npm run test:unit -- packages/ui/src/ui/App.test.tsx   # some files, or all with none, without coverage (root vitest.config.ts)
 npm run test:watch # watch mode, every package's tests
 npm run test:unit -w @solid-memo/domain -- account.test.ts   # one package's (test:watch too)
 npm run crosscheck # the pySHACL cross-check, as CI runs it (needs scripts/requirements-ci.txt)
@@ -280,7 +280,7 @@ test("a learner's first deck @smoke", async ({ app, account, runId }) => {
   are what a user does, and each is a step of its own in the report.
   They find elements by role and accessible name, with the app's own text
   ([harness/strings.ts](../e2e/journeys/harness/strings.ts) reads
-  `apps/web/src/i18n/`), so a journey follows the language it switches
+  `packages/ui/src/i18n/`), so a journey follows the language it switches
   to. They never use CSS classes; where the app gives no accessible
   name, the app gets one.
 - **Flows** ([flows/](../e2e/journeys/flows/)): the steps many journeys
@@ -307,7 +307,8 @@ one), set up once in [vitest.shared.ts](../vitest.shared.ts), with these
 documented exclusions:
 
 - `apps/web/src/main.tsx` — composition root; pure wiring, no logic
-  (configured in [vite.config.ts](../apps/web/vite.config.ts)).
+  (configured in [vite.config.ts](../apps/web/vite.config.ts)). The
+  test of the built site, the app's only test, runs in node.
 - `src/test/` and `src/testing/` — test setup and helpers other
   packages' tests import (`@solid-memo/domain/testing/libraryDeck`,
   `@solid-memo/shacl/testing/turtle`), not product code.

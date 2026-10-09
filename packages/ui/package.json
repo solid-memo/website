@@ -1,0 +1,49 @@
+{
+  "name": "@solid-memo/ui",
+  "private": true,
+  "license": "MIT",
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    "./style.css": "./src/style.css",
+    "./i18n/*.json": "./src/i18n/*.json",
+    "./documentTitle": "./src/ui/documentTitle.ts",
+    "./router": "./src/ui/router.ts",
+    "./deckRelease": "./src/ui/deckRelease.ts",
+    "./panelFocus": "./src/ui/panelFocus.ts",
+    "./remembered": "./src/ui/remembered.ts",
+    "./markdownCache": "./src/ui/markdownCache.ts",
+    "./motion": "./src/ui/motion.ts",
+    "./keepSchedule": "./src/ui/keepSchedule.ts",
+    "./screenFocus": "./src/ui/screenFocus.ts",
+    "./deckTree/useFlip": "./src/ui/deckTree/useFlip.ts",
+    "./deckTree/rows": "./src/ui/deckTree/rows.ts",
+    "./deckTree/dragMachine": "./src/ui/deckTree/dragMachine.ts",
+    "./deckTree/dropZones": "./src/ui/deckTree/dropZones.ts",
+    "./deckTree/useDragReorder": "./src/ui/deckTree/useDragReorder.ts",
+    "./*": "./src/ui/*.tsx"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p .",
+    "test": "vitest run --coverage",
+    "test:unit": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@fontsource-variable/fredoka": "^5.3.0",
+    "@fontsource/bangers": "^5.3.0",
+    "@solid-memo/application": "*",
+    "@solid-memo/domain": "*",
+    "@solid-memo/markdown": "*",
+    "@solid-memo/vocab": "*",
+    "@tanstack/react-query": "^5.103.2",
+    "preact": "^11.0.0"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.10.6",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/preact": "^3.2.4",
+    "happy-dom": "^20.14.5",
+    "vite": "^8.3.0"
+  }
+}
