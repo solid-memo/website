@@ -305,7 +305,10 @@ languages.
   Markdown" for a text of marks alone. Each list describes its own text
   (`aria-describedby`), so it is read as that text is reached; it is
   not announced as it changes, which while typing would be noise. A
-  card is never refused for its Markdown, as in a pod nothing is.
+  card is never refused for its Markdown, as in a pod nothing is. The
+  Studio's [health](studio.md#health) screen lists the same hints for
+  every card of a deck, its wrong options' text and notes too, each a
+  link to its field.
 - **Switching on.** Text Markdown reads otherwise (`readsDifferently`:
   its plain text is not what was typed, white space aside) is noted at
   the moment the box is ticked (`switchMarkdown`), and a status under

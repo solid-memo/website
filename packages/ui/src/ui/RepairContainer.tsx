@@ -10,7 +10,7 @@ import { useI18n, type I18n } from "./i18n";
 import { summaryOf, ValidationScreen, ViolationMessage } from "./ValidationScreen";
 
 /** What a repair does, for the user: "Give the deck the default description". */
-function repairLabels(t: I18n["t"]): Record<RepairKind, string> {
+export function repairLabels(t: I18n["t"]): Record<RepairKind, string> {
   return {
     "describe-deck": t("repair.action.describeDeck"),
     "direct-deck": t("repair.action.directDeck"),
@@ -20,6 +20,25 @@ function repairLabels(t: I18n["t"]): Record<RepairKind, string> {
     "drop-dangling-members": t("repair.action.dropDanglingMembers"),
     "remove-subject": t("repair.action.removeSubject"),
   };
+}
+
+/**
+ * Applies repairs (UseCases.applyRepairs), then reads afresh what they
+ * may have changed: the decks, cards, reviews and preferences, the
+ * format update's plan, and every check of the instance (its own, and
+ * its decks' health in the Studio, under the same key).
+ */
+export function useRepairMutation(useCases: UseCases, instanceUrl: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (repairs: Parameters<UseCases["applyRepairs"]>[0]) => useCases.applyRepairs(repairs),
+    onSuccess: async () => {
+      for (const key of ["decks", "cards", "reviews", "preferences", "migration"]) {
+        await queryClient.invalidateQueries({ queryKey: [key] });
+      }
+      await queryClient.invalidateQueries({ queryKey: ["validation", instanceUrl] });
+    },
+  });
 }
 
 /**
@@ -38,18 +57,8 @@ export function RepairContainer({
   report: ValidationReport;
 }) {
   const { t, tx, errorText } = useI18n();
-  const queryClient = useQueryClient();
   const plan = useCases.planRepair(report);
-
-  const repairMutation = useMutation({
-    mutationFn: (repairs: Parameters<UseCases["applyRepairs"]>[0]) => useCases.applyRepairs(repairs),
-    onSuccess: async () => {
-      for (const key of ["decks", "cards", "reviews", "preferences", "migration"]) {
-        await queryClient.invalidateQueries({ queryKey: [key] });
-      }
-      await queryClient.invalidateQueries({ queryKey: ["validation", instance.url] });
-    },
-  });
+  const repairMutation = useRepairMutation(useCases, instance.url);
 
   function remove(problem: Unrepairable) {
     if (window.confirm(t("repair.removeConfirm", { url: problem.subjectUrl }))) {

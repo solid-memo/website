@@ -2,6 +2,9 @@ import { chunksOf } from "@solid-memo/markdown/chunks";
 import { parseInlineMarkdown } from "@solid-memo/markdown/inline";
 import { parseMarkdown, type MdBlock, type MdPhrase } from "@solid-memo/markdown/parse";
 import { plainText } from "@solid-memo/markdown/plainText";
+import { markdownProblems, OPTION, PROSE, SIDE, type FieldRule, type MarkdownProblem } from "@solid-memo/markdown/problems";
+import type { DeckTextCheck } from "@solid-memo/domain/deckHealth";
+import type { FieldRuleName } from "@solid-memo/domain/release/markdownFields";
 
 /** How many texts each cache keeps; the oldest goes first. */
 export const CACHE_SIZE = 500;
@@ -54,4 +57,16 @@ export function plainTexts(): (text: string) => string {
     }
     return plain;
   };
+}
+
+/** The markdown package's rule of each field rule the domain names. */
+const RULES: Record<FieldRuleName, FieldRule> = { side: SIDE, option: OPTION, prose: PROSE };
+
+/**
+ * How a deck's health reads its text in Markdown (UseCases.checkDeck):
+ * the plain text, each text parsed once (plainTexts), and the markdown
+ * package's check of a field held to a rule (markdownProblems).
+ */
+export function deckTextCheck(): DeckTextCheck<MarkdownProblem> {
+  return { plain: plainTexts(), check: (text, rule) => markdownProblems(text, RULES[rule]) };
 }

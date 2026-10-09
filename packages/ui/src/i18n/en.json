@@ -1335,7 +1335,9 @@
         "course": "Course",
         "invalid": "Invalid data",
         "unreadable": "Unreadable"
-      }
+      },
+      "healthLink": "Health",
+      "healthOf": "in {deck}"
     },
     "bulk": {
       "label": "Selected decks",
@@ -1454,7 +1456,8 @@
       "lapsesNone": "Lapses count the card's wrong answers: none are logged yet.",
       "lapsesLoading": "Reading the answer log for the lapses…",
       "lapsesFailed": "The answer log could not be read, so the lapses are not known.",
-      "scheduleLink": "Schedule, lapses and leeches"
+      "scheduleLink": "Schedule, lapses and leeches",
+      "healthLink": "Health"
     },
     "card": {
       "heading": "Card: {card}",
@@ -1752,6 +1755,70 @@
       "description": "Description",
       "licenseHint": "The licence the decks are offered under, for apps that read the catalogue.",
       "saveCatalog": "Save catalogue"
+    },
+    "health": {
+      "crumb": "Health",
+      "heading": "Health of {instance}",
+      "deckHeading": "Health of {deck}",
+      "loading": "Checking…",
+      "checkAgain": "Check again",
+      "checking": "Checking…",
+      "summary": {
+        "one": "{count} problem found.",
+        "other": "{count} problems found."
+      },
+      "allWell": "Nothing is wrong with this deck.",
+      "dataHeading": "Data check",
+      "dataHint": "The deck's entry in the catalogue and its documents, checked against Solid Memo's shapes.",
+      "instanceDataHint": "The instance's documents, checked against Solid Memo's shapes. Documents unchanged since they last passed are not checked again.",
+      "deckEntry": "The deck's entry",
+      "deckDistribution": "The deck's distribution",
+      "inDeck": "in {deck}",
+      "remove": "Remove {subject}",
+      "removeHint": "No repair covers this: fix it in the document, or remove it.",
+      "decksHeading": "Decks",
+      "decksHint": "Each deck is checked once it is on the screen.",
+      "languagesHeading": "Languages",
+      "languagesFine": "Every card side states its language.",
+      "unstated": {
+        "one": "{count} card side states no language.",
+        "other": "{count} card sides state no language."
+      },
+      "unstatedLink": "Set the languages on the about screen",
+      "languagesUnchecked": "The release this deck was copied from could not be read, so which sides are yours to settle is not known.",
+      "duplicatesHeading": "Cards that say the same",
+      "duplicatesFine": "No two cards in use say the same.",
+      "duplicatesHint": "These cards have the same front and back, in the same languages, and the same pictures.",
+      "duplicateGroup": "The same card {count} times:",
+      "markdownHeading": "Markdown",
+      "markdownFine": "The text written in Markdown shows as its author meant.",
+      "markdownHint": "What would not show as its author meant, in the cards written in Markdown.",
+      "part": {
+        "front": "front",
+        "back": "back",
+        "frontNote": "note under the front",
+        "backNote": "note under the back",
+        "backLabel": "label",
+        "frontImageDescription": "front picture's description",
+        "backImageDescription": "back picture's description"
+      },
+      "place": {
+        "card": "{card}",
+        "part": "{card}, {part}",
+        "distractor": "{card}, wrong option {id}",
+        "distractorText": "{card}, wrong option {id}",
+        "distractorNote": "{card}, note of wrong option {id}",
+        "schedule": "{card}, its schedule"
+      },
+      "language": "{place} ({language})",
+      "badge": {
+        "problems": {
+          "one": "{count} problem",
+          "other": "{count} problems"
+        },
+        "healthy": "No problems",
+        "failed": "Not checked"
+      }
     }
   }
 }

@@ -139,6 +139,9 @@ export function useMissingLanguage(fieldId: string) {
  * hint about a translation sits by the translation and is read with it.
  * They are read as the text is reached, never announced as they change,
  * which as the user types would be noise.
+ *
+ * `arrival`: the screen was opened at this field (a link to it), so its
+ * main text is where the user arrives (useScreenFocus).
  */
 export function LangTextField({
   id,
@@ -158,6 +161,7 @@ export function LangTextField({
   missing,
   errorId,
   inputRef,
+  arrival = false,
   onChange,
 }: {
   id: string;
@@ -180,6 +184,7 @@ export function LangTextField({
   missing?: DraftEntry;
   errorId?: string;
   inputRef?: { current: HTMLInputElement | HTMLTextAreaElement | null };
+  arrival?: boolean;
   onChange: (draft: LangTextDraft) => void;
 }) {
   const { t, partLang, languageParts, errorText } = useI18n();
@@ -256,6 +261,7 @@ export function LangTextField({
       "aria-invalid": entry === main ? invalid : undefined,
       disabled,
       "aria-describedby": describers.join(" "),
+      "data-arrival": (entry === main && arrival) || undefined,
       onInput: (event: Event) => edit(entry, (event.currentTarget as HTMLInputElement).value),
     };
     return (

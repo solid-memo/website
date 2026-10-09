@@ -1,3 +1,4 @@
+import type { ComponentChildren } from "preact";
 import { useState } from "preact/hooks";
 import type { Deck, DeckDirection } from "@solid-memo/domain/deck";
 import type { DeckPace } from "@solid-memo/domain/deckPace";
@@ -52,7 +53,9 @@ const COLUMNS: readonly Exclude<DeckColumn, "title">[] = [
  * selected, but is left alone until shown again. A deck's name opens
  * what it says of itself (`deckHref`), its number of cards its cards in
  * the Studio's card workbench (`cardsHref`). The header links to the
- * groups and to the instance's name and catalogue (`instanceHref`).
+ * groups, to the instance's name and catalogue (`instanceHref`) and to
+ * its health (`healthHref`); each deck's name has its health beside it
+ * (`healthBadge`).
  */
 export function DeckTableScreen({
   instance,
@@ -68,6 +71,8 @@ export function DeckTableScreen({
   appHref,
   groupsHref,
   instanceHref,
+  healthHref,
+  healthBadge,
   onMove,
   onPace,
   onDirection,
@@ -94,6 +99,10 @@ export function DeckTableScreen({
   groupsHref: string;
   /** The instance's name and catalogue. */
   instanceHref: string;
+  /** The instance's health. */
+  healthHref: string;
+  /** A deck's health, as a badge beside its name. */
+  healthBadge: (deck: Deck) => ComponentChildren;
   /** Each resolves to whether it was done (the container says why not, through `error`). */
   onMove: (decks: readonly Deck[], parent: DeckGroup | null) => Promise<boolean>;
   onPace: (decks: readonly Deck[], pace: DeckPace) => Promise<boolean>;
@@ -162,7 +171,8 @@ export function DeckTableScreen({
     <section>
       <header>
         <h2>{t("studio.decks.heading")}</h2>
-        <a href={groupsHref}>{t("studio.decks.groupsLink")}</a> <a href={instanceHref}>{t("studio.decks.instanceLink")}</a>
+        <a href={groupsHref}>{t("studio.decks.groupsLink")}</a> <a href={instanceHref}>{t("studio.decks.instanceLink")}</a>{" "}
+        <a href={healthHref}>{t("studio.decks.healthLink")}</a>
       </header>
       <label class="studio-filter">
         {t("studio.decks.filter")}
@@ -236,6 +246,7 @@ export function DeckTableScreen({
                           {t(`studio.decks.badge.${badge}`)}
                         </span>
                       ))}
+                      {healthBadge(deck)}
                     </th>
                     <td>
                       {row.groups.length === 0 ? (

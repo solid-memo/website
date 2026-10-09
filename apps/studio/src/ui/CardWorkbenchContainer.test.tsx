@@ -46,6 +46,7 @@ function renderContainer(useCases: UseCases, query: CardQuery = DEFAULT_CARD_QUE
         cardHref={(card) => `#/card?card=${card.id}`}
         onOpen={() => undefined}
         scheduleHref="#/schedule"
+        healthHref="#/health"
       />
     </QueryClientProvider>,
   );

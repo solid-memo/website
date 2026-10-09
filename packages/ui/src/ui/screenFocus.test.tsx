@@ -79,6 +79,20 @@ describe("useScreenFocus", () => {
     expect(screen.getByRole("heading", { name: "Languages" })).toHaveFocus();
   });
 
+  it("focuses the field a link opens the screen at, leaving it a Tab stop", () => {
+    vi.spyOn(window, "scrollTo").mockImplementation(() => undefined);
+    const { rerender } = render(<Screen route={home} change="initial" />);
+    rerender(
+      <Screen route={other} change="push">
+        <h2>Card</h2>
+        <input aria-label="Back" data-arrival />
+      </Screen>,
+    );
+    const field = screen.getByRole("textbox", { name: "Back" });
+    expect(field).toHaveFocus();
+    expect(field).not.toHaveAttribute("tabindex");
+  });
+
   it("leaves the scroll to the browser on Back/Forward", () => {
     const scrollTo = vi.spyOn(window, "scrollTo").mockImplementation(() => undefined);
     const { rerender } = render(<Screen route={home} change="initial" />);

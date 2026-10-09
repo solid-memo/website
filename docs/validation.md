@@ -15,6 +15,10 @@ and the [DCAT-AP profile](#profiles-dcat-ap-and-skos), in the browser:
   linked as "Validate this instance" at the bottom of the workspace
   while developer mode (a per-instance [preference](data-model.md#instance-layout))
   is on, shows it in full.
+- The Studio's [health](studio.md#health) screen shows what the check
+  finds to every user, of the instance or of one deck (`checkDeck`, its
+  entry and documents only), with the repairs, beside what else is
+  wrong with a deck.
 
 Text in Markdown is never invalid: CommonMark has no invalid document,
 so no shape constrains it, and the app shows any text safely

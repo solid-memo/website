@@ -17,7 +17,7 @@ const copy = { ...deck, sourceUrl: "https://solid-memo.com/decks/kanji/v1.ttl" }
 const card: Card = { ...makeCard(deck, "water"), distractors: [{ id: "water-d1", text: { en: "fire" } }] };
 const release = (cards: Partial<Card>[]) => ({ cards }) as unknown as LibraryDeckContent;
 
-function renderContainer(useCases: UseCases, { tab = "distractors" as CardTab, of = deck, shown = card } = {}) {
+function renderContainer(useCases: UseCases, { tab = "distractors" as CardTab, of = deck, shown = card, field = undefined as string | undefined } = {}) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const invalidate = vi.spyOn(queryClient, "invalidateQueries");
   const onRemoved = vi.fn();
@@ -28,6 +28,7 @@ function renderContainer(useCases: UseCases, { tab = "distractors" as CardTab, o
         deck={of}
         card={shown}
         tab={tab}
+        field={field}
         tabHref={(each) => `#${each}`}
         onTab={vi.fn()}
         appHref="#/card"
@@ -57,6 +58,15 @@ describe("CardInspectorContainer", () => {
     fireEvent.input(screen.getByLabelText("Back"), { target: { value: "H2O" } });
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
     await waitFor(() => expect(useCases.updateCard).toHaveBeenCalledWith(deck, card, { front: { en: "water" }, back: { en: "H2O" } }));
+  });
+
+  it("marks the field it is opened at as where the user arrives: a text, or a wrong option", () => {
+    const useCases = makeUseCasesFake();
+    renderContainer(useCases, { tab: "content", field: "back" });
+    expect(screen.getByLabelText("Back")).toHaveAttribute("data-arrival");
+    cleanup();
+    renderContainer(useCases, { field: "water-d1" });
+    expect(screen.getByRole("button", { name: "Edit the wrong option “fire”" })).toHaveAttribute("data-arrival");
   });
 
   it("shows the card's schedule on its tab", async () => {

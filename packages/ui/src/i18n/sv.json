@@ -1332,7 +1332,9 @@
         "course": "Kurs",
         "invalid": "Ogiltiga data",
         "unreadable": "Oläslig"
-      }
+      },
+      "healthLink": "Hälsa",
+      "healthOf": "i {deck}"
     },
     "bulk": {
       "label": "Valda kortlekar",
@@ -1451,7 +1453,8 @@
       "lapsesNone": "Missar räknar kortets felaktiga svar: inga är loggade än.",
       "lapsesLoading": "Läser svarsloggen för missarna…",
       "lapsesFailed": "Svarsloggen kunde inte läsas, så missarna är okända.",
-      "scheduleLink": "Schema, missar och blodiglar"
+      "scheduleLink": "Schema, missar och blodiglar",
+      "healthLink": "Hälsa"
     },
     "card": {
       "heading": "Kort: {card}",
@@ -1749,6 +1752,70 @@
       "description": "Beskrivning",
       "licenseHint": "Licensen som kortlekarna erbjuds under, för appar som läser katalogen.",
       "saveCatalog": "Spara katalog"
+    },
+    "health": {
+      "crumb": "Hälsa",
+      "heading": "Hälsan i {instance}",
+      "deckHeading": "Hälsan i {deck}",
+      "loading": "Kontrollerar…",
+      "checkAgain": "Kontrollera igen",
+      "checking": "Kontrollerar…",
+      "summary": {
+        "one": "{count} problem hittades.",
+        "other": "{count} problem hittades."
+      },
+      "allWell": "Inget är fel med den här kortleken.",
+      "dataHeading": "Datakontroll",
+      "dataHint": "Kortlekens post i katalogen och dess dokument, kontrollerade mot Solid Memos former.",
+      "instanceDataHint": "Instansens dokument, kontrollerade mot Solid Memos former. Dokument som inte ändrats sedan de senast godkändes kontrolleras inte igen.",
+      "deckEntry": "Kortlekens post",
+      "deckDistribution": "Kortlekens distribution",
+      "inDeck": "i {deck}",
+      "remove": "Ta bort {subject}",
+      "removeHint": "Ingen reparation täcker det här: rätta det i dokumentet eller ta bort det.",
+      "decksHeading": "Kortlekar",
+      "decksHint": "Varje kortlek kontrolleras när den syns på skärmen.",
+      "languagesHeading": "Språk",
+      "languagesFine": "Varje kortsida anger sitt språk.",
+      "unstated": {
+        "one": "{count} kortsida anger inget språk.",
+        "other": "{count} kortsidor anger inget språk."
+      },
+      "unstatedLink": "Ange språken på sidan om kortleken",
+      "languagesUnchecked": "Utgåvan som kortleken kopierades från kunde inte läsas, så det går inte att veta vilka sidor du ska ange.",
+      "duplicatesHeading": "Kort som säger samma sak",
+      "duplicatesFine": "Inga två kort i bruk säger samma sak.",
+      "duplicatesHint": "De här korten har samma framsida och baksida, på samma språk, och samma bilder.",
+      "duplicateGroup": "Samma kort {count} gånger:",
+      "markdownHeading": "Markdown",
+      "markdownFine": "Texten som skrivits i Markdown visas så som den var tänkt.",
+      "markdownHint": "Det som inte skulle visas så som det var tänkt, i korten som skrivits i Markdown.",
+      "part": {
+        "front": "framsidan",
+        "back": "baksidan",
+        "frontNote": "anteckningen under framsidan",
+        "backNote": "anteckningen under baksidan",
+        "backLabel": "etiketten",
+        "frontImageDescription": "framsidebildens beskrivning",
+        "backImageDescription": "baksidebildens beskrivning"
+      },
+      "place": {
+        "card": "{card}",
+        "part": "{card}, {part}",
+        "distractor": "{card}, felaktigt alternativ {id}",
+        "distractorText": "{card}, felaktigt alternativ {id}",
+        "distractorNote": "{card}, anteckningen till felaktigt alternativ {id}",
+        "schedule": "{card}, dess schema"
+      },
+      "language": "{place} ({language})",
+      "badge": {
+        "problems": {
+          "one": "{count} problem",
+          "other": "{count} problem"
+        },
+        "healthy": "Inga problem",
+        "failed": "Inte kontrollerad"
+      }
     }
   }
 }

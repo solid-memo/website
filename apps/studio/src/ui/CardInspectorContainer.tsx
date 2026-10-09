@@ -2,7 +2,7 @@ import { useMemo } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { distractorPicksOf } from "@solid-memo/domain/cardHistory";
-import type { Card, Deck, Distractor } from "@solid-memo/domain/deck";
+import type { Card, CardTextPart, Deck, Distractor } from "@solid-memo/domain/deck";
 import { instanceUrlOfDeck } from "@solid-memo/domain/instanceLayout";
 import { fragmentIdOf } from "@solid-memo/domain/subjectUrl";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
@@ -39,13 +39,16 @@ export function releaseLinkOf(card: Card, release: LibraryDeckContent | null | u
  * loses none of it. The schedule tab is CardScheduleContainer's. The
  * history tab lists the card's answers (UseCases.cardAnswers, read from
  * the answer log), and the wrong options' tab says from them how often
- * each option was chosen, once they are read.
+ * each option was chosen, once they are read. Opened at a field (`field`,
+ * as the health screen links to one), that is where the user arrives: a
+ * text of the content, or a wrong option's Edit button.
  */
 export function CardInspectorContainer({
   useCases,
   deck,
   card,
   tab,
+  field,
   tabHref,
   onTab,
   appHref,
@@ -55,6 +58,8 @@ export function CardInspectorContainer({
   deck: Deck;
   card: Card;
   tab: CardTab;
+  /** The field the inspector was opened at: a text of the content (front, backNote…), or a wrong option by its id. */
+  field?: string;
   tabHref: (tab: CardTab) => string;
   onTab: (tab: CardTab) => void;
   appHref: string;
@@ -85,7 +90,16 @@ export function CardInspectorContainer({
   return (
     <CardInspectorScreen card={card} release={releaseLinkOf(card, release)} tab={tab} tabHref={tabHref} onTab={onTab} appHref={appHref}>
       {tab === "content" ? (
-        <CardContainer useCases={useCases} deck={deck} card={card} onRemoved={onRemoved} heading={false} withDistractors={false} />
+        <CardContainer
+          useCases={useCases}
+          deck={deck}
+          card={card}
+          onRemoved={onRemoved}
+          heading={false}
+          withDistractors={false}
+          // A field the content does not have marks none.
+          arrival={field as CardTextPart | undefined}
+        />
       ) : tab === "schedule" ? (
         <CardScheduleContainer useCases={useCases} deck={deck} card={card} />
       ) : tab === "history" ? (
@@ -107,6 +121,7 @@ export function CardInspectorContainer({
             busy={saveMutation.isPending}
             suggestions={Object.keys(card.back).filter((tag) => tag !== "")}
             picks={picks}
+            arrival={field}
             onChange={(distractors) => saveMutation.mutateAsync(distractors).then(() => true, () => false)}
           />
           {/* Mounted throughout, so each save is heard. */}

@@ -413,6 +413,7 @@ export function CardContentFields({
   busy,
   invalid = null,
   suggestions,
+  arrival,
   onChange,
 }: {
   draft: CardDraft;
@@ -422,6 +423,8 @@ export function CardContentFields({
   /** Why the draft was refused, if it was: its field is marked invalid and described by it. */
   invalid?: CardFieldsError | null;
   suggestions: Record<LanguageGroup, string[]>;
+  /** The text the screen was opened at (a link to it): where the user arrives. */
+  arrival?: CardTextPart;
   onChange: (draft: CardDraft) => void;
 }) {
   const { t } = useI18n();
@@ -502,6 +505,7 @@ export function CardContentFields({
         entryHints={inMarkdown ? (entry) => markdownHints(entry.value, ruleOf(part), t) : undefined}
         missing={invalid?.part === part ? invalid.entry : undefined}
         errorId={CARD_FIELDS_ERROR_ID}
+        arrival={part === arrival}
         onChange={(text) => changeText(part, text)}
       />
     );

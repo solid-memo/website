@@ -35,6 +35,7 @@ function Harness({ initial = DEFAULT_CARD_QUERY, onQuery, ...overrides }: Partia
       lapses={{ lapses: new Map([[water.url, 2]]), since: "2025-03" }}
       lapsesFailed={false}
       scheduleHref="#/schedule"
+      healthHref="#/health"
       query={query}
       onQuery={(next) => {
         onQuery?.(next);

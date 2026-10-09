@@ -10,7 +10,8 @@ import { Screen } from "./Screen.ts";
  * actions), its Groups screen, the card workbench (its search, sort,
  * selection and bulk edits, with their Undo, its edits of review
  * states, and its moves to another deck), the card inspector (a card's content, its wrong options,
- * its schedule and its history), a deck's schedule, a deck's about screen (its
+ * its schedule and its history), a deck's schedule, a deck's and the
+ * instance's health, a deck's about screen (its
  * authors and licence), the instance's name and catalogue, and its way
  * back to Solid Memo.
  */
@@ -299,6 +300,70 @@ export class Studio extends Screen {
       await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.card.heading", { card: front }) })).toBeVisible();
       await expect(this.page).toHaveURL(/#\/studio\/card\?deck=/);
       await expect(this.page.getByLabel(this.t("cardContentFields.front"), { exact: true })).toHaveValue(front);
+    });
+  }
+
+  /** Writes the inspected card in Markdown, its back as typed, and saves it. */
+  async writeBackInMarkdown(back: string): Promise<void> {
+    await this.intent(`Write the card in Markdown, its back ${back}`, async () => {
+      await this.page.getByRole("checkbox", { name: this.t("cardContentFields.markdown"), exact: true }).check();
+      await this.page.getByLabel(this.t("cardContentFields.back"), { exact: true }).fill(back);
+      await this.page.getByRole("button", { name: this.t("card.saveButton") }).click();
+      await this.expectStatus(this.t("card.saved"));
+    });
+  }
+
+  /**
+   * Follows the trail from a card to its deck's cards, then the
+   * workbench's link to the deck's health, whose line counts its
+   * problems.
+   */
+  async openDeckHealth(deck: string, problems: number): Promise<void> {
+    await this.intent(`Open the health of ${deck}`, async () => {
+      await this.page.getByRole("navigation", { name: this.t("breadcrumbs.label") }).getByRole("link", { name: this.t("studio.cards.crumb", { deck }) }).click();
+      await this.page.getByRole("link", { name: this.t("studio.cards.healthLink"), exact: true }).click();
+      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.health.deckHeading", { deck }) })).toBeVisible();
+      await expect(this.page).toHaveURL(/#\/studio\/health\?instance=.*&deck=/);
+      await expect(this.page.getByRole("status").filter({ hasText: /\S/ })).toHaveText(
+        problems === 0 ? this.t("studio.health.allWell") : this.t("studio.health.summary", { count: problems }),
+      );
+    });
+  }
+
+  /**
+   * Follows the first link of the health's Markdown part named `place`
+   * ("Moon, back (Swedish)"): the card inspector, opened at that field,
+   * which has the focus.
+   */
+  async followMarkdownProblem(place: string, field: string): Promise<void> {
+    await this.intent(`Follow the Markdown problem of ${place}`, async () => {
+      await this.page.getByRole("region", { name: this.t("studio.health.markdownHeading") }).getByRole("link", { name: place }).first().click();
+      await expect(this.page).toHaveURL(/#\/studio\/card\?.*field=/);
+      await expect(this.page.getByLabel(this.t(`cardContentFields.${field}`), { exact: true })).toBeFocused();
+    });
+  }
+
+  /** Types into the field that has the focus, in place of what it holds, and saves the card. */
+  async fixFocusedField(value: string): Promise<void> {
+    await this.intent(`Write ${value} in the field instead`, async () => {
+      await this.page.keyboard.press("ControlOrMeta+a");
+      await this.page.keyboard.type(value);
+      await this.page.getByRole("button", { name: this.t("card.saveButton") }).click();
+      await this.expectStatus(this.t("card.saved"));
+    });
+  }
+
+  /** Follows Home's link to the instance's health: every deck is listed, these with no problems. */
+  async openInstanceHealth(instance: string, healthy: string[]): Promise<void> {
+    await this.intent("Open the instance's health", async () => {
+      await this.page.getByRole("link", { name: this.t("studio.decks.healthLink"), exact: true }).click();
+      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.health.heading", { instance }) })).toBeVisible();
+      const decks = this.page.getByRole("region", { name: this.t("studio.health.decksHeading") });
+      for (const deck of healthy) {
+        await expect(decks.getByRole("listitem").filter({ has: this.page.getByRole("link", { name: deck, exact: true }) })).toContainText(
+          this.t("studio.health.badge.healthy"),
+        );
+      }
     });
   }
 

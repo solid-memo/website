@@ -1,5 +1,6 @@
 import { AppError } from "@solid-memo/domain/appError";
 import { describe, expect, it, vi } from "vitest";
+import { SM } from "@solid-memo/vocab/vocab.generated";
 import type {
   AnswerLog,
   DigestRepository,
@@ -2282,6 +2283,46 @@ describe("the instance digest", () => {
     await useCases.checkInstance(instance.url);
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(digestRepository.updateDigest).not.toHaveBeenCalled();
+  });
+
+  describe("checkDeck", () => {
+    const text = {
+      plain: (value: string) => value.replace(/\*/g, ""),
+      check: (value: string) => (value.includes("<") ? [{ code: "html" }] : []),
+    };
+    const unstated: Card = { ...current, front: { "": "水" }, back: { en: "water" } };
+    const twin: Card = { ...unstated, id: "card-3", url: `${deck.cardsDocumentUrl}#card-3` };
+    const marked: Card = { ...card2, front: { en: "<b>x</b>" }, back: { en: "x" }, textFormat: SM.markdown };
+
+    it("checks the deck's entry and documents as the instance's check does, its cards' languages, twins and Markdown", async () => {
+      const { deps, useCases } = setup();
+      deps.deckRepository.listCards = vi.fn(async () => [unstated, twin, marked]);
+      const health = await useCases.checkDeck(instance.url, deck, text);
+      expect(vi.mocked(deps.shapeValidator.validateDocumentSince).mock.calls.map(([url]) => url)).toEqual([
+        `${instance.url}catalog.ttl`,
+        deck.cardsDocumentUrl,
+        deck.reviewsDocumentUrl,
+      ]);
+      expect(health.report.conforms).toBe(true);
+      expect(health.unstated!.map(({ card }) => card.id)).toEqual(["card-1", "card-3"]);
+      expect(health.duplicates.map((group) => group.map(({ id }) => id))).toEqual([["card-1", "card-3"]]);
+      expect(health.markdown.map(({ card, finding }) => [card.id, finding.code])).toEqual([["card-2", "html"]]);
+      expect(deps.deckLibrary.fetchLibraryDeck).not.toHaveBeenCalled();
+    });
+
+    it("leaves out the cards still as the deck's release has them, and does not know them while it cannot be read", async () => {
+      const { deps, useCases } = setup();
+      const copy = { ...deck, sourceUrl: libraryContent.url };
+      deps.deckRepository.listCards = vi.fn(async () => [unstated, twin]);
+      deps.deckLibrary.fetchLibraryDeck = vi.fn(async () => ({ ...libraryContent, cards: [{ ...unstated, distractors: [] }] }) as LibraryDeckContent);
+      expect((await useCases.checkDeck(instance.url, copy, text)).unstated!.map(({ card }) => card.id)).toEqual(["card-3"]);
+      deps.deckLibrary.fetchLibraryDeck = vi.fn(async () => {
+        throw new Error("offline");
+      });
+      const health = await useCases.checkDeck(instance.url, copy, text);
+      expect(health.unstated).toBeNull();
+      expect(health.duplicates).toHaveLength(1);
+    });
   });
 
   it("plans the format update without reading again documents with nothing outdated, and writes no digest", async () => {

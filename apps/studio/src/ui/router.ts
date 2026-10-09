@@ -5,6 +5,7 @@ import {
   type DeckTableView,
 } from "@solid-memo/domain/deckTable";
 import { isDefaultQuery, queryFromParams, queryToParams, type CardQuery } from "@solid-memo/domain/cardQuery";
+import type { CardSpot } from "@solid-memo/domain/deckHealth";
 import { instanceUrlOfDeck } from "@solid-memo/domain/instanceLayout";
 import { STUDIO_PATH } from "@solid-memo/ui/router";
 import { hashParams, useHashRouter } from "@solid-memo/ui/routerCore";
@@ -28,20 +29,33 @@ export type StudioRoute =
   | { screen: "groups"; instanceUrl: string }
   /** The card workbench: a deck's cards, searched, filtered, sorted and paged as `query` says (all, as listed, when absent). */
   | { screen: "cards"; deckUrl: string; query?: CardQuery }
-  /** The card inspector: one card of a deck, its content, its wrong options, its schedule or its history (`tab`; the content when absent). */
-  | { screen: "card"; deckUrl: string; cardUrl: string; tab?: CardTab }
+  /**
+   * The card inspector: one card of a deck, its content, its wrong
+   * options, its schedule or its history (`tab`; the content when
+   * absent), opened at one of its fields when `field` says (a text of
+   * its content, or a wrong option by its id).
+   */
+  | { screen: "card"; deckUrl: string; cardUrl: string; tab?: CardTab; field?: string }
   /** A deck's schedule: the reviews to come, how its intervals and eases are spread, its lapses and leeches. */
   | { screen: "schedule"; deckUrl: string }
   /** What a deck says of itself, how it is studied and, for a course, the learner's progress through it. */
   | { screen: "about"; deckUrl: string }
   /** The instance's name and its catalogue's description and licence. */
-  | { screen: "instance"; instanceUrl: string };
+  | { screen: "instance"; instanceUrl: string }
+  /** Everything wrong with the instance or, with `deckUrl`, one of its decks. */
+  | { screen: "health"; instanceUrl: string; deckUrl?: string };
 
 /** What the card inspector shows: the card's content, its wrong options, its review state in each direction, or its answers. */
 export type CardTab = "content" | "distractors" | "schedule" | "history";
 
 /** The inspector's tabs, in their order. */
 export const CARD_TABS: readonly CardTab[] = ["content", "distractors", "schedule", "history"];
+
+/** The card inspector, opened at where in a card a problem is (`spot`, domain/deckHealth.ts): its tab, and the field there. */
+export function spotRoute(deckUrl: string, { card, place }: CardSpot): StudioRoute {
+  const field = place.tab === "content" ? place.part : place.tab === "distractors" ? place.distractor : undefined;
+  return { screen: "card", deckUrl, cardUrl: card.url, tab: place.tab, ...(field === undefined ? {} : { field }) };
+}
 
 /** The instance a route is in: the one it names, or the one of the deck it names; null for the picker. */
 export function instanceOfRoute(route: StudioRoute): string | null {
@@ -69,13 +83,20 @@ export function studioRouteToHash(route: StudioRoute): string {
     case "cards":
       return `#${STUDIO_PATH}/cards${hashParams({ deck: route.deckUrl, ...(route.query === undefined ? {} : queryToParams(route.query)) })}`;
     case "card":
-      return `#${STUDIO_PATH}/card${hashParams({ deck: route.deckUrl, card: route.cardUrl, ...(route.tab === undefined || route.tab === "content" ? {} : { tab: route.tab }) })}`;
+      return `#${STUDIO_PATH}/card${hashParams({
+        deck: route.deckUrl,
+        card: route.cardUrl,
+        ...(route.tab === undefined || route.tab === "content" ? {} : { tab: route.tab }),
+        ...(route.field === undefined ? {} : { field: route.field }),
+      })}`;
     case "about":
       return `#${STUDIO_PATH}/about${hashParams({ deck: route.deckUrl })}`;
     case "schedule":
       return `#${STUDIO_PATH}/schedule${hashParams({ deck: route.deckUrl })}`;
     case "instance":
       return `#${STUDIO_PATH}/instance${hashParams({ instance: route.instanceUrl })}`;
+    case "health":
+      return `#${STUDIO_PATH}/health${hashParams({ instance: route.instanceUrl, ...(route.deckUrl === undefined ? {} : { deck: route.deckUrl }) })}`;
   }
 }
 
@@ -107,6 +128,11 @@ export function parseStudioHash(hash: string): StudioRoute | null {
       return instanceUrl === null ? null : { screen: "groups", instanceUrl };
     case "/instance":
       return instanceUrl === null ? null : { screen: "instance", instanceUrl };
+    case "/health": {
+      const deckUrl = query.get("deck");
+      if (instanceUrl === null) return null;
+      return deckUrl === null ? { screen: "health", instanceUrl } : { screen: "health", instanceUrl, deckUrl };
+    }
     case "/about": {
       const deckUrl = query.get("deck");
       return deckUrl === null ? null : { screen: "about", deckUrl };
@@ -126,7 +152,14 @@ export function parseStudioHash(hash: string): StudioRoute | null {
       const cardUrl = query.get("card");
       if (deckUrl === null || cardUrl === null) return null;
       const tab = CARD_TABS.find((known) => known !== "content" && known === query.get("tab"));
-      return tab === undefined ? { screen: "card", deckUrl, cardUrl } : { screen: "card", deckUrl, cardUrl, tab };
+      const field = query.get("field");
+      return {
+        screen: "card",
+        deckUrl,
+        cardUrl,
+        ...(tab === undefined ? {} : { tab }),
+        ...(field === null ? {} : { field }),
+      };
     }
     default:
       return null;

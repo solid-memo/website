@@ -41,6 +41,8 @@ function Harness({ initial = { filter: "" }, ...overrides }: Partial<Props> & { 
       appHref="#/decks"
       groupsHref="#/groups?instance=a"
       instanceHref="#/instance?instance=a"
+      healthHref="#/health?instance=a"
+      healthBadge={() => null}
       onMove={async () => true}
       onPace={async () => true}
       onDirection={async () => true}
@@ -105,6 +107,13 @@ describe("DeckTableScreen", () => {
     ]);
     expect(screen.getByRole("link", { name: "Arrange groups" })).toHaveAttribute("href", "#/groups?instance=a");
     expect(screen.getByRole("link", { name: "Name and catalogue" })).toHaveAttribute("href", "#/instance?instance=a");
+  });
+
+  it("links to the instance's health, and puts each deck's beside its name", () => {
+    render(<Harness healthBadge={(deck) => <a href={`#/health?deck=${deck.id}`}>Health of {deck.id}</a>} />);
+    expect(screen.getByRole("link", { name: "Health" })).toHaveAttribute("href", "#/health?instance=a");
+    const kanjiRow = within(table()).getAllByRole("rowheader")[0]!;
+    expect(within(kanjiRow).getByRole("link", { name: "Health of deck-1" })).toHaveAttribute("href", "#/health?deck=deck-1");
   });
 
   it("sorts by a column, then the other way, then as arranged, saying so on the column", () => {
