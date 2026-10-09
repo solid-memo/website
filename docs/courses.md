@@ -86,7 +86,10 @@ the first course, written in Markdown, is the complete example. The
 terms are in
 [vocab.md](vocab.md#courses), the shapes in [shapes.md](shapes.md), and
 the rules the shapes cannot state in
-[deck-library.md](deck-library.md#course-rules).
+[deck-library.md](deck-library.md#course-rules). Those rules are the
+domain's
+([`courseRules.ts`](../packages/domain/src/release/courseRules.ts)):
+`npm run library:check` runs them, and the Studio can too.
 
 ### Order
 

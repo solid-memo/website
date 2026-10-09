@@ -3,7 +3,13 @@
   "extends": ["//"],
   "tasks": {
     "test": {
-      "inputs": ["$TURBO_EXTENDS$", "$TURBO_ROOT$/ns/**"]
+      "inputs": [
+        "$TURBO_EXTENDS$",
+        "$TURBO_ROOT$/ns/**",
+        "$TURBO_ROOT$/decks/greek-alphabet/v1.ttl",
+        "$TURBO_ROOT$/decks/git-commands/v1.ttl",
+        "$TURBO_ROOT$/decks/solid-fundamentals/v1.ttl"
+      ]
     },
     "library:check": {
       "dependsOn": ["transit"],

@@ -352,6 +352,13 @@ describe("buildIndex", () => {
     ).toHaveLength(1);
   });
 
+  it("states the current release's themes and keywords as it states them, a blank node too", () => {
+    const turtle = `${releaseText("capitals", 1)}\n<> <${DCAT}theme> [ a <http://www.w3.org/2004/02/skos/core#Concept> ] .\n`;
+    const built = parseTurtle(buildIndex([{ deck: "capitals", version: 1, turtle, quads: parseTurtle(turtle, `${DECKS}capitals/v1.ttl`) }]), INDEX);
+    const themes = built.filter((q) => q.subject.value === `${INDEX}#capitals` && q.predicate.value === `${DCAT}theme`);
+    expect(themes.map((q) => q.object.termType)).toEqual(["NamedNode", "NamedNode", "BlankNode"]);
+  });
+
   it("leaves out what a release does not say, for validation to name", () => {
     const bare = (version: number): DeckRelease => ({
       deck: "x",
@@ -452,6 +459,28 @@ describe("validateLibrary", () => {
     ]);
     const retired = [...CAPITALS, release("capitals", 3, { ...NORWAY, retired: ["no"] })];
     await expect(validateLibrary(retired, buildIndex(retired), validators)).resolves.toEqual([]);
+  });
+
+  it("names a version other than its path says once, on the release that states it", async () => {
+    const stating = (r: DeckRelease, version: string): DeckRelease => {
+      const turtle = r.turtle.replace(`dcat:version "${r.version}"`, `dcat:version "${version}"`);
+      return { ...r, turtle, quads: parseTurtle(turtle, `${DECKS}${r.deck}/v${r.version}.ttl`) };
+    };
+    const first = [stating(CAPITALS[0], "2"), CAPITALS[1]];
+    expect(await validateLibrary(first, buildIndex(first), validators)).toEqual([
+      'decks/capitals/v1.ttl: states dcat:version "2"; its path says "1".',
+    ]);
+    const second = [CAPITALS[0], stating(CAPITALS[1], "3")];
+    expect(await validateLibrary(second, buildIndex(second), validators)).toEqual([
+      'decks/capitals/v2.ttl: states dcat:version "3"; its path says "2".',
+    ]);
+  });
+
+  it("names a release that gives an id of the version before it to another kind of subject", async () => {
+    const reused = [course(1), course(2, OUTLINE.replace("<#s-2>", "<#s-2-new>") + chapter("s-2", 2, RETIRED))];
+    expect(await validateLibrary(reused, buildIndex(reused), validators)).toEqual([
+      "decks/solid/v2.ttl: <#s-2> is a chapter, but a step in v1.ttl: an id names one subject for good, so give the chapter an id of its own.",
+    ]);
   });
 
   it("accepts a course, and names what its outline does not hold together", async () => {
@@ -895,10 +924,12 @@ describe("markdownProblems", () => {
       step("s-3", "ch-1", 2, ["q-1"]).replace(`"Theory s-3."@en`, `"""---\n\na"""@en , "b"@sv`),
       theory("s-4", 3, `"""---\n\na\n\n---\n\n---\n\nb\n\n---"""@en , """a\n\n---\n\nb"""@sv`),
       theory("s-5", 4, `"""a\n\n---\n\nb"""@en , "c"@sv , """d\n\n---\n\ne\n\n---\n\nf"""`),
+      theory("s-6", 5, `"""a\n\n---"""`),
     ].join("");
     expect(problemsOf(outline)).toEqual([
       `${L}: <#s-4> solid-memo:theory@en has a thematic break first, last or right after another, which makes an empty chunk the app drops: a step's theory is shown a chunk at a time, split at its top-level thematic breaks, with text between each two.`,
       `${L}: <#s-5> has its theory in 2 chunks in solid-memo:theory@en, 1 chunk in solid-memo:theory@sv, 3 chunks in solid-memo:theory: a step's theory is in as many chunks in each language, so a learner who switches language keeps their place.`,
+      `${L}: <#s-6> solid-memo:theory has a thematic break first, last or right after another, which makes an empty chunk the app drops: a step's theory is shown a chunk at a time, split at its top-level thematic breaks, with text between each two.`,
     ]);
   });
 

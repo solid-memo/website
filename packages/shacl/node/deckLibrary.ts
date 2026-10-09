@@ -2,23 +2,29 @@ import { execFile } from "node:child_process";
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import { join, relative } from "node:path";
 import { promisify } from "node:util";
-import { DataFactory, Writer, type Literal, type Quad, type Quad_Object } from "n3";
+import { DataFactory, Writer, type Quad, type Quad_Object } from "n3";
 import type { ShapeEngine } from "../src/engine.ts";
-import {
-  markdownProblems as textProblems,
-  OPTION,
-  PROSE,
-  SIDE,
-  type FieldRule,
-  type MarkdownProblem,
-} from "@solid-memo/markdown/problems";
-import { MAX_CHARS, MAX_DEPTH, MAX_TABLE_CELLS, MAX_TABLE_COLUMNS } from "@solid-memo/markdown/parse";
 import { inspectChunks } from "@solid-memo/markdown/chunks";
+import { markdownProblems as textProblems, OPTION, PROSE, SIDE, type FieldRule } from "@solid-memo/markdown/problems";
+import { continuityProblems } from "@solid-memo/domain/release/continuityRules";
+import { courseProblems as releaseCourseProblems } from "@solid-memo/domain/release/courseRules";
+import {
+  metadataProblems as releaseMetadataProblems,
+  pathProblems,
+  releasePathOf,
+  versionGapProblems,
+} from "@solid-memo/domain/release/libraryRules";
+import { markdownProblems as releaseMarkdownProblems, type FieldRuleName } from "@solid-memo/domain/release/markdownFields";
+import type { ReleaseProblem } from "@solid-memo/domain/release/problems";
+import { SCHEMA_NS, type ReleaseModel, type ReleaseTerm } from "@solid-memo/domain/release/releaseModel";
+import { keptInIndex, lastIssued, seriesEntry } from "@solid-memo/domain/release/seriesEntry";
 import { formatTurtle } from "@solid-memo/turtle/formatTurtle";
-import { objectsOf, parseTurtle, RDF_TYPE, subjectsOfType } from "@solid-memo/turtle/rdf";
+import { objectsOf, parseTurtle, RDF_TYPE } from "@solid-memo/turtle/rdf";
 import { SITE, VOCAB_BASE } from "@solid-memo/vocab/tooling/sources";
 import { SM_NS } from "@solid-memo/vocab/tooling/vocab";
 import { DECKS_ROOT, VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
+import { quadsToReleaseModel } from "./quadsToReleaseModel.ts";
+import { releaseMessage, type WordedProblem } from "./releaseMessages.ts";
 import {
   loadEngine,
   loadProfileEngine,
@@ -43,7 +49,11 @@ import {
  * a card, chapter, step or distractor of the one before it. With
  * `--base <git ref>`, a version published at that ref must be there
  * still, byte for byte: a published version is never edited or removed,
- * only followed by the next.
+ * only followed by the next. The rules that read a release's data are
+ * the domain's (@solid-memo/domain/release), which the Studio runs too:
+ * this file reads the files, builds each release's model
+ * (quadsToReleaseModel.ts), words the problems in English
+ * (releaseMessages.ts), and checks what only the text or the shapes can.
  */
 
 const DCAT = "http://www.w3.org/ns/dcat#";
@@ -53,10 +63,7 @@ const FOAF = "http://xmlns.com/foaf/0.1/";
 const XSD = "http://www.w3.org/2001/XMLSchema#";
 const DATA_THEMES = "http://publications.europa.eu/resource/authority/data-theme";
 const TOPICS = `${VOCAB_BASE}topics.ttl`;
-const OWL_DEPRECATED = "http://www.w3.org/2002/07/owl#deprecated";
 const PROV = "http://www.w3.org/ns/prov#";
-const RDFS_COMMENT = "http://www.w3.org/2000/01/rdf-schema#comment";
-const SCHEMA = "https://schema.org/";
 
 /** Where the site publishes the library. Every IRI of it is under this: the index, its series and publisher, and every release. */
 export const DECKS_BASE = `${SITE}decks/`;
@@ -97,47 +104,35 @@ export interface DeckRelease {
 /** The library's files: path under decks/ (`index.ttl`, `<name>/v<N>.ttl`) → content. */
 export type LibraryFiles = ReadonlyMap<string, string>;
 
-/** Deck names are plain: lower-case letters, digits and dashes. */
-const DECK_NAME = /^[a-z0-9][a-z0-9-]*$/;
-const RELEASE_PATH = /^([^/]+)\/v([1-9][0-9]*)\.ttl$/;
+/** A layout problem in English: it names its path, not a release. */
+function layoutMessage(problem: ReleaseProblem): string {
+  return releaseMessage(problem as WordedProblem, "", "");
+}
 
 /**
  * The releases among the library's files, sorted by deck then version,
- * and every problem with the layout: a file that is neither the index
- * nor a release, a deck whose versions do not run 1, 2, … , or a release
- * that is not Turtle (left out of the releases).
+ * and every problem with the layout (libraryRules): a file that is
+ * neither the index nor a release, a deck whose versions do not run 1,
+ * 2, … , or a release that is not Turtle (left out of the releases).
  */
 export function releasesOf(files: LibraryFiles): { releases: DeckRelease[]; problems: string[] } {
   const problems: string[] = [];
   const releases: DeckRelease[] = [];
   for (const [path, turtle] of files) {
     if (path === INDEX_FILE) continue;
-    const match = RELEASE_PATH.exec(path);
-    if (match === null || !DECK_NAME.test(match[1])) {
-      problems.push(
-        `decks/${path} is neither the index nor a release: decks/ holds only index.ttl and <name>/v<N>.ttl, the name lower-case letters, digits and dashes.`,
-      );
+    const at = releasePathOf(path);
+    if (at === undefined) {
+      problems.push(...pathProblems(path).map(layoutMessage));
       continue;
     }
-    const [, deck, version] = match;
+    const { deck, version } = at;
     try {
-      releases.push({ deck, version: Number(version), turtle, quads: parseTurtle(turtle, releaseUrlOf(deck, Number(version))) });
+      releases.push({ deck, version, turtle, quads: parseTurtle(turtle, releaseUrlOf(deck, version)) });
     } catch (error) {
       problems.push(`decks/${path}: ${(error as Error).message}`);
     }
   }
-  const versionsOf = new Map<string, number[]>();
-  for (const path of files.keys()) {
-    const match = RELEASE_PATH.exec(path);
-    if (match === null || !DECK_NAME.test(match[1])) continue;
-    versionsOf.set(match[1], [...(versionsOf.get(match[1]) ?? []), Number(match[2])]);
-  }
-  for (const [deck, versions] of versionsOf) {
-    const sorted = versions.sort((a, b) => a - b);
-    if (sorted.some((version, i) => version !== i + 1)) {
-      problems.push(`decks/${deck}/: versions must run 1, 2, … without gaps; found ${sorted.map((v) => `v${v}.ttl`).join(", ")}.`);
-    }
-  }
+  problems.push(...versionGapProblems(files.keys()).map(layoutMessage));
   return { releases: sortReleases(releases), problems };
 }
 
@@ -145,45 +140,43 @@ function sortReleases(releases: readonly DeckRelease[]): DeckRelease[] {
   return [...releases].sort((a, b) => a.deck.localeCompare(b.deck) || a.version - b.version);
 }
 
-/** The subjects of a release that state owl:deprecated true: retired. */
-function retiredOf(quads: readonly Quad[]): Set<string> {
-  return new Set(
-    quads
-      .filter((q) => q.predicate.value === OWL_DEPRECATED && q.object.termType === "Literal" && q.object.value === "true")
-      .map((q) => q.subject.value),
-  );
+/** Each release's model, by its quads and address: the rules read a release several times. */
+const models = new WeakMap<readonly Quad[], Map<string, ReleaseModel>>();
+
+/** The release as the release rules read it (@solid-memo/domain/release), at its path's address. */
+function modelOf(release: DeckRelease): ReleaseModel {
+  const url = releaseUrlOf(release.deck, release.version);
+  const byUrl = models.get(release.quads) ?? new Map<string, ReleaseModel>();
+  models.set(release.quads, byUrl);
+  const model = byUrl.get(url) ?? quadsToReleaseModel(release.quads, url);
+  byUrl.set(url, model);
+  return model;
 }
 
-/** A release's cards by subject, each with whether it is retired (owl:deprecated true). */
-function cardsOf(quads: readonly Quad[]): Map<string, boolean> {
-  const retired = retiredOf(quads);
-  return new Map(subjectsOfType(quads, `${SM_NS}Card`).map((subject) => [subject, retired.has(subject)]));
-}
-
-/** The fragment ids of a release's subjects of a class: a card's, chapter's, step's or distractor's identity from one version to the next. */
-function idsOf(quads: readonly Quad[], type: string): string[] {
-  return subjectsOfType(quads, type).map((subject) => subject.slice(subject.indexOf("#") + 1));
-}
-
-/** What a course's outline and wrong options are: subjects the index leaves out, and a later version never drops. */
-const OUTLINE_TYPES = [`${SM_NS}Chapter`, `${SM_NS}Step`, `${SM_NS}Distractor`];
-
-function literalsOf(quads: readonly Quad[], subject: string, predicate: string): Quad_Object[] {
-  return objectsOf(quads, subject, predicate).filter((o) => o.termType === "Literal");
+/** A term of a release back as n3's. */
+function n3Term(term: ReleaseTerm): Quad_Object {
+  const { namedNode, literal, blankNode } = DataFactory;
+  switch (term.kind) {
+    case "literal":
+      return literal(term.value, term.language === "" ? namedNode(term.datatype) : term.language);
+    case "blank":
+      return blankNode(term.value);
+    case "iri":
+      return namedNode(term.value);
+  }
 }
 
 /**
- * The index: a dcat:Catalog of the library's decks. Each deck is a
+ * The index: a dcat:Catalog of the library's decks, each a
  * dcat:DatasetSeries (and dcat:Dataset) whose members are its releases,
- * which are its versions too, stating the current release's title,
- * description, themes and keywords as the release has them; every older
- * release is summarised (a dcat:Dataset with its title, description,
- * version, issue time and notes), the current one described in full —
- * everything but its cards, a course's chapters, steps and distractors
- * (its schema:Course type stays, which tells a course) and the record of how it was made (every
- * rdfs:comment, and of its prov:Activity nodes all but the type of the
- * one that generated it; the release itself carries them), plus sm:cardCount, the cards it has in use (retired
- * ones not counted) — so the library can be listed from the index alone. The releases must be sorted by deck then version.
+ * as seriesEntry (@solid-memo/domain/release/seriesEntry) describes it:
+ * the current release's title, description, themes and keywords, every
+ * older release summarised, the current one described in full but for
+ * its cards, a course's chapters, steps and distractors and the record
+ * of how it was made (its schema:Course type stays, which tells a
+ * course), plus sm:cardCount, the cards it has in use — so the library
+ * can be listed from the index alone. The releases must be sorted by
+ * deck then version.
  * The catalogue names `newcomerCourse`'s series the course for newcomers
  * (solid-memo:newcomerCourse), even when there is no such deck, which
  * newcomerProblems then reports.
@@ -192,20 +185,18 @@ export function buildIndex(releases: readonly DeckRelease[], newcomerCourse?: st
   const { namedNode, literal, quad } = DataFactory;
   const out: Quad[] = [];
   const add = (s: string, p: string, o: Quad_Object) => out.push(quad(namedNode(s), namedNode(p), o));
+  const addAll = (s: string, p: string, terms: readonly ReleaseTerm[]) => {
+    for (const term of terms) add(s, p, n3Term(term));
+  };
   const iri = (value: string) => namedNode(value);
   const decks = [...new Set(releases.map((r) => r.deck))];
-  const issued = releases
-    .map((r) => literalsOf(r.quads, releaseUrlOf(r.deck, r.version), `${DCTERMS}issued`)[0]?.value)
-    .filter((value): value is string => value !== undefined)
-    .sort();
+  const modified = lastIssued(releases.map(modelOf));
 
   add(INDEX_URL, RDF_TYPE, iri(`${DCAT}Catalog`));
   add(INDEX_URL, `${DCTERMS}title`, literal("Solid Memo deck library"));
   add(INDEX_URL, `${DCTERMS}description`, literal("Ready-made flashcard decks to import into your own Solid pod."));
   add(INDEX_URL, `${DCTERMS}publisher`, iri(PUBLISHER_URL));
-  if (issued.length > 0) {
-    add(INDEX_URL, `${DCTERMS}modified`, literal(issued[issued.length - 1], iri(`${XSD}dateTime`)));
-  }
+  if (modified !== undefined) add(INDEX_URL, `${DCTERMS}modified`, literal(modified, iri(`${XSD}dateTime`)));
   add(INDEX_URL, `${DCAT}themeTaxonomy`, iri(DATA_THEMES));
   add(INDEX_URL, `${DCAT}themeTaxonomy`, iri(TOPICS));
   for (const deck of decks) add(INDEX_URL, `${DCAT}dataset`, iri(seriesUrlOf(deck)));
@@ -216,55 +207,37 @@ export function buildIndex(releases: readonly DeckRelease[], newcomerCourse?: st
   for (const deck of decks) {
     const ofDeck = releases.filter((r) => r.deck === deck);
     const latest = ofDeck[ofDeck.length - 1];
-    const latestUrl = releaseUrlOf(deck, latest.version);
-    const series = seriesUrlOf(deck);
+    const entry = seriesEntry(seriesUrlOf(deck), ofDeck.map(modelOf));
+    const { series } = entry;
     add(series, RDF_TYPE, iri(`${DCAT}DatasetSeries`));
     add(series, RDF_TYPE, iri(`${DCAT}Dataset`));
     add(series, `${SM_NS}formatVersion`, literal(String(LIBRARY_DECK_SERIES_FORMAT), iri(`${XSD}integer`)));
-    for (const predicate of [`${DCTERMS}title`, `${DCTERMS}description`]) {
-      // A release without one fails validation, which says so.
-      for (const object of literalsOf(latest.quads, latestUrl, predicate)) add(series, predicate, object);
-    }
+    // A release without a title or description fails validation, which says so.
+    addAll(series, `${DCTERMS}title`, entry.title);
+    addAll(series, `${DCTERMS}description`, entry.description);
     add(series, `${DCTERMS}publisher`, iri(PUBLISHER_URL));
-    for (const predicate of [`${DCAT}theme`, `${DCAT}keyword`]) {
-      for (const object of objectsOf(latest.quads, latestUrl, predicate)) add(series, predicate, object);
-    }
-    add(series, `${DCAT}first`, iri(releaseUrlOf(deck, ofDeck[0].version)));
-    add(series, `${DCAT}last`, iri(latestUrl));
-    for (const release of ofDeck) add(series, `${DCAT}hasVersion`, iri(releaseUrlOf(deck, release.version)));
-    add(series, `${DCAT}hasCurrentVersion`, iri(latestUrl));
+    addAll(series, `${DCAT}theme`, entry.themes);
+    addAll(series, `${DCAT}keyword`, entry.keywords);
+    add(series, `${DCAT}first`, iri(entry.first));
+    add(series, `${DCAT}last`, iri(entry.last));
+    for (const version of entry.versions) add(series, `${DCAT}hasVersion`, iri(version));
+    add(series, `${DCAT}hasCurrentVersion`, iri(entry.last));
 
-    for (const release of ofDeck.slice(0, -1)) {
-      const url = releaseUrlOf(deck, release.version);
-      add(url, RDF_TYPE, iri(`${DCAT}Dataset`));
-      for (const predicate of [`${DCTERMS}title`, `${DCTERMS}description`]) {
-        for (const object of literalsOf(release.quads, url, predicate)) add(url, predicate, object);
-      }
-      for (const predicate of [`${DCAT}version`, `${DCTERMS}issued`, `${ADMS}versionNotes`]) {
-        const object = literalsOf(release.quads, url, predicate)[0];
-        if (object !== undefined) add(url, predicate, object);
-      }
+    for (const older of entry.older) {
+      add(older.url, RDF_TYPE, iri(`${DCAT}Dataset`));
+      addAll(older.url, `${DCTERMS}title`, older.title);
+      addAll(older.url, `${DCTERMS}description`, older.description);
+      addAll(older.url, `${DCAT}version`, older.version);
+      addAll(older.url, `${DCTERMS}issued`, older.issued);
+      addAll(older.url, `${ADMS}versionNotes`, older.versionNotes);
     }
 
-    const cards = cardsOf(latest.quads);
-    const activities = new Set(
-      latest.quads.filter((q) => q.predicate.value === RDF_TYPE && q.object.value === `${PROV}Activity`).map((q) => q.subject.value),
-    );
-    // DCAT-AP wants the activity that generated the release typed as one: its type stays.
-    const generating = new Set(objectsOf(latest.quads, latestUrl, `${PROV}wasGeneratedBy`).map((o) => o.value));
-    const outline = new Set(OUTLINE_TYPES.flatMap((type) => subjectsOfType(latest.quads, type)));
-    const keep = (q: Quad) =>
-      !cards.has(q.subject.value) &&
-      !outline.has(q.subject.value) &&
-      q.predicate.value !== RDFS_COMMENT &&
-      (!activities.has(q.subject.value) || (generating.has(q.subject.value) && q.predicate.value === RDF_TYPE));
-    out.push(...latest.quads.filter(keep));
-    const inUse = [...cards.values()].filter((retired) => !retired).length;
-    add(latestUrl, `${SM_NS}cardCount`, literal(String(inUse), iri(`${XSD}integer`)));
+    const kept = keptInIndex(modelOf(latest));
+    out.push(...latest.quads.filter((q) => kept(q.subject.value, q.predicate.value)));
+    add(entry.last, `${SM_NS}cardCount`, literal(String(entry.cardCount), iri(`${XSD}integer`)));
   }
   return writeIndex(distinct(out));
 }
-
 /**
  * Each triple once: decks share nodes (a licence, a source, an agent),
  * which every deck's release describes, and a graph is a set.
@@ -328,329 +301,56 @@ export async function loadValidators(): Promise<LibraryValidators> {
   return { shapes, dcatAp, skos, reference };
 }
 
-/** The values of a predicate on a release as `<iri>`s, for a problem to quote. */
-function shownValues(objects: readonly Quad_Object[]): string {
-  return objects.length === 0 ? "nothing" : objects.map((o) => (o.termType === "Literal" ? JSON.stringify(o.value) : `<${o.value}>`)).join(", ");
+/** The rules' problems of a release in English, after its path. */
+function messagesOf(release: DeckRelease, problems: readonly ReleaseProblem[]): string[] {
+  const label = labelOf(release.deck, release.version);
+  const url = releaseUrlOf(release.deck, release.version);
+  return problems.map((problem) => releaseMessage(problem as WordedProblem, label, url));
 }
 
 /**
  * What the shapes cannot say about a release, against its path: its
- * @base is its own address, it is exactly one deck, the document
- * itself, of the version its path says, in its deck's series, published
- * by Solid Memo, and following the version before it (version 1 follows
- * none).
+ * @base is its own address (a check of its text, so here), and by the
+ * library rules (metadataProblems in @solid-memo/domain/release/libraryRules)
+ * it is exactly one deck, the document itself, of the version its path
+ * says, in its deck's series, published by Solid Memo, and following
+ * the version before it (version 1 follows none).
  */
 export function metadataProblems(release: DeckRelease): string[] {
-  const { deck, version, quads } = release;
-  const label = labelOf(deck, version);
+  const { deck, version } = release;
   const url = releaseUrlOf(deck, version);
   const problems: string[] = [];
   const base = /^@base\s+<([^>]*)>/m.exec(release.turtle)?.[1];
   if (base !== url) {
-    problems.push(`${label}: states ${base === undefined ? "no @base" : `@base <${base}>`}; its path says @base <${url}>.`);
+    problems.push(`${labelOf(deck, version)}: states ${base === undefined ? "no @base" : `@base <${base}>`}; its path says @base <${url}>.`);
   }
-  const decks = [
-    ...new Set(
-      quads
-        .filter((q) => q.predicate.value === RDF_TYPE && q.object.value === `${SM_NS}Deck`)
-        .map((q) => q.subject.value),
-    ),
-  ];
-  if (decks.length !== 1 || decks[0] !== url) {
-    problems.push(`${label}: expected the document itself to be its one solid-memo:Deck, found ${decks.map((d) => `<${d}>`).join(", ") || "none"}.`);
-  }
-  const expect = (predicate: string, name: string, expected: readonly string[], shown: string) => {
-    const objects = objectsOf(quads, url, predicate);
-    if (objects.length !== expected.length || objects.some((o, i) => o.value !== expected[i])) {
-      problems.push(`${label}: states ${name} ${shownValues(objects)}; its path says ${shown}.`);
-    }
+  const place = {
+    version,
+    series: seriesUrlOf(deck),
+    publisher: PUBLISHER_URL,
+    ...(version > 1 ? { previous: releaseUrlOf(deck, version - 1) } : {}),
   };
-  const stated = literalsOf(quads, url, `${DCAT}version`);
-  if (stated.length !== 1 || stated[0].value !== String(version)) {
-    problems.push(`${label}: states dcat:version ${shownValues(objectsOf(quads, url, `${DCAT}version`))}; its path says "${version}".`);
-  }
-  const series = seriesUrlOf(deck);
-  expect(`${DCAT}inSeries`, "dcat:inSeries", [series], `<${series}>`);
-  expect(`${DCAT}isVersionOf`, "dcat:isVersionOf", [series], `<${series}>`);
-  expect(`${DCTERMS}publisher`, "dcterms:publisher", [PUBLISHER_URL], `<${PUBLISHER_URL}>`);
-  const previous = version > 1 ? [releaseUrlOf(deck, version - 1)] : [];
-  const shownPrevious = version > 1 ? `<${previous[0]}>` : "nothing, being the first version";
-  expect(`${DCAT}prev`, "dcat:prev", previous, shownPrevious);
-  expect(`${DCAT}previousVersion`, "dcat:previousVersion", previous, shownPrevious);
-  return problems;
+  return [...problems, ...messagesOf(release, releaseMetadataProblems(modelOf(release), place))];
 }
 
-/**
- * What the shapes cannot say about a course: a release with chapters or
- * steps is a schema:Course, with at least one chapter, studied front to
- * back; its chapters are part of it and its steps part of its chapters,
- * each at its own position; what a step in use checks and a chapter in
- * use reviews is a card of the release in use, asked once, with text on
- * its back and at least two distractors that have text in each of its
- * back's languages (retired ones not counted); and a chapter in use has
- * a step in use. Every card's
- * distractors, in a course or not, are distractors of the release, each
- * named by that card alone.
- * Retired chapters and steps keep what they named.
- */
+/** A course's outline, by the course rules (@solid-memo/domain/release/courseRules). */
 export function courseProblems(release: DeckRelease): string[] {
-  const { deck, version, quads } = release;
-  const label = labelOf(deck, version);
-  const url = releaseUrlOf(deck, version);
-  const problems: string[] = [];
-  const retired = retiredOf(quads);
-  const inUse = (subject: string) => !retired.has(subject);
-  const cards = cardsOf(quads);
-  const chapters = subjectsOfType(quads, `${SM_NS}Chapter`);
-  const steps = subjectsOfType(quads, `${SM_NS}Step`);
-  const distractors = new Set(subjectsOfType(quads, `${SM_NS}Distractor`));
-  const shown = (iri: string) => (iri.startsWith(`${url}#`) ? `<${iri.slice(url.length)}>` : `<${iri}>`);
-  const named = (subject: string, predicate: string) =>
-    objectsOf(quads, subject, predicate).filter((o) => o.termType === "NamedNode").map((o) => o.value);
-  const partOf = (subject: string) => named(subject, `${SCHEMA}isPartOf`);
-
-  const course = objectsOf(quads, url, RDF_TYPE).some((o) => o.value === `${SCHEMA}Course`);
-  if (!course && chapters.length + steps.length > 0) {
-    problems.push(`${label}: has chapters or steps but is no schema:Course: type the release itself schema:Course.`);
-  }
-  if (course && chapters.length === 0) {
-    problems.push(`${label}: is a schema:Course without a chapter: a course has at least one solid-memo:Chapter.`);
-  }
-  const direction = objectsOf(quads, url, `${SM_NS}studyDirection`);
-  if (course && (direction.length !== 1 || direction[0].value !== `${SM_NS}frontToBack`)) {
-    problems.push(`${label}: states solid-memo:studyDirection ${shownValues(direction)}; a course studies solid-memo:frontToBack.`);
-  }
-
-  for (const chapter of chapters) {
-    const parts = partOf(chapter);
-    if (parts.some((part) => part !== url)) {
-      problems.push(
-        `${label}: chapter ${shown(chapter)} is part of ${parts.map(shown).join(", ")}; a chapter is part of the release it is in (schema:isPartOf <>).`,
-      );
-    }
-  }
-  for (const step of steps) {
-    for (const part of partOf(step).filter((part) => !chapters.includes(part))) {
-      problems.push(`${label}: step ${shown(step)} is part of ${shown(part)}, which is no chapter of this release.`);
-    }
-  }
-
-  // The cards the steps and chapters in use ask, each with the steps that check it and the chapters that review it.
-  const asked = new Map<string, { checkedBy: string[]; reviewedBy: string[] }>();
-  const ask = (asker: string, term: "checkedBy" | "reviewQuestion") => {
-    for (const card of named(asker, `${SM_NS}${term}`)) {
-      if (!cards.has(card)) {
-        problems.push(`${label}: ${shown(asker)} names ${shown(card)} by solid-memo:${term}, which is no card of this release.`);
-      } else if (cards.get(card) === true) {
-        problems.push(`${label}: ${shown(asker)} names ${shown(card)} by solid-memo:${term}, which is retired: name a card in use, or retire ${shown(asker)} too.`);
-      } else {
-        const entry = asked.get(card) ?? { checkedBy: [], reviewedBy: [] };
-        entry[term === "checkedBy" ? "checkedBy" : "reviewedBy"].push(asker);
-        asked.set(card, entry);
-      }
-    }
-  };
-  for (const step of steps.filter(inUse)) ask(step, "checkedBy");
-  for (const chapter of chapters.filter(inUse)) ask(chapter, "reviewQuestion");
-  for (const q of quads.filter((q) => q.predicate.value === `${SM_NS}distractor` && !distractors.has(q.object.value))) {
-    problems.push(
-      `${label}: ${shown(q.subject.value)} names ${shown(q.object.value)} by solid-memo:distractor, which is no solid-memo:Distractor of this release.`,
-    );
-  }
-  // A card's distractors are its own: a copy writes and removes them with it, so one two cards share would go with either.
-  const namers = new Map<string, Set<string>>();
-  for (const q of quads.filter((q) => q.predicate.value === `${SM_NS}distractor`)) {
-    namers.set(q.object.value, (namers.get(q.object.value) ?? new Set()).add(q.subject.value));
-  }
-  for (const [distractor, by] of namers) {
-    if (by.size > 1) {
-      problems.push(
-        `${label}: distractor ${shown(distractor)} is named by ${[...by].map(shown).join(", ")}; a distractor is one card's: give each card its own.`,
-      );
-    }
-  }
-
-  // Languages of text, "" for untagged.
-  const languagesOf = (subject: string, predicate: string) =>
-    new Set(
-      objectsOf(quads, subject, predicate)
-        .filter((o): o is Literal => o.termType === "Literal")
-        .map((o) => o.language),
-    );
-  for (const [card, { checkedBy, reviewedBy }] of asked) {
-    if (checkedBy.length > 1) {
-      problems.push(`${label}: ${shown(card)} is checked by ${checkedBy.map(shown).join(", ")}; a card is checked by one step at most.`);
-    }
-    if (checkedBy.length > 0 && reviewedBy.length > 0) {
-      problems.push(
-        `${label}: ${shown(card)} is checked by ${checkedBy.map(shown).join(", ")} and a review question of ${reviewedBy.map(shown).join(", ")}; a card is the one or the other.`,
-      );
-    }
-    const back = languagesOf(card, `${SM_NS}back`);
-    if (back.size === 0) {
-      problems.push(`${label}: ${shown(card)} has no text on its back (solid-memo:back), the right one among the options a course offers.`);
-    }
-    const options = named(card, `${SM_NS}distractor`).filter((d) => distractors.has(d) && inUse(d));
-    if (options.length < 2) {
-      problems.push(`${label}: ${shown(card)} has too few distractors (${options.length}); a card a course asks has at least 2.`);
-    }
-    for (const option of options) {
-      const text = languagesOf(option, `${SM_NS}distractorText`);
-      const missing = [...back].filter((language) => !text.has(language));
-      if (missing.length > 0) {
-        problems.push(
-          `${label}: distractor ${shown(option)} has no text ${missing.map((l) => (l === "" ? "untagged" : `@${l}`)).join(", ")}, which the back of ${shown(card)} has.`,
-        );
-      }
-    }
-  }
-
-  // Members of the same list that share a schema:position.
-  const clashes = (members: readonly string[]) => {
-    const at = new Map<string, string[]>();
-    for (const member of members) {
-      for (const position of literalsOf(quads, member, `${SCHEMA}position`)) {
-        at.set(position.value, [...(at.get(position.value) ?? []), member]);
-      }
-    }
-    return [...at].filter(([, sharing]) => sharing.length > 1);
-  };
-  for (const [position, sharing] of clashes(chapters.filter(inUse))) {
-    problems.push(`${label}: chapters ${sharing.map(shown).join(", ")} share schema:position ${position}; a course's chapters each have their own.`);
-  }
-  for (const chapter of chapters) {
-    const ofChapter = steps.filter((step) => inUse(step) && partOf(step).includes(chapter));
-    for (const [position, sharing] of clashes(ofChapter)) {
-      problems.push(
-        `${label}: steps ${sharing.map(shown).join(", ")} of ${shown(chapter)} share schema:position ${position}; a chapter's steps each have their own.`,
-      );
-    }
-    if (inUse(chapter) && ofChapter.length === 0) {
-      problems.push(`${label}: chapter ${shown(chapter)} has no step in use; a chapter in use has at least one step that is not retired.`);
-    }
-  }
-  return problems;
+  return messagesOf(release, releaseCourseProblems(modelOf(release)));
 }
 
-const TEXT_FORMAT = `${SM_NS}textFormat`;
-const MARKDOWN = `${SM_NS}markdown`;
-/** The concepts of solid-memo:TextFormats. */
-const TEXT_FORMATS = new Set([`${SM_NS}plainText`, MARKDOWN]);
-
-/** What a Markdown problem means for a release's author, after the subject and field it is in. */
-function problemText(problem: MarkdownProblem): string {
-  const code = (source: string) => JSON.stringify(source);
-  switch (problem.code) {
-    case "tooLong":
-      return `is ${problem.length} characters, more than the ${MAX_CHARS} the app reads as Markdown: it would be shown as plain text. Make it shorter.`;
-    case "tooComplex":
-      return "nests or marks up more than the app reads as Markdown (docs/markdown.md, Limits): it would be shown as plain text.";
-    case "tooDeep":
-      return `nests ${code(problem.source)} past the ${MAX_DEPTH} levels of blocks and markup the app reads (each quote, list item, paragraph, emphasis and link is one): it would be shown as its source.`;
-    case "largeTable":
-      return `has a table of more than ${MAX_TABLE_COLUMNS} columns or ${MAX_TABLE_CELLS} cells: it would be shown as its source.`;
-    case "html":
-      return `has raw HTML, ${code(problem.source)}, which is shown as its source: write it as code, or escape its "<" (\\<).`;
-    case "image":
-      return `has a picture, ${code(problem.source)}, which is never shown, only its description: a card shows a picture by solid-memo:frontImage or backImage.`;
-    case "link":
-      return `has a link, ${code(problem.source)}, where none may be (a card's sides, its label and its options): ${problem.autolink ? "an autolink loses its angle brackets; " : ""}write it as code to show it as written.`;
-    case "linkNotFollowed":
-      return `links to ${code(problem.url)}, which the app does not follow: only an https: address without a user name or password is.`;
-    case "linkHost":
-      return `has link text that reads as the host name or address ${code(problem.text)}, but the link leads to ${problem.host}: name that host, or word the text otherwise (a file's name, such as package.json, reads as a host name too).`;
-    case "hiddenControl":
-      return `has ${problem.controls.join(", ")} in ${problem.in === "code" ? "code" : "a link"}, which would show as markers: such controls make text read other than it is.`;
-    case "characterReference":
-      return `has the character reference ${problem.source}, which Markdown shows decoded: write it as code, or escape its "&" (\\${problem.source}).`;
-    case "notOneParagraph":
-      return "is an option but not one paragraph: the right option and the wrong ones must look alike.";
-    case "dashHeading":
-      return `underlines a line with dashes, ${code(problem.source)}, which makes it a heading, not a line of text and a thematic break: put a blank line before the break (in a step's theory, it ends a chunk), or write the heading with "##".`;
-  }
-}
+const RULES: Record<FieldRuleName, FieldRule> = { side: SIDE, option: OPTION, prose: PROSE };
 
 /**
  * The text of a release written in Markdown, by the rules for a release
- * (docs/markdown.md, docs/deck-library.md): raw HTML, pictures, links
- * where none may be or that the app does not follow or that name another
- * host, hidden controls, character references and what the app would not
- * read as Markdown, field by field, of each card, step and chapter that
- * states solid-memo:textFormat solid-memo:markdown; on a card, its
- * distractors' text too, its back and every distractor's text one
- * paragraph when it has distractors, as options are; a step's theory
- * with no empty chunk, and in as many chunks in each language (chunks
- * are split at its top-level thematic breaks). Only those subjects
- * state a text format, and only a concept of solid-memo:TextFormats.
- * None of this keeps the app safe, which shows any text safely: it is
- * that the text shows as its author meant.
+ * (docs/markdown.md, docs/deck-library.md): which fields are Markdown and
+ * by which rule is @solid-memo/domain/release/markdownFields', what is
+ * wrong with each text @solid-memo/markdown's.
  */
 export function markdownProblems(release: DeckRelease): string[] {
-  const { deck, version, quads } = release;
-  const label = labelOf(deck, version);
-  const url = releaseUrlOf(deck, version);
-  const problems: string[] = [];
-  const shown = (iri: string) => (iri.startsWith(`${url}#`) ? `<${iri.slice(url.length)}>` : `<${iri}>`);
-  const cards = subjectsOfType(quads, `${SM_NS}Card`);
-  const steps = subjectsOfType(quads, `${SM_NS}Step`);
-  const chapters = subjectsOfType(quads, `${SM_NS}Chapter`);
-  const formatted = new Set([...cards, ...steps, ...chapters]);
-
-  const distractors = new Set(subjectsOfType(quads, `${SM_NS}Distractor`));
-  for (const q of quads.filter((q) => q.predicate.value === TEXT_FORMAT)) {
-    if (!formatted.has(q.subject.value)) {
-      const why = distractors.has(q.subject.value) ? "a distractor's text is written as its card's" : "its text is plain text";
-      problems.push(
-        `${label}: ${shown(q.subject.value)} states solid-memo:textFormat, which only a card, a step or a chapter does: ${why}.`,
-      );
-    } else if (!TEXT_FORMATS.has(q.object.value)) {
-      problems.push(
-        `${label}: ${shown(q.subject.value)} states solid-memo:textFormat ${shownValues([q.object])}, no concept of solid-memo:TextFormats: the app shows its text as plain text.`,
-      );
-    }
-  }
-
-  const marked = (subject: string) => objectsOf(quads, subject, TEXT_FORMAT).some((o) => o.value === MARKDOWN);
-  const fieldOf = (name: string, text: Literal) => `${name}${text.language === "" ? "" : `@${text.language}`}`;
-  const check = (subject: string, predicate: string, name: string, rule: FieldRule) => {
-    for (const text of literalsOf(quads, subject, predicate) as Literal[]) {
-      const field = fieldOf(name, text);
-      for (const problem of textProblems(text.value, rule)) problems.push(`${label}: ${shown(subject)} ${field} ${problemText(problem)}`);
-    }
-  };
-  for (const card of cards.filter(marked)) {
-    const options = objectsOf(quads, card, `${SM_NS}distractor`).map((o) => o.value);
-    check(card, `${SM_NS}front`, "solid-memo:front", SIDE);
-    check(card, `${SM_NS}back`, "solid-memo:back", options.length > 0 ? OPTION : SIDE);
-    check(card, `${SM_NS}backLabel`, "solid-memo:backLabel", SIDE);
-    check(card, `${SM_NS}frontNote`, "solid-memo:frontNote", PROSE);
-    check(card, `${SM_NS}backNote`, "solid-memo:backNote", PROSE);
-    for (const option of options) {
-      check(option, `${SM_NS}distractorText`, "solid-memo:distractorText", OPTION);
-      check(option, `${SM_NS}distractorNote`, "solid-memo:distractorNote", PROSE);
-    }
-  }
-  for (const step of steps.filter(marked)) {
-    check(step, `${SM_NS}theory`, "solid-memo:theory", PROSE);
-    // A step's theory is shown a chunk at a time, split at its top-level thematic breaks.
-    const chunked = (literalsOf(quads, step, `${SM_NS}theory`) as Literal[]).map((text) => ({
-      field: fieldOf("solid-memo:theory", text),
-      ...inspectChunks(text.value),
-    }));
-    for (const { field } of chunked.filter(({ empty }) => empty > 0)) {
-      problems.push(
-        `${label}: ${shown(step)} ${field} has a thematic break first, last or right after another, which makes an empty chunk the app drops: a step's theory is shown a chunk at a time, split at its top-level thematic breaks, with text between each two.`,
-      );
-    }
-    if (new Set(chunked.map(({ chunks }) => chunks)).size > 1) {
-      const counts = chunked.map(({ field, chunks }) => `${chunks} ${chunks === 1 ? "chunk" : "chunks"} in ${field}`);
-      problems.push(
-        `${label}: ${shown(step)} has its theory in ${counts.join(", ")}: a step's theory is in as many chunks in each language, so a learner who switches language keeps their place.`,
-      );
-    }
-  }
-  for (const chapter of chapters.filter(marked)) check(chapter, `${DCTERMS}description`, "dcterms:description", PROSE);
-  return problems;
+  return messagesOf(
+    release,
+    releaseMarkdownProblems(modelOf(release), { problems: (text, rule) => textProblems(text, RULES[rule]), chunks: inspectChunks }),
+  );
 }
 
 /** A code point as Unicode writes it: U+00E9. */
@@ -700,9 +400,10 @@ export function newcomerProblems(indexQuads: readonly Quad[]): string[] {
     problems.push(`${label}: names ${named.length} courses for newcomers by solid-memo:newcomerCourse: at most one.`);
   }
   const decks = new Set(objectsOf(indexQuads, INDEX_URL, `${DCAT}dataset`).map((o) => o.value));
-  const isCourse = (release: Quad_Object) => objectsOf(indexQuads, release.value, RDF_TYPE).some((o) => o.value === `${SCHEMA}Course`);
+  const isCourse = (release: Quad_Object) => objectsOf(indexQuads, release.value, RDF_TYPE).some((o) => o.value === `${SCHEMA_NS}Course`);
   for (const course of named) {
-    const shown = `${label}: names ${shownValues([course])} by solid-memo:newcomerCourse`;
+    const value = course.termType === "Literal" ? JSON.stringify(course.value) : `<${course.value}>`;
+    const shown = `${label}: names ${value} by solid-memo:newcomerCourse`;
     if (course.termType !== "NamedNode") problems.push(`${shown}, which is no IRI.`);
     else if (!decks.has(course.value)) problems.push(`${shown}, which is no deck of the library.`);
     else if (!objectsOf(indexQuads, course.value, `${DCAT}hasCurrentVersion`).some(isCourse)) {
@@ -724,16 +425,17 @@ async function problemsOf(check: Promise<void>): Promise<string[]> {
 
 /**
  * Every problem with the releases and their index: each release's
- * metadata against its path, its cards, chapters, steps and distractors
- * against the version before it (one the deck no longer uses is retired,
- * owl:deprecated true, never removed, so the copies that have it keep it
- * and its review history), its course outline (courseProblems), its
- * text written in Markdown (markdownProblems), its literals in Unicode
- * NFC (normalizationProblems), and Solid Memo's shapes,
- * DCAT-AP (a release with the index beside it, where its series and
- * publisher are described) and SKOS, with the reference data; then the
- * index's course for newcomers (newcomerProblems), its literals in NFC,
- * and the index to the shapes and the profiles too.
+ * metadata against its path, against the version before it
+ * (continuityRules: a card, chapter, step or distractor the deck no
+ * longer uses is retired, owl:deprecated true, never removed, so the
+ * copies that have it keep it and its review history, and its id is
+ * never another kind of subject's), its course outline (courseProblems),
+ * its text written in Markdown (markdownProblems), its literals in
+ * Unicode NFC (normalizationProblems), and Solid Memo's shapes, DCAT-AP
+ * (a release with the index beside it, where its series and publisher
+ * are described) and SKOS, with the reference data; then the index's
+ * course for newcomers (newcomerProblems), its literals in NFC, and the
+ * index to the shapes and the profiles too.
  */
 export async function validateLibrary(
   releases: readonly DeckRelease[],
@@ -747,22 +449,9 @@ export async function validateLibrary(
     problems.push(...metadataProblems(release));
     const before = releases.find((r) => r.deck === release.deck && r.version === release.version - 1);
     if (before !== undefined) {
-      const droppedOf = (types: readonly string[]) => {
-        const now = new Set(types.flatMap((type) => idsOf(release.quads, type)));
-        return types.flatMap((type) => idsOf(before.quads, type)).filter((id) => !now.has(id));
-      };
-      const cards = droppedOf([`${SM_NS}Card`]);
-      if (cards.length > 0) {
-        problems.push(
-          `${label}: drops ${cards.map((id) => `<#${id}>`).join(", ")}, which v${before.version}.ttl has. A card is never removed: retire it (owl:deprecated true), so the copies that have it keep it and its review history.`,
-        );
-      }
-      const outline = droppedOf(OUTLINE_TYPES);
-      if (outline.length > 0) {
-        problems.push(
-          `${label}: drops ${outline.map((id) => `<#${id}>`).join(", ")}, which v${before.version}.ttl has. A chapter, step or distractor is never removed: retire it (owl:deprecated true), so the copies that follow the course keep their place in it.`,
-        );
-      }
+      // Its path fixes each version, so metadataProblems names one that is not the one before it plus one.
+      const continuity = continuityProblems(modelOf(before), modelOf(release)).filter((p) => p.code !== "versionNotNext");
+      problems.push(...messagesOf(release, continuity));
     }
     problems.push(...courseProblems(release), ...markdownProblems(release));
     problems.push(...normalizationProblems(label, releaseUrlOf(release.deck, release.version), release.quads));
