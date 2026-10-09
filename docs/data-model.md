@@ -71,8 +71,8 @@ flowchart LR
   instance registered publicly: they say what the user studied and how
   well. Without a private index they are not registered anywhere.
   They are written when an instance is created, by a
-  [format update](migrations.md#the-pod-migration) once it succeeded
-  (a failure there leaves the update done), when a guest's study moves
+  [format update](migrations.md#the-pod-migration) once it updated every
+  document (a failure there leaves the update done), when a guest's study moves
   into the pod as a new instance ([guest-mode.md](guest-mode.md#as-a-new-instance)), and
   by **Register what is missing** under **Findable by other apps** in
   Preferences, which lists every registration that belongs in an index
@@ -122,9 +122,7 @@ flowchart LR
   catalogue goes can be retried and find the decks again (a catalogue
   the pod serves but that cannot be read, as another app might leave
   it, is kept, and so are the decks' documents, which nothing else
-  names; the rest goes as ever); then every [backup](migrations.md#the-backup)
-  in `backups/`, each as its manifest names what it holds (its update's
-  working copy, if any, whole), and `backups/` once empty; then
+  names; the rest goes as ever); then
   `decks/`, `reviews/` and `history/`, each only if it is then empty;
   then `meta.ttl`, last of the documents, so a half-deleted instance
   still attaches by URL; and the container itself only if it is then
@@ -139,7 +137,7 @@ flowchart LR
   delete retryable. Restoring the copy of a whole instance an earlier
   version's format update left deletes the updated instance, and
   deleting that copy the original, the same way
-  ([migrations.md](migrations.md#backups-an-earlier-version-made)). Every blocking server
+  ([migrations.md](migrations.md#the-backup)). Every blocking server
   the end-to-end tests start ([testing.md](testing.md#commands)), and
   Pivot and Community Solid Server 8, keeps another app's file and its
   folder, and deletes a folder holding only Solid Memo's documents with
@@ -211,7 +209,9 @@ replaces only the links to the instance's data, each with the same
 resource of the other container, in every index that holds any of
 them: the private index of an instance registered publicly holds only
 its review states' and answers', and they move too. The other things a
-shared registration names, and its title, stay as they were.
+shared registration names, and its title, stay as they were; an index
+that registers the instance but no catalogue of it gains the other
+container's catalogue.
 
 ## Instance layout
 
@@ -262,21 +262,10 @@ shared registration names, and its title, stay as they were.
 ├── history/<YYYY-MM>.ttl  the answer log (below): one sm:Answer per grade
 │                        given in study or a course that month,
 │                        appended, never edited; sm:formatVersion 1
-├── digest.ttl      derived data (below): a sm:DocumentReceipt per document
-│                        (#receipt-<path>) and a sm:DeckSchedule per deck
-│                        (#schedule-<path>), each stamped with the versions
-│                        it was learned from; sm:formatVersion 1
-└── backups/<stamp>/  a backup an update made before it changed documents
-                         in place (migrations.md#the-backup): manifest.ttl
-                         (#it a sm:Backup, #entry-<n> a sm:BackupEntry per
-                         document, sm:formatVersion 1), each document's
-                         bytes as the server served them at its own path
-                         with .orig added (one outside the instance, or
-                         at staging/… or elsewhere/…, at
-                         elsewhere/<n>.orig), application/octet-stream,
-                         with the access its document has as its own;
-                         while the update runs, its working copy in
-                         staging/
+└── digest.ttl      derived data (below): a sm:DocumentReceipt per document
+                         (#receipt-<path>) and a sm:DeckSchedule per deck
+                         (#schedule-<path>), each stamped with the versions
+                         it was learned from; sm:formatVersion 1
 ```
 
 A deck's documents are found through its catalog entry
@@ -452,11 +441,11 @@ graph LR
   document by the deck's own operations (import, adding, editing or
   removing a card, stating its languages, a course's question joining
   the deck, the format update's rewrite of outdated cards, a library
-  upgrade's new document, a guest's deck added to an instance) adds `<> dcterms:isPartOf
+  upgrade's write of the cards, a guest's deck added to an instance) adds `<> dcterms:isPartOf
   <catalog.ttl#deck-X>` once, on the document itself, so an app that
   finds a cards document finds its deck. A [repair](validation.md#repair)
-  from the data check and a copy of the instance (the format
-  update's, a guest's transfer into a new instance) leave the document as it was, so one
+  from the data check and a copy of the instance (a guest's study moved
+  into a new instance) leave the document as it was, so one
   untouched since vocabulary 1.16 does not say it yet. Another
   `dcterms:isPartOf` there stays: another app may point two decks at one
   document. The subject has no class, so no shape checks it, and the
@@ -465,9 +454,8 @@ graph LR
 An instance's URL is permanent, and so is every document's and
 subject's in it: the [format update](migrations.md#the-pod-migration)
 and the [library upgrade](migrations.md#how-an-upgrade-is-applied)
-write the documents where they are, after backing them up inside the
-instance, and change no registration (the format update only adds
-those missing). Another app may keep a link to
+write the documents where they are, and change no registration (the
+format update only adds those missing). Another app may keep a link to
 the instance, a deck, a card or a review state. The one way an
 instance's address still changes is restoring the copy of a whole
 instance that a format update by an earlier version of the app left as
@@ -757,9 +745,8 @@ sequenceDiagram
   ETag on a read: nothing can be known to be unchanged, so nothing is
   kept, and every visit reads everything, as before.
 - The [format update](migrations.md#the-pod-migration) does not write
-  the digest; the documents it writes, and those a restore puts back,
-  have new versions, so what it says of them is relearned on the next
-  visit.
+  the digest; the documents it writes have new versions, so what it
+  says of them is relearned on the next visit.
 
 ## Write discipline
 
@@ -820,11 +807,8 @@ sequenceDiagram
   queue, the format check and the data check): a read already under way
   is shared, and a document read before is asked for with
   `If-None-Match: <its ETag>`; on 304 the dataset read then is returned
-  (datasets are immutable). A write to the document forgets both, and so
-  does an update's backup of it or check of it
-  ([migrations.md](migrations.md#the-pod-migration)): a server whose ETag
-  outlives an edit made in the same second answers 304 for a document
-  that changed. This is memory only, for the open page: nothing is
+  (datasets are immutable). A write to the document forgets both. This
+  is memory only, for the open page: nothing is
   stored in the browser. Logged in, the browser's own cache does not do
   this, so without it a login downloaded every deck three times; and it
   is never asked (`cache: "no-store"`), as it may keep a document the pod
@@ -839,9 +823,8 @@ sequenceDiagram
 - **What Solid Memo did not write, it does not delete or unlink.** A
   write touches only the triples it changes (a deck save adds or
   removes its own `dcat:dataset` link, never another app's), and a
-  delete only resources Solid Memo knows it wrote: an instance, a
-  backup (each file its manifest names, then the manifest), a copy of a
-  whole instance an earlier version's update left, or the updated
+  delete only resources Solid Memo knows it wrote: an instance, a copy
+  of a whole instance an earlier version's update left, or the updated
   instance that copy's restore replaces, is deleted document by
   document, its folder only once empty
   ([deleting an instance](#discovery-chain)); the cards and reviews
@@ -850,29 +833,20 @@ sequenceDiagram
   with `If-Match` ([guest-mode.md](guest-mode.md#adding-to-an-instance)). Only a folder Solid Memo
   made whole and nothing names yet is deleted recursively: the guest's
   study moved into a new instance, when it fails half-way or a closed tab left it behind,
-  an update's working copy (`staging/` in its backup's folder), an
-  update's folder when the update fails before its manifest named
-  anything, and a copy of a whole instance an earlier version's update
+  and the partial copy of a whole instance an earlier version's update
   left so: Solid Memo created it at a URL it found free, and all it holds
   is copies whose originals stay where they were.
-- **An update writes only what it backed up, as it backed it up, and
-  puts back what it wrote when it fails.** The format update and the
-  library upgrade write a document only after a working copy of what
-  they will write checked out, and only while the document is at the
-  version whose bytes they backed up (`If-Match`, or checked just before
-  where the server gives no ETag), held so by the write fence; a failure
-  after that puts each document they wrote back, its bytes as the server
-  served them before ([migrations.md](migrations.md#the-pod-migration));
-  and no write puts an older format over a subject a newer version of
-  the app wrote ([migrations.md](migrations.md#versions)).
-- No `.acl`/`.acr` resource is ever written but an update's own files'
-  ([backup](migrations.md#the-backup) and working copy), made from the
-  access the document each is of has: the document's own access
-  control, rebased, or, when it inherits, the rules its nearest folder
-  with an access control of its own gives what is inside it
-  (`acl:default`), each now of the file alone. An update writes no
-  document's access control, so none is backed up. Nothing else's
-  access changes: a resource without its own
+- **An update writes each document in one edit, held to its read.** The
+  format update and the library upgrade write each document where it
+  is, as any save does: one edit made only if the document is still at
+  the version read (`If-Match`), its outdated subjects brought up to date
+  from that very read, or, for an upgrade's cards, the changes planned
+  on it ([migrations.md](migrations.md#the-pod-migration)). A document
+  whose write fails is as it was, and nothing is put back: every
+  document is in a format the app reads. No write puts an older format
+  over a subject a newer version of the app wrote
+  ([migrations.md](migrations.md#versions)).
+- No `.acl`/`.acr` resource is ever written: a resource without its own
   ACL safely inherits its ancestors' access, while a malformed one
   replaces inheritance entirely and can lock the owner out (WAC) or
   expose data. Access control stays whatever the user's server

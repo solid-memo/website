@@ -139,10 +139,10 @@ than assume ([serverTraits.ts](../e2e/pod/src/serverTraits.ts)):
   so a changed document looks unchanged. The tests edit within the
   second, so there the test that proves an edit is refused and the
   digest's tests are skipped. 7 stamps milliseconds. The tests of an
-  update stopped, or undone, by a change made elsewhere instead wait for
-  the next second before they make it, on every server whose ETag does
-  not change on every edit (one without ETags included), and so run on
-  every server.
+  update whose write a change made elsewhere refuses instead wait for
+  the next second before they make that change, where the server's ETag
+  does not change on every edit, and so run there too; on
+  node-solid-server, which ignores `If-Match`, they are skipped.
 
 Every skip says why. Everything else runs on every server. A test may
 skip only where the server does something the Solid Protocol allows and
@@ -156,12 +156,10 @@ app" makes is an N3 Patch, a SPARQL Update or the whole document, as its
 ([serverTraits.integration.test.ts](../e2e/pod/src/serverTraits.integration.test.ts)):
 a release that changes it fails there, not as tests quietly starting or
 stopping to skip, and the pin moves by hand once the change is
-understood. Among it: every blocking server serves a document PUT as
-Turtle byte for byte as it was written (`keepsWrittenTurtle`), which an
-update's putting a document back exactly as it was relies on, and
-which the tests of the format update and of the library upgrade check
-"byte for byte": the bytes the server serves for each document, asked
-for as the app asks (`Accept: text/turtle`), before and after
+understood. The tests of the format update and of the library upgrade
+check that a document a write of theirs left alone, or failed on, is as
+it was "byte for byte": the bytes the server serves for it, asked for as
+the app asks (`Accept: text/turtle`), before and after
 ([migrations.md](migrations.md#proof-on-a-real-server),
 [the upgrade's](migrations.md#proof-of-the-upgrade-on-a-real-server)).
 

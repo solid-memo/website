@@ -6,8 +6,9 @@ import { useI18n, type I18n, type ErrorText } from "./i18n";
 /**
  * "adds 1 card, changes 2 cards, retires 1 card and removes 1 card", of
  * what the plan does to the cards the user studies: a card that is added
- * or changed retired is out of sight. Cards already as the release has
- * them (an upgrade cut off half-way) are said to be kept so.
+ * or changed retired is out of sight. Cards, and what the deck says of
+ * itself, already as the release has them (an upgrade cut off half-way)
+ * are said to be kept so.
  */
 export function describeChanges(
   plan: LibraryUpgradePlan,
@@ -22,6 +23,7 @@ export function describeChanges(
     ...(plan.restore.length > 0 ? [t("libraryUpgradeNotice.bringsBack", { count: plan.restore.length })] : []),
     ...(plan.remove.length > 0 ? [t("libraryUpgradeNotice.removes", { count: plan.remove.length })] : []),
     ...(plan.applied.length > 0 ? [t("libraryUpgradeNotice.alreadyApplied", { count: plan.applied.length })] : []),
+    ...(plan.appliedAbout.length > 0 ? [t("libraryUpgradeNotice.alreadyDescribed")] : []),
     ...(plan.direction === undefined
       ? []
       : [t("libraryUpgradeNotice.studies", { direction: directionLabel(plan.direction).toLowerCase() })]),
@@ -38,9 +40,13 @@ export function describeChanges(
       });
 }
 
-/** "Your review history is kept…", with the exceptions the plan makes. */
+/**
+ * "Your review history is kept…", with the exceptions the plan makes: the
+ * cards it removes, and those the copy no longer has (`gone`), whose
+ * states left, if any, go too.
+ */
 function historyKept(plan: LibraryUpgradePlan, t: I18n["t"]): string {
-  const removes = plan.remove.length > 0;
+  const removes = plan.remove.length + plan.gone.length > 0;
   const retires = plan.retire.length > 0;
   if (removes && retires) return t("libraryUpgradeNotice.historyKeptButRemovedRetired");
   if (removes) return t("libraryUpgradeNotice.historyKeptButRemoved");

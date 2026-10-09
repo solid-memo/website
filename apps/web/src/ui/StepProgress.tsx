@@ -19,6 +19,7 @@ export function StepProgress<Step extends string>({
   done,
   total,
   part,
+  count,
   status,
   progressLabel,
   hint,
@@ -33,6 +34,8 @@ export function StepProgress<Step extends string>({
   total: number;
   /** How far into the current step; the bar moves on within it. */
   part?: StepPart;
+  /** How far into the current step, in words ("3 of 7 documents"); by default "3 of 7". */
+  count?: string;
   /** What it is doing now, in a sentence; it changes only with the step. */
   status: string;
   progressLabel: string;
@@ -53,7 +56,7 @@ export function StepProgress<Step extends string>({
   return (
     <div ref={ref} class="warning migration" role="region" aria-label={region} tabIndex={-1}>
       <p role="status">{shown ? status : ""}</p>
-      {part !== undefined && <p class="hint">{t("stepProgress.count", { done: part.done, total: part.total })}</p>}
+      {part !== undefined && <p class="hint">{count ?? t("stepProgress.count", { done: part.done, total: part.total })}</p>}
       <progress
         value={done + (part === undefined ? 0 : Math.min(part.done / Math.max(part.total, 1), 1))}
         max={Math.max(total, 1)}

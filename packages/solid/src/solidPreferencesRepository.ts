@@ -5,6 +5,7 @@ import {
 } from "@inrupt/solid-client";
 import type { PreferencesRepository } from "@solid-memo/application/ports";
 import { preferencesUrlOf } from "@solid-memo/domain/instanceLayout";
+import { isPreferencesOutdated } from "@solid-memo/domain/migration";
 import type { StoredPreferences } from "@solid-memo/domain/preferences";
 import { getSolidDatasetOrNull, saveDataset } from "./datasets";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
@@ -43,6 +44,21 @@ export function createSolidPreferencesRepository({
       );
       await checkWrite(updated, [url]);
       await saveDataset(documentUrl, updated, fetch);
+    },
+
+    async upgradePreferences(instanceUrl): Promise<boolean> {
+      const documentUrl = preferencesUrlOf(instanceUrl);
+      const dataset = await getSolidDatasetOrNull(documentUrl, fetch);
+      const url = `${documentUrl}#it`;
+      const existing = dataset === null ? null : getThing(dataset, url);
+      // The preferences as read, brought up to date in memory, written in this app's format.
+      const stored = existing === null ? null : toPreferences(existing);
+      if (stored === null || !isPreferencesOutdated(stored)) return false;
+      const updated = setThing(dataset!, toPreferencesThing(url, stored.preferences, existing));
+      await checkWrite(updated, [url]);
+      // If-Match the read above.
+      await saveDataset(documentUrl, updated, fetch);
+      return true;
     },
   };
 }

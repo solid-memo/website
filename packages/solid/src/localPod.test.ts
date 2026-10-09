@@ -39,20 +39,6 @@ describe("createLocalPod", () => {
     expect(await get.text()).toBe(`<${DOC}#it> <${DOC}#name> "Deck" .`);
   });
 
-  it("reads Turtle, and a SPARQL Update, sent as bytes as it reads them sent as text", async () => {
-    const { fetch } = pod();
-    const served = '<#it> <#name> "Deck" .';
-    expect((await fetch(DOC, { ...turtle(""), body: new TextEncoder().encode(served) })).status).toBe(201);
-    expect(await (await fetch(DOC)).text()).toBe(`<${DOC}#it> <${DOC}#name> "Deck" .`);
-    // Its own bytes put back, it serves them as they were.
-    const bytes = new Uint8Array(await (await fetch(DOC)).arrayBuffer());
-    await fetch(DOC, update("INSERT DATA { <#it> <#n> 1 . }"));
-    await fetch(DOC, { ...turtle(""), body: bytes });
-    expect(new Uint8Array(await (await fetch(DOC)).arrayBuffer())).toEqual(bytes);
-    expect((await fetch(DOC, { ...update(""), body: new TextEncoder().encode("INSERT DATA { <#it> <#n> 2 . }") })).status).toBe(205);
-    expect(await (await fetch(DOC)).text()).toContain(`<${DOC}#n> "2"`);
-  });
-
   it("serves the document of a fragment URL, as the network does", async () => {
     const { fetch } = pod();
     await fetch(DOC, turtle("<#me> <#p> <#o> ."));

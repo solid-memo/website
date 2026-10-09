@@ -17,7 +17,6 @@ card/v1.ttl … v5.ttl
 review-state/v1.ttl, v2.ttl
 preferences/v1.ttl … v4.ttl
 document-receipt/v1.ttl, deck-schedule/v1.ttl   (the digest)
-backup/v1.ttl, backup-entry/v1.ttl               (an update's backup)
 deck-group/v1.ttl             …/deck-group/v1.ttl#inPod  (the arranged deck list)
 chapter/v1.ttl, step/v1.ttl   …/chapter/v1.ttl#inLibrary  (a course's outline)
 distractor/v1.ttl             …/distractor/v1.ttl#shape  (a wrong option, in a pod or the library)
@@ -113,8 +112,6 @@ since a shape's `sh:name` version must match its file's.
 | Chapter 1 | In the library (`ChapterV1`, `<#inLibrary>`): a chapter of a [course](courses.md), a `sm:Chapter` and a `schema:Syllabus`; `dcterms:title` 1..n language-tagged text, one per language, exactly one of them English; `dcterms:description` 0..n language-tagged text, one per language; `schema:isPartOf` (the release) and `schema:position` (an integer ≥ 0) 1..1; `sm:reviewQuestion` 0..n IRIs (cards asked only in its final review); `owl:deprecated` 0..1 boolean, `true` once retired. `sm:textFormat` 0..1 IRI, how its description is written (never its title), added without a version bump in vocabulary 1.15, as on a card 5 |
 | Step 1 | In the library (`StepV1`, `<#inLibrary>`): a step of a course chapter, a `sm:Step` and a `schema:LearningResource`; `sm:theory` 1..n language-tagged text, one per language, exactly one of them English; `sm:checkedBy` 1..n IRIs (the cards that check it); `schema:isPartOf` (its chapter) and `schema:position` (an integer ≥ 0) 1..1; `owl:deprecated` 0..1 boolean. `sm:textFormat` 0..1 IRI, how its theory is written, added without a version bump in vocabulary 1.15, as on a card 5 |
 | Distractor 1 | In a pod or the library (`DistractorV1`, `<#shape>`): a wrong option of a card, a `sm:Distractor` and a `schema:Answer`, a subject of the card's document; `sm:distractorText` 1..n, one untagged literal or language-tagged text, one per language, never both, as a card 5 side's text; `sm:distractorNote` 0..n language-tagged text, one per language, why the option is wrong; `owl:deprecated` 0..1, true once retired, when the app no longer offers it |
-| Backup 1 | In a backup's manifest (`manifest.ttl#it`, [migrations.md](migrations.md#the-backup)): `sm:backupOf` (the instance's container or a deck's entry, an IRI) and `dcterms:created` (xsd:dateTime) 1..1; `sm:releaseBackedUp` 0..1 IRI, on a library upgrade's backup the release the deck came from |
-| Backup entry 1 | In a backup's manifest (`#entry-<n>`): `sm:backedUpDocument` 1..1 IRI; `sm:backupCopy` 0..1 IRI, the file of the document's bytes (absent: there was no document); `sm:contentTypeBackedUp` 0..1 string, the Content-Type they were served with; `sm:versionBackedUp` and `sm:versionUpdated` 0..1 strings, the versions the bytes were read at and the update left the document at |
 | Deck schedule 1 | In an instance's digest: `sm:scheduleOf` (the deck), `sm:cardsVersion`, `sm:reviewsVersion` (`"absent"` for none), `sm:scheduledDirection` (a concept of `sm:StudyDirections`), `sm:scheduledDayBoundaryHour` (0–23), `sm:scheduledOn` (`YYYY-MM-DD`), `sm:unreviewedCount`, `sm:reviewedOnDayCount`, `sm:introducedOnDayCount` 1..1; `sm:dueOnDay` 0..n, `"YYYY-MM-DD count"` |
 
 The DCAT and FOAF classes' values (an agent is a `foaf:Agent`, a theme a

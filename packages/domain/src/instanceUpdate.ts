@@ -1,51 +1,63 @@
-import type { RunUndo } from "./backup";
 import type { StepPart } from "./deckUpgrade";
 import { ensureTrailingSlash } from "./instanceLayout";
+import type { LangText } from "./langText";
 
 /**
- * The format update of an instance, done safely (see docs/migrations.md):
- * every document it is about to change is first backed up, its bytes as
- * the pod serves them; the updated documents are written into a working
- * copy beside the backup and checked there; once every document is found
- * still as it was backed up, each is updated in place, then checked
- * again. Until then nothing of the user's is written, and a failure from
- * then on puts every document it wrote back, byte for byte. Every document
- * keeps its address.
+ * The format update of an instance (see docs/migrations.md "The pod
+ * migration"): each document that holds a subject in an older format is
+ * brought up to this app's formats on its own, one after another, in one
+ * write made only if the document is still as it was read. Every document
+ * stays readable throughout, updated or not: a reader brings every stored
+ * version up to date in memory, so an instance works with any mix of
+ * updated and outdated documents. A document that cannot be updated now
+ * is left as it is, and the update goes on with the others; run again,
+ * it updates only what is still outdated. Every document keeps its
+ * address.
  */
 
-export type UpdateStep = "stage" | "backup" | "copy" | "check" | "verify" | "rewrite" | "validate" | "tidy";
+/** The steps the user sees: finding what to update, updating each document, making the instance's data findable. */
+export type UpdateStep = "read" | "write" | "register";
 
-export const UPDATE_STEPS: readonly UpdateStep[] = ["stage", "backup", "copy", "check", "verify", "rewrite", "validate", "tidy"];
+export const UPDATE_STEPS: readonly UpdateStep[] = ["read", "write", "register"];
 
 export interface UpdateProgress {
   step: UpdateStep;
   /** Steps finished, out of `total`. */
   done: number;
   total: number;
-  /** How far into `step` it is; absent for a step done in one go. */
+  /** How many of the documents to update are done, while it updates them. */
   part?: StepPart;
-  /** Set while the update, failed at `step`, puts back the documents it wrote. */
-  undoing?: true;
 }
 
-export type UpdateOutcome =
+/** A document the update brings up to this app's formats: where it is, and what it holds, for the user to tell it. */
+export interface UpdateDocument {
+  url: string;
+  /** The instance's record, its preferences, its catalogue of decks, or a deck's cards or review states. */
+  holds: "instance" | "preferences" | "catalog" | "cards" | "reviews";
+  /** For a deck's cards or review states: the deck's title (the first deck's, for a document decks share). */
+  deck?: LangText;
+}
+
+/**
+ * A document the update could not bring up to date, or cannot tell it
+ * did: as it was or, when the answer to its write was lost, updated;
+ * readable either way.
+ */
+export interface UpdateFailure extends UpdateDocument {
   /**
-   * Done: every document is in this app's formats, at its address.
-   * `backupUrl` is the backup of what changed, kept as the previous
-   * version; absent when nothing did (another tab or app brought it up to
-   * date meanwhile).
+   * Why: an AppError the app can show in the reader's language (another
+   * tab or device changed the document since it was read, say), or any
+   * other error.
    */
-  | { ok: true; backupUrl?: string }
-  /**
-   * Failed at `step`. `undo` is null when it failed before it wrote any
-   * document of the user's (they are as they were); else what putting back
-   * the documents it wrote did. `backupUrl` is the update's folder (its
-   * backup and working copy), when something of it is kept: a document
-   * was kept as changed elsewhere, putting back stopped, or the folder
-   * could not be removed. `error` is what went wrong: an AppError the app
-   * can show in the reader's language, or any other error.
-   */
-  | { ok: false; step: UpdateStep; error: unknown; undo: RunUndo | null; backupUrl?: string };
+  error: unknown;
+}
+
+export interface UpdateOutcome {
+  /** The documents brought up to date, in the order they were written. */
+  updated: UpdateDocument[];
+  /** The documents that could not be, each readable as it is, to update on another run; empty when the update is done. */
+  failed: UpdateFailure[];
+}
 
 /** An IRI under the `from` container moved under `to`; any other IRI as it is. */
 export function rebaseIri(iri: string, from: string, to: string): string {

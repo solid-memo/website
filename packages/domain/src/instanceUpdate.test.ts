@@ -23,6 +23,6 @@ describe("rebaseIri", () => {
 
 describe("UPDATE_STEPS", () => {
   it("are the steps the user sees, in order", () => {
-    expect(UPDATE_STEPS).toEqual(["stage", "backup", "copy", "check", "verify", "rewrite", "validate", "tidy"]);
+    expect(UPDATE_STEPS).toEqual(["read", "write", "register"]);
   });
 });

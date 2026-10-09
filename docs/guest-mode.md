@@ -35,13 +35,7 @@ graph LR
   `If-None-Match: *` and `If-None-Match: <etag>`, keeps `ldp:contains`
   listings, and marks the root as a `pim:Storage`. It has no access
   control. Each request runs exclusively on the store, under a Web Lock
-  shared by every tab. It keeps a Turtle document (sent as text or as
-  bytes) as its statements, in the order the document states them, and
-  serves them as N-Triples lines in that order: a document it served,
-  written again as it was served, is served again byte for byte, as an
-  update's putting a document back needs
-  ([migrations.md](migrations.md#the-pod-migration)). Any other file it
-  keeps byte for byte, under its content type.
+  shared by every tab.
 - **Storage:** the `ResourceStore` port. In the browser this is
   [indexedDbResourceStore.ts](../packages/browser/src/indexedDbResourceStore.ts),
   which is needed because the login redirect leaves the page and the
@@ -227,9 +221,10 @@ instance goes). It runs these steps:
 A failure before **register** deletes the copy, whole, and leaves the
 guest's study exactly as it was: Solid Memo created the target's
 container where nothing was, and nothing names it before **register**,
-so all it holds is Solid Memo's copies. As with the [format update](migrations.md#the-pod-migration),
-the update journal notes the run, so a copy left behind by a closed tab
-is offered for removal on the next opening of the guest's instance. A guest's
+so all it holds is Solid Memo's copies. The update journal of this
+browser notes the run, so a copy left behind by a closed tab is offered
+for removal on the next opening of the guest's instance, as the partial
+copy an earlier version's [update](migrations.md#the-backup) left is. A guest's
 instance has no access control of its own, so the copy inherits the
 user's pod's defaults, the same as a newly created instance.
 

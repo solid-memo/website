@@ -31,9 +31,11 @@ import {
   reviewsContainerOf,
 } from "@solid-memo/domain/instanceLayout";
 import { documentUrlOf, fragmentIdOf } from "@solid-memo/domain/subjectUrl";
+import { isDeckOutdated, isOutdated, upgradeCard } from "@solid-memo/domain/migration";
+import { ABSENT_VERSION } from "@solid-memo/domain/studyDigest";
 import { CARD_V5 } from "@solid-memo/vocab/descriptors.generated";
 import { applyDeckTreeEdit, buildTree, treeChanges } from "@solid-memo/domain/deckTree";
-import { deleteDataset, getSolidDatasetOrNull, PreconditionFailedError, saveDataset } from "./datasets";
+import { deleteDataset, getSolidDatasetOrNull, PreconditionFailedError, saveDataset, versionOf } from "./datasets";
 import { DCTERMS, SM } from "./vocab";
 import {
   deckSubjects,
@@ -122,22 +124,23 @@ export function createSolidDeckRepository({
       ]);
     },
 
-    async saveDecks(instanceUrl, decks, catalog) {
+    async upgradeDecks(instanceUrl, catalog) {
       const catalogUrl = catalogUrlOf(instanceUrl);
       const read = await getSolidDatasetOrNull(catalogUrl, fetch);
       let dataset = read ?? createSolidDataset();
       const subjects: string[] = [];
-      for (const deck of decks) {
-        if (getThing(dataset, deck.url) === null) continue;
+      // Each entry stored in an older format, as read and brought up to date in memory, written in this app's.
+      for (const deck of toDecks(dataset).filter(isDeckOutdated)) {
         const written: Deck = { ...deck, formatVersion: DECK_FORMAT_VERSION };
         dataset = withDeck(dataset, written);
         subjects.push(...deckSubjects(written));
       }
-      if (catalog !== null) {
+      if (catalog !== null && toCatalog(dataset, catalogUrl) === null) {
         dataset = withCatalog(dataset, catalogUrl, catalog);
         subjects.push(`${catalogUrl}#catalog`, catalog.publisher.webId);
       }
       if (subjects.length === 0) return false;
+      // If-Match the read above (a creation, where there was no document): written only as it was read.
       await save(catalogUrl, dataset, subjects);
       return true;
     },
@@ -290,22 +293,21 @@ export function createSolidDeckRepository({
       return updated;
     },
 
-    async saveCards(deck, cards): Promise<void> {
-      const dataset = await getSolidDatasetOrNull(
-        deck.cardsDocumentUrl,
-        fetch,
-      );
-      if (dataset === null) return;
+    async upgradeCards(deck): Promise<boolean> {
+      const dataset = await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch);
+      if (dataset === null) return false;
       let updated: SolidDataset = dataset;
       const subjects: string[] = [];
-      for (const card of cards) {
-        const thing = getThing(updated, card.url);
-        if (thing === null) continue;
-        const written = withCard(updated, deck, card, thing);
+      // Each card stored in an older format, as read and brought up to date in memory, written in this app's.
+      for (const card of toCards(dataset).filter(isOutdated)) {
+        const written = withCard(updated, deck, upgradeCard(card), getThing(updated, card.url));
         updated = written.dataset;
         subjects.push(...written.subjects);
       }
+      if (subjects.length === 0) return false;
+      // If-Match the read above; an edit too large for one PATCH is one PUT of the whole document (datasets.ts).
       await saveCardsDocument(deck, updated, subjects);
+      return true;
     },
 
     async stateCardLanguages(deck, cardIds, languages): Promise<number> {
@@ -327,11 +329,14 @@ export function createSolidDeckRepository({
       return stated.length;
     },
 
-    async applyCardChanges(deck, changes, options): Promise<void> {
-      const dataset =
-        (await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch)) ?? createSolidDataset();
-      const changed = withCardChanges(dataset, deck, changes);
-      await saveCardsDocument(deck, changed.dataset, changed.subjects, options);
+    async applyCardChanges(deck, changes, { whole, version } = {}): Promise<void> {
+      const read = await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch);
+      // Changes made from an earlier read go only to the document as it was then: a later edit is not undone.
+      if (version !== undefined && (read === null ? ABSENT_VERSION : (versionOf(read) ?? null)) !== version) {
+        throw new PreconditionFailedError(deck.cardsDocumentUrl, version === ABSENT_VERSION ? "absent" : "unchanged");
+      }
+      const changed = withCardChanges(read ?? createSolidDataset(), deck, changes);
+      await saveCardsDocument(deck, changed.dataset, changed.subjects, { whole });
     },
 
     async readDeck(deckUrl) {

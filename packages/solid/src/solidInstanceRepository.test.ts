@@ -46,11 +46,12 @@ const PRIVATE_INDEX = "https://alice.example/settings/privateTypeIndex.ttl";
 const PUBLIC_INDEX = "https://alice.example/settings/publicTypeIndex.ttl";
 const CONTAINER = "https://alice.example/solid-memo/main/";
 
-function makeRepository() {
+function makeRepository(checkWrite?: Parameters<typeof createSolidInstanceRepository>[0]["checkWrite"]) {
   return createSolidInstanceRepository({
     fetch: vi.fn() as unknown as typeof globalThis.fetch,
     now: () => new Date("2026-09-21T10:00:00.000Z"),
     randomId: () => "fixed-id",
+    ...(checkWrite === undefined ? {} : { checkWrite }),
   });
 }
 
@@ -598,6 +599,33 @@ describe("readMeta and saveMeta", () => {
     await expect(makeRepository().saveMeta(CONTAINER, meta)).rejects.toThrow(
       "has no description to update.",
     );
+    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+  });
+
+  it("brings an outdated subject up to this app's format as read, in place, checked first", async () => {
+    vi.mocked(getSolidDataset).mockResolvedValue(metaDataset());
+    const checkWrite = vi.fn(async () => undefined);
+    await expect(makeRepository(checkWrite).upgradeMeta(CONTAINER)).resolves.toBe(true);
+    const [url, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    expect(url).toBe(META);
+    const thing = getThing(saved as SolidDataset, `${META}#it`)!;
+    expect(getStringNoLocale(thing, DCTERMS.title)).toBe("Main");
+    expect(getStringNoLocale(thing, "https://other.example/#note")).toBe("kept");
+    expect(getInteger(thing, SM.formatVersion)).toBe(2);
+    expect(checkWrite).toHaveBeenCalledWith(saved, [`${META}#it`]);
+  });
+
+  it("writes nothing for a subject up to date, missing or unreadable, or no meta document", async () => {
+    vi.mocked(getSolidDataset).mockResolvedValue(setThing(metaDataset(), buildThing(getThing(metaDataset(), `${META}#it`)!).setInteger(SM.formatVersion, 2).build()));
+    await expect(makeRepository().upgradeMeta(CONTAINER)).resolves.toBe(false);
+    vi.mocked(getSolidDataset).mockResolvedValue(mockSolidDatasetFrom(META));
+    await expect(makeRepository().upgradeMeta(CONTAINER)).resolves.toBe(false);
+    vi.mocked(getSolidDataset).mockResolvedValue(
+      setThing(mockSolidDatasetFrom(META), buildThing(createThing({ url: `${META}#it` })).addIri("http://www.w3.org/1999/02/22-rdf-syntax-ns#type", SM.Instance).build()),
+    );
+    await expect(makeRepository().upgradeMeta(CONTAINER)).resolves.toBe(false);
+    vi.mocked(getSolidDataset).mockRejectedValue({ statusCode: 404 });
+    await expect(makeRepository().upgradeMeta(CONTAINER)).resolves.toBe(false);
     expect(saveSolidDatasetAt).not.toHaveBeenCalled();
   });
 });

@@ -1,6 +1,7 @@
 import { createSolidDataset } from "@inrupt/solid-client";
 import type { ReviewStateRepository } from "@solid-memo/application/ports";
 import type { ReviewState } from "@solid-memo/domain/review";
+import { isReviewStateOutdated, upgradeReviewState } from "@solid-memo/domain/migration";
 import { getSolidDatasetOrNull, saveDataset } from "./datasets";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
 import { mapSince, readSince } from "./readSince";
@@ -64,6 +65,19 @@ export function createSolidReviewStateRepository({
       const written = withReviewStates(withoutReadReviewStates(dataset, deck, remove), deck, save, randomId);
       await checkWrite(written.dataset, written.subjects);
       await saveDataset(deck.reviewsDocumentUrl, written.dataset, fetch);
+    },
+
+    async upgradeReviewStates(deck): Promise<boolean> {
+      const dataset = await getSolidDatasetOrNull(deck.reviewsDocumentUrl, fetch);
+      if (dataset === null) return false;
+      // Each state stored in an older format, as read and brought up to date in memory, written back at its subject.
+      const outdated = toReviewStates(dataset, deck).filter(isReviewStateOutdated);
+      if (outdated.length === 0) return false;
+      const written = withReviewStates(dataset, deck, outdated.map(upgradeReviewState), randomId);
+      await checkWrite(written.dataset, written.subjects);
+      // If-Match the read above.
+      await saveDataset(deck.reviewsDocumentUrl, written.dataset, fetch);
+      return true;
     },
   };
 }

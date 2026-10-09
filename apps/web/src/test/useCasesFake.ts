@@ -109,10 +109,8 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
     applyLibraryUpgrade: vi.fn(async (deck, plan) => ({
       ok: true as const,
       deck: { ...deck, sourceUrl: plan.releaseUrl },
-      tidied: true,
     })),
     tidyInterruptedDeckUpgrade: vi.fn(async () => false),
-    findInterruptedDeckUpgrade: vi.fn(async () => null),
     listCards: vi.fn(async () => []),
     addCard: vi.fn(async () => {
       throw new Error("addCard fake not configured");
@@ -133,12 +131,9 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
       instanceOutdated: false,
       catalogMissing: false,
     })),
-    updateInstance: vi.fn(async (_session, instance) => ({ ok: true as const, backupUrl: `${instance.url}backups/20260928T100000Z-0f3a/` })),
+    updateInstance: vi.fn(async () => ({ updated: [], failed: [] })),
     findInterruptedUpdate: vi.fn(async () => null),
     removeInterruptedUpdate: vi.fn(async () => undefined),
-    listBackups: vi.fn(async () => []),
-    restoreBackup: vi.fn(async () => ({ restored: [], kept: [], removed: true })),
-    deleteBackup: vi.fn(async () => ({ keptFolder: null })),
     readLegacyBackup: vi.fn(async () => null),
     restoreLegacyBackup: vi.fn(async (_session, instance) => ({ instance, keptFolder: null })),
     deleteLegacyBackup: vi.fn(async () => ({ keptFolder: null })),

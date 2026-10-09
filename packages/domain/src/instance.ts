@@ -20,7 +20,7 @@ export interface InstanceMeta {
    * For an instance a format update by an earlier version of the app
    * made, as a copy: the container it replaced, kept in the pod as a
    * backup until the user restores or deletes it. This app's update
-   * writes in place, and states none (domain/backup.ts).
+   * writes each document where it is, and states none.
    */
   replaces?: string;
   /** When it replaced that container (ISO dateTime). */

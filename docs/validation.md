@@ -38,11 +38,7 @@ flowchart LR
 - `validateInstance` (application) lists the decks, names every document
   the instance may hold, the [answer log](data-model.md#the-answer-log)'s
   month documents included, and asks the `ShapeValidator` port about
-  each; `summarize` (domain) counts the violations. It reads only. An
-  update's [backups](migrations.md#the-backup) are not checked: they
-  hold documents' bytes as they were, in older formats by design, in
-  files no server takes for RDF; their manifests are checked as they are
-  written, and an update's working copy by the update itself.
+  each; `summarize` (domain) counts the violations. It reads only.
 - **Opening an instance** runs `checkInstance` instead: the same check,
   but a document still at a version the instance's
   [digest](data-model.md#the-digest) says conformed, by the same rules,
@@ -54,18 +50,15 @@ flowchart LR
   answer log, which grows every session: answers are checked as they are
   written, and in the full check. The developer report always runs the
   full `validateInstance`.
-- The [format update](migrations.md#the-pod-migration) checks the
-  documents it is about to write before it writes them, then its working
-  copy of them once updated, its subjects read as the instance's, then
-  each document once it has written it: a subject that fails, and did
-  not fail before (which the update should never make), stops it —
-  before anything of the user's is written, when the working copy fails
-  (`updatedCopyInvalid`); else every document it wrote is put back, byte
-  for byte (`updatedInstanceInvalid`). A
-  [library upgrade](migrations.md#how-an-upgrade-is-applied) checks the
-  deck's documents the same way. What failed before, as a deck set
-  aside, is not the update's doing and does not stop it. What another
-  app wrote has warnings, not violations, so it never stops an update.
+- The [format update](migrations.md#the-pod-migration) and a
+  [library upgrade](migrations.md#how-an-upgrade-is-applied) check what
+  they write as every save does: each subject a write touches, against
+  its shape, before the write is sent (the [write check](#the-write-check)). A
+  document such a write would make fail is not written
+  (`dataNotConforming`): it stays as it was, named with why; the format
+  update goes on with the other documents, and a library upgrade stops
+  there, as at any failure. What another app wrote has warnings, not
+  violations, so it never stops a write.
 - [shaclShapeValidator.ts](../packages/solid/src/shaclShapeValidator.ts)
   fetches the document, converts it to an RDF/JS dataset
   (`toRdfJsDataset`) and, for every subject, picks the shape by class

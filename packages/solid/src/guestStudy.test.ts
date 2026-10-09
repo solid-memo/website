@@ -18,7 +18,6 @@ import { createSolidAnswerLog } from "./solidAnswerLog";
 import { createSolidDeckRepository } from "./solidDeckRepository";
 import { createSolidDigestRepository } from "./solidDigestRepository";
 import { createSolidInstanceCopier } from "./solidInstanceCopier";
-import { createSolidDocumentBackups } from "./solidDocumentBackups";
 import { createSolidInstanceRepository } from "./solidInstanceRepository";
 import { createSolidPreferencesRepository } from "./solidPreferencesRepository";
 import { createSolidRepairRepository } from "./solidRepairRepository";
@@ -110,7 +109,6 @@ async function app() {
     shapeValidator,
     repairRepository: createSolidRepairRepository({ fetch: podFetch }),
     instanceCopier: createSolidInstanceCopier({ fetch: podFetch }),
-    documentBackups: createSolidDocumentBackups({ fetch: podFetch }),
     digestRepository: createSolidDigestRepository({ fetch: podFetch, checkWrite }),
     answerLog: createSolidAnswerLog({ fetch: podFetch, checkWrite }),
     guestPod: createLocalGuestPod({ fetch: guestFetch, store: guestStore }),
@@ -235,7 +233,7 @@ describe("a guest's study", () => {
     expect(await useCases.planMigration(TARGET)).toMatchObject({ deckCount: 1, cardCount: 2 });
   });
 
-  it("is brought up to date in place, every document at its address, and put back from its backup but for what was studied since", { timeout: 30_000 }, async () => {
+  it("is brought up to date in place, each document on its own, at its address, another app's triples kept", { timeout: 30_000 }, async () => {
     const { useCases, guestStore } = await app();
     await useCases.startGuest("My study");
     const [instance] = await useCases.listInstances(GUEST_SESSION);
@@ -246,37 +244,25 @@ describe("a guest's study", () => {
     await restamp(guestStore, deck.url, 5);
     await restamp(guestStore, card.url, 4);
     await addTriples(guestStore, deck.cardsDocumentUrl, [`<${card.url}> <https://example.org/seen> "yes" .`]);
-    // The catalogue as the guest's pod serves it: its statements in the order it keeps them.
-    const catalogTriples = async () => {
-      const catalog = await guestStore.get(`${instance!.url}catalog.ttl`);
-      return catalog?.kind === "rdf" ? [...catalog.triples] : [];
-    };
-    const before = await catalogTriples();
+    const urls = await guestStore.urls();
     expect(await useCases.planMigration(instance!.url)).toMatchObject({ deckCount: 1, cardCount: 1 });
 
     const outcome = await useCases.updateInstance(GUEST_SESSION, instance!);
 
-    expect(outcome).toMatchObject({ ok: true, backupUrl: expect.stringContaining(`${instance!.url}backups/`) });
+    expect(outcome).toEqual({
+      updated: [
+        { url: deck.cardsDocumentUrl, holds: "cards", deck: { en: "Capitals" } },
+        { url: `${instance!.url}catalog.ttl`, holds: "catalog" },
+      ],
+      failed: [],
+    });
     expect(await useCases.planMigration(instance!.url)).toMatchObject({ deckCount: 0, cardCount: 0 });
     expect((await useCases.validateInstance(instance!.url)).conforms).toBe(true);
     expect(await useCases.listDecks(instance!.url)).toMatchObject([{ url: deck.url, cardsDocumentUrl: deck.cardsDocumentUrl }]);
     expect(await everyTriple(guestStore)).toContain(`<${card.url}> <https://example.org/seen> "yes" .`);
-    const [backup] = await useCases.listBackups(instance!);
-    expect(backup!.entries.map((entry) => entry.document)).toEqual([deck.cardsDocumentUrl, `${instance!.url}catalog.ttl`]);
-    expect(backup!.entries.every((entry) => entry.versionUpdated !== undefined)).toBe(true);
-
-    // Studied since: the card is edited, so its document is kept as it is now; the catalogue is put back, as it was.
-    await useCases.updateCard(deck, (await useCases.listCards(deck))[0]!, { front: { sv: "Sverige" }, back: { sv: "Stockholm!" } });
-    await expect(useCases.restoreBackup(instance!, backup!)).resolves.toEqual({
-      restored: [`${instance!.url}catalog.ttl`],
-      kept: [{ document: deck.cardsDocumentUrl, copy: backup!.entries[0]!.copy }],
-      removed: false,
-    });
-    expect(await catalogTriples()).toEqual(before);
-    expect(await everyTriple(guestStore)).toContain(`<${card.url}> <${SM_NS}back> "Stockholm!"@sv .`);
-    await expect(useCases.deleteBackup(backup!)).resolves.toEqual({ keptFolder: null });
-    await expect(useCases.listBackups(instance!)).resolves.toEqual([]);
-    expect((await guestStore.urls()).filter((url) => url.includes("/backups/"))).toEqual([]);
+    // Nothing is kept beside the documents, no copy or backup; the answer log and the digest are written as ever.
+    const added = (await guestStore.urls()).filter((url) => !urls.includes(url) && !/\/history\/|\/digest\.ttl$/.test(url));
+    expect(added).toEqual([]);
   });
 
   it("refuses a write over a subject a newer version of the app wrote", { timeout: 30_000 }, async () => {

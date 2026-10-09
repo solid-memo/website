@@ -17,6 +17,7 @@ import {
   type RegistrationTarget,
 } from "@solid-memo/domain/instance";
 import { metaUrlOf } from "@solid-memo/domain/instanceLayout";
+import { isInstanceOutdated } from "@solid-memo/domain/migration";
 import { getSolidDatasetOrNull, readDataset, saveDataset } from "./datasets";
 import { deleteInstanceData } from "./instanceData";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
@@ -192,6 +193,20 @@ export function createSolidInstanceRepository({
       const updated = setThing(dataset, toInstanceMetaThing(url, meta, existing));
       await checkWrite(updated, [url]);
       await saveDataset(metaUrl, updated, fetch);
+    },
+    async upgradeMeta(instanceUrl): Promise<boolean> {
+      const metaUrl = metaUrlOf(instanceUrl);
+      const dataset = await getSolidDatasetOrNull(metaUrl, fetch);
+      const url = `${metaUrl}#it`;
+      const existing = dataset === null ? null : getThing(dataset, url);
+      // The record as read, brought up to date in memory, written in this app's format.
+      const meta = existing === null ? null : toInstanceMeta(existing);
+      if (meta === null || !isInstanceOutdated(meta)) return false;
+      const updated = setThing(dataset!, toInstanceMetaThing(url, meta, existing));
+      await checkWrite(updated, [url]);
+      // If-Match the read above.
+      await saveDataset(metaUrl, updated, fetch);
+      return true;
     },
 
     async deleteInstance({ webId, instance }) {

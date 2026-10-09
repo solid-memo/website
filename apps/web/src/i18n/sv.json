@@ -93,37 +93,16 @@
     "connectingTitle": "Ansluter din pod"
   },
   "backup": {
-    "heading": "Tidigare versioner",
+    "heading": "Föregående version på en annan adress",
+    "kept": "En uppdatering av en tidigare version av Solid Memo sparade dina data som de var innan, i {link}.",
+    "keptOn": "En uppdatering av en tidigare version av Solid Memo sparade dina data som de var innan ({date}), i {link}.",
     "folder": "en mapp med säkerhetskopian i din Pod",
-    "restoreConfirm": "Lägga tillbaka dokumenten i {name} som den här säkerhetskopian innehåller, precis som de var? Vart och ett blir som det var före uppdateringen, om det inte har ändrats sedan (du har studerat sedan): ett sådant behålls som det är nu.",
-    "restore": "Återställ den här versionen",
+    "restoreConfirm": "Gå tillbaka till den föregående versionen av {name}? Det du har studerat sedan uppdateringen försvinner med den uppdaterade versionen.",
+    "restore": "Återställ föregående version",
     "restoring": "Återställer…",
-    "deleteConfirm": "Ta bort den här säkerhetskopian för gott? Dina data förblir som de är nu. Det går inte att ångra.",
-    "delete": "Ta bort den här säkerhetskopian",
-    "deleting": "Tar bort…",
-    "ofUpdate": {
-      "one": "Sparad {date}, före formatuppdateringen: {count} dokument som det var, i {link}.",
-      "other": "Sparad {date}, före formatuppdateringen: {count} dokument som de var, i {link}."
-    },
-    "ofDeck": "Sparad {date}, innan {deck} uppdaterades från biblioteket, i {link}.",
-    "ofSomeDeck": "Sparad {date}, innan en kortlek uppdaterades från biblioteket, i {link}.",
-    "restored": {
-      "one": "La tillbaka {count} dokument precis som det var.",
-      "other": "La tillbaka {count} dokument precis som de var."
-    },
-    "keptSince": "Behölls som de är nu, ändrade sedan uppdateringen:",
-    "legacy": {
-      "heading": "Föregående version på en annan adress",
-      "kept": "En uppdatering av en tidigare version av Solid Memo sparade dina data som de var innan, i {link}.",
-      "keptOn": "En uppdatering av en tidigare version av Solid Memo sparade dina data som de var innan ({date}), i {link}.",
-      "folder": "en mapp med säkerhetskopian i din Pod",
-      "restoreConfirm": "Gå tillbaka till den föregående versionen av {name}? Det du har studerat sedan uppdateringen försvinner med den uppdaterade versionen.",
-      "restore": "Återställ föregående version",
-      "deleteConfirm": "Ta bort den föregående versionen för gott? Det går inte att ångra.",
-      "delete": "Ta bort säkerhetskopian"
-    },
-    "keptItem": "{document} ({link})",
-    "earlierVersion": "dess tidigare version"
+    "deleteConfirm": "Ta bort den föregående versionen för gott? Det går inte att ångra.",
+    "delete": "Ta bort säkerhetskopian",
+    "deleting": "Tar bort…"
   },
   "breadcrumbs": {
     "label": "Brödsmulor",
@@ -549,38 +528,43 @@
   "instanceUpdate": {
     "confirmRegion": "Starta uppdateringen",
     "confirmHeading": "Så skyddar uppdateringen dina data.",
-    "confirmBody": "Solid Memo sparar först en exakt kopia av varje dokument i {name} som uppdateringen ändrar, i en mapp för säkerhetskopior inuti den. Den skriver de uppdaterade dokumenten i en arbetskopia bredvid säkerhetskopian och kontrollerar dem där, innan den ändrar något av dina. Sedan, bara om inget av dina dokument har ändrats under tiden, uppdaterar den vart och ett där det ligger och kontrollerar det igen. Om något går fel läggs varje dokument den ändrat tillbaka precis som det var. Alla adresser förblir desamma, och så gör vilka du delar med. Under Inställningar kan du återställa den tidigare versionen, som behåller det du har studerat sedan, eller ta bort den.",
+    "confirmBody": "Solid Memo uppdaterar dokumenten i {name} ett i taget, vart och ett där det ligger, i en enda skrivning som din Pod gör helt eller inte alls och, där din Pod kontrollerar det, bara om inget annat har ändrat det sedan Solid Memo läste det. Varje dokument går att läsa hela tiden, oavsett om det är uppdaterat än eller inte. Ett som inte kan uppdateras nu, till exempel för att det ändrades någon annanstans under tiden, lämnas som det är, och du kan försöka igen: då uppdateras bara det som fortfarande är föråldrat. Alla adresser förblir desamma, och så gör vilka du delar med.",
     "start": "Starta uppdateringen",
     "notNow": "Inte nu",
     "progressRegion": "Uppdaterar",
     "running": "{step}…",
     "progressLabel": "Uppdateringens förlopp",
-    "keepOpen": "Håll sidan öppen tills uppdateringen är klar.",
+    "keepOpen": "Håll sidan öppen tills uppdateringen är klar. Skulle den avbrytas går varje dokument ändå att läsa, uppdaterat eller inte, och du kan uppdatera resten senare.",
     "step": {
-      "stage": "Tar reda på vad som ska uppdateras",
-      "backup": "Sparar en exakt kopia av varje dokument",
-      "copy": "Skriver den uppdaterade kopian",
-      "check": "Kontrollerar den uppdaterade kopian",
-      "verify": "Ser till att inget har ändrats under tiden",
-      "rewrite": "Uppdaterar dina dokument",
-      "validate": "Kontrollerar dina dokument",
-      "tidy": "Tar bort arbetskopian"
+      "read": "Tar reda på vad som ska uppdateras",
+      "write": "Uppdaterar dina dokument",
+      "register": "Gör dina data hittbara för andra appar"
     },
-    "failedRegion": "Uppdateringen misslyckades",
-    "failedWhile": "Uppdateringen misslyckades i steget ”{step}”:",
-    "noChanges": "Inga ändringar gjordes i dina data.",
+    "count": {
+      "one": "{done} av {count} dokument",
+      "other": "{done} av {count} dokument"
+    },
+    "resultRegion": "Uppdateringen blev inte klar",
+    "notFinished": {
+      "one": "{count} dokument kunde inte uppdateras nu:",
+      "other": "{count} dokument kunde inte uppdateras nu:"
+    },
+    "updatedAlso": {
+      "one": "{count} annat dokument uppdaterades.",
+      "other": "{count} andra dokument uppdaterades."
+    },
+    "document": {
+      "instance": "Instansposten",
+      "preferences": "Dina inställningar",
+      "catalog": "Katalogen över kortlekarna",
+      "cards": "Korten i {deck}",
+      "reviews": "Repetitionstillstånden i {deck}"
+    },
+    "failedItem": "{document}: {reason}",
+    "retryHint": "Varje dokument går att läsa som det är, uppdaterat eller inte. Om du försöker igen uppdateras bara det som fortfarande är föråldrat.",
+    "tryAgain": "Försök igen",
     "close": "Stäng",
-    "undoing": "Lägger tillbaka det den ändrat…",
-    "putBack": "Varje dokument den hade ändrat är tillbaka precis som det var.",
-    "leftover": "Dess mapp för säkerhetskopian kunde inte tas bort; du kan ta bort den under Inställningar.",
-    "keptChanged": {
-      "one": "{count} dokument ändrades någon annanstans efter att uppdateringen skrev det, så det behölls som det är nu. Dess tidigare version finns kvar i en säkerhetskopia under Inställningar:",
-      "other": "{count} dokument ändrades någon annanstans efter att uppdateringen skrev dem, så de behölls som de är nu. Deras tidigare versioner finns kvar i en säkerhetskopia under Inställningar:"
-    },
-    "notPutBack": "Solid Memo kunde inte lägga tillbaka allt den ändrat. Varje dokuments tidigare version finns kvar i {link}, så att du kan försöka igen.",
-    "backupFolder": "uppdateringens mapp för säkerhetskopian",
-    "tryRestoring": "Försök återställa igen",
-    "restoring": "Återställer…"
+    "done": "Dina data är uppdaterade."
   },
   "library": {
     "heading": "Kortleksbiblioteket",
@@ -682,32 +666,20 @@
     "progressRegion": "Uppdaterar kortleken",
     "running": "{step}…",
     "progressLabel": "Uppdateringens förlopp",
-    "keepOpen": "Håll sidan öppen tills uppdateringen är klar. Om något går fel lägger Solid Memo tillbaka kortleken precis som den var.",
+    "keepOpen": "Håll sidan öppen tills uppdateringen är klar. Skulle den avbrytas går kortleken ändå att studera som den är, och en ny uppdatering gör klart det som återstår.",
     "step": {
       "read": "Läser kortleken och dess kort",
-      "backup": "Sparar en exakt kopia av kortleken",
-      "copy": "Skriver den uppdaterade kopian",
-      "check": "Kontrollerar den uppdaterade kopian",
-      "verify": "Ser till att inget har ändrats under tiden",
-      "write": "Skriver de uppdaterade korten",
-      "validate": "Kontrollerar det som skrevs",
+      "cards": "Skriver de uppdaterade korten",
+      "reviews": "Tar bort repetitionstillstånden för borttagna kort",
       "entry": "Flyttar kortleken till den nya utgåvan",
-      "tidy": "Tar bort kopiorna",
       "refresh": "Visar den uppdaterade kortleken"
     },
     "failedRegion": "Uppdateringen misslyckades",
     "failedWhile": "Uppdateringen misslyckades i steget ”{step}”:",
-    "noChanges": "Din kortlek är precis som den var.",
+    "noChanges": "Din kortlek ändrades inte.",
+    "partlyChanged": "En del av den nya utgåvan kan redan finnas i din kortlek, som du kan studera som den är. Uppdatera igen för att göra klart.",
     "tryAgain": "Försök igen",
-    "close": "Stäng",
-    "undoing": "Lägger tillbaka kortleken som den var…",
-    "keptChanged": "En del av kortleken ändrades någon annanstans efter att uppdateringen skrev den, kanske i en annan flik eller app, så den behölls som den är nu; dess tidigare version finns kvar i en säkerhetskopia under Inställningar:",
-    "notPutBack": "Solid Memo kunde inte lägga tillbaka kortleken som den var. Dess tidigare version finns kvar i {link}, så att du kan försöka igen.",
-    "backupFolder": "uppdateringens mapp för säkerhetskopian",
-    "tryRestoring": "Försök återställa igen",
-    "restoring": "Återställer…",
-    "interruptedRegion": "Avbruten uppdatering",
-    "interrupted": "En uppdatering av den här kortleken från biblioteket blev inte klar, så den kanske inte är som den var. Kortleken som den var finns kvar i {link}, och Solid Memo kan lägga tillbaka den."
+    "close": "Stäng"
   },
   "libraryUpgradeNotice": {
     "region": "Nyare utgåva i biblioteket",
@@ -737,6 +709,7 @@
       "one": "behåller {count} kort som redan är som i utgåvan",
       "other": "behåller {count} kort som redan är som i utgåvan"
     },
+    "alreadyDescribed": "behåller kortlekens namn, beskrivning, nyckelord, ämnen eller riktning som redan är som i utgåvan",
     "studies": "studerar den {direction}",
     "describes": "uppdaterar kortlekens namn, beskrivning eller nyckelord",
     "noStudiedChanges": "uppdaterar kort som du inte längre studerar",
@@ -756,10 +729,9 @@
   },
   "migration": {
     "interruptedRegion": "Avbruten uppdatering",
-    "interrupted": "En uppdatering av {name} avbröts innan den blev klar; dina data är som de var. Det den hade börjat skriva finns kvar på {url}.",
+    "interrupted": "En kopia av {name} som Solid Memo höll på att göra avbröts innan den blev klar; dina data är som de var. Den ofullständiga kopian finns kvar på {url}.",
     "removing": "Tar bort…",
-    "removeIt": "Ta bort den",
-    "interruptedRun": "En uppdatering av {name} blev inte klar, så några av dess dokument kanske inte är som de var. Varje dokuments tidigare version finns kvar i {link}, och Solid Memo kan lägga tillbaka dem."
+    "removeIt": "Ta bort den"
   },
   "migrationNotice": {
     "region": "Formatuppdatering",
@@ -769,7 +741,7 @@
       "other": "{outdated} sparas i ett äldre format."
     },
     "writes": "Solid Memo skriver nu {formats}.",
-    "howItWorks": "Uppdateringen sparar först en exakt kopia av varje dokument den ändrar och kontrollerar de uppdaterade dokumenten i en arbetskopia; först därefter uppdaterar den vart och ett där det ligger, och om något går fel läggs varje dokument tillbaka precis som det var. Alla adresser förblir desamma; kortleksnamn, korttext, riktningar, din repetitionshistorik och dina inställningar förblir som de är, och en kortlek utan beskrivning får en kort beskrivning som du kan ändra.",
+    "howItWorks": "Uppdateringen gör varje dokument aktuellt för sig, där det ligger, ett i taget, vart och ett i en enda skrivning som din Pod gör helt eller inte alls. Varje dokument går att läsa hela tiden, uppdaterat eller inte; ett som inte kan uppdateras nu lämnas som det är, och du kan försöka igen. Alla adresser förblir desamma; kortleksnamn, korttext, riktningar, din repetitionshistorik och dina inställningar förblir som de är, och en kortlek utan beskrivning får en kort beskrivning som du kan ändra.",
     "listAnd": "{rest} och {last}",
     "instanceRecord": "instansposten",
     "instanceCatalogue": "instansens katalog",
@@ -1183,14 +1155,6 @@
     "notRegistered": "Den instansen finns inte längre i din lista över instanser, så det finns inget att byta. Läs in sidan igen och försök på nytt.",
     "noMetaToUpdate": "Den här instansen har ingen beskrivning att uppdatera. Läs in sidan igen och försök på nytt.",
     "noBackup": "{instance} har ingen säkerhetskopia att återställa.",
-    "updatedCopyInvalid": {
-      "one": "Den uppdaterade kopian av dina data har inte det format Solid Memo förväntar sig ({count} problem), så inget av dina data ändrades. Försök igen senare.",
-      "other": "Den uppdaterade kopian av dina data har inte det format Solid Memo förväntar sig ({count} problem), så inget av dina data ändrades. Försök igen senare."
-    },
-    "updatedInstanceInvalid": {
-      "one": "När de skrivits har de uppdaterade data inte det format Solid Memo förväntar sig ({count} problem). Försök igen senare.",
-      "other": "När de skrivits har de uppdaterade data inte det format Solid Memo förväntar sig ({count} problem). Försök igen senare."
-    },
     "movedCopyInvalid": {
       "one": "Kopian i din Pod har inte det format Solid Memo förväntar sig ({count} problem), så dina studier lämnas som de var. Försök igen senare.",
       "other": "Kopian i din Pod har inte det format Solid Memo förväntar sig ({count} problem), så dina studier lämnas som de var. Försök igen senare."
@@ -1206,26 +1170,14 @@
     "resourceChangedDuringCopy": "En del av instansen ändrades medan den kopierades, kanske i en annan flik eller app. Försök igen.",
     "instanceBeingUpdated": "Solid Memo uppdaterar den här instansen och sparar inget i den förrän uppdateringen är klar. Vänta tills uppdateringen är klar och försök sedan igen.",
     "deckChangedSinceOffer": "Kortleken ändrades efter att uppdateringen erbjöds, kanske i en annan flik eller app, så inget ändrades. Titta på erbjudandet igen.",
-    "upgradedCardsDiffer": "Din Pod innehåller inte de nya korten så som Solid Memo sparade dem. Försök uppdatera igen.",
-    "upgradedReviewsDiffer": "Din Pod innehåller inte dina framsteg så som Solid Memo sparade dem. Försök uppdatera igen.",
     "deckChangedDuringUpgrade": "Kortleken ändrades medan den uppdaterades, kanske i en annan flik eller app. Försök igen.",
-    "deckBeingUpgraded": "Solid Memo uppdaterar den här kortleken och sparar inget i den förrän uppdateringen är klar. Vänta tills uppdateringen är klar och försök sedan igen.",
     "changedElsewhere": "Det här ändrades någon annanstans, kanske i en annan flik eller app, efter att Solid Memo läste det, så inget sparades. Läs in sidan igen och försök på nytt.",
     "deckTreeChanged": "Dina kortlekar ordnades om någon annanstans, kanske i en annan flik eller app, så ändringen gjordes inte. Listan visar dem nu som de är.",
-    "backupGone": "Säkerhetskopian som uppdateringen gjorde går inte längre att hitta, så uppdateringen avbröts. Kör uppdateringen igen.",
-    "backupFileGone": "Den tidigare versionen av ett dokument finns inte längre i säkerhetskopian, så Solid Memo kan inte lägga tillbaka den.",
-    "backupNotExact": "Din Pod behöll inte säkerhetskopian precis som Solid Memo skrev den, så inget av dina data ändrades. Försök igen senare.",
-    "changedDuringUpdate": "En del av dina data ändrades medan de uppdaterades, kanske i en annan flik eller app, så inget av dem ändrades. Försök igen.",
-    "restoredNotExact": "Din Pod ger inte tillbaka ett dokument precis som Solid Memo lade tillbaka det. Dess tidigare version finns kvar i säkerhetskopian.",
-    "backupNotOurs": "Den här säkerhetskopian nämner dokument som inte hör till {instance}, så Solid Memo återställer den inte. Du kan ta bort den: bara det den har i sin egen mapp tas bort.",
-    "deckBackupOutdated": "Kortleken som den här säkerhetskopian gäller har tagits bort, eller uppdaterats till en nyare utgåva i biblioteket, sedan säkerhetskopian gjordes, så en återställning skulle inte ge tillbaka kortleken som den var. Inget ändrades; du kan ta bort säkerhetskopian.",
-    "backupInUse": "Den här säkerhetskopian hör till en uppdatering som fortfarande pågår, kanske i en annan flik, så inget ändrades. Vänta tills uppdateringen är klar och försök sedan igen.",
     "writtenByNewerApp": "En nyare version av Solid Memo har uppdaterat de här data, så den här versionen sparar inte över dem. Läs in sidan igen för att få den senaste versionen.",
     "deckTreeTooNew": "En nyare version av Solid Memo ordnade de här kortlekarna, så den här versionen kan inte ordna om dem. Läs in sidan igen för att få den senaste versionen.",
     "createdElsewhere": "Det här skapades någon annanstans, kanske i en annan flik eller app, just när Solid Memo skulle skapa det, så inget sparades. Läs in sidan igen och försök på nytt.",
     "alreadyExists": "Något finns redan på den platsen i din Pod. Välj en annan plats.",
     "cannotCheck": "Solid Memo kunde inte kontrollera din Pod. Kontrollera anslutningen och försök igen.",
-    "accessControlUnknown": "Din Pod anger inte hur man bestämmer vem som får öppna kopian, så Solid Memo kan inte behålla din delning som den var. Inget ändrades.",
     "dataNotConforming": "Solid Memo sparade inte det här: det har inte det format Solid Memo förväntar sig. Inget ändrades. Läs in sidan igen och försök på nytt.",
     "deckGone": "Kortleken ”{deck}” finns inte längre. Kanske togs den bort i en annan flik eller app.",
     "cardsDocumentGone": "Korten i ”{deck}” går inte längre att hitta. Läs in sidan igen och försök på nytt.",

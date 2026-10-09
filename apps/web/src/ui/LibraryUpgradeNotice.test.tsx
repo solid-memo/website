@@ -24,6 +24,8 @@ const plan: LibraryUpgradePlan = {
   remove: [card("is")],
   kept: [card("fi")],
   applied: [],
+  gone: [],
+  appliedAbout: [],
 };
 
 function renderNotice(overrides: Partial<Parameters<typeof LibraryUpgradeNotice>[0]> = {}) {
@@ -65,6 +67,15 @@ describe("describeChanges", () => {
       "behåller 1 kort som redan är som i utgåvan",
     );
   });
+
+  it("says when what the deck says of itself is already as the release has it", () => {
+    expect(describeChanges({ ...plan, add: [], change: [], remove: [], appliedAbout: ["title", "direction"] }, en)).toBe(
+      "keeps the deck's name, description, keywords, topics or direction already as the release has them",
+    );
+    expect(describeChanges({ ...plan, add: [], change: [], remove: [], appliedAbout: ["keywords"] }, createI18n("sv"))).toBe(
+      "behåller kortlekens namn, beskrivning, nyckelord, ämnen eller riktning som redan är som i utgåvan",
+    );
+  });
 });
 
 describe("LibraryUpgradeNotice", () => {
@@ -97,6 +108,13 @@ describe("LibraryUpgradeNotice", () => {
     expect(screen.queryByRole("list")).toBeNull();
     renderNotice({ plan: { ...plan, remove: [], kept: [] } });
     expect(screen.getAllByRole("region")[1]).toHaveTextContent(/Your review history is kept\.Release 2/);
+  });
+
+  it("says the history of a card the release removed goes, though the deck no longer has the card", () => {
+    renderNotice({ plan: { ...plan, add: [], change: [], remove: [], kept: [], gone: ["is"] } });
+    expect(screen.getByRole("region", { name: "Newer library release" })).toHaveTextContent(
+      "Updating updates cards you no longer study. Your review history is kept, but for the cards removed.",
+    );
   });
 
   it("speaks Swedish, naming both removals and retirements", () => {

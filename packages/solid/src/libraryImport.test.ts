@@ -122,7 +122,6 @@ async function app() {
     shapeValidator,
     repairRepository: undefined as never,
     instanceCopier: undefined as never,
-    documentBackups: undefined as never,
   });
   return { useCases, store };
 }

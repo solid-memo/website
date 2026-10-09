@@ -660,7 +660,7 @@ describe("Workspace", () => {
       planMigration,
       updateInstance: vi.fn(async () => {
         outdated = false;
-        return { ok: true as const, backupUrl: `${instanceA.url}backups/x/` };
+        return { updated: [{ url: `${instanceA.url}preferences.ttl`, holds: "preferences" as const }], failed: [] };
       }),
     });
     renderWorkspace(useCases);

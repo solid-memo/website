@@ -76,9 +76,7 @@ export function createLocalPod({ root, store, newEtag }: LocalPodDeps): typeof g
     }
 
     const contentType = headers.get("Content-Type") ?? "";
-    // An RDF body is text however it is sent: a string, or bytes (a backup's, put back as they were).
-    const rdf = method === "PATCH" || contentType.startsWith("text/turtle");
-    const text = !rdf || request.body === null ? null : await new Response(request.body).text();
+    const text = typeof request.body === "string" ? request.body : null;
     let next: StoredResource;
     if (method === "PATCH") {
       if (!contentType.startsWith("application/sparql-update") || text === null) return answer(url, 415);
