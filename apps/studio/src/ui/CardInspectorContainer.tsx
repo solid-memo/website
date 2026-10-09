@@ -9,6 +9,7 @@ import { DistractorFields } from "@solid-memo/ui/DistractorFields";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { CardInspectorScreen, type CardReleaseLink } from "./CardInspectorScreen";
+import { CardScheduleContainer } from "./CardScheduleContainer";
 import type { CardTab } from "./router";
 
 /** How the card stands to the release (`release`, as useDeckRelease reads it): unknown while it is read, or when it cannot be. */
@@ -29,7 +30,7 @@ export function releaseLinkOf(card: Card, release: LibraryDeckContent | null | u
  * it is with its distractors as changed), then reads the cards afresh
  * and drops the deck's study queue, as a save in Solid Memo does. An
  * option being written stays open until it is saved, so a failed save
- * loses none of it.
+ * loses none of it. The schedule tab is CardScheduleContainer's.
  */
 export function CardInspectorContainer({
   useCases,
@@ -66,6 +67,8 @@ export function CardInspectorContainer({
     <CardInspectorScreen card={card} release={releaseLinkOf(card, release)} tab={tab} tabHref={tabHref} onTab={onTab} appHref={appHref}>
       {tab === "content" ? (
         <CardContainer useCases={useCases} deck={deck} card={card} onRemoved={onRemoved} heading={false} withDistractors={false} />
+      ) : tab === "schedule" ? (
+        <CardScheduleContainer useCases={useCases} deck={deck} card={card} />
       ) : (
         <>
           <DistractorFields

@@ -1181,6 +1181,7 @@
     "distractorEmpty": "Ett felaktigt alternativ behöver text.",
     "distractorPublished": "Det här felaktiga alternativet finns i utgåvan som kortleken kommer från, så det kan inte tas bort. Ta det ur bruk i stället.",
     "dailyLimitInvalid": "En daglig gräns är ett heltal, 0 eller mer.",
+    "dueDayInvalid": "”{day}” är ingen dag. Välj dagen då kortet ska repeteras.",
     "licenseUnknown": "Välj en av licenserna som erbjuds.",
     "authorEmpty": "En upphovsperson behöver ett namn.",
     "authorTwice": "{author} nämns två gånger. Nämn varje upphovsperson en gång.",
@@ -1443,11 +1444,32 @@
       "tabs": "Vad som ska redigeras",
       "tab": {
         "content": "Innehåll",
-        "distractors": "Felaktiga alternativ ({count})"
+        "distractors": "Felaktiga alternativ ({count})",
+        "schedule": "Schema"
       },
       "releaseSame": "Det här kortet är som i utgåvan som kortleken kopierades från, så en nyare utgåva uppdaterar det. En ändring kopplar loss det: nyare utgåvor uppdaterar det inte längre, men kan fortfarande ta det ur bruk.",
       "releaseChanged": "Det här kortet har ändrats sedan utgåvan som kortleken kopierades från, så nyare utgåvor uppdaterar det inte längre, men kan fortfarande ta det ur bruk.",
       "openInApp": "Öppna kortet i Solid Memo"
+    },
+    "schedule": {
+      "loading": "Läser in schemat…",
+      "notStudiedSo": "Kortleken studeras inte längre åt det här hållet. Kortets framsteg åt det här hållet sparas.",
+      "new": "Inte studerat åt det här hållet än: kortet är nytt.",
+      "due": "Repeteras",
+      "interval": "Intervall",
+      "ease": "Lätthet",
+      "repetitions": "Rätt i rad",
+      "firstReviewed": "Först repeterat",
+      "lastReviewed": "Senast repeterat",
+      "dueLabel": "Repeteras den",
+      "reschedule": "Ändra repetitionsdag",
+      "reset": "Glöm framstegen",
+      "resetConfirm": "Glömma kortets framsteg åt det här hållet? Det blir nytt igen. Dess svar finns kvar i historiken.",
+      "hint": "Inget av dem ändrar kortets svar: de finns kvar i historiken och statistiken.",
+      "done": {
+        "reset": "Glömde kortets framsteg åt hållet ”{direction}”.",
+        "reschedule": "”{direction}” repeteras nu den {due}."
+      }
     },
     "cardBulk": {
       "label": "Valda kort",
@@ -1457,11 +1479,20 @@
       "markdownOff": "Skriv som vanlig text",
       "stateLanguage": "Ange språk",
       "findReplace": "Sök och ersätt",
+      "reschedule": "Ändra repetitionsdag",
+      "reset": "Glöm framstegen",
       "remove": "Ta bort",
       "removeConfirm": {
         "one": "Ta bort {count} kort och dess framsteg? Du kan ångra det tills du gör nästa ändring eller lämnar sidan.",
         "other": "Ta bort {count} kort och deras framsteg? Du kan ångra det tills du gör nästa ändring eller lämnar sidan."
       },
+      "resetConfirm": {
+        "one": "Glömma framstegen för {count} kort? Det blir nytt igen. Dess svar finns kvar i historiken.",
+        "other": "Glömma framstegen för {count} kort? De blir nya igen. Deras svar finns kvar i historiken."
+      },
+      "dueLabel": "Repeteras den",
+      "rescheduleHint": "Ett kort som inte studerats än förblir nytt.",
+      "notStudied": "Inget av de valda korten har studerats än.",
       "nothing": "Inget av de valda korten skulle ändras.",
       "tag": "Språkkod",
       "side": "För",
@@ -1537,6 +1568,14 @@
         "stateLanguage": {
           "one": "Angav språket för {count} kort.",
           "other": "Angav språket för {count} kort."
+        },
+        "reset": {
+          "one": "Glömde framstegen för {count} kort.",
+          "other": "Glömde framstegen för {count} kort."
+        },
+        "reschedule": {
+          "one": "{count} kort repeteras nu den {due}.",
+          "other": "{count} kort repeteras nu den {due}."
         }
       },
       "skipped": {

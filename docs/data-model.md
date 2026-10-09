@@ -809,9 +809,9 @@ in Solid Memo; the [Studio](studio.md) closes the gaps one by one.
 - **Edited in the Studio**: a deck's authors and licence, its course
   progress (a chapter marked not done, the course restarted), the
   instance's name and the catalogue's description and licence, a
-  card's wrong options, and edits of many cards at once.
-- **Shown only**: a card's review state, which is reset only for a
-  whole study day; the answer log, as statistics; the schedule in the
+  card's wrong options, edits of many cards at once, and a card's
+  review state (forgotten, or given a due day).
+- **Shown only**: the answer log, as statistics; the schedule in the
   digest, as counts.
 - **Not shown**: a catalogue's `dcterms:modified`, which the app keeps
   but never writes; a library copy's release provenance beyond its

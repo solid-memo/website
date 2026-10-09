@@ -1065,6 +1065,87 @@ describe("createUseCases", () => {
     expect(deps.deckRepository.updateCard).not.toHaveBeenCalled();
   });
 
+  describe("resetCards and rescheduleCards", () => {
+    const studied = (cardId: string, direction: ReviewState["direction"] = "front-to-back"): ReviewState => ({
+      cardId,
+      direction,
+      easeFactor: 2.5,
+      intervalDays: 6,
+      repetitions: 2,
+      due: "2026-10-01",
+      firstReviewedAt: "2026-09-20T10:00:00.000Z",
+      lastReviewedAt: "2026-09-28T09:00:00.000Z",
+      formatVersion: 2,
+      previous: { easeFactor: 2.5, intervalDays: 1, repetitions: 1, due: "2026-09-27", lastReviewedAt: "2026-09-26T10:00:00.000Z" },
+    });
+
+    function setup() {
+      const deps = makeDeps();
+      vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue([
+        studied("one"),
+        studied("one", "back-to-front"),
+        studied("two"),
+      ]);
+      return { deps, useCases: createUseCases(deps) };
+    }
+
+    it("forgets the cards' states in one write of the reviews document, then refreshes the digest", async () => {
+      const { deps, useCases } = setup();
+      await expect(useCases.resetCards(instance.url, deck, ["one", "new"])).resolves.toBe(1);
+      expect(deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledExactlyOnceWith(deck, {
+        save: [],
+        remove: [
+          { cardId: "one", direction: "front-to-back" },
+          { cardId: "one", direction: "back-to-front" },
+        ],
+      });
+      expect(deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledWith(deck, undefined);
+    });
+
+    it("forgets one direction when asked", async () => {
+      const { deps, useCases } = setup();
+      await expect(useCases.resetCards(instance.url, deck, ["one"], "back-to-front")).resolves.toBe(1);
+      expect(deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledWith(deck, {
+        save: [],
+        remove: [{ cardId: "one", direction: "back-to-front" }],
+      });
+    });
+
+    it("writes nothing for cards never studied", async () => {
+      const { deps, useCases } = setup();
+      await expect(useCases.resetCards(instance.url, deck, ["new"])).resolves.toBe(0);
+      await expect(useCases.rescheduleCards(instance.url, deck, ["new"], "2026-10-12")).resolves.toBe(0);
+      expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
+      expect(deps.reviewStateRepository.readReviewStatesSince).not.toHaveBeenCalled();
+    });
+
+    it("sets the cards due on the day in one write, their snapshot dropped", async () => {
+      const { deps, useCases } = setup();
+      await expect(useCases.rescheduleCards(instance.url, deck, ["one", "two"], "2026-10-12", "front-to-back")).resolves.toBe(2);
+      const { previous: _one, ...one } = studied("one");
+      const { previous: _two, ...two } = studied("two");
+      expect(deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledExactlyOnceWith(deck, {
+        save: [
+          { ...one, due: "2026-10-12" },
+          { ...two, due: "2026-10-12" },
+        ],
+        remove: [],
+      });
+    });
+
+    it("refuses a day that is no date before reading anything", async () => {
+      const { deps, useCases } = setup();
+      await expect(useCases.rescheduleCards(instance.url, deck, ["one"], "2026-02-30")).rejects.toMatchObject({ code: "dueDayInvalid" });
+      expect(deps.reviewStateRepository.listReviewStates).not.toHaveBeenCalled();
+    });
+
+    it("keeps an edit made when the digest cannot be refreshed", async () => {
+      const { deps, useCases } = setup();
+      vi.mocked(deps.reviewStateRepository.readReviewStatesSince).mockRejectedValue(new Error("offline"));
+      await expect(useCases.resetCards(instance.url, deck, ["two"])).resolves.toBe(1);
+    });
+  });
+
   describe("format migration", () => {
     const other: Deck = {
       ...deck,

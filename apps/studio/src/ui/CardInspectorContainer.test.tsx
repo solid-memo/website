@@ -58,6 +58,13 @@ describe("CardInspectorContainer", () => {
     await waitFor(() => expect(useCases.updateCard).toHaveBeenCalledWith(deck, card, { front: { en: "water" }, back: { en: "H2O" } }));
   });
 
+  it("shows the card's schedule on its tab", async () => {
+    const useCases = makeUseCasesFake();
+    renderContainer(useCases, { tab: "schedule" });
+    expect(await screen.findByText("Not studied this way yet: the card is new.")).toBeInTheDocument();
+    expect(useCases.listDeckReviewStates).toHaveBeenCalledWith(deck);
+  });
+
   it("saves each change of the wrong options as it is made, then reads the cards afresh", async () => {
     const useCases = makeUseCasesFake({ updateCard: vi.fn(async () => card) });
     const { invalidate, queryClient } = renderContainer(useCases);

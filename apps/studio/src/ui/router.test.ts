@@ -64,6 +64,9 @@ describe("the Studio's routes", () => {
     expect(studioRouteToHash({ ...routes[6]!, tab: "content" } as StudioRoute)).toBe(studioRouteToHash(routes[6]!));
     expect(parseStudioHash(`${studioRouteToHash(routes[6]!)}&tab=content`)).toEqual(routes[6]);
     expect(parseStudioHash(`${studioRouteToHash(routes[6]!)}&tab=gossip`)).toEqual(routes[6]);
+    const schedule = { ...routes[6]!, tab: "schedule" } as StudioRoute;
+    expect(studioRouteToHash(schedule)).toMatch(/&tab=schedule$/);
+    expect(parseStudioHash(studioRouteToHash(schedule))).toEqual(schedule);
     expect(parseStudioHash("#/card?deck=d")).toBeNull();
     expect(parseStudioHash("#/card?card=c")).toBeNull();
   });

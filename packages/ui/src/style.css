@@ -1483,6 +1483,28 @@ table.studio-cards tbody td p {
   margin-bottom: 0;
 }
 
+/* A card's schedule, a section per direction: its due day to set, the
+   field and its button side by side while they fit. */
+.studio-schedule section {
+  margin-bottom: 1.25rem;
+}
+
+.studio-reschedule {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.studio-reschedule label {
+  flex-basis: 100%;
+}
+
+.studio-reschedule input {
+  max-width: 100%;
+  margin-bottom: 0;
+}
+
 /* A course's chapters, each with its state and what can be done with it. */
 .studio-chapters {
   margin: 0 0 0.75rem;

@@ -43,6 +43,9 @@ function Harness({ initial = DEFAULT_CARD_QUERY, onQuery, ...overrides }: Partia
       lastEdit={null}
       undone={false}
       onUndo={() => undefined}
+      today="2026-10-09"
+      onReviewEdit={async () => true}
+      reviewDone={null}
       busy={false}
       error={null}
       {...overrides}
@@ -267,6 +270,22 @@ describe("CardWorkbenchScreen", () => {
     fireEvent.click(within(bulk).getByRole("button", { name: "Delete" }));
     await waitFor(() => expect(screen.getAllByRole("status")[0]).toHaveTextContent("0 cards selected"));
     vi.unstubAllGlobals();
+  });
+
+  it("forgets or reschedules the selected cards' progress, and says what it did", () => {
+    vi.stubGlobal("confirm", () => true);
+    const onReviewEdit = vi.fn(async () => true);
+    const { rerender } = render(<Harness onReviewEdit={onReviewEdit} />);
+    fireEvent.click(screen.getByRole("checkbox", { name: "Select 木" }));
+    fireEvent.click(within(screen.getByRole("group", { name: "Selected cards" })).getByRole("button", { name: "Forget progress" }));
+    expect(onReviewEdit).toHaveBeenCalledWith(["tree"], { kind: "reset" });
+    vi.unstubAllGlobals();
+    rerender(<Harness reviewDone={{ edit: { kind: "reset" }, count: 2 }} />);
+    expect(screen.getByText("Forgot the progress of 2 cards.")).toBeInTheDocument();
+    rerender(<Harness reviewDone={{ edit: { kind: "reschedule", due: "2026-10-20" }, count: 1 }} />);
+    expect(screen.getByText("Set 1 card due on October 20, 2026.")).toBeInTheDocument();
+    rerender(<Harness reviewDone={{ edit: { kind: "reschedule", due: "2026-10-20" }, count: 0 }} />);
+    expect(screen.getByText("None of the selected cards has been studied yet.")).toBeInTheDocument();
   });
 
   it("keeps the selection when a deletion fails", async () => {
