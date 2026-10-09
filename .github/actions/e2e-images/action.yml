@@ -1,6 +1,7 @@
 # The Docker images an end-to-end job runs, from GitHub's cache, so the job
 # pulls nothing from Docker Hub, whose limit on pulls without an account the
-# runners share (docs/testing.md). This restores and loads them; the job
+# runners share (docs/testing.md); what the cache does not have yet comes
+# through Google's mirror of Docker Hub. This restores and loads them; the job
 # saves them after preparing its servers when the cache had none under
 # this key:
 #
@@ -38,19 +39,22 @@ runs:
     # it is saved and loaded again, and the compose files name pulled images
     # by digest, so compose would pull them again; the containerd store keeps
     # it. Docker 29 uses it on a new install; an older runner is switched.
-    - name: Use the containerd image store
+    # What the cache does not have yet is pulled through Google's mirror of
+    # Docker Hub, outside Docker Hub's limit; Docker goes to Docker Hub
+    # for what the mirror lacks. One restart of Docker does both.
+    - name: Use the containerd image store and Docker Hub's mirror
       shell: bash
       run: |
-        if docker info --format '{{json .DriverStatus}}' | grep -q io.containerd.snapshotter; then
-          echo "Docker keeps its images in containerd already."
-          exit 0
-        fi
         config=/etc/docker/daemon.json
-        if sudo test -s "$config"; then sudo cat "$config"; else echo '{}'; fi \
-          | jq '.features["containerd-snapshotter"] = true' | sudo tee "$config.new" > /dev/null
-        sudo mv "$config.new" "$config"
-        sudo systemctl restart docker
+        if sudo test -s "$config"; then current=$(sudo cat "$config"); else current='{}'; fi
+        wanted=$(echo "$current" | jq '.features["containerd-snapshotter"] = true
+          | .["registry-mirrors"] = ((.["registry-mirrors"] // []) - ["https://mirror.gcr.io"] + ["https://mirror.gcr.io"])')
+        if [ "$(echo "$current" | jq -S .)" != "$(echo "$wanted" | jq -S .)" ]; then
+          echo "$wanted" | sudo tee "$config" > /dev/null
+          sudo systemctl restart docker
+        fi
         docker info --format '{{json .DriverStatus}}' | grep -q io.containerd.snapshotter
+        docker info --format '{{json .RegistryConfig.Mirrors}}' | grep -q mirror.gcr.io
     - id: file
       shell: bash
       run: |

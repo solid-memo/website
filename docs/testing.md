@@ -106,8 +106,11 @@ jobs use Docker's containerd image store, which keeps the digest a loaded
 image was pulled by (the classic store forgets it, and compose would pull
 the image again), switching to it on a runner whose Docker does not
 already; an image pulled by digest is saved under the tag its reference
-names. A cache that cannot be saved or loaded only warns: the job pulls
-or builds, as before.
+names. What the cache does not have yet (a job's first run, or after an
+image changes) is pulled through `mirror.gcr.io`, Google's mirror of
+Docker Hub, set as Docker's registry mirror in the same step; Docker goes
+to Docker Hub for what the mirror lacks. A cache that cannot be saved or
+loaded only warns: the job pulls or builds, as before.
 
 They need Docker: Docker Engine 28.3.3 or later on Linux (before it, a
 port published on 127.0.0.1 could be reached from the local network,
