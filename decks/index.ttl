@@ -14,7 +14,7 @@
     dcterms:title "Solid Memo deck library" ;
     dcterms:description "Ready-made flashcard decks to import into your own Solid pod." ;
     dcterms:publisher <#solid-memo> ;
-    dcterms:modified "2026-10-08T00:00:00Z"^^xsd:dateTime ;
+    dcterms:modified "2026-10-09T00:00:00Z"^^xsd:dateTime ;
     dcat:themeTaxonomy <http://publications.europa.eu/resource/authority/data-theme> ,
                        <https://solid-memo.com/ns/vocab/topics.ttl> ;
     dcat:dataset <#academy-award-best-picture> ,
@@ -43,6 +43,7 @@
                  <#geologic-time-scale> ,
                  <#geometry-formulas> ,
                  <#german-basics> ,
+                 <#getting-started> ,
                  <#git-commands> ,
                  <#greek-alphabet> ,
                  <#greek-and-roman-gods> ,
@@ -2825,6 +2826,108 @@
     a dcat:Distribution ;
     dcat:accessURL <https://solid-memo.com/decks/german-basics/v1.ttl> ;
     dcat:downloadURL <https://solid-memo.com/decks/german-basics/v1.ttl> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
+
+<#getting-started>
+    a dcat:DatasetSeries ,
+      dcat:Dataset ;
+    solid-memo:formatVersion 3 ;
+    dcterms:title "Getting started with Solid Memo"@en ,
+                  "Kom igång med Solid Memo"@sv ;
+    dcterms:description "A short course for people new to Solid Memo, guests trying it out included: how studying works and how to grade yourself honestly, where your decks and study are kept (in your own Solid Pod, or only in this browser as a guest) and how to keep what you studied as a guest, ready-made decks and courses from the deck library, making your own decks and cards, and setting a daily pace and following your progress. 5 chapters of short steps, each a piece of theory followed by multiple-choice questions; each chapter ends with a review, and every question you answer becomes a card in your deck. Take about one chapter a day, since every answer comes back as a card on the next study day. The facts come from the Solid Memo app and its documentation, as of October 2026."@en ,
+                        "En kort kurs för dig som är ny i Solid Memo, även om du bara provar som gäst: hur studierna går till och hur du betygsätter dig själv ärligt, var dina kortlekar och studier sparas (i din egen Solid Pod, eller bara i den här webbläsaren som gäst) och hur du behåller det du studerat som gäst, färdiga kortlekar och kurser från kortleksbiblioteket, att göra egna kortlekar och kort, och att sätta en takt för varje dag och följa dina framsteg. 5 kapitel med korta steg av teori följda av flervalsfrågor; varje kapitel avslutas med en repetition, och varje fråga du besvarar blir ett kort i din kortlek. Ta ungefär ett kapitel om dagen, eftersom varje svar kommer tillbaka som ett kort nästa studiedag. Fakta kommer från appen Solid Memo och dess dokumentation, så som de var i oktober 2026."@sv ;
+    dcterms:publisher <#solid-memo> ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ;
+    dcat:keyword "Solid Memo"@en ,
+                 "getting started"@en ,
+                 "beginner"@en ,
+                 "spaced repetition"@en ,
+                 "flashcards"@en ,
+                 "Solid"@en ,
+                 "pod"@en ,
+                 "Solid Memo"@sv ,
+                 "kom igång"@sv ,
+                 "nybörjare"@sv ,
+                 "repetition med mellanrum"@sv ,
+                 "kortlekar"@sv ,
+                 "Solid"@sv ,
+                 "pod"@sv ;
+    dcat:first <https://solid-memo.com/decks/getting-started/v1.ttl> ;
+    dcat:last <https://solid-memo.com/decks/getting-started/v1.ttl> ;
+    dcat:hasVersion <https://solid-memo.com/decks/getting-started/v1.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/getting-started/v1.ttl> .
+
+<https://solid-memo.com/decks/getting-started/v1.ttl>
+    a solid-memo:Deck ,
+      dcat:Dataset ,
+      <https://schema.org/Course> ;
+    dcterms:title "Getting started with Solid Memo"@en ,
+                  "Kom igång med Solid Memo"@sv ;
+    dcterms:creator <https://solid-memo.com/decks/getting-started/v1.ttl#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "A short course for people new to Solid Memo, guests trying it out included: how studying works and how to grade yourself honestly, where your decks and study are kept (in your own Solid Pod, or only in this browser as a guest) and how to keep what you studied as a guest, ready-made decks and courses from the deck library, making your own decks and cards, and setting a daily pace and following your progress. 5 chapters of short steps, each a piece of theory followed by multiple-choice questions; each chapter ends with a review, and every question you answer becomes a card in your deck. Take about one chapter a day, since every answer comes back as a card on the next study day. The facts come from the Solid Memo app and its documentation, as of October 2026."@en ,
+                        "En kort kurs för dig som är ny i Solid Memo, även om du bara provar som gäst: hur studierna går till och hur du betygsätter dig själv ärligt, var dina kortlekar och studier sparas (i din egen Solid Pod, eller bara i den här webbläsaren som gäst) och hur du behåller det du studerat som gäst, färdiga kortlekar och kurser från kortleksbiblioteket, att göra egna kortlekar och kort, och att sätta en takt för varje dag och följa dina framsteg. 5 kapitel med korta steg av teori följda av flervalsfrågor; varje kapitel avslutas med en repetition, och varje fråga du besvarar blir ett kort i din kortlek. Ta ungefär ett kapitel om dagen, eftersom varje svar kommer tillbaka som ett kort nästa studiedag. Fakta kommer från appen Solid Memo och dess dokumentation, så som de var i oktober 2026."@sv ;
+    prov:wasDerivedFrom <https://github.com/solid-memo/website/tree/2a2bfaaf3635a39d2f34559d3053deb64d052770> ,
+                        <https://solid-memo.com/> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/getting-started/v1.ttl#compilation> ;
+    dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ;
+    dcat:keyword "Solid Memo"@en ,
+                 "getting started"@en ,
+                 "beginner"@en ,
+                 "spaced repetition"@en ,
+                 "flashcards"@en ,
+                 "Solid"@en ,
+                 "pod"@en ,
+                 "Solid Memo"@sv ,
+                 "kom igång"@sv ,
+                 "nybörjare"@sv ,
+                 "repetition med mellanrum"@sv ,
+                 "kortlekar"@sv ,
+                 "Solid"@sv ,
+                 "pod"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-09T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <#solid-memo> ;
+    dcat:inSeries <#getting-started> ;
+    dcat:isVersionOf <#getting-started> ;
+    dcat:distribution <https://solid-memo.com/decks/getting-started/v1.ttl#turtle> ;
+    solid-memo:cardCount 26 .
+
+<https://solid-memo.com/decks/getting-started/v1.ttl#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://solid-memo.com/decks/getting-started/v1.ttl#compilation>
+    a prov:Activity .
+
+<https://github.com/solid-memo/website/tree/2a2bfaaf3635a39d2f34559d3053deb64d052770>
+    dcterms:title "Solid Memo repository: docs and source, at the commit the course describes" ;
+    dcterms:creator "Solid Memo" .
+
+<https://solid-memo.com/>
+    dcterms:title "Solid Memo" ;
+    dcterms:creator "Solid Memo" .
+
+<http://augmentingcognition.com/ltm.html>
+    dcterms:title "Augmenting Long-term Memory" ;
+    dcterms:creator "Michael A. Nielsen, 2018" .
+
+<https://docs.ankiweb.net/studying.html>
+    dcterms:title "Anki Manual: Studying" ;
+    dcterms:creator "Ankitects" .
+
+<https://solid-memo.com/decks/getting-started/v1.ttl#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <https://solid-memo.com/decks/getting-started/v1.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/getting-started/v1.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
