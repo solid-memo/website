@@ -259,8 +259,9 @@ else offers nothing.
 | `getCourse(deck)` | The course as the learner has it: the deck as its entry is now, the release, its outline, its cards by id, the cards answered and the progress. Writes nothing. A deck that is gone throws `deckGone`. |
 | `answerCourseQuestion(instanceUrl, deck, card, choice, now)` | Grades one answer as `courseAnswerEffect` says. A card introduced is written first (`applyCardChanges`), then graded, so a review state never exists without its card. Returns the effect and the card's state. |
 | `completeChapter(deck, chapterUrl)` | Adds `sm:completedChapter` to the deck's entry. |
+| `setCompletedChapters(deck, edit)` | The Studio's change of the chapters completed: one marked not done (in any release, by its fragment id), or the course restarted, none completed. Answers and review states stay. |
 
-Two ports gained a method ([ports.ts](../packages/application/src/ports.ts)):
+Two ports gained methods ([ports.ts](../packages/application/src/ports.ts)):
 
 - **`DeckLibrary.fetchCourseOutline(releaseUrl)`** reads the chapters and
   steps of a release (`toCourseOutline` in
@@ -280,6 +281,10 @@ Two ports gained a method ([ports.ts](../packages/application/src/ports.ts)):
   guest's deck [added to an instance](guest-mode.md#adding-to-an-instance)
   with the chapters the guest completed, If-Match and tried again on a
   412 in the same way.
+- **`DeckRepository.setCompletedChapters(deck, edit)`** removes the
+  triples the edit drops (`editCompletedChapters` in
+  [course.ts](../packages/domain/src/course.ts)) the same way. It is the
+  Studio's edit of the entry, so it passes the shape check.
 
 The deck's distractors are written and removed with its cards
 (`withDistractors` and `distractorsOf` in

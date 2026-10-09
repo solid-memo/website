@@ -22,6 +22,7 @@ import {
   readInstanceRegistrations,
   readRegisteredClasses,
   removeInstanceRegistrations,
+  renameInstanceRegistrations,
 } from "./typeIndex";
 import { DCTERMS, SM } from "./vocab";
 import { deleteInstanceData } from "./instanceData";
@@ -538,6 +539,53 @@ describe("readMeta and upgradeMeta", () => {
     await expect(makeRepository().upgradeMeta(CONTAINER)).resolves.toBe(false);
     vi.mocked(getSolidDataset).mockRejectedValue({ statusCode: 404 });
     await expect(makeRepository().upgradeMeta(CONTAINER)).resolves.toBe(false);
+    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+  });
+});
+
+describe("renameRegistrations", () => {
+  it("renames the instance's registrations in each type index there is", async () => {
+    vi.mocked(locateTypeIndexes).mockResolvedValue({ privateIndexUrl: null, publicIndexUrl: PUBLIC_INDEX });
+    vi.mocked(renameInstanceRegistrations).mockReset().mockResolvedValue(undefined);
+    await makeRepository().renameRegistrations({ webId: WEBID, instanceUrl: CONTAINER, title: "Languages" });
+    expect(vi.mocked(renameInstanceRegistrations).mock.calls.map((c) => [c[0], c[1]])).toEqual([
+      [PUBLIC_INDEX, { containerUrl: CONTAINER, title: "Languages" }],
+    ]);
+  });
+});
+
+describe("saveMeta", () => {
+  const META = `${CONTAINER}meta.ttl`;
+  const meta = { name: "Main", createdAt: "2026-09-21T10:00:00.000Z", formatVersion: 1 };
+
+  it("rewrites the subject in place, keeping foreign triples, checked first", async () => {
+    vi.mocked(getSolidDataset).mockResolvedValue(
+      setThing(
+        mockSolidDatasetFrom(META),
+        buildThing(createThing({ url: `${META}#it` }))
+          .addIri("http://www.w3.org/1999/02/22-rdf-syntax-ns#type", SM.Instance)
+          .addStringNoLocale(DCTERMS.title, "Main")
+          .addDatetime(DCTERMS.created, new Date(meta.createdAt))
+          .addStringNoLocale("https://other.example/#note", "kept")
+          .build(),
+      ),
+    );
+    const checkWrite = vi.fn(async () => undefined);
+    await makeRepository(checkWrite).saveMeta(CONTAINER, { ...meta, name: "Renamed" });
+    const [url, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    expect(url).toBe(META);
+    const thing = getThing(saved as SolidDataset, `${META}#it`)!;
+    expect(getStringNoLocale(thing, DCTERMS.title)).toBe("Renamed");
+    expect(getStringNoLocale(thing, "https://other.example/#note")).toBe("kept");
+    expect(getInteger(thing, SM.formatVersion)).toBe(2);
+    expect(checkWrite).toHaveBeenCalledWith(saved, [`${META}#it`]);
+  });
+
+  it("refuses to save when the meta document or its subject is missing", async () => {
+    vi.mocked(getSolidDataset).mockRejectedValue({ statusCode: 404 });
+    await expect(makeRepository().saveMeta(CONTAINER, meta)).rejects.toMatchObject({ code: "noMetaToUpdate" });
+    vi.mocked(getSolidDataset).mockResolvedValue(mockSolidDatasetFrom(META));
+    await expect(makeRepository().saveMeta(CONTAINER, meta)).rejects.toMatchObject({ code: "noMetaToUpdate" });
     expect(saveSolidDatasetAt).not.toHaveBeenCalled();
   });
 });

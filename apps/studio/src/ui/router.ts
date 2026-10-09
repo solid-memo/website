@@ -12,8 +12,7 @@ import { hashParams, useHashRouter } from "@solid-memo/ui/routerCore";
  * A Studio view, as its URL hash carries it (docs/studio.md): only
  * identifiers (instance, deck and card URLs) and how a screen is looked
  * at (Home's filter and sort, the card workbench's query, the card
- * inspector's tab), so it
- * round-trips through the hash. Solid Memo's
+ * inspector's tab), so it round-trips through the hash. Solid Memo's
  * own routes are another set (packages/ui/src/ui/router.ts); both keep
  * the hash with the same core (routerCore.ts).
  */
@@ -27,7 +26,11 @@ export type StudioRoute =
   /** The card workbench: a deck's cards, searched, filtered, sorted and paged as `query` says (all, as listed, when absent). */
   | { screen: "cards"; deckUrl: string; query?: CardQuery }
   /** The card inspector: one card of a deck, its content or its wrong options (`tab`; the content when absent). */
-  | { screen: "card"; deckUrl: string; cardUrl: string; tab?: CardTab };
+  | { screen: "card"; deckUrl: string; cardUrl: string; tab?: CardTab }
+  /** What a deck says of itself, how it is studied and, for a course, the learner's progress through it. */
+  | { screen: "about"; deckUrl: string }
+  /** The instance's name and its catalogue's description and licence. */
+  | { screen: "instance"; instanceUrl: string };
 
 /** What the card inspector shows: the card's content, or its wrong options. */
 export type CardTab = "content" | "distractors";
@@ -41,6 +44,7 @@ export function instanceOfRoute(route: StudioRoute): string | null {
       return null;
     case "cards":
     case "card":
+    case "about":
       return instanceUrlOfDeck(route.deckUrl);
     default:
       return route.instanceUrl;
@@ -59,6 +63,10 @@ export function studioRouteToHash(route: StudioRoute): string {
       return `#/cards${hashParams({ deck: route.deckUrl, ...(route.query === undefined ? {} : queryToParams(route.query)) })}`;
     case "card":
       return `#/card${hashParams({ deck: route.deckUrl, card: route.cardUrl, ...(route.tab === undefined || route.tab === "content" ? {} : { tab: route.tab }) })}`;
+    case "about":
+      return `#/about${hashParams({ deck: route.deckUrl })}`;
+    case "instance":
+      return `#/instance${hashParams({ instance: route.instanceUrl })}`;
   }
 }
 
@@ -84,6 +92,12 @@ export function parseStudioHash(hash: string): StudioRoute | null {
     }
     case "/groups":
       return instanceUrl === null ? null : { screen: "groups", instanceUrl };
+    case "/instance":
+      return instanceUrl === null ? null : { screen: "instance", instanceUrl };
+    case "/about": {
+      const deckUrl = query.get("deck");
+      return deckUrl === null ? null : { screen: "about", deckUrl };
+    }
     case "/cards": {
       const deckUrl = query.get("deck");
       if (deckUrl === null) return null;

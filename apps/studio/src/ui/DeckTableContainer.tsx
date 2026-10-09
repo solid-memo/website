@@ -44,6 +44,7 @@ export function DeckTableContainer({
   onView,
   appHref,
   groupsHref,
+  instanceHref,
   deckHref,
   cardsHref,
 }: {
@@ -54,7 +55,9 @@ export function DeckTableContainer({
   /** Solid Memo, open at the instance's decks. */
   appHref: string;
   groupsHref: string;
-  /** A deck's page in Solid Memo. */
+  /** The instance's name and catalogue. */
+  instanceHref: string;
+  /** What a deck says of itself, in the Studio. */
   deckHref: (deck: Deck) => string;
   /** A deck's cards, in the card workbench. */
   cardsHref: (deck: Deck) => string;
@@ -174,6 +177,7 @@ export function DeckTableContainer({
       cardsHref={cardsHref}
       appHref={appHref}
       groupsHref={groupsHref}
+      instanceHref={instanceHref}
       onMove={(selected, parent) => run({ kind: "move", decks: selected, parent })}
       onPace={(selected, pace) => run({ kind: "pace", decks: selected, pace })}
       onDirection={(selected, direction) => run({ kind: "direction", decks: selected, direction })}

@@ -25,6 +25,7 @@
     "./deckTreeEditor": "./src/ui/deckTreeEditor.ts",
     "./test/setup": "./src/test/setup.ts",
     "./test/useCasesFake": "./src/test/useCasesFake.ts",
+    "./test/course": "./src/test/course.ts",
     "./*": "./src/ui/*.tsx"
   },
   "scripts": {

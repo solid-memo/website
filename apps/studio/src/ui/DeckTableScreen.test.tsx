@@ -40,6 +40,7 @@ function Harness({ initial = { filter: "" }, ...overrides }: Partial<Props> & { 
       cardsHref={(deck) => `../#/browse?deck=${deck.id}`}
       appHref="../#/decks"
       groupsHref="#/groups?instance=a"
+      instanceHref="#/instance?instance=a"
       onMove={async () => true}
       onPace={async () => true}
       onDirection={async () => true}
@@ -103,6 +104,7 @@ describe("DeckTableScreen", () => {
       "–Could not be read",
     ]);
     expect(screen.getByRole("link", { name: "Arrange groups" })).toHaveAttribute("href", "#/groups?instance=a");
+    expect(screen.getByRole("link", { name: "Name and catalogue" })).toHaveAttribute("href", "#/instance?instance=a");
   });
 
   it("sorts by a column, then the other way, then as arranged, saying so on the column", () => {
@@ -276,6 +278,7 @@ describe("DeckTableScreen", () => {
     render(<Harness rows={[]} />);
     expect(screen.queryByRole("table")).toBeNull();
     expect(screen.getByRole("link", { name: "Solid Memo" })).toHaveAttribute("href", "../#/decks");
+    expect(screen.getByRole("link", { name: "Name and catalogue" })).toHaveAttribute("href", "#/instance?instance=a");
   });
 
   it("names a deck in the reader's language, in Swedish", () => {

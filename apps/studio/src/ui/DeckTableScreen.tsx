@@ -49,9 +49,10 @@ const COLUMNS: readonly Exclude<DeckColumn, "title">[] = [
  * Rows are selected by their checkbox, or all those shown at once, and
  * DeckBulkActions does what can be done with those shown, in the
  * table's order, one action at a time: a deck the filter hides stays
- * selected, but is left alone until shown again. A deck's name opens it
- * in Solid Memo (`deckHref`), its number of cards its cards in the
- * Studio's card workbench (`cardsHref`).
+ * selected, but is left alone until shown again. A deck's name opens
+ * what it says of itself (`deckHref`), its number of cards its cards in
+ * the Studio's card workbench (`cardsHref`). The header links to the
+ * groups and to the instance's name and catalogue (`instanceHref`).
  */
 export function DeckTableScreen({
   instance,
@@ -66,6 +67,7 @@ export function DeckTableScreen({
   cardsHref,
   appHref,
   groupsHref,
+  instanceHref,
   onMove,
   onPace,
   onDirection,
@@ -90,6 +92,8 @@ export function DeckTableScreen({
   appHref: string;
   /** The Groups screen. */
   groupsHref: string;
+  /** The instance's name and catalogue. */
+  instanceHref: string;
   /** Each resolves to whether it was done (the container says why not, through `error`). */
   onMove: (decks: readonly Deck[], parent: DeckGroup | null) => Promise<boolean>;
   onPace: (decks: readonly Deck[], pace: DeckPace) => Promise<boolean>;
@@ -106,7 +110,10 @@ export function DeckTableScreen({
   if (rows.length === 0) {
     return (
       <section>
-        <h2>{t("studio.decks.heading")}</h2>
+        <header>
+          <h2>{t("studio.decks.heading")}</h2>
+          <a href={instanceHref}>{t("studio.decks.instanceLink")}</a>
+        </header>
         <p class="hint">{tx("studio.decks.empty", { app: <a href={appHref}>{t("app.documentTitle")}</a> })}</p>
       </section>
     );
@@ -155,7 +162,7 @@ export function DeckTableScreen({
     <section>
       <header>
         <h2>{t("studio.decks.heading")}</h2>
-        <a href={groupsHref}>{t("studio.decks.groupsLink")}</a>
+        <a href={groupsHref}>{t("studio.decks.groupsLink")}</a> <a href={instanceHref}>{t("studio.decks.instanceLink")}</a>
       </header>
       <label class="studio-filter">
         {t("studio.decks.filter")}

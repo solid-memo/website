@@ -1468,6 +1468,42 @@ table.studio-cards tbody td p {
   font-weight: 600;
 }
 
+/* An author of a deck: the name's field, and its Remove button beside it. */
+.studio-author {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.studio-author input {
+  flex: 1 1 12rem;
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+/* A course's chapters, each with its state and what can be done with it. */
+.studio-chapters {
+  margin: 0 0 0.75rem;
+  padding-left: 1.5rem;
+}
+
+.studio-chapters li {
+  margin: 0.35rem 0;
+}
+
+/* A deck's name, one per language. */
+.studio-names {
+  list-style: none;
+  margin: 0 0 0.75rem;
+  padding: 0;
+}
+
+.studio-names li {
+  margin: 0.25rem 0;
+}
+
 .breadcrumbs ol {
   display: flex;
   flex-wrap: wrap;

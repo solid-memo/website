@@ -207,6 +207,21 @@ export function courseProgress(
   };
 }
 
+/**
+ * A change of the chapters a learner completed, as the Studio makes one
+ * (UseCases.setCompletedChapters): a chapter marked not done, in any
+ * release (by its fragment id), or the course restarted, no chapter
+ * completed. Answers and review states are left as they are.
+ */
+export type CompletedChaptersEdit = { kind: "notDone"; chapterUrl: string } | { kind: "restart" };
+
+/** The completed chapters (their URLs) once `edit` is made of them. */
+export function editCompletedChapters(completed: readonly string[], edit: CompletedChaptersEdit): string[] {
+  if (edit.kind === "restart") return [];
+  const id = fragmentIdOf(edit.chapterUrl);
+  return completed.filter((url) => fragmentIdOf(url) !== id);
+}
+
 /** One option of a multiple-choice question. */
 export interface Choice {
   /** Stable within the question, for the UI to key and pick by: "back" for the right one, "distractor:<id>" for a wrong one. */

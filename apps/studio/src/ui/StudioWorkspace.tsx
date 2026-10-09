@@ -17,8 +17,10 @@ import { MAIN_ID } from "@solid-memo/ui/SkipLink";
 import { useInstanceTheme } from "@solid-memo/ui/theme";
 import { CardInspectorContainer } from "./CardInspectorContainer";
 import { CardWorkbenchContainer } from "./CardWorkbenchContainer";
+import { DeckAboutContainer } from "./DeckAboutContainer";
 import { DeckTableContainer } from "./DeckTableContainer";
 import { GroupsContainer } from "./GroupsContainer";
+import { InstanceAboutContainer } from "./InstanceAboutContainer";
 import { learnerApp } from "./learnerApp";
 import { instanceOfRoute, studioRouteToHash, useStudioRoute, type StudioRoute } from "./router";
 
@@ -40,7 +42,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
   const instances = instancesQuery.data;
   const instanceUrl = route === null ? null : instanceOfRoute(route);
   const activeInstance = instanceUrl === null ? null : (instances?.find((i) => i.url === instanceUrl) ?? null);
-  const deckUrl = route?.screen === "cards" || route?.screen === "card" ? route.deckUrl : null;
+  const deckUrl = route?.screen === "cards" || route?.screen === "card" || route?.screen === "about" ? route.deckUrl : null;
   const decksQuery = useQuery({
     queryKey: ["decks", instanceUrl],
     queryFn: () => useCases.listDecks(instanceUrl!),
@@ -84,6 +86,10 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
         return [instancesCrumb, { ...decks, route }];
       case "groups":
         return [instancesCrumb, decks, { label: t("breadcrumbs.groups"), route }];
+      case "instance":
+        return [instancesCrumb, decks, { label: t("studio.instance.crumb"), route }];
+      case "about":
+        return [instancesCrumb, decks, { label: t("studio.about.crumb", { deck: readerText(activeDeck!.title) }), route }];
       case "cards":
         return [instancesCrumb, decks, { label: t("studio.cards.crumb", { deck: readerText(activeDeck!.title) }), route }];
       case "card":
@@ -135,12 +141,27 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             onView={(view) => replace({ ...route, view })}
             appHref={learnerApp(decksHref(route.instanceUrl))}
             groupsHref={studioRouteToHash({ screen: "groups", instanceUrl: route.instanceUrl })}
-            deckHref={(deck) => learnerApp(deckHref(route.instanceUrl, deck.url))}
+            instanceHref={studioRouteToHash({ screen: "instance", instanceUrl: route.instanceUrl })}
+            deckHref={(deck) => studioRouteToHash({ screen: "about", deckUrl: deck.url })}
             cardsHref={(deck) => studioRouteToHash({ screen: "cards", deckUrl: deck.url })}
           />
         );
       case "groups":
         return <GroupsContainer useCases={useCases} instance={activeInstance!} />;
+      case "instance":
+        // Another instance: its forms start afresh.
+        return <InstanceAboutContainer key={route.instanceUrl} useCases={useCases} session={session} instance={activeInstance!} />;
+      case "about":
+        return (
+          <DeckAboutContainer
+            // Another deck: its forms start afresh.
+            key={route.deckUrl}
+            useCases={useCases}
+            instance={activeInstance!}
+            deck={activeDeck!}
+            appHref={learnerApp(deckHref(activeInstance!.url, route.deckUrl))}
+          />
+        );
       case "cards": {
         const inspector = (card: Card): StudioRoute => ({ screen: "card", deckUrl: route.deckUrl, cardUrl: card.url });
         return (

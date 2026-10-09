@@ -6,7 +6,9 @@ Later it is also where creators build decks and courses and publish
 them. For now it shows the decks of an instance in a table, changes
 several of them at once, arranges them into groups, lists a deck's
 cards to search, filter, sort, select and edit at once, and edits one
-card, its wrong options included.
+card, its wrong options included. It also edits what a deck says of
+itself (its authors and licence among it), a course's progress, and
+the instance's name and catalogue.
 
 ## What it shares with Solid Memo
 
@@ -52,6 +54,8 @@ hash with the same core as Solid Memo's router (`routerCore.ts` in
 | `#/groups?instance=…` | Groups: the instance's decks arranged into groups, as Solid Memo's deck list arranges them. |
 | `#/cards?deck=…[&q&field&lang&state&has&sort&order&page&size]` | the card workbench: a deck's cards as a table ([below](#card-workbench)). The deck names the instance: its catalog's folder. |
 | `#/card?deck=…&card=…[&tab=distractors]` | the card inspector: one card, its content, or with `tab=distractors` its wrong options ([below](#card-inspector)). The content is the default tab, and is left out of the URL. |
+| `#/about?deck=…` | a deck's about screen: what it says of itself, how it is studied and, for a course, the learner's progress ([below](#a-decks-about-screen)). |
+| `#/instance?instance=…` | the instance's name and its catalogue ([below](#the-instance)). |
 
 Anything else, `#/` among them, is the default route: the only
 instance's Home, or else the picker. An unknown instance falls back to
@@ -65,12 +69,12 @@ looked at another way, so Back leaves it.
 
 Solid Memo links to Home as `studio/#/?instance=…` ("Open in Studio",
 in its instance bar, each deck's actions menu and the deck page;
-[routing.md](routing.md)). The Studio has no screen of one deck yet, so
-a deck's link opens its instance's Home.
+[routing.md](routing.md)). A deck's link opens its instance's Home too.
 
 The trail is Instances › Decks, then › Groups on the Groups screen,
-› Cards of *deck* in the workbench, or › Cards of *deck* › *card* in the
-inspector. The document title is the trail's
+› Cards of *deck* in the workbench, › Cards of *deck* › *card* in the
+inspector, › About *deck* on a deck's about screen, or › Name and
+catalogue on the instance's screen. The document title is the trail's
 last step and "Solid Memo Studio". After a move, the screen's heading
 takes the focus (`useScreenFocus`). The header has a link back to
 Solid Memo (`../#/`), at the open instance's decks when there is one.
@@ -83,7 +87,8 @@ signed in can go back.
 Home ([`DeckTableContainer`](../apps/studio/src/ui/DeckTableContainer.tsx))
 is a table with a row per deck. Its columns are:
 
-- the deck's name, a link to its page in Solid Memo, and its badges:
+- the deck's name, a link to its [about screen](#a-decks-about-screen),
+  and its badges:
   **Library** for a copy of a library deck (it has
   `prov:wasDerivedFrom`), **Course** for a copy of a course, **Invalid
   data** when the instance's check finds a problem in its entry or its
@@ -97,6 +102,10 @@ is a table with a row per deck. Its columns are:
 - when it last changed (`dcterms:modified`, else when it was made);
 - its cards, retired ones aside, a link to its cards in the
   [workbench](#card-workbench).
+
+Above the table are links to the [Groups](#groups) screen and to the
+instance's [name and catalogue](#the-instance); with no decks yet, the
+latter is still there.
 
 The table starts in the order the user arranged the decks. A column's
 name sorts by it, then the other way, then back to that order; the
@@ -287,6 +296,66 @@ card keeps its own.
 
 The inspector reads the deck's cards with the same query as the
 workbench and Solid Memo, so an edit in one shows in the others.
+
+## A deck's about screen
+
+The about screen ([`DeckAboutContainer`](../apps/studio/src/ui/DeckAboutContainer.tsx))
+shows what a deck says of itself and how it is studied, with a link to
+its page in Solid Memo. Each part has its own form, and a status line
+says when a save is made:
+
+- **Name**: the deck's name in every language it has, renamed as in
+  Solid Memo's deck preferences (`renameDeck`).
+- **About this deck**: its description, topics and keywords, with
+  Solid Memo's own form (`DeckAboutSection` in `ui`, `describeDeck`).
+- **Authors and licence**: an author a line, "Name" or "Name <email>",
+  and a licence chosen from those offered (`KNOWN_LICENSES` in
+  [license.ts](../packages/domain/src/license.ts), each named as
+  `licenseLabel` names it). A licence another app wrote is offered too,
+  so it can be kept. The domain tidies and checks them
+  ([deckProvenance.ts](../packages/domain/src/deckProvenance.ts)): two
+  authors that would share one agent node are refused, and the form
+  stays until the save is made. Nothing here says anyone reviewed the
+  deck. `setDeckProvenance` reads the deck's entry afresh and writes it
+  again on a 412, three times in all.
+- **Study**: its direction and its pace, a limit left empty following
+  the instance's preferences, which are set in Solid Memo
+  (`setDeckPace`, then `setDeckDirection` when that changed).
+- **Languages**: its card sides whose language is not stated, set as in
+  Solid Memo (`DeckLanguagesSection` in `ui`).
+- **Course progress**, for a copy of a course: its chapters in order,
+  each done, open or locked. A chapter done can be marked not done, and
+  the course restarted, once the user confirms, so the first chapter
+  opens again. A chapter completed that the release no longer has is
+  listed by its id, to mark not done too. Answers and review states
+  stay as they are either way (`setCompletedChapters`,
+  [courses.md](courses.md#use-cases-and-ports)).
+
+After a save the decks are read afresh, and the deck's study queue is
+dropped, as Solid Memo does after a change of its pace.
+
+## The instance
+
+The instance's screen ([`InstanceAboutContainer`](../apps/studio/src/ui/InstanceAboutContainer.tsx))
+shows where the instance is, and links to its study preferences in
+Solid Memo. Its forms:
+
+- **Name**: `renameInstance` writes it everywhere it is kept: the meta
+  document, the catalogue and the type index registrations
+  ([data-model.md](data-model.md#the-catalogue)). Then the instances
+  are read afresh, so every screen names it anew. An empty name is
+  refused.
+- **Catalogue**: its description, required, and its licence, from the
+  same list as a deck's (`describeCatalog`). Its publisher, the pod's
+  owner, is shown, never edited. An instance without a catalogue (one
+  not updated yet) says so instead. The form starts again from each
+  read of the catalogue, as a rename can change its description.
+
+The meta document and catalogue writes pass the shape check. The type
+index renames have no shape, so they are If-Match writes only. Each
+write is made again from a fresh read on a 412, three times in all. The end-to-end tests hold these edits
+against real servers
+([metadata.integration.test.ts](../e2e/pod/src/metadata.integration.test.ts)).
 
 ## Groups
 

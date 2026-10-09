@@ -13,12 +13,14 @@ import type { CssAccount } from "../harness/cssAccount.ts";
  * keyboard, the URL holding the view; they replace a word in the
  * selected cards, checking the preview first, then retire both cards and
  * undo that. They inspect one card, give it two wrong options (saved as
- * each is added), retire one and delete the other. On the Groups screen they group
+ * each is added), retire one and delete the other. From Home they open a
+ * deck's about screen and name its author and licence. On the Groups screen they group
  * the two decks, as Solid Memo's deck list would; back on Home, the
  * table shows the group, filters and sorts by what the URL says, gives
  * both decks a pace and moves them back to the top level at once, and
- * deletes one of them, once the user confirms. They pick the instance
- * again from the picker, and go back to Solid Memo, which takes a login
+ * deletes one of them, once the user confirms. They rename the instance
+ * and describe its catalogue, under a licence, then pick it, by its new
+ * name, from the picker, and go back to Solid Memo, which takes a login
  * of its own again (docs/authentication.md) and lists the deck that is
  * left.
  */
@@ -27,6 +29,7 @@ test("log in to the Studio and manage an instance's decks @studio", async ({ app
   const alpha = `Alpha ${runId}`;
   const beta = `Beta ${runId}`;
   const group = `Pair ${runId}`;
+  const renamed = `Renamed ${runId}`;
 
   await app.step("01 · Visit Solid Memo", () => app.onboarding.visit());
   await app.step("02 · Log in with a WebID", () => logInAndCreateInstance(app, account, instance));
@@ -74,7 +77,13 @@ test("log in to the Studio and manage an instance's decks @studio", async ({ app
     await app.chrome.breadcrumb("breadcrumbs.decks");
   });
 
-  await app.step("10 · Group the two decks on the Groups screen", async () => {
+  await app.step("10 · Name a deck's author and licence on its about screen", async () => {
+    await app.studio.openAbout(instance, beta);
+    await app.studio.setAuthorAndLicence("Ada Lovelace", "CC BY 4.0");
+    await app.chrome.breadcrumb("breadcrumbs.decks");
+  });
+
+  await app.step("11 · Group the two decks on the Groups screen", async () => {
     await app.studio.openGroups();
     await app.groups.groupWithNeighbour(alpha);
     await app.groups.nameGroup(group);
@@ -83,13 +92,13 @@ test("log in to the Studio and manage an instance's decks @studio", async ({ app
     await app.studio.expectDeck(instance, beta, { cards: 0, due: 0, group });
   });
 
-  await app.step("11 · Filter the decks, then sort them by name", async () => {
+  await app.step("12 · Filter the decks, then sort them by name", async () => {
     await app.studio.filter(instance, "beta", [beta]);
     await app.studio.filter(instance, runId, [alpha, beta]);
     await app.studio.sortBy(instance, "title", [alpha, beta]);
   });
 
-  await app.step("12 · Give both decks a pace and move them to the top level", async () => {
+  await app.step("13 · Give both decks a pace and move them to the top level", async () => {
     await app.studio.select([alpha, beta]);
     await app.studio.setNewCardsPerDay(7, 2);
     await app.studio.moveToTopLevel(2);
@@ -97,19 +106,25 @@ test("log in to the Studio and manage an instance's decks @studio", async ({ app
     await app.studio.expectDeck(instance, beta, { cards: 0, due: 0, newCardsPerDay: "7" });
   });
 
-  await app.step("13 · Delete one deck, confirming", async () => {
+  await app.step("14 · Delete one deck, confirming", async () => {
     await app.studio.clearSelection();
     await app.studio.select([beta]);
     await app.studio.deleteSelected(instance, [beta]);
     await app.studio.expectDeck(instance, alpha, { cards: 2, due: 0 });
   });
 
-  await app.step("14 · Pick the instance from the instance picker", async () => {
-    await app.studio.pickInstance(instance);
-    await app.studio.expectDeck(instance, alpha, { cards: 2, due: 0 });
+  await app.step("15 · Rename the instance and describe its catalogue", async () => {
+    await app.studio.openInstance(instance);
+    await app.studio.renameInstance(renamed);
+    await app.studio.describeCatalog("Decks for the Studio journey.", "CC0 1.0");
   });
 
-  await app.step("15 · Go back to Solid Memo and log in to it again", async () => {
+  await app.step("16 · Pick the instance, by its new name, from the instance picker", async () => {
+    await app.studio.pickInstance(renamed);
+    await app.studio.expectDeck(renamed, alpha, { cards: 2, due: 0 });
+  });
+
+  await app.step("17 · Go back to Solid Memo and log in to it again", async () => {
     await app.studio.backToApp();
     await logInAgain(app, account);
     await app.decks.expectDeck(alpha);

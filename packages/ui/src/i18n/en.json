@@ -1184,6 +1184,13 @@
     "distractorEmpty": "A wrong option needs text.",
     "distractorPublished": "This wrong option is in the release the deck came from, so it cannot be deleted. Retire it instead.",
     "dailyLimitInvalid": "A daily limit is a whole number, 0 or more.",
+    "licenseUnknown": "Choose one of the licences offered.",
+    "authorEmpty": "An author needs a name.",
+    "authorTwice": "{author} is named twice. Name each author once.",
+    "instanceNameEmpty": "An instance needs a name.",
+    "catalogNeedsDescription": "The catalogue needs a description.",
+    "noCatalogToUpdate": "This instance has no catalogue yet. Update the instance in Solid Memo first.",
+    "noMetaToUpdate": "This instance has no description to update. Reload the page and try again.",
     "webIdEmpty": "Enter your WebID.",
     "webIdInvalidUrl": "That is not a valid URL. A WebID looks like https://you.example/profile/card#me.",
     "webIdNotHttps": "A WebID must start with https://.",
@@ -1291,6 +1298,7 @@
       "loading": "Loading decks…",
       "empty": "No decks yet: create or import them in {app}.",
       "groupsLink": "Arrange groups",
+      "instanceLink": "Name and catalogue",
       "filter": "Filter by name or group",
       "shown": {
         "one": "{shown} of {count} deck",
@@ -1540,6 +1548,59 @@
       },
       "undo": "Undo",
       "undone": "Undone: the cards are as they were."
+    },
+    "license": {
+      "label": "Licence",
+      "none": "None stated"
+    },
+    "about": {
+      "crumb": "About {deck}",
+      "heading": "About: {deck}",
+      "openInApp": "Open this deck in Solid Memo",
+      "name": "Name",
+      "rename": "Rename",
+      "provenance": "Authors and licence",
+      "noProvenance": "No authors or licence stated.",
+      "editProvenance": "Edit authors and licence",
+      "authors": "Authors",
+      "authorsHint": "A name, or a name and an email address: Ada Lovelace <ada@example.org>. Leave a line empty to remove it.",
+      "author": "Author {number}",
+      "removeAuthor": "Remove author {number}",
+      "addAuthor": "Add an author",
+      "saveProvenance": "Save authors and licence",
+      "study": "Study",
+      "saveStudy": "Save study settings",
+      "progress": "Course progress",
+      "progressLoading": "Loading the course…",
+      "chapter": {
+        "done": "Done",
+        "open": "Open",
+        "locked": "Locked"
+      },
+      "notDone": "Mark not done",
+      "notDoneLabel": "Mark {chapter} not done",
+      "goneChapters": "Completed chapters the course no longer has:",
+      "progressHint": "Your answers and your progress on the cards stay as they are.",
+      "restart": "Restart the course",
+      "restartConfirm": "Restart the course? Every chapter is marked not done, so the first one opens again. Your answers and your progress on the cards stay.",
+      "saved": "Saved."
+    },
+    "instance": {
+      "crumb": "Name and catalogue",
+      "heading": "Instance: {instance}",
+      "loading": "Loading the catalogue…",
+      "preferencesLink": "Study preferences in Solid Memo",
+      "address": "Address",
+      "name": "Name",
+      "nameLabel": "Instance name",
+      "nameHint": "Saved in the instance, in its catalogue and in your Pod's lists of data, where other apps find it.",
+      "saveName": "Save name",
+      "catalog": "Catalogue",
+      "noCatalog": "This instance has no catalogue yet. Open it in Solid Memo to update it.",
+      "publisher": "Publisher",
+      "description": "Description",
+      "licenseHint": "The licence the decks are offered under, for apps that read the catalogue.",
+      "saveCatalog": "Save catalogue"
     }
   }
 }

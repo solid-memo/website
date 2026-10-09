@@ -317,7 +317,12 @@ graph LR
   deck copied from the [deck library](deck-library.md) inherits the
   provenance and says which release it came from with
   `prov:wasDerivedFrom` (`dcterms:source` before format 3). Agents no
-  deck names any more are removed with the deck that named them.
+  deck names any more are removed with the deck that named them. The
+  Studio edits the authors and the licence (`setDeckProvenance`,
+  [deckProvenance.ts](../packages/domain/src/deckProvenance.ts)): two
+  authors that would share an agent node are refused, and a licence is
+  one of `KNOWN_LICENSES` ([license.ts](../packages/domain/src/license.ts))
+  or the one the deck has.
 - **Card sides**: each side is text (`sm:front` / `sm:back`, a literal),
   a picture (`sm:frontImage` / `sm:backImage`, always an IRI — a string in
   its place is ignored) or both; a side with neither makes the subject
@@ -464,7 +469,10 @@ instance's decks: a `dcterms:title` (the instance's name), a
 described in the same document as a `foaf:Agent` with the `foaf:name`
 of their profile), the topics scheme and the EU data themes as
 `dcat:themeTaxonomy`, and a `dcat:dataset` per deck, kept in step as
-decks are added and removed. Saving a deck adds only that deck's link,
+decks are added and removed. It may state a licence (`dcterms:license`),
+which the same document then types a `dcterms:LicenseDocument`, as
+DCAT-AP asks; a licence it no longer states loses that type. Saving a
+deck adds only that deck's link,
 and removing a deck removes only its own: a dataset another app listed
 in the catalogue stays listed through every deck save, and writing the
 catalogue itself keeps it too, beside every deck of the document. The
@@ -486,8 +494,19 @@ by the format update and Preferences when missing
 ([Discovery chain](#discovery-chain)). The whole document
 conforms to DCAT-AP (a test holds what the app writes to it).
 
+The instance's name is kept in the meta document's `dcterms:title`,
+the catalogue's `dcterms:title`, and, in each type index, the
+`dcterms:title` of every registration of the instance's data
+([Discovery chain](#discovery-chain)): its `sm:Instance` registration, which
+names it in the instance list, and those of its catalogue, decks,
+cards, review states and answers. Renaming it in the Studio
+(`renameInstance`, [studio.md](studio.md#the-instance)) writes all of
+them, each document read and written again on a 412. A catalogue
+description that is the one the old name gave (`defaultCatalogDescription`)
+follows the new name; one the user wrote stays.
+
 A deck's description, topics and keywords are edited in its Browser
-("Describe deck"), the keywords one comma-separated list per language
+("Describe deck") and on its about screen in the Studio, the keywords one comma-separated list per language
 the user states; the description is required, as DCAT-AP asks of
 every dataset. Only the keyword languages the user states in an edit are
 checked and stored in their canonical form ("iw" → "he"); a language tag
@@ -651,6 +670,9 @@ type-index entries:
   [added from a guest's study](guest-mode.md#adding-to-an-instance)
   (`addDeck`) has the guest's completed chapters written with its new
   entry, in the same way.
+  The Studio marks a chapter not done, or restarts the course, the same
+  way (`setCompletedChapters`); that write passes the shape check, as
+  any other edit of the entry does.
 - **Answers** go to the [answer log](#the-answer-log), with
   `sm:answerMode`.
 - **Everything else is derived**: a step is done when each card it is
@@ -779,6 +801,22 @@ sequenceDiagram
   the digest; the documents it writes have new versions, so what it
   says of them is relearned on the next visit.
 
+## UI gaps
+
+What the data model holds that no screen edits yet. Most of it is shown
+in Solid Memo; the [Studio](studio.md) closes the gaps one by one.
+
+- **Edited in the Studio**: a deck's authors and licence, its course
+  progress (a chapter marked not done, the course restarted), the
+  instance's name and the catalogue's description and licence, a
+  card's wrong options, and edits of many cards at once.
+- **Shown only**: a card's review state, which is reset only for a
+  whole study day; the answer log, as statistics; the schedule in the
+  digest, as counts.
+- **Not shown**: a catalogue's `dcterms:modified`, which the app keeps
+  but never writes; a library copy's release provenance beyond its
+  authors, licence and sources.
+
 ## Write discipline
 
 - Mutations always follow read → modify → save
@@ -819,7 +857,9 @@ sequenceDiagram
   own, except the writes that re-apply a change to the document as it
   is then: [the digest](#the-digest), an edit of the
   [deck groups](#deck-groups), which is read, applied and written again,
-  three times in all, before the 412 surfaces, and a bulk edit of cards,
+  three times in all, before the 412 surfaces, the Studio's edits of
+  metadata (a deck's authors and licence, the instance's name, the
+  catalogue, a course's chapters completed), likewise, and a bulk edit of cards,
   planned again on the cards as they are, three times in all, which
   stops at once when that plan is not the one the user previewed. Weak ETags (`W/"…"`) are never sent in `If-Match`, whose
   comparison is strong; a document the pod gives no ETag, or one saved

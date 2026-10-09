@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { Deck } from "@solid-memo/domain/deck";
 import { createSolidDeckRepository } from "./solidDeckRepository";
 import { fakePod } from "./testing/fakePod";
+import type { WriteCheck } from "./writeCheck";
 
 const INSTANCE = "https://pod.example/solid-memo/main/";
 const CATALOG = `${INSTANCE}catalog.ttl`;
@@ -39,8 +40,8 @@ const deck: Deck = {
   sourceUrl: RELEASE,
 };
 
-function repositoryOn(fetch: typeof globalThis.fetch) {
-  return createSolidDeckRepository({ fetch, now: () => new Date("2026-10-07T10:00:00.000Z"), randomId: () => "new" });
+function repositoryOn(fetch: typeof globalThis.fetch, checkWrite?: WriteCheck) {
+  return createSolidDeckRepository({ fetch, now: () => new Date("2026-10-07T10:00:00.000Z"), randomId: () => "new", checkWrite });
 }
 
 const writes = (pod: ReturnType<typeof fakePod>) => pod.requests.filter((request) => request.method !== "GET");
@@ -101,5 +102,54 @@ describe("completing a course chapter", () => {
     expect(writes(pod)).toHaveLength(1);
     await expect(repository.completeChapter({ ...deck, url: `${CATALOG}#gone` }, `${RELEASE}#ch-1`)).rejects.toMatchObject({ code: "deckGone" });
     await expect(repositoryOn(fakePod().fetch).completeChapter(deck, `${RELEASE}#ch-1`)).rejects.toMatchObject({ code: "deckGone" });
+  });
+});
+
+describe("changing the chapters completed in the Studio", () => {
+  const LATER = RELEASE.replace("v1.ttl", "v2.ttl");
+
+  async function podWithChapters() {
+    const pod = await podWithCourse();
+    const repository = repositoryOn(pod.fetch);
+    await repository.completeChapter(deck, `${RELEASE}#ch-1`);
+    await repository.completeChapter(deck, `${RELEASE}#ch-2`);
+    pod.clearRequests();
+    return pod;
+  }
+
+  it("marks a chapter not done, in one checked write If-Match the read, and writes nothing when it is not done", async () => {
+    const pod = await podWithChapters();
+    const checked: string[][] = [];
+    const repository = repositoryOn(pod.fetch, async (_dataset, subjects) => {
+      checked.push([...subjects]);
+    });
+    // The same chapter of a later release is the same chapter.
+    const edited = await repository.setCompletedChapters(deck, { kind: "notDone", chapterUrl: `${LATER}#ch-1` });
+    expect(edited.completedChapters).toEqual([`${RELEASE}#ch-2`]);
+    expect(checked).toEqual([[deck.url]]);
+    expect(writes(pod)).toEqual([expect.objectContaining({ method: "PATCH", url: CATALOG, status: 205 })]);
+    expect(completedIn(pod)).toEqual([`<${RELEASE}#ch-2>`]);
+    pod.clearRequests();
+    await expect(repository.setCompletedChapters(deck, { kind: "notDone", chapterUrl: `${RELEASE}#ch-1` })).resolves.toMatchObject({
+      completedChapters: [`${RELEASE}#ch-2`],
+    });
+    expect(writes(pod)).toEqual([]);
+  });
+
+  it("restarts the course: no chapter completed", async () => {
+    const pod = await podWithChapters();
+    const restarted = await repositoryOn(pod.fetch).setCompletedChapters(deck, { kind: "restart" });
+    expect(restarted).not.toHaveProperty("completedChapters");
+    expect(completedIn(pod)).toEqual([]);
+    expect(await repositoryOn(pod.fetch).readDeck(deck.url)).not.toHaveProperty("completedChapters");
+  });
+
+  it("writes nothing the write check refuses", async () => {
+    const pod = await podWithChapters();
+    const refusing = repositoryOn(pod.fetch, async () => {
+      throw new Error("refused");
+    });
+    await expect(refusing.setCompletedChapters(deck, { kind: "restart" })).rejects.toThrow("refused");
+    expect(writes(pod)).toEqual([]);
   });
 });

@@ -409,6 +409,30 @@ function withoutRegistered(dataset: SolidDataset, registration: Thing, urls: rea
 }
 
 /**
+ * Give every registration of an instance's data in a type index document
+ * a new title (dcterms:title), in one save (see changeIndex): each
+ * class's registration, by what it names (registeredOf). Saves nothing
+ * when no registration needs the title.
+ */
+export async function renameInstanceRegistrations(
+  indexUrl: string,
+  { containerUrl, title }: { containerUrl: string; title: string },
+  fetch: Fetch,
+): Promise<void> {
+  const container = ensureTrailingSlash(containerUrl);
+  await changeIndex(indexUrl, fetch, (dataset) => {
+    let updated: SolidDataset = dataset;
+    for (const thing of getThingAll(dataset)) {
+      const ours = DATA_CLASSES.some((dataClass) => registeredOf(thing, dataClass, container).length > 0);
+      if (ours && getStringNoLocale(thing, DCTERMS.title) !== title) {
+        updated = setThing(updated, buildThing(thing).setStringNoLocale(DCTERMS.title, title).build());
+      }
+    }
+    return { dataset: updated, result: undefined };
+  });
+}
+
+/**
  * Storage root for a resource per the Solid Protocol Link-header walk-up,
  * falling back to the origin root when no candidate advertises one.
  */

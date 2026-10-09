@@ -1,6 +1,13 @@
 import { profileNameOf, type SolidAccount } from "@solid-memo/domain/account";
-import { defaultCatalogDescription, type Catalog } from "@solid-memo/domain/catalog";
+import {
+  defaultCatalogDescription,
+  describedCatalog,
+  renamedCatalog,
+  type Catalog,
+  type CatalogAbout,
+} from "@solid-memo/domain/catalog";
 import { withAbout, type DeckAbout } from "@solid-memo/domain/deckAbout";
+import { withProvenance, type DeckProvenance } from "@solid-memo/domain/deckProvenance";
 import type { LangTexts } from "@solid-memo/domain/keywords";
 import { deckPreferences, withPace, type DeckPace } from "@solid-memo/domain/deckPace";
 import { isCopyOf } from "@solid-memo/domain/library";
@@ -26,12 +33,13 @@ import {
   type Prompt,
   type StudyDirection,
 } from "@solid-memo/domain/deck";
-import type {
-  DataClassRegistrations,
-  Instance,
-  InstanceDeletion,
-  RegistrationOptions,
-  RegistrationTarget,
+import {
+  instanceName,
+  type DataClassRegistrations,
+  type Instance,
+  type InstanceDeletion,
+  type RegistrationOptions,
+  type RegistrationTarget,
 } from "@solid-memo/domain/instance";
 import type { LibraryCard, LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
 import {
@@ -109,6 +117,7 @@ import { answerIdOf, type Answer, type AnswerMode } from "@solid-memo/domain/ans
 import {
   courseAnswerEffect,
   courseProgress,
+  type CompletedChaptersEdit,
   type CourseAnswerEffect,
   type CourseOutline,
   type CourseProgress,
@@ -354,6 +363,14 @@ export interface UseCases {
    * instance's preferences again.
    */
   setDeckPace(deck: Deck, pace: DeckPace): Promise<Deck>;
+  /**
+   * Replace who made the deck and its licence (withProvenance): the
+   * authors tidied, the licence one of KNOWN_LICENSES or the one it has.
+   * The edit is made of the deck as its entry says now; when the catalog
+   * document changed meanwhile, it is read and made again, three times
+   * in all. Throws deckGone when the deck has no entry.
+   */
+  setDeckProvenance(deck: Deck, provenance: DeckProvenance): Promise<Deck>;
   /** Study several decks of an instance one way, as setDeckDirection, in one write of their catalog. */
   setDecksDirection(decks: readonly Deck[], direction: DeckDirection): Promise<Deck[]>;
   /**
@@ -496,6 +513,26 @@ export interface UseCases {
   removeInterruptedGuestMove(instance: Instance): Promise<void>;
   /** Stored preferences overlaid on the defaults. */
   getPreferences(instanceUrl: string): Promise<StudyPreferences>;
+  /**
+   * Give an instance a new name (instanceName: trimmed, not empty)
+   * everywhere it is kept: its meta document, its catalogue's title (and
+   * the description, while it is the one the old name gave), and its
+   * registrations in the type indexes, the instance's and the
+   * catalogue's, which name it in the instance list. Each write is made
+   * of its document as it is then, and made again from a fresh read
+   * when it changed meanwhile, three times in all. The instance as
+   * renamed.
+   */
+  renameInstance(session: Session, instance: Instance, name: string): Promise<Instance>;
+  /** The instance's catalogue; null when it has none (an instance not updated yet). */
+  readCatalog(instanceUrl: string): Promise<Catalog | null>;
+  /**
+   * Replace the catalogue's description and licence (describedCatalog),
+   * of the catalogue as it is now, again from a fresh read when it
+   * changed meanwhile, three times in all. Throws noCatalogToUpdate when
+   * the instance has no catalogue. The catalogue as written.
+   */
+  describeCatalog(instanceUrl: string, about: CatalogAbout): Promise<Catalog>;
   savePreferences(
     instanceUrl: string,
     preferences: StudyPreferences,
@@ -578,6 +615,12 @@ export interface UseCases {
    * deck as its entry says then.
    */
   completeChapter(deck: Deck, chapterUrl: string): Promise<Deck>;
+  /**
+   * Change the chapters of the deck's course completed, as the Studio
+   * does (DeckRepository.setCompletedChapters): mark one not done, or
+   * restart the course. The learner's answers and review states stay.
+   */
+  setCompletedChapters(deck: Deck, edit: CompletedChaptersEdit): Promise<Deck>;
 }
 
 /** A course as the learner has it (UseCases.getCourse). */
@@ -686,6 +729,28 @@ function changedElsewhere(error: unknown): boolean {
  */
 function cardsChangedElsewhere(error: unknown): boolean {
   return changedElsewhere(error) || (error instanceof AppError && error.code === "createdElsewhere");
+}
+
+/**
+ * How often an edit of metadata (a deck's provenance, an instance's
+ * name, its catalogue) is made, in all, while its document keeps
+ * changing elsewhere (412).
+ */
+const METADATA_ATTEMPTS = 3;
+
+/**
+ * Make an edit, a read of its document then a write of it If-Match that
+ * read, again while the document keeps changing elsewhere: each attempt
+ * reads afresh, so what changed meanwhile is kept.
+ */
+async function again<T>(edit: () => Promise<T>): Promise<T> {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await edit();
+    } catch (error) {
+      if (!changedElsewhere(error) || attempt === METADATA_ATTEMPTS) throw error;
+    }
+  }
 }
 
 /**
@@ -1783,6 +1848,13 @@ export function createUseCases({
     async setDeckPace(deck, pace) {
       return deckRepository.saveDeck(withPace(deck, pace));
     },
+    setDeckProvenance(offered, provenance) {
+      return again(async () => {
+        const deck = await deckRepository.readDeck(offered.url);
+        if (deck === null) throw new AppError("deckGone", { deck: offered.title });
+        return deckRepository.saveDeck(withProvenance(deck, provenance));
+      });
+    },
     setDecksDirection(decks, direction) {
       return deckRepository.saveDecks(decks.map((deck) => ({ ...deck, direction })));
     },
@@ -1985,6 +2057,32 @@ export function createUseCases({
       updateJournal.end(source);
     },
     getPreferences,
+    async renameInstance(session, instance, typed) {
+      const name = instanceName(typed);
+      await again(async () => {
+        const meta = await instanceRepository.readMeta(instance.url);
+        if (meta === null) throw new AppError("noMetaToUpdate", { url: instance.url });
+        if (meta.name !== name) await instanceRepository.saveMeta(instance.url, { ...meta, name });
+      });
+      await again(async () => {
+        const catalog = await deckRepository.readCatalog(instance.url);
+        if (catalog !== null && catalog.title !== name) await deckRepository.saveCatalog(instance.url, renamedCatalog(catalog, name));
+      });
+      await instanceRepository.renameRegistrations({ webId: session.webId, instanceUrl: instance.url, title: name });
+      return { ...instance, name };
+    },
+    readCatalog(instanceUrl) {
+      return deckRepository.readCatalog(instanceUrl);
+    },
+    describeCatalog(instanceUrl, about) {
+      return again(async () => {
+        const catalog = await deckRepository.readCatalog(instanceUrl);
+        if (catalog === null) throw new AppError("noCatalogToUpdate", { url: instanceUrl });
+        const described = describedCatalog(catalog, about);
+        await deckRepository.saveCatalog(instanceUrl, described);
+        return described;
+      });
+    },
     savePreferences(instanceUrl, preferences) {
       themePreference.choose(preferences.theme);
       return preferencesRepository.savePreferences(instanceUrl, preferences);
@@ -2098,6 +2196,9 @@ export function createUseCases({
     },
     completeChapter(deck, chapterUrl) {
       return deckRepository.completeChapter(deck, chapterUrl);
+    },
+    setCompletedChapters(deck, edit) {
+      return deckRepository.setCompletedChapters(deck, edit);
     },
   };
 }

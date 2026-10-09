@@ -1,10 +1,18 @@
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
+import { AppError } from "./appError";
 
 /** One Solid Memo data location (a container in a pod). */
 export interface Instance {
   /** Container URL with trailing slash. The instance's identity. */
   url: string;
   name: string;
+}
+
+/** An instance's name as the user typed it, trimmed; an empty one is refused (instanceNameEmpty). */
+export function instanceName(typed: string): string {
+  const name = typed.trim();
+  if (name === "") throw new AppError("instanceNameEmpty");
+  return name;
 }
 
 /** Format version written on every instance meta document this app creates. */

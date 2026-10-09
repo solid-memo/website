@@ -1184,6 +1184,13 @@
     "distractorEmpty": "오답 선택지에 텍스트를 입력해 주세요.",
     "distractorPublished": "이 오답 선택지는 덱을 가져온 릴리스에 들어 있어서 삭제할 수 없어요. 대신 사용 중지해 주세요.",
     "dailyLimitInvalid": "하루 한도는 0 이상의 정수여야 해요.",
+    "licenseUnknown": "제시된 라이선스 중 하나를 선택해 주세요.",
+    "authorEmpty": "저자 이름을 입력해 주세요.",
+    "authorTwice": "{author}이(가) 두 번 들어 있어요. 저자는 한 번씩만 입력해 주세요.",
+    "instanceNameEmpty": "인스턴스 이름을 입력해 주세요.",
+    "catalogNeedsDescription": "카탈로그에 설명을 입력해 주세요.",
+    "noCatalogToUpdate": "이 인스턴스에는 아직 카탈로그가 없어요. 먼저 Solid Memo에서 인스턴스를 업데이트해 주세요.",
+    "noMetaToUpdate": "이 인스턴스에는 업데이트할 설명이 없어요. 페이지를 새로고침하고 다시 시도해 주세요.",
     "webIdEmpty": "WebID를 입력해 주세요.",
     "webIdInvalidUrl": "올바른 URL이 아니에요. WebID는 https://you.example/profile/card#me 같은 형태예요.",
     "webIdNotHttps": "WebID는 https://로 시작해야 해요.",
@@ -1291,6 +1298,7 @@
       "loading": "덱을 불러오는 중…",
       "empty": "아직 덱이 없어요. {app}에서 만들거나 가져와 주세요.",
       "groupsLink": "그룹 정리",
+      "instanceLink": "이름과 카탈로그",
       "filter": "이름이나 그룹으로 필터",
       "shown": {
         "one": "덱 {count}개 중 {shown}개",
@@ -1540,6 +1548,59 @@
       },
       "undo": "실행 취소",
       "undone": "실행 취소했어요. 카드가 원래대로 돌아갔어요."
+    },
+    "license": {
+      "label": "라이선스",
+      "none": "지정 안 됨"
+    },
+    "about": {
+      "crumb": "{deck} 정보",
+      "heading": "정보: {deck}",
+      "openInApp": "Solid Memo에서 이 덱 열기",
+      "name": "이름",
+      "rename": "이름 변경",
+      "provenance": "저자와 라이선스",
+      "noProvenance": "지정된 저자나 라이선스가 없어요.",
+      "editProvenance": "저자와 라이선스 편집",
+      "authors": "저자",
+      "authorsHint": "이름, 또는 이름과 이메일 주소를 입력해 주세요: Ada Lovelace <ada@example.org>. 줄을 비워 두면 그 저자는 삭제돼요.",
+      "author": "저자 {number}",
+      "removeAuthor": "저자 {number} 삭제",
+      "addAuthor": "저자 추가",
+      "saveProvenance": "저자와 라이선스 저장",
+      "study": "학습",
+      "saveStudy": "학습 설정 저장",
+      "progress": "코스 진행 상황",
+      "progressLoading": "코스를 불러오는 중…",
+      "chapter": {
+        "done": "완료",
+        "open": "열림",
+        "locked": "잠김"
+      },
+      "notDone": "미완료로 표시",
+      "notDoneLabel": "{chapter}을(를) 미완료로 표시",
+      "goneChapters": "코스에 더 이상 없는 완료한 챕터:",
+      "progressHint": "답변과 카드 진행 상황은 그대로 유지돼요.",
+      "restart": "코스 다시 시작",
+      "restartConfirm": "코스를 다시 시작할까요? 모든 챕터가 미완료로 표시되어 첫 챕터가 다시 열려요. 답변과 카드 진행 상황은 그대로 유지돼요.",
+      "saved": "저장했어요."
+    },
+    "instance": {
+      "crumb": "이름과 카탈로그",
+      "heading": "인스턴스: {instance}",
+      "loading": "카탈로그를 불러오는 중…",
+      "preferencesLink": "Solid Memo의 학습 설정",
+      "address": "주소",
+      "name": "이름",
+      "nameLabel": "인스턴스 이름",
+      "nameHint": "인스턴스와 그 카탈로그, 그리고 다른 앱이 찾아보는 Pod의 데이터 목록에 저장돼요.",
+      "saveName": "이름 저장",
+      "catalog": "카탈로그",
+      "noCatalog": "이 인스턴스에는 아직 카탈로그가 없어요. 업데이트하려면 Solid Memo에서 열어 주세요.",
+      "publisher": "게시자",
+      "description": "설명",
+      "licenseHint": "카탈로그를 읽는 앱에 덱을 제공하는 라이선스예요.",
+      "saveCatalog": "카탈로그 저장"
     }
   }
 }
