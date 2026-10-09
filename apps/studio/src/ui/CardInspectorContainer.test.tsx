@@ -1,13 +1,14 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/preact";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
+import type { Answer } from "@solid-memo/domain/answer";
 import type { Card } from "@solid-memo/domain/deck";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { CardInspectorContainer, releaseLinkOf } from "./CardInspectorContainer";
 import type { CardTab } from "./router";
-import { makeCard, makeDeck } from "../test/fixtures";
+import { instanceA, makeCard, makeDeck } from "../test/fixtures";
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -63,6 +64,41 @@ describe("CardInspectorContainer", () => {
     renderContainer(useCases, { tab: "schedule" });
     expect(await screen.findByText("Not studied this way yet: the card is new.")).toBeInTheDocument();
     expect(useCases.listDeckReviewStates).toHaveBeenCalledWith(deck);
+  });
+
+  it("lists the card's answers on its history tab, and how often each wrong option was chosen on theirs", async () => {
+    const answer: Answer = {
+      id: "answer-1",
+      deckUrl: deck.url,
+      cardUrl: card.url,
+      direction: "front-to-back",
+      grade: 1,
+      answeredAt: "2026-10-02T10:00:00.000Z",
+      studyDay: "2026-10-02",
+      nextIntervalDays: 1,
+      mode: "multiple-choice",
+      chosenDistractor: `${deck.cardsDocumentUrl}#water-d1`,
+    };
+    const useCases = makeUseCasesFake({ cardAnswers: vi.fn(async () => [answer]) });
+    renderContainer(useCases, { tab: "history" });
+    expect(screen.getByText("Loading the card's answers…")).toBeInTheDocument();
+    expect(await screen.findByText("1 answer, 1 forgotten.")).toBeInTheDocument();
+    expect(useCases.cardAnswers).toHaveBeenCalledWith(instanceA.url, deck, "water");
+    cleanup();
+    renderContainer(useCases);
+    expect(await screen.findByText("Chosen 1 time")).toBeInTheDocument();
+  });
+
+  it("says why the card's answers could not be read", async () => {
+    renderContainer(
+      makeUseCasesFake({
+        cardAnswers: vi.fn(async () => {
+          throw new Error("Log unreachable");
+        }),
+      }),
+      { tab: "history" },
+    );
+    expect(await screen.findByText(/Log unreachable/)).toBeInTheDocument();
   });
 
   it("saves each change of the wrong options as it is made, then reads the cards afresh", async () => {

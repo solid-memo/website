@@ -51,7 +51,8 @@ interface Editing {
  * it) takes it; Cancel leaves it as it was. Under the list, what is worth
  * a look (distractorIssues): an option not in the back's languages, and
  * too few in use for a course, as warnings, never refusals, for a pod's
- * deck is its user's.
+ * deck is its user's. With `picks`, each option says how often a learner
+ * chose it, as the answer log tells.
  */
 export function DistractorFields({
   cardId,
@@ -61,6 +62,7 @@ export function DistractorFields({
   textFormat,
   busy,
   suggestions,
+  picks,
   onChange,
 }: {
   cardId: string;
@@ -74,6 +76,8 @@ export function DistractorFields({
   busy: boolean;
   /** The languages the pickers suggest first. */
   suggestions: string[];
+  /** How often each option (by id) was chosen in a wrong answer; none counts as 0. Not shown when absent. */
+  picks?: ReadonlyMap<string, number>;
   /** Nothing, or, for a change saved at once, whether it was saved. */
   onChange: (distractors: Distractor[]) => void | Promise<boolean>;
 }) {
@@ -252,6 +256,9 @@ export function DistractorFields({
                   </p>
                 )}
                 <p class="hint distractor-id">{distractor.id}</p>
+                {picks !== undefined && (
+                  <p class="hint distractor-picks">{t("distractorFields.picks", { count: picks.get(distractor.id) ?? 0 })}</p>
+                )}
                 <div class="edit-actions">
                   <button
                     type="button"

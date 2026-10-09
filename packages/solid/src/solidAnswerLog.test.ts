@@ -39,8 +39,10 @@ function pod() {
         : [...(documents.get(url) ?? [])];
       if (!url.endsWith("/") && !documents.has(url)) return new Response("", { status: 404 });
       if (url.endsWith("/") && contained.length === 0) return new Response("", { status: 404 });
+      const etag = `"v${versions.get(url) ?? 0}"`;
+      if (headers.get("If-None-Match") === etag) return new Response(null, { status: 304, headers: { ETag: etag } });
       const response = new Response(lines.join("\n"), {
-        headers: { "Content-Type": "text/turtle", ETag: `"v${versions.get(url) ?? 0}"` },
+        headers: { "Content-Type": "text/turtle", ETag: etag },
       });
       Object.defineProperty(response, "url", { value: url });
       return response;
@@ -209,6 +211,24 @@ describe("createSolidAnswerLog", () => {
     await log.append(INSTANCE, given);
     fake.documents.get(SEPTEMBER)!.add(`<${SEPTEMBER}#odd> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://solid-memo.com/ns/vocab/v1.ttl#Answer> .`);
     await expect(log.readMonth(INSTANCE, "2026-09")).resolves.toEqual([given]);
+  });
+
+  it("reads a month again only when its document changed since the version known", async () => {
+    const fake = pod();
+    const log = createSolidAnswerLog({ fetch: fake.fetch });
+    await expect(log.readMonthSince(INSTANCE, "2026-09", undefined)).resolves.toEqual({ unchanged: false, value: [], version: "absent" });
+    const given = answer("2026-09-21");
+    await log.append(INSTANCE, given);
+    const read = await log.readMonthSince(INSTANCE, "2026-09", "absent");
+    expect(read).toEqual({ unchanged: false, value: [given], version: '"v1"' });
+    await expect(log.readMonthSince(INSTANCE, "2026-09", '"v1"')).resolves.toEqual({ unchanged: true });
+    const more = answer("2026-09-22");
+    await log.append(INSTANCE, more);
+    await expect(log.readMonthSince(INSTANCE, "2026-09", '"v1"')).resolves.toEqual({
+      unchanged: false,
+      value: expect.arrayContaining([given, more]),
+      version: '"v2"',
+    });
   });
 
   it("removes a deck's answers of a study day, and only those, saving only when there are some", async () => {

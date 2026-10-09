@@ -69,12 +69,12 @@ describe("ActivityCalendar", () => {
 describe("DayBars", () => {
   it("draws a bar for each day with answers on one baseline, and says what a pointed day held", () => {
     const { container } = render(<DayBars days={days} today="2026-09-21" count={7} />);
-    expect(container.querySelectorAll("g[data-day]")).toHaveLength(7);
+    expect(container.querySelectorAll("g[data-bar]")).toHaveLength(7);
     expect(container.querySelectorAll("rect.bar")).toHaveLength(2);
-    fireEvent.pointerEnter(container.querySelector('g[data-day="2026-09-21"]')!);
+    fireEvent.pointerEnter(container.querySelector('g[data-bar="2026-09-21"]')!);
     expect(screen.getByText("September 21, 2026: 1 answer, 1 new, 0 forgotten.")).toBeInTheDocument();
-    expect(container.querySelector('g[data-day="2026-09-21"] rect.bar')).toHaveClass("pointed");
-    fireEvent.click(container.querySelector('g[data-day="2026-09-19"]')!);
+    expect(container.querySelector('g[data-bar="2026-09-21"] rect.bar')).toHaveClass("pointed");
+    fireEvent.click(container.querySelector('g[data-bar="2026-09-19"]')!);
     expect(screen.getByText("September 19, 2026: nothing studied.")).toBeInTheDocument();
     expect(screen.getAllByRole("row")).toHaveLength(1 + 2);
   });

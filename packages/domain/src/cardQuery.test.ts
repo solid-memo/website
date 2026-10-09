@@ -93,6 +93,7 @@ describe("the card query in the URL", () => {
       DEFAULT_CARD_QUERY,
       { ...DEFAULT_CARD_QUERY, text: "hus", field: "front", lang: "sv" },
       { ...DEFAULT_CARD_QUERY, lang: "unstated", state: "due", has: "picture", sort: { key: "due", descending: true }, page: 3, size: 200 },
+      { ...DEFAULT_CARD_QUERY, state: "leech", sort: { key: "lapses", descending: true } },
       { ...DEFAULT_CARD_QUERY, sort: { key: "front", descending: false }, size: 10 },
     ];
     for (const query of queries) {
@@ -186,6 +187,39 @@ describe("queryCards", () => {
     expect(ids({ state: "young" })).toEqual(["c-iron"]);
     expect(ids({ state: "mature" })).toEqual(["c-house"]);
     expect(ids({ state: "due" })).toEqual(["c-cafe", "c-iron"]);
+  });
+
+  it("keeps the cards forgotten four times or more as leeches, once their lapses are known", () => {
+    const lapses = new Map([
+      [house.url, 4],
+      [cafe.url, 3],
+      [old.url, 9],
+    ]);
+    const query = { ...DEFAULT_CARD_QUERY, state: "leech" as const };
+    const leeches = (given?: ReadonlyMap<string, number>) =>
+      queryCards(cards, reviews, query, TODAY, plain, englishReader, given).map((row) => row.card.id);
+    // A retired card is no leech: it is not studied.
+    expect(leeches(lapses)).toEqual(["c-house"]);
+    expect(leeches()).toEqual([]);
+  });
+
+  it("gives each card its lapses when they are known, none counting as 0", () => {
+    const lapses = new Map([[house.url, 2]]);
+    const rows = queryCards(cards, reviews, DEFAULT_CARD_QUERY, TODAY, plain, englishReader, lapses);
+    expect(rows.map((row) => row.lapses)).toEqual([2, 0, 0, 0, 0]);
+    expect(queryCards(cards, reviews, DEFAULT_CARD_QUERY, TODAY, plain, englishReader)[0]).not.toHaveProperty("lapses");
+  });
+
+  it("sorts by lapses when they are known, else keeps the deck's order", () => {
+    const lapses = new Map([
+      [iron.url, 5],
+      [house.url, 1],
+    ]);
+    const query: CardQuery = { ...DEFAULT_CARD_QUERY, sort: { key: "lapses", descending: true } };
+    const sorted = (given?: ReadonlyMap<string, number>) =>
+      queryCards(cards, reviews, query, TODAY, plain, englishReader, given).map((row) => row.card.id);
+    expect(sorted(lapses)).toEqual(["c-iron", "c-house", "c-cafe", "c-old", "c-fresh"]);
+    expect(sorted()).toEqual(["c-house", "c-cafe", "c-iron", "c-old", "c-fresh"]);
   });
 
   it("counts a card studied both ways as new while one way is not yet reviewed", () => {

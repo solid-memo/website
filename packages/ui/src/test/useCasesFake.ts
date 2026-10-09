@@ -8,6 +8,7 @@ import { describedCatalog } from "@solid-memo/domain/catalog";
 import { applyDeckTreeEdit } from "@solid-memo/domain/deckTree";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import { statisticsOf } from "@solid-memo/domain/statistics";
+import { easeHistogram, intervalHistogram } from "@solid-memo/domain/scheduleInsight";
 
 /** A complete UseCases fake; override the methods a test cares about. */
 export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
@@ -102,6 +103,18 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
     listLibraryCards: vi.fn(async () => []),
     planLibraryUpgrade: vi.fn(async () => null),
     getStatistics: vi.fn(async () => statisticsOf([], "2026-09-21")),
+    loadAnswerLog: vi.fn(async () => []),
+    cardAnswers: vi.fn(async () => []),
+    deckInsight: vi.fn(async () => ({
+      today: "2026-09-21",
+      maxReviewsPerDay: DEFAULT_PREFERENCES.maxReviewsPerDay,
+      forecast: [],
+      scheduled: 0,
+      intervals: intervalHistogram([]),
+      eases: easeHistogram([]),
+      lapses: { lapses: new Map(), since: null },
+      leeches: [],
+    })),
     startCourse: vi.fn(async () => {
       throw new Error("startCourse fake not configured");
     }),

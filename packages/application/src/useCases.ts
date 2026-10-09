@@ -24,6 +24,7 @@ import {
   type UpdateStep,
 } from "@solid-memo/domain/instanceUpdate";
 import {
+  activeCards,
   DECK_FORMAT_VERSION,
   validateCardContent,
   type Card,
@@ -92,6 +93,7 @@ import {
   studyCountsOf,
   withReceipt,
   withSchedule,
+  type DeckSchedule,
   type DocumentReceipt,
   type InstanceDigest,
 } from "@solid-memo/domain/studyDigest";
@@ -126,6 +128,18 @@ import {
   type CourseProgress,
 } from "@solid-memo/domain/course";
 import { statisticsOf, type Statistics } from "@solid-memo/domain/statistics";
+import { cardAnswers, deckAnswers, lapseIndex, type LapseIndex } from "@solid-memo/domain/cardHistory";
+import {
+  easeHistogram,
+  FORECAST_DAYS,
+  forecastOf,
+  freshSchedule,
+  intervalHistogram,
+  leechesOf,
+  scheduledStates,
+  type Bin,
+  type ForecastDay,
+} from "@solid-memo/domain/scheduleInsight";
 import type { EstablishedSession, Session } from "@solid-memo/domain/session";
 import { applySm2, INITIAL_SM2_STATE } from "@solid-memo/domain/sm2";
 import type { Storage } from "@solid-memo/domain/storage";
@@ -629,6 +643,26 @@ export interface UseCases {
    */
   getStatistics(instanceUrl: string, now: Date, options?: { months?: number; deckUrl?: string }): Promise<Statistics>;
   /**
+   * Every answer of the instance's log, of every month, answers still
+   * waiting to be added to it added first. Each month's document is read
+   * once a call, and only when it changed since the last call (by its
+   * version, kept in this page with the month's answers).
+   */
+  loadAnswerLog(instanceUrl: string): Promise<Answer[]>;
+  /**
+   * What the Studio's schedule screen shows of a deck (domain/scheduleInsight.ts),
+   * as of `now` with the instance's preferences `prefs`: the reviews of
+   * the next FORECAST_DAYS study days, capped by the deck's pace (else
+   * the preferences'), from the deck's schedule in the digest while it
+   * was computed from the documents as they are, else from them (and the
+   * digest is brought up to date); how its prompts' intervals and eases
+   * are spread; and its lapses and leeches, from the answer log. Writes
+   * nothing to the deck.
+   */
+  deckInsight(instanceUrl: string, deck: Deck, now: Date, prefs: StudyPreferences): Promise<DeckInsight>;
+  /** The answers of one card of the deck (by its id), newest first, from the answer log. */
+  cardAnswers(instanceUrl: string, deck: Deck, cardId: string): Promise<Answer[]>;
+  /**
    * Start a course (a library deck whose release is a course, see
    * docs/courses.md): the instance's deck of it, a copy of the current
    * release with its title, description, authors and the rest, but no
@@ -674,6 +708,24 @@ export interface UseCases {
    * restart the course. The learner's answers and review states stay.
    */
   setCompletedChapters(deck: Deck, edit: CompletedChaptersEdit): Promise<Deck>;
+}
+
+/** What the Studio's schedule screen shows of a deck (UseCases.deckInsight). */
+export interface DeckInsight {
+  /** The study day it is of. */
+  today: string;
+  /** The reviews a day the forecast is capped at: the deck's pace, else the instance's. */
+  maxReviewsPerDay: number;
+  /** The next FORECAST_DAYS study days, today's first. */
+  forecast: ForecastDay[];
+  /** The review states of the deck's cards in use, in the directions it studies. */
+  scheduled: number;
+  intervals: Bin[];
+  eases: Bin[];
+  /** How often each card was forgotten, by its IRI in the deck's cards document now. */
+  lapses: LapseIndex;
+  /** The deck's cards in use forgotten LEECH_LAPSES times or more, the most forgotten first. */
+  leeches: { card: Card; lapses: number }[];
 }
 
 /** A course as the learner has it (UseCases.getCourse). */
@@ -835,7 +887,15 @@ const NO_FENCE: WriteFence = { hold: () => () => undefined };
 const NO_DIGESTS: DigestRepository = { readDigest: async () => null, updateDigest: async () => undefined };
 const nothing = async () => undefined;
 const none = async (): Promise<never[]> => [];
-const NO_ANSWER_LOG: AnswerLog = { append: nothing, appendAll: nothing, months: none, readMonth: none, removeDay: nothing };
+const NO_ANSWER_LOG: AnswerLog = {
+  append: nothing,
+  appendAll: nothing,
+  months: none,
+  readMonth: none,
+  // Never asked: a log without months has none to read.
+  readMonthSince: nothing as unknown as AnswerLog["readMonthSince"],
+  removeDay: nothing,
+};
 const NO_GUEST_POD: GuestPod = {
   exists: async () => false,
   start: async () => {
@@ -1322,16 +1382,26 @@ export function createUseCases({
     dayBoundaryHour: number,
     now: Date,
   ): void {
+    recordSchedule(
+      instanceUrl,
+      deck,
+      cards,
+      reviews,
+      scheduleOf({ cards: cards.value, direction: deck.direction, reviews: reviews.value, dayBoundaryHour, now }),
+    );
+  }
+
+  /** Keeps a schedule already worked out in the digest, with the receipts the documents earned. */
+  function recordSchedule(
+    instanceUrl: string,
+    deck: Deck,
+    cards: { value: Card[]; version: string | null },
+    reviews: { value: ReviewState[]; version: string | null },
+    schedule: DeckSchedule,
+  ): void {
     const { version: cardsVersion } = cards;
     const { version: reviewsVersion } = reviews;
     if (cardsVersion === null || reviewsVersion === null) return;
-    const schedule = scheduleOf({
-      cards: cards.value,
-      direction: deck.direction,
-      reviews: reviews.value,
-      dayBoundaryHour,
-      now,
-    });
     remember(instanceUrl, (digest) => {
       let next = withSchedule(digest, { deck: deck.url, cardsVersion, reviewsVersion, schedule });
       if (!cards.value.some(isOutdated)) next = withReceipt(next, deck.cardsDocumentUrl, cardsVersion, { latestFormat: true });
@@ -1402,6 +1472,30 @@ export function createUseCases({
       }
     });
     return logging;
+  }
+
+  /** Each instance's answer log as last read, by month: its answers, and the version they were read at. */
+  const answerMonths = new Map<string, Map<string, { version: string; answers: Answer[] }>>();
+
+  async function loadAnswerLog(instanceUrl: string): Promise<Answer[]> {
+    await logAnswers();
+    const months = await answerLog.months(instanceUrl);
+    const known = answerMonths.get(instanceUrl) ?? new Map<string, { version: string; answers: Answer[] }>();
+    const read = new Map<string, { version: string; answers: Answer[] }>();
+    const answers = await Promise.all(
+      months.map(async (month) => {
+        const kept = known.get(month);
+        const since = await answerLog.readMonthSince(instanceUrl, month, kept?.version);
+        if (since.unchanged) {
+          read.set(month, kept!);
+          return kept!.answers;
+        }
+        if (since.version !== null) read.set(month, { version: since.version, answers: since.value });
+        return since.value;
+      }),
+    );
+    answerMonths.set(instanceUrl, read);
+    return answers.flat();
   }
 
   /**
@@ -2281,6 +2375,49 @@ export function createUseCases({
       );
       const answers = read.flat().filter((answer) => deckUrl === undefined || answer.deckUrl === deckUrl);
       return statisticsOf(answers, today);
+    },
+    loadAnswerLog,
+    async deckInsight(instanceUrl, deck, at, prefs) {
+      const today = studyDayOf(at, prefs.dayBoundaryHour);
+      const [digest, cards, reviews, answers] = await Promise.all([
+        digestOf(instanceUrl),
+        readNow(deckRepository.readCardsSince(deck, undefined)),
+        readNow(reviewStateRepository.readReviewStatesSince(deck, undefined)),
+        loadAnswerLog(instanceUrl),
+      ]);
+      const versions = { cards: cards.version, reviews: reviews.version };
+      const studied = { direction: deck.direction, dayBoundaryHour: prefs.dayBoundaryHour, today };
+      let schedule = freshSchedule(digest.schedules[deck.url], versions, studied);
+      if (schedule === null) {
+        schedule = scheduleOf({
+          cards: cards.value,
+          direction: deck.direction,
+          reviews: reviews.value,
+          dayBoundaryHour: prefs.dayBoundaryHour,
+          now: at,
+        });
+        recordSchedule(instanceUrl, deck, cards, reviews, schedule);
+      }
+      const { maxReviewsPerDay } = deckPreferences(prefs, deck);
+      const states = scheduledStates(cards.value, deck.direction, reviews.value);
+      const lapses = lapseIndex(deckAnswers(answers, deck));
+      const live = new Map(activeCards(cards.value).map((card) => [card.url, card]));
+      return {
+        today,
+        maxReviewsPerDay,
+        forecast: forecastOf(schedule, { today, days: FORECAST_DAYS, maxReviewsPerDay }),
+        scheduled: states.length,
+        intervals: intervalHistogram(states),
+        eases: easeHistogram(states),
+        lapses,
+        leeches: leechesOf(lapses).flatMap(({ cardUrl, lapses }) => {
+          const card = live.get(cardUrl);
+          return card === undefined ? [] : [{ card, lapses }];
+        }),
+      };
+    },
+    async cardAnswers(instanceUrl, deck, cardId) {
+      return cardAnswers(deckAnswers(await loadAnswerLog(instanceUrl), deck), `${deck.cardsDocumentUrl}#${cardId}`);
     },
     async startCourse(instanceUrl, course) {
       const started = (await deckRepository.listDecks(instanceUrl)).find((deck) => isCopyOf(deck, course));

@@ -17,7 +17,7 @@ export type CardReleaseLink = "none" | "same" | "changed";
  * a word on its release when the deck is a copy of a library deck or a
  * course (an edit of a card still as the release has it detaches it: a
  * newer release no longer updates it), the tabs (`tab`, in the URL:
- * the card's content, its wrong options or its schedule, each a link,
+ * the card's content, its wrong options, its schedule or its history, each a link,
  * which changes the view without a Back stop through `onTab`), and the
  * tab's panel.
  */

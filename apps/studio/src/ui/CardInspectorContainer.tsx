@@ -1,6 +1,10 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMemo } from "preact/hooks";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
+import { distractorPicksOf } from "@solid-memo/domain/cardHistory";
 import type { Card, Deck, Distractor } from "@solid-memo/domain/deck";
+import { instanceUrlOfDeck } from "@solid-memo/domain/instanceLayout";
+import { fragmentIdOf } from "@solid-memo/domain/subjectUrl";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import { untouched } from "@solid-memo/domain/libraryUpgrade";
 import { CardContainer } from "@solid-memo/ui/CardContainer";
@@ -8,6 +12,8 @@ import { publishedDistractorIds, useDeckRelease } from "@solid-memo/ui/deckRelea
 import { DistractorFields } from "@solid-memo/ui/DistractorFields";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
+import { Loading } from "@solid-memo/ui/Loading";
+import { CardHistoryScreen } from "./CardHistoryScreen";
 import { CardInspectorScreen, type CardReleaseLink } from "./CardInspectorScreen";
 import { CardScheduleContainer } from "./CardScheduleContainer";
 import type { CardTab } from "./router";
@@ -30,7 +36,10 @@ export function releaseLinkOf(card: Card, release: LibraryDeckContent | null | u
  * it is with its distractors as changed), then reads the cards afresh
  * and drops the deck's study queue, as a save in Solid Memo does. An
  * option being written stays open until it is saved, so a failed save
- * loses none of it. The schedule tab is CardScheduleContainer's.
+ * loses none of it. The schedule tab is CardScheduleContainer's. The
+ * history tab lists the card's answers (UseCases.cardAnswers, read from
+ * the answer log), and the wrong options' tab says from them how often
+ * each option was chosen, once they are read.
  */
 export function CardInspectorContainer({
   useCases,
@@ -55,6 +64,16 @@ export function CardInspectorContainer({
   const { t, errorText } = useI18n();
   const queryClient = useQueryClient();
   const release = useDeckRelease(useCases, deck);
+  const answersQuery = useQuery({
+    queryKey: ["cardAnswers", deck.url, card.id],
+    queryFn: () => useCases.cardAnswers(instanceUrlOfDeck(deck.url), deck, card.id),
+    enabled: tab === "history" || tab === "distractors",
+  });
+  const answers = answersQuery.data;
+  const picks = useMemo(
+    () => (answers === undefined ? undefined : new Map([...distractorPicksOf(answers)].map(([iri, count]) => [fragmentIdOf(iri), count]))),
+    [answers],
+  );
   const saveMutation = useMutation({
     mutationFn: (distractors: Distractor[]) => useCases.updateCard(deck, card, { ...card, distractors }),
     onSuccess: async () => {
@@ -69,6 +88,14 @@ export function CardInspectorContainer({
         <CardContainer useCases={useCases} deck={deck} card={card} onRemoved={onRemoved} heading={false} withDistractors={false} />
       ) : tab === "schedule" ? (
         <CardScheduleContainer useCases={useCases} deck={deck} card={card} />
+      ) : tab === "history" ? (
+        answersQuery.error ? (
+          <ErrorMessage error={errorText(answersQuery.error)} />
+        ) : answers === undefined ? (
+          <Loading label={t("studio.history.loading")} />
+        ) : (
+          <CardHistoryScreen card={card} answers={answers} />
+        )
       ) : (
         <>
           <DistractorFields
@@ -79,6 +106,7 @@ export function CardInspectorContainer({
             textFormat={card.textFormat}
             busy={saveMutation.isPending}
             suggestions={Object.keys(card.back).filter((tag) => tag !== "")}
+            picks={picks}
             onChange={(distractors) => saveMutation.mutateAsync(distractors).then(() => true, () => false)}
           />
           {/* Mounted throughout, so each save is heard. */}

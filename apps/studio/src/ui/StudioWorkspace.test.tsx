@@ -179,6 +179,39 @@ describe("StudioWorkspace", () => {
     expect(window.history.length).toBe(length + 1);
   });
 
+  it("opens a deck's schedule from its cards, its trail through them, its leeches linked to their history and to the workbench", async () => {
+    const card = makeCard(kanji, "water");
+    window.history.replaceState(null, "", studioRouteToHash({ screen: "cards", deckUrl: kanji.url }));
+    const useCases = makeUseCasesFake({
+      listInstances: vi.fn(async () => [instanceA]),
+      listDecks: vi.fn(async () => [kanji]),
+      listCards: vi.fn(async () => [card]),
+    });
+    vi.mocked(useCases.deckInsight).mockImplementation(async () => ({
+      ...(await makeUseCasesFake().deckInsight(instanceA.url, kanji, new Date(), {} as never)),
+      leeches: [{ card, lapses: 4 }],
+    }));
+    renderWorkspace(useCases);
+    fireEvent.click(await screen.findByRole("link", { name: "Schedule, lapses and leeches" }));
+    expect(await screen.findByRole("heading", { name: "Schedule: Kanji N5" })).toBeInTheDocument();
+    expect(parseStudioHash(window.location.hash)).toEqual({ screen: "schedule", deckUrl: kanji.url });
+    await waitFor(() => expect(document.title).toBe("Schedule – Solid Memo Studio"));
+    const trail = screen.getByRole("navigation", { name: "Breadcrumb" });
+    expect(within(trail).getByRole("link", { name: "Cards of Kanji N5" })).toHaveAttribute(
+      "href",
+      studioRouteToHash({ screen: "cards", deckUrl: kanji.url }),
+    );
+    expect(screen.getByRole("link", { name: "water" })).toHaveAttribute(
+      "href",
+      studioRouteToHash({ screen: "card", deckUrl: kanji.url, cardUrl: card.url, tab: "history" }),
+    );
+    expect(parseStudioHash(screen.getByRole("link", { name: "Show the leeches among the deck's cards" }).getAttribute("href")!)).toEqual({
+      screen: "cards",
+      deckUrl: kanji.url,
+      query: { ...DEFAULT_CARD_QUERY, state: "leech", sort: { key: "lapses", descending: true } },
+    });
+  });
+
   it("inspects a card: its trail and title, its tabs in the URL, its page in Solid Memo", async () => {
     const card = { ...makeCard(kanji, "water"), distractors: [{ id: "water-d1", text: { en: "fire" } }] };
     const route = { screen: "card" as const, deckUrl: kanji.url, cardUrl: card.url };

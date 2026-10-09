@@ -100,6 +100,8 @@ export interface I18n {
   languageLabel(tag: string): string;
   /** A day, written out ("September 22, 2026" / "22 september 2026"). */
   formatDate(iso: string): string;
+  /** A month, "YYYY-MM", written out ("March 2025" / "mars 2025"). */
+  formatMonth(month: string): string;
   /** How a study direction is named. */
   directionLabel(direction: DeckDirection): string;
   /**
@@ -239,6 +241,9 @@ export function createI18n(locale: Locale): I18n {
     },
     formatDate(iso) {
       return new Date(iso).toLocaleDateString(locale, { dateStyle: "long", timeZone: "UTC" });
+    },
+    formatMonth(month) {
+      return new Date(`${month}-01T00:00:00.000Z`).toLocaleDateString(locale, { month: "long", year: "numeric", timeZone: "UTC" });
     },
     violationText(violation) {
       if (locale in violation.message) return violation.message[locale];

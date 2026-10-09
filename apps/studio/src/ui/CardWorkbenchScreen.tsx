@@ -21,14 +21,15 @@ import { paginate, Pager } from "@solid-memo/ui/Pager";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
 import { RetiredTag } from "@solid-memo/ui/RetiredCards";
 import type { CardTransferPlan } from "@solid-memo/domain/cardTransfer";
+import type { LapseIndex } from "@solid-memo/domain/cardHistory";
 import { CardBulkActions, type ReviewEdit } from "./CardBulkActions";
 import type { CardTransfer } from "./TransferCardsDialog";
 
 /** The columns after the card's front, each sorted by its key. */
-const COLUMNS: readonly Exclude<CardSort, "front">[] = ["back", "due", "interval", "ease", "created", "id"];
+const COLUMNS: readonly Exclude<CardSort, "front">[] = ["back", "due", "interval", "ease", "lapses", "created", "id"];
 
 /** The columns of figures, aligned to compare. */
-const NUMBERS: ReadonlySet<CardSort> = new Set(["interval", "ease"]);
+const NUMBERS: ReadonlySet<CardSort> = new Set(["interval", "ease", "lapses"]);
 
 /** An edit made, which can be undone while the page is open. */
 export interface CardEditMade {
@@ -86,6 +87,12 @@ function typedInto(target: EventTarget | null): boolean {
  * the status line then says how many went where, how many got a new id
  * there and how many it had already (`transferDone`). Moved cards leave
  * the selection.
+ *
+ * Each card's lapses (`lapses`, from the answer log; a dash while it is
+ * read, or when it cannot be, `lapsesFailed`) count its wrong answers
+ * since the month of the deck's first answer in the log, which a line
+ * above the table names.
+ * A link goes to the deck's schedule (`scheduleHref`).
  */
 export function CardWorkbenchScreen({
   deck,
@@ -93,6 +100,9 @@ export function CardWorkbenchScreen({
   rows,
   total,
   languages,
+  lapses,
+  lapsesFailed,
+  scheduleHref,
   query,
   onQuery,
   cardHref,
@@ -120,6 +130,12 @@ export function CardWorkbenchScreen({
   total: number;
   /** The languages the language filter offers (cardLanguages), with the query's own. */
   languages: readonly string[];
+  /** How often each card was forgotten; absent while the answer log is read. */
+  lapses: LapseIndex | undefined;
+  /** The answer log could not be read. */
+  lapsesFailed: boolean;
+  /** The deck's schedule screen. */
+  scheduleHref: string;
   query: CardQuery;
   onQuery: (query: CardQuery) => void;
   cardHref: (card: Card) => string;
@@ -149,7 +165,7 @@ export function CardWorkbenchScreen({
   busy: boolean;
   error: ErrorText | null;
 }) {
-  const { t, tx, readerText, languageLabel, formatDate } = useI18n();
+  const { t, tx, readerText, languageLabel, formatDate, formatMonth } = useI18n();
   const [chosen, setChosen] = useState<ReadonlySet<string>>(new Set());
   const bodyRef = useRef<HTMLTableSectionElement>(null);
 
@@ -245,6 +261,7 @@ export function CardWorkbenchScreen({
       <header>
         <h2>{tx("studio.cards.heading", { deck: <ReaderText text={deck.title} /> })}</h2>
         {course && <span class="studio-badge">{t("studio.decks.badge.course")}</span>}
+        <a href={scheduleHref}>{t("studio.cards.scheduleLink")}</a>
       </header>
       {course && <p class="hint">{t("studio.cards.courseHint")}</p>}
       {lastEdit !== null && (
@@ -307,6 +324,15 @@ export function CardWorkbenchScreen({
             )}
           </div>
           <p class="hint">{t("studio.cards.shown", { shown: rows.length, count: total })}</p>
+          <p class="hint">
+            {lapsesFailed
+              ? t("studio.cards.lapsesFailed")
+              : lapses === undefined
+                ? t("studio.cards.lapsesLoading")
+                : lapses.since === null
+                  ? t("studio.cards.lapsesNone")
+                  : t("studio.cards.lapsesSince", { month: formatMonth(lapses.since) })}
+          </p>
           <p class="hint studio-keys">
             {tx("studio.cards.keys", {
               j: <kbd>j</kbd>,
@@ -369,7 +395,7 @@ export function CardWorkbenchScreen({
                     </tr>
                   </thead>
                   <tbody ref={bodyRef}>
-                    {shown.map(({ card, due, intervalDays, easeFactor }) => (
+                    {shown.map(({ card, due, intervalDays, easeFactor, lapses: forgotten }) => (
                       <tr key={card.url} class={card.retired ? "retired" : undefined}>
                         <td>
                           <input
@@ -404,6 +430,7 @@ export function CardWorkbenchScreen({
                           {intervalDays === undefined ? none : t("studio.cards.days", { count: intervalDays })}
                         </td>
                         <td class="number">{easeFactor === undefined ? none : easeFactor.toFixed(2)}</td>
+                        <td class="number">{forgotten ?? <span aria-hidden="true">–</span>}</td>
                         <td>{formatDate(card.createdAt)}</td>
                         <td>
                           <code>{card.id}</code>

@@ -9,8 +9,8 @@ import { Screen } from "./Screen.ts";
  * its instance picker, Home's table of decks (its filter, sort and bulk
  * actions), its Groups screen, the card workbench (its search, sort,
  * selection and bulk edits, with their Undo, its edits of review
- * states, and its moves to another deck), the card inspector (a card's content, its wrong options and
- * its schedule), a deck's about screen (its
+ * states, and its moves to another deck), the card inspector (a card's content, its wrong options,
+ * its schedule and its history), a deck's schedule, a deck's about screen (its
  * authors and licence), the instance's name and catalogue, and its way
  * back to Solid Memo.
  */
@@ -354,6 +354,40 @@ export class Studio extends Screen {
         this.t("studio.schedule.firstReviewed"),
         this.t("studio.schedule.lastReviewed"),
       ]);
+    });
+  }
+
+  /** Follows the inspector's tab of the card's history: its answers, newest first, each with its grade and how it was given. */
+  async openHistory(answers: { grade: string; mode: "recall" | "multiple-choice" }[]): Promise<void> {
+    await this.intent("Open the card's history", async () => {
+      await this.page.getByRole("link", { name: this.t("studio.card.tab.history") }).click();
+      await expect(this.page).toHaveURL(/[?&]tab=history/);
+      const table = this.page.getByRole("table", { name: this.t("studio.history.caption") });
+      const rows = table.getByRole("row").filter({ has: this.page.getByRole("cell") });
+      await expect(rows).toHaveCount(answers.length);
+      for (const [i, answer] of answers.entries()) {
+        await expect(rows.nth(i)).toContainText(this.t(`study.quality.${answer.grade}`));
+        await expect(rows.nth(i)).toContainText(this.t(`studio.history.mode.${answer.mode}`));
+      }
+    });
+  }
+
+  /**
+   * Follows the workbench's link to the deck's schedule: its tiles count
+   * the reviews today and in the week to come, and the cards studied; it
+   * names no leech.
+   */
+  async openDeckSchedule(deck: string, expected: { today: number; week: number; studied: number }): Promise<void> {
+    await this.intent(`Open the schedule of ${deck}`, async () => {
+      await this.page.getByRole("link", { name: this.t("studio.cards.scheduleLink") }).click();
+      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.insight.heading", { deck }) })).toBeVisible();
+      await expect(this.page).toHaveURL(/#\/studio\/schedule\?deck=/);
+      const tile = (label: string) => this.page.getByRole("group", { name: label, exact: true }).locator("strong");
+      await expect(tile(this.t("studio.insight.today"))).toHaveText(String(expected.today));
+      await expect(tile(this.t("studio.insight.week", { count: 7 }))).toHaveText(String(expected.week));
+      await expect(tile(this.t("studio.insight.scheduled"))).toHaveText(String(expected.studied));
+      await expect(tile(this.t("studio.insight.leeches"))).toHaveText("0");
+      await expect(this.page.getByText(this.t("studio.insight.noLeeches"), { exact: true })).toBeVisible();
     });
   }
 

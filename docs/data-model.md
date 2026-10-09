@@ -741,6 +741,14 @@ data, since nothing could rebuild it.
   source. In the target the card's history starts again, though its
   review state may come along. A copy's history starts in the target;
   the original keeps its own.
+- **Read whole by the Studio** (`loadAnswerLog`): every month, for a
+  card's history, its lapses and the deck's leeches
+  ([studio.md](studio.md#a-decks-schedule)). Each month's answers are
+  kept in the page with the version they were read at, and a month is
+  read again only once it changed (`readMonthSince`, a conditional GET).
+  A library upgrade moves a deck's cards into a new document, so the
+  Studio names a deck's past answers by their card's id in its cards
+  document as it is now (`deckAnswers`).
 - Checked in the full check only ([validation.md](validation.md)): the
   current month changes every session, so checking it on every visit
   would download it every time.
@@ -819,8 +827,9 @@ in Solid Memo; the [Studio](studio.md) closes the gaps one by one.
   card's wrong options, edits of many cards at once, a card's review
   state (forgotten, or given a due day), and the deck a card is in
   (moved or copied to another).
-- **Shown only**: the answer log, as statistics; the schedule in the
-  digest, as counts.
+- **Shown only**: the answer log, as statistics, and in the Studio as a
+  card's history, the wrong options chosen, lapses and leeches; the
+  schedule in the digest, as counts, and in the Studio as a forecast.
 - **Not shown**: a catalogue's `dcterms:modified`, which the app keeps
   but never writes; a library copy's release provenance beyond its
   authors, licence and sources.

@@ -204,6 +204,10 @@
         "one": "{count} felaktigt alternativ används; en kurs ställer en fråga med minst {least}.",
         "other": "{count} felaktiga alternativ används; en kurs ställer en fråga med minst {least}."
       }
+    },
+    "picks": {
+      "one": "Valt {count} gång",
+      "other": "Valt {count} gånger"
     }
   },
   "cardCreator": {
@@ -1401,7 +1405,8 @@
         "learning": "Lär in",
         "young": "Unga",
         "mature": "Mogna",
-        "due": "Att repetera"
+        "due": "Att repetera",
+        "leech": "Blodigel: glöms ofta"
       },
       "has": "Har",
       "anything": "Vad som helst",
@@ -1433,6 +1438,7 @@
         "due": "Repeteras",
         "interval": "Intervall",
         "ease": "Lätthet",
+        "lapses": "Missar",
         "created": "Tillagt",
         "id": "Id"
       },
@@ -1440,7 +1446,12 @@
         "one": "{count} dag",
         "other": "{count} dagar"
       },
-      "notStudied": "Inte studerat än"
+      "notStudied": "Inte studerat än",
+      "lapsesSince": "Missar räknar kortets felaktiga svar sedan {month}, månaden för kortlekens första svar i loggen.",
+      "lapsesNone": "Missar räknar kortets felaktiga svar: inga är loggade än.",
+      "lapsesLoading": "Läser svarsloggen för missarna…",
+      "lapsesFailed": "Svarsloggen kunde inte läsas, så missarna är okända.",
+      "scheduleLink": "Schema, missar och blodiglar"
     },
     "card": {
       "heading": "Kort: {card}",
@@ -1448,7 +1459,8 @@
       "tab": {
         "content": "Innehåll",
         "distractors": "Felaktiga alternativ ({count})",
-        "schedule": "Schema"
+        "schedule": "Schema",
+        "history": "Historik"
       },
       "releaseSame": "Det här kortet är som i utgåvan som kortleken kopierades från, så en nyare utgåva uppdaterar det. En ändring kopplar loss det: nyare utgåvor uppdaterar det inte längre, men kan fortfarande ta det ur bruk.",
       "releaseChanged": "Det här kortet har ändrats sedan utgåvan som kortleken kopierades från, så nyare utgåvor uppdaterar det inte längre, men kan fortfarande ta det ur bruk.",
@@ -1473,6 +1485,70 @@
         "reset": "Glömde kortets framsteg åt hållet ”{direction}”.",
         "reschedule": "”{direction}” repeteras nu den {due}."
       }
+    },
+    "history": {
+      "loading": "Läser kortets svar…",
+      "empty": "Inga svar på det här kortet i den här kortleken än.",
+      "summary": {
+        "one": "{count} svar, varav {forgotten} där kortet glömdes.",
+        "other": "{count} svar, varav {forgotten} där kortet glömdes."
+      },
+      "caption": "Kortets svar, nyaste först",
+      "column": {
+        "when": "När",
+        "direction": "Riktning",
+        "grade": "Betyg",
+        "mode": "Hur",
+        "chosen": "Valt felaktigt alternativ"
+      },
+      "mode": {
+        "recall": "Mindes",
+        "multiple-choice": "Flerval"
+      },
+      "unknownOption": "{id} (finns inte längre på kortet)",
+      "hint": "Bara svaren i den här kortleken visas: ett kort som flyttats hit från en annan kortlek börjar sin historik om. Att glömma kortets framsteg behåller dess svar."
+    },
+    "insight": {
+      "crumb": "Schema",
+      "heading": "Schema: {deck}",
+      "loading": "Läser schemat…",
+      "today": "Repetitioner i dag",
+      "week": "Repetitioner, de närmaste {count} dagarna",
+      "scheduled": "Studerade, åt varje håll",
+      "leeches": "Blodiglar",
+      "forecastHeading": "Kommande repetitioner",
+      "capDeck": "Högst {max} repetitioner om dagen, som kortleken anger: det som taket håller tillbaka väntar till nästa dag. I dag räknas varje kort som förfallit till i dag.",
+      "capInstance": "Högst {max} repetitioner om dagen, enligt instansens inställningar: det som taket håller tillbaka väntar till nästa dag. I dag räknas varje kort som förfallit till i dag.",
+      "forecast": "Repetitioner, de närmaste {count} dagarna",
+      "forecastLabel": "Repetitioner var och en av de närmaste {count} dagarna, så som det dagliga taket släpper igenom dem.",
+      "forecastDay": "{date}: {reviews} att repetera, {due} förfaller.",
+      "due": "Förfaller",
+      "reviews": "Att repetera",
+      "spreadHeading": "Intervall och lätthet",
+      "noneScheduled": "Inget kort i den här kortleken är studerat än.",
+      "intervals": "Intervall",
+      "intervalsLabel": "Hur många kort, åt varje håll, som har varje intervall.",
+      "interval": "Intervall",
+      "intervalRange": "{from}–{to} dagar",
+      "intervalFrom": "{from} dagar eller fler",
+      "eases": "Lätthet",
+      "easesLabel": "Hur många kort, åt varje håll, som har varje lätthet.",
+      "ease": "Lätthet",
+      "easeRange": "{from} till under {to}",
+      "easeFrom": "{from} eller mer",
+      "prompts": "Kort, åt varje håll",
+      "binText": "{range}: {count}.",
+      "pointAtBar": "Peka på en stapel för att se antalet, eller öppna tabellen nedan.",
+      "lapsesHeading": "Missar och blodiglar",
+      "lapsesSince": "Missar räknar de felaktiga svaren sedan {month}, månaden för kortlekens första svar i loggen.",
+      "noAnswers": "Inga svar är loggade än.",
+      "leechHint": "En blodigel är ett kort som glömts {count} gånger eller fler. Det kostar repetition efter repetition: skriv om det, dela upp det eller ta det ur bruk.",
+      "noLeeches": "Inga blodiglar.",
+      "leechLapses": {
+        "one": "glömt {count} gång",
+        "other": "glömt {count} gånger"
+      },
+      "allLeeches": "Visa blodiglarna bland kortlekens kort"
     },
     "cardBulk": {
       "label": "Valda kort",

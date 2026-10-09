@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
+import type { Answer } from "@solid-memo/domain/answer";
 import { AppError } from "@solid-memo/domain/appError";
 import { DEFAULT_CARD_QUERY, type CardQuery } from "@solid-memo/domain/cardQuery";
 import type { LibraryDeck } from "@solid-memo/domain/library";
@@ -44,6 +45,7 @@ function renderContainer(useCases: UseCases, query: CardQuery = DEFAULT_CARD_QUE
         onQuery={() => undefined}
         cardHref={(card) => `#/card?card=${card.id}`}
         onOpen={() => undefined}
+        scheduleHref="#/schedule"
       />
     </QueryClientProvider>,
   );
@@ -67,6 +69,46 @@ describe("CardWorkbenchContainer", () => {
     expect(useCases.listCards).toHaveBeenCalledWith(deck);
     expect(useCases.listDeckReviewStates).toHaveBeenCalledWith(deck);
     expect(useCases.getPreferences).toHaveBeenCalledWith(instanceA.url);
+  });
+
+  it("finds the deck's leeches from the answer log, waiting for it, its answers named in the deck's cards now", async () => {
+    let read: (answers: Answer[]) => void = () => undefined;
+    const lapse = (n: number, cardId: string, deckUrl = deck.url): Answer => ({
+      id: `answer-${n}`,
+      deckUrl,
+      cardUrl: `${instanceA.url}decks/deck-1-old.ttl#${cardId}`,
+      direction: "front-to-back",
+      grade: 1,
+      answeredAt: "2026-09-21T10:00:00.000Z",
+      studyDay: "2026-09-21",
+      nextIntervalDays: 1,
+    });
+    const useCases = makeUseCasesFake({
+      listCards: vi.fn(async () => [water, fire]),
+      loadAnswerLog: vi.fn(() => new Promise<Answer[]>((resolve) => (read = resolve))),
+    });
+    renderContainer(useCases, { ...DEFAULT_CARD_QUERY, state: "leech", sort: { key: "lapses", descending: true } });
+    await waitFor(() => expect(useCases.loadAnswerLog).toHaveBeenCalledWith(instanceA.url));
+    expect(screen.getByText("Loading cards…")).toBeInTheDocument();
+    read([1, 2, 3, 4].map((n) => lapse(n, "fire")).concat([5, 6, 7, 8].map((n) => lapse(n, "water", "https://pod.example/other#deck"))));
+    expect(await screen.findByText("1 of 2 cards")).toBeInTheDocument();
+    expect(fronts()).toEqual(["fire"]);
+  });
+
+  it("lists the cards without their lapses when the answer log cannot be read, unless the query needs them", async () => {
+    const failing = () =>
+      makeUseCasesFake({
+        listCards: vi.fn(async () => [water, fire]),
+        loadAnswerLog: vi.fn(async () => {
+          throw new Error("Log unreachable");
+        }),
+      });
+    const { unmount } = renderContainer(failing());
+    expect(await screen.findByText("The answer log could not be read, so the lapses are not known.")).toBeInTheDocument();
+    expect(fronts()).toEqual(["water", "fire"]);
+    unmount();
+    renderContainer(failing(), { ...DEFAULT_CARD_QUERY, state: "leech" });
+    expect(await screen.findByText(/Log unreachable/)).toBeInTheDocument();
   });
 
   it("finds a card in Markdown by its plain text, and offers the cards' languages", async () => {
