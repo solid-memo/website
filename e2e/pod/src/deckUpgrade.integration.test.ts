@@ -3,16 +3,17 @@
  * A library deck upgrade against a real Solid server (docs/migrations.md):
  * the app's own use cases and Solid adapters, wired as in main.tsx, over a
  * fetch that records every request as it reaches the server (after the
- * write fence). The upgrade backs the deck's documents up, writes them in
- * place, each only while it is as backed up, reads them back and moves
- * the catalog entry to the new release; a failure after a write puts back
- * what it wrote. No document changes its address.
+ * write fence). The upgrade backs up the bytes of the deck's documents,
+ * upgrades and checks a working copy of them, writes them in place, each
+ * only while it is as backed up, checks them again and moves the catalog
+ * entry to the new release; a failure after a write puts back what it
+ * wrote, byte for byte. No document changes its address.
  */
 import { beforeAll, describe, expect, inject, it } from "vitest";
 import { Parser, Writer } from "n3";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/sources";
 import { createUseCases, type UseCases } from "@solid-memo/application/useCases";
-import type { DeckLibrary } from "@solid-memo/application/ports";
+import type { DeckLibrary, ShapeValidator } from "@solid-memo/application/ports";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { LibraryCard, LibraryDeckContent } from "@solid-memo/domain/library";
 import { librarySeriesUrlOf } from "@solid-memo/domain/libraryLayout";
@@ -107,12 +108,24 @@ interface Recorded {
   url: string;
   ifMatch: string | null;
   ifNoneMatch: string | null;
+  contentType: string | null;
   /** The pod's answer, once it came. */
   status?: number;
 }
 
 /** The app as main.tsx wires it, over a fetch that records every request, with the shapes read from this repository. */
-function app(options: { failOn?: (request: Recorded) => boolean; onRequest?: (request: Recorded) => Promise<void> } = {}) {
+function app(
+  options: {
+    /** Answers the request with a failure of its own, after the fence: the pod never sees it. */
+    failOn?: (request: Recorded) => boolean;
+    /** Runs as the app is about to make the request: another device's doing. */
+    onRequest?: (request: Recorded) => Promise<void>;
+    /** The request is made, and its answer lost on the way: the app sees a network failure. */
+    loseAnswer?: (request: Recorded) => boolean;
+    /** What the shape check says of a document, from what it would have said. */
+    check?: (url: string, report: Awaited<ReturnType<ShapeValidator["validateDocument"]>>) => typeof report;
+  } = {},
+) {
   const record = (input: RequestInfo | URL, init?: RequestInit): Recorded => {
     const request = input instanceof Request ? input : undefined;
     const headers = new Headers(init?.headers ?? request?.headers);
@@ -121,6 +134,7 @@ function app(options: { failOn?: (request: Recorded) => boolean; onRequest?: (re
       url: decodeURI(request?.url ?? String(input)),
       ifMatch: headers.get("If-Match"),
       ifNoneMatch: headers.get("If-None-Match"),
+      contentType: headers.get("Content-Type"),
     };
   };
   /** Each request as it reaches the server, after the fence: with the If-Match it set, and its own checks. */
@@ -135,11 +149,18 @@ function app(options: { failOn?: (request: Recorded) => boolean; onRequest?: (re
   });
   // What the app attempts, before the fence: where another device's change is made, as the app is about to write.
   const podFetch: typeof fetch = async (input, init) => {
-    await options.onRequest?.(record(input, init));
-    return writeFence.fetch(input, init);
+    const recorded = record(input, init);
+    await options.onRequest?.(recorded);
+    const response = await writeFence.fetch(input, init);
+    if (options.loseAnswer?.(recorded)) throw new TypeError("Failed to fetch");
+    return response;
   };
-  const shapeValidator = createShaclShapeValidator({ fetch: podFetch, shapesFetch, ...SHAPE_SOURCES });
-  const checkWrite = shapeValidator.checkSubjects;
+  const validator = createShaclShapeValidator({ fetch: podFetch, shapesFetch, ...SHAPE_SOURCES });
+  const shapeValidator: typeof validator =
+    options.check === undefined
+      ? validator
+      : { ...validator, validateDocument: async (url) => options.check!(url, await validator.validateDocument(url)) };
+  const checkWrite = validator.checkSubjects;
   const deps = { fetch: podFetch, checkWrite, now: () => new Date(), randomId: () => crypto.randomUUID() };
   const deckRepository = createSolidDeckRepository(deps);
   const reviewStateRepository = createSolidReviewStateRepository(deps);
@@ -180,8 +201,47 @@ async function seedDeck(server: string): Promise<Deck> {
   return (await deckRepository.readDeck(deck.url))!;
 }
 
+/**
+ * The document written again as a person might write it by hand: prefixes
+ * of its own, a comment, its statements in the order opposite to the
+ * server's, the document's own IRIs relative, and a blank node of another
+ * app's on a card, which a server's rewrite would not keep as they are.
+ */
+async function writeByHand(url: string, note: string, extra = ""): Promise<void> {
+  const turtle = await fetch(url, { headers: { accept: "text/turtle" } }).then((response) => response.text());
+  const quads = new Parser({ baseIRI: url }).parse(turtle).reverse();
+  const writer = new Writer({ prefixes: { c: "https://solid-memo.com/ns/vocab/v1.ttl#", t: "http://purl.org/dc/terms/", x: "http://www.w3.org/2001/XMLSchema#" } });
+  writer.addQuads(quads);
+  const written = await new Promise<string>((resolve, reject) => writer.end((error, result: string) => (error ? reject(error) : resolve(result))));
+  const body = `# ${note}\n${written.split(`<${url}#`).join("<#")}\n${extra}\n`;
+  const response = await fetch(url, { method: "PUT", headers: { "content-type": "text/turtle" }, body });
+  if (!response.ok) throw new Error(`Writing ${url} by hand: ${response.status}`);
+}
+
+/** The bytes the server serves for each document, asked for as the app asks (Accept: text/turtle), one character a byte. */
+async function servedBytes(urls: readonly string[]): Promise<string[]> {
+  return Promise.all(urls.map(async (url) => Buffer.from(await (await fetch(url, { headers: { accept: "text/turtle" } })).arrayBuffer()).toString("latin1")));
+}
+
 const status = async (url: string) => (await fetch(url, { method: "HEAD" })).status;
 const isWrite = (request: Recorded) => !READS.has(request.method);
+
+/**
+ * Each document's last write put it back: its bytes whole (PUT) with the
+ * Content-Type they were served with, held to the version the upgrade left
+ * it at (If-Match where the server enforces it, else right after a read
+ * of it).
+ */
+function expectPutBack(sent: Recorded[], documents: readonly string[], conditional: Preconditions): void {
+  for (const url of documents) {
+    const putBack = sent.filter((request) => request.method === "PUT" && request.url === url).at(-1);
+    expect(putBack, url).toBeDefined();
+    expect(sent.filter((request) => isWrite(request) && request.url === url).at(-1), url).toBe(putBack);
+    expect(putBack!.contentType, url).toMatch(/^text\/turtle/);
+    if (conditional.edits) expect(putBack!.ifMatch, url).toMatch(/^"/);
+    else expect(sent[sent.indexOf(putBack!) - 1], url).toMatchObject({ method: "GET", url });
+  }
+}
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const instanceOf = (deck: Deck) => deck.url.slice(0, deck.url.lastIndexOf("/") + 1);
 
@@ -205,7 +265,7 @@ describe.each(SERVERS)("a library deck upgrade on $name", ({ url: server }) => {
     everyEdit = await etagMarksEveryEdit(server);
   });
 
-  it("upgrades the deck where it is: its documents, review states and sharing kept, every write conditional, the backup gone", async () => {
+  it("upgrades the deck where it is: its documents, review states and sharing kept, every write conditional, its backup and working copy gone", async () => {
     const deck = await seedDeck(server);
     // Another app's triple on a card, and a subject of its own, in the cards document.
     await changeElsewhere(deck.cardsDocumentUrl, `<#sweden> <${FOREIGN}> "kept" . <#other-app> <${FOREIGN}> "theirs" .`);
@@ -248,24 +308,44 @@ describe.each(SERVERS)("a library deck upgrade on $name", ({ url: server }) => {
       ]),
     );
 
-    // Each document written once, only of the version backed up; everything else written was the backup's, or the entry.
+    // Each document written once, only of the version backed up, after its working copy was written;
+    // everything else written was in the upgrade's folder, or the entry.
     const writes = sent.filter(isWrite);
     const backups = `${instanceOf(deck)}backups/`;
+    const folder = writes.find((request) => request.url.startsWith(backups) && request.url.endsWith("/manifest.ttl"))!.url.replace(/manifest\.ttl$/, "");
     for (const url of [deck.cardsDocumentUrl, deck.reviewsDocumentUrl]) {
       const own = writes.filter((request) => request.url === url);
       expect(own.map((request) => request.method), url).toEqual(url === deck.cardsDocumentUrl ? ["PUT"] : [expect.stringMatching(/^(PATCH|PUT)$/)]);
       if (conditional.edits) expect(own[0]!.ifMatch, url).toBe(versions.get(url));
       else expect(sent[sent.indexOf(own[0]!) - 1], url).toMatchObject({ method: "GET", url });
+      // After its bytes were kept, and its working copy upgraded.
+      const path = url.slice(instanceOf(deck).length);
+      expect(writes.indexOf(own[0]!), url).toBeGreaterThan(writes.findIndex((request) => request.url === `${folder}${path}.orig`));
+      const stagedWrites = writes.filter((request) => request.url === `${folder}staging/${path}` && request.method !== "DELETE");
+      expect(stagedWrites.length, url).toBeGreaterThan(0);
+      expect(writes.indexOf(own[0]!), url).toBeGreaterThan(writes.indexOf(stagedWrites.at(-1)!));
     }
     expect(
-      writes.filter((request) => ![deck.cardsDocumentUrl, deck.reviewsDocumentUrl, `${instanceOf(deck)}catalog.ttl`].includes(request.url) && !request.url.startsWith(backups)),
+      writes.filter(
+        (request) =>
+          ![deck.cardsDocumentUrl, deck.reviewsDocumentUrl, `${instanceOf(deck)}catalog.ttl`].includes(request.url) &&
+          !request.url.startsWith(backups),
+      ),
     ).toEqual([]);
+    // No access control but the upgrade's own files' is written.
+    expect(writes.filter((request) => request.url.endsWith(".acl") && !request.url.startsWith(backups))).toEqual([]);
     // The entry, the last write, made once, only of the catalog document as it was read, where the server enforces it.
     const entry = writes.filter((request) => request.url === `${instanceOf(deck)}catalog.ttl`);
     expect(entry).toHaveLength(1);
     if (conditional.edits) expect(entry[0]!.ifMatch).toMatch(/^"/);
-    expect(writes.indexOf(entry[0]!)).toBeGreaterThan(Math.max(...[deck.cardsDocumentUrl, deck.reviewsDocumentUrl].map((url) => writes.findIndex((request) => request.url === url))));
+    expect(writes.indexOf(entry[0]!)).toBeGreaterThan(
+      Math.max(...[deck.cardsDocumentUrl, deck.reviewsDocumentUrl].map((url) => writes.findIndex((request) => request.url === url))),
+    );
+    // Everything the upgrade made in its folder was first written where nothing was.
+    const made = new Set<string>();
     for (const write of writes.filter((request) => request.url.startsWith(backups) && request.method === "PUT")) {
+      if (made.has(write.url)) continue;
+      made.add(write.url);
       expect(write.ifNoneMatch, write.url).toBe("*");
     }
     await expect(useCases.listBackups({ url: instanceOf(deck), name: "Main" })).resolves.toEqual([]);
@@ -289,50 +369,6 @@ describe.each(SERVERS)("a library deck upgrade on $name", ({ url: server }) => {
     expect((await deckRepository.readDeck(deck.url))!.keywords).toEqual({ en: ["capitals", "mine"] });
   });
 
-  it("writes nothing over a review saved elsewhere while it runs, and puts back the cards it wrote", async () => {
-    const deck = await seedDeck(server);
-    const cardsBefore = await said(deck.cardsDocumentUrl);
-    const elsewhere = app().reviewStateRepository;
-    let reviewed = false;
-    const { useCases, deckRepository } = app({
-      // Another device answers a card just as the upgrade writes the review states.
-      onRequest: async (request) => {
-        if (reviewed || !isWrite(request) || request.url !== deck.reviewsDocumentUrl) return;
-        reviewed = true;
-        // A server whose versions are to the second needs the next second to tell.
-        if (!everyEdit) await sleep(1100);
-        await elsewhere.saveReviewState(deck, review("denmark", 1));
-      },
-    });
-    const plan = (await useCases.planLibraryUpgrade(deck))!;
-
-    const outcome = await useCases.applyLibraryUpgrade(deck, plan);
-
-    expect(reviewed).toBe(true);
-    expect(outcome).toMatchObject({ ok: false, step: "write", asItWas: true, error: { code: "changedElsewhere" } });
-    expect(await deckRepository.readDeck(deck.url)).toEqual(deck);
-    expect(await said(deck.cardsDocumentUrl)).toEqual(cardsBefore);
-    const states = await app().reviewStateRepository.listReviewStates(deck);
-    expect(states.map((state) => state.cardId).sort()).toEqual(["denmark", "latvia", "sweden"]);
-    await expect(useCases.listBackups({ url: instanceOf(deck), name: "Main" })).resolves.toEqual([]);
-  });
-
-  it("puts the deck back as it was when the entry cannot be moved to the new release", async () => {
-    const deck = await seedDeck(server);
-    const before = [await said(deck.cardsDocumentUrl), await said(deck.reviewsDocumentUrl)];
-    const { useCases, deckRepository } = app({
-      failOn: (request) => isWrite(request) && request.url.endsWith("/catalog.ttl"),
-    });
-    const plan = (await useCases.planLibraryUpgrade(deck))!;
-
-    const outcome = await useCases.applyLibraryUpgrade(deck, plan);
-
-    expect(outcome).toMatchObject({ ok: false, step: "entry", asItWas: true });
-    expect(await deckRepository.readDeck(deck.url)).toEqual(deck);
-    expect([await said(deck.cardsDocumentUrl), await said(deck.reviewsDocumentUrl)]).toEqual(before);
-    await expect(useCases.listBackups({ url: instanceOf(deck), name: "Main" })).resolves.toEqual([]);
-  });
-
   it("upgrades a deck an earlier version moved to documents of its own, where they are", async () => {
     const seeded = await seedDeck(server);
     const { useCases, deckRepository } = app();
@@ -352,5 +388,169 @@ describe.each(SERVERS)("a library deck upgrade on $name", ({ url: server }) => {
     expect((await deckRepository.listCards(deck)).map((card) => card.id).sort()).toEqual(["denmark", "norway", "sweden"]);
     // The states written before the move name their cards in the first document, and are read all the same.
     expect(await app().reviewStateRepository.listReviewStates(deck)).toEqual([review("sweden", 6)]);
+  });
+
+  /**
+   * A failed upgrade leaves the deck exactly as it was: the bytes the
+   * server serves for its cards and reviews documents, asked for as the
+   * app asks, are those it served before — written by hand, which a
+   * server's rewrite would not keep so — its entry as it was, and nothing
+   * of the upgrade left in the instance.
+   */
+  describe("byte for byte", () => {
+    async function prepared() {
+      const deck = await seedDeck(server);
+      await writeByHand(
+        deck.cardsDocumentUrl,
+        "The deck's cards, written by hand.",
+        `<#sweden> <https://other-app.example/ns#seen> [ <https://other-app.example/ns#by> "another app" ] .`,
+      );
+      await writeByHand(deck.reviewsDocumentUrl, "What was studied, written by hand.");
+      const documents = [deck.cardsDocumentUrl, deck.reviewsDocumentUrl];
+      return { deck, documents, before: await servedBytes(documents) };
+    }
+
+    /** The deck's documents as before, but where `except` gives other bytes; its entry as it was; nothing of the upgrade left. */
+    async function expectAsItWas(seeded: Awaited<ReturnType<typeof prepared>>, except: (string | undefined)[] = []): Promise<void> {
+      expect(await servedBytes(seeded.documents)).toEqual(seeded.before.map((bytes, index) => except[index] ?? bytes));
+      expect(await app().deckRepository.readDeck(seeded.deck.url)).toEqual(seeded.deck);
+      expect(await status(`${instanceOf(seeded.deck)}backups/`)).toBe(404);
+    }
+
+    it("changes nothing of the deck when its working copy cannot be written", async () => {
+      const seeded = await prepared();
+      const { useCases, sent } = app({ failOn: (request) => isWrite(request) && request.url.includes("/staging/") });
+      const outcome = await useCases.applyLibraryUpgrade(seeded.deck, (await useCases.planLibraryUpgrade(seeded.deck))!);
+      expect(outcome, JSON.stringify(outcome)).toMatchObject({ ok: false, step: "copy", asItWas: true, undo: null });
+      expect(sent.filter(isWrite).filter((request) => seeded.documents.includes(request.url))).toEqual([]);
+      await expectAsItWas(seeded);
+    });
+
+    it("changes nothing of the deck when one of its documents changed elsewhere after it was backed up", async () => {
+      const seeded = await prepared();
+      let studied = false;
+      const { useCases, sent } = app({
+        onRequest: async (request) => {
+          // As the working copy is written, another device studies.
+          if (studied || !isWrite(request) || !request.url.includes("/staging/")) return;
+          studied = true;
+          if (!everyEdit) await sleep(1100);
+          await changeElsewhere(seeded.deck.reviewsDocumentUrl, `<#denmark> <${FOREIGN}> "studied elsewhere" .`);
+        },
+      });
+      const outcome = await useCases.applyLibraryUpgrade(seeded.deck, (await useCases.planLibraryUpgrade(seeded.deck))!);
+      expect(outcome, JSON.stringify(outcome)).toMatchObject({ ok: false, step: "verify", asItWas: true, undo: null });
+      expect((outcome as { error: unknown }).error).toMatchObject({ code: "deckChangedDuringUpgrade", vars: { url: seeded.deck.reviewsDocumentUrl } });
+      expect(sent.filter(isWrite).filter((request) => seeded.documents.includes(request.url))).toEqual([]);
+      await expectAsItWas(seeded, [undefined, (await servedBytes([seeded.deck.reviewsDocumentUrl]))[0]]);
+    });
+
+    it("puts the cards back when the review states changed elsewhere just before their write, and keeps that change", async () => {
+      const seeded = await prepared();
+      let reviewed = false;
+      const elsewhere = app().reviewStateRepository;
+      const { useCases, sent } = app({
+        // Another device answers a card just as the upgrade writes the review states.
+        onRequest: async (request) => {
+          if (reviewed || !isWrite(request) || request.url !== seeded.deck.reviewsDocumentUrl) return;
+          reviewed = true;
+          if (!everyEdit) await sleep(1100);
+          await elsewhere.saveReviewState(seeded.deck, review("denmark", 1));
+        },
+      });
+      const outcome = await useCases.applyLibraryUpgrade(seeded.deck, (await useCases.planLibraryUpgrade(seeded.deck))!);
+      expect(reviewed).toBe(true);
+      // The cards were written, and are put back; the states' write was refused, so never made.
+      expect(outcome, JSON.stringify(outcome)).toMatchObject({
+        ok: false,
+        step: "write",
+        asItWas: true,
+        undo: { restored: [seeded.deck.cardsDocumentUrl], kept: [], removed: true },
+      });
+      expect((outcome as { error: unknown }).error).toMatchObject({ code: "changedElsewhere" });
+      const states = await app().reviewStateRepository.listReviewStates(seeded.deck);
+      expect(states.map((state) => state.cardId).sort()).toEqual(["denmark", "latvia", "sweden"]);
+      await expectAsItWas(seeded, [undefined, (await servedBytes([seeded.deck.reviewsDocumentUrl]))[0]]);
+      expectPutBack(sent, [seeded.deck.cardsDocumentUrl], conditional);
+    });
+
+    it("puts both documents back when the review states' write fails, or is made but its answer lost", async () => {
+      const failing = await prepared();
+      const first = app({ failOn: (request) => isWrite(request) && request.url === failing.deck.reviewsDocumentUrl });
+      const failed = await first.useCases.applyLibraryUpgrade(failing.deck, (await first.useCases.planLibraryUpgrade(failing.deck))!);
+      expect(failed, JSON.stringify(failed)).toMatchObject({
+        ok: false,
+        step: "write",
+        asItWas: true,
+        undo: { restored: [failing.deck.cardsDocumentUrl], kept: [], removed: true },
+      });
+      expectPutBack(first.sent, [failing.deck.cardsDocumentUrl], conditional);
+      await expectAsItWas(failing);
+
+      const lost = await prepared();
+      let gone = false;
+      const second = app({
+        loseAnswer: (request) => !gone && isWrite(request) && request.url === lost.deck.reviewsDocumentUrl && (gone = true),
+      });
+      const outcome = await second.useCases.applyLibraryUpgrade(lost.deck, (await second.useCases.planLibraryUpgrade(lost.deck))!);
+      // Its version never noted, the review states are told the upgrade's by what its working copy says.
+      expect(outcome, JSON.stringify(outcome)).toMatchObject({
+        ok: false,
+        step: "write",
+        asItWas: true,
+        undo: { restored: [lost.deck.reviewsDocumentUrl, lost.deck.cardsDocumentUrl], kept: [], removed: true },
+      });
+      expectPutBack(second.sent, lost.documents, conditional);
+      await expectAsItWas(lost);
+    });
+
+    it("puts both documents back when one fails its check once written", async () => {
+      const seeded = await prepared();
+      let checks = 0;
+      const injected = { message: { en: "Injected." }, severity: "violation" as const, constraint: "MinCount" };
+      const { useCases, sent } = app({
+        // The cards' second check where they are is after the upgrade wrote them; the first, before it read them for the plan.
+        check: (url, report) =>
+          url !== seeded.deck.cardsDocumentUrl || ++checks < 2
+            ? report
+            : { ...report, subjects: [...report.subjects, { url: `${url}#sweden`, status: "checked", shape: "card", version: 5, violations: [injected] }] },
+      });
+      const outcome = await useCases.applyLibraryUpgrade(seeded.deck, (await useCases.planLibraryUpgrade(seeded.deck))!);
+      expect(outcome, JSON.stringify(outcome)).toMatchObject({
+        ok: false,
+        step: "validate",
+        asItWas: true,
+        undo: { restored: [seeded.deck.reviewsDocumentUrl, seeded.deck.cardsDocumentUrl], kept: [], removed: true },
+      });
+      expect((outcome as { error: unknown }).error).toMatchObject({ code: "updatedInstanceInvalid", vars: { count: 1 } });
+      expectPutBack(sent, seeded.documents, conditional);
+      await expectAsItWas(seeded);
+    });
+
+    it("puts both documents back when the entry cannot be moved to the new release", async () => {
+      const seeded = await prepared();
+      const { useCases, sent } = app({ failOn: (request) => isWrite(request) && request.url.endsWith("/catalog.ttl") });
+      const outcome = await useCases.applyLibraryUpgrade(seeded.deck, (await useCases.planLibraryUpgrade(seeded.deck))!);
+      expect(outcome, JSON.stringify(outcome)).toMatchObject({
+        ok: false,
+        step: "entry",
+        asItWas: true,
+        undo: { restored: [seeded.deck.reviewsDocumentUrl, seeded.deck.cardsDocumentUrl], kept: [], removed: true },
+      });
+      expectPutBack(sent, seeded.documents, conditional);
+      await expectAsItWas(seeded);
+    });
+
+    it("upgrades a deck written by hand, and deletes what it backed up", async () => {
+      const seeded = await prepared();
+      const { useCases, deckRepository } = app();
+      const outcome = await useCases.applyLibraryUpgrade(seeded.deck, (await useCases.planLibraryUpgrade(seeded.deck))!);
+      expect(outcome, JSON.stringify(outcome)).toMatchObject({ ok: true, tidied: true });
+      expect((await deckRepository.listCards(seeded.deck)).map((card) => card.id).sort()).toEqual(["denmark", "norway", "sweden"]);
+      expect(await said(seeded.deck.cardsDocumentUrl)).toEqual(
+        expect.arrayContaining([expect.stringMatching(/^_:\S+ <https:\/\/other-app\.example\/ns#by> "another app" \.$/)]),
+      );
+      expect(await status(`${instanceOf(seeded.deck)}backups/`)).toBe(404);
+    });
   });
 });

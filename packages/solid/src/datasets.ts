@@ -79,6 +79,7 @@ export class PreconditionFailedError extends AppError {
  * A write to the URL forgets both, so no read after it gets what was
  * there before. Both are kept by document: a read by one of its subjects
  * (a WebID, `card#me`) is forgotten by a write to the document (`card`).
+ * Every read asks the pod (`cache: "no-store"`): this is the only cache.
  */
 const READS = new WeakMap<
   typeof globalThis.fetch,
@@ -108,7 +109,7 @@ export function readDataset(url: string, fetch: typeof globalThis.fetch): Promis
 }
 
 /** A write is about to change the document: reads from now on fetch it again. */
-function forgetRead(url: string, fetch: typeof globalThis.fetch): void {
+export function forgetRead(url: string, fetch: typeof globalThis.fetch): void {
   const reads = READS.get(fetch);
   if (reads === undefined) return;
   url = documentUrlOf(url);
@@ -184,7 +185,9 @@ async function fetchDataset(
       fetch: async (input, init) => {
         const headers = new Headers(init?.headers);
         if (asked !== undefined) headers.set("If-None-Match", asked);
-        const response = await fetch(input, { ...init, headers });
+        // The pod is asked every time; what is kept is kept here. A browser would answer a plain read from its
+        // own cache, which a pod that gives a modification time and no Cache-Control lets it keep for days.
+        const response = await fetch(input, { ...init, headers, cache: "no-store" });
         // @inrupt/solid-client fails on a 304 without saying its status: noted here.
         notModified = response.status === 304;
         etag = response.headers.get("ETag");

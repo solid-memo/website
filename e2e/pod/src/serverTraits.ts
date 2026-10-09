@@ -108,6 +108,22 @@ export async function changeElsewhere(url: string, triple: string): Promise<void
   if (!response.ok) throw new Error(`Changing ${url} as another app: ${response.status}.`);
 }
 
+/**
+ * Whether the server serves a Turtle document, asked for as Turtle, as it
+ * was written: byte for byte, its comments, prefixes and order kept. An
+ * update puts a document back exactly as it was by writing its bytes
+ * again (docs/migrations.md), which only such a server serves back as
+ * they were; one that keeps what a document says and writes it out anew,
+ * as the Solid Protocol allows, serves another spelling of the same.
+ */
+export async function keepsWrittenTurtle(server: string): Promise<boolean> {
+  const url = new URL(`probe-${crypto.randomUUID()}.ttl`, server).href;
+  const written = `# Written by hand.\n@prefix p: <https://probe.example/ns#> .\n<#b> p:n 2.50 .\n<#a>   p:t "x" ;  p:u [ p:v "w" ] .\n`;
+  const put = await fetch(url, { method: "PUT", headers: { "content-type": "text/turtle" }, body: written });
+  if (!put.ok) throw new Error(`Probing whether a document is served as it was written: PUT ${url} answered ${put.status}.`);
+  return (await (await fetch(url, { headers: { accept: "text/turtle" } })).text()) === written;
+}
+
 /** The ACL document of a resource, where its Link rel="acl" says: the Solid Protocol leaves the name to the server. */
 export async function aclOf(url: string): Promise<string> {
   const link = /<([^>]+)>;\s*rel="acl"/.exec((await fetch(url, { method: "HEAD" })).headers.get("link") ?? "")?.[1];
@@ -130,5 +146,6 @@ export async function traitsOf(server: string) {
     etagEveryEdit: await etagMarksEveryEdit(server),
     ...(await preconditionsOf(server)),
     ...(await patchFormatsOf(server)),
+    keepsTurtle: await keepsWrittenTurtle(server),
   };
 }

@@ -109,6 +109,7 @@ export const BACKUP_ENTRY_V1: ShapeDescriptor<BackupEntryV1> = {
   fields: [
     { name: "document", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#backedUpDocument", kind: "iri", cardinality: "one" },
     { name: "copy", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#backupCopy", kind: "iri", cardinality: "optional" },
+    { name: "contentType", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#contentTypeBackedUp", kind: "string", cardinality: "optional" },
     { name: "versionBackedUp", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#versionBackedUp", kind: "string", cardinality: "optional" },
     { name: "versionUpdated", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#versionUpdated", kind: "string", cardinality: "optional" },
   ],

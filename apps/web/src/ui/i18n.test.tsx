@@ -173,7 +173,7 @@ describe("errorText", () => {
     const invalid = new AppError("updatedInstanceInvalid", { count: 1 });
     expect(createI18n("sv").errorText(invalid, { detail: false })).toContain("(1 problem)");
     expect(createI18n("sv").errorText(invalid)).toBe(
-      "Efter uppdateringen har en del av dina data inte det format Solid Memo förväntar sig (1 problem). Återställ den tidigare versionen som uppdateringen sparade och försök sedan igen senare.",
+      "När de skrivits har de uppdaterade data inte det format Solid Memo förväntar sig (1 problem). Försök igen senare.",
     );
   });
 

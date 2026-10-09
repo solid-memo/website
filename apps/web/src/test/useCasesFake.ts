@@ -112,6 +112,7 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
       tidied: true,
     })),
     tidyInterruptedDeckUpgrade: vi.fn(async () => false),
+    findInterruptedDeckUpgrade: vi.fn(async () => null),
     listCards: vi.fn(async () => []),
     addCard: vi.fn(async () => {
       throw new Error("addCard fake not configured");

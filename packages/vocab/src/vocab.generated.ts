@@ -28,9 +28,9 @@ export const SM = {
   Step: `${SM_NS}Step`,
   /** A wrong option of a card asked as a multiple-choice question, the card's back being the right one. A subject of the document that holds its card, which names it with solid-memo:distractor; copied with the card. (Added in 1.14.) */
   Distractor: `${SM_NS}Distractor`,
-  /** What an update saved before it changed documents in place: the earlier version of each document it was to change, one solid-memo:BackupEntry each, kept in the instance's backups/ folder. The subject #it of the backup's manifest.ttl, beside the copies; the entries are subjects of the same document. A restore puts back each document still as the update left it, and keeps any changed since. (Added in 1.17.) */
+  /** What an update saved before it changed documents in place: the bytes of each document it was to change, exactly as the pod served them, one solid-memo:BackupEntry each, kept in a folder of the instance's backups/ with the update's own working copy. The subject #it of the backup's manifest.ttl, beside the bytes; the entries are subjects of the same document. Putting the bytes back, with the Content-Type they were served with, makes each document exactly as it was: an update that fails does so at once, and a restore does it for each document still as the update left it, keeping any changed since. (Added in 1.17.) */
   Backup: `${SM_NS}Backup`,
-  /** One document of a backup: the document, where its earlier version is kept, the version it was copied at, and the version the update left it at once it wrote it. A subject of the backup's manifest. (Added in 1.17.) */
+  /** One document of a backup: the document, where its bytes are kept, the Content-Type and the version they were served with, and the version the update left it at once it wrote it. A subject of the backup's manifest. (Added in 1.17.) */
   BackupEntry: `${SM_NS}BackupEntry`,
   /** Which version of its class's shape the subject conforms to. Absent means 1, the format that predates the field. Every subject Solid Memo writes carries it. (Since 1.0.) */
   formatVersion: `${SM_NS}formatVersion`,
@@ -146,13 +146,15 @@ export const SM = {
   backupOf: `${SM_NS}backupOf`,
   /** The document a backup entry is of, at its own address, which the update did not change. (Added in 1.17.) */
   backedUpDocument: `${SM_NS}backedUpDocument`,
-  /** Where the backup keeps the document's earlier version: a document in the backup's folder holding the triples the document held, their IRIs as they were. Absent when there was no document: the update was to create it, and a restore deletes it. (Added in 1.17.) */
+  /** Where the backup keeps the document's bytes, exactly as the pod served them when Turtle was asked for: a file in the backup's folder, at the document's path below the instance with .orig added (a document outside the instance, or at a path the folder uses itself, staging/ or elsewhere/, at elsewhere/<n>.orig, n its entry's number from 1), stored as application/octet-stream so that no server reads or rewrites it as RDF (its prefixes, comments, order and relative IRIs are kept). A manifest that names any other file for a document is no backup of Solid Memo's. Absent when there was no document: the update was to create it, and putting it back deletes it. (Added in 1.17.) */
   backupCopy: `${SM_NS}backupCopy`,
-  /** The version of the document the copy was made from, as the pod gave it: its ETag, else "Last-Modified: " and its modification time, else "sha256:" and a hash of its content. The update writes the document only while it is still at this version. Absent when there was no document. (Added in 1.17.) */
+  /** The Content-Type the pod served the document with when its bytes were backed up, parameters and all ("text/turtle; charset=utf-8"): the bytes are put back with it. Absent when there was no document. (Added in 1.17.) */
+  contentTypeBackedUp: `${SM_NS}contentTypeBackedUp`,
+  /** The version of the document the bytes were read at, as the pod gave it in that very response: its ETag, else "Last-Modified: " and its modification time, else "sha256:" and a hash of the bytes. The update writes the document only while it is still at this version. Absent when there was no document. (Added in 1.17.) */
   versionBackedUp: `${SM_NS}versionBackedUp`,
   /** The version the update left the document at, in the form versionBackedUp has, once it wrote it; absent until then. A restore puts the earlier version back only while the document is still at this version. (Added in 1.17.) */
   versionUpdated: `${SM_NS}versionUpdated`,
-  /** On the backup a library upgrade makes: the library release the deck came from when the backup was made, which its catalog entry names (prov:wasDerivedFrom). The backup's copies are of that release's cards, so it is restored only while the entry still names it. (Added in 1.17.) */
+  /** On the backup a library upgrade makes: the library release the deck came from when the backup was made, which its catalog entry names (prov:wasDerivedFrom). The backup holds that release's cards, so it is restored only while the entry still names it. (Added in 1.17.) */
   releaseBackedUp: `${SM_NS}releaseBackedUp`,
   /** The short piece of theory a course step teaches, read before its questions: language-tagged text, one per language. (Added in 1.14.) */
   theory: `${SM_NS}theory`,

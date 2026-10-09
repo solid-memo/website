@@ -13,10 +13,16 @@ const SERVERS = inject("solidServers");
 
 type Traits = Awaited<ReturnType<typeof traitsOf>>;
 
-/** The Community Solid Server enforces every precondition and takes both PATCH formats; 6 stamps its ETags in whole seconds. */
-const CSS: Traits = { etag: true, etagEveryEdit: true, edits: true, creations: true, sparqlUpdate: true, n3: true };
-/** node-solid-server gives no ETag on a read, so no edit can be conditional; 5.8.8 and 6.0.0 enforce If-None-Match: *. */
-const NSS: Traits = { etag: false, etagEveryEdit: false, edits: false, creations: true, sparqlUpdate: true, n3: true };
+/**
+ * The Community Solid Server enforces every precondition, takes both PATCH formats and serves a document PUT as
+ * Turtle as it was written; 6 stamps its ETags in whole seconds.
+ */
+const CSS: Traits = { etag: true, etagEveryEdit: true, edits: true, creations: true, sparqlUpdate: true, n3: true, keepsTurtle: true };
+/**
+ * node-solid-server gives no ETag on a read, so no edit can be conditional; 5.8.8 and 6.0.0 enforce
+ * If-None-Match: *, and serve a document PUT as Turtle as it was written.
+ */
+const NSS: Traits = { etag: false, etagEveryEdit: false, edits: false, creations: true, sparqlUpdate: true, n3: true, keepsTurtle: true };
 
 const PINNED: Record<string, Traits> = {
   "css-7": CSS,

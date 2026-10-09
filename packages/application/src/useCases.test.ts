@@ -17,7 +17,7 @@ import type {
   DocumentBackups,
   GuestPod,
 } from "./ports";
-import type { Backup } from "@solid-memo/domain/backup";
+import { withPicturesAt, type Backup, type BackupEntry } from "@solid-memo/domain/backup";
 import { GUEST_INSTANCE_URL, GUEST_ORIGIN, GUEST_SESSION, GUEST_WEBID, guestDeckStamp } from "@solid-memo/domain/guest";
 import { createUseCases } from "./useCases";
 import type { InstanceDigest } from "@solid-memo/domain/studyDigest";
@@ -203,18 +203,24 @@ function makeDeps() {
     deleteRecursively: vi.fn(async () => undefined),
   };
   const documentBackups: DocumentBackups = {
-    create: vi.fn(async ({ folder, of, createdAt, documents }: Parameters<DocumentBackups["create"]>[0], onCopied = () => undefined) => {
+    create: vi.fn(async ({ folder, of, createdAt, documents, release }: Parameters<DocumentBackups["create"]>[0], onBackedUp = () => undefined) => {
       const entries = documents.map((document: string) => {
-        onCopied();
-        return { document, copy: `${folder}${document.slice(instance.url.length)}`, versionBackedUp: `before ${document}` };
+        onBackedUp();
+        return { document, copy: `${folder}${document.slice(instance.url.length)}.orig`, contentType: "text/turtle", versionBackedUp: `before ${document}` };
       });
-      return { url: folder, of, createdAt, entries };
+      return { url: folder, of, createdAt, ...(release === undefined ? {} : { release }), entries };
     }),
+    stage: vi.fn(async (backup: Backup, onStaged = () => undefined) => {
+      for (const _entry of backup.entries) onStaged();
+    }),
+    stateOf: vi.fn(async (entry: BackupEntry) => ({ version: entry.versionBackedUp ?? null, asBackedUp: true })),
+    sameAsStaged: vi.fn(async (): Promise<boolean | null> => null),
     versionOf: vi.fn(async (url: string): Promise<string | null> => `after ${url}`),
     noteUpdated: vi.fn(async () => undefined),
     list: vi.fn(async (): Promise<Backup[]> => []),
     read: vi.fn(async (): Promise<Backup | null> => null),
     putBack: vi.fn(async () => undefined),
+    unstage: vi.fn(async () => undefined),
     remove: vi.fn(async () => ({ keptFolder: null })),
   };
   const updateJournal = { begin: vi.fn(), end: vi.fn(), staging: vi.fn((): string | null => null) };
@@ -939,131 +945,196 @@ describe("createUseCases", () => {
       expect(deps.instanceRepository.saveMeta).not.toHaveBeenCalled();
     });
 
+    const violation = { message: { en: "x" }, severity: "violation" as const, constraint: "MinCount" };
     const FOLDER = `${instance.url}backups/20260928T100000Z-0f3a/`;
+    const STAGING = `${FOLDER}staging/`;
     const META = `${instance.url}meta.ttl`;
     const PREFERENCES = `${instance.url}preferences.ttl`;
     const CATALOG = `${instance.url}catalog.ttl`;
+    const REVIEWS = deck.reviewsDocumentUrl;
+    const CARDS = deck.cardsDocumentUrl;
+    const DOCUMENTS = [META, PREFERENCES, CARDS, REVIEWS, CATALOG];
+    const staged = (url: string) => url.replace(instance.url, STAGING);
     const oldMeta = { name: "Main", createdAt: "2026-09-21T10:00:00.000Z", formatVersion: 1 };
+    const orig = (document: string) => `${FOLDER}${document.slice(instance.url.length)}.orig`;
+    const runNote = (state: string, updated: Record<string, string> = {}) =>
+      JSON.stringify({ folder: FOLDER, startedAt: "2026-09-28T10:00:00.000Z", state, updated });
 
-    /** An instance where everything is outdated: its record, its preferences, a deck's entry, cards and review states. */
+    /**
+     * An instance where everything is outdated — its record, its
+     * preferences, a deck's entry, cards and review states — in a pod
+     * where each document has a version, moved by every write, and says
+     * what it said when backed up ("old"), what the update writes ("new"),
+     * or what another device wrote ("theirs"). A write made while the
+     * fence passes the document against a version fails (changedElsewhere)
+     * unless the document is at it, as the pod would answer. The backups
+     * adapter notes each document at the version it is at, tells one still
+     * as backed up by what it says, and puts it back.
+     */
     function outdated() {
       const deps = makeDeps();
-      const oldEntry: Deck = { ...other, formatVersion: 1 };
+      const oldEntry: Deck = { ...other, reviewsDocumentUrl: `${instance.url}reviews/deck-2.ttl`, formatVersion: 1 };
+      const pod = new Map<string, { version: number; says: string }>();
+      const at = (url: string) => pod.get(url) ?? { version: 0, says: "old" };
+      const versionOf = (url: string) => `"v${at(url).version}"`;
+      const write = (url: string, says = "new") => pod.set(url, { version: at(url).version + 1, says });
+      const pins = new Map<string, string | undefined>();
+      const passes: [string, string | undefined][] = [];
+      const held: string[] = [];
+      const released: string[] = [];
+      const writeFence = {
+        hold: vi.fn((url: string) => {
+          held.push(url);
+          return () => released.push(`hold ${url}`);
+        }),
+        pass: vi.fn((url: string, version?: string) => {
+          passes.push([url, version]);
+          pins.set(url, version);
+          return () => {
+            pins.delete(url);
+            released.push(`pass ${url}`);
+          };
+        }),
+      };
+      /** A write of the document, refused unless it is at the version the fence holds its first write to. */
+      const writing = (url: string) => {
+        const pinned = pins.get(url);
+        if (pinned !== undefined && pinned !== versionOf(url)) throw new AppError("changedElsewhere", { url });
+        pins.delete(url);
+        write(url);
+      };
       vi.mocked(deps.instanceRepository.readMeta).mockResolvedValue(oldMeta);
+      vi.mocked(deps.instanceRepository.saveMeta).mockImplementation(async (url) => writing(`${url}meta.ttl`));
       vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue({
         preferences: { ...DEFAULT_PREFERENCES, newCardsPerDay: 7 },
         formatVersion: 1,
       });
+      vi.mocked(deps.preferencesRepository.savePreferences).mockImplementation(async (url) => writing(`${url}preferences.ttl`));
       vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([deck, oldEntry]);
       vi.mocked(deps.deckRepository.listCards).mockImplementation(async (d) =>
-        d === oldEntry ? [current("d")] : [old("a"), current("b")],
+        d.cardsDocumentUrl.endsWith("deck-2.ttl") ? [current("d")] : [old("a"), current("b")],
       );
+      vi.mocked(deps.deckRepository.saveCards).mockImplementation(async (d) => writing(d.cardsDocumentUrl));
       vi.mocked(deps.reviewStateRepository.listReviewStates).mockImplementation(async (d) =>
-        d === deck ? [oldReview("a"), { ...oldReview("b"), formatVersion: 2 }] : [],
+        d.reviewsDocumentUrl.endsWith("reviews/deck-1.ttl") ? [oldReview("a"), { ...oldReview("b"), formatVersion: 2 }] : [],
       );
-      return { deps, oldEntry };
+      vi.mocked(deps.reviewStateRepository.applyReviewChanges).mockImplementation(async (d) => writing(d.reviewsDocumentUrl));
+      vi.mocked(deps.deckRepository.saveDecks).mockImplementation(async (url) => {
+        writing(`${url}catalog.ttl`);
+        return true;
+      });
+      const backups = deps.documentBackups;
+      vi.mocked(backups.create).mockImplementation(async ({ folder, of, createdAt, documents }, onBackedUp = () => undefined) => {
+        const entries = documents.map((document) => {
+          onBackedUp();
+          return { document, copy: orig(document), contentType: "text/turtle", versionBackedUp: versionOf(document) };
+        });
+        return { url: folder, of, createdAt, entries };
+      });
+      vi.mocked(backups.stateOf).mockImplementation(async (entry) => ({
+        version: versionOf(entry.document),
+        asBackedUp: at(entry.document).says === "old",
+      }));
+      vi.mocked(backups.sameAsStaged).mockImplementation(async (_backup, entry) => at(entry.document).says === "new");
+      vi.mocked(backups.versionOf).mockImplementation(async (url) => versionOf(url));
+      vi.mocked(backups.putBack).mockImplementation(async (entry, version) => {
+        if (versionOf(entry.document) !== version) throw new AppError("changedElsewhere", { url: entry.document });
+        write(entry.document, "old");
+      });
+      return { deps: { ...deps, writeFence }, oldEntry, pod, at, write, versionOf, passes, held, released, writeFence };
     }
 
-    it("updateInstance backs up what it will change, writes each document in place, then checks the instance, reporting its progress", async () => {
-      const { deps, oldEntry } = outdated();
+    it("updateInstance backs up what it will change, updates and checks a working copy, then each document in place, checked again", async () => {
+      const { deps, oldEntry, at, passes, released } = outdated();
       const progress: string[] = [];
       const outcome = await createUseCases(deps).updateInstance(session, instance, (p) =>
         progress.push(`${p.step} ${p.done}/${p.total}${p.part === undefined ? "" : ` (${p.part.done} of ${p.part.total})`}`),
       );
       expect(outcome).toEqual({ ok: true, backupUrl: FOLDER });
-      const documents = [META, PREFERENCES, deck.cardsDocumentUrl, deck.reviewsDocumentUrl, CATALOG];
       expect(deps.documentBackups.create).toHaveBeenCalledWith(
-        { folder: FOLDER, of: instance.url, createdAt: "2026-09-28T10:00:00.000Z", instanceUrl: instance.url, documents },
+        { folder: FOLDER, of: instance.url, createdAt: "2026-09-28T10:00:00.000Z", instanceUrl: instance.url, documents: DOCUMENTS },
         expect.any(Function),
       );
-      expect(deps.instanceRepository.saveMeta).toHaveBeenCalledExactlyOnceWith(instance.url, oldMeta);
-      expect(deps.preferencesRepository.savePreferences).toHaveBeenCalledExactlyOnceWith(instance.url, {
-        ...DEFAULT_PREFERENCES,
-        newCardsPerDay: 7,
-      });
-      expect(deps.deckRepository.saveCards).toHaveBeenCalledExactlyOnceWith(deck, [current("a")]);
-      expect(deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledExactlyOnceWith(deck, {
-        save: [{ ...oldReview("a"), formatVersion: 2 }],
-        remove: [],
-      });
+      // Each write made twice, to the working copy first, then in place, the same.
+      expect(vi.mocked(deps.instanceRepository.saveMeta).mock.calls).toEqual([
+        [STAGING, oldMeta],
+        [instance.url, oldMeta],
+      ]);
+      expect(vi.mocked(deps.preferencesRepository.savePreferences).mock.calls).toEqual([
+        [STAGING, { ...DEFAULT_PREFERENCES, newCardsPerDay: 7 }],
+        [instance.url, { ...DEFAULT_PREFERENCES, newCardsPerDay: 7 }],
+      ]);
+      const stagedDeck = { ...deck, url: staged(deck.url), cardsDocumentUrl: staged(CARDS), reviewsDocumentUrl: staged(REVIEWS) };
+      expect(vi.mocked(deps.deckRepository.saveCards).mock.calls).toEqual([
+        [stagedDeck, [current("a")]],
+        [deck, [current("a")]],
+      ]);
+      expect(vi.mocked(deps.reviewStateRepository.applyReviewChanges).mock.calls).toEqual([
+        [stagedDeck, { save: [{ ...oldReview("a"), formatVersion: 2 }], remove: [] }],
+        [deck, { save: [{ ...oldReview("a"), formatVersion: 2 }], remove: [] }],
+      ]);
       // Every deck entry, and the catalogue only when missing, in one write of the catalog document, last.
-      expect(deps.deckRepository.saveDecks).toHaveBeenCalledExactlyOnceWith(instance.url, [oldEntry], null);
-      expect(vi.mocked(deps.deckRepository.saveDecks).mock.invocationCallOrder[0]).toBeGreaterThan(
-        vi.mocked(deps.reviewStateRepository.applyReviewChanges).mock.invocationCallOrder[0]!,
+      expect(vi.mocked(deps.deckRepository.saveDecks).mock.calls).toEqual([
+        [STAGING, [oldEntry], null],
+        [instance.url, [oldEntry], null],
+      ]);
+      // The copy is checked before any document of the user's is written; they are checked after.
+      const validated = vi.mocked(deps.shapeValidator.validateDocument).mock.calls.map(([url]) => url);
+      expect(validated).toEqual([...DOCUMENTS, ...DOCUMENTS.map(staged), ...DOCUMENTS]);
+      const checkedCopy = vi.mocked(deps.shapeValidator.validateDocument).mock.invocationCallOrder[9]!;
+      expect(vi.mocked(deps.instanceRepository.saveMeta).mock.invocationCallOrder[1]).toBeGreaterThan(checkedCopy);
+      // Each document found still as backed up before the first is written in place.
+      expect(vi.mocked(deps.documentBackups.stateOf).mock.calls.map(([entry]) => entry.document)).toEqual(DOCUMENTS);
+      expect(vi.mocked(deps.documentBackups.stateOf).mock.invocationCallOrder.at(-1)).toBeLessThan(
+        vi.mocked(deps.instanceRepository.saveMeta).mock.invocationCallOrder[1]!,
       );
-      expect(deps.deckRepository.saveDeck).not.toHaveBeenCalled();
       expect(vi.mocked(deps.documentBackups.noteUpdated).mock.calls.map(([, document, version]) => [document, version])).toEqual(
-        documents.map((document) => [document, `after ${document}`]),
+        DOCUMENTS.map((document) => [document, '"v1"']),
       );
-      expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(META);
-      expect(deps.updateJournal.begin).toHaveBeenCalledWith(instance.url, FOLDER);
-      expect(deps.updateJournal.end).toHaveBeenCalledWith(instance.url);
+      for (const document of DOCUMENTS) expect(at(document)).toEqual({ version: 1, says: "new" });
+      // The working copy goes; the backup stays, the previous version.
+      expect(deps.documentBackups.unstage).toHaveBeenCalledOnce();
       expect(deps.documentBackups.remove).not.toHaveBeenCalled();
+      expect(deps.documentBackups.putBack).not.toHaveBeenCalled();
       expect(deps.instanceRepository.switchInstance).not.toHaveBeenCalled();
-      // Once updated, the registrations of its data that are missing are added, before the update is over.
+      // Each document passed while it is written, against the version backed up; the instance held throughout.
+      expect(passes).toEqual([[FOLDER, undefined], ...DOCUMENTS.map((document): [string, string] => [document, '"v0"'])]);
+      expect(deps.writeFence.hold).toHaveBeenCalledExactlyOnceWith(instance.url);
+      expect(released.slice(-2)).toEqual([`hold ${instance.url}`, `pass ${FOLDER}`]);
+      // Once updated, the registrations of its data that are missing are added.
       expect(deps.instanceRepository.registerDataClasses).toHaveBeenCalledExactlyOnceWith({
         webId: session.webId,
         instanceUrl: instance.url,
         title: instance.name,
       });
-      expect(vi.mocked(deps.instanceRepository.registerDataClasses).mock.invocationCallOrder[0]).toBeGreaterThan(
-        vi.mocked(deps.shapeValidator.validateDocument).mock.invocationCallOrder.at(-1)!,
+      // The browser notes the run as it goes, and forgets it once over.
+      const notes = deps.updateJournal.begin.mock.calls.map(([key, text]) => [key, JSON.parse(text as string).state]);
+      expect(notes[0]).toEqual([instance.url, "running"]);
+      expect(notes.at(-1)).toEqual([instance.url, "done"]);
+      expect(JSON.parse(deps.updateJournal.begin.mock.calls.at(-1)![1] as string).updated).toEqual(
+        Object.fromEntries(DOCUMENTS.map((document) => [document, '"v1"'])),
       );
+      expect(deps.updateJournal.end).toHaveBeenCalledExactlyOnceWith(instance.url);
       expect(progress).toEqual([
-        "stage 0/4",
-        "backup 1/4 (0 of 5)",
-        "backup 1/4 (1 of 5)",
-        "backup 1/4 (2 of 5)",
-        "backup 1/4 (3 of 5)",
-        "backup 1/4 (4 of 5)",
-        "upgrade 2/4 (0 of 5)",
-        "upgrade 2/4 (1 of 5)",
-        "upgrade 2/4 (2 of 5)",
-        "upgrade 2/4 (3 of 5)",
-        "upgrade 2/4 (4 of 5)",
-        "validate 3/4",
-        "validate 3/4 (0 of 7)",
-        "validate 3/4 (1 of 7)",
-        "validate 3/4 (2 of 7)",
-        "validate 3/4 (3 of 7)",
-        "validate 3/4 (4 of 7)",
-        "validate 3/4 (5 of 7)",
-        "validate 3/4 (6 of 7)",
-        "validate 4/4",
+        "stage 0/8",
+        "backup 1/8 (0 of 5)",
+        ...[1, 2, 3, 4].map((n) => `backup 1/8 (${n} of 5)`),
+        "copy 2/8 (0 of 10)",
+        ...[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => `copy 2/8 (${n} of 10)`),
+        "check 3/8 (0 of 5)",
+        ...[1, 2, 3, 4].map((n) => `check 3/8 (${n} of 5)`),
+        "verify 4/8 (0 of 5)",
+        ...[1, 2, 3, 4].map((n) => `verify 4/8 (${n} of 5)`),
+        "rewrite 5/8 (0 of 5)",
+        ...[1, 2, 3, 4].map((n) => `rewrite 5/8 (${n} of 5)`),
+        "validate 6/8 (0 of 5)",
+        ...[1, 2, 3, 4].map((n) => `validate 6/8 (${n} of 5)`),
+        "tidy 7/8",
+        "tidy 8/8",
       ]);
     });
 
-    it("updateInstance lets each write through the fence it holds only against the version backed up, and nothing else in the tab", async () => {
-      const { deps } = outdated();
-      const released: string[] = [];
-      const passes: [string, string | undefined][] = [];
-      const writeFence = {
-        hold: vi.fn((url: string) => () => released.push(`hold ${url}`)),
-        pass: vi.fn((url: string, version?: string) => {
-          passes.push([url, version]);
-          return () => released.push(`pass ${url}`);
-        }),
-      };
-      vi.mocked(deps.deckRepository.saveCards).mockImplementation(async () => {
-        // Each document is passed only while it is written.
-        expect(passes.at(-1)).toEqual([deck.cardsDocumentUrl, `before ${deck.cardsDocumentUrl}`]);
-        expect(released).not.toContain(`pass ${deck.cardsDocumentUrl}`);
-      });
-      await createUseCases({ ...deps, writeFence }).updateInstance(session, instance);
-      expect(writeFence.hold).toHaveBeenCalledExactlyOnceWith(instance.url);
-      expect(passes).toEqual([
-        [FOLDER, undefined],
-        [META, `before ${META}`],
-        [PREFERENCES, `before ${PREFERENCES}`],
-        [deck.cardsDocumentUrl, `before ${deck.cardsDocumentUrl}`],
-        [deck.reviewsDocumentUrl, `before ${deck.reviewsDocumentUrl}`],
-        [CATALOG, `before ${CATALOG}`],
-      ]);
-      expect(released.slice(-2)).toEqual([`hold ${instance.url}`, `pass ${FOLDER}`]);
-      expect(released).toHaveLength(7);
-    });
-
-    it("updateInstance gives an instance without a catalogue one, published by the owner, and names it after the URL when nothing says more", async () => {
+    it("updateInstance gives an instance without a catalogue one, published by the owner, the same in the copy and in place", async () => {
       const deps = makeDeps();
       vi.mocked(deps.deckRepository.readCatalog).mockResolvedValue(null);
       vi.mocked(deps.deckRepository.listCards).mockResolvedValue([]);
@@ -1077,12 +1148,22 @@ describe("createUseCases", () => {
           },
         ],
       } as WebIdDocument);
-      await createUseCases(deps).updateInstance(session, instance);
-      expect(deps.deckRepository.saveDecks).toHaveBeenCalledExactlyOnceWith(instance.url, [], {
-        title: "Main",
-        description: "Flashcard decks of the Solid Memo instance Main.",
-        publisher: { webId: session.webId, name: "Alice" },
-      });
+      // There is no catalog document: none is backed up, and it is created, where nothing is still.
+      vi.mocked(deps.documentBackups.create).mockImplementation(async ({ folder, of, createdAt, documents }) => ({
+        url: folder,
+        of,
+        createdAt,
+        entries: documents.map((d) => ({ document: d })),
+      }));
+      vi.mocked(deps.documentBackups.stateOf).mockResolvedValue({ version: null, asBackedUp: true });
+      expect(await createUseCases(deps).updateInstance(session, instance)).toEqual({ ok: true, backupUrl: FOLDER });
+      const made = { title: "Main", description: "Flashcard decks of the Solid Memo instance Main.", publisher: { webId: session.webId, name: "Alice" } };
+      expect(vi.mocked(deps.deckRepository.saveDecks).mock.calls).toEqual([
+        [STAGING, [], made],
+        [instance.url, [], made],
+      ]);
+      // Made once: the profile is read once.
+      expect(deps.webIdDocumentRepository.fetchWebIdDocument).toHaveBeenCalledOnce();
       expect(vi.mocked(deps.documentBackups.create).mock.calls[0]![0].documents).toEqual([CATALOG]);
 
       const anonymous = makeDeps();
@@ -1090,7 +1171,7 @@ describe("createUseCases", () => {
       vi.mocked(anonymous.deckRepository.listCards).mockResolvedValue([]);
       vi.mocked(anonymous.webIdDocumentRepository.fetchWebIdDocument).mockRejectedValue(new Error("offline"));
       await createUseCases(anonymous).updateInstance(session, instance);
-      expect(anonymous.deckRepository.saveDecks).toHaveBeenCalledExactlyOnceWith(instance.url, [], {
+      expect(anonymous.deckRepository.saveDecks).toHaveBeenLastCalledWith(instance.url, [], {
         title: instance.url,
         description: `Flashcard decks of the Solid Memo instance ${instance.url}.`,
         publisher: { webId: session.webId, name: session.webId },
@@ -1099,85 +1180,118 @@ describe("createUseCases", () => {
 
     it("updateInstance backs up a document two decks share once, and writes each deck's part of it in turn", async () => {
       const deps = makeDeps();
-      const twin: Deck = { ...other, cardsDocumentUrl: deck.cardsDocumentUrl, reviewsDocumentUrl: deck.reviewsDocumentUrl };
+      const twin: Deck = { ...other, cardsDocumentUrl: CARDS, reviewsDocumentUrl: REVIEWS };
       vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([deck, twin]);
-      vi.mocked(deps.deckRepository.listCards).mockImplementation(async (d) => (d === deck ? [old("a")] : [old("b")]));
+      vi.mocked(deps.deckRepository.listCards).mockImplementation(async (d) => (d.id === deck.id ? [old("a")] : [old("b")]));
       const passes: [string, string | undefined][] = [];
       const writeFence = { hold: vi.fn(() => () => undefined), pass: vi.fn((url: string, version?: string) => (passes.push([url, version]), () => undefined)) };
       expect(await createUseCases({ ...deps, writeFence }).updateInstance(session, instance)).toEqual({ ok: true, backupUrl: FOLDER });
-      expect(vi.mocked(deps.documentBackups.create).mock.calls[0]![0].documents).toEqual([deck.cardsDocumentUrl]);
+      expect(vi.mocked(deps.documentBackups.create).mock.calls[0]![0].documents).toEqual([CARDS]);
+      const stagedTwin = (d: Deck) => ({ ...d, url: staged(d.url), cardsDocumentUrl: staged(CARDS), reviewsDocumentUrl: staged(REVIEWS) });
       expect(vi.mocked(deps.deckRepository.saveCards).mock.calls).toEqual([
+        [stagedTwin(deck), [current("a")]],
+        [stagedTwin(twin), [current("b")]],
         [deck, [current("a")]],
         [twin, [current("b")]],
       ]);
       // One pass for both writes, held to the version backed up (the fence lets the first write alone be held to it).
-      expect(passes.filter(([url]) => url === deck.cardsDocumentUrl)).toEqual([[deck.cardsDocumentUrl, `before ${deck.cardsDocumentUrl}`]]);
-      expect(deps.documentBackups.noteUpdated).toHaveBeenCalledOnce();
+      expect(passes.filter(([url]) => url === CARDS)).toEqual([[CARDS, `before ${CARDS}`]]);
+      // The version each write left it at is noted, so a document written in part is still told the update's.
+      expect(deps.documentBackups.noteUpdated).toHaveBeenCalledTimes(2);
+
+      // Its second deck's part refused after the first was written, the document is the update's to put back.
+      const refused = makeDeps();
+      vi.mocked(refused.deckRepository.listDecks).mockResolvedValue([deck, twin]);
+      vi.mocked(refused.deckRepository.listCards).mockImplementation(async (d) => (d.id === deck.id ? [old("a")] : [old("b")]));
+      vi.mocked(refused.deckRepository.saveCards).mockImplementation(async (d) => {
+        if (d.id === twin.id && d.cardsDocumentUrl === CARDS) throw new AppError("changedElsewhere", { url: CARDS });
+      });
+      expect(await createUseCases(refused).updateInstance(session, instance)).toMatchObject({ step: "rewrite", undo: { restored: [], kept: [] } });
+      expect(refused.documentBackups.stateOf).toHaveBeenLastCalledWith(expect.objectContaining({ document: CARDS }));
 
       // Up to date meanwhile in the first deck's part, it still writes the second's.
       const later = makeDeps();
       vi.mocked(later.deckRepository.listDecks).mockResolvedValue([deck, twin]);
       let reads = 0;
-      vi.mocked(later.deckRepository.listCards).mockImplementation(async (d) => (d === deck && ++reads > 1 ? [current("a")] : d === deck ? [old("a")] : [old("b")]));
+      vi.mocked(later.deckRepository.listCards).mockImplementation(async (d) =>
+        d.id === deck.id && ++reads > 1 ? [current("a")] : d.id === deck.id ? [old("a")] : [old("b")],
+      );
       await createUseCases(later).updateInstance(session, instance);
-      expect(vi.mocked(later.deckRepository.saveCards).mock.calls).toEqual([[twin, [current("b")]]]);
-      expect(later.documentBackups.noteUpdated).toHaveBeenCalledOnce();
+      expect(vi.mocked(later.deckRepository.saveCards).mock.calls.map(([d]) => d.id)).toEqual(["deck-2", "deck-2"]);
       // And the other way round.
       const sooner = makeDeps();
       vi.mocked(sooner.deckRepository.listDecks).mockResolvedValue([deck, twin]);
       let twinReads = 0;
-      vi.mocked(sooner.deckRepository.listCards).mockImplementation(async (d) => (d === twin && ++twinReads > 1 ? [current("b")] : d === deck ? [old("a")] : [old("b")]));
+      vi.mocked(sooner.deckRepository.listCards).mockImplementation(async (d) =>
+        d.id === twin.id && ++twinReads > 1 ? [current("b")] : d.id === deck.id ? [old("a")] : [old("b")],
+      );
       await createUseCases(sooner).updateInstance(session, instance);
-      expect(vi.mocked(sooner.deckRepository.saveCards).mock.calls).toEqual([[deck, [current("a")]]]);
+      expect(vi.mocked(sooner.deckRepository.saveCards).mock.calls.map(([d]) => d.id)).toEqual(["deck-1", "deck-1"]);
       expect(sooner.documentBackups.noteUpdated).toHaveBeenCalledOnce();
     });
 
+    it("updateInstance puts back a document two decks share that it wrote in part, by the version its first write left", async () => {
+      const { deps, at, versionOf } = outdated();
+      const twin: Deck = { ...other, cardsDocumentUrl: CARDS, reviewsDocumentUrl: REVIEWS };
+      vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([deck, twin]);
+      const saveCards = vi.mocked(deps.deckRepository.saveCards).getMockImplementation()!;
+      vi.mocked(deps.deckRepository.saveCards).mockImplementation(async (d, cards) => {
+        // The second deck's part in place fails before it reaches the pod.
+        if (d.id === twin.id && d.cardsDocumentUrl === CARDS) throw new TypeError("Failed to fetch");
+        return saveCards(d, cards);
+      });
+      // Its working copy holds both decks' parts, so the document, holding the first's alone, does not say what it says.
+      vi.mocked(deps.documentBackups.sameAsStaged).mockResolvedValue(false);
+      const outcome = await createUseCases(deps).updateInstance(session, instance);
+      expect(outcome).toMatchObject({ ok: false, step: "rewrite", undo: { restored: [CARDS, PREFERENCES, META], kept: [], removed: true } });
+      expect(vi.mocked(deps.documentBackups.noteUpdated).mock.calls.map(([, document, version]) => [document, version])).toContainEqual([
+        CARDS,
+        '"v1"',
+      ]);
+      expect(at(CARDS).says).toBe("old");
+      expect(versionOf(CARDS)).toBe('"v2"');
+    });
+
     it("updateInstance writes nothing, and keeps no backup, of what was brought up to date meanwhile", async () => {
-      const { deps } = outdated();
-      // Read afresh at its turn, each document is up to date already: another tab updated the instance.
-      vi.mocked(deps.documentBackups.create).mockImplementation(async (args) => {
-        vi.mocked(deps.instanceRepository.readMeta).mockResolvedValue({ ...oldMeta, formatVersion: 2 });
-        vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue({ preferences: DEFAULT_PREFERENCES, formatVersion: 4 });
-        vi.mocked(deps.deckRepository.listCards).mockResolvedValue([current("a")]);
-        vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue([]);
-        vi.mocked(deps.deckRepository.saveDecks).mockResolvedValue(false);
-        return { url: args.folder, of: args.of, createdAt: args.createdAt, entries: args.documents.map((d) => ({ document: d })) };
-      });
-      expect(await createUseCases(deps).updateInstance(session, instance)).toEqual({ ok: true });
-      expect(deps.instanceRepository.saveMeta).not.toHaveBeenCalled();
-      expect(deps.preferencesRepository.savePreferences).not.toHaveBeenCalled();
-      expect(deps.deckRepository.saveCards).not.toHaveBeenCalled();
-      expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
-      expect(deps.documentBackups.noteUpdated).not.toHaveBeenCalled();
-      expect(deps.documentBackups.remove).toHaveBeenCalledOnce();
-
-      // Gone meanwhile, the record and the preferences are not written either.
-      const gone = outdated();
-      vi.mocked(gone.deps.documentBackups.create).mockImplementation(async (args) => {
-        vi.mocked(gone.deps.instanceRepository.readMeta).mockResolvedValue(null);
-        vi.mocked(gone.deps.preferencesRepository.getPreferences).mockResolvedValue(null);
-        return { url: args.folder, of: args.of, createdAt: args.createdAt, entries: args.documents.map((d) => ({ document: d })) };
-      });
-      vi.mocked(gone.deps.documentBackups.remove).mockResolvedValue({ keptFolder: FOLDER });
-      // A backup it could not remove stays named.
-      expect(await createUseCases(gone.deps).updateInstance(session, instance)).toEqual({ ok: true, backupUrl: FOLDER });
-      expect(gone.deps.instanceRepository.saveMeta).not.toHaveBeenCalled();
-      expect(gone.deps.preferencesRepository.savePreferences).not.toHaveBeenCalled();
-    });
-
-    it("updateInstance is done even when the registrations of the instance's data cannot be added", async () => {
-      const { deps } = outdated();
-      vi.mocked(deps.instanceRepository.registerDataClasses).mockRejectedValue(new Error("index refused"));
-      expect(await createUseCases(deps).updateInstance(session, instance)).toEqual({ ok: true, backupUrl: FOLDER });
-      expect(deps.updateJournal.end).toHaveBeenCalledWith(instance.url);
-    });
-
-    it("updateInstance makes no backup when nothing is outdated any more", async () => {
       const deps = makeDeps();
       vi.mocked(deps.deckRepository.listCards).mockResolvedValue([current("a")]);
       expect(await createUseCases(deps).updateInstance(session, instance)).toEqual({ ok: true });
       expect(deps.documentBackups.create).not.toHaveBeenCalled();
       expect(deps.updateJournal.begin).not.toHaveBeenCalled();
+
+      // Up to date by the time it is backed up, in the copy and in place: the backup goes.
+      const meanwhile = () => {
+        const { deps } = outdated();
+        const create = vi.mocked(deps.documentBackups.create).getMockImplementation()!;
+        vi.mocked(deps.documentBackups.create).mockImplementationOnce(async (args, onBackedUp) => {
+          vi.mocked(deps.instanceRepository.readMeta).mockResolvedValue({ ...oldMeta, formatVersion: 2 });
+          vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue(null);
+          vi.mocked(deps.deckRepository.listCards).mockResolvedValue([current("a")]);
+          vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue([]);
+          vi.mocked(deps.deckRepository.saveDecks).mockResolvedValue(false);
+          return create(args, onBackedUp);
+        });
+        return deps;
+      };
+      const gone = meanwhile();
+      expect(await createUseCases(gone).updateInstance(session, instance)).toEqual({ ok: true });
+      expect(gone.instanceRepository.saveMeta).not.toHaveBeenCalled();
+      expect(gone.documentBackups.noteUpdated).not.toHaveBeenCalled();
+      expect(gone.documentBackups.remove).toHaveBeenCalledOnce();
+      expect(gone.updateJournal.end).toHaveBeenCalledWith(instance.url);
+      // A backup it could not remove stays named, and the browser keeps its note.
+      const left = meanwhile();
+      vi.mocked(left.documentBackups.remove).mockResolvedValueOnce({ keptFolder: FOLDER });
+      expect(await createUseCases(left).updateInstance(session, instance)).toEqual({ ok: true, backupUrl: FOLDER });
+      expect(JSON.parse(left.updateJournal.begin.mock.calls.at(-1)![1] as string).state).toBe("stopped");
+    });
+
+    it("updateInstance is done even when the registrations of the instance's data cannot be added, or its working copy deleted", async () => {
+      const { deps } = outdated();
+      vi.mocked(deps.instanceRepository.registerDataClasses).mockRejectedValue(new Error("index refused"));
+      vi.mocked(deps.documentBackups.unstage).mockRejectedValue(new Error("offline"));
+      expect(await createUseCases(deps).updateInstance(session, instance)).toEqual({ ok: true, backupUrl: FOLDER });
+      expect(deps.updateJournal.end).toHaveBeenCalledWith(instance.url);
     });
 
     it("updateInstance does not note a version the pod no longer gives", async () => {
@@ -1185,99 +1299,6 @@ describe("createUseCases", () => {
       vi.mocked(deps.documentBackups.versionOf).mockResolvedValue(null);
       expect(await createUseCases(deps).updateInstance(session, instance)).toEqual({ ok: true, backupUrl: FOLDER });
       expect(deps.documentBackups.noteUpdated).not.toHaveBeenCalled();
-    });
-
-    it("updateInstance stops at a document changed elsewhere since it was backed up: what it updated stays, and so does the backup", async () => {
-      const { deps } = outdated();
-      const changed = new AppError("changedElsewhere", { url: deck.cardsDocumentUrl });
-      vi.mocked(deps.deckRepository.saveCards).mockRejectedValueOnce(changed);
-      const outcome = await createUseCases(deps).updateInstance(session, instance);
-      expect(outcome).toEqual({ ok: false, step: "upgrade", error: changed, updated: [META, PREFERENCES], backupUrl: FOLDER });
-      expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
-      expect(deps.documentBackups.remove).not.toHaveBeenCalled();
-      expect(deps.updateJournal.end).toHaveBeenCalledWith(instance.url);
-    });
-
-    it.each([
-      ["stage", (deps: ReturnType<typeof makeDeps>) => vi.mocked(deps.deckRepository.listDecks).mockRejectedValueOnce(new Error("boom"))],
-      ["backup", (deps: ReturnType<typeof makeDeps>) => vi.mocked(deps.documentBackups.create).mockRejectedValueOnce(new Error("boom"))],
-      ["upgrade", (deps: ReturnType<typeof makeDeps>) => vi.mocked(deps.instanceRepository.saveMeta).mockRejectedValueOnce(new AppError("writtenByNewerApp", {}))],
-    ] as const)("updateInstance failing at %s before it wrote a document removes what it backed up", async (step, fail) => {
-      const { deps } = outdated();
-      fail(deps);
-      vi.mocked(deps.documentBackups.read).mockResolvedValue({ url: FOLDER, of: instance.url, createdAt: "", entries: [] });
-      const outcome = await createUseCases(deps).updateInstance(session, instance);
-      expect(outcome).toEqual({ ok: false, step, error: step === "upgrade" ? new AppError("writtenByNewerApp", {}) : new Error("boom"), updated: [] });
-      expect(deps.documentBackups.remove).toHaveBeenCalledOnce();
-      expect(deps.updateJournal.end).toHaveBeenCalledWith(instance.url);
-    });
-
-    it("updateInstance keeps the backup when a write fails without saying it was not made: its answer may have been lost", async () => {
-      const { deps } = outdated();
-      vi.mocked(deps.instanceRepository.saveMeta).mockRejectedValueOnce(new TypeError("Failed to fetch"));
-      const outcome = await createUseCases(deps).updateInstance(session, instance);
-      expect(outcome).toEqual({ ok: false, step: "upgrade", error: new TypeError("Failed to fetch"), updated: [], backupUrl: FOLDER });
-      expect(deps.documentBackups.remove).not.toHaveBeenCalled();
-      // A failed update adds no registration.
-      expect(deps.instanceRepository.registerDataClasses).not.toHaveBeenCalled();
-    });
-
-    it("updateInstance names a backup it could not remove, or that nothing of was made", async () => {
-      const { deps } = outdated();
-      vi.mocked(deps.documentBackups.create).mockRejectedValueOnce(new Error("boom"));
-      expect(await createUseCases(deps).updateInstance(session, instance)).toEqual({
-        ok: false,
-        step: "backup",
-        error: new Error("boom"),
-        updated: [],
-      });
-      expect(deps.documentBackups.remove).not.toHaveBeenCalled();
-      vi.mocked(deps.documentBackups.create).mockRejectedValueOnce(new Error("boom"));
-      vi.mocked(deps.documentBackups.read).mockRejectedValueOnce(new Error("offline"));
-      expect(await createUseCases(deps).updateInstance(session, instance)).toMatchObject({ backupUrl: FOLDER });
-    });
-
-    const violation = { message: { en: "x" }, severity: "violation" as const, constraint: "MinCount" };
-    const failing = (url: string, subject: string) => ({
-      url,
-      status: "checked" as const,
-      subjects: [{ url: subject, status: "checked" as const, shape: "card" as const, version: 5, violations: [violation] }],
-    });
-
-    it("updateInstance reports a document it wrote that does not conform after it, keeping the backup to restore", async () => {
-      const deps = makeDeps();
-      vi.mocked(deps.deckRepository.listCards).mockResolvedValue([old("a")]);
-      let written = false;
-      vi.mocked(deps.deckRepository.saveCards).mockImplementation(async () => {
-        written = true;
-      });
-      vi.mocked(deps.shapeValidator.validateDocument).mockImplementation(async (url) =>
-        // What fails in a document the update did not write (meta.ttl) is not its doing.
-        url.endsWith("meta.ttl") || (written && url === deck.cardsDocumentUrl)
-          ? failing(url, `${url}#a`)
-          : { url, status: "missing" as const, subjects: [] },
-      );
-      expect(await createUseCases(deps).updateInstance(session, instance)).toEqual({
-        ok: false,
-        step: "validate",
-        error: new AppError("updatedInstanceInvalid", { count: 1 }),
-        updated: [deck.cardsDocumentUrl],
-        backupUrl: FOLDER,
-      });
-      expect(new AppError("updatedInstanceInvalid", { count: 1 }).message).toMatch(/^After the update, part of your data/);
-    });
-
-    it("updateInstance counts only what fails anew in what it wrote: an instance with a deck set aside is updated", async () => {
-      const deps = makeDeps();
-      vi.mocked(deps.deckRepository.listCards).mockResolvedValue([old("a")]);
-      vi.mocked(deps.shapeValidator.validateDocument).mockImplementation(async (url) =>
-        url === deck.cardsDocumentUrl ? failing(url, `${url}#broken`) : { url, status: "missing" as const, subjects: [] },
-      );
-      expect(await createUseCases(deps).updateInstance(session, instance)).toEqual({ ok: true, backupUrl: FOLDER });
-      // Checked before the backup, the documents it is about to write.
-      expect(vi.mocked(deps.shapeValidator.validateDocument).mock.invocationCallOrder[0]).toBeLessThan(
-        vi.mocked(deps.documentBackups.create).mock.invocationCallOrder[0]!,
-      );
     });
 
     it("updateInstance names its backup by the time and a random id, and runs without a journal", async () => {
@@ -1290,48 +1311,335 @@ describe("createUseCases", () => {
       await expect(createUseCases(deps).findInterruptedUpdate(instance)).resolves.toBeNull();
     });
 
-    it("findInterruptedUpdate tells a whole backup an interrupted update left from a partial one, and forgets one that is gone", async () => {
-      const deps = makeDeps();
-      const useCases = createUseCases(deps);
-      await expect(useCases.findInterruptedUpdate(instance)).resolves.toBeNull();
-      deps.updateJournal.staging.mockReturnValue(FOLDER);
-      vi.mocked(deps.documentBackups.read).mockResolvedValueOnce({ url: FOLDER, of: instance.url, createdAt: "", entries: [] });
-      await expect(useCases.findInterruptedUpdate(instance)).resolves.toEqual({ folder: FOLDER, backedUp: true });
-      vi.mocked(deps.instanceCopier.ensureAbsent).mockRejectedValueOnce(new Error("exists"));
-      await expect(useCases.findInterruptedUpdate(instance)).resolves.toEqual({ folder: FOLDER, backedUp: false });
-      expect(deps.updateJournal.end).not.toHaveBeenCalled();
-      await expect(useCases.findInterruptedUpdate(instance)).resolves.toBeNull();
-      expect(deps.updateJournal.end).toHaveBeenCalledWith(instance.url);
+    describe("failing before it writes a document of the user's", () => {
+      it.each([
+        ["stage", (deps: ReturnType<typeof outdated>["deps"]) => vi.mocked(deps.deckRepository.listDecks).mockRejectedValueOnce(new Error("boom"))],
+        ["stage", (deps: ReturnType<typeof outdated>["deps"]) => vi.mocked(deps.shapeValidator.validateDocument).mockRejectedValueOnce(new Error("boom"))],
+      ] as const)("at %s, makes nothing, so leaves nothing", async (step, fail) => {
+        const { deps } = outdated();
+        fail(deps);
+        expect(await createUseCases(deps).updateInstance(session, instance)).toEqual({ ok: false, step, error: new Error("boom"), undo: null });
+        expect(deps.documentBackups.create).not.toHaveBeenCalled();
+        expect(deps.documentBackups.read).not.toHaveBeenCalled();
+      });
+
+      it("while backing up, deletes what of its folder was made: what its manifest names, or the folder whole without one", async () => {
+        const { deps } = outdated();
+        vi.mocked(deps.documentBackups.create).mockRejectedValueOnce(new AppError("backupNotExact", { url: META }));
+        vi.mocked(deps.documentBackups.read).mockResolvedValueOnce({ url: FOLDER, of: instance.url, createdAt: "", entries: [] });
+        expect(await createUseCases(deps).updateInstance(session, instance)).toEqual({
+          ok: false,
+          step: "backup",
+          error: new AppError("backupNotExact", { url: META }),
+          undo: null,
+        });
+        expect(deps.documentBackups.remove).toHaveBeenCalledOnce();
+        expect(deps.updateJournal.end).toHaveBeenCalledWith(instance.url);
+
+        vi.mocked(deps.documentBackups.create).mockRejectedValueOnce(new Error("boom"));
+        expect(await createUseCases(deps).updateInstance(session, instance)).toMatchObject({ step: "backup", undo: null });
+        expect(deps.instanceCopier.deleteRecursively).toHaveBeenCalledWith(FOLDER);
+
+        // What could not be told, or deleted, is named, and the browser keeps its note to try again.
+        vi.mocked(deps.documentBackups.create).mockRejectedValueOnce(new Error("boom"));
+        vi.mocked(deps.documentBackups.read).mockRejectedValueOnce(new Error("offline"));
+        expect(await createUseCases(deps).updateInstance(session, instance)).toMatchObject({ backupUrl: FOLDER });
+        vi.mocked(deps.documentBackups.create).mockRejectedValueOnce(new Error("boom"));
+        vi.mocked(deps.instanceCopier.deleteRecursively).mockRejectedValueOnce(new Error("offline"));
+        expect(await createUseCases(deps).updateInstance(session, instance)).toMatchObject({ backupUrl: FOLDER });
+        expect(JSON.parse(deps.updateJournal.begin.mock.calls.at(-1)![1] as string).state).toBe("stopped");
+      });
+
+      it.each([
+        ["copy", (deps: ReturnType<typeof outdated>["deps"]) => vi.mocked(deps.documentBackups.stage).mockRejectedValueOnce(new Error("boom"))],
+        ["copy", (deps: ReturnType<typeof outdated>["deps"]) => vi.mocked(deps.instanceRepository.saveMeta).mockRejectedValueOnce(new AppError("writtenByNewerApp", {}))],
+        ["verify", (deps: ReturnType<typeof outdated>["deps"]) => vi.mocked(deps.documentBackups.stateOf).mockRejectedValueOnce(new Error("offline"))],
+      ] as const)("at %s, deletes its backup and working copy, every document as it was", async (step, fail) => {
+        const { deps, at } = outdated();
+        fail(deps);
+        const outcome = await createUseCases(deps).updateInstance(session, instance);
+        expect(outcome).toMatchObject({ ok: false, step, undo: null });
+        expect(outcome).not.toHaveProperty("backupUrl");
+        expect(deps.documentBackups.remove).toHaveBeenCalledOnce();
+        for (const document of DOCUMENTS) expect(at(document).says).toBe("old");
+        expect(deps.documentBackups.putBack).not.toHaveBeenCalled();
+        expect(deps.instanceRepository.registerDataClasses).not.toHaveBeenCalled();
+      });
+
+      it("when its working copy fails its shapes anew, counting only what failed before in no document of it", async () => {
+        const { deps, at } = outdated();
+        const failing = (url: string, subject: string) => ({
+          url,
+          status: "checked" as const,
+          subjects: [{ url: subject, status: "checked" as const, shape: "card" as const, version: 5, violations: [violation] }],
+        });
+        vi.mocked(deps.shapeValidator.validateDocument).mockImplementation(async (url) =>
+          // What fails in the instance before the update is not its doing; the copy's subjects are read as the instance's.
+          url === CARDS || url === staged(CARDS) ? failing(url, `${url}#broken`) : url === staged(REVIEWS) ? failing(url, `${url}#a`) : { url, status: "missing" as const, subjects: [] },
+        );
+        expect(await createUseCases(deps).updateInstance(session, instance)).toEqual({
+          ok: false,
+          step: "check",
+          error: new AppError("updatedCopyInvalid", { count: 1 }),
+          undo: null,
+        });
+        expect(new AppError("updatedCopyInvalid", { count: 2 }).message).toMatch(/^The updated copy of your data .* \(2 problems\), so none of your data was changed/);
+        for (const document of DOCUMENTS) expect(at(document).says).toBe("old");
+      });
+
+      it("when a document changed elsewhere since it was backed up", async () => {
+        const { deps, write } = outdated();
+        vi.mocked(deps.documentBackups.stage).mockImplementationOnce(async () => {
+          // Another device studies as the working copy is written.
+          write(REVIEWS, "theirs");
+        });
+        expect(await createUseCases(deps).updateInstance(session, instance)).toEqual({
+          ok: false,
+          step: "verify",
+          error: new AppError("changedDuringUpdate", { url: REVIEWS }),
+          undo: null,
+        });
+        expect(deps.instanceRepository.saveMeta).not.toHaveBeenCalledWith(instance.url, expect.anything());
+        // Still saying what it said, at another version: as good as changed.
+        const { deps: touched, pod } = outdated();
+        vi.mocked(touched.documentBackups.stage).mockImplementationOnce(async () => {
+          pod.set(META, { version: 7, says: "old" });
+        });
+        expect(await createUseCases(touched).updateInstance(session, instance)).toMatchObject({
+          step: "verify",
+          error: new AppError("changedDuringUpdate", { url: META }),
+        });
+      });
     });
 
-    it("removeInterruptedUpdate deletes a partial backup it remembers, never a whole one, then forgets it", async () => {
-      const deps = makeDeps();
-      await createUseCases(deps).removeInterruptedUpdate(instance);
-      expect(deps.instanceCopier.deleteRecursively).not.toHaveBeenCalled();
-      deps.updateJournal.staging.mockReturnValue(FOLDER);
-      vi.mocked(deps.documentBackups.read).mockResolvedValueOnce({ url: FOLDER, of: instance.url, createdAt: "", entries: [] });
-      await createUseCases(deps).removeInterruptedUpdate(instance);
-      expect(deps.instanceCopier.deleteRecursively).not.toHaveBeenCalled();
-      await createUseCases(deps).removeInterruptedUpdate(instance);
-      expect(deps.instanceCopier.deleteRecursively).toHaveBeenCalledWith(FOLDER);
-      expect(deps.updateJournal.end).toHaveBeenCalledTimes(3);
+    describe("failing after it wrote a document of the user's, it puts back what it wrote, byte for byte", () => {
+      /** The catalogue's write in place, the last, fails without saying whether it was made. */
+      const failInPlace = (deps: ReturnType<typeof outdated>["deps"]) =>
+        vi.mocked(deps.deckRepository.saveDecks).mockImplementation(async (url) => {
+          if (url === instance.url) throw new Error("pod down");
+          return true;
+        });
+
+      it("at a document changed elsewhere since it was backed up (412): those before it put back, it and the rest as they are", async () => {
+        const { deps, at, write } = outdated();
+        const saveCards = vi.mocked(deps.deckRepository.saveCards).getMockImplementation()!;
+        vi.mocked(deps.deckRepository.saveCards).mockImplementation(async (d, cards) => {
+          // Another device writes the cards just before the update does.
+          if (d.cardsDocumentUrl === CARDS) write(CARDS, "theirs");
+          return saveCards(d, cards);
+        });
+        const progress: string[] = [];
+        const outcome = await createUseCases(deps).updateInstance(session, instance, (p) =>
+          progress.push(`${p.step}${p.undoing ? " undoing" : ""} ${p.part?.done} of ${p.part?.total}`),
+        );
+        // The refused write was never made: the cards are the other device's, and nothing of the update's is left to keep.
+        expect(outcome).toEqual({
+          ok: false,
+          step: "rewrite",
+          error: new AppError("changedElsewhere", { url: CARDS }),
+          undo: { restored: [PREFERENCES, META], kept: [], removed: true },
+        });
+        expect(at(META).says).toBe("old");
+        expect(at(PREFERENCES).says).toBe("old");
+        expect(at(CARDS).says).toBe("theirs");
+        expect(at(REVIEWS).says).toBe("old");
+        expect(vi.mocked(deps.documentBackups.putBack).mock.calls.map(([entry, version]) => [entry.document, version])).toEqual([
+          [PREFERENCES, '"v1"'],
+          [META, '"v1"'],
+        ]);
+        expect(vi.mocked(deps.documentBackups.stateOf).mock.calls.slice(DOCUMENTS.length).map(([entry]) => entry.document)).toEqual([
+          PREFERENCES,
+          META,
+        ]);
+        expect(progress.slice(-2)).toEqual(["rewrite undoing 0 of 2", "rewrite undoing 1 of 2"]);
+        // Everything put back: the backup and its working copy go, and the browser forgets the run.
+        expect(deps.documentBackups.remove).toHaveBeenCalledOnce();
+        expect(deps.updateJournal.end).toHaveBeenCalledWith(instance.url);
+        expect(deps.instanceRepository.registerDataClasses).not.toHaveBeenCalled();
+      });
+
+      it("refused at the first: nothing of the user's changed, so everything goes", async () => {
+        const { deps, at } = outdated();
+        vi.mocked(deps.instanceRepository.saveMeta).mockImplementation(async (url) => {
+          if (url === instance.url) throw new AppError("changedElsewhere", { url: META });
+        });
+        expect(await createUseCases(deps).updateInstance(session, instance)).toEqual({
+          ok: false,
+          step: "rewrite",
+          error: new AppError("changedElsewhere", { url: META }),
+          undo: null,
+        });
+        expect(at(META).says).toBe("old");
+        expect(deps.documentBackups.remove).toHaveBeenCalledOnce();
+        expect(deps.documentBackups.putBack).not.toHaveBeenCalled();
+      });
+
+      it("whose answer was lost: a document saying what the working copy says is put back, its version never noted", async () => {
+        const { deps, at } = outdated();
+        const savePreferences = vi.mocked(deps.preferencesRepository.savePreferences).getMockImplementation()!;
+        vi.mocked(deps.preferencesRepository.savePreferences).mockImplementation(async (url, preferences) => {
+          await savePreferences(url, preferences);
+          if (url === instance.url) throw new TypeError("Failed to fetch");
+        });
+        const outcome = await createUseCases(deps).updateInstance(session, instance);
+        expect(outcome).toMatchObject({ ok: false, step: "rewrite", undo: { restored: [PREFERENCES, META], kept: [], removed: true } });
+        expect(deps.documentBackups.sameAsStaged).toHaveBeenCalledWith(expect.objectContaining({ url: FOLDER }), expect.objectContaining({ document: PREFERENCES }));
+        expect(at(PREFERENCES).says).toBe("old");
+      });
+
+      it("when what it wrote fails its shapes anew where it is", async () => {
+        const { deps, at } = outdated();
+        let written = false;
+        vi.mocked(deps.deckRepository.saveDecks).mockImplementation(async (url) => {
+          written ||= url === instance.url;
+          return true;
+        });
+        vi.mocked(deps.shapeValidator.validateDocument).mockImplementation(async (url) =>
+          written && url === CARDS
+            ? { url, status: "checked" as const, subjects: [{ url: `${url}#a`, status: "checked" as const, shape: "card" as const, version: 5, violations: [violation] }] }
+            : { url, status: "missing" as const, subjects: [] },
+        );
+        expect(await createUseCases(deps).updateInstance(session, instance)).toMatchObject({
+          ok: false,
+          step: "validate",
+          error: new AppError("updatedInstanceInvalid", { count: 1 }),
+          undo: { restored: [REVIEWS, CARDS, PREFERENCES, META], kept: [], removed: true },
+        });
+        for (const document of DOCUMENTS) expect(at(document).says).toBe("old");
+        expect(new AppError("updatedInstanceInvalid", { count: 1 }).message).toMatch(/^Once written, the updated data/);
+      });
+
+      it("keeps a document changed between the check and its write back, as the pod refuses that write", async () => {
+        const { deps, at, write } = outdated();
+        failInPlace(deps);
+        const putBack = vi.mocked(deps.documentBackups.putBack).getMockImplementation()!;
+        vi.mocked(deps.documentBackups.putBack).mockImplementation(async (entry, version) => {
+          if (entry.document === REVIEWS) write(REVIEWS, "theirs");
+          return putBack(entry, version);
+        });
+        // A working copy that cannot be deleted goes with the backup.
+        vi.mocked(deps.documentBackups.unstage).mockRejectedValueOnce(new Error("offline"));
+        expect(await createUseCases(deps).updateInstance(session, instance)).toMatchObject({
+          step: "rewrite",
+          undo: { restored: [CARDS, PREFERENCES, META], kept: [{ document: REVIEWS, copy: orig(REVIEWS) }], removed: false },
+          backupUrl: FOLDER,
+        });
+        expect(at(REVIEWS).says).toBe("theirs");
+      });
+
+      it("and when putting back fails, keeps everything, tries the rest, and the browser offers it again", async () => {
+        const { deps, at } = outdated();
+        failInPlace(deps);
+        const putBack = vi.mocked(deps.documentBackups.putBack).getMockImplementation()!;
+        vi.mocked(deps.documentBackups.putBack).mockImplementation(async (entry, version) => {
+          if (entry.document === CARDS) throw new Error("offline");
+          return putBack(entry, version);
+        });
+        const outcome = await createUseCases(deps).updateInstance(session, instance);
+        expect(outcome).toEqual({
+          ok: false,
+          step: "rewrite",
+          error: new Error("pod down"),
+          undo: { restored: [REVIEWS, PREFERENCES, META], kept: [], removed: false, failed: new Error("offline") },
+          backupUrl: FOLDER,
+        });
+        expect(at(CARDS).says).toBe("new");
+        expect(deps.documentBackups.unstage).not.toHaveBeenCalled();
+        expect(deps.documentBackups.remove).not.toHaveBeenCalled();
+        expect(JSON.parse(deps.updateJournal.begin.mock.calls.at(-1)![1] as string)).toMatchObject({ folder: FOLDER, state: "stopped" });
+        expect(deps.updateJournal.end).not.toHaveBeenCalled();
+      });
+
+      it("with its backup kept when it cannot be removed once all is put back", async () => {
+        const { deps } = outdated();
+        failInPlace(deps);
+        vi.mocked(deps.documentBackups.remove).mockRejectedValueOnce(new Error("offline"));
+        expect(await createUseCases(deps).updateInstance(session, instance)).toMatchObject({
+          undo: { restored: [REVIEWS, CARDS, PREFERENCES, META], kept: [], removed: false },
+          backupUrl: FOLDER,
+        });
+      });
     });
 
-    describe("a backup made in place", () => {
-      const entry = (document: string, more: object) => ({ document, copy: `${FOLDER}${document.slice(instance.url.length)}`, versionBackedUp: `before ${document}`, ...more });
+    describe("an update this browser noted", () => {
+      it("is found once over: a run stopped or cut off is offered, its backup to put back", async () => {
+        const deps = makeDeps();
+        const useCases = createUseCases(deps);
+        const backup: Backup = { url: FOLDER, of: instance.url, createdAt: "", entries: [] };
+        await expect(useCases.findInterruptedUpdate(instance)).resolves.toBeNull();
+        vi.mocked(deps.documentBackups.read).mockResolvedValue(backup);
+        // Still under way in another tab, perhaps: left to it.
+        deps.updateJournal.staging.mockReturnValue(runNote("running").replace("2026-09-28T10:00:00.000Z", "2026-09-28T09:55:00.000Z"));
+        await expect(useCases.findInterruptedUpdate(instance)).resolves.toBeNull();
+        deps.updateJournal.staging.mockReturnValue(runNote("running").replace("2026-09-28T10:00:00.000Z", "2026-09-28T09:00:00.000Z"));
+        await expect(useCases.findInterruptedUpdate(instance)).resolves.toEqual({ kind: "run", backup });
+        deps.updateJournal.staging.mockReturnValue(runNote("stopped"));
+        await expect(useCases.findInterruptedUpdate(instance)).resolves.toEqual({ kind: "run", backup });
+        expect(deps.updateJournal.end).not.toHaveBeenCalled();
+      });
+
+      it("is tidied quietly when only tidying was left, and forgotten once its manifest is gone", async () => {
+        const deps = makeDeps();
+        const useCases = createUseCases(deps);
+        const backup: Backup = { url: FOLDER, of: instance.url, createdAt: "", entries: [] };
+        deps.updateJournal.staging.mockReturnValue(runNote("done"));
+        vi.mocked(deps.documentBackups.read).mockResolvedValueOnce(backup);
+        await expect(useCases.findInterruptedUpdate(instance)).resolves.toBeNull();
+        expect(deps.documentBackups.unstage).toHaveBeenCalledWith(backup);
+        // The manifest is written first: without it, nothing in the folder is the update's.
+        deps.updateJournal.staging.mockReturnValue(runNote("stopped"));
+        await expect(useCases.findInterruptedUpdate(instance)).resolves.toBeNull();
+        expect(deps.instanceCopier.deleteRecursively).not.toHaveBeenCalled();
+        expect(deps.updateJournal.end).toHaveBeenCalledTimes(2);
+      });
+
+      it("by an earlier version, its partial copy of the whole instance, is offered for removal while it is there", async () => {
+        const COPY = "https://alice.example/solid-memo/main-0f3a/";
+        const deps = makeDeps();
+        const useCases = createUseCases(deps);
+        deps.updateJournal.staging.mockReturnValue(COPY);
+        vi.mocked(deps.instanceCopier.ensureAbsent).mockRejectedValueOnce(new Error("exists"));
+        await expect(useCases.findInterruptedUpdate(instance)).resolves.toEqual({ kind: "copy", folder: COPY });
+        expect(deps.updateJournal.end).not.toHaveBeenCalled();
+        await expect(useCases.findInterruptedUpdate(instance)).resolves.toBeNull();
+        expect(deps.updateJournal.end).toHaveBeenCalledWith(instance.url);
+        // Removed whole, as nothing names it; a run's backup never is.
+        await useCases.removeInterruptedUpdate(instance);
+        expect(deps.instanceCopier.deleteRecursively).toHaveBeenCalledWith(COPY);
+        vi.mocked(deps.instanceCopier.deleteRecursively).mockClear();
+        deps.updateJournal.staging.mockReturnValue(runNote("stopped"));
+        await useCases.removeInterruptedUpdate(instance);
+        deps.updateJournal.staging.mockReturnValue(null);
+        await useCases.removeInterruptedUpdate(instance);
+        expect(deps.instanceCopier.deleteRecursively).not.toHaveBeenCalled();
+      });
+    });
+
+    describe("a backup", () => {
+      const entry = (document: string, more: object) => ({ document, copy: orig(document), contentType: "text/turtle", versionBackedUp: '"v0"', ...more });
       const backup: Backup = {
         url: FOLDER,
         of: instance.url,
         createdAt: "2026-09-28T10:00:00.000Z",
         entries: [
-          entry(META, { versionUpdated: `after ${META}` }),
-          entry(PREFERENCES, { versionUpdated: `after ${PREFERENCES}` }),
-          entry(deck.cardsDocumentUrl, {}),
-          { document: CATALOG, versionUpdated: `after ${CATALOG}` },
+          entry(META, { versionUpdated: '"v1"' }),
+          entry(PREFERENCES, { versionUpdated: '"v1"' }),
+          entry(CARDS, {}),
+          { document: CATALOG, versionUpdated: '"v1"' },
         ],
       };
+      /** The backup's documents now: the record and the catalogue as the update left them, the preferences studied since, the cards never written. */
+      function restoring() {
+        const deps = makeDeps();
+        vi.mocked(deps.documentBackups.read).mockResolvedValue(backup);
+        vi.mocked(deps.documentBackups.stateOf).mockImplementation(async ({ document }) =>
+          document === CARDS ? { version: '"v0"', asBackedUp: true } : { version: document === PREFERENCES ? '"v2"' : '"v1"', asBackedUp: false },
+        );
+        vi.mocked(deps.documentBackups.sameAsStaged).mockResolvedValue(null);
+        return deps;
+      }
 
-      it("is listed, and deleted, as the backups adapter says", async () => {
+      it("is listed, and deleted, as the backups adapter says, the browser's note of its run forgotten with it", async () => {
         const deps = makeDeps();
         vi.mocked(deps.documentBackups.list).mockResolvedValue([backup]);
         await expect(createUseCases(deps).listBackups(instance)).resolves.toEqual([backup]);
@@ -1339,28 +1647,47 @@ describe("createUseCases", () => {
         vi.mocked(deps.documentBackups.remove).mockResolvedValue({ keptFolder: FOLDER });
         await expect(createUseCases(deps).deleteBackup(backup)).resolves.toEqual({ keptFolder: FOLDER });
         expect(deps.documentBackups.remove).toHaveBeenCalledWith(backup);
+        expect(deps.updateJournal.end).not.toHaveBeenCalled();
+        deps.updateJournal.staging.mockReturnValue(runNote("stopped"));
+        await createUseCases(deps).deleteBackup(backup);
+        expect(deps.updateJournal.end).toHaveBeenCalledWith(instance.url);
+        // Another run's note is not this backup's.
+        deps.updateJournal.staging.mockReturnValue(runNote("stopped").replace(FOLDER, `${instance.url}backups/other/`));
+        await createUseCases(deps).deleteBackup(backup);
+        expect(deps.updateJournal.end).toHaveBeenCalledOnce();
       });
 
       it("is restored document by document, last written first: what the update left is put back, what changed since is kept", async () => {
-        const deps = makeDeps();
-        vi.mocked(deps.documentBackups.read).mockResolvedValue(backup);
-        vi.mocked(deps.documentBackups.versionOf).mockImplementation(async (url) =>
-          url === PREFERENCES ? "studied since" : url === deck.cardsDocumentUrl ? `before ${url}` : `after ${url}`,
-        );
+        const deps = restoring();
         const restored = await createUseCases(deps).restoreBackup(instance, backup);
-        expect(restored).toEqual({ restored: [CATALOG, META], kept: [PREFERENCES], removed: false });
+        expect(restored).toEqual({ restored: [CATALOG, META], kept: [{ document: PREFERENCES, copy: orig(PREFERENCES) }], removed: false });
         expect(vi.mocked(deps.documentBackups.putBack).mock.calls).toEqual([
-          [backup.entries[3], `after ${CATALOG}`],
-          [backup.entries[0], `after ${META}`],
+          [backup.entries[3], '"v1"'],
+          [backup.entries[0], '"v1"'],
         ]);
+        // Nothing passes the fence: nothing holds the instance.
+        expect(deps.documentBackups.unstage).toHaveBeenCalledWith(backup);
         expect(deps.documentBackups.remove).not.toHaveBeenCalled();
       });
 
+      it("puts back one whose version only the browser noted, or that says what the update's working copy says", async () => {
+        const deps = restoring();
+        vi.mocked(deps.documentBackups.read).mockResolvedValue({ ...backup, entries: backup.entries.map(({ versionUpdated: _v, ...rest }) => rest) });
+        deps.updateJournal.staging.mockReturnValue(runNote("stopped", { [META]: '"v1"' }));
+        vi.mocked(deps.documentBackups.sameAsStaged).mockImplementation(async (_backup, { document }) => document === CATALOG);
+        await expect(createUseCases(deps).restoreBackup(instance, backup)).resolves.toEqual({
+          restored: [CATALOG, META],
+          kept: [{ document: PREFERENCES, copy: orig(PREFERENCES) }],
+          removed: false,
+        });
+        // Nothing left of the run to put back: the browser forgets it.
+        expect(deps.updateJournal.end).toHaveBeenCalledWith(instance.url);
+      });
+
       it("is deleted once all of it is put back; a document changed between the check and the write is kept", async () => {
-        const deps = makeDeps();
-        vi.mocked(deps.documentBackups.read).mockResolvedValue(backup);
-        vi.mocked(deps.documentBackups.versionOf).mockImplementation(async (url) =>
-          url === deck.cardsDocumentUrl ? `before ${url}` : `after ${url}`,
+        const deps = restoring();
+        vi.mocked(deps.documentBackups.stateOf).mockImplementation(async ({ document }) =>
+          document === CARDS ? { version: '"v0"', asBackedUp: true } : { version: '"v1"', asBackedUp: false },
         );
         await expect(createUseCases(deps).restoreBackup(instance, backup)).resolves.toEqual({
           restored: [CATALOG, PREFERENCES, META],
@@ -1368,16 +1695,25 @@ describe("createUseCases", () => {
           removed: true,
         });
         expect(deps.documentBackups.remove).toHaveBeenCalledWith(backup);
-        vi.mocked(deps.documentBackups.remove).mockRejectedValueOnce(new Error("offline"));
-        await expect(createUseCases(deps).restoreBackup(instance, backup)).resolves.toMatchObject({ removed: false });
         vi.mocked(deps.documentBackups.putBack).mockRejectedValueOnce(new AppError("changedElsewhere", { url: CATALOG }));
         await expect(createUseCases(deps).restoreBackup(instance, backup)).resolves.toEqual({
           restored: [PREFERENCES, META],
-          kept: [CATALOG],
+          kept: [{ document: CATALOG }],
           removed: false,
         });
+        // A document gone since is kept gone.
+        vi.mocked(deps.documentBackups.stateOf).mockResolvedValue({ version: null, asBackedUp: false });
+        await expect(createUseCases(deps).restoreBackup(instance, backup)).resolves.toMatchObject({ restored: [] });
+      });
+
+      it("stops at a document it cannot put back, after trying the others, keeping everything", async () => {
+        const deps = restoring();
         vi.mocked(deps.documentBackups.putBack).mockRejectedValueOnce(new Error("offline"));
+        deps.updateJournal.staging.mockReturnValue(runNote("stopped"));
         await expect(createUseCases(deps).restoreBackup(instance, backup)).rejects.toThrow("offline");
+        expect(deps.documentBackups.putBack).toHaveBeenCalledTimes(2);
+        expect(deps.documentBackups.unstage).not.toHaveBeenCalled();
+        expect(deps.updateJournal.end).not.toHaveBeenCalled();
       });
 
       it("is not restored once it is gone", async () => {
@@ -1386,32 +1722,63 @@ describe("createUseCases", () => {
         expect(deps.documentBackups.putBack).not.toHaveBeenCalled();
       });
 
+      it("is neither restored nor deleted while this browser notes its update under way, perhaps in another tab", async () => {
+        const deps = restoring();
+        deps.updateJournal.staging.mockReturnValue(runNote("running"));
+        await expect(createUseCases(deps).restoreBackup(instance, backup)).rejects.toMatchObject({ code: "backupInUse" });
+        await expect(createUseCases(deps).deleteBackup(backup)).rejects.toMatchObject({ code: "backupInUse" });
+        expect(deps.documentBackups.stateOf).not.toHaveBeenCalled();
+        expect(deps.documentBackups.putBack).not.toHaveBeenCalled();
+        expect(deps.documentBackups.remove).not.toHaveBeenCalled();
+        expect(deps.updateJournal.end).not.toHaveBeenCalled();
+        // Once it is over, or cut off long enough ago, it is.
+        deps.updateJournal.staging.mockReturnValue(runNote("running").replace("2026-09-28T10:00:00.000Z", "2026-09-28T09:00:00.000Z"));
+        await expect(createUseCases(deps).deleteBackup(backup)).resolves.toEqual({ keptFolder: null });
+      });
+
       it("is not restored when its manifest names what is not the instance's, as anyone who may write in it could leave one", async () => {
         const PROFILE = "https://alice.example/profile/card";
+        const ELSEWHERE = "https://alice.example/elsewhere/deck-1.ttl";
         const planted: Backup[] = [
-          { ...backup, entries: [{ document: PROFILE, copy: `${FOLDER}card.ttl`, versionBackedUp: "a", versionUpdated: "b" }] },
-          { ...backup, entries: [entry(META, { copy: "https://elsewhere.example/meta.ttl", versionUpdated: "b" })] },
+          { ...backup, entries: [{ document: PROFILE, copy: `${FOLDER}elsewhere/1.orig`, versionBackedUp: "a", versionUpdated: "b" }] },
+          // A request resolves the dot segments, stepping out of the instance, or of the backup's folder.
+          { ...backup, entries: [entry(`${instance.url}../profile/card`, { copy: `${FOLDER}../profile/card.orig`, versionUpdated: "b" })] },
+          { ...backup, entries: [entry(META, { copy: `${FOLDER}../../decks/deck-1.ttl`, versionUpdated: "b" })] },
+          { ...backup, entries: [entry(META, { copy: "https://elsewhere.example/meta.ttl.orig", versionUpdated: "b" })] },
           { ...backup, entries: [entry(META, { copy: FOLDER, versionUpdated: "b" })] },
           { ...backup, entries: [entry(`${instance.url}backups/other/meta.ttl`, { versionUpdated: "b" })] },
+          // An access control, or a description, which no update writes.
+          { ...backup, entries: [entry(`${instance.url}.acl`, { versionUpdated: "b" })] },
+          { ...backup, entries: [entry(`${CARDS}.meta`, { versionUpdated: "b" })] },
           { ...backup, of: "https://alice.example/solid-memo/other/" },
           { ...backup, url: `${instance.url}decks/` },
+          { ...backup, url: `${FOLDER}deeper/`, entries: [] },
         ];
         for (const manifest of planted) {
           const deps = makeDeps();
           vi.mocked(deps.documentBackups.read).mockResolvedValue(manifest);
-          await expect(createUseCases(deps).restoreBackup(instance, manifest)).rejects.toMatchObject({ code: "backupNotOurs" });
-          expect(deps.documentBackups.versionOf).not.toHaveBeenCalled();
+          await expect(createUseCases(deps).restoreBackup(instance, manifest), JSON.stringify(manifest)).rejects.toMatchObject({
+            code: "backupNotOurs",
+          });
+          expect(deps.documentBackups.stateOf).not.toHaveBeenCalled();
           expect(deps.documentBackups.putBack).not.toHaveBeenCalled();
         }
-        // A deck's document outside the instance, which the catalog names, is the instance's.
+        // Nor a deck's document outside the instance, though the catalog names it: anyone who may write
+        // in the instance could name any document there.
         const deps = makeDeps();
-        const ELSEWHERE = "https://alice.example/elsewhere/deck-1.ttl";
         vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([{ ...deck, cardsDocumentUrl: ELSEWHERE }]);
-        const outside = { ...backup, entries: [{ document: ELSEWHERE, copy: `${FOLDER}elsewhere/1.ttl`, versionBackedUp: "a", versionUpdated: "b" }] };
+        const outside = { ...backup, entries: [{ document: ELSEWHERE, copy: `${FOLDER}elsewhere/1.orig`, versionBackedUp: "a", versionUpdated: "b" }] };
         vi.mocked(deps.documentBackups.read).mockResolvedValue(outside);
-        vi.mocked(deps.documentBackups.versionOf).mockResolvedValue("b");
-        await expect(createUseCases(deps).restoreBackup({ ...instance, url: instance.url.slice(0, -1) }, outside)).resolves.toMatchObject({
-          restored: [ELSEWHERE],
+        vi.mocked(deps.documentBackups.stateOf).mockResolvedValue({ version: "b", asBackedUp: false });
+        await expect(createUseCases(deps).restoreBackup({ ...instance, url: instance.url.slice(0, -1) }, outside)).rejects.toMatchObject({
+          code: "backupNotOurs",
+        });
+        expect(deps.documentBackups.putBack).not.toHaveBeenCalled();
+        // The instance's own, named without its trailing slash, is.
+        vi.mocked(deps.documentBackups.read).mockResolvedValue(backup);
+        vi.mocked(deps.documentBackups.stateOf).mockResolvedValue({ version: '"v1"', asBackedUp: false });
+        await expect(createUseCases(deps).restoreBackup({ ...instance, url: instance.url.slice(0, -1) }, backup)).resolves.toMatchObject({
+          restored: [CATALOG, PREFERENCES, META],
         });
       });
     });
@@ -2347,7 +2714,11 @@ describe("library deck upgrade", () => {
    * Sweden fixed, Latvia removed, Norway added. Each document has a
    * version, moved by every write; a write made while the fence passes
    * the document against a version fails (changedElsewhere) unless the
-   * document is still at it, as the pod would answer.
+   * document is still at it, as the pod would answer. The backups adapter
+   * keeps each document's cards or states as they were, writes the
+   * working copy's documents beside them (its pictures in the instance
+   * moved with it), tells a document still as backed up, or as its working
+   * copy says, by what it holds, and puts it back.
    */
   async function world({
     reviews = [reviewOf("sweden"), reviewOf("latvia")],
@@ -2410,7 +2781,7 @@ describe("library deck upgrade", () => {
       cards: new Map<string, Card[]>([[copy.cardsDocumentUrl, v1.cards.map((c) => toPodCard(copy.cardsDocumentUrl, c))]]),
       reviews: new Map<string, ReviewState[]>([[copy.reviewsDocumentUrl, reviews]]),
       writes: new Map<string, number>(),
-      /** The backups made, by folder, with what each copied. */
+      /** The backups made, by folder, with what each holds of each document. */
       backups: new Map<string, { backup: Backup; copied: Map<string, { cards?: Card[]; reviews?: ReviewState[] }> }>(),
     };
     const versionOf = (url: string) => `v${pod.writes.get(url) ?? 0}`;
@@ -2420,6 +2791,13 @@ describe("library deck upgrade", () => {
       const pinned = pins.get(url);
       if (pinned !== undefined && pinned !== versionOf(url)) throw new AppError("changedElsewhere", { url });
     };
+    /** What a document holds, its cards' addresses left out: what two documents are compared by. */
+    const holds = (url: string, map: (iri: string) => string = (iri) => iri) =>
+      JSON.stringify({
+        cards: pod.cards.get(url)?.map(({ url: _url, ...card }) => withPicturesAt([card], map)[0]),
+        reviews: pod.reviews.get(url),
+      });
+    const stagedOf = (folder: string, url: string) => url.replace(instance.url, `${folder}staging/`);
     const repo = deps.deckRepository;
     vi.mocked(repo.readDeck).mockImplementation(async (url) => (pod.deck?.url === url ? pod.deck : null));
     vi.mocked(repo.listDecks).mockImplementation(async () => (pod.deck === null ? [] : [pod.deck]));
@@ -2464,16 +2842,37 @@ describe("library deck upgrade", () => {
       wrote(url);
     });
     const backups = deps.documentBackups;
-    vi.mocked(backups.create).mockImplementation(async ({ folder, of, createdAt, documents, release }, onCopied = () => undefined) => {
+    vi.mocked(backups.create).mockImplementation(async ({ folder, of, createdAt, documents, release }, onBackedUp = () => undefined) => {
       const copied = new Map<string, { cards?: Card[]; reviews?: ReviewState[] }>();
       const entries = documents.map((document) => {
         copied.set(document, { cards: pod.cards.get(document), reviews: pod.reviews.get(document) });
-        onCopied();
-        return { document, copy: `${folder}${document.slice(instance.url.length)}`, versionBackedUp: versionOf(document) };
+        onBackedUp();
+        return { document, copy: `${folder}${document.slice(instance.url.length)}.orig`, contentType: "text/turtle", versionBackedUp: versionOf(document) };
       });
       const backup = { url: folder, of, createdAt, release, entries };
       pod.backups.set(folder, { backup, copied });
       return backup;
+    });
+    vi.mocked(backups.stage).mockImplementation(async (backup, onStaged = () => undefined) => {
+      for (const { document } of backup.entries) {
+        const was = pod.backups.get(backup.url)!.copied.get(document)!;
+        const staged = stagedOf(backup.url, document);
+        if (was.cards !== undefined) {
+          pod.cards.set(staged, withPicturesAt(was.cards, (iri) => stagedOf(backup.url, iri)).map((c) => ({ ...c, url: `${staged}#${c.id}` })));
+        }
+        if (was.reviews !== undefined) pod.reviews.set(staged, was.reviews);
+        onStaged();
+      }
+    });
+    const asBackedUp = (document: string) => {
+      const was = [...pod.backups.values()].find(({ copied }) => copied.has(document))!.copied.get(document)!;
+      return JSON.stringify({ cards: was.cards?.map(({ url: _url, ...card }) => card), reviews: was.reviews }) === holds(document);
+    };
+    vi.mocked(backups.stateOf).mockImplementation(async (entry) => ({ version: versionOf(entry.document), asBackedUp: asBackedUp(entry.document) }));
+    vi.mocked(backups.sameAsStaged).mockImplementation(async (backup, entry) => {
+      const staged = stagedOf(backup.url, entry.document);
+      if (!pod.cards.has(staged) && !pod.reviews.has(staged)) return null;
+      return holds(staged, (iri) => iri.replace(`${backup.url}staging/`, instance.url)) === holds(entry.document);
     });
     vi.mocked(backups.versionOf).mockImplementation(async (url) => versionOf(url));
     vi.mocked(backups.noteUpdated).mockImplementation(async (backup, document, version) => {
@@ -2488,19 +2887,30 @@ describe("library deck upgrade", () => {
       if (was.reviews !== undefined) pod.reviews.set(entry.document, was.reviews);
       wrote(entry.document);
     });
+    const unstage = async (backup: Backup) => {
+      for (const url of [...pod.cards.keys(), ...pod.reviews.keys()].filter((key) => key.startsWith(`${backup.url}staging/`))) {
+        pod.cards.delete(url);
+        pod.reviews.delete(url);
+      }
+    };
+    vi.mocked(backups.unstage).mockImplementation(unstage);
     vi.mocked(backups.remove).mockImplementation(async (backup) => {
+      await unstage(backup);
       pod.backups.delete(backup.url);
       return { keptFolder: null };
     });
     const useCases = createUseCases({ ...deps, writeFence });
     const plan = (await useCases.planLibraryUpgrade(copy))!;
-    return { deps, pod, copy, plan, useCases, writeFence, held, released, wrote, v2, versionOf };
+    return { deps, pod, copy, plan, useCases, writeFence, held, released, wrote, v2, versionOf, stagedOf };
   }
 
   const cardsOf = (pod: Awaited<ReturnType<typeof world>>["pod"], url: string) =>
     pod.cards.get(url)!.map((c) => [c.id, c.back[""], c.retired === true]);
+  const violation = { message: { en: "x" }, severity: "violation" as const, constraint: "MinCount" };
+  const STAGED_COPY_CARDS = `${FOLDER}staging/decks/deck-1.ttl`;
+  const STAGED_COPY_REVIEWS = `${FOLDER}staging/reviews/deck-1.ttl`;
 
-  it("backs the deck's documents up, writes the upgrade into them in place, checks it, moves the entry, and deletes the backup", async () => {
+  it("backs the deck's documents up, upgrades and checks a working copy, then writes and checks each in place, moves the entry, and deletes the backup", async () => {
     const { deps, pod, copy, plan, useCases, writeFence, held, released } = await world();
     const progress: DeckUpgradeProgress[] = [];
     const outcome = await useCases.applyLibraryUpgrade(copy, plan, (p) => progress.push(p));
@@ -2515,7 +2925,9 @@ describe("library deck upgrade", () => {
       title: { en: "Capitals", sv: "Huvudstäder" },
     });
     expect(outcome.ok && outcome.deck).toEqual(pod.deck);
+    // The working copy is gone with the backup.
     expect([...pod.cards.keys()]).toEqual([copy.cardsDocumentUrl]);
+    expect([...pod.reviews.keys()]).toEqual([copy.reviewsDocumentUrl]);
     expect(cardsOf(pod, copy.cardsDocumentUrl)).toEqual([
       ["sweden", "Stockholm", false],
       ["denmark", "Copenhagen", false],
@@ -2534,9 +2946,29 @@ describe("library deck upgrade", () => {
       },
       expect.any(Function),
     );
-    // The cards are written whole, the states of the removed card dropped.
-    expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledWith(copy, expect.anything(), { whole: true });
-    expect(deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledWith(copy, { save: [], remove: [reviewOf("latvia")] });
+    // The cards are written whole, the states of the removed card dropped: in the working copy, then in place, the same.
+    const staged = { ...copy, url: `${FOLDER}staging/catalog.ttl#deck-1`, cardsDocumentUrl: STAGED_COPY_CARDS, reviewsDocumentUrl: STAGED_COPY_REVIEWS };
+    expect(vi.mocked(deps.deckRepository.applyCardChanges).mock.calls.map(([d, , options]) => [d, options])).toEqual([
+      [staged, { whole: true }],
+      [copy, { whole: true }],
+    ]);
+    const [stagedChanges, changes] = vi.mocked(deps.deckRepository.applyCardChanges).mock.calls.map(([, made]) => made);
+    expect(changes).toEqual(stagedChanges);
+    // A card the release adds is made at the time the upgrade began, in both.
+    expect(changes!.save.find((card) => card.id === "norway")).toMatchObject({ createdAt: "2026-09-28T10:00:00.000Z" });
+    expect(vi.mocked(deps.reviewStateRepository.applyReviewChanges).mock.calls).toEqual([
+      [staged, { save: [], remove: [reviewOf("latvia")] }],
+      [copy, { save: [], remove: [reviewOf("latvia")] }],
+    ]);
+    // The copy is checked against the shapes before the deck is written in place, the deck after.
+    expect(vi.mocked(deps.shapeValidator.validateDocument).mock.calls.map(([url]) => url)).toEqual([
+      copy.cardsDocumentUrl,
+      copy.reviewsDocumentUrl,
+      STAGED_COPY_CARDS,
+      STAGED_COPY_REVIEWS,
+      copy.cardsDocumentUrl,
+      copy.reviewsDocumentUrl,
+    ]);
     expect(vi.mocked(deps.documentBackups.noteUpdated).mock.calls.map(([, document, version]) => [document, version])).toEqual([
       [copy.cardsDocumentUrl, "v1"],
       [copy.reviewsDocumentUrl, "v1"],
@@ -2550,24 +2982,40 @@ describe("library deck upgrade", () => {
       [copy.reviewsDocumentUrl, "v0"],
     ]);
     expect(progress.map((p) => [p.step, p.done, p.part])).toEqual([
-      ["read", 0, { done: 0, total: 3 }],
-      ["read", 0, { done: 1, total: 3 }],
-      ["read", 0, { done: 2, total: 3 }],
-      ["read", 0, { done: 3, total: 4 }],
-      ["backup", 1, { done: 0, total: 4 }],
-      ["backup", 1, { done: 1, total: 4 }],
-      ["backup", 1, { done: 2, total: 4 }],
-      ["backup", 1, { done: 3, total: 4 }],
-      ["write", 2, { done: 0, total: 2 }],
-      ["write", 2, { done: 1, total: 2 }],
+      ["read", 0, { done: 0, total: 4 }],
+      ["read", 0, { done: 1, total: 4 }],
+      ["read", 0, { done: 2, total: 4 }],
+      ["read", 0, { done: 3, total: 5 }],
+      ["read", 0, { done: 4, total: 5 }],
+      ["backup", 1, { done: 0, total: 3 }],
+      ["backup", 1, { done: 1, total: 3 }],
+      ["backup", 1, { done: 2, total: 3 }],
+      ["copy", 2, { done: 0, total: 4 }],
+      ["copy", 2, { done: 1, total: 4 }],
+      ["copy", 2, { done: 2, total: 4 }],
+      ["copy", 2, { done: 3, total: 4 }],
       ["check", 3, { done: 0, total: 2 }],
       ["check", 3, { done: 1, total: 2 }],
-      ["entry", 4, undefined],
-      ["tidy", 5, undefined],
-      ["tidy", 6, undefined],
+      ["verify", 4, { done: 0, total: 2 }],
+      ["verify", 4, { done: 1, total: 2 }],
+      ["write", 5, { done: 0, total: 2 }],
+      ["write", 5, { done: 1, total: 2 }],
+      ["validate", 6, { done: 0, total: 2 }],
+      ["validate", 6, { done: 1, total: 2 }],
+      ["entry", 7, undefined],
+      ["tidy", 8, undefined],
+      ["tidy", 9, undefined],
     ]);
-    expect(progress.every((p) => p.total === 6)).toBe(true);
-    expect(deps.updateJournal.begin).not.toHaveBeenCalled();
+    expect(progress.every((p) => p.total === 9)).toBe(true);
+    // The browser notes the run under the deck as it goes, and forgets it once over.
+    const notes = deps.updateJournal.begin.mock.calls.map(([key, text]) => [key, JSON.parse(text as string).state]);
+    expect(notes).toEqual([
+      [copy.url, "running"],
+      [copy.url, "running"],
+      [copy.url, "running"],
+      [copy.url, "done"],
+    ]);
+    expect(deps.updateJournal.end).toHaveBeenCalledExactlyOnceWith(copy.url);
     expect(deps.deckRepository.deleteDocument).not.toHaveBeenCalled();
   });
 
@@ -2591,6 +3039,7 @@ describe("library deck upgrade", () => {
       step: "read",
       error: expect.objectContaining({ code: "deckChangedSinceOffer" }),
       asItWas: true,
+      undo: null,
     });
     pod.deck = { ...copy, cardsDocumentUrl: "elsewhere" };
     await expect(useCases.applyLibraryUpgrade(copy, plan)).resolves.toMatchObject({ error: expect.objectContaining({ code: "deckChangedSinceOffer" }) });
@@ -2600,6 +3049,7 @@ describe("library deck upgrade", () => {
     await expect(useCases.applyLibraryUpgrade(copy, plan)).resolves.toMatchObject({ error: expect.objectContaining({ code: "deckGone" }) });
     expect(deps.documentBackups.create).not.toHaveBeenCalled();
     expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
+    expect(deps.updateJournal.begin).not.toHaveBeenCalled();
   });
 
   it("fails at reading when a read without a version answers unchanged", async () => {
@@ -2610,26 +3060,28 @@ describe("library deck upgrade", () => {
 
   it("gives up before writing, deleting its backup, when a card or review state changed since it was read", async () => {
     const cards = await world();
-    vi.mocked(cards.deps.documentBackups.create).mockImplementationOnce(async (args) => {
+    const create = vi.mocked(cards.deps.documentBackups.create).getMockImplementation()!;
+    vi.mocked(cards.deps.documentBackups.create).mockImplementationOnce(async (args, onBackedUp) => {
       const [first, ...rest] = cards.pod.cards.get(cards.copy.cardsDocumentUrl)!;
       cards.pod.cards.set(cards.copy.cardsDocumentUrl, [{ ...first, front: { "": "Sverige" } }, ...rest]);
       cards.wrote(cards.copy.cardsDocumentUrl);
-      return { url: args.folder, of: args.of, createdAt: args.createdAt, entries: [] };
+      return create(args, onBackedUp);
     });
-    vi.mocked(cards.deps.documentBackups.read).mockResolvedValueOnce({ url: FOLDER, of: cards.copy.url, createdAt: "", entries: [] });
     await expect(cards.useCases.applyLibraryUpgrade(cards.copy, cards.plan)).resolves.toEqual({
       ok: false,
       step: "backup",
       error: expect.objectContaining({ code: "deckChangedDuringUpgrade", vars: { url: cards.copy.cardsDocumentUrl } }),
       asItWas: true,
+      undo: null,
     });
-    expect(cards.deps.documentBackups.remove).toHaveBeenCalledOnce();
+    expect(cards.pod.backups.size).toBe(0);
     expect(cards.deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
+    expect(cards.deps.updateJournal.end).toHaveBeenCalledWith(cards.copy.url);
 
     const states = await world();
-    const create = vi.mocked(states.deps.documentBackups.create).getMockImplementation()!;
-    vi.mocked(states.deps.documentBackups.create).mockImplementationOnce(async (args, onCopied) => {
-      const made = await create(args, onCopied);
+    const createStates = vi.mocked(states.deps.documentBackups.create).getMockImplementation()!;
+    vi.mocked(states.deps.documentBackups.create).mockImplementationOnce(async (args, onBackedUp) => {
+      const made = await createStates(args, onBackedUp);
       states.pod.reviews.set(states.copy.reviewsDocumentUrl, [{ ...reviewOf("sweden"), intervalDays: 6 }, reviewOf("latvia")]);
       states.wrote(states.copy.reviewsDocumentUrl);
       return made;
@@ -2640,15 +3092,29 @@ describe("library deck upgrade", () => {
       asItWas: true,
     });
     expect(states.pod.backups.size).toBe(0);
+
+    // A backup that cannot be deleted is named, and the browser keeps its note.
+    const left = await world();
+    vi.mocked(left.deps.documentBackups.stage).mockRejectedValueOnce(new Error("offline"));
+    vi.mocked(left.deps.documentBackups.remove).mockResolvedValueOnce({ keptFolder: FOLDER });
+    await expect(left.useCases.applyLibraryUpgrade(left.copy, left.plan)).resolves.toEqual({
+      ok: false,
+      step: "copy",
+      error: new Error("offline"),
+      asItWas: true,
+      undo: null,
+      backupUrl: FOLDER,
+    });
+    expect(JSON.parse(left.deps.updateJournal.begin.mock.calls.at(-1)![1] as string).state).toBe("stopped");
   });
 
   it("goes on when a document was written meanwhile but still says the same, and compares contents when the pod says no versions", async () => {
     const same = await world();
     const create = vi.mocked(same.deps.documentBackups.create).getMockImplementation()!;
-    vi.mocked(same.deps.documentBackups.create).mockImplementationOnce(async (args, onCopied) => {
+    vi.mocked(same.deps.documentBackups.create).mockImplementationOnce(async (args, onBackedUp) => {
       same.wrote(same.copy.cardsDocumentUrl);
       same.wrote(same.copy.reviewsDocumentUrl);
-      return create(args, onCopied);
+      return create(args, onBackedUp);
     });
     await expect(same.useCases.applyLibraryUpgrade(same.copy, same.plan)).resolves.toMatchObject({ ok: true });
 
@@ -2667,28 +3133,7 @@ describe("library deck upgrade", () => {
     expect(versionless.deps.deckRepository.readCardsSince).toHaveBeenCalledWith(versionless.copy, undefined);
   });
 
-  it("writes nothing over a document changed elsewhere after it was backed up, and puts back what it wrote", async () => {
-    const { pod, copy, plan, useCases, wrote, deps } = await world();
-    const applyCards = vi.mocked(deps.deckRepository.applyCardChanges).getMockImplementation()!;
-    vi.mocked(deps.deckRepository.applyCardChanges).mockImplementationOnce(async (d, changes, options) => {
-      await applyCards(d, changes, options);
-      // Another device studies before the reviews document is written.
-      wrote(copy.reviewsDocumentUrl);
-    });
-    const before = cardsOf(pod, copy.cardsDocumentUrl);
-    await expect(useCases.applyLibraryUpgrade(copy, plan)).resolves.toEqual({
-      ok: false,
-      step: "write",
-      error: expect.objectContaining({ code: "changedElsewhere", vars: { url: copy.reviewsDocumentUrl } }),
-      asItWas: true,
-    });
-    expect(cardsOf(pod, copy.cardsDocumentUrl)).toEqual(before);
-    expect(pod.reviews.get(copy.reviewsDocumentUrl)!.map((s) => s.cardId)).toEqual(["sweden", "latvia"]);
-    expect(pod.deck).toEqual(copy);
-    expect(pod.backups.size).toBe(0);
-  });
-
-  it("puts the deck back as it was when what it wrote does not read back as written", async () => {
+  it("changes nothing of the deck when its working copy does not read back as the plan means, or fails its shapes anew", async () => {
     const cards = await world();
     const applyCards = vi.mocked(cards.deps.deckRepository.applyCardChanges).getMockImplementation()!;
     vi.mocked(cards.deps.deckRepository.applyCardChanges).mockImplementationOnce(async (d, changes, options) => {
@@ -2698,12 +3143,13 @@ describe("library deck upgrade", () => {
     await expect(cards.useCases.applyLibraryUpgrade(cards.copy, cards.plan)).resolves.toEqual({
       ok: false,
       step: "check",
-      error: expect.objectContaining({ code: "upgradedCardsDiffer", vars: { url: cards.copy.cardsDocumentUrl } }),
+      error: expect.objectContaining({ code: "upgradedCardsDiffer", vars: { url: STAGED_COPY_CARDS } }),
       asItWas: true,
+      undo: null,
     });
     expect(cardsOf(cards.pod, cards.copy.cardsDocumentUrl)).toEqual(before);
-    expect(cards.pod.reviews.get(cards.copy.reviewsDocumentUrl)!).toHaveLength(2);
-    expect(cards.pod.deck).toEqual(cards.copy);
+    expect(vi.mocked(cards.deps.deckRepository.applyCardChanges)).toHaveBeenCalledOnce();
+    expect(cards.pod.backups.size).toBe(0);
 
     const states = await world();
     vi.mocked(states.deps.reviewStateRepository.applyReviewChanges).mockImplementationOnce(async (d) => {
@@ -2712,24 +3158,124 @@ describe("library deck upgrade", () => {
     });
     await expect(states.useCases.applyLibraryUpgrade(states.copy, states.plan)).resolves.toMatchObject({
       step: "check",
-      error: expect.objectContaining({ code: "upgradedReviewsDiffer" }),
+      error: expect.objectContaining({ code: "upgradedReviewsDiffer", vars: { url: STAGED_COPY_REVIEWS } }),
       asItWas: true,
     });
     expect(states.pod.reviews.get(states.copy.reviewsDocumentUrl)!).toHaveLength(2);
+
+    // What already failed in the deck (a broken card) is not the upgrade's doing; a state failing anew in the copy is.
+    const invalid = await world();
+    vi.mocked(invalid.deps.shapeValidator.validateDocument).mockImplementation(async (url) => ({
+      url,
+      status: "checked" as const,
+      subjects: [
+        ...(url.endsWith("decks/deck-1.ttl") ? [`${url}#broken`] : []),
+        ...(url === STAGED_COPY_REVIEWS ? [`${url}#sweden`] : []),
+      ].map((subject) => ({ url: subject, status: "checked" as const, shape: "card" as const, version: 5, violations: [violation] })),
+    }));
+    await expect(invalid.useCases.applyLibraryUpgrade(invalid.copy, invalid.plan)).resolves.toMatchObject({
+      step: "check",
+      error: new AppError("updatedCopyInvalid", { count: 1 }),
+      asItWas: true,
+      undo: null,
+    });
+  });
+
+  it("changes nothing of the deck when a document changed elsewhere since it was backed up", async () => {
+    const { deps, pod, copy, plan, useCases, wrote } = await world();
+    const stage = vi.mocked(deps.documentBackups.stage).getMockImplementation()!;
+    vi.mocked(deps.documentBackups.stage).mockImplementationOnce(async (backup, onStaged) => {
+      await stage(backup, onStaged);
+      // Another device studies as the working copy is written.
+      pod.reviews.set(copy.reviewsDocumentUrl, [reviewOf("sweden")]);
+      wrote(copy.reviewsDocumentUrl);
+    });
+    await expect(useCases.applyLibraryUpgrade(copy, plan)).resolves.toMatchObject({
+      step: "verify",
+      error: expect.objectContaining({ code: "deckChangedDuringUpgrade", vars: { url: copy.reviewsDocumentUrl } }),
+      asItWas: true,
+      undo: null,
+    });
+    expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalledWith(copy, expect.anything(), expect.anything());
+  });
+
+  it("writes nothing over a document changed elsewhere after it was backed up, and puts back what it wrote", async () => {
+    const { pod, copy, plan, useCases, wrote, deps } = await world();
+    const applyCards = vi.mocked(deps.deckRepository.applyCardChanges).getMockImplementation()!;
+    vi.mocked(deps.deckRepository.applyCardChanges).mockImplementation(async (d, changes, options) => {
+      await applyCards(d, changes, options);
+      // Another device studies before the reviews document is written.
+      if (d.cardsDocumentUrl === copy.cardsDocumentUrl) wrote(copy.reviewsDocumentUrl);
+    });
+    const before = cardsOf(pod, copy.cardsDocumentUrl);
+    const progress: DeckUpgradeProgress[] = [];
+    await expect(useCases.applyLibraryUpgrade(copy, plan, (p) => progress.push(p))).resolves.toEqual({
+      ok: false,
+      step: "write",
+      error: expect.objectContaining({ code: "changedElsewhere", vars: { url: copy.reviewsDocumentUrl } }),
+      // The reviews document says what it said: it needs nothing.
+      asItWas: true,
+      undo: { restored: [copy.cardsDocumentUrl], kept: [], removed: true },
+    });
+    // Refused, the reviews document was never written: only the cards are put back.
+    expect(progress.at(-1)).toMatchObject({ step: "write", undoing: true, part: { done: 0, total: 1 } });
+    expect(cardsOf(pod, copy.cardsDocumentUrl)).toEqual(before);
+    expect(pod.reviews.get(copy.reviewsDocumentUrl)!.map((s) => s.cardId)).toEqual(["sweden", "latvia"]);
+    expect(pod.deck).toEqual(copy);
+    expect(pod.backups.size).toBe(0);
+  });
+
+  it("puts the deck back as it was when what it wrote in place does not read back as written, or fails its shapes anew", async () => {
+    const cards = await world();
+    const applyCards = vi.mocked(cards.deps.deckRepository.applyCardChanges).getMockImplementation()!;
+    vi.mocked(cards.deps.deckRepository.applyCardChanges).mockImplementation(async (d, changes, options) => {
+      await applyCards(d, d.cardsDocumentUrl === cards.copy.cardsDocumentUrl ? { ...changes, save: changes.save.slice(1) } : changes, options);
+    });
+    const before = cardsOf(cards.pod, cards.copy.cardsDocumentUrl);
+    await expect(cards.useCases.applyLibraryUpgrade(cards.copy, cards.plan)).resolves.toEqual({
+      ok: false,
+      step: "validate",
+      error: expect.objectContaining({ code: "upgradedCardsDiffer", vars: { url: cards.copy.cardsDocumentUrl } }),
+      asItWas: true,
+      undo: { restored: [cards.copy.reviewsDocumentUrl, cards.copy.cardsDocumentUrl], kept: [], removed: true },
+    });
+    expect(cardsOf(cards.pod, cards.copy.cardsDocumentUrl)).toEqual(before);
+    expect(cards.pod.reviews.get(cards.copy.reviewsDocumentUrl)!).toHaveLength(2);
+    expect(cards.pod.deck).toEqual(cards.copy);
+
+    const invalid = await world();
+    let written = false;
+    const applyStates = vi.mocked(invalid.deps.reviewStateRepository.applyReviewChanges).getMockImplementation()!;
+    vi.mocked(invalid.deps.reviewStateRepository.applyReviewChanges).mockImplementation(async (d, changes) => {
+      await applyStates(d, changes);
+      written ||= d.reviewsDocumentUrl === invalid.copy.reviewsDocumentUrl;
+    });
+    vi.mocked(invalid.deps.shapeValidator.validateDocument).mockImplementation(async (url) => ({
+      url,
+      status: "checked" as const,
+      subjects: written ? [{ url: `${url}#x`, status: "checked" as const, shape: "card" as const, version: 5, violations: [violation] }] : [],
+    }));
+    await expect(invalid.useCases.applyLibraryUpgrade(invalid.copy, invalid.plan)).resolves.toMatchObject({
+      step: "validate",
+      error: new AppError("updatedInstanceInvalid", { count: 2 }),
+      asItWas: true,
+    });
+    expect(invalid.pod.reviews.get(invalid.copy.reviewsDocumentUrl)!).toHaveLength(2);
   });
 
   it("puts back what it wrote when the entry's write is refused", async () => {
     const { deps, pod, copy, plan, useCases } = await world();
     const applyStates = vi.mocked(deps.reviewStateRepository.applyReviewChanges).getMockImplementation()!;
-    vi.mocked(deps.reviewStateRepository.applyReviewChanges).mockImplementationOnce(async (d, changes) => {
+    vi.mocked(deps.reviewStateRepository.applyReviewChanges).mockImplementation(async (d, changes) => {
       await applyStates(d, changes);
-      pod.deck = { ...copy, title: { en: "Renamed" } };
+      if (d.reviewsDocumentUrl === copy.reviewsDocumentUrl) pod.deck = { ...copy, title: { en: "Renamed" } };
     });
     await expect(useCases.applyLibraryUpgrade(copy, plan)).resolves.toMatchObject({
       ok: false,
       step: "entry",
       error: expect.objectContaining({ code: "deckChangedDuringUpgrade" }),
       asItWas: true,
+      undo: { restored: [copy.reviewsDocumentUrl, copy.cardsDocumentUrl], kept: [], removed: true },
     });
     expect(pod.deck).toEqual({ ...copy, title: { en: "Renamed" } });
     expect(pod.reviews.get(copy.reviewsDocumentUrl)!).toHaveLength(2);
@@ -2746,20 +3292,84 @@ describe("library deck upgrade", () => {
     const outcome = await useCases.applyLibraryUpgrade(copy, plan);
     expect(outcome).toMatchObject({ ok: true, deck: { sourceUrl: `${LIB}v2.ttl` }, tidied: true });
     expect(pod.cards.get(copy.cardsDocumentUrl)!.map((c) => c.id)).toEqual(["sweden", "denmark", "norway"]);
+    expect(pod.backups.size).toBe(0);
 
-    // An entry that cannot be read again is taken to have failed.
+    // An entry that cannot be read again either is not taken to have failed: putting the cards back could leave
+    // the entry naming the new release over the old one's cards. Everything stays, to settle by the entry later.
     const lost = await world();
     vi.mocked(lost.deps.deckRepository.upgradeDeckEntry).mockRejectedValueOnce(new TypeError("Failed to fetch"));
+    const readDeck = vi.mocked(lost.deps.deckRepository.readDeck).getMockImplementation()!;
     vi.mocked(lost.deps.deckRepository.readDeck).mockImplementation(async (url) => {
-      if (vi.mocked(lost.deps.deckRepository.upgradeDeckEntry).mock.calls.length > 0) throw new TypeError("Failed to fetch");
-      return lost.pod.deck?.url === url ? lost.pod.deck : null;
+      if (vi.mocked(lost.deps.deckRepository.upgradeDeckEntry).mock.calls.length > 0) throw new TypeError("offline");
+      return readDeck(url);
     });
-    await expect(lost.useCases.applyLibraryUpgrade(lost.copy, lost.plan)).resolves.toMatchObject({ ok: false, step: "entry", asItWas: true });
+    await expect(lost.useCases.applyLibraryUpgrade(lost.copy, lost.plan)).resolves.toEqual({
+      ok: false,
+      step: "entry",
+      error: new TypeError("Failed to fetch"),
+      asItWas: false,
+      undo: { restored: [], kept: [], removed: false, failed: new TypeError("offline") },
+      backupUrl: FOLDER,
+    });
+    expect(lost.deps.documentBackups.putBack).not.toHaveBeenCalled();
+    expect(lost.pod.cards.get(lost.copy.cardsDocumentUrl)!.map((c) => c.id)).toEqual(["sweden", "denmark", "norway"]);
+    expect(JSON.parse(lost.deps.updateJournal.begin.mock.calls.at(-1)![1] as string).state).toBe("stopped");
+    // Restoring again settles it: the entry still names the old release, so the deck is put back.
+    vi.mocked(lost.deps.deckRepository.readDeck).mockImplementation(readDeck);
+    const [{ backup }] = [...lost.pod.backups.values()];
+    await expect(lost.useCases.restoreBackup(instance, backup)).resolves.toEqual({
+      restored: [lost.copy.reviewsDocumentUrl, lost.copy.cardsDocumentUrl],
+      kept: [],
+      removed: true,
+    });
+    expect(lost.pod.cards.get(lost.copy.cardsDocumentUrl)!.map((c) => c.id)).toEqual(["sweden", "denmark", "latvia"]);
+
+    // A write of the entry refused is known not to have been made: the entry is not read again.
+    const refused = await world();
+    vi.mocked(refused.deps.deckRepository.upgradeDeckEntry).mockRejectedValueOnce(new AppError("changedElsewhere", { url: refused.copy.url }));
+    await expect(refused.useCases.applyLibraryUpgrade(refused.copy, refused.plan)).resolves.toMatchObject({ ok: false, step: "entry", asItWas: true });
+    expect(refused.deps.deckRepository.readDeck).toHaveBeenCalledOnce();
+  });
+
+  it("puts back a write whose answer was lost, told from another's by what its working copy says", async () => {
+    const lost = await world();
+    const applyCards = vi.mocked(lost.deps.deckRepository.applyCardChanges).getMockImplementation()!;
+    vi.mocked(lost.deps.deckRepository.applyCardChanges).mockImplementation(async (d, changes, options) => {
+      await applyCards(d, changes, options);
+      if (d.cardsDocumentUrl === lost.copy.cardsDocumentUrl) throw new TypeError("Failed to fetch");
+    });
+    await expect(lost.useCases.applyLibraryUpgrade(lost.copy, lost.plan)).resolves.toMatchObject({
+      ok: false,
+      step: "write",
+      asItWas: true,
+      undo: { restored: [lost.copy.cardsDocumentUrl], kept: [] },
+    });
+    expect(lost.deps.documentBackups.noteUpdated).not.toHaveBeenCalled();
+    expect(lost.pod.cards.get(lost.copy.cardsDocumentUrl)!.map((c) => c.id)).toEqual(["sweden", "denmark", "latvia"]);
+
+    // Changed again elsewhere at once: kept, its backup with it.
+    const changed = await world();
+    const applyChanged = vi.mocked(changed.deps.deckRepository.applyCardChanges).getMockImplementation()!;
+    vi.mocked(changed.deps.deckRepository.applyCardChanges).mockImplementation(async (d, changes, options) => {
+      await applyChanged(d, changes, options);
+      if (d.cardsDocumentUrl !== changed.copy.cardsDocumentUrl) return;
+      changed.pod.cards.set(d.cardsDocumentUrl, []);
+      throw new TypeError("Failed to fetch");
+    });
+    await expect(changed.useCases.applyLibraryUpgrade(changed.copy, changed.plan)).resolves.toMatchObject({
+      asItWas: false,
+      undo: { restored: [], kept: [{ document: changed.copy.cardsDocumentUrl, copy: `${FOLDER}decks/deck-1.ttl.orig` }], removed: false },
+      backupUrl: FOLDER,
+    });
+    expect(changed.pod.backups.size).toBe(1);
+    // Its working copy goes; the backup holds the deck as it was.
+    expect(changed.pod.cards.has(STAGED_COPY_CARDS)).toBe(false);
   });
 
   it("keeps its backup, saying the deck is not as it was, when a document it wrote changed since or cannot be put back", async () => {
     const changed = await world();
     vi.mocked(changed.deps.deckRepository.upgradeDeckEntry).mockImplementationOnce(async () => {
+      changed.pod.reviews.set(changed.copy.reviewsDocumentUrl, []);
       changed.wrote(changed.copy.reviewsDocumentUrl);
       throw new AppError("deckChangedDuringUpgrade", { url: changed.copy.url });
     });
@@ -2767,49 +3377,24 @@ describe("library deck upgrade", () => {
       ok: false,
       step: "entry",
       asItWas: false,
+      undo: { restored: [changed.copy.cardsDocumentUrl], kept: [{ document: changed.copy.reviewsDocumentUrl }] },
     });
     expect(changed.pod.backups.size).toBe(1);
     // The cards are as they were again; the studied reviews document is kept as it is.
     expect(changed.pod.cards.get(changed.copy.cardsDocumentUrl)!.map((c) => c.id)).toEqual(["sweden", "denmark", "latvia"]);
-    expect(changed.pod.reviews.get(changed.copy.reviewsDocumentUrl)!.map((s) => s.cardId)).toEqual(["sweden"]);
+    expect(changed.pod.reviews.get(changed.copy.reviewsDocumentUrl)!).toEqual([]);
+    expect(changed.deps.updateJournal.end).toHaveBeenCalledWith(changed.copy.url);
 
     const offline = await world();
     vi.mocked(offline.deps.deckRepository.upgradeDeckEntry).mockRejectedValueOnce(new Error("pod down"));
     vi.mocked(offline.deps.documentBackups.putBack).mockRejectedValue(new Error("pod down"));
-    await expect(offline.useCases.applyLibraryUpgrade(offline.copy, offline.plan)).resolves.toMatchObject({ asItWas: false });
+    await expect(offline.useCases.applyLibraryUpgrade(offline.copy, offline.plan)).resolves.toMatchObject({
+      asItWas: false,
+      undo: { failed: new Error("pod down") },
+      backupUrl: FOLDER,
+    });
     expect(offline.pod.backups.size).toBe(1);
-  });
-
-  it("keeps its backup when a write fails without saying it was not made, as the pod may have made it", async () => {
-    const cards = await world();
-    const applyCards = vi.mocked(cards.deps.deckRepository.applyCardChanges).getMockImplementation()!;
-    vi.mocked(cards.deps.deckRepository.applyCardChanges).mockImplementationOnce(async (d, changes, options) => {
-      await applyCards(d, changes, options);
-      throw new TypeError("Failed to fetch");
-    });
-    await expect(cards.useCases.applyLibraryUpgrade(cards.copy, cards.plan)).resolves.toMatchObject({ ok: false, step: "write", asItWas: false });
-    // Written, though unanswered: not as backed up, so kept, with the backup holding the cards as they were.
-    expect(cards.pod.backups.size).toBe(1);
-    expect(cards.pod.deck).toEqual(cards.copy);
-
-    // The reviews document's write lost: the cards are put back, the backup keeps the dropped states.
-    const states = await world();
-    const applyStates = vi.mocked(states.deps.reviewStateRepository.applyReviewChanges).getMockImplementation()!;
-    vi.mocked(states.deps.reviewStateRepository.applyReviewChanges).mockImplementationOnce(async (d, changes) => {
-      await applyStates(d, changes);
-      throw new TypeError("Failed to fetch");
-    });
-    await expect(states.useCases.applyLibraryUpgrade(states.copy, states.plan)).resolves.toMatchObject({ asItWas: false });
-    expect(states.pod.cards.get(states.copy.cardsDocumentUrl)!.map((c) => c.id)).toEqual(["sweden", "denmark", "latvia"]);
-    const [{ backup, copied }] = [...states.pod.backups.values()];
-    expect(copied.get(states.copy.reviewsDocumentUrl)!.reviews!.map((s) => s.cardId)).toEqual(["sweden", "latvia"]);
-    expect(backup.entries.map((e) => e.document)).toEqual([states.copy.cardsDocumentUrl, states.copy.reviewsDocumentUrl]);
-
-    // A write the pod refused (412) was not made: nothing is kept.
-    const refused = await world();
-    vi.mocked(refused.deps.deckRepository.applyCardChanges).mockRejectedValueOnce(new AppError("changedElsewhere", { url: refused.copy.cardsDocumentUrl }));
-    await expect(refused.useCases.applyLibraryUpgrade(refused.copy, refused.plan)).resolves.toMatchObject({ asItWas: true });
-    expect(refused.pod.backups.size).toBe(0);
+    expect(JSON.parse(offline.deps.updateJournal.begin.mock.calls.at(-1)![1] as string).state).toBe("stopped");
   });
 
   it("restores its backup while the deck's entry still names the release it was made at, and only then", async () => {
@@ -2822,8 +3407,6 @@ describe("library deck upgrade", () => {
     vi.mocked(cut.deps.documentBackups.putBack).mockImplementation(putBack);
     const [{ backup }] = [...cut.pod.backups.values()];
     expect(backup.release).toBe(`${LIB}v1.ttl`);
-    // The offer comes again, to move the entry: the cards already are release 2's.
-    expect(await cut.useCases.planLibraryUpgrade(cut.copy)).toMatchObject({ releaseUrl: `${LIB}v2.ttl`, change: [], add: [] });
     await expect(cut.useCases.restoreBackup(instance, backup)).resolves.toMatchObject({ kept: [], removed: true });
     expect(cut.pod.cards.get(cut.copy.cardsDocumentUrl)!.map((c) => [c.id, c.back[""]])).toEqual([
       ["sweden", "Stockholm?"],
@@ -2850,6 +3433,55 @@ describe("library deck upgrade", () => {
     vi.mocked(deps.documentBackups.remove).mockRejectedValue(new Error("pod down"));
     await expect(useCases.applyLibraryUpgrade(copy, plan)).resolves.toMatchObject({ ok: true, tidied: false });
     expect(deps.documentBackups.noteUpdated).not.toHaveBeenCalled();
+  });
+
+  describe("findInterruptedDeckUpgrade", () => {
+    const runNote = (state: string, startedAt = "2026-09-28T09:00:00.000Z") => JSON.stringify({ folder: FOLDER, startedAt, state, updated: {} });
+
+    it("offers the backup of an upgrade cut off or stopped, while the deck's entry names the release it was made at", async () => {
+      const { deps, copy, useCases, pod } = await world();
+      await expect(useCases.findInterruptedDeckUpgrade(copy)).resolves.toBeNull();
+      const backup: Backup = { url: FOLDER, of: copy.url, createdAt: "", release: `${LIB}v1.ttl`, entries: [] };
+      pod.backups.set(FOLDER, { backup, copied: new Map() });
+      // Under way in another tab, perhaps: left to it. An earlier version's note is no run's.
+      deps.updateJournal.staging.mockReturnValue(runNote("running", "2026-09-28T09:55:00.000Z"));
+      await expect(useCases.findInterruptedDeckUpgrade(copy)).resolves.toBeNull();
+      deps.updateJournal.staging.mockReturnValue(JSON.stringify({ startedAt: "2026-09-28T09:00:00.000Z", cards: { from: "a", to: "b" } }));
+      await expect(useCases.findInterruptedDeckUpgrade(copy)).resolves.toBeNull();
+      deps.updateJournal.staging.mockReturnValue(runNote("running"));
+      await expect(useCases.findInterruptedDeckUpgrade(copy)).resolves.toEqual(backup);
+      deps.updateJournal.staging.mockReturnValue(runNote("stopped"));
+      await expect(useCases.findInterruptedDeckUpgrade(copy)).resolves.toEqual(backup);
+      expect(deps.updateJournal.end).not.toHaveBeenCalled();
+      // Restored, nothing is left to put back: the browser forgets the run.
+      await expect(useCases.restoreBackup(instance, backup)).resolves.toEqual({ restored: [], kept: [], removed: true });
+      expect(deps.updateJournal.end).toHaveBeenCalledWith(copy.url);
+    });
+
+    it("tidies quietly what an upgrade that went through left; forgets one whose manifest is gone, or of a deck gone", async () => {
+      const { deps, copy, useCases, pod } = await world();
+      const backup: Backup = { url: FOLDER, of: copy.url, createdAt: "", release: `${LIB}v1.ttl`, entries: [] };
+      const leave = () => pod.backups.set(FOLDER, { backup, copied: new Map() });
+      leave();
+      deps.updateJournal.staging.mockReturnValue(runNote("done"));
+      await expect(useCases.findInterruptedDeckUpgrade(copy)).resolves.toBeNull();
+      expect(pod.backups.size).toBe(0);
+      // Its entry moved on: it went through.
+      leave();
+      deps.updateJournal.staging.mockReturnValue(runNote("stopped"));
+      pod.deck = { ...copy, sourceUrl: `${LIB}v2.ttl` };
+      await expect(useCases.findInterruptedDeckUpgrade(copy)).resolves.toBeNull();
+      expect(pod.backups.size).toBe(0);
+      // Without its manifest, written first, nothing in the folder is the upgrade's: the note is forgotten.
+      await expect(useCases.findInterruptedDeckUpgrade(copy)).resolves.toBeNull();
+      expect(deps.instanceCopier.deleteRecursively).not.toHaveBeenCalled();
+      // The deck gone, its backup stays in Preferences.
+      leave();
+      pod.deck = null;
+      await expect(useCases.findInterruptedDeckUpgrade(copy)).resolves.toBeNull();
+      expect(pod.backups.size).toBe(1);
+      expect(deps.updateJournal.end).toHaveBeenCalledTimes(4);
+    });
   });
 
   describe("tidyInterruptedDeckUpgrade", () => {

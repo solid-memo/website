@@ -69,10 +69,11 @@ export interface BackupV1 {
   readonly release?: string;
 }
 
-/** Backup entry format 1: the document; where its earlier version is kept and the version that was, unless there was no document; the version the update left it at, once it wrote it. */
+/** Backup entry format 1: the document; where its bytes are kept, and the Content-Type and version they were served with, unless there was no document; the version the update left it at, once it wrote it. */
 export interface BackupEntryV1 {
   readonly document: string;
   readonly copy?: string;
+  readonly contentType?: string;
   readonly versionBackedUp?: string;
   readonly versionUpdated?: string;
 }

@@ -122,13 +122,18 @@ real data in it, and stop it when done.
 The servers differ in what they enforce, and the tests ask each rather
 than assume ([serverTraits.ts](../e2e/pod/src/serverTraits.ts)):
 
-- **node-solid-server** gives no ETag on a read and ignores `If-Match`, so
-  there an edit cannot be made conditional and the test that proves an
-  edit is refused is skipped; without ETags no
-  [digest](data-model.md#the-digest) is kept either, so the test of two
-  pages learning at once is skipped, and the others check that every
-  visit reads everything. (5.7.4 also ignored `If-None-Match: *` on a
-  PUT; 5.8.8 and 6.0.0 enforce it.)
+- **node-solid-server** gives no ETag (nor a modification time) on a
+  read and ignores `If-Match`, so there an edit cannot be made
+  conditional and the test that proves an edit is refused is skipped;
+  without ETags no [digest](data-model.md#the-digest) is kept either, so
+  the test of two pages learning at once is skipped, and the others
+  check that every visit reads everything. (5.7.4 also ignored
+  `If-None-Match: *` on a PUT; 5.8.8 and 6.0.0 enforce it.) Its parser
+  knows no SPARQL-style `PREFIX` directive, and its PATCH cannot delete a
+  value spelled otherwise than it spells it (`2.50`): no one can patch
+  such a document there, so the documents an update's tests write by
+  hand use `@prefix`, and spell what an update rewrites as Solid Memo
+  does ([migrations.md](migrations.md#the-pod-migration)).
 - **Community Solid Server 6** builds its ETag from the modification time
   in whole seconds: an edit in the same second as a read keeps the ETag,
   so a changed document looks unchanged. The tests edit within the
@@ -151,7 +156,14 @@ app" makes is an N3 Patch, a SPARQL Update or the whole document, as its
 ([serverTraits.integration.test.ts](../e2e/pod/src/serverTraits.integration.test.ts)):
 a release that changes it fails there, not as tests quietly starting or
 stopping to skip, and the pin moves by hand once the change is
-understood.
+understood. Among it: every blocking server serves a document PUT as
+Turtle byte for byte as it was written (`keepsWrittenTurtle`), which an
+update's putting a document back exactly as it was relies on, and
+which the tests of the format update and of the library upgrade check
+"byte for byte": the bytes the server serves for each document, asked
+for as the app asks (`Accept: text/turtle`), before and after
+([migrations.md](migrations.md#proof-on-a-real-server),
+[the upgrade's](migrations.md#proof-of-the-upgrade-on-a-real-server)).
 
 The Community Solid Server's in-memory store (the one these tests use)
 cuts a document short after a PATCH to it when the document holds

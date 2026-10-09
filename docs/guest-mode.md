@@ -35,7 +35,13 @@ graph LR
   `If-None-Match: *` and `If-None-Match: <etag>`, keeps `ldp:contains`
   listings, and marks the root as a `pim:Storage`. It has no access
   control. Each request runs exclusively on the store, under a Web Lock
-  shared by every tab.
+  shared by every tab. It keeps a Turtle document (sent as text or as
+  bytes) as its statements, in the order the document states them, and
+  serves them as N-Triples lines in that order: a document it served,
+  written again as it was served, is served again byte for byte, as an
+  update's putting a document back needs
+  ([migrations.md](migrations.md#the-pod-migration)). Any other file it
+  keeps byte for byte, under its content type.
 - **Storage:** the `ResourceStore` port. In the browser this is
   [indexedDbResourceStore.ts](../packages/browser/src/indexedDbResourceStore.ts),
   which is needed because the login redirect leaves the page and the

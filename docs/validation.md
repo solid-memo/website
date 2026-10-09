@@ -39,9 +39,10 @@ flowchart LR
   the instance may hold, the [answer log](data-model.md#the-answer-log)'s
   month documents included, and asks the `ShapeValidator` port about
   each; `summarize` (domain) counts the violations. It reads only. An
-  update's [backups](migrations.md#the-backup) are not checked: their
-  copies are documents as they were, in older formats by design; their
-  manifests are checked as they are written.
+  update's [backups](migrations.md#the-backup) are not checked: they
+  hold documents' bytes as they were, in older formats by design, in
+  files no server takes for RDF; their manifests are checked as they are
+  written, and an update's working copy by the update itself.
 - **Opening an instance** runs `checkInstance` instead: the same check,
   but a document still at a version the instance's
   [digest](data-model.md#the-digest) says conformed, by the same rules,
@@ -51,14 +52,18 @@ flowchart LR
   when the site is built (`__SHAPES_RULESET__` in `apps/web/vite.config.ts`),
   so a site with other shapes checks everything again. It leaves out the
   answer log, which grows every session: answers are checked as they are
-  written, and in the full check. The developer report and the format
-  update always run the full `validateInstance`.
+  written, and in the full check. The developer report always runs the
+  full `validateInstance`.
 - The [format update](migrations.md#the-pod-migration) checks the
-  documents it is about to write before it writes them, and runs the
-  same check on the instance once it has written it: a subject of a
-  document it wrote that fails, and did not fail before (which the
-  update should never make), is reported, and the failure offers to put
-  back the update's backup at once. What failed before, as a deck set
+  documents it is about to write before it writes them, then its working
+  copy of them once updated, its subjects read as the instance's, then
+  each document once it has written it: a subject that fails, and did
+  not fail before (which the update should never make), stops it —
+  before anything of the user's is written, when the working copy fails
+  (`updatedCopyInvalid`); else every document it wrote is put back, byte
+  for byte (`updatedInstanceInvalid`). A
+  [library upgrade](migrations.md#how-an-upgrade-is-applied) checks the
+  deck's documents the same way. What failed before, as a deck set
   aside, is not the update's doing and does not stop it. What another
   app wrote has warnings, not violations, so it never stops an update.
 - [shaclShapeValidator.ts](../packages/solid/src/shaclShapeValidator.ts)

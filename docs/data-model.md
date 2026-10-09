@@ -123,8 +123,8 @@ flowchart LR
   the pod serves but that cannot be read, as another app might leave
   it, is kept, and so are the decks' documents, which nothing else
   names; the rest goes as ever); then every [backup](migrations.md#the-backup)
-  in `backups/`, each as its manifest names what it holds, and
-  `backups/` once empty; then
+  in `backups/`, each as its manifest names what it holds (its update's
+  working copy, if any, whole), and `backups/` once empty; then
   `decks/`, `reviews/` and `history/`, each only if it is then empty;
   then `meta.ttl`, last of the documents, so a half-deleted instance
   still attaches by URL; and the container itself only if it is then
@@ -269,10 +269,14 @@ shared registration names, and its title, stay as they were.
 └── backups/<stamp>/  a backup an update made before it changed documents
                          in place (migrations.md#the-backup): manifest.ttl
                          (#it a sm:Backup, #entry-<n> a sm:BackupEntry per
-                         document, sm:formatVersion 1), and each
-                         document's earlier version at its own path (one
-                         outside the instance at elsewhere/<n>.ttl), with
-                         the access its document has as its own
+                         document, sm:formatVersion 1), each document's
+                         bytes as the server served them at its own path
+                         with .orig added (one outside the instance, or
+                         at staging/… or elsewhere/…, at
+                         elsewhere/<n>.orig), application/octet-stream,
+                         with the access its document has as its own;
+                         while the update runs, its working copy in
+                         staging/
 ```
 
 A deck's documents are found through its catalog entry
@@ -816,10 +820,16 @@ sequenceDiagram
   queue, the format check and the data check): a read already under way
   is shared, and a document read before is asked for with
   `If-None-Match: <its ETag>`; on 304 the dataset read then is returned
-  (datasets are immutable). A write to the document forgets both. This is
-  memory only, for the open page: nothing is stored in the browser.
-  Logged in, the browser's own cache does not do this, so without it a
-  login downloaded every deck three times.
+  (datasets are immutable). A write to the document forgets both, and so
+  does an update's backup of it or check of it
+  ([migrations.md](migrations.md#the-pod-migration)): a server whose ETag
+  outlives an edit made in the same second answers 304 for a document
+  that changed. This is memory only, for the open page: nothing is
+  stored in the browser. Logged in, the browser's own cache does not do
+  this, so without it a login downloaded every deck three times; and it
+  is never asked (`cache: "no-store"`), as it may keep a document the pod
+  gives a modification time and no `Cache-Control` for days, and answer
+  a plain read with it.
 - Reading builds the dataset in one pass
   ([linearDataset.ts](../packages/solid/src/linearDataset.ts)):
   `@inrupt/solid-client` copies the whole graph for every quad, which
@@ -830,7 +840,7 @@ sequenceDiagram
   write touches only the triples it changes (a deck save adds or
   removes its own `dcat:dataset` link, never another app's), and a
   delete only resources Solid Memo knows it wrote: an instance, a
-  backup (each copy its manifest names, then the manifest), a copy of a
+  backup (each file its manifest names, then the manifest), a copy of a
   whole instance an earlier version's update left, or the updated
   instance that copy's restore replaces, is deleted document by
   document, its folder only once empty
@@ -840,23 +850,29 @@ sequenceDiagram
   with `If-Match` ([guest-mode.md](guest-mode.md#adding-to-an-instance)). Only a folder Solid Memo
   made whole and nothing names yet is deleted recursively: the guest's
   study moved into a new instance, when it fails half-way or a closed tab left it behind,
-  and a backup's folder a closed tab left before its manifest named
-  anything (or a copy an earlier version's update left so): Solid Memo
-  created it at a URL it found free, and all it holds is copies whose
-  originals stay where they were.
-- **An update writes only what it backed up, as it backed it up.** The
-  format update and the library upgrade write a document only while it
-  is at the version their backup copied (`If-Match`, or checked just
-  before where the server gives no ETag), held so by the write fence
-  ([migrations.md](migrations.md#the-pod-migration)); and no write puts
-  an older format over a subject a newer version of the app wrote
-  ([migrations.md](migrations.md#versions)).
-- No `.acl`/`.acr` resource is ever written but a
-  [backup](migrations.md#the-backup)'s copy's own, made from the access
-  its document has: the document's own access control, rebased, or,
-  when it inherits, the rules its nearest folder with an access control
-  of its own gives what is inside it (`acl:default`), each now of the
-  copy alone. Nothing else's access changes: a resource without its own
+  an update's working copy (`staging/` in its backup's folder), an
+  update's folder when the update fails before its manifest named
+  anything, and a copy of a whole instance an earlier version's update
+  left so: Solid Memo created it at a URL it found free, and all it holds
+  is copies whose originals stay where they were.
+- **An update writes only what it backed up, as it backed it up, and
+  puts back what it wrote when it fails.** The format update and the
+  library upgrade write a document only after a working copy of what
+  they will write checked out, and only while the document is at the
+  version whose bytes they backed up (`If-Match`, or checked just before
+  where the server gives no ETag), held so by the write fence; a failure
+  after that puts each document they wrote back, its bytes as the server
+  served them before ([migrations.md](migrations.md#the-pod-migration));
+  and no write puts an older format over a subject a newer version of
+  the app wrote ([migrations.md](migrations.md#versions)).
+- No `.acl`/`.acr` resource is ever written but an update's own files'
+  ([backup](migrations.md#the-backup) and working copy), made from the
+  access the document each is of has: the document's own access
+  control, rebased, or, when it inherits, the rules its nearest folder
+  with an access control of its own gives what is inside it
+  (`acl:default`), each now of the file alone. An update writes no
+  document's access control, so none is backed up. Nothing else's
+  access changes: a resource without its own
   ACL safely inherits its ancestors' access, while a malformed one
   replaces inheritance entirely and can lock the owner out (WAC) or
   expose data. Access control stays whatever the user's server
