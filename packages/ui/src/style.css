@@ -1318,11 +1318,21 @@ table.studio-list input[type="checkbox"] {
   font-weight: 400;
 }
 
-/* A deck's problems, as a link to its health. */
+/* A deck's problems, as a link to its health; a newer library release, as a link to the library copies. */
 .studio-badge-warning {
   border-color: var(--warning-border);
   background: var(--warning-soft);
   color: var(--warning-text);
+}
+
+/* What a library upgrade would change, folded out under its summary. */
+.studio-diff {
+  margin-top: 0.25rem;
+}
+
+.studio-diff h4 {
+  margin: 0.5rem 0 0.25rem;
+  font-size: 0.875rem;
 }
 
 .studio-health-list li {

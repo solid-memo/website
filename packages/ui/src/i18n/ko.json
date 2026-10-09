@@ -1337,6 +1337,7 @@
         "unreadable": "읽을 수 없음"
       },
       "healthLink": "상태 점검",
+      "libraryLink": "라이브러리 복사본",
       "healthOf": "{deck}에서"
     },
     "bulk": {
@@ -1819,6 +1820,64 @@
         "healthy": "문제 없음",
         "failed": "검사 안 됨"
       }
+    },
+    "library": {
+      "crumb": "라이브러리 복사본",
+      "heading": "{instance}의 라이브러리 복사본",
+      "caption": "덱 라이브러리에서 복사해 온 {instance}의 덱",
+      "loading": "덱 라이브러리를 확인하는 중…",
+      "empty": "여기에는 덱 라이브러리에서 복사해 온 덱이 없어요. {library}에서 찾아보세요.",
+      "libraryLink": "덱 라이브러리",
+      "browse": "덱 라이브러리 둘러보기",
+      "intro": "덱 라이브러리에서 복사해 왔거나 링크로 추가한 각 덱과, 그 덱을 가져온 릴리스, 최신 릴리스를 보여 줘요. 덱을 업데이트하면 릴리스에 있던 그대로 둔 카드에 릴리스의 변경 사항이 반영돼요. 복습 기록은 유지돼요.",
+      "upgrade": {
+        "one": "덱 {count}개 업데이트",
+        "other": "덱 {count}개 업데이트"
+      },
+      "running": "{deck} 업데이트 중({total}개 중 {at}번째)",
+      "selectAll": "업데이트할 수 있는 덱 모두 선택",
+      "copied": "복사해 온 릴리스",
+      "current": "라이브러리의 릴리스",
+      "update": "업데이트",
+      "unknown": "알 수 없는 릴리스",
+      "release": "릴리스 {version}",
+      "gone": "더 이상 라이브러리에 없음",
+      "upToDate": "최신 상태",
+      "planning": "업데이트로 바뀔 내용을 확인하는 중…",
+      "planFailed": "릴리스 {version}이(가) 나왔지만, 바뀔 내용을 읽을 수 없어요.",
+      "nothingToUpdate": "릴리스 {version}이(가) 나왔지만, 내 복사본에 업데이트할 내용이 없어요.",
+      "changes": "릴리스 {version}: 업데이트 내용: {changes}.",
+      "details": "바뀌는 내용",
+      "cards": {
+        "add": {
+          "one": "추가: 카드 {count}장",
+          "other": "추가: 카드 {count}장"
+        },
+        "change": {
+          "one": "변경: 카드 {count}장",
+          "other": "변경: 카드 {count}장"
+        },
+        "retire": {
+          "one": "사용 중지: 카드 {count}장",
+          "other": "사용 중지: 카드 {count}장"
+        },
+        "restore": {
+          "one": "복원: 카드 {count}장",
+          "other": "복원: 카드 {count}장"
+        },
+        "remove": {
+          "one": "삭제: 카드 {count}장",
+          "other": "삭제: 카드 {count}장"
+        },
+        "kept": {
+          "one": "지금 상태로 유지: 카드 {count}장",
+          "other": "지금 상태로 유지: 카드 {count}장"
+        }
+      },
+      "updated": "{deck}: 릴리스 {version}(으)로 업데이트했어요.",
+      "failed": "{deck}: ‘{step}’ 단계에서 업데이트에 실패했어요:",
+      "badge": "릴리스 {version} 나옴",
+      "badgeOf": "{deck}의 새 릴리스"
     }
   }
 }

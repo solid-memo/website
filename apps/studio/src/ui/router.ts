@@ -43,7 +43,9 @@ export type StudioRoute =
   /** The instance's name and its catalogue's description and licence. */
   | { screen: "instance"; instanceUrl: string }
   /** Everything wrong with the instance or, with `deckUrl`, one of its decks. */
-  | { screen: "health"; instanceUrl: string; deckUrl?: string };
+  | { screen: "health"; instanceUrl: string; deckUrl?: string }
+  /** The instance's copies of library releases: their versions, the newer releases and what upgrading would change. */
+  | { screen: "library"; instanceUrl: string };
 
 /** What the card inspector shows: the card's content, its wrong options, its review state in each direction, or its answers. */
 export type CardTab = "content" | "distractors" | "schedule" | "history";
@@ -97,6 +99,8 @@ export function studioRouteToHash(route: StudioRoute): string {
       return `#${STUDIO_PATH}/instance${hashParams({ instance: route.instanceUrl })}`;
     case "health":
       return `#${STUDIO_PATH}/health${hashParams({ instance: route.instanceUrl, ...(route.deckUrl === undefined ? {} : { deck: route.deckUrl }) })}`;
+    case "library":
+      return `#${STUDIO_PATH}/library${hashParams({ instance: route.instanceUrl })}`;
   }
 }
 
@@ -128,6 +132,8 @@ export function parseStudioHash(hash: string): StudioRoute | null {
       return instanceUrl === null ? null : { screen: "groups", instanceUrl };
     case "/instance":
       return instanceUrl === null ? null : { screen: "instance", instanceUrl };
+    case "/library":
+      return instanceUrl === null ? null : { screen: "library", instanceUrl };
     case "/health": {
       const deckUrl = query.get("deck");
       if (instanceUrl === null) return null;

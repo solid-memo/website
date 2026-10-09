@@ -1337,6 +1337,7 @@
         "unreadable": "Unreadable"
       },
       "healthLink": "Health",
+      "libraryLink": "Library copies",
       "healthOf": "in {deck}"
     },
     "bulk": {
@@ -1819,6 +1820,64 @@
         "healthy": "No problems",
         "failed": "Not checked"
       }
+    },
+    "library": {
+      "crumb": "Library copies",
+      "heading": "Library copies in {instance}",
+      "caption": "The decks of {instance} copied from the library",
+      "loading": "Looking up the library…",
+      "empty": "No deck here is a copy of a library deck. Find one in {library}.",
+      "libraryLink": "the deck library",
+      "browse": "Browse the deck library",
+      "intro": "Each deck copied from the deck library, the release it came from and the library's current one. Updating a deck applies the library's changes to the cards you have left as it had them; your review history is kept.",
+      "upgrade": {
+        "one": "Update {count} deck",
+        "other": "Update {count} decks"
+      },
+      "running": "Updating {deck} ({at} of {total})",
+      "selectAll": "Select every deck that can be updated",
+      "copied": "Copied from",
+      "current": "In the library",
+      "update": "Update",
+      "unknown": "Unknown release",
+      "release": "Release {version}",
+      "gone": "No longer in the library",
+      "upToDate": "Up to date",
+      "planning": "Looking at what an update would change…",
+      "planFailed": "Release {version} is out, but what it would change could not be read.",
+      "nothingToUpdate": "Release {version} is out, with nothing to update your copy with.",
+      "changes": "Release {version}: updating {changes}.",
+      "details": "What changes",
+      "cards": {
+        "add": {
+          "one": "Added: {count} card",
+          "other": "Added: {count} cards"
+        },
+        "change": {
+          "one": "Changed: {count} card",
+          "other": "Changed: {count} cards"
+        },
+        "retire": {
+          "one": "Retired: {count} card",
+          "other": "Retired: {count} cards"
+        },
+        "restore": {
+          "one": "Brought back: {count} card",
+          "other": "Brought back: {count} cards"
+        },
+        "remove": {
+          "one": "Removed: {count} card",
+          "other": "Removed: {count} cards"
+        },
+        "kept": {
+          "one": "Left as you have it: {count} card",
+          "other": "Left as you have them: {count} cards"
+        }
+      },
+      "updated": "{deck}: updated to release {version}.",
+      "failed": "{deck}: the update failed while {step}:",
+      "badge": "Release {version} out",
+      "badgeOf": "for {deck}"
     }
   }
 }

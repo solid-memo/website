@@ -1334,6 +1334,7 @@
         "unreadable": "Oläslig"
       },
       "healthLink": "Hälsa",
+      "libraryLink": "Kopior från biblioteket",
       "healthOf": "i {deck}"
     },
     "bulk": {
@@ -1816,6 +1817,64 @@
         "healthy": "Inga problem",
         "failed": "Inte kontrollerad"
       }
+    },
+    "library": {
+      "crumb": "Kopior från biblioteket",
+      "heading": "Kopior från biblioteket i {instance}",
+      "caption": "Kortlekarna i {instance} som kopierats från biblioteket",
+      "loading": "Slår upp i biblioteket…",
+      "empty": "Ingen kortlek här är en kopia av en kortlek från biblioteket. Hitta en i {library}.",
+      "libraryLink": "kortleksbiblioteket",
+      "browse": "Bläddra i kortleksbiblioteket",
+      "intro": "Varje kortlek som kopierats från kortleksbiblioteket, utgåvan den kom från och bibliotekets nuvarande. En uppdatering för över bibliotekets ändringar till de kort som du har lämnat som biblioteket hade dem; din repetitionshistorik behålls.",
+      "upgrade": {
+        "one": "Uppdatera {count} kortlek",
+        "other": "Uppdatera {count} kortlekar"
+      },
+      "running": "Uppdaterar {deck} ({at} av {total})",
+      "selectAll": "Välj alla kortlekar som kan uppdateras",
+      "copied": "Kopierad från",
+      "current": "I biblioteket",
+      "update": "Uppdatering",
+      "unknown": "Okänd utgåva",
+      "release": "Utgåva {version}",
+      "gone": "Finns inte längre i biblioteket",
+      "upToDate": "Aktuell",
+      "planning": "Ser efter vad en uppdatering skulle ändra…",
+      "planFailed": "Utgåva {version} finns, men vad den skulle ändra kunde inte läsas.",
+      "nothingToUpdate": "Utgåva {version} finns, men inget i den uppdaterar din kopia.",
+      "changes": "Utgåva {version}: en uppdatering {changes}.",
+      "details": "Vad som ändras",
+      "cards": {
+        "add": {
+          "one": "Läggs till: {count} kort",
+          "other": "Läggs till: {count} kort"
+        },
+        "change": {
+          "one": "Ändras: {count} kort",
+          "other": "Ändras: {count} kort"
+        },
+        "retire": {
+          "one": "Tas ur bruk: {count} kort",
+          "other": "Tas ur bruk: {count} kort"
+        },
+        "restore": {
+          "one": "Tas tillbaka: {count} kort",
+          "other": "Tas tillbaka: {count} kort"
+        },
+        "remove": {
+          "one": "Tas bort: {count} kort",
+          "other": "Tas bort: {count} kort"
+        },
+        "kept": {
+          "one": "Lämnas som du har det: {count} kort",
+          "other": "Lämnas som du har dem: {count} kort"
+        }
+      },
+      "updated": "{deck}: uppdaterad till utgåva {version}.",
+      "failed": "{deck}: uppdateringen misslyckades i steget ”{step}”:",
+      "badge": "Utgåva {version} finns",
+      "badgeOf": "för {deck}"
     }
   }
 }

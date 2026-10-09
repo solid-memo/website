@@ -49,7 +49,7 @@ export function describeChanges(
  * cards it removes, and those the copy no longer has (`gone`), whose
  * states left, if any, go too.
  */
-function historyKept(plan: LibraryUpgradePlan, t: I18n["t"]): string {
+export function historyKept(plan: LibraryUpgradePlan, t: I18n["t"]): string {
   const removes = plan.remove.length + plan.gone.length > 0;
   const retires = plan.retire.length > 0;
   if (removes && retires) return t("libraryUpgradeNotice.historyKeptButRemovedRetired");

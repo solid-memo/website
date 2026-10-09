@@ -11,7 +11,7 @@
  * once a newer release is out, takes the deck on to that one. No document
  * changes its address.
  */
-import { beforeAll, describe, expect, inject, it } from "vitest";
+import { beforeAll, describe, expect, inject, it, vi } from "vitest";
 import { Parser, Writer } from "n3";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/sources";
 import { createUseCases, type UseCases } from "@solid-memo/application/useCases";
@@ -329,6 +329,42 @@ describe.each(SERVERS)("a library deck upgrade on $name", ({ url: server }) => {
     expect(await status(`${deck.cardsDocumentUrl.replace(/\.ttl$/, "")}-0f3a.ttl`)).toBe(404);
     expect((await useCases.validateInstance(instanceOf(deck))).conforms).toBe(true);
     expect(await useCases.planLibraryUpgrade(upgraded)).toBeNull();
+  });
+
+  it("lists an instance's copies from one read of the library's index, and upgrades them one after another", async () => {
+    const instanceUrl = new URL(`run-${crypto.randomUUID()}/solid-memo/main/`, server).href;
+    const { deckRepository, reviewStateRepository } = app();
+    const seeded: Deck[] = [];
+    for (let made = 0; made < 2; made++) {
+      const deck = await deckRepository.importDeck(instanceUrl, V1);
+      await reviewStateRepository.saveReviewState(deck, review("sweden", 6));
+      seeded.push(deck);
+    }
+    // Release 2's title in ASCII: two upgrades patch it into one catalog, which the
+    // Community Solid Server's in-memory store would otherwise cut short (docs/testing.md).
+    const ascii: DeckLibrary = { ...library, fetchLibraryDeck: async (url) => (url === V2.url ? { ...V2, title: { en: "Capitals", sv: "Huvudstader" } } : V1) };
+    const { useCases } = app({ deckLibrary: ascii });
+    const reads = vi.spyOn(ascii, "listLibraryDecks");
+    try {
+      const copies = await useCases.listLibraryUpdates(instanceUrl);
+      expect(reads).toHaveBeenCalledTimes(1);
+      expect(copies.map((copy) => [copy.deck.url, copy.version, copy.newer]).sort()).toEqual(
+        seeded.map((deck) => [deck.url, "1", true]).sort(),
+      );
+
+      for (const { deck } of copies) {
+        const outcome = await useCases.applyLibraryUpgrade(deck, (await useCases.planLibraryUpgrade(deck))!);
+        expect(outcome, JSON.stringify(outcome)).toMatchObject({ ok: true });
+      }
+
+      const after = await useCases.listLibraryUpdates(instanceUrl);
+      expect(after.map((copy) => [copy.deck.url, copy.version, copy.newer]).sort()).toEqual(
+        seeded.map((deck) => [deck.url, "2", false]).sort(),
+      );
+      for (const { deck } of after) expect(await reviewStateRepository.listReviewStates(deck)).toEqual([review("sweden", 6)]);
+    } finally {
+      reads.mockRestore();
+    }
   });
 
   it("keeps the keywords the user changed, in every language", async () => {

@@ -10,7 +10,7 @@ import { withAbout, type DeckAbout } from "@solid-memo/domain/deckAbout";
 import { withProvenance, type DeckProvenance } from "@solid-memo/domain/deckProvenance";
 import type { LangTexts } from "@solid-memo/domain/keywords";
 import { deckPreferences, withPace, type DeckPace } from "@solid-memo/domain/deckPace";
-import { isCopyOf } from "@solid-memo/domain/library";
+import { isCopyOf, libraryCopiesOf, offersNewerRelease, type LibraryCopy } from "@solid-memo/domain/library";
 import { pickLocale, type Locale } from "@solid-memo/domain/locale";
 import type { ThemeChoice } from "@solid-memo/domain/theme";
 import { planRepair, type Repair, type RepairPlan } from "@solid-memo/domain/repair";
@@ -424,9 +424,19 @@ export interface UseCases {
    * release would do; null for a deck not from the library, or when
    * there is nothing (safe) to offer. Reads the library's index, the two
    * releases (and those in between, for a copy more than one behind) and
-   * the copy's cards; writes nothing.
+   * the copy's cards; writes nothing. Given the deck's series as the index
+   * lists it (a LibraryCopy's, listLibraryUpdates), it does not read the
+   * index again.
    */
-  planLibraryUpgrade(deck: Deck): Promise<LibraryUpgradePlan | null>;
+  planLibraryUpgrade(deck: Deck, series?: LibraryDeck): Promise<LibraryUpgradePlan | null>;
+  /**
+   * The instance's decks copied from a library release, each with its
+   * deck in the library, the version it was copied from, and whether a
+   * newer release is there (domain/library.ts, libraryCopiesOf). One read
+   * of the library's index serves them all; none when no deck is a copy.
+   * Writes nothing: planLibraryUpgrade says what an upgrade would change.
+   */
+  listLibraryUpdates(instanceUrl: string): Promise<LibraryCopy[]>;
   /**
    * Give an imported deck the languages its own release states its title
    * and description in and the copy lacks, where the copy's English is
@@ -1052,17 +1062,19 @@ export function createUseCases({
    * between too: an upgrade to one of them, cut off before it moved the
    * deck's entry, may have left cards as that release has them, which are
    * the library's, not the user's.
+   * The deck's series is looked up in the index unless it is `known`.
    */
-  async function planUpgrade(deck: Deck, cards: () => Promise<Card[]>): Promise<LibraryUpgradePlan | null> {
+  async function planUpgrade(
+    deck: Deck,
+    cards: () => Promise<Card[]>,
+    known?: LibraryDeck,
+  ): Promise<LibraryUpgradePlan | null> {
     if (deck.sourceUrl === undefined) return null;
-    const series = (await deckLibrary.listLibraryDecks()).find((libraryDeck) => isCopyOf(deck, libraryDeck));
+    const series = known ?? (await deckLibrary.listLibraryDecks()).find((libraryDeck) => isCopyOf(deck, libraryDeck));
     if (series === undefined) return null;
     // The index tells a copy of the current release, or of no older one,
     // without reading a release (thousands of cards) or the copy's cards.
-    const copied = series.releases.find((release) => release.url === deck.sourceUrl);
-    if (series.url === deck.sourceUrl || (copied !== undefined && Number(series.version) <= Number(copied.version))) {
-      return null;
-    }
+    if (!offersNewerRelease(deck, series)) return null;
     const [from, to, copy] = await Promise.all([
       deckLibrary.fetchLibraryDeck(deck.sourceUrl),
       deckLibrary.fetchLibraryDeck(series.url),
@@ -2119,8 +2131,13 @@ export function createUseCases({
     async listLibraryCards(deck) {
       return (await deckLibrary.fetchLibraryDeck(deck.url)).cards;
     },
-    planLibraryUpgrade(deck) {
-      return planUpgrade(deck, () => deckRepository.listCards(deck));
+    planLibraryUpgrade(deck, series) {
+      return planUpgrade(deck, () => deckRepository.listCards(deck), series);
+    },
+    async listLibraryUpdates(instanceUrl) {
+      const decks = await deckRepository.listDecks(instanceUrl);
+      if (decks.every((deck) => deck.sourceUrl === undefined)) return [];
+      return libraryCopiesOf(decks, await deckLibrary.listLibraryDecks());
     },
     async deckRelease(deck) {
       return deck.sourceUrl === undefined ? null : deckLibrary.fetchLibraryDeck(deck.sourceUrl);

@@ -11,7 +11,7 @@ import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { InstancePickerContainer } from "@solid-memo/ui/InstancePickerContainer";
 import { Loading } from "@solid-memo/ui/Loading";
-import { decksHref, deckHref, routeToHash } from "@solid-memo/ui/router";
+import { decksHref, deckHref, libraryHref, routeToHash } from "@solid-memo/ui/router";
 import { useScreenFocus } from "@solid-memo/ui/screenFocus";
 import { MAIN_ID } from "@solid-memo/ui/SkipLink";
 import { useInstanceTheme } from "@solid-memo/ui/theme";
@@ -23,6 +23,7 @@ import { DeckTableContainer } from "./DeckTableContainer";
 import { GroupsContainer } from "./GroupsContainer";
 import { HealthContainer } from "./HealthContainer";
 import { InstanceAboutContainer } from "./InstanceAboutContainer";
+import { LibraryCopiesContainer } from "./LibraryCopiesContainer";
 import { instanceOfRoute, spotRoute, studioRouteToHash, useStudioRoute, type StudioRoute } from "./router";
 
 /**
@@ -94,6 +95,8 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
         return [instancesCrumb, decks, { label: t("breadcrumbs.groups"), route }];
       case "instance":
         return [instancesCrumb, decks, { label: t("studio.instance.crumb"), route }];
+      case "library":
+        return [instancesCrumb, decks, { label: t("studio.library.crumb"), route }];
       case "health": {
         const health: Crumb<StudioRoute> = { label: t("studio.health.crumb"), route: { screen: "health", instanceUrl: route.instanceUrl } };
         return route.deckUrl === undefined
@@ -162,6 +165,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             groupsHref={studioRouteToHash({ screen: "groups", instanceUrl: route.instanceUrl })}
             instanceHref={studioRouteToHash({ screen: "instance", instanceUrl: route.instanceUrl })}
             healthHref={(deck) => studioRouteToHash({ screen: "health", instanceUrl: route.instanceUrl, ...(deck === undefined ? {} : { deckUrl: deck.url }) })}
+            libraryHref={studioRouteToHash({ screen: "library", instanceUrl: route.instanceUrl })}
             deckHref={(deck) => studioRouteToHash({ screen: "about", deckUrl: deck.url })}
             cardsHref={(deck) => studioRouteToHash({ screen: "cards", deckUrl: deck.url })}
           />
@@ -177,6 +181,15 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             spotHref={(deck, spot) => studioRouteToHash(spotRoute(deck.url, spot))}
             aboutHref={(deck) => studioRouteToHash({ screen: "about", deckUrl: deck.url })}
             deckHref={(deck) => studioRouteToHash({ screen: "health", instanceUrl: route.instanceUrl, deckUrl: deck.url })}
+          />
+        );
+      case "library":
+        return (
+          <LibraryCopiesContainer
+            useCases={useCases}
+            instance={activeInstance!}
+            deckHref={(deck) => studioRouteToHash({ screen: "about", deckUrl: deck.url })}
+            libraryHref={libraryHref(route.instanceUrl)}
           />
         );
       case "instance":

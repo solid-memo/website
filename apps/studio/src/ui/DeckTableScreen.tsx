@@ -54,8 +54,10 @@ const COLUMNS: readonly Exclude<DeckColumn, "title">[] = [
  * what it says of itself (`deckHref`), its number of cards its cards in
  * the Studio's card workbench (`cardsHref`). The header links to the
  * groups, to the instance's name and catalogue (`instanceHref`) and to
- * its health (`healthHref`); each deck's name has its health beside it
- * (`healthBadge`).
+ * its health (`healthHref`) and to its copies of library releases
+ * (`libraryHref`); each deck's name has its health beside it
+ * (`healthBadge`), and for a library copy whether a newer release is out
+ * (`updateBadge`).
  */
 export function DeckTableScreen({
   instance,
@@ -73,6 +75,8 @@ export function DeckTableScreen({
   instanceHref,
   healthHref,
   healthBadge,
+  libraryHref,
+  updateBadge,
   onMove,
   onPace,
   onDirection,
@@ -103,6 +107,10 @@ export function DeckTableScreen({
   healthHref: string;
   /** A deck's health, as a badge beside its name. */
   healthBadge: (deck: Deck) => ComponentChildren;
+  /** The instance's copies of library releases. */
+  libraryHref: string;
+  /** Whether the library has a newer release of a deck, as a badge beside its name. */
+  updateBadge: (deck: Deck) => ComponentChildren;
   /** Each resolves to whether it was done (the container says why not, through `error`). */
   onMove: (decks: readonly Deck[], parent: DeckGroup | null) => Promise<boolean>;
   onPace: (decks: readonly Deck[], pace: DeckPace) => Promise<boolean>;
@@ -172,7 +180,7 @@ export function DeckTableScreen({
       <header>
         <h2>{t("studio.decks.heading")}</h2>
         <a href={groupsHref}>{t("studio.decks.groupsLink")}</a> <a href={instanceHref}>{t("studio.decks.instanceLink")}</a>{" "}
-        <a href={healthHref}>{t("studio.decks.healthLink")}</a>
+        <a href={healthHref}>{t("studio.decks.healthLink")}</a> <a href={libraryHref}>{t("studio.decks.libraryLink")}</a>
       </header>
       <label class="studio-filter">
         {t("studio.decks.filter")}
@@ -247,6 +255,7 @@ export function DeckTableScreen({
                         </span>
                       ))}
                       {healthBadge(deck)}
+                      {updateBadge(deck)}
                     </th>
                     <td>
                       {row.groups.length === 0 ? (

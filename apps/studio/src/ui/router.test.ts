@@ -36,6 +36,7 @@ describe("the Studio's routes", () => {
       tab: "distractors",
       field: "c1-d2",
     },
+    { screen: "library", instanceUrl: "https://pod.example/solid-memo/a/" },
   ];
 
   it("round-trip through the hash", () => {
@@ -119,13 +120,14 @@ describe("the Studio's routes", () => {
   });
 
   it("name the instance a route is in, the deck's for the workbench", () => {
-    expect(routes.map(instanceOfRoute)).toEqual([null, ...Array(13).fill("https://pod.example/solid-memo/a/")]);
+    expect(routes.map(instanceOfRoute)).toEqual([null, ...Array(14).fill("https://pod.example/solid-memo/a/")]);
   });
 
   it("leave the root without an instance, and anything unknown, to the default route", () => {
     expect(parseStudioHash("")).toBeNull();
     expect(parseStudioHash("#/studio")).toBeNull();
     expect(parseStudioHash("#/studio/groups")).toBeNull();
+    expect(parseStudioHash("#/studio/library")).toBeNull();
     expect(parseStudioHash("#/studio/decks?instance=x")).toBeNull();
   });
 

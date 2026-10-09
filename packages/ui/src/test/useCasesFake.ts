@@ -103,6 +103,7 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
     }),
     listLibraryCards: vi.fn(async () => []),
     planLibraryUpgrade: vi.fn(async () => null),
+    listLibraryUpdates: vi.fn(async () => []),
     getStatistics: vi.fn(async () => statisticsOf([], "2026-09-21")),
     loadAnswerLog: vi.fn(async () => []),
     cardAnswers: vi.fn(async () => []),
