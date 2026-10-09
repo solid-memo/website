@@ -267,6 +267,69 @@ describe("StudioWorkspace", () => {
     expect(screen.getByRole("link", { name: "Kanji N5" })).toHaveAttribute("href", studioRouteToHash({ screen: "about", deckUrl: kanji.url }));
   });
 
+  it("opens import and export from Home, the decks ticked in the URL, and a deck's cards export it", async () => {
+    window.history.replaceState(null, "", home(instanceA.url));
+    const imported = makeDeck("deck-3", { en: "Capitals" });
+    renderWorkspace(
+      makeUseCasesFake({
+        listInstances: vi.fn(async () => [instanceA]),
+        listDecks: vi.fn(async () => [kanji, verbs]),
+        openDeckFile: vi.fn(async () => ({ name: "c.ttl", format: "turtle" as const, content: { deck: imported, cards: [], upgraded: [], dropped: [] } })),
+        importDeckFile: vi.fn(async () => imported),
+      }),
+    );
+    fireEvent.click(await screen.findByRole("checkbox", { name: "Select Verbs" }));
+    expect(screen.getByRole("link", { name: "Export" })).toHaveAttribute(
+      "href",
+      studioRouteToHash({ screen: "transfer", instanceUrl: instanceA.url, deckUrls: [verbs.url] }),
+    );
+    fireEvent.click(screen.getByRole("link", { name: "Import and export" }));
+    expect(await screen.findByRole("heading", { name: "Import and export decks of Deck set A" })).toBeInTheDocument();
+    expect(parseStudioHash(window.location.hash)).toEqual({ screen: "transfer", instanceUrl: instanceA.url });
+    await waitFor(() => expect(document.title).toBe("Import and export – Solid Memo Studio"));
+    fireEvent.click(screen.getByRole("checkbox", { name: "Verbs" }));
+    expect(parseStudioHash(window.location.hash)).toEqual({ screen: "transfer", instanceUrl: instanceA.url, deckUrls: [verbs.url] });
+    expect(screen.getByRole("checkbox", { name: "Verbs" })).toBeChecked();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Verbs" }));
+    expect(parseStudioHash(window.location.hash)).toEqual({ screen: "transfer", instanceUrl: instanceA.url });
+    fireEvent.click(screen.getByRole("button", { name: "Choose a file…" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Import into Deck set A" }));
+    expect(await screen.findByRole("link", { name: "Capitals" })).toHaveAttribute(
+      "href",
+      studioRouteToHash({ screen: "cards", deckUrl: imported.url }),
+    );
+  });
+
+  it("starts import and export afresh in another instance: no file or status of the last one", async () => {
+    window.history.replaceState(null, "", studioRouteToHash({ screen: "transfer", instanceUrl: instanceA.url, deckUrls: [kanji.url] }));
+    const imported = makeDeck("deck-3", { en: "Capitals" });
+    renderWorkspace(
+      makeUseCasesFake({
+        listInstances: vi.fn(async () => [instanceA, instanceB]),
+        listDecks: vi.fn(async () => [kanji]),
+        openDeckFile: vi.fn(async () => ({ name: "c.ttl", format: "turtle" as const, content: { deck: imported, cards: [], upgraded: [], dropped: [] } })),
+      }),
+    );
+    fireEvent.click(await screen.findByRole("button", { name: "Export 1 deck" }));
+    expect(await screen.findByText(/^Exported 1 deck\./)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Choose a file…" }));
+    expect(await screen.findByRole("button", { name: "Import into Deck set A" })).toBeInTheDocument();
+    window.location.hash = studioRouteToHash({ screen: "transfer", instanceUrl: instanceB.url });
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+    expect(await screen.findByRole("heading", { name: "Import and export decks of Deck set B" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Import into Deck set B" })).toBeNull();
+    expect(screen.queryByText(/^Exported 1 deck\./)).toBeNull();
+  });
+
+  it("links a deck's cards to its export", async () => {
+    window.history.replaceState(null, "", studioRouteToHash({ screen: "cards", deckUrl: kanji.url }));
+    renderWorkspace(makeUseCasesFake({ listInstances: vi.fn(async () => [instanceA]), listDecks: vi.fn(async () => [kanji]) }));
+    expect(await screen.findByRole("link", { name: "Export" })).toHaveAttribute(
+      "href",
+      studioRouteToHash({ screen: "transfer", instanceUrl: instanceA.url, deckUrls: [kanji.url] }),
+    );
+  });
+
   it("links a deck's cards to its health", async () => {
     window.history.replaceState(null, "", studioRouteToHash({ screen: "cards", deckUrl: kanji.url }));
     renderWorkspace(makeUseCasesFake({ listInstances: vi.fn(async () => [instanceA]), listDecks: vi.fn(async () => [kanji]) }));

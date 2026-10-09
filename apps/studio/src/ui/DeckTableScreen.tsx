@@ -53,9 +53,10 @@ const COLUMNS: readonly Exclude<DeckColumn, "title">[] = [
  * selected, but is left alone until shown again. A deck's name opens
  * what it says of itself (`deckHref`), its number of cards its cards in
  * the Studio's card workbench (`cardsHref`). The header links to the
- * groups, to the instance's name and catalogue (`instanceHref`) and to
- * its health (`healthHref`) and to its copies of library releases
- * (`libraryHref`); each deck's name has its health beside it
+ * groups, to the instance's name and catalogue (`instanceHref`), to
+ * its health (`healthHref`), to its copies of library releases
+ * (`libraryHref`) and to import and export (`transferHref`, which the
+ * bulk actions' Export opens with the selected decks ticked); each deck's name has its health beside it
  * (`healthBadge`), and for a library copy whether a newer release is out
  * (`updateBadge`).
  */
@@ -76,6 +77,7 @@ export function DeckTableScreen({
   healthHref,
   healthBadge,
   libraryHref,
+  transferHref,
   updateBadge,
   onMove,
   onPace,
@@ -109,6 +111,8 @@ export function DeckTableScreen({
   healthBadge: (deck: Deck) => ComponentChildren;
   /** The instance's copies of library releases. */
   libraryHref: string;
+  /** Import and export, these decks ticked to export. */
+  transferHref: (decks: readonly Deck[]) => string;
   /** Whether the library has a newer release of a deck, as a badge beside its name. */
   updateBadge: (deck: Deck) => ComponentChildren;
   /** Each resolves to whether it was done (the container says why not, through `error`). */
@@ -129,7 +133,7 @@ export function DeckTableScreen({
       <section>
         <header>
           <h2>{t("studio.decks.heading")}</h2>
-          <a href={instanceHref}>{t("studio.decks.instanceLink")}</a>
+          <a href={instanceHref}>{t("studio.decks.instanceLink")}</a> <a href={transferHref([])}>{t("studio.decks.transferLink")}</a>
         </header>
         <p class="hint">{tx("studio.decks.empty", { app: <a href={appHref}>{t("app.documentTitle")}</a> })}</p>
       </section>
@@ -180,7 +184,8 @@ export function DeckTableScreen({
       <header>
         <h2>{t("studio.decks.heading")}</h2>
         <a href={groupsHref}>{t("studio.decks.groupsLink")}</a> <a href={instanceHref}>{t("studio.decks.instanceLink")}</a>{" "}
-        <a href={healthHref}>{t("studio.decks.healthLink")}</a> <a href={libraryHref}>{t("studio.decks.libraryLink")}</a>
+        <a href={healthHref}>{t("studio.decks.healthLink")}</a> <a href={libraryHref}>{t("studio.decks.libraryLink")}</a>{" "}
+        <a href={transferHref([])}>{t("studio.decks.transferLink")}</a>
       </header>
       <label class="studio-filter">
         {t("studio.decks.filter")}
@@ -195,6 +200,7 @@ export function DeckTableScreen({
           groups={groups}
           readOnly={readOnly}
           busy={busy}
+          exportHref={transferHref(selected)}
           onMove={(parent) => {
             const group = groups.find((entry) => entry.group.url === parent)?.group ?? null;
             const name = group === null ? t("studio.bulk.topLevel") : readerText(group.title);

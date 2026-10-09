@@ -24,6 +24,7 @@ import { GroupsContainer } from "./GroupsContainer";
 import { HealthContainer } from "./HealthContainer";
 import { InstanceAboutContainer } from "./InstanceAboutContainer";
 import { LibraryCopiesContainer } from "./LibraryCopiesContainer";
+import { TransferContainer } from "./TransferContainer";
 import { instanceOfRoute, spotRoute, studioRouteToHash, useStudioRoute, type StudioRoute } from "./router";
 
 /**
@@ -97,6 +98,8 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
         return [instancesCrumb, decks, { label: t("studio.instance.crumb"), route }];
       case "library":
         return [instancesCrumb, decks, { label: t("studio.library.crumb"), route }];
+      case "transfer":
+        return [instancesCrumb, decks, { label: t("studio.transfer.crumb"), route }];
       case "health": {
         const health: Crumb<StudioRoute> = { label: t("studio.health.crumb"), route: { screen: "health", instanceUrl: route.instanceUrl } };
         return route.deckUrl === undefined
@@ -166,6 +169,9 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             instanceHref={studioRouteToHash({ screen: "instance", instanceUrl: route.instanceUrl })}
             healthHref={(deck) => studioRouteToHash({ screen: "health", instanceUrl: route.instanceUrl, ...(deck === undefined ? {} : { deckUrl: deck.url }) })}
             libraryHref={studioRouteToHash({ screen: "library", instanceUrl: route.instanceUrl })}
+            transferHref={(decks) =>
+              studioRouteToHash({ screen: "transfer", instanceUrl: route.instanceUrl, deckUrls: decks.map((deck) => deck.url) })
+            }
             deckHref={(deck) => studioRouteToHash({ screen: "about", deckUrl: deck.url })}
             cardsHref={(deck) => studioRouteToHash({ screen: "cards", deckUrl: deck.url })}
           />
@@ -190,6 +196,19 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             instance={activeInstance!}
             deckHref={(deck) => studioRouteToHash({ screen: "about", deckUrl: deck.url })}
             libraryHref={libraryHref(route.instanceUrl)}
+          />
+        );
+      case "transfer":
+        // Another instance: no file or status of the last one stays.
+        return (
+          <TransferContainer
+            key={route.instanceUrl}
+            useCases={useCases}
+            instance={activeInstance!}
+            chosen={route.deckUrls ?? []}
+            // Like Home's view, which decks are ticked is no Back stop.
+            onChoose={(urls) => replace({ screen: "transfer", instanceUrl: route.instanceUrl, ...(urls.length === 0 ? {} : { deckUrls: urls }) })}
+            cardsHref={(deck) => studioRouteToHash({ screen: "cards", deckUrl: deck.url })}
           />
         );
       case "instance":
@@ -223,6 +242,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             onOpen={(card) => navigate(inspector(card))}
             scheduleHref={studioRouteToHash({ screen: "schedule", deckUrl: route.deckUrl })}
             healthHref={studioRouteToHash({ screen: "health", instanceUrl: activeInstance!.url, deckUrl: route.deckUrl })}
+            exportHref={studioRouteToHash({ screen: "transfer", instanceUrl: activeInstance!.url, deckUrls: [route.deckUrl] })}
           />
         );
       }

@@ -153,3 +153,22 @@ describe("changing the chapters completed in the Studio", () => {
     expect(writes(pod)).toEqual([]);
   });
 });
+
+describe("registerDeck", () => {
+  it("adds a deck's entry with the chapters it completed, in one checked write", async () => {
+    const pod = await podWithCourse();
+    const checked: string[][] = [];
+    const repository = repositoryOn(pod.fetch, async (_dataset, subjects) => void checked.push([...subjects]));
+    const added: Deck = { ...deck, id: "deck-2", url: `${CATALOG}#deck-2`, completedChapters: [`${RELEASE}#ch1`] };
+    expect(await repository.registerDeck(added)).toBe(added);
+    expect(await repository.readDeck(added.url)).toMatchObject({ id: "deck-2", completedChapters: [`${RELEASE}#ch1`] });
+    expect(checked[0]).toContain(added.url);
+    expect(writes(pod)).toHaveLength(1);
+  });
+
+  it("refuses a deck the catalog has an entry of, writing nothing", async () => {
+    const pod = await podWithCourse();
+    await expect(repositoryOn(pod.fetch).registerDeck(deck)).rejects.toMatchObject({ code: "alreadyExists" });
+    expect(writes(pod)).toHaveLength(0);
+  });
+});

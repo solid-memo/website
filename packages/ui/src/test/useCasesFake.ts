@@ -152,6 +152,11 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
     editCards: vi.fn(async (_instanceUrl, _deck, _ids, _edit, previewed) => previewed),
     undoCardEdit: vi.fn(async () => undefined),
     resetCards: vi.fn(async (_instanceUrl, _deck, ids) => ids.length),
+    exportDeckFile: vi.fn(async () => undefined),
+    openDeckFile: vi.fn(async () => null),
+    importDeckFile: vi.fn(async () => {
+      throw new Error("importDeckFile fake not configured");
+    }),
     rescheduleCards: vi.fn(async (_instanceUrl, _deck, ids) => ids.length),
     transferCards: vi.fn(async (_instanceUrl, _from, _to, ids) => ({
       cards: ids.map((id: string) => ({ from: id, to: id, present: false })),

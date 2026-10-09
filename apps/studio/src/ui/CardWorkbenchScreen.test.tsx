@@ -36,6 +36,7 @@ function Harness({ initial = DEFAULT_CARD_QUERY, onQuery, ...overrides }: Partia
       lapsesFailed={false}
       scheduleHref="#/schedule"
       healthHref="#/health"
+      exportHref="#/transfer"
       query={query}
       onQuery={(next) => {
         onQuery?.(next);
@@ -71,6 +72,7 @@ describe("CardWorkbenchScreen", () => {
     const { rerender } = render(<Harness />);
     expect(screen.getByText("Lapses count the card's wrong answers since March 2025, the month of the deck's first answer in the log.")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Schedule, lapses and leeches" })).toHaveAttribute("href", "#/schedule");
+    expect(screen.getByRole("link", { name: "Export" })).toHaveAttribute("href", "#/transfer");
     rerender(<Harness lapses={undefined} />);
     expect(screen.getByText("Reading the answer log for the lapses…")).toBeInTheDocument();
     rerender(<Harness lapses={{ lapses: new Map(), since: null }} />);

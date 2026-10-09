@@ -37,6 +37,12 @@ describe("the Studio's routes", () => {
       field: "c1-d2",
     },
     { screen: "library", instanceUrl: "https://pod.example/solid-memo/a/" },
+    { screen: "transfer", instanceUrl: "https://pod.example/solid-memo/a/" },
+    {
+      screen: "transfer",
+      instanceUrl: "https://pod.example/solid-memo/a/",
+      deckUrls: ["https://pod.example/solid-memo/a/catalog.ttl#deck-1", "https://pod.example/solid-memo/a/catalog.ttl#deck-2"],
+    },
   ];
 
   it("round-trip through the hash", () => {
@@ -119,8 +125,14 @@ describe("the Studio's routes", () => {
     expect(spotRoute(deckUrl, { card, place: { tab: "schedule" } })).toEqual({ ...at, tab: "schedule" });
   });
 
+  it("keep each deck to export as a deck of its own", () => {
+    expect(studioRouteToHash(routes[16]!)).toBe(
+      "#/studio/transfer?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2F&deck=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2Fcatalog.ttl%23deck-1&deck=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2Fcatalog.ttl%23deck-2",
+    );
+  });
+
   it("name the instance a route is in, the deck's for the workbench", () => {
-    expect(routes.map(instanceOfRoute)).toEqual([null, ...Array(14).fill("https://pod.example/solid-memo/a/")]);
+    expect(routes.map(instanceOfRoute)).toEqual([null, ...Array(16).fill("https://pod.example/solid-memo/a/")]);
   });
 
   it("leave the root without an instance, and anything unknown, to the default route", () => {
@@ -128,6 +140,7 @@ describe("the Studio's routes", () => {
     expect(parseStudioHash("#/studio")).toBeNull();
     expect(parseStudioHash("#/studio/groups")).toBeNull();
     expect(parseStudioHash("#/studio/library")).toBeNull();
+    expect(parseStudioHash("#/studio/transfer?deck=x")).toBeNull();
     expect(parseStudioHash("#/studio/decks?instance=x")).toBeNull();
   });
 

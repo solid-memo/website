@@ -111,6 +111,10 @@ export const ERROR_TEMPLATES = {
     "This deck is in a newer format than this version of Solid Memo can read. Reload the page to get the latest version.",
   libraryCardTooNew:
     "A card in this deck is in a newer format than this version of Solid Memo can read. Reload the page to get the latest version.",
+  deckFileUnreadable: "Solid Memo cannot read that file. Choose a Turtle or JSON-LD file exported from Solid Memo.",
+  notADeckFile: "That file does not hold one Solid Memo deck. Choose a file exported from Solid Memo.",
+  deckFileTooNew:
+    "That file was written by a newer version of Solid Memo, so this one cannot import it. Reload the page to get the latest version.",
   noGuestPod: "There is no guest study on this device.",
   guestPodStartFailed: "The guest study on this device could not be opened. Reload the page and try again.",
   guestStorageAborted:

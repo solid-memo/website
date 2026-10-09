@@ -1241,6 +1241,9 @@
     "notADeck": "That is not a Solid Memo deck, so it cannot be added. Choose another deck.",
     "libraryDeckTooNew": "This deck is in a newer format than this version of Solid Memo can read. Reload the page to get the latest version.",
     "libraryCardTooNew": "A card in this deck is in a newer format than this version of Solid Memo can read. Reload the page to get the latest version.",
+    "deckFileUnreadable": "Solid Memo cannot read that file. Choose a Turtle or JSON-LD file exported from Solid Memo.",
+    "notADeckFile": "That file does not hold one Solid Memo deck. Choose a file exported from Solid Memo.",
+    "deckFileTooNew": "That file was written by a newer version of Solid Memo, so this one cannot import it. Reload the page to get the latest version.",
     "noGuestPod": "There is no guest study on this device.",
     "guestPodStartFailed": "The guest study on this device could not be opened. Reload the page and try again.",
     "guestStorageAborted": "This browser refused to save a change to the guest study. Check that it has room to keep data, then try again.",
@@ -1338,7 +1341,8 @@
       },
       "healthLink": "Health",
       "libraryLink": "Library copies",
-      "healthOf": "in {deck}"
+      "healthOf": "in {deck}",
+      "transferLink": "Import and export"
     },
     "bulk": {
       "label": "Selected decks",
@@ -1378,7 +1382,8 @@
       "removed": {
         "one": "Deleted {count} deck.",
         "other": "Deleted {count} decks."
-      }
+      },
+      "export": "Export"
     },
     "groups": {
       "heading": "Groups"
@@ -1458,7 +1463,8 @@
       "lapsesLoading": "Reading the answer log for the lapses…",
       "lapsesFailed": "The answer log could not be read, so the lapses are not known.",
       "scheduleLink": "Schedule, lapses and leeches",
-      "healthLink": "Health"
+      "healthLink": "Health",
+      "exportLink": "Export"
     },
     "card": {
       "heading": "Card: {card}",
@@ -1878,6 +1884,58 @@
       "failed": "{deck}: the update failed while {step}:",
       "badge": "Release {version} out",
       "badgeOf": "for {deck}"
+    },
+    "transfer": {
+      "crumb": "Import and export",
+      "heading": "Import and export decks of {instance}",
+      "export": "Export",
+      "exportIntro": "Save decks as files, each a file of its own, in Turtle or JSON-LD: the deck, its cards and their wrong options, and, if you choose, your progress. Any app that reads RDF can read them, and Solid Memo can import them again.",
+      "noDecks": "This instance has no decks to export yet.",
+      "decks": "Decks to export",
+      "format": "Format",
+      "formats": {
+        "turtle": "Turtle (.ttl)",
+        "jsonld": "JSON-LD (.jsonld)"
+      },
+      "withProgress": "Include my progress: when each card is due, and the chapters of a course I completed",
+      "exportButton": {
+        "one": "Export {count} deck",
+        "other": "Export {count} decks"
+      },
+      "exporting": "Exporting {deck} ({at} of {total})…",
+      "exported": {
+        "one": "Exported {count} deck. Your browser saves it as a download.",
+        "other": "Handed {count} decks to your browser, each to save as a download of its own. It may ask you to allow several downloads: those it blocks are not saved."
+      },
+      "import": "Import",
+      "importIntro": "Add a deck from a Turtle or JSON-LD file to {instance}, as a new deck. A file from an older version of Solid Memo is brought up to date as it is read.",
+      "choose": "Choose a file…",
+      "reading": "Reading the file…",
+      "file": "{name}: {deck}",
+      "cards": {
+        "one": "{count} card",
+        "other": "{count} cards"
+      },
+      "states": {
+        "one": "Progress: {count} review state",
+        "other": "Progress: {count} review states"
+      },
+      "chapters": {
+        "one": "{count} completed chapter",
+        "other": "{count} completed chapters"
+      },
+      "upgraded": {
+        "one": "{count} part of it is in an older format, and is brought up to date.",
+        "other": "{count} parts of it are in an older format, and are brought up to date."
+      },
+      "dropped": {
+        "one": "{count} part of it cannot be read, and is left out.",
+        "other": "{count} parts of it cannot be read, and are left out."
+      },
+      "importProgress": "Import the progress too",
+      "importButton": "Import into {instance}",
+      "importing": "Importing the deck…",
+      "imported": "Imported {deck}."
     }
   }
 }

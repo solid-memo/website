@@ -10,7 +10,8 @@ type Form = "move" | "pace" | "direction";
 /**
  * What can be done with the decks selected in Home's table, all at once:
  * move them into a group (or to the top level), give them a pace or a
- * direction, or delete them, once the user confirms, naming each. Each
+ * direction, export them (a link to import and export, `exportHref`,
+ * with them ticked), or delete them, once the user confirms, naming each. Each
  * resolves to whether it was done; the screen says what was and why not.
  * Only one is made at a time (`busy`).
  */
@@ -19,6 +20,7 @@ export function DeckBulkActions({
   groups,
   readOnly,
   busy,
+  exportHref,
   onMove,
   onPace,
   onDirection,
@@ -31,6 +33,8 @@ export function DeckBulkActions({
   /** A newer version arranged the decks: none can be moved. */
   readOnly: boolean;
   busy: boolean;
+  /** Import and export, the selected decks ticked to export. */
+  exportHref: string;
   /** Into the group of that URL; null for the top level. */
   onMove: (parent: string | null) => Promise<boolean>;
   onPace: (pace: DeckPace) => Promise<boolean>;
@@ -80,6 +84,9 @@ export function DeckBulkActions({
             {t(`studio.bulk.${which}`)}
           </button>
         ))}
+        <a class="button" href={exportHref}>
+          {t("studio.bulk.export")}
+        </a>
         <button type="button" class="danger" disabled={busy} onClick={remove}>
           {t("studio.bulk.remove")}
         </button>

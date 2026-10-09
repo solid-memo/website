@@ -4,6 +4,7 @@ import type { LangText } from "@solid-memo/domain/langText";
 import type { ThemeChoice } from "@solid-memo/domain/theme";
 import type { Repair } from "@solid-memo/domain/repair";
 import type { Card, CardContent, Deck } from "@solid-memo/domain/deck";
+import type { DeckFileContent, DeckFileFormat, DeckFileOptions } from "@solid-memo/domain/deckFile";
 import type { CompletedChaptersEdit, CourseOutline } from "@solid-memo/domain/course";
 import type { StatedLanguages } from "@solid-memo/domain/deckLanguages";
 import type { DeckTree, DeckTreeEdit } from "@solid-memo/domain/deckTree";
@@ -184,6 +185,13 @@ export interface DeckRepository {
   upgradeDecks(instanceUrl: string, catalog: Catalog | null): Promise<boolean>;
   /** A new, empty deck by that title. */
   createDeck(instanceUrl: string, title: LangText): Promise<Deck>;
+  /**
+   * Add a deck's entry to its catalog, its course progress
+   * (sm:completedChapter) with it: a deck made from a file, whose cards
+   * and reviews documents are written already. Throws alreadyExists,
+   * writing nothing, when the catalog has an entry of its URL.
+   */
+  registerDeck(deck: Deck): Promise<Deck>;
   /** Replaces the deck's title; cards and review state are untouched. */
   renameDeck(deck: Deck, title: LangText): Promise<Deck>;
   /**
@@ -342,6 +350,43 @@ export interface DeckLibrary {
    * Empty for a release that is no course.
    */
   fetchCourseOutline(releaseUrl: string): Promise<CourseOutline>;
+}
+
+/**
+ * Driven port: a deck as a file, in Turtle or JSON-LD
+ * (domain/deckFile.ts). Reads the pod to export; never writes it.
+ */
+export interface DeckArchive {
+  /**
+   * The deck's entry, with its agents and distribution, and every subject
+   * of its cards document, as the pod has them, at their IRIs; with
+   * `withProgress`, every subject of its reviews document and a course's
+   * completed chapters too. Throws deckGone when the catalog has no entry
+   * of it.
+   */
+  exportDeck(deck: Deck, options: DeckFileOptions): Promise<string>;
+  /**
+   * What a file holds: its one deck, read as the pod's are (an older
+   * format brought up to date, in memory), the cards of its cards
+   * document and the review states of its reviews document. Relative
+   * IRIs are resolved against `baseUrl`. Throws deckFileUnreadable when
+   * the text does not parse (or a JSON-LD context would be fetched from
+   * elsewhere), notADeckFile when it holds no deck this app can read, or
+   * more than one, and deckFileTooNew when a deck, card or review state
+   * is in a newer format than this app reads.
+   */
+  readDeckFile(text: string, format: DeckFileFormat, baseUrl: string): Promise<DeckFileContent>;
+}
+
+/**
+ * Driven port: files on the user's device, which the user picks. Text
+ * only.
+ */
+export interface FileExchange {
+  /** Hand the text to the browser to save, as a download named `name`. */
+  save(name: string, mediaType: string, text: string): void;
+  /** The file the user picks, of those `accept` names (as an input's accept attribute); null when they pick none. */
+  open(accept: string): Promise<{ name: string; text: string } | null>;
 }
 
 /** Driven port: SM-2 review state, stored separately from card content. */

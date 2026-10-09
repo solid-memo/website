@@ -45,7 +45,9 @@ export type StudioRoute =
   /** Everything wrong with the instance or, with `deckUrl`, one of its decks. */
   | { screen: "health"; instanceUrl: string; deckUrl?: string }
   /** The instance's copies of library releases: their versions, the newer releases and what upgrading would change. */
-  | { screen: "library"; instanceUrl: string };
+  | { screen: "library"; instanceUrl: string }
+  /** Decks to and from files: the instance's decks to export (those of `deckUrls` chosen, none when absent), and a file to import. */
+  | { screen: "transfer"; instanceUrl: string; deckUrls?: readonly string[] };
 
 /** What the card inspector shows: the card's content, its wrong options, its review state in each direction, or its answers. */
 export type CardTab = "content" | "distractors" | "schedule" | "history";
@@ -101,6 +103,12 @@ export function studioRouteToHash(route: StudioRoute): string {
       return `#${STUDIO_PATH}/health${hashParams({ instance: route.instanceUrl, ...(route.deckUrl === undefined ? {} : { deck: route.deckUrl }) })}`;
     case "library":
       return `#${STUDIO_PATH}/library${hashParams({ instance: route.instanceUrl })}`;
+    case "transfer":
+      // A `deck` each: hashParams takes one value a name.
+      return `#${STUDIO_PATH}/transfer?${new URLSearchParams([
+        ["instance", route.instanceUrl],
+        ...(route.deckUrls ?? []).map((url) => ["deck", url]),
+      ]).toString()}`;
   }
 }
 
@@ -134,6 +142,11 @@ export function parseStudioHash(hash: string): StudioRoute | null {
       return instanceUrl === null ? null : { screen: "instance", instanceUrl };
     case "/library":
       return instanceUrl === null ? null : { screen: "library", instanceUrl };
+    case "/transfer": {
+      if (instanceUrl === null) return null;
+      const deckUrls = query.getAll("deck");
+      return deckUrls.length === 0 ? { screen: "transfer", instanceUrl } : { screen: "transfer", instanceUrl, deckUrls };
+    }
     case "/health": {
       const deckUrl = query.get("deck");
       if (instanceUrl === null) return null;

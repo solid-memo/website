@@ -92,8 +92,8 @@ function typedInto(target: EventTarget | null): boolean {
  * read, or when it cannot be, `lapsesFailed`) count its wrong answers
  * since the month of the deck's first answer in the log, which a line
  * above the table names.
- * Links go to the deck's schedule (`scheduleHref`) and its health
- * (`healthHref`).
+ * Links go to the deck's schedule (`scheduleHref`), its health
+ * (`healthHref`) and its export (`exportHref`).
  */
 export function CardWorkbenchScreen({
   deck,
@@ -105,6 +105,7 @@ export function CardWorkbenchScreen({
   lapsesFailed,
   scheduleHref,
   healthHref,
+  exportHref,
   query,
   onQuery,
   cardHref,
@@ -140,6 +141,8 @@ export function CardWorkbenchScreen({
   scheduleHref: string;
   /** The deck's health. */
   healthHref: string;
+  /** The deck, ticked to export as a file. */
+  exportHref: string;
   query: CardQuery;
   onQuery: (query: CardQuery) => void;
   cardHref: (card: Card) => string;
@@ -265,7 +268,8 @@ export function CardWorkbenchScreen({
       <header>
         <h2>{tx("studio.cards.heading", { deck: <ReaderText text={deck.title} /> })}</h2>
         {course && <span class="studio-badge">{t("studio.decks.badge.course")}</span>}
-        <a href={scheduleHref}>{t("studio.cards.scheduleLink")}</a> <a href={healthHref}>{t("studio.cards.healthLink")}</a>
+        <a href={scheduleHref}>{t("studio.cards.scheduleLink")}</a> <a href={healthHref}>{t("studio.cards.healthLink")}</a>{" "}
+        <a href={exportHref}>{t("studio.cards.exportLink")}</a>
       </header>
       {course && <p class="hint">{t("studio.cards.courseHint")}</p>}
       {lastEdit !== null && (

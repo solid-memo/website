@@ -52,6 +52,7 @@ export function CardWorkbenchContainer({
   onOpen,
   scheduleHref,
   healthHref,
+  exportHref,
 }: {
   useCases: UseCases;
   instance: Instance;
@@ -67,6 +68,8 @@ export function CardWorkbenchContainer({
   scheduleHref: string;
   /** The deck's health. */
   healthHref: string;
+  /** The deck, ticked to export as a file. */
+  exportHref: string;
 }) {
   const { t, errorText, locale } = useI18n();
   const queryClient = useQueryClient();
@@ -186,6 +189,7 @@ export function CardWorkbenchContainer({
       lapsesFailed={answersQuery.error !== null}
       scheduleHref={scheduleHref}
       healthHref={healthHref}
+      exportHref={exportHref}
       query={query}
       onQuery={onQuery}
       cardHref={cardHref}
