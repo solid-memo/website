@@ -206,7 +206,8 @@ instance goes). It runs these steps:
 4. **validate:** the copy must fully conform to the shapes
    (`movedCopyInvalid`).
 5. **verify:** the guest's instance must be unchanged since it was
-   copied. The write fence keeps it read-only meanwhile.
+   copied. The write fence keeps it read-only meanwhile, in the site's
+   other open tabs too.
 6. **register:** `attachInstance` in the type index the user chose.
    From here on the study is theirs.
 7. **tidy:** register each class of the instance's data (its
@@ -224,7 +225,20 @@ container where nothing was, and nothing names it before **register**,
 so all it holds is Solid Memo's copies. The update journal of this
 browser notes the run, so a copy left behind by a closed tab is offered
 for removal on the next opening of the guest's instance
-(`InterruptedMoveContainer`), and removed whole. A guest's
+(`InterruptedMoveContainer`), and removed whole. A copy another tab's
+move is still writing is not offered, nor removed. A guest's
 instance has no access control of its own, so the copy inherits the
 user's pod's defaults, the same as a newly created instance.
+
+The other open tabs of the site (the web app's and the Studio's, which
+share one origin) hold the guest's instance and its copy while a move
+runs, so a write there fails with the same message as in the tab moving it. The
+tab running the move holds a Web Lock named after its journal entry
+until the move is over, failed or not; the browser lets the lock go when
+the tab closes or crashes. Each other tab reads the entries when it
+opens, then follows them through the browser's `storage` events, and
+holds what an entry names only while its lock is held. An entry a
+failed move keeps, one a closed tab left, or one noting a deck added to
+an instance fences nothing. A browser without Web Locks fences no other
+tab; the verify step catches what it misses.
 

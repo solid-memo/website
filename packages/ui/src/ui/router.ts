@@ -233,6 +233,15 @@ export function courseHref(instanceUrl: string, deckUrl: string): string {
   return routeToHash({ screen: "course", instanceUrl, deckUrl });
 }
 
+/**
+ * URL of the instance's Home in Solid Memo Studio, which the site serves
+ * a folder down, at studio/ (docs/studio.md). It is the Studio's route,
+ * spelled here since Solid Memo cannot import the Studio's router.
+ */
+export function studioHref(instanceUrl: string): string {
+  return `studio/#/${params({ instance: instanceUrl })}`;
+}
+
 /** Parse a location hash; null for anything that isn't a valid route. */
 export function parseHash(hash: string): RouteRef | null {
   const [path, search] = hash.replace(/^#/, "").split("?");

@@ -2,7 +2,7 @@ import { isGuestUrl } from "@solid-memo/domain/guest";
 import type { Instance } from "@solid-memo/domain/instance";
 import { ExternalLink } from "./ExternalLink";
 import { useI18n } from "./i18n";
-import { routeToHash, statisticsHref } from "./router";
+import { routeToHash, statisticsHref, studioHref } from "./router";
 
 /**
  * Persistent bar showing which instance the user is working in, with the
@@ -29,6 +29,9 @@ export function InstanceBar({ instance }: { instance: Instance }) {
       </a>
       <a class="button" href={routeToHash({ screen: "preferences", instanceUrl: instance.url })}>
         {t("instanceBar.preferences")}
+      </a>
+      <a class="button" href={studioHref(instance.url)}>
+        {t("studio.open")}
       </a>
       <a class="button" href={routeToHash({ screen: "instancePicker" })}>
         {t("instanceBar.switch")}

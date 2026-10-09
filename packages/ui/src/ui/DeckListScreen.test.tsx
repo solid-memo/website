@@ -108,6 +108,7 @@ function Harness({
       libraryHref="#/library?instance=a"
       deckHref={(d) => `#/deck?deck=${d.id}`}
       preferencesHref={(d) => `#/deck-preferences?deck=${d.id}`}
+      studioHref="studio/#/?instance=a"
       renderStudyAction={(d) => <span>action for {d.title.en}</span>}
       createDeckHref="#/new-deck?instance=a"
       {...overrides}
@@ -273,8 +274,13 @@ describe("DeckListScreen", () => {
       "href",
       "#/deck-preferences?deck=deck-2",
     );
+    expect(within(menu).getByRole("menuitem", { name: "Open in Studio" })).toHaveAttribute(
+      "href",
+      "studio/#/?instance=a",
+    );
     expect(within(menu).getAllByRole("menuitem").map((item) => item.textContent)).toEqual([
       "Preferences",
+      "Open in Studio",
       "Rename",
       "Move up",
       "Move down",
@@ -693,6 +699,7 @@ describe("DeckListScreen", () => {
       libraryHref: "#/library?instance=a",
       deckHref: (d) => `#/deck?deck=${d.id}`,
       preferencesHref: (d) => `#/deck-preferences?deck=${d.id}`,
+      studioHref: "studio/#/?instance=a",
       renderStudyAction: () => null,
       createDeckHref: "#/new-deck?instance=a",
     });
@@ -929,6 +936,7 @@ describe("DeckListScreen", () => {
       libraryHref: "#/library?instance=a",
       deckHref: (d) => `#/deck?deck=${d.id}`,
       preferencesHref: (d) => `#/deck-preferences?deck=${d.id}`,
+      studioHref: "studio/#/?instance=a",
       renderStudyAction: () => null,
       createDeckHref: "#/new-deck?instance=a",
     };
@@ -958,7 +966,7 @@ describe("DeckListScreen", () => {
     // A deck's name, preferences and cards are its own: they are not the arrangement's.
     openMenu("Kana");
     const enabled = screen.getAllByRole("menuitem").filter((item) => !item.hasAttribute("aria-disabled"));
-    expect(enabled.map((item) => item.textContent)).toEqual(["Preferences", "Rename", "Delete deck"]);
+    expect(enabled.map((item) => item.textContent)).toEqual(["Preferences", "Open in Studio", "Rename", "Delete deck"]);
     fireEvent.click(screen.getByRole("menuitem", { name: "Move out of Japanese" }));
     expect(onEdit).not.toHaveBeenCalled();
     expect(screen.getByRole("menu")).toBeInTheDocument();
@@ -977,7 +985,7 @@ describe("DeckListScreen", () => {
     openMenu("Japanese");
     openMenu("Kana");
     const enabled = screen.getAllByRole("menuitem").filter((item) => !item.hasAttribute("aria-disabled"));
-    expect(enabled.map((item) => item.textContent)).toEqual(["Preferences", "Rename", "Delete deck"]);
+    expect(enabled.map((item) => item.textContent)).toEqual(["Preferences", "Open in Studio", "Rename", "Delete deck"]);
     fireEvent.click(screen.getByRole("menuitem", { name: "Move out of Japanese" }));
     expect(onEdit).not.toHaveBeenCalled();
   });
@@ -1530,6 +1538,7 @@ describe("DeckListScreen dragging while the list changes", () => {
       libraryHref: "#/library?instance=a",
       deckHref: (d) => `#/deck?deck=${d.id}`,
       preferencesHref: (d) => `#/deck-preferences?deck=${d.id}`,
+      studioHref: "studio/#/?instance=a",
       renderStudyAction: () => null,
       createDeckHref: "#/new-deck?instance=a",
     });

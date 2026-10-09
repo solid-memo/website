@@ -1245,6 +1245,7 @@
     "name": "Solid Memo Studio",
     "tagline": "Manage the decks in your Solid Pod.",
     "backToApp": "Back to Solid Memo",
+    "open": "Open in Studio",
     "decks": {
       "heading": "Decks",
       "caption": "The decks of {instance}",

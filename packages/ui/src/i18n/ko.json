@@ -1245,6 +1245,7 @@
     "name": "Solid Memo Studio",
     "tagline": "Solid Pod에 있는 덱을 관리해요.",
     "backToApp": "Solid Memo로 돌아가기",
+    "open": "스튜디오에서 열기",
     "decks": {
       "heading": "덱",
       "caption": "{instance}의 덱",

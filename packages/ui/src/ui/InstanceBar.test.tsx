@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { render, screen, within } from "@testing-library/preact";
 import { InstanceBar } from "./InstanceBar";
 import type { Instance } from "@solid-memo/domain/instance";
-import { routeToHash } from "./router";
+import { routeToHash, studioHref } from "./router";
 
 const instance: Instance = {
   url: "https://pod.example/solid-memo/main/",
@@ -14,11 +14,11 @@ function renderBar(shown: Instance = instance) {
 }
 
 describe("InstanceBar", () => {
-  it("says a guest's instance is kept in this browser, and links nowhere outside the app", () => {
+  it("says a guest's instance is kept in this browser, and links nowhere outside the site", () => {
     renderBar({ url: "https://guest.solid-memo.invalid/solid-memo/", name: "My study" });
     expect(screen.getByText("Kept in this browser")).toBeInTheDocument();
     for (const link of screen.getAllByRole("link")) {
-      expect(link.getAttribute("href")).toMatch(/^#\//);
+      expect(link.getAttribute("href")).toMatch(/^(studio\/)?#\//);
     }
   });
 
@@ -40,7 +40,7 @@ describe("InstanceBar", () => {
     );
   });
 
-  it("links to the instance's statistics and preferences, and to the instance picker", () => {
+  it("links to the instance's statistics and preferences, to the instance in the Studio, and to the instance picker", () => {
     renderBar();
     const bar = within(screen.getByRole("navigation"));
     expect(bar.getByRole("link", { name: "Statistics" })).toHaveAttribute(
@@ -51,6 +51,7 @@ describe("InstanceBar", () => {
       "href",
       routeToHash({ screen: "preferences", instanceUrl: instance.url }),
     );
+    expect(bar.getByRole("link", { name: "Open in Studio" })).toHaveAttribute("href", studioHref(instance.url));
     expect(bar.getByRole("link", { name: "Switch instance" })).toHaveAttribute(
       "href",
       routeToHash({ screen: "instancePicker" }),

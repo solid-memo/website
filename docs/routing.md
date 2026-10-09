@@ -17,6 +17,13 @@ routes and its pair of functions. The [Studio](studio.md) has routes of
 its own and keeps them with the same core; this page is about Solid
 Memo's.
 
+Solid Memo links to the Studio with `studioHref`: the instance's Home
+there, `studio/#/?instance=…`, a folder down on the same origin. The
+instance bar, each deck's actions menu and the deck page have this
+"Open in Studio" link. Solid Memo cannot import the Studio's router, so
+`studioHref` spells that route itself, and a Studio test checks that
+the two agree.
+
 ## Hash routing, not pathname routing
 
 The route is kept in `location.hash`:

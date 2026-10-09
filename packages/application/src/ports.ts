@@ -497,12 +497,28 @@ export interface UpdateJournal {
   end(sourceUrl: string): void;
   /** What an unfinished update of the source was writing; null when none. */
   staging(sourceUrl: string): string | null;
+  /**
+   * Mark this page as running a move of the guest's instance until the
+   * returned function is called, or the page goes away. An entry outlives
+   * its run when the move fails half-way: only the mark tells other pages
+   * the move still runs.
+   */
+  run(sourceUrl: string): () => void;
+  /**
+   * Call `changed` for each move another page of the app, in this
+   * browser, runs: at once for those running already, then as each begins
+   * (`staging` its copy); with `staging` null once it stops running or its
+   * entry ends. Never for this page's own. It watches for as long as the
+   * page lives.
+   */
+  watch(changed: (sourceUrl: string, staging: string | null) => void): void;
 }
 
 /**
  * Driven port: makes a container read-only for a while. Moving a guest's
  * study holds the guest's instance, so nothing else in this tab writes to
- * it until the move is over.
+ * it until the move is over. A move another tab runs is held the same
+ * way, with its copy.
  */
 export interface WriteFence {
   /** Refuse every write under the container (a URL ending in "/") until the returned release is called. */

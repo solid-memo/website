@@ -1242,6 +1242,7 @@
     "name": "Solid Memo Studio",
     "tagline": "Hantera kortlekarna i din Solid Pod.",
     "backToApp": "Tillbaka till Solid Memo",
+    "open": "Öppna i Studio",
     "decks": {
       "heading": "Kortlekar",
       "caption": "Kortlekarna i {instance}",

@@ -320,7 +320,8 @@ documented exclusions:
   in node.
 - `src/test/` and `src/testing/` — test setup and helpers other
   packages' tests import (`@solid-memo/domain/testing/libraryDeck`,
-  `@solid-memo/shacl/testing/turtle`, `@solid-memo/ui/test/useCasesFake`), not product code.
+  `@solid-memo/shacl/testing/turtle`, `@solid-memo/ui/test/useCasesFake`,
+  `@solid-memo/browser/testing/fakeLocks`), not product code.
 - `e2e/pod/` and `e2e/journeys/` — they are tests. Their harnesses'
   logic is unit-tested (what they make of a server's answers, the
   journeys' time zone, seed, text and CI summary), but no threshold
