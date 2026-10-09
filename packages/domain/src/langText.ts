@@ -79,6 +79,11 @@ export function tidied(value: string, formatted = false): string {
   return formatted ? value.replace(/^(?:[ \t]*\r?\n)+/, "").trimEnd() : value.trim();
 }
 
+/** Text as it is searched: lower case, without diacritics ("Ö" is "o"). */
+export function folded(text: string): string {
+  return text.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
+}
+
 /** Whether two texts say the same in the same languages. */
 export function sameText(a: LangText | undefined, b: LangText | undefined): boolean {
   if (a === undefined || b === undefined) return a === b;

@@ -1240,16 +1240,17 @@ dl.facts .sources {
   font-size: 0.9rem;
 }
 
-/* The Studio's table of decks: the deck's name as the row's heading, in the
-   body's own type; the figures beside it right-aligned, to compare. */
-table.studio-decks caption {
+/* The Studio's tables, of decks and of cards: the deck's name (or the
+   card's front) as the row's heading, in the body's own type; the figures
+   beside it right-aligned, to compare. */
+table.studio-list caption {
   caption-side: top;
   padding: 0.6rem 0.8rem;
   text-align: left;
   color: var(--text-muted);
 }
 
-table.studio-decks tbody th {
+table.studio-list tbody th {
   background: none;
   font-size: inherit;
   font-weight: 600;
@@ -1261,7 +1262,7 @@ table.studio-decks tbody th {
   min-width: 10rem;
 }
 
-table.studio-decks .number {
+table.studio-list .number {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
@@ -1276,13 +1277,13 @@ table.studio-decks .number {
   margin-bottom: 0;
 }
 
-table.studio-decks thead th,
-table.studio-decks td {
+table.studio-list thead th,
+table.studio-list td {
   white-space: nowrap;
 }
 
 /* A column's name is the button that sorts by it, in the header's type. */
-table.studio-decks button.sort {
+table.studio-list button.sort {
   min-height: 0;
   padding: 0;
   border: none;
@@ -1294,15 +1295,15 @@ table.studio-decks button.sort {
   color: inherit;
 }
 
-table.studio-decks [aria-sort="ascending"] button.sort::after {
+table.studio-list [aria-sort="ascending"] button.sort::after {
   content: " ▲";
 }
 
-table.studio-decks [aria-sort="descending"] button.sort::after {
+table.studio-list [aria-sort="descending"] button.sort::after {
   content: " ▼";
 }
 
-table.studio-decks input[type="checkbox"] {
+table.studio-list input[type="checkbox"] {
   min-height: 0;
   margin: 0;
 }
@@ -1322,6 +1323,69 @@ table.studio-decks input[type="checkbox"] {
   width: 100%;
   max-width: 24rem;
   margin-top: 0.25rem;
+}
+
+/* The card workbench: a card's sides wrap, as in Solid Memo's Browser;
+   its filters side by side while there is room; the selection's count. */
+table.studio-cards tbody th,
+table.studio-cards tbody td:nth-child(3) {
+  white-space: normal;
+  min-width: 10rem;
+  max-width: 24rem;
+}
+
+table.studio-cards tbody th p,
+table.studio-cards tbody td p {
+  margin: 0;
+}
+
+.studio-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  align-items: flex-end;
+  margin-bottom: 0.75rem;
+}
+
+.studio-filters label {
+  display: block;
+}
+
+.studio-filters .studio-filter {
+  flex: 1 1 14rem;
+}
+
+.studio-filters select {
+  display: block;
+  font: inherit;
+  min-height: 2.75rem;
+  margin-top: 0.25rem;
+  max-width: 100%;
+  padding: 0.55rem 0.8rem;
+  color: var(--text);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.studio-selection {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.studio-selection p {
+  margin: 0;
+}
+
+.studio-keys kbd {
+  padding: 0 0.3rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.85em;
 }
 
 /* What can be done with the selected decks, and the form an action opens. */

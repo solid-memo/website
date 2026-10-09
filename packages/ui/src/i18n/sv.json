@@ -1268,7 +1268,7 @@
       "new": "Nya idag",
       "modified": "Senast ändrad",
       "cards": "Kort",
-      "cardsOf": "kort i {deck}, i Solid Memo",
+      "cardsOf": "kort i {deck}",
       "topLevel": "Översta nivån",
       "followsInstance": "(instansen)",
       "counting": "Räknar…",
@@ -1322,6 +1322,75 @@
     },
     "groups": {
       "heading": "Grupper"
+    },
+    "cards": {
+      "crumb": "Kort i {deck}",
+      "heading": "Kort: {deck}",
+      "loading": "Läser in korten…",
+      "courseHint": "En kopia av en kurs: dess kort är kursens frågor.",
+      "empty": "Inga kort i kortleken än.",
+      "search": "Sök",
+      "field": "I",
+      "fields": {
+        "any": "All text",
+        "front": "Framsida",
+        "back": "Baksida",
+        "note": "Anteckningar",
+        "label": "Etikett",
+        "distractor": "Felaktiga alternativ"
+      },
+      "lang": "Språk",
+      "anyLang": "Alla språk",
+      "unstated": "Inget språk angivet",
+      "state": "Läge",
+      "anyState": "Alla lägen",
+      "states": {
+        "live": "I bruk",
+        "retired": "Ur bruk",
+        "new": "Nya",
+        "learning": "Lär in",
+        "young": "Unga",
+        "mature": "Mogna",
+        "due": "Att repetera"
+      },
+      "has": "Har",
+      "anything": "Vad som helst",
+      "features": {
+        "picture": "En bild",
+        "distractors": "Felaktiga alternativ",
+        "markdown": "Markdown",
+        "notes": "Anteckningar"
+      },
+      "pageSize": "Kort per sida",
+      "shown": {
+        "one": "{shown} av {count} kort",
+        "other": "{shown} av {count} kort"
+      },
+      "keys": "Tangenter: {j} och {k} flyttar mellan korten, {x} väljer ett, {enter} öppnar det.",
+      "selected": {
+        "one": "{count} kort valt",
+        "other": "{count} kort valda"
+      },
+      "clear": "Rensa valet",
+      "noMatch": "Inget kort matchar.",
+      "caption": "Korten i {deck}",
+      "select": "Välj",
+      "selectAll": "Välj alla kort på sidan",
+      "selectCard": "Välj {card}",
+      "column": {
+        "front": "Framsida",
+        "back": "Baksida",
+        "due": "Repeteras",
+        "interval": "Intervall",
+        "ease": "Lätthet",
+        "created": "Tillagt",
+        "id": "Id"
+      },
+      "days": {
+        "one": "{count} dag",
+        "other": "{count} dagar"
+      },
+      "notStudied": "Inte studerat än"
     }
   }
 }

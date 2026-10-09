@@ -677,6 +677,27 @@ describe("createUseCases", () => {
     });
   });
 
+  it("listDeckReviewStates reads the deck's review states as stored", async () => {
+    const deps = makeDeps();
+    const stored: ReviewState[] = [
+      {
+        cardId: "card-1",
+        direction: "front-to-back",
+        easeFactor: 2.5,
+        intervalDays: 1,
+        repetitions: 1,
+        due: "2026-09-27",
+        firstReviewedAt: "2026-09-26T10:00:00.000Z",
+        lastReviewedAt: "2026-09-26T10:00:00.000Z",
+        formatVersion: 2,
+      },
+    ];
+    vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue(stored);
+    const useCases = createUseCases(deps);
+    await expect(useCases.listDeckReviewStates(deck)).resolves.toBe(stored);
+    expect(deps.reviewStateRepository.listReviewStates).toHaveBeenCalledWith(deck);
+  });
+
   it("setDeckPace saves the deck's own daily limits, refusing one that is not a whole number", async () => {
     const deps = makeDeps();
     const useCases = createUseCases(deps);

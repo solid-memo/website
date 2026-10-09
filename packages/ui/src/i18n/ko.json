@@ -1325,6 +1325,75 @@
     },
     "groups": {
       "heading": "그룹"
+    },
+    "cards": {
+      "crumb": "{deck}의 카드",
+      "heading": "카드: {deck}",
+      "loading": "카드를 불러오는 중…",
+      "courseHint": "코스의 복사본이에요. 카드가 곧 코스의 질문이에요.",
+      "empty": "이 덱에는 아직 카드가 없어요.",
+      "search": "검색",
+      "field": "검색 위치",
+      "fields": {
+        "any": "모든 텍스트",
+        "front": "앞면",
+        "back": "뒷면",
+        "note": "메모",
+        "label": "레이블",
+        "distractor": "오답 선택지"
+      },
+      "lang": "언어",
+      "anyLang": "모든 언어",
+      "unstated": "언어 지정 안 됨",
+      "state": "상태",
+      "anyState": "모든 상태",
+      "states": {
+        "live": "사용 중",
+        "retired": "사용 중지됨",
+        "new": "새 카드",
+        "learning": "학습 중",
+        "young": "익히는 중",
+        "mature": "익숙함",
+        "due": "복습 예정"
+      },
+      "has": "포함",
+      "anything": "전체",
+      "features": {
+        "picture": "그림",
+        "distractors": "오답 선택지",
+        "markdown": "Markdown",
+        "notes": "메모"
+      },
+      "pageSize": "페이지당 카드 수",
+      "shown": {
+        "one": "카드 {count}장 중 {shown}장",
+        "other": "카드 {count}장 중 {shown}장"
+      },
+      "keys": "키: {j}와(과) {k}(으)로 카드 사이를 이동하고, {x}(으)로 카드를 선택하고, {enter}(으)로 카드를 열어요.",
+      "selected": {
+        "one": "카드 {count}장 선택됨",
+        "other": "카드 {count}장 선택됨"
+      },
+      "clear": "선택 해제",
+      "noMatch": "일치하는 카드가 없어요.",
+      "caption": "{deck}의 카드",
+      "select": "선택",
+      "selectAll": "이 페이지의 모든 카드 선택",
+      "selectCard": "{card} 선택",
+      "column": {
+        "front": "앞면",
+        "back": "뒷면",
+        "due": "다음 복습일",
+        "interval": "복습 간격",
+        "ease": "난이도 계수",
+        "created": "추가한 날",
+        "id": "ID"
+      },
+      "days": {
+        "one": "{count}일",
+        "other": "{count}일"
+      },
+      "notStudied": "아직 학습하지 않음"
     }
   }
 }

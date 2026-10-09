@@ -83,9 +83,9 @@ describe("DeckTableScreen", () => {
       "3",
       "4",
       "September 21, 2026",
-      "12 cards of Kanji N5, in Solid Memo",
+      "12 cards of Kanji N5",
     ]);
-    expect(within(row).getByRole("link", { name: "12 cards of Kanji N5, in Solid Memo" })).toHaveAttribute(
+    expect(within(row).getByRole("link", { name: "12 cards of Kanji N5" })).toHaveAttribute(
       "href",
       "../#/browse?deck=deck-1",
     );

@@ -216,7 +216,7 @@ text is rendered, and none relies on a check of the data.
 | Link spoofing | A followed link opens in a new tab, says so, and when its text is not its own URL, or its host is an international one, the host it leads to follows it in sight: "the spec (solidproject.org)", punycode kept, so `<https://bаnk.example>` with a Cyrillic "а" shows "(xn--bnk-6cd.example)". The link and its host are each isolated (`dir="ltr"`), so a bidi override in the text before them cannot reorder them. |
 | Tracking pictures | Never loaded: alt text only. Pictures belong in `sm:frontImage`/`sm:backImage`, with a description. |
 | Trojan Source | Bidi controls, zero-width and other hidden characters in code and link text shown as markers; links isolated from the text around them. |
-| Denial of service | The limits above, at every entry point, and each text parsed once (`markdownCache.ts` keeps the last 500, and a theory's chunks are split from its cached blocks). |
+| Denial of service | The limits above, at every entry point, and each text parsed once (`markdownCache.ts` keeps the last 500, and a theory's chunks are split from its cached blocks, and the plain text of every card of the deck the Studio's workbench searches). |
 
 Two checks of each built app hold this (`apps/web/src/build.test.ts`,
 and the same in `apps/studio/src/build.test.ts`):

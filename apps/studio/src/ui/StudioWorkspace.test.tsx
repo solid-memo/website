@@ -2,11 +2,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
+import { DEFAULT_CARD_QUERY } from "@solid-memo/domain/cardQuery";
 import { AppName } from "@solid-memo/ui/documentTitle";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { parseStudioHash, studioRouteToHash } from "./router";
 import { StudioWorkspace } from "./StudioWorkspace";
-import { instanceA, instanceB, makeDeck, session } from "../test/fixtures";
+import { instanceA, instanceB, makeCard, makeDeck, session } from "../test/fixtures";
 
 const kanji = makeDeck("deck-1", { en: "Kanji N5" });
 const verbs = makeDeck("deck-2", { en: "Verbs" });
@@ -75,7 +76,7 @@ describe("StudioWorkspace", () => {
     expect(useCases.listDecks).toHaveBeenCalledWith(instanceB.url);
   });
 
-  it("keeps Home's filter and sort in the URL, replacing the entry, and links its decks to Solid Memo", async () => {
+  it("keeps Home's filter and sort in the URL, replacing the entry, and links its decks to Solid Memo, their cards to the workbench", async () => {
     window.history.replaceState(null, "", home(instanceA.url));
     const length = window.history.length;
     renderWorkspace(
@@ -94,10 +95,7 @@ describe("StudioWorkspace", () => {
     const instance = encodeURIComponent(instanceA.url);
     const deck = encodeURIComponent(verbs.url);
     expect(screen.getByRole("link", { name: "Verbs" })).toHaveAttribute("href", `../#/deck?instance=${instance}&deck=${deck}`);
-    expect(await screen.findByRole("link", { name: /cards of Verbs/ })).toHaveAttribute(
-      "href",
-      `../#/browse?instance=${instance}&deck=${deck}`,
-    );
+    expect(await screen.findByRole("link", { name: /cards of Verbs/ })).toHaveAttribute("href", `#/cards?deck=${deck}`);
   });
 
   it("opens the instance's groups from Home, to arrange them as in Solid Memo", async () => {
@@ -115,6 +113,80 @@ describe("StudioWorkspace", () => {
       "href",
       `../#/deck?instance=${encodeURIComponent(instanceA.url)}&deck=${encodeURIComponent(kanji.url)}`,
     );
+  });
+
+  it("opens a deck's cards in the workbench, keeping its query in the URL, and a card in Solid Memo's editor", async () => {
+    window.history.replaceState(null, "", home(instanceA.url));
+    const card = makeCard(kanji, "water");
+    const useCases = makeUseCasesFake({
+      listInstances: vi.fn(async () => [instanceA]),
+      listDecks: vi.fn(async () => [kanji]),
+      listCards: vi.fn(async () => [card]),
+    });
+    renderWorkspace(useCases);
+    fireEvent.click(await screen.findByRole("link", { name: /cards of Kanji N5/ }));
+    const link = await screen.findByRole("link", { name: "water" });
+    expect(parseStudioHash(window.location.hash)).toEqual({ screen: "cards", deckUrl: kanji.url });
+    await waitFor(() => expect(document.title).toBe("Cards of Kanji N5 – Solid Memo Studio"));
+    const trail = screen.getByRole("navigation", { name: "Breadcrumb" });
+    expect(within(trail).getByRole("link", { name: "Decks" })).toHaveAttribute("href", home(instanceA.url));
+    expect(within(trail).getByRole("link", { name: "Cards of Kanji N5" })).toHaveAttribute("aria-current", "page");
+    const editor = `../#/card?instance=${encodeURIComponent(instanceA.url)}&deck=${encodeURIComponent(kanji.url)}&card=${encodeURIComponent(card.url)}`;
+    expect(link).toHaveAttribute("href", editor);
+
+    const length = window.history.length;
+    fireEvent.input(screen.getByRole("searchbox", { name: "Search" }), { target: { value: "wat" } });
+    expect(parseStudioHash(window.location.hash)).toEqual({
+      screen: "cards",
+      deckUrl: kanji.url,
+      query: { ...DEFAULT_CARD_QUERY, text: "wat" },
+    });
+    expect(window.history.length).toBe(length);
+
+    const assign = vi.fn();
+    vi.stubGlobal("location", { ...window.location, assign });
+    const box = screen.getByRole("checkbox", { name: "Select water" });
+    box.focus();
+    fireEvent.keyDown(box, { key: "Enter" });
+    vi.unstubAllGlobals();
+    expect(assign).toHaveBeenCalledWith(editor);
+  });
+
+  it("falls back to the instance's decks from a deck it does not have, and says why its decks could not be read", async () => {
+    window.history.replaceState(null, "", studioRouteToHash({ screen: "cards", deckUrl: `${instanceA.url}catalog.ttl#gone` }));
+    const { unmount } = renderWorkspace(
+      makeUseCasesFake({ listInstances: vi.fn(async () => [instanceA]), listDecks: vi.fn(async () => [kanji]) }),
+    );
+    expect(await screen.findByRole("rowheader", { name: "Kanji N5" })).toBeInTheDocument();
+    expect(window.location.hash).toBe(home(instanceA.url));
+    unmount();
+    window.history.replaceState(null, "", studioRouteToHash({ screen: "cards", deckUrl: kanji.url }));
+    renderWorkspace(
+      makeUseCasesFake({
+        listInstances: vi.fn(async () => [instanceA]),
+        listDecks: vi.fn(async () => {
+          throw new Error("Catalog unreadable");
+        }),
+      }),
+    );
+    expect(await screen.findByRole("alert")).toHaveTextContent("Catalog unreadable");
+  });
+
+  it("says why the decks could not be read only on the workbench, not once the user goes Home", async () => {
+    window.history.replaceState(null, "", studioRouteToHash({ screen: "cards", deckUrl: kanji.url }));
+    renderWorkspace(
+      makeUseCasesFake({
+        listInstances: vi.fn(async () => [instanceA]),
+        listDecks: vi.fn(async () => {
+          throw new Error("Catalog unreadable");
+        }),
+      }),
+    );
+    expect(await screen.findByRole("alert")).toHaveTextContent("Catalog unreadable");
+    window.location.hash = home(instanceA.url);
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+    expect(await screen.findByRole("navigation", { name: "Breadcrumb" })).toBeInTheDocument();
+    expect(screen.queryByText("Catalog unreadable")).toBeNull();
   });
 
   it("falls back to the picker from an instance the user does not have", async () => {

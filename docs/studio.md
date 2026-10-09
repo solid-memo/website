@@ -4,7 +4,8 @@ Solid Memo Studio is a second app beside Solid Memo, at
 `https://solid-memo.com/studio/`. It is where users manage their decks.
 Later it is also where creators build decks and courses and publish
 them. For now it shows the decks of an instance in a table, changes
-several of them at once, and arranges them into groups.
+several of them at once, arranges them into groups, and lists a deck's
+cards to search, filter, sort and select.
 
 ## What it shares with Solid Memo
 
@@ -48,26 +49,30 @@ hash with the same core as Solid Memo's router (`routerCore.ts` in
 | `#/instances` | the instance picker. A new instance is made in Solid Memo, so its link goes to Solid Memo's storage picker. |
 | `#/?instance=…[&q=…&sort=…&order=desc]` | Home: every deck of the instance as a table ([below](#home)). `q` filters it, `sort` names the column it is sorted by, and `order=desc` sorts it the other way. |
 | `#/groups?instance=…` | Groups: the instance's decks arranged into groups, as Solid Memo's deck list arranges them. |
+| `#/cards?deck=…[&q&field&lang&state&has&sort&order&page&size]` | the card workbench: a deck's cards as a table ([below](#card-workbench)). The deck names the instance: its catalog's folder. |
 
 Anything else, `#/` among them, is the default route: the only
 instance's Home, or else the picker. An unknown instance falls back to
-the picker. Like Solid Memo's fallbacks, these replace the history
-entry.
+the picker, and an unknown deck to its instance's Home. Like Solid
+Memo's fallbacks, these replace the history entry.
 
-Changing Home's filter or sort replaces the history entry: it is the
-same screen, looked at another way, so Back leaves it.
+Changing Home's filter or sort, or the workbench's query, replaces the
+history entry: it is the same screen, looked at another way, so Back
+leaves it.
 
 Solid Memo links to Home as `studio/#/?instance=…` ("Open in Studio",
 in its instance bar, each deck's actions menu and the deck page;
 [routing.md](routing.md)). The Studio has no screen of one deck yet, so
 a deck's link opens its instance's Home.
 
-The trail is Instances › Decks, then › Groups on the Groups screen. The document title is the trail's last
-step and "Solid Memo Studio". After a move, the screen's heading takes
-the focus (`useScreenFocus`). The header has a link back to Solid Memo
-(`../#/`), at the open instance's decks when there is one. The landing
-page and the Pod connection screen have it too (`headerLink` in the
-Studio's `AppIdentity`), so a visitor who is not signed in can go back.
+The trail is Instances › Decks, then › Groups on the Groups screen, or
+› Cards of *deck* in the workbench. The document title is the trail's
+last step and "Solid Memo Studio". After a move, the screen's heading
+takes the focus (`useScreenFocus`). The header has a link back to
+Solid Memo (`../#/`), at the open instance's decks when there is one.
+The landing page and the Pod connection screen have it too
+(`headerLink` in the Studio's `AppIdentity`), so a visitor who is not
+signed in can go back.
 
 ## Home
 
@@ -86,7 +91,8 @@ is a table with a row per deck. Its columns are:
 - how many cards are due today and how many are new, as Solid Memo
   counts them (from the study digest when it is fresh);
 - when it last changed (`dcterms:modified`, else when it was made);
-- its cards, retired ones aside, a link to its card list in Solid Memo.
+- its cards, retired ones aside, a link to its cards in the
+  [workbench](#card-workbench).
 
 The table starts in the order the user arranged the decks. A column's
 name sorts by it, then the other way, then back to that order; the
@@ -112,6 +118,59 @@ of the catalog, and the table is read afresh after it
 ([data-model.md](data-model.md#deck-groups)). A deck whose data is
 invalid fails the write check, so a pace or direction that includes it
 is refused, and nothing is written.
+
+## Card workbench
+
+The workbench ([`CardWorkbenchContainer`](../apps/studio/src/ui/CardWorkbenchContainer.tsx))
+lists a deck's cards in a table, a row each: the front (a link to the
+card), the back, when it is due, its interval and its ease, when it
+was added, and its id. A retired card says so. A card studied both
+ways shows the direction that needs the most work: the earliest due
+day, the shortest interval and the lowest ease. A deck that is a copy
+of a course says so: its cards are the course's questions.
+
+The URL holds how the cards are looked at. The domain applies it
+([cardQuery.ts](../packages/domain/src/cardQuery.ts)):
+
+- `q`: text to find, case and accents aside. A card in Markdown is
+  searched as its plain text ([markdown.md](markdown.md)).
+- `field`: where to look: the front, the back, the notes, the label or
+  the wrong options. Without it, all of them and the pictures'
+  descriptions.
+- `lang`: only text in this language (a regional form too: `sv` finds
+  `sv-fi`), or `unstated` for a side whose language is not stated.
+  With `q`, the text is looked for in that language only. The filter
+  offers the languages of the cards' fronts and backs, and the URL's
+  own when they do not have it.
+- `state`: `live` (in use) or `retired`; or, for a card in use, where
+  its schedule is. `new` has a direction never reviewed. `learning` was
+  answered wrong last time. `young` has an interval under 21 days and
+  `mature` one of 21 or more (`MATURE_INTERVAL_DAYS`, as in the
+  statistics). `due` is due by today's study day. A card studied both
+  ways is in a state when either direction is.
+- `has`: a `picture`, `distractors` (wrong options), `markdown` or
+  `notes`.
+- `sort` and `order=desc`: by `id`, `created`, `front`, `back`, `due`,
+  `interval` or `ease`. A column's name sorts by it, then the other way,
+  then back to the deck's order, as on Home. A side sorts by the text
+  the table shows the reader, in the order of the UI's language. A card
+  without the value (one never studied) comes last, either way.
+- `page` and `size`: 10, 50 (the default) or 200 cards a page, with the
+  same pager as Solid Memo's Browser.
+
+A change of the search or a filter goes back to the first page.
+
+Cards are selected by their checkbox, or all those on the page at once.
+The selection stays while the view changes, and a status line counts
+it. The keys say so on the screen: **j** and **k** move between the
+rows, **x** selects one, and **Enter** opens it. They work wherever the
+focus is: from outside the table, **j** goes to the first row. The keys
+are left to the search and the filters while they have the focus.
+
+A card opens in Solid Memo's card editor (`../#/card?…`), for now. The
+workbench reads the cards and the review states with the same queries
+as Solid Memo, and the instance's preferences for today's study day.
+A time-budget test keeps a query over 5,000 cards fast.
 
 ## Groups
 
