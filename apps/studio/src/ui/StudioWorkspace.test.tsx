@@ -115,7 +115,7 @@ describe("StudioWorkspace", () => {
     );
   });
 
-  it("opens a deck's cards in the workbench, keeping its query in the URL, and a card in Solid Memo's editor", async () => {
+  it("opens a deck's cards in the workbench, keeping its query in the URL, and a card in the inspector", async () => {
     window.history.replaceState(null, "", home(instanceA.url));
     const card = makeCard(kanji, "water");
     const useCases = makeUseCasesFake({
@@ -131,8 +131,8 @@ describe("StudioWorkspace", () => {
     const trail = screen.getByRole("navigation", { name: "Breadcrumb" });
     expect(within(trail).getByRole("link", { name: "Decks" })).toHaveAttribute("href", home(instanceA.url));
     expect(within(trail).getByRole("link", { name: "Cards of Kanji N5" })).toHaveAttribute("aria-current", "page");
-    const editor = `../#/card?instance=${encodeURIComponent(instanceA.url)}&deck=${encodeURIComponent(kanji.url)}&card=${encodeURIComponent(card.url)}`;
-    expect(link).toHaveAttribute("href", editor);
+    const inspector = studioRouteToHash({ screen: "card", deckUrl: kanji.url, cardUrl: card.url });
+    expect(link).toHaveAttribute("href", inspector);
 
     const length = window.history.length;
     fireEvent.input(screen.getByRole("searchbox", { name: "Search" }), { target: { value: "wat" } });
@@ -143,13 +143,80 @@ describe("StudioWorkspace", () => {
     });
     expect(window.history.length).toBe(length);
 
-    const assign = vi.fn();
-    vi.stubGlobal("location", { ...window.location, assign });
     const box = screen.getByRole("checkbox", { name: "Select water" });
     box.focus();
     fireEvent.keyDown(box, { key: "Enter" });
+    expect(await screen.findByRole("heading", { name: "Card: water" })).toBeInTheDocument();
+    expect(window.location.hash).toBe(inspector);
+    expect(window.history.length).toBe(length + 1);
+  });
+
+  it("inspects a card: its trail and title, its tabs in the URL, its page in Solid Memo", async () => {
+    const card = { ...makeCard(kanji, "water"), distractors: [{ id: "water-d1", text: { en: "fire" } }] };
+    const route = { screen: "card" as const, deckUrl: kanji.url, cardUrl: card.url };
+    window.history.replaceState(null, "", studioRouteToHash(route));
+    renderWorkspace(
+      makeUseCasesFake({
+        listInstances: vi.fn(async () => [instanceA]),
+        listDecks: vi.fn(async () => [kanji]),
+        listCards: vi.fn(async () => [card]),
+      }),
+    );
+    expect(await screen.findByRole("heading", { name: "Card: water" })).toBeInTheDocument();
+    await waitFor(() => expect(document.title).toBe("water – Solid Memo Studio"));
+    const trail = screen.getByRole("navigation", { name: "Breadcrumb" });
+    expect(within(trail).getByRole("link", { name: "Cards of Kanji N5" })).toHaveAttribute(
+      "href",
+      studioRouteToHash({ screen: "cards", deckUrl: kanji.url }),
+    );
+    expect(within(trail).getByRole("link", { name: "water" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "Open this card in Solid Memo" })).toHaveAttribute(
+      "href",
+      `../#/card?instance=${encodeURIComponent(instanceA.url)}&deck=${encodeURIComponent(kanji.url)}&card=${encodeURIComponent(card.url)}`,
+    );
+    expect(screen.getByLabelText("Front")).toHaveValue("water");
+
+    const length = window.history.length;
+    const tab = screen.getByRole("link", { name: "Wrong options (1)" });
+    expect(tab).toHaveAttribute("href", studioRouteToHash({ ...route, tab: "distractors" }));
+    fireEvent.click(tab);
+    expect(await screen.findByRole("group", { name: "Wrong options" })).toBeInTheDocument();
+    expect(parseStudioHash(window.location.hash)).toEqual({ ...route, tab: "distractors" });
+    expect(window.history.length).toBe(length);
+    expect(screen.queryByLabelText("Front")).toBeNull();
+  });
+
+  it("goes back to the deck's cards once the card inspected is removed, leaving no Back stop", async () => {
+    vi.stubGlobal("confirm", vi.fn(() => true));
+    const card = makeCard(kanji, "water");
+    window.history.replaceState(null, "", studioRouteToHash({ screen: "card", deckUrl: kanji.url, cardUrl: card.url }));
+    const listCards = vi.fn().mockResolvedValueOnce([card]).mockResolvedValue([]);
+    renderWorkspace(makeUseCasesFake({ listInstances: vi.fn(async () => [instanceA]), listDecks: vi.fn(async () => [kanji]), listCards }));
+    fireEvent.click(await screen.findByRole("button", { name: "Remove card" }));
+    expect(await screen.findByText("No cards in this deck yet.")).toBeInTheDocument();
+    expect(parseStudioHash(window.location.hash)).toEqual({ screen: "cards", deckUrl: kanji.url });
     vi.unstubAllGlobals();
-    expect(assign).toHaveBeenCalledWith(editor);
+  });
+
+  it("falls back to the deck's cards from a card it does not have, and says why its cards could not be read", async () => {
+    window.history.replaceState(null, "", studioRouteToHash({ screen: "card", deckUrl: kanji.url, cardUrl: `${kanji.cardsDocumentUrl}#gone` }));
+    const { unmount } = renderWorkspace(
+      makeUseCasesFake({ listInstances: vi.fn(async () => [instanceA]), listDecks: vi.fn(async () => [kanji]), listCards: vi.fn(async () => []) }),
+    );
+    expect(await screen.findByText("No cards in this deck yet.")).toBeInTheDocument();
+    expect(parseStudioHash(window.location.hash)).toEqual({ screen: "cards", deckUrl: kanji.url });
+    unmount();
+    window.history.replaceState(null, "", studioRouteToHash({ screen: "card", deckUrl: kanji.url, cardUrl: `${kanji.cardsDocumentUrl}#c` }));
+    renderWorkspace(
+      makeUseCasesFake({
+        listInstances: vi.fn(async () => [instanceA]),
+        listDecks: vi.fn(async () => [kanji]),
+        listCards: vi.fn(async () => {
+          throw new Error("Cards unreadable");
+        }),
+      }),
+    );
+    expect(await screen.findByRole("alert")).toHaveTextContent("Cards unreadable");
   });
 
   it("falls back to the instance's decks from a deck it does not have, and says why its decks could not be read", async () => {

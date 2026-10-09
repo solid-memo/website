@@ -196,6 +196,10 @@ describe("queryCards", () => {
   it("keeps the cards with a picture, distractors, Markdown or notes", () => {
     expect(ids({ has: "picture" })).toEqual(["c-iron", "c-fresh"]);
     expect(ids({ has: "distractors" })).toEqual(["c-cafe"]);
+    // Only distractors in use count: a card whose only one is retired has none to offer.
+    const retiredOnly = card("c-retired", { distractors: [{ id: "c-retired-d1", text: { en: "x" }, retired: true }] });
+    const only = queryCards([retiredOnly], reviews, { ...DEFAULT_CARD_QUERY, has: "distractors" }, TODAY, plain, englishReader, "en");
+    expect(only).toEqual([]);
     expect(ids({ has: "markdown" })).toEqual(["c-cafe"]);
     expect(ids({ has: "notes" })).toEqual(["c-house", "c-old"]);
   });

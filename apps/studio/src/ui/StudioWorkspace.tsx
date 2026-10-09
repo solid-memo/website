@@ -5,6 +5,7 @@ import { DEFAULT_DECK_TABLE_VIEW } from "@solid-memo/domain/deckTable";
 import type { Card } from "@solid-memo/domain/deck";
 import type { WorkspaceProps } from "@solid-memo/ui/App";
 import { Breadcrumbs, type Crumb } from "@solid-memo/ui/Breadcrumbs";
+import { cardName } from "@solid-memo/ui/DataText";
 import { useDocumentTitle } from "@solid-memo/ui/documentTitle";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
@@ -14,6 +15,7 @@ import { decksHref, deckHref, routeToHash } from "@solid-memo/ui/router";
 import { useScreenFocus } from "@solid-memo/ui/screenFocus";
 import { MAIN_ID } from "@solid-memo/ui/SkipLink";
 import { useInstanceTheme } from "@solid-memo/ui/theme";
+import { CardInspectorContainer } from "./CardInspectorContainer";
 import { CardWorkbenchContainer } from "./CardWorkbenchContainer";
 import { DeckTableContainer } from "./DeckTableContainer";
 import { GroupsContainer } from "./GroupsContainer";
@@ -24,7 +26,7 @@ import { instanceOfRoute, studioRouteToHash, useStudioRoute, type StudioRoute } 
  * The signed-in Studio: the site header, with a way back to Solid Memo,
  * then the main content, from the breadcrumbs to the screen the route
  * names, once the instances it needs are read (and, for a deck's
- * screen, the instance's decks).
+ * screen, the instance's decks; for a card's, the deck's cards).
  */
 export function StudioWorkspace({ useCases, session, banner, children }: WorkspaceProps) {
   const { t, errorText, readerText } = useI18n();
@@ -38,13 +40,21 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
   const instances = instancesQuery.data;
   const instanceUrl = route === null ? null : instanceOfRoute(route);
   const activeInstance = instanceUrl === null ? null : (instances?.find((i) => i.url === instanceUrl) ?? null);
-  const deckUrl = route?.screen === "cards" ? route.deckUrl : null;
+  const deckUrl = route?.screen === "cards" || route?.screen === "card" ? route.deckUrl : null;
   const decksQuery = useQuery({
     queryKey: ["decks", instanceUrl],
     queryFn: () => useCases.listDecks(instanceUrl!),
     enabled: deckUrl !== null && activeInstance !== null,
   });
   const activeDeck = deckUrl === null ? null : (decksQuery.data?.find((deck) => deck.url === deckUrl) ?? null);
+  const cardUrl = route?.screen === "card" ? route.cardUrl : null;
+  // The same query as the workbench's and Solid Memo's, so an edit anywhere shows here.
+  const cardsQuery = useQuery({
+    queryKey: ["cards", activeDeck?.cardsDocumentUrl],
+    queryFn: () => useCases.listCards(activeDeck!),
+    enabled: cardUrl !== null && activeDeck !== null,
+  });
+  const activeCard = cardUrl === null ? null : (cardsQuery.data?.find((card) => card.url === cardUrl) ?? null);
 
   useInstanceTheme(useCases, activeInstance?.url ?? null);
 
@@ -59,8 +69,11 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
     } else if (deckUrl !== null && decksQuery.data !== undefined && activeDeck === null) {
       // A deck the instance does not have (deleted, perhaps): its decks.
       replace({ screen: "home", instanceUrl: instanceUrl! });
+    } else if (cardUrl !== null && cardsQuery.data !== undefined && activeCard === null) {
+      // A card the deck does not have (removed, perhaps): the deck's cards.
+      replace({ screen: "cards", deckUrl: deckUrl! });
     }
-  }, [route, instances, decksQuery.data]);
+  }, [route, instances, decksQuery.data, cardsQuery.data]);
 
   const instancesCrumb: Crumb<StudioRoute> = { label: t("breadcrumbs.instances"), route: { screen: "instances" } };
   const crumbsOf = (route: StudioRoute): Crumb<StudioRoute>[] => {
@@ -73,16 +86,26 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
         return [instancesCrumb, decks, { label: t("breadcrumbs.groups"), route }];
       case "cards":
         return [instancesCrumb, decks, { label: t("studio.cards.crumb", { deck: readerText(activeDeck!.title) }), route }];
+      case "card":
+        return [
+          instancesCrumb,
+          decks,
+          { label: t("studio.cards.crumb", { deck: readerText(activeDeck!.title) }), route: { screen: "cards", deckUrl: route.deckUrl } },
+          { label: cardName(activeCard!, readerText), route },
+        ];
     }
   };
   const waiting = instancesQuery.error ? (
     <ErrorMessage error={errorText(instancesQuery.error)} />
   ) : deckUrl !== null && decksQuery.error ? (
     <ErrorMessage error={errorText(decksQuery.error)} />
+  ) : cardUrl !== null && cardsQuery.error ? (
+    <ErrorMessage error={errorText(cardsQuery.error)} />
   ) : route === null ||
     instances === undefined ||
     (instanceUrl !== null && activeInstance === null) ||
-    (deckUrl !== null && activeDeck === null) ? (
+    (deckUrl !== null && activeDeck === null) ||
+    (cardUrl !== null && activeCard === null) ? (
     <Loading label={t("workspace.loadingInstances")} />
   ) : null;
   const crumbs = waiting === null ? crumbsOf(route!) : [];
@@ -119,8 +142,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
       case "groups":
         return <GroupsContainer useCases={useCases} instance={activeInstance!} />;
       case "cards": {
-        const editor = (card: Card) =>
-          learnerApp(routeToHash({ screen: "card", instanceUrl: activeInstance!.url, deckUrl: route.deckUrl, cardUrl: card.url }));
+        const inspector = (card: Card): StudioRoute => ({ screen: "card", deckUrl: route.deckUrl, cardUrl: card.url });
         return (
           <CardWorkbenchContainer
             // Another deck's cards: a new page, its selection and its Undo gone.
@@ -131,11 +153,27 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             query={route.query ?? DEFAULT_CARD_QUERY}
             // Like Home's view, the query is no Back stop.
             onQuery={(query) => replace({ ...route, query })}
-            cardHref={editor}
-            onOpen={(card) => window.location.assign(editor(card))}
+            cardHref={(card) => studioRouteToHash(inspector(card))}
+            onOpen={(card) => navigate(inspector(card))}
           />
         );
       }
+      case "card":
+        return (
+          <CardInspectorContainer
+            // Another card: its editors start afresh.
+            key={route.cardUrl}
+            useCases={useCases}
+            deck={activeDeck!}
+            card={activeCard!}
+            tab={route.tab ?? "content"}
+            tabHref={(tab) => studioRouteToHash({ ...route, tab })}
+            // Like the workbench's query, the tab is no Back stop.
+            onTab={(tab) => replace({ ...route, tab })}
+            appHref={learnerApp(routeToHash({ screen: "card", instanceUrl: activeInstance!.url, deckUrl: route.deckUrl, cardUrl: route.cardUrl }))}
+            onRemoved={() => replace({ screen: "cards", deckUrl: route.deckUrl })}
+          />
+        );
     }
   };
 

@@ -270,7 +270,8 @@ export function createSolidDeckRepository({
       if (thing === null) {
         throw new AppError("cardGone", { card: card.url });
       }
-      // An edit that does not state distractors (the card editor has none) keeps the card's,
+      // An edit that does not state distractors (the card editor's, while its wrong options are
+      // unchanged) keeps the card's,
       // and one that does not state a text format keeps the card's too.
       const distractors = content.distractors ?? card.distractors;
       const textFormat = content.textFormat ?? card.textFormat;

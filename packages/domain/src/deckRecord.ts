@@ -167,22 +167,27 @@ export function cardToRecord(card: CardContent & { retired?: true }, createdAt: 
 }
 
 /**
- * A distractor subject's content; null when its text is empty, or it is
- * retired (owl:deprecated true): a withdrawn option is never offered.
+ * A distractor subject's content; null when its text is empty. A retired
+ * one (owl:deprecated true) is kept, marked so: it is never offered
+ * (choicesOf), but its id stays the card's, for a learner's answers may
+ * name it and an editor may restore it.
  */
 export function distractorFromRecord(url: string, data: DistractorV1): Distractor | null {
-  if (data.deprecated === true || isEmptyText(data.text)) return null;
+  if (isEmptyText(data.text)) return null;
   return {
     id: fragmentIdOf(url),
     text: data.text,
     ...(data.note === undefined || isEmptyText(data.note) ? {} : { note: data.note }),
+    ...(data.deprecated === true ? { retired: true } : {}),
   };
 }
 
+/** A distractor as its record: one in use states no retirement. */
 export function distractorToRecord(distractor: Distractor): DistractorV1 {
   return {
     text: distractor.text,
     ...(distractor.note === undefined ? {} : { note: distractor.note }),
+    ...(distractor.retired === true ? { deprecated: true } : {}),
   };
 }
 

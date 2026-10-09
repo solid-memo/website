@@ -31,6 +31,8 @@ export const ERROR_TEMPLATES = {
   textLanguageInvalid: "“{tag}” is not a language code.",
   textLanguageTaken: "There is already text in {language}. Edit or remove it first.",
   textMixesUnstated: "This text does not say which language it is in, so it cannot have translations. Choose its language first.",
+  distractorEmpty: "A wrong option needs text.",
+  distractorPublished: "This wrong option is in the release the deck came from, so it cannot be deleted. Retire it instead.",
   dailyLimitInvalid: "A daily limit is a whole number, 0 or more.",
   webIdEmpty: "Enter your WebID.",
   webIdInvalidUrl: "That is not a valid URL. A WebID looks like https://you.example/profile/card#me.",

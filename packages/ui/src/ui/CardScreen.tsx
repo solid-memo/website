@@ -1,5 +1,5 @@
 import { useLayoutEffect, useMemo, useRef, useState } from "preact/hooks";
-import { isMarkdown, type Card, type CardContent } from "@solid-memo/domain/deck";
+import { isMarkdown, type Card, type CardContent, type Distractor } from "@solid-memo/domain/deck";
 import { cardName } from "./DataText";
 import type { DeckLanguages } from "@solid-memo/domain/deckLanguages";
 import type { LangText } from "@solid-memo/domain/langText";
@@ -14,6 +14,7 @@ import {
   type CardFieldsError,
 } from "./CardContentFields";
 import { CardFace } from "./CardFace";
+import { DistractorFields } from "./DistractorFields";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type ErrorText } from "./i18n";
 import { CardIcon, TrashIcon } from "./icons";
@@ -22,6 +23,8 @@ import { RetiredNotice } from "./RetiredCards";
 /** What a deck with no cards (yet read) says of its languages: nothing. */
 const NO_LANGUAGES: DeckLanguages = { unstatedCounts: { front: 0, back: 0 } };
 const NO_TITLE: LangText = {};
+const NONE_PUBLISHED: ReadonlySet<string> = new Set();
+const NO_DISTRACTORS: readonly Distractor[] = [];
 
 /**
  * One card's own page: the card as it looks in study, and its editor.
@@ -32,11 +35,24 @@ const NO_TITLE: LangText = {};
  * the card starting in the language the deck's cards usually have
  * (`languages`). A side saved with no language keeps none until the user
  * edits it or gives it a translation: then its language is asked for.
+ *
+ * Under the card's fields, its wrong options (DistractorFields): changed
+ * there, they are saved with the card, by its Save; left as they were,
+ * they show the card's as it is read afresh (a change made in the
+ * Studio meanwhile included), and the save does not state them, so the
+ * card keeps its own. A page that
+ * edits them on its own (the Studio's card inspector) leaves them out
+ * (`withDistractors` false), as it gives the page its own heading
+ * (`heading` false). Those the deck's
+ * release published (`published`) are never deleted, only retired.
  */
 export function CardScreen({
   card,
   deckTitle = NO_TITLE,
   languages = NO_LANGUAGES,
+  published = NONE_PUBLISHED,
+  heading = true,
+  withDistractors = true,
   busy,
   saved,
   error,
@@ -48,6 +64,12 @@ export function CardScreen({
   deckTitle?: LangText;
   /** What the deck's cards say of their languages (deckLanguages). */
   languages?: DeckLanguages;
+  /** The ids of the card's distractors the deck's release published. */
+  published?: ReadonlySet<string>;
+  /** Whether the page heads the card itself ("Card"). */
+  heading?: boolean;
+  /** Whether the editor edits the card's wrong options too. */
+  withDistractors?: boolean;
   busy: boolean;
   /** The last save succeeded (and nothing was edited since). */
   saved: boolean;
@@ -60,6 +82,9 @@ export function CardScreen({
   const startDraft = () => draftOf(card, [locale, ...navigator.languages], { defaults: hints.defaults });
   const [draft, setDraft] = useState(startDraft);
   const [invalid, setInvalid] = useState<CardFieldsError | null>(null);
+  /** The wrong options as changed here, until saved; null while left as the card has them. */
+  const [changed, setChanged] = useState<Distractor[] | null>(null);
+  const distractors = changed ?? card.distractors ?? NO_DISTRACTORS;
 
   // What is known of the deck (its cards' languages) may come
   // after the page opens: an editor not yet touched — no text, no
@@ -79,6 +104,8 @@ export function CardScreen({
   // latest choices for it once the save succeeds, not before.
   const submitted = useRef<{ content: CardContent; draft: CardDraft } | null>(null);
   useLayoutEffect(() => {
+    // Saved, the card read afresh has the wrong options changed here.
+    if (saved) setChanged(null);
     if (!saved || submitted.current === null) return;
     rememberCardLanguages(submitted.current.content, submitted.current.draft);
     submitted.current = null;
@@ -93,8 +120,10 @@ export function CardScreen({
       return;
     }
     setInvalid(null);
-    submitted.current = { content: check.content, draft };
-    onSave(check.content);
+    // Wrong options left as they were are not stated: the card keeps its own.
+    const content = changed === null ? check.content : { ...check.content, distractors: changed };
+    submitted.current = { content, draft };
+    onSave(content);
   }
 
   function handleRemove() {
@@ -108,12 +137,14 @@ export function CardScreen({
 
   return (
     <section>
-      <header>
-        <h2>
-          <CardIcon />
-          {t("card.heading")}
-        </h2>
-      </header>
+      {heading && (
+        <header>
+          <h2>
+            <CardIcon />
+            {t("card.heading")}
+          </h2>
+        </header>
+      )}
       <div class="practice-card">
         <CardFace
           side="front"
@@ -147,6 +178,18 @@ export function CardScreen({
             setDraft(next);
           }}
         />
+        {withDistractors && (
+          <DistractorFields
+            cardId={card.id}
+            distractors={distractors}
+            published={published}
+            back={card.back}
+            textFormat={card.textFormat}
+            busy={busy}
+            suggestions={hints.suggestions.back}
+            onChange={setChanged}
+          />
+        )}
         <CardFieldsErrorMessage invalid={invalid} />
         <div class="edit-actions">
           <button type="submit" aria-disabled={busy}>

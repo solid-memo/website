@@ -223,6 +223,32 @@ describe("validateCardContent", () => {
       }),
     ).toEqual({ ok: false, error: new AppError("cardBackImageNotWebUrl") });
   });
+
+  it("tidies the distractors it is given, keeping their ids and retirement, and refuses one without text", () => {
+    const MARKDOWN = "https://solid-memo.com/ns/vocab/v1.ttl#markdown";
+    const card = { front: { en: "f" }, back: { en: "b" } };
+    expect(
+      validateCardContent({
+        ...card,
+        distractors: [
+          { id: "c-d1", text: { en: " one " }, note: { en: " " } },
+          { id: "c-d2", text: { en: "two" }, note: { sv: " Fel. " }, retired: true },
+        ],
+      }),
+    ).toEqual({
+      ok: true,
+      content: { ...card, distractors: [{ id: "c-d1", text: { en: "one" } }, { id: "c-d2", text: { en: "two" }, note: { sv: "Fel." }, retired: true }] },
+    });
+    expect(validateCardContent({ ...card, textFormat: MARKDOWN, distractors: [{ id: "c-d1", text: { en: "    code" } }] })).toMatchObject({
+      ok: true,
+      content: { distractors: [{ id: "c-d1", text: { en: "    code" } }] },
+    });
+    expect(validateCardContent({ ...card, distractors: [{ id: "c-d1", text: { en: " " } }] })).toEqual({
+      ok: false,
+      error: new AppError("distractorEmpty"),
+    });
+    expect(validateCardContent({ ...card, distractors: [] })).toEqual({ ok: true, content: { ...card, distractors: [] } });
+  });
 });
 
 describe("deck directions", () => {

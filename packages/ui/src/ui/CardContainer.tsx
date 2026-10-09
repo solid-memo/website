@@ -4,6 +4,7 @@ import type { UseCases } from "@solid-memo/application/useCases";
 import type { Card, CardContent, Deck } from "@solid-memo/domain/deck";
 import { deckLanguages } from "@solid-memo/domain/deckLanguages";
 import { CardScreen } from "./CardScreen";
+import { publishedDistractorIds, useDeckRelease } from "./deckRelease";
 import { useI18n } from "./i18n";
 
 /**
@@ -11,19 +12,25 @@ import { useI18n } from "./i18n";
  * resolved by the Workspace from the ["cards", …] query, so a save shows
  * up here as a fresh `card` prop once that query is invalidated. The
  * deck's cards (the same query) give the languages its new text starts
- * in.
+ * in, and the release the deck came from, if any, the wrong options it
+ * published, which are never deleted.
  */
 export function CardContainer({
   useCases,
   deck,
   card,
   onRemoved,
+  heading,
+  withDistractors,
 }: {
   useCases: UseCases;
   deck: Deck;
   card: Card;
   /** The card is gone; leave its page. */
   onRemoved: () => void;
+  /** As CardScreen's: whether it heads the card, and edits its wrong options. */
+  heading?: boolean;
+  withDistractors?: boolean;
 }) {
   const { errorText } = useI18n();
   const queryClient = useQueryClient();
@@ -33,6 +40,7 @@ export function CardContainer({
     queryFn: () => useCases.listCards(deck),
   });
   const languages = useMemo(() => deckLanguages(cardsQuery.data ?? []), [cardsQuery.data]);
+  const release = useDeckRelease(useCases, deck);
 
   const updateCardMutation = useMutation({
     mutationFn: (content: CardContent) =>
@@ -64,6 +72,9 @@ export function CardContainer({
       card={card}
       deckTitle={deck.title}
       languages={languages}
+      published={publishedDistractorIds(release, card)}
+      heading={heading}
+      withDistractors={withDistractors}
       busy={updateCardMutation.isPending || removeCardMutation.isPending}
       saved={updateCardMutation.isSuccess}
       error={

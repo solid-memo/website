@@ -4237,3 +4237,63 @@ table.deck-statistics td {
 .card-preview-option-name {
   color: var(--text-muted);
 }
+
+/* A card's wrong options: a list of them, each with its note, id and
+   buttons; a retired one muted; the one being written in its own box. */
+.distractor-list,
+.distractor-issues {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0;
+}
+
+.distractor-list > li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.distractor-list > li.retired .distractor-text {
+  color: var(--text-muted);
+}
+
+.distractor-list p {
+  margin: 0;
+}
+
+.distractor-id {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+.distractor-issues li {
+  margin: 0.4rem 0;
+}
+
+.distractor-editor {
+  margin: 0.5rem 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+}
+
+/* The Studio's tabs: links in a row, the one shown marked. */
+.studio-tabs ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.studio-tabs a {
+  display: inline-block;
+  padding: 0.4rem 0.1rem;
+  text-decoration: none;
+}
+
+.studio-tabs a[aria-current="page"] {
+  font-weight: 600;
+  border-bottom: 3px solid var(--primary);
+}

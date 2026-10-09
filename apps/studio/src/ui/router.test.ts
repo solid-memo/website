@@ -16,6 +16,13 @@ describe("the Studio's routes", () => {
       deckUrl: "https://pod.example/solid-memo/a/catalog.ttl#deck-1",
       query: { ...DEFAULT_CARD_QUERY, text: "hus", state: "due", sort: { key: "due", descending: false }, page: 2 },
     },
+    { screen: "card", deckUrl: "https://pod.example/solid-memo/a/catalog.ttl#deck-1", cardUrl: "https://pod.example/solid-memo/a/decks/deck-1.ttl#c1" },
+    {
+      screen: "card",
+      deckUrl: "https://pod.example/solid-memo/a/catalog.ttl#deck-1",
+      cardUrl: "https://pod.example/solid-memo/a/decks/deck-1.ttl#c1",
+      tab: "distractors",
+    },
   ];
 
   it("round-trip through the hash", () => {
@@ -48,8 +55,19 @@ describe("the Studio's routes", () => {
     expect(parseStudioHash("#/cards")).toBeNull();
   });
 
+  it("keep the inspector's deck, card and tab in its query, and leave out the content tab, the default", () => {
+    expect(studioRouteToHash(routes[7]!)).toBe(
+      "#/card?deck=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2Fcatalog.ttl%23deck-1&card=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2Fdecks%2Fdeck-1.ttl%23c1&tab=distractors",
+    );
+    expect(studioRouteToHash({ ...routes[6]!, tab: "content" } as StudioRoute)).toBe(studioRouteToHash(routes[6]!));
+    expect(parseStudioHash(`${studioRouteToHash(routes[6]!)}&tab=content`)).toEqual(routes[6]);
+    expect(parseStudioHash(`${studioRouteToHash(routes[6]!)}&tab=gossip`)).toEqual(routes[6]);
+    expect(parseStudioHash("#/card?deck=d")).toBeNull();
+    expect(parseStudioHash("#/card?card=c")).toBeNull();
+  });
+
   it("name the instance a route is in, the deck's for the workbench", () => {
-    expect(routes.map(instanceOfRoute)).toEqual([null, ...Array(5).fill("https://pod.example/solid-memo/a/")]);
+    expect(routes.map(instanceOfRoute)).toEqual([null, ...Array(7).fill("https://pod.example/solid-memo/a/")]);
   });
 
   it("leave the root without an instance, and anything unknown, to the default route", () => {

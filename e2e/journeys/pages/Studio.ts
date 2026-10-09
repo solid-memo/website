@@ -7,7 +7,8 @@ import { Screen } from "./Screen.ts";
  * landing page (the same login as Solid Memo's, under the Studio's name),
  * its instance picker, Home's table of decks (its filter, sort and bulk
  * actions), its Groups screen, the card workbench (its search, sort,
- * selection and bulk edits, with their Undo), and its way back to Solid Memo.
+ * selection and bulk edits, with their Undo), the card inspector (a
+ * card's content and its wrong options), and its way back to Solid Memo.
  */
 export class Studio extends Screen {
   /** Home's table of the instance's decks ("The decks of {instance}"). */
@@ -247,6 +248,65 @@ export class Studio extends Screen {
         await expect(this.cards(deck).getByRole("rowheader", { name: front, exact: true })).toBeVisible();
       }
     });
+  }
+
+  /** Opens a card from the workbench in the card inspector, on its content. */
+  async openCard(deck: string, front: string): Promise<void> {
+    await this.intent(`Inspect the card ${front}`, async () => {
+      await this.cards(deck).getByRole("rowheader", { name: front, exact: true }).getByRole("link").click();
+      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.card.heading", { card: front }) })).toBeVisible();
+      await expect(this.page).toHaveURL(/#\/card\?deck=/);
+      await expect(this.page.getByLabel(this.t("cardContentFields.front"), { exact: true })).toHaveValue(front);
+    });
+  }
+
+  /** Follows the inspector's tab of the card's wrong options, which the URL holds. */
+  async openWrongOptions(count: number): Promise<void> {
+    await this.intent("Open the card's wrong options", async () => {
+      await this.page.getByRole("link", { name: this.t("studio.card.tab.distractors", { count }) }).click();
+      await expect(this.page).toHaveURL(/[?&]tab=distractors/);
+      await expect(this.wrongOptions).toBeVisible();
+    });
+  }
+
+  /** Adds a wrong option, in the back's language, which is saved at once and listed. */
+  async addWrongOption(text: string, note: string): Promise<void> {
+    await this.intent(`Add the wrong option ${text}`, async () => {
+      await this.wrongOptions.getByRole("button", { name: this.t("distractorFields.add") }).click();
+      await this.wrongOptions.getByLabel(this.t("distractorFields.text"), { exact: true }).fill(text);
+      await this.wrongOptions.getByLabel(this.t("distractorFields.note"), { exact: true }).fill(note);
+      await this.wrongOptions.getByRole("button", { name: this.t("distractorFields.addDone"), exact: true }).click();
+      await this.expectStatus(this.t("card.saved"));
+      await expect(this.wrongOption(text)).toContainText(note);
+    });
+  }
+
+  /** Retires a wrong option: it is kept, marked retired. */
+  async retireWrongOption(text: string): Promise<void> {
+    await this.intent(`Retire the wrong option ${text}`, async () => {
+      await this.wrongOptions.getByRole("button", { name: this.t("distractorFields.retireLabel", { option: text }) }).click();
+      await expect(this.wrongOption(text)).toContainText(this.t("distractorFields.retiredTag"));
+      await expect(this.wrongOptions.getByRole("button", { name: this.t("distractorFields.restoreLabel", { option: text }) })).toBeVisible();
+    });
+  }
+
+  /** Deletes a wrong option never published, confirming: it goes. */
+  async deleteWrongOption(text: string): Promise<void> {
+    await this.intent(`Delete the wrong option ${text}`, async () => {
+      this.app.expectDialog(this.tp("distractorFields.deleteConfirm", { option: text }));
+      await this.wrongOptions.getByRole("button", { name: this.t("distractorFields.deleteLabel", { option: text }) }).click();
+      await expect(this.wrongOption(text)).toHaveCount(0);
+    });
+  }
+
+  /** The inspector's wrong options. */
+  private get wrongOptions(): Locator {
+    return this.page.getByRole("group", { name: this.t("distractorFields.legend") });
+  }
+
+  /** A wrong option's item in the list, by its text. */
+  private wrongOption(text: string): Locator {
+    return this.wrongOptions.getByRole("listitem").filter({ hasText: text });
   }
 
   /** What can be done with the selected cards. */

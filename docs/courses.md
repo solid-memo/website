@@ -108,10 +108,12 @@ domain's
 - A retired chapter or step (`owl:deprecated true`) is left out of the
   outline (`courseOutlineFromRecords`), with every step of a retired
   chapter.
-- A retired distractor (`owl:deprecated true`) is never offered: it is
-  left out wherever a card's distractors are read (`distractorsOf`), and
-  in any order the release lists them, a card's distractors are read by
-  id. An upgrade then removes it from the copies that have it.
+- A retired distractor (`owl:deprecated true`) is never offered
+  (`choicesOf` leaves it out). It is kept wherever a card's distractors
+  are read (`distractorsOf`), marked `retired`, since a learner's
+  answers may name it and the [Studio](studio.md#card-inspector) may
+  restore it. In any order the release lists them, a card's distractors
+  are read by id. An upgrade then retires it in the copies that have it.
 
 ## The learner's state
 
@@ -282,8 +284,10 @@ Two ports gained a method ([ports.ts](../packages/application/src/ports.ts)):
 The deck's distractors are written and removed with its cards
 (`withDistractors` and `distractorsOf` in
 [deckMapper.ts](../packages/solid/src/mappers/deckMapper.ts)). An edit
-that states no distractors, as the card editor's does, keeps the card's.
-Removing a card removes the distractors it names.
+that states no distractors, as the card editor's does while its wrong
+options are left as they were, keeps the card's. Removing a card
+removes the distractors it names. The card editor and the Studio edit
+them ([studio.md](studio.md#card-inspector)).
 
 The tests that hold this against a real server are in
 [courses.integration.test.ts](../e2e/pod/src/courses.integration.test.ts).

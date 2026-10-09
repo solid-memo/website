@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { CourseOutline } from "./course";
-import type { Card, Deck } from "./deck";
+import type { Card, Deck, Distractor } from "./deck";
 import type { LibraryCard, LibraryDeckContent } from "./library";
 import { applyLibraryUpgrade, planLibraryUpgrade, sameContent, upgradedCards, withReleaseLanguages } from "./libraryUpgrade";
 
@@ -183,7 +183,7 @@ describe("planLibraryUpgrade", () => {
   });
 
   it("takes changed wrong options (distractors) for a changed card: their text, note, number or ids, but not their order", () => {
-    const options = [
+    const options: Distractor[] = [
       { id: "dk-d1", text: { en: "Aarhus" } },
       { id: "dk-d2", text: { en: "Odense" }, note: { en: "The third city." } },
     ];
@@ -198,6 +198,8 @@ describe("planLibraryUpgrade", () => {
     expect(changed([options[1]!, options[0]!])).toBeUndefined();
     expect(changed([options[0]!, { ...options[1]!, id: "dk-d3" }])).toHaveLength(1);
     expect(changed([options[0]!])).toHaveLength(1);
+    // A retired option is kept, so retiring it, or restoring it, is a change.
+    expect(changed([options[0]!, { ...options[1]!, retired: true }])).toHaveLength(1);
   });
 
   describe("text formats", () => {
