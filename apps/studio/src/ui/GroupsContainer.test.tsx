@@ -32,7 +32,7 @@ function renderContainer(useCases: UseCases) {
 }
 
 const instance = encodeURIComponent(instanceA.url);
-const app = (hash: string) => `../#/${hash}`;
+const app = (hash: string) => `#/${hash}`;
 
 describe("GroupsContainer", () => {
   it("arranges the decks as Solid Memo's list does, all else opening in Solid Memo, nothing to study", async () => {

@@ -1291,6 +1291,8 @@
     "tagline": "Hantera kortlekarna i din Solid Pod.",
     "backToApp": "Tillbaka till Solid Memo",
     "open": "Öppna i Studio",
+    "loading": "Öppnar Studio…",
+    "loadFailed": "Studio gick inte att öppna. Ladda om sidan för att försöka igen.",
     "decks": {
       "heading": "Kortlekar",
       "caption": "Kortlekarna i {instance}",

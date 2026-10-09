@@ -1294,6 +1294,8 @@
     "tagline": "Manage the decks in your Solid Pod.",
     "backToApp": "Back to Solid Memo",
     "open": "Open in Studio",
+    "loading": "Opening the Studio…",
+    "loadFailed": "The Studio could not be opened. Reload the page to try again.",
     "decks": {
       "heading": "Decks",
       "caption": "The decks of {instance}",

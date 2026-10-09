@@ -42,8 +42,6 @@ test("edit a card in Markdown and keep its line breaks @markdown", async ({ app,
 
   await app.step("07 · Reload: the pod keeps the lines and the format", async () => {
     await app.chrome.reload();
-    await app.deckBrowser.openFor(deck);
-    await app.cardEditor.open(title);
     await app.cardEditor.expectMarkdown(edited, "git clone https://example.org/repo.git\ncd repo");
   });
 });

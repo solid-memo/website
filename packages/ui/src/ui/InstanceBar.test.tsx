@@ -18,7 +18,7 @@ describe("InstanceBar", () => {
     renderBar({ url: "https://guest.solid-memo.invalid/solid-memo/", name: "My study" });
     expect(screen.getByText("Kept in this browser")).toBeInTheDocument();
     for (const link of screen.getAllByRole("link")) {
-      expect(link.getAttribute("href")).toMatch(/^(studio\/)?#\//);
+      expect(link.getAttribute("href")).toMatch(/^#\//);
     }
   });
 

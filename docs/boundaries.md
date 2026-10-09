@@ -11,7 +11,8 @@ package and fails on:
 
 - a relative import that leaves its package;
 - an import of a workspace package its layer may not use (the table
-  below), or from a file that may not use it;
+  below), or from a file that may not use it, or a static import of one
+  that may only be loaded lazily;
 - an import of any package its `package.json` does not declare — npm
   hoists every dependency to the root, so an undeclared import would
   otherwise resolve and pass the type check;
@@ -36,8 +37,8 @@ configs may also use the shared test tooling of the root `package.json`.
 | `browser` | `application`, `domain` | |
 | `ui` | `application`, `domain`, `vocab`, `markdown` | `markdown`: `src/ui/` only |
 | `composition` | `application`, `domain`, `vocab`, `solid`, `browser` | |
-| `web` | `application`, `domain`, `vocab`, `ui`, `composition` | `composition`: `src/main.tsx` only |
-| `studio` | `application`, `domain`, `vocab`, `ui`, `composition` | `composition`: `src/main.tsx` only |
+| `web` | `application`, `domain`, `vocab`, `ui`, `composition`, `studio` | `composition`: `src/main.tsx` only; `studio`: `src/main.tsx` only, with a dynamic `import()` |
+| `studio` | `application`, `domain`, `vocab`, `ui` | |
 | `e2e-pod` | `application`, `domain`, `vocab`, `solid` | |
 | `e2e-journeys` | `ui` | `ui`: `harness/strings.ts` only, for the app's messages |
 
@@ -52,7 +53,7 @@ used nowhere else):
 | Library | Package | Notes |
 |---|---|---|
 | `@inrupt/solid-client`, `@inrupt/solid-client-authn-browser` | `solid` | `shacl` also uses `@inrupt/solid-client` to parse shape documents |
-| `@tanstack/react-query`, `preact` | `ui`, `web`, `studio` | the components; in `web`, `main.tsx` only, to render the app; in `studio`, its screens too |
+| `@tanstack/react-query`, `preact` | `ui`, `web`, `studio` | the components; in `web`, `main.tsx` to render the page and `App.tsx`, the page; in `studio`, its screens |
 | `@fontsource/*`, `@fontsource-variable/*` | `ui` | `src/style.css` only |
 | `rdf-validate-shacl` | `shacl` | `src/engine.ts` only, loaded lazily |
 | `mdast-util-from-markdown`, `micromark-extension-gfm-table`, `mdast-util-gfm-table`, `micromark-extension-cjk-friendly` | `markdown` | `src/parse.ts` only; the package's API is its own types, never `mdast`'s ([markdown.md](markdown.md)) |
@@ -72,10 +73,13 @@ used nowhere else):
   them. Imports between packages go through `exports` and carry no
   extension.
 - Only `composition` wires the layers together
-  ([appUseCases.ts](../packages/composition/src/appUseCases.ts)). Each
-  app's `src/main.tsx` calls `@solid-memo/composition`, with what is its
-  own (its name, where it is served, the build's values), and renders
-  its components.
+  ([appUseCases.ts](../packages/composition/src/appUseCases.ts)). The
+  site's `apps/web/src/main.tsx` calls `@solid-memo/composition`, with
+  what is its own (its name, where it is served, the build's values),
+  and renders its components.
+- The Studio is loaded lazily: `apps/web/src/main.tsx` alone imports
+  `@solid-memo/studio`, with `import()`, so the Studio stays a chunk of
+  its own that learners never download ([studio.md](studio.md)).
 
 ## Adding a dependency
 

@@ -218,8 +218,8 @@ text is rendered, and none relies on a check of the data.
 | Trojan Source | Bidi controls, zero-width and other hidden characters in code and link text shown as markers; links isolated from the text around them. |
 | Denial of service | The limits above, at every entry point, and each text parsed once (`markdownCache.ts` keeps the last 500, and a theory's chunks are split from its cached blocks, and the plain text of every card of the deck the Studio's workbench searches). |
 
-Two checks of each built app hold this (`apps/web/src/build.test.ts`,
-and the same in `apps/studio/src/build.test.ts`):
+Two checks of the built site hold this (`apps/web/src/build.test.ts`,
+over every chunk, the [Studio](studio.md)'s included):
 
 - **No HTML sink.** The production bundle's only module with
   `innerHTML`, `outerHTML`, `insertAdjacentHTML`,
@@ -227,9 +227,9 @@ and the same in `apps/studio/src/build.test.ts`):
   `document.write` is Preact's own diff, which only a
   `dangerouslySetInnerHTML` prop reaches, and no other module names one.
   The parser's entity decoder has a browser build that decodes `&name;`
-  by writing to `innerHTML`; `apps/web/vite.config.ts` and
-  `apps/studio/vite.config.ts` alias it to its plain build, a lookup
-  table, and so do `packages/ui/vitest.config.ts` and
+  by writing to `innerHTML`; `apps/web/vite.config.ts` aliases it to
+  its plain build, a lookup table, and so do
+  `packages/ui/vitest.config.ts`, `apps/web/vitest.config.ts` and
   `apps/studio/vitest.config.ts` for the component tests.
 - **A Content Security Policy**, as a meta tag in `index.html` (GitHub
   Pages sets no headers): `script-src 'self'` and the inline theme

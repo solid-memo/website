@@ -4,7 +4,8 @@
  *
  * - a relative import stays inside the package;
  * - an import of another workspace package is one its layer may use, and
- *   the package declares it in package.json;
+ *   the package declares it in package.json; some may be imported only
+ *   from certain files, or only lazily, with a dynamic import();
  * - any other package is declared too (npm hoists everything, so an
  *   undeclared import would still resolve — this is what catches it);
  * - code that runs in the browser imports nothing node-only (node:*, n3,
@@ -32,9 +33,10 @@ const LAYERS: Record<string, string[]> = {
   ui: ["application", "domain", "vocab", "markdown"],
   // The composition root: every adapter behind its port, and the use cases over them.
   composition: ["application", "domain", "vocab", "solid", "browser"],
-  web: ["application", "domain", "vocab", "ui", "composition"],
-  // The Studio, a second app on the same layers as Solid Memo's.
-  studio: ["application", "domain", "vocab", "ui", "composition"],
+  // The site's page, which shows the Studio at its routes.
+  web: ["application", "domain", "vocab", "ui", "composition", "studio"],
+  // The Studio, a second app on the same layers as Solid Memo's, which the site's page loads.
+  studio: ["application", "domain", "vocab", "ui"],
   "e2e-pod": ["application", "domain", "vocab", "solid"],
   // The journeys drive the built app in a browser; they read only its text.
   "e2e-journeys": ["ui"],
@@ -42,9 +44,8 @@ const LAYERS: Record<string, string[]> = {
 
 /** Within a package, files that alone may use some of its allowed packages. */
 const ONLY_FROM: Record<string, Record<string, RegExp>> = {
-  // Only the app's entry point has the layers wired; the build test imports none.
-  web: { composition: /^src\/main\.tsx$/ },
-  studio: { composition: /^src\/main\.tsx$/ },
+  // Only the app's entry point has the layers wired, and loads the Studio; the build test imports neither.
+  web: { composition: /^src\/main\.tsx$/, studio: /^src\/main\.tsx$/ },
   // Data text is rendered by the components alone (docs/markdown.md).
   ui: { markdown: /^src\/ui\// },
   // The generators read Turtle; the vocabulary the browser loads never does.
@@ -53,6 +54,12 @@ const ONLY_FROM: Record<string, Record<string, RegExp>> = {
   shacl: { turtle: /^node\//, markdown: /^node\// },
   // The app's messages (packages/ui/src/i18n), which the page objects find text by.
   "e2e-journeys": { ui: /^harness\/strings\.ts$/ },
+};
+
+/** Packages a package may import only with a dynamic import(), so they stay out of its first chunk. */
+const LAZY_ONLY: Record<string, string[]> = {
+  // The Studio is a chunk of its own, which a learner never downloads (docs/studio.md).
+  web: ["studio"],
 };
 
 /** Code that ends up in the browser bundle (tests aside). */
@@ -112,7 +119,7 @@ for (const group of ["apps", "packages", "e2e"]) {
       const text = readFileSync(join(dir, file), "utf8");
       const where = `${group}/${folder}/${file}`;
       const test = isTestFile(file);
-      for (const [, specifier] of text.matchAll(IMPORT)) {
+      for (const [statement, specifier] of text.matchAll(IMPORT)) {
         if (specifier!.startsWith(".")) {
           const target = relative(dir, resolve(dir, dirname(file), specifier!));
           // Every package's vitest.config.ts shares the root's setup.
@@ -130,6 +137,9 @@ for (const group of ["apps", "packages", "e2e"]) {
           const only = ONLY_FROM[short]?.[other];
           if (only !== undefined && !only.test(file)) {
             problems.push(`${where}: only files matching ${only} may import @solid-memo/${other}.`);
+          }
+          if (LAZY_ONLY[short]?.includes(other) && !/^import\s*\(/.test(statement!)) {
+            problems.push(`${where}: may import @solid-memo/${other} only with a dynamic import().`);
           }
           if (other !== short && !declared.has(`@solid-memo/${other}`)) {
             problems.push(`${where}: imports @solid-memo/${other}, which package.json does not declare.`);

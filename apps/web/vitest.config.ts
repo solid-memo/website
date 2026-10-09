@@ -4,14 +4,15 @@ import preact from "@preact/preset-vite";
 import { packageConfig } from "../../vitest.shared.ts";
 
 /**
- * The Studio's screens run in a browser, as the components do
- * (packages/ui/vitest.config.ts). The site's page loads them (apps/web),
- * whose build test checks they ship as a chunk of their own.
+ * The site's page runs in a browser, as the components do
+ * (packages/ui/vitest.config.ts); its build test, in node. The entry
+ * point only wires and renders, so is left to the build test and the
+ * journeys.
  */
 export default mergeConfig(
   packageConfig({
     environment: "happy-dom",
-    exclude: ["src/vite-env.d.ts"],
+    exclude: ["src/main.tsx", "src/vite-env.d.ts"],
     test: {
       // Testing Library unmounts after each test through vitest's global afterEach.
       globals: true,

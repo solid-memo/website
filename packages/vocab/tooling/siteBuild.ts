@@ -5,9 +5,9 @@ import { join } from "node:path";
 import { NS_ROOT, VOCAB_ROOT } from "./root.ts";
 
 /**
- * What every app on the site is built with (each app's vite.config.ts):
- * the values its code reads as constants, the same in each, so the apps
- * name the same commit and check pod documents by the same rules.
+ * What the site is built with (apps/web/vite.config.ts): the values its
+ * code reads as constants, the commit it names and the rules it checks
+ * pod documents by.
  */
 
 /**

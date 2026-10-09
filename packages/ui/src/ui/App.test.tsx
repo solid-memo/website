@@ -8,7 +8,7 @@ import {
   within,
 } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { App, AppShell } from "./App";
+import { AppShell, SOLID_MEMO, STUDIO } from "./App";
 import { Workspace } from "./Workspace";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { SolidAccount } from "@solid-memo/domain/account";
@@ -38,12 +38,17 @@ function renderApp(useCases: UseCases) {
   });
   return render(
     <QueryClientProvider client={queryClient}>
-      <App useCases={useCases} commitSha="8faa7e1bd2e6de2b6570d692fd2865bb4b3217ad" />
+      <AppShell
+        useCases={useCases}
+        commitSha="8faa7e1bd2e6de2b6570d692fd2865bb4b3217ad"
+        identity={SOLID_MEMO}
+        workspace={Workspace}
+      />
     </QueryClientProvider>,
   );
 }
 
-describe("App", () => {
+describe("AppShell", () => {
   it("speaks the language the use cases pick from the browser's", async () => {
     const useCases = makeUseCases({ language: vi.fn(() => "sv" as const) });
     renderApp(useCases);
@@ -227,27 +232,31 @@ describe("App", () => {
     });
   });
 
-  it("shows an app's link out in the header before it is signed in", async () => {
-    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    render(
-      <QueryClientProvider client={queryClient}>
-        <AppShell
-          useCases={makeUseCases()}
-          commitSha={null}
-          identity={{
-            name: "app.documentTitle",
-            tagline: "app.tagline",
-            headerLink: { href: "../#/", label: "studio.backToApp" },
-          }}
-          workspace={Workspace}
-        />
-      </QueryClientProvider>,
-    );
-    await screen.findByRole("heading", { name: "Set up your Solid Pod" });
-    expect(within(screen.getByRole("banner")).getByRole("link", { name: "Back to Solid Memo" })).toHaveAttribute(
-      "href",
-      "../#/",
-    );
+  describe("as another app of the site (the Studio)", () => {
+    function renderStudio(useCases: UseCases) {
+      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+      return render(
+        <QueryClientProvider client={queryClient}>
+          <AppShell useCases={useCases} commitSha={null} identity={STUDIO} workspace={Workspace} />
+        </QueryClientProvider>,
+      );
+    }
+
+    it("names itself, and shows its link out in the header before it is signed in", async () => {
+      renderStudio(makeUseCases());
+      expect(await screen.findByRole("heading", { level: 1, name: "Solid Memo Studio" })).toBeInTheDocument();
+      expect(screen.getByText("Manage the decks in your Solid Pod.")).toBeInTheDocument();
+      expect(within(screen.getByRole("banner")).getByRole("link", { name: "Back to Solid Memo" })).toHaveAttribute(
+        "href",
+        "#/",
+      );
+      await waitFor(() => expect(document.title).toBe("Log in – Solid Memo Studio"));
+    });
+
+    it("links its wordmark to its own home once signed in", async () => {
+      renderStudio(makeUseCases({ restoreSession: vi.fn(async () => restored) }));
+      expect(await screen.findByRole("link", { name: "Solid Memo Studio" })).toHaveAttribute("href", "#/studio");
+    });
   });
 
   it("shows a restoring indicator while the session check is pending", () => {

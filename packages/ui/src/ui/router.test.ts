@@ -4,6 +4,7 @@ import {
   courseHref,
   deckHref,
   decksHref,
+  isStudioHash,
   libraryDeckHref,
   libraryHref,
   parseHash,
@@ -277,8 +278,24 @@ describe("courseHref", () => {
 });
 
 describe("studioHref", () => {
-  it("is the instance's Home in the Studio, a folder down", () => {
-    expect(studioHref("https://pod.example/a/")).toBe("studio/#/?instance=https%3A%2F%2Fpod.example%2Fa%2F");
+  it("is the instance's Home in the Studio, in the same page", () => {
+    expect(studioHref("https://pod.example/a/")).toBe("#/studio?instance=https%3A%2F%2Fpod.example%2Fa%2F");
+    expect(isStudioHash(studioHref("https://pod.example/a/"))).toBe(true);
+  });
+});
+
+describe("isStudioHash", () => {
+  it("takes /studio and the paths under it for the Studio's, and nothing else", () => {
+    expect(isStudioHash("#/studio")).toBe(true);
+    expect(isStudioHash("#/studio/")).toBe(true);
+    expect(isStudioHash("#/studio/cards?deck=a")).toBe(true);
+    expect(isStudioHash("#/studios")).toBe(false);
+    expect(isStudioHash("#/?instance=a")).toBe(false);
+    expect(isStudioHash("")).toBe(false);
+  });
+
+  it("is never one of Solid Memo's own routes", () => {
+    expect(parseHash("#/studio")).toBeNull();
   });
 });
 

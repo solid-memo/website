@@ -6,15 +6,18 @@ import {
 } from "@solid-memo/domain/deckTable";
 import { isDefaultQuery, queryFromParams, queryToParams, type CardQuery } from "@solid-memo/domain/cardQuery";
 import { instanceUrlOfDeck } from "@solid-memo/domain/instanceLayout";
+import { STUDIO_PATH } from "@solid-memo/ui/router";
 import { hashParams, useHashRouter } from "@solid-memo/ui/routerCore";
 
 /**
  * A Studio view, as its URL hash carries it (docs/studio.md): only
  * identifiers (instance, deck and card URLs) and how a screen is looked
  * at (Home's filter and sort, the card workbench's query, the card
- * inspector's tab), so it round-trips through the hash. Solid Memo's
- * own routes are another set (packages/ui/src/ui/router.ts); both keep
- * the hash with the same core (routerCore.ts).
+ * inspector's tab), so it round-trips through the hash. The Studio
+ * shares the site's one page with Solid Memo, so its hashes all start
+ * with `#/studio` (STUDIO_PATH); Solid Memo's own routes are the others
+ * (packages/ui/src/ui/router.ts). Both keep the hash with the same core
+ * (routerCore.ts).
  */
 export type StudioRoute =
   /** The user's instances, to pick the one to manage. */
@@ -55,35 +58,39 @@ export function instanceOfRoute(route: StudioRoute): string | null {
 export function studioRouteToHash(route: StudioRoute): string {
   switch (route.screen) {
     case "instances":
-      return "#/instances";
+      return `#${STUDIO_PATH}/instances`;
     case "home":
-      return `#/${hashParams({ instance: route.instanceUrl, ...deckTableViewToParams(route.view ?? DEFAULT_DECK_TABLE_VIEW) })}`;
+      return `#${STUDIO_PATH}${hashParams({ instance: route.instanceUrl, ...deckTableViewToParams(route.view ?? DEFAULT_DECK_TABLE_VIEW) })}`;
     case "groups":
-      return `#/groups${hashParams({ instance: route.instanceUrl })}`;
+      return `#${STUDIO_PATH}/groups${hashParams({ instance: route.instanceUrl })}`;
     case "cards":
-      return `#/cards${hashParams({ deck: route.deckUrl, ...(route.query === undefined ? {} : queryToParams(route.query)) })}`;
+      return `#${STUDIO_PATH}/cards${hashParams({ deck: route.deckUrl, ...(route.query === undefined ? {} : queryToParams(route.query)) })}`;
     case "card":
-      return `#/card${hashParams({ deck: route.deckUrl, card: route.cardUrl, ...(route.tab === undefined || route.tab === "content" ? {} : { tab: route.tab }) })}`;
+      return `#${STUDIO_PATH}/card${hashParams({ deck: route.deckUrl, card: route.cardUrl, ...(route.tab === undefined || route.tab === "content" ? {} : { tab: route.tab }) })}`;
     case "about":
-      return `#/about${hashParams({ deck: route.deckUrl })}`;
+      return `#${STUDIO_PATH}/about${hashParams({ deck: route.deckUrl })}`;
     case "instance":
-      return `#/instance${hashParams({ instance: route.instanceUrl })}`;
+      return `#${STUDIO_PATH}/instance${hashParams({ instance: route.instanceUrl })}`;
   }
 }
 
 /**
- * Parse a location hash; null for anything that isn't a route, `#/`
+ * Parse a location hash; null for anything that isn't a route, `#/studio`
  * without an instance among them: the default route, which depends on
- * how many instances the user has. Home's view, and the workbench's
- * query, are left out when they are the default ones.
+ * how many instances the user has. Home is `#/studio`, or `#/studio/` as
+ * the redirect from the Studio's old address makes it (docs/studio.md).
+ * Home's view, and the workbench's query, are left out when they are the
+ * default ones.
  */
 export function parseStudioHash(hash: string): StudioRoute | null {
   const [path, search] = hash.replace(/^#/, "").split("?");
+  if (!path!.startsWith(STUDIO_PATH)) return null;
   const query = new URLSearchParams(search);
   const instanceUrl = query.get("instance");
-  switch (path) {
+  switch (path!.slice(STUDIO_PATH.length)) {
     case "/instances":
       return { screen: "instances" };
+    case "":
     case "/": {
       if (instanceUrl === null) return null;
       const view = deckTableViewFromParams(query);

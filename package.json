@@ -12,7 +12,6 @@
   "packageManager": "npm@12.2.0",
   "scripts": {
     "dev": "npm run dev -w @solid-memo/web",
-    "dev:studio": "npm run dev -w @solid-memo/studio",
     "start": "npm run build && npm run preview -w @solid-memo/web",
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",

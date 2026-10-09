@@ -1,7 +1,7 @@
 # Studio
 
-Solid Memo Studio is a second app beside Solid Memo, at
-`https://solid-memo.com/studio/`. It is where users manage their decks.
+Solid Memo Studio is a second app beside Solid Memo, in the same page,
+at `https://solid-memo.com/#/studio`. It is where users manage their decks.
 Later it is also where creators build decks and courses and publish
 them. For now it shows the decks of an instance in a table, changes
 several of them at once, arranges them into groups, lists a deck's
@@ -14,16 +14,19 @@ progress, and the instance's name and catalogue.
 ## What it shares with Solid Memo
 
 The Studio is its own package, `@solid-memo/studio` in
-[`apps/studio/`](../apps/studio/). It sits on the same layers as
-Solid Memo's app ([boundaries.md](boundaries.md)):
+[`apps/studio/`](../apps/studio/), with its own screens, tests and
+router. It sits on the same layers as Solid Memo's app
+([boundaries.md](boundaries.md)):
 
-- Its [`src/main.tsx`](../apps/studio/src/main.tsx) calls
-  `createAppUseCases` from `@solid-memo/composition`, as the name
-  "Solid Memo Studio", and renders `StudioApp`.
-- `StudioApp` is `AppShell` from `@solid-memo/ui` (the same as Solid
-  Memo's `App`): the session restore, the landing page and its login,
-  the connected Pod, the masthead, the language, the theme and the
-  footer. Only the name and the tagline differ.
+- Its entry point is `StudioWorkspace`, the signed-in Studio. Solid
+  Memo's page ([`apps/web/src/App.tsx`](../apps/web/src/App.tsx))
+  shows it for the hashes under `#/studio`.
+- Around it is the page's one `AppShell` from `@solid-memo/ui`: the
+  session restore, the landing page and its login, the connected Pod,
+  the masthead, the language, the theme and the footer. At the Studio's
+  routes the shell names the Studio (`STUDIO`, an `AppIdentity` in
+  `ui`): its name, its tagline, its home (`#/studio`, where the
+  masthead's wordmark goes) and a link back to Solid Memo.
 - Its screens are in [`apps/studio/src/ui/`](../apps/studio/src/ui/),
   containers over use cases and screens over props, as in `ui`. They
   reuse `ui`'s components, such as `InstancePickerContainer`,
@@ -31,34 +34,46 @@ Solid Memo's app ([boundaries.md](boundaries.md)):
 - Its text is in `ui`'s message files, under `studio.*`, in English and
   Swedish ([i18n.md](i18n.md)).
 
-Both apps are served from one origin. So they share the browser's
-storage: the guest's pod, the language and theme chosen on this
-device, and the update journal. So while one app updates an instance,
-the other refuses to write to it ([migrations.md](migrations.md)).
-They also share the login library's session, but a session restores
-only in the app it was logged in from
-([authentication.md](authentication.md#two-apps-on-one-origin)). Moving
-between the apps therefore takes a login in the other app, which the
-identity provider usually answers without a password.
+Both apps are one page. So they share one session and one login
+([authentication.md](authentication.md#session-restore)): a link from
+one to the other is a hash link, which keeps the user signed in. A
+login set off in the Studio, or a reload of one of its routes, comes
+back to the Studio: the redirect drops the hash, and the session
+gateway puts it back. They
+also share the use cases, their cached queries (an edit in one shows in
+the other), and the browser's storage: the guest's pod, the language
+and theme chosen on this device, and the update journal. So while a
+tab moves a guest's study into a pod, the others refuse to write to it
+([guest-mode.md](guest-mode.md#as-a-new-instance)).
+
+The Studio's code is a chunk of its own. The page fetches it the first
+time a Studio route opens (`loadStudio`, in
+[`apps/web/src/main.tsx`](../apps/web/src/main.tsx)), so a learner who
+never opens the Studio never downloads it. Meanwhile, under the
+masthead, the page says the Studio is opening; if the chunk cannot be
+fetched (offline, or after a new deploy), it says so.
 
 ## Routes
 
 The Studio has its own hash router
 ([`src/ui/router.ts`](../apps/studio/src/ui/router.ts)). It keeps the
 hash with the same core as Solid Memo's router (`routerCore.ts` in
-`ui`, [routing.md](routing.md)).
+`ui`, [routing.md](routing.md)). Its hashes all start with `#/studio`
+(`STUDIO_PATH`, `isStudioHash` in `ui`'s router); Solid Memo's are the
+others.
 
 | Hash | Screen |
 | --- | --- |
-| `#/instances` | the instance picker. A new instance is made in Solid Memo, so its link goes to Solid Memo's storage picker. |
-| `#/?instance=…[&q=…&sort=…&order=desc]` | Home: every deck of the instance as a table ([below](#home)). `q` filters it, `sort` names the column it is sorted by, and `order=desc` sorts it the other way. |
-| `#/groups?instance=…` | Groups: the instance's decks arranged into groups, as Solid Memo's deck list arranges them. |
-| `#/cards?deck=…[&q&field&lang&state&has&sort&order&page&size]` | the card workbench: a deck's cards as a table ([below](#card-workbench)). The deck names the instance: its catalog's folder. |
-| `#/card?deck=…&card=…[&tab=distractors\|schedule]` | the card inspector: one card, its content, with `tab=distractors` its wrong options, or with `tab=schedule` its review state ([below](#card-inspector)). The content is the default tab, and is left out of the URL. |
-| `#/about?deck=…` | a deck's about screen: what it says of itself, how it is studied and, for a course, the learner's progress ([below](#a-decks-about-screen)). |
-| `#/instance?instance=…` | the instance's name and its catalogue ([below](#the-instance)). |
+| `#/studio/instances` | the instance picker. A new instance is made in Solid Memo, so its link goes to Solid Memo's storage picker. |
+| `#/studio?instance=…[&q=…&sort=…&order=desc]` | Home: every deck of the instance as a table ([below](#home)). `q` filters it, `sort` names the column it is sorted by, and `order=desc` sorts it the other way. |
+| `#/studio/groups?instance=…` | Groups: the instance's decks arranged into groups, as Solid Memo's deck list arranges them. |
+| `#/studio/cards?deck=…[&q&field&lang&state&has&sort&order&page&size]` | the card workbench: a deck's cards as a table ([below](#card-workbench)). The deck names the instance: its catalog's folder. |
+| `#/studio/card?deck=…&card=…[&tab=distractors\|schedule]` | the card inspector: one card, its content, with `tab=distractors` its wrong options, or with `tab=schedule` its review state ([below](#card-inspector)). The content is the default tab, and is left out of the URL. |
+| `#/studio/about?deck=…` | a deck's about screen: what it says of itself, how it is studied and, for a course, the learner's progress ([below](#a-decks-about-screen)). |
+| `#/studio/instance?instance=…` | the instance's name and its catalogue ([below](#the-instance)). |
 
-Anything else, `#/` among them, is the default route: the only
+`#/studio/` and its query count as `#/studio`. Anything else under
+`#/studio`, `#/studio` itself among them, is the default route: the only
 instance's Home, or else the picker. An unknown instance falls back to
 the picker, an unknown deck to its instance's Home, and an unknown card
 (one removed, say) to its deck's cards. Like Solid Memo's fallbacks,
@@ -68,7 +83,7 @@ Changing Home's filter or sort, the workbench's query, or the
 inspector's tab, replaces the history entry: it is the same screen,
 looked at another way, so Back leaves it.
 
-Solid Memo links to Home as `studio/#/?instance=…` ("Open in Studio",
+Solid Memo links to Home as `#/studio?instance=…` ("Open in Studio",
 in its instance bar, each deck's actions menu and the deck page;
 [routing.md](routing.md)). A deck's link opens its instance's Home too.
 
@@ -78,10 +93,19 @@ inspector, › About *deck* on a deck's about screen, or › Name and
 catalogue on the instance's screen. The document title is the trail's
 last step and "Solid Memo Studio". After a move, the screen's heading
 takes the focus (`useScreenFocus`). The header has a link back to
-Solid Memo (`../#/`), at the open instance's decks when there is one.
-The landing page and the Pod connection screen have it too
-(`headerLink` in the Studio's `AppIdentity`), so a visitor who is not
-signed in can go back.
+Solid Memo, at the open instance's decks when there is one, and the
+masthead names the Studio. The landing page and the Pod connection
+screen have the link too (`headerLink` in `STUDIO`), so a visitor who
+is not signed in can go back. The Studio's links into Solid Memo (a
+deck's page, its preferences, a new instance) are Solid Memo's own
+hashes.
+
+The Studio's old address, `/studio/`, is a small page
+([`apps/web/public/studio/index.html`](../apps/web/public/studio/index.html))
+that sends `/studio/#/x` on to `../#/studio/x`. Its script runs under a
+Content Security Policy that allows it alone, by its hash; a test
+([studioRedirect.test.ts](../apps/web/src/studioRedirect.test.ts))
+checks both.
 
 ## Home
 
@@ -464,29 +488,14 @@ deck, the library) opens in Solid Memo.
 
 ## How it is built and served
 
-- The Studio builds with `base: "./"` into `apps/studio/dist/`
-  ([vite.config.ts](../apps/studio/vite.config.ts)). Its page has the
-  same Content Security Policy as Solid Memo's, and its own build test
-  ([build.test.ts](../apps/studio/src/build.test.ts)) checks it and the
-  bundle as Solid Memo's does ([markdown.md](markdown.md#safety)).
-- Solid Memo's build depends on the Studio's
-  ([apps/web/turbo.json](../apps/web/turbo.json)), so `npm run build`
-  builds the Studio first. Solid Memo's Vite build then copies
-  `apps/studio/dist/` into `apps/web/dist/studio/` (`builtAppPlugin` in
-  [publishApp.ts](../packages/vocab/tooling/publishApp.ts)). One artifact
-  serves both apps ([deployment.md](deployment.md)).
-- So build the site through turbo: `npm run build`, or
-  `npx turbo run build --filter=@solid-memo/web`. `vite build` in
-  `apps/web` (or `npm run build -w @solid-memo/web`) skips the Studio's
-  build and copies whatever build is in `apps/studio/dist/`, perhaps an
-  old one. With none there, it warns and publishes no Studio.
-- The Studio reads the site's documents (the shapes, the vocabulary and
-  the deck library) from the folder above it, where the site serves
-  them.
-- Both apps get the same build values (the commit and the shapes'
-  ruleset) from `siteDefines` in
-  [siteBuild.ts](../packages/vocab/tooling/siteBuild.ts).
-
-`npm run dev:studio` serves the Studio from source on a port of its
-own, with the site's documents beside it. Its link back to Solid Memo
-opens the Studio again there; `npm start` serves both apps together.
+- The Studio has no page or build of its own. Solid Memo's Vite build
+  ([apps/web/vite.config.ts](../apps/web/vite.config.ts)) bundles it,
+  through the dynamic `import("@solid-memo/studio")` in
+  `apps/web/src/main.tsx`, as a chunk of its own. Solid Memo's build
+  test ([build.test.ts](../apps/web/src/build.test.ts)) checks that
+  nothing the page loads up front holds any of the Studio, and checks
+  the whole bundle, the Studio's chunk included, for HTML sinks
+  ([markdown.md](markdown.md#safety)).
+- `npm run build` and `npm run dev` therefore build and serve the
+  Studio with the site: `npm run dev` serves it at
+  `http://localhost:5173/#/studio`.

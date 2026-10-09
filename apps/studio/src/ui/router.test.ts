@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { act, renderHook } from "@testing-library/preact";
-import { studioHref } from "@solid-memo/ui/router";
+import { isStudioHash, studioHref } from "@solid-memo/ui/router";
 import { DEFAULT_CARD_QUERY } from "@solid-memo/domain/cardQuery";
 import { instanceOfRoute, parseStudioHash, studioRouteToHash, useStudioRoute, type StudioRoute } from "./router";
 
@@ -31,35 +31,37 @@ describe("the Studio's routes", () => {
     for (const route of routes) expect(parseStudioHash(studioRouteToHash(route))).toEqual(route);
   });
 
-  it("include Home as Solid Memo links to it", () => {
-    expect(`studio/${studioRouteToHash(routes[1]!)}`).toBe(studioHref("https://pod.example/solid-memo/a/"));
+  it("include Home as Solid Memo links to it, all under /studio", () => {
+    expect(studioRouteToHash(routes[1]!)).toBe(studioHref("https://pod.example/solid-memo/a/"));
+    for (const route of routes) expect(isStudioHash(studioRouteToHash(route))).toBe(true);
   });
 
-  it("put Home at the root, its instance in the query", () => {
-    expect(studioRouteToHash(routes[1]!)).toBe("#/?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2F");
-    expect(studioRouteToHash(routes[0]!)).toBe("#/instances");
+  it("put Home at /studio, its instance in the query, and take /studio/ for it too", () => {
+    expect(parseStudioHash("#/studio/?instance=a")).toEqual({ screen: "home", instanceUrl: "a" });
+    expect(studioRouteToHash(routes[1]!)).toBe("#/studio?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2F");
+    expect(studioRouteToHash(routes[0]!)).toBe("#/studio/instances");
   });
 
   it("keep Home's filter and sort in its query, and leave out a view that is the default", () => {
     expect(studioRouteToHash(routes[2]!)).toBe(
-      "#/?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2F&q=kanji&sort=due&order=desc",
+      "#/studio?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2F&q=kanji&sort=due&order=desc",
     );
     expect(studioRouteToHash({ ...routes[1]!, view: { filter: "" } } as StudioRoute)).toBe(studioRouteToHash(routes[1]!));
-    expect(parseStudioHash("#/?instance=a&sort=colour")).toEqual({ screen: "home", instanceUrl: "a" });
-    expect(studioRouteToHash(routes[3]!)).toBe("#/groups?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2F");
+    expect(parseStudioHash("#/studio?instance=a&sort=colour")).toEqual({ screen: "home", instanceUrl: "a" });
+    expect(studioRouteToHash(routes[3]!)).toBe("#/studio/groups?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2F");
   });
 
   it("keep the workbench's deck and query in its query, and leave out a query that is the default", () => {
     expect(studioRouteToHash(routes[5]!)).toBe(
-      "#/cards?deck=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2Fcatalog.ttl%23deck-1&q=hus&state=due&sort=due&page=2",
+      "#/studio/cards?deck=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2Fcatalog.ttl%23deck-1&q=hus&state=due&sort=due&page=2",
     );
     expect(studioRouteToHash({ ...routes[4]!, query: DEFAULT_CARD_QUERY } as StudioRoute)).toBe(studioRouteToHash(routes[4]!));
-    expect(parseStudioHash("#/cards")).toBeNull();
+    expect(parseStudioHash("#/studio/cards")).toBeNull();
   });
 
   it("keep the inspector's deck, card and tab in its query, and leave out the content tab, the default", () => {
     expect(studioRouteToHash(routes[7]!)).toBe(
-      "#/card?deck=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2Fcatalog.ttl%23deck-1&card=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2Fdecks%2Fdeck-1.ttl%23c1&tab=distractors",
+      "#/studio/card?deck=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2Fcatalog.ttl%23deck-1&card=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2Fdecks%2Fdeck-1.ttl%23c1&tab=distractors",
     );
     expect(studioRouteToHash({ ...routes[6]!, tab: "content" } as StudioRoute)).toBe(studioRouteToHash(routes[6]!));
     expect(parseStudioHash(`${studioRouteToHash(routes[6]!)}&tab=content`)).toEqual(routes[6]);
@@ -67,15 +69,15 @@ describe("the Studio's routes", () => {
     const schedule = { ...routes[6]!, tab: "schedule" } as StudioRoute;
     expect(studioRouteToHash(schedule)).toMatch(/&tab=schedule$/);
     expect(parseStudioHash(studioRouteToHash(schedule))).toEqual(schedule);
-    expect(parseStudioHash("#/card?deck=d")).toBeNull();
-    expect(parseStudioHash("#/card?card=c")).toBeNull();
+    expect(parseStudioHash("#/studio/card?deck=d")).toBeNull();
+    expect(parseStudioHash("#/studio/card?card=c")).toBeNull();
   });
 
   it("keep a deck's about screen and the instance's screen in their query", () => {
-    expect(studioRouteToHash(routes[8]!)).toBe("#/about?deck=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2Fcatalog.ttl%23deck-1");
-    expect(studioRouteToHash(routes[9]!)).toBe("#/instance?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2F");
-    expect(parseStudioHash("#/about")).toBeNull();
-    expect(parseStudioHash("#/instance")).toBeNull();
+    expect(studioRouteToHash(routes[8]!)).toBe("#/studio/about?deck=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2Fcatalog.ttl%23deck-1");
+    expect(studioRouteToHash(routes[9]!)).toBe("#/studio/instance?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2F");
+    expect(parseStudioHash("#/studio/about")).toBeNull();
+    expect(parseStudioHash("#/studio/instance")).toBeNull();
   });
 
   it("name the instance a route is in, the deck's for the workbench", () => {
@@ -84,15 +86,21 @@ describe("the Studio's routes", () => {
 
   it("leave the root without an instance, and anything unknown, to the default route", () => {
     expect(parseStudioHash("")).toBeNull();
+    expect(parseStudioHash("#/studio")).toBeNull();
+    expect(parseStudioHash("#/studio/groups")).toBeNull();
+    expect(parseStudioHash("#/studio/decks?instance=x")).toBeNull();
+  });
+
+  it("are none of Solid Memo's own", () => {
     expect(parseStudioHash("#/")).toBeNull();
-    expect(parseStudioHash("#/groups")).toBeNull();
-    expect(parseStudioHash("#/decks?instance=x")).toBeNull();
+    expect(parseStudioHash("#/?instance=x")).toBeNull();
+    expect(parseStudioHash("#/instances")).toBeNull();
   });
 });
 
 describe("useStudioRoute", () => {
   it("keeps the route in the hash", () => {
-    window.history.replaceState(null, "", "#/instances");
+    window.history.replaceState(null, "", "#/studio/instances");
     const { result } = renderHook(() => useStudioRoute());
     expect(result.current.route).toEqual({ screen: "instances" });
     act(() => result.current.navigate({ screen: "home", instanceUrl: "https://pod.example/a/" }));

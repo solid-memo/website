@@ -30,7 +30,7 @@ import {
 import { ThemeToggle } from "./ThemeToggle";
 import { AppName, useDocumentTitle } from "./documentTitle";
 import { MAIN_ID, SkipLink } from "./SkipLink";
-import { Workspace } from "./Workspace";
+import { STUDIO_PATH } from "./router";
 
 /** What an app built on AppShell calls itself, as messages in the user's language. */
 export interface AppIdentity {
@@ -38,6 +38,8 @@ export interface AppIdentity {
   name: MessageKey;
   /** What it is for, under the name on the landing page. */
   tagline: MessageKey;
+  /** Its home, as a hash: where the masthead's wordmark links to. */
+  home: string;
   /**
    * A link out of the app in the header of the screens before its
    * workspace (the Studio's way back to Solid Memo); the workspace shows
@@ -57,28 +59,24 @@ export interface WorkspaceProps {
 }
 
 /** Solid Memo itself, the learner's app. */
-const SOLID_MEMO: AppIdentity = {
+export const SOLID_MEMO: AppIdentity = {
   name: "app.documentTitle",
   tagline: "app.tagline",
+  home: "#/",
 };
 
-/** The learner's app: the shell around its Workspace. `commitSha` is the build's, shown in the footer. */
-export function App({
-  useCases,
-  commitSha,
-}: {
-  useCases: UseCases;
-  commitSha: string | null;
-}) {
-  return (
-    <AppShell
-      useCases={useCases}
-      commitSha={commitSha}
-      identity={SOLID_MEMO}
-      workspace={Workspace}
-    />
-  );
-}
+/**
+ * Solid Memo Studio, which shares the site's page with Solid Memo at the
+ * hashes under `#/studio` (docs/studio.md), with a way back to Solid
+ * Memo before the user is in. It is said here, not in the Studio, so
+ * the page names the Studio while the Studio's code is still loading.
+ */
+export const STUDIO: AppIdentity = {
+  name: "studio.name",
+  tagline: "studio.tagline",
+  home: `#${STUDIO_PATH}`,
+  headerLink: { href: "#/", label: "studio.backToApp" },
+};
 
 /**
  * An app in whichever state it is in, between a link past the header
@@ -377,7 +375,7 @@ function AppContent({
       <div class="masthead-title">
         {/* One link home: the logo beside the name is part of it, not a second stop. */}
         <h1>
-          <a class="brand" href="#/">
+          <a class="brand" href={identity.home}>
             <img
               class="logo"
               src={illustrationUrl}

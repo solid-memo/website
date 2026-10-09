@@ -37,7 +37,7 @@ function Harness({ initial = DEFAULT_CARD_QUERY, onQuery, ...overrides }: Partia
         onQuery?.(next);
         setQuery(next);
       }}
-      cardHref={(card) => `../#/card?card=${card.id}`}
+      cardHref={(card) => `#/card?card=${card.id}`}
       onOpen={() => undefined}
       plan={(ids, edit) => planCardEdit(rows.map((row) => row.card), ids, edit)}
       onEdit={async () => true}
@@ -77,7 +77,7 @@ describe("CardWorkbenchScreen", () => {
       "Id",
     ]);
     const row = within(table()).getByRole("row", { name: /水/ });
-    expect(link("水")).toHaveAttribute("href", "../#/card?card=water");
+    expect(link("水")).toHaveAttribute("href", "#/card?card=water");
     // Markdown, shown as such.
     expect(within(row).getAllByRole("cell").map((cell) => cell.textContent)).toEqual([
       "",

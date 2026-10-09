@@ -14,7 +14,7 @@ function renderScreen(overrides: Partial<Parameters<typeof CardInspectorScreen>[
     tab: "content" as CardTab,
     tabHref: (tab: CardTab) => `#/card?tab=${tab}`,
     onTab: vi.fn(),
-    appHref: "../#/card",
+    appHref: "#/card",
     ...overrides,
   };
   render(
@@ -38,7 +38,7 @@ describe("CardInspectorScreen", () => {
     fireEvent.click(content);
     expect(props.onTab).toHaveBeenCalledWith("content");
     expect(screen.getByText("The panel")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Open this card in Solid Memo" })).toHaveAttribute("href", "../#/card");
+    expect(screen.getByRole("link", { name: "Open this card in Solid Memo" })).toHaveAttribute("href", "#/card");
     expect(screen.queryByRole("note")).toBeNull();
   });
 

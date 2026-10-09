@@ -36,9 +36,9 @@ function Harness({ initial = { filter: "" }, ...overrides }: Partial<Props> & { 
         { group: scripts, trail: [languages, scripts] },
       ]}
       readOnly={false}
-      deckHref={(deck) => `../#/deck?deck=${deck.id}`}
-      cardsHref={(deck) => `../#/browse?deck=${deck.id}`}
-      appHref="../#/decks"
+      deckHref={(deck) => `#/deck?deck=${deck.id}`}
+      cardsHref={(deck) => `#/browse?deck=${deck.id}`}
+      appHref="#/decks"
       groupsHref="#/groups?instance=a"
       instanceHref="#/instance?instance=a"
       onMove={async () => true}
@@ -74,7 +74,7 @@ describe("DeckTableScreen", () => {
     ]);
     const row = within(table()).getByRole("row", { name: /Kanji N5/ });
     expect(within(row).getByRole("rowheader")).toHaveTextContent("Kanji N5LibraryInvalid data");
-    expect(within(row).getByRole("link", { name: "Kanji N5" })).toHaveAttribute("href", "../#/deck?deck=deck-1");
+    expect(within(row).getByRole("link", { name: "Kanji N5" })).toHaveAttribute("href", "#/deck?deck=deck-1");
     expect(within(row).getAllByRole("cell").map((cell) => cell.textContent)).toEqual([
       "",
       "Languages › Scripts",
@@ -88,7 +88,7 @@ describe("DeckTableScreen", () => {
     ]);
     expect(within(row).getByRole("link", { name: "12 cards of Kanji N5" })).toHaveAttribute(
       "href",
-      "../#/browse?deck=deck-1",
+      "#/browse?deck=deck-1",
     );
     // The deck's own pace, and figures not known yet, or not to be.
     const other = within(table()).getByRole("row", { name: /Verbs/ });
@@ -277,7 +277,7 @@ describe("DeckTableScreen", () => {
   it("sends the user to Solid Memo for decks when there are none", () => {
     render(<Harness rows={[]} />);
     expect(screen.queryByRole("table")).toBeNull();
-    expect(screen.getByRole("link", { name: "Solid Memo" })).toHaveAttribute("href", "../#/decks");
+    expect(screen.getByRole("link", { name: "Solid Memo" })).toHaveAttribute("href", "#/decks");
     expect(screen.getByRole("link", { name: "Name and catalogue" })).toHaveAttribute("href", "#/instance?instance=a");
   });
 
