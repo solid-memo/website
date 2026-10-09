@@ -6,7 +6,7 @@ import { AppError } from "@solid-memo/domain/appError";
 import type { DeckFile } from "@solid-memo/domain/deckFile";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { TransferContainer } from "./TransferContainer";
-import { instanceA, makeCard, makeDeck } from "../test/fixtures";
+import { instanceA, invalidReport, makeCard, makeDeck } from "../test/fixtures";
 
 const kanji = makeDeck("deck-1", { en: "Kanji N5" });
 const verbs = makeDeck("deck-2", { en: "Verbs" });
@@ -23,7 +23,7 @@ function renderContainer(useCases: UseCases, chosen: readonly string[] = []) {
   const onChoose = vi.fn();
   render(
     <QueryClientProvider client={queryClient}>
-      <TransferContainer useCases={useCases} instance={instanceA} chosen={chosen} onChoose={onChoose} cardsHref={(deck) => `#/cards?deck=${deck.id}`} />
+      <TransferContainer useCases={useCases} instance={instanceA} chosen={chosen} onChoose={onChoose} cardsHref={(deck) => `#/cards?deck=${deck.id}`} healthHref="#/health" />
     </QueryClientProvider>,
   );
   return { invalidate, onChoose };
@@ -87,6 +87,15 @@ describe("TransferContainer", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Import into Deck set A" }));
     expect(await screen.findByText(/Something is already kept at that place/)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "capitals.ttl: Capitals" })).toBeInTheDocument();
+  });
+
+  it("holds the import while the catalogue is set aside", async () => {
+    const useCases = makeUseCasesFake({ listDecks: vi.fn(async () => [kanji]), checkInstance: vi.fn(async () => invalidReport([], { catalogue: true })) });
+    vi.mocked(useCases.openDeckFile).mockResolvedValueOnce(file);
+    renderContainer(useCases);
+    fireEvent.click(await screen.findByRole("button", { name: "Choose a file…" }));
+    expect(await screen.findByText(/catalogue or one of its groups has invalid data/)).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Import into Deck set A" })).toBeDisabled();
   });
 
   it("says why the decks could not be read", async () => {

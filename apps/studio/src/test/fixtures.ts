@@ -3,6 +3,7 @@ import type { Instance } from "@solid-memo/domain/instance";
 import type { LibraryDeck } from "@solid-memo/domain/library";
 import type { LibraryUpgradePlan } from "@solid-memo/domain/libraryUpgrade";
 import type { Session } from "@solid-memo/domain/session";
+import type { ValidationReport } from "@solid-memo/domain/validation";
 
 /** What the Studio's tests share: a user, two instances, and decks and cards in the first. */
 export const session: Session = { webId: "https://alice.example/profile/card#me" };
@@ -74,5 +75,36 @@ export function makePlan(deck: Deck): LibraryUpgradePlan {
     applied: [],
     gone: [],
     appliedAbout: [],
+  };
+}
+
+/**
+ * The check of instance A, finding a violation in each of these decks'
+ * cards documents, and in the catalogue when asked: under "set invalid
+ * data aside", those decks are set aside, and the arrangement with the
+ * catalogue.
+ */
+export function invalidReport(decks: readonly Deck[], { catalogue = false } = {}): ValidationReport {
+  const violation = { message: { en: "Less than 1 values" }, severity: "violation" as const, constraint: "MinCount" };
+  return {
+    instanceUrl: instanceA.url,
+    violationCount: decks.length + (catalogue ? 1 : 0),
+    conforms: false,
+    documents: [
+      ...decks.map((deck) => ({
+        url: deck.cardsDocumentUrl,
+        status: "checked" as const,
+        subjects: [{ url: `${deck.cardsDocumentUrl}#c1`, status: "checked" as const, shape: "card" as const, version: 5, violations: [violation] }],
+      })),
+      ...(catalogue
+        ? [
+            {
+              url: `${instanceA.url}catalog.ttl`,
+              status: "checked" as const,
+              subjects: [{ url: `${instanceA.url}catalog.ttl#catalog`, status: "checked" as const, shape: "catalog" as const, version: 1, violations: [violation] }],
+            },
+          ]
+        : []),
+    ],
   };
 }

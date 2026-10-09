@@ -5,6 +5,7 @@ import type { Deck } from "@solid-memo/domain/deck";
 import type { DeckFile, DeckFileOptions } from "@solid-memo/domain/deckFile";
 import { decksOf } from "@solid-memo/domain/deckTree";
 import type { Instance } from "@solid-memo/domain/instance";
+import { useDataCheck } from "@solid-memo/ui/dataCheck";
 import { catalogScope, deckTreeKey } from "@solid-memo/ui/deckTreeEditor";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
@@ -18,7 +19,8 @@ import { TransferScreen, type ExportRun } from "./TransferScreen";
  * file reads it (openDeckFile); importing it (importDeckFile) writes the
  * catalog, so it waits its turn with the other writes of the catalog
  * (catalogScope), and every query of the instance's decks is read afresh
- * after it.
+ * after it. It is held until the instance's data check is done, and
+ * while the catalogue is set aside (useDataCheck).
  */
 export function TransferContainer({
   useCases,
@@ -26,6 +28,7 @@ export function TransferContainer({
   chosen,
   onChoose,
   cardsHref,
+  healthHref,
 }: {
   useCases: UseCases;
   instance: Instance;
@@ -33,11 +36,14 @@ export function TransferContainer({
   chosen: readonly string[];
   onChoose: (urls: readonly string[]) => void;
   cardsHref: (deck: Deck) => string;
+  /** The instance's health, where data set aside is repaired. */
+  healthHref: string;
 }) {
   const { t, errorText } = useI18n();
   const queryClient = useQueryClient();
   const [exporting, setExporting] = useState<ExportRun | null>(null);
   const [file, setFile] = useState<DeckFile | null>(null);
+  const check = useDataCheck(useCases, instance.url);
   const treeQuery = useQuery({
     queryKey: deckTreeKey(instance.url),
     queryFn: () => useCases.listDeckTree(instance.url),
@@ -94,6 +100,8 @@ export function TransferContainer({
       imported={importMutation.data ?? null}
       importError={errorText(importMutation.error)}
       onImport={(withProgress) => importMutation.mutate(withProgress)}
+      importReadOnly={check.readOnly() ?? (check.arrangementSetAside ? "setAside" : null)}
+      healthHref={healthHref}
       cardsHref={cardsHref}
     />
   );

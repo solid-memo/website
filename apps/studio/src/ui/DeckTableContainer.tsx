@@ -7,6 +7,7 @@ import { groupsOfDecks, groupTrails, type DeckFigure, type DeckTableRow, type De
 import { decksOf, type DeckGroup } from "@solid-memo/domain/deckTree";
 import type { Instance } from "@solid-memo/domain/instance";
 import { setAsideDecks } from "@solid-memo/domain/validation";
+import { useDataCheck } from "@solid-memo/ui/dataCheck";
 import { studyCountsQuery } from "@solid-memo/ui/DeckStudyAction";
 import { catalogScope, deckTreeKey, useCourseCopies } from "@solid-memo/ui/deckTreeEditor";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
@@ -39,7 +40,9 @@ type Bulk =
  * catalog, a deletion one save of it after the decks' own documents. It
  * is made in turn with the other writes of the catalog (catalogScope),
  * and every query of the instance's decks, and their counts, is read
- * afresh after it.
+ * afresh after it. Until the check is done no deck can be selected,
+ * nor, after it, a deck it sets aside (useDataCheck); while the
+ * arrangement is set aside, none can be moved into a group.
  */
 export function DeckTableContainer({
   useCases,
@@ -87,11 +90,7 @@ export function DeckTableContainer({
     queryKey: ["preferences", instance.url],
     queryFn: () => useCases.getPreferences(instance.url),
   });
-  const checkQuery = useQuery({
-    queryKey: ["validation", instance.url],
-    queryFn: () => useCases.checkInstance(instance.url),
-    staleTime: Infinity,
-  });
+  const check = useDataCheck(useCases, instance.url);
   const decks = decksOf(treeQuery.data?.children ?? []);
   const cardQueries = useQueries({
     queries: decks.map((deck) => ({
@@ -147,7 +146,7 @@ export function DeckTableContainer({
 
   const preferences = preferencesQuery.data;
   const groups = groupsOfDecks(treeQuery.data);
-  const report = checkQuery.data !== undefined && !checkQuery.data.conforms ? checkQuery.data : null;
+  const report = check.report;
   const queries = (deck: Deck) => {
     const at = decks.indexOf(deck);
     return { cards: cardQueries[at]!, counts: countQueries[at]! };
@@ -185,7 +184,9 @@ export function DeckTableContainer({
       pending={pending}
       badges={badges}
       groups={groupTrails(treeQuery.data)}
-      readOnly={treeQuery.data.readOnly}
+      moveLocked={treeQuery.data.readOnly ? "newerVersion" : check.arrangementSetAside ? "setAside" : null}
+      readOnly={check.readOnly() ?? (decks.some(check.isSetAside) ? "setAside" : null)}
+      selectable={(deck) => check.readOnly(deck) === null}
       deckHref={deckHref}
       cardsHref={cardsHref}
       appHref={appHref}

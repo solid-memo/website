@@ -408,10 +408,15 @@ export interface ReviewStateRepository {
    * Write several states and drop others in ONE save of the reviews
    * document, so a day reset cannot be left half-applied. A deck without
    * one gets it when there are states to save; else nothing is written.
+   * A removal drops only the state read for its card and direction (a
+   * second one, never read, stays, as a day reset wants); with `every`,
+   * every SM-2 state of it, read or not, as removing a card does (a card
+   * forgotten, removed or moved away). Another scheduler's state stays
+   * either way.
    */
   applyReviewChanges(
     deck: Deck,
-    changes: { save: ReviewState[]; remove: ReviewKey[] },
+    changes: { save: ReviewState[]; remove: ReviewKey[]; every?: boolean },
   ): Promise<void>;
   /**
    * For the format update: bring every review state of the deck in its

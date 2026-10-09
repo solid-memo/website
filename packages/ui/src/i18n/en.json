@@ -1383,7 +1383,8 @@
         "one": "Deleted {count} deck.",
         "other": "Deleted {count} decks."
       },
-      "export": "Export"
+      "export": "Export",
+      "moveSetAside": "The arrangement of these decks has invalid data, so decks cannot be moved into groups until it is repaired."
     },
     "groups": {
       "heading": "Groups"
@@ -1777,6 +1778,7 @@
       "allWell": "Nothing is wrong with this deck.",
       "dataHeading": "Data check",
       "dataHint": "The deck's entry in the catalogue and its documents, checked against Solid Memo's shapes.",
+      "held": "Nothing in this deck can be changed until the data is repaired, so the problems below are named, not linked to their forms. Repair what can be repaired here, and remove what no repair covers.",
       "instanceDataHint": "The instance's documents, checked against Solid Memo's shapes. Documents unchanged since they last passed are not checked again.",
       "deckEntry": "The deck's entry",
       "deckDistribution": "The deck's distribution",
@@ -1936,6 +1938,15 @@
       "importButton": "Import into {instance}",
       "importing": "Importing the deck…",
       "imported": "Imported {deck}."
+    },
+    "readOnly": {
+      "checking": "This instance's data is being checked. Nothing can be changed until the check is done.",
+      "blocked": "This instance has invalid data, and your preferences keep it closed until it is repaired, so nothing can be changed here. {repair}",
+      "deck": "This deck has invalid data, so it is set aside: it is shown here, but nothing in it can be changed until it is repaired. {repair}",
+      "decks": "Decks with invalid data are set aside: they cannot be selected or changed until they are repaired. {repair}",
+      "catalogue": "The instance's catalogue or one of its groups has invalid data, so it is set aside: nothing can be added to it or changed in it until it is repaired. {repair}",
+      "repair": "Repair it on the health screen.",
+      "repairDecks": "Repair them on the health screen."
     }
   }
 }

@@ -12,11 +12,13 @@ import {
 } from "@solid-memo/domain/deckTable";
 import type { DeckGroup } from "@solid-memo/domain/deckTree";
 import type { Instance } from "@solid-memo/domain/instance";
+import type { ReadOnlyReason } from "@solid-memo/ui/dataCheck";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n, type ErrorText } from "@solid-memo/ui/i18n";
 import { LoadingDots } from "@solid-memo/ui/Loading";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
-import { DeckBulkActions } from "./DeckBulkActions";
+import { DeckBulkActions, type MoveLock } from "./DeckBulkActions";
+import { ReadOnlyNotice } from "./ReadOnly";
 
 /** One figure of a deck's row: a number, or why there is none yet. */
 export type Count = number | "loading" | "unreadable";
@@ -58,7 +60,9 @@ const COLUMNS: readonly Exclude<DeckColumn, "title">[] = [
  * (`libraryHref`) and to import and export (`transferHref`, which the
  * bulk actions' Export opens with the selected decks ticked); each deck's name has its health beside it
  * (`healthBadge`), and for a library copy whether a newer release is out
- * (`updateBadge`).
+ * (`updateBadge`). Only a deck that may be changed (`selectable`) can be
+ * selected: none while the instance's data is being checked, and none
+ * set aside, which a line says (`readOnly`), with a link to the health.
  */
 export function DeckTableScreen({
   instance,
@@ -68,7 +72,9 @@ export function DeckTableScreen({
   pending,
   badges,
   groups,
+  moveLocked,
   readOnly,
+  selectable,
   deckHref,
   cardsHref,
   appHref,
@@ -95,8 +101,12 @@ export function DeckTableScreen({
   badges: (deck: Deck) => readonly DeckBadge[];
   /** Every group, each with its trail, to move decks into. */
   groups: readonly { group: DeckGroup; trail: readonly DeckGroup[] }[];
-  /** A newer version arranged the decks, so none can be moved. */
-  readOnly: boolean;
+  /** Why no deck can be moved into a group: a newer version arranged them, or the arrangement is set aside. */
+  moveLocked: MoveLock | null;
+  /** Why some decks, or all, cannot be selected now (useDataCheck); null when all can. */
+  readOnly: ReadOnlyReason | null;
+  /** Whether a deck may be changed, so selected. */
+  selectable: (deck: Deck) => boolean;
   deckHref: (deck: Deck) => string;
   cardsHref: (deck: Deck) => string;
   /** Solid Memo, open at the instance's decks. */
@@ -142,9 +152,10 @@ export function DeckTableScreen({
 
   const shown = arrangeDeckRows(rows, view, readerText, locale);
   // Only decks shown, in the table's order: one filtered out, or deleted here or elsewhere, is left alone.
-  const selected = shown.map((row) => row.deck).filter((deck) => chosen.has(deck.url));
+  const selected = shown.map((row) => row.deck).filter((deck) => chosen.has(deck.url) && selectable(deck));
   const count = selected.length;
-  const allShown = shown.length > 0 && shown.every((row) => chosen.has(row.deck.url));
+  const choosable = shown.map((row) => row.deck).filter(selectable);
+  const allShown = choosable.length > 0 && choosable.every((deck) => chosen.has(deck.url));
 
   const toggle = (urls: readonly string[], on: boolean) =>
     setChosen((all) => new Set(on ? [...all, ...urls] : [...all].filter((url) => !urls.includes(url))));
@@ -198,7 +209,7 @@ export function DeckTableScreen({
         <DeckBulkActions
           selected={selected}
           groups={groups}
-          readOnly={readOnly}
+          moveLocked={moveLocked}
           busy={busy}
           exportHref={transferHref(selected)}
           onMove={(parent) => {
@@ -215,6 +226,7 @@ export function DeckTableScreen({
       <p class="visually-hidden" role="status">
         {announcement}
       </p>
+      <ReadOnlyNotice reason={readOnly} subject="decks" healthHref={healthHref} />
       <ErrorMessage error={error} />
       {shown.length === 0 ? (
         <p>{t("studio.decks.noMatch", { filter: view.filter.trim() })}</p>
@@ -230,7 +242,8 @@ export function DeckTableScreen({
                     type="checkbox"
                     aria-label={t("studio.decks.selectAll")}
                     checked={allShown}
-                    onChange={(event) => toggle(shown.map((row) => row.deck.url), event.currentTarget.checked)}
+                    disabled={choosable.length === 0}
+                    onChange={(event) => toggle(choosable.map((deck) => deck.url), event.currentTarget.checked)}
                   />
                 </th>
                 {header("title")}
@@ -247,7 +260,8 @@ export function DeckTableScreen({
                       <input
                         type="checkbox"
                         aria-label={t("studio.decks.selectDeck", { deck: readerText(deck.title) })}
-                        checked={chosen.has(deck.url)}
+                        checked={chosen.has(deck.url) && selectable(deck)}
+                        disabled={!selectable(deck)}
                         onChange={(event) => toggle([deck.url], event.currentTarget.checked)}
                       />
                     </td>

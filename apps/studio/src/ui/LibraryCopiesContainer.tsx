@@ -5,6 +5,7 @@ import type { Deck } from "@solid-memo/domain/deck";
 import type { DeckUpgradeOutcome } from "@solid-memo/domain/deckUpgrade";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { LibraryUpgradePlan } from "@solid-memo/domain/libraryUpgrade";
+import { useDataCheck } from "@solid-memo/ui/dataCheck";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { libraryUpgradeQuery, refreshUpgradedDeck } from "@solid-memo/ui/LibraryUpgradeContainer";
@@ -23,21 +24,26 @@ import { libraryUpdatesQuery } from "./UpdateBadge";
  * the next is upgraded all the same. Then everything the upgrades
  * touched is read afresh, the copies among it, failed decks included.
  * The plans take each copy's series from the copies' one read of the
- * library's index.
+ * library's index. Until the instance's data check is done no copy can
+ * be upgraded, nor, after it, one it sets aside (useDataCheck).
  */
 export function LibraryCopiesContainer({
   useCases,
   instance,
   deckHref,
   libraryHref,
+  healthHref,
 }: {
   useCases: UseCases;
   instance: Instance;
   deckHref: (deck: Deck) => string;
   libraryHref: string;
+  /** The instance's health, where data set aside is repaired. */
+  healthHref: string;
 }) {
   const { t, errorText } = useI18n();
   const queryClient = useQueryClient();
+  const check = useDataCheck(useCases, instance.url);
   const copiesQuery = useQuery(libraryUpdatesQuery(useCases, instance.url));
   const copies = copiesQuery.data ?? [];
   const planQueries = useQueries({
@@ -100,6 +106,9 @@ export function LibraryCopiesContainer({
       results={results}
       deckHref={deckHref}
       libraryHref={libraryHref}
+      readOnly={check.readOnly() ?? (copies.some((copy) => check.isSetAside(copy.deck)) ? "setAside" : null)}
+      selectable={(deck) => check.readOnly(deck) === null}
+      healthHref={healthHref}
       onUpgrade={(chosen) => batchMutation.mutate(chosen)}
     />
   );

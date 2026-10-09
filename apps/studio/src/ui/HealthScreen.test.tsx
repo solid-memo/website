@@ -56,7 +56,7 @@ function actions(overrides: Partial<RepairActions> = {}): RepairActions {
 const spotHref = ({ card, place }: CardSpot) =>
   `#/card?card=${card.id}&tab=${place.tab}${"part" in place && place.part !== undefined ? `&part=${place.part}` : ""}${place.tab === "distractors" ? `&d=${place.distractor}` : ""}`;
 
-function renderDeck(shown: DeckHealth<MarkdownProblem>, repairs = actions(), checking = false) {
+function renderDeck(shown: DeckHealth<MarkdownProblem>, repairs = actions(), checking = false, held = false) {
   const onCheck = vi.fn();
   render(
     <DeckHealthScreen
@@ -68,6 +68,7 @@ function renderDeck(shown: DeckHealth<MarkdownProblem>, repairs = actions(), che
       repairs={repairs}
       spotHref={spotHref}
       aboutHref="#/about"
+      held={held}
     />,
   );
   return { onCheck, repairs };
@@ -145,6 +146,23 @@ describe("DeckHealthScreen", () => {
     expect(part("Cards that say the same")).toHaveTextContent("No two cards in use say the same.");
     expect(part("Markdown")).toHaveTextContent("shows as its author meant");
     expect(within(part("Data check")).queryByRole("list")).toBeNull();
+  });
+
+  it("names, but links to no form, the places of a deck held, saying why; its repairs and removals stay", () => {
+    const { repairs } = renderDeck(health, actions(), false, true);
+    expect(screen.getByText(/Nothing in this deck can be changed until the data is repaired/)).toBeInTheDocument();
+    const data = part("Data check");
+    const items = within(data).getAllByRole("listitem");
+    expect(items[0]).toHaveTextContent("water, back: A card has a back.");
+    expect(items[2]).toHaveTextContent("The deck's entry");
+    // Only a subject the deck has no form for is still linked, to itself.
+    expect(within(data).getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual([`${instanceA.url}catalog.ttl#agent-ada`]);
+    fireEvent.click(within(data).getByRole("button", { name: "Repair 1 problem" }));
+    expect(repairs.onRepair).toHaveBeenCalled();
+    fireEvent.click(within(data).getByRole("button", { name: `Remove ${water.url}` }));
+    expect(repairs.onRemove).toHaveBeenCalledWith(plan.unrepairable[0]);
+    for (const name of ["Languages", "Cards that say the same", "Markdown"]) expect(within(part(name)).queryByRole("link")).toBeNull();
+    expect(within(part("Markdown")).getAllByRole("listitem")[0]).toHaveTextContent("water, note under the back (English)");
   });
 
   it("says so when nothing is wrong at all", () => {

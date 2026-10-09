@@ -8,7 +8,7 @@ import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { CardInspectorContainer, releaseLinkOf } from "./CardInspectorContainer";
 import type { CardTab } from "./router";
-import { instanceA, makeCard, makeDeck } from "../test/fixtures";
+import { instanceA, invalidReport, makeCard, makeDeck } from "../test/fixtures";
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -32,6 +32,7 @@ function renderContainer(useCases: UseCases, { tab = "distractors" as CardTab, o
         tabHref={(each) => `#${each}`}
         onTab={vi.fn()}
         appHref="#/card"
+        healthHref="#/health"
         onRemoved={onRemoved}
       />
     </QueryClientProvider>,
@@ -58,6 +59,29 @@ describe("CardInspectorContainer", () => {
     fireEvent.input(screen.getByLabelText("Back"), { target: { value: "H2O" } });
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
     await waitFor(() => expect(useCases.updateCard).toHaveBeenCalledWith(deck, card, { front: { en: "water" }, back: { en: "H2O" } }));
+  });
+
+  it("holds every tab's controls while the data is checked, and while the deck is set aside, with a link to its health", async () => {
+    let checked: (report: ReturnType<typeof invalidReport>) => void = () => undefined;
+    const useCases = makeUseCasesFake({ checkInstance: vi.fn(() => new Promise<ReturnType<typeof invalidReport>>((resolve) => (checked = resolve))) });
+    renderContainer(useCases, { tab: "content" });
+    expect(screen.getByText(/being checked/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+    checked(invalidReport([deck]));
+    expect(await screen.findByRole("link", { name: "Repair it on the health screen." })).toHaveAttribute("href", "#/health");
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+    expect(screen.getByLabelText("Back")).toBeDisabled();
+    cleanup();
+    renderContainer(makeUseCasesFake({ checkInstance: vi.fn(async () => invalidReport([deck])) }));
+    await screen.findByText(/This deck has invalid data/);
+    expect(screen.getByRole("button", { name: "Edit the wrong option “fire”" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Add a wrong option" })).toBeDisabled();
+  });
+
+  it("frees the controls once the check finds the deck's data valid, another deck's invalid", async () => {
+    renderContainer(makeUseCasesFake({ checkInstance: vi.fn(async () => invalidReport([makeDeck("other", { en: "Other" })])) }), { tab: "content" });
+    await waitFor(() => expect(screen.getByRole("button", { name: "Save" })).toBeEnabled());
+    expect(screen.queryByText(/invalid data/)).toBeNull();
   });
 
   it("marks the field it is opened at as where the user arrives: a text, or a wrong option", () => {

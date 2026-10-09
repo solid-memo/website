@@ -7,6 +7,7 @@ import { cardLanguages, queryCards, type CardQuery } from "@solid-memo/domain/ca
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import { studyDayOf } from "@solid-memo/domain/scheduling";
+import { useDataCheck } from "@solid-memo/ui/dataCheck";
 import { useCourseCopies } from "@solid-memo/ui/deckTreeEditor";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
@@ -39,7 +40,10 @@ import type { CardTransfer } from "./TransferCardsDialog";
  * to another of the instance's decks (UseCases.transferCards), with no
  * undo either. After any of these, the cards, review states and study
  * queue of each deck it touched are read afresh, and after a transfer
- * the instance's decks too, for their counts.
+ * the instance's decks too, for their counts. Until the instance's data
+ * check is done, and while the deck is set aside (useDataCheck), no edit
+ * is offered; a deck set aside is never offered to move or copy cards
+ * to.
  */
 export function CardWorkbenchContainer({
   useCases,
@@ -78,7 +82,6 @@ export function CardWorkbenchContainer({
   const [failure, setFailure] = useState<unknown>(null);
   const [reviewDone, setReviewDone] = useState<ReviewEditMade | null>(null);
   const [transferDone, setTransferDone] = useState<TransferMade | null>(null);
-  const others = useMemo(() => decks.filter((other) => other.url !== deck.url), [decks, deck.url]);
   const cardsQuery = useQuery({
     queryKey: ["cards", deck.cardsDocumentUrl],
     queryFn: () => useCases.listCards(deck),
@@ -91,6 +94,9 @@ export function CardWorkbenchContainer({
     queryKey: ["preferences", instance.url],
     queryFn: () => useCases.getPreferences(instance.url),
   });
+  const check = useDataCheck(useCases, instance.url);
+  // Only a deck that may be changed takes cards.
+  const others = decks.filter((other) => other.url !== deck.url && check.readOnly(other) === null);
   const answersQuery = useQuery({
     queryKey: ["answerLog", instance.url],
     queryFn: () => useCases.loadAnswerLog(instance.url),
@@ -220,6 +226,7 @@ export function CardWorkbenchContainer({
         )
       }
       transferDone={transferDone}
+      readOnly={check.readOnly(deck)}
       busy={editMutation.isPending || undoMutation.isPending || reviewMutation.isPending || transferMutation.isPending}
       error={errorText(failure)}
     />

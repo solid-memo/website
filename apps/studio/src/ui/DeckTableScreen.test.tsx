@@ -35,7 +35,9 @@ function Harness({ initial = { filter: "" }, ...overrides }: Partial<Props> & { 
         { group: languages, trail: [languages] },
         { group: scripts, trail: [languages, scripts] },
       ]}
-      readOnly={false}
+      moveLocked={null}
+      readOnly={null}
+      selectable={() => true}
       deckHref={(deck) => `#/deck?deck=${deck.id}`}
       cardsHref={(deck) => `#/browse?deck=${deck.id}`}
       appHref="#/decks"
@@ -239,11 +241,36 @@ describe("DeckTableScreen", () => {
   });
 
   it("does not offer a move when a newer version arranged the decks", () => {
-    render(<Harness readOnly />);
+    render(<Harness moveLocked="newerVersion" />);
     select("Verbs");
     fireEvent.click(screen.getByRole("button", { name: "Move to group" }));
     expect(screen.getByText(/A newer version of Solid Memo arranged these groups/)).toBeInTheDocument();
     expect(screen.queryByRole("combobox", { name: "Group" })).toBeNull();
+  });
+
+  it("does not offer a move while the arrangement is set aside", () => {
+    render(<Harness moveLocked="setAside" />);
+    select("Verbs");
+    fireEvent.click(screen.getByRole("button", { name: "Move to group" }));
+    expect(screen.getByText(/The arrangement of these decks has invalid data/)).toBeInTheDocument();
+  });
+
+  it("selects only the decks that may be changed, saying why the others cannot be, all at once too", () => {
+    render(<Harness selectable={(deck) => deck.url !== kanji.url} readOnly="setAside" />);
+    expect(screen.getByText(/Decks with invalid data are set aside/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Repair them on the health screen." })).toHaveAttribute("href", "#/health?instance=a");
+    expect(screen.getByRole("checkbox", { name: "Select Kanji N5" })).toBeDisabled();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Select every deck shown" }));
+    expect(screen.getByRole("checkbox", { name: "Select every deck shown" })).toBeChecked();
+    expect(screen.getByRole("checkbox", { name: "Select Kanji N5" })).not.toBeChecked();
+    expect(screen.getByText("1 deck selected")).toBeInTheDocument();
+  });
+
+  it("selects no deck while the data is checked", () => {
+    render(<Harness selectable={() => false} readOnly="checking" />);
+    expect(screen.getByText(/being checked/)).toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: "Select every deck shown" })).toBeDisabled();
+    expect(screen.getByRole("checkbox", { name: "Select Verbs" })).toBeDisabled();
   });
 
   it("sets the selected decks' pace, a limit left empty following the instance", async () => {

@@ -1,12 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/preact";
+import { fireEvent, render, screen, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { LibraryDeck } from "@solid-memo/domain/library";
+import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import { firstRelease } from "@solid-memo/domain/testing/libraryDeck";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { GroupsContainer } from "./GroupsContainer";
-import { instanceA, makeDeck } from "../test/fixtures";
+import { instanceA, invalidReport, makeDeck } from "../test/fixtures";
 
 const RELEASE = "https://solid-memo.com/decks/solid/v1.ttl";
 const kanji = makeDeck("deck-1", { en: "Kanji N5" });
@@ -26,7 +27,7 @@ function renderContainer(useCases: UseCases) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={queryClient}>
-      <GroupsContainer useCases={useCases} instance={instanceA} />
+      <GroupsContainer useCases={useCases} instance={instanceA} healthHref="#/health" />
     </QueryClientProvider>,
   );
 }
@@ -72,6 +73,60 @@ describe("GroupsContainer", () => {
         to: { parent: null, after: course.url },
       }),
     );
+  });
+
+  it("says which decks are set aside, and holds the arrangement while it is set aside", async () => {
+    renderContainer(
+      makeUseCasesFake({ listDecks: vi.fn(async () => [kanji, course]), checkInstance: vi.fn(async () => invalidReport([kanji], { catalogue: true })) }),
+    );
+    expect(await screen.findByText("Set aside: its data needs repair")).toBeInTheDocument();
+    expect(await screen.findByText(/The arrangement of these decks has invalid data/)).toBeInTheDocument();
+  });
+
+  /** Whether the deck `name`'s menu offers to rename it and to delete it. */
+  function deckActions(name: string) {
+    fireEvent.click(screen.getByRole("button", { name: `Actions for ${name}` }));
+    const menu = screen.getByRole("menu");
+    const offered = ["Rename", "Delete deck"].map((item) => !within(menu).getByRole("menuitem", { name: item }).hasAttribute("aria-disabled"));
+    fireEvent.keyDown(document.activeElement!, { key: "Escape" });
+    return offered;
+  }
+
+  it("neither renames nor deletes a deck while the data is checked, nor after it one set aside, saying why", async () => {
+    let checked: (report: ReturnType<typeof invalidReport>) => void = () => undefined;
+    renderContainer(
+      makeUseCasesFake({
+        listDecks: vi.fn(async () => [kanji, course]),
+        checkInstance: vi.fn(() => new Promise<ReturnType<typeof invalidReport>>((resolve) => (checked = resolve))),
+      }),
+    );
+    expect(await screen.findByText(/being checked/)).toBeInTheDocument();
+    expect(deckActions("Kanji N5")).toEqual([false, false]);
+    checked(invalidReport([kanji]));
+    expect(await screen.findByText(/Decks with invalid data are set aside/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Repair them on the health screen." })).toHaveAttribute("href", "#/health");
+    expect(deckActions("Kanji N5")).toEqual([false, false]);
+    expect(deckActions("Solid")).toEqual([true, true]);
+  });
+
+  it("holds every deck while the instance is blocked, saying why", async () => {
+    renderContainer(
+      makeUseCasesFake({
+        listDecks: vi.fn(async () => [kanji, course]),
+        getPreferences: vi.fn(async () => ({ ...DEFAULT_PREFERENCES, invalidDataPolicy: "block-instance" as const })),
+        checkInstance: vi.fn(async () => invalidReport([kanji])),
+      }),
+    );
+    expect(await screen.findByText(/your preferences keep it closed/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Repair it on the health screen." })).toHaveAttribute("href", "#/health");
+    expect(deckActions("Solid")).toEqual([false, false]);
+  });
+
+  it("says nothing, and holds no deck, when the data conforms", async () => {
+    renderContainer(makeUseCasesFake({ listDecks: vi.fn(async () => [kanji, course]) }));
+    expect(await screen.findByRole("heading", { name: "Groups" })).toBeInTheDocument();
+    await vi.waitFor(() => expect(deckActions("Kanji N5")).toEqual([true, true]));
+    expect(screen.queryByText(/set aside|being checked/)).toBeNull();
   });
 
   it("says why the decks could not be read", async () => {

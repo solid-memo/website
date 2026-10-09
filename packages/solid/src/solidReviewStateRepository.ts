@@ -8,6 +8,7 @@ import { mapSince, readSince } from "./readSince";
 import {
   toReviewStates,
   withoutReadReviewStates,
+  withoutReviewStates,
   withReviewStates,
 } from "./mappers/reviewStateMapper";
 
@@ -59,12 +60,13 @@ export function createSolidReviewStateRepository({
       await saveDataset(deck.reviewsDocumentUrl, written.dataset, fetch);
     },
 
-    async applyReviewChanges(deck, { save, remove }): Promise<void> {
+    async applyReviewChanges(deck, { save, remove, every = false }): Promise<void> {
       const read = await getSolidDatasetOrNull(deck.reviewsDocumentUrl, fetch);
       // No document, nothing to remove: one is made only for states to save (a card moved in, with them).
       if (read === null && save.length === 0) return;
       const dataset = read ?? createSolidDataset();
-      const written = withReviewStates(withoutReadReviewStates(dataset, deck, remove), deck, save, randomId);
+      const without = every ? withoutReviewStates : withoutReadReviewStates;
+      const written = withReviewStates(without(dataset, deck, remove), deck, save, randomId);
       await checkWrite(written.dataset, written.subjects);
       await saveDataset(deck.reviewsDocumentUrl, written.dataset, fetch);
     },

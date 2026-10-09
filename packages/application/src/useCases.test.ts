@@ -753,13 +753,14 @@ describe("createUseCases", () => {
           { cardId: "one", direction: "front-to-back" },
           { cardId: "one", direction: "back-to-front" },
         ],
+        every: true,
       });
       expect(written.inverse.reviewSaves).toEqual([reviewed]);
 
       const after = setup([two]);
       await after.useCases.undoCardEdit(instance.url, deck, written);
       expect(after.deps.deckRepository.applyCardChanges).toHaveBeenCalledWith(deck, { save: [one], remove: [] }, { whole: true, version: "v1" });
-      expect(after.deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledWith(deck, { save: [reviewed], remove: [] });
+      expect(after.deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledWith(deck, { save: [reviewed], remove: [], every: true });
     });
 
     it("writes nothing when the edit changes no card", async () => {
@@ -1101,6 +1102,7 @@ describe("createUseCases", () => {
           { cardId: "one", direction: "front-to-back" },
           { cardId: "one", direction: "back-to-front" },
         ],
+        every: true,
       });
       expect(deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledWith(deck, undefined);
     });
@@ -1111,6 +1113,7 @@ describe("createUseCases", () => {
       expect(deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledWith(deck, {
         save: [],
         remove: [{ cardId: "one", direction: "back-to-front" }],
+        every: true,
       });
     });
 
@@ -1133,6 +1136,7 @@ describe("createUseCases", () => {
           { ...two, due: "2026-10-12" },
         ],
         remove: [],
+        every: true,
       });
     });
 
@@ -1196,8 +1200,8 @@ describe("createUseCases", () => {
         [deck, { save: [], remove: ["one"] }, { whole: true, version: "v1" }],
       ]);
       expect(vi.mocked(deps.reviewStateRepository.applyReviewChanges).mock.calls).toEqual([
-        [target, { save: [studied], remove: [] }],
-        [deck, { save: [], remove: [{ cardId: "one", direction: "front-to-back" }] }],
+        [target, { save: [studied], remove: [], every: true }],
+        [deck, { save: [], remove: [{ cardId: "one", direction: "front-to-back" }], every: true }],
       ]);
       expect(deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledWith(target, undefined);
       expect(deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledWith(deck, undefined);

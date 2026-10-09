@@ -14,6 +14,7 @@ import {
 import type { CardEdit, CardEditPlan } from "@solid-memo/domain/cardBulk";
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import { CardRowBack, CardRowFront } from "@solid-memo/ui/CardFace";
+import type { ReadOnlyReason } from "@solid-memo/ui/dataCheck";
 import { cardName } from "@solid-memo/ui/DataText";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n, type ErrorText } from "@solid-memo/ui/i18n";
@@ -23,6 +24,7 @@ import { RetiredTag } from "@solid-memo/ui/RetiredCards";
 import type { CardTransferPlan } from "@solid-memo/domain/cardTransfer";
 import type { LapseIndex } from "@solid-memo/domain/cardHistory";
 import { CardBulkActions, type ReviewEdit } from "./CardBulkActions";
+import { ReadOnlyNotice } from "./ReadOnly";
 import type { CardTransfer } from "./TransferCardsDialog";
 
 /** The columns after the card's front, each sorted by its key. */
@@ -86,7 +88,10 @@ function typedInto(target: EventTarget | null): boolean {
  * copied to another of the instance's decks (`decks`, `onTransfer`);
  * the status line then says how many went where, how many got a new id
  * there and how many it had already (`transferDone`). Moved cards leave
- * the selection.
+ * the selection. While the deck may not be changed (`readOnly`: the
+ * instance's data is being checked, or the deck is set aside), cards are
+ * still found and selected, but no edit is offered, and a line says why,
+ * with a link to the deck's health.
  *
  * Each card's lapses (`lapses`, from the answer log; a dash while it is
  * read, or when it cannot be, `lapsesFailed`) count its wrong answers
@@ -121,6 +126,7 @@ export function CardWorkbenchScreen({
   decks,
   onTransfer,
   transferDone,
+  readOnly,
   busy,
   error,
 }: {
@@ -168,6 +174,8 @@ export function CardWorkbenchScreen({
   onTransfer: (ids: readonly string[], transfer: CardTransfer) => Promise<boolean>;
   /** The last move or copy made on this page. */
   transferDone: TransferMade | null;
+  /** Why the deck may not be changed now (useDataCheck); null when it may. */
+  readOnly: ReadOnlyReason | null;
   /** An edit, or its undo, is being made. */
   busy: boolean;
   error: ErrorText | null;
@@ -272,6 +280,7 @@ export function CardWorkbenchScreen({
         <a href={exportHref}>{t("studio.cards.exportLink")}</a>
       </header>
       {course && <p class="hint">{t("studio.cards.courseHint")}</p>}
+      <ReadOnlyNotice reason={readOnly} subject="deck" healthHref={healthHref} />
       {lastEdit !== null && (
         <div class="studio-selection">
           <p role="status">
@@ -280,7 +289,7 @@ export function CardWorkbenchScreen({
             })}
             {lastEdit.plan.skipped.length > 0 && ` ${t("studio.cardBulk.skipped", { count: lastEdit.plan.skipped.length })}`}
           </p>
-          <button type="button" disabled={busy} onClick={onUndo}>
+          <button type="button" disabled={busy || readOnly !== null} onClick={onUndo}>
             {t("studio.cardBulk.undo")}
           </button>
         </div>
@@ -357,7 +366,7 @@ export function CardWorkbenchScreen({
               </button>
             )}
           </div>
-          {selected.length > 0 && (
+          {selected.length > 0 && readOnly === null && (
             <CardBulkActions
               cards={selected}
               languages={languages}

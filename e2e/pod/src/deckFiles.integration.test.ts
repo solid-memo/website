@@ -9,6 +9,7 @@
  * and imported again comes back at its URLs; and every document stays
  * valid.
  */
+import { Parser, Writer } from "n3";
 import { describe, expect, inject, it } from "vitest";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/sources";
 import { SM_NS as SM } from "@solid-memo/vocab/vocab.generated";
@@ -114,6 +115,12 @@ async function seed(server: string) {
   return { main, other, deck, useCases };
 }
 
+/** A document as N-Triples: every IRI written out in full, whatever the server's Turtle abbreviates. */
+async function triples(url: string): Promise<string> {
+  const turtle = await fetch(url, { headers: { accept: "text/turtle" } }).then((response) => response.text());
+  return new Writer({ format: "N-Triples" }).quadsToString(new Parser({ baseIRI: url }).parse(turtle));
+}
+
 /** A deck's cards without where they are: what a file carries over. */
 const contentOf = (cards: readonly Card[]) => cards.map(({ url: _, ...card }) => card).sort((a, b) => a.id.localeCompare(b.id));
 const statesOf = async (deck: Deck) =>
@@ -138,6 +145,14 @@ describe.each(SERVERS)("decks as files on $name", ({ url: server }) => {
       const copied = await statesOf(imported);
       expect(copied.map((state) => state.cardId)).toEqual(["flag", "se"]);
       expect(copied).toEqual(await statesOf(deck));
+      // Written as Solid Memo writes them: each wrong option a suggested answer too, each state naming its card here.
+      const cardsWritten = await triples(imported.cardsDocumentUrl);
+      for (const id of ["se-d1", "se-d2"]) {
+        expect(cardsWritten).toContain(`<${imported.cardsDocumentUrl}#se> <https://schema.org/suggestedAnswer> <${imported.cardsDocumentUrl}#${id}> .`);
+      }
+      expect(await triples(imported.reviewsDocumentUrl)).toContain(
+        `<${imported.reviewsDocumentUrl}#se> <${SM}reviewOf> <${imported.cardsDocumentUrl}#se> .`,
+      );
       expect((await page().validateInstance(other.url)).conforms).toBe(true);
     });
   }

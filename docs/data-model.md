@@ -439,7 +439,11 @@ graph LR
   removes the card's review states, both ways: every `sm:ReviewState` of
   the reviews document that is of it, by its `sm:reviewOf` or the
   fragment rule, read or not, and no other subject (another scheduler's
-  state stays).
+  state stays). The Studio's edits do the same
+  ([studio.md](studio.md#review-state)): a card deleted, moved away or
+  forgotten loses every SM-2 state it has, read or not
+  (`applyReviewChanges` with `every`), where a day reset removes only
+  the one it read.
 - **The cards document says whose it is.** Every write of a deck's cards
   document by the deck's own operations (import, adding, editing or
   removing a card, stating its languages, a course's question joining
@@ -618,7 +622,11 @@ as a multiple-choice question ([courses.md](courses.md)). Each is an
 `sm:Distractor` subject of the card's document, typed `schema:Answer`
 too, with `sm:formatVersion 1`, its text (`sm:distractorText`) and,
 optionally, why it is wrong (`sm:distractorNote`). The card names each
-with `sm:distractor`. Solid Memo's card editor and the Studio's card
+with `sm:distractor`, and with `schema:suggestedAnswer` too (since
+vocabulary 1.16, [below](#courses)): every write of a card keeps the two
+in step, whoever makes it (the card editor, the Studio's inspector, bulk
+edits, moves, copies and imports, a course's question joining the deck).
+Solid Memo's card editor and the Studio's card
 inspector edit them ([studio.md](studio.md#card-inspector); the domain
 is [distractors.ts](../packages/domain/src/distractors.ts)):
 
@@ -629,7 +637,10 @@ is [distractors.ts](../packages/domain/src/distractors.ts)):
   before it was published may be.
 - **Retiring** one writes `owl:deprecated true` on its subject, and
   restoring it removes that. A retired one stays named by the card, and
-  is never offered.
+  is never offered. Readers keep it, marked retired (`toDistractor`),
+  so the editors show it, a learner's history names it, and a write of
+  the card keeps it; only the choices of a question leave it out
+  (`choicesOf`).
 - **Deleting** one removes its subject and the card's link to it, in the
   one write of the card. Only one the deck's release never published
   can be deleted; one it did is retired instead.
@@ -847,7 +858,10 @@ An import reads the file as the pod is read, with the same mappers:
 - an older format is brought up to date as it is read
   ([migrations.md](migrations.md)), and the screen says how many parts
   were. A deck, card or review state in a newer format than the app
-  reads is refused (`deckFileTooNew`), and nothing is written;
+  reads is refused (`deckFileTooNew`), and nothing is written. It is
+  not `writtenByNewerApp`, which refuses to save over pod data a newer
+  version wrote: here nothing is saved over, and the file is what the
+  app cannot read;
 - a subject of these kinds that cannot be read is left out, and the
   screen says how many were;
 - relative IRIs are resolved against `https://file.solid-memo.invalid/`
@@ -865,7 +879,16 @@ catalogue already. An id this app would not give (`deck-…`) takes a
 fresh one too, so no deck lands on `#catalog`, a group or an agent. Its cards
 keep their ids. Only what Solid Memo knows of the deck and its cards is
 written, as when cards move to another deck: triples another app put
-there are in the file, but not imported. The writes follow the
+there are in the file, but not imported. It is written as Solid Memo
+writes any deck: each card names its wrong options with `sm:distractor`
+and `schema:suggestedAnswer`, each typed `sm:Distractor` and
+`schema:Answer`, and each review state names its card in the new cards
+document (`sm:reviewOf`), its direction and `sm:sm2`; a state of
+another scheduler in the file is not imported. The deck needs no
+type-index registration of its own: the instance's registrations of its
+decks (`catalog.ttl`), cards (`decks/`) and review states (`reviews/`)
+cover it, as they cover a deck made in Solid Memo
+([Registrations](#registrations)). The writes follow the
 [write discipline](#write-discipline): the cards document is created
 (If-None-Match), the reviews document written, and then the deck's
 entry added to the catalogue, each checked against the shapes.

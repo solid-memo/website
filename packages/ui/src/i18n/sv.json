@@ -1380,7 +1380,8 @@
         "one": "Tog bort {count} kortlek.",
         "other": "Tog bort {count} kortlekar."
       },
-      "export": "Exportera"
+      "export": "Exportera",
+      "moveSetAside": "Ordningen av kortlekarna har ogiltiga data, så kortlekar kan inte flyttas in i grupper förrän den är reparerad."
     },
     "groups": {
       "heading": "Grupper"
@@ -1774,6 +1775,7 @@
       "allWell": "Inget är fel med den här kortleken.",
       "dataHeading": "Datakontroll",
       "dataHint": "Kortlekens post i katalogen och dess dokument, kontrollerade mot Solid Memos former.",
+      "held": "Inget i kortleken kan ändras förrän data är reparerade, så problemen nedan namnges men länkas inte till sina formulär. Reparera det som kan repareras här, och ta bort det som ingen reparation täcker.",
       "instanceDataHint": "Instansens dokument, kontrollerade mot Solid Memos former. Dokument som inte ändrats sedan de senast godkändes kontrolleras inte igen.",
       "deckEntry": "Kortlekens post",
       "deckDistribution": "Kortlekens distribution",
@@ -1933,6 +1935,15 @@
       "importButton": "Importera till {instance}",
       "importing": "Importerar kortleken…",
       "imported": "Importerade {deck}."
+    },
+    "readOnly": {
+      "checking": "Instansens data kontrolleras. Inget kan ändras förrän kontrollen är klar.",
+      "blocked": "Instansen har ogiltiga data, och dina inställningar håller den stängd tills de är reparerade, så inget kan ändras här. {repair}",
+      "deck": "Kortleken har ogiltiga data, så den är lagd åt sidan: den visas här, men inget i den kan ändras förrän den är reparerad. {repair}",
+      "decks": "Kortlekar med ogiltiga data är lagda åt sidan: de kan inte väljas eller ändras förrän de är reparerade. {repair}",
+      "catalogue": "Instansens katalog eller en av dess grupper har ogiltiga data, så den är lagd åt sidan: inget kan läggas till i den eller ändras i den förrän den är reparerad. {repair}",
+      "repair": "Reparera den på skärmen Hälsa.",
+      "repairDecks": "Reparera dem på skärmen Hälsa."
     }
   }
 }

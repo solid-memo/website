@@ -178,9 +178,10 @@ stays selected, but is left alone until it is shown again):
 
 Each is one write of `catalog.ttl`, made in turn with the other writes
 of the catalog, and the table is read afresh after it
-([data-model.md](data-model.md#deck-groups)). A deck whose data is
-invalid fails the write check, so a pace or direction that includes it
-is refused, and nothing is written.
+([data-model.md](data-model.md#deck-groups)). A deck set aside cannot be
+selected, nor can any deck until the data check is done
+([below](#data-set-aside)). While the arrangement is set aside, no deck
+is moved into a group.
 
 ## Card workbench
 
@@ -272,7 +273,9 @@ edits are:
   whole words when asked. A preview lists every text it changes, before
   and after, and every card it leaves as it is, and why. Nothing is
   written until the user confirms.
-- **Delete**, with the cards' review states, once the user confirms.
+- **Delete**, with the cards' review states, once the user confirms:
+  every SM-2 state of each card, read or not; another scheduler's state
+  stays ([data-model.md](data-model.md#decks-and-cards)).
 - **Set due date** and **Forget progress**, of the cards' review states
   in every direction ([below](#review-state)). A card not studied yet
   stays new. These have no Undo, and a forget asks first.
@@ -309,6 +312,16 @@ cards' review states included. It does so only while the cards are as
 the edit left them. The plan is kept in the page, never stored, so
 Undo goes with the next edit, another deck, or leaving the page.
 
+No edit takes a backup first. Solid Memo keeps no backups: the format
+update and the library upgrade write each document in place, and the
+backups the copying update made are gone
+([migrations.md](migrations.md#the-backup)). A deletion or a find and
+replace over many cards is guarded by its preview, its confirmation,
+and Undo while the page stays open. What Undo cannot bring back is
+what Solid Memo never knew: triples another app put on a deleted card
+or its wrong options, and a second state of a card that was never
+read.
+
 ## Card inspector
 
 The card inspector ([`CardInspectorContainer`](../apps/studio/src/ui/CardInspectorContainer.tsx))
@@ -327,8 +340,10 @@ in Solid Memo. Its four tabs are links, the one shown marked
   history), and is edited, retired, restored or deleted there. "Add a wrong
   option" writes a new one, in the back's language to start with. Each
   change is saved as it is made, as one write of the card
-  (`updateCard`), and the status line says so. An option being written
-  stays open until it is saved, so a failed save loses none of it.
+  (`updateCard`), which names each option with `sm:distractor` and
+  `schema:suggestedAnswer` alike, and the status line says so. An
+  option being written stays open until it is saved, so a failed save
+  loses none of it.
 - **Schedule**: the card's review state in each direction the deck
   studies, and in one it no longer does while a state is kept there
   ([`CardScheduleContainer`](../apps/studio/src/ui/CardScheduleContainer.tsx)).
@@ -382,6 +397,9 @@ they were, they follow the card as it is read afresh (a change in the
 inspector meanwhile included), and the save does not state them, so the
 card keeps its own.
 
+While the deck is set aside, or the data check is under way, every tab
+is shown but nothing in it can be changed ([below](#data-set-aside)).
+
 Opened at a field (`field`, as the [health](#health) screen links to
 one), the inspector puts the focus there: on the text, or on the wrong
 option's Edit button (`data-arrival`, as `useScreenFocus` in `ui`
@@ -398,12 +416,20 @@ The domain makes both changes
 
 - `resetStates` forgets cards: their states go, so the scheduler sees
   them as new. The inspector forgets one direction; the workbench
-  forgets every direction of the selected cards.
+  forgets every direction of the selected cards. Every SM-2 state of the
+  card that way goes, read or not, so no second one is read in its
+  place; another scheduler's state stays.
 - `rescheduleState` sets a state's due day. Its interval, ease and
   repetitions stay. It drops the state's snapshot for resetting the
   study day (`previous`, [srs.md](srs.md#resetting-the-day)), so that
   reset can never bring back a state from before the new due day. A
   day that is no date is refused.
+
+The states are those Solid Memo reads
+([data-model.md](data-model.md#decks-and-cards)): joined to their card
+by `sm:reviewOf` and `sm:reviewDirection`, the fragment rule only where
+a state leaves them out, so a state another app named its own way is
+edited in place. Only `sm:sm2` states are touched.
 
 Neither touches the answer log: the card's answers stay in its history
 and in the statistics. The use cases `resetCards` and
@@ -440,9 +466,19 @@ The domain plans the transfer
   ([data-model.md](data-model.md#write-discipline)).
 - With **Keep their progress**, the card's review states go with it,
   under its id in the target, their snapshot for resetting the study
-  day included. Without, the card starts as new there.
-- A move then removes the cards from the source, with their review
-  states. A copy leaves the source as it is.
+  day included. Without, the card starts as new there. A state is
+  found by the card its `sm:reviewOf` names, whatever its subject is
+  called, and is written in the target naming the card there
+  (`sm:reviewOf` into the target's cards document), at the subject the
+  fragment rule names, or a new `#review-<uuid>` when another's is
+  there.
+- A card written in the target names its wrong options with
+  `sm:distractor` and `schema:suggestedAnswer` alike, each typed
+  `sm:Distractor` and `schema:Answer`.
+- A move then removes the cards from the source, with every SM-2 state
+  they have, read or not. A copy leaves the source as it is. Another
+  scheduler's states are never moved, copied or removed: they stay in
+  the source, naming the card there.
 - Past answers are not touched. They keep naming the source, so a
   moved card's history starts again in the target
   ([data-model.md](data-model.md#the-answer-log)).
@@ -561,6 +597,9 @@ Solid Memo. Its forms:
   not updated yet) says so instead. The form starts again from each
   read of the catalogue, as a rename can change its description.
 
+Both forms are held until the data check is done, and while the
+catalogue or a group is set aside ([below](#data-set-aside)).
+
 The meta document and catalogue writes pass the shape check. The type
 index renames have no shape, so they are If-Match writes only. Each
 write is made again from a fresh read on a 412, three times in all. The end-to-end tests hold these edits
@@ -610,6 +649,15 @@ Each counts toward the badge on [Home](#home): every violation
 (warnings aside), every side to settle, every group of cards that say
 the same, and every Markdown finding (`healthProblemCount`).
 
+While the deck is held (set aside, or the instance blocked:
+[below](#data-set-aside)), its forms change nothing, so the screen
+does not send the user there. Every place is named, not linked, and a
+line says why. The repairs and removals stay:
+they are the way out. A problem no repair covers is then removed here,
+or corrected in the pod by other means. The deck's "Check again" then
+makes the instance's check again too, so a deck mended that way is let
+go without a reload.
+
 The instance's health is the check made when it is opened
 (`checkInstance`, the same query as Home's), with its repairs, then
 every deck with its badge, a link to its own health. A result about a
@@ -650,7 +698,8 @@ added, changed, retired, brought back, removed, and left as the user
 has them. A newer release with nothing for the copy says so.
 
 The copies that can be upgraded are selected by their checkbox, or all
-at once. **Update 2 decks** (as many as are selected) upgrades them one
+at once; a copy set aside cannot be, nor any until the data check is
+done ([below](#data-set-aside)). **Update 2 decks** (as many as are selected) upgrades them one
 after another, each with Solid Memo's own upgrade (`applyLibraryUpgrade`), on the plan the user saw: a
 deck changed since is refused, and left as it was. Nothing about an
 upgrade is new here. While it runs, the screen names the deck, "2 of 3",
@@ -709,6 +758,19 @@ take a fresh id, once. The deck's schedule in the digest is then
 brought up to date, and the screen links to the deck's cards. Every
 query of the instance's decks is read afresh.
 
+The deck is written as any deck Solid Memo writes: its wrong options
+named with `sm:distractor` and `schema:suggestedAnswer`, its states
+naming their card in the new deck. It needs no type-index registration
+of its own: the instance's registrations of its decks, cards and
+review states cover it ([data-model.md](data-model.md#decks-as-files)).
+While the data check is under way, or the catalogue is set aside, the
+import is held ([below](#data-set-aside)); a file can still be read.
+
+A file in a newer format is refused as `deckFileTooNew`, not as
+`writtenByNewerApp`: that one refuses to save over pod data a newer
+version wrote, while here nothing is saved over, and the file is what
+the app cannot read.
+
 Each write passes the shape check. Turtle and JSON-LD go through
 `@inrupt/solid-client`, and files through the browser's own
 `Blob` and file input: no new library
@@ -720,6 +782,38 @@ formats and back
 and the end-to-end tests do so against real servers
 ([deckFiles.integration.test.ts](../e2e/pod/src/deckFiles.integration.test.ts)).
 
+## Data set aside
+
+Every Studio screen holds to the check Solid Memo makes when an
+instance is opened, and to the user's invalid data policy
+([validation.md](validation.md)). `useDataCheck` in `ui` reads both, with
+the same queries as Solid Memo's workspace, so the check is made once
+and again after a repair:
+
+- **Until the check is done**, nothing can be changed, under any policy
+  but "only warn": a deck set aside is not known yet. The screens are
+  shown, and say so.
+- **A deck set aside** (under "set invalid data aside", one whose entry
+  or documents have invalid data) is shown read-only in every screen:
+  its about screen, its workbench (cards are found and selected, but no
+  edit is offered), and its card inspector, every tab. A line says why,
+  with a link to its [health](#health), where it is repaired. It is
+  left out of every bulk action: Home and the library copies do not let
+  it be selected, and moving or copying cards does not offer it.
+  Groups does not rename or delete it.
+- **The arrangement set aside** (the catalogue or a deck group invalid):
+  Groups cannot be rearranged, Home moves no deck into a group, and the
+  instance's name and catalogue, and an import, are held.
+- **Under "block the instance"**, invalid data holds every deck and the
+  instance, as a set-aside deck is held.
+- **What another app wrote** only warns: it sets nothing aside.
+
+A held form is a disabled `fieldset` (`ReadOnlyScope`), so no control
+in it can be used, while links still lead on; what is typed in it stays.
+The health screen's repairs are never held: they are the way out. It
+does not link a held deck's problems to its forms
+([health](#health)).
+
 ## Groups
 
 Groups ([`GroupsContainer`](../apps/studio/src/ui/GroupsContainer.tsx))
@@ -728,7 +822,12 @@ is Solid Memo's deck list without the study: the same screen
 `ui`, which Solid Memo's `DeckListContainer` uses too. Decks and groups
 are dragged, moved from their menus, grouped, renamed and deleted there.
 What is not arranging (a deck's page, its preferences, a course, a new
-deck, the library) opens in Solid Memo.
+deck, the library) opens in Solid Memo. As in Solid Memo, a deck set
+aside says so, and nothing is rearranged until the data check is done,
+nor while the arrangement is set aside. Unlike Solid Memo, a deck held
+([above](#data-set-aside)) cannot be renamed or deleted either
+(`deckHeld`), and a line says why, with a link to the instance's
+health.
 
 ## How it is built and served
 

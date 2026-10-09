@@ -36,6 +36,9 @@ function renderScreen(overrides: Partial<Props> = {}) {
       results={[]}
       deckHref={(deck) => `#/about?deck=${deck.id}`}
       libraryHref="#/library"
+      readOnly={null}
+      selectable={() => true}
+      healthHref="#/health"
       onUpgrade={onUpgrade}
       {...overrides}
     />,
@@ -107,6 +110,14 @@ describe("LibraryCopiesScreen", () => {
     fireEvent.click(screen.getByRole("checkbox", { name: "Select every deck that can be updated" }));
     fireEvent.click(screen.getByRole("checkbox", { name: "Select every deck that can be updated" }));
     expect(screen.queryByRole("button", { name: /Update/ })).toBeNull();
+  });
+
+  it("offers only the copies that may be changed, saying why the others are not", () => {
+    renderScreen({ selectable: (deck) => deck.url !== old.url, readOnly: "setAside" });
+    expect(within(row("Capitals")).queryByRole("checkbox")).toBeNull();
+    expect(screen.getByRole("checkbox", { name: "Select My capitals" })).toBeInTheDocument();
+    expect(screen.getByText(/Decks with invalid data are set aside/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Repair them on the health screen." })).toHaveAttribute("href", "#/health");
   });
 
   it("shows the deck a batch is updating, with its steps, and nothing to choose meanwhile", () => {

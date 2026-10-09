@@ -204,6 +204,32 @@ describe("applyCardChanges", () => {
     expect(getBoolean(getThing(saved, `${deck.cardsDocumentUrl}#se`)!, OWL_DEPRECATED)).toBe(true);
   });
 
+  it("writes a card's distractors as the Studio's edits, moves and imports do: both links in step, typed sm:Distractor and schema:Answer", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    const distractors = [
+      { id: "no-d1", text: { en: "Bergen" } },
+      { id: "no-d2", text: { en: "Trondheim" }, retired: true as const },
+    ];
+    await makeRepository().applyCardChanges(deck, { save: [{ id: "no", front: { en: "Norway" }, back: { en: "Oslo" }, distractors }], remove: [] });
+    const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as SolidDataset;
+    const urls = distractors.map((d) => `${deck.cardsDocumentUrl}#${d.id}`);
+    const no = getThing(saved, `${deck.cardsDocumentUrl}#no`)!;
+    expect(getUrlAll(no, SM.distractor).sort()).toEqual(urls);
+    expect(getUrlAll(no, SCHEMA.suggestedAnswer).sort()).toEqual(urls);
+    for (const url of urls) expect(getUrlAll(getThing(saved, url)!, RDF.type).sort()).toEqual(["https://schema.org/Answer", SM.Distractor]);
+    expect(getBoolean(getThing(saved, urls[1]!)!, OWL_DEPRECATED)).toBe(true);
+
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(saved as never);
+    await makeRepository().applyCardChanges(deck, {
+      save: [{ id: "no", front: { en: "Norway" }, back: { en: "Oslo" }, distractors: [distractors[0]!] }],
+      remove: [],
+    });
+    const again = vi.mocked(saveSolidDatasetAt).mock.calls[1][1] as SolidDataset;
+    expect(getUrlAll(getThing(again, `${deck.cardsDocumentUrl}#no`)!, SM.distractor)).toEqual([urls[0]]);
+    expect(getUrlAll(getThing(again, `${deck.cardsDocumentUrl}#no`)!, SCHEMA.suggestedAnswer)).toEqual([urls[0]]);
+    expect(getThing(again, urls[1]!)).toBeNull();
+  });
+
   it("creates the cards document when there is none", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
     await makeRepository().applyCardChanges(deck, { save: [{ id: "no", front: { "": "Norway" }, back: { "": "Oslo" } }], remove: [] });

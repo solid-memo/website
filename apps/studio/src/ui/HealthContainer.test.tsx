@@ -6,7 +6,7 @@ import type { Deck } from "@solid-memo/domain/deck";
 import type { RepairPlan } from "@solid-memo/domain/repair";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { HealthContainer } from "./HealthContainer";
-import { instanceA, makeCard, makeDeck } from "../test/fixtures";
+import { instanceA, invalidReport, makeCard, makeDeck } from "../test/fixtures";
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -67,6 +67,30 @@ describe("HealthContainer", () => {
         { kind: "remove-subject", documentUrl: deck.cardsDocumentUrl, subjectUrl: plan.unrepairable[0]!.subjectUrl, version: 1 },
       ]),
     );
+  });
+
+  it("links a deck set aside to none of its forms, which change nothing, and says why; its repairs stay", async () => {
+    const useCases = makeUseCasesFake({
+      listCards: vi.fn(async () => [makeCard(deck, "c1")]),
+      checkInstance: vi.fn(async () => invalidReport([deck])),
+      planRepair: vi.fn(() => plan),
+    });
+    renderContainer(useCases, deck);
+    expect(await screen.findByText(/Nothing in this deck can be changed until the data is repaired/)).toBeInTheDocument();
+    expect(screen.getByText(/^c1/)).toBeInTheDocument();
+    expect(screen.queryAllByRole("link").filter((link) => /^#\/(card|about)/.test(link.getAttribute("href")!))).toEqual([]);
+    expect(screen.getByRole("button", { name: "Repair 1 problem" })).toBeEnabled();
+  });
+
+  it("lets a deck set aside go once Check again finds it mended in the pod", async () => {
+    const checkInstance = vi.fn(async () => invalidReport([deck]));
+    const useCases = makeUseCasesFake({ checkInstance, planRepair: vi.fn(() => plan) });
+    renderContainer(useCases, deck);
+    expect(await screen.findByText(/Nothing in this deck can be changed until the data is repaired/)).toBeInTheDocument();
+    checkInstance.mockResolvedValue({ instanceUrl: instanceA.url, documents: [], violationCount: 0, conforms: true });
+    fireEvent.click(screen.getByRole("button", { name: "Check again" }));
+    await waitFor(() => expect(screen.queryByText(/Nothing in this deck can be changed/)).not.toBeInTheDocument());
+    expect(screen.getByRole("link", { name: "The deck's entry" })).toHaveAttribute("href", "#/about?deck=deck-1");
   });
 
   it("says why a deck could not be checked", async () => {

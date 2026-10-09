@@ -10,6 +10,7 @@
     "./documentTitle": "./src/ui/documentTitle.ts",
     "./router": "./src/ui/router.ts",
     "./deckRelease": "./src/ui/deckRelease.ts",
+    "./dataCheck": "./src/ui/dataCheck.ts",
     "./panelFocus": "./src/ui/panelFocus.ts",
     "./remembered": "./src/ui/remembered.ts",
     "./markdownCache": "./src/ui/markdownCache.ts",

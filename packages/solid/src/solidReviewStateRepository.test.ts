@@ -366,6 +366,30 @@ describe("states that name their card", () => {
     ]);
   });
 
+  it("remove every SM-2 state of a card and direction, read or not, when asked for every one, another scheduler's kept", async () => {
+    const reverse: ReviewState = { ...state, direction: "back-to-front" };
+    const theirs: ReviewState = { ...state, due: "2026-10-05" };
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      documentOf(
+        stateAt("card-1"),
+        stateAt("rs-1", theirs),
+        stateAt("rs-2", reverse),
+        otherSchedulerAt("fsrs-1"),
+        stateAt("card-2", { ...state, cardId: "card-2" }),
+      ),
+    );
+    await makeRepository().applyReviewChanges(deck, {
+      save: [],
+      remove: [{ cardId: "card-1", direction: "front-to-back" }],
+      every: true,
+    });
+    expect(getThingAll(savedDataset()).map((thing) => thing.url)).toEqual([
+      `${deck.reviewsDocumentUrl}#rs-2`,
+      `${deck.reviewsDocumentUrl}#fsrs-1`,
+      `${deck.reviewsDocumentUrl}#card-2`,
+    ]);
+  });
+
   it("read a state naming its card in the cards document before an upgrade moved it, and write the link anew", async () => {
     const upgraded: Deck = { ...deck, cardsDocumentUrl: `${INSTANCE}decks/deck-1-u1.ttl` };
     // Written before the upgrade, its link to the card in deck-1.ttl.

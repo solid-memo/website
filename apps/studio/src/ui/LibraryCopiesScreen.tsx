@@ -4,12 +4,14 @@ import type { StepPart, DeckUpgradeOutcome } from "@solid-memo/domain/deckUpgrad
 import type { Instance } from "@solid-memo/domain/instance";
 import type { LibraryCard, LibraryCopy } from "@solid-memo/domain/library";
 import type { LibraryUpgradePlan } from "@solid-memo/domain/libraryUpgrade";
+import type { ReadOnlyReason } from "@solid-memo/ui/dataCheck";
 import { cardName } from "@solid-memo/ui/DataText";
 import { DeckUpgradeProgress, type DeckUpgradeScreenStep } from "@solid-memo/ui/DeckUpgrade";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { describeChanges, historyKept } from "@solid-memo/ui/LibraryUpgradeNotice";
 import { LoadingDots } from "@solid-memo/ui/Loading";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
+import { ReadOnlyNotice } from "./ReadOnly";
 
 /** What upgrading a copy would do: its plan, null when there is nothing to offer, or why it is not known yet. */
 export type PlanState = LibraryUpgradePlan | null | "loading" | "failed";
@@ -49,7 +51,10 @@ const CHANGES = ["add", "change", "retire", "restore", "remove", "kept"] as cons
  * as Solid Memo's offer says it, and a list of the cards each change
  * touches. The copies that can be upgraded are selected by their
  * checkbox, or all at once, and upgraded in turn (`onUpgrade`): the deck
- * being upgraded, with its steps, then how each upgrade ended.
+ * being upgraded, with its steps, then how each upgrade ended. Only a
+ * deck that may be changed (`selectable`) can be: none while the
+ * instance's data is being checked, and none set aside, which a line
+ * says (`readOnly`), with a link to the health (`healthHref`).
  */
 export function LibraryCopiesScreen({
   instance,
@@ -58,6 +63,9 @@ export function LibraryCopiesScreen({
   results,
   deckHref,
   libraryHref,
+  readOnly,
+  selectable,
+  healthHref,
   onUpgrade,
 }: {
   instance: Instance;
@@ -70,6 +78,12 @@ export function LibraryCopiesScreen({
   deckHref: (deck: Deck) => string;
   /** Solid Memo's deck library. */
   libraryHref: string;
+  /** Why some decks, or all, cannot be upgraded now (useDataCheck); null when all can. */
+  readOnly: ReadOnlyReason | null;
+  /** Whether a deck may be changed, so upgraded. */
+  selectable: (deck: Deck) => boolean;
+  /** The instance's health, where data set aside is repaired. */
+  healthHref: string;
   onUpgrade: (chosen: readonly { deck: Deck; plan: LibraryUpgradePlan }[]) => void;
 }) {
   const i18n = useI18n();
@@ -89,7 +103,7 @@ export function LibraryCopiesScreen({
   const planOf = (row: CopyRow) => (row.copy.newer && typeof row.plan === "object" && row.plan !== null ? row.plan : null);
   const upgradable = rows.flatMap((row) => {
     const plan = planOf(row);
-    return plan === null ? [] : [{ deck: row.copy.deck, plan }];
+    return plan === null || !selectable(row.copy.deck) ? [] : [{ deck: row.copy.deck, plan }];
   });
   const selected = upgradable.filter((each) => chosen.has(each.deck.url));
   const busy = running !== null;
@@ -103,6 +117,7 @@ export function LibraryCopiesScreen({
         <a href={libraryHref}>{t("studio.library.browse")}</a>
       </header>
       <p class="hint">{t("studio.library.intro")}</p>
+      <ReadOnlyNotice reason={readOnly} subject="decks" healthHref={healthHref} />
       {selected.length > 0 && !busy && (
         <div class="edit-actions">
           <button
@@ -169,7 +184,7 @@ export function LibraryCopiesScreen({
               return (
                 <tr key={deck.url}>
                   <td>
-                    {plan !== null && (
+                    {plan !== null && selectable(deck) && (
                       <input
                         type="checkbox"
                         aria-label={t("studio.decks.selectDeck", { deck: readerText(deck.title) })}

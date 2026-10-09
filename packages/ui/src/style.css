@@ -1468,6 +1468,14 @@ table.studio-cards tbody td p {
   margin: 0 0 0.6rem;
 }
 
+/* A Studio screen's part that changes things (ReadOnlyScope): no frame of its own. */
+.studio-scope {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
 .studio-preview {
   margin: 0.75rem 0;
   padding: 0.75rem;
@@ -2375,7 +2383,8 @@ legend {
   padding: 0 0.4rem;
 }
 
-fieldset label {
+/* Not the Studio's ReadOnlyScope, which only holds a screen's controls; :where keeps the specificity. */
+fieldset:where(:not(.studio-scope)) label {
   display: block;
   margin: 0.3rem 0;
   font-size: 0.95rem;
@@ -2383,7 +2392,7 @@ fieldset label {
   color: var(--text);
 }
 
-fieldset .hint {
+fieldset:where(:not(.studio-scope)) .hint {
   margin: 0.25rem 0 0;
 }
 
@@ -3268,7 +3277,7 @@ form.card-edit {
   text-align: left;
 }
 
-fieldset label.radio-option .hint {
+fieldset:where(:not(.studio-scope)) label.radio-option .hint {
   display: block;
   margin: 0.1rem 0 0.4rem 1.6rem;
 }
