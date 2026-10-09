@@ -193,9 +193,9 @@ describe("BackupContainer: backups made in place", () => {
     fireEvent.click(restore);
     expect(useCases.restoreBackup).not.toHaveBeenCalled();
     fireEvent.click(restore);
-    expect(await screen.findByRole("status")).toHaveTextContent(/^Put back 2 documents as they were\.$/);
+    expect(await screen.findByRole("status")).toHaveTextContent(/^Put back 2 documents exactly as they were\.$/);
     await waitFor(() => expect(screen.queryByRole("region", { name: "Previous versions" })).not.toBeInTheDocument());
-    expect(screen.getByRole("status")).toHaveTextContent(/^Put back 2 documents as they were\.$/);
+    expect(screen.getByRole("status")).toHaveTextContent(/^Put back 2 documents exactly as they were\.$/);
     expect(useCases.restoreBackup).toHaveBeenCalledWith(instance, update);
   });
 
@@ -203,12 +203,21 @@ describe("BackupContainer: backups made in place", () => {
     vi.stubGlobal("confirm", vi.fn(() => true));
     const useCases = makeUseCasesFake({
       listBackups: vi.fn(async () => [update]),
-      restoreBackup: vi.fn(async () => ({ restored: [], kept: [`${instance.url}meta.ttl`], removed: false })),
+      restoreBackup: vi.fn(async () => ({
+        restored: [],
+        kept: [{ document: `${instance.url}meta.ttl`, copy: `${FOLDER}meta.ttl.orig` }, { document: `${instance.url}catalog.ttl` }],
+        removed: false,
+      })),
       deleteBackup: vi.fn(async () => ({ keptFolder: null })),
     });
     renderContainer(useCases);
     fireEvent.click(await screen.findByRole("button", { name: "Restore this version" }));
-    expect(await screen.findByRole("status")).toHaveTextContent(`${instance.url}meta.ttl`);
+    const status = await screen.findByRole("status");
+    expect(status).toHaveTextContent(
+      `Put back 0 documents exactly as they were. Kept as they are now, changed since the update:${instance.url}meta.ttl (its earlier version (opens in a new tab))${instance.url}catalog.ttl`,
+    );
+    // Each kept document's earlier version is a link to its bytes in the backup; one the update created has none.
+    expect(within(status).getByRole("link", { name: "its earlier version (opens in a new tab)" })).toHaveAttribute("href", `${FOLDER}meta.ttl.orig`);
     await waitFor(() => expect(screen.getByRole("button", { name: "Delete this backup" })).toBeEnabled());
     fireEvent.click(screen.getByRole("button", { name: "Delete this backup" }));
     await waitFor(() => expect(screen.queryByRole("status")).not.toBeInTheDocument());

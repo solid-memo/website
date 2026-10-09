@@ -35,6 +35,19 @@ describe("a backup's manifest", () => {
     expect(toBackup(setThing(dataset, stray), FOLDER)!.entries).toEqual([]);
   });
 
+  it("holds no backup when it names a file the update would not have written, or a URL that steps out of where it seems to be", () => {
+    // The parser keeps an absolute IRI's dot segments, which a request then resolves.
+    for (const entry of [
+      { document: `${backup.of}d0.ttl`, copy: `${FOLDER}../../decks/deck-1.ttl` },
+      { document: `${backup.of}../profile/card`, copy: `${FOLDER}../profile/card.orig` },
+      { document: `${backup.of}d0.ttl`, copy: `${FOLDER}d1.ttl.orig` },
+    ]) {
+      expect(toBackup(manifestOf(createSolidDataset(), { ...backup, entries: [entry] }).dataset, FOLDER), JSON.stringify(entry)).toBeNull();
+    }
+    const kept = { ...backup, entries: [{ document: `${backup.of}d0.ttl`, copy: `${FOLDER}d0.ttl.orig` }] };
+    expect(toBackup(manifestOf(createSolidDataset(), kept).dataset, FOLDER)).toEqual(kept);
+  });
+
   it("notes the version an update left a document at on its entry alone", () => {
     const { dataset } = manifestOf(createSolidDataset(), backup);
     const noted = withVersionUpdated(dataset, backup.entries[3]!.document, '"v2"')!;

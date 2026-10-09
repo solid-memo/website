@@ -246,9 +246,10 @@ describe("a guest's study", () => {
     await restamp(guestStore, deck.url, 5);
     await restamp(guestStore, card.url, 4);
     await addTriples(guestStore, deck.cardsDocumentUrl, [`<${card.url}> <https://example.org/seen> "yes" .`]);
+    // The catalogue as the guest's pod serves it: its statements in the order it keeps them.
     const catalogTriples = async () => {
       const catalog = await guestStore.get(`${instance!.url}catalog.ttl`);
-      return catalog?.kind === "rdf" ? [...catalog.triples].sort() : [];
+      return catalog?.kind === "rdf" ? [...catalog.triples] : [];
     };
     const before = await catalogTriples();
     expect(await useCases.planMigration(instance!.url)).toMatchObject({ deckCount: 1, cardCount: 1 });
@@ -264,11 +265,11 @@ describe("a guest's study", () => {
     expect(backup!.entries.map((entry) => entry.document)).toEqual([deck.cardsDocumentUrl, `${instance!.url}catalog.ttl`]);
     expect(backup!.entries.every((entry) => entry.versionUpdated !== undefined)).toBe(true);
 
-    // Studied since: the card is edited, so its document is kept as it is now; the catalogue is put back.
+    // Studied since: the card is edited, so its document is kept as it is now; the catalogue is put back, as it was.
     await useCases.updateCard(deck, (await useCases.listCards(deck))[0]!, { front: { sv: "Sverige" }, back: { sv: "Stockholm!" } });
     await expect(useCases.restoreBackup(instance!, backup!)).resolves.toEqual({
       restored: [`${instance!.url}catalog.ttl`],
-      kept: [deck.cardsDocumentUrl],
+      kept: [{ document: deck.cardsDocumentUrl, copy: backup!.entries[0]!.copy }],
       removed: false,
     });
     expect(await catalogTriples()).toEqual(before);

@@ -59,9 +59,13 @@ export const ERROR_TEMPLATES = {
     "That instance is no longer on your list of instances, so there is nothing to switch. Reload the page and try again.",
   noMetaToUpdate: "This instance has no description to update. Reload the page and try again.",
   noBackup: "{instance} has no backup to restore.",
+  updatedCopyInvalid: {
+    one: "The updated copy of your data is not in the format Solid Memo expects ({count} problem), so none of your data was changed. Try again later.",
+    other: "The updated copy of your data is not in the format Solid Memo expects ({count} problems), so none of your data was changed. Try again later.",
+  },
   updatedInstanceInvalid: {
-    one: "After the update, part of your data is not in the format Solid Memo expects ({count} problem). Restore the previous version the update kept, then try again later.",
-    other: "After the update, part of your data is not in the format Solid Memo expects ({count} problems). Restore the previous version the update kept, then try again later.",
+    one: "Once written, the updated data is not in the format Solid Memo expects ({count} problem). Try again later.",
+    other: "Once written, the updated data is not in the format Solid Memo expects ({count} problems). Try again later.",
   },
   movedCopyInvalid: {
     one: "The copy in your Pod is not in the format Solid Memo expects ({count} problem), so your study is left as it was. Try again later.",
@@ -95,10 +99,19 @@ export const ERROR_TEMPLATES = {
   deckTreeChanged:
     "Your decks were rearranged elsewhere, perhaps in another tab or app, so this change was not made. The list now shows them as they are.",
   backupGone: "The backup this update made can no longer be found, so the update stopped. Run the update again.",
+  backupFileGone: "The earlier version of a document is no longer in its backup, so Solid Memo cannot put it back.",
+  backupNotExact:
+    "Your Pod did not keep the backup exactly as Solid Memo wrote it, so none of your data was changed. Try again later.",
+  changedDuringUpdate:
+    "Part of your data changed while it was being updated, perhaps in another tab or app, so none of it was changed. Try again.",
+  restoredNotExact:
+    "Your Pod does not give a document back exactly as Solid Memo put it back. Its earlier version is still kept in the backup.",
   backupNotOurs:
     "This backup names documents that are not part of {instance}, so Solid Memo does not restore it. You can delete it: only what it holds in its own folder is deleted.",
   deckBackupOutdated:
     "The deck this backup is of has been removed, or updated to a newer library release, since the backup was made, so restoring it would not put the deck back as it was. Nothing was changed; you can delete the backup.",
+  backupInUse:
+    "This backup belongs to an update that is still running, perhaps in another tab, so nothing was changed. Wait for the update to finish, then try again.",
   writtenByNewerApp:
     "A newer version of Solid Memo has updated this data, so this version does not save over it. Reload the page to get the latest version.",
   deckTreeTooNew:

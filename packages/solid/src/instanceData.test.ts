@@ -90,7 +90,7 @@ describe("deleteInstanceData", () => {
     await expect(deleteInstanceData(INSTANCE, p.fetch)).resolves.toEqual({ keptFolder: null });
     expect(p.deleted).toEqual(
       expect.arrayContaining([
-        `${INSTANCE}backups/20261009T100000Z-0f3a1b2c/decks/deck-1.ttl`,
+        `${INSTANCE}backups/20261009T100000Z-0f3a1b2c/decks/deck-1.ttl.orig`,
         `${INSTANCE}backups/20261009T100000Z-0f3a1b2c/manifest.ttl`,
         `${INSTANCE}backups/`,
       ]),

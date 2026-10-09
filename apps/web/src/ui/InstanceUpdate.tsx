@@ -1,7 +1,9 @@
-import type { BackupRestore } from "@solid-memo/domain/backup";
+import type { BackupRestore, KeptDocument } from "@solid-memo/domain/backup";
 import type { UpdateOutcome, UpdateProgress, UpdateStep } from "@solid-memo/domain/instanceUpdate";
 import type { ComponentChildren } from "preact";
 import { useId } from "preact/hooks";
+import { ExternalLink } from "./ExternalLink";
+import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type I18n } from "./i18n";
 import { usePanelFocus } from "./panelFocus";
 import { StepProgress } from "./StepProgress";
@@ -11,8 +13,12 @@ function stepLabels(t: I18n["t"]): Record<UpdateStep, string> {
   return {
     stage: t("instanceUpdate.step.stage"),
     backup: t("instanceUpdate.step.backup"),
-    upgrade: t("instanceUpdate.step.upgrade"),
+    copy: t("instanceUpdate.step.copy"),
+    check: t("instanceUpdate.step.check"),
+    verify: t("instanceUpdate.step.verify"),
+    rewrite: t("instanceUpdate.step.rewrite"),
     validate: t("instanceUpdate.step.validate"),
+    tidy: t("instanceUpdate.step.tidy"),
   };
 }
 
@@ -56,7 +62,11 @@ export function InstanceUpdateConfirm({
   );
 }
 
-/** While the update runs: which step it is on, and how far along it is. It cannot be stopped half-way. */
+/**
+ * While the update runs: which step it is on, and how far along it is; or,
+ * once it failed after writing, that it puts back what it changed. It
+ * cannot be stopped half-way.
+ */
 export function InstanceUpdateProgress({ progress }: { progress: UpdateProgress }) {
   const { t } = useI18n();
   const labels = stepLabels(t);
@@ -69,7 +79,7 @@ export function InstanceUpdateProgress({ progress }: { progress: UpdateProgress 
       done={progress.done}
       total={progress.total}
       part={progress.part}
-      status={t("instanceUpdate.running", { step })}
+      status={progress.undoing === true ? t("instanceUpdate.undoing") : t("instanceUpdate.running", { step })}
       progressLabel={t("instanceUpdate.progressLabel")}
       hint={t("instanceUpdate.keepOpen")}
     />
@@ -77,11 +87,12 @@ export function InstanceUpdateProgress({ progress }: { progress: UpdateProgress 
 }
 
 /**
- * When the update stopped: where, why, and what it left: nothing changed,
- * or the documents it updated, which stay so, and the backup in
- * Preferences. An instance that does not conform after the update (which
- * should not happen) can be put back from the backup at once. It takes
- * the progress's place and its focus, so the failure is read out.
+ * When the update failed: where, why, and what became of the user's
+ * documents — none was changed; every one it changed is back exactly as
+ * it was; some changed elsewhere since it wrote them and were kept, each
+ * with its earlier version; or putting them back failed, which can be
+ * tried again. It takes the progress's place and its focus, so the
+ * failure is read out.
  */
 export function InstanceUpdateFailure({
   outcome,
@@ -93,18 +104,19 @@ export function InstanceUpdateFailure({
 }: {
   outcome: Extract<UpdateOutcome, { ok: false }>;
   busy: boolean;
-  /** What restoring the backup did, once it did. */
+  /** What trying again to put the documents back did, once it did. */
   restored: BackupRestore | undefined;
   onRestore: () => void;
   onDismiss: () => void;
-  /** The restore's error, if any. */
+  /** Trying again's error, if any. */
   children?: ComponentChildren;
 }) {
-  const { t, errorText } = useI18n();
+  const { t, tx, errorText } = useI18n();
   const ref = usePanelFocus<HTMLDivElement>();
   const whyId = useId();
-  const updated = outcome.updated.length;
-  const offersRestore = outcome.step === "validate" && outcome.backupUrl !== undefined && restored === undefined;
+  const { undo, backupUrl } = outcome;
+  const folder = backupUrl === undefined ? null : <ExternalLink url={backupUrl}>{t("instanceUpdate.backupFolder")}</ExternalLink>;
+  const offersRestore = undo?.failed !== undefined && restored === undefined;
   return (
     <div
       ref={ref}
@@ -118,11 +130,23 @@ export function InstanceUpdateFailure({
         <strong>{t("instanceUpdate.failedWhile", { step: stepLabels(t)[outcome.step].toLowerCase() })}</strong>{" "}
         {errorText(outcome.error)}
       </div>
-      <p>
-        {updated === 0
-          ? `${t("instanceUpdate.noChanges")}${outcome.backupUrl === undefined ? "" : ` ${t("instanceUpdate.backupLeft")}`}`
-          : t("instanceUpdate.partlyUpdated", { count: updated })}
-      </p>
+      {undo !== null && undo.failed !== undefined ? (
+        <>
+          <p>{tx("instanceUpdate.notPutBack", { link: folder })}</p>
+          <ErrorMessage error={errorText(undo.failed)} />
+        </>
+      ) : undo !== null && undo.kept.length > 0 ? (
+        <>
+          <p>{t("instanceUpdate.keptChanged", { count: undo.kept.length })}</p>
+          <KeptDocuments kept={undo.kept} />
+          {undo.restored.length > 0 && <p>{t("backup.restored", { count: undo.restored.length })}</p>}
+        </>
+      ) : (
+        <p>
+          {undo === null || undo.restored.length === 0 ? t("instanceUpdate.noChanges") : t("instanceUpdate.putBack")}
+          {folder !== null && ` ${t("instanceUpdate.leftover")}`}
+        </p>
+      )}
       {restored !== undefined && <RestoreResult restored={restored} />}
       <div class="edit-actions">
         {offersRestore && (
@@ -132,7 +156,7 @@ export function InstanceUpdateFailure({
             }}
             aria-disabled={busy}
           >
-            {busy ? t("backup.restoring") : t("instanceUpdate.restore")}
+            {busy ? t("instanceUpdate.restoring") : t("instanceUpdate.tryRestoring")}
           </button>
         )}
         <button
@@ -149,13 +173,32 @@ export function InstanceUpdateFailure({
   );
 }
 
+/** Documents kept as they are now, changed since an update wrote them, each with its earlier version where the backup has one. */
+export function KeptDocuments({ kept }: { kept: readonly KeptDocument[] }) {
+  const { t, tx } = useI18n();
+  return (
+    <ul class="kept-documents">
+      {kept.map(({ document, copy }) => (
+        <li key={document}>
+          {copy === undefined
+            ? document
+            : tx("backup.keptItem", { document, link: <ExternalLink url={copy}>{t("backup.earlierVersion")}</ExternalLink> })}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 /** What restoring a backup did: how many documents it put back, and which it kept, changed since the update. */
 export function RestoreResult({ restored }: { restored: BackupRestore }) {
   const { t } = useI18n();
   return (
-    <p role="status">
-      {t("backup.restored", { count: restored.restored.length })}
-      {restored.kept.length > 0 && ` ${t("backup.keptSince", { documents: restored.kept.join(", ") })}`}
-    </p>
+    <div role="status">
+      <p>
+        {t("backup.restored", { count: restored.restored.length })}
+        {restored.kept.length > 0 && ` ${t("backup.keptSince")}`}
+      </p>
+      {restored.kept.length > 0 && <KeptDocuments kept={restored.kept} />}
+    </div>
   );
 }

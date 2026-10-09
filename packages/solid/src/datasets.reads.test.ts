@@ -11,6 +11,7 @@ const DOC = "https://pod.example/doc.ttl";
 
 function pod({ etag = '"v1"' as string | null, honoursIfNoneMatch = true } = {}) {
   const gets: { ifNoneMatch: string | null }[] = [];
+  const caches: (RequestCache | undefined)[] = [];
   let current = etag;
   let exists = true;
   let release: (() => void) | undefined;
@@ -24,6 +25,7 @@ function pod({ etag = '"v1"' as string | null, honoursIfNoneMatch = true } = {})
       return new Response("", { status: method === "DELETE" ? 204 : 205 });
     }
     gets.push({ ifNoneMatch: headers.get("If-None-Match") });
+    caches.push(init?.cache);
     await held;
     if (!exists) return new Response("", { status: 404 });
     const response =
@@ -38,6 +40,7 @@ function pod({ etag = '"v1"' as string | null, honoursIfNoneMatch = true } = {})
   return {
     fetch,
     gets,
+    caches,
     /** Answers wait until let go. */
     hold() {
       held = new Promise((resolve) => (release = resolve));
@@ -66,6 +69,13 @@ describe("reading a document more than once", () => {
     server.letGo();
     expect(await second).toBe(await first);
     expect(server.gets).toHaveLength(1);
+  });
+
+  it("asks the pod every time, never a browser's cache: the read it keeps is the only one", async () => {
+    const server = pod();
+    await readDataset(DOC, server.fetch);
+    await readDataset(DOC, server.fetch);
+    expect(server.caches).toEqual(["no-store", "no-store"]);
   });
 
   it("asks again with the ETag it read, and keeps the dataset when the pod says it is unchanged (304)", async () => {

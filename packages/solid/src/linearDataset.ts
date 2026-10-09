@@ -36,6 +36,27 @@ export async function getSolidDatasetLinear(
   return Object.freeze({ ...described, graphs: graphsOf(collected.quads) });
 }
 
+/**
+ * A Turtle text's statements, its relative IRIs read against `baseIri`:
+ * what solid-client makes of the same text served at that address. Throws
+ * when it is no Turtle.
+ */
+export function parseTurtle(text: string, baseIri: string): Promise<Quad[]> {
+  return new Promise((resolve, reject) => {
+    const parser = getTurtleParser();
+    const quads: Quad[] = [];
+    parser.onQuad((quad) => quads.push(quad));
+    parser.onError(reject);
+    parser.onComplete(() => resolve(quads));
+    parser.parse(text, { internal_resourceInfo: { sourceIri: baseIri, isRawData: false, linkedResources: {} } });
+  });
+}
+
+/** A Turtle text as a SolidDataset with no resource behind it, its relative IRIs read against `baseIri`. */
+export async function turtleDataset(text: string, baseIri: string): Promise<SolidDataset> {
+  return Object.freeze({ type: "Dataset" as const, graphs: graphsOf(await parseTurtle(text, baseIri)) });
+}
+
 /** solid-client's Turtle parser, whose quads go to `collected` instead of to solid-client. */
 function collectingTurtleParser(collected: { quads?: Quad[] }): Parser {
   const parser = getTurtleParser();

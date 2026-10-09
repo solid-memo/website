@@ -10,12 +10,15 @@
  * not assumed: node-solid-server gives no ETag on a read and ignores
  * If-Match, so there an edit is held to its version by the fence checking
  * it just before; 5.7.4 also ignored If-None-Match: * on a PUT, which
- * 5.8.8 and 6.0.0 enforce.
+ * 5.8.8 and 6.0.0 enforce. "Byte for byte" is what the server serves for
+ * a document asked for as the app asks (Accept: text/turtle), before and
+ * after.
  */
 import { beforeAll, describe, expect, inject, it } from "vitest";
 import { Parser, Writer, type Quad } from "n3";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/sources";
 import { createUseCases, type UseCases } from "@solid-memo/application/useCases";
+import type { ShapeValidator } from "@solid-memo/application/ports";
 import type { Backup } from "@solid-memo/domain/backup";
 import type { Instance } from "@solid-memo/domain/instance";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
@@ -59,6 +62,7 @@ interface Recorded {
   url: string;
   ifMatch: string | null;
   ifNoneMatch: string | null;
+  contentType: string | null;
   /** The pod's answer, once it came. */
   status?: number;
 }
@@ -206,6 +210,90 @@ ${deck("deck-2", `dcterms:title "Huvudstader i Europa"@en ;
   return pod;
 }
 
+/**
+ * The seeded pod's instance as an older app, or a person, wrote it by
+ * hand, every document outdated: prefixes of its own, comments, statements
+ * in no order Solid Memo writes, relative IRIs (one through @base), a
+ * blank node and another app's decimal with a trailing zero, which a
+ * server's rewrite would not keep as they are. Its text is ASCII: the
+ * Community Solid Server's in-memory store cuts a document with other
+ * characters short when it is patched (docs/testing.md). What
+ * node-solid-server cannot patch is left out: a document with SPARQL-style
+ * `PREFIX` directives, and a value the update rewrites spelled otherwise
+ * than Solid Memo spells it (`2.50`), which its PATCH cannot delete.
+ */
+async function seedHandWritten(server: string): Promise<Pod> {
+  const pod = await seedPod(server);
+  const { source } = pod;
+  const put = async (path: string, body: string) => {
+    const response = await fetch(`${source}${path}`, { method: "PUT", headers: { "content-type": "text/turtle" }, body });
+    if (!response.ok) throw new Error(`Seeding ${path}: ${response.status}`);
+  };
+  await put(
+    "meta.ttl",
+    `# The instance's record, written by hand.
+@prefix memo: <https://solid-memo.com/ns/vocab/v1.ttl#>.
+@prefix dc:   <http://purl.org/dc/terms/>.
+@prefix xs:   <http://www.w3.org/2001/XMLSchema#>.
+
+<#it>   dc:created "2026-09-21T10:00:00Z"^^xs:dateTime ;
+        a memo:Instance ;     # no format version: format 1
+        dc:title "Main" .
+`,
+  );
+  await put(
+    "preferences.ttl",
+    `@prefix : <https://solid-memo.com/ns/vocab/v1.ttl#> .
+# Study caps, and nothing else.
+<#it> :dayBoundaryHour 4 ; :maxReviewsPerDay 200 ;
+   a :Preferences ;
+   :newCardsPerDay 20 .
+`,
+  );
+  await put(
+    "catalog.ttl",
+    `@base <./> .
+@prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix t: <http://purl.org/dc/terms/> .
+# One deck, its documents named from the folder.
+<catalog.ttl#deck-1> sm:reviewsDocument <reviews/deck-1.ttl> ;
+  sm:cardsDocument <decks/deck-1.ttl> ;
+  sm:direction "bidirectional" ;
+  a sm:Deck ; sm:formatVersion 2 ; t:title "Capitals" .
+`,
+  );
+  await put(
+    "decks/deck-1.ttl",
+    `@prefix card: <https://solid-memo.com/ns/vocab/v1.ttl#>.
+@prefix other: <https://other-app.example/ns#> .
+@prefix d:<http://purl.org/dc/terms/> .
+
+# Cards, in no particular order.
+<#no> card:back "Oslo" ; card:front "Norway" ; a card:Card ; card:formatVersion 1 ;
+  d:created "2026-09-21T10:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+<#se> a card:Card ;
+   other:annotation [ other:by "another app" ; other:at "2026-09-01" ] ;
+   card:front "Sweden" ; card:back "Stockholm" .
+`,
+  );
+  await put(
+    "reviews/deck-1.ttl",
+    `@prefix s: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix x: <http://www.w3.org/2001/XMLSchema#> .
+
+<#se>
+    s:lastReviewedAt "2026-09-22T10:00:00Z"^^x:dateTime ;
+    s:firstReviewedAt "2026-09-20T10:00:00Z"^^x:dateTime ;
+    s:due "2026-09-28" ;
+    <https://other-app.example/ns#weight> 1.50 ;   # another app's, its trailing zero kept
+    s:repetitions 2 ; s:intervalDays 6 ; s:easeFactor 2.5 ;
+    a s:ReviewState .
+`,
+  );
+  return pod;
+}
+
+
 const TEXT = new Set(
   ["http://purl.org/dc/terms/title", "http://purl.org/dc/terms/description", "http://www.w3.org/ns/dcat#keyword"].concat(
     ["front", "back", "frontNote", "backLabel", "backNote", "frontImageDescription", "backImageDescription"].map(
@@ -244,20 +332,35 @@ async function statedFormats(container: string, urls: string[]): Promise<Record<
   );
 }
 
-
 /** The app as main.tsx wires it, over a fetch that records every request, with the shapes read from this repository. */
-function app(pod: Pod, options: { failOn?: (request: Recorded) => boolean; onRequest?: (request: Recorded) => Promise<void> } = {}) {
-  /** Each request as it reaches the server, after the fence: with the If-Match it set, and its own checks. */
-  const sent: Recorded[] = [];
-  const sending: typeof fetch = async (input, init) => {
+function app(
+  pod: Pod,
+  options: {
+    /** Answers the request with a failure of its own, before the fence: the pod never sees it. */
+    failOn?: (request: Recorded) => boolean;
+    /** Runs as the app is about to make the request: another device's doing. */
+    onRequest?: (request: Recorded) => Promise<void>;
+    /** The request is made, and its answer lost on the way: the app sees a network failure. */
+    loseAnswer?: (request: Recorded) => boolean;
+    /** What the shape check says of a document, from what it would have said. */
+    check?: (url: string, report: Awaited<ReturnType<ShapeValidator["validateDocument"]>>) => typeof report;
+  } = {},
+) {
+  const record = (input: RequestInfo | URL, init?: RequestInit): Recorded => {
     const request = input instanceof Request ? input : undefined;
     const headers = new Headers(init?.headers ?? request?.headers);
-    const recorded: Recorded = {
+    return {
       method: (init?.method ?? request?.method ?? "GET").toUpperCase(),
       url: decodeURI(request?.url ?? String(input)),
       ifMatch: headers.get("If-Match"),
       ifNoneMatch: headers.get("If-None-Match"),
+      contentType: headers.get("Content-Type"),
     };
+  };
+  /** Each request as it reaches the server, after the fence: with the If-Match it set, and its own checks. */
+  const sent: Recorded[] = [];
+  const sending: typeof fetch = async (input, init) => {
+    const recorded = record(input, init);
     sent.push(recorded);
     const response = await fetch(input, init);
     recorded.status = response.status;
@@ -267,27 +370,25 @@ function app(pod: Pod, options: { failOn?: (request: Recorded) => boolean; onReq
   // The recording of attempts sits outside the fence: it sees what the app attempts, not only what gets through.
   const attempts: Recorded[] = [];
   const attemptingFetch: typeof fetch = async (input, init) => {
-    const request = input instanceof Request ? input : undefined;
-    const headers = new Headers(init?.headers ?? request?.headers);
-    const recorded: Recorded = {
-      method: (init?.method ?? request?.method ?? "GET").toUpperCase(),
-      url: decodeURI(request?.url ?? String(input)),
-      ifMatch: headers.get("If-Match"),
-      ifNoneMatch: headers.get("If-None-Match"),
-    };
+    const recorded = record(input, init);
     attempts.push(recorded);
     await options.onRequest?.(recorded);
     if (options.failOn?.(recorded)) return new Response("injected failure", { status: 500 });
     const response = await writeFence.fetch(input, init);
     recorded.status = response.status;
+    if (options.loseAnswer?.(recorded)) throw new TypeError("Failed to fetch");
     return response;
   };
-  const shapeValidator = createShaclShapeValidator({
+  const validator = createShaclShapeValidator({
     fetch: attemptingFetch,
     shapesFetch,
     ...SHAPE_SOURCES,
   });
-  const checkWrite = shapeValidator.checkSubjects;
+  const shapeValidator: typeof validator =
+    options.check === undefined
+      ? validator
+      : { ...validator, validateDocument: async (url) => options.check!(url, await validator.validateDocument(url)) };
+  const checkWrite = validator.checkSubjects;
   const useCases: UseCases = createUseCases({
     sessionGateway: undefined as never,
     storageGateway: undefined as never,
@@ -343,18 +444,57 @@ async function snapshot(container: string, skip: (url: string) => boolean = () =
   return result;
 }
 
+/** The bytes the server serves for each document, asked for as the app asks (Accept: text/turtle), one character a byte; "(none)" for none. */
+async function servedBytes(urls: readonly string[]): Promise<Map<string, string>> {
+  const result = new Map<string, string>();
+  for (const url of urls) {
+    const response = await fetch(url, { headers: { accept: "text/turtle" } });
+    result.set(url, response.status === 404 ? "(none)" : Buffer.from(await response.arrayBuffer()).toString("latin1"));
+  }
+  return result;
+}
+
+/** The Content-Type the server serves each document with, asked for as the app asks: what a backup keeps it with. */
+async function servedTypes(urls: readonly string[]): Promise<Map<string, string | null>> {
+  const result = new Map<string, string | null>();
+  for (const url of urls) result.set(url, (await fetch(url, { headers: { accept: "text/turtle" } })).headers.get("content-type"));
+  return result;
+}
+
+/** The bytes a file of a backup holds, as stored, one character a byte. */
+async function fileBytes(url: string): Promise<string> {
+  return Buffer.from(await (await fetch(url)).arrayBuffer()).toString("latin1");
+}
+
+const status = async (url: string) => (await fetch(url, { method: "HEAD" })).status;
 const isWrite = (request: Recorded) => !READS.has(request.method);
 const under = (container: string) => (request: Recorded) => request.url.startsWith(container);
+
+/**
+ * Every write to one of the documents was held to the version it was
+ * read at — If-Match where the server enforces it, else right after a
+ * read of it (the fence's check, or a restore's) — and every resource
+ * made in the update's `folder` was first written where nothing was.
+ */
+function expectConditional(sent: Recorded[], documents: readonly string[], folder: string, conditional: Preconditions): void {
+  const made = new Set<string>();
+  for (const [index, request] of sent.entries()) {
+    if (!isWrite(request)) continue;
+    if (documents.includes(request.url)) {
+      if (conditional.edits) expect(request.ifMatch, `${request.method} ${request.url}`).toMatch(/^"/);
+      else expect(sent[index - 1], `${request.method} ${request.url}`).toMatchObject({ method: "GET", url: request.url });
+    }
+    if (request.url.startsWith(folder) && request.method === "PUT" && !made.has(request.url)) {
+      made.add(request.url);
+      expect(request.ifNoneMatch, `PUT ${request.url}`).toBe("*");
+    }
+  }
+}
 
 /** A document as N-Triples: every IRI written out in full, whatever the server's Turtle abbreviates. */
 async function triples(url: string): Promise<string> {
   const turtle = await fetch(url, { headers: { accept: "text/turtle" } }).then((response) => response.text());
   return new Writer({ format: "N-Triples" }).quadsToString(new Parser({ baseIRI: url }).parse(turtle));
-}
-
-/** A document's triples, one a line, sorted: what it says, however the server writes it. */
-async function sortedTriples(url: string): Promise<string[]> {
-  return (await triples(url)).split("\n").filter((line) => line !== "").sort();
 }
 
 async function registeredContainers(pod: Pod): Promise<string> {
@@ -383,10 +523,12 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
     return backups[0]!;
   }
 
-  it("updates each document in place, once, after backing it up, every write conditional; addresses, unknown files and foreign triples kept", async () => {
+  it("backs up each document's bytes, updates and checks a working copy, then each document in place, every write conditional; addresses, unknown files, sharing and foreign triples kept", async () => {
     const pod = await seedPod(server);
     const backups = `${pod.source}backups/`;
+    const documents = UPDATED.map((path) => `${pod.source}${path}`);
     const before = await snapshot(pod.source);
+    const bytesBefore = await servedBytes(documents);
     const indexBefore = await registeredContainers(pod);
     const { useCases, attempts, sent, session } = app(pod);
 
@@ -397,35 +539,47 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
     expect(backupUrl).toMatch(new RegExp(`^${backups}\\d{8}T\\d{6}Z-[0-9a-f]{8}/$`));
     const backup = await onlyBackup(useCases, pod);
     expect(backup).toMatchObject({ url: backupUrl, of: pod.source });
-    expect(backup.entries.map((entry) => entry.document)).toEqual(UPDATED.map((path) => `${pod.source}${path}`));
+    expect(backup.entries.map((entry) => entry.document)).toEqual(documents);
 
-    // Every write went to a document the backup lists, or into the backup, but the last: the type index,
+    // Every write went to a document the backup names, or into the update's folder, but the last: the type index,
     // once updated, given the registrations of the instance's data it lacked, If-Match where the server enforces it.
     const writes = sent.filter(isWrite);
-    const documents = new Set(backup.entries.map((entry) => entry.document));
-    expect(writes.filter((request) => !documents.has(request.url) && !under(backupUrl)(request))).toEqual([writes.at(-1)]);
+    expect(writes.filter((request) => !documents.includes(request.url) && !under(backupUrl)(request))).toEqual([writes.at(-1)]);
     expect(writes.at(-1)).toMatchObject({ method: "PATCH", url: pod.typeIndex });
     if (conditional.edits) expect(writes.at(-1)!.ifMatch).toMatch(/^"/);
-    // Each document was written once, and only after the backup's manifest and its own copy were.
-    const manifest = writes.findIndex((request) => request.url === `${backupUrl}manifest.ttl`);
+    // No access control but the update's own files' is written: an update changes no one's access.
+    expect(writes.filter((request) => request.url.endsWith(".acl") && !under(backupUrl)(request))).toEqual([]);
+    // Each document was written once: after its bytes were kept and its working copy updated and checked,
+    // only of the version backed up (If-Match it, where the server enforces it; else checked just before).
+    const staged = (document: string) => document.replace(pod.source, `${backupUrl}staging/`);
+    /** The index of the last request that matches, -1 when none does. */
+    const lastIndex = (requests: Recorded[], matches: (request: Recorded) => boolean) =>
+      requests.reduce((last, request, index) => (matches(request) ? index : last), -1);
+    const firstWrite = sent.findIndex((request) => isWrite(request) && documents.includes(request.url));
     for (const entry of backup.entries) {
       const own = writes.filter((request) => request.url === entry.document);
       expect(own, entry.document).toHaveLength(1);
-      expect(writes.indexOf(own[0]!)).toBeGreaterThan(manifest);
+      expect(writes.indexOf(own[0]!), entry.document).toBeGreaterThan(writes.findIndex((request) => request.url === entry.copy));
       expect(writes.indexOf(own[0]!), entry.document).toBeGreaterThan(
-        writes.findIndex((request) => request.url === entry.copy),
+        lastIndex(writes, (request) => request.url === staged(entry.document) && request.method !== "DELETE"),
       );
-      // Only of the version backed up: If-Match it, where the server enforces it; else checked just before.
+      // Its working copy was read and checked once written, before any document of the user's was written.
+      const lastStagedWrite = lastIndex(sent, (request) => isWrite(request) && request.method !== "DELETE" && request.url === staged(entry.document));
+      expect(
+        sent.slice(lastStagedWrite + 1, firstWrite).some((request) => request.method === "GET" && request.url === staged(entry.document)),
+        entry.document,
+      ).toBe(true);
       if (conditional.edits) expect(own[0]!.ifMatch, entry.document).toBe(entry.versionBackedUp);
       else expect(sent[sent.indexOf(own[0]!) - 1], entry.document).toMatchObject({ method: "GET", url: entry.document });
-      // The version the update left it at is noted, so a restore can tell a document changed since.
       expect(entry.versionUpdated, entry.document).toBeDefined();
+      expect(entry.contentType, entry.document).toMatch(/^text\/turtle/);
+      // Its bytes, kept as they were served, as no RDF.
+      expect(entry.copy).toBe(`${backupUrl}${entry.document.slice(pod.source.length)}.orig`);
+      expect(await fileBytes(entry.copy!), entry.document).toBe(bytesBefore.get(entry.document));
     }
-    // Everything the backup holds was created where nothing was.
-    for (const write of writes.filter(under(backupUrl))) {
-      if (write.method === "PUT") expect(write.ifNoneMatch, `${write.method} ${write.url}`).toBe("*");
-      if (write.method === "PATCH" && conditional.edits) expect(write.ifMatch, `${write.method} ${write.url}`).toMatch(/^"/);
-    }
+    expectConditional(sent, documents, backupUrl, conditional);
+    // The working copy is gone; the backup stays, the previous version.
+    expect(await status(`${backupUrl}staging/`)).toBe(404);
     // Nothing else in the tab wrote meanwhile; the attempts are the writes sent.
     expect(attempts.filter(isWrite).map((request) => request.url)).toEqual(writes.map((request) => request.url));
 
@@ -458,15 +612,12 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
     }
     const picture: ArrayBuffer = await (await fetch(`${pod.source}attachments/picture.png`)).arrayBuffer();
     expect(new Uint8Array(picture)).toEqual(PICTURE);
-    // The backup's copy holds the document as it was; a document shared on its own is no more open there.
+    // A document's bytes are no more open than it: one shared on its own is shared alike…
     const copy = backup.entries.find((entry) => entry.document === `${pod.source}decks/deck-1.ttl`)!.copy!;
-    expect(await triples(copy)).toContain(`<${pod.source}decks/deck-1.ttl#se> <https://solid-memo.com/ns/vocab/v1.ttl#back> "Stockholm"`);
-    expect(await triples(copy)).toContain(`<${pod.source}decks/deck-1.ttl#no> <https://solid-memo.com/ns/vocab/v1.ttl#formatVersion> "1"`);
-    expect(await triples(copy)).not.toContain('formatVersion> "5"');
     const copyAcl = await triples(await aclOf(copy));
     expect(copyAcl).toContain(FRIEND);
-    expect(copyAcl).toContain(copy);
-    // A document that inherits its access (from the instance's folder) gives its copy that access as its own.
+    expect(copyAcl).toContain(`<${copy}>`);
+    // …and one that inherits its access (from the instance's folder) gives its bytes that access as their own.
     const metaCopy = backup.entries.find((entry) => entry.document === `${pod.source}meta.ttl`)!.copy!;
     const inherited = await triples(await aclOf(metaCopy));
     expect(inherited).toContain(FRIEND);
@@ -538,10 +689,10 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
     60_000,
   );
 
-  it("restores the documents still as the update left them, keeps one studied since, and deletes only its own files", async () => {
+  it("restores, byte for byte, the documents still as the update left them, keeps one studied since, and deletes only its own files", async () => {
     const pod = await seedPod(server);
-    const original = new Map<string, string[]>();
-    for (const path of UPDATED) original.set(`${pod.source}${path}`, await sortedTriples(`${pod.source}${path}`));
+    const documents = UPDATED.map((path) => `${pod.source}${path}`);
+    const original = await servedBytes(documents);
     const { useCases, session, sent } = app(pod);
     expect(await useCases.updateInstance(session, pod.instance)).toMatchObject({ ok: true });
     const backup = await onlyBackup(useCases, pod);
@@ -549,13 +700,14 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
     const reviews = `${pod.source}reviews/deck-1.ttl`;
     if (!everyEdit) await sleep(1100);
     await changeElsewhere(reviews, `<#no> <${FOREIGN}> "studied since" .`);
-    const studied = await sortedTriples(reviews);
+    const studied = (await servedBytes([reviews])).get(reviews);
 
     const restoring = sent.length;
     const restored = await useCases.restoreBackup(pod.instance, backup);
 
-    // Each document put back only while it is still as the update left it: If-Match that version
-    // where the server enforces it, else right after a read of it; the one studied since is not written.
+    // Each document put back only while it is still as the update left it: If-Match that version where the
+    // server enforces it, else right after a read of it, with the Content-Type it was served with; the one studied
+    // since is not written.
     const putBack = sent.slice(restoring);
     for (const entry of backup.entries) {
       const own = putBack.filter((request) => isWrite(request) && request.url === entry.document);
@@ -563,90 +715,36 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
         expect(own, entry.document).toEqual([]);
         continue;
       }
-      expect(own, entry.document).toHaveLength(1);
+      expect(own, entry.document).toMatchObject([{ method: "PUT", contentType: entry.contentType }]);
       if (conditional.edits) expect(own[0]!.ifMatch, entry.document).toBe(entry.versionUpdated);
       else expect(putBack[putBack.indexOf(own[0]!) - 1], entry.document).toMatchObject({ method: "GET", url: entry.document });
     }
 
     expect(restored).toEqual({
       restored: UPDATED.filter((path) => !path.startsWith("reviews/")).reverse().map((path) => `${pod.source}${path}`),
-      kept: [reviews],
+      kept: [{ document: reviews, copy: `${backup.url}reviews/deck-1.ttl.orig` }],
       removed: false,
     });
-    for (const [url, triplesBefore] of original) {
-      expect(await sortedTriples(url), url).toEqual(url === reviews ? studied : triplesBefore);
-    }
+    // Byte for byte as before the update, but the one studied since.
+    expect(await servedBytes(documents)).toEqual(new Map([...original].map(([url, bytes]) => [url, url === reviews ? studied! : bytes])));
     expect((await useCases.validateInstance(pod.source)).conforms).toBe(true);
-    // Restored, the instance is offered the update again; the backup stays, holding the kept document's earlier version.
+    // Restored, the instance is offered the update again; the backup stays, holding the kept document's bytes from before.
     expect((await useCases.planMigration(pod.source)).deckCount).toBe(1);
     await expect(useCases.listBackups(pod.instance)).resolves.toHaveLength(1);
+    expect(await fileBytes(`${backup.url}reviews/deck-1.ttl.orig`)).toBe(original.get(reviews));
 
     // Deleting the backup deletes what Solid Memo put in it, and keeps another app's file, and the folder with it.
     await fetch(`${backup.url}notes.txt`, { method: "PUT", headers: { "content-type": "text/plain" }, body: "another app's" });
     await expect(useCases.deleteBackup(backup)).resolves.toEqual({ keptFolder: backup.url });
-    for (const url of [`${backup.url}manifest.ttl`, ...backup.entries.map((entry) => entry.copy!).filter(Boolean)]) {
-      expect(await fetch(url, { method: "HEAD" }).then((r) => r.status), url).toBe(404);
+    for (const url of [`${backup.url}manifest.ttl`, ...backup.entries.map((entry) => entry.copy!)]) {
+      expect(await status(url), url).toBe(404);
     }
     expect(await fetch(`${backup.url}notes.txt`).then((r) => r.text())).toBe("another app's");
     await expect(useCases.listBackups(pod.instance)).resolves.toEqual([]);
-    expect(await triples(`${pod.source}decks/deck-1.ttl`)).toContain(`<${FOREIGN}> "kept"`);
-    // Once the other app's file is gone, deleting it again leaves no folder: each copy's access control went with it.
+    // Once the other app's file is gone, deleting it again leaves no folder: each file's access control went with it.
     await fetch(`${backup.url}notes.txt`, { method: "DELETE" });
     await expect(useCases.deleteBackup(backup)).resolves.toEqual({ keptFolder: null });
-    expect(await fetch(backup.url, { method: "HEAD" }).then((r) => r.status)).toBe(404);
-  }, 60_000);
-
-  it("stops at a document changed elsewhere after it was backed up, leaving a readable, valid, partly updated instance that a second run finishes", async () => {
-    const pod = await seedPod(server);
-    const reviews = `${pod.source}reviews/deck-1.ttl`;
-    let changed = false;
-    const { useCases, session } = app(pod, {
-      onRequest: async (request) => {
-        // As the update is about to write the reviews document, another device studies.
-        if (changed || !isWrite(request) || request.url !== reviews) return;
-        changed = true;
-        // A server whose versions are to the second needs the next second to tell.
-        if (!everyEdit) await sleep(1100);
-        await changeElsewhere(reviews, `<#se> <${FOREIGN}> "studied elsewhere" .`);
-      },
-    });
-
-    const outcome = await useCases.updateInstance(session, pod.instance);
-
-    expect(changed).toBe(true);
-    expect(outcome).toMatchObject({
-      ok: false,
-      step: "upgrade",
-      updated: ["meta.ttl", "preferences.ttl", "decks/deck-1.ttl"].map((path) => `${pod.source}${path}`),
-      backupUrl: expect.stringContaining(`${pod.source}backups/`),
-    });
-    expect((outcome as { error: Error }).error).toMatchObject({ code: "changedElsewhere", vars: { url: reviews } });
-    // The other device's study is kept; the instance reads and conforms, each subject at its own format.
-    expect(await triples(reviews)).toContain("studied elsewhere");
-    expect((await useCases.validateInstance(pod.source)).conforms).toBe(true);
-    expect(await useCases.listCards((await useCases.listDecks(pod.source))[0]!)).toHaveLength(2);
-    expect(await useCases.planMigration(pod.source)).toMatchObject({
-      instanceOutdated: false,
-      preferencesOutdated: false,
-      cardCount: 0,
-      reviewCount: 1,
-      deckCount: 1,
-    });
-
-    // Run again, it updates what is still outdated, and backs up only that.
-    const second = app(pod).useCases;
-    const again = await second.updateInstance(session, pod.instance);
-    expect(again, JSON.stringify(again)).toMatchObject({ ok: true });
-    // Read by the tab that ran it: another tab's reads may be answered from what it read before, on a
-    // server whose ETag outlives an edit made in the same second (Community Solid Server 6).
-    expect(await second.planMigration(pod.source)).toMatchObject({ deckCount: 0, cardCount: 0, reviewCount: 0 });
-    expect((await second.validateInstance(pod.source)).conforms).toBe(true);
-    expect(await triples(reviews)).toContain("studied elsewhere");
-    const backups = await second.listBackups(pod.instance);
-    expect(backups.map((backup) => backup.entries.map((entry) => entry.document.slice(pod.source.length)))).toEqual([
-      ["reviews/deck-1.ttl", "catalog.ttl"],
-      UPDATED,
-    ]);
+    expect(await status(backup.url)).toBe(404);
   }, 60_000);
 
   it("refuses, in this tab, any write to the instance while the update runs but its own", async () => {
@@ -665,22 +763,7 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
     });
     expect(await useCases.updateInstance(session, pod.instance)).toMatchObject({ ok: true });
     expect(refused).toMatchObject({ code: "instanceBeingUpdated" });
-    expect(await fetch(`${pod.source}meta.ttl`).then((r) => r.status)).toBe(200);
-  }, 60_000);
-
-  it("leaves no trace when it fails before writing a document", async () => {
-    const pod = await seedPod(server);
-    const before = await snapshot(pod.source);
-    const { useCases, session } = app(pod, {
-      failOn: (request) => request.method === "PUT" && request.url.includes("/backups/") && request.url.endsWith("decks/deck-1.ttl"),
-    });
-    const outcome = await useCases.updateInstance(session, pod.instance);
-    expect(outcome).toMatchObject({ ok: false, step: "backup", updated: [] });
-    expect(outcome).not.toHaveProperty("backupUrl");
-    // Every document as it was (a container's listing changes with the backups folder made and removed).
-    const documents = (map: Map<string, string>) => [...map].filter(([url]) => !url.endsWith("/"));
-    expect(documents(await snapshot(pod.source, (url) => url.startsWith(`${pod.source}backups/`)))).toEqual(documents(before));
-    await expect(app(pod).useCases.listBackups(pod.instance)).resolves.toEqual([]);
+    expect(await status(`${pod.source}meta.ttl`)).toBe(200);
   }, 60_000);
 
   it("updates a large deck in one write of the whole document, still only of the version backed up", async () => {
@@ -705,7 +788,7 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
     expect(await useCases.planMigration(pod.source)).toMatchObject({ deckCount: 0, cardCount: 0, reviewCount: 0 });
     expect((await useCases.validateInstance(pod.source)).conforms).toBe(true);
     expect(await triples(`${pod.source}decks/deck-1.ttl`)).toContain(`<${pod.source}decks/deck-1.ttl#card-599>`);
-  });
+  }, 60_000);
 
   it("refuses to write over what a newer version of the app wrote, and leaves it as it is", async () => {
     const pod = await seedPod(server);
@@ -744,7 +827,7 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
       keptFolder: copy.source,
     });
     expect(await registeredContainers(copy)).toContain(`<${pod.source}>`);
-    expect(await fetch(`${copy.source}meta.ttl`, { method: "HEAD" }).then((r) => r.status)).toBe(404);
+    expect(await status(`${copy.source}meta.ttl`)).toBe(404);
 
     // Deleting such a backup deletes what Solid Memo wrote of it, and keeps the unknown file.
     const other = await seedPod(server);
@@ -755,7 +838,7 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
     dcterms:created "2026-09-21T10:00:00Z"^^xsd:dateTime ; dcterms:replaces <${other.source}> .`,
     });
     await expect(useCases.deleteLegacyBackup(updated)).resolves.toEqual({ keptFolder: other.source });
-    expect(await fetch(`${other.source}meta.ttl`, { method: "HEAD" }).then((r) => r.status)).toBe(404);
+    expect(await status(`${other.source}meta.ttl`)).toBe(404);
     expect(new Uint8Array(await (await fetch(`${other.source}attachments/picture.png`)).arrayBuffer())).toEqual(PICTURE);
     await expect(useCases.readLegacyBackup(updated)).resolves.toBeNull();
   }, 60_000);
@@ -783,5 +866,218 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
     // Read again, the save goes through.
     await useCases.savePreferences(pod.source, { ...preferences, newCardsPerDay: 7 });
     expect(await triples(`${pod.source}preferences.ttl`)).toMatch(/newCardsPerDay> "?7/);
+  });
+
+  /**
+   * A failed update leaves every document of the user's exactly as it
+   * was: the bytes the server serves for it, asked for as the app asks,
+   * are those it served before, prefixes, comments, order and all
+   * (seedHandWritten's documents, which a server's rewrite would not keep
+   * so); nothing of the update is left in the instance; the type index is
+   * as it was; and every write to a document was conditional.
+   */
+  describe("byte for byte", () => {
+    async function prepared() {
+      const pod = await seedHandWritten(server);
+      const documents = UPDATED.map((path) => `${pod.source}${path}`);
+      const [meta, preferences, cards, reviews, catalog] = documents as [string, string, string, string, string];
+      return {
+        pod,
+        documents,
+        meta,
+        preferences,
+        cards,
+        reviews,
+        catalog,
+        before: await servedBytes(documents),
+        types: await servedTypes(documents),
+        index: await servedBytes([pod.typeIndex]),
+      };
+    }
+
+    /**
+     * Each document put back was sent whole (PUT) with the Content-Type it
+     * was served with before, and every write to a document was held to
+     * the version it was read at (expectConditional).
+     */
+    function expectPutBack(seeded: Awaited<ReturnType<typeof prepared>>, sent: Recorded[], putBack: readonly string[]): void {
+      for (const document of putBack) {
+        const puts = sent.filter((request) => request.method === "PUT" && request.url === document);
+        expect(puts.length, document).toBeGreaterThan(0);
+        expect(puts.at(-1)!.contentType, document).toBe(seeded.types.get(document));
+      }
+      expectConditional(sent, seeded.documents, `${seeded.pod.source}backups/`, conditional);
+    }
+
+    /** Every document's bytes as before, but those `except` gives; nothing of the update in the instance; the type index as it was. */
+    async function expectAsItWas(seeded: Awaited<ReturnType<typeof prepared>>, except = new Map<string, string>()): Promise<void> {
+      const after = await servedBytes(seeded.documents);
+      for (const document of seeded.documents) expect(after.get(document), document).toBe(except.get(document) ?? seeded.before.get(document));
+      expect(await status(`${seeded.pod.source}backups/`)).toBe(404);
+      expect(await servedBytes([seeded.pod.typeIndex])).toEqual(seeded.index);
+      expect(new Uint8Array(await (await fetch(`${seeded.pod.source}attachments/picture.png`)).arrayBuffer())).toEqual(PICTURE);
+    }
+
+    it("leaves every document as it was, and nothing of the update, when its working copy cannot be written", async () => {
+      const seeded = await prepared();
+      const { useCases, sent, session } = app(seeded.pod, {
+        failOn: (request) => isWrite(request) && request.url.includes("/staging/decks/"),
+      });
+      const outcome = await useCases.updateInstance(session, seeded.pod.instance);
+      expect(outcome, JSON.stringify(outcome)).toMatchObject({ ok: false, step: "copy", undo: null });
+      expect(outcome).not.toHaveProperty("backupUrl");
+      expect(sent.filter(isWrite).filter((request) => seeded.documents.includes(request.url))).toEqual([]);
+      await expectAsItWas(seeded);
+    }, 60_000);
+
+    it("leaves every document as it was, and nothing of the update, when backing one up fails", async () => {
+      const seeded = await prepared();
+      const { useCases, sent, session } = app(seeded.pod, {
+        failOn: (request) => request.method === "PUT" && request.url.endsWith("decks/deck-1.ttl.orig"),
+      });
+      const outcome = await useCases.updateInstance(session, seeded.pod.instance);
+      expect(outcome, JSON.stringify(outcome)).toMatchObject({ ok: false, step: "backup", undo: null });
+      expect(outcome).not.toHaveProperty("backupUrl");
+      expect(sent.filter(isWrite).filter((request) => seeded.documents.includes(request.url))).toEqual([]);
+      await expectAsItWas(seeded);
+    }, 60_000);
+
+    it("writes no document of the user's when one changed elsewhere after it was backed up", async () => {
+      const seeded = await prepared();
+      let changed = false;
+      const { useCases, sent, session } = app(seeded.pod, {
+        onRequest: async (request) => {
+          // As the working copy is written, another device studies.
+          if (changed || !isWrite(request) || !request.url.includes("/staging/")) return;
+          changed = true;
+          if (!everyEdit) await sleep(1100);
+          await changeElsewhere(seeded.reviews, `<#se> <${FOREIGN}> "studied elsewhere" .`);
+        },
+      });
+      const outcome = await useCases.updateInstance(session, seeded.pod.instance);
+      expect(changed).toBe(true);
+      expect(outcome, JSON.stringify(outcome)).toMatchObject({ ok: false, step: "verify", undo: null });
+      expect((outcome as { error: unknown }).error).toMatchObject({ code: "changedDuringUpdate", vars: { url: seeded.reviews } });
+      expect(sent.filter(isWrite).filter((request) => seeded.documents.includes(request.url))).toEqual([]);
+      expect(await triples(seeded.reviews)).toContain("studied elsewhere");
+      await expectAsItWas(seeded, await servedBytes([seeded.reviews]));
+    }, 60_000);
+
+    it("puts back what it wrote when a document changed elsewhere just before its write, and keeps that change; a second run finishes", async () => {
+      const seeded = await prepared();
+      let changed = false;
+      const { useCases, sent, session } = app(seeded.pod, {
+        onRequest: async (request) => {
+          // As the update is about to write the cards, another device edits one.
+          if (changed || !isWrite(request) || request.url !== seeded.cards) return;
+          changed = true;
+          if (!everyEdit) await sleep(1100);
+          await changeElsewhere(seeded.cards, `<#se> <${FOREIGN}> "edited elsewhere" .`);
+        },
+      });
+      const outcome = await useCases.updateInstance(session, seeded.pod.instance);
+      expect(changed).toBe(true);
+      // The record and the preferences were written, and are put back; the cards' write was refused, so never made.
+      expect(outcome, JSON.stringify(outcome)).toMatchObject({
+        ok: false,
+        step: "rewrite",
+        undo: { restored: [seeded.preferences, seeded.meta], kept: [], removed: true },
+      });
+      expect((outcome as { error: unknown }).error).toMatchObject({ code: "changedElsewhere", vars: { url: seeded.cards } });
+      expect(outcome).not.toHaveProperty("backupUrl");
+      expect(await triples(seeded.cards)).toContain("edited elsewhere");
+      await expectAsItWas(seeded, await servedBytes([seeded.cards]));
+      expectPutBack(seeded, sent, [seeded.preferences, seeded.meta]);
+
+      // Run again, it finishes, the other device's edit kept.
+      const second = app(seeded.pod);
+      expect(await second.useCases.updateInstance(second.session, seeded.pod.instance)).toMatchObject({ ok: true });
+      expect(await second.useCases.planMigration(seeded.pod.source)).toMatchObject({ deckCount: 0, cardCount: 0, reviewCount: 0 });
+      expect(await triples(seeded.cards)).toContain("edited elsewhere");
+    }, 60_000);
+
+    it("puts back every document it wrote when a write fails after others were written", async () => {
+      const seeded = await prepared();
+      const { useCases, sent, session } = app(seeded.pod, {
+        failOn: (request) => isWrite(request) && request.url === seeded.catalog,
+      });
+      const outcome = await useCases.updateInstance(session, seeded.pod.instance);
+      expect(outcome, JSON.stringify(outcome)).toMatchObject({
+        ok: false,
+        step: "rewrite",
+        undo: { restored: [seeded.reviews, seeded.cards, seeded.preferences, seeded.meta], kept: [], removed: true },
+      });
+      expectPutBack(seeded, sent, [seeded.reviews, seeded.cards, seeded.preferences, seeded.meta]);
+      await expectAsItWas(seeded);
+    }, 60_000);
+
+    it("puts back a document whose write was made but its answer lost, told by what its working copy says, and the others", async () => {
+      const seeded = await prepared();
+      let lost = false;
+      const { useCases, sent, session } = app(seeded.pod, {
+        // The update's write of the reviews reaches the pod; its answer does not reach the app.
+        loseAnswer: (request) => !lost && isWrite(request) && request.url === seeded.reviews && (lost = true),
+      });
+      const outcome = await useCases.updateInstance(session, seeded.pod.instance);
+      expect(outcome, JSON.stringify(outcome)).toMatchObject({
+        ok: false,
+        step: "rewrite",
+        undo: { restored: [seeded.reviews, seeded.cards, seeded.preferences, seeded.meta], kept: [], removed: true },
+      });
+      expectPutBack(seeded, sent, [seeded.reviews, seeded.cards, seeded.preferences, seeded.meta]);
+      await expectAsItWas(seeded);
+    }, 60_000);
+
+    it("puts back every document it wrote when one fails its check once written", async () => {
+      const seeded = await prepared();
+      let checks = 0;
+      const injected = { message: { en: "Injected." }, severity: "violation" as const, constraint: "MinCount" };
+      const { useCases, sent, session } = app(seeded.pod, {
+        // The second check of the cards in place is after the update wrote them.
+        check: (url, report) =>
+          url !== seeded.cards || ++checks < 2
+            ? report
+            : { ...report, subjects: [...report.subjects, { url: `${url}#se`, status: "checked", shape: "card", version: 5, violations: [injected] }] },
+      });
+      const outcome = await useCases.updateInstance(session, seeded.pod.instance);
+      expect(outcome, JSON.stringify(outcome)).toMatchObject({
+        ok: false,
+        step: "validate",
+        undo: {
+          restored: [seeded.catalog, seeded.reviews, seeded.cards, seeded.preferences, seeded.meta],
+          kept: [],
+          removed: true,
+        },
+      });
+      expect((outcome as { error: unknown }).error).toMatchObject({ code: "updatedInstanceInvalid", vars: { count: 1 } });
+      expectPutBack(seeded, sent, seeded.documents);
+      await expectAsItWas(seeded);
+    }, 60_000);
+
+    it("keeps each document's bytes, and gives them all back when the update is restored", async () => {
+      const seeded = await prepared();
+      const { useCases, sent, session } = app(seeded.pod);
+      expect(await useCases.updateInstance(session, seeded.pod.instance)).toMatchObject({ ok: true });
+      expect(await useCases.planMigration(seeded.pod.source)).toMatchObject({ deckCount: 0, cardCount: 0, reviewCount: 0 });
+      const backup = await onlyBackup(useCases, seeded.pod);
+      for (const entry of backup.entries) expect(await fileBytes(entry.copy!), entry.document).toBe(seeded.before.get(entry.document));
+      // Updated, the documents read differently: the server rewrote each one.
+      for (const document of seeded.documents) expect((await servedBytes([document])).get(document), document).not.toBe(seeded.before.get(document));
+
+      const restoring = sent.length;
+      await expect(useCases.restoreBackup(seeded.pod.instance, backup)).resolves.toEqual({
+        restored: [...seeded.documents].reverse(),
+        kept: [],
+        removed: true,
+      });
+      for (const entry of backup.entries) {
+        expect(sent.slice(restoring).filter((request) => isWrite(request) && request.url === entry.document), entry.document).toMatchObject([
+          { method: "PUT", contentType: entry.contentType },
+        ]);
+      }
+      expectConditional(sent.slice(restoring), seeded.documents, `${seeded.pod.source}backups/`, conditional);
+      await expectAsItWas({ ...seeded, index: await servedBytes([seeded.pod.typeIndex]) });
+      expect((await useCases.planMigration(seeded.pod.source)).deckCount).toBe(1);
+    }, 60_000);
   });
 });

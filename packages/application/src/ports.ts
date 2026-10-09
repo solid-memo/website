@@ -24,7 +24,7 @@ import type { Storage } from "@solid-memo/domain/storage";
 import type { DocumentReport } from "@solid-memo/domain/validation";
 import type { InstanceDigest } from "@solid-memo/domain/studyDigest";
 import type { WebIdDocument } from "@solid-memo/domain/webIdDocument";
-import type { Backup, BackupEntry } from "@solid-memo/domain/backup";
+import type { Backup, BackupEntry, DocumentState } from "@solid-memo/domain/backup";
 
 /**
  * Driven port: authentication against a Solid identity provider.
@@ -406,8 +406,7 @@ export interface ContainerMove {
 
 /**
  * Driven port: copying an instance's container, for moving a guest's
- * study into the user's pod (docs/guest-mode.md), and a document's own
- * access control, for a backup's copy of it (docs/migrations.md).
+ * study into the user's pod (docs/guest-mode.md).
  */
 export interface InstanceCopier {
   /** Every resource below the container, depth first; containers end with a slash. */
@@ -434,10 +433,11 @@ export interface InstanceCopier {
   /**
    * Delete a container and everything below it; one that is gone counts
    * as deleted. Only for a copy this app made whole, at a URL it found
-   * free, before anything names it — a guest's study being moved, a
-   * backup's folder whose manifest was never written — : every resource
-   * in it is a copy whose original stays where it was. An instance in
-   * use is deleted by what it holds of Solid Memo's
+   * free, before anything names it — a guest's study being moved, an
+   * update's folder whose manifest was never written, a copy of a whole
+   * instance an earlier version's update left — : every resource in it is
+   * a copy whose original stays where it was. An instance in use is
+   * deleted by what it holds of Solid Memo's
    * (InstanceRepository.deleteInstanceData), a backup by what its
    * manifest names (DocumentBackups.remove), never whole.
    */
@@ -445,20 +445,28 @@ export interface InstanceCopier {
 }
 
 /**
- * Driven port: backups of the documents an update changes in place
+ * Driven port: the backups of the documents an update changes in place
  * (domain/backup.ts, docs/migrations.md "The backup"), each in a folder of
- * the instance's backups/, with a manifest naming its documents.
+ * the instance's backups/: the bytes of every document, exactly as the pod
+ * served them, a manifest naming them, and, while the update runs, its
+ * working copy (`staging/`).
  */
 export interface DocumentBackups {
   /**
-   * Make a backup in `folder` (a URL no backup uses) of the documents, as
-   * they are now: read each, then write the manifest — what the backup is
-   * of, when it was made, each document's entry with the version read —
-   * then a copy of each document there was, and of its own access control
-   * (rebased), every one created only where nothing is (If-None-Match: *).
-   * `release` is the library release a deck came from, for a library
-   * upgrade's backup. `onCopied` is told of each document done. The
-   * backup as written.
+   * Back up the documents, as they are now, in `folder` (a URL no backup
+   * uses): read each as the app reads it (Accept: text/turtle), noting its
+   * bytes, the Content-Type and the version of that very response; write
+   * the manifest, naming every document; then each one's bytes, unchanged,
+   * as application/octet-stream at its place in the folder
+   * (backupCopyUrlOf), created only where nothing is (If-None-Match: *)
+   * and given the access its document has, as its own; then read each
+   * back, throwing backupNotExact unless the pod gives the very same
+   * bytes. What the app read of each document before is forgotten, so the
+   * next read fetches it whole: a read asked with an earlier version may
+   * be told "unchanged" by a pod whose version outlives an edit made in
+   * the same second. `release` is the library release a deck came from,
+   * for a library upgrade's backup. `onBackedUp` is told of each document
+   * done. The backup as written.
    */
   create(
     args: {
@@ -469,8 +477,31 @@ export interface DocumentBackups {
       documents: readonly string[];
       release?: string;
     },
-    onCopied?: () => void,
+    onBackedUp?: () => void,
   ): Promise<Backup>;
+  /**
+   * Write the update's working copy of each document the backup holds,
+   * as it holds it: its bytes read at the document's own address, every
+   * IRI moved into the staging folder (stagingMapOf), created only where
+   * nothing is and given the access its document has. Nothing of the
+   * user's is written. `onStaged` is told of each document done.
+   */
+  stage(backup: Backup, onStaged?: () => void): Promise<void>;
+  /**
+   * The document of the entry as it is now: its version, and whether it
+   * is exactly as backed up — its bytes those the backup holds (where the
+   * backup lost them, its version the one backed up), or, where there was
+   * no document, still none. What the app read of it before is forgotten,
+   * as create does, so a write made after this check is made from a read
+   * of the document whole.
+   */
+  stateOf(entry: BackupEntry): Promise<DocumentState>;
+  /**
+   * Whether the document says just what the update's working copy of it
+   * says, statement for statement, the copy's IRIs read as the
+   * instance's (stagingMapOf); null when the copy is not there.
+   */
+  sameAsStaged(backup: Backup, entry: BackupEntry): Promise<boolean | null>;
   /** The version a document is at now, in the form a backup notes; null when there is none. */
   versionOf(url: string): Promise<string | null>;
   /** Note in the backup's manifest the version the update left a document at. */
@@ -480,16 +511,20 @@ export interface DocumentBackups {
   /** The backup in the folder; null when its manifest is gone. */
   read(folder: string): Promise<Backup | null>;
   /**
-   * Put the document back as the backup has it — or delete it, for one
-   * the update created — only while it is still at `version` (If-Match,
-   * or checked first where the pod gives no ETag); else throws
-   * changedElsewhere and writes nothing.
+   * Put the document back as the backup holds it — its bytes, with the
+   * Content-Type they were served with — or delete it, for one the update
+   * created, only while it is still at `version` (If-Match, or checked
+   * just before where the pod gives no ETag; else changedElsewhere,
+   * writing nothing); then read it, throwing restoredNotExact unless the
+   * pod serves those very bytes.
    */
   putBack(entry: BackupEntry, version: string): Promise<void>;
+  /** Delete the update's working copy, whole (the update made it, and nothing names it). */
+  unstage(backup: Backup): Promise<void>;
   /**
-   * Delete what the backup holds — each copy, then the manifest — and its
-   * folders once empty; a folder that holds what another app put there is
-   * kept, and named.
+   * Delete what the backup holds — the working copy, each file the
+   * manifest names, then the manifest — and its folders once empty; a
+   * folder that holds what another app put there is kept, and named.
    */
   remove(backup: Backup): Promise<InstanceDeletion>;
 }
@@ -522,10 +557,11 @@ export interface ThemePreference {
 /**
  * Driven port: a note of an update in progress, kept where the app runs
  * (the browser), so an update cut off half-way (a closed tab) can be
- * found: the format update's backup folder, a guest's study being moved
- * into its new folder, each guest's deck already added to an instance
- * (domain/guest.ts GuestMergeNote), or what a library upgrade by an
- * earlier version of the app was moving. Best effort: it may forget.
+ * found: the format update's or a library upgrade's run (domain/backup.ts
+ * RunNote), a guest's study being moved into its new folder, each guest's
+ * deck already added to an instance (domain/guest.ts GuestMergeNote), or
+ * what an update by an earlier version of the app was writing. Best
+ * effort: it may forget.
  */
 export interface UpdateJournal {
   begin(sourceUrl: string, stagingUrl: string): void;
@@ -539,8 +575,9 @@ export interface UpdateJournal {
  * but for the writes an update lets through. The format update holds the
  * instance it updates, a library deck upgrade the documents it changes,
  * so nothing else in this tab writes to them until the update is over;
- * the update passes its own writes, each only against the version it
- * backed up.
+ * the update passes its own writes: its backup's folder, and each
+ * document while it writes it, against the version it backed up, or puts
+ * it back.
  */
 export interface WriteFence {
   /**

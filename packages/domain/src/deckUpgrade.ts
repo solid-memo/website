@@ -1,3 +1,4 @@
+import type { RunUndo } from "./backup";
 import type { Card, CardContent, Deck } from "./deck";
 import { sameText } from "./langText";
 import { sameContent, upgradedCards, type LibraryUpgradePlan } from "./libraryUpgrade";
@@ -5,19 +6,30 @@ import { reviewKeyOf, type ReviewState } from "./review";
 
 /**
  * Upgrading a library deck, done safely (see docs/migrations.md): the
- * deck's cards document — and, when cards with review states are
- * removed, its reviews document — is first copied into a backup in the
- * instance's backups/ folder, then written in place, only while it is
- * still as it was copied, and read back; the deck's catalog entry is then
- * moved to the new release. A failure after a write puts back each document
- * still as the upgrade left it, and the deck is as it was. Every
- * document keeps its address, the deck its URL and its cards their ids,
- * so the answer log still names them.
+ * bytes of the deck's cards document — and, when cards with review states
+ * are removed, of its reviews document — are first backed up in the
+ * instance's backups/ folder; the upgraded documents are written into a
+ * working copy beside the backup and checked there; once both are found
+ * still as backed up, each is written in place and checked again, and the
+ * deck's catalog entry is moved to the new release. A failure after the
+ * first write puts back each document it wrote, byte for byte, and the
+ * deck is exactly as it was. Every document keeps its address, the deck
+ * its URL and its cards their ids, so the answer log still names them.
  */
 
-export type DeckUpgradeStep = "read" | "backup" | "write" | "check" | "entry" | "tidy";
+export type DeckUpgradeStep = "read" | "backup" | "copy" | "check" | "verify" | "write" | "validate" | "entry" | "tidy";
 
-export const DECK_UPGRADE_STEPS: readonly DeckUpgradeStep[] = ["read", "backup", "write", "check", "entry", "tidy"];
+export const DECK_UPGRADE_STEPS: readonly DeckUpgradeStep[] = [
+  "read",
+  "backup",
+  "copy",
+  "check",
+  "verify",
+  "write",
+  "validate",
+  "entry",
+  "tidy",
+];
 
 /** How far into a step it is, in the step's own units: documents, decks, reads, writes. */
 export interface StepPart {
@@ -32,20 +44,25 @@ export interface DeckUpgradeProgress {
   total: number;
   /** How far into `step` it is; absent for a step done in one go. */
   part?: StepPart;
+  /** Set while the upgrade, failed at `step`, puts back the documents it wrote. */
+  undoing?: true;
 }
 
 export type DeckUpgradeOutcome =
-  /** Done: `deck` as it now is. `tidied` says whether its backup was deleted. */
+  /** Done: `deck` as it now is. `tidied` says whether its backup and working copy were deleted. */
   | { ok: true; deck: Deck; tidied: boolean }
   /**
-   * Failed at `step`. `asItWas` says whether the deck is as it was: nothing
-   * was written, or what was is put back. When it is not, a document
-   * changed elsewhere since the upgrade wrote it is kept as it is, or
-   * putting one back failed, and the backup stays for the user to restore
-   * or delete. `error` is what went wrong: an AppError the app can show
-   * in the reader's language, or any other error.
+   * Failed at `step`. `asItWas` says whether the deck is exactly as it was:
+   * nothing of it was written (`undo` null), or every document written is
+   * put back. When it is not, a document changed elsewhere since the
+   * upgrade wrote it is kept as it is (`undo.kept`), or putting one back
+   * failed, or the entry, whose write's answer was lost, could not be
+   * read to tell whether to (`undo.failed`, to try again), and the backup
+   * stays (`backupUrl`), as it does when it could not be removed. `error`
+   * is what went wrong: an AppError the app can show in the reader's
+   * language, or any other error.
    */
-  | { ok: false; step: DeckUpgradeStep; error: unknown; asItWas: boolean };
+  | { ok: false; step: DeckUpgradeStep; error: unknown; asItWas: boolean; undo: RunUndo | null; backupUrl?: string };
 
 /**
  * Whether `documentUrl` is, or was, the deck's cards document: the one it
@@ -76,8 +93,9 @@ export interface DocumentMove {
  * noted in the browser before it wrote, so that one cut off (a closed
  * tab) can be tidied away: the documents of the side that lost — the new
  * ones before it switched the deck's entry over, the old ones after.
- * This app's upgrade moves no document and notes nothing; it reads the
- * notes an earlier one left.
+ * This app's upgrade moves no document: the note it keeps under the same
+ * key is a RunNote (domain/backup.ts), which no DeckUpgradeNote is taken
+ * for, nor the other way round. It reads the notes an earlier one left.
  */
 export interface DeckUpgradeNote {
   /** ISO dateTime the upgrade began. */

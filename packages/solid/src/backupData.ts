@@ -1,7 +1,7 @@
 import { getContainedResourceUrlAll } from "@inrupt/solid-client";
-import { backupsContainerOf, manifestUrlOf, type Backup } from "@solid-memo/domain/backup";
+import { backupsContainerOf, manifestUrlOf, stagingFolderOf, type Backup } from "@solid-memo/domain/backup";
 import type { InstanceDeletion } from "@solid-memo/domain/instance";
-import { deleteContainerIfEmpty } from "./containers";
+import { deleteContainerIfEmpty, deleteContainerRecursively } from "./containers";
 import { deleteIfPresent, getSolidDatasetOrNull } from "./datasets";
 import { toBackup } from "./mappers/backupMapper";
 
@@ -32,14 +32,16 @@ export async function listBackupsOf(instanceUrl: string, fetch: typeof globalThi
 }
 
 /**
- * Delete what a backup holds of Solid Memo's: each copy its manifest
- * names below its folder (a copy's access control goes with it), then
- * the manifest, then each folder below it and the folder itself, each
- * only once empty; and the instance's backups/ folder, once that is
- * empty too. A folder that still holds what another app put there is
- * kept, and named.
+ * Delete what a backup holds of Solid Memo's: its update's working copy
+ * (staging/, whole: the update made it, and nothing names it), each file
+ * of bytes its manifest names below its folder (a file's access control
+ * goes with it), then the manifest, then each folder below it and the
+ * folder itself, each only once empty; and the instance's backups/
+ * folder, once that is empty too. A folder that still holds what another
+ * app put there is kept, and named.
  */
 export async function removeBackup(backup: Backup, fetch: typeof globalThis.fetch): Promise<InstanceDeletion> {
+  await deleteContainerRecursively(stagingFolderOf(backup.url), fetch);
   const copies = backup.entries
     .map((entry) => entry.copy)
     .filter((copy): copy is string => copy !== undefined && copy.startsWith(backup.url) && copy !== backup.url);

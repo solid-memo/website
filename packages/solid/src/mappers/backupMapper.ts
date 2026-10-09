@@ -1,5 +1,5 @@
 import { getThing, getThingAll, setThing, type SolidDataset } from "@inrupt/solid-client";
-import { manifestUrlOf, type Backup, type BackupEntry } from "@solid-memo/domain/backup";
+import { isAsWritten, manifestUrlOf, type Backup, type BackupEntry } from "@solid-memo/domain/backup";
 import { BACKUP_ENTRY_V1, BACKUP_V1 } from "@solid-memo/vocab/descriptors.generated";
 import { readVersioned, recordThing } from "../records";
 
@@ -16,7 +16,12 @@ export function entryUrlOf(folder: string, n: number): string {
   return `${manifestUrlOf(folder)}#entry-${n}`;
 }
 
-/** The backup a manifest holds; null when its `#it` is no backup (or does not fit its shape). */
+/**
+ * The backup a manifest holds; null when its `#it` is no backup (or does
+ * not fit its shape), or when it is not as an update writes one
+ * (domain/backup.ts isAsWritten): anyone who may write in the instance
+ * could leave a manifest naming any file.
+ */
 export function toBackup(dataset: SolidDataset, folder: string): Backup | null {
   const it = getThing(dataset, `${manifestUrlOf(folder)}#it`);
   const read = it === null ? null : readVersioned(it, "backup");
@@ -27,7 +32,8 @@ export function toBackup(dataset: SolidDataset, folder: string): Backup | null {
     .sort((a, b) => a.n - b.n)
     .map(({ read: { record } }): BackupEntry => ({ ...record.data }));
   const { backupOf, created, release } = read.record.data;
-  return { url: folder, of: backupOf, createdAt: created, ...(release === undefined ? {} : { release }), entries };
+  const backup: Backup = { url: folder, of: backupOf, createdAt: created, ...(release === undefined ? {} : { release }), entries };
+  return isAsWritten(backup) ? backup : null;
 }
 
 /** A new manifest's dataset, and the subjects it holds. */
