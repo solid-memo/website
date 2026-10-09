@@ -124,7 +124,8 @@ function makeDeps() {
     deleteInstanceData: vi.fn(async () => ({ keptFolder: null })),
     readMeta: vi.fn(async () => null),
     saveMeta: vi.fn(async () => undefined),
-    registerCatalog: vi.fn(async () => undefined),
+    readDataClassRegistrations: vi.fn(async () => ({ registrations: [], privateIndexMissing: false, unreadableIndexes: [] })),
+    registerDataClasses: vi.fn(async () => undefined),
     switchInstance: vi.fn(async () => undefined),
   };
   const deckRepository: DeckRepository = {
@@ -734,6 +735,28 @@ describe("createUseCases", () => {
     });
   });
 
+  it("dataClassRegistrations and registerDataClasses pass the WebID and the instance, titled with its name", async () => {
+    const deps = makeDeps();
+    const registrations = {
+      registrations: [{ dataClass: "deck" as const, index: "private" as const, registered: false }],
+      privateIndexMissing: false,
+      unreadableIndexes: [],
+    };
+    vi.mocked(deps.instanceRepository.readDataClassRegistrations).mockResolvedValue(registrations);
+    const useCases = createUseCases(deps);
+    await expect(useCases.dataClassRegistrations(session, instance)).resolves.toEqual(registrations);
+    expect(deps.instanceRepository.readDataClassRegistrations).toHaveBeenCalledWith({
+      webId: session.webId,
+      instanceUrl: instance.url,
+    });
+    await useCases.registerDataClasses(session, instance);
+    expect(deps.instanceRepository.registerDataClasses).toHaveBeenCalledWith({
+      webId: session.webId,
+      instanceUrl: instance.url,
+      title: instance.name,
+    });
+  });
+
   it("deck tree use cases name a new group with a fresh id, and tidy a group's name", async () => {
     const deps = makeDeps();
     const useCases = createUseCases(deps);
@@ -975,7 +998,15 @@ describe("createUseCases", () => {
       expect(deps.updateJournal.end).toHaveBeenCalledWith(instance.url);
       expect(deps.documentBackups.remove).not.toHaveBeenCalled();
       expect(deps.instanceRepository.switchInstance).not.toHaveBeenCalled();
-      expect(deps.instanceRepository.registerCatalog).not.toHaveBeenCalled();
+      // Once updated, the registrations of its data that are missing are added, before the update is over.
+      expect(deps.instanceRepository.registerDataClasses).toHaveBeenCalledExactlyOnceWith({
+        webId: session.webId,
+        instanceUrl: instance.url,
+        title: instance.name,
+      });
+      expect(vi.mocked(deps.instanceRepository.registerDataClasses).mock.invocationCallOrder[0]).toBeGreaterThan(
+        vi.mocked(deps.shapeValidator.validateDocument).mock.invocationCallOrder.at(-1)!,
+      );
       expect(progress).toEqual([
         "stage 0/4",
         "backup 1/4 (0 of 5)",
@@ -1132,6 +1163,13 @@ describe("createUseCases", () => {
       expect(gone.deps.preferencesRepository.savePreferences).not.toHaveBeenCalled();
     });
 
+    it("updateInstance is done even when the registrations of the instance's data cannot be added", async () => {
+      const { deps } = outdated();
+      vi.mocked(deps.instanceRepository.registerDataClasses).mockRejectedValue(new Error("index refused"));
+      expect(await createUseCases(deps).updateInstance(session, instance)).toEqual({ ok: true, backupUrl: FOLDER });
+      expect(deps.updateJournal.end).toHaveBeenCalledWith(instance.url);
+    });
+
     it("updateInstance makes no backup when nothing is outdated any more", async () => {
       const deps = makeDeps();
       vi.mocked(deps.deckRepository.listCards).mockResolvedValue([current("a")]);
@@ -1178,6 +1216,8 @@ describe("createUseCases", () => {
       const outcome = await createUseCases(deps).updateInstance(session, instance);
       expect(outcome).toEqual({ ok: false, step: "upgrade", error: new TypeError("Failed to fetch"), updated: [], backupUrl: FOLDER });
       expect(deps.documentBackups.remove).not.toHaveBeenCalled();
+      // A failed update adds no registration.
+      expect(deps.instanceRepository.registerDataClasses).not.toHaveBeenCalled();
     });
 
     it("updateInstance names a backup it could not remove, or that nothing of was made", async () => {
@@ -3011,7 +3051,7 @@ describe("library deck upgrade", () => {
         instanceUrl: TARGET,
         registrationTarget: "private",
       });
-      expect(deps.instanceRepository.registerCatalog).toHaveBeenCalledWith({
+      expect(deps.instanceRepository.registerDataClasses).toHaveBeenCalledWith({
         webId: session.webId,
         instanceUrl: TARGET,
         title: "My study",
@@ -3074,13 +3114,21 @@ describe("library deck upgrade", () => {
       expect(deps.deckRepository.saveCatalog).not.toHaveBeenCalled();
     });
 
+    it("transferGuestStudy tidies the guest's study away even when its data could not be registered", async () => {
+      const { deps } = guestDeps();
+      vi.mocked(deps.instanceRepository.registerDataClasses).mockRejectedValue(new Error("offline"));
+      expect(
+        await createUseCases(deps).transferGuestStudy(session, guestInstance, { containerUrl: TARGET, registrationTarget: "private" }),
+      ).toEqual({ ok: true, instance: { url: TARGET, name: "My study" }, tidied: true });
+      expect(deps.instanceRepository.deleteInstance).toHaveBeenCalledWith({ webId: GUEST_WEBID, instance: guestInstance });
+    });
+
     it("transferGuestStudy says the study moved even when the guest's could not be tidied away", async () => {
       const { deps } = guestDeps();
-      vi.mocked(deps.instanceRepository.registerCatalog).mockRejectedValue(new Error("offline"));
+      vi.mocked(deps.instanceRepository.deleteInstance).mockRejectedValue(new Error("offline"));
       expect(
         await createUseCases(deps).transferGuestStudy(session, guestInstance, { containerUrl: TARGET, registrationTarget: "private" }),
       ).toEqual({ ok: true, instance: { url: TARGET, name: "My study" }, tidied: false });
-      expect(deps.instanceRepository.deleteInstance).not.toHaveBeenCalled();
     });
 
     it("transferGuestStudy moves only from the guest's pod into a user's", async () => {

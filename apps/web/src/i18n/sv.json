@@ -914,6 +914,30 @@
     },
     "save": "Spara"
   },
+  "findable": {
+    "heading": "Hittbar för andra appar",
+    "intro": "Andra Solid-appar hittar dina data genom typindexen i din Pod: en registrering för varje sorts data, som talar om var den finns. Solid Memo lägger till dem när det skapar en instans eller uppdaterar dess format, och här när du ber om det. Det lägger aldrig av sig självt tillbaka en som du eller en annan app har tagit bort.",
+    "loading": "Läser dina typindex…",
+    "class": {
+      "instance": "Den här instansen (Solid Memos mapp)",
+      "catalog": "Dess katalog över kortlekar",
+      "deck": "Kortlekar",
+      "card": "Kort",
+      "reviewState": "Repetitionslägen",
+      "answer": "Svar"
+    },
+    "index": {
+      "private": "privata typindex",
+      "public": "publika typindex"
+    },
+    "registered": "finns i ditt {index}",
+    "missing": "saknas i ditt {index}",
+    "noPrivateIndex": "Repetitionslägen och svar visar vad du har studerat och hur väl, så de registreras aldrig någon annanstans än i ditt privata typindex. Du har inget, så de är inte registrerade.",
+    "unreadable": "Ditt {index} gick inte att läsa, så det som registreras där visas inte här, och inget läggs till i det.",
+    "add": "Registrera det som saknas",
+    "adding": "Registrerar…",
+    "complete": "Allt är registrerat."
+  },
   "registrationTargetChooser": {
     "legend": "Registrera i",
     "intro": "Ett typindex är en lista i din profil som talar om för appar var dina data finns. Bara du kan se ett privat typindex.",

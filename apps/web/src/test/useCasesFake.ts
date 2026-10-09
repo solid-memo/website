@@ -57,6 +57,16 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
       name: "Main",
     })),
     deleteInstance: vi.fn(async () => ({ keptFolder: null })),
+    dataClassRegistrations: vi.fn(async () => ({
+      registrations: (["instance", "catalog", "deck", "card", "reviewState", "answer"] as const).map((dataClass) => ({
+        dataClass,
+        index: "private" as const,
+        registered: true,
+      })),
+      privateIndexMissing: false,
+      unreadableIndexes: [],
+    })),
+    registerDataClasses: vi.fn(async () => undefined),
     listDecks: vi.fn(async () => []),
     createDeck: vi.fn(async () => {
       throw new Error("createDeck fake not configured");

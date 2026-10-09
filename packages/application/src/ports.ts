@@ -8,6 +8,7 @@ import type { CourseOutline } from "@solid-memo/domain/course";
 import type { StatedLanguages } from "@solid-memo/domain/deckLanguages";
 import type { DeckTree, DeckTreeEdit } from "@solid-memo/domain/deckTree";
 import type {
+  DataClassRegistrations,
   Instance,
   InstanceDeletion,
   InstanceMeta,
@@ -73,8 +74,13 @@ export interface InstanceRepository {
   getRegistrationOptions(webId: string): Promise<RegistrationOptions>;
   /**
    * Create the instance container + meta document and register it in the
-   * chosen type index (creating the index if needed). Fails loudly and
-   * cleans up the container when registration fails.
+   * chosen type index (creating the index if needed), with its
+   * catalogue, decks and cards; its review states and answers in the
+   * private index, whichever is chosen, and nowhere when there is none
+   * (docs/data-model.md "Discovery chain"). Fails loudly and cleans up
+   * the container when registration in the chosen index fails; the
+   * review states' and answers' registrations of an instance registered
+   * publicly are left out when the private index refuses them.
    */
   createInstance(args: {
     webId: string;
@@ -82,7 +88,10 @@ export interface InstanceRepository {
     name: string;
     registrationTarget: RegistrationTarget;
   }): Promise<Instance>;
-  /** Register an existing instance container in a type index (recovery). */
+  /**
+   * Register an existing instance container in a type index (recovery):
+   * its sm:Instance registration only, unless the index has one.
+   */
   attachInstance(args: {
     webId: string;
     instanceUrl: string;
@@ -105,16 +114,29 @@ export interface InstanceRepository {
    */
   deleteInstanceData(instanceUrl: string): Promise<InstanceDeletion>;
   /**
-   * Register the instance's catalogue (a dcat:Catalog) beside the
-   * instance in every type index that registers the instance, so other
-   * applications find its decks; nothing where it already is.
+   * The registrations of the instance's data, one per class, that
+   * belong in the type indexes there are, and whether each is there:
+   * Solid Memo's own, the catalogue's, the decks' and the cards' in each
+   * index that registers the instance, the review states' and answers'
+   * in the private index only. An index that cannot be read is left
+   * out, and said to be unreadable.
    */
-  registerCatalog(args: { webId: string; instanceUrl: string; title: string }): Promise<void>;
+  readDataClassRegistrations(args: { webId: string; instanceUrl: string }): Promise<DataClassRegistrations>;
   /**
-   * Point every type index registration of the instance at another
-   * container: all indexes or none — when a later index fails, the
-   * earlier ones are switched back before rethrowing. An instance
-   * registered in no index is an error. Only for restoring a backup an
+   * Add each registration readDataClassRegistrations finds missing,
+   * titled `title`, one save per index (If-Match, read again and
+   * retried when the index changed meanwhile), none where an equal one
+   * is there, and none in an index that cannot be read.
+   */
+  registerDataClasses(args: { webId: string; instanceUrl: string; title: string }): Promise<void>;
+  /**
+   * Point every type index registration of the instance's data at the
+   * same resource of another container, in every index that holds one
+   * (the private index of an instance registered publicly holds its
+   * review states' and answers'): all indexes or none — when a later
+   * index fails, the earlier ones are switched back before rethrowing.
+   * An instance registered in no index is an error, and switches
+   * nothing. Only for restoring a backup an
    * earlier version of the app's format update left as a copy of the
    * whole instance (docs/migrations.md "Backups an earlier version made").
    */

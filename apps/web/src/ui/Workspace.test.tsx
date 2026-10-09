@@ -735,6 +735,26 @@ describe("Workspace", () => {
     ).toBeInTheDocument();
   });
 
+  it("shows in the preferences how other apps find the instance's data, to a user and not to a guest", async () => {
+    window.history.replaceState(null, "", routeToHash({ screen: "preferences", instanceUrl: instanceA.url }));
+    const useCases = makeUseCases({ listInstances: vi.fn(async () => [instanceA]) });
+    const view = renderWorkspace(useCases);
+    expect(await screen.findByRole("region", { name: "Findable by other apps" })).toBeInTheDocument();
+    await waitFor(() => expect(useCases.dataClassRegistrations).toHaveBeenCalledWith(session, instanceA));
+    view.unmount();
+
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const guest = makeUseCases({ listInstances: vi.fn(async () => [instanceA]) });
+    render(
+      <QueryClientProvider client={queryClient}>
+        <Workspace useCases={guest} session={{ ...session, guest: true }} />
+      </QueryClientProvider>,
+    );
+    expect(await screen.findByRole("heading", { name: "Study preferences" })).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Findable by other apps" })).toBeNull();
+    expect(guest.dataClassRegistrations).not.toHaveBeenCalled();
+  });
+
   it("opens the statistics from the instance bar", async () => {
     renderWorkspace(makeUseCases({ listInstances: vi.fn(async () => [instanceA]) }));
     fireEvent.click(await screen.findByRole("link", { name: "Statistics" }));

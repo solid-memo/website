@@ -917,6 +917,30 @@
     },
     "save": "Save"
   },
+  "findable": {
+    "heading": "Findable by other apps",
+    "intro": "Other Solid apps find your data through the type indexes in your Pod: one registration for each kind of data, saying where it is. Solid Memo adds them when it creates an instance or updates its format, and here when you ask. It never adds back by itself one that you or another app removed.",
+    "loading": "Reading your type indexes…",
+    "class": {
+      "instance": "This instance (Solid Memo's folder)",
+      "catalog": "Its catalogue of decks",
+      "deck": "Decks",
+      "card": "Cards",
+      "reviewState": "Review states",
+      "answer": "Answers"
+    },
+    "index": {
+      "private": "private type index",
+      "public": "public type index"
+    },
+    "registered": "in your {index}",
+    "missing": "missing from your {index}",
+    "noPrivateIndex": "Review states and answers say what you studied and how well, so they are only ever registered in your private type index. You have none, so they are not registered.",
+    "unreadable": "Your {index} could not be read, so what it registers is not shown here, and nothing is added to it.",
+    "add": "Register what is missing",
+    "adding": "Registering…",
+    "complete": "Everything is registered."
+  },
   "registrationTargetChooser": {
     "legend": "Register in",
     "intro": "A type index is a list in your profile that tells apps where your data is. Only you can see a private one.",

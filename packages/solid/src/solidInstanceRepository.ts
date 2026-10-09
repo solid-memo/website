@@ -7,11 +7,16 @@ import {
 } from "@inrupt/solid-client";
 import type { InstanceRepository } from "@solid-memo/application/ports";
 import {
+  DATA_CLASSES,
   INSTANCE_FORMAT_VERSION,
+  isPrivateOnly,
+  type DataClass,
+  type DataClassRegistrations,
   type Instance,
   type InstanceMeta,
+  type RegistrationTarget,
 } from "@solid-memo/domain/instance";
-import { catalogNodeUrlOf, metaUrlOf } from "@solid-memo/domain/instanceLayout";
+import { metaUrlOf } from "@solid-memo/domain/instanceLayout";
 import { getSolidDatasetOrNull, readDataset, saveDataset } from "./datasets";
 import { deleteInstanceData } from "./instanceData";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
@@ -21,11 +26,12 @@ import {
   toInstanceMetaThing,
 } from "./mappers/instanceMapper";
 import {
-  addCatalogRegistration,
-  addInstanceRegistration,
+  addRegistrations,
+  createTypeIndex,
   ensureTypeIndex,
   locateTypeIndexes,
   readInstanceRegistrations,
+  readRegisteredClasses,
   removeInstanceRegistrations,
   switchInstanceRegistrations,
   type InstanceRegistration,
@@ -84,26 +90,36 @@ export function createSolidInstanceRepository({
         fetch,
         checkWrite,
       );
+      // The private index, for the review states' and answers' registrations of an instance registered elsewhere.
+      let privateIndexElsewhere: string | null;
       try {
-        const indexUrl = await ensureTypeIndex(
-          registrationTarget,
-          webId,
-          url,
-          fetch,
-        );
-        await addInstanceRegistration(
+        const locations = await locateTypeIndexes(webId, fetch);
+        const indexUrl =
+          (registrationTarget === "private" ? locations.privateIndexUrl : locations.publicIndexUrl) ??
+          (await createTypeIndex(registrationTarget, webId, url, fetch));
+        privateIndexElsewhere = locations.privateIndexUrl === indexUrl ? null : locations.privateIndexUrl;
+        await addRegistrations(
           indexUrl,
-          { id: `sm-inst-${randomId()}`, containerUrl: url, title: name },
-          fetch,
-        );
-        await addCatalogRegistration(
-          indexUrl,
-          { id: `sm-cat-${randomId()}`, catalogUrl: catalogNodeUrlOf(url), title: name },
+          { instanceUrl: url, title: name, classes: wantedIn(registrationTarget, true) },
+          randomId,
           fetch,
         );
       } catch (error) {
         await bestEffortCleanup(metaUrl, url, fetch);
         throw error;
+      }
+      // The instance works without them, and Preferences adds them later: a private index that refuses them does not fail the creation.
+      if (privateIndexElsewhere !== null) {
+        try {
+          await addRegistrations(
+            privateIndexElsewhere,
+            { instanceUrl: url, title: name, classes: wantedIn("private", false) },
+            randomId,
+            fetch,
+          );
+        } catch {
+          // Left for Preferences to add.
+        }
       }
       return { url, name };
     },
@@ -117,57 +133,43 @@ export function createSolidInstanceRepository({
         url,
         fetch,
       );
-      const registrations = await readInstanceRegistrations(indexUrl, fetch);
-      const alreadyRegistered = registrations.some(
-        (registration) =>
-          ensureTrailingSlash(registration.containerUrl) === url,
-      );
-      if (!alreadyRegistered) {
-        await addInstanceRegistration(
-          indexUrl,
-          { id: `sm-inst-${randomId()}`, containerUrl: url, title: name },
-          fetch,
-        );
-      }
+      await addRegistrations(indexUrl, { instanceUrl: url, title: name, classes: ["instance"] }, randomId, fetch);
       return { url, name };
     },
 
-    async registerCatalog({ webId, instanceUrl, title }) {
-      const url = ensureTrailingSlash(instanceUrl);
-      const locations = await locateTypeIndexes(webId, fetch);
-      for (const indexUrl of [locations.privateIndexUrl, locations.publicIndexUrl]) {
-        if (indexUrl === null) continue;
-        const registrations = await readRegistrationsSafely(indexUrl, fetch);
-        if (!registrations.some((r) => ensureTrailingSlash(r.containerUrl) === url)) continue;
-        await addCatalogRegistration(
-          indexUrl,
-          { id: `sm-cat-${randomId()}`, catalogUrl: catalogNodeUrlOf(url), title },
-          fetch,
-        );
+    async readDataClassRegistrations({ webId, instanceUrl }) {
+      return registrationsOf(await indexesOf(webId, instanceUrl, fetch));
+    },
+
+    async registerDataClasses({ webId, instanceUrl, title }) {
+      for (const index of (await indexesOf(webId, instanceUrl, fetch)).indexes) {
+        const missing = index.wanted.filter((dataClass) => !index.registered.includes(dataClass));
+        if (missing.length === 0) continue;
+        await addRegistrations(index.url, { instanceUrl, title, classes: missing }, randomId, fetch);
       }
     },
 
     async switchInstance({ webId, from, to, title }) {
       const { privateIndexUrl, publicIndexUrl } = await locateTypeIndexes(webId, fetch);
       const catalogId = `sm-cat-${randomId()}`;
-      const switched: string[] = [];
+      // Every index where something changed, to switch back when a later one fails.
+      const changed: string[] = [];
       try {
+        let switched = false;
         for (const indexUrl of [privateIndexUrl, publicIndexUrl]) {
           if (indexUrl === null) continue;
-          if (await switchInstanceRegistrations(indexUrl, { from, to, title, catalogId }, fetch)) {
-            switched.push(indexUrl);
-          }
+          const result = await switchInstanceRegistrations(indexUrl, { from, to, title, catalogId }, fetch);
+          if (result.changed) changed.push(indexUrl);
+          switched ||= result.switched;
         }
+        if (!switched) throw new AppError("notRegistered", { url: from });
       } catch (error) {
-        for (const indexUrl of switched) {
+        for (const indexUrl of changed) {
           await switchInstanceRegistrations(indexUrl, { from: to, to: from, title, catalogId }, fetch).catch(
             () => undefined,
           );
         }
         throw error;
-      }
-      if (switched.length === 0) {
-        throw new AppError("notRegistered", { url: from });
       }
     },
 
@@ -212,6 +214,77 @@ export function createSolidInstanceRepository({
   };
 }
 
+
+/**
+ * The classes of an instance's data that belong in a type index of a
+ * kind: Solid Memo's own registration, the catalogue's, the decks' and
+ * the cards' in each index that registers the instance (`holding`), and
+ * the review states' and answers' in the private index only, whatever
+ * index registers the instance.
+ */
+function wantedIn(kind: RegistrationTarget, holding: boolean): DataClass[] {
+  return DATA_CLASSES.filter((dataClass) => (isPrivateOnly(dataClass) ? kind === "private" : holding));
+}
+
+interface IndexRegistrations {
+  kind: RegistrationTarget;
+  url: string;
+  /** The classes of the instance's data it registers. */
+  registered: DataClass[];
+  /** The classes of the instance's data that belong in it (wantedIn). */
+  wanted: DataClass[];
+}
+
+/**
+ * Each type index there is, private first, with what it registers of the
+ * instance's data and what belongs in it; one that cannot be read is
+ * left out, and said to be unreadable.
+ */
+async function indexesOf(
+  webId: string,
+  instanceUrl: string,
+  fetch: typeof globalThis.fetch,
+): Promise<{ indexes: IndexRegistrations[]; privateIndexMissing: boolean; unreadableIndexes: RegistrationTarget[] }> {
+  const { privateIndexUrl, publicIndexUrl } = await locateTypeIndexes(webId, fetch);
+  const indexes: IndexRegistrations[] = [];
+  const unreadableIndexes: RegistrationTarget[] = [];
+  for (const [kind, url] of [
+    ["private", privateIndexUrl],
+    ["public", publicIndexUrl],
+  ] as const) {
+    if (url === null) continue;
+    let registered: DataClass[];
+    try {
+      registered = await readRegisteredClasses(url, instanceUrl, fetch);
+    } catch {
+      unreadableIndexes.push(kind);
+      continue;
+    }
+    indexes.push({ kind, url, registered, wanted: wantedIn(kind, registered.includes("instance")) });
+  }
+  return { indexes, privateIndexMissing: privateIndexUrl === null, unreadableIndexes };
+}
+
+/** Every registration that belongs in an index, by class, the private index's first, and whether it is there. */
+function registrationsOf({
+  indexes,
+  privateIndexMissing,
+  unreadableIndexes,
+}: {
+  indexes: IndexRegistrations[];
+  privateIndexMissing: boolean;
+  unreadableIndexes: RegistrationTarget[];
+}): DataClassRegistrations {
+  return {
+    registrations: DATA_CLASSES.flatMap((dataClass) =>
+      indexes
+        .filter((index) => index.wanted.includes(dataClass))
+        .map((index) => ({ dataClass, index: index.kind, registered: index.registered.includes(dataClass) })),
+    ),
+    privateIndexMissing,
+    unreadableIndexes,
+  };
+}
 
 async function readRegistrationsSafely(
   indexUrl: string,

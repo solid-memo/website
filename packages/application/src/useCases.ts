@@ -32,6 +32,7 @@ import {
   type StudyDirection,
 } from "@solid-memo/domain/deck";
 import type {
+  DataClassRegistrations,
   Instance,
   InstanceDeletion,
   InstanceMeta,
@@ -265,6 +266,21 @@ export interface UseCases {
    * kept, and the result says so.
    */
   deleteInstance(session: Session, instance: Instance): Promise<InstanceDeletion>;
+  /**
+   * The registrations of the instance's data, one per class, that belong
+   * in the user's type indexes, and whether each is there
+   * (docs/data-model.md "Discovery chain"): what lets other apps find
+   * each kind of it. Reads only.
+   */
+  dataClassRegistrations(session: Session, instance: Instance): Promise<DataClassRegistrations>;
+  /**
+   * Add the registrations dataClassRegistrations finds missing, titled
+   * with the instance's name. Only on the user's say (or with a new
+   * instance, a format update, a guest's study kept): never on opening an
+   * instance, where it would add back what the user, or another app,
+   * removed.
+   */
+  registerDataClasses(session: Session, instance: Instance): Promise<void>;
   listDecks(instanceUrl: string): Promise<Deck[]>;
   /**
    * A new deck by `title`: its name in every language it is given in,
@@ -394,7 +410,10 @@ export interface UseCases {
    * up, then check the instance. Every document keeps its address. Only
    * ever run after the user has agreed to the plan; it reads afresh what
    * to change. A document changed meanwhile stops it, and what it updated
-   * stays updated; run again, it updates what is still outdated.
+   * stays updated; run again, it updates what is still outdated. Once
+   * the update succeeded, the registrations of the instance's data that
+   * are missing are added (registerDataClasses); a failure there leaves
+   * the update done.
    */
   updateInstance(
     session: Session,
@@ -1413,8 +1432,10 @@ export function createUseCases({
       progress.finished("tidy");
       updateJournal.end(source);
       const tidied = await (async () => {
-        // The catalogue's registration lets other apps find it; the instance works without.
-        await instanceRepository.registerCatalog({ webId: session.webId, instanceUrl: target, title: instance.name });
+        // The registrations of each class of its data let other apps find it; the instance works without, and Preferences adds them later.
+        await instanceRepository
+          .registerDataClasses({ webId: session.webId, instanceUrl: target, title: instance.name })
+          .catch(() => undefined);
         await removeGuestInstance(guestInstance);
       })().then(
         () => true,
@@ -1520,6 +1541,16 @@ export function createUseCases({
       return instanceRepository.deleteInstance({
         webId: session.webId,
         instance,
+      });
+    },
+    dataClassRegistrations(session, instance) {
+      return instanceRepository.readDataClassRegistrations({ webId: session.webId, instanceUrl: instance.url });
+    },
+    registerDataClasses(session, instance) {
+      return instanceRepository.registerDataClasses({
+        webId: session.webId,
+        instanceUrl: instance.url,
+        title: instance.name,
       });
     },
     listDecks(instanceUrl) {
@@ -1846,6 +1877,10 @@ export function createUseCases({
         }
         // A backup of documents of which none changed (each was brought up to date meanwhile) is not needed.
         const kept = updated.length > 0 || !(await discardBackup(folder, backup));
+        // Other apps find each kind of the instance's data by its class; the instance works without.
+        await instanceRepository
+          .registerDataClasses({ webId: session.webId, instanceUrl, title: instance.name })
+          .catch(() => undefined);
         progress.finished();
         updateJournal.end(instanceUrl);
         return { ok: true, ...(kept ? { backupUrl: folder } : {}) };

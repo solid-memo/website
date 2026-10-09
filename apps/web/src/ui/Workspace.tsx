@@ -27,6 +27,7 @@ import { InstanceBar } from "./InstanceBar";
 import { InstanceCreator } from "./InstanceCreator";
 import { InstancePicker } from "./InstancePicker";
 import { BackupContainer } from "./BackupContainer";
+import { FindableContainer } from "./FindableContainer";
 import { KeptFolderNotice } from "./KeptFolderNotice";
 import { DataCheckNotice } from "./DataCheckNotice";
 import { LibraryBrowserContainer } from "./LibraryBrowserContainer";
@@ -741,6 +742,10 @@ export function Workspace({
               navigate({ screen: "home", instanceUrl: instanceUrl! })
             }
           />
+          {/* A guest's pod is on this device: no other app looks there. */}
+          {session.guest !== true && (
+            <FindableContainer useCases={useCases} session={session} instance={activeInstance!} />
+          )}
           <BackupContainer
             useCases={useCases}
             session={session}

@@ -88,10 +88,14 @@ these steps:
    copied. The write fence keeps it read-only meanwhile.
 6. **register:** `attachInstance` in the type index the user chose.
    From here on the study is theirs.
-7. **tidy:** register the catalogue, then delete the guest's instance
+7. **tidy:** register each class of the instance's data (its
+   catalogue, decks, cards, review states and answers,
+   [data-model.md](data-model.md#discovery-chain)), then delete the guest's instance
    as any instance is deleted ([data-model.md](data-model.md#discovery-chain)),
-   and the whole guest pod once no instance is left. A failure here
-   only means `tidied: false`.
+   and the whole guest pod once no instance is left. A registration
+   that fails is left for **Register what is missing** in Preferences,
+   and the guest's instance is deleted all the same. A failure to
+   delete it only means `tidied: false`.
 
 A failure before **register** deletes the copy, whole, and leaves the
 guest's study exactly as it was: Solid Memo created the target's
