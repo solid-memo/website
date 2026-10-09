@@ -276,11 +276,10 @@ describe.each(SERVERS)("a guest's study on $name", ({ url: server }) => {
     // The instance's preferences stay; the guest's are not carried over.
     expect((await useCases.getPreferences(target.url)).newCardsPerDay).toBe(7);
     const tree = await useCases.listDeckTree(target.url);
-    expect(tree.children.map((node) => (node.kind === "deck" ? node.deck.url : [node.group.title, node.children.length]))).toEqual([
-      mine.url,
-      theirCourse.url,
-      [{ en: "Learning" }, 2],
-    ]);
+    // Members without a position come in document order, which a server may serialise as it likes.
+    const topLevel = tree.children.map((node) => (node.kind === "deck" ? node.deck.url : [node.group.title, node.children.length]));
+    expect(topLevel).toHaveLength(3);
+    expect(topLevel).toEqual(expect.arrayContaining([mine.url, theirCourse.url, [{ en: "Learning" }, 2]]));
     await expect(useCases.listCards(theirCourse)).resolves.toEqual([]);
     expect((await useCases.validateInstance(target.url)).conforms).toBe(true);
     const served = await contents(target.url);

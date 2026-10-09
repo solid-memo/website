@@ -16,7 +16,7 @@ import { describe, expect, inject, it } from "vitest";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/sources";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
 import { createSolidInstanceRepository } from "@solid-memo/solid/solidInstanceRepository";
-import { aclOf, storageOf } from "./serverTraits";
+import { aclOf, ETAG_OUTLIVES_EDITS, etagMarksEveryEdit, storageOf } from "./serverTraits";
 
 const SERVERS = inject("solidServers");
 const PRIVATE_TYPE_INDEX = "http://www.w3.org/ns/solid/terms#privateTypeIndex";
@@ -133,7 +133,20 @@ describe.each(SERVERS)("registering an instance on $name", ({ url: server }) => 
       unreadableIndexes: [],
     });
 
-    // A registration the user removed is said to be missing, and added back only when asked.
+    // Deleting the instance removes every one of them.
+    await repository.deleteInstance({ webId, instance });
+    expect(await registrationsIn(index, instance.url)).toEqual([]);
+  });
+
+  it("says a registration the user removed is missing, and adds it back only when asked", async (context) => {
+    const { base, webId } = await profile(server);
+    const repository = instances();
+    const instance = await repository.createInstance({ webId, containerUrl: `${base}solid-memo/`, name: "Main", registrationTarget: "private" });
+    const index = `${await storageOf(base)}settings/privateTypeIndex.ttl`;
+    // The removal is made in the same second as the index was read, which such a server's ETag does not tell apart.
+    if (!(await etagMarksEveryEdit(server))) context.skip(ETAG_OUTLIVES_EDITS);
+    const all = ["instance", "catalog", "deck", "card", "reviewState", "answer"] as const;
+
     const cards = (await registrationsIn(index, instance.url)).find((registration) => registration.target.endsWith("decks/"))!;
     const removal = await fetch(index, {
       method: "PATCH",
@@ -150,10 +163,6 @@ describe.each(SERVERS)("registering an instance on $name", ({ url: server }) => 
     });
     await repository.registerDataClasses({ webId, instanceUrl: instance.url, title: "Main" });
     expect(await registrationsIn(index, instance.url)).toEqual(registered(instance.url, [...all]));
-
-    // Deleting the instance removes every one of them.
-    await repository.deleteInstance({ webId, instance });
-    expect(await registrationsIn(index, instance.url)).toEqual([]);
   });
 
   it("registers an instance publicly, its review states and answers in the private index alone, and unregisters it from both", async () => {
