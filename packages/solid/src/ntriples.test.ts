@@ -18,11 +18,6 @@ describe("triplesOf", () => {
     expect(lines).toContain(`${node} <${DOC}#q> "x" .`);
   });
 
-  it("keeps the order the document states them in, each once", async () => {
-    const triples = await triplesOf(DOC, `<#b> <#p> 1 . <#a> <#p> 2 . <#b> <#q> 3 . <#a> <#p> 2 .`);
-    expect([...triples].map((line) => line.split(" ")[0])).toEqual([`<${DOC}#b>`, `<${DOC}#a>`, `<${DOC}#b>`]);
-  });
-
   it("rejects what does not parse", async () => {
     await expect(triplesOf(DOC, "<#a> <#p")).rejects.toThrow();
   });

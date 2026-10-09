@@ -2,16 +2,13 @@ import { describe, expect, it } from "vitest";
 import type { Card, Deck } from "./deck";
 import type { LibraryCard } from "./library";
 import type { LibraryUpgradePlan } from "./libraryUpgrade";
-import type { ReviewState } from "./review";
 import {
+  DECK_UPGRADE_STEPS,
   decodeDeckUpgradeNote,
   isAbandoned,
   sameCardChanges,
-  sameCards,
   sameDeckState,
-  sameReviewStates,
   isCardsDocumentOf,
-  upgradedCardList,
   withDeckChanges,
 } from "./deckUpgrade";
 
@@ -54,7 +51,15 @@ const plan: LibraryUpgradePlan = {
   remove: [podCard("lv", "Riga")],
   kept: [],
   applied: [],
+  gone: [],
+  appliedAbout: [],
 };
+
+describe("DECK_UPGRADE_STEPS", () => {
+  it("are the steps the user sees, in the order the upgrade writes: its cards, its review states, its entry last", () => {
+    expect(DECK_UPGRADE_STEPS).toEqual(["read", "cards", "reviews", "entry"]);
+  });
+});
 
 describe("isCardsDocumentOf", () => {
   const deck = { id: "deck-1", cardsDocumentUrl: "https://pod.example/a/decks/deck-1-u2.ttl" };
@@ -103,67 +108,6 @@ describe("deck upgrade notes", () => {
   });
 });
 
-describe("upgradedCardList", () => {
-  it("applies every change of the plan to the deck's cards, leaving the rest", () => {
-    const cards = [
-      podCard("se", "Stockholm?"),
-      podCard("dk", "Copenhagen"),
-      podCard("is", "Reykjavik", true),
-      podCard("lv", "Riga"),
-      podCard("fi", "Helsinki"),
-    ];
-    const list = upgradedCardList(cards, plan);
-    expect(list.map((card) => card.id).sort()).toEqual(["dk", "fi", "is", "no", "se"]);
-    expect(sameCards(list, [
-      podCard("se", "Stockholm"),
-      podCard("dk", "Copenhagen", true),
-      podCard("is", "Reykjavik"),
-      podCard("fi", "Helsinki"),
-      podCard("no", "Oslo"),
-    ])).toBe(true);
-  });
-});
-
-describe("sameCards", () => {
-  const cards = [podCard("se", "Stockholm"), podCard("dk", "Copenhagen", true)];
-
-  it("holds for the same cards in any order", () => {
-    expect(sameCards(cards, [...cards].reverse())).toBe(true);
-  });
-
-  it("fails on a card missing, extra, other, of other content or retirement", () => {
-    expect(sameCards(cards, cards.slice(1))).toBe(false);
-    expect(sameCards(cards, [cards[0], podCard("no", "Oslo")])).toBe(false);
-    expect(sameCards(cards, [podCard("se", "Stockholm!"), cards[1]])).toBe(false);
-    expect(sameCards(cards, [cards[0], podCard("dk", "Copenhagen")])).toBe(false);
-  });
-});
-
-describe("sameReviewStates", () => {
-  const state = (cardId: string, due: string): ReviewState => ({
-    cardId,
-    direction: "front-to-back",
-    easeFactor: 2.5,
-    intervalDays: 1,
-    repetitions: 1,
-    due,
-    firstReviewedAt: "2026-10-01T00:00:00.000Z",
-    lastReviewedAt: "2026-10-01T00:00:00.000Z",
-    formatVersion: 2,
-  });
-
-  it("holds for the same states in any order, their keys in any order", () => {
-    const { due, ...rest } = state("b", "2026-10-02");
-    expect(sameReviewStates([state("a", "2026-10-02"), state("b", "2026-10-02")], [{ due, ...rest }, state("a", "2026-10-02")])).toBe(true);
-    expect(sameReviewStates([], [])).toBe(true);
-  });
-
-  it("fails when a state differs, or one is missing", () => {
-    expect(sameReviewStates([state("a", "2026-10-02")], [state("a", "2026-10-03")])).toBe(false);
-    expect(sameReviewStates([state("a", "2026-10-02")], [])).toBe(false);
-  });
-});
-
 describe("sameCardChanges", () => {
   it("holds for plans changing the same cards alike, whatever they say of the deck's texts", () => {
     expect(sameCardChanges(plan, { ...plan, title: { en: "Capitals", sv: "Huvudstäder" }, add: [...plan.add] })).toBe(true);
@@ -198,6 +142,12 @@ describe("sameDeckState", () => {
 });
 
 describe("withDeckChanges", () => {
+  it("takes a text in several languages, listed in another order, as unchanged", () => {
+    const current = { ...deck, title: { en: "Capitals", sv: "Huvudstäder" } };
+    const stored = { ...current, title: { en: "Capitals", sv: "Huvudstäder", fi: "Pääkaupungit" } };
+    expect(withDeckChanges(stored, current, { ...current, title: { sv: "Huvudstäder", en: "Capitals" } })).toEqual(stored);
+  });
+
   it("writes what the upgrade changes onto the deck as stored, keeping changes made meanwhile", () => {
     const next = { ...deck, sourceUrl: plan.releaseUrl, cardsDocumentUrl: "new", title: { en: "Capitals" } };
     const stored = { ...deck, keywords: { en: ["geography"] } };

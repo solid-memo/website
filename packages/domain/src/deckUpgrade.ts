@@ -1,35 +1,27 @@
-import type { RunUndo } from "./backup";
-import type { Card, CardContent, Deck } from "./deck";
+import type { Deck } from "./deck";
 import { sameText } from "./langText";
-import { sameContent, upgradedCards, type LibraryUpgradePlan } from "./libraryUpgrade";
-import { reviewKeyOf, type ReviewState } from "./review";
+import type { LibraryUpgradePlan } from "./libraryUpgrade";
 
 /**
- * Upgrading a library deck, done safely (see docs/migrations.md): the
- * bytes of the deck's cards document — and, when cards with review states
- * are removed, of its reviews document — are first backed up in the
- * instance's backups/ folder; the upgraded documents are written into a
- * working copy beside the backup and checked there; once both are found
- * still as backed up, each is written in place and checked again, and the
- * deck's catalog entry is moved to the new release. A failure after the
- * first write puts back each document it wrote, byte for byte, and the
- * deck is exactly as it was. Every document keeps its address, the deck
- * its URL and its cards their ids, so the answer log still names them.
+ * Upgrading a library deck (see docs/migrations.md "How an upgrade is
+ * applied"): the deck's documents are written where they are, each in
+ * one write made only if it is still as it was read, in an order that
+ * leaves the deck readable after each: its cards first; then, when the
+ * upgrade drops review states (of cards the release removed), its
+ * reviews document; and last its catalog entry, which says which release
+ * the deck is. A failure leaves what was written so, the deck still
+ * naming the release it came from: its plan then takes the cards already
+ * as the newer release has them, or gone as it removed them, for the
+ * release's, not the user's (LibraryUpgradePlan `applied`, `gone`) — and
+ * those as the release in between has them, once a newer one is out —
+ * and offers the upgrade again, which finishes it. Nothing is put back.
+ * The deck keeps its URL, its documents theirs and its cards their ids,
+ * so the answer log still names them.
  */
 
-export type DeckUpgradeStep = "read" | "backup" | "copy" | "check" | "verify" | "write" | "validate" | "entry" | "tidy";
+export type DeckUpgradeStep = "read" | "cards" | "reviews" | "entry";
 
-export const DECK_UPGRADE_STEPS: readonly DeckUpgradeStep[] = [
-  "read",
-  "backup",
-  "copy",
-  "check",
-  "verify",
-  "write",
-  "validate",
-  "entry",
-  "tidy",
-];
+export const DECK_UPGRADE_STEPS: readonly DeckUpgradeStep[] = ["read", "cards", "reviews", "entry"];
 
 /** How far into a step it is, in the step's own units: documents, decks, reads, writes. */
 export interface StepPart {
@@ -44,25 +36,22 @@ export interface DeckUpgradeProgress {
   total: number;
   /** How far into `step` it is; absent for a step done in one go. */
   part?: StepPart;
-  /** Set while the upgrade, failed at `step`, puts back the documents it wrote. */
-  undoing?: true;
 }
 
 export type DeckUpgradeOutcome =
-  /** Done: `deck` as it now is. `tidied` says whether its backup and working copy were deleted. */
-  | { ok: true; deck: Deck; tidied: boolean }
+  /** Done: `deck` as it now is, at the newer release. */
+  | { ok: true; deck: Deck }
   /**
-   * Failed at `step`. `asItWas` says whether the deck is exactly as it was:
-   * nothing of it was written (`undo` null), or every document written is
-   * put back. When it is not, a document changed elsewhere since the
-   * upgrade wrote it is kept as it is (`undo.kept`), or putting one back
-   * failed, or the entry, whose write's answer was lost, could not be
-   * read to tell whether to (`undo.failed`, to try again), and the backup
-   * stays (`backupUrl`), as it does when it could not be removed. `error`
-   * is what went wrong: an AppError the app can show in the reader's
-   * language, or any other error.
+   * Failed at `step`. `changed` says whether a document of the deck was
+   * written, or may have been: a write whose answer was lost may have
+   * been made (the entry's is read again to tell, when it can be). The
+   * deck then has part of the newer release, or all of it once its entry
+   * is written; one whose entry still names the release it came from is
+   * offered the upgrade again, which finishes it. Else the deck is as it
+   * was. `error` is what went wrong: an AppError the app can show in the
+   * reader's language, or any other error.
    */
-  | { ok: false; step: DeckUpgradeStep; error: unknown; asItWas: boolean; undo: RunUndo | null; backupUrl?: string };
+  | { ok: false; step: DeckUpgradeStep; error: unknown; changed: boolean };
 
 /**
  * Whether `documentUrl` is, or was, the deck's cards document: the one it
@@ -93,9 +82,8 @@ export interface DocumentMove {
  * noted in the browser before it wrote, so that one cut off (a closed
  * tab) can be tidied away: the documents of the side that lost — the new
  * ones before it switched the deck's entry over, the old ones after.
- * This app's upgrade moves no document: the note it keeps under the same
- * key is a RunNote (domain/backup.ts), which no DeckUpgradeNote is taken
- * for, nor the other way round. It reads the notes an earlier one left.
+ * This app's upgrade moves no document and notes nothing: it only reads
+ * the notes an earlier one left.
  */
 export interface DeckUpgradeNote {
   /** ISO dateTime the upgrade began. */
@@ -142,40 +130,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function isMove(value: unknown): value is DocumentMove {
   return isRecord(value) && typeof value.from === "string" && typeof value.to === "string";
-}
-
-/** A card as an upgrade means to leave it: its id, content and retirement. */
-export type ExpectedCard = CardContent & { id: string; retired?: true };
-
-/** The deck's cards once the plan is applied to them. */
-export function upgradedCardList(cards: readonly Card[], plan: LibraryUpgradePlan): ExpectedCard[] {
-  const removed = new Set(plan.remove.map((card) => card.id));
-  const byId = new Map<string, ExpectedCard>(
-    cards.filter((card) => !removed.has(card.id)).map((card) => [card.id, card]),
-  );
-  for (const card of upgradedCards(plan)) byId.set(card.id, card);
-  return [...byId.values()];
-}
-
-/** Whether the cards are the expected ones, no more and no fewer, each saying the same and as retired. */
-export function sameCards(expected: readonly ExpectedCard[], actual: readonly ExpectedCard[]): boolean {
-  if (expected.length !== actual.length) return false;
-  const byId = new Map(actual.map((card) => [card.id, card]));
-  return expected.every((card) => {
-    const other = byId.get(card.id);
-    return other !== undefined && sameContent(card, other) && (card.retired === true) === (other.retired === true);
-  });
-}
-
-/** Whether two lists hold the same review states, in any order. */
-export function sameReviewStates(a: readonly ReviewState[], b: readonly ReviewState[]): boolean {
-  const canonical = (states: readonly ReviewState[]) =>
-    states
-      .map((state) => [reviewKeyOf(state), stableJson(state)] as const)
-      .sort(([x], [y]) => x.localeCompare(y))
-      .map(([, json]) => json)
-      .join("\n");
-  return a.length === b.length && canonical(a) === canonical(b);
 }
 
 /** JSON with every object's keys in order, so equal values give equal text. */

@@ -83,6 +83,8 @@ describe("planLibraryUpgrade", () => {
       kept: [podCard("fi", "Helsinki, my note"), podCard("lv", "Riga, mine")],
       // A card the copy already has as the release adds it.
       applied: [podCard("mine", "Mine")],
+      gone: [],
+      appliedAbout: [],
     });
   });
 
@@ -267,6 +269,10 @@ describe("planLibraryUpgrade", () => {
     // A release that only adds cards offers a course's deck nothing.
     const added = release(2, [...from.cards, libraryCard("no", "Oslo")]);
     expect(planLibraryUpgrade({ deck, cards: reached, from, to: added, releases, course: true })).toBeNull();
+    // Nor does one that only removes a card the learner has not reached, which the deck lacks as it lacks every such card.
+    const removed = release(2, from.cards.filter((card) => card.id !== "is"));
+    expect(planLibraryUpgrade({ deck, cards: reached, from, to: removed, releases, course: true })).toBeNull();
+    expect(planLibraryUpgrade({ deck, cards: reached, from, to: removed, releases })).toMatchObject({ gone: ["is"] });
   });
 
   it("takes a retirement the copy already has as done, and only moves the deck to the release", () => {
@@ -275,6 +281,193 @@ describe("planLibraryUpgrade", () => {
     expect(planLibraryUpgrade({ deck, cards: mine, from, to: now, releases })).toMatchObject({
       retire: [],
       applied: [{ ...podCard("dk", "Copenhagen"), retired: true }],
+    });
+  });
+
+  describe("on a copy an upgrade cut off half-way left", () => {
+    const MARKDOWN = "https://solid-memo.com/ns/vocab/v1.ttl#markdown";
+    /** Release 2: Sweden fixed and in Markdown, Denmark retired, Iceland removed (as releases did before they could retire), Norway added, retired Belgrade too. */
+    const next = release(2, [
+      { ...libraryCard("se", "**Stockholm**"), textFormat: MARKDOWN },
+      { ...libraryCard("dk", "Copenhagen"), retired: true },
+      libraryCard("fi", "Helsingfors"),
+      libraryCard("ee", "Tallinn"),
+      libraryCard("lv", "Riga"),
+      libraryCard("no", "Oslo"),
+      { ...libraryCard("yu", "Belgrade"), retired: true },
+    ]);
+    /** The copy as the upgrade's write of its cards left it: the plan applied to them, the deck's entry not yet moved. */
+    const written = (plan: NonNullable<ReturnType<typeof planLibraryUpgrade>>, copy: readonly Card[]): Card[] => {
+      const byId = new Map(copy.map((card) => [card.id, card]));
+      for (const card of plan.remove) byId.delete(card.id);
+      for (const card of upgradedCards(plan)) byId.set(card.id, { ...card, url: `${CARDS}#${card.id}`, createdAt: "", formatVersion: 5 });
+      return [...byId.values()];
+    };
+
+    it("offers it again, every card the upgrade wrote taken as the release's and none as the user's, and finishes it", () => {
+      const first = planLibraryUpgrade({ deck, cards, from, to: next, releases })!;
+      expect(first).toMatchObject({
+        change: [{ id: "se" }],
+        retire: [{ id: "dk" }],
+        remove: [{ id: "is" }],
+        add: [{ id: "no" }, { id: "yu" }],
+        kept: [podCard("fi", "Helsinki, my note")],
+      });
+      const cut = written(first, cards);
+      const again = planLibraryUpgrade({ deck, cards: cut, from, to: next, releases })!;
+      expect(again).toMatchObject({
+        releaseUrl: next.url,
+        add: [],
+        change: [],
+        retire: [],
+        restore: [],
+        remove: [],
+        // What the user changed stays theirs, as it was the first time.
+        kept: [podCard("fi", "Helsinki, my note")],
+        gone: ["is"],
+      });
+      expect(again.applied.map((card) => card.id)).toEqual(["se", "dk", "no", "yu"]);
+      // Written again, nothing changes: the second run only moves the deck's entry.
+      expect(upgradedCards(again)).toEqual([]);
+      // Once the entry names the newer release, nothing is left to offer.
+      expect(planLibraryUpgrade({ deck: { ...deck, sourceUrl: next.url }, cards: cut, from: next, to: { ...next, version: "3" }, releases })).toBeNull();
+    });
+
+    it("takes a card the newer release adds, already in the copy, as the release has it, or as the user changed it since", () => {
+      const added = release(2, [...from.cards, { ...libraryCard("no", "Oslo"), retired: true }]);
+      const copy = (card: Card) => planLibraryUpgrade({ deck, cards: [...cards, card], from, to: added, releases })!;
+      expect(copy({ ...podCard("no", "Oslo"), retired: true })).toMatchObject({ add: [], applied: [{ id: "no" }], kept: [] });
+      // Its retirement is the release's, whatever the user did to its text.
+      expect(copy(podCard("no", "Oslo"))).toMatchObject({ add: [], applied: [], retire: [{ id: "no" }] });
+      expect(copy(podCard("no", "Oslo, mine"))).toMatchObject({ add: [], applied: [], kept: [{ id: "no" }], retire: [{ id: "no" }] });
+      // As the release has it but for the text format an older app dropped: the marker comes back.
+      const marked = release(2, [...from.cards, { ...libraryCard("no", "Oslo"), textFormat: MARKDOWN }]);
+      expect(planLibraryUpgrade({ deck, cards: [...cards, podCard("no", "Oslo")], from, to: marked, releases })).toMatchObject({
+        change: [{ id: "no", textFormat: MARKDOWN }],
+        applied: [],
+      });
+    });
+
+    it("brings back the text format an older app dropped from a card already as the newer release has it", () => {
+      const lost = cards.map((card) => (card.id === "se" ? podCard("se", "**Stockholm**") : card));
+      expect(planLibraryUpgrade({ deck, cards: lost, from, to: next, releases })).toMatchObject({
+        change: [{ id: "se", textFormat: MARKDOWN }],
+      });
+    });
+
+    it("drops the review states left of a card the release removed and the copy has no longer, an offer of its own", () => {
+      // The release only removes Iceland, which the user left alone: the upgrade removes it from the copy.
+      const removed = release(2, from.cards.filter((card) => card.id !== "is"));
+      expect(planLibraryUpgrade({ deck, cards, from, to: removed, releases })).toMatchObject({ remove: [{ id: "is" }], gone: [] });
+      // Cut off once it wrote the cards, it is offered again, to drop the card's states left and move the deck.
+      const without = cards.filter((card) => card.id !== "is");
+      expect(planLibraryUpgrade({ deck, cards: without, from, to: removed, releases })).toMatchObject({
+        add: [],
+        change: [],
+        remove: [],
+        applied: [],
+        gone: ["is"],
+      });
+      const fixed = release(2, removed.cards.map((card) => (card.id === "se" ? libraryCard("se", "Stockholm") : card)));
+      expect(planLibraryUpgrade({ deck, cards: without, from, to: fixed, releases })).toMatchObject({ remove: [], gone: ["is"] });
+    });
+
+    it("takes the retirement of a card the user changed as the release's, once written: an offer of its own", () => {
+      // Release 2 corrects Finland and retires it; the user changed the card, so its text stays theirs.
+      const retiring = release(2, from.cards.map((card) => (card.id === "fi" ? { ...libraryCard("fi", "Helsingfors"), retired: true as const } : card)));
+      const first = planLibraryUpgrade({ deck, cards, from, to: retiring, releases })!;
+      expect(first).toMatchObject({ change: [], retire: [{ id: "fi" }], kept: [{ id: "fi" }], applied: [] });
+      const again = planLibraryUpgrade({ deck, cards: written(first, cards), from, to: retiring, releases })!;
+      expect(again).toMatchObject({
+        change: [],
+        retire: [],
+        kept: [{ id: "fi", back: { "": "Helsinki, my note" }, retired: true }],
+        applied: [{ id: "fi", retired: true }],
+      });
+      expect(upgradedCards(again)).toEqual([]);
+    });
+
+    it("takes it on to a release out since, every card the cut-off upgrade wrote the library's, none the user's", () => {
+      const first = planLibraryUpgrade({ deck, cards, from, to: next, releases })!;
+      const cut = written(first, cards);
+      /** Release 3: Sweden fixed again, Denmark in use again, Norway (release 2 added it) fixed; Belgrade as release 2 has it. */
+      const third = release(3, [
+        { ...libraryCard("se", "**Stockholm**, Sweden"), textFormat: MARKDOWN },
+        libraryCard("dk", "Copenhagen"),
+        ...next.cards.filter((card) => !["se", "dk", "no"].includes(card.id)),
+        libraryCard("no", "Oslo, Norway"),
+      ]);
+      // Planned against releases 1 and 3 alone, the cards release 2 wrote would look like the user's, Denmark left retired.
+      expect(planLibraryUpgrade({ deck, cards: cut, from, to: third, releases })).toMatchObject({
+        change: [],
+        restore: [],
+        kept: [{ id: "se" }, { id: "fi" }, { id: "no" }],
+      });
+      const again = planLibraryUpgrade({ deck, cards: cut, from, between: [next], to: third, releases })!;
+      expect(again).toMatchObject({
+        releaseUrl: third.url,
+        add: [],
+        change: [{ id: "se", back: { "": "**Stockholm**, Sweden" } }, { id: "no", back: { "": "Oslo, Norway" } }],
+        retire: [],
+        restore: [{ id: "dk", retired: true }],
+        remove: [],
+        // What the user changed stays theirs.
+        kept: [podCard("fi", "Helsinki, my note")],
+        applied: [{ id: "yu", retired: true }],
+        gone: ["is"],
+      });
+      // Written, and the deck moved to release 3, nothing is left to offer.
+      const done = written(again, cut);
+      expect(done.find((card) => card.id === "dk")).not.toHaveProperty("retired");
+      expect(planLibraryUpgrade({ deck: { ...deck, sourceUrl: third.url }, cards: done, from: third, to: { ...third, version: "4" }, releases })).toBeNull();
+    });
+
+    it("removes a card a release in between added and the newer one dropped, where the copy has it as written", () => {
+      const added = release(2, [...from.cards, libraryCard("no", "Oslo")]);
+      const cut = [...cards, { ...podCard("no", "Oslo"), formatVersion: 5 }];
+      const dropped = release(3, [...from.cards, libraryCard("ba", "Sarajevo")]);
+      expect(planLibraryUpgrade({ deck, cards: cut, from, between: [added], to: dropped, releases })).toMatchObject({
+        add: [{ id: "ba" }],
+        remove: [{ id: "no" }],
+        kept: [],
+      });
+      // One the user changed since is theirs.
+      const mine = [...cards, podCard("no", "Oslo, mine")];
+      expect(planLibraryUpgrade({ deck, cards: mine, from, between: [added], to: dropped, releases })).toMatchObject({
+        remove: [],
+        kept: [{ id: "no" }],
+      });
+    });
+
+    it("takes what the deck says of itself as the release's where the copy already has the newer release's, an offer of its own", () => {
+      const was = { ...release(1, from.cards), title: { en: "Capitals" }, description: { en: "Capitals." }, keywords: { en: ["capitals"] }, themes: [] };
+      const now = {
+        ...was,
+        ...release(2, from.cards, "bidirectional"),
+        title: { en: "Capitals", sv: "Huvudstäder" },
+        description: { en: "Capitals of Europe." },
+        keywords: { en: ["capitals", "europe"] },
+        themes: ["https://solid-memo.com/ns/vocab/topics.ttl#geography"],
+      };
+      const already = {
+        ...deck,
+        title: now.title,
+        description: now.description,
+        keywords: now.keywords,
+        themes: now.themes,
+        direction: "bidirectional" as const,
+      };
+      const plan = planLibraryUpgrade({ deck: already, cards, from: was, to: now, releases })!;
+      expect(plan.appliedAbout).toEqual(["direction", "title", "description", "keywords", "themes"]);
+      for (const key of ["direction", "title", "description", "keywords", "themes"]) expect(plan).not.toHaveProperty(key);
+      // A copy still as the older release has it takes the newer release's: nothing of it is applied yet.
+      expect(planLibraryUpgrade({ deck: { ...deck, ...was, sourceUrl: deck.sourceUrl, themes: [] }, cards, from: was, to: now, releases })).toMatchObject({
+        appliedAbout: [],
+        direction: "bidirectional",
+        title: now.title,
+      });
+      // What the release did not change is no offer, whatever the copy says.
+      expect(planLibraryUpgrade({ deck: already, cards, from: was, to: { ...was, version: "2", url: now.url }, releases })).toBeNull();
     });
   });
 });
@@ -304,7 +497,7 @@ describe("upgradedCards", () => {
 
 describe("applyLibraryUpgrade", () => {
   it("moves the copy to the newer release, and to its direction when that changes", () => {
-    const plan = { fromVersion: "1", toVersion: "3", releaseUrl: `${DECKS}capitals/v3.ttl`, notes: [], add: [], change: [], retire: [], restore: [], remove: [], kept: [], applied: [] };
+    const plan = { fromVersion: "1", toVersion: "3", releaseUrl: `${DECKS}capitals/v3.ttl`, notes: [], add: [], change: [], retire: [], restore: [], remove: [], kept: [], applied: [], gone: [], appliedAbout: [] };
     expect(applyLibraryUpgrade(deck, plan)).toEqual({ ...deck, sourceUrl: `${DECKS}capitals/v3.ttl` });
     expect(applyLibraryUpgrade(deck, { ...plan, direction: "bidirectional" })).toEqual({
       ...deck,

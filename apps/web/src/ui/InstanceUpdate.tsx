@@ -1,9 +1,5 @@
-import type { BackupRestore, KeptDocument } from "@solid-memo/domain/backup";
-import type { UpdateOutcome, UpdateProgress, UpdateStep } from "@solid-memo/domain/instanceUpdate";
-import type { ComponentChildren } from "preact";
+import type { UpdateDocument, UpdateOutcome, UpdateProgress, UpdateStep } from "@solid-memo/domain/instanceUpdate";
 import { useId } from "preact/hooks";
-import { ExternalLink } from "./ExternalLink";
-import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type I18n } from "./i18n";
 import { usePanelFocus } from "./panelFocus";
 import { StepProgress } from "./StepProgress";
@@ -11,14 +7,9 @@ import { StepProgress } from "./StepProgress";
 /** What each step of the update does, as the progress line names it. */
 function stepLabels(t: I18n["t"]): Record<UpdateStep, string> {
   return {
-    stage: t("instanceUpdate.step.stage"),
-    backup: t("instanceUpdate.step.backup"),
-    copy: t("instanceUpdate.step.copy"),
-    check: t("instanceUpdate.step.check"),
-    verify: t("instanceUpdate.step.verify"),
-    rewrite: t("instanceUpdate.step.rewrite"),
-    validate: t("instanceUpdate.step.validate"),
-    tidy: t("instanceUpdate.step.tidy"),
+    read: t("instanceUpdate.step.read"),
+    write: t("instanceUpdate.step.write"),
+    register: t("instanceUpdate.step.register"),
   };
 }
 
@@ -63,14 +54,16 @@ export function InstanceUpdateConfirm({
 }
 
 /**
- * While the update runs: which step it is on, and how far along it is; or,
- * once it failed after writing, that it puts back what it changed. It
- * cannot be stopped half-way.
+ * While the update runs: which step it is on, and, while it updates the
+ * documents one by one, how many are done. Each document is updated or as
+ * it was at every moment, so a page closed half-way leaves the rest to
+ * update later.
  */
 export function InstanceUpdateProgress({ progress }: { progress: UpdateProgress }) {
   const { t } = useI18n();
   const labels = stepLabels(t);
   const step = labels[progress.step];
+  const { part } = progress;
   return (
     <StepProgress
       region={t("instanceUpdate.progressRegion")}
@@ -78,127 +71,78 @@ export function InstanceUpdateProgress({ progress }: { progress: UpdateProgress 
       current={progress.step}
       done={progress.done}
       total={progress.total}
-      part={progress.part}
-      status={progress.undoing === true ? t("instanceUpdate.undoing") : t("instanceUpdate.running", { step })}
+      part={part}
+      count={part === undefined ? undefined : t("instanceUpdate.count", { done: part.done, count: part.total })}
+      status={t("instanceUpdate.running", { step })}
       progressLabel={t("instanceUpdate.progressLabel")}
       hint={t("instanceUpdate.keepOpen")}
     />
   );
 }
 
+/** A document as the user knows it: the instance's record, its preferences, its catalogue, or a deck's cards or review states. */
+export function documentName(document: UpdateDocument, { t, readerText }: Pick<I18n, "t" | "readerText">): string {
+  switch (document.holds) {
+    case "cards":
+    case "reviews":
+      return t(`instanceUpdate.document.${document.holds}`, { deck: readerText(document.deck!) });
+    default:
+      return t(`instanceUpdate.document.${document.holds}`);
+  }
+}
+
 /**
- * When the update failed: where, why, and what became of the user's
- * documents — none was changed; every one it changed is back exactly as
- * it was; some changed elsewhere since it wrote them and were kept, each
- * with its earlier version; or putting them back failed, which can be
- * tried again. It takes the progress's place and its focus, so the
- * failure is read out.
+ * When the update could not update every document: which ones are left,
+ * each with why, how many it did update, and that every document can be
+ * read as it is, updated or not; trying again updates only what is still
+ * outdated. It takes the progress's place and its focus, so it is read
+ * out.
  */
-export function InstanceUpdateFailure({
+export function InstanceUpdateResult({
   outcome,
-  busy,
-  restored,
-  onRestore,
+  onRetry,
   onDismiss,
-  children,
 }: {
-  outcome: Extract<UpdateOutcome, { ok: false }>;
-  busy: boolean;
-  /** What trying again to put the documents back did, once it did. */
-  restored: BackupRestore | undefined;
-  onRestore: () => void;
+  outcome: UpdateOutcome;
+  onRetry: () => void;
   onDismiss: () => void;
-  /** Trying again's error, if any. */
-  children?: ComponentChildren;
 }) {
-  const { t, tx, errorText } = useI18n();
+  const i18n = useI18n();
+  const { t, tx, errorText } = i18n;
   const ref = usePanelFocus<HTMLDivElement>();
   const whyId = useId();
-  const { undo, backupUrl } = outcome;
-  const folder = backupUrl === undefined ? null : <ExternalLink url={backupUrl}>{t("instanceUpdate.backupFolder")}</ExternalLink>;
-  const offersRestore = undo?.failed !== undefined && restored === undefined;
+  const { updated, failed } = outcome;
   return (
     <div
       ref={ref}
       class="warning migration"
       role="region"
-      aria-label={t("instanceUpdate.failedRegion")}
+      aria-label={t("instanceUpdate.resultRegion")}
       aria-describedby={whyId}
       tabIndex={-1}
     >
-      <div id={whyId} class="failure-why">
-        <strong>{t("instanceUpdate.failedWhile", { step: stepLabels(t)[outcome.step].toLowerCase() })}</strong>{" "}
-        {errorText(outcome.error)}
-      </div>
-      {undo !== null && undo.failed !== undefined ? (
-        <>
-          <p>{tx("instanceUpdate.notPutBack", { link: folder })}</p>
-          <ErrorMessage error={errorText(undo.failed)} />
-        </>
-      ) : undo !== null && undo.kept.length > 0 ? (
-        <>
-          <p>{t("instanceUpdate.keptChanged", { count: undo.kept.length })}</p>
-          <KeptDocuments kept={undo.kept} />
-          {undo.restored.length > 0 && <p>{t("backup.restored", { count: undo.restored.length })}</p>}
-        </>
-      ) : (
+      <div id={whyId}>
         <p>
-          {undo === null || undo.restored.length === 0 ? t("instanceUpdate.noChanges") : t("instanceUpdate.putBack")}
-          {folder !== null && ` ${t("instanceUpdate.leftover")}`}
+          <strong>{t("instanceUpdate.notFinished", { count: failed.length })}</strong>
         </p>
-      )}
-      {restored !== undefined && <RestoreResult restored={restored} />}
-      <div class="edit-actions">
-        {offersRestore && (
-          <button
-            onClick={() => {
-              if (!busy) onRestore();
-            }}
-            aria-disabled={busy}
-          >
-            {busy ? t("instanceUpdate.restoring") : t("instanceUpdate.tryRestoring")}
-          </button>
-        )}
-        <button
-          onClick={() => {
-            if (!busy) onDismiss();
-          }}
-          aria-disabled={busy}
-        >
-          {t("instanceUpdate.close")}
-        </button>
+        <ul>
+          {failed.map((failure) => (
+            <li key={failure.url}>
+              {tx("instanceUpdate.failedItem", { document: documentName(failure, i18n), reason: errorText(failure.error) })}
+            </li>
+          ))}
+        </ul>
+        <p>
+          {updated.length > 0 && `${t("instanceUpdate.updatedAlso", { count: updated.length })} `}
+          {t("instanceUpdate.retryHint")}
+        </p>
       </div>
-      {children}
-    </div>
-  );
-}
-
-/** Documents kept as they are now, changed since an update wrote them, each with its earlier version where the backup has one. */
-export function KeptDocuments({ kept }: { kept: readonly KeptDocument[] }) {
-  const { t, tx } = useI18n();
-  return (
-    <ul class="kept-documents">
-      {kept.map(({ document, copy }) => (
-        <li key={document}>
-          {copy === undefined
-            ? document
-            : tx("backup.keptItem", { document, link: <ExternalLink url={copy}>{t("backup.earlierVersion")}</ExternalLink> })}
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-/** What restoring a backup did: how many documents it put back, and which it kept, changed since the update. */
-export function RestoreResult({ restored }: { restored: BackupRestore }) {
-  const { t } = useI18n();
-  return (
-    <div role="status">
-      <p>
-        {t("backup.restored", { count: restored.restored.length })}
-        {restored.kept.length > 0 && ` ${t("backup.keptSince")}`}
-      </p>
-      {restored.kept.length > 0 && <KeptDocuments kept={restored.kept} />}
+      <div class="edit-actions">
+        <button class="primary" onClick={onRetry}>
+          {t("instanceUpdate.tryAgain")}
+        </button>
+        <button onClick={onDismiss}>{t("instanceUpdate.close")}</button>
+      </div>
     </div>
   );
 }

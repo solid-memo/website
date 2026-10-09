@@ -381,3 +381,34 @@ describe("states that name their card", () => {
     expect(toReviewState(getThing(saved, `${deck.reviewsDocumentUrl}#card-200`)!, deck)).toMatchObject({ repetitions: 3 });
   });
 });
+
+describe("upgradeReviewStates", () => {
+  /** A state as an older app wrote it: format 1, at its own subject, another app's triple beside it. */
+  function older(written: ReviewState) {
+    return buildThing(named(written))
+      .setInteger(SM.formatVersion, 1)
+      .addStringNoLocale("https://other.example/#note", "kept")
+      .build();
+  }
+  const current: ReviewState = { ...state, cardId: "card-2" };
+
+  it("brings each outdated state up to this app's format as read, at its own subject, in one checked save", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(documentOf(older(state), named(current)));
+    const checkWrite = vi.fn(async () => undefined);
+    await expect(makeRepository(checkWrite).upgradeReviewStates(deck)).resolves.toBe(true);
+    expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
+    const saved = savedDataset();
+    const upgraded = getThing(saved, `${deck.reviewsDocumentUrl}#card-1`)!;
+    expect(toReviewState(upgraded, deck)).toEqual(state);
+    expect(upgraded.predicates["https://other.example/#note"]).toBeDefined();
+    expect(checkWrite).toHaveBeenCalledWith(saved, [`${deck.reviewsDocumentUrl}#card-1`]);
+  });
+
+  it("writes nothing when no state is outdated, or there is no reviews document", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(documentOf(named(current)));
+    await expect(makeRepository().upgradeReviewStates(deck)).resolves.toBe(false);
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await expect(makeRepository().upgradeReviewStates(deck)).resolves.toBe(false);
+    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+  });
+});

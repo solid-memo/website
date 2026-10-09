@@ -146,3 +146,49 @@ describe("savePreferences", () => {
     expect(getInteger(thing, SM.formatVersion)).toBe(4);
   });
 });
+
+describe("upgradePreferences", () => {
+  /** Preferences as an older app wrote them: format 1, a field left out, another app's triple beside them. */
+  function older() {
+    return setThing(
+      mockSolidDatasetFrom(DOCUMENT),
+      buildThing(createThing({ url: `${DOCUMENT}#it` }))
+        .addIri(RDF.type, SM.Preferences)
+        .addInteger(SM.newCardsPerDay, 7)
+        .addStringNoLocale("https://other.example/#note", "kept")
+        .build(),
+    );
+  }
+
+  it("brings outdated preferences up to this app's format as read, in place, checked first", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(older());
+    const checkWrite = vi.fn(async () => undefined);
+    await expect(makeRepository(checkWrite).upgradePreferences(INSTANCE)).resolves.toBe(true);
+    const [saveUrl, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    expect(saveUrl).toBe(DOCUMENT);
+    const thing = getThing(saved as SolidDataset, `${DOCUMENT}#it`)!;
+    expect(getInteger(thing, SM.newCardsPerDay)).toBe(7);
+    expect(getInteger(thing, SM.maxReviewsPerDay)).toBe(DEFAULT_PREFERENCES.maxReviewsPerDay);
+    expect(getStringNoLocale(thing, "https://other.example/#note")).toBe("kept");
+    expect(getInteger(thing, SM.formatVersion)).toBe(4);
+    expect(checkWrite).toHaveBeenCalledWith(saved, [`${DOCUMENT}#it`]);
+  });
+
+  it("writes nothing for preferences up to date, none, or no preferences document", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(mockSolidDatasetFrom(DOCUMENT));
+    await makeRepository().savePreferences(INSTANCE, DEFAULT_PREFERENCES);
+    const current = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as Parameters<typeof setThing>[0];
+    vi.mocked(saveSolidDatasetAt).mockReset();
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(current as never);
+    await expect(makeRepository().upgradePreferences(INSTANCE)).resolves.toBe(false);
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(mockSolidDatasetFrom(DOCUMENT));
+    await expect(makeRepository().upgradePreferences(INSTANCE)).resolves.toBe(false);
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(mockSolidDatasetFrom(DOCUMENT), buildThing(createThing({ url: `${DOCUMENT}#it` })).addInteger(SM.newCardsPerDay, 7).build()),
+    );
+    await expect(makeRepository().upgradePreferences(INSTANCE)).resolves.toBe(false);
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await expect(makeRepository().upgradePreferences(INSTANCE)).resolves.toBe(false);
+    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+  });
+});

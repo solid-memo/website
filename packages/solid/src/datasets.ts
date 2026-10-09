@@ -109,7 +109,7 @@ export function readDataset(url: string, fetch: typeof globalThis.fetch): Promis
 }
 
 /** A write is about to change the document: reads from now on fetch it again. */
-export function forgetRead(url: string, fetch: typeof globalThis.fetch): void {
+function forgetRead(url: string, fetch: typeof globalThis.fetch): void {
   const reads = READS.get(fetch);
   if (reads === undefined) return;
   url = documentUrlOf(url);

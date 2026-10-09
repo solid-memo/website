@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { aclOf, changeElsewhere, etagMarksEveryEdit, keepsWrittenTurtle, preconditionsOf, storageOf } from "./serverTraits";
+import { aclOf, changeElsewhere, etagMarksEveryEdit, preconditionsOf, storageOf } from "./serverTraits";
 
 const SERVER = "http://127.0.0.1:1/";
 
@@ -30,32 +30,6 @@ describe("a probe that cannot tell", () => {
     serve((method) => (method === "PATCH" ? new Response(null, { status: 415 }) : ok({ etag: '"1"' })));
     await expect(etagMarksEveryEdit(SERVER)).rejects.toThrow(/answered 415/);
     await expect(preconditionsOf(SERVER)).rejects.toThrow(/answered 415/);
-  });
-});
-
-describe("keepsWrittenTurtle", () => {
-  it("is whether a document PUT as Turtle is served as it was written, byte for byte", async () => {
-    // A server that keeps the bytes it is given.
-    let written = "";
-    const keeping = vi.fn(async (_input: string | URL, init: RequestInit = {}) => {
-      if (init.method === "PUT") {
-        written = String(init.body);
-        return new Response(null, { status: 201 });
-      }
-      return ok({}, written);
-    });
-    vi.stubGlobal("fetch", keeping);
-    await expect(keepsWrittenTurtle(SERVER)).resolves.toBe(true);
-    expect(new Headers(keeping.mock.calls[0]![1]!.headers).get("content-type")).toBe("text/turtle");
-    expect(written).toContain("# Written by hand.");
-    // One that writes out what it keeps anew.
-    serve((method) => (method === "PUT" ? new Response(null, { status: 201 }) : ok({}, `<#a> <#t> "x" .`)));
-    await expect(keepsWrittenTurtle(SERVER)).resolves.toBe(false);
-  });
-
-  it("throws rather than say the server lacks it, when the document cannot be written", async () => {
-    serve(() => new Response(null, { status: 403 }));
-    await expect(keepsWrittenTurtle(SERVER)).rejects.toThrow(/answered 403/);
   });
 });
 

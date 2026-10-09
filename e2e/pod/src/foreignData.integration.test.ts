@@ -22,7 +22,6 @@ import { arrangementSetAside, setAsideDecks } from "@solid-memo/domain/validatio
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
 import { createSolidDeckRepository } from "@solid-memo/solid/solidDeckRepository";
 import { createSolidInstanceCopier } from "@solid-memo/solid/solidInstanceCopier";
-import { createSolidDocumentBackups } from "@solid-memo/solid/solidDocumentBackups";
 import { createSolidInstanceRepository } from "@solid-memo/solid/solidInstanceRepository";
 import { createSolidPreferencesRepository } from "@solid-memo/solid/solidPreferencesRepository";
 import { createSolidRepairRepository } from "@solid-memo/solid/solidRepairRepository";
@@ -56,7 +55,6 @@ function page(): UseCases {
     shapeValidator,
     repairRepository: createSolidRepairRepository({ fetch: podFetch }),
     instanceCopier: createSolidInstanceCopier({ fetch: podFetch }),
-    documentBackups: createSolidDocumentBackups({ fetch: podFetch }),
     writeFence,
   });
 }

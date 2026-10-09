@@ -9,7 +9,6 @@ import {
   getSolidDataset,
   getThing,
   getUrl,
-  getUrlAll,
   getDatetime,
   mockContainerFrom,
   mockSolidDatasetFrom,
@@ -19,7 +18,7 @@ import {
   type SolidDataset,
 } from "@inrupt/solid-client";
 import { getSolidDatasetOrNull } from "./datasets";
-import { copyEffectiveAccessControl, createSolidInstanceCopier, linkedUrl } from "./solidInstanceCopier";
+import { createSolidInstanceCopier } from "./solidInstanceCopier";
 
 vi.mock("@inrupt/solid-client", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@inrupt/solid-client")>();
@@ -59,16 +58,6 @@ function copier(fetch = fetchOf({})) {
 
 beforeEach(() => {
   vi.resetAllMocks();
-});
-
-describe("linkedUrl", () => {
-  it("finds the link of a relation, resolved against the resource", () => {
-    const link = '<http://www.w3.org/ns/ldp#Resource>; rel="type", <main/.acl>; rel="acl describedby"';
-    expect(linkedUrl(link, "acl", "https://pod.example/solid-memo/")).toBe("https://pod.example/solid-memo/main/.acl");
-    expect(linkedUrl("<x.acr>; rel=acl", "acl", "https://pod.example/y")).toBe("https://pod.example/x.acr");
-    expect(linkedUrl('<x>; title="no rel"', "acl", "https://pod.example/")).toBeNull();
-    expect(linkedUrl(null, "acl", "https://pod.example/")).toBeNull();
-  });
 });
 
 describe("ensureAbsent", () => {
@@ -139,124 +128,6 @@ describe("copyResource", () => {
     expect(overwriteFile).toHaveBeenCalledWith(`${TO}flag.png`, picture, expect.objectContaining({ contentType: "image/png" }));
     await copier(fetchOf({ [`${FROM}x`]: {} })).copyResource(`${FROM}x`, `${TO}x`, MOVE);
     expect(overwriteFile).toHaveBeenLastCalledWith(`${TO}x`, picture, expect.objectContaining({ contentType: "image/png" }));
-  });
-});
-
-describe("copyEffectiveAccessControl", () => {
-  const acl = `${FROM}.acl`;
-  const ACL = "http://www.w3.org/ns/auth/acl#";
-  const deps = (fetch: typeof globalThis.fetch) => ({ fetch, loadEngine: () => import("@solid-memo/shacl/engine") });
-
-  it("copies a resource's own access control to the new resource's, its targets moved", async () => {
-    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
-      setThing(
-        mockSolidDatasetFrom(acl),
-        buildThing(createThing({ url: `${acl}#owner` }))
-          .addIri(`${ACL}accessTo`, FROM)
-          .addIri(`${ACL}default`, FROM)
-          .addIri(`${ACL}agent`, "https://alice.example/profile/card#me")
-          .build(),
-      ) as never,
-    );
-    const fetch = fetchOf({
-      [FROM]: { headers: { Link: '<.acl>; rel="acl"' } },
-      [TO]: { headers: { Link: '<.acl>; rel="acl"' } },
-    });
-    await expect(copyEffectiveAccessControl(deps(fetch), FROM, TO)).resolves.toBe(true);
-    const [url, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
-    expect(url).toBe(`${TO}.acl`);
-    const rule = getThing(saved as SolidDataset, `${TO}.acl#owner`)!;
-    expect(getUrlAll(rule, `${ACL}accessTo`)).toEqual([TO]);
-    expect(getUrlAll(rule, `${ACL}agent`)).toEqual(["https://alice.example/profile/card#me"]);
-  });
-
-  it("moves a document's own rules with it, and nothing else, when a document is copied", async () => {
-    const from = `${FROM}decks/deck-1.ttl`;
-    const to = `${FROM}backups/b1/decks/deck-1.ttl`;
-    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
-      setThing(
-        mockSolidDatasetFrom(`${from}.acl`),
-        buildThing(createThing({ url: `${from}.acl#friend` }))
-          .addIri(`${ACL}accessTo`, from)
-          .addIri(`${ACL}agent`, "https://bob.example/profile/card#me")
-          .build(),
-      ) as never,
-    );
-    const fetch = fetchOf({
-      [from]: { headers: { Link: '<deck-1.ttl.acl>; rel="acl"' } },
-      [to]: { headers: { Link: '<deck-1.ttl.acl>; rel="acl"' } },
-    });
-    await expect(copyEffectiveAccessControl(deps(fetch), from, to)).resolves.toBe(true);
-    const [url, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
-    expect(url).toBe(`${to}.acl`);
-    const rule = getThing(saved as SolidDataset, `${to}.acl#friend`)!;
-    expect(getUrlAll(rule, `${ACL}accessTo`)).toEqual([to]);
-    expect(getUrlAll(rule, `${ACL}agent`)).toEqual(["https://bob.example/profile/card#me"]);
-  });
-
-  it("gives a resource that inherits the rules of the nearest folder with its own, as its own, only those its contents inherit", async () => {
-    const from = `${FROM}decks/deck-1.ttl`;
-    const to = `${FROM}backups/b1/decks/deck-1.ttl`;
-    const decksAcl = `${FROM}decks/.acl`;
-    vi.mocked(getSolidDatasetOrNull).mockImplementation(async (url) =>
-      url === decksAcl
-        ? (setThing(
-            setThing(
-              mockSolidDatasetFrom(decksAcl),
-              buildThing(createThing({ url: `${decksAcl}#friend` }))
-                .addIri(`http://www.w3.org/1999/02/22-rdf-syntax-ns#type`, `${ACL}Authorization`)
-                .addIri(`${ACL}accessTo`, `${FROM}decks/`)
-                .addIri(`${ACL}default`, `${FROM}decks/`)
-                .addIri(`${ACL}agent`, "https://bob.example/profile/card#me")
-                .addIri(`${ACL}mode`, `${ACL}Read`)
-                .build(),
-            ),
-            // The folder's own listing only: not inherited.
-            buildThing(createThing({ url: `${decksAcl}#listing` }))
-              .addIri(`http://www.w3.org/1999/02/22-rdf-syntax-ns#type`, `${ACL}Authorization`)
-              .addIri(`${ACL}accessTo`, `${FROM}decks/`)
-              .addIri(`${ACL}agentClass`, "http://xmlns.com/foaf/0.1/Agent")
-              .build(),
-          ) as never)
-        : null,
-    );
-    const fetch = fetchOf({
-      [from]: { headers: { Link: '<deck-1.ttl.acl>; rel="acl"' } },
-      [`${FROM}decks/`]: { headers: { Link: '<.acl>; rel="acl"' } },
-      [to]: { headers: { Link: '<deck-1.ttl.acl>; rel="acl"' } },
-    });
-    await expect(copyEffectiveAccessControl(deps(fetch), from, to)).resolves.toBe(true);
-    const [url, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
-    expect(url).toBe(`${to}.acl`);
-    expect(getThing(saved as SolidDataset, `${to}.acl#inherited-2`)).toBeNull();
-    const rule = getThing(saved as SolidDataset, `${to}.acl#inherited-1`)!;
-    expect(getUrlAll(rule, `${ACL}accessTo`)).toEqual([to]);
-    expect(getUrlAll(rule, `${ACL}default`)).toEqual([]);
-    expect(getUrlAll(rule, `${ACL}agent`)).toEqual(["https://bob.example/profile/card#me"]);
-    expect(getUrlAll(rule, `${ACL}mode`)).toEqual([`${ACL}Read`]);
-  });
-
-  it("copies nothing where the pod gives no access control, or none is found up to the root", async () => {
-    await expect(copyEffectiveAccessControl(deps(fetchOf({})), FROM, TO)).resolves.toBe(false);
-    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
-    const fetch = fetchOf({
-      [FROM]: { headers: { Link: '<.acl>; rel="acl"' } },
-      // A folder whose access control is not there is passed over, as is one the pod gives none.
-      "https://pod.example/solid-memo/": { headers: { Link: '<.acl>; rel="acl"' } },
-    });
-    await expect(copyEffectiveAccessControl(deps(fetch), FROM, TO)).resolves.toBe(false);
-    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
-  });
-
-  it("refuses when the pod does not say where the new resource's access control goes", async () => {
-    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(mockSolidDatasetFrom(acl) as never);
-    const fetch = fetchOf({ [FROM]: { headers: { Link: '<.acl>; rel="acl"' } }, [TO]: {} });
-    const refused = `Your Pod does not say how to set who may open the copy, so Solid Memo cannot keep your sharing as it was. Nothing was changed.\nurl: ${TO}`;
-    await expect(copyEffectiveAccessControl(deps(fetch), FROM, TO)).rejects.toThrow(refused);
-    const from = `${FROM}decks/deck-1.ttl`;
-    vi.mocked(getSolidDatasetOrNull).mockImplementation(async (url) => (url === acl ? (mockSolidDatasetFrom(acl) as never) : null));
-    const inheriting = fetchOf({ [from]: { headers: { Link: '<deck-1.ttl.acl>; rel="acl"' } }, [FROM]: { headers: { Link: '<.acl>; rel="acl"' } } });
-    await expect(copyEffectiveAccessControl(deps(inheriting), from, TO)).rejects.toThrow(refused);
   });
 });
 
@@ -331,6 +202,22 @@ describe("the version a copy was made from", () => {
     const version = await copier(source.fetch).copyResource(`${FROM}decks/`, `${TO}decks/`, MOVE);
     expect(source.requests[0]).toMatchObject({ url: `${FROM}decks/`, method: "HEAD" });
     expect(JSON.parse(version)).toMatchObject({ etag: '"c1"', accept: "text/turtle" });
+  });
+
+  it("of a document now is read as the app reads it, never from a browser's cache, in the same form", async () => {
+    const tagged = recordingFetch({ [`${FROM}catalog.ttl`]: { headers: { ETag: '"v1"' } } });
+    expect(JSON.parse((await copier(tagged.fetch).versionOf(`${FROM}catalog.ttl`))!)).toEqual({ accept: "text/turtle", etag: '"v1"' });
+    expect(tagged.requests[0]).toMatchObject({ url: `${FROM}catalog.ttl`, method: "GET" });
+    expect(tagged.requests[0]!.headers.get("Accept")).toBe("text/turtle");
+    expect(vi.mocked(tagged.fetch).mock.calls[0]![1]).toMatchObject({ cache: "no-store" });
+    // Without an ETag or a modification time, a hash of the bytes: the same bytes, the same version.
+    const hashed = (body: string) => copier(recordingFetch({ [`${FROM}a.ttl`]: { body } }).fetch).versionOf(`${FROM}a.ttl`);
+    expect(await hashed("abc")).toBe(await hashed("abc"));
+    expect(await hashed("abc")).not.toBe(await hashed("abd"));
+    await expect(copier(recordingFetch({}).fetch).versionOf(`${FROM}gone.ttl`)).resolves.toBeNull();
+    await expect(copier(recordingFetch({ [`${FROM}a.ttl`]: { status: 403 } }).fetch).versionOf(`${FROM}a.ttl`)).rejects.toThrow(
+      `url: ${FROM}a.ttl\nstatus: 403`,
+    );
   });
 
   it("makes a copy only where nothing is yet: If-None-Match: *", async () => {

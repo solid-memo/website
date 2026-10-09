@@ -240,57 +240,6 @@ schedules by another algorithm can keep its states beside Solid Memo's.
   the document itself. Neither belongs to a shape, so neither moved a
   format; Solid Memo reads neither.
 
-## Backups
-
-Version 1.17 added what an update's backup says, so the format update
-and the library upgrade can change documents in place and still put
-each one back exactly as it was, document by document
-([migrations.md](migrations.md#the-backup)). A backup is a folder of the
-instance's `backups/`; its `manifest.ttl` holds these subjects, beside a
-file of each document's bytes.
-
-| Term | Kind | Domain → range | What it says |
-|---|---|---|---|
-| `sm:Backup` | class | | the backup, `manifest.ttl#it` |
-| `sm:BackupEntry` | class | | one document of the backup, `#entry-<n>` |
-| `sm:backupOf` | object property | Backup → the instance (its container) or a deck (its catalog entry) | what the backup was made for |
-| `sm:backedUpDocument` | object property | BackupEntry → a document | the document, at its own address |
-| `sm:backupCopy` | object property | BackupEntry → a file | where the document's bytes are kept, as the server served them (`<path>.orig`, or `elsewhere/<n>.orig` for a document outside the instance or at `staging/…` or `elsewhere/…`; `application/octet-stream`); absent: there was no document |
-| `sm:contentTypeBackedUp` | datatype property, `xsd:string` | BackupEntry | the Content-Type the bytes were served with, parameters and all, which they are put back with |
-| `sm:versionBackedUp` | datatype property, `xsd:string` | BackupEntry | the version the bytes were read at |
-| `sm:versionUpdated` | datatype property, `xsd:string` | BackupEntry | the version the update left the document at, once it wrote it |
-| `sm:releaseBackedUp` | object property | Backup → a library release | on a library upgrade's backup, the release the deck came from when it was made |
-
-- **New classes, format 1.** Backup and backup entry formats 1
-  (`backup/v1.ttl`, `backup-entry/v1.ttl`); no existing format changed,
-  so nothing older is outdated ([migrations.md](migrations.md#versions)).
-- **A version is opaque, as the pod gave it**: the document's ETag
-  (`"a1"`, or a weak `W/"…"`), else `Last-Modified: <date>`, else
-  `sha256:<hex>` of the bytes served. Compared only with another version
-  of the same document, read the same way (as Turtle).
-- **Bytes, not statements.** A document's earlier version is kept as
-  the very bytes the server served for it, in a file the server is told
-  is no RDF, so none parses or rewrites it: putting them back, with the
-  Content-Type they were served with, at the document's own address,
-  gives the document back exactly as it was, its prefixes, comments,
-  order, blank node labels and relative IRIs (which mean the same there)
-  included. Statements written out again would not: a server's rewrite
-  changes all of these.
-- **Why terms of its own.** `dcterms:hasVersion` and `prov:wasRevisionOf`
-  relate a resource to a version of itself; a backup is neither the
-  instance nor a version of it, but a set of earlier versions of some of
-  its documents, each with the versions a restore needs to know whether
-  it may put it back. `dcterms:created` dates the backup. The Content-Type
-  is a string, not `dcat:mediaType`'s IRI: it is put back as the server
-  gave it, parameters included.
-- **A deck's backup names its release.** It holds that release's cards,
-  so it is restored only while the deck's entry still names the release
-  (`prov:wasDerivedFrom`) that `sm:releaseBackedUp` gives.
-- **Not linked from the instance's record.** Backups are found by
-  listing `backups/`: the record is written by the update only when its
-  own format is outdated, so that it is backed up and restored like any
-  document, and two runs never write over each other's link.
-
 ## The language of text
 
 Solid Memo's text properties (`sm:front`, `sm:back`, `sm:frontNote`,

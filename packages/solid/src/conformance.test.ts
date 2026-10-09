@@ -103,17 +103,6 @@ const FIXTURES: Record<ShapeName, Record<number, object>> = {
   documentReceipt: {
     1: { document: "https://pod.example/solid-memo/a/decks/d.ttl", version: '"v1"', conformedTo: "0123abcd", latestFormat: true },
   },
-  backup: {
-    1: { backupOf: "https://pod.example/solid-memo/a/catalog.ttl#deck-1", created: "2026-10-09T10:00:00.000Z", release: "https://solid-memo.com/decks/capitals/v1.ttl" },
-  },
-  backupEntry: {
-    1: {
-      document: "https://pod.example/solid-memo/a/decks/d.ttl",
-      copy: "https://pod.example/solid-memo/a/backups/20261009T100000Z-0f3a/decks/d.ttl",
-      versionBackedUp: '"v1"',
-      versionUpdated: '"v2"',
-    },
-  },
   deckSchedule: {
     1: {
       deck: "https://pod.example/solid-memo/a/catalog.ttl#deck-1",
