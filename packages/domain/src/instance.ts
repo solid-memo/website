@@ -44,3 +44,37 @@ export interface InstanceDeletion {
   /** The instance's folder, when it was kept for what else it holds; null when it is gone. */
   keptFolder: string | null;
 }
+
+/**
+ * The kinds of an instance's data registered in the type indexes, one
+ * class each (docs/data-model.md "Discovery chain"): the instance
+ * itself, its catalogue, its decks, cards, review states and answers.
+ */
+export const DATA_CLASSES = ["instance", "catalog", "deck", "card", "reviewState", "answer"] as const;
+export type DataClass = (typeof DATA_CLASSES)[number];
+
+/**
+ * Review states and answers say what the user studied, and how well:
+ * they are registered in the private type index only, never in the
+ * public one, even for an instance registered publicly.
+ */
+export function isPrivateOnly(dataClass: DataClass): boolean {
+  return dataClass === "reviewState" || dataClass === "answer";
+}
+
+/** One registration an instance's data has, or is missing, in one type index. */
+export interface DataClassRegistration {
+  dataClass: DataClass;
+  index: RegistrationTarget;
+  registered: boolean;
+}
+
+/** The registrations an instance's data has and is missing, by class. */
+export interface DataClassRegistrations {
+  /** In DATA_CLASSES order, the private index's before the public one's. */
+  registrations: DataClassRegistration[];
+  /** No private type index: review states and answers, which go only there, are not registered. */
+  privateIndexMissing: boolean;
+  /** The type indexes the profile links that could not be read: what they register is not known, and nothing is added to them. */
+  unreadableIndexes: RegistrationTarget[];
+}

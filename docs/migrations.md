@@ -285,7 +285,8 @@ The format update changes the user's documents where they are. Before
 it writes one, it copies it into a backup inside the instance; it then
 writes each document only while it is still as it was copied, and
 checks the instance after. No document, subject or folder changes its
-address, and nothing in the type index changes
+address, and no registration in the type index changes: once it
+succeeded, only those missing of the instance's data are added
 ([instanceUpdate.ts](../packages/domain/src/instanceUpdate.ts),
 `updateInstance` in [useCases.ts](../packages/application/src/useCases.ts)).
 
@@ -299,7 +300,7 @@ flowchart TD
     stage --> backup["2 backup: backups/&lt;stamp&gt;/manifest.ttl,<br/>then a copy of each document (and its own ACL),<br/>each created where nothing is"]
     backup --> upgrade["3 upgrade: each document in place,<br/>only while still at the version backed up;<br/>the version it left noted in the manifest"]
     upgrade --> validate["4 validate: validateInstance;<br/>nothing it wrote may fail anew"]
-    validate --> done["Updated, at the same address;<br/>the backup in Preferences"]
+    validate --> done["Updated, at the same address;<br/>the backup in Preferences;<br/>missing registrations added"]
     stage & backup -->|error| clean["Delete what was backed up,<br/>show the error: nothing changed"]
     upgrade -->|"a document changed elsewhere (412)"| partly["Stop: what was updated stays updated,<br/>the backup is kept; run again to finish"]
     validate -->|new violation| offer["Report it, keep the backup,<br/>offer Restore"]
@@ -401,6 +402,17 @@ flowchart TD
   before. What another app wrote in the instance has only warnings
   ([validation.md](validation.md#data-another-app-wrote)), so it never
   stops an update either.
+- **Then the registrations.** Once the update succeeded, each
+  registration of the instance's data by class that belongs in a type
+  index and is missing there is added
+  ([data-model.md](data-model.md#discovery-chain)), one write per index
+  with `If-Match`, so an instance made before there were such
+  registrations gains them with its update; one already there is left
+  as it is. This is the one write outside
+  the instance, and the only one not backed up: it changes no
+  registration, and the instance works without it, so a failure there
+  leaves the update done, and **Register what is missing** in
+  Preferences adds them later. An update that failed adds none.
 - **A failure before the first write leaves nothing.** The backup is
   deleted (its copies and manifest, as the manifest names them), and
   the user is told no changes were made; a backup that could not be
@@ -445,7 +457,10 @@ It seeds an old-format instance with another app's triple, an unknown
 file and shared access, and checks that:
 
 - every write goes to a document the backup's manifest names, or into
-  the backup; none to the type index, which is as it was;
+  the backup, but the last: one edit of the type index (with `If-Match`
+  where the server enforces it), which keeps every triple it had and
+  adds the registrations of the instance's catalogue, decks, cards,
+  review states and answers;
 - the backup's copy of a document shared on its own is shared alike,
   and the copy of one that inherits its access is given that access as
   its own;
@@ -565,9 +580,12 @@ which the copy's `meta.ttl` names (`dcterms:replaces`, and
 it, and handled as then:
 
 - **Restore previous version** switches the type indexes back to it
-  (`switchInstance`: only the registrations' links to the instance
-  change, in each index that registers it, one save per index with
-  `If-Match`, the ones switched undone when a later one fails), then
+  (`switchInstance`: only the registrations' links to the instance's
+  data change, each to the same resource of the backup, in each index
+  that holds any of them, so the review states' and answers' in the
+  private index of an instance registered publicly move too; one save
+  per index with `If-Match`, the ones switched undone when a later one
+  fails), then
   deletes what the updated instance holds of Solid Memo's; what was
   studied since that update is lost with it (the confirmation says
   so). This is the one way an instance's address still changes.

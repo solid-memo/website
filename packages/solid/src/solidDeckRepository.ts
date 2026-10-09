@@ -23,7 +23,13 @@ import {
 } from "@solid-memo/domain/deck";
 import { cardToRecord } from "@solid-memo/domain/deckRecord";
 import { withStatedLanguages } from "@solid-memo/domain/deckLanguages";
-import { catalogUrlOf, documentsInUse, ensureTrailingSlash } from "@solid-memo/domain/instanceLayout";
+import {
+  cardsContainerOf,
+  catalogUrlOf,
+  documentsInUse,
+  ensureTrailingSlash,
+  reviewsContainerOf,
+} from "@solid-memo/domain/instanceLayout";
 import { documentUrlOf, fragmentIdOf } from "@solid-memo/domain/subjectUrl";
 import { CARD_V5 } from "@solid-memo/vocab/descriptors.generated";
 import { applyDeckTreeEdit, buildTree, treeChanges } from "@solid-memo/domain/deckTree";
@@ -419,8 +425,8 @@ export function createSolidDeckRepository({
       id,
       url: `${catalogUrlOf(base)}#${id}`,
       title,
-      cardsDocumentUrl: `${base}decks/${id}.ttl`,
-      reviewsDocumentUrl: `${base}reviews/${id}.ttl`,
+      cardsDocumentUrl: `${cardsContainerOf(base)}${id}.ttl`,
+      reviewsDocumentUrl: `${reviewsContainerOf(base)}${id}.ttl`,
       createdAt: now().toISOString(),
       formatVersion: DECK_FORMAT_VERSION,
       direction: source?.direction ?? DEFAULT_DECK_DIRECTION,

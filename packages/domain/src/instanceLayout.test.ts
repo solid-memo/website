@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Deck } from "./deck";
 import {
+  cardsContainerOf,
   catalogNodeUrlOf,
   catalogUrlOf,
   deckGroupUrlOf,
@@ -15,6 +16,7 @@ import {
   monthOfHistoryUrl,
   metaUrlOf,
   preferencesUrlOf,
+  reviewsContainerOf,
 } from "./instanceLayout";
 
 const INSTANCE = "https://pod.example/solid-memo/main";
@@ -26,6 +28,11 @@ describe("instance layout", () => {
     expect(metaUrlOf(INSTANCE)).toBe(`${INSTANCE}/meta.ttl`);
     expect(preferencesUrlOf(`${INSTANCE}/`)).toBe(`${INSTANCE}/preferences.ttl`);
     expect(catalogUrlOf(INSTANCE)).toBe(`${INSTANCE}/catalog.ttl`);
+  });
+
+  it("names the containers of the decks' documents, with or without a trailing slash", () => {
+    expect(cardsContainerOf(INSTANCE)).toBe(`${INSTANCE}/decks/`);
+    expect(reviewsContainerOf(`${INSTANCE}/`)).toBe(`${INSTANCE}/reviews/`);
   });
 
   it("lists every document of an instance, fixed ones first", () => {

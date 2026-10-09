@@ -42,6 +42,16 @@ export function digestUrlOf(instanceUrl: string): string {
   return `${ensureTrailingSlash(instanceUrl)}digest.ttl`;
 }
 
+/** The container of the instance's cards documents, `decks/`, where every deck's is made. */
+export function cardsContainerOf(instanceUrl: string): string {
+  return `${ensureTrailingSlash(instanceUrl)}decks/`;
+}
+
+/** The container of the instance's reviews documents, `reviews/`, where every deck's is made. */
+export function reviewsContainerOf(instanceUrl: string): string {
+  return `${ensureTrailingSlash(instanceUrl)}reviews/`;
+}
+
 /**
  * The instance's answer log (domain/answer.ts): one document per study
  * month in this container, `history/<YYYY-MM>.ttl`. Source data the

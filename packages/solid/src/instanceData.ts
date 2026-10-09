@@ -1,6 +1,7 @@
 import { getThingAll, getUrlAll, type SolidDataset } from "@inrupt/solid-client";
 import type { InstanceDeletion } from "@solid-memo/domain/instance";
 import {
+  cardsContainerOf,
   catalogUrlOf,
   digestUrlOf,
   ensureTrailingSlash,
@@ -8,6 +9,7 @@ import {
   metaUrlOf,
   monthOfHistoryUrl,
   preferencesUrlOf,
+  reviewsContainerOf,
 } from "@solid-memo/domain/instanceLayout";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { deleteContainerIfEmpty, listContainerTree } from "./containers";
@@ -68,7 +70,7 @@ export async function deleteInstanceData(
     await deleteIfPresent(url, fetch);
   }
   for (const backup of await listBackupsOf(container, fetch)) await removeBackup(backup, fetch);
-  for (const subcontainer of [`${container}decks/`, `${container}reviews/`, history]) {
+  for (const subcontainer of [cardsContainerOf(container), reviewsContainerOf(container), history]) {
     await deleteContainerIfEmpty(subcontainer, fetch);
   }
   await deleteIfPresent(meta, fetch);

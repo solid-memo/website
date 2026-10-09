@@ -40,6 +40,8 @@ flowchart LR
     W -->|solid:publicTypeIndex| PUB[Public type index]
     PTI -->|solid:TypeRegistration<br/>forClass sm:Instance| I1[Instance container]
     PUB -->|solid:TypeRegistration| I2[Instance container]
+    PTI -.->|"forClass dcat:Catalog, sm:Deck,<br/>sm:Card, sm:ReviewState, sm:Answer"| D1[The instance's data,<br/>for other apps]
+    PUB -.->|"forClass dcat:Catalog, sm:Deck,<br/>sm:Card"| D1
 ```
 
 - **Storage**: `pim:storage` triples in the (extended) profile via
@@ -49,7 +51,46 @@ flowchart LR
 - **Instances**: one `solid:TypeRegistration` per instance, `solid:forClass
   sm:Instance`, in the private type index by default. `dcterms:title` on the
   registration names the instance (harmless extra triples). Reading accepts
-  both `solid:instanceContainer` and `solid:instance`.
+  both `solid:instanceContainer` and `solid:instance`. This is how
+  Solid Memo finds its instances, and the only registration it reads to
+  do so.
+- **Each class of an instance's data** has a registration of its own,
+  so another app finds the kind of data it knows by its class, without
+  knowing Solid Memo's layout ([examples below](#registrations)):
+  the catalogue (`dcat:Catalog`, `solid:instance` its subject
+  `catalog.ttl#catalog`), the decks (`sm:Deck`, `solid:instance`
+  `catalog.ttl`, the one document that holds every deck subject), the
+  cards (`sm:Card`, `solid:instanceContainer` `decks/`), the review
+  states (`sm:ReviewState`, `reviews/`) and the answers (`sm:Answer`,
+  `history/`), each titled with the instance's name. Per the Type
+  Indexes spec, `solid:instance` names the one resource holding the
+  class's subjects, and `solid:instanceContainer` a container whose
+  documents hold them. The catalogue's, the decks' and the cards'
+  registrations go in each index that registers the instance. The
+  review states' and answers' go in the private index only, even for an
+  instance registered publicly: they say what the user studied and how
+  well. Without a private index they are not registered anywhere.
+  They are written when an instance is created, by a
+  [format update](migrations.md#the-pod-migration) once it succeeded
+  (a failure there leaves the update done), when a guest's study moves
+  into the pod ([guest-mode.md](guest-mode.md#keeping-the-study)), and
+  by **Register what is missing** under **Findable by other apps** in
+  Preferences, which lists every registration that belongs in an index
+  and whether it is there (not offered to a guest, whose pod no other
+  app sees). A type index the profile links that cannot be read is
+  left out there, and said to be unreadable; nothing is added to it. Never on opening an instance: that would fight other
+  editors of the index, and add back what the user removed. Attaching
+  an instance by URL writes its `sm:Instance` registration alone.
+- **Writing a type index** reads it, makes the change and saves it with
+  `If-Match` the version read; when the index changed meanwhile (412),
+  it is read and the change made again, three attempts in all
+  (`changeIndex` in [typeIndex.ts](../packages/solid/src/typeIndex.ts)).
+  A registration is added only when no equal one is there: the same
+  class, naming the same resource under either predicate (the
+  instance's container with or without its trailing slash, as reading
+  takes it). Every registration of the instance's data, read back from
+  the type indexes of real servers, is in
+  [typeIndex.integration.test.ts](../e2e/pod/src/typeIndex.integration.test.ts).
 - **Type index links** are read from the WebID subject in the WebID
   document and in its extended profile documents (`rdfs:seeAlso` /
   `foaf:isPrimaryTopicOf`), plus `pim:preferencesFile` for the private one.
@@ -61,12 +102,17 @@ flowchart LR
   `id.inrupt.com` is read-only; `<storage>profile` is the writable one). An
   index document already at the target URL is adopted, not overwritten. If
   registration fails, instance creation fails loudly and the created
-  container is cleaned up; there is no local fallback.
+  container is cleaned up; there is no local fallback. For an instance
+  registered publicly, the review states' and answers' registrations
+  are written to the private index afterwards, and a private index that
+  refuses them does not fail the creation: they are left for
+  **Register what is missing**.
 - **Deleting an instance** deletes what Solid Memo wrote in its
   container and nothing else (`deleteInstanceData` in
   [instanceData.ts](../packages/solid/src/instanceData.ts)), then removes
-  its registrations from both type indexes. What it wrote: every deck's
-  cards and reviews documents as the catalogue names them (only those
+  its registrations, of every class, from both type indexes (below).
+  What it wrote: every deck's cards and reviews documents as the
+  catalogue names them (only those
   below the container: the catalogue is data, and one naming a document
   elsewhere must not lead a delete there), the answer log's months
   (`history/<YYYY-MM>.ttl`), `preferences.ttl`, `digest.ttl` and
@@ -99,6 +145,71 @@ flowchart LR
   Solid-Nextcloud lists a folder's ACL among what the folder contains, so
   there such a folder is kept, its access rules in it; what the advisory
   servers fail, and why, is their `expected-failures.json`.
+
+### Registrations
+
+In the type index, the instance's own registration, by which Solid Memo
+finds it:
+
+```turtle
+<#sm-inst-9f3c1a> a solid:TypeRegistration ;
+    solid:forClass sm:Instance ;
+    solid:instanceContainer <https://pod.example/solid-memo/main/> ;
+    dcterms:title "Japanese study" .
+```
+
+Beside it, one registration for each class of its data, so other
+applications find each kind without knowing Solid Memo: its catalogue as
+a DCAT catalogue, its decks, and the containers of its cards, review
+states and answers.
+
+```turtle
+<#sm-cat-4b7d2e> a solid:TypeRegistration ;
+    solid:forClass dcat:Catalog ;
+    solid:instance <https://pod.example/solid-memo/main/catalog.ttl#catalog> ;
+    dcterms:title "Japanese study" .
+
+<#sm-deck-1c8e40> a solid:TypeRegistration ;
+    solid:forClass sm:Deck ;
+    solid:instance <https://pod.example/solid-memo/main/catalog.ttl> ;
+    dcterms:title "Japanese study" .
+
+<#sm-card-7a21d9> a solid:TypeRegistration ;
+    solid:forClass sm:Card ;
+    solid:instanceContainer <https://pod.example/solid-memo/main/decks/> ;
+    dcterms:title "Japanese study" .
+```
+
+and, in the private type index only:
+
+```turtle
+<#sm-review-52f0b3> a solid:TypeRegistration ;
+    solid:forClass sm:ReviewState ;
+    solid:instanceContainer <https://pod.example/solid-memo/main/reviews/> ;
+    dcterms:title "Japanese study" .
+
+<#sm-answer-e9d417> a solid:TypeRegistration ;
+    solid:forClass sm:Answer ;
+    solid:instanceContainer <https://pod.example/solid-memo/main/history/> ;
+    dcterms:title "Japanese study" .
+```
+
+`meta.ttl` makes a container self-describing: attach-by-URL reads it to
+recover an instance that lost its registration. Deleting an instance
+removes all of its registrations: the `sm:Instance` one by its
+container, each other by the exact IRI it names
+(`<container>catalog.ttl#catalog`, `<container>catalog.ttl`,
+`<container>decks/`, `<container>reviews/`, `<container>history/`),
+never by what lies under the container, where another app may have
+registered data of its own. A registration that also registers
+something else keeps it, and loses only the link to the instance's
+data. Switching the registrations to another container, as restoring
+the copy an earlier version's format update left does, likewise
+replaces only the links to the instance's data, each with the same
+resource of the other container, in every index that holds any of
+them: the private index of an instance registered publicly holds only
+its review states' and answers', and they move too. The other things a
+shared registration names, and its title, stay as they were.
 
 ## Instance layout
 
@@ -345,43 +456,12 @@ graph LR
   document. The subject has no class, so no shape checks it, and the
   [data check](validation.md#flow) lists it as not a Solid Memo subject.
 
-Registration in the type index:
-
-```turtle
-<#sm-inst-9f3c1a> a solid:TypeRegistration ;
-    solid:forClass sm:Instance ;
-    solid:instanceContainer <https://pod.example/solid-memo/main/> ;
-    dcterms:title "Japanese study" .
-```
-
-Beside it, the instance's catalogue is registered as a DCAT catalogue,
-so other applications find its decks without knowing Solid Memo:
-
-```turtle
-<#sm-cat-4b7d2e> a solid:TypeRegistration ;
-    solid:forClass dcat:Catalog ;
-    solid:instance <https://pod.example/solid-memo/main/catalog.ttl#catalog> ;
-    dcterms:title "Japanese study" .
-```
-
-`meta.ttl` makes a container self-describing: attach-by-URL reads it to
-recover an instance that lost its registration. Deleting an instance
-removes both registrations: the `sm:Instance` one by its container, the
-`dcat:Catalog` one by the catalogue's exact IRI,
-`<container>catalog.ttl#catalog`, never by what lies under the
-container, where another app may have registered a catalogue of its
-own. A registration that also registers something else keeps it, and
-loses only the link to the instance. Switching the registrations to
-another container, as restoring the copy an earlier version's format
-update left does, likewise replaces only the links to the instance: the
-other things a shared registration names, and its title, stay as they
-were.
-
 An instance's URL is permanent, and so is every document's and
 subject's in it: the [format update](migrations.md#the-pod-migration)
 and the [library upgrade](migrations.md#how-an-upgrade-is-applied)
 write the documents where they are, after backing them up inside the
-instance, and change no registration. Another app may keep a link to
+instance, and change no registration (the format update only adds
+those missing). Another app may keep a link to
 the instance, a deck, a card or a review state. The one way an
 instance's address still changes is restoring the copy of a whole
 instance that a format update by an earlier version of the app left as
@@ -411,9 +491,9 @@ instance listing one stays valid (held against real servers in
 [foreignData.integration.test.ts](../e2e/pod/src/foreignData.integration.test.ts)). It is written when an instance is created,
 and by the [format update](migrations.md) for an instance made before
 there were catalogues. Its registration is written with the instance's
-when the instance is created or a guest's study moves into the pod; the
-format update changes no registration, so an instance made before
-there were catalogues and updated since has none. The whole document
+when the instance is created or a guest's study moves into the pod, and
+by the format update and Preferences when missing
+([Discovery chain](#discovery-chain)). The whole document
 conforms to DCAT-AP (a test holds what the app writes to it).
 
 A deck's description, topics and keywords are edited in its Browser

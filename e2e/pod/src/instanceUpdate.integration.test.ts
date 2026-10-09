@@ -31,6 +31,7 @@ import { createWriteFence } from "@solid-memo/solid/writeFence";
 import { aclOf, changeElsewhere, ETAG_OUTLIVES_EDITS, etagMarksEveryEdit, preconditionsOf, type Preconditions } from "./serverTraits";
 
 const SERVERS = inject("solidServers");
+const SM = "https://solid-memo.com/ns/vocab/v1.ttl#";
 const READS = new Set(["GET", "HEAD", "OPTIONS"]);
 const PREFIXES = `@prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
@@ -398,10 +399,13 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
     expect(backup).toMatchObject({ url: backupUrl, of: pod.source });
     expect(backup.entries.map((entry) => entry.document)).toEqual(UPDATED.map((path) => `${pod.source}${path}`));
 
-    // Every write went to a document the backup lists, or into the backup; none to the type index.
+    // Every write went to a document the backup lists, or into the backup, but the last: the type index,
+    // once updated, given the registrations of the instance's data it lacked, If-Match where the server enforces it.
     const writes = sent.filter(isWrite);
     const documents = new Set(backup.entries.map((entry) => entry.document));
-    expect(writes.filter((request) => !documents.has(request.url) && !under(backupUrl)(request))).toEqual([]);
+    expect(writes.filter((request) => !documents.has(request.url) && !under(backupUrl)(request))).toEqual([writes.at(-1)]);
+    expect(writes.at(-1)).toMatchObject({ method: "PATCH", url: pod.typeIndex });
+    if (conditional.edits) expect(writes.at(-1)!.ifMatch).toMatch(/^"/);
     // Each document was written once, and only after the backup's manifest and its own copy were.
     const manifest = writes.findIndex((request) => request.url === `${backupUrl}manifest.ttl`);
     for (const entry of backup.entries) {
@@ -425,8 +429,22 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
     // Nothing else in the tab wrote meanwhile; the attempts are the writes sent.
     expect(attempts.filter(isWrite).map((request) => request.url)).toEqual(writes.map((request) => request.url));
 
-    // The instance: updated, conforming, at its address, the type index as it was.
-    expect(await registeredContainers(pod)).toBe(indexBefore);
+    // The instance: updated, conforming, at its address; the type index as it was, and each class of its data registered.
+    const indexAfter = await registeredContainers(pod);
+    for (const triple of indexBefore.split("\n").filter((line) => line !== "")) expect(indexAfter).toContain(triple);
+    for (const [forClass, predicate, target] of [
+      ["http://www.w3.org/ns/dcat#Catalog", "instance", `${pod.source}catalog.ttl#catalog`],
+      [`${SM}Deck`, "instance", `${pod.source}catalog.ttl`],
+      [`${SM}Card`, "instanceContainer", `${pod.source}decks/`],
+      [`${SM}ReviewState`, "instanceContainer", `${pod.source}reviews/`],
+      [`${SM}Answer`, "instanceContainer", `${pod.source}history/`],
+    ]) {
+      const registration = new RegExp(`^(<[^>]+>) <http://www.w3.org/ns/solid/terms#forClass> <${forClass}> \\.$`, "m");
+      const subject = registration.exec(indexAfter)?.[1];
+      expect(subject, forClass).toBeDefined();
+      expect(indexAfter).toContain(`${subject} <http://www.w3.org/ns/solid/terms#${predicate}> <${target}> .`);
+      expect(indexAfter).toContain(`${subject} <http://purl.org/dc/terms/title> "Main" .`);
+    }
     expect(await useCases.planMigration(pod.source)).toMatchObject({ deckCount: 0, cardCount: 0, reviewCount: 0, catalogMissing: false });
     expect((await useCases.validateInstance(pod.source)).conforms).toBe(true);
     expect(await useCases.listDecks(pod.source)).toMatchObject([
