@@ -12,7 +12,7 @@ versions, each version a `dcat:Dataset` with its cards and a Turtle
 
 | Path under `decks/` | IRI | What |
 |---|---|---|
-| `index.ttl` | `https://solid-memo.com/decks/index.ttl` | The catalogue the app lists, generated from the versions and committed: each deck a series (`index.ttl#<name>`), its current version described in full but for its cards and how it was made, the publisher `index.ttl#solid-memo`. |
+| `index.ttl` | `https://solid-memo.com/decks/index.ttl` | The catalogue the app lists, generated from the versions and committed: each deck a series (`index.ttl#<name>`), its current version described in full but for its cards and how it was made, the publisher `index.ttl#solid-memo`, and the [course for newcomers](#courses). |
 | `<name>/v<N>.ttl` | `https://solid-memo.com/decks/<name>/v<N>.ttl` | Version `N` of a deck, frozen once published; its cards are fragments of it (`…/v1.ttl#sweden`). |
 
 Nothing else is in `decks/`: no lock file, no sources, no scripts. A
@@ -88,6 +88,17 @@ is the first course, and the first release written in Markdown.
 A course's chapters, steps and distractors are never removed, as its
 cards are not: one that should go is retired (`owl:deprecated true`), so
 the learners' decks that follow the course keep their place in it.
+
+The index names at most one course for newcomers:
+`<> sm:newcomerCourse <#name>` on the catalogue, the series of a course
+the app offers to someone with no decks yet
+([courses.md](courses.md#the-course-for-newcomers)). It is library
+configuration, not part of any release: `NEWCOMER_COURSE` in
+[deckLibrary.ts](../packages/shacl/node/deckLibrary.ts) names the deck
+(`io.newcomerCourse` in `main`, so its tests can name another), and
+`undefined` names none (and retires the journey that expects an offer,
+[courses.md](courses.md#the-course-for-newcomers)). The term belongs to no shape: `CatalogV1` does
+not own it, and DCAT-AP ignores it.
 
 ## Provenance
 
@@ -219,6 +230,11 @@ what the versions make. Both check:
 - that no version drops a card, chapter, step or distractor of the one
   before it;
 - a course's outline, by the [course rules](#course-rules);
+- the index's course for newcomers (`newcomerProblems`): at most one, an
+  IRI, a deck of the library (one of the catalogue's `dcat:dataset`s),
+  whose current release is a `schema:Course`. `buildIndex` writes the
+  name even when there is no such deck, so a typo in `NEWCOMER_COURSE`
+  is reported, not dropped;
 - text in Markdown, by the [Markdown rules](#markdown-rules);
 - every version and the index against Solid Memo's shapes, DCAT-AP (a
   version with the index beside it) and SKOS, with the reference data.
@@ -332,6 +348,9 @@ The library conforms to the same shapes the app reads it with
 flowchart LR
     ui["LibraryContainer / LibraryScreen<br/>#/library?instance=…"] --> uc["listLibraryDecks<br/>importLibraryDeck"]
     page["LibraryDeckContainer / LibraryDeckScreen<br/>#/library-deck?instance=…&deck=&lt;series&gt;"] --> uc
+    offer["NewcomerCourseContainer<br/>on an empty deck list"] --> start["listLibraryDecks<br/>startCourse"]
+    start --> lib
+    start --> repo
     uc --> lib["DeckLibrary port<br/>(solidDeckLibrary.ts)"]
     uc --> repo["DeckRepository.importDeck<br/>(solidDeckRepository.ts)"]
     lib -->|plain fetch| idx["solid-memo.com/decks/index.ttl"]
@@ -384,6 +403,10 @@ flowchart LR
   it, only its page): its copy starts with no
   cards, and a card joins it when its question is answered
   ([courses.md](courses.md)).
+- The course the index names for newcomers is `LibraryDeck.forNewcomers`
+  (`toLibraryDecks` flags it only when it is a course). An instance with
+  no decks is offered it under its deck list's heading, started in one
+  click ([courses.md](courses.md#the-course-for-newcomers)).
 - When the library publishes a newer release of an imported deck, the
   deck's page offers to update the copy card by card, keeping what the
   user changed and their review history

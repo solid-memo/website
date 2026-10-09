@@ -464,6 +464,28 @@ describe("Workspace", () => {
     });
   });
 
+  it("reads the library as an instance is created, not only once its empty deck list is in", async () => {
+    const useCases = makeUseCases({
+      listStorages: vi.fn(async () => [storageA]),
+      listInstances: vi
+        .fn<() => Promise<Instance[]>>()
+        .mockResolvedValueOnce([])
+        .mockResolvedValue([instanceA]),
+      listDeckTree: vi.fn(() => new Promise<never>(() => undefined)),
+    });
+    renderWorkspace(useCases);
+
+    fireEvent.input(await screen.findByLabelText("Name"), {
+      target: { value: "Deck set A" },
+    });
+    fireEvent.submit(
+      screen.getByRole("button", { name: "Create instance" }).closest("form")!,
+    );
+
+    await waitFor(() => expect(useCases.listLibraryDecks).toHaveBeenCalledOnce());
+    expect(screen.queryByRole("heading", { name: "Decks" })).not.toBeInTheDocument();
+  });
+
   it("adds a manual storage and continues to the creator", async () => {
     const useCases = makeUseCases();
     renderWorkspace(useCases);
@@ -2175,6 +2197,25 @@ describe("Workspace", () => {
         "Course",
       ]);
       expect(document.title).toBe("Course – Solid fundamentals – Solid Memo");
+    });
+
+    it("starts the course for newcomers from the empty deck list and opens it", async () => {
+      let started = false;
+      const useCases = courseUseCases({
+        listDecks: vi.fn(async () => (started ? [courseDeck] : [])),
+        listLibraryDecks: vi.fn(async () => [{ ...courseLibraryDeck, forNewcomers: true as const }]),
+        startCourse: vi.fn(async () => {
+          started = true;
+          return courseDeck;
+        }),
+      });
+      window.history.replaceState(null, "", routeToHash({ screen: "home", instanceUrl: instanceA.url }));
+      renderWorkspace(useCases);
+      fireEvent.click(await screen.findByRole("button", { name: "Start the course" }));
+
+      expect(await screen.findByRole("link", { name: "Start the course" })).toBeInTheDocument();
+      expect(window.location.hash).toBe(routeToHash(courseRoute));
+      expect(useCases.getCourse).toHaveBeenCalledWith(courseDeck);
     });
 
     it("takes a chapter from the course, named in the trail, and goes on to its final review", async () => {

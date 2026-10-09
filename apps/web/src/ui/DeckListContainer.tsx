@@ -11,6 +11,7 @@ import { DeckStudyActionContainer } from "./DeckStudyAction";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n } from "./i18n";
 import { Loading } from "./Loading";
+import { NewcomerCourseContainer } from "./NewcomerCourseContainer";
 import { collapsedGroups, rememberCollapsed } from "./remembered";
 import { TodaySummaryContainer } from "./TodaySummaryContainer";
 import { courseHref, deckHref, libraryHref, routeToHash } from "./router";
@@ -58,7 +59,9 @@ function retitled(nodes: readonly TreeNode[], url: string, title: LangText): Tre
  *
  * A deck copied from a course (docs/courses.md) is continued from its
  * menu: which library decks are courses, the library says, read once
- * some deck is a library copy.
+ * some deck is a library copy. An instance with no decks (groups aside)
+ * is offered the library's course for newcomers under the list's heading
+ * (NewcomerCourseContainer), which opens once started.
  */
 export function DeckListContainer({
   useCases,
@@ -67,6 +70,7 @@ export function DeckListContainer({
   arrangementSetAside = false,
   checking = false,
   onStudyDeck,
+  onCourseStarted,
 }: {
   useCases: UseCases;
   instance: Instance;
@@ -76,6 +80,8 @@ export function DeckListContainer({
   /** The instance's data is still being checked, under a policy that may set some of it aside: the list cannot be rearranged yet. */
   checking?: boolean;
   onStudyDeck: (deck: Deck) => void;
+  /** Called with the instance's deck of the course for newcomers once it is started. */
+  onCourseStarted: (deck: Deck) => void;
 }) {
   const { t, errorText } = useI18n();
   const queryClient = useQueryClient();
@@ -239,6 +245,11 @@ export function DeckListContainer({
           )
         }
         createDeckHref={routeToHash({ screen: "deckCreator", instanceUrl: instance.url })}
+        offer={
+          decksOf(treeQuery.data.children).length === 0 && (
+            <NewcomerCourseContainer useCases={useCases} instance={instance} onCourseStarted={onCourseStarted} />
+          )
+        }
       />
     </>
   );

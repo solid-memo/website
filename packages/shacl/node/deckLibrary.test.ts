@@ -13,13 +13,15 @@ import {
   main,
   markdownProblems,
   metadataProblems,
+  NEWCOMER_COURSE,
+  newcomerProblems,
   releasesOf,
   run,
   validateLibrary,
   type DeckRelease,
   type LibraryIo,
 } from "./deckLibrary.ts";
-import { DataFactory } from "n3";
+import { DataFactory, type Quad_Object } from "n3";
 import { formatTurtle } from "@solid-memo/turtle/formatTurtle";
 import { parseTurtle, RDF_TYPE } from "@solid-memo/turtle/rdf";
 import { SM_NS as SM } from "@solid-memo/vocab/tooling/vocab";
@@ -362,6 +364,15 @@ describe("buildIndex", () => {
     expect(built.some((q) => q.predicate.value === `${DCTERMS}modified`)).toBe(false);
     expect(buildIndex([])).not.toContain("modified");
   });
+
+  it("names the course for newcomers when given one, even one the library does not have", () => {
+    const named = (index: string) =>
+      parseTurtle(index, INDEX).filter((q) => q.predicate.value === `${SM}newcomerCourse`).map((q) => [q.subject.value, q.object.value]);
+    expect(named(buildIndex([course(1)], "solid"))).toEqual([[INDEX, `${INDEX}#solid`]]);
+    expect(buildIndex([course(1)], "solid")).toContain("solid-memo:newcomerCourse <#solid>");
+    expect(named(buildIndex(LIBRARY, "nowhere"))).toEqual([[INDEX, `${INDEX}#nowhere`]]);
+    expect(named(index)).toEqual([]);
+  });
 });
 
 describe("metadataProblems", () => {
@@ -533,10 +544,38 @@ describe("validateLibrary", () => {
     );
   });
 
+  it("accepts the course for newcomers, and names one that is no course of the library", async () => {
+    await expect(validateLibrary([course(1)], buildIndex([course(1)], "solid"), validators)).resolves.toEqual([]);
+    expect(await validateLibrary([course(1)], buildIndex([course(1)], "nowhere"), validators)).toEqual([
+      `decks/index.ttl: names <${INDEX}#nowhere> by solid-memo:newcomerCourse, which is no deck of the library.`,
+    ]);
+    expect(await validateLibrary(LIBRARY, buildIndex(LIBRARY, "rivers"), validators)).toEqual([
+      `decks/index.ttl: names <${INDEX}#rivers> by solid-memo:newcomerCourse, which is not a course: its current release is no schema:Course.`,
+    ]);
+  });
+
   it("names an index that breaks the shapes and the profiles", async () => {
     const problems = await validateLibrary([], `<${INDEX}> a <${DCAT}Catalog> .`, validators);
     expect(problems).toHaveLength(2);
     for (const problem of problems) expect(problem).toMatch(/^decks\/index\.ttl:\n/);
+  });
+});
+
+describe("newcomerProblems", () => {
+  const { namedNode, literal, quad } = DataFactory;
+  const index = parseTurtle(buildIndex([course(1)], "solid"), INDEX);
+  const naming = (object: Quad_Object) => quad(namedNode(INDEX), namedNode(`${SM}newcomerCourse`), object);
+
+  it("accepts an index that names one course of the library, or none", () => {
+    expect(newcomerProblems(index)).toEqual([]);
+    expect(newcomerProblems(parseTurtle(buildIndex([course(1)]), INDEX))).toEqual([]);
+  });
+
+  it("names an index that names more than one, or one that is no IRI", () => {
+    expect(newcomerProblems([...index, naming(literal("solid"))])).toEqual([
+      "decks/index.ttl: names 2 courses for newcomers by solid-memo:newcomerCourse: at most one.",
+      'decks/index.ttl: names "solid" by solid-memo:newcomerCourse, which is no IRI.',
+    ]);
   });
 });
 
@@ -863,6 +902,12 @@ describe("main", () => {
     expect(log.mock.calls.map(([m]) => m)).toEqual(["wrote decks/index.ttl", "decks/: 3 versions of 2 decks, valid."]);
   });
 
+  it("names in the index the course for newcomers its io names", async () => {
+    const { io: library, writeIndex } = io(filesOf([course(1)], "stale"));
+    expect(await main(["node"], { ...library, newcomerCourse: "solid" })).toBe(0);
+    expect(writeIndex).toHaveBeenCalledWith(buildIndex([course(1)], "solid"));
+  });
+
   it("writes no index while the layout is broken", async () => {
     const files = filesOf(LIBRARY);
     files.set("notes.txt", "x");
@@ -972,6 +1017,7 @@ describe("defaultIo", () => {
       "decks/capitals/v3.ttl is neither a file nor a folder: decks/ holds only index.ttl and <name>/v<N>.ttl, as plain files.",
     );
     expect(library.loadValidators).toBe(loadValidators);
+    expect(library.newcomerCourse).toBe(NEWCOMER_COURSE);
     const log = vi.spyOn(console, "log").mockImplementation(() => undefined);
     library.log("hello");
     expect(log).toHaveBeenCalledWith("hello");

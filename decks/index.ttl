@@ -108,7 +108,8 @@
                  <#world-flags> ,
                  <#world-history-dates> ,
                  <#world-rivers> ,
-                 <#world-war-ii> .
+                 <#world-war-ii> ;
+    solid-memo:newcomerCourse <#getting-started> .
 
 <#solid-memo>
     a foaf:Agent ;

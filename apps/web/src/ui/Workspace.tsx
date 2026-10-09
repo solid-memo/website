@@ -344,6 +344,12 @@ export function Workspace({
       registrationTarget: RegistrationTarget;
     }) => useCases.createInstance(session, args),
     onSuccess: async (instance) => {
+      // A new instance has no decks, so its list offers the library's course for
+      // newcomers (NewcomerCourseContainer): read from now, it comes with the list.
+      void queryClient.prefetchQuery({
+        queryKey: ["library"],
+        queryFn: () => useCases.listLibraryDecks(),
+      });
       await queryClient.invalidateQueries({ queryKey: ["instances", webId] });
       navigate({ screen: "home", instanceUrl: instance.url });
     },
@@ -525,6 +531,9 @@ export function Workspace({
                 instanceUrl: instanceUrl!,
                 deckUrl: deck.url,
               })
+            }
+            onCourseStarted={(started) =>
+              navigate({ screen: "course", instanceUrl: instanceUrl!, deckUrl: started.url })
             }
           />
         );

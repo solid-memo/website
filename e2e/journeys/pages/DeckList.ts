@@ -5,7 +5,8 @@ import { Screen } from "./Screen.ts";
  * "Decks": the instance's home, its decks as the user arranged them into
  * groups, each row a link to the deck's page, what it offers today ("Study
  * {deck}" or "Done for today") and its actions menu (DeckGroups); under
- * them, Create deck and Deck library (Library.open).
+ * them, Create deck and Deck library (Library.open). With no decks yet,
+ * the library's course for newcomers is offered under the heading.
  */
 export class DeckList extends Screen {
   get heading(): Locator {
@@ -42,6 +43,30 @@ export class DeckList extends Screen {
   /** The deck's "Study" button in its row ("Study {deck}"), there while it has something to study today. */
   studyButton(name: string): Locator {
     return this.page.getByRole("button", { name: this.t("deckStudyAction.studyLabel", { deck: name }), exact: true });
+  }
+
+  /**
+   * The offer of the library's course for newcomers: the landmark with
+   * "Start the course", named by the course's title, whichever it is.
+   */
+  get newcomerCourse(): Locator {
+    return this.page
+      .getByRole("complementary")
+      .filter({ has: this.page.getByRole("button", { name: this.t("newcomerCourse.start"), exact: true }) });
+  }
+
+  /** The title of the course offered to newcomers: what names its landmark. */
+  async newcomerCourseTitle(): Promise<string> {
+    const titleId = await this.newcomerCourse.getAttribute("aria-labelledby");
+    return (await this.page.locator(`[id="${titleId}"]`).innerText()).trim();
+  }
+
+  /** Starts the course offered to newcomers, which opens it. */
+  async startNewcomerCourse(title: string): Promise<void> {
+    await this.intent(`Start the course for newcomers ${title}`, async () => {
+      await this.newcomerCourse.getByRole("button", { name: this.t("newcomerCourse.start"), exact: true }).click();
+      await this.app.course.expectShown(title);
+    });
   }
 
   async expectShown(): Promise<void> {

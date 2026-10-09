@@ -11,7 +11,8 @@ import { RDF, SM } from "./vocab";
 /**
  * The library this repository publishes (decks/, docs/deck-library.md),
  * read as the app reads it, through the library adapter: the index lists
- * every deck, every release reads with all its cards, and a course's
+ * every deck and offers newcomers at most one course, every release reads
+ * with all its cards, and a course's
  * outline has every chapter and step it has in use, each asking cards of
  * the release that the app can ask. The library check validates the
  * releases against the shapes; this is what the app makes of them.
@@ -55,6 +56,12 @@ it("lists every deck of the library", async () => {
   const decks = await library.listLibraryDecks();
   const names = new Set(releases.map((path) => path.split("/")[0]));
   expect(decks.map((deck) => deck.seriesUrl).sort()).toEqual([...names].map((name) => `${DECKS}index.ttl#${name}`).sort());
+});
+
+it("offers newcomers at most one deck of the library, a course", async () => {
+  const offered = (await library.listLibraryDecks()).filter((deck) => deck.forNewcomers === true);
+  expect(offered.length).toBeLessThanOrEqual(1);
+  for (const deck of offered) expect(deck.isCourse).toBe(true);
 });
 
 describe.each(releases)("decks/%s", (path) => {
