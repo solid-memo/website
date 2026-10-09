@@ -33,6 +33,8 @@ const LAYERS: Record<string, string[]> = {
   // The composition root: every adapter behind its port, and the use cases over them.
   composition: ["application", "domain", "vocab", "solid", "browser"],
   web: ["application", "domain", "vocab", "ui", "composition"],
+  // The Studio, a second app on the same layers as Solid Memo's.
+  studio: ["application", "domain", "vocab", "ui", "composition"],
   "e2e-pod": ["application", "domain", "vocab", "solid"],
   // The journeys drive the built app in a browser; they read only its text.
   "e2e-journeys": ["ui"],
@@ -42,6 +44,7 @@ const LAYERS: Record<string, string[]> = {
 const ONLY_FROM: Record<string, Record<string, RegExp>> = {
   // Only the app's entry point has the layers wired; the build test imports none.
   web: { composition: /^src\/main\.tsx$/ },
+  studio: { composition: /^src\/main\.tsx$/ },
   // Data text is rendered by the components alone (docs/markdown.md).
   ui: { markdown: /^src\/ui\// },
   // The generators read Turtle; the vocabulary the browser loads never does.
@@ -64,6 +67,7 @@ const BROWSER: Record<string, RegExp> = {
   composition: /^src\//,
   ui: /^src\//,
   web: /^src\//,
+  studio: /^src\//,
 };
 const NODE_ONLY = [/^node:/, /^n3$/, /^@solid-memo\/turtle(\/|$)/, /^@solid-memo\/[a-z-]+\/(tooling|node)\//];
 

@@ -1233,6 +1233,38 @@ dl.facts .sources {
   box-shadow: none;
 }
 
+/* An app's link out (the Studio's way back to Solid Memo), under its masthead. */
+.header-link {
+  margin: 0 0 1rem;
+  text-align: right;
+  font-size: 0.9rem;
+}
+
+/* The Studio's table of decks: the deck's name as the row's heading, in the
+   body's own type; the figures beside it right-aligned, to compare. */
+table.studio-decks caption {
+  caption-side: top;
+  padding: 0.6rem 0.8rem;
+  text-align: left;
+  color: var(--text-muted);
+}
+
+table.studio-decks tbody th {
+  background: none;
+  font-size: inherit;
+  font-weight: 600;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+table.studio-decks td,
+table.studio-decks thead th:not(:first-child) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
 .breadcrumbs ol {
   display: flex;
   flex-wrap: wrap;

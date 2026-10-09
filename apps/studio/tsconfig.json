@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "paths": {
+      "react": [
+        "./node_modules/preact/compat",
+        "../../node_modules/preact/compat"
+      ],
+      "react-dom": [
+        "./node_modules/preact/compat",
+        "../../node_modules/preact/compat"
+      ]
+    },
+    "resolveJsonModule": true
+  },
+  "include": [
+    "src",
+    "vite.config.ts",
+    "vitest.config.ts"
+  ]
+}

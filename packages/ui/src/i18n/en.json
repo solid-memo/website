@@ -1240,5 +1240,21 @@
   "zoomableImage": {
     "enlarge": "Enlarge picture",
     "shrink": "Shrink picture"
+  },
+  "studio": {
+    "name": "Solid Memo Studio",
+    "tagline": "Manage the decks in your Solid Pod.",
+    "backToApp": "Back to Solid Memo",
+    "decks": {
+      "heading": "Decks",
+      "caption": "The decks of {instance}",
+      "loading": "Loading decks…",
+      "empty": "No decks yet: create or import them in {app}.",
+      "deck": "Deck",
+      "cards": "Cards",
+      "due": "Due today",
+      "counting": "Counting…",
+      "unreadable": "Could not be read"
+    }
   }
 }

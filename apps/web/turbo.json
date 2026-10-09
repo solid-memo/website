@@ -6,6 +6,7 @@
       "inputs": ["$TURBO_EXTENDS$", "$TURBO_ROOT$/ns/shapes/**"]
     },
     "build": {
+      "dependsOn": ["$TURBO_EXTENDS$", "@solid-memo/studio#build"],
       "inputs": ["$TURBO_EXTENDS$", "$TURBO_ROOT$/ns/**", "$TURBO_ROOT$/decks/**"]
     }
   }

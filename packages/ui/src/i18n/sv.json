@@ -1237,5 +1237,21 @@
   "zoomableImage": {
     "enlarge": "Förstora bilden",
     "shrink": "Förminska bilden"
+  },
+  "studio": {
+    "name": "Solid Memo Studio",
+    "tagline": "Hantera kortlekarna i din Solid Pod.",
+    "backToApp": "Tillbaka till Solid Memo",
+    "decks": {
+      "heading": "Kortlekar",
+      "caption": "Kortlekarna i {instance}",
+      "loading": "Läser in kortlekar…",
+      "empty": "Inga kortlekar än: skapa eller importera dem i {app}.",
+      "deck": "Kortlek",
+      "cards": "Kort",
+      "due": "Att repetera idag",
+      "counting": "Räknar…",
+      "unreadable": "Kunde inte läsas"
+    }
   }
 }

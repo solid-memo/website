@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { renderHook } from "@testing-library/preact";
 import type { ComponentChildren } from "preact";
 import { I18nProvider } from "./i18n";
-import { useDocumentTitle } from "./documentTitle";
+import { AppName, useDocumentTitle } from "./documentTitle";
 
 describe("useDocumentTitle", () => {
   it("names the page before the app", () => {
@@ -36,5 +36,13 @@ describe("useDocumentTitle", () => {
     );
     renderHook(() => useDocumentTitle(["Kortlekar"]), { wrapper });
     expect(document.title).toBe("Kortlekar – Solid Memo");
+  });
+
+  it("ends in the name of the app the page is", () => {
+    const wrapper = ({ children }: { children: ComponentChildren }) => (
+      <AppName.Provider value="studio.name">{children}</AppName.Provider>
+    );
+    renderHook(() => useDocumentTitle(["Decks"]), { wrapper });
+    expect(document.title).toBe("Decks – Solid Memo Studio");
   });
 });

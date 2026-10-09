@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <!-- What the page may load and run (docs/markdown.md). GitHub Pages sets no
+       headers, so the policy is a meta tag, first, before anything it covers.
+       Script only from the site itself, and the theme script below by its
+       hash (src/build.test.ts checks it still matches); no plugins, no
+       <base>, no form posted anywhere. Pictures come from pods, so img-src
+       stays open; style-src waits on the inline styles of the components
+       (packages/ui). The same policy as Solid Memo's own page (apps/web). -->
+  <meta http-equiv="Content-Security-Policy"
+    content="script-src 'self' 'sha256-GA9xjX8xIwJkNnm+B1POrvr6HWF6KTLvZlHcOcEBr3I='; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Manage the decks of Solid Memo, the spaced-repetition flashcards that live in your own Solid pod." />
+  <meta name="theme-color" content="#f7f6f1" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#11171e" media="(prefers-color-scheme: dark)" />
+  <!-- The theme before the first paint, so the page does not flash in the
+       other one: the choice kept on this device (the key
+       localStorageThemePreference.ts keeps it under), else the browser's.
+       The app takes over from here (packages/ui/src/ui/theme.tsx). -->
+  <script>
+    (function () {
+      var chosen = null;
+      try {
+        chosen = localStorage.getItem("solid-memo:theme");
+      } catch (e) {}
+      document.documentElement.dataset.theme =
+        chosen === "light" || chosen === "dark" ? chosen
+        : matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    })();
+  </script>
+  <!-- The site's favicons (apps/web/public), at the root of the origin
+       the Studio is served from, beside Solid Memo (docs/studio.md). -->
+  <link rel="icon" href="/favicon.ico" sizes="48x48" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <title>Solid Memo Studio</title>
+  <!-- An app to sign in to, not a page to find: the search engines index Solid Memo's. -->
+  <meta name="robots" content="noindex" />
+</head>
+
+<body>
+  <div id="app"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
+</html>

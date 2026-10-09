@@ -1,53 +1,18 @@
-import { execFileSync } from "node:child_process";
-import { createHash } from "node:crypto";
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { createRequire } from "node:module";
-import { join } from "node:path";
+import { resolve } from "node:path";
 import { defineConfig } from "vitest/config";
 import preact from "@preact/preset-vite";
+import { builtAppPlugin } from "@solid-memo/vocab/tooling/publishApp";
 import { turtleDirectoryPlugin } from "@solid-memo/vocab/tooling/publishTurtle";
 import { DECKS_ROOT, NS_ROOT, VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
+import { siteDefines } from "@solid-memo/vocab/tooling/siteBuild";
 
-/**
- * The commit being built, shown as the site's version in the footer. Read
- * from the checkout itself (the deploy workflow builds a specific commit,
- * which GITHUB_SHA need not equal); null outside a git checkout.
- */
-function commitSha(): string | null {
-  try {
-    return execFileSync("git", ["rev-parse", "HEAD"], {
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "ignore"],
-    }).trim();
-  } catch {
-    return process.env.GITHUB_SHA ?? null;
-  }
-}
-
-/**
- * Names the rules pod documents are checked by: a hash of every shape
- * (ns/shapes/) and vendored profile file. A check receipt in an
- * instance's digest counts only under the same rules.
- */
-function shapesRuleset(): string {
-  const hash = createHash("sha256");
-  const visit = (root: string, dir: string) => {
-    for (const entry of readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
-      const path = join(dir, entry.name);
-      if (entry.isDirectory()) visit(root, path);
-      else hash.update(path.slice(root.length)).update(readFileSync(path));
-    }
-  };
-  visit(NS_ROOT, `${NS_ROOT}shapes`);
-  visit(VOCAB_ROOT, `${VOCAB_ROOT}vendor`);
-  return hash.digest("hex").slice(0, 16);
-}
+/** The Studio's build (apps/studio), which turbo runs before this one (turbo.json). */
+const STUDIO_DIST = resolve(import.meta.dirname, "../studio/dist");
 
 export default defineConfig({
-  define: {
-    __COMMIT_SHA__: JSON.stringify(commitSha()),
-    __SHAPES_RULESET__: JSON.stringify(shapesRuleset()),
-  },
+  define: siteDefines(),
   base: "./",
   plugins: [
     preact(),
@@ -57,6 +22,10 @@ export default defineConfig({
     turtleDirectoryPlugin({ dir: NS_ROOT, publicPath: "ns" }),
     ...(existsSync(DECKS_ROOT) ? [turtleDirectoryPlugin({ dir: DECKS_ROOT, publicPath: "decks" })] : []),
     turtleDirectoryPlugin({ dir: `${VOCAB_ROOT}vendor`, publicPath: "vendor" }),
+    // The Studio, at studio/, on the same origin (docs/studio.md). A build
+    // of this app outside turbo copies whatever Studio build is there, or
+    // warns that there is none; the deploy checks it is there.
+    builtAppPlugin({ dir: STUDIO_DIST, publicPath: "studio" }),
   ],
   resolve: {
     alias: {

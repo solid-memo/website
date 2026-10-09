@@ -11,6 +11,6 @@ import { defineConfig } from "vitest/config";
  */
 export default defineConfig({
   test: {
-    projects: ["apps/web", "packages/*", "e2e/pod/vitest.unit.config.ts", "e2e/journeys/vitest.unit.config.ts"],
+    projects: ["apps/web", "apps/studio", "packages/*", "e2e/pod/vitest.unit.config.ts", "e2e/journeys/vitest.unit.config.ts"],
   },
 });

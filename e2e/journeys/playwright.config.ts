@@ -48,8 +48,9 @@ export default defineConfig({
     screenshot: "only-on-failure",
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
-  // The built app (npm run build -w @solid-memo/web), its deck library and
-  // shapes included; 127.0.0.1 is a secure context, so http will do.
+  // The built site (npx turbo run build --filter=@solid-memo/web), its deck
+  // library, shapes and the Studio at studio/ included; 127.0.0.1 is a
+  // secure context, so http will do.
   webServer: {
     command: "npm run preview -w @solid-memo/web -- --host 127.0.0.1 --port 4173 --strictPort",
     cwd: "../..",

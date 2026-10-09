@@ -1,7 +1,11 @@
-import type { ComponentChildren } from "preact";
+import type { ComponentChildren, ComponentType } from "preact";
 import { useEffect, useId, useRef, useState } from "preact/hooks";
 import type { Locale } from "@solid-memo/domain/locale";
-import { resolveTheme, type Theme, type ThemeChoice } from "@solid-memo/domain/theme";
+import {
+  resolveTheme,
+  type Theme,
+  type ThemeChoice,
+} from "@solid-memo/domain/theme";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { POD_PROVIDERS } from "@solid-memo/domain/podProvider";
@@ -10,27 +14,95 @@ import illustrationUrl from "../assets/illustration.svg";
 import { ErrorMessage } from "./ErrorMessage";
 import { ExternalLink } from "./ExternalLink";
 import { Footer } from "./Footer";
-import { GuestStudyOffer } from "./GuestStudyOffer";
-import { I18nProvider, useI18n } from "./i18n";
+import { I18nProvider, useI18n, type MessageKey } from "./i18n";
 import { LanguageSelector } from "./LanguageSelector";
 import { Loading } from "./Loading";
 import { OnboardingFlow } from "./onboarding/OnboardingFlow";
 import { PodConnectionScreen } from "./onboarding/PodConnectionScreen";
 import { usePanelFocus } from "./panelFocus";
-import { applyTheme, browserTheme, DARK_QUERY, instanceThemeKey, ThemeProvider } from "./theme";
+import {
+  applyTheme,
+  browserTheme,
+  DARK_QUERY,
+  instanceThemeKey,
+  ThemeProvider,
+} from "./theme";
 import { ThemeToggle } from "./ThemeToggle";
-import { useDocumentTitle } from "./documentTitle";
+import { AppName, useDocumentTitle } from "./documentTitle";
 import { MAIN_ID, SkipLink } from "./SkipLink";
 import { Workspace } from "./Workspace";
 
+/** What an app built on AppShell calls itself, as messages in the user's language. */
+export interface AppIdentity {
+  /** Its name: the landing page's heading, the masthead's wordmark, and the end of every document title. */
+  name: MessageKey;
+  /** What it is for, under the name on the landing page. */
+  tagline: MessageKey;
+  /**
+   * A link out of the app in the header of the screens before its
+   * workspace (the Studio's way back to Solid Memo); the workspace shows
+   * its own.
+   */
+  headerLink?: { href: string; label: MessageKey };
+}
+
+/** What an app's signed-in part is given: the session, and what goes above and at the top of its screens. */
+export interface WorkspaceProps {
+  useCases: UseCases;
+  session: Session;
+  /** What the site header shows first (the top bar and the masthead). */
+  banner?: ComponentChildren;
+  /** What the main content starts with (a guest's discard question). */
+  children?: ComponentChildren;
+}
+
+/** Solid Memo itself, the learner's app. */
+const SOLID_MEMO: AppIdentity = {
+  name: "app.documentTitle",
+  tagline: "app.tagline",
+};
+
+/** The learner's app: the shell around its Workspace. `commitSha` is the build's, shown in the footer. */
+export function App({
+  useCases,
+  commitSha,
+}: {
+  useCases: UseCases;
+  commitSha: string | null;
+}) {
+  return (
+    <AppShell
+      useCases={useCases}
+      commitSha={commitSha}
+      identity={SOLID_MEMO}
+      workspace={Workspace}
+    />
+  );
+}
+
 /**
- * The app in whichever state it is in, between a link past the header
+ * An app in whichever state it is in, between a link past the header
  * to the main content and the site-wide footer, in the language the user chose
  * (else their browser's, else English) and the theme they chose (else
- * their browser's). `commitSha` is the build's, shown in the footer.
+ * their browser's): restoring the session, the landing page and its
+ * login, the connected Pod, then the app's own `workspace` under the
+ * masthead. Every app on the site shares it (Solid Memo, the Studio), so
+ * a session, the language and the theme are the same in each.
  */
-export function App({ useCases, commitSha }: { useCases: UseCases; commitSha: string | null }) {
-  const [locale, setLocale] = useState<Locale>(() => useCases.language(navigator.languages));
+export function AppShell({
+  useCases,
+  commitSha,
+  identity,
+  workspace,
+}: {
+  useCases: UseCases;
+  commitSha: string | null;
+  identity: AppIdentity;
+  workspace: ComponentType<WorkspaceProps>;
+}) {
+  const [locale, setLocale] = useState<Locale>(() =>
+    useCases.language(navigator.languages),
+  );
 
   useEffect(() => {
     document.documentElement.lang = locale;
@@ -42,7 +114,9 @@ export function App({ useCases, commitSha }: { useCases: UseCases; commitSha: st
   }
 
   const queryClient = useQueryClient();
-  const [themeChoice, setThemeChoice] = useState<ThemeChoice>(() => useCases.themeChoice());
+  const [themeChoice, setThemeChoice] = useState<ThemeChoice>(() =>
+    useCases.themeChoice(),
+  );
   const [preferredTheme, setPreferredTheme] = useState<Theme>(browserTheme);
   const theme = resolveTheme(themeChoice, preferredTheme);
 
@@ -72,8 +146,12 @@ export function App({ useCases, commitSha }: { useCases: UseCases; commitSha: st
       .finally(() => {
         // Read back what the pod holds (which undoes a failed write), unless another choice is on its way.
         if (instanceUrl === null || count !== themeChoices.current) return;
-        void queryClient.invalidateQueries({ queryKey: instanceThemeKey(instanceUrl) });
-        void queryClient.invalidateQueries({ queryKey: ["preferences", instanceUrl] });
+        void queryClient.invalidateQueries({
+          queryKey: instanceThemeKey(instanceUrl),
+        });
+        void queryClient.invalidateQueries({
+          queryKey: ["preferences", instanceUrl],
+        });
       });
   }
 
@@ -88,9 +166,15 @@ export function App({ useCases, commitSha }: { useCases: UseCases; commitSha: st
         }}
         onAdopt={setThemeChoice}
       >
-        <SkipLink />
-        <AppContent useCases={useCases} />
-        <Footer commitSha={commitSha} />
+        <AppName.Provider value={identity.name}>
+          <SkipLink />
+          <AppContent
+            useCases={useCases}
+            identity={identity}
+            workspace={workspace}
+          />
+          <Footer commitSha={commitSha} />
+        </AppName.Provider>
       </ThemeProvider>
     </I18nProvider>
   );
@@ -99,7 +183,15 @@ export function App({ useCases, commitSha }: { useCases: UseCases; commitSha: st
 /** The login screen's error once the session expired: not a failure to report, but why the user is back. */
 const SESSION_EXPIRED = Symbol("session expired");
 
-function AppContent({ useCases }: { useCases: UseCases }) {
+function AppContent({
+  useCases,
+  identity,
+  workspace: AppWorkspace,
+}: {
+  useCases: UseCases;
+  identity: AppIdentity;
+  workspace: ComponentType<WorkspaceProps>;
+}) {
   const queryClient = useQueryClient();
   const { t, tx, errorText } = useI18n();
   const [checkingSession, setCheckingSession] = useState(true);
@@ -109,7 +201,10 @@ function AppContent({ useCases }: { useCases: UseCases }) {
   const [busy, setBusy] = useState(false);
   const [authError, setAuthError] = useState<unknown>(null);
   // Said in whatever language the user reads by the time it shows, not as an error's message.
-  const authText = authError === SESSION_EXPIRED ? t("app.sessionExpired") : errorText(authError);
+  const authText =
+    authError === SESSION_EXPIRED
+      ? t("app.sessionExpired")
+      : errorText(authError);
   // A guest on their way to logging in, to keep their study; and one about to discard it.
   const [guestLoggingIn, setGuestLoggingIn] = useState(false);
   const [confirmingDiscard, setConfirmingDiscard] = useState(false);
@@ -211,7 +306,7 @@ function AppContent({ useCases }: { useCases: UseCases }) {
   if (checkingSession) {
     return (
       <>
-        <SiteHeader />
+        <SiteHeader link={identity.headerLink} />
         <main id={MAIN_ID} tabIndex={-1}>
           <Loading label={t("app.restoringSession")} />
         </main>
@@ -223,10 +318,12 @@ function AppContent({ useCases }: { useCases: UseCases }) {
     const guest = session?.guest === true;
     return (
       <>
-        <SiteHeader />
+        <SiteHeader link={identity.headerLink} />
         <main id={MAIN_ID} tabIndex={-1} class="landing">
-          <Hero />
-          <p class="tagline">{guest ? t("app.loginToKeep") : t("app.tagline")}</p>
+          <Hero name={t(identity.name)} />
+          <p class="tagline">
+            {guest ? t("app.loginToKeep") : t(identity.tagline)}
+          </p>
           {/* First and focused: after the session expired the whole screen
               changed under the user, and this says why. */}
           <ErrorMessage error={authText} focus />
@@ -259,9 +356,9 @@ function AppContent({ useCases }: { useCases: UseCases }) {
   if (connecting) {
     return (
       <>
-        <SiteHeader />
+        <SiteHeader link={identity.headerLink} />
         <main id={MAIN_ID} tabIndex={-1} class="landing">
-          <Hero />
+          <Hero name={t(identity.name)} />
           <PodConnectionScreen
             account={accountQuery.data}
             busy={accountQuery.isFetching}
@@ -281,8 +378,14 @@ function AppContent({ useCases }: { useCases: UseCases }) {
         {/* One link home: the logo beside the name is part of it, not a second stop. */}
         <h1>
           <a class="brand" href="#/">
-            <img class="logo" src={illustrationUrl} alt="" width={60} height={40} />
-            <span class="wordmark">Solid Memo</span>
+            <img
+              class="logo"
+              src={illustrationUrl}
+              alt=""
+              width={60}
+              height={40}
+            />
+            <span class="wordmark">{t(identity.name)}</span>
           </a>
         </h1>
         {session.guest === true ? (
@@ -301,8 +404,12 @@ function AppContent({ useCases }: { useCases: UseCases }) {
       </div>
       {session.guest === true ? (
         <div class="masthead-actions">
-          <button onClick={() => setGuestLoggingIn(true)}>{t("app.keepStudy")}</button>
-          <button onClick={() => setConfirmingDiscard(true)}>{t("app.discardGuest")}</button>
+          <button onClick={() => setGuestLoggingIn(true)}>
+            {t("app.keepStudy")}
+          </button>
+          <button onClick={() => setConfirmingDiscard(true)}>
+            {t("app.discardGuest")}
+          </button>
         </div>
       ) : (
         <button onClick={handleLogout}>{t("app.logOut")}</button>
@@ -311,7 +418,7 @@ function AppContent({ useCases }: { useCases: UseCases }) {
   );
 
   return (
-    <Workspace
+    <AppWorkspace
       useCases={useCases}
       session={session}
       banner={
@@ -330,8 +437,7 @@ function AppContent({ useCases }: { useCases: UseCases }) {
           <ErrorMessage error={authText} />
         </DiscardGuestConfirm>
       )}
-      {session.guest !== true && <GuestStudyOffer useCases={useCases} session={session} />}
-    </Workspace>
+    </AppWorkspace>
   );
 }
 
@@ -345,21 +451,27 @@ function TopBar() {
   );
 }
 
-/** The site header of the screens before the workspace: only the top bar. */
-function SiteHeader() {
+/** The site header of the screens before the workspace: the top bar, and the app's link out, if it has one. */
+function SiteHeader({ link }: { link: AppIdentity["headerLink"] }) {
+  const { t } = useI18n();
   return (
     <header class="site-header">
       <TopBar />
+      {link !== undefined && (
+        <p class="header-link">
+          <a href={link.href}>{t(link.label)}</a>
+        </p>
+      )}
     </header>
   );
 }
 
-/** The landing picture, decorative, over the product name as the page's heading. */
-function Hero() {
+/** The landing picture, decorative, over the app's name as the page's heading. */
+function Hero({ name }: { name: string }) {
   return (
     <>
       <img class="hero" src={illustrationUrl} alt="" width={640} height={427} />
-      <h1>Solid Memo</h1>
+      <h1>{name}</h1>
     </>
   );
 }

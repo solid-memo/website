@@ -79,7 +79,8 @@ export function createAppUseCases({ clientName, servedSite, libraryIndexUrl, rul
   const randomId = () => crypto.randomUUID();
 
   return createUseCases({
-    sessionGateway: createSolidSessionGateway(clientName),
+    // Solid Memo is served at the site's root, so a session that keeps no app is its.
+    sessionGateway: createSolidSessionGateway(clientName, servedSite),
     webIdDocumentRepository: createSolidWebIdDocumentRepository({ fetch: podFetch }),
     storageGateway: createSolidStorageGateway({ fetch: podFetch }),
     instanceRepository: createSolidInstanceRepository({ fetch: podFetch, checkWrite, now, randomId }),

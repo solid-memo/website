@@ -1240,5 +1240,21 @@
   "zoomableImage": {
     "enlarge": "그림 확대",
     "shrink": "그림 축소"
+  },
+  "studio": {
+    "name": "Solid Memo Studio",
+    "tagline": "Solid Pod에 있는 덱을 관리해요.",
+    "backToApp": "Solid Memo로 돌아가기",
+    "decks": {
+      "heading": "덱",
+      "caption": "{instance}의 덱",
+      "loading": "덱을 불러오는 중…",
+      "empty": "아직 덱이 없어요. {app}에서 만들거나 가져와 주세요.",
+      "deck": "덱",
+      "cards": "카드",
+      "due": "오늘 복습",
+      "counting": "세는 중…",
+      "unreadable": "읽을 수 없음"
+    }
   }
 }

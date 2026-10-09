@@ -45,8 +45,9 @@ flowchart LR
   is neither downloaded nor checked again (`validateDocumentSince`: a
   304 is enough). A document that conforms is given a receipt. The rules
   are named by a hash of every shape and vendored profile file, computed
-  when the site is built (`__SHAPES_RULESET__` in `apps/web/vite.config.ts`),
-  so a site with other shapes checks everything again. It leaves out the
+  when the site is built (`siteDefines` in
+  `packages/vocab/tooling/siteBuild.ts`, which each app's
+  `vite.config.ts` uses), so a site with other shapes checks everything again. It leaves out the
   answer log, which grows every session: answers are checked as they are
   written, and in the full check. The developer report always runs the
   full `validateInstance`.
