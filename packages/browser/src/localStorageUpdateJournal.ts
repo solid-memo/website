@@ -1,10 +1,11 @@
 import type { UpdateJournal } from "@solid-memo/application/ports";
 
 /**
- * The UpdateJournal in the browser's localStorage, one key per instance
- * being updated. Browser storage may be missing or refuse (a private
- * window, blocked site data), so every access is guarded: the journal
- * is a convenience, never needed for an update to succeed.
+ * The UpdateJournal in the browser's localStorage, one key per guest's
+ * instance being moved, or guest's deck or deck group being added.
+ * Browser storage may be missing or refuse (a private window, blocked
+ * site data), so every access is guarded: the journal is a convenience,
+ * never needed for a move to succeed.
  */
 export function createLocalStorageUpdateJournal(
   storage: () => Storage = () => globalThis.localStorage,
@@ -15,7 +16,7 @@ export function createLocalStorageUpdateJournal(
       try {
         storage().setItem(key(sourceUrl), JSON.stringify({ stagingUrl, startedAt: new Date().toISOString() }));
       } catch {
-        // Without storage, an interrupted update cannot be found later; nothing else changes.
+        // Without storage, an interrupted move cannot be found later; nothing else changes.
       }
     },
     end(sourceUrl) {

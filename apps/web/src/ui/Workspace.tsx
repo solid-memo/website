@@ -1,5 +1,5 @@
 import type { ComponentChildren } from "preact";
-import { useEffect, useState } from "preact/hooks";
+import { useEffect } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
@@ -26,9 +26,7 @@ import { ErrorMessage } from "./ErrorMessage";
 import { InstanceBar } from "./InstanceBar";
 import { InstanceCreator } from "./InstanceCreator";
 import { InstancePicker } from "./InstancePicker";
-import { BackupContainer } from "./BackupContainer";
 import { FindableContainer } from "./FindableContainer";
-import { KeptFolderNotice } from "./KeptFolderNotice";
 import { DataCheckNotice } from "./DataCheckNotice";
 import { LibraryBrowserContainer } from "./LibraryBrowserContainer";
 import { LibraryCardScreen } from "./LibraryCardScreen";
@@ -36,6 +34,7 @@ import { LibraryContainer } from "./LibraryContainer";
 import { LibraryDeckContainer } from "./LibraryDeckContainer";
 import { LibraryPreviewContainer } from "./LibraryPreviewContainer";
 import { Loading } from "./Loading";
+import { InterruptedMoveContainer } from "./InterruptedMoveContainer";
 import { MigrationContainer } from "./MigrationContainer";
 import { StudyContainer } from "./StudyContainer";
 import { PreferencesContainer } from "./PreferencesContainer";
@@ -78,8 +77,6 @@ export function Workspace({
   const queryClient = useQueryClient();
   const { route, change, navigate, replace } = useHashRoute();
   const screenRef = useScreenFocus(route, change);
-  /** The updated instance's folder a restore kept for another app's files, shown on the restored instance. */
-  const [restoredKeptFolder, setRestoredKeptFolder] = useState<{ instanceUrl: string; folder: string } | null>(null);
   const webId = session.webId;
 
   const instancesQuery = useQuery({
@@ -746,15 +743,6 @@ export function Workspace({
           {session.guest !== true && (
             <FindableContainer useCases={useCases} session={session} instance={activeInstance!} />
           )}
-          <BackupContainer
-            useCases={useCases}
-            session={session}
-            instance={activeInstance!}
-            onRestored={(restored, keptFolder) => {
-              setRestoredKeptFolder(keptFolder === null ? null : { instanceUrl: restored.url, folder: keptFolder });
-              replace({ screen: "home", instanceUrl: restored.url });
-            }}
-          />
           </>
         );
       case "statistics":
@@ -806,14 +794,12 @@ export function Workspace({
         {children}
         {waiting === null && activeInstance !== null && (
           <>
+            <InterruptedMoveContainer useCases={useCases} instance={activeInstance} />
             <MigrationContainer
               useCases={useCases}
               session={session}
               instance={activeInstance}
             />
-            {restoredKeptFolder?.instanceUrl === activeInstance.url && (
-              <KeptFolderNotice url={restoredKeptFolder.folder} />
-            )}
             {checkQuery.error && (
               // A div: the error may bring its technical details, a block.
               <div class="warning">

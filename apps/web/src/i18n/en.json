@@ -92,18 +92,6 @@
     "landingTitle": "Log in",
     "connectingTitle": "Connecting your Pod"
   },
-  "backup": {
-    "heading": "Previous version at another address",
-    "kept": "An update by an earlier version of Solid Memo kept your data as it was before, in {link}.",
-    "keptOn": "An update by an earlier version of Solid Memo kept your data as it was before ({date}), in {link}.",
-    "folder": "a backup folder in your Pod",
-    "restoreConfirm": "Go back to the previous version of {name}? What you studied since the update is lost with the updated version.",
-    "restore": "Restore previous version",
-    "restoring": "Restoring…",
-    "deleteConfirm": "Delete the previous version for good? This cannot be undone.",
-    "delete": "Delete backup",
-    "deleting": "Deleting…"
-  },
   "breadcrumbs": {
     "label": "Breadcrumb",
     "instances": "Instances",
@@ -730,12 +718,6 @@
     "update": "Update to release {version}",
     "updating": "Updating…"
   },
-  "migration": {
-    "interruptedRegion": "Interrupted update",
-    "interrupted": "A copy of {name} that Solid Memo was making was cut off before it was finished; your data is as it was. The partial copy remains at {url}.",
-    "removing": "Removing…",
-    "removeIt": "Remove it"
-  },
   "migrationNotice": {
     "region": "Format update",
     "heading": "Your data needs a format update.",
@@ -871,6 +853,12 @@
     "stillHereRetry": "Your study is still in this browser. Trying again adds what is not in {name} yet.",
     "added": "Your study is in {name} now.",
     "addedNotTidied": "Your study is in {name} now. It could not be removed from this browser: discard it there when you no longer need it."
+  },
+  "interruptedMove": {
+    "region": "Interrupted move",
+    "text": "Moving {name} into your Pod was cut off before it was finished; your study here is as it was. The partial copy remains at {url}.",
+    "removing": "Removing…",
+    "remove": "Remove it"
   },
   "pager": {
     "label": "Card pages",
@@ -1155,9 +1143,6 @@
     "storageInaccessible": "Solid Memo cannot open that storage. Check the address, and that you are logged in with the account that owns it.",
     "notAnInstanceNoMeta": "That address is not a Solid Memo instance. Check that you pasted the address of an instance's folder, ending in /.",
     "notAnInstanceNoSubject": "That folder is not a Solid Memo instance: its description cannot be read. Check that you pasted the right address.",
-    "notRegistered": "That instance is no longer on your list of instances, so there is nothing to switch. Reload the page and try again.",
-    "noMetaToUpdate": "This instance has no description to update. Reload the page and try again.",
-    "noBackup": "{instance} has no backup to restore.",
     "movedCopyInvalid": {
       "one": "The copy in your Pod is not in the format Solid Memo expects ({count} problem), so your study is left as it was. Try again later.",
       "other": "The copy in your Pod is not in the format Solid Memo expects ({count} problems), so your study is left as it was. Try again later."
@@ -1169,9 +1154,9 @@
     },
     "guestStudyTooNew": "A newer version of Solid Memo saved part of your study in this browser, so this version does not add it to your Pod. Reload the page to get the latest version.",
     "guestStudyChanged": "Your study in this browser changed while it was being added, perhaps in another tab, so it is kept here. Try again to add what changed.",
-    "instanceChangedDuringCopy": "The instance changed while it was being copied, perhaps in another tab or app. Try again.",
-    "resourceChangedDuringCopy": "Part of the instance changed while it was being copied, perhaps in another tab or app. Try again.",
-    "instanceBeingUpdated": "Solid Memo is updating this instance and saves nothing to it until the update is done. Wait for the update to finish, then try again.",
+    "instanceChangedDuringCopy": "Your study in this browser changed while it was being copied, perhaps in another tab, so it is kept here. Try again.",
+    "resourceChangedDuringCopy": "Part of your study in this browser changed while it was being copied, perhaps in another tab, so it is kept here. Try again.",
+    "guestStudyBeingMoved": "Solid Memo is moving your study in this browser into your Pod and saves nothing to it until that is done. Wait for it to finish, then try again.",
     "deckChangedSinceOffer": "The deck changed since the update was offered, perhaps in another tab or app, so nothing was changed. Look at the offer again.",
     "deckChangedDuringUpgrade": "The deck changed while it was being updated, perhaps in another tab or app. Try again.",
     "changedElsewhere": "This was changed elsewhere, perhaps in another tab or app, since Solid Memo read it, so nothing was saved. Reload the page and try again.",

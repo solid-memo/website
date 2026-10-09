@@ -19,12 +19,10 @@ import { DECK_UPGRADE_SCREEN_STEPS, DeckUpgradeFailure, DeckUpgradeProgress, typ
  * Home-made decks render nothing at all. Once a session, it also gives
  * the deck the languages its own release states its title and
  * description in and the copy lacks, which upgrades made before they
- * brought the texts along left out, and tidies away what an upgrade by an
- * earlier version of the app, cut off half-way, left in the pod. While an
- * upgrade runs, its steps are shown in place of the offer; a failed one
- * says where it failed and whether the deck changed, and offers to try
- * again with the deck as it now is: an upgrade cut off half-way is
- * offered again, and finishes.
+ * brought the texts along left out. While an upgrade runs, its steps
+ * are shown in place of the offer; a failed one says where it failed and
+ * whether the deck changed, and offers to try again with the deck as it
+ * now is: an upgrade cut off half-way is offered again, and finishes.
  */
 export function LibraryUpgradeContainer({
   useCases,
@@ -54,14 +52,6 @@ export function LibraryUpgradeContainer({
       if (updated !== null) await queryClient.invalidateQueries({ queryKey: ["decks"] });
       return updated !== null;
     },
-    enabled: deck.sourceUrl !== undefined,
-    staleTime: Infinity,
-    retry: false,
-  });
-
-  useQuery({
-    queryKey: ["deckUpgradeTidy", deck.url],
-    queryFn: () => useCases.tidyInterruptedDeckUpgrade(deck),
     enabled: deck.sourceUrl !== undefined,
     staleTime: Infinity,
     retry: false,

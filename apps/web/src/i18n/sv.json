@@ -92,18 +92,6 @@
     "landingTitle": "Logga in",
     "connectingTitle": "Ansluter din pod"
   },
-  "backup": {
-    "heading": "Föregående version på en annan adress",
-    "kept": "En uppdatering av en tidigare version av Solid Memo sparade dina data som de var innan, i {link}.",
-    "keptOn": "En uppdatering av en tidigare version av Solid Memo sparade dina data som de var innan ({date}), i {link}.",
-    "folder": "en mapp med säkerhetskopian i din Pod",
-    "restoreConfirm": "Gå tillbaka till den föregående versionen av {name}? Det du har studerat sedan uppdateringen försvinner med den uppdaterade versionen.",
-    "restore": "Återställ föregående version",
-    "restoring": "Återställer…",
-    "deleteConfirm": "Ta bort den föregående versionen för gott? Det går inte att ångra.",
-    "delete": "Ta bort säkerhetskopian",
-    "deleting": "Tar bort…"
-  },
   "breadcrumbs": {
     "label": "Brödsmulor",
     "instances": "Instanser",
@@ -727,12 +715,6 @@
     "update": "Uppdatera till utgåva {version}",
     "updating": "Uppdaterar…"
   },
-  "migration": {
-    "interruptedRegion": "Avbruten uppdatering",
-    "interrupted": "En kopia av {name} som Solid Memo höll på att göra avbröts innan den blev klar; dina data är som de var. Den ofullständiga kopian finns kvar på {url}.",
-    "removing": "Tar bort…",
-    "removeIt": "Ta bort den"
-  },
   "migrationNotice": {
     "region": "Formatuppdatering",
     "heading": "Dina data behöver en formatuppdatering.",
@@ -868,6 +850,12 @@
     "stillHereRetry": "Dina studier finns kvar i den här webbläsaren. Försöker du igen läggs det till som ännu inte finns i {name}.",
     "added": "Dina studier finns i {name} nu.",
     "addedNotTidied": "Dina studier finns i {name} nu. De kunde inte tas bort från den här webbläsaren: släng dem där när du inte längre behöver dem."
+  },
+  "interruptedMove": {
+    "region": "Avbruten flytt",
+    "text": "Flytten av {name} till din pod avbröts innan den blev klar; dina studier här är som de var. Den ofullständiga kopian finns kvar på {url}.",
+    "removing": "Tar bort…",
+    "remove": "Ta bort den"
   },
   "pager": {
     "label": "Kortsidor",
@@ -1152,9 +1140,6 @@
     "storageInaccessible": "Solid Memo kommer inte åt den lagringen. Kontrollera adressen och att du är inloggad med kontot som äger den.",
     "notAnInstanceNoMeta": "Den adressen är ingen instans av Solid Memo. Kontrollera att du klistrade in adressen till en instans mapp, som slutar med /.",
     "notAnInstanceNoSubject": "Den mappen är ingen instans av Solid Memo: dess beskrivning går inte att läsa. Kontrollera att du klistrade in rätt adress.",
-    "notRegistered": "Den instansen finns inte längre i din lista över instanser, så det finns inget att byta. Läs in sidan igen och försök på nytt.",
-    "noMetaToUpdate": "Den här instansen har ingen beskrivning att uppdatera. Läs in sidan igen och försök på nytt.",
-    "noBackup": "{instance} har ingen säkerhetskopia att återställa.",
     "movedCopyInvalid": {
       "one": "Kopian i din Pod har inte det format Solid Memo förväntar sig ({count} problem), så dina studier lämnas som de var. Försök igen senare.",
       "other": "Kopian i din Pod har inte det format Solid Memo förväntar sig ({count} problem), så dina studier lämnas som de var. Försök igen senare."
@@ -1166,9 +1151,9 @@
     },
     "guestStudyTooNew": "En nyare version av Solid Memo har sparat en del av dina studier i den här webbläsaren, så den här versionen lägger inte till dem i din Pod. Ladda om sidan för att få den senaste versionen.",
     "guestStudyChanged": "Dina studier i den här webbläsaren ändrades medan de lades till, kanske i en annan flik, så de finns kvar här. Försök igen för att lägga till det som ändrades.",
-    "instanceChangedDuringCopy": "Instansen ändrades medan den kopierades, kanske i en annan flik eller app. Försök igen.",
-    "resourceChangedDuringCopy": "En del av instansen ändrades medan den kopierades, kanske i en annan flik eller app. Försök igen.",
-    "instanceBeingUpdated": "Solid Memo uppdaterar den här instansen och sparar inget i den förrän uppdateringen är klar. Vänta tills uppdateringen är klar och försök sedan igen.",
+    "instanceChangedDuringCopy": "Dina studier i den här webbläsaren ändrades medan de kopierades, kanske i en annan flik, så de finns kvar här. Försök igen.",
+    "resourceChangedDuringCopy": "En del av dina studier i den här webbläsaren ändrades medan de kopierades, kanske i en annan flik, så de finns kvar här. Försök igen.",
+    "guestStudyBeingMoved": "Solid Memo flyttar dina studier i den här webbläsaren till din Pod och sparar inget i dem förrän det är klart. Vänta tills det är klart och försök sedan igen.",
     "deckChangedSinceOffer": "Kortleken ändrades efter att uppdateringen erbjöds, kanske i en annan flik eller app, så inget ändrades. Titta på erbjudandet igen.",
     "deckChangedDuringUpgrade": "Kortleken ändrades medan den uppdaterades, kanske i en annan flik eller app. Försök igen.",
     "changedElsewhere": "Det här ändrades någon annanstans, kanske i en annan flik eller app, efter att Solid Memo läste det, så inget sparades. Läs in sidan igen och försök på nytt.",

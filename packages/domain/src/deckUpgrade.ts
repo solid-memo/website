@@ -71,65 +71,8 @@ export function isCardsDocumentOf(documentUrl: string, deck: Pick<Deck, "id" | "
   return rest === ".ttl" || /^-[^/]+\.ttl$/.test(rest);
 }
 
-/** A document an upgrade replaces (`from`) and the one it writes in its place (`to`). */
-export interface DocumentMove {
-  from: string;
-  to: string;
-}
-
-/**
- * What an upgrade by an earlier version of the app was moving, which it
- * noted in the browser before it wrote, so that one cut off (a closed
- * tab) can be tidied away: the documents of the side that lost — the new
- * ones before it switched the deck's entry over, the old ones after.
- * This app's upgrade moves no document and notes nothing: it only reads
- * the notes an earlier one left.
- */
-export interface DeckUpgradeNote {
-  /** ISO dateTime the upgrade began. */
-  startedAt: string;
-  cards: DocumentMove;
-  /** Absent when the upgrade keeps the reviews document. */
-  reviews?: DocumentMove;
-}
-
-/**
- * How long an upgrade may take before its note counts as left behind.
- * An upgrade takes seconds; until then, the note may be another tab's
- * upgrade under way (the note is kept per browser, not per tab).
- */
-export const ABANDONED_UPGRADE_MS = 10 * 60 * 1000;
-
-/** Whether the upgrade the note is of began long enough ago to have been cut off. */
-export function isAbandoned(note: DeckUpgradeNote, now: Date): boolean {
-  const started = Date.parse(note.startedAt);
-  return Number.isNaN(started) || now.getTime() - started >= ABANDONED_UPGRADE_MS;
-}
-
-/** The note again; null when it is not one (forgotten, or written by something else). */
-export function decodeDeckUpgradeNote(text: string | null): DeckUpgradeNote | null {
-  if (text === null) return null;
-  let value: unknown;
-  try {
-    value = JSON.parse(text);
-  } catch {
-    return null;
-  }
-  if (!isRecord(value) || typeof value.startedAt !== "string" || !isMove(value.cards)) return null;
-  if (value.reviews !== undefined && !isMove(value.reviews)) return null;
-  return {
-    startedAt: value.startedAt,
-    cards: { from: value.cards.from, to: value.cards.to },
-    ...(value.reviews === undefined ? {} : { reviews: { from: value.reviews.from, to: value.reviews.to } }),
-  };
-}
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
-}
-
-function isMove(value: unknown): value is DocumentMove {
-  return isRecord(value) && typeof value.from === "string" && typeof value.to === "string";
 }
 
 /** JSON with every object's keys in order, so equal values give equal text. */

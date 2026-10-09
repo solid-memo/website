@@ -237,34 +237,4 @@ describe("MigrationContainer", () => {
     expect(await screen.findByText("catalogue unreadable")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Update 1 deck" })).toBeEnabled();
   });
-
-  it("offers to remove the partial copy a run cut off half-way left (a guest's move, an earlier version's update), and says why it could not", async () => {
-    let leftover: string | null = "https://pod.example/solid-memo/a-0f3a/";
-    const removeInterruptedUpdate = vi
-      .fn()
-      .mockRejectedValueOnce(new Error("not allowed"))
-      .mockImplementation(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 10));
-        leftover = null;
-      });
-    const useCases = makeUseCasesFake({
-      planMigration: vi.fn(async () => current),
-      findInterruptedUpdate: vi.fn(async () => leftover),
-      removeInterruptedUpdate,
-    });
-    renderContainer(useCases);
-    const notice = await screen.findByRole("region", { name: "Interrupted update" });
-    expect(notice).toHaveTextContent(
-      "A copy of Main that Solid Memo was making was cut off before it was finished; your data is as it was. The partial copy remains at https://pod.example/solid-memo/a-0f3a/.",
-    );
-    fireEvent.click(screen.getByRole("button", { name: "Remove it" }));
-    expect(await screen.findByText("not allowed")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Remove it" }));
-    // Only aria-disabled, so it keeps the focus; pressed again meanwhile, it does nothing.
-    const removing = await screen.findByRole("button", { name: "Removing…" });
-    expect(removing).toHaveAttribute("aria-disabled", "true");
-    fireEvent.click(removing);
-    expect(removeInterruptedUpdate).toHaveBeenCalledTimes(2);
-    await waitFor(() => expect(screen.queryByRole("region", { name: "Interrupted update" })).toBeNull());
-  });
 });

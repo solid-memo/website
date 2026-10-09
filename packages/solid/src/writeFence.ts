@@ -31,7 +31,7 @@ export function createWriteFence(inner: typeof globalThis.fetch): WriteFence & {
       if (!READS.has(method)) {
         const url = normalize(request?.url ?? String(input));
         for (const container of held.keys()) {
-          if (url.startsWith(container)) throw new AppError("instanceBeingUpdated", { container, method, url });
+          if (url.startsWith(container)) throw new AppError("guestStudyBeingMoved", { container, method, url });
         }
       }
       return inner(input, init);

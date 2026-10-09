@@ -55,10 +55,6 @@ export const ERROR_TEMPLATES = {
     "That address is not a Solid Memo instance. Check that you pasted the address of an instance's folder, ending in /.",
   notAnInstanceNoSubject:
     "That folder is not a Solid Memo instance: its description cannot be read. Check that you pasted the right address.",
-  notRegistered:
-    "That instance is no longer on your list of instances, so there is nothing to switch. Reload the page and try again.",
-  noMetaToUpdate: "This instance has no description to update. Reload the page and try again.",
-  noBackup: "{instance} has no backup to restore.",
   movedCopyInvalid: {
     one: "The copy in your Pod is not in the format Solid Memo expects ({count} problem), so your study is left as it was. Try again later.",
     other: "The copy in your Pod is not in the format Solid Memo expects ({count} problems), so your study is left as it was. Try again later.",
@@ -74,11 +70,11 @@ export const ERROR_TEMPLATES = {
   guestStudyChanged:
     "Your study in this browser changed while it was being added, perhaps in another tab, so it is kept here. Try again to add what changed.",
   instanceChangedDuringCopy:
-    "The instance changed while it was being copied, perhaps in another tab or app. Try again.",
+    "Your study in this browser changed while it was being copied, perhaps in another tab, so it is kept here. Try again.",
   resourceChangedDuringCopy:
-    "Part of the instance changed while it was being copied, perhaps in another tab or app. Try again.",
-  instanceBeingUpdated:
-    "Solid Memo is updating this instance and saves nothing to it until the update is done. Wait for the update to finish, then try again.",
+    "Part of your study in this browser changed while it was being copied, perhaps in another tab, so it is kept here. Try again.",
+  guestStudyBeingMoved:
+    "Solid Memo is moving your study in this browser into your Pod and saves nothing to it until that is done. Wait for it to finish, then try again.",
   deckChangedSinceOffer:
     "The deck changed since the update was offered, perhaps in another tab or app, so nothing was changed. Look at the offer again.",
   deckChangedDuringUpgrade: "The deck changed while it was being updated, perhaps in another tab or app. Try again.",

@@ -134,14 +134,10 @@ flowchart LR
   so is every container on its path: the user is told the folder was
   kept, and why, with a link to it (`KeptFolderNotice`). Data goes
   before registration so a failure leaves the instance listed and the
-  delete retryable. Restoring the copy of a whole instance an earlier
-  version's format update left deletes the updated instance, and
-  deleting that copy the original, the same way
-  ([migrations.md](migrations.md#the-backup)). Every blocking server
-  the end-to-end tests start ([testing.md](testing.md#commands)), and
-  Pivot and Community Solid Server 8, keeps another app's file and its
-  folder, and deletes a folder holding only Solid Memo's documents with
-  its access rules ([foreignData.integration.test.ts](../e2e/pod/src/foreignData.integration.test.ts)).
+  delete retryable. Every blocking server the end-to-end tests start
+  ([testing.md](testing.md#commands)), and Pivot and Community Solid
+  Server 8, keeps another app's file and its folder, and deletes a
+  folder holding only Solid Memo's documents with its access rules ([foreignData.integration.test.ts](../e2e/pod/src/foreignData.integration.test.ts)).
   Solid-Nextcloud lists a folder's ACL among what the folder contains, so
   there such a folder is kept, its access rules in it; what the advisory
   servers fail, and why, is their `expected-failures.json`.
@@ -203,15 +199,7 @@ container, each other by the exact IRI it names
 never by what lies under the container, where another app may have
 registered data of its own. A registration that also registers
 something else keeps it, and loses only the link to the instance's
-data. Switching the registrations to another container, as restoring
-the copy an earlier version's format update left does, likewise
-replaces only the links to the instance's data, each with the same
-resource of the other container, in every index that holds any of
-them: the private index of an instance registered publicly holds only
-its review states' and answers', and they move too. The other things a
-shared registration names, and its title, stay as they were; an index
-that registers the instance but no catalogue of it gains the other
-container's catalogue.
+data.
 
 ## Instance layout
 
@@ -219,8 +207,9 @@ container's catalogue.
 <storage>solid-memo/<name>/          (default path; user-editable)
 ├── meta.ttl        #it: a sm:Instance; dcterms:title; dcterms:created;
 │                        on an instance an earlier version's format
-│                        update made, dcterms:replaces (that update's
-│                        backup) and dcterms:modified; sm:formatVersion 2
+│                        update made, dcterms:replaces and
+│                        dcterms:modified, ignored and kept;
+│                        sm:formatVersion 2
 ├── preferences.ttl #it: a sm:Preferences (created on first explicit save):
 │                        study caps, sm:answerScale, sm:developerMode,
 │                        sm:invalidDataPolicy, sm:theme,
@@ -456,10 +445,7 @@ subject's in it: the [format update](migrations.md#the-pod-migration)
 and the [library upgrade](migrations.md#how-an-upgrade-is-applied)
 write the documents where they are, and change no registration (the
 format update only adds those missing). Another app may keep a link to
-the instance, a deck, a card or a review state. The one way an
-instance's address still changes is restoring the copy of a whole
-instance that a format update by an earlier version of the app left as
-its backup, which switches the registrations back to that copy.
+the instance, a deck, a card or a review state.
 
 ## The catalogue
 
@@ -823,19 +809,16 @@ sequenceDiagram
 - **What Solid Memo did not write, it does not delete or unlink.** A
   write touches only the triples it changes (a deck save adds or
   removes its own `dcat:dataset` link, never another app's), and a
-  delete only resources Solid Memo knows it wrote: an instance, a copy
-  of a whole instance an earlier version's update left, or the updated
-  instance that copy's restore replaces, is deleted document by
-  document, its folder only once empty
+  delete only resources Solid Memo knows it wrote: an instance is
+  deleted document by document, its folder only once empty
   ([deleting an instance](#discovery-chain)); the cards and reviews
   documents adding a guest's deck to an instance just created, when it
   fails before the deck's entry names them, are deleted each as read,
   with `If-Match` ([guest-mode.md](guest-mode.md#adding-to-an-instance)). Only a folder Solid Memo
   made whole and nothing names yet is deleted recursively: the guest's
-  study moved into a new instance, when it fails half-way or a closed tab left it behind,
-  and the partial copy of a whole instance an earlier version's update
-  left so: Solid Memo created it at a URL it found free, and all it holds
-  is copies whose originals stay where they were.
+  study moved into a new instance, when it fails half-way or a closed tab left it behind:
+  Solid Memo created it at a URL it found free, and all it holds is
+  copies whose originals stay where they were.
 - **An update writes each document in one edit, held to its read.** The
   format update and the library upgrade write each document where it
   is, as any save does: one edit made only if the document is still at

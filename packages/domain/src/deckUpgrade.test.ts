@@ -4,8 +4,6 @@ import type { LibraryCard } from "./library";
 import type { LibraryUpgradePlan } from "./libraryUpgrade";
 import {
   DECK_UPGRADE_STEPS,
-  decodeDeckUpgradeNote,
-  isAbandoned,
   sameCardChanges,
   sameDeckState,
   isCardsDocumentOf,
@@ -76,35 +74,6 @@ describe("isCardsDocumentOf", () => {
     expect(isCardsDocumentOf("https://pod.example/b/decks/deck-1.ttl", deck)).toBe(false);
     expect(isCardsDocumentOf("https://pod.example/a/decks/deck-1-x/y.ttl", deck)).toBe(false);
     expect(isCardsDocumentOf("https://pod.example/a/decks/deck-1-u1.json", deck)).toBe(false);
-  });
-});
-
-describe("deck upgrade notes", () => {
-  const startedAt = "2026-10-03T10:00:00.000Z";
-
-  it("are read as JSON, as an earlier version stored them, with or without a reviews move", () => {
-    const note = { startedAt, cards: { from: "a", to: "b" }, reviews: { from: "c", to: "d" } };
-    expect(
-      decodeDeckUpgradeNote(`{"startedAt": "${startedAt}", "cards": {"from": "a", "to": "b"}, "reviews": {"from": "c", "to": "d"}}`),
-    ).toEqual(note);
-    expect(decodeDeckUpgradeNote(`{"startedAt": "${startedAt}", "cards": {"from": "a", "to": "b"}}`)).toEqual({ startedAt, cards: note.cards });
-  });
-
-  it("are null when missing or not a note", () => {
-    expect(decodeDeckUpgradeNote(null)).toBeNull();
-    expect(decodeDeckUpgradeNote("{")).toBeNull();
-    expect(decodeDeckUpgradeNote("null")).toBeNull();
-    const cards = { from: "a", to: "b" };
-    expect(decodeDeckUpgradeNote(JSON.stringify({ cards }))).toBeNull();
-    expect(decodeDeckUpgradeNote(JSON.stringify({ startedAt, cards: { from: "a" } }))).toBeNull();
-    expect(decodeDeckUpgradeNote(JSON.stringify({ startedAt, cards, reviews: 1 }))).toBeNull();
-  });
-
-  it("count as left behind once an upgrade would long be over, or when they say no time", () => {
-    const note = { startedAt, cards: { from: "a", to: "b" } };
-    expect(isAbandoned(note, new Date("2026-10-03T10:09:59.000Z"))).toBe(false);
-    expect(isAbandoned(note, new Date("2026-10-03T10:10:00.000Z"))).toBe(true);
-    expect(isAbandoned({ ...note, startedAt: "soon" }, new Date(startedAt))).toBe(true);
   });
 });
 

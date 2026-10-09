@@ -113,12 +113,6 @@ describe("LibraryUpgradeContainer", () => {
     expect(other.textContent).toBe("");
   });
 
-  it("tidies away what an upgrade cut off half-way left, once", async () => {
-    const useCases = makeUseCasesFake();
-    renderContainer(useCases);
-    await waitFor(() => expect(useCases.tidyInterruptedDeckUpgrade).toHaveBeenCalledWith(imported));
-  });
-
   it("offers the upgrade, shows its steps while it runs, then refreshes what depends on the deck at once, and reports", async () => {
     let stored: Deck = imported;
     let report: ((progress: DeckUpgradeProgress) => void) | undefined;

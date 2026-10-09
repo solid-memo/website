@@ -121,11 +121,9 @@ function makeDeps() {
     deleteInstance: vi.fn(async () => ({ keptFolder: null })),
     deleteInstanceData: vi.fn(async () => ({ keptFolder: null })),
     readMeta: vi.fn(async () => null),
-    saveMeta: vi.fn(async () => undefined),
     upgradeMeta: vi.fn(async () => true),
     readDataClassRegistrations: vi.fn(async () => ({ registrations: [], privateIndexMissing: false, unreadableIndexes: [] })),
     registerDataClasses: vi.fn(async () => undefined),
-    switchInstance: vi.fn(async () => undefined),
   };
   const deckRepository: DeckRepository = {
     listDecks: vi.fn(async () => [deck]),
@@ -922,7 +920,7 @@ describe("createUseCases", () => {
       expect(deps.deckRepository.saveDeck).not.toHaveBeenCalled();
       expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
       expect(deps.preferencesRepository.savePreferences).not.toHaveBeenCalled();
-      expect(deps.instanceRepository.saveMeta).not.toHaveBeenCalled();
+      expect(deps.instanceRepository.upgradeMeta).not.toHaveBeenCalled();
     });
 
     const META = `${instance.url}meta.ttl`;
@@ -983,7 +981,6 @@ describe("createUseCases", () => {
       // A catalogue there is not written anew: only the outdated entries are.
       expect(deps.deckRepository.upgradeDecks).toHaveBeenCalledExactlyOnceWith(instance.url, null);
       // Nothing but the documents' own conditional writes: no copy, no check of a copy, no hold of the instance.
-      expect(deps.instanceRepository.saveMeta).not.toHaveBeenCalled();
       expect(deps.preferencesRepository.savePreferences).not.toHaveBeenCalled();
       expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
       expect(deps.instanceCopier.copyResource).not.toHaveBeenCalled();
@@ -1123,136 +1120,6 @@ describe("createUseCases", () => {
       const { deps } = outdated();
       vi.mocked(deps.instanceRepository.registerDataClasses).mockRejectedValue(new Error("index refused"));
       expect(await createUseCases(deps).updateInstance(session, instance)).toEqual({ updated: UPDATED, failed: [] });
-    });
-
-    it("an update by an earlier version, cut off, left a partial copy of the whole instance: offered for removal while it is there", async () => {
-      const COPY = "https://alice.example/solid-memo/main-0f3a/";
-      const deps = makeDeps();
-      const useCases = createUseCases(deps);
-      await expect(useCases.findInterruptedUpdate(instance)).resolves.toBeNull();
-      deps.updateJournal.staging.mockReturnValue(COPY);
-      vi.mocked(deps.instanceCopier.ensureAbsent).mockRejectedValueOnce(new Error("exists"));
-      await expect(useCases.findInterruptedUpdate(instance)).resolves.toBe(COPY);
-      expect(deps.updateJournal.end).not.toHaveBeenCalled();
-      await expect(useCases.findInterruptedUpdate(instance)).resolves.toBeNull();
-      expect(deps.updateJournal.end).toHaveBeenCalledWith(instance.url);
-      // Removed whole, as nothing names it.
-      await useCases.removeInterruptedUpdate(instance);
-      expect(deps.instanceCopier.deleteRecursively).toHaveBeenCalledWith(COPY);
-      vi.mocked(deps.instanceCopier.deleteRecursively).mockClear();
-      deps.updateJournal.staging.mockReturnValue(null);
-      await useCases.removeInterruptedUpdate(instance);
-      expect(deps.instanceCopier.deleteRecursively).not.toHaveBeenCalled();
-    });
-
-    const COPY = "https://alice.example/solid-memo/main-0f3a/";
-
-    describe("a backup an earlier version made as a copy", () => {
-      const updated: Instance = { url: COPY, name: "Main" };
-      const meta = {
-        name: "Main",
-        createdAt: "2026-09-21T10:00:00.000Z",
-        formatVersion: 2,
-        replaces: instance.url,
-        replacedAt: "2026-09-28T10:00:00.000Z",
-      };
-
-      const backupMeta = { name: "Main", createdAt: meta.createdAt, formatVersion: 1 };
-      const forgotten = { name: "Main", createdAt: meta.createdAt, formatVersion: 2 };
-      /** The updated instance's meta, and the backup's (null when its meta document is gone). */
-      function metas(deps: ReturnType<typeof makeDeps>, updatedMeta: typeof meta | Omit<typeof meta, "replacedAt">, backup: typeof backupMeta | null) {
-        vi.mocked(deps.instanceRepository.readMeta).mockImplementation(async (url) =>
-          url === COPY ? updatedMeta : backup,
-        );
-      }
-
-      it("is read from what the instance replaces, and forgotten once its meta document is gone", async () => {
-        const deps = makeDeps();
-        const useCases = createUseCases(deps);
-        await expect(useCases.readLegacyBackup(updated)).resolves.toBeNull();
-        metas(deps, meta, backupMeta);
-        await expect(useCases.readLegacyBackup(updated)).resolves.toEqual({ url: instance.url, replacedAt: meta.replacedAt });
-        const { replacedAt: _r, ...undated } = meta;
-        metas(deps, undated, backupMeta);
-        await expect(useCases.readLegacyBackup(updated)).resolves.toEqual({ url: instance.url });
-        expect(deps.instanceRepository.saveMeta).not.toHaveBeenCalled();
-        // A pod that cannot say leaves the backup offered.
-        vi.mocked(deps.instanceRepository.readMeta).mockImplementation(async (url) => {
-          if (url === COPY) return meta;
-          throw new Error("503");
-        });
-        await expect(useCases.readLegacyBackup(updated)).resolves.toEqual({ url: instance.url, replacedAt: meta.replacedAt });
-        // The folder may still be there, kept for another app's files: without its meta document it is no backup.
-        metas(deps, meta, null);
-        await expect(useCases.readLegacyBackup(updated)).resolves.toBeNull();
-        expect(deps.instanceRepository.saveMeta).toHaveBeenCalledWith(COPY, forgotten);
-      });
-
-      it("is restored by switching back to it, then deleting what the updated instance holds of Solid Memo's", async () => {
-        const deps = makeDeps();
-        metas(deps, meta, backupMeta);
-        vi.mocked(deps.instanceRepository.deleteInstanceData).mockImplementation(async () => {
-          // The switch comes first: the deletion never leaves the instance registered nowhere.
-          expect(deps.instanceRepository.switchInstance).toHaveBeenCalled();
-          return { keptFolder: COPY };
-        });
-        await expect(createUseCases(deps).restoreLegacyBackup(session, updated)).resolves.toEqual({ instance, keptFolder: COPY });
-        expect(deps.instanceRepository.switchInstance).toHaveBeenCalledWith({
-          webId: session.webId,
-          from: COPY,
-          to: instance.url,
-          title: "Main",
-        });
-        expect(deps.instanceRepository.deleteInstanceData).toHaveBeenCalledWith(COPY);
-        expect(deps.instanceCopier.deleteRecursively).not.toHaveBeenCalled();
-        vi.mocked(deps.instanceRepository.readMeta).mockResolvedValue(null);
-        await expect(createUseCases(deps).restoreLegacyBackup(session, updated)).rejects.toThrow("Main has no backup to restore.");
-      });
-
-      it("is not restored once its data is gone, so the updated instance's data stays", async () => {
-        const deps = makeDeps();
-        metas(deps, meta, null);
-        await expect(createUseCases(deps).restoreLegacyBackup(session, updated)).rejects.toThrow("Main has no backup to restore.");
-        expect(deps.instanceRepository.switchInstance).not.toHaveBeenCalled();
-        expect(deps.instanceRepository.deleteInstanceData).not.toHaveBeenCalled();
-        expect(deps.instanceRepository.saveMeta).toHaveBeenCalledWith(COPY, forgotten);
-      });
-
-      it("is deleted after it is forgotten, what it holds of Solid Memo's; with none, nothing happens", async () => {
-        const deps = makeDeps();
-        await expect(createUseCases(deps).deleteLegacyBackup(updated)).resolves.toEqual({ keptFolder: null });
-        expect(deps.instanceRepository.deleteInstanceData).not.toHaveBeenCalled();
-        metas(deps, meta, backupMeta);
-        vi.mocked(deps.instanceRepository.deleteInstanceData).mockImplementation(async () => {
-          expect(deps.instanceRepository.saveMeta).toHaveBeenCalledWith(COPY, forgotten);
-          return { keptFolder: instance.url };
-        });
-        await expect(createUseCases(deps).deleteLegacyBackup(updated)).resolves.toEqual({ keptFolder: instance.url });
-        expect(deps.instanceRepository.deleteInstanceData).toHaveBeenCalledWith(instance.url);
-        expect(deps.instanceCopier.deleteRecursively).not.toHaveBeenCalled();
-      });
-
-      it("deletes nothing when it cannot be forgotten, and is never offered again once its deletion was cut off", async () => {
-        const deps = makeDeps();
-        const useCases = createUseCases(deps);
-        metas(deps, meta, backupMeta);
-        vi.mocked(deps.instanceRepository.saveMeta).mockRejectedValueOnce(new Error("412"));
-        await expect(useCases.deleteLegacyBackup(updated)).rejects.toThrow("412");
-        expect(deps.instanceRepository.deleteInstanceData).not.toHaveBeenCalled();
-
-        // Forgotten, then the deletion fails half-way: the updated instance no longer names a backup.
-        let current: typeof meta | typeof forgotten = meta;
-        vi.mocked(deps.instanceRepository.readMeta).mockImplementation(async (url) => (url === COPY ? current : backupMeta));
-        vi.mocked(deps.instanceRepository.saveMeta).mockImplementation(async (_url, saved) => {
-          current = saved as typeof forgotten;
-        });
-        vi.mocked(deps.instanceRepository.deleteInstanceData).mockRejectedValueOnce(new Error("500"));
-        await expect(useCases.deleteLegacyBackup(updated)).rejects.toThrow("500");
-        await expect(useCases.readLegacyBackup(updated)).resolves.toBeNull();
-        await expect(useCases.restoreLegacyBackup(session, updated)).rejects.toThrow("Main has no backup to restore.");
-        expect(deps.instanceRepository.switchInstance).not.toHaveBeenCalled();
-        expect(deps.instanceRepository.deleteInstanceData).toHaveBeenCalledOnce();
-      });
     });
   });
 
@@ -2077,9 +1944,6 @@ describe("the answer log", () => {
 
 describe("library deck upgrade", () => {
   const LIB = "https://solid-memo.com/decks/capitals/";
-  /** Where an upgrade by an earlier version wrote the deck's new documents. */
-  const STAGED_CARDS = `${instance.url}decks/deck-1-0f3a.ttl`;
-  const STAGED_REVIEWS = `${instance.url}reviews/deck-1-0f3a.ttl`;
   const libraryCard = (id: string, back: string): LibraryCard => ({ id, front: { "": id }, back: { "": back }, formatVersion: 4 });
   const reviewOf = (cardId: string): ReviewState => ({
     cardId,
@@ -2183,10 +2047,6 @@ describe("library deck upgrade", () => {
       pod.deck = withDeckChanges(pod.deck, current, next);
       wrote(current.url);
       return pod.deck;
-    });
-    vi.mocked(repo.deleteDocument).mockImplementation(async (url) => {
-      pod.cards.delete(url);
-      pod.reviews.delete(url);
     });
     const reviewRepo = deps.reviewStateRepository;
     vi.mocked(reviewRepo.listReviewStates).mockImplementation(async (d) => pod.reviews.get(d.reviewsDocumentUrl) ?? []);
@@ -2409,67 +2269,6 @@ describe("library deck upgrade", () => {
     await expect(unread.useCases.applyLibraryUpgrade(unread.copy, unread.plan)).resolves.toMatchObject({ ok: false, step: "entry", changed: true });
   });
 
-  describe("tidyInterruptedDeckUpgrade", () => {
-    const note = (startedAt = "2026-09-28T09:00:00.000Z") =>
-      JSON.stringify({
-        startedAt,
-        cards: { from: deck.cardsDocumentUrl, to: STAGED_CARDS },
-        reviews: { from: deck.reviewsDocumentUrl, to: STAGED_REVIEWS },
-      });
-
-    it("does nothing without a note, or while the upgrade may still be under way", async () => {
-      const { deps, copy, useCases } = await world();
-      await expect(useCases.tidyInterruptedDeckUpgrade(copy)).resolves.toBe(false);
-      vi.mocked(deps.updateJournal.staging).mockReturnValue(note("2026-09-28T09:55:00.000Z"));
-      await expect(useCases.tidyInterruptedDeckUpgrade(copy)).resolves.toBe(false);
-      expect(deps.deckRepository.deleteDocument).not.toHaveBeenCalled();
-    });
-
-    it("deletes the new documents of an upgrade cut off before its switch", async () => {
-      const { deps, pod, copy, useCases } = await world();
-      pod.cards.set(STAGED_CARDS, []);
-      vi.mocked(deps.updateJournal.staging).mockReturnValue(note());
-      await expect(useCases.tidyInterruptedDeckUpgrade(copy)).resolves.toBe(true);
-      expect([...pod.cards.keys()]).toEqual([copy.cardsDocumentUrl]);
-      expect(deps.deckRepository.deleteDocument).toHaveBeenCalledWith(STAGED_REVIEWS);
-      expect(deps.updateJournal.end).toHaveBeenCalledWith(copy.url);
-    });
-
-    it("deletes the old documents of an upgrade cut off after its switch, never what the deck uses", async () => {
-      const { deps, pod, copy, useCases } = await world();
-      pod.cards.set(STAGED_CARDS, []);
-      pod.deck = { ...copy, cardsDocumentUrl: STAGED_CARDS };
-      vi.mocked(deps.updateJournal.staging).mockReturnValue(note());
-      await expect(useCases.tidyInterruptedDeckUpgrade(copy)).resolves.toBe(true);
-      expect(deps.deckRepository.deleteDocument).toHaveBeenCalledWith(copy.cardsDocumentUrl);
-      expect(deps.deckRepository.deleteDocument).not.toHaveBeenCalledWith(copy.reviewsDocumentUrl);
-      expect([...pod.cards.keys()]).toEqual([STAGED_CARDS]);
-    });
-
-    it("deletes the new cards document of an upgrade that kept the reviews document", async () => {
-      const { deps, pod, copy, useCases } = await world();
-      pod.cards.set(STAGED_CARDS, []);
-      vi.mocked(deps.updateJournal.staging).mockReturnValue(
-        JSON.stringify({ startedAt: "2026-09-28T09:00:00.000Z", cards: { from: deck.cardsDocumentUrl, to: STAGED_CARDS } }),
-      );
-      await expect(useCases.tidyInterruptedDeckUpgrade(copy)).resolves.toBe(true);
-      expect(vi.mocked(deps.deckRepository.deleteDocument).mock.calls).toEqual([[STAGED_CARDS]]);
-    });
-
-    it("deletes every document the note names when the deck is gone", async () => {
-      const { deps, pod, copy, useCases } = await world();
-      pod.deck = null;
-      vi.mocked(deps.updateJournal.staging).mockReturnValue(note());
-      await useCases.tidyInterruptedDeckUpgrade(copy);
-      expect(vi.mocked(deps.deckRepository.deleteDocument).mock.calls.map(([url]) => url)).toEqual([
-        copy.cardsDocumentUrl,
-        STAGED_CARDS,
-        copy.reviewsDocumentUrl,
-        STAGED_REVIEWS,
-      ]);
-    });
-  });
-
   describe("guests", () => {
     const guestInstance: Instance = { url: GUEST_INSTANCE_URL, name: "My study" };
     const TARGET = "https://alice.example/solid-memo/main/";
@@ -2647,6 +2446,39 @@ describe("library deck upgrade", () => {
       ]);
     });
 
+    it("a move cut off by a closed tab left a partial copy: offered for removal while it is there", async () => {
+      const { deps } = guestDeps();
+      const useCases = createUseCases(deps);
+      await expect(useCases.findInterruptedGuestMove(guestInstance)).resolves.toBeNull();
+      vi.mocked(deps.updateJournal.staging).mockReturnValue(TARGET);
+      vi.mocked(deps.instanceCopier.ensureAbsent).mockRejectedValueOnce(new Error("exists"));
+      await expect(useCases.findInterruptedGuestMove(guestInstance)).resolves.toBe(TARGET);
+      expect(deps.updateJournal.staging).toHaveBeenCalledWith(GUEST_INSTANCE_URL);
+      expect(deps.updateJournal.end).not.toHaveBeenCalled();
+      // Gone meanwhile: forgotten.
+      await expect(useCases.findInterruptedGuestMove(guestInstance)).resolves.toBeNull();
+      expect(deps.updateJournal.end).toHaveBeenCalledWith(GUEST_INSTANCE_URL);
+      // Removed whole, as nothing names it.
+      await useCases.removeInterruptedGuestMove(guestInstance);
+      expect(deps.instanceCopier.deleteRecursively).toHaveBeenCalledWith(TARGET);
+      vi.mocked(deps.instanceCopier.deleteRecursively).mockClear();
+      vi.mocked(deps.updateJournal.staging).mockReturnValue(null);
+      await useCases.removeInterruptedGuestMove(guestInstance);
+      expect(deps.instanceCopier.deleteRecursively).not.toHaveBeenCalled();
+    });
+
+    it("a note an earlier version's update left on an instance in a Pod is not a move: nothing offered, nothing removed", async () => {
+      const { deps } = guestDeps();
+      const useCases = createUseCases(deps);
+      vi.mocked(deps.updateJournal.staging).mockReturnValue(TARGET);
+      await expect(useCases.findInterruptedGuestMove(instance)).resolves.toBeNull();
+      await useCases.removeInterruptedGuestMove(instance);
+      expect(deps.updateJournal.staging).not.toHaveBeenCalled();
+      expect(deps.updateJournal.end).not.toHaveBeenCalled();
+      expect(deps.instanceCopier.ensureAbsent).not.toHaveBeenCalled();
+      expect(deps.instanceCopier.deleteRecursively).not.toHaveBeenCalled();
+    });
+
     it("transferGuestStudy deletes the whole guest pod with its last instance", async () => {
       const { deps, guestPod } = guestDeps();
       vi.mocked(deps.instanceRepository.deleteInstance).mockImplementation(async () => {
@@ -2663,7 +2495,7 @@ describe("library deck upgrade", () => {
       await expect(
         useCases.transferGuestStudy(session, guestInstance, { containerUrl: TARGET, registrationTarget: "private" }),
       ).resolves.toMatchObject({ ok: true });
-      await expect(useCases.findInterruptedUpdate(instance)).resolves.toBeNull();
+      await expect(useCases.findInterruptedGuestMove(guestInstance)).resolves.toBeNull();
       expect(useCases.newDeckGroup(instance.url, { en: "Group" }).url).toMatch(/#group-[0-9a-f-]{36}$/);
       await expect(useCases.refreshStudyDigest(instance.url, deck)).resolves.toBeUndefined();
     });

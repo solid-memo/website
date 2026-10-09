@@ -22,7 +22,7 @@ describe("createWriteFence", () => {
       hold(MAIN);
       for (const url of [MAIN, `${MAIN}decks/deck-1.ttl`, `${MAIN}.acl`, "https://POD.example:443/solid-memo/main/meta.ttl", "https://pod.example/solid-memo/%6Dain/x.ttl"]) {
         await expect(fetch(url, { method })).rejects.toThrow(
-          `Solid Memo is updating this instance and saves nothing to it until the update is done. Wait for the update to finish, then try again.\ncontainer: ${MAIN}`,
+          `Solid Memo is moving your study in this browser into your Pod and saves nothing to it until that is done. Wait for it to finish, then try again.\ncontainer: ${MAIN}`,
         );
       }
       await expect(fetch(new Request(`${MAIN}meta.ttl`, { method: "DELETE" }))).rejects.toThrow("method: DELETE");

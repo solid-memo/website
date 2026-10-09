@@ -110,7 +110,6 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
       ok: true as const,
       deck: { ...deck, sourceUrl: plan.releaseUrl },
     })),
-    tidyInterruptedDeckUpgrade: vi.fn(async () => false),
     listCards: vi.fn(async () => []),
     addCard: vi.fn(async () => {
       throw new Error("addCard fake not configured");
@@ -132,11 +131,8 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
       catalogMissing: false,
     })),
     updateInstance: vi.fn(async () => ({ updated: [], failed: [] })),
-    findInterruptedUpdate: vi.fn(async () => null),
-    removeInterruptedUpdate: vi.fn(async () => undefined),
-    readLegacyBackup: vi.fn(async () => null),
-    restoreLegacyBackup: vi.fn(async (_session, instance) => ({ instance, keptFolder: null })),
-    deleteLegacyBackup: vi.fn(async () => ({ keptFolder: null })),
+    findInterruptedGuestMove: vi.fn(async () => null),
+    removeInterruptedGuestMove: vi.fn(async () => undefined),
     getPreferences: vi.fn(async () => DEFAULT_PREFERENCES),
     savePreferences: vi.fn(async () => undefined),
     getStudyQueue: vi.fn(async () => ({
