@@ -1,8 +1,9 @@
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { parse } from "yaml";
-import { composeFile, SERVER_IDS, SERVERS, serversNamed } from "./servers.ts";
+import { builtImage, composeFile, imageKey, inputsOf, SERVER_IDS, SERVERS, serversNamed } from "./servers.ts";
 
 interface Service {
   image?: string;
@@ -112,5 +113,81 @@ describe("the workflows' servers", () => {
     expect(matrix("ci.yml", "pod")).toEqual(tier("blocking"));
     expect(matrix("ci.yml", "contract")).toEqual(tier("advisory"));
     expect(matrix("interop.yml", "pod")).toEqual(tier("advisory"));
+  });
+});
+
+/** What CI's image cache goes by (.github/actions/e2e-images): it must change whenever a server's images would. */
+describe("the images a server runs", () => {
+  it.each(SERVER_IDS)("are named for %s by what makes them: a built image by an inputs tag beside its own", (id) => {
+    const server = (parse(readFileSync(composeFile(id), "utf8")) as { services: Record<string, Service> }).services.server!;
+    const built = builtImage(id);
+    if (server.build === undefined) {
+      expect(built).toBeNull();
+    } else {
+      expect(built?.image).toBe(server.image);
+      expect(built?.inputs.startsWith(`${server.image!.replace(/:local$/, "")}:inputs-`)).toBe(true);
+      expect(built?.inputs).toMatch(/:inputs-[0-9a-f]{16}$/);
+    }
+    expect(imageKey(id)).toMatch(/^[0-9a-f]{16}$/);
+  });
+
+  it("differ from server to server, so no job loads another's", () => {
+    expect(new Set(SERVER_IDS.map(imageKey)).size).toBe(SERVER_IDS.length);
+  });
+});
+
+describe("the hash of what an image is built from (inputsOf)", () => {
+  const compose = (args: string) => `services:\n  server:\n    build: { context: ., args: { MAJOR: "${args}" } }\n    image: localhost/x:local\n`;
+
+  function context(): string {
+    const dir = mkdtempSync(join(tmpdir(), "inputs-"));
+    writeFileSync(join(dir, "compose.yml"), compose("6"));
+    writeFileSync(join(dir, "Dockerfile"), "FROM scratch\n");
+    mkdirSync(join(dir, "seed"));
+    writeFileSync(join(dir, "seed", "start.sh"), "echo\n");
+    return dir;
+  }
+
+  it("is the same for the same files, and changes with a file, a new file, a file's executable bit or a build argument", () => {
+    const dir = context();
+    try {
+      const file = join(dir, "compose.yml");
+      const first = inputsOf(file);
+      expect(inputsOf(file)).toBe(first);
+      const seen = new Set([first]);
+      const changed = (change: () => void) => {
+        change();
+        const next = inputsOf(file);
+        expect(seen.has(next)).toBe(false);
+        seen.add(next);
+      };
+      changed(() => writeFileSync(join(dir, "seed", "start.sh"), "echo hi\n"));
+      changed(() => writeFileSync(join(dir, "seed", "more.ttl"), "<#a> <#b> <#c> .\n"));
+      changed(() => chmodSync(join(dir, "seed", "start.sh"), 0o755));
+      changed(() => writeFileSync(file, compose("5")));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("leaves out what .dockerignore keeps from the build, and refuses a pattern it does not know", () => {
+    const dir = context();
+    try {
+      const file = join(dir, "compose.yml");
+      writeFileSync(join(dir, ".dockerignore"), "expected-failures.json\n**/node_modules\n");
+      const before = inputsOf(file);
+      writeFileSync(join(dir, "expected-failures.json"), "{}\n");
+      mkdirSync(join(dir, "seed", "node_modules"));
+      writeFileSync(join(dir, "seed", "node_modules", "x.js"), "\n");
+      expect(inputsOf(file)).toBe(before);
+      writeFileSync(join(dir, ".dockerignore"), "*.log\n");
+      expect(() => inputsOf(file)).toThrow(/does not know/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("is null for an image that is pulled", () => {
+    expect(inputsOf(composeFile("css-7"))).toBeNull();
   });
 });

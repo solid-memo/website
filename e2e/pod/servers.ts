@@ -1,10 +1,11 @@
 import { spawn, spawnSync, type ChildProcess } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
-import { createWriteStream, existsSync, readFileSync, rmSync } from "node:fs";
+import { createWriteStream, existsSync, readdirSync, readFileSync, rmSync, statSync } from "node:fs";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { createServer } from "node:net";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join, resolve as resolvePath } from "node:path";
+import { parse } from "yaml";
 import { checkContract } from "./contract.ts";
 
 export type Tier = "blocking" | "advisory";
@@ -144,10 +145,110 @@ function lockedVersion(dir: string, pkg: string): string {
   return lock.packages[`node_modules/${pkg}`]!.version;
 }
 
-/** Pulls the server's image unless it is here, or builds it (from the cache when nothing changed). */
+/**
+ * The patterns of a build context's .dockerignore, as the ones used here
+ * are written: a name excluded at the top ("node_modules") or, after
+ * "**" and a slash, at any depth. Anything else is refused rather than
+ * misread.
+ */
+function ignoredIn(context: string): { name: string; anyDepth: boolean }[] {
+  const file = join(context, ".dockerignore");
+  if (!existsSync(file)) return [];
+  const lines = readFileSync(file, "utf8").split("\n").map((line) => line.trim()).filter((line) => line !== "" && !line.startsWith("#"));
+  return lines.map((line) => {
+    const anyDepth = line.startsWith("**/");
+    const name = anyDepth ? line.slice(3) : line;
+    if (!/^[\w.-]+$/.test(name)) throw new Error(`${file}: "${line}" is a pattern the image cache's hash (servers.ts) does not know.`);
+    return { name, anyDepth };
+  });
+}
+
+/** The files of a build context Docker sends, relative to it, sorted. */
+function contextFiles(context: string): string[] {
+  const ignored = ignoredIn(context);
+  const files: string[] = [];
+  const walk = (dir: string, depth: number): void => {
+    for (const entry of readdirSync(join(context, dir), { withFileTypes: true })) {
+      if (ignored.some(({ name, anyDepth }) => entry.name === name && (anyDepth || depth === 0))) continue;
+      const path = dir === "" ? entry.name : `${dir}/${entry.name}`;
+      if (entry.isDirectory()) walk(path, depth + 1);
+      else if (entry.isFile()) files.push(path);
+    }
+  };
+  walk("", 0);
+  return files.sort();
+}
+
+/**
+ * A hash of what an image is built from: the compose file (its build
+ * arguments with it), and every file of the build context Docker is sent,
+ * with whether it is executable, which COPY keeps.
+ */
+export function inputsOf(composePath: string): string | null {
+  const text = readFileSync(composePath, "utf8");
+  const build = (parse(text) as { services: { server: { build?: string | { context: string } } } }).services.server.build;
+  if (build === undefined) return null;
+  const context = resolvePath(dirname(composePath), typeof build === "string" ? build : build.context);
+  const hash = createHash("sha256").update(text);
+  for (const file of contextFiles(context)) {
+    const executable = (statSync(join(context, file)).mode & 0o111) !== 0;
+    hash.update(`\0${file}\0${executable ? "x" : "-"}\0`).update(readFileSync(join(context, file)));
+  }
+  return hash.digest("hex").slice(0, 16);
+}
+
+/**
+ * A server built here: the image its compose file names, and the tag
+ * that image is also given, from the hash of what it is built from
+ * (inputsOf). null for a server whose image is pulled.
+ */
+export function builtImage(id: string): { image: string; inputs: string } | null {
+  const inputs = inputsOf(composeFile(id));
+  if (inputs === null) return null;
+  const image = (parse(readFileSync(composeFile(id), "utf8")) as { services: { server: { image: string } } }).services.server.image;
+  return { image, inputs: `${repositoryOf(image)}:inputs-${inputs}` };
+}
+
+/** An image reference without its tag: "localhost/solid-memo-e2e-nss-6". */
+const repositoryOf = (image: string) => image.replace(/:[^:/]+$/, "");
+
+/**
+ * What names the images a server runs, for CI's image cache
+ * (.github/actions/e2e-images): its built image's inputs tag, or its
+ * compose file, which pins a pulled image by digest.
+ */
+export function imageKey(id: ServerId): string {
+  const naming = builtImage(id)?.inputs ?? readFileSync(composeFile(id), "utf8");
+  return createHash("sha256").update(naming).digest("hex").slice(0, 16);
+}
+
+/** Whether Docker has an image by that reference. */
+async function hasImage(reference: string): Promise<boolean> {
+  return docker(["image", "inspect", reference], {}).then(
+    () => true,
+    () => false,
+  );
+}
+
+/**
+ * Pulls the server's image unless it is here, or builds it, unless an
+ * image built from the same files is here (its inputs tag, which CI's
+ * image cache brings along, so a job never needs the base image again).
+ */
 export async function prepare(id: ServerId): Promise<void> {
+  const built = builtImage(id);
+  if (built !== null && (await hasImage(built.inputs))) {
+    await docker(["tag", built.inputs, built.image], {});
+    return;
+  }
   await compose(id, ["pull", "--ignore-buildable", "--policy", "missing", "--quiet"], PLACEHOLDERS);
   await compose(id, ["build", "--quiet"], PLACEHOLDERS);
+  // Tagged only when nothing changed while it was built, and older tags let go, so `docker image prune` takes their images.
+  if (built === null || builtImage(id)?.inputs !== built.inputs) return;
+  await docker(["tag", built.image, built.inputs], {});
+  const tags = await docker(["image", "ls", "--filter", `reference=${repositoryOf(built.image)}:inputs-*`, "--format", "{{.Repository}}:{{.Tag}}"], {});
+  const older = tags.split("\n").filter((tag) => tag !== "" && tag !== built.inputs);
+  if (older.length > 0) await docker(["rmi", ...older], {});
 }
 
 /**
@@ -320,7 +421,8 @@ async function untilUp(name: string, url: string, timeoutMs: number, log: string
 /**
  * `node servers.ts prepare [id...]` pulls or builds the servers' images
  * (every one when none is named), `contract [id...]` starts each, checks
- * the contract and stops it, `clean` takes down what interrupted runs left.
+ * the contract and stops it, `key <id>` prints what names its images
+ * (imageKey), `clean` takes down what interrupted runs left.
  */
 if (import.meta.main) {
   const [command, ...ids] = process.argv.slice(2);
@@ -337,10 +439,12 @@ if (import.meta.main) {
       await stop();
       console.log(`${server.name} (${id}) meets the contract.`);
     }
+  } else if (command === "key" && named.length === 1) {
+    console.log(imageKey(named[0]!));
   } else if (command === "clean") {
     const taken = await clean();
     console.log(taken.length > 0 ? `Took down ${taken.join(", ")}.` : "Nothing to take down.");
   } else {
-    throw new Error(`Usage: node servers.ts prepare|contract|clean [id...]`);
+    throw new Error(`Usage: node servers.ts prepare|contract|clean [id...] | key <id>`);
   }
 }

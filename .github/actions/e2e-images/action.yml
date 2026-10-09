@@ -1,0 +1,69 @@
+# The Docker images an end-to-end job runs, from GitHub's cache, so the job
+# pulls nothing from Docker Hub, whose limit on pulls without an account the
+# runners share (docs/testing.md); what the cache does not have yet comes
+# through Google's mirror of Docker Hub. This restores and loads them; the job
+# saves them after preparing its servers when the cache had none under
+# this key:
+#
+#   - if: steps.images.outputs.hit != 'true'
+#     run: node e2e/pod/images.ts save ${{ steps.images.outputs.file }} <compose.yml>...
+#   - if: steps.images.outputs.hit != 'true'
+#     uses: actions/cache/save@v6
+#     with: { path: "${{ steps.images.outputs.file }}", key: "${{ steps.images.outputs.key }}" }
+#
+# The key must change whenever the images would (`node e2e/pod/servers.ts
+# key <id>`, or the hash of a compose file that pins its images by digest).
+name: End-to-end images
+description: Restores and loads the Docker images an end-to-end job runs.
+inputs:
+  name:
+    description: Which images, one cache entry each (pod-css-7, journeys).
+    required: true
+  key:
+    description: What names those images; a new key, a new entry.
+    required: true
+outputs:
+  hit:
+    description: Whether the cache had the images under this key.
+    value: ${{ steps.cache.outputs.cache-hit }}
+  file:
+    description: The file the images are kept in.
+    value: ${{ steps.file.outputs.file }}
+  key:
+    description: The cache key to save them under.
+    value: ${{ steps.file.outputs.key }}
+runs:
+  using: composite
+  steps:
+    # The classic image store forgets the digest an image was pulled by when
+    # it is saved and loaded again, and the compose files name pulled images
+    # by digest, so compose would pull them again; the containerd store keeps
+    # it. Docker 29 uses it on a new install; an older runner is switched.
+    # What the cache does not have yet is pulled through Google's mirror of
+    # Docker Hub, outside Docker Hub's limit; Docker goes to Docker Hub
+    # for what the mirror lacks. One restart of Docker does both.
+    - name: Use the containerd image store and Docker Hub's mirror
+      shell: bash
+      run: |
+        config=/etc/docker/daemon.json
+        if sudo test -s "$config"; then current=$(sudo cat "$config"); else current='{}'; fi
+        wanted=$(echo "$current" | jq '.features["containerd-snapshotter"] = true
+          | .["registry-mirrors"] = ((.["registry-mirrors"] // []) - ["https://mirror.gcr.io"] + ["https://mirror.gcr.io"])')
+        if [ "$(echo "$current" | jq -S .)" != "$(echo "$wanted" | jq -S .)" ]; then
+          echo "$wanted" | sudo tee "$config" > /dev/null
+          sudo systemctl restart docker
+        fi
+        docker info --format '{{json .DriverStatus}}' | grep -q io.containerd.snapshotter
+        docker info --format '{{json .RegistryConfig.Mirrors}}' | grep -q mirror.gcr.io
+    - id: file
+      shell: bash
+      run: |
+        echo "file=$HOME/.cache/e2e-images/${{ inputs.name }}.tar" >> "$GITHUB_OUTPUT"
+        echo "key=e2e-images-${{ runner.os }}-${{ runner.arch }}-${{ inputs.name }}-${{ inputs.key }}" >> "$GITHUB_OUTPUT"
+    - id: cache
+      uses: actions/cache/restore@v6
+      with:
+        path: ${{ steps.file.outputs.file }}
+        key: ${{ steps.file.outputs.key }}
+    - shell: bash
+      run: node e2e/pod/images.ts load "${{ steps.file.outputs.file }}"

@@ -88,6 +88,30 @@ Renovate keeps each server on its major (`renovate.json5`), and which
 servers each workflow runs is the table's in servers.ts (`npm test`
 checks).
 
+**In CI the images come from GitHub's cache**, not Docker Hub, whose
+limit on pulls without an account the runners share: each job restores
+its server's images ([e2e-images](../.github/actions/e2e-images/action.yml)),
+and only when the cache has none under the job's key does it pull or
+build them, then save them ([e2e/pod/images.ts](../e2e/pod/images.ts)).
+The key is what names the images (`node e2e/pod/servers.ts key <id>`):
+the compose file, which pins a pulled image by digest, or, for an image
+built here, a hash of its compose file and of every file of its build
+context that Docker is sent (what `.dockerignore` keeps out is left out,
+so `expected-failures.json` changes nothing) and whether each is
+executable. `prepare` tags a built image with that hash
+(`localhost/solid-memo-e2e-<id>:inputs-<hash>`), lets older such tags go,
+and skips the build when an image of the current tag is there, as it is
+after a load. The journeys' images are keyed by their compose file. The
+jobs use Docker's containerd image store, which keeps the digest a loaded
+image was pulled by (the classic store forgets it, and compose would pull
+the image again), switching to it on a runner whose Docker does not
+already; an image pulled by digest is saved under the tag its reference
+names. What the cache does not have yet (a job's first run, or after an
+image changes) is pulled through `mirror.gcr.io`, Google's mirror of
+Docker Hub, set as Docker's registry mirror in the same step; Docker goes
+to Docker Hub for what the mirror lacks. A cache that cannot be saved or
+loaded only warns: the job pulls or builds, as before.
+
 They need Docker: Docker Engine 28.3.3 or later on Linux (before it, a
 port published on 127.0.0.1 could be reached from the local network,
 CVE-2025-54388), or Docker Desktop. A run killed before its teardown
