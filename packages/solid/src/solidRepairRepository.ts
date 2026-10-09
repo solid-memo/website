@@ -15,6 +15,7 @@ import type { RepairRepository } from "@solid-memo/application/ports";
 import { defaultDeckDescription, defaultDeckDescriptionText } from "@solid-memo/domain/dcat";
 import type { Repair, RepairKind } from "@solid-memo/domain/repair";
 import { getSolidDatasetOrNull, saveDataset } from "./datasets";
+import { foreignSubjects } from "./ownership";
 import { readText } from "./records";
 import { DCAT, DCTERMS, RDF, SM } from "./vocab";
 
@@ -94,12 +95,14 @@ function withoutMembershipsOf(dataset: SolidDataset, documentUrl: string, url: s
  * A catalogue or deck group without its links to subjects of its own
  * document that the document does not describe as decks or groups. A
  * member in another document (a dataset another app listed) is described
- * there, and its link stays.
+ * there, and its link stays, as does one another app described in this
+ * document, whatever its class.
  */
 function withoutDanglingMembers(dataset: SolidDataset, documentUrl: string, thing: Thing): Thing {
+  const foreign = foreignSubjects(dataset);
   const describes = (url: string, types: string[]) => {
     const member = getThing(dataset, url);
-    return member !== null && getUrlAll(member, RDF.type).some((type) => types.includes(type));
+    return member !== null && (foreign.has(url) || getUrlAll(member, RDF.type).some((type) => types.includes(type)));
   };
   return MEMBERSHIP.reduce(
     (builder, { link, types }) =>

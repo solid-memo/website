@@ -48,7 +48,7 @@ string, so other applications can look up what it means:
 | Scheme | Where | Concepts | Used by |
 |---|---|---|---|
 | `sm:StudyDirections` | [`v1.ttl`](../ns/vocab/v1.ttl) | `sm:frontToBack`, `sm:backToFront`, `sm:bidirectional` | `sm:studyDirection` on a deck |
-| `sm:InvalidDataPolicies` | [`v1.ttl`](../ns/vocab/v1.ttl) | `sm:blockInstance` (default), `sm:blockSubject`, `sm:warnOnly` | `sm:invalidDataPolicy` in preferences |
+| `sm:InvalidDataPolicies` | [`v1.ttl`](../ns/vocab/v1.ttl) | `sm:blockInstance`, `sm:blockSubject` (default), `sm:warnOnly` | `sm:invalidDataPolicy` in preferences |
 | `sm:Themes` | [`v1.ttl`](../ns/vocab/v1.ttl) | `sm:systemTheme` (default), `sm:lightTheme`, `sm:darkTheme` | `sm:theme` in preferences ([theme.md](theme.md)) |
 | `sm:AnswerModes` | [`v1.ttl`](../ns/vocab/v1.ttl) | `sm:recall` (absent means this), `sm:multipleChoice` | `sm:answerMode` on an answer in the [answer log](data-model.md#the-answer-log) |
 | `sm:TextFormats` | [`v1.ttl`](../ns/vocab/v1.ttl) | `sm:plainText` (absent means this), `sm:markdown` | `sm:textFormat` on a card, a course step or a chapter ([Text formats](#text-formats)) |
@@ -111,6 +111,14 @@ string, so other applications can look up what it means:
   as plain, rather than erasing it or calling the subject invalid. A
   scheme whose shape does list its concepts (`sm:studyDirection`,
   `sm:theme`) is an `iriEnum`, and there a new concept is a new format.
+- **Which concept is the app's default is the app's, not the
+  vocabulary's.** A scheme's default concept says "The default." in its
+  definition, a note on what the app does where data states no concept,
+  which moves with the app: when "Set invalid data aside" became the
+  default ([validation.md](validation.md#the-invalid-data-policy)), the
+  note moved from `sm:blockInstance` to `sm:blockSubject` without a
+  version bump, as no term was added and no stored value changed its
+  meaning.
 - **A breaking change is a new namespace** (`ns/vocab/v2.ttl#`, with
   `owl:priorVersion` pointing back), never an edit of v1: the v1 IRIs
   are baked into every pod that ever wrote them.

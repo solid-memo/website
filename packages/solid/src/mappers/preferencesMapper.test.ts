@@ -11,7 +11,7 @@ const FULL = {
   dayBoundaryHour: 2,
   answerScale: "minimal" as const,
   developerMode: true,
-  invalidDataPolicy: "block-instance" as const,
+  invalidDataPolicy: "block-subject" as const,
   theme: "system" as const,
 };
 
@@ -42,7 +42,7 @@ describe("toPreferences", () => {
         dayBoundaryHour: 4,
         answerScale: "sm2",
         developerMode: false,
-        invalidDataPolicy: "block-instance" as const,
+        invalidDataPolicy: "block-subject" as const,
         theme: "system" as const,
       },
       formatVersion: 1,
@@ -54,7 +54,7 @@ describe("toPreferences", () => {
       dayBoundaryHour: 4,
       answerScale: "sm2",
       developerMode: false,
-      invalidDataPolicy: "block-instance" as const,
+      invalidDataPolicy: "block-subject" as const,
       theme: "system" as const,
     });
   });

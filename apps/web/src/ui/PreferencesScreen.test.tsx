@@ -87,6 +87,7 @@ describe("PreferencesScreen", () => {
     expect(screen.getByLabelText("Day starts at (hour)")).toHaveValue(2);
     expect(screen.getByLabelText("Developer mode")).toBeChecked();
     expect(screen.getByLabelText(/Again · Hard · Good · Easy/)).toBeChecked();
+    expect(screen.getByLabelText(/Block the instance/)).toBeChecked();
   });
 
   it("keeps developer mode off by default", () => {
@@ -105,7 +106,7 @@ describe("PreferencesScreen", () => {
     expect(props.onSave).toHaveBeenCalledWith({
       ...DEFAULT_PREFERENCES,
       developerMode: true,
-      invalidDataPolicy: "block-instance" as const,
+      invalidDataPolicy: "block-subject" as const,
       theme: "system",
     });
   });
@@ -129,15 +130,17 @@ describe("PreferencesScreen", () => {
     const { props, container } = renderScreen();
     const group = screen.getByRole("group", { name: "When data does not conform" });
     expect(group).toContainElement(screen.getByLabelText(/Block the instance/));
-    expect(screen.getByLabelText(/Block the instance/)).toBeChecked();
+    // Setting invalid data aside is the default, and says so.
+    expect(screen.getByLabelText(/Set invalid data aside/)).toBeChecked();
+    expect(group).toHaveTextContent("Decks with invalid data are set aside until they are repaired; everything else keeps working. The default.");
     expect(group).toHaveTextContent("Any invalid data stops the app from using the instance until it is repaired.");
 
-    fireEvent.click(screen.getByLabelText(/Set invalid data aside/));
+    fireEvent.click(screen.getByLabelText(/Block the instance/));
     fireEvent.submit(container.querySelector("form")!);
 
     expect(props.onSave).toHaveBeenCalledWith({
       ...DEFAULT_PREFERENCES,
-      invalidDataPolicy: "block-subject",
+      invalidDataPolicy: "block-instance",
     });
   });
 
@@ -159,7 +162,7 @@ describe("PreferencesScreen", () => {
       dayBoundaryHour: 0,
       answerScale: "sm2",
       developerMode: false,
-      invalidDataPolicy: "block-instance" as const,
+      invalidDataPolicy: "block-subject" as const,
       theme: "system",
     });
   });
@@ -179,6 +182,6 @@ describe("PreferencesScreen", () => {
     );
     expect(screen.getByRole("heading", { name: "Studieinställningar" })).toBeInTheDocument();
     expect(screen.getByLabelText("Nya kort per dag")).toBeInTheDocument();
-    expect(screen.getByLabelText(/Spärra instansen/)).toBeChecked();
+    expect(screen.getByLabelText(/Lägg ogiltig data åt sidan/)).toBeChecked();
   });
 });

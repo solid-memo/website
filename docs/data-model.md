@@ -14,7 +14,12 @@ what a valid subject of each class looks like, version by version, is a
 SHACL shape under [`ns/shapes/`](../ns/shapes/) ([shapes.md](shapes.md)). Both
 are published with the site, and the app's constants, record types and
 descriptors are generated from them. Readers ignore unknown triples and
-writers never delete triples they don't understand.
+writers never delete triples they don't understand. Every subject
+Solid Memo writes carries `sm:formatVersion`; a subject with neither
+that stamp nor a Solid Memo class, that is not the catalogue and that
+no subject of Solid Memo's names as its creator, publisher or
+distribution, is another app's, which the data check only warns about
+([validation.md](validation.md#data-another-app-wrote)).
 
 ```mermaid
 flowchart LR
@@ -310,7 +315,9 @@ catalogue itself keeps it too, beside every deck of the document. The
 one link the catalogue loses when it is written whole is one to a
 subject of its own document that is no `dcat:Dataset` (left by a deck
 removed some other way): it would fail DCAT-AP's class check, and the
-catalogue could not be written. A dataset in another document is
+catalogue could not be written. A member another app described in the
+document keeps its link whatever its class: the check only warns about
+that link ([validation.md](validation.md#data-another-app-wrote)). A dataset in another document is
 described there, so that class check does not hold it to its class
 ([validation.md](validation.md#profiles-dcat-ap-and-skos)), and an
 instance listing one stays valid (held against real servers in
@@ -380,7 +387,11 @@ the top level. A cycle is broken by moving the lowest-URL group in it to
 the top level. A negative position counts as none, and on a tie of
 positions decks come before groups, each kind in document order. A
 group in a format newer than the app's makes the arrangement read-only,
-and a group the app cannot read is never edited: its members show at
+and so, under the "Set invalid data aside" policy (`sm:blockSubject`,
+the default), does a catalogue or group that does not conform, and so
+does every list while that check is still running
+([validation.md](validation.md#the-invalid-data-policy));
+a group the app cannot read is never edited: its members show at
 the top level, and the catalogue's `dcat:catalog` keeps its link.
 
 **Writing an arrangement.** The screen sends an edit, not a finished

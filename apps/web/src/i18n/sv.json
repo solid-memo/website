@@ -297,6 +297,7 @@
       "other": "{names} läggs åt sidan tills de är reparerade; resten fungerar som vanligt."
     },
     "keepsWorking": "Solid Memo fortsätter att använda dem.",
+    "arrangementSetAside": "Kortlekslistan kan inte ordnas om förrän dess ordning är reparerad.",
     "policyHint": "Vad som händer med ogiltiga data ställer du in under {preferences}.",
     "preferences": "Inställningar",
     "repair": "Reparera"
@@ -366,6 +367,7 @@
     "libraryLink": "Kortleksbiblioteket",
     "emptyGroup": "Inget i den här gruppen än.",
     "readOnly": "En nyare version av Solid Memo har ordnat kortlekarna, så de kan inte ordnas om här. Läs in sidan igen för att få den senaste versionen.",
+    "arrangementSetAside": "Ordningen av kortlekarna har ogiltig data, så de kan inte ordnas om förrän den är reparerad.",
     "newGroupName": "Ny grupp",
     "groupName": "Gruppens namn",
     "saveName": "Spara namnet",
@@ -870,11 +872,11 @@
       "legend": "När data inte uppfyller formerna",
       "blockInstance": {
         "label": "Spärra instansen",
-        "hint": "All ogiltig data hindrar appen från att använda instansen tills den har reparerats. Standardvalet."
+        "hint": "All ogiltig data hindrar appen från att använda instansen tills den har reparerats."
       },
       "blockSubject": {
         "label": "Lägg ogiltig data åt sidan",
-        "hint": "Kortlekar med ogiltig data läggs åt sidan tills de har reparerats; allt annat fortsätter att fungera."
+        "hint": "Kortlekar med ogiltig data läggs åt sidan tills de har reparerats; allt annat fortsätter att fungera. Standardvalet."
       },
       "warnOnly": {
         "label": "Varna bara",
@@ -991,6 +993,7 @@
     "untyped": "{name} — inte ett Solid Memo-subjekt.",
     "newer": "{name} — formatet {shape} {version} är nyare än vad appen känner till (upp till {latest}); hoppas över.",
     "profiled": "{name} — inte ett Solid Memo-subjekt; DCAT-AP säger:",
+    "foreign": "{name} — skrivet av en annan app; Solid Memo varnar bara för det:",
     "conforms": "{name} — uppfyller formatet {shape} {version}.",
     "checked": "{name} — formatet {shape} {version}:",
     "severity": "Allvarlighetsgrad",

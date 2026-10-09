@@ -6,7 +6,11 @@ import type { ShapeName } from "@solid-memo/vocab/types.generated";
  * What checking an instance's documents against Solid Memo's shapes and
  * the DCAT-AP profile found (see docs/validation.md). The app checks an
  * instance whenever it opens it and acts on what it finds according to
- * the user's invalid data policy.
+ * the user's invalid data policy. What another app wrote — a subject
+ * that is not Solid Memo's (the adapter's ownership.ts says which are),
+ * or a catalogue's link to such a member — has its results reported as
+ * warnings, the subject marked `foreign`, so it never sets a deck aside
+ * or blocks the instance.
  */
 
 export interface Violation {
@@ -37,13 +41,21 @@ export type SubjectReport =
       shape: ShapeName;
       version: number;
       violations: Violation[];
+      /** Another app's subject (a foaf:Agent it described, say), whose results are all warnings. */
+      foreign?: true;
     }
   /** Stored in a format newer than this app knows: left alone. */
   | { url: string; status: "newer"; shape: ShapeName; version: number; latest: number }
   /** Not a Solid Memo subject: listed so strays are visible, not checked. */
   | { url: string; status: "untyped" }
   /** Not a Solid Memo subject, but one the DCAT-AP profile checks (a licence, say). */
-  | { url: string; status: "profiled"; violations: Violation[] };
+  | {
+      url: string;
+      status: "profiled";
+      violations: Violation[];
+      /** Another app's subject (a dcat:Dataset it listed, say), whose results are all warnings. */
+      foreign?: true;
+    };
 
 export interface DocumentReport {
   url: string;
@@ -108,5 +120,18 @@ export function setAsideDecks(report: ValidationReport, decks: readonly Deck[]):
           documents.has(deck.reviewsDocumentUrl),
       )
       .map((deck) => deck.url),
+  );
+}
+
+/**
+ * Whether the arrangement of the deck list — the catalogue itself or one
+ * of its deck groups — has invalid data, which the "set invalid data
+ * aside" policy leaves read-only until it is repaired.
+ */
+export function arrangementSetAside(report: ValidationReport): boolean {
+  return report.documents.some((document) =>
+    document.subjects.some(
+      (subject) => failing(subject) && subject.status === "checked" && (subject.shape === "catalog" || subject.shape === "deckGroup"),
+    ),
   );
 }

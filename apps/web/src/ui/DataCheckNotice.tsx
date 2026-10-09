@@ -12,7 +12,8 @@ import { routeToHash } from "./router";
  * Tells the user that data in the instance does not conform, and what
  * the app does about it under their policy, with the repair a click
  * away. Under "block the instance" the notice takes the workspace's
- * place; otherwise it sits above it.
+ * place; otherwise it sits above it. What another app wrote is never in
+ * it: the check reports that as warnings, which need no notice.
  */
 export function DataCheckNotice({
   useCases,
@@ -20,6 +21,7 @@ export function DataCheckNotice({
   report,
   policy,
   setAside,
+  arrangementSetAside,
 }: {
   useCases: UseCases;
   instance: Instance;
@@ -27,6 +29,8 @@ export function DataCheckNotice({
   policy: InvalidDataPolicy;
   /** Titles of the decks set aside, under "set invalid data aside". */
   setAside: LangText[];
+  /** The catalogue or a deck group is set aside, under "set invalid data aside": the list cannot be rearranged. */
+  arrangementSetAside: boolean;
 }) {
   const { t, tx } = useI18n();
   const preferences = routeToHash({ screen: "preferences", instanceUrl: instance.url });
@@ -42,6 +46,7 @@ export function DataCheckNotice({
     <div class="warning data-check" role="region" aria-label={t("dataCheckNotice.region")}>
       <p>
         <strong>{t("dataCheckNotice.heading", { name: instance.name })}</strong> {consequence}{" "}
+        {arrangementSetAside && <>{t("dataCheckNotice.arrangementSetAside")} </>}
         {tx("dataCheckNotice.policyHint", {
           preferences: <a href={preferences}>{t("dataCheckNotice.preferences")}</a>,
         })}

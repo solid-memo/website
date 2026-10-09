@@ -5,7 +5,8 @@ and the [DCAT-AP profile](#profiles-dcat-ap-and-skos), in the browser:
 
 - **Every instance is checked when it is opened**, and what happens with
   data that does not conform is the user's
-  [invalid data policy](#the-invalid-data-policy).
+  [invalid data policy](#the-invalid-data-policy). What another app
+  wrote is only ever warned about ([below](#data-another-app-wrote)).
 - **Every write is checked before it is saved**, so the app never adds
   invalid data to a pod ([write check](#the-write-check)).
 - **What can be repaired is repaired on request**; what cannot is shown,
@@ -51,7 +52,9 @@ flowchart LR
   update always run the full `validateInstance`.
 - The [format update](migrations.md#the-pod-migration) runs the same
   check on its updated copy before switching over: a copy with any
-  violation is deleted and the user's instance is left as it was.
+  violation is deleted and the user's instance is left as it was. What
+  another app wrote has warnings, not violations, so it never stops an
+  update.
 - [shaclShapeValidator.ts](../packages/solid/src/shaclShapeValidator.ts)
   fetches the document, converts it to an RDF/JS dataset
   (`toRdfJsDataset`) and, for every subject, picks the shape by class
@@ -62,7 +65,9 @@ flowchart LR
   is then `checked` (with its violations), `newer` (a format this app
   does not know: skipped, reported) or `untyped` (no Solid Memo class:
   listed so strays are visible). A document that does not exist is
-  `missing`, which is normal, not a problem.
+  `missing`, which is normal, not a problem. A subject another app
+  wrote is marked `foreign` and its results are warnings
+  ([below](#data-another-app-wrote)).
 - The shapes are fetched at their IRIs, under
   `https://solid-memo.com/ns/shapes/` (`SHAPES_BASE`), not bundled: they
   are published with the site anyway, and the document the browser
@@ -129,8 +134,9 @@ checks) and published with the site at `/vendor/`:
 Per document, its URL and status; per subject, "conforms to deck format
 2", "deck format 3 is newer than this app knows; skipped", "not a Solid
 Memo subject", a subject only DCAT-AP has something to say about (a
-licence, say), or a table of severity, property, message and value
-(DCAT-AP's results marked as such). The summary line says "All 9
+licence, say), "written by another app; Solid Memo only warns about
+it", or a table of severity, property, message and value (DCAT-AP's
+results marked as such). The summary line says "All 9
 documents conform" or "3 violations in 2 documents". A subject is
 checked in its *stored* format, so outdated but valid data passes: the
 [format update](migrations.md) is a separate matter.
@@ -145,13 +151,66 @@ not conform is a preference, `sm:invalidDataPolicy`, a concept of
 
 | Policy | What the app does |
 |---|---|
-| Block the instance (`sm:blockInstance`, the default) | The workspace waits for the check, then shows the Data check notice with the repair in place of every screen. Preferences and the validation view stay reachable, so the policy can be changed. |
-| Set invalid data aside (`sm:blockSubject`) | A deck whose entry, cards or review states do not conform is set aside (`setAsideDecks`): listed as "Set aside", not offered for study, its pages saying so. Everything else works. The notice names the decks set aside. |
+| Block the instance (`sm:blockInstance`) | The workspace waits for the check, then shows the Data check notice with the repair in place of every screen. Preferences and the validation view stay reachable, so the policy can be changed. |
+| Set invalid data aside (`sm:blockSubject`, the default) | A deck whose entry, cards or review states do not conform is set aside (`setAsideDecks`): listed as "Set aside", not offered for study, its pages saying so. The catalogue itself or a deck group that does not conform sets the arrangement of the deck list aside (`arrangementSetAside`): the list shows every deck, but cannot be rearranged, nor its groups renamed or deleted, until it is repaired, as a list a [newer version arranged](data-model.md#deck-groups) cannot. Any other subject that does not conform (a deck's agents or distribution, the catalogue's publisher, the preferences, the instance record) sets nothing aside: the notice reports it, and the write check still refuses a write that would leave it not conforming. Everything else works. The notice names the decks set aside, and says when the list cannot be rearranged. |
 | Warn only (`sm:warnOnly`) | The notice, and nothing else. |
 
-A check that cannot run (the shapes unreachable, say) is a warning, not a
-block: the app does not lock a user out of their data over its own
-trouble.
+- **The default is a choice of the app, not of the data.** Preferences
+  format 3 and later state a policy, so the default applies only where
+  none is stated: an instance whose preferences were never saved, and
+  preferences format 2, which the [step to format 3](migrations.md)
+  gives the default. Preferences saved with "Block the instance" keep
+  it. In the vocabulary the default concept's definition says "The
+  default.", as `sm:systemTheme`'s does.
+- **Until the preferences are read, the workspace waits for the check**
+  as under "Block the instance", so a user who chose it never sees data
+  before it is checked. Preferences that cannot be read leave the
+  default.
+- **Under "Set invalid data aside", nothing is used before the check
+  says what is set aside**: until it is done, a deck's pages (its
+  browser, study, preferences and course) wait for it, and the deck
+  list shows but cannot be rearranged, so no write lands on data the
+  check would set aside (a review state a reader drops would be studied
+  as new, and the first answer would write over its history). A check
+  that fails sets nothing aside.
+- A check that cannot run (the shapes unreachable, say) is a warning,
+  not a block: the app does not lock a user out of their data over its
+  own trouble.
+
+### Data another app wrote
+
+The pod is shared: another app may list a dataset in the catalogue, or
+add its own subjects to a cards document. A subject is Solid Memo's
+when it has a Solid Memo class (`sm:Deck`, `sm:Card`, …), carries
+`sm:formatVersion`, the stamp Solid Memo writes on every subject it
+writes, is the catalogue (`catalog.ttl#catalog`), or is named by one of
+Solid Memo's subjects as its `dcterms:creator`, `dcterms:publisher` or
+`dcat:distribution`: the catalogue, a deck's agents and its
+distribution have no Solid Memo class, and they stay Solid Memo's when
+another app's rewrite has dropped their stamp
+([ownership.ts](../packages/solid/src/ownership.ts)). Any other subject
+is another app's, and
+[shaclShapeValidator.ts](../packages/solid/src/shaclShapeValidator.ts)
+marks it `foreign`: it is still checked, against the shape its class
+picks (a `foaf:Agent` against `AgentV1`) and DCAT-AP, but every result
+about it, DCAT-AP's included, is a warning. So under every policy it
+sets no deck aside, leaves the arrangement as it is and blocks no
+instance, and the document holding it still conforms (and gets its
+[receipt](#flow)). The developer report shows its results; the notice,
+which is about violations, does not, and the repair offers nothing for
+it: a warning is no problem. A subject another app wrote with a Solid
+Memo class is held to that class's shape, as Solid Memo's own are.
+
+A catalogue's or deck group's link to a member another app wrote is
+that app's data too. When the member is a subject of the same document
+that is not Solid Memo's (a `schema:Dataset`, say, which fails DCAT-AP's
+class check) or a blank node (which fails the shape's `sh:nodeKind
+sh:IRI`), the result about the link is a warning, in the check and in
+the write check alike: the catalogue still conforms, the arrangement
+stays editable, and no repair unlinks the member. The drop-dangling-members
+repair, and writing the catalogue whole, keep such a link; a link to a
+subject of the document that nothing describes is still the
+catalogue's own problem.
 
 ## The write check
 

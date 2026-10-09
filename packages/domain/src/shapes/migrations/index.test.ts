@@ -7,7 +7,7 @@ const CONTEXT = { subject: "https://pod.example/x.ttl#it" };
 const SM = "https://solid-memo.com/ns/vocab/v1.ttl#";
 const EDUC = "http://publications.europa.eu/resource/authority/data-theme/EDUC";
 /** The concept-valued fields of migrated preferences: the policy that blocks, the browser's theme. */
-const MIGRATED_CONCEPTS = { invalidDataPolicy: `${SM}blockInstance`, theme: `${SM}systemTheme` };
+const MIGRATED_CONCEPTS = { invalidDataPolicy: `${SM}blockSubject`, theme: `${SM}systemTheme` };
 
 const SHAPES = Object.keys(LATEST_VERSION) as ShapeName[];
 

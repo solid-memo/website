@@ -92,7 +92,7 @@ describe("DataCheckNotice", () => {
     const notice = (setAside: LangText[]) =>
       render(
         <QueryClientProvider client={queryClient}>
-          <DataCheckNotice useCases={makeUseCasesFake()} instance={instance} report={report} policy="block-subject" setAside={setAside} />
+          <DataCheckNotice useCases={makeUseCasesFake()} instance={instance} report={report} policy="block-subject" setAside={setAside} arrangementSetAside={false} />
         </QueryClientProvider>,
       );
     notice([{ en: "Kanji" }, { en: "Capitals" }]);
@@ -108,6 +108,7 @@ describe("DataCheckNotice", () => {
             instance={instance}
             report={report}
             policy="block-subject"
+            arrangementSetAside={false}
             setAside={[{ en: "Capitals", sv: "Huvudstäder" }, { en: "Kanji" }]}
           />
         </QueryClientProvider>

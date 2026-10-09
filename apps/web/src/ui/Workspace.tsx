@@ -6,7 +6,7 @@ import type { Deck } from "@solid-memo/domain/deck";
 import { cardName, cardNameText } from "./DataText";
 import { decksOf } from "@solid-memo/domain/deckTree";
 import { DEFAULT_INVALID_DATA_POLICY } from "@solid-memo/domain/invalidDataPolicy";
-import { setAsideDecks } from "@solid-memo/domain/validation";
+import { arrangementSetAside, setAsideDecks } from "@solid-memo/domain/validation";
 import type { Instance, RegistrationTarget } from "@solid-memo/domain/instance";
 import type { LibraryDeck } from "@solid-memo/domain/library";
 import type { Session } from "@solid-memo/domain/session";
@@ -276,7 +276,11 @@ export function Workspace({
       void queryClient.prefetchQuery(studyCountsQuery(useCases, instanceUrl, deck));
     }
   }, [homeTreeQuery.data, instanceUrl]);
-  const policy = preferencesQuery.data?.invalidDataPolicy ?? DEFAULT_INVALID_DATA_POLICY;
+  // Until the preferences are read, the workspace waits as under "block
+  // the instance": a user who chose it never sees data before the check.
+  const policy =
+    preferencesQuery.data?.invalidDataPolicy ??
+    (preferencesQuery.isPending ? "block-instance" : DEFAULT_INVALID_DATA_POLICY);
   const invalidReport =
     checkQuery.data !== undefined && !checkQuery.data.conforms ? checkQuery.data : null;
   const decksOfCheck = useQuery({
@@ -286,6 +290,14 @@ export function Workspace({
   });
   const isSetAside = (deck: Deck) =>
     invalidReport !== null && policy === "block-subject" && setAsideDecks(invalidReport, [deck]).size > 0;
+  /** The catalogue or a deck group is invalid: the deck list cannot be rearranged until it is repaired. */
+  const arrangementIsSetAside =
+    invalidReport !== null && policy === "block-subject" && arrangementSetAside(invalidReport);
+  // Under "set invalid data aside" nothing is known to be set aside until
+  // the check is done: until then a deck's pages wait for it and the list
+  // cannot be rearranged, so no write lands on data the check would set
+  // aside. A check that fails sets nothing aside.
+  const checkUnsettled = activeInstance !== null && policy === "block-subject" && checkQuery.isPending;
   /** Screens that stay reachable whatever the data: where the policy is changed and the report read. */
   const alwaysReachable = route?.screen === "preferences" || route?.screen === "validation";
 
@@ -507,6 +519,8 @@ export function Workspace({
             useCases={useCases}
             instance={activeInstance!}
             isSetAside={isSetAside}
+            arrangementSetAside={arrangementIsSetAside}
+            checking={checkUnsettled}
             onStudyDeck={(deck) =>
               navigate({
                 screen: "study",
@@ -768,7 +782,8 @@ export function Workspace({
     activeInstance !== null && !alwaysReachable && policy === "block-instance" &&
     (checkQuery.isPending || invalidReport !== null);
   const deckSetAside = activeDeck !== null && isSetAside(activeDeck);
-  const shown = waiting ?? (blocked ? (
+  const deckWaits = activeDeck !== null && checkUnsettled;
+  const shown = waiting ?? (blocked || deckWaits ? (
     invalidReport === null ? <Loading label={t("workspace.checkingData")} /> : null
   ) : deckSetAside ? (
     <p class="hint">{t("workspace.deckSetAside")}</p>
@@ -808,6 +823,7 @@ export function Workspace({
                 report={invalidReport}
                 policy={policy}
                 setAside={(decksOfCheck.data ?? []).filter(isSetAside).map((deck) => deck.title)}
+                arrangementSetAside={arrangementIsSetAside}
               />
             )}
           </>

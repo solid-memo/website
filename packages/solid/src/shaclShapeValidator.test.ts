@@ -3,9 +3,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildThing,
   createThing,
+  fromRdfJsDataset,
   getThing,
   mockSolidDatasetFrom,
   setThing,
+  toRdfJsDataset,
+  type SolidDataset,
   type ThingBuilder,
   type ThingPersisted,
 } from "@inrupt/solid-client";
@@ -22,6 +25,18 @@ vi.mock("./datasets", async (importOriginal) => ({
 }));
 
 const DOC = "https://pod.example/solid-memo/a/catalog.ttl";
+
+/** The dataset with a catalogue's link to a blank-node member, `[ a dcat:Dataset ]`, as another app may write one: Solid Memo never does. */
+function withBlankMember(dataset: SolidDataset, catalogue: string, label: string): SolidDataset {
+  const term = (termType: string, value: string) => ({ termType, value });
+  const graph = term("DefaultGraph", "");
+  const quads = [
+    ...toRdfJsDataset(dataset),
+    { subject: term("NamedNode", catalogue), predicate: term("NamedNode", DCAT.dataset), object: term("BlankNode", label), graph },
+    { subject: term("BlankNode", label), predicate: term("NamedNode", RDF.type), object: term("NamedNode", DCAT.Dataset), graph },
+  ];
+  return fromRdfJsDataset({ [Symbol.iterator]: () => quads[Symbol.iterator]() } as never);
+}
 
 function catalog() {
   let dataset = mockSolidDatasetFrom(DOC);
@@ -164,7 +179,88 @@ describe("createShaclShapeValidator", () => {
     expect(report.subjects).toEqual([
       expect.objectContaining({ url: `${DOC}#deck-1`, status: "checked", violations: [expect.anything(), profiled] }),
       { url: `${DOC}#deck-2`, status: "newer", shape: "deck", version: 9, latest: 6 },
-      { url: `${DOC}#note`, status: "profiled", violations: [profiled] },
+      { url: `${DOC}#note`, status: "profiled", violations: [{ ...profiled, severity: "warning" }], foreign: true },
+    ]);
+  });
+
+  it("reports what another app wrote — no Solid Memo class, format stamp or link from a subject of Solid Memo's — with warnings only", async () => {
+    const FOAF_AGENT = "http://xmlns.com/foaf/0.1/Agent";
+    let dataset = mockSolidDatasetFrom(DOC);
+    for (const [id, stamped] of [["agent-mine", true], ["agent-theirs", false]] as const) {
+      const agent = buildThing(createThing({ url: `${DOC}#${id}` })).addIri(RDF.type, FOAF_AGENT);
+      dataset = setThing(dataset, (stamped ? agent.addInteger(SM.formatVersion, 1) : agent).build());
+    }
+    dataset = setThing(dataset, buildThing(createThing({ url: `${DOC}#stamped` })).addIri(RDF.type, "http://www.w3.org/ns/dcat#Dataset").addInteger(SM.formatVersion, 1).build());
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(dataset);
+    const { validator, validateNode, validate } = makeValidator();
+    const nameless = { path: "http://xmlns.com/foaf/0.1/name", message: { en: "Less than 1 values" }, severity: "violation" as const, constraint: "MinCount" };
+    const odd = { message: { en: "odd" }, severity: "info" as const, constraint: "Pattern" };
+    validateNode.mockResolvedValue([nameless, odd] as never);
+    validate.mockResolvedValue([
+      { focusNode: `${DOC}#agent-mine`, ...nameless },
+      { focusNode: `${DOC}#agent-theirs`, ...nameless },
+      { focusNode: `${DOC}#stamped`, ...nameless },
+    ]);
+    const profiled = { ...nameless, profile: "dcat-ap" };
+    const warning = { ...nameless, severity: "warning" };
+    expect((await validator.validateDocument(DOC)).subjects).toEqual([
+      { url: `${DOC}#agent-mine`, status: "checked", shape: "agent", version: 1, violations: [nameless, odd, profiled] },
+      {
+        url: `${DOC}#agent-theirs`,
+        status: "checked",
+        shape: "agent",
+        version: 1,
+        violations: [warning, odd, { ...warning, profile: "dcat-ap" }],
+        foreign: true,
+      },
+      { url: `${DOC}#stamped`, status: "profiled", violations: [profiled] },
+    ]);
+  });
+
+  it("holds a catalogue and its publisher that lost their stamps as Solid Memo's, warning only about its links to another app's members", async () => {
+    const alice = "https://alice.example/profile/card#me";
+    let dataset = mockSolidDatasetFrom(DOC);
+    for (const thing of [
+      // Another app rewrote the catalogue and its publisher without the triples it does not know, sm:formatVersion among them.
+      buildThing(createThing({ url: `${DOC}#catalog` })).addIri(RDF.type, DCAT.Catalog).addUrl(DCTERMS.publisher, alice)
+        .addUrl(DCAT.dataset, `${DOC}#recipes`).addUrl(DCAT.dataset, `${DOC}#deck-gone`),
+      buildThing(createThing({ url: alice })).addIri(RDF.type, "http://xmlns.com/foaf/0.1/Agent"),
+      // Another app's dataset, described beside the decks with a class of its own.
+      buildThing(createThing({ url: `${DOC}#recipes` })).addIri(RDF.type, "https://schema.org/Dataset"),
+    ]) {
+      dataset = setThing(dataset, thing.build());
+    }
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(withBlankMember(dataset, `${DOC}#catalog`, "theirs") as never);
+    const { validator, validateNode, validate } = makeValidator();
+    const result = (constraint: string, path: string, value?: string) => ({
+      path,
+      message: { en: constraint },
+      severity: "violation" as const,
+      constraint,
+      ...(value === undefined ? {} : { value }),
+    });
+    const untitled = result("MinCount", DCTERMS.title);
+    validateNode.mockResolvedValue([untitled] as never);
+    const members = [
+      result("Class", DCAT.dataset, `${DOC}#recipes`),
+      result("NodeKind", DCAT.dataset, "theirs"),
+      // A link to nothing the document describes, and one to a blank node another subject names, are the catalogue's own.
+      result("Class", DCAT.dataset, `${DOC}#deck-gone`),
+      result("NodeKind", DCAT.dataset, "elsewhere"),
+      result("MinCount", DCAT.dataset),
+    ];
+    validate.mockResolvedValue(members.map((member) => ({ focusNode: `${DOC}#catalog`, ...member })));
+    const [recipes, theirs, ...own] = members.map((member) => ({ ...member, profile: "dcat-ap" }));
+    expect((await validator.validateDocument(DOC)).subjects).toEqual([
+      {
+        url: `${DOC}#catalog`,
+        status: "checked",
+        shape: "catalog",
+        version: 1,
+        violations: [untitled, { ...recipes, severity: "warning" }, { ...theirs, severity: "warning" }, ...own],
+      },
+      { url: alice, status: "checked", shape: "agent", version: 1, violations: [untitled] },
+      { url: `${DOC}#recipes`, status: "untyped" },
     ]);
   });
 
@@ -258,7 +354,7 @@ describe("createShaclShapeValidator", () => {
       );
     });
 
-    it("holds a catalogue's members of its own document to their class, not those another document describes", async () => {
+    it("holds a catalogue's members of its own document to their class, not those another document describes or another app wrote", async () => {
       const written = withCatalog(mockSolidDatasetFrom(DOC), DOC, {
         title: "Main",
         description: "My decks.",
@@ -269,6 +365,13 @@ describe("createShaclShapeValidator", () => {
       await expect(
         validator.checkSubjects(listing("https://pod.example/recipes/index.ttl#cookbook"), [`${DOC}#catalog`]),
       ).resolves.toBeUndefined();
+      // Another app's members of this document: one it described with a class of its own, and a blank node.
+      const theirs = setThing(
+        listing(`${DOC}#recipes`),
+        buildThing(createThing({ url: `${DOC}#recipes` })).addIri(RDF.type, "https://schema.org/Dataset").build(),
+      );
+      await expect(validator.checkSubjects(theirs, [`${DOC}#catalog`])).resolves.toBeUndefined();
+      await expect(validator.checkSubjects(withBlankMember(written, `${DOC}#catalog`, "theirs"), [`${DOC}#catalog`])).resolves.toBeUndefined();
       await expect(validator.checkSubjects(listing(`${DOC}#deck-gone`), [`${DOC}#catalog`])).rejects.toThrow(
         `<${DOC}#catalog> (${DCAT.dataset}): DCAT-AP:`,
       );

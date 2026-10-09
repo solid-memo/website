@@ -6,7 +6,8 @@
  * folder and the folder with them, and deletes the whole folder, access
  * rules and all, when nothing else is in it; a dataset another app listed
  * in the catalogue stays listed through every deck save, and the instance
- * stays valid. The app's own use cases and Solid adapters, wired as in
+ * stays valid; and what is wrong with another app's subjects is only
+ * warned about (docs/validation.md "Data another app wrote"). The app's own use cases and Solid adapters, wired as in
  * main.tsx.
  */
 import { describe, expect, inject, it } from "vitest";
@@ -14,6 +15,7 @@ import { Parser, Writer } from "n3";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/sources";
 import { createUseCases, type UseCases } from "@solid-memo/application/useCases";
 import type { Instance } from "@solid-memo/domain/instance";
+import { arrangementSetAside, setAsideDecks } from "@solid-memo/domain/validation";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
 import { createSolidDeckRepository } from "@solid-memo/solid/solidDeckRepository";
 import { createSolidInstanceCopier } from "@solid-memo/solid/solidInstanceCopier";
@@ -183,5 +185,41 @@ describe.each(SERVERS)("what another app wrote, on $name", ({ url: server }) => 
     expect(after).toContain(`<${DCAT_DATASET}> <${lakes.url}>`);
 
     expect((await page().validateInstance(instance.url)).conforms).toBe(true);
+  }, 60_000);
+
+  it("is only warned about by the data check, so it sets no deck aside and blocks nothing", async () => {
+    const { instance, decks, useCases } = await seed(server);
+    const catalog = `${instance.url}catalog.ttl`;
+    const cards = decks[0]!.cardsDocumentUrl;
+    // A dataset another app listed without the title and description DCAT-AP asks for, two it listed that no
+    // DCAT class or IRI makes a dcat:Dataset, and a nameless agent of its own beside a deck's cards.
+    for (const [url, triples] of [
+      [catalog, `<${catalog}#catalog> <${DCAT_DATASET}> <${catalog}#recipes> . <${catalog}#recipes> a <http://www.w3.org/ns/dcat#Dataset> .`],
+      [catalog, `<${catalog}#catalog> <${DCAT_DATASET}> <${catalog}#menu>, _:theirs . <${catalog}#menu> a <https://schema.org/Dataset> . _:theirs a <http://www.w3.org/ns/dcat#Dataset> .`],
+      [cards, `<${cards}#their-agent> a <http://xmlns.com/foaf/0.1/Agent> .`],
+    ] as const) {
+      const patch = await fetch(url, {
+        method: "PATCH",
+        headers: { "content-type": "application/sparql-update" },
+        body: `INSERT DATA { ${triples} }`,
+      });
+      expect(patch.ok, `PATCH ${url}: ${patch.status}`).toBe(true);
+    }
+
+    const report = await page().validateInstance(instance.url);
+    expect(report.conforms).toBe(true);
+    const subjects = report.documents.flatMap((document) => document.subjects);
+    const warned = { foreign: true, violations: expect.arrayContaining([expect.objectContaining({ severity: "warning" })]) };
+    expect(subjects.find((subject) => subject.url === `${catalog}#recipes`)).toMatchObject({ status: "profiled", ...warned });
+    expect(subjects.find((subject) => subject.url === `${cards}#their-agent`)).toMatchObject({ status: "checked", shape: "agent", ...warned });
+    // The catalogue only has warnings about its links to them.
+    expect(subjects.find((subject) => subject.url === `${catalog}#catalog`)).toMatchObject({
+      status: "checked",
+      violations: expect.arrayContaining([expect.objectContaining({ path: DCAT_DATASET, severity: "warning" })]),
+    });
+    expect(setAsideDecks(report, decks)).toEqual(new Set());
+    expect(arrangementSetAside(report)).toBe(false);
+    // Opening the instance checks it the same way.
+    expect((await useCases.checkInstance(instance.url)).conforms).toBe(true);
   }, 60_000);
 });

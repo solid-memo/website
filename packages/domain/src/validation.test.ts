@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Deck } from "./deck";
 import {
+  arrangementSetAside,
   failingDocumentUrls,
   failingSubjectUrls,
   setAsideDecks,
@@ -113,5 +114,24 @@ describe("what fails, and the decks set aside for it", () => {
       `${INSTANCE}catalog.ttl#deck-3`,
     ]);
     expect([...setAsideDecks(cardsFail, ["deck-4"].map(deck))]).toEqual([`${INSTANCE}catalog.ttl#deck-4`]);
+  });
+});
+
+describe("arrangementSetAside", () => {
+  const catalog = (...subjects: DocumentReport["subjects"]) =>
+    summarize(INSTANCE, [{ url: `${INSTANCE}catalog.ttl`, status: "checked", subjects }]);
+  const broken = [{ message: { en: "x" }, severity: "violation" as const, constraint: "MinCount" }];
+  const warned = [{ message: { en: "x" }, severity: "warning" as const, constraint: "MinCount" }];
+
+  it("is set aside when the catalogue or a deck group fails", () => {
+    expect(arrangementSetAside(catalog({ url: `${INSTANCE}catalog.ttl#catalog`, status: "checked", shape: "catalog", version: 1, violations: broken }))).toBe(true);
+    expect(arrangementSetAside(catalog({ url: `${INSTANCE}catalog.ttl#group-1`, status: "checked", shape: "deckGroup", version: 1, violations: broken }))).toBe(true);
+  });
+
+  it("is not for a failing deck, a warning, or what another app wrote", () => {
+    expect(arrangementSetAside(catalog({ url: `${INSTANCE}catalog.ttl#deck-1`, status: "checked", shape: "deck", version: 6, violations: broken }))).toBe(false);
+    expect(arrangementSetAside(catalog({ url: `${INSTANCE}catalog.ttl#catalog`, status: "checked", shape: "catalog", version: 1, violations: warned }))).toBe(false);
+    expect(arrangementSetAside(catalog({ url: `${INSTANCE}catalog.ttl#theirs`, status: "checked", shape: "catalog", version: 1, violations: warned, foreign: true }))).toBe(false);
+    expect(arrangementSetAside(catalog({ url: `${INSTANCE}catalog.ttl#theirs`, status: "profiled", violations: broken }))).toBe(false);
   });
 });

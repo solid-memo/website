@@ -89,7 +89,7 @@ function SubjectView({ subject }: { subject: SubjectReport }) {
     case "profiled":
       return (
         <>
-          {tx("validation.profiled", { name })}
+          {tx(subject.foreign ? "validation.foreign" : "validation.profiled", { name })}
           <ViolationTable violations={subject.violations} />
         </>
       );
@@ -99,7 +99,9 @@ function SubjectView({ subject }: { subject: SubjectReport }) {
       }
       return (
         <>
-          {tx("validation.checked", { name, shape: subject.shape, version: subject.version })}
+          {subject.foreign
+            ? tx("validation.foreign", { name })
+            : tx("validation.checked", { name, shape: subject.shape, version: subject.version })}
           <ViolationTable violations={subject.violations} />
         </>
       );
