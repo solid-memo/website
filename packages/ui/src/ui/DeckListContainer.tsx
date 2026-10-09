@@ -14,7 +14,7 @@ import { Loading } from "./Loading";
 import { NewcomerCourseContainer } from "./NewcomerCourseContainer";
 import { collapsedGroups, rememberCollapsed } from "./remembered";
 import { TodaySummaryContainer } from "./TodaySummaryContainer";
-import { courseHref, deckHref, libraryHref, routeToHash } from "./router";
+import { courseHref, deckHref, libraryHref, routeToHash, studioHref } from "./router";
 
 /** Every group's URL in the nodes, at any depth. */
 function groupUrls(nodes: readonly TreeNode[]): string[] {
@@ -232,6 +232,7 @@ export function DeckListContainer({
         preferencesHref={(deck) =>
           routeToHash({ screen: "deckPreferences", instanceUrl: instance.url, deckUrl: deck.url })
         }
+        studioHref={studioHref(instance.url)}
         renderStudyAction={(deck) =>
           isSetAside(deck) ? (
             <span class="hint">{t("deckList.setAside")}</span>

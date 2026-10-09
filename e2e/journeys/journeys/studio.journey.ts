@@ -5,7 +5,8 @@ import type { CssAccount } from "../harness/cssAccount.ts";
 
 /**
  * Solid Memo Studio beside Solid Memo, on one origin (docs/studio.md): a
- * learner with a deck opens the Studio, logs in to it at the Solid server
+ * learner with a deck opens the instance in the Studio from Solid Memo's
+ * instance bar, logs in to it at the Solid server
  * (the session is Solid Memo's, which restores only there), sees the
  * instance's decks in its table, picks the instance again from the
  * picker, and goes back to Solid Memo, which takes a login of its own
@@ -22,7 +23,7 @@ test("log in to the Studio and see an instance's decks @studio", async ({ app, a
     await app.deckCreator.create(deck);
   });
 
-  await app.step("04 · Open Solid Memo Studio: its own login", () => app.studio.visit());
+  await app.step("04 · Open the instance in Solid Memo Studio: its own login", () => app.studio.openFromApp());
   await app.step("05 · Log in to the Studio with the WebID", () => logInAgain(app, account));
   await app.step("06 · See the instance's decks", () => app.studio.expectDeck(instance, deck, { cards: 0, due: 0 }));
   await app.step("07 · Pick the instance from the instance picker", async () => {

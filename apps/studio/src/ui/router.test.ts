@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { act, renderHook } from "@testing-library/preact";
+import { studioHref } from "@solid-memo/ui/router";
 import { parseStudioHash, studioRouteToHash, useStudioRoute, type StudioRoute } from "./router";
 
 describe("the Studio's routes", () => {
@@ -7,6 +8,10 @@ describe("the Studio's routes", () => {
 
   it("round-trip through the hash", () => {
     for (const route of routes) expect(parseStudioHash(studioRouteToHash(route))).toEqual(route);
+  });
+
+  it("include Home as Solid Memo links to it", () => {
+    expect(`studio/${studioRouteToHash(routes[1]!)}`).toBe(studioHref("https://pod.example/solid-memo/a/"));
   });
 
   it("put Home at the root, its instance in the query", () => {

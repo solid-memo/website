@@ -32,7 +32,11 @@ import type { Storage } from "@solid-memo/domain/storage";
 import type { WebIdDocument } from "@solid-memo/domain/webIdDocument";
 import { firstRelease } from "@solid-memo/domain/testing/libraryDeck";
 import { librarySeriesUrlOf } from "@solid-memo/domain/libraryLayout";
-import { sameDeckState, withDeckChanges, type DeckUpgradeProgress } from "@solid-memo/domain/deckUpgrade";
+import {
+  sameDeckState,
+  withDeckChanges,
+  type DeckUpgradeProgress,
+} from "@solid-memo/domain/deckUpgrade";
 import type { LibraryCard } from "@solid-memo/domain/library";
 import type { CourseOutline } from "@solid-memo/domain/course";
 import type { Locale } from "@solid-memo/domain/locale";
@@ -203,7 +207,13 @@ function makeDeps() {
     mentions: vi.fn(async () => false),
     deleteRecursively: vi.fn(async () => undefined),
   };
-  const updateJournal = { begin: vi.fn(), end: vi.fn(), staging: vi.fn((): string | null => null) };
+  const updateJournal = {
+    begin: vi.fn(),
+    end: vi.fn(),
+    staging: vi.fn((_sourceUrl: string): string | null => null),
+    run: vi.fn((_sourceUrl: string): (() => void) => vi.fn()),
+    watch: vi.fn(),
+  };
   return {
     sessionGateway,
     webIdDocumentRepository,
@@ -2420,6 +2430,8 @@ describe("library deck upgrade", () => {
       expect(guestPod.discard).not.toHaveBeenCalled();
       expect(deps.updateJournal.begin).toHaveBeenCalledWith(GUEST_INSTANCE_URL, TARGET);
       expect(deps.updateJournal.end).toHaveBeenCalledWith(GUEST_INSTANCE_URL);
+      expect(deps.updateJournal.run).toHaveBeenCalledWith(GUEST_INSTANCE_URL);
+      expect(deps.updateJournal.run.mock.results[0]!.value).toHaveBeenCalledOnce();
       expect(deps.instanceCopier.deleteRecursively).not.toHaveBeenCalled();
       expect(progress).toEqual([
         "stage 0/7 (0 of 3)",
@@ -2478,6 +2490,45 @@ describe("library deck upgrade", () => {
       expect(deps.updateJournal.end).not.toHaveBeenCalled();
       expect(deps.instanceCopier.ensureAbsent).not.toHaveBeenCalled();
       expect(deps.instanceCopier.deleteRecursively).not.toHaveBeenCalled();
+    });
+
+    it("holds read-only, while it runs, the guest's instance and the copy a move another page runs", () => {
+      const holds: { url: string; release: ReturnType<typeof vi.fn> }[] = [];
+      const writeFence = {
+        hold: vi.fn((url: string) => {
+          const release = vi.fn();
+          holds.push({ url, release });
+          return release;
+        }),
+      };
+      const { deps } = guestDeps();
+      createUseCases({ ...deps, writeFence });
+      const changed = vi.mocked(deps.updateJournal.watch).mock.calls[0]![0];
+      const held = () => holds.filter(({ release }) => release.mock.calls.length === 0).map(({ url }) => url);
+      changed(GUEST_INSTANCE_URL, TARGET);
+      expect(held()).toEqual([GUEST_INSTANCE_URL, TARGET]);
+      // Told again, it holds the copy named now, the old hold let go.
+      changed(GUEST_INSTANCE_URL, TARGET);
+      expect(held()).toEqual([GUEST_INSTANCE_URL, TARGET]);
+      expect(holds).toHaveLength(4);
+      // Released when it stops running; one never seen releases nothing.
+      changed(GUEST_INSTANCE_URL, null);
+      changed(GUEST_INSTANCE_URL, null);
+      expect(held()).toEqual([]);
+      expect(holds.every(({ release }) => release.mock.calls.length === 1)).toBe(true);
+    });
+
+    it("takes no move another page runs for an interrupted one, nor removes its copy", async () => {
+      const { deps } = guestDeps();
+      const useCases = createUseCases(deps);
+      const changed = vi.mocked(deps.updateJournal.watch).mock.calls[0]![0];
+      changed(GUEST_INSTANCE_URL, TARGET);
+      vi.mocked(deps.updateJournal.staging).mockReturnValue(TARGET);
+      await expect(useCases.findInterruptedGuestMove(guestInstance)).resolves.toBeNull();
+      await expect(useCases.removeInterruptedGuestMove(guestInstance)).rejects.toMatchObject({ code: "guestStudyBeingMoved" });
+      expect(deps.instanceCopier.ensureAbsent).not.toHaveBeenCalled();
+      expect(deps.instanceCopier.deleteRecursively).not.toHaveBeenCalled();
+      expect(deps.updateJournal.end).not.toHaveBeenCalled();
     });
 
     it("transferGuestStudy deletes the whole guest pod with its last instance", async () => {
@@ -2698,6 +2749,8 @@ describe("library deck upgrade", () => {
           begin: vi.fn((key: string, value: string) => void journal.set(key, value)),
           end: vi.fn((key: string) => void journal.delete(key)),
           staging: vi.fn((key: string) => journal.get(key) ?? null),
+          run: vi.fn(() => () => undefined),
+          watch: vi.fn(),
         };
         return {
           deps: { ...deps, answerLog, updateJournal, newId: () => `n${++id}` },

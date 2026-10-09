@@ -26,9 +26,11 @@ Solid Memo's app ([boundaries.md](boundaries.md)):
   Swedish ([i18n.md](i18n.md)).
 
 Both apps are served from one origin. So they share the browser's
-storage: the guest's pod, and the language and theme chosen on this
-device. They also share the login library's session, but a session
-restores only in the app it was logged in from
+storage: the guest's pod, the language and theme chosen on this
+device, and the update journal. So while one app updates an instance,
+the other refuses to write to it ([migrations.md](migrations.md)).
+They also share the login library's session, but a session restores
+only in the app it was logged in from
 ([authentication.md](authentication.md#two-apps-on-one-origin)). Moving
 between the apps therefore takes a login in the other app, which the
 identity provider usually answers without a password.
@@ -49,6 +51,11 @@ Anything else, `#/` among them, is the default route: the only
 instance's Home, or else the picker. An unknown instance falls back to
 the picker. Like Solid Memo's fallbacks, these replace the history
 entry.
+
+Solid Memo links to Home as `studio/#/?instance=…` ("Open in Studio",
+in its instance bar, each deck's actions menu and the deck page;
+[routing.md](routing.md)). The Studio has no screen of one deck yet, so
+a deck's link opens its instance's Home.
 
 The trail is Instances › Decks. The document title is the trail's last
 step and "Solid Memo Studio". After a move, the screen's heading takes

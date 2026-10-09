@@ -9,6 +9,7 @@ import {
   parseHash,
   routeToHash,
   statisticsHref,
+  studioHref,
   type RouteRef,
   useHashRoute,
 } from "./router";
@@ -272,6 +273,12 @@ describe("courseHref", () => {
       instanceUrl: "https://pod.example/a/",
       deckUrl: "https://pod.example/a/c#d",
     });
+  });
+});
+
+describe("studioHref", () => {
+  it("is the instance's Home in the Studio, a folder down", () => {
+    expect(studioHref("https://pod.example/a/")).toBe("studio/#/?instance=https%3A%2F%2Fpod.example%2Fa%2F");
   });
 });
 

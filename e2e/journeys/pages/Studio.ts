@@ -13,10 +13,14 @@ export class Studio extends Screen {
     return this.page.getByRole("table", { name: this.t("studio.decks.caption", { instance }) });
   }
 
-  /** Opens the Studio, which shows its landing page unless the session was logged in from the Studio. */
-  async visit(): Promise<void> {
-    await this.intent("Visit Solid Memo Studio", async () => {
-      await this.page.goto("./studio/");
+  /**
+   * Follows Solid Memo's "Open in Studio" in the instance bar. The Studio
+   * shows its landing page, unless the session was logged in from the Studio.
+   */
+  async openFromApp(): Promise<void> {
+    await this.intent("Open Solid Memo Studio from Solid Memo", async () => {
+      await this.app.chrome.instanceNav.getByRole("link", { name: this.t("studio.open") }).click();
+      await expect(this.page).toHaveURL(/\/studio\/#\/\?instance=/);
       await expect(this.page.getByRole("heading", { level: 1, name: this.t("studio.name") })).toBeVisible();
       await expect(this.page.getByRole("button", { name: this.t("onboardingFlow.havePod") })).toBeVisible();
     });

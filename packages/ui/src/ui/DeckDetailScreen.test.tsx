@@ -23,6 +23,7 @@ function renderScreen(
     deck,
     preferencesHref: "#/deck-preferences?deck=d",
     browseHref: "#/browser?deck=d",
+    studioHref: "studio/#/?instance=a",
     cardCount: 3,
     dueCount: 2,
     newCount: 1,
@@ -206,6 +207,11 @@ describe("DeckDetailScreen", () => {
     );
   });
 
+  it("links to the deck's instance in the Studio", () => {
+    renderScreen();
+    expect(screen.getByRole("link", { name: "Open in Studio" })).toHaveAttribute("href", "studio/#/?instance=a");
+  });
+
   it("links to the deck's preferences above the Browser's link", () => {
     renderScreen();
     const preferences = screen.getByRole("link", { name: "Deck preferences" });
@@ -234,6 +240,7 @@ describe("DeckDetailScreen", () => {
           deck={deck}
           preferencesHref="#/deck-preferences?deck=d"
           browseHref="#/browser?deck=d"
+          studioHref="studio/#/?instance=a"
           cardCount={3}
           dueCount={2}
           newCount={1}

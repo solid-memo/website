@@ -16,6 +16,7 @@ export function DeckDetailScreen({
   error,
   preferencesHref,
   browseHref,
+  studioHref,
   onStudy,
   onResetDay,
   notice,
@@ -35,6 +36,8 @@ export function DeckDetailScreen({
   preferencesHref: string;
   /** URL of the Browser view, where the deck and its cards are edited. */
   browseHref: string;
+  /** URL of the deck's instance in Solid Memo Studio. */
+  studioHref: string;
   /** Today's session: due prompts and new ones, interleaved. */
   onStudy: () => void;
   /** Undo today's reviews of this deck. */
@@ -69,6 +72,9 @@ export function DeckDetailScreen({
           </a>
           <a class="button" href={browseHref}>
             {t("deckDetail.browseButton")}
+          </a>
+          <a class="button" href={studioHref}>
+            {t("studio.open")}
           </a>
         </div>
       </header>

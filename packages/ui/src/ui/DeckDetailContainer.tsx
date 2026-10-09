@@ -10,7 +10,7 @@ import { DeckStatisticsContainer } from "./DeckStatisticsContainer";
 import { ErrorMessage } from "./ErrorMessage";
 import { LibraryUpgradeContainer } from "./LibraryUpgradeContainer";
 import { Loading } from "./Loading";
-import { routeToHash } from "./router";
+import { routeToHash, studioHref } from "./router";
 import { useI18n } from "./i18n";
 import { useDeckReleaseQuery } from "./deckRelease";
 
@@ -100,6 +100,7 @@ export function DeckDetailContainer({
       onResetDay={() => resetDayMutation.mutate()}
       preferencesHref={routeToHash({ screen: "deckPreferences", instanceUrl: instance.url, deckUrl: deck.url })}
       browseHref={routeToHash({ screen: "browser", instanceUrl: instance.url, deckUrl: deck.url })}
+      studioHref={studioHref(instance.url)}
       onStudy={onStudy}
       notice={
         <>

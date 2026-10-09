@@ -602,6 +602,27 @@ export interface Dependencies {
   guestPod?: GuestPod;
 }
 
+/**
+ * Holds in this page what a guest's move another page runs copies, and
+ * the copy, for as long as it runs (not as long as its journal entry,
+ * which a failed move leaves). Two apps on one origin (the web app and
+ * the Studio) thus never write to what the other is moving. Tells
+ * whether a move of the URL runs elsewhere.
+ */
+function fenceMovesElsewhere(journal: UpdateJournal, fence: WriteFence): (sourceUrl: string) => boolean {
+  const held = new Map<string, () => void>();
+  journal.watch((sourceUrl, staging) => {
+    held.get(sourceUrl)?.();
+    held.delete(sourceUrl);
+    if (staging === null) return;
+    const releases = [sourceUrl, staging].map((url) => fence.hold(url));
+    held.set(sourceUrl, () => {
+      for (const release of releases) release();
+    });
+  });
+  return (sourceUrl) => held.has(sourceUrl);
+}
+
 /** A read made without a known version, which always comes with the contents. */
 async function readNow<T>(read: Promise<Since<T>>): Promise<{ value: T; version: string | null }> {
   const since = await read;
@@ -611,7 +632,13 @@ async function readNow<T>(read: Promise<Since<T>>): Promise<{ value: T; version:
 
 const NO_LANGUAGE_PREFERENCE: LanguagePreference = { chosen: () => null, choose: () => undefined };
 const NO_THEME_PREFERENCE: ThemePreference = { chosen: () => "system", choose: () => undefined };
-const NO_JOURNAL: UpdateJournal = { begin: () => undefined, end: () => undefined, staging: () => null };
+const NO_JOURNAL: UpdateJournal = {
+  begin: () => undefined,
+  end: () => undefined,
+  staging: () => null,
+  run: () => () => undefined,
+  watch: () => undefined,
+};
 const NO_FENCE: WriteFence = { hold: () => () => undefined };
 const NO_DIGESTS: DigestRepository = { readDigest: async () => null, updateDigest: async () => undefined };
 const nothing = async () => undefined;
@@ -738,6 +765,8 @@ export function createUseCases({
   ruleset = "",
   guestPod = NO_GUEST_POD,
 }: Dependencies): UseCases {
+  const runsElsewhere = fenceMovesElsewhere(updateJournal, writeFence);
+
   /**
    * Normalized card content, or a throw naming what is missing; `saved`
    * the card edited, if any, whose untagged sides may stay as they are.
@@ -1312,6 +1341,7 @@ export function createUseCases({
       let created = false;
       let instance: Instance;
       const release = writeFence.hold(source);
+      const stopRunning = updateJournal.run(source);
       try {
         // Listing the guest's instance, making sure the target is free, creating it.
         progress.start(3);
@@ -1356,6 +1386,7 @@ export function createUseCases({
           ...(cleanedUp ? {} : { leftoverUrl: target }),
         };
       } finally {
+        stopRunning();
         release();
       }
       // The study is the user's now: what follows only tidies.
@@ -1782,7 +1813,8 @@ export function createUseCases({
       // Only a guest's study moves; a note on another instance is an earlier version's, and its folder is left alone.
       if (!isGuestUrl(source)) return null;
       const staging = updateJournal.staging(source);
-      if (staging === null) return null;
+      // A move another page runs is not interrupted, however long it takes.
+      if (staging === null || runsElsewhere(source)) return null;
       const gone = await instanceCopier.ensureAbsent(staging).then(
         () => true,
         () => false,
@@ -1793,6 +1825,8 @@ export function createUseCases({
     async removeInterruptedGuestMove(instance) {
       const source = ensureTrailingSlash(instance.url);
       if (!isGuestUrl(source)) return;
+      // The copy of a move another page runs is that move's to remove.
+      if (runsElsewhere(source)) throw new AppError("guestStudyBeingMoved", { container: source });
       const staging = updateJournal.staging(source);
       // Made whole by that move, at a URL it found free, and named nowhere: deleted whole.
       if (staging !== null) await instanceCopier.deleteRecursively(staging);
