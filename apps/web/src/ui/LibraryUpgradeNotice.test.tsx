@@ -23,6 +23,7 @@ const plan: LibraryUpgradePlan = {
   restore: [],
   remove: [card("is")],
   kept: [card("fi")],
+  applied: [],
 };
 
 function renderNotice(overrides: Partial<Parameters<typeof LibraryUpgradeNotice>[0]> = {}) {
@@ -51,6 +52,18 @@ describe("describeChanges", () => {
       describeChanges({ ...plan, add: [retired], change: [retired], retire: [card("se")], restore: [card("dk"), card("fi")], remove: [] }, en),
     ).toBe("retires 1 card and brings back 2 cards");
     expect(describeChanges({ ...plan, add: [retired], change: [], remove: [] }, en)).toBe("updates cards you no longer study");
+  });
+
+  it("counts the cards already as the release has them, as an upgrade cut off half-way leaves them", () => {
+    expect(describeChanges({ ...plan, add: [], change: [], remove: [], applied: [card("se")] }, en)).toBe(
+      "keeps 1 card already as the release has it",
+    );
+    expect(describeChanges({ ...plan, applied: [card("se"), card("dk")] }, en)).toBe(
+      "adds 1 card, changes 2 cards, removes 1 card and keeps 2 cards already as the release has them",
+    );
+    expect(describeChanges({ ...plan, add: [], change: [], remove: [], applied: [card("se")] }, createI18n("sv"))).toBe(
+      "behåller 1 kort som redan är som i utgåvan",
+    );
   });
 });
 

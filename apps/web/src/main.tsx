@@ -22,6 +22,7 @@ import { createLocalPod } from "@solid-memo/solid/localPod";
 import { createMemoryResourceStore } from "@solid-memo/solid/memoryResourceStore";
 import { routedFetch } from "@solid-memo/solid/routedFetch";
 import { createSolidInstanceCopier } from "@solid-memo/solid/solidInstanceCopier";
+import { createSolidDocumentBackups } from "@solid-memo/solid/solidDocumentBackups";
 import { createSolidRepairRepository } from "@solid-memo/solid/solidRepairRepository";
 import { createSolidReviewStateRepository } from "@solid-memo/solid/solidReviewStateRepository";
 import { createSolidStorageGateway } from "@solid-memo/solid/solidStorageGateway";
@@ -41,9 +42,10 @@ const guestFetch = createLocalPod({
 });
 
 /**
- * Every pod request goes through the fence, so an instance being updated
- * cannot be written (docs/migrations.md); then to the guest's pod or, as
- * the logged-in user, to any other.
+ * Every pod request goes through the fence, so nothing but the update
+ * writes to an instance being updated, and the update only against the
+ * versions it backed up (docs/migrations.md); then to the guest's pod or,
+ * as the logged-in user, to any other.
  */
 const writeFence = createWriteFence(routedFetch({ origin: GUEST_ORIGIN, local: guestFetch, remote: authFetch }));
 const podFetch = writeFence.fetch;
@@ -110,6 +112,7 @@ const useCases = createUseCases({
   shapeValidator,
   repairRepository: createSolidRepairRepository({ fetch: podFetch }),
   instanceCopier: createSolidInstanceCopier({ fetch: podFetch }),
+  documentBackups: createSolidDocumentBackups({ fetch: podFetch, checkWrite }),
   updateJournal: createLocalStorageUpdateJournal(),
   languagePreference: createLocalStorageLanguagePreference(),
   themePreference: createLocalStorageThemePreference(),

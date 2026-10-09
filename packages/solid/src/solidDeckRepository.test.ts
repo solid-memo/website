@@ -243,6 +243,36 @@ describe("readCatalog and saveCatalog", () => {
   });
 });
 
+describe("saveDecks", () => {
+  const catalog = {
+    title: "Main",
+    description: "My decks.",
+    publisher: { webId: "https://alice.example/profile/card#me", name: "Alice" },
+  };
+
+  it("rewrites the decks' entries in this app's format and writes a missing catalogue, in one write of the catalog document", async () => {
+    const checkWrite = vi.fn(async () => undefined);
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    const gone = { ...deck, id: "deck-2", url: `${CATALOG}#deck-2` };
+    await expect(makeRepository(checkWrite).saveDecks(INSTANCE, [{ ...deck, formatVersion: 1 }, gone], catalog)).resolves.toBe(true);
+    expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
+    const [url, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    expect(url).toBe(CATALOG);
+    expect(getInteger(getThing(saved as SolidDataset, deck.url)!, SM.formatVersion)).toBe(6);
+    expect(getThing(saved as SolidDataset, gone.url)).toBeNull();
+    expect(getUrlAll(getThing(saved as SolidDataset, `${CATALOG}#catalog`)!, "http://www.w3.org/ns/dcat#dataset")).toEqual([deck.url]);
+    expect(checkWrite).toHaveBeenCalledWith(saved, expect.arrayContaining([deck.url, `${CATALOG}#catalog`, catalog.publisher.webId]));
+  });
+
+  it("creates the catalog document for a catalogue alone, and writes nothing when there is nothing to write", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await expect(makeRepository().saveDecks(INSTANCE, [deck], null)).resolves.toBe(false);
+    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+    await expect(makeRepository().saveDecks(INSTANCE, [], catalog)).resolves.toBe(true);
+    expect(getThing(vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as SolidDataset, `${CATALOG}#catalog`)).not.toBeNull();
+  });
+});
+
 describe("createDeck", () => {
   it("adds a deck subject to a fresh catalog and returns the deck", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
@@ -993,6 +1023,16 @@ describe("stateCardLanguages", () => {
 });
 
 describe("removeCard", () => {
+  it("refuses to remove a card a newer version of the app has written, writing nothing", async () => {
+    const cardsDoc = setThing(
+      mockSolidDatasetFrom(deck.cardsDocumentUrl),
+      buildThing(createThing({ url: card.url })).addIri(RDF.type, SM.Card).addInteger(SM.formatVersion, 99).build(),
+    );
+    vi.mocked(getSolidDatasetOrNull).mockImplementation(async (url) => (url === deck.cardsDocumentUrl ? cardsDoc : null));
+    await expect(makeRepository().removeCard(deck, card)).rejects.toMatchObject({ code: "writtenByNewerApp" });
+    expect(vi.mocked(saveSolidDatasetAt).mock.calls.filter(([url]) => url === deck.cardsDocumentUrl)).toEqual([]);
+  });
+
   it("removes the card and its review state", async () => {
     const cardsDoc = setThing(
       mockSolidDatasetFrom(deck.cardsDocumentUrl),
@@ -1102,76 +1142,35 @@ describe("library upgrade writes", () => {
     await expect(makeRepository().readDeck(deck.url)).resolves.toBeNull();
   });
 
-  it("stageCardChanges writes the changed cards into a new document, moving every card to it, and leaves the original alone", async () => {
-    const checkWrite = vi.fn(async () => undefined);
-    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
-      setThing(
-        setThing(
-          mockSolidDatasetFrom(deck.cardsDocumentUrl),
-          buildThing(createThing({ url: `${deck.cardsDocumentUrl}#se` }))
-            .addIri(RDF.type, SM.Card)
-            .addStringNoLocale(SM.front, "Sweden")
-            .addStringNoLocale(SM.back, "Stockholm?")
-            .addDatetime(DCTERMS.created, new Date("2026-01-01T00:00:00.000Z"))
-            .addUrl("https://example.org/seeAlso", `${deck.cardsDocumentUrl}#is`)
-            .build(),
-        ),
-        buildThing(createThing({ url: `${deck.cardsDocumentUrl}#is` })).addIri(RDF.type, SM.Card).build(),
-      ) as never,
-    );
-    await makeRepository(checkWrite).stageCardChanges(deck, STAGED, {
-      save: [{ id: "se", front: { "": "Sweden" }, back: { "": "Stockholm" } }],
-      remove: ["is"],
-    });
-    expect(getSolidDatasetOrNull).toHaveBeenCalledWith(deck.cardsDocumentUrl, expect.anything());
-    expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
-    const [url, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
-    expect(url).toBe(STAGED);
-    expect(checkWrite).toHaveBeenCalledWith(saved, [`${STAGED}#se`]);
-    const se = getThing(saved as SolidDataset, `${STAGED}#se`)!;
-    expect(getStringNoLocale(se, SM.back)).toBe("Stockholm");
-    expect(getDatetime(se, DCTERMS.created)?.toISOString()).toBe("2026-01-01T00:00:00.000Z");
-    expect(getUrl(se, "https://example.org/seeAlso")).toBe(`${STAGED}#is`);
-    expect(getThing(saved as SolidDataset, `${STAGED}#is`)).toBeNull();
-    expect(getThing(saved as SolidDataset, `${deck.cardsDocumentUrl}#se`)).toBeNull();
-    expect(getUrlAll(getThing(saved as SolidDataset, STAGED)!, DCTERMS.isPartOf)).toEqual([deck.url]);
-  });
-
-  it("stageCardChanges writes a deck without a cards document the new cards alone", async () => {
-    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
-    await makeRepository().stageCardChanges(deck, STAGED, { save: [{ id: "no", front: { "": "Norway" }, back: { "": "Oslo" } }], remove: [] });
-    expect(getThing(vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as SolidDataset, `${STAGED}#no`)).not.toBeNull();
-  });
-
-  it("switchDeck moves the entry over in one write of the catalog, keeping what changed meanwhile", async () => {
+  it("upgradeDeckEntry moves the entry to the new release in one write of the catalog, keeping what changed meanwhile", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
     const current = (await makeRepository().readDeck(deck.url))!;
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
       setThing(catalogWithDeck(), buildThing(getThing(catalogWithDeck(), deck.url)!).addUrl(DCTERMS.license, CC0).build()),
     );
-    const next = { ...current, cardsDocumentUrl: STAGED, sourceUrl: "https://solid-memo.com/decks/capitals/v2.ttl" };
-    const switched = await makeRepository().switchDeck(current, next);
-    expect(switched).toMatchObject({ cardsDocumentUrl: STAGED, sourceUrl: next.sourceUrl, license: CC0, formatVersion: 6 });
+    const next = { ...current, sourceUrl: "https://solid-memo.com/decks/capitals/v2.ttl" };
+    const upgraded = await makeRepository().upgradeDeckEntry(current, next);
+    expect(upgraded).toMatchObject({ cardsDocumentUrl: deck.cardsDocumentUrl, sourceUrl: next.sourceUrl, license: CC0, formatVersion: 6 });
     expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
     const [url, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
     expect(url).toBe(CATALOG);
     const thing = getThing(saved as SolidDataset, deck.url)!;
-    expect(getUrl(thing, SM.cardsDocument)).toBe(STAGED);
+    expect(getUrl(thing, SM.cardsDocument)).toBe(deck.cardsDocumentUrl);
     expect(getUrl(thing, SM.reviewsDocument)).toBe(deck.reviewsDocumentUrl);
     expect(getUrl(thing, PROV.wasDerivedFrom)).toBe(next.sourceUrl);
     expect(getUrl(thing, DCTERMS.license)).toBe(CC0);
   });
 
-  it("switchDeck writes nothing when the entry changed meanwhile, or is gone", async () => {
+  it("upgradeDeckEntry writes nothing when the entry changed meanwhile, or is gone", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
     const current = (await makeRepository().readDeck(deck.url))!;
-    const next = { ...current, cardsDocumentUrl: STAGED };
-    await expect(makeRepository().switchDeck({ ...current, title: { en: "Other" } }, next)).rejects.toThrow(
+    const next = { ...current, sourceUrl: "https://solid-memo.com/decks/capitals/v2.ttl" };
+    await expect(makeRepository().upgradeDeckEntry({ ...current, title: { en: "Other" } }, next)).rejects.toThrow(
       `The deck changed while it was being updated, perhaps in another tab or app. Try again.\nurl: ${deck.url}`,
     );
-    await expect(makeRepository().switchDeck({ ...current, url: `${CATALOG}#deck-2` }, next)).rejects.toThrow("changed while");
+    await expect(makeRepository().upgradeDeckEntry({ ...current, url: `${CATALOG}#deck-2` }, next)).rejects.toThrow("changed while");
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
-    await expect(makeRepository().switchDeck(current, next)).rejects.toThrow("changed while");
+    await expect(makeRepository().upgradeDeckEntry(current, next)).rejects.toThrow("changed while");
     expect(saveSolidDatasetAt).not.toHaveBeenCalled();
   });
 

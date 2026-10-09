@@ -10,7 +10,10 @@ import {
   getStringNoLocale,
   getStringNoLocaleAll,
   getUrl,
+  getThing,
   getUrlAll,
+  removeThing,
+  type SolidDataset,
   type Thing,
   type ThingBuilder,
   type ThingPersisted,
@@ -28,6 +31,7 @@ import type {
 } from "@solid-memo/vocab/shapeDescriptor";
 import { SHAPES } from "@solid-memo/vocab/descriptors.generated";
 import { RDF, SM } from "./vocab";
+import { AppError } from "@solid-memo/domain/appError";
 
 /**
  * The generic half of every mapper: a subject read into the record its
@@ -241,6 +245,15 @@ function addValue(
  * triples survive) or a new one, typed once with its class and any
  * further types its shape names, with the record applied and the
  * shape's version stamped.
+ *
+ * A tab running an older version of the app is stopped here from
+ * writing over what a newer one wrote: an existing subject stamped with a
+ * version above the one this app writes for its kind is refused
+ * (writtenByNewerApp), before anything is sent. Reading it passes it
+ * through (readVersioned); only writing would lose what the newer format
+ * says. Writes that change or remove a subject without recording it
+ * (a position, a completed chapter, a repair, a removal) are refused the
+ * same way by unlessNewer.
  */
 export function recordThing<T>(
   url: string,
@@ -248,6 +261,9 @@ export function recordThing<T>(
   record: T,
   existing: ThingPersisted | null,
 ): ThingPersisted {
+  if (existing !== null && storedVersionOf(existing) > descriptor.version) {
+    throw new AppError("writtenByNewerApp", { url, version: storedVersionOf(existing), writes: descriptor.version });
+  }
   const thing = existing ?? createThing({ url });
   const builder = buildThing(thing);
   const types = getUrlAll(thing, RDF.type);
@@ -257,6 +273,33 @@ export function recordThing<T>(
   return applyRecord(builder, descriptor, record)
     .setInteger(SM.formatVersion, descriptor.version)
     .build();
+}
+
+/**
+ * The subject, unless a newer version of the app wrote it: one stamped
+ * with a version above the latest this app writes for its class is
+ * refused (writtenByNewerApp), as recordThing refuses it, for the writes
+ * that change or remove a subject without recording it. A subject of no
+ * class this app writes is not its to judge, and passes.
+ */
+export function unlessNewer<T extends Thing>(thing: T): T {
+  const types = getUrlAll(thing, RDF.type);
+  const writes = Math.max(
+    0,
+    ...(Object.keys(LATEST_VERSION) as ShapeName[])
+      .filter((shape) => types.includes((SHAPES[shape] as Record<number, ShapeDescriptor>)[LATEST_VERSION[shape]].targetClass))
+      .map((shape) => LATEST_VERSION[shape]),
+  );
+  const version = storedVersionOf(thing);
+  if (writes > 0 && version > writes) throw new AppError("writtenByNewerApp", { url: thing.url, version, writes });
+  return thing;
+}
+
+/** The dataset without the subject, unless a newer version of the app wrote it (unlessNewer). */
+export function removeUnlessNewer<D extends SolidDataset>(dataset: D, url: string): D {
+  const thing = getThing(dataset, url);
+  if (thing !== null) unlessNewer(thing);
+  return removeThing(dataset, url);
 }
 
 // addDatetime is re-exported for mappers that stamp times outside a record.

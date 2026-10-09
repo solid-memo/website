@@ -15,7 +15,7 @@ where the layers meet.
 | `@solid-memo/application` | `packages/application/` | Use cases (what the app does) and ports (what the app needs). |
 | `@solid-memo/domain` | `packages/domain/` | Pure types and pure functions: the app's vocabulary, SRS, migrations. |
 | `@solid-memo/vocab` | `packages/vocab/` | The data contract: the TypeScript generated (`src/*.generated.ts`) from the RDF vocabulary and SHACL shapes in the repository's `ns/` ([vocab.md](vocab.md), [shapes.md](shapes.md)), with the generator (`tooling/`); vendored profiles (`vendor/`) and fixtures. |
-| `@solid-memo/solid` | `packages/solid/` | Adapters for Solid pods (Inrupt): repositories, the type index, the instance copier, the write fence, the pod-reading shape validator, and the guest's pod kept in the browser ([guest-mode.md](guest-mode.md)). |
+| `@solid-memo/solid` | `packages/solid/` | Adapters for Solid pods (Inrupt): repositories, the type index, the instance copier, the document backups of an update, the write fence, the pod-reading shape validator, and the guest's pod kept in the browser ([guest-mode.md](guest-mode.md)). |
 | `@solid-memo/shacl` | `packages/shacl/` | The SHACL engine (rdf-validate-shacl, loaded lazily), profiles and shape loading (`src/`); node-side validation of Turtle files and the deck library's index and checks, its Markdown rules among them (`node/`, `npm run library`). |
 | `@solid-memo/browser` | `packages/browser/` | Adapters for browser storage: the update journal, the language, the guest's pod's store (IndexedDB). |
 | `@solid-memo/turtle` | `packages/turtle/` | Node-only Turtle tooling (n3): parsing and the house-style formatter. |

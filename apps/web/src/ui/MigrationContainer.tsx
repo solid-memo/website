@@ -2,6 +2,7 @@ import type { ComponentChildren } from "preact";
 import { useState } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
+import { AppError } from "@solid-memo/domain/appError";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { UpdateOutcome, UpdateProgress } from "@solid-memo/domain/instanceUpdate";
 import { isPlanEmpty } from "@solid-memo/domain/migration";
@@ -15,25 +16,24 @@ import { usePanelFocus } from "./panelFocus";
 /**
  * Checks an instance for documents in an older format and, when there
  * are any, offers the update (docs/migrations.md): a confirmation of how
- * it keeps the data safe, then its progress, then either the new
- * instance or what went wrong. The check reads every document once per
- * session; a failed check shows nothing, since the app works on the old
- * format and the deck list reports pod trouble on its own. An update
- * left half-done by a closed tab is offered for cleanup. Each step takes
- * the focus from the one it replaces; Cancel gives it back to the notice.
+ * it keeps the data safe, then its progress, then either nothing (every
+ * document is up to date, at its address) or what stopped it and what it
+ * left. The check reads every document once per session; a failed check
+ * shows nothing, since the app works on the old format and the deck list
+ * reports pod trouble on its own. An update a closed tab cut off is
+ * reported: its backup, kept, or a partial one, offered for removal. Each
+ * step takes the focus from the one it replaces; Cancel gives it back to
+ * the notice.
  */
 export function MigrationContainer({
   useCases,
   session,
   instance,
-  onUpdated,
 }: {
   useCases: UseCases;
   /** Whose pod it is: the publisher of a catalogue the update writes. */
   session: Session;
   instance: Instance;
-  /** The update switched over: the instance now lives at a new address. */
-  onUpdated: (instance: Instance) => void;
 }) {
   const { t, errorText } = useI18n();
   const queryClient = useQueryClient();
@@ -59,20 +59,25 @@ export function MigrationContainer({
     mutationFn: () => useCases.updateInstance(session, instance, setProgress),
     onSuccess: async (outcome) => {
       setProgress(null);
-      if (!outcome.ok) {
-        setFailure(outcome);
-        return;
-      }
-      await queryClient.invalidateQueries({ queryKey: ["instances"] });
-      onUpdated({ url: outcome.instanceUrl, name: instance.name });
+      if (!outcome.ok) setFailure(outcome);
+      // The documents are where they were, in newer formats: everything shown of them is read again.
+      if (outcome.ok || outcome.updated.length > 0) await queryClient.invalidateQueries();
     },
     onError: () => setProgress(null),
+  });
+
+  const restoreMutation = useMutation({
+    mutationFn: async (backupUrl: string) => {
+      const backup = (await useCases.listBackups(instance)).find((candidate) => candidate.url === backupUrl);
+      if (backup === undefined) throw new AppError("noBackup", { instance: instance.name });
+      return useCases.restoreBackup(instance, backup);
+    },
+    onSuccess: () => queryClient.invalidateQueries(),
   });
 
   const cleanupMutation = useMutation({
     mutationFn: () => useCases.removeInterruptedUpdate(instance),
     onSuccess: async () => {
-      setFailure(null);
       await queryClient.invalidateQueries({ queryKey: ["interruptedUpdate", instance.url] });
     },
   });
@@ -85,19 +90,29 @@ export function MigrationContainer({
     return (
       <InstanceUpdateFailure
         outcome={failure}
-        busy={cleanupMutation.isPending}
-        onRemoveLeftover={() => cleanupMutation.mutate()}
+        busy={restoreMutation.isPending}
+        restored={restoreMutation.data}
+        onRestore={() => restoreMutation.mutate(failure.backupUrl!)}
         onDismiss={() => {
           setFailure(null);
+          restoreMutation.reset();
           setReturned(true);
         }}
-      />
+      >
+        <ErrorMessage error={errorText(restoreMutation.error)} />
+      </InstanceUpdateFailure>
     );
   }
   if (interrupted !== null) {
     return (
       <InterruptedUpdate
-        message={t("migration.interrupted", { name: instance.name, url: interrupted })}
+        message={
+          interrupted.backedUp
+            ? t("migration.interruptedBackedUp", { name: instance.name })
+            : t("migration.interrupted", { name: instance.name, url: interrupted.folder })
+        }
+        action={interrupted.backedUp ? t("migration.understood") : t("migration.removeIt")}
+        working={interrupted.backedUp ? t("migration.understood") : t("migration.removing")}
         busy={cleanupMutation.isPending}
         onRemove={() => cleanupMutation.mutate()}
       >
@@ -134,17 +149,23 @@ export function MigrationContainer({
 }
 
 /**
- * An update a closed tab left half-done, and the button that removes what
- * it left. Once removed, the panel goes and the focus moves to the
- * screen; while it works, the button keeps the focus (aria-disabled).
+ * An update a closed tab cut off, and the button that removes what it
+ * left, or (its backup being whole) takes note. Once done, the panel goes
+ * and the focus moves to the screen; while it works, the button keeps the
+ * focus (aria-disabled).
  */
 function InterruptedUpdate({
   message,
+  action,
+  working,
   busy,
   onRemove,
   children,
 }: {
   message: string;
+  /** What the button does, and says while it does it. */
+  action: string;
+  working: string;
   busy: boolean;
   onRemove: () => void;
   /** The cleanup's error, if any. */
@@ -161,7 +182,7 @@ function InterruptedUpdate({
         }}
         aria-disabled={busy}
       >
-        {busy ? t("migration.removing") : t("migration.removeIt")}
+        {busy ? working : action}
       </button>
       {children}
     </div>

@@ -9,12 +9,19 @@ import type { ThemeChoice } from "@solid-memo/domain/theme";
 import { planRepair, type Repair, type RepairPlan } from "@solid-memo/domain/repair";
 import {
   rebaseIri,
-  stagingUrlOf,
-  UPDATE_STEP_LABELS,
+  UPDATE_STEPS,
   type UpdateOutcome,
   type UpdateProgress,
   type UpdateStep,
 } from "@solid-memo/domain/instanceUpdate";
+import {
+  backupFolderOf,
+  backupsContainerOf,
+  restoreActionOf,
+  withVersionUpdated,
+  type Backup,
+  type BackupRestore,
+} from "@solid-memo/domain/backup";
 import {
   validateCardContent,
   type Card,
@@ -42,12 +49,10 @@ import {
 import {
   DECK_UPGRADE_STEPS,
   decodeDeckUpgradeNote,
-  encodeDeckUpgradeNote,
   isAbandoned,
   sameCardChanges,
   sameCards,
   sameReviewStates,
-  stagedDocumentUrl,
   upgradedCardList,
   type DeckUpgradeNote,
   type DeckUpgradeOutcome,
@@ -60,17 +65,18 @@ import { canonicalTag } from "@solid-memo/domain/languageTag";
 import { unlikeRelease, withStatedLanguages, type StatedLanguages } from "@solid-memo/domain/deckLanguages";
 import {
   isDeckOutdated,
+  isInstanceOutdated,
   isOutdated,
   isPreferencesOutdated,
   isReviewStateOutdated,
   planMigration,
   upgradeCard,
-  upgradeDeck,
   upgradeReviewState,
   type MigrationPlan,
 } from "@solid-memo/domain/migration";
 import type { DeckGroup, DeckTree, DeckTreeEdit } from "@solid-memo/domain/deckTree";
 import {
+  catalogUrlOf,
   deckGroupUrlOf,
   digestUrlOf,
   documentsInUse,
@@ -78,8 +84,10 @@ import {
   historyUrlOf,
   instanceDocumentUrls,
   instanceUrlOfDeck,
+  metaUrlOf,
+  preferencesUrlOf,
 } from "@solid-memo/domain/instanceLayout";
-import { summarize, type DocumentReport, type ValidationReport } from "@solid-memo/domain/validation";
+import { failingSubjectUrls, summarize, type DocumentReport, type ValidationReport } from "@solid-memo/domain/validation";
 import {
   emptyDigest,
   scheduleOf,
@@ -148,6 +156,7 @@ import type {
   RepairRepository,
   InstanceCopier,
   ContainerMove,
+  DocumentBackups,
   GuestPod,
   LanguagePreference,
   ThemePreference,
@@ -330,13 +339,14 @@ export interface UseCases {
   deckRelease(deck: Deck): Promise<LibraryDeckContent | null>;
   /**
    * Apply the upgrade the user agreed to, safely (domain/deckUpgrade.ts):
-   * the upgraded cards — and the review states, when cards with some are
-   * removed — are written into new documents, read back, and the deck's
-   * catalog entry is switched over to them in one conditional write once
-   * the originals are found unchanged; the originals are deleted then. A
-   * failure before the switch deletes the new documents and leaves the
-   * deck as it was. Refuses (deckChangedSinceOffer) when the deck's cards
-   * no longer call for the changes the user agreed to.
+   * the deck's cards document — and its reviews document, when cards with
+   * review states are removed — is backed up, found unchanged since it
+   * was read, written in place (only while still as backed up) and read
+   * back; then the deck's catalog entry is moved to the new release in
+   * one conditional write, and the backup deleted. A failure after a
+   * write puts back each document still as the upgrade left it. Refuses
+   * (deckChangedSinceOffer) when the deck's cards no longer call for the
+   * changes the user agreed to.
    */
   applyLibraryUpgrade(
     deck: Deck,
@@ -344,9 +354,10 @@ export interface UseCases {
     onProgress?: (progress: DeckUpgradeProgress) => void,
   ): Promise<DeckUpgradeOutcome>;
   /**
-   * Tidy away what an upgrade of the deck cut off half-way (a closed tab)
-   * left behind — the new documents before its switch, the old ones after
-   * it — never what the deck uses. Whether there was any to tidy.
+   * Tidy away what an upgrade of the deck by an earlier version of the
+   * app, cut off half-way (a closed tab), left behind — its new documents
+   * before it switched the deck's entry over, the old ones after — never
+   * what the deck uses. Whether there was any to tidy.
    */
   tidyInterruptedDeckUpgrade(deck: Deck): Promise<boolean>;
   listCards(deck: Deck): Promise<Card[]>;
@@ -377,40 +388,56 @@ export interface UseCases {
    */
   planMigration(instanceUrl: string): Promise<MigrationPlan>;
   /**
-   * Rewrite every outdated deck entry and card in the instance in the
-   * current format, one write per document (cards are re-read first, so
-   * an edit made since the plan is never overwritten). Resolves to what
-   * was migrated. Only ever run after the user has agreed to the plan.
-   */
-  /**
-   * Bring the instance up to this app's formats without writing it
-   * (docs/migrations.md): copy it into a new sibling container, update
-   * and validate the copy, check the original did not change meanwhile,
-   * then switch the type index registrations over. The original stays as
-   * the backup; a failure before the switch deletes the copy.
+   * Bring the instance up to this app's formats in place
+   * (docs/migrations.md): back up every document it will change, then
+   * write each, one write per document, only while it is still as backed
+   * up, then check the instance. Every document keeps its address. Only
+   * ever run after the user has agreed to the plan; it reads afresh what
+   * to change. A document changed meanwhile stops it, and what it updated
+   * stays updated; run again, it updates what is still outdated.
    */
   updateInstance(
     session: Session,
     instance: Instance,
     onProgress?: (progress: UpdateProgress) => void,
   ): Promise<UpdateOutcome>;
-  /** The partial copy an update cut off half-way left behind; null when none. */
-  findInterruptedUpdate(instance: Instance): Promise<string | null>;
-  /** Delete the partial copy an interrupted update left behind. */
+  /**
+   * What an update cut off half-way (a closed tab) left behind, as this
+   * browser noted it: its backup, made whole (`backedUp`, kept with the
+   * instance's other backups), or a partial one to remove (not
+   * `backedUp`); null when none.
+   */
+  findInterruptedUpdate(instance: Instance): Promise<{ folder: string; backedUp: boolean } | null>;
+  /** Delete the partial backup an interrupted update left behind (never a whole one), and forget the update. */
   removeInterruptedUpdate(instance: Instance): Promise<void>;
-  /** The instance an update replaced, kept as a backup; null when there is none (any more). */
-  readBackup(instance: Instance): Promise<{ url: string; replacedAt?: string } | null>;
+  /** The backups the instance's updates made, newest first. */
+  listBackups(instance: Instance): Promise<Backup[]>;
   /**
-   * Switch back to the backup, then delete the updated instance's data
-   * (its folder kept when it holds what another app put there). Returns
-   * the backup, and what the deletion kept.
+   * Put back each document of the backup still as its update left it
+   * (deleting one the update created), keeping every one changed since;
+   * the backup is deleted after, unless it kept one. Throws noBackup when
+   * the backup is gone.
    */
-  restoreBackup(session: Session, instance: Instance): Promise<{ instance: Instance } & InstanceDeletion>;
+  restoreBackup(instance: Instance, backup: Backup): Promise<BackupRestore>;
+  /** Delete the backup (its folder kept when it holds what another app put there). */
+  deleteBackup(backup: Backup): Promise<InstanceDeletion>;
   /**
-   * Delete the backup's data (its folder kept when it holds what another
-   * app put there), and forget it.
+   * The copy of the whole instance an update by an earlier version of the
+   * app left as its backup, at another address; null when there is none
+   * (any more).
    */
-  deleteBackup(instance: Instance): Promise<InstanceDeletion>;
+  readLegacyBackup(instance: Instance): Promise<{ url: string; replacedAt?: string } | null>;
+  /**
+   * Switch back to the earlier version's backup, then delete the updated
+   * instance's data (its folder kept when it holds what another app put
+   * there). Returns the backup, and what the deletion kept.
+   */
+  restoreLegacyBackup(session: Session, instance: Instance): Promise<{ instance: Instance } & InstanceDeletion>;
+  /**
+   * Delete the earlier version's backup's data (its folder kept when it
+   * holds what another app put there), and forget it.
+   */
+  deleteLegacyBackup(instance: Instance): Promise<InstanceDeletion>;
   /** Stored preferences overlaid on the defaults. */
   getPreferences(instanceUrl: string): Promise<StudyPreferences>;
   savePreferences(
@@ -543,6 +570,8 @@ export interface Dependencies {
   shapeValidator: ShapeValidator;
   repairRepository: RepairRepository;
   instanceCopier: InstanceCopier;
+  /** The backups the format update and the library upgrade make of what they change. */
+  documentBackups: DocumentBackups;
   /** A note of updates in progress; by default none is kept. */
   updateJournal?: UpdateJournal;
   /** The language the user chose; by default none is kept. */
@@ -551,9 +580,9 @@ export interface Dependencies {
   themePreference?: ThemePreference;
   /** The clock; injected for tests. */
   now?: () => Date;
-  /** Fresh identifiers (the UUID of an update's copy); injected for tests. */
+  /** Fresh identifiers (a backup's folder, a deck group); injected for tests. */
   newId?: () => string;
-  /** Keeps the instance an update copies read-only while it runs. */
+  /** Keeps what an update changes read-only to anything else in the tab while it runs. */
   writeFence?: WriteFence;
   /** Where each instance's digest is kept; by default none is. */
   digestRepository?: DigestRepository;
@@ -575,7 +604,7 @@ async function readNow<T>(read: Promise<Since<T>>): Promise<{ value: T; version:
 const NO_LANGUAGE_PREFERENCE: LanguagePreference = { chosen: () => null, choose: () => undefined };
 const NO_THEME_PREFERENCE: ThemePreference = { chosen: () => "system", choose: () => undefined };
 const NO_JOURNAL: UpdateJournal = { begin: () => undefined, end: () => undefined, staging: () => null };
-const NO_FENCE: WriteFence = { hold: () => () => undefined };
+const NO_FENCE: WriteFence = { hold: () => () => undefined, pass: () => () => undefined };
 const NO_DIGESTS: DigestRepository = { readDigest: async () => null, updateDigest: async () => undefined };
 const nothing = async () => undefined;
 const none = async (): Promise<never[]> => [];
@@ -684,6 +713,7 @@ export function createUseCases({
   shapeValidator,
   repairRepository,
   instanceCopier,
+  documentBackups,
   updateJournal = NO_JOURNAL,
   languagePreference = NO_LANGUAGE_PREFERENCE,
   themePreference = NO_THEME_PREFERENCE,
@@ -791,56 +821,177 @@ export function createUseCases({
 
 
   /**
-   * A new catalogue for an instance: published by the session's owner,
-   * named as their profile names them (the WebID when it does not say).
+   * The documents the format update brings up to this app's formats, as
+   * the instance is now, in the order it writes them: its meta document,
+   * its preferences, each deck's cards and review states, and last its
+   * catalogue (written when missing), which lists the decks as DCAT
+   * datasets, which outdated entries are not. A document listed twice (two
+   * decks sharing one) is one item, whose writes follow each other. Each
+   * write reads the document afresh and writes it in place (unknown
+   * triples survive),
+   * each subject from the model the chain brought up to date, so content
+   * does not change, only its version; whether it wrote anything (a
+   * document brought up to date meanwhile is not written).
    */
-  /**
-   * Bring an instance's documents up to this app's formats, in place: its
-   * meta document (saying what it replaces, for an updated copy), its
-   * preferences, every deck's entry, cards and review states, and last
-   * its catalogue (written when missing), one write per document. Only ever
-   * run on the copy an update makes (see updateInstance).
-   */
-  async function upgradeInPlace(
-    session: Session,
-    instanceUrl: string,
-    replacing: { replaces: string; replacedAt: string },
-    onDone: (count: number, of: number) => void,
-  ): Promise<void> {
-    const decks = await deckRepository.listDecks(instanceUrl);
-    // The documents brought up to date, one by one: meta, preferences, each deck's three, the catalogue.
-    const of = 3 + decks.length * 3;
-    let count = 0;
-    const updated = () => onDone(++count, of);
-    onDone(count, of);
-    const meta = await instanceRepository.readMeta(instanceUrl);
-    if (meta !== null) await instanceRepository.saveMeta(instanceUrl, { ...meta, ...replacing });
-    updated();
-    const stored = await preferencesRepository.getPreferences(instanceUrl);
-    if (stored !== null && isPreferencesOutdated(stored)) {
-      await preferencesRepository.savePreferences(instanceUrl, stored.preferences);
+  async function updateWork(session: Session, instanceUrl: string): Promise<{ document: string; write: () => Promise<boolean> }[]> {
+    const [meta, stored, catalog, decks] = await Promise.all([
+      instanceRepository.readMeta(instanceUrl),
+      preferencesRepository.getPreferences(instanceUrl),
+      deckRepository.readCatalog(instanceUrl),
+      deckRepository.listDecks(instanceUrl),
+    ]);
+    const work: { document: string; write: () => Promise<boolean> }[] = [];
+    const add = (document: string, write: () => Promise<boolean>) => {
+      const item = work.find((candidate) => candidate.document === document);
+      if (item === undefined) {
+        work.push({ document, write });
+        return;
+      }
+      // Another app may point two decks at one document: it is backed up once, and each deck's part
+      // written in turn, the first write held to the version backed up, the next to what it read.
+      const first = item.write;
+      item.write = async () => {
+        const wrote = await first();
+        return (await write()) || wrote;
+      };
+    };
+    if (meta !== null && isInstanceOutdated(meta)) {
+      add(metaUrlOf(instanceUrl), async () => {
+        const now = await instanceRepository.readMeta(instanceUrl);
+        if (now === null || !isInstanceOutdated(now)) return false;
+        await instanceRepository.saveMeta(instanceUrl, now);
+        return true;
+      });
     }
-    updated();
+    if (stored !== null && isPreferencesOutdated(stored)) {
+      add(preferencesUrlOf(instanceUrl), async () => {
+        const now = await preferencesRepository.getPreferences(instanceUrl);
+        if (now === null || !isPreferencesOutdated(now)) return false;
+        await preferencesRepository.savePreferences(instanceUrl, now.preferences);
+        return true;
+      });
+    }
     for (const deck of decks) {
-      if (isDeckOutdated(deck)) await deckRepository.saveDeck(upgradeDeck(deck));
-      updated();
-      const cards = (await deckRepository.listCards(deck)).filter(isOutdated);
-      if (cards.length > 0) await deckRepository.saveCards(deck, cards.map(upgradeCard));
-      updated();
-      const reviews = (await reviewStateRepository.listReviewStates(deck)).filter(isReviewStateOutdated);
-      if (reviews.length > 0) {
-        await reviewStateRepository.applyReviewChanges(deck, {
-          save: reviews.map(upgradeReviewState),
-          remove: [],
+      const [cards, reviews] = await Promise.all([
+        deckRepository.listCards(deck),
+        reviewStateRepository.listReviewStates(deck),
+      ]);
+      if (cards.some(isOutdated)) {
+        add(deck.cardsDocumentUrl, async () => {
+          const outdated = (await deckRepository.listCards(deck)).filter(isOutdated);
+          if (outdated.length === 0) return false;
+          await deckRepository.saveCards(deck, outdated.map(upgradeCard));
+          return true;
         });
       }
-      updated();
+      if (reviews.some(isReviewStateOutdated)) {
+        add(deck.reviewsDocumentUrl, async () => {
+          const outdated = (await reviewStateRepository.listReviewStates(deck)).filter(isReviewStateOutdated);
+          if (outdated.length === 0) return false;
+          await reviewStateRepository.applyReviewChanges(deck, { save: outdated.map(upgradeReviewState), remove: [] });
+          return true;
+        });
+      }
     }
-    // Last: the catalogue lists the decks as DCAT datasets, which they are only once updated.
-    if ((await deckRepository.readCatalog(instanceUrl)) === null) {
-      await deckRepository.saveCatalog(instanceUrl, await catalogOf(session, meta?.name ?? instanceUrl));
+    if (catalog === null || decks.some(isDeckOutdated)) {
+      add(catalogUrlOf(instanceUrl), async () => {
+        const [catalogNow, decksNow] = await Promise.all([
+          deckRepository.readCatalog(instanceUrl),
+          deckRepository.listDecks(instanceUrl),
+        ]);
+        return deckRepository.saveDecks(
+          instanceUrl,
+          decksNow.filter(isDeckOutdated),
+          catalogNow === null ? await catalogOf(session, meta?.name ?? instanceUrl) : null,
+        );
+      });
     }
-    updated();
+    return work;
+  }
+
+  /**
+   * Put back each document of the backup still as its update left it,
+   * last written first, and keep every one changed since (one that
+   * changes between the check and the write is kept too: the write is
+   * conditional).
+   */
+  async function putBack(backup: Backup): Promise<{ restored: string[]; kept: string[] }> {
+    const restored: string[] = [];
+    const kept: string[] = [];
+    for (const entry of [...backup.entries].reverse()) {
+      const current = await documentBackups.versionOf(entry.document);
+      const action = restoreActionOf(entry, current);
+      if (action === "asItWas") continue;
+      if (action === "keep") {
+        kept.push(entry.document);
+        continue;
+      }
+      try {
+        await documentBackups.putBack(entry, current as string);
+        restored.push(entry.document);
+      } catch (error) {
+        if (!(error instanceof AppError && error.code === "changedElsewhere")) throw error;
+        kept.push(entry.document);
+      }
+    }
+    return { restored, kept };
+  }
+
+  /**
+   * Refuse to restore a backup that is not one of the instance's own as an
+   * update made it — its folder in the instance's backups/, every copy in
+   * that folder, every document in the instance (not its backups) or one
+   * the catalog names for a deck, made for the instance or (naming the
+   * release it was at) for one of its decks — as anyone who may write in the instance could leave a manifest
+   * naming any document (backupNotOurs). And a deck's backup holds an
+   * older release's cards: it is restored only while the deck's entry
+   * still names that release (deckBackupOutdated).
+   */
+  async function ensureRestorable(instance: Instance, backup: Backup): Promise<void> {
+    const instanceUrl = ensureTrailingSlash(instance.url);
+    const backups = backupsContainerOf(instanceUrl);
+    const decks = await deckRepository.listDecks(instanceUrl);
+    const deckDocuments = new Set(decks.flatMap((deck) => [deck.cardsDocumentUrl, deck.reviewsDocumentUrl]));
+    const inside = (url: string, folder: string) => url.startsWith(folder) && url !== folder;
+    const ours =
+      inside(backup.url, backups) &&
+      (backup.of === instanceUrl || backup.release !== undefined) &&
+      backup.entries.every(
+        ({ document, copy }) =>
+          (copy === undefined || inside(copy, backup.url)) &&
+          ((inside(document, instanceUrl) && !document.startsWith(backups)) || deckDocuments.has(document)),
+      );
+    if (!ours) throw new AppError("backupNotOurs", { instance: instance.name });
+    if (backup.release !== undefined && decks.find((deck) => deck.url === backup.of)?.sourceUrl !== backup.release) {
+      throw new AppError("deckBackupOutdated");
+    }
+  }
+
+  /**
+   * Whether a write's failure says it was never made: the pod refused it
+   * (412, the document changed or was created elsewhere), or this app did
+   * before sending it. Any other failure, an answer lost on the way, may
+   * follow a write the pod made.
+   */
+  function unsent(error: unknown): boolean {
+    return (
+      error instanceof AppError &&
+      ["changedElsewhere", "createdElsewhere", "writtenByNewerApp", "instanceBeingUpdated", "deckBeingUpgraded"].includes(
+        error.code,
+      )
+    );
+  }
+
+  /**
+   * Delete a backup the update that made it no longer needs (it changed
+   * nothing), or what was written of it in its folder; whether nothing is
+   * left of it.
+   */
+  async function discardBackup(folder: string, backup: Backup | null): Promise<boolean> {
+    return (async () => {
+      const made = backup ?? (await documentBackups.read(folder));
+      return made === null || (await documentBackups.remove(made)).keptFolder === null;
+    })().catch(() => false);
   }
 
   /**
@@ -1054,20 +1205,17 @@ export function createUseCases({
 
   /**
    * Copy each resource (below `move.from`) to its place below `move.to`,
-   * one by one, the copy's own access control too when `withAccess`; the
-   * version each was copied at, by resource.
+   * one by one; the version each was copied at, by resource.
    */
   async function copyResources(
     resources: readonly string[],
     move: ContainerMove,
-    withAccess: boolean,
     onCopied: () => void,
   ): Promise<Map<string, string>> {
     const versions = new Map<string, string>();
     for (const resource of resources) {
       const copy = rebaseIri(resource, move.from, move.to);
       versions.set(resource, await instanceCopier.copyResource(resource, copy, move));
-      if (withAccess) await instanceCopier.copyAccessControl(resource, copy, move);
       onCopied();
     }
     return versions;
@@ -1152,6 +1300,10 @@ export function createUseCases({
     return instance;
   }
 
+  /**
+   * A new catalogue for an instance: published by the session's owner,
+   * named as their profile names them (the WebID when it does not say).
+   */
   async function catalogOf(session: Session, title: string): Promise<Catalog> {
     const name = await webIdDocumentRepository
       .fetchWebIdDocument(session.webId)
@@ -1222,7 +1374,7 @@ export function createUseCases({
         await instanceCopier.createContainer(target);
         created = true;
         progress.finished("copy", resources.length);
-        const versions = await copyResources(resources, move, false, () => progress.stepped());
+        const versions = await copyResources(resources, move, () => progress.stepped());
         // The catalogue's publisher, named as the user's profile names them; then nothing may name the guest's pod.
         const documents = resources.filter((url) => !url.endsWith("/")).map((url) => rebaseIri(url, source, target));
         progress.finished("adopt", documents.length + 1);
@@ -1425,12 +1577,16 @@ export function createUseCases({
       return updated === null ? null : deckRepository.saveDeck(updated);
     },
     async applyLibraryUpgrade(offered, offeredPlan, onProgress = () => undefined) {
-      const uuid = newId();
       const progress = stepReporter<DeckUpgradeStep>("read", DECK_UPGRADE_STEPS.length, onProgress);
-      let note: DeckUpgradeNote | null = null;
-      // The documents the upgrade replaces are read-only in this tab until
-      // it is over: a review or edit made meanwhile would be lost.
-      const releases = [writeFence.hold(offered.cardsDocumentUrl)];
+      const instanceUrl = instanceUrlOfDeck(offered.url);
+      const folder = backupFolderOf(instanceUrl, now(), newId());
+      let backup: Backup | null = null;
+      let releaseUrl: string | null = null;
+      const written: string[] = [];
+      // The documents the upgrade changes are read-only in this tab until
+      // it is over, but for its own writes: a review or edit made meanwhile
+      // would be lost.
+      const releases = [writeFence.hold(offered.cardsDocumentUrl), writeFence.pass(folder)];
       const releaseAll = () => {
         for (const release of releases.splice(0)) release();
       };
@@ -1447,94 +1603,106 @@ export function createUseCases({
         if (plan === null || !sameCardChanges(plan, offeredPlan)) throw new AppError("deckChangedSinceOffer");
         const removed = new Set(plan.remove.map((card) => card.id));
         progress.partly(3, removed.size === 0 ? 3 : 4);
-        // The review states move only when some are dropped; else the deck keeps its reviews document.
+        // The review states change only when some are dropped; else the deck's reviews document is not touched.
         const reviews =
           removed.size === 0 ? null : await readNow(reviewStateRepository.readReviewStatesSince(deck, undefined));
-        const movesReviews = reviews !== null && reviews.value.some((state) => removed.has(state.cardId));
-        if (movesReviews) releases.push(writeFence.hold(deck.reviewsDocumentUrl));
-        note = {
-          startedAt: now().toISOString(),
-          cards: { from: deck.cardsDocumentUrl, to: stagedDocumentUrl(deck.cardsDocumentUrl, deck.id, uuid) },
-          ...(movesReviews
-            ? { reviews: { from: deck.reviewsDocumentUrl, to: stagedDocumentUrl(deck.reviewsDocumentUrl, deck.id, uuid) } }
-            : {}),
-        };
-        const staged: Deck = {
-          ...applyLibraryUpgrade(deck, plan),
-          cardsDocumentUrl: note.cards.to,
-          reviewsDocumentUrl: note.reviews?.to ?? deck.reviewsDocumentUrl,
-        };
+        const dropped = (reviews?.value ?? []).filter((state) => removed.has(state.cardId));
+        if (dropped.length > 0) releases.push(writeFence.hold(deck.reviewsDocumentUrl));
+        const documents = [deck.cardsDocumentUrl, ...(dropped.length > 0 ? [deck.reviewsDocumentUrl] : [])];
 
-        // Each new document, and who may access it.
-        progress.finished("write", note.reviews === undefined ? 2 : 4);
-        updateJournal.begin(deck.url, encodeDeckUpgradeNote(note));
-        await deckRepository.stageCardChanges(deck, note.cards.to, {
-          save: upgradedCards(plan),
-          remove: [...removed],
-        });
-        progress.stepped();
-        // A document shared on its own (its own access control) stays shared as it was.
-        await instanceCopier.copyAccessControl(note.cards.from, note.cards.to, note.cards);
-        progress.stepped();
-        const keptStates = (reviews?.value ?? []).filter((state) => !removed.has(state.cardId));
-        if (note.reviews !== undefined) {
-          await reviewStateRepository.stageReviewChanges(
-            deck,
-            staged,
-            reviews!.value.filter((state) => removed.has(state.cardId)),
-          );
-          progress.stepped();
-          await instanceCopier.copyAccessControl(note.reviews.from, note.reviews.to, note.reviews);
-        }
-
-        // Each new document, read back.
-        progress.finished("check", note.reviews === undefined ? undefined : 2);
-        const written = await readNow(deckRepository.readCardsSince(staged, undefined));
-        if (!sameCards(upgradedCardList(cards.value, plan), written.value)) {
-          throw new AppError("upgradedCardsDiffer", { url: note.cards.to });
-        }
-        if (note.reviews !== undefined) {
-          progress.stepped();
-          const writtenStates = await readNow(reviewStateRepository.readReviewStatesSince(staged, undefined));
-          if (!sameReviewStates(keptStates, writtenStates.value)) {
-            throw new AppError("upgradedReviewsDiffer", { url: note.reviews.to });
-          }
-        }
-
-        // Each original, read again.
-        progress.finished("verify", note.reviews === undefined ? undefined : 2);
+        // Each document copied into the backup, then each found as it was read: the plan is of the deck as read.
+        progress.finished("backup", documents.length * 2);
+        backup = await documentBackups.create(
+          { folder, of: deck.url, createdAt: now().toISOString(), instanceUrl, documents, release: deck.sourceUrl },
+          () => progress.stepped(),
+        );
         const cardsNow = await deckRepository.readCardsSince(deck, cards.version ?? undefined);
         if (!cardsNow.unchanged && !sameCards(cards.value, cardsNow.value)) {
           throw new AppError("deckChangedDuringUpgrade", { url: deck.cardsDocumentUrl });
         }
-        if (note.reviews !== undefined) {
-          progress.stepped();
+        progress.stepped();
+        if (dropped.length > 0) {
           const reviewsNow = await reviewStateRepository.readReviewStatesSince(deck, reviews!.version ?? undefined);
           if (!reviewsNow.unchanged && !sameReviewStates(reviews!.value, reviewsNow.value)) {
             throw new AppError("deckChangedDuringUpgrade", { url: deck.reviewsDocumentUrl });
           }
         }
 
-        progress.finished("switch");
-        const switched = await deckRepository.switchDeck(deck, staged);
-        // The old documents are no longer the deck's: what is left is to delete them.
+        // Each document written in place, only while it is still as it was backed up.
+        progress.finished("write", documents.length);
+        const writeTo = async (document: string, write: () => Promise<void>) => {
+          const entry = backup!.entries.find((candidate) => candidate.document === document)!;
+          const release = writeFence.pass(document, entry.versionBackedUp);
+          try {
+            await write();
+          } catch (error) {
+            // A write whose answer was lost may have been made: putting back finds out.
+            if (!unsent(error)) written.push(document);
+            throw error;
+          } finally {
+            release();
+          }
+          written.push(document);
+          const version = await documentBackups.versionOf(document);
+          if (version !== null) {
+            backup = withVersionUpdated(backup!, document, version);
+            await documentBackups.noteUpdated(backup, document, version);
+          }
+          progress.stepped();
+        };
+        // One PUT of the whole document: a PATCH of much text can be cut short (docs/testing.md).
+        await writeTo(deck.cardsDocumentUrl, () =>
+          deckRepository.applyCardChanges(deck, { save: upgradedCards(plan), remove: [...removed] }, { whole: true }),
+        );
+        if (dropped.length > 0) {
+          await writeTo(deck.reviewsDocumentUrl, () =>
+            reviewStateRepository.applyReviewChanges(deck, { save: [], remove: dropped }),
+          );
+        }
+
+        // Each document, read back.
+        progress.finished("check", dropped.length > 0 ? 2 : undefined);
+        const writtenCards = await readNow(deckRepository.readCardsSince(deck, undefined));
+        if (!sameCards(upgradedCardList(cards.value, plan), writtenCards.value)) {
+          throw new AppError("upgradedCardsDiffer", { url: deck.cardsDocumentUrl });
+        }
+        if (dropped.length > 0) {
+          progress.stepped();
+          const writtenStates = await readNow(reviewStateRepository.readReviewStatesSince(deck, undefined));
+          const keptStates = reviews!.value.filter((state) => !removed.has(state.cardId));
+          if (!sameReviewStates(keptStates, writtenStates.value)) {
+            throw new AppError("upgradedReviewsDiffer", { url: deck.reviewsDocumentUrl });
+          }
+        }
+
+        // The deck's entry, moved to the new release: the upgrade's last write.
+        progress.finished("entry");
+        releaseUrl = plan.releaseUrl;
+        const upgraded = await deckRepository.upgradeDeckEntry(deck, applyLibraryUpgrade(deck, plan));
         releaseAll();
 
         progress.finished("tidy");
-        const tidied = await settleUpgrade(deck.url, note, (count, of) => progress.partly(count, of)).then(
-          () => true,
-          () => false,
-        );
+        const tidied = await discardBackup(folder, backup);
         progress.finished();
-        return { ok: true, deck: switched, tidied };
+        return { ok: true, deck: upgraded, tidied };
       } catch (error) {
         releaseAll();
         const step = progress.step();
-        if (note === null) return { ok: false, step, error, cleanedUp: true };
-        // A switch whose answer was lost may have happened: the deck says which side won.
-        const settled = await settleUpgrade(offered.url, note).catch(() => null);
-        if (settled?.switched === true) return { ok: true, deck: settled.deck!, tidied: true };
-        return { ok: false, step, error, cleanedUp: settled !== null };
+        if (releaseUrl !== null) {
+          // A write of the entry whose answer was lost may have been made: the entry says.
+          const deck = await deckRepository.readDeck(offered.url).catch(() => null);
+          if (deck?.sourceUrl === releaseUrl) return { ok: true, deck, tidied: await discardBackup(folder, backup) };
+        }
+        if (written.length === 0) {
+          await discardBackup(folder, backup);
+          return { ok: false, step, error, asItWas: true };
+        }
+        // Each document the upgrade wrote is put back, unless it changed since; then the backup stays.
+        const ownWrites = { ...backup!, entries: backup!.entries.filter((entry) => written.includes(entry.document)) };
+        const undone = await putBack(ownWrites).catch(() => null);
+        const asItWas = undone !== null && undone.kept.length === 0;
+        if (asItWas) await discardBackup(folder, backup);
+        return { ok: false, step, error, asItWas };
       } finally {
         releaseAll();
       }
@@ -1606,74 +1774,125 @@ export function createUseCases({
       return planMigration({ instance, preferences, catalog, entries });
     },
     async updateInstance(session, instance, onProgress = () => undefined) {
-      const source = ensureTrailingSlash(instance.url);
-      const target = stagingUrlOf(source, newId());
-      const move = { from: source, to: target };
-      const progress = stepReporter<UpdateStep>("stage", Object.keys(UPDATE_STEP_LABELS).length, onProgress);
+      const instanceUrl = ensureTrailingSlash(instance.url);
+      const progress = stepReporter<UpdateStep>("stage", UPDATE_STEPS.length, onProgress);
       const partly = (count: number, of: number) => progress.partly(count, of);
-      let created = false;
-      // The original is read-only from here until the update is over: a
-      // write aimed at it by mistake fails instead of changing it.
-      const release = writeFence.hold(source);
+      const folder = backupFolderOf(instanceUrl, now(), newId());
+      let backup: Backup | null = null;
+      const updated: string[] = [];
+      // Documents whose write failed without saying it was not made.
+      const attempted: string[] = [];
+      // From here until the update is over, nothing else in this tab writes to the
+      // instance; the update's own writes pass, the backup's and each document's.
+      const releases = [writeFence.hold(instanceUrl), writeFence.pass(folder)];
       try {
-        // Listing the original, making sure the copy's container is free, creating it.
-        progress.start(3);
-        const resources = await instanceCopier.listResources(source);
-        progress.stepped();
-        await instanceCopier.ensureAbsent(target);
-        progress.stepped();
-        updateJournal.begin(source, target);
-        await instanceCopier.createContainer(target);
-        created = true;
-        progress.finished("access");
-        await instanceCopier.copyAccessControl(source, target, move);
-        progress.finished("copy", resources.length);
-        const versions = await copyResources(resources, move, true, () => progress.stepped());
-        progress.finished("upgrade");
-        await upgradeInPlace(session, target, { replaces: source, replacedAt: now().toISOString() }, partly);
-        progress.finished("validate");
-        const report = await validateInstance(target, partly);
-        if (!report.conforms) {
-          throw new AppError("updatedCopyInvalid", { count: report.violationCount });
+        progress.start();
+        const work = await updateWork(session, instanceUrl);
+        if (work.length === 0) {
+          // Brought up to date meanwhile, in another tab or app: nothing to back up or write.
+          progress.finished("validate");
+          progress.finished();
+          return { ok: true };
         }
-        // Listing the original again, then each of its documents.
-        progress.finished("verify", resources.length + 1);
-        await ensureUnchanged(() => instanceCopier.listResources(source), resources, versions, () => progress.stepped());
-        progress.finished("switch");
-        await instanceRepository.switchInstance({ webId: session.webId, from: source, to: target, title: instance.name });
+        // What already fails in the documents to be written is not the update's doing (a deck set aside, say):
+        // the check after it counts only what fails anew.
+        const failingBefore = failingSubjectUrls(
+          summarize(instanceUrl, await Promise.all(work.map((item) => shapeValidator.validateDocument(item.document)))),
+        );
+        updateJournal.begin(instanceUrl, folder);
+        progress.finished("backup", work.length);
+        backup = await documentBackups.create(
+          {
+            folder,
+            of: instanceUrl,
+            createdAt: now().toISOString(),
+            instanceUrl,
+            documents: work.map((item) => item.document),
+          },
+          () => progress.stepped(),
+        );
+        progress.finished("upgrade", work.length);
+        for (const item of work) {
+          const entry = backup.entries.find((candidate) => candidate.document === item.document)!;
+          // Written only while it is as it was backed up: a change made since, elsewhere, stops the update.
+          const release = writeFence.pass(item.document, entry.versionBackedUp);
+          const wrote = await item.write().then(
+            (wrote) => {
+              release();
+              return wrote;
+            },
+            (error: unknown) => {
+              release();
+              // A write whose answer was lost may have been made: its backup is kept.
+              if (!unsent(error)) attempted.push(item.document);
+              throw error;
+            },
+          );
+          if (wrote) {
+            updated.push(item.document);
+            const version = await documentBackups.versionOf(item.document);
+            if (version !== null) await documentBackups.noteUpdated(backup, item.document, version);
+          }
+          progress.stepped();
+        }
+        progress.finished("validate");
+        const report = await validateInstance(instanceUrl, partly);
+        const failing = failingSubjectUrls(
+          summarize(instanceUrl, report.documents.filter((document) => updated.includes(document.url))),
+        );
+        const failingAnew = [...failing].filter((subject) => !failingBefore.has(subject));
+        if (failingAnew.length > 0) {
+          throw new AppError("updatedInstanceInvalid", { count: failingAnew.length });
+        }
+        // A backup of documents of which none changed (each was brought up to date meanwhile) is not needed.
+        const kept = updated.length > 0 || !(await discardBackup(folder, backup));
         progress.finished();
-        updateJournal.end(source);
-        return { ok: true, instanceUrl: target, backupUrl: source };
+        updateJournal.end(instanceUrl);
+        return { ok: true, ...(kept ? { backupUrl: folder } : {}) };
       } catch (error) {
-        const cleanedUp = await removeCopy(source, target, created);
-        return {
-          ok: false,
-          step: progress.step(),
-          error,
-          cleanedUp,
-          ...(cleanedUp ? {} : { leftoverUrl: target }),
-        };
+        // A backup of documents of which none changed is not needed.
+        const kept = updated.length + attempted.length > 0 || !(await discardBackup(folder, backup));
+        updateJournal.end(instanceUrl);
+        return { ok: false, step: progress.step(), error, updated, ...(kept ? { backupUrl: folder } : {}) };
       } finally {
-        release();
+        for (const release of releases) release();
       }
     },
     async findInterruptedUpdate(instance) {
-      const staging = updateJournal.staging(ensureTrailingSlash(instance.url));
-      if (staging === null) return null;
-      const gone = await instanceCopier.ensureAbsent(staging).then(
+      const source = ensureTrailingSlash(instance.url);
+      const folder = updateJournal.staging(source);
+      if (folder === null) return null;
+      if ((await documentBackups.read(folder)) !== null) return { folder, backedUp: true };
+      const gone = await instanceCopier.ensureAbsent(folder).then(
         () => true,
         () => false,
       );
-      if (gone) updateJournal.end(ensureTrailingSlash(instance.url));
-      return gone ? null : staging;
+      if (gone) updateJournal.end(source);
+      return gone ? null : { folder, backedUp: false };
     },
     async removeInterruptedUpdate(instance) {
       const source = ensureTrailingSlash(instance.url);
-      const staging = updateJournal.staging(source);
-      if (staging !== null) await instanceCopier.deleteRecursively(staging);
+      const folder = updateJournal.staging(source);
+      // A backup without its manifest (or a copy an earlier version made) was made whole by
+      // the update and nothing names it; a whole backup stays, with the instance's others.
+      if (folder !== null && (await documentBackups.read(folder)) === null) await instanceCopier.deleteRecursively(folder);
       updateJournal.end(source);
     },
-    async readBackup(instance) {
+    listBackups(instance) {
+      return documentBackups.list(instance.url);
+    },
+    async restoreBackup(instance, offered) {
+      const backup = await documentBackups.read(offered.url);
+      if (backup === null) throw new AppError("noBackup", { instance: instance.name });
+      await ensureRestorable(instance, backup);
+      const { restored, kept } = await putBack(backup);
+      const removed = kept.length === 0 && (await discardBackup(backup.url, backup));
+      return { restored, kept, removed };
+    },
+    deleteBackup(backup) {
+      return documentBackups.remove(backup);
+    },
+    async readLegacyBackup(instance) {
       const meta = await instanceRepository.readMeta(instance.url);
       if (meta?.replaces === undefined) return null;
       if (await backupGone(meta.replaces)) {
@@ -1682,7 +1901,7 @@ export function createUseCases({
       }
       return { url: meta.replaces, ...(meta.replacedAt === undefined ? {} : { replacedAt: meta.replacedAt }) };
     },
-    async restoreBackup(session, instance) {
+    async restoreLegacyBackup(session, instance) {
       const meta = await instanceRepository.readMeta(instance.url);
       if (meta?.replaces === undefined) throw new AppError("noBackup", { instance: instance.name });
       // Never switch to a backup that is no longer whole: the deletion below would leave nothing.
@@ -1700,7 +1919,7 @@ export function createUseCases({
       const { keptFolder } = await instanceRepository.deleteInstanceData(instance.url);
       return { instance: { url: meta.replaces, name: instance.name }, keptFolder };
     },
-    async deleteBackup(instance) {
+    async deleteLegacyBackup(instance) {
       const meta = await instanceRepository.readMeta(instance.url);
       if (meta?.replaces === undefined) return { keptFolder: null };
       // Forgotten first: a deletion cut off half-way must not leave a backup that can still be restored.

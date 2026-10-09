@@ -240,6 +240,47 @@ schedules by another algorithm can keep its states beside Solid Memo's.
   the document itself. Neither belongs to a shape, so neither moved a
   format; Solid Memo reads neither.
 
+## Backups
+
+Version 1.17 added what an update's backup says, so the format update
+and the library upgrade can change documents in place and still be
+undone, document by document ([migrations.md](migrations.md#the-backup)).
+A backup is a folder of the instance's `backups/`; its `manifest.ttl`
+holds these subjects.
+
+| Term | Kind | Domain → range | What it says |
+|---|---|---|---|
+| `sm:Backup` | class | | the backup, `manifest.ttl#it` |
+| `sm:BackupEntry` | class | | one document of the backup, `#entry-<n>` |
+| `sm:backupOf` | object property | Backup → the instance (its container) or a deck (its catalog entry) | what the backup was made for |
+| `sm:backedUpDocument` | object property | BackupEntry → a document | the document, at its own address |
+| `sm:backupCopy` | object property | BackupEntry → a document | where its earlier version is kept; absent: there was no document |
+| `sm:versionBackedUp` | datatype property, `xsd:string` | BackupEntry | the version the copy was made from |
+| `sm:versionUpdated` | datatype property, `xsd:string` | BackupEntry | the version the update left the document at, once it wrote it |
+| `sm:releaseBackedUp` | object property | Backup → a library release | on a library upgrade's backup, the release the deck came from when it was made |
+
+- **New classes, format 1.** Backup and backup entry formats 1
+  (`backup/v1.ttl`, `backup-entry/v1.ttl`); no existing format changed,
+  so nothing older is outdated ([migrations.md](migrations.md#versions)).
+- **A version is opaque, as the pod gave it**: the document's ETag
+  (`"a1"`, or a weak `W/"…"`), else `Last-Modified: <date>`, else
+  `sha256:<hex>` of its content as Turtle. Compared only with another
+  version of the same document, read the same way.
+- **Why terms of its own.** `dcterms:hasVersion` and `prov:wasRevisionOf`
+  relate a resource to a version of itself; a backup is neither the
+  instance nor a version of it, but a set of earlier versions of some of
+  its documents, each with the versions a restore needs to know whether
+  it may put it back. `dcterms:created` dates the backup. The copies
+  themselves are plain documents: their triples are the document's as
+  they were, IRIs unchanged.
+- **A deck's backup names its release.** Its copies hold that release's
+  cards, so it is restored only while the deck's entry still names the
+  release (`prov:wasDerivedFrom`) that `sm:releaseBackedUp` gives.
+- **Not linked from the instance's record.** Backups are found by
+  listing `backups/`: the record is written by the update only when its
+  own format is outdated, so that it is backed up and restored like any
+  document, and two runs never write over each other's link.
+
 ## The language of text
 
 Solid Memo's text properties (`sm:front`, `sm:back`, `sm:frontNote`,

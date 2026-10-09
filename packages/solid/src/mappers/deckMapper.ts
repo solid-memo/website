@@ -4,7 +4,6 @@ import {
   getThing,
   getThingAll,
   getUrlAll,
-  removeThing,
   setThing,
   type SolidDataset,
   type Thing,
@@ -32,7 +31,7 @@ import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { AGENT_V1, CATALOG_V1, DECK_V6, DISTRACTOR_V1, DISTRIBUTION_V1 } from "@solid-memo/vocab/descriptors.generated";
 import { foreignSubjects } from "../ownership";
-import { readVersioned, recordThing } from "../records";
+import { readVersioned, recordThing, removeUnlessNewer, unlessNewer } from "../records";
 import { DCAT, DCTERMS, RDF, SCHEMA, SM } from "../vocab";
 
 export { fragmentIdOf } from "@solid-memo/domain/subjectUrl";
@@ -125,13 +124,13 @@ export function deckSubjects(deck: Deck): string[] {
  * (domain/deckTree.ts buildTree), and the next arrangement closes it.
  */
 export function withoutDeck(dataset: SolidDataset, deck: Deck): SolidDataset {
-  let updated = removeThing(
-    removeThing(dataset, deck.url),
+  let updated = removeUnlessNewer(
+    removeUnlessNewer(dataset, deck.url),
     distributionUrlOf(deck.url),
   );
   for (const thing of getThingAll(updated)) {
     if (getUrlAll(thing, RDF.type).includes(SM.DeckGroup) && getUrlAll(thing, DCAT.dataset).includes(deck.url)) {
-      updated = setThing(updated, buildThing(thing).removeUrl(DCAT.dataset, deck.url).build());
+      updated = setThing(updated, buildThing(unlessNewer(thing)).removeUrl(DCAT.dataset, deck.url).build());
     }
   }
   return withCatalogDataset(withoutStrayAgents(updated, documentUrlOf(deck.url)), deck.url, "remove");
@@ -159,7 +158,7 @@ function withCatalogDataset(dataset: SolidDataset, deckUrl: string, change: "add
   if (catalog === null) return dataset;
   const listed = getUrlAll(catalog, DCAT.dataset).includes(deckUrl);
   if (listed === (change === "add")) return dataset;
-  const builder = buildThing(catalog);
+  const builder = buildThing(unlessNewer(catalog));
   return setThing(dataset, (change === "add" ? builder.addIri(DCAT.dataset, deckUrl) : builder.removeUrl(DCAT.dataset, deckUrl)).build());
 }
 
@@ -214,7 +213,7 @@ function withoutStrayAgents(dataset: SolidDataset, documentUrl: string): SolidDa
   return getThingAll(dataset)
     .map(asUrl)
     .filter((url) => url.startsWith(`${documentUrl}#agent-`) && !named.has(url))
-    .reduce((current, url) => removeThing(current, url), dataset);
+    .reduce((current, url) => removeUnlessNewer(current, url), dataset);
 }
 
 /**
@@ -272,7 +271,7 @@ export function withDistractors(
   const subjects = distractors.map((distractor) => `${documentUrl}#${distractor.id}`);
   let updated = before
     .filter((url) => !subjects.includes(url))
-    .reduce((current, url) => removeThing(current, url), dataset);
+    .reduce((current, url) => removeUnlessNewer(current, url), dataset);
   for (const [i, distractor] of distractors.entries()) {
     updated = setThing(
       updated,

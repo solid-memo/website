@@ -170,10 +170,10 @@ describe("errorText", () => {
     expect(createI18n("sv").errorText(gone)).toBe(
       "Kortleken ”Capitals” finns inte längre. Kanske togs den bort i en annan flik eller app.",
     );
-    const invalid = new AppError("updatedCopyInvalid", { count: 1 });
+    const invalid = new AppError("updatedInstanceInvalid", { count: 1 });
     expect(createI18n("sv").errorText(invalid, { detail: false })).toContain("(1 problem)");
     expect(createI18n("sv").errorText(invalid)).toBe(
-      "Den uppdaterade kopian har inte det format Solid Memo förväntar sig (1 problem), så dina data lämnas som de var. Försök igen senare.",
+      "Efter uppdateringen har en del av dina data inte det format Solid Memo förväntar sig (1 problem). Återställ den tidigare versionen som uppdateringen sparade och försök sedan igen senare.",
     );
   });
 

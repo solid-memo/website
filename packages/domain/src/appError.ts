@@ -59,9 +59,9 @@ export const ERROR_TEMPLATES = {
     "That instance is no longer on your list of instances, so there is nothing to switch. Reload the page and try again.",
   noMetaToUpdate: "This instance has no description to update. Reload the page and try again.",
   noBackup: "{instance} has no backup to restore.",
-  updatedCopyInvalid: {
-    one: "The updated copy is not in the format Solid Memo expects ({count} problem), so your data is left as it was. Try again later.",
-    other: "The updated copy is not in the format Solid Memo expects ({count} problems), so your data is left as it was. Try again later.",
+  updatedInstanceInvalid: {
+    one: "After the update, part of your data is not in the format Solid Memo expects ({count} problem). Restore the previous version the update kept, then try again later.",
+    other: "After the update, part of your data is not in the format Solid Memo expects ({count} problems). Restore the previous version the update kept, then try again later.",
   },
   movedCopyInvalid: {
     one: "The copy in your Pod is not in the format Solid Memo expects ({count} problem), so your study is left as it was. Try again later.",
@@ -86,6 +86,13 @@ export const ERROR_TEMPLATES = {
     "This was changed elsewhere, perhaps in another tab or app, since Solid Memo read it, so nothing was saved. Reload the page and try again.",
   deckTreeChanged:
     "Your decks were rearranged elsewhere, perhaps in another tab or app, so this change was not made. The list now shows them as they are.",
+  backupGone: "The backup this update made can no longer be found, so the update stopped. Run the update again.",
+  backupNotOurs:
+    "This backup names documents that are not part of {instance}, so Solid Memo does not restore it. You can delete it: only what it holds in its own folder is deleted.",
+  deckBackupOutdated:
+    "The deck this backup is of has been removed, or updated to a newer library release, since the backup was made, so restoring it would not put the deck back as it was. Nothing was changed; you can delete the backup.",
+  writtenByNewerApp:
+    "A newer version of Solid Memo has updated this data, so this version does not save over it. Reload the page to get the latest version.",
   deckTreeTooNew:
     "A newer version of Solid Memo arranged these decks, so this one cannot rearrange them. Reload the page to get the latest version.",
   createdElsewhere:

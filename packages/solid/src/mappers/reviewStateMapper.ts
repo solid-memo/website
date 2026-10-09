@@ -5,7 +5,6 @@ import {
   getTermAll,
   getUrl,
   getUrlAll,
-  removeThing,
   setThing,
   type SolidDataset,
   type Thing,
@@ -23,7 +22,7 @@ import {
 } from "@solid-memo/domain/reviewRecord";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { REVIEW_STATE_V2 } from "@solid-memo/vocab/descriptors.generated";
-import { readVersioned, recordThing } from "../records";
+import { readVersioned, recordThing, removeUnlessNewer } from "../records";
 import { RDF, SM } from "../vocab";
 
 /**
@@ -150,7 +149,7 @@ export function withoutReadReviewStates(dataset: SolidDataset, documents: Review
   const removed = new Set(keys.map(reviewKeyOf));
   return readStates(dataset, documents)
     .filter(({ key }) => removed.has(reviewKeyOf(key)))
-    .reduce((current, { url }) => removeThing(current, url), dataset);
+    .reduce((current, { url }) => removeUnlessNewer(current, url), dataset);
 }
 
 /**
@@ -166,7 +165,7 @@ export function withoutReviewStates(dataset: SolidDataset, documents: ReviewDocu
       const key = keyOfSubject(thing, documents);
       return key !== null && keys.some((removed) => sameKey(removed, key));
     })
-    .reduce((current, thing) => removeThing(current, asUrl(thing)), dataset);
+    .reduce((current, thing) => removeUnlessNewer(current, asUrl(thing)), dataset);
 }
 
 /**

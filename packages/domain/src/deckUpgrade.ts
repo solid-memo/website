@@ -5,19 +5,19 @@ import { reviewKeyOf, type ReviewState } from "./review";
 
 /**
  * Upgrading a library deck, done safely (see docs/migrations.md): the
- * upgraded cards — and, when cards are removed, the review states — are
- * written into new documents beside the deck's own, read back, and only
- * once the originals are found unchanged is the deck's catalog entry
- * pointed at them, in one conditional write. The originals are never
- * written; they are deleted once the deck has moved. A failure before
- * the switch deletes the new documents and leaves the deck as it was.
- * The deck keeps its URL and its cards their ids, so the answer log
- * still names them.
+ * deck's cards document — and, when cards with review states are
+ * removed, its reviews document — is first copied into a backup in the
+ * instance's backups/ folder, then written in place, only while it is
+ * still as it was copied, and read back; the deck's catalog entry is then
+ * moved to the new release. A failure after a write puts back each document
+ * still as the upgrade left it, and the deck is as it was. Every
+ * document keeps its address, the deck its URL and its cards their ids,
+ * so the answer log still names them.
  */
 
-export type DeckUpgradeStep = "read" | "write" | "check" | "verify" | "switch" | "tidy";
+export type DeckUpgradeStep = "read" | "backup" | "write" | "check" | "entry" | "tidy";
 
-export const DECK_UPGRADE_STEPS: readonly DeckUpgradeStep[] = ["read", "write", "check", "verify", "switch", "tidy"];
+export const DECK_UPGRADE_STEPS: readonly DeckUpgradeStep[] = ["read", "backup", "write", "check", "entry", "tidy"];
 
 /** How far into a step it is, in the step's own units: documents, decks, reads, writes. */
 export interface StepPart {
@@ -35,32 +35,25 @@ export interface DeckUpgradeProgress {
 }
 
 export type DeckUpgradeOutcome =
-  /** Switched over: `deck` as it now is. `tidied` says whether its old documents were deleted. */
+  /** Done: `deck` as it now is. `tidied` says whether its backup was deleted. */
   | { ok: true; deck: Deck; tidied: boolean }
   /**
-   * Failed before switching over, at `step`: the deck is as it was.
-   * `cleanedUp` says whether the new documents were deleted again.
-   * `error` is what went wrong: an AppError the app can show in the
-   * reader's language, or any other error.
+   * Failed at `step`. `asItWas` says whether the deck is as it was: nothing
+   * was written, or what was is put back. When it is not, a document
+   * changed elsewhere since the upgrade wrote it is kept as it is, or
+   * putting one back failed, and the backup stays for the user to restore
+   * or delete. `error` is what went wrong: an AppError the app can show
+   * in the reader's language, or any other error.
    */
-  | { ok: false; step: DeckUpgradeStep; error: unknown; cleanedUp: boolean };
-
-/**
- * Where an upgrade writes a new version of one of the deck's documents:
- * beside it, named by the deck and the upgrade, `…/decks/deck-1.ttl` →
- * `…/decks/deck-1-<uuid>.ttl`; the name never grows from one upgrade to
- * the next.
- */
-export function stagedDocumentUrl(documentUrl: string, deckId: string, uuid: string): string {
-  return `${documentUrl.slice(0, documentUrl.lastIndexOf("/") + 1)}${deckId}-${uuid}.ttl`;
-}
+  | { ok: false; step: DeckUpgradeStep; error: unknown; asItWas: boolean };
 
 /**
  * Whether `documentUrl` is, or was, the deck's cards document: the one it
- * has now, or one beside it that an upgrade names (stagedDocumentUrl) or
- * the deck was created with, `…/decks/<deckId>.ttl` or
- * `…/decks/<deckId>-<uuid>.ttl`. A link written to a card before an
- * upgrade moved the cards still names its card by its fragment.
+ * has now, or one beside it that the deck was created with or an upgrade
+ * by an earlier version of the app moved the cards to (it wrote the
+ * upgraded cards into a new document), `…/decks/<deckId>.ttl` or
+ * `…/decks/<deckId>-<uuid>.ttl`. A link written to a card before such
+ * an upgrade still names its card by its fragment.
  */
 export function isCardsDocumentOf(documentUrl: string, deck: Pick<Deck, "id" | "cardsDocumentUrl">): boolean {
   if (documentUrl === deck.cardsDocumentUrl) return true;
@@ -79,10 +72,12 @@ export interface DocumentMove {
 }
 
 /**
- * What an upgrade under way is moving, noted down before it writes, so
- * that one cut off (a closed tab) can be tidied away: the documents of
- * the side that lost — the new ones before the switch, the old ones
- * after it.
+ * What an upgrade by an earlier version of the app was moving, which it
+ * noted in the browser before it wrote, so that one cut off (a closed
+ * tab) can be tidied away: the documents of the side that lost — the new
+ * ones before it switched the deck's entry over, the old ones after.
+ * This app's upgrade moves no document and notes nothing; it reads the
+ * notes an earlier one left.
  */
 export interface DeckUpgradeNote {
   /** ISO dateTime the upgrade began. */
@@ -103,10 +98,6 @@ export const ABANDONED_UPGRADE_MS = 10 * 60 * 1000;
 export function isAbandoned(note: DeckUpgradeNote, now: Date): boolean {
   const started = Date.parse(note.startedAt);
   return Number.isNaN(started) || now.getTime() - started >= ABANDONED_UPGRADE_MS;
-}
-
-export function encodeDeckUpgradeNote(note: DeckUpgradeNote): string {
-  return JSON.stringify(note);
 }
 
 /** The note again; null when it is not one (forgotten, or written by something else). */
@@ -200,7 +191,7 @@ export function sameCardChanges(a: LibraryUpgradePlan, b: LibraryUpgradePlan): b
  * Whether the deck's catalog entry still says what an upgrade read from
  * it: where its cards and review states are, which release it is, how
  * it is studied, its title and description. Anything else may change
- * meanwhile; the switch keeps it (withDeckChanges).
+ * meanwhile; the upgrade's write of the entry keeps it (withDeckChanges).
  */
 export function sameDeckState(a: Deck, b: Deck): boolean {
   return (

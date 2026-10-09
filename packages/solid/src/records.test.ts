@@ -1,6 +1,9 @@
 import {
   buildThing,
+  createSolidDataset,
   createThing,
+  getThing,
+  setThing,
   getDecimal,
   getInteger,
   getStringNoLocale,
@@ -12,9 +15,9 @@ import {
 } from "@inrupt/solid-client";
 import { describe, expect, it } from "vitest";
 import type { ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
-import type { CardV5 } from "@solid-memo/vocab/types.generated";
+import { LATEST_VERSION, type CardV5 } from "@solid-memo/vocab/types.generated";
 import { CARD_V2, CARD_V4, CARD_V5, DECK_V2, DECK_V4, DECK_V6, LIBRARY_DECK_V5, PREFERENCES_V2, REVIEW_STATE_V2 } from "@solid-memo/vocab/descriptors.generated";
-import { applyRecord, readRecord, readVersioned, recordThing, storedVersionOf } from "./records";
+import { applyRecord, readRecord, readVersioned, recordThing, removeUnlessNewer, storedVersionOf, unlessNewer } from "./records";
 import { DCTERMS, RDF, SM } from "./vocab";
 
 const URL_ = "https://pod.example/x.ttl#it";
@@ -105,6 +108,46 @@ describe("recordThing and readRecord", () => {
     expect(getStringNoLocale(thing, `${EX}foreign`)).toBe("kept");
     expect(getStringNoLocale(thing, `${EX}gone`)).toBeNull();
     expect(getInteger(thing, SM.formatVersion)).toBe(1);
+  });
+
+  it("refuse to write over a subject a newer version of the app wrote, and write over one at this app's version or older", () => {
+    const stamped = (version: number) =>
+      buildThing(createThing({ url: URL_ })).addIri(RDF.type, `${EX}Thing`).addInteger(SM.formatVersion, version).build();
+    expect(() => recordThing(URL_, THING, FULL, stamped(2))).toThrow(
+      expect.objectContaining({ code: "writtenByNewerApp", message: expect.stringContaining(`url: ${URL_}\nversion: 2\nwrites: 1`) }),
+    );
+    expect(getInteger(recordThing(URL_, THING, FULL, stamped(1)), SM.formatVersion)).toBe(1);
+    expect(getInteger(recordThing(URL_, { ...THING, version: 2 }, FULL, stamped(1)), SM.formatVersion)).toBe(2);
+  });
+});
+
+describe("a change or removal that records no subject", () => {
+  const CARD = "https://pod.example/cards.ttl#q";
+  const card = (version?: number, type: string = SM.Card) => {
+    const builder = buildThing(createThing({ url: CARD })).addIri(RDF.type, type);
+    return (version === undefined ? builder : builder.addInteger(SM.formatVersion, version)).build();
+  };
+
+  it("refuses a subject stamped above every version this app writes for its class", () => {
+    const newer = LATEST_VERSION.card + 1;
+    expect(() => unlessNewer(card(newer))).toThrow(
+      expect.objectContaining({
+        code: "writtenByNewerApp",
+        message: expect.stringContaining(`url: ${CARD}\nversion: ${newer}\nwrites: ${LATEST_VERSION.card}`),
+      }),
+    );
+    expect(() => removeUnlessNewer(setThing(createSolidDataset(), card(newer)), CARD)).toThrow(
+      expect.objectContaining({ code: "writtenByNewerApp" }),
+    );
+  });
+
+  it("passes one at this app's version or older, one of no class it writes, and the removal of one not there", () => {
+    expect(unlessNewer(card(LATEST_VERSION.card))).toEqual(card(LATEST_VERSION.card));
+    expect(unlessNewer(card())).toEqual(card());
+    expect(unlessNewer(card(99, `${EX}Other`))).toEqual(card(99, `${EX}Other`));
+    const dataset = setThing(createSolidDataset(), card(LATEST_VERSION.card));
+    expect(getThing(removeUnlessNewer(dataset, CARD), CARD)).toBeNull();
+    expect(getThing(removeUnlessNewer(createSolidDataset(), CARD), CARD)).toBeNull();
   });
 });
 

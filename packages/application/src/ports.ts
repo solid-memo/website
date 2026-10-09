@@ -23,6 +23,7 @@ import type { Storage } from "@solid-memo/domain/storage";
 import type { DocumentReport } from "@solid-memo/domain/validation";
 import type { InstanceDigest } from "@solid-memo/domain/studyDigest";
 import type { WebIdDocument } from "@solid-memo/domain/webIdDocument";
+import type { Backup, BackupEntry } from "@solid-memo/domain/backup";
 
 /**
  * Driven port: authentication against a Solid identity provider.
@@ -111,9 +112,11 @@ export interface InstanceRepository {
   registerCatalog(args: { webId: string; instanceUrl: string; title: string }): Promise<void>;
   /**
    * Point every type index registration of the instance at another
-   * container (docs/migrations.md): all indexes or none — when a later
-   * index fails, the earlier ones are switched back before rethrowing.
-   * An instance registered in no index is an error.
+   * container: all indexes or none — when a later index fails, the
+   * earlier ones are switched back before rethrowing. An instance
+   * registered in no index is an error. Only for restoring a backup an
+   * earlier version of the app's format update left as a copy of the
+   * whole instance (docs/migrations.md "Backups an earlier version made").
    */
   switchInstance(args: { webId: string; from: string; to: string; title: string }): Promise<void>;
   /** What the instance's meta document says; null when there is none. */
@@ -140,6 +143,15 @@ export interface DeckRepository {
   readCatalog(instanceUrl: string): Promise<Catalog | null>;
   /** Write the instance's catalogue, listing every deck, creating the catalog document if need be. */
   saveCatalog(instanceUrl: string, catalog: Catalog): Promise<void>;
+  /**
+   * For the format update: rewrite the given decks' catalog entries in
+   * this app's format, in place (unknown triples survive), and write the
+   * catalogue when one is given, all in ONE save of the catalog document
+   * (If-Match the read it is made from; created only if nothing is there,
+   * when there is none). A deck that no longer has an entry is skipped.
+   * Whether anything was written.
+   */
+  saveDecks(instanceUrl: string, decks: Deck[], catalog: Catalog | null): Promise<boolean>;
   /** A new, empty deck by that title. */
   createDeck(instanceUrl: string, title: LangText): Promise<Deck>;
   /** Replaces the deck's title; cards and review state are untouched. */
@@ -208,33 +220,31 @@ export interface DeckRepository {
   /**
    * Write cards by fragment id, new or existing (an existing card keeps
    * its creation time and triples this app does not know), retired or
-   * not, and remove others, in one write of the cards document.
+   * not, and remove others, in one write of the cards document. `whole`
+   * writes it as one PUT of the whole document (with the same If-Match),
+   * for a bulk edit of text, which a PATCH could have cut short
+   * (docs/testing.md).
    */
   applyCardChanges(
     deck: Deck,
     changes: { save: (CardContent & { id: string; retired?: true })[]; remove: string[] },
+    options?: { whole?: boolean },
   ): Promise<void>;
   /** The deck as its catalog entry says now; null when it has none (any more). */
   readDeck(deckUrl: string): Promise<Deck | null>;
   /**
-   * For a library upgrade (domain/deckUpgrade.ts): write the deck's cards
-   * document, with the changes applyCardChanges would make, as a NEW
-   * document at `stagedUrl` (only if nothing is there yet), every IRI of
-   * the original moved to it. The original is only read.
+   * For a library upgrade (domain/deckUpgrade.ts): write the deck's entry
+   * as `next` in one write of the catalog document — what changed from
+   * `current`, as withDeckChanges puts it — only if the entry still says
+   * what `current` does (sameDeckState); else throws
+   * deckChangedDuringUpgrade and writes nothing.
    */
-  stageCardChanges(
-    deck: Deck,
-    stagedUrl: string,
-    changes: { save: (CardContent & { id: string; retired?: true })[]; remove: string[] },
-  ): Promise<void>;
+  upgradeDeckEntry(current: Deck, next: Deck): Promise<Deck>;
   /**
-   * Move the deck over to `next` in one write of its catalog entry —
-   * what changed from `current`, as withDeckChanges puts it — only if
-   * the entry still says what `current` does (sameDeckState); else
-   * throws deckChangedDuringUpgrade and writes nothing.
+   * Delete a document an upgrade by an earlier version of the app left
+   * behind (domain/deckUpgrade.ts DeckUpgradeNote); one that is gone
+   * counts as deleted.
    */
-  switchDeck(current: Deck, next: Deck): Promise<Deck>;
-  /** Delete one of a deck's documents (an upgrade's leftovers); one that is gone counts as deleted. */
   deleteDocument(url: string): Promise<void>;
   /**
    * Note a course chapter completed: add `sm:completedChapter
@@ -278,19 +288,6 @@ export interface ReviewStateRepository {
   applyReviewChanges(
     deck: Deck,
     changes: { save: ReviewState[]; remove: ReviewKey[] },
-  ): Promise<void>;
-  /**
-   * For a library upgrade: write the deck's reviews document without the
-   * states of the given cards and directions as a NEW document at
-   * `staged.reviewsDocumentUrl` (only if nothing is there yet), every IRI
-   * of the original moved to it, and every IRI of the deck's cards
-   * document (a state's link to its card) to `staged.cardsDocumentUrl`.
-   * The original is only read; a deck without one gets an empty document.
-   */
-  stageReviewChanges(
-    deck: Deck,
-    staged: Pick<Deck, "cardsDocumentUrl" | "reviewsDocumentUrl">,
-    remove: ReviewKey[],
   ): Promise<void>;
 }
 
@@ -360,8 +357,9 @@ export interface ContainerMove {
 }
 
 /**
- * Driven port: copying an instance's container, for the format update
- * that never writes the original (docs/migrations.md).
+ * Driven port: copying an instance's container, for moving a guest's
+ * study into the user's pod (docs/guest-mode.md), and a document's own
+ * access control, for a backup's copy of it (docs/migrations.md).
  */
 export interface InstanceCopier {
   /** Every resource below the container, depth first; containers end with a slash. */
@@ -369,12 +367,6 @@ export interface InstanceCopier {
   /** Throws unless nothing is at the URL yet. */
   ensureAbsent(url: string): Promise<void>;
   createContainer(url: string): Promise<void>;
-  /**
-   * Copy a resource's own access control (WAC .acl or ACP .acr),
-   * rebased; false when it has none of its own (it inherits). The new
-   * resource must exist: the pod says where its access control goes.
-   */
-  copyAccessControl(from: string, to: string, move: ContainerMove): Promise<boolean>;
   /**
    * Copy one resource: a container is created, RDF rebased, anything
    * else byte for byte; the target must not exist yet (If-None-Match: *).
@@ -394,12 +386,64 @@ export interface InstanceCopier {
   /**
    * Delete a container and everything below it; one that is gone counts
    * as deleted. Only for a copy this app made whole, at a URL it found
-   * free and created (`ensureAbsent`, `createContainer`), before anything
-   * names it: every resource in it is a copy whose original stays where
-   * it was. An instance in use is deleted by what it holds of Solid
-   * Memo's (InstanceRepository.deleteInstanceData), never whole.
+   * free, before anything names it — a guest's study being moved, a
+   * backup's folder whose manifest was never written — : every resource
+   * in it is a copy whose original stays where it was. An instance in
+   * use is deleted by what it holds of Solid Memo's
+   * (InstanceRepository.deleteInstanceData), a backup by what its
+   * manifest names (DocumentBackups.remove), never whole.
    */
   deleteRecursively(url: string): Promise<void>;
+}
+
+/**
+ * Driven port: backups of the documents an update changes in place
+ * (domain/backup.ts, docs/migrations.md "The backup"), each in a folder of
+ * the instance's backups/, with a manifest naming its documents.
+ */
+export interface DocumentBackups {
+  /**
+   * Make a backup in `folder` (a URL no backup uses) of the documents, as
+   * they are now: read each, then write the manifest — what the backup is
+   * of, when it was made, each document's entry with the version read —
+   * then a copy of each document there was, and of its own access control
+   * (rebased), every one created only where nothing is (If-None-Match: *).
+   * `release` is the library release a deck came from, for a library
+   * upgrade's backup. `onCopied` is told of each document done. The
+   * backup as written.
+   */
+  create(
+    args: {
+      folder: string;
+      of: string;
+      createdAt: string;
+      instanceUrl: string;
+      documents: readonly string[];
+      release?: string;
+    },
+    onCopied?: () => void,
+  ): Promise<Backup>;
+  /** The version a document is at now, in the form a backup notes; null when there is none. */
+  versionOf(url: string): Promise<string | null>;
+  /** Note in the backup's manifest the version the update left a document at. */
+  noteUpdated(backup: Backup, document: string, version: string): Promise<void>;
+  /** The instance's backups, newest first; a folder whose manifest cannot be read is no backup. */
+  list(instanceUrl: string): Promise<Backup[]>;
+  /** The backup in the folder; null when its manifest is gone. */
+  read(folder: string): Promise<Backup | null>;
+  /**
+   * Put the document back as the backup has it — or delete it, for one
+   * the update created — only while it is still at `version` (If-Match,
+   * or checked first where the pod gives no ETag); else throws
+   * changedElsewhere and writes nothing.
+   */
+  putBack(entry: BackupEntry, version: string): Promise<void>;
+  /**
+   * Delete what the backup holds — each copy, then the manifest — and its
+   * folders once empty; a folder that holds what another app put there is
+   * kept, and named.
+   */
+  remove(backup: Backup): Promise<InstanceDeletion>;
 }
 
 /**
@@ -430,27 +474,42 @@ export interface ThemePreference {
 /**
  * Driven port: a note of an update in progress, kept where the app runs
  * (the browser), so an update cut off half-way (a closed tab) can be
- * found and its partial copy removed. Best effort: it may forget.
+ * found: the format update's backup folder, a guest's study being moved
+ * into its new folder, or what a library upgrade by an earlier version
+ * of the app was moving. Best effort: it may forget.
  */
 export interface UpdateJournal {
   begin(sourceUrl: string, stagingUrl: string): void;
   end(sourceUrl: string): void;
-  /** The copy an unfinished update of the instance was making; null when none. */
+  /** What an unfinished update of the source was writing; null when none. */
   staging(sourceUrl: string): string | null;
 }
 
 /**
- * Driven port: makes a container, or a document, read-only for a while.
- * The format update holds the instance it copies, a library deck upgrade
- * the documents it replaces, so nothing — neither the update nor
- * anything else in this tab — writes to them until the update is over.
+ * Driven port: makes a container, or a document, read-only for a while,
+ * but for the writes an update lets through. The format update holds the
+ * instance it updates, a library deck upgrade the documents it changes,
+ * so nothing else in this tab writes to them until the update is over;
+ * the update passes its own writes, each only against the version it
+ * backed up.
  */
 export interface WriteFence {
   /**
    * Refuse every write under the container (a URL ending in "/") or to
-   * the document until the returned release is called.
+   * the document until the returned release is called, but those a pass
+   * lets through.
    */
   hold(url: string): () => void;
+  /**
+   * Let the writes under the container, or to the document, through
+   * every hold until the returned release is called. With a `version`
+   * (as DocumentBackups notes one), the first write to the document that
+   * the pod accepts is made only if the document is still at that
+   * version: sent with If-Match when it is an ETag, else checked just
+   * before (the pod answers 412, or the fence does, and nothing is
+   * written); writes after it carry their own conditions.
+   */
+  pass(url: string, version?: string): () => void;
 }
 
 /** Driven port: repairs of what an instance check found (docs/validation.md). */

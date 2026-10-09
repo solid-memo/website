@@ -109,7 +109,11 @@ than assume ([serverTraits.ts](../e2e/pod/src/serverTraits.ts)):
   in whole seconds: an edit in the same second as a read keeps the ETag,
   so a changed document looks unchanged. The tests edit within the
   second, so there the test that proves an edit is refused and the
-  digest's tests are skipped. 7 stamps milliseconds.
+  digest's tests are skipped. 7 stamps milliseconds. The tests of an
+  update stopped, or undone, by a change made elsewhere instead wait for
+  the next second before they make it, on every server whose ETag does
+  not change on every edit (one without ETags included), and so run on
+  every server.
 
 Every skip says why. Everything else runs on every server. A test may
 skip only where the server does something the Solid Protocol allows and

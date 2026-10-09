@@ -38,7 +38,10 @@ flowchart LR
 - `validateInstance` (application) lists the decks, names every document
   the instance may hold, the [answer log](data-model.md#the-answer-log)'s
   month documents included, and asks the `ShapeValidator` port about
-  each; `summarize` (domain) counts the violations. It reads only.
+  each; `summarize` (domain) counts the violations. It reads only. An
+  update's [backups](migrations.md#the-backup) are not checked: their
+  copies are documents as they were, in older formats by design; their
+  manifests are checked as they are written.
 - **Opening an instance** runs `checkInstance` instead: the same check,
   but a document still at a version the instance's
   [digest](data-model.md#the-digest) says conformed, by the same rules,
@@ -50,11 +53,14 @@ flowchart LR
   answer log, which grows every session: answers are checked as they are
   written, and in the full check. The developer report and the format
   update always run the full `validateInstance`.
-- The [format update](migrations.md#the-pod-migration) runs the same
-  check on its updated copy before switching over: a copy with any
-  violation is deleted and the user's instance is left as it was. What
-  another app wrote has warnings, not violations, so it never stops an
-  update.
+- The [format update](migrations.md#the-pod-migration) checks the
+  documents it is about to write before it writes them, and runs the
+  same check on the instance once it has written it: a subject of a
+  document it wrote that fails, and did not fail before (which the
+  update should never make), is reported, and the failure offers to put
+  back the update's backup at once. What failed before, as a deck set
+  aside, is not the update's doing and does not stop it. What another
+  app wrote has warnings, not violations, so it never stops an update.
 - [shaclShapeValidator.ts](../packages/solid/src/shaclShapeValidator.ts)
   fetches the document, converts it to an RDF/JS dataset
   (`toRdfJsDataset`) and, for every subject, picks the shape by class

@@ -4,6 +4,8 @@ import type { ShapeDescriptor } from "./shapeDescriptor.ts";
 import type {
   AgentV1,
   AnswerV1,
+  BackupV1,
+  BackupEntryV1,
   CardV1,
   CardV2,
   CardV3,
@@ -76,6 +78,39 @@ export const ANSWER_V1: ShapeDescriptor<AnswerV1> = {
     { name: "nextIntervalDays", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#nextIntervalDays", kind: "integer", cardinality: "one" },
     { name: "mode", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#answerMode", kind: "iriEnum", cardinality: "optional", values: ["https://solid-memo.com/ns/vocab/v1.ttl#recall","https://solid-memo.com/ns/vocab/v1.ttl#multipleChoice"] },
     { name: "chosenDistractor", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#chosenDistractor", kind: "iri", cardinality: "optional" },
+  ],
+};
+
+export const BACKUP_V1: ShapeDescriptor<BackupV1> = {
+  shape: "backup",
+  version: 1,
+  targetClass: "https://solid-memo.com/ns/vocab/v1.ttl#Backup",
+  additionalTypes: [],
+  absent: [],
+  shapeIri: "https://solid-memo.com/ns/shapes/backup/v1.ttl#shape",
+  shapeDocument: "backup/v1.ttl",
+  context: "any",
+  fields: [
+    { name: "backupOf", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#backupOf", kind: "iri", cardinality: "one" },
+    { name: "created", predicate: "http://purl.org/dc/terms/created", kind: "dateTime", cardinality: "one" },
+    { name: "release", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#releaseBackedUp", kind: "iri", cardinality: "optional" },
+  ],
+};
+
+export const BACKUP_ENTRY_V1: ShapeDescriptor<BackupEntryV1> = {
+  shape: "backupEntry",
+  version: 1,
+  targetClass: "https://solid-memo.com/ns/vocab/v1.ttl#BackupEntry",
+  additionalTypes: [],
+  absent: [],
+  shapeIri: "https://solid-memo.com/ns/shapes/backup-entry/v1.ttl#shape",
+  shapeDocument: "backup-entry/v1.ttl",
+  context: "any",
+  fields: [
+    { name: "document", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#backedUpDocument", kind: "iri", cardinality: "one" },
+    { name: "copy", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#backupCopy", kind: "iri", cardinality: "optional" },
+    { name: "versionBackedUp", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#versionBackedUp", kind: "string", cardinality: "optional" },
+    { name: "versionUpdated", predicate: "https://solid-memo.com/ns/vocab/v1.ttl#versionUpdated", kind: "string", cardinality: "optional" },
   ],
 };
 
@@ -859,6 +894,8 @@ export const STEP_V1: ShapeDescriptor<StepV1> = {
 export const SHAPES = {
   agent: { 1: AGENT_V1 },
   answer: { 1: ANSWER_V1 },
+  backup: { 1: BACKUP_V1 },
+  backupEntry: { 1: BACKUP_ENTRY_V1 },
   card: { 1: CARD_V1, 2: CARD_V2, 3: CARD_V3, 4: CARD_V4, 5: CARD_V5 },
   catalog: { 1: CATALOG_V1 },
   chapter: { 1: CHAPTER_V1 },
@@ -880,6 +917,8 @@ export const SHAPES = {
 export const ALL_SHAPES: readonly ShapeDescriptor[] = [
   AGENT_V1,
   ANSWER_V1,
+  BACKUP_V1,
+  BACKUP_ENTRY_V1,
   CARD_V1,
   CARD_V2,
   CARD_V3,

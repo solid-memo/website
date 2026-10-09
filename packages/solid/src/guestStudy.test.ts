@@ -18,6 +18,7 @@ import { createSolidAnswerLog } from "./solidAnswerLog";
 import { createSolidDeckRepository } from "./solidDeckRepository";
 import { createSolidDigestRepository } from "./solidDigestRepository";
 import { createSolidInstanceCopier } from "./solidInstanceCopier";
+import { createSolidDocumentBackups } from "./solidDocumentBackups";
 import { createSolidInstanceRepository } from "./solidInstanceRepository";
 import { createSolidPreferencesRepository } from "./solidPreferencesRepository";
 import { createSolidRepairRepository } from "./solidRepairRepository";
@@ -109,6 +110,7 @@ async function app() {
     shapeValidator,
     repairRepository: createSolidRepairRepository({ fetch: podFetch }),
     instanceCopier: createSolidInstanceCopier({ fetch: podFetch }),
+    documentBackups: createSolidDocumentBackups({ fetch: podFetch }),
     digestRepository: createSolidDigestRepository({ fetch: podFetch, checkWrite }),
     answerLog: createSolidAnswerLog({ fetch: podFetch, checkWrite }),
     guestPod: createLocalGuestPod({ fetch: guestFetch, store: guestStore }),
@@ -231,5 +233,62 @@ describe("a guest's study", () => {
     );
     // The format-4 deck and its cards are what the next format update moves to 5.
     expect(await useCases.planMigration(TARGET)).toMatchObject({ deckCount: 1, cardCount: 2 });
+  });
+
+  it("is brought up to date in place, every document at its address, and put back from its backup but for what was studied since", { timeout: 30_000 }, async () => {
+    const { useCases, guestStore } = await app();
+    await useCases.startGuest("My study");
+    const [instance] = await useCases.listInstances(GUEST_SESSION);
+    const deck = await useCases.createDeck(instance!.url, { en: "Capitals" });
+    const card = await useCases.addCard(deck, { front: { sv: "Sverige" }, back: { sv: "Stockholm" } });
+    await useCases.recordReview(instance!.url, deck, { card, direction: "front-to-back" }, 4, new Date("2026-10-09T10:00:00Z"));
+    // As a format-4 app left them: the deck's entry and its card, and another app's triple beside the card.
+    await restamp(guestStore, deck.url, 5);
+    await restamp(guestStore, card.url, 4);
+    await addTriples(guestStore, deck.cardsDocumentUrl, [`<${card.url}> <https://example.org/seen> "yes" .`]);
+    const catalogTriples = async () => {
+      const catalog = await guestStore.get(`${instance!.url}catalog.ttl`);
+      return catalog?.kind === "rdf" ? [...catalog.triples].sort() : [];
+    };
+    const before = await catalogTriples();
+    expect(await useCases.planMigration(instance!.url)).toMatchObject({ deckCount: 1, cardCount: 1 });
+
+    const outcome = await useCases.updateInstance(GUEST_SESSION, instance!);
+
+    expect(outcome).toMatchObject({ ok: true, backupUrl: expect.stringContaining(`${instance!.url}backups/`) });
+    expect(await useCases.planMigration(instance!.url)).toMatchObject({ deckCount: 0, cardCount: 0 });
+    expect((await useCases.validateInstance(instance!.url)).conforms).toBe(true);
+    expect(await useCases.listDecks(instance!.url)).toMatchObject([{ url: deck.url, cardsDocumentUrl: deck.cardsDocumentUrl }]);
+    expect(await everyTriple(guestStore)).toContain(`<${card.url}> <https://example.org/seen> "yes" .`);
+    const [backup] = await useCases.listBackups(instance!);
+    expect(backup!.entries.map((entry) => entry.document)).toEqual([deck.cardsDocumentUrl, `${instance!.url}catalog.ttl`]);
+    expect(backup!.entries.every((entry) => entry.versionUpdated !== undefined)).toBe(true);
+
+    // Studied since: the card is edited, so its document is kept as it is now; the catalogue is put back.
+    await useCases.updateCard(deck, (await useCases.listCards(deck))[0]!, { front: { sv: "Sverige" }, back: { sv: "Stockholm!" } });
+    await expect(useCases.restoreBackup(instance!, backup!)).resolves.toEqual({
+      restored: [`${instance!.url}catalog.ttl`],
+      kept: [deck.cardsDocumentUrl],
+      removed: false,
+    });
+    expect(await catalogTriples()).toEqual(before);
+    expect(await everyTriple(guestStore)).toContain(`<${card.url}> <${SM_NS}back> "Stockholm!"@sv .`);
+    await expect(useCases.deleteBackup(backup!)).resolves.toEqual({ keptFolder: null });
+    await expect(useCases.listBackups(instance!)).resolves.toEqual([]);
+    expect((await guestStore.urls()).filter((url) => url.includes("/backups/"))).toEqual([]);
+  });
+
+  it("refuses a write over a subject a newer version of the app wrote", { timeout: 30_000 }, async () => {
+    const { useCases, guestStore } = await app();
+    await useCases.startGuest("My study");
+    const [instance] = await useCases.listInstances(GUEST_SESSION);
+    const deck = await useCases.createDeck(instance!.url, { en: "Capitals" });
+    const card = await useCases.addCard(deck, { front: { sv: "Sverige" }, back: { sv: "Stockholm" } });
+    await restamp(guestStore, card.url, 99);
+    const [read] = await useCases.listCards(deck);
+    await expect(useCases.updateCard(deck, read!, { front: { sv: "Sverige" }, back: { sv: "Oslo" } })).rejects.toMatchObject({
+      code: "writtenByNewerApp",
+    });
+    expect(await everyTriple(guestStore)).toContain(`<${card.url}> <${SM_NS}back> "Stockholm"@sv .`);
   });
 });

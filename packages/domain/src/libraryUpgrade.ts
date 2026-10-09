@@ -49,6 +49,16 @@ export interface LibraryUpgradePlan {
   remove: Card[];
   /** Cards the library changed or removed that the user has changed too: left as the user has them. */
   kept: Card[];
+  /**
+   * Cards the library added, changed, retired or brought back that the
+   * copy already has as the newer release has them: an upgrade cut off
+   * after writing the cards and before moving the deck's entry left them
+   * so (or the user made them so). Nothing is written to them, but they
+   * are an offer of their own: the deck still names the older release,
+   * and moving it to the newer keeps a later upgrade from taking them
+   * for the user's changes.
+   */
+  applied: Card[];
   /** The library's new study direction, when the copy is still studied the old way. */
   direction?: DeckDirection;
   /**
@@ -190,7 +200,8 @@ function sameDistractors(a: CardContent, b: CardContent): boolean {
 /**
  * What upgrading the copy to the newer release would do; null — no
  * offer — when the release is not newer, uses a card format this app
- * does not know, or would change nothing. A course's deck (`course`)
+ * does not know, or would change nothing (a copy already as the newer
+ * release has it in some card still moves to it: see `applied`). A course's deck (`course`)
  * holds only the cards the learner has reached, each joining it when
  * its question is first answered: its upgrade adds none, but changes,
  * retires and restores those it holds as any copy's.
@@ -227,6 +238,7 @@ export function planLibraryUpgrade({
   const restore: Card[] = [];
   const remove: Card[] = [];
   const kept: Card[] = [];
+  const applied = new Map<string, Card>();
   for (const old of from.cards) {
     const mine = copy.get(old.id);
     const next = after.get(old.id);
@@ -235,17 +247,23 @@ export function planLibraryUpgrade({
       (untouched(mine, old) ? remove : kept).push(mine);
       continue;
     }
-    if (!sameContent(old, next)) {
-      if (untouched(mine, old)) change.push(next);
-      else kept.push(mine);
-    } else if (!sameContent(mine, next) && untouched(mine, old)) {
-      // The copy lost the release's text format: the newer release brings it back.
+    const changes = untouched(mine, old) && !sameContent(mine, next);
+    if (changes) {
+      // Changed by the library; or, left alone by it, the copy lost the release's text format, which it brings back.
       change.push(next);
+    } else if (!sameContent(old, next)) {
+      if (untouched(mine, next)) applied.set(mine.id, mine);
+      else kept.push(mine);
     }
     const retired = next.retired === true;
-    if (retired !== (old.retired === true) && retired !== (mine.retired === true)) {
-      (retired ? retire : restore).push(mine);
+    if (retired !== (old.retired === true)) {
+      if (retired !== (mine.retired === true)) (retired ? retire : restore).push(mine);
+      else if (!changes) applied.set(mine.id, mine);
     }
+  }
+  for (const next of to.cards) {
+    const mine = copy.get(next.id);
+    if (!before.has(next.id) && mine !== undefined && untouched(mine, next)) applied.set(mine.id, mine);
   }
   const direction =
     to.direction !== from.direction && deck.direction === from.direction ? to.direction : undefined;
@@ -263,7 +281,7 @@ export function planLibraryUpgrade({
   };
   const aboutChanged = Object.values(about).some((value) => value !== undefined);
   if (
-    add.length + change.length + retire.length + restore.length + remove.length === 0 &&
+    add.length + change.length + retire.length + restore.length + remove.length + applied.size === 0 &&
     direction === undefined &&
     !aboutChanged
   ) {
@@ -282,6 +300,7 @@ export function planLibraryUpgrade({
     restore,
     remove,
     kept,
+    applied: [...applied.values()],
     ...(direction === undefined ? {} : { direction }),
     ...Object.fromEntries(Object.entries(about).filter(([, value]) => value !== undefined)),
   };

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { deleteInstanceData } from "./instanceData";
 import { createLocalPod } from "./localPod";
 import { createMemoryResourceStore } from "./memoryResourceStore";
+import { createSolidDocumentBackups } from "./solidDocumentBackups";
 
 const ROOT = "https://pod.example/";
 const INSTANCE = `${ROOT}solid-memo/main/`;
@@ -73,6 +74,30 @@ describe("deleteInstanceData", () => {
       INSTANCE,
     ]);
     expect(await p.urls()).toEqual([ROOT, `${ROOT}profile/`, `${ROOT}profile/card`, `${ROOT}solid-memo/`]);
+  });
+
+  it("deletes the instance's backups with it, as their manifests name what they hold", async () => {
+    const p = pod();
+    await seedInstance(p);
+    const backups = createSolidDocumentBackups({ fetch: p.fetch });
+    await backups.create({
+      folder: `${INSTANCE}backups/20261009T100000Z-0f3a1b2c/`,
+      of: INSTANCE,
+      createdAt: "2026-10-09T10:00:00.000Z",
+      instanceUrl: INSTANCE,
+      documents: [`${INSTANCE}meta.ttl`, `${INSTANCE}decks/deck-1.ttl`],
+    });
+    await expect(deleteInstanceData(INSTANCE, p.fetch)).resolves.toEqual({ keptFolder: null });
+    expect(p.deleted).toEqual(
+      expect.arrayContaining([
+        `${INSTANCE}backups/20261009T100000Z-0f3a1b2c/decks/deck-1.ttl`,
+        `${INSTANCE}backups/20261009T100000Z-0f3a1b2c/manifest.ttl`,
+        `${INSTANCE}backups/`,
+      ]),
+    );
+    // Before meta.ttl, the last of the documents.
+    expect(p.deleted.indexOf(`${INSTANCE}backups/`)).toBeLessThan(p.deleted.indexOf(`${INSTANCE}meta.ttl`));
+    expect((await p.urls()).filter((url) => url.startsWith(INSTANCE))).toEqual([]);
   });
 
   it("keeps what another app put in the folder, and the containers holding it, and says the folder was kept", async () => {

@@ -96,8 +96,9 @@ these steps:
 A failure before **register** deletes the copy, whole, and leaves the
 guest's study exactly as it was: Solid Memo created the target's
 container where nothing was, and nothing names it before **register**,
-so all it holds is Solid Memo's copies. As with an [instance update](migrations.md),
-the update journal finds a copy left behind by a closed tab. A guest's
+so all it holds is Solid Memo's copies. As with the [format update](migrations.md#the-pod-migration),
+the update journal notes the run, so a copy left behind by a closed tab
+is offered for removal on the next opening of the guest's instance. A guest's
 instance has no access control of its own, so the copy inherits the
 user's pod's defaults, the same as a newly created instance.
 
