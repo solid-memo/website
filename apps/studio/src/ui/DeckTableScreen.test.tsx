@@ -42,6 +42,7 @@ function Harness({ initial = { filter: "" }, ...overrides }: Partial<Props> & { 
       groupsHref="#/groups?instance=a"
       instanceHref="#/instance?instance=a"
       healthHref="#/health?instance=a"
+      transferHref={(decks) => `#/transfer?${decks.map((deck) => `deck=${deck.id}`).join("&")}`}
       healthBadge={() => null}
       libraryHref="#/library?instance=a"
       updateBadge={() => null}
@@ -123,6 +124,15 @@ describe("DeckTableScreen", () => {
     expect(screen.getByRole("link", { name: "Library copies" })).toHaveAttribute("href", "#/library?instance=a");
     const kanjiRow = within(table()).getAllByRole("rowheader")[0]!;
     expect(within(kanjiRow).getByRole("link", { name: "Release 2 out" })).toHaveAttribute("href", "#/library?instance=a");
+  });
+
+  it("links to import and export, and exports the selected decks there", () => {
+    render(<Harness />);
+    expect(screen.getByRole("link", { name: "Import and export" })).toHaveAttribute("href", "#/transfer?");
+    select("Verbs");
+    select("Kanji N5");
+    const bulk = screen.getByRole("group", { name: "Selected decks" });
+    expect(within(bulk).getByRole("link", { name: "Export" })).toHaveAttribute("href", "#/transfer?deck=deck-1&deck=deck-2");
   });
 
   it("sorts by a column, then the other way, then as arranged, saying so on the column", () => {
@@ -297,6 +307,7 @@ describe("DeckTableScreen", () => {
     expect(screen.queryByRole("table")).toBeNull();
     expect(screen.getByRole("link", { name: "Solid Memo" })).toHaveAttribute("href", "#/decks");
     expect(screen.getByRole("link", { name: "Name and catalogue" })).toHaveAttribute("href", "#/instance?instance=a");
+    expect(screen.getByRole("link", { name: "Import and export" })).toHaveAttribute("href", "#/transfer?");
   });
 
   it("names a deck in the reader's language, in Swedish", () => {

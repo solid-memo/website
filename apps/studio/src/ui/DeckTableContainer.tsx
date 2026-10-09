@@ -51,6 +51,7 @@ export function DeckTableContainer({
   instanceHref,
   healthHref,
   libraryHref,
+  transferHref,
   deckHref,
   cardsHref,
 }: {
@@ -67,6 +68,8 @@ export function DeckTableContainer({
   healthHref: (deck?: Deck) => string;
   /** The instance's copies of library releases. */
   libraryHref: string;
+  /** Import and export, these decks ticked to export. */
+  transferHref: (decks: readonly Deck[]) => string;
   /** What a deck says of itself, in the Studio. */
   deckHref: (deck: Deck) => string;
   /** A deck's cards, in the card workbench. */
@@ -192,6 +195,7 @@ export function DeckTableContainer({
       // Checked only as its row comes into view; quiet when all is well.
       healthBadge={(deck) => <HealthBadge useCases={useCases} instanceUrl={instance.url} deck={deck} href={healthHref(deck)} quiet />}
       libraryHref={libraryHref}
+      transferHref={transferHref}
       // A copy only, looked up as its row comes into view; nothing while it is up to date.
       updateBadge={(deck) =>
         deck.sourceUrl === undefined ? null : <UpdateBadge useCases={useCases} instanceUrl={instance.url} deck={deck} href={libraryHref} />

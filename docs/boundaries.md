@@ -52,7 +52,7 @@ used nowhere else):
 
 | Library | Package | Notes |
 |---|---|---|
-| `@inrupt/solid-client`, `@inrupt/solid-client-authn-browser` | `solid` | `shacl` also uses `@inrupt/solid-client` to parse shape documents |
+| `@inrupt/solid-client`, `@inrupt/solid-client-authn-browser` | `solid` | `shacl` also uses `@inrupt/solid-client` to parse shape documents; deck files are written and read with it too ([below](#files-without-a-vendor-library)) |
 | `@tanstack/react-query`, `preact` | `ui`, `web`, `studio` | the components; in `web`, `main.tsx` to render the page and `App.tsx`, the page; in `studio`, its screens |
 | `@fontsource/*`, `@fontsource-variable/*` | `ui` | `src/style.css` only |
 | `rdf-validate-shacl` | `shacl` | `src/engine.ts` only, loaded lazily |
@@ -60,6 +60,21 @@ used nowhere else):
 | `n3` | `turtle`, the node tooling of `shacl`, and `e2e-pod` | never in the browser; in `e2e-pod`, the server contract and the tests |
 | `fake-indexeddb` | `browser`, `composition` | tests only: IndexedDB in node, for the guest's pod's store |
 | `@playwright/test` | `e2e-journeys` | drives the built app in Chromium; the harness also talks to the Solid server with its request API |
+
+## Files without a vendor library
+
+A deck saved as a file, or read from one ([studio.md](studio.md#import-and-export)),
+needs no library of its own:
+
+- `solid` writes Turtle with `@inrupt/solid-client`'s
+  `solidDatasetAsTurtle`, and reads Turtle and JSON-LD with its
+  `getTurtleParser` and `getJsonLdParser`. JSON-LD is written by
+  [jsonLd.ts](../packages/solid/src/jsonLd.ts), a few lines over the
+  triples. n3 and `@solid-memo/turtle` stay out of the browser.
+- `browser` saves and opens files with what the browser has
+  ([fileExchange.ts](../packages/browser/src/fileExchange.ts)): a `Blob`
+  behind a link with `download`, and a hidden `<input type="file">`.
+  It is the `FileExchange` port; the UI never touches a file itself.
 
 ## Further rules
 

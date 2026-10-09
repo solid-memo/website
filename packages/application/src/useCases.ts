@@ -90,6 +90,7 @@ import { summarize, type DocumentReport, type ValidationReport } from "@solid-me
 import { deckHealth, type DeckHealth, type DeckTextCheck } from "@solid-memo/domain/deckHealth";
 import type { MarkdownFinding } from "@solid-memo/domain/release/problems";
 import {
+  ABSENT_VERSION,
   emptyDigest,
   scheduleOf,
   studyCountsOf,
@@ -112,6 +113,16 @@ import {
 } from "@solid-memo/domain/review";
 import { isStudyDay, rescheduleStates, resetStates } from "@solid-memo/domain/reviewStateEdits";
 import { planCardTransfer, type CardTransferPlan, type TransferOptions } from "@solid-memo/domain/cardTransfer";
+import {
+  DECK_FILE_ACCEPT,
+  DECK_FILE_TYPES,
+  deckFileBaseOf,
+  deckFileFormatOf,
+  deckFileName,
+  importedDeck,
+  type DeckFile,
+  type DeckFileOptions,
+} from "@solid-memo/domain/deckFile";
 import {
   buildStudyQueue,
   nextDueDate,
@@ -194,6 +205,8 @@ import type {
   UpdateJournal,
   WriteFence,
   Since,
+  DeckArchive,
+  FileExchange,
 } from "./ports";
 import { AppError } from "@solid-memo/domain/appError";
 
@@ -568,6 +581,31 @@ export interface UseCases {
     options: TransferOptions,
   ): Promise<CardTransferPlan>;
   /**
+   * Save the deck as a file (domain/deckFile.ts, DeckArchive.exportDeck),
+   * in `options.format`, named after its title (deckFileName), with its
+   * progress when `options.withProgress`. Writes nothing to the pod.
+   */
+  exportDeckFile(deck: Deck, options: DeckFileOptions): Promise<void>;
+  /**
+   * The deck file the user picks (Turtle or JSON-LD, by its name, else
+   * its text: deckFileFormatOf), read as DeckArchive.readDeckFile reads
+   * it; null when they pick none. Writes nothing.
+   */
+  openDeckFile(): Promise<DeckFile | null>;
+  /**
+   * Make the file's deck a new deck of the instance (importedDeck): its
+   * id kept unless the instance uses it, its cards with their ids and,
+   * with `withProgress`, its review states and a course's completed
+   * chapters. Its cards document is written in ONE write, only if there
+   * is none at its URL yet (one left by an import cut off has the deck
+   * given a fresh id, once); then its review states in one write of its
+   * reviews document; then its entry in the catalog, so the deck shows
+   * only once it is whole. Each write is checked against the shapes.
+   * Then the deck's schedule in the digest is brought up to date. The
+   * deck as written.
+   */
+  importDeckFile(instanceUrl: string, file: DeckFile, options: { withProgress: boolean }): Promise<Deck>;
+  /**
    * What bringing the instance's cards up to this app's format would
    * touch — reads every deck's cards, writes nothing. Empty when there is
    * nothing to migrate.
@@ -818,6 +856,10 @@ export interface Dependencies {
   ruleset?: string;
   /** The pod a guest studies in on this device; by default there is none. */
   guestPod?: GuestPod;
+  /** Decks as files; by default there is none to export or read. */
+  deckArchive?: DeckArchive;
+  /** Files on the user's device; by default none is saved or opened. */
+  fileExchange?: FileExchange;
 }
 
 /**
@@ -920,6 +962,15 @@ const NO_ANSWER_LOG: AnswerLog = {
   readMonthSince: nothing as unknown as AnswerLog["readMonthSince"],
   removeDay: nothing,
 };
+const NO_DECK_ARCHIVE: DeckArchive = {
+  exportDeck: async () => {
+    throw new Error("This app keeps no deck archive.");
+  },
+  readDeckFile: async () => {
+    throw new Error("This app keeps no deck archive.");
+  },
+};
+const NO_FILE_EXCHANGE: FileExchange = { save: () => undefined, open: async () => null };
 const NO_GUEST_POD: GuestPod = {
   exists: async () => false,
   start: async () => {
@@ -1040,6 +1091,8 @@ export function createUseCases({
   answerLog = NO_ANSWER_LOG,
   ruleset = "",
   guestPod = NO_GUEST_POD,
+  deckArchive = NO_DECK_ARCHIVE,
+  fileExchange = NO_FILE_EXCHANGE,
 }: Dependencies): UseCases {
   const runsElsewhere = fenceMovesElsewhere(updateJournal, writeFence);
 
@@ -2281,6 +2334,41 @@ export function createUseCases({
         } catch (error) {
           if (!cardsChangedElsewhere(error) || attempt === CARD_EDIT_ATTEMPTS) throw error;
         }
+      }
+    },
+    async exportDeckFile(deck, options) {
+      const text = await deckArchive.exportDeck(deck, options);
+      fileExchange.save(deckFileName(deck, options.format), DECK_FILE_TYPES[options.format].mediaType, text);
+    },
+    async openDeckFile() {
+      const picked = await fileExchange.open(DECK_FILE_ACCEPT);
+      if (picked === null) return null;
+      const format = deckFileFormatOf(picked.name, picked.text);
+      return { name: picked.name, format, content: await deckArchive.readDeckFile(picked.text, format, deckFileBaseOf(picked.name)) };
+    },
+    async importDeckFile(instanceUrl, file, { withProgress }) {
+      let decks = await deckRepository.listDecks(instanceUrl);
+      for (let attempt = 1; ; attempt++) {
+        const { deck, cards, reviews } = importedDeck(instanceUrl, file.content, {
+          withProgress,
+          decks,
+          freshId: `deck-${newId()}`,
+          now: now().toISOString(),
+        });
+        try {
+          // Only where nothing is yet: a deck's documents are never written over.
+          await deckRepository.applyCardChanges(deck, { save: cards, remove: [] }, { whole: true, version: ABSENT_VERSION });
+        } catch (error) {
+          // A cards document an import cut off before its entry left: the deck takes another id.
+          if (!(error instanceof AppError && error.code === "createdElsewhere") || attempt === 2) throw error;
+          decks = [...decks, deck];
+          continue;
+        }
+        if (reviews.length > 0) await reviewStateRepository.applyReviewChanges(deck, { save: reviews, remove: [] });
+        await deckRepository.registerDeck(deck);
+        // The deck is in: a digest left behind is brought up to date by the next deck list.
+        await refreshStudyDigest(instanceUrl, deck).catch(() => undefined);
+        return deck;
       }
     },
     planMigration: (instanceUrl) => planOf(instanceUrl),

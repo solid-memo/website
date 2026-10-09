@@ -1238,6 +1238,9 @@
     "notADeck": "Det är ingen kortlek från Solid Memo, så den kan inte läggas till. Välj en annan kortlek.",
     "libraryDeckTooNew": "Kortleken har ett nyare format än den här versionen av Solid Memo kan läsa. Läs in sidan igen för att få den senaste versionen.",
     "libraryCardTooNew": "Ett kort i kortleken har ett nyare format än den här versionen av Solid Memo kan läsa. Läs in sidan igen för att få den senaste versionen.",
+    "deckFileUnreadable": "Solid Memo kan inte läsa den filen. Välj en Turtle- eller JSON-LD-fil som exporterats från Solid Memo.",
+    "notADeckFile": "Den filen innehåller inte en kortlek från Solid Memo. Välj en fil som exporterats från Solid Memo.",
+    "deckFileTooNew": "Den filen skrevs av en nyare version av Solid Memo, så den här versionen kan inte importera den. Läs in sidan igen för att få den senaste versionen.",
     "noGuestPod": "Det finns inga gäststudier på den här enheten.",
     "guestPodStartFailed": "Gäststudierna på den här enheten gick inte att öppna. Läs in sidan igen och försök på nytt.",
     "guestStorageAborted": "Webbläsaren vägrade spara en ändring i gäststudierna. Kontrollera att den har plats att spara data och försök sedan igen.",
@@ -1335,7 +1338,8 @@
       },
       "healthLink": "Hälsa",
       "libraryLink": "Kopior från biblioteket",
-      "healthOf": "i {deck}"
+      "healthOf": "i {deck}",
+      "transferLink": "Importera och exportera"
     },
     "bulk": {
       "label": "Valda kortlekar",
@@ -1375,7 +1379,8 @@
       "removed": {
         "one": "Tog bort {count} kortlek.",
         "other": "Tog bort {count} kortlekar."
-      }
+      },
+      "export": "Exportera"
     },
     "groups": {
       "heading": "Grupper"
@@ -1455,7 +1460,8 @@
       "lapsesLoading": "Läser svarsloggen för missarna…",
       "lapsesFailed": "Svarsloggen kunde inte läsas, så missarna är okända.",
       "scheduleLink": "Schema, missar och blodiglar",
-      "healthLink": "Hälsa"
+      "healthLink": "Hälsa",
+      "exportLink": "Exportera"
     },
     "card": {
       "heading": "Kort: {card}",
@@ -1875,6 +1881,58 @@
       "failed": "{deck}: uppdateringen misslyckades i steget ”{step}”:",
       "badge": "Utgåva {version} finns",
       "badgeOf": "för {deck}"
+    },
+    "transfer": {
+      "crumb": "Importera och exportera",
+      "heading": "Importera och exportera kortlekar i {instance}",
+      "export": "Exportera",
+      "exportIntro": "Spara kortlekar som filer, var och en i en egen fil, i Turtle eller JSON-LD: kortleken, dess kort och deras felaktiga alternativ, och, om du vill, dina framsteg. Alla appar som läser RDF kan läsa dem, och Solid Memo kan importera dem igen.",
+      "noDecks": "Den här instansen har inga kortlekar att exportera än.",
+      "decks": "Kortlekar att exportera",
+      "format": "Format",
+      "formats": {
+        "turtle": "Turtle (.ttl)",
+        "jsonld": "JSON-LD (.jsonld)"
+      },
+      "withProgress": "Ta med mina framsteg: när varje kort ska repeteras, och de kapitel i en kurs som jag har slutfört",
+      "exportButton": {
+        "one": "Exportera {count} kortlek",
+        "other": "Exportera {count} kortlekar"
+      },
+      "exporting": "Exporterar {deck} ({at} av {total})…",
+      "exported": {
+        "one": "Exporterade {count} kortlek. Din webbläsare sparar den som en nedladdning.",
+        "other": "Lämnade {count} kortlekar till din webbläsare, var och en att spara som en egen nedladdning. Den kan be dig tillåta flera nedladdningar: de den stoppar sparas inte."
+      },
+      "import": "Importera",
+      "importIntro": "Lägg till en kortlek från en Turtle- eller JSON-LD-fil i {instance}, som en ny kortlek. En fil från en äldre version av Solid Memo uppdateras när den läses.",
+      "choose": "Välj en fil…",
+      "reading": "Läser filen…",
+      "file": "{name}: {deck}",
+      "cards": {
+        "one": "{count} kort",
+        "other": "{count} kort"
+      },
+      "states": {
+        "one": "Framsteg: {count} repetitionstillstånd",
+        "other": "Framsteg: {count} repetitionstillstånd"
+      },
+      "chapters": {
+        "one": "{count} slutfört kapitel",
+        "other": "{count} slutförda kapitel"
+      },
+      "upgraded": {
+        "one": "{count} del av den har ett äldre format och uppdateras.",
+        "other": "{count} delar av den har ett äldre format och uppdateras."
+      },
+      "dropped": {
+        "one": "{count} del av den kan inte läsas och utelämnas.",
+        "other": "{count} delar av den kan inte läsas och utelämnas."
+      },
+      "importProgress": "Importera framstegen också",
+      "importButton": "Importera till {instance}",
+      "importing": "Importerar kortleken…",
+      "imported": "Importerade {deck}."
     }
   }
 }

@@ -150,6 +150,8 @@ export function createSolidDeckRepository({
       return registerDeck(newDeck(instanceUrl, title));
     },
 
+    registerDeck,
+
     async importDeck(instanceUrl, content): Promise<Deck> {
       const deck = newDeck(instanceUrl, content.title, content);
       let cards = createSolidDataset();
@@ -575,13 +577,20 @@ export function createSolidDeckRepository({
     return { dataset: written.dataset, subjects: [`${deck.cardsDocumentUrl}#${card.id}`, ...written.subjects] };
   }
 
-  /** Add a deck's catalog entry. */
+  /**
+   * Add a deck's catalog entry, with the chapters of a course it
+   * completed; refused (alreadyExists) when the catalog has one of its URL.
+   */
   async function registerDeck(deck: Deck): Promise<Deck> {
     const catalogUrl = documentUrlOf(deck.url);
     const dataset =
       (await getSolidDatasetOrNull(catalogUrl, fetch)) ??
       createSolidDataset();
-    await save(catalogUrl, withDeck(dataset, deck), deckSubjects(deck));
+    if (getThing(dataset, deck.url) !== null) throw new AppError("alreadyExists", { url: deck.url });
+    const written = withDeck(dataset, deck);
+    let builder = buildThing(getThing(written, deck.url)!);
+    for (const url of deck.completedChapters ?? []) builder = builder.addIri(SM.completedChapter, url);
+    await save(catalogUrl, setThing(written, builder.build()), deckSubjects(deck));
     return deck;
   }
 

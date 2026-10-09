@@ -816,6 +816,60 @@ sequenceDiagram
   the digest; the documents it writes have new versions, so what it
   says of them is relearned on the next visit.
 
+## Decks as files
+
+The Studio saves a deck as a file, and makes a deck of a file
+([studio.md](studio.md#import-and-export)). The file is Turtle or
+JSON-LD, one deck to a file. The domain names its parts
+([deckFile.ts](../packages/domain/src/deckFile.ts)), and the
+`DeckArchive` port reads and writes it
+([solidDeckArchive.ts](../packages/solid/src/solidDeckArchive.ts)).
+
+An export holds triples as the pod has them, at the pod's IRIs:
+
+- the deck's entry in `catalog.ttl`, its distribution and the agents
+  it names as its creators. Its `sm:position` among its groups is left
+  behind, and its `sm:completedChapter`s unless the progress goes too;
+- every subject of its cards document: its cards and their wrong
+  options, retired ones too, and whatever another app put there;
+- with the progress, every subject of its reviews document.
+
+Nothing is rewritten: a deck still at an older format is exported at
+it. A JSON-LD file is flattened: every subject a node of its `@graph`,
+its `@context` the prefixes the Turtle uses too (`sm`, `dcterms`,
+`dcat` and so on), written in full.
+
+An import reads the file as the pod is read, with the same mappers:
+
+- the file must hold one deck (`sm:Deck`) that fits its shape;
+- its cards are the cards of its cards document, its review states
+  those of its reviews document, of cards it holds;
+- an older format is brought up to date as it is read
+  ([migrations.md](migrations.md)), and the screen says how many parts
+  were. A deck, card or review state in a newer format than the app
+  reads is refused (`deckFileTooNew`), and nothing is written;
+- a subject of these kinds that cannot be read is left out, and the
+  screen says how many were;
+- relative IRIs are resolved against `https://file.solid-memo.invalid/`
+  and the file's name (`DECK_FILE_BASE`): a file has no address;
+- a JSON-LD context named by its address (or `@import`) is refused:
+  reading it would fetch that address.
+
+The deck is then written as a new deck of the instance
+(`importedDeck`). It keeps the file's deck id, so a deck exported,
+removed and imported again comes back at its URLs, and the answers the
+log keeps of it name it again. It takes a fresh id when the instance
+has a deck by that id, or one using a document of that name, or when
+the id or its distribution's (`<id>-cards`) is a subject of the
+catalogue already. An id this app would not give (`deck-…`) takes a
+fresh one too, so no deck lands on `#catalog`, a group or an agent. Its cards
+keep their ids. Only what Solid Memo knows of the deck and its cards is
+written, as when cards move to another deck: triples another app put
+there are in the file, but not imported. The writes follow the
+[write discipline](#write-discipline): the cards document is created
+(If-None-Match), the reviews document written, and then the deck's
+entry added to the catalogue, each checked against the shapes.
+
 ## UI gaps
 
 What the data model holds that no screen edits yet. Most of it is shown
@@ -826,8 +880,8 @@ in Solid Memo; the [Studio](studio.md) closes the gaps one by one.
   instance's name and the catalogue's description and licence, a
   card's wrong options, edits of many cards at once, a card's review
   state (forgotten, or given a due day), the deck a card is in
-  (moved or copied to another), and several library copies upgraded at
-  once.
+  (moved or copied to another), several library copies upgraded at
+  once, and a deck exported to a file or imported from one.
 - **Shown only**: the answer log, as statistics, and in the Studio as a
   card's history, the wrong options chosen, lapses and leeches; the
   schedule in the digest, as counts, and in the Studio as a forecast;

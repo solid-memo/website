@@ -1,4 +1,4 @@
-import { expect, type Locator } from "@playwright/test";
+import { expect, test, type Locator } from "@playwright/test";
 import { escapeRegExp } from "../harness/strings.ts";
 import { Screen } from "./Screen.ts";
 
@@ -12,8 +12,8 @@ import { Screen } from "./Screen.ts";
  * states, and its moves to another deck), the card inspector (a card's content, its wrong options,
  * its schedule and its history), a deck's schedule, a deck's and the
  * instance's health, its library copies, a deck's about screen (its
- * authors and licence), the instance's name and catalogue, and its way
- * back to Solid Memo.
+ * authors and licence), the instance's name and catalogue, a deck
+ * exported to a file and imported from it, and its way back to Solid Memo.
  */
 export class Studio extends Screen {
   /** Home's table of the instance's decks ("The decks of {instance}"). */
@@ -174,6 +174,55 @@ export class Studio extends Screen {
       await this.bulk.getByRole("button", { name: this.t("studio.bulk.remove"), exact: true }).click();
       await this.expectStatus(this.t("studio.bulk.removed", { count: decks.length }));
       for (const deck of decks) await expect(this.row(instance, deck)).toHaveCount(0);
+    });
+  }
+
+  /**
+   * Follows the selection's Export to import and export, the selected
+   * deck ticked there (the URL holds it), and saves it as a Turtle file
+   * with the user's progress: the browser downloads it, named after the
+   * deck. Where the file is kept.
+   */
+  async exportSelected(instance: string, deck: string): Promise<string> {
+    return this.intent(`Export ${deck} with its progress`, async () => {
+      await this.bulk.getByRole("link", { name: this.t("studio.bulk.export"), exact: true }).click();
+      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.transfer.heading", { instance }) })).toBeVisible();
+      await this.app.chrome.expectBreadcrumbHere("studio.transfer.crumb");
+      await expect(this.page).toHaveURL(/[?&]deck=/);
+      await expect(this.page.getByRole("checkbox", { name: deck, exact: true })).toBeChecked();
+      await this.page.getByRole("radio", { name: this.t("studio.transfer.formats.turtle") }).check();
+      await this.page.getByRole("checkbox", { name: this.t("studio.transfer.withProgress") }).check();
+      const downloaded = this.page.waitForEvent("download");
+      await this.page.getByRole("button", { name: this.t("studio.transfer.exportButton", { count: 1 }) }).click();
+      const download = await downloaded;
+      expect(download.suggestedFilename()).toBe(`${deck.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.ttl`);
+      await expect(this.page.getByRole("status").filter({ hasText: this.t("studio.transfer.exported", { count: 1 }) })).toHaveCount(1);
+      // Kept under the name the browser was given, as a user's downloads folder would keep it.
+      const path = test.info().outputPath(download.suggestedFilename());
+      await download.saveAs(path);
+      return path;
+    });
+  }
+
+  /**
+   * Follows Home's link to import and export, picks the file, sees what
+   * it holds (its deck, its cards and its progress), and imports it with
+   * its progress: the deck it made is linked.
+   */
+  async importFile(instance: string, path: string, deck: string, cards: number, states: number): Promise<void> {
+    await this.intent(`Import ${deck} from its file`, async () => {
+      await this.page.getByRole("link", { name: this.t("studio.decks.transferLink"), exact: true }).click();
+      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.transfer.heading", { instance }) })).toBeVisible();
+      const chooser = this.page.waitForEvent("filechooser");
+      await this.page.getByRole("button", { name: this.t("studio.transfer.choose") }).click();
+      await (await chooser).setFiles(path);
+      const name = path.split(/[\\/]/).at(-1)!;
+      await expect(this.page.getByRole("heading", { name: this.t("studio.transfer.file", { name, deck }) })).toBeVisible();
+      await expect(this.page.getByText(this.t("studio.transfer.cards", { count: cards }), { exact: true })).toBeVisible();
+      await expect(this.page.getByText(this.t("studio.transfer.states", { count: states }), { exact: true })).toBeVisible();
+      await expect(this.page.getByRole("checkbox", { name: this.t("studio.transfer.importProgress") })).toBeChecked();
+      await this.page.getByRole("button", { name: this.t("studio.transfer.importButton", { instance }) }).click();
+      await expect(this.page.getByRole("status").getByRole("link", { name: deck, exact: true })).toBeVisible();
     });
   }
 

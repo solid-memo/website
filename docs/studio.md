@@ -10,7 +10,8 @@ to another deck, and edits one card, its wrong options and its
 schedule included, with its history of answers. It shows a deck's
 schedule to come, its lapses and leeches, and everything wrong with a
 deck or the instance. It lists the decks copied from the library, and
-upgrades them to newer releases. It also edits what
+upgrades them to newer releases. It exports decks as Turtle or JSON-LD
+files, and imports them. It also edits what
 a deck says of itself (its authors and licence among it), a course's
 progress, and the instance's name and catalogue.
 
@@ -77,6 +78,7 @@ others.
 | `#/studio/instance?instance=…` | the instance's name and its catalogue ([below](#the-instance)). |
 | `#/studio/health?instance=…[&deck=…]` | everything wrong with the instance, or with one of its decks ([below](#health)). |
 | `#/studio/library?instance=…` | the instance's copies of library releases, the newer releases and what upgrading would change ([below](#library-copies)). |
+| `#/studio/transfer?instance=…[&deck=…&deck=…]` | import and export: the instance's decks to save as files, those of each `deck` ticked, and a file to make a deck of ([below](#import-and-export)). |
 
 `#/studio/` and its query count as `#/studio`. Anything else under
 `#/studio`, `#/studio` itself among them, is the default route: the only
@@ -85,8 +87,8 @@ the picker, an unknown deck to its instance's Home, and an unknown card
 (one removed, say) to its deck's cards. Like Solid Memo's fallbacks,
 these replace the history entry.
 
-Changing Home's filter or sort, the workbench's query, or the
-inspector's tab, replaces the history entry: it is the same screen,
+Changing Home's filter or sort, the workbench's query, the
+inspector's tab, or the decks ticked to export, replaces the history entry: it is the same screen,
 looked at another way, so Back leaves it.
 
 Solid Memo links to Home as `#/studio?instance=…` ("Open in Studio",
@@ -97,8 +99,8 @@ The trail is Instances › Decks, then › Groups on the Groups screen,
 › Cards of *deck* in the workbench, › Cards of *deck* › *card* in the
 inspector, › Cards of *deck* › Schedule on a deck's schedule, › About *deck* on a deck's about screen, or › Name and
 catalogue on the instance's screen, › Health on the instance's health,
-› Health › *deck* on a deck's, and › Library copies on the library
-copies. The document title is the trail's
+› Health › *deck* on a deck's, › Library copies on the library
+copies, and › Import and export on import and export. The document title is the trail's
 last step and "Solid Memo Studio". After a move, the screen's heading
 takes the focus (`useScreenFocus`). The header has a link back to
 Solid Memo, at the open instance's decks when there is one, and the
@@ -149,8 +151,9 @@ date, or one whose library cannot be read, gets no badge.
 
 Above the table are links to the [Groups](#groups) screen, to the
 instance's [name and catalogue](#the-instance), to its
-[health](#health) and to its [library copies](#library-copies); with no decks yet, the name and catalogue is still
-there.
+[health](#health), to its [library copies](#library-copies) and to
+[import and export](#import-and-export); with no decks yet, the name
+and catalogue, and import and export, are still there.
 
 The table starts in the order the user arranged the decks. A column's
 name sorts by it, then the other way, then back to that order; the
@@ -168,6 +171,8 @@ stays selected, but is left alone until it is shown again):
 - **given a pace**: a limit left empty follows the instance's
   preferences again;
 - **given a direction**;
+- **exported**: Export opens [import and export](#import-and-export)
+  with them ticked;
 - **deleted**, with their cards, once the user confirms a question that
   names each deck.
 
@@ -238,7 +243,8 @@ answer in it: "since March 2025". The workbench reads the whole log once (`loadA
 it is read, the cards show without their lapses, and a query that needs
 them (`state=leech`, `sort=lapses`) waits. When it cannot be read, the
 line says so, and such a query shows why. The header links to the
-deck's [schedule](#a-decks-schedule) and its [health](#health).
+deck's [schedule](#a-decks-schedule), its [health](#health) and its
+export ([import and export](#import-and-export), the deck ticked).
 
 A card opens in the [card inspector](#card-inspector). The
 workbench reads the cards and the review states with the same queries
@@ -664,6 +670,55 @@ batch of two upgrades against real servers
 A copy of a release outside the library's index (one imported by its
 URL, once that can be) shows as no longer in the library: there is no
 index to find a newer release in.
+
+## Import and export
+
+Import and export ([`TransferContainer`](../apps/studio/src/ui/TransferContainer.tsx))
+saves decks as files and makes decks of files. A file is Turtle or
+JSON-LD, one deck to a file, as
+[data-model.md](data-model.md#decks-as-files) describes it.
+
+**Export** lists the instance's decks, as they are arranged. The decks
+ticked are in the URL, so Home's bulk Export and the workbench's link
+open the screen with them ticked. The user picks the format and
+whether their progress goes too: the cards' review states and a
+course's completed chapters. **Export** saves each deck as a file of
+its own, named after its title (`capitals.ttl`), one after another;
+the screen names the deck it is at. The use case `exportDeckFile`
+reads the deck's documents (`DeckArchive.exportDeck`) and hands the
+text to the browser to save as a download (`FileExchange.save`). It
+writes nothing to the pod. A browser lets a page start one download
+by itself; for more, Chrome and others ask the user to allow several
+downloads, and save none of the rest if they say no. The app cannot
+tell, so after several decks the screen says how many it handed the
+browser, not how many were saved, and that the browser may ask.
+
+**Import** asks for a file (`openDeckFile`, `FileExchange.open`): a
+`.ttl`, `.jsonld` or `.json` file. Its format goes by its name, else by
+its text. The screen then says what the file holds: its deck, its
+cards, its progress, how many of its parts were in an older format and
+are brought up to date, and how many cannot be read and are left out.
+A file in a newer format than the app reads is refused, as is one
+without exactly one deck, or one that does not parse. **Import into**
+the instance (`importDeckFile`) makes a new deck of it, with its
+progress when the file has some and the user leaves it ticked. Its
+cards document goes first, only if none is at its URL yet, then its
+review states, then its entry in the catalogue, so the deck shows only
+once it is whole. One left behind by an import cut off makes the deck
+take a fresh id, once. The deck's schedule in the digest is then
+brought up to date, and the screen links to the deck's cards. Every
+query of the instance's decks is read afresh.
+
+Each write passes the shape check. Turtle and JSON-LD go through
+`@inrupt/solid-client`, and files through the browser's own
+`Blob` and file input: no new library
+([boundaries.md](boundaries.md#files-without-a-vendor-library)). Unit
+tests take a deck with Markdown, pictures, wrong options (one retired),
+text in two languages, a retired card and review states through both
+formats and back
+([solidDeckArchive.test.ts](../packages/solid/src/solidDeckArchive.test.ts)),
+and the end-to-end tests do so against real servers
+([deckFiles.integration.test.ts](../e2e/pod/src/deckFiles.integration.test.ts)).
 
 ## Groups
 

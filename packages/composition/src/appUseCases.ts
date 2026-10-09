@@ -4,12 +4,14 @@ import { createWriteFence } from "@solid-memo/solid/writeFence";
 import { createSolidSessionGateway } from "@solid-memo/solid/solidSessionGateway";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
 import { SHAPES_BASE, SITE, VOCAB_BASE } from "@solid-memo/vocab/ns";
+import { createSolidDeckArchive } from "@solid-memo/solid/solidDeckArchive";
 import { createSolidDeckLibrary } from "@solid-memo/solid/solidDeckLibrary";
 import { createSolidDeckRepository } from "@solid-memo/solid/solidDeckRepository";
 import { createSolidDigestRepository } from "@solid-memo/solid/solidDigestRepository";
 import { createSolidAnswerLog } from "@solid-memo/solid/solidAnswerLog";
 import { createSolidInstanceRepository } from "@solid-memo/solid/solidInstanceRepository";
 import { createSolidPreferencesRepository } from "@solid-memo/solid/solidPreferencesRepository";
+import { createBrowserFileExchange } from "@solid-memo/browser/fileExchange";
 import { createLocalStorageLanguagePreference } from "@solid-memo/browser/localStorageLanguagePreference";
 import { createLocalStorageThemePreference } from "@solid-memo/browser/localStorageThemePreference";
 import { createLocalStorageUpdateJournal } from "@solid-memo/browser/localStorageUpdateJournal";
@@ -102,6 +104,8 @@ export function createAppUseCases({ clientName, servedSite, libraryIndexUrl, rul
     answerLog: createSolidAnswerLog({ fetch: podFetch, checkWrite }),
     ruleset,
     guestPod: createLocalGuestPod({ fetch: guestFetch, store: guestStore }),
+    deckArchive: createSolidDeckArchive({ fetch: podFetch }),
+    fileExchange: createBrowserFileExchange(),
   });
 }
 

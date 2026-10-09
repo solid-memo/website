@@ -1241,6 +1241,9 @@
     "notADeck": "Solid Memo 덱이 아니라서 추가할 수 없어요. 다른 덱을 선택해 주세요.",
     "libraryDeckTooNew": "이 덱은 이 버전의 Solid Memo가 읽을 수 없는 더 새로운 형식이에요. 최신 버전을 받으려면 페이지를 새로고침해 주세요.",
     "libraryCardTooNew": "이 덱의 카드 중 하나가 이 버전의 Solid Memo가 읽을 수 없는 더 새로운 형식이에요. 최신 버전을 받으려면 페이지를 새로고침해 주세요.",
+    "deckFileUnreadable": "Solid Memo가 이 파일을 읽을 수 없어요. Solid Memo에서 내보낸 Turtle 또는 JSON-LD 파일을 선택해 주세요.",
+    "notADeckFile": "이 파일에는 Solid Memo 덱 하나가 들어 있지 않아요. Solid Memo에서 내보낸 파일을 선택해 주세요.",
+    "deckFileTooNew": "이 파일은 더 새로운 버전의 Solid Memo에서 만들어져서 지금 버전으로는 가져올 수 없어요. 페이지를 새로고침해 최신 버전을 받아 주세요.",
     "noGuestPod": "이 기기에는 게스트 학습이 없어요.",
     "guestPodStartFailed": "이 기기의 게스트 학습을 열 수 없어요. 페이지를 새로고침하고 다시 시도해 주세요.",
     "guestStorageAborted": "이 브라우저가 게스트 학습의 변경 사항 저장을 거부했어요. 데이터를 보관할 공간이 있는지 확인한 뒤 다시 시도해 주세요.",
@@ -1338,7 +1341,8 @@
       },
       "healthLink": "상태 점검",
       "libraryLink": "라이브러리 복사본",
-      "healthOf": "{deck}에서"
+      "healthOf": "{deck}에서",
+      "transferLink": "가져오기와 내보내기"
     },
     "bulk": {
       "label": "선택한 덱",
@@ -1378,7 +1382,8 @@
       "removed": {
         "one": "덱 {count}개를 삭제했어요.",
         "other": "덱 {count}개를 삭제했어요."
-      }
+      },
+      "export": "내보내기"
     },
     "groups": {
       "heading": "그룹"
@@ -1458,7 +1463,8 @@
       "lapsesLoading": "잊은 횟수를 알기 위해 답변 기록을 읽는 중…",
       "lapsesFailed": "답변 기록을 읽을 수 없어서 잊은 횟수를 알 수 없어요.",
       "scheduleLink": "복습 일정, 잊은 횟수, 자주 잊는 카드",
-      "healthLink": "상태 점검"
+      "healthLink": "상태 점검",
+      "exportLink": "내보내기"
     },
     "card": {
       "heading": "카드: {card}",
@@ -1878,6 +1884,58 @@
       "failed": "{deck}: ‘{step}’ 단계에서 업데이트에 실패했어요:",
       "badge": "릴리스 {version} 나옴",
       "badgeOf": "{deck}의 새 릴리스"
+    },
+    "transfer": {
+      "crumb": "가져오기와 내보내기",
+      "heading": "{instance}의 덱 가져오기와 내보내기",
+      "export": "내보내기",
+      "exportIntro": "덱을 Turtle 또는 JSON-LD 파일로 하나씩 따로 저장해요. 덱과 카드, 카드의 오답 선택지, 그리고 원하면 진행 상황까지 담겨요. RDF를 읽는 앱이라면 어떤 앱이든 읽을 수 있고, Solid Memo로 다시 가져올 수도 있어요.",
+      "noDecks": "이 인스턴스에는 아직 내보낼 덱이 없어요.",
+      "decks": "내보낼 덱",
+      "format": "형식",
+      "formats": {
+        "turtle": "Turtle (.ttl)",
+        "jsonld": "JSON-LD (.jsonld)"
+      },
+      "withProgress": "내 진행 상황 포함: 각 카드의 복습 예정일과 완료한 코스 챕터",
+      "exportButton": {
+        "one": "덱 {count}개 내보내기",
+        "other": "덱 {count}개 내보내기"
+      },
+      "exporting": "{deck} 내보내는 중({total}개 중 {at}번째)…",
+      "exported": {
+        "one": "덱 {count}개를 브라우저에 넘겼어요. 덱마다 따로 다운로드로 저장돼요. 브라우저가 여러 파일 다운로드를 허용할지 물어볼 수 있어요. 차단된 파일은 저장되지 않아요.",
+        "other": "덱 {count}개를 브라우저에 넘겼어요. 덱마다 따로 다운로드로 저장돼요. 브라우저가 여러 파일 다운로드를 허용할지 물어볼 수 있어요. 차단된 파일은 저장되지 않아요."
+      },
+      "import": "가져오기",
+      "importIntro": "Turtle 또는 JSON-LD 파일의 덱을 {instance}에 새 덱으로 추가해요. 이전 버전의 Solid Memo에서 만든 파일은 읽는 동안 최신 형식으로 바뀌어요.",
+      "choose": "파일 선택…",
+      "reading": "파일을 읽는 중…",
+      "file": "{name}: {deck}",
+      "cards": {
+        "one": "카드 {count}장",
+        "other": "카드 {count}장"
+      },
+      "states": {
+        "one": "진행 상황: 복습 상태 {count}개",
+        "other": "진행 상황: 복습 상태 {count}개"
+      },
+      "chapters": {
+        "one": "완료한 챕터 {count}개",
+        "other": "완료한 챕터 {count}개"
+      },
+      "upgraded": {
+        "one": "{count}개 부분이 이전 형식이라서 최신 형식으로 바뀌어요.",
+        "other": "{count}개 부분이 이전 형식이라서 최신 형식으로 바뀌어요."
+      },
+      "dropped": {
+        "one": "{count}개 부분을 읽을 수 없어서 제외돼요.",
+        "other": "{count}개 부분을 읽을 수 없어서 제외돼요."
+      },
+      "importProgress": "진행 상황도 가져오기",
+      "importButton": "{instance}(으)로 가져오기",
+      "importing": "덱을 가져오는 중…",
+      "imported": "{deck}을(를) 가져왔어요."
     }
   }
 }

@@ -166,6 +166,7 @@ function makeDeps() {
       completedChapters: [...(completed.completedChapters ?? []), chapterUrl],
     })),
     setCompletedChapters: vi.fn(async (edited) => edited),
+    registerDeck: vi.fn(async (registered) => registered),
   };
   const deckLibrary: DeckLibrary = {
     listLibraryDecks: vi.fn(async () => [libraryDeck]),
@@ -4219,6 +4220,128 @@ describe("metadata", () => {
         code: "noCatalogToUpdate",
       });
       expect(deps.deckRepository.saveCatalog).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("deck files", () => {
+    const fileDeck: Deck = {
+      ...deck,
+      id: "deck-x",
+      url: "https://bob.example/memo/catalog.ttl#deck-x",
+      cardsDocumentUrl: "https://bob.example/memo/decks/deck-x.ttl",
+      reviewsDocumentUrl: "https://bob.example/memo/reviews/deck-x.ttl",
+      completedChapters: ["https://lib.example/c.ttl#ch1"],
+    };
+    const state: ReviewState = {
+      cardId: "card-1",
+      direction: "front-to-back",
+      easeFactor: 2.5,
+      intervalDays: 1,
+      repetitions: 1,
+      due: "2026-09-29",
+      firstReviewedAt: "2026-09-28T10:00:00.000Z",
+      lastReviewedAt: "2026-09-28T10:00:00.000Z",
+      formatVersion: 2,
+    };
+    const file = {
+      name: "kanji.ttl",
+      format: "turtle" as const,
+      content: { deck: fileDeck, cards: [{ ...card, url: `${fileDeck.cardsDocumentUrl}#card-1` }], reviews: [state], upgraded: [], dropped: [] },
+    };
+
+    function withFiles(picked: { name: string; text: string } | null = null) {
+      const deckArchive = {
+        exportDeck: vi.fn(async () => "<#a> <#b> <#c> ."),
+        readDeckFile: vi.fn(async () => file.content),
+      };
+      const fileExchange = { save: vi.fn(), open: vi.fn(async () => picked) };
+      const deps = makeDeps();
+      return { deps, deckArchive, fileExchange, useCases: createUseCases({ ...deps, deckArchive, fileExchange }) };
+    }
+
+    it("saves a deck as a file named after it", async () => {
+      const { deckArchive, fileExchange, useCases } = withFiles();
+      await useCases.exportDeckFile(deck, { format: "jsonld", withProgress: true });
+      expect(deckArchive.exportDeck).toHaveBeenCalledWith(deck, { format: "jsonld", withProgress: true });
+      expect(fileExchange.save).toHaveBeenCalledWith("kanji-n5.jsonld", "application/ld+json", "<#a> <#b> <#c> .");
+    });
+
+    it("reads the file the user picks, in the format its name says, at a base of its own", async () => {
+      const { deckArchive, fileExchange, useCases } = withFiles({ name: "kanji.jsonld", text: "{}" });
+      expect(await useCases.openDeckFile()).toEqual({ name: "kanji.jsonld", format: "jsonld", content: file.content });
+      expect(fileExchange.open).toHaveBeenCalledWith(".ttl,.jsonld,.json,text/turtle,application/ld+json");
+      expect(deckArchive.readDeckFile).toHaveBeenCalledWith("{}", "jsonld", "https://file.solid-memo.invalid/kanji.jsonld");
+    });
+
+    it("reads nothing when the user picks no file", async () => {
+      const { deckArchive, useCases } = withFiles(null);
+      expect(await useCases.openDeckFile()).toBeNull();
+      expect(deckArchive.readDeckFile).not.toHaveBeenCalled();
+    });
+
+    it("refuses a file in a newer format, as the archive does", async () => {
+      const { deckArchive, useCases } = withFiles({ name: "new.ttl", text: "" });
+      deckArchive.readDeckFile.mockRejectedValueOnce(new AppError("deckFileTooNew"));
+      await expect(useCases.openDeckFile()).rejects.toMatchObject({ code: "deckFileTooNew" });
+    });
+
+    it("imports the deck: its cards where none are yet, its progress, then its entry, then the digest", async () => {
+      const { deps, useCases } = withFiles();
+      const imported = await useCases.importDeckFile(instance.url, file, { withProgress: true });
+      expect(imported).toMatchObject({
+        id: "deck-x",
+        url: `${instance.url}catalog.ttl#deck-x`,
+        cardsDocumentUrl: `${instance.url}decks/deck-x.ttl`,
+        completedChapters: fileDeck.completedChapters,
+      });
+      expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledWith(
+        imported,
+        { save: [{ ...card, url: `${instance.url}decks/deck-x.ttl#card-1`, formatVersion: CARD_FORMAT_VERSION }], remove: [] },
+        { whole: true, version: "absent" },
+      );
+      expect(deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledWith(imported, { save: [state], remove: [] });
+      expect(deps.deckRepository.registerDeck).toHaveBeenCalledWith(imported);
+      const order = (mock: unknown) => (mock as { mock: { invocationCallOrder: number[] } }).mock.invocationCallOrder[0]!;
+      expect(order(deps.deckRepository.applyCardChanges)).toBeLessThan(order(deps.reviewStateRepository.applyReviewChanges));
+      expect(order(deps.reviewStateRepository.applyReviewChanges)).toBeLessThan(order(deps.deckRepository.registerDeck));
+      expect(deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledWith(imported, undefined);
+    });
+
+    it("imports no progress unless asked, and a digest it cannot bring up to date stops nothing", async () => {
+      const { deps, useCases } = withFiles();
+      vi.mocked(deps.deckRepository.readCardsSince).mockRejectedValueOnce(new Error("offline"));
+      const imported = await useCases.importDeckFile(instance.url, file, { withProgress: false });
+      expect(imported.completedChapters).toBeUndefined();
+      expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
+    });
+
+    it("gives the deck a fresh id when a cards document is at its URL already, once", async () => {
+      const { deps, useCases } = withFiles();
+      vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValueOnce(new AppError("createdElsewhere"));
+      const imported = await useCases.importDeckFile(instance.url, file, { withProgress: true });
+      expect(imported.id).toBe("deck-0f3a");
+      expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledTimes(2);
+      vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValue(new AppError("createdElsewhere"));
+      await expect(useCases.importDeckFile(instance.url, file, { withProgress: true })).rejects.toMatchObject({ code: "createdElsewhere" });
+    });
+
+    it("stops at any other failure of the cards' write, writing nothing more", async () => {
+      const { deps, useCases } = withFiles();
+      vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValueOnce(new Error("offline"));
+      await expect(useCases.importDeckFile(instance.url, file, { withProgress: true })).rejects.toThrow("offline");
+      expect(deps.deckRepository.registerDeck).not.toHaveBeenCalled();
+    });
+
+    it("has no archive nor files unless given them", async () => {
+      const useCases = createUseCases(makeDeps());
+      await expect(useCases.exportDeckFile(deck, { format: "turtle", withProgress: false })).rejects.toThrow("no deck archive");
+      expect(await useCases.openDeckFile()).toBeNull();
+      const { deps } = withFiles();
+      const archiveless = createUseCases({ ...deps, fileExchange: { save: vi.fn(), open: async () => ({ name: "a.ttl", text: "" }) } });
+      await expect(archiveless.openDeckFile()).rejects.toThrow("no deck archive");
+      const { deckArchive } = withFiles();
+      await createUseCases({ ...deps, deckArchive }).exportDeckFile(deck, { format: "turtle", withProgress: false });
+      expect(deckArchive.exportDeck).toHaveBeenCalled();
     });
   });
 });
