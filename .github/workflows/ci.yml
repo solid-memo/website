@@ -58,8 +58,8 @@ jobs:
 
   # The app's use cases and Solid adapters against real Solid servers,
   # one job per server (e2e/pod/servers.ts): each pulls or builds only its
-  # server's image, starts it in Docker on this runner and runs the whole
-  # suite (docs/testing.md). One server failing does not stop the others;
+  # server's image, or loads it from GitHub's cache (e2e-images), starts it
+  # in Docker on this runner and runs the whole suite (docs/testing.md). One server failing does not stop the others;
   # what the server printed is kept when its job fails.
   pod:
     name: pod (${{ matrix.server }})
@@ -76,7 +76,22 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      - id: key
+        run: echo "key=$(node e2e/pod/servers.ts key ${{ matrix.server }})" >> "$GITHUB_OUTPUT"
+      - id: images
+        uses: ./.github/actions/e2e-images
+        with:
+          name: pod-${{ matrix.server }}
+          key: ${{ steps.key.outputs.key }}
       - run: npm run servers -w @solid-memo/e2e-pod -- ${{ matrix.server }}
+      - if: steps.images.outputs.hit != 'true'
+        run: node e2e/pod/images.ts save "${{ steps.images.outputs.file }}" e2e/pod/servers/${{ matrix.server }}/compose.yml
+      - if: steps.images.outputs.hit != 'true'
+        uses: actions/cache/save@v6
+        continue-on-error: true
+        with:
+          path: ${{ steps.images.outputs.file }}
+          key: ${{ steps.images.outputs.key }}
       - run: npm run test:pod
         env:
           SOLID_SERVERS: ${{ matrix.server }}
@@ -105,7 +120,22 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      - id: key
+        run: echo "key=$(node e2e/pod/servers.ts key ${{ matrix.server }})" >> "$GITHUB_OUTPUT"
+      - id: images
+        uses: ./.github/actions/e2e-images
+        with:
+          name: pod-${{ matrix.server }}
+          key: ${{ steps.key.outputs.key }}
       - run: npm run servers -w @solid-memo/e2e-pod -- ${{ matrix.server }}
+      - if: steps.images.outputs.hit != 'true'
+        run: node e2e/pod/images.ts save "${{ steps.images.outputs.file }}" e2e/pod/servers/${{ matrix.server }}/compose.yml
+      - if: steps.images.outputs.hit != 'true'
+        uses: actions/cache/save@v6
+        continue-on-error: true
+        with:
+          path: ${{ steps.images.outputs.file }}
+          key: ${{ steps.images.outputs.key }}
       - run: node e2e/pod/servers.ts contract ${{ matrix.server }}
       - if: failure()
         uses: actions/upload-artifact@v7
@@ -151,7 +181,20 @@ jobs:
       - if: steps.browsers.outputs.cache-hit == 'true'
         run: npx playwright install-deps chromium
       - run: npx turbo run build --filter=@solid-memo/web
+      - id: images
+        uses: ./.github/actions/e2e-images
+        with:
+          name: journeys
+          key: ${{ hashFiles('e2e/journeys/css/compose.yml') }}
       - run: npm run css:prepare -w @solid-memo/e2e-journeys
+      - if: steps.images.outputs.hit != 'true'
+        run: node e2e/pod/images.ts save "${{ steps.images.outputs.file }}" e2e/journeys/css/compose.yml
+      - if: steps.images.outputs.hit != 'true'
+        uses: actions/cache/save@v6
+        continue-on-error: true
+        with:
+          path: ${{ steps.images.outputs.file }}
+          key: ${{ steps.images.outputs.key }}
       - run: npm run journeys
       - if: always()
         run: node e2e/journeys/harness/summary.ts journeys-${{ github.run_attempt }}

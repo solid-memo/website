@@ -19,6 +19,7 @@ on:
       - package-lock.json
       - .nvmrc
       - .github/workflows/interop.yml
+      - .github/actions/e2e-images/**
   schedule:
     - cron: "17 4 * * 1"
   workflow_dispatch:
@@ -48,7 +49,22 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      - id: key
+        run: echo "key=$(node e2e/pod/servers.ts key ${{ matrix.server }})" >> "$GITHUB_OUTPUT"
+      - id: images
+        uses: ./.github/actions/e2e-images
+        with:
+          name: pod-${{ matrix.server }}
+          key: ${{ steps.key.outputs.key }}
       - run: npm run servers -w @solid-memo/e2e-pod -- ${{ matrix.server }}
+      - if: steps.images.outputs.hit != 'true'
+        run: node e2e/pod/images.ts save "${{ steps.images.outputs.file }}" e2e/pod/servers/${{ matrix.server }}/compose.yml
+      - if: steps.images.outputs.hit != 'true'
+        uses: actions/cache/save@v6
+        continue-on-error: true
+        with:
+          path: ${{ steps.images.outputs.file }}
+          key: ${{ steps.images.outputs.key }}
       # compare.ts says whether the run went as expected, not Vitest.
       - run: npm run test:pod
         continue-on-error: true
