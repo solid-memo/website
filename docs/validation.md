@@ -85,6 +85,10 @@ flowchart LR
   dynamic import, so the library is a separate chunk fetched only when a
   validation is asked for. It validates one focus node against one node
   shape (`validateNode`), so no `sh:targetClass` is needed.
+- One engine is made per shape document and shared by every document
+  checked against it. An engine runs one check at a time: the library
+  keeps a single report per validator, so two checks at once (two
+  documents checked together) would mix up their results.
 
 ## Profiles: DCAT-AP and SKOS
 
