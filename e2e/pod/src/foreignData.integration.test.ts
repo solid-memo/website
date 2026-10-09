@@ -11,7 +11,7 @@
  * review state another app named its own way is read by what it says it
  * is of, while another scheduler's is left alone (docs/data-model.md
  * "Decks and cards"). The app's own use cases and Solid adapters, wired
- * as in main.tsx.
+ * as in createAppUseCases.
  */
 import { describe, expect, inject, it } from "vitest";
 import { Parser, Writer } from "n3";
@@ -36,7 +36,7 @@ const DCAT_DATASET = "http://www.w3.org/ns/dcat#dataset";
 /** A PNG's first bytes: a file another app put in the instance's folder. */
 const PICTURE = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
-/** A page of the app as main.tsx wires it. */
+/** A page of the app as createAppUseCases wires it. */
 function page(): UseCases {
   const writeFence = createWriteFence(fetch);
   const podFetch = writeFence.fetch;

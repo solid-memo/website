@@ -56,7 +56,7 @@ gh repo create <user>/solid-memo --public --source . --push
 (GitHub Pages on the free plan requires a public repository.) A fork
 deploys to `https://<user>.github.io/solid-memo/`; its app works there,
 but the IRIs it reads still name `https://solid-memo.com/`, which
-`siteFetch` ([main.tsx](../apps/web/src/main.tsx)) maps to wherever the
+`siteFetch` ([appUseCases.ts](../packages/composition/src/appUseCases.ts)) maps to wherever the
 site is served.
 
 ## Why any static host works, unconfigured

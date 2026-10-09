@@ -1,6 +1,6 @@
 /**
  * A deck imported from the library, end to end, through the app's own use
- * cases and Solid adapters wired as in main.tsx (docs/deck-library.md): the
+ * cases and Solid adapters wired as in createAppUseCases (docs/deck-library.md): the
  * library publishes its releases at library deck format 4 or 5 and their
  * cards at the format each was frozen at; an import writes the user's
  * copy at the formats this app writes (deck 6, card 5), its text exactly

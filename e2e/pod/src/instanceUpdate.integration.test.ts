@@ -2,8 +2,8 @@
 /**
  * The format update against a real Solid server (docs/migrations.md "The
  * pod migration"): the app's own use cases and Solid adapters, wired as in
- * main.tsx, with every HTTP request recorded, both as the app attempts it
- * and as it reaches the server. `npm run test:pod` runs them against each
+ * createAppUseCases, with every HTTP request recorded, both as the app
+ * attempts it and as it reaches the server. `npm run test:pod` runs them against each
  * server globalSetup.ts starts — Community Solid Server and
  * node-solid-server — unless SOLID_SERVER_URL names one (see
  * docs/testing.md). Each outdated document is updated on its own, in one
@@ -333,7 +333,7 @@ async function statedFormats(container: string, urls: string[]): Promise<Record<
 }
 
 
-/** The app as main.tsx wires it, over a fetch that records every request, with the shapes read from this repository. */
+/** The app as createAppUseCases wires it, over a fetch that records every request, with the shapes read from this repository. */
 function app(
   pod: Pod,
   options: {

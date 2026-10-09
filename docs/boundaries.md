@@ -35,12 +35,13 @@ configs may also use the shared test tooling of the root `package.json`.
 | `solid` | `application`, `domain`, `vocab`, `shacl` | |
 | `browser` | `application`, `domain` | |
 | `ui` | `application`, `domain`, `vocab`, `markdown` | `markdown`: `src/ui/` only |
-| `web` | `application`, `domain`, `vocab`, `solid`, `browser`, `ui` | `solid`, `browser`: `src/main.tsx` only |
+| `composition` | `application`, `domain`, `vocab`, `solid`, `browser` | |
+| `web` | `application`, `domain`, `vocab`, `ui`, `composition` | `composition`: `src/main.tsx` only |
 | `e2e-pod` | `application`, `domain`, `vocab`, `solid` | |
 | `e2e-journeys` | `ui` | `ui`: `harness/strings.ts` only, for the app's messages |
 
 Browser code: `src/` of `markdown`, `vocab`, `domain`, `application`, `shacl`,
-`solid`, `browser`, `ui` and `web`; `vocab`'s `tooling/` is node-only.
+`solid`, `browser`, `composition`, `ui` and `web`; `vocab`'s `tooling/` is node-only.
 
 ## Vendor libraries
 
@@ -55,7 +56,7 @@ used nowhere else):
 | `rdf-validate-shacl` | `shacl` | `src/engine.ts` only, loaded lazily |
 | `mdast-util-from-markdown`, `micromark-extension-gfm-table`, `mdast-util-gfm-table`, `micromark-extension-cjk-friendly` | `markdown` | `src/parse.ts` only; the package's API is its own types, never `mdast`'s ([markdown.md](markdown.md)) |
 | `n3` | `turtle`, the node tooling of `shacl`, and `e2e-pod` | never in the browser; in `e2e-pod`, the server contract and the tests |
-| `fake-indexeddb` | `browser` | tests only: IndexedDB in node, for the guest's pod's store |
+| `fake-indexeddb` | `browser`, `composition` | tests only: IndexedDB in node, for the guest's pod's store |
 | `@playwright/test` | `e2e-journeys` | drives the built app in Chromium; the harness also talks to the Solid server with its request API |
 
 ## Further rules
@@ -69,8 +70,11 @@ used nowhere else):
   imports: Vite can load the config with Node's own loader, which needs
   them. Imports between packages go through `exports` and carry no
   extension.
-- `apps/web/src/main.tsx` is the only module that wires the layers
-  together.
+- Only `composition` wires the layers together
+  ([appUseCases.ts](../packages/composition/src/appUseCases.ts)). Each
+  app's `src/main.tsx` calls `@solid-memo/composition`, with what is its
+  own (its name, where it is served, the build's values), and renders
+  its components.
 
 ## Adding a dependency
 

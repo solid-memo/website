@@ -4,7 +4,7 @@
  * a guest studies in the pod kept on their device, then logs in and moves
  * their study into their pod on the server, as a new instance or added to
  * the instance they have — through the app's own use cases and Solid
- * adapters, wired as in main.tsx: one fetch routed to the guest's pod or
+ * adapters, wired as in createAppUseCases: one fetch routed to the guest's pod or
  * the server by URL. Runs against each server globalSetup.ts starts.
  */
 import { describe, expect, inject, it } from "vitest";
@@ -108,7 +108,7 @@ async function seedPod(server: string) {
   return { base, session: { webId } };
 }
 
-/** The app as main.tsx wires it, its guest's pod in memory, the user's pod on the server. */
+/** The app as createAppUseCases wires it, its guest's pod in memory, the user's pod on the server. */
 function app() {
   const guestStore = createMemoryResourceStore();
   const guestFetch = createLocalPod({ root: GUEST_ORIGIN, store: guestStore, newEtag: () => `"${crypto.randomUUID()}"` });

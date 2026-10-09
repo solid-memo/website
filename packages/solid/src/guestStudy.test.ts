@@ -1,6 +1,6 @@
 /**
  * A guest's study, end to end, through the app's own use cases and Solid
- * adapters wired as in main.tsx (docs/guest-mode.md): the guest studies in
+ * adapters wired as in createAppUseCases (docs/guest-mode.md): the guest studies in
  * the pod kept on their device, then logs in and keeps it. Their pod is a
  * second local pod here; e2e/pod moves a guest's study into real servers.
  */

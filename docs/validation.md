@@ -77,7 +77,7 @@ flowchart LR
   `https://solid-memo.com/ns/shapes/` (`SHAPES_BASE`), not bundled: they
   are published with the site anyway, and the document the browser
   checks against is the one CI validated. `siteFetch` in
-  [main.tsx](../apps/web/src/main.tsx) reads them from wherever the
+  [appUseCases.ts](../packages/composition/src/appUseCases.ts) reads them from wherever the
   site is served, so `npm run dev` and `npm run preview` use the
   repository's `ns/`. Each shape document is fetched once per session.
 - The SHACL engine ([engine.ts](../packages/shacl/src/engine.ts),
@@ -233,7 +233,8 @@ catalogue, cards, review states, preferences, the instance record) is
 checked before it is saved: the subjects the write touches against their
 shapes, and — in a document with DCAT subjects — against DCAT-AP
 (`checkSubjects` in [shaclShapeValidator.ts](../packages/solid/src/shaclShapeValidator.ts),
-wired into the repositories as `checkWrite` in `main.tsx`). A write that
+wired into the repositories as `checkWrite` in
+[appUseCases.ts](../packages/composition/src/appUseCases.ts)). A write that
 would not conform is refused with every problem named, and nothing is
 saved. Only what the write touches is checked, so a document with an
 old problem elsewhere can still be written to.

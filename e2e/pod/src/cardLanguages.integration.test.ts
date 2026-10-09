@@ -27,7 +27,7 @@ import { ETAG_OUTLIVES_EDITS, etagMarksEveryEdit, preconditionsOf } from "./serv
 
 const SERVERS = inject("solidServers");
 
-/** A page of the app as main.tsx wires it; `beforeWrite` runs before each write it makes. */
+/** A page of the app as createAppUseCases wires it; `beforeWrite` runs before each write it makes. */
 function page(beforeWrite: (url: string) => Promise<void> = async () => undefined) {
   const watching: typeof fetch = async (input, init) => {
     const method = (init?.method ?? "GET").toUpperCase();

@@ -2,7 +2,7 @@
 /**
  * A library deck upgrade against a real Solid server (docs/migrations.md
  * "How an upgrade is applied"): the app's own use cases and Solid
- * adapters, wired as in main.tsx, over a fetch that records every request
+ * adapters, wired as in createAppUseCases, over a fetch that records every request
  * as it reaches the server. The upgrade writes the deck's cards first,
  * held to the read its plan was made from, then the review states of the
  * cards it removes, then the catalog entry, which names the new release;
@@ -123,7 +123,7 @@ interface Recorded {
   etag?: string | null;
 }
 
-/** The app as main.tsx wires it, over a fetch that records every request, with the shapes read from this repository. */
+/** The app as createAppUseCases wires it, over a fetch that records every request, with the shapes read from this repository. */
 function app(
   options: {
     /** Answers the request with a failure of its own: the pod never sees it. */

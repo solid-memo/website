@@ -23,7 +23,7 @@ const PRIVATE_TYPE_INDEX = "http://www.w3.org/ns/solid/terms#privateTypeIndex";
 const SOLID_TERMS = "http://www.w3.org/ns/solid/terms#";
 const SM = "https://solid-memo.com/ns/vocab/v1.ttl#";
 
-/** The instance repository as main.tsx wires it. */
+/** The instance repository as createAppUseCases wires it. */
 function instances() {
   const shapeValidator = createShaclShapeValidator({ fetch, shapesFetch, ...SHAPE_SOURCES });
   return createSolidInstanceRepository({ fetch, checkWrite: shapeValidator.checkSubjects, now: () => new Date(), randomId: () => crypto.randomUUID() });

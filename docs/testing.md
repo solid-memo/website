@@ -306,9 +306,12 @@ them under.
 one), set up once in [vitest.shared.ts](../vitest.shared.ts), with these
 documented exclusions:
 
-- `apps/web/src/main.tsx` — composition root; pure wiring, no logic
-  (configured in [vite.config.ts](../apps/web/vite.config.ts)). The
-  test of the built site, the app's only test, runs in node.
+- `apps/web/src/main.tsx` — the app's entry point: it calls the
+  composition root and renders the app, no logic (configured in
+  [vite.config.ts](../apps/web/vite.config.ts)). The test of the built
+  site, the app's only test, runs in node. The composition root itself
+  (`packages/composition/`) is covered: its test wires the app as a page
+  does, over the site's documents read from this repository.
 - `src/test/` and `src/testing/` — test setup and helpers other
   packages' tests import (`@solid-memo/domain/testing/libraryDeck`,
   `@solid-memo/shacl/testing/turtle`), not product code.
@@ -337,7 +340,7 @@ Dependency inversion gives every layer a seam that makes mocks trivial:
 | Markdown (`packages/markdown/`) | none needed | Pure functions over strings: every node in both profiles, the folds, the chunks of a step's theory, each rule for a release (`markdownProblems`), the limits at every entry point, and the cmark and commonmark.js pathological inputs at the length cap within a time budget ([markdown.md](markdown.md)). |
 | The built site (`apps/web/src/build.test.ts`) | Vite's build API | Builds the app as `vite build` does, without writing it, and checks the bundle has no HTML sink but Preact's own and the page's Content Security Policy still lets its inline script run ([markdown.md](markdown.md#safety)). |
 | Generated code | drift test | `packages/vocab/tooling/generate.test.ts` renders the generators' output and compares it with the committed files; generated modules are data only, so importing them covers them (`packages/vocab/src/generated.test.ts`). |
-| End to end | real Solid servers | `e2e/pod/` wires the real use cases and Solid adapters as `main.tsx` does, over a fetch that records every request, against Community Solid Server 7 and 6 and node-solid-server 6 and 5. |
+| End to end | real Solid servers | `e2e/pod/` wires the real use cases and Solid adapters as `createAppUseCases` does, over a fetch that records every request, against Community Solid Server 7 and 6 and node-solid-server 6 and 5. |
 | User journeys | the built app in a browser | `e2e/journeys/` drives the app in Chromium (Playwright) through whole journeys, logging in at a real identity provider (Community Solid Server 7 behind TLS) ([User journeys](#user-journeys)). |
 
 ```mermaid

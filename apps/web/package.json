@@ -14,10 +14,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@solid-memo/application": "*",
-    "@solid-memo/browser": "*",
-    "@solid-memo/domain": "*",
-    "@solid-memo/solid": "*",
+    "@solid-memo/composition": "*",
     "@solid-memo/ui": "*",
     "@solid-memo/vocab": "*",
     "@tanstack/react-query": "^5.103.2",
