@@ -2,16 +2,20 @@
 /**
  * Keeping a guest's study (docs/guest-mode.md) against a real Solid server:
  * a guest studies in the pod kept on their device, then logs in and moves
- * their study into their pod on the server — through the app's own use
- * cases and Solid adapters, wired as in main.tsx: one fetch routed to the
- * guest's pod or the server by URL. Runs against each server globalSetup.ts
- * starts.
+ * their study into their pod on the server, as a new instance or added to
+ * the instance they have — through the app's own use cases and Solid
+ * adapters, wired as in main.tsx: one fetch routed to the guest's pod or
+ * the server by URL. Runs against each server globalSetup.ts starts.
  */
 import { describe, expect, inject, it } from "vitest";
 import { Parser, Writer } from "n3";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/sources";
 import { createUseCases } from "@solid-memo/application/useCases";
+import type { DeckLibrary } from "@solid-memo/application/ports";
 import { GUEST_ORIGIN, GUEST_SESSION } from "@solid-memo/domain/guest";
+import type { LibraryCard, LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
+import { librarySeriesUrlOf } from "@solid-memo/domain/libraryLayout";
+import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import { createLocalGuestPod } from "@solid-memo/solid/localGuestPod";
 import { createLocalPod } from "@solid-memo/solid/localPod";
 import { createMemoryResourceStore } from "@solid-memo/solid/memoryResourceStore";
@@ -31,6 +35,51 @@ import { createSolidWebIdDocumentRepository } from "@solid-memo/solid/solidWebId
 import { createWriteFence } from "@solid-memo/solid/writeFence";
 
 const SERVERS = inject("solidServers");
+
+/** A course of one question in a library of its own, for a guest to start. */
+const RELEASE = "https://solid-memo.test/decks/solid/v1.ttl";
+const CHAPTER = `${RELEASE}#ch-linked-data`;
+const question: LibraryCard = {
+  id: "q-iri",
+  front: { en: "What can an IRI name?" },
+  back: { en: "Any thing at all" },
+  formatVersion: 5,
+  distractors: [{ id: "q-iri-d1", text: { en: "Only web pages" } }],
+};
+const content: LibraryDeckContent = {
+  url: RELEASE,
+  seriesUrl: librarySeriesUrlOf(RELEASE),
+  title: { en: "Solid fundamentals" },
+  description: { en: "Linked data, RDF and Solid." },
+  formatVersion: 5,
+  authors: ["Anton Wiklund"],
+  license: "https://creativecommons.org/publicdomain/zero/1.0/",
+  direction: "front-to-back",
+  version: "1",
+  themes: [],
+  keywords: {},
+  cards: [question],
+  isCourse: true,
+};
+const course: LibraryDeck = {
+  url: RELEASE,
+  seriesUrl: content.seriesUrl,
+  version: "1",
+  releases: [{ url: RELEASE, version: "1" }],
+  themes: [],
+  keywords: {},
+  title: content.title,
+  cardCount: 1,
+  authors: content.authors,
+  direction: "front-to-back",
+  sources: [],
+  isCourse: true,
+};
+const library: DeckLibrary = {
+  listLibraryDecks: async () => [course],
+  fetchLibraryDeck: async () => content,
+  fetchCourseOutline: async () => ({ releaseUrl: RELEASE, chapters: [] }),
+};
 
 /**
  * A user's empty pod in a fresh folder of the server: a profile naming its
@@ -75,7 +124,7 @@ function app() {
   const ids = { now: () => new Date(), randomId: () => crypto.randomUUID() };
   const useCases = createUseCases({
     sessionGateway: undefined as never,
-    deckLibrary: undefined as never,
+    deckLibrary: library,
     webIdDocumentRepository: createSolidWebIdDocumentRepository({ fetch: podFetch }),
     storageGateway: createSolidStorageGateway({ fetch: podFetch }),
     instanceRepository: createSolidInstanceRepository({ fetch: podFetch, checkWrite, ...ids }),
@@ -170,5 +219,83 @@ describe.each(SERVERS)("a guest's study on $name", ({ url: server }) => {
     expect((await guestStore.urls()).sort()).toEqual(before);
     expect(await useCases.listInstances(session)).toEqual([]);
     expect((await fetch(`${taken}note.ttl`)).ok).toBe(true);
+  });
+
+  it("adds the guest's decks to the instance the user has, each a new deck with its progress, and leaves the device", async () => {
+    const { base, session } = await seedPod(server);
+    const { useCases, guestStore } = app();
+    // The user's instance, with a deck and preferences of its own.
+    const target = await useCases.createInstance(session, {
+      containerUrl: `${base}solid-memo/main/`,
+      name: "Main",
+      registrationTarget: "private",
+    });
+    const mine = await useCases.createDeck(target.url, { en: "Mine" });
+    const theirCourse = await useCases.startCourse(target.url, course);
+    await useCases.savePreferences(target.url, { ...DEFAULT_PREFERENCES, newCardsPerDay: 7 });
+    // The guest's: a deck with a card studied, and a course with its question answered and a chapter done, in a group.
+    await useCases.startGuest("My study");
+    const [guestInstance] = await useCases.listInstances(GUEST_SESSION);
+    const capitals = await useCases.createDeck(guestInstance!.url, { en: "Capitals" });
+    await useCases.addCard(capitals, { front: { en: "Sweden" }, back: { en: "Stockholm" } });
+    const now = new Date();
+    const queue = await useCases.getStudyQueue(guestInstance!.url, capitals, now);
+    await useCases.recordReview(guestInstance!.url, capitals, queue.newPrompts[0]!, 4, now);
+    const started = await useCases.startCourse(guestInstance!.url, course);
+    await useCases.answerCourseQuestion(guestInstance!.url, started, question, { correct: false, distractorId: "q-iri-d1" }, now);
+    const guestCourse = await useCases.completeChapter(started, CHAPTER);
+    await useCases.savePreferences(guestInstance!.url, { ...DEFAULT_PREFERENCES, newCardsPerDay: 3 });
+    const group = useCases.newDeckGroup(guestInstance!.url, { en: "Learning" });
+    await useCases.editDeckTree(guestInstance!.url, { kind: "combine", dragged: guestCourse.url, target: capitals.url, group });
+    // The course the instance has too is added beside it, not merged into it.
+    expect(await useCases.planGuestMerge(guestInstance!, target)).toEqual({
+      decks: [
+        { deck: expect.objectContaining({ url: capitals.url }), sameRelease: [] },
+        { deck: expect.objectContaining({ url: guestCourse.url }), sameRelease: [expect.objectContaining({ url: theirCourse.url })] },
+      ],
+    });
+
+    const outcome = await useCases.mergeGuestStudy(session, guestInstance!, target);
+
+    expect(outcome).toMatchObject({ ok: true, instance: target, tidied: true });
+    const decks = await useCases.listDecks(target.url);
+    expect(decks.map((deck) => deck.title.en).sort()).toEqual(["Capitals", "Mine", "Solid fundamentals", "Solid fundamentals"]);
+    const addedCapitals = decks.find((deck) => deck.title.en === "Capitals")!;
+    const addedCourse = decks.find((deck) => deck.title.en === "Solid fundamentals" && deck.url !== theirCourse.url)!;
+    expect(outcome.ok && outcome.added.map((deck) => deck.url).sort()).toEqual([addedCapitals.url, addedCourse.url].sort());
+    expect(addedCapitals.id).not.toBe(capitals.id);
+    expect((await useCases.listCards(addedCapitals)).map((card) => card.front)).toEqual([{ en: "Sweden" }]);
+    expect((await useCases.getStudyQueue(target.url, addedCapitals, now)).newPrompts).toEqual([]);
+    expect(addedCourse).toMatchObject({ sourceUrl: RELEASE, completedChapters: [CHAPTER] });
+    const [courseCard] = await useCases.listCards(addedCourse);
+    expect(courseCard).toMatchObject({ id: "q-iri", url: `${addedCourse.cardsDocumentUrl}#q-iri`, distractors: question.distractors });
+    expect((await useCases.getCourse(addedCourse)).answeredCardIds).toEqual(["q-iri"]);
+    const statistics = await useCases.getStatistics(target.url, now);
+    expect(statistics.totals.answers).toBe(2);
+    expect((await useCases.getStatistics(target.url, now, { deckUrl: addedCourse.url })).totals.answers).toBe(1);
+    // The instance's preferences stay; the guest's are not carried over.
+    expect((await useCases.getPreferences(target.url)).newCardsPerDay).toBe(7);
+    const tree = await useCases.listDeckTree(target.url);
+    expect(tree.children.map((node) => (node.kind === "deck" ? node.deck.url : [node.group.title, node.children.length]))).toEqual([
+      mine.url,
+      theirCourse.url,
+      [{ en: "Learning" }, 2],
+    ]);
+    await expect(useCases.listCards(theirCourse)).resolves.toEqual([]);
+    expect((await useCases.validateInstance(target.url)).conforms).toBe(true);
+    const served = await contents(target.url);
+    expect([...served].filter(([, body]) => body.includes(GUEST_ORIGIN)).map(([url]) => url)).toEqual([]);
+    // The links other apps follow: a review state to its card, a cards document to its deck, a card to its options.
+    const reviews = nTriples(addedCourse.reviewsDocumentUrl, served.get(addedCourse.reviewsDocumentUrl)!);
+    expect(reviews).toContain(
+      `<${addedCourse.reviewsDocumentUrl}#q-iri> <https://solid-memo.com/ns/vocab/v1.ttl#reviewOf> <${addedCourse.cardsDocumentUrl}#q-iri> .`,
+    );
+    const cards = nTriples(addedCourse.cardsDocumentUrl, served.get(addedCourse.cardsDocumentUrl)!);
+    expect(cards).toContain(`<${addedCourse.cardsDocumentUrl}> <http://purl.org/dc/terms/isPartOf> <${addedCourse.url}> .`);
+    expect(cards).toContain(
+      `<${addedCourse.cardsDocumentUrl}#q-iri> <https://schema.org/suggestedAnswer> <${addedCourse.cardsDocumentUrl}#q-iri-d1> .`,
+    );
+    expect(await useCases.listInstances(session)).toEqual([target]);
+    expect(await guestStore.urls()).toEqual([]);
   });
 });

@@ -198,7 +198,11 @@ Two ports gained a method ([ports.ts](../packages/application/src/ports.ts)):
   three attempts in all, as an edit of the
   [deck groups](data-model.md#deck-groups) does. A chapter completed
   already writes nothing. The write is not shape-checked:
-  `sm:completedChapter` belongs to no shape.
+  `sm:completedChapter` belongs to no shape. The one other write of it
+  is **`DeckRepository.addDeck(deck)`**, which writes the entry of a
+  guest's deck [added to an instance](guest-mode.md#adding-to-an-instance)
+  with the chapters the guest completed, If-Match and tried again on a
+  412 in the same way.
 
 The deck's distractors are written and removed with its cards
 (`withDistractors` and `distractorsOf` in

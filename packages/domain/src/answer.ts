@@ -8,7 +8,11 @@ import type { ReviewQuality } from "./review";
  * study day removes that day's answers.
  */
 export interface Answer {
-  /** The entry's fragment id in its month document: "answer-<time>-<random>". */
+  /**
+   * The entry's fragment id in its month document: "answer-<time>-<random>";
+   * for one added from a guest's study, followed by the id of the deck it
+   * was added to (guest.ts mergedAnswer).
+   */
   id: string;
   /** The deck's catalog entry, which may since have been removed. */
   deckUrl: string;

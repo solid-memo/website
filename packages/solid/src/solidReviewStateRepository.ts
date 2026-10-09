@@ -51,6 +51,13 @@ export function createSolidReviewStateRepository({
       await saveDataset(deck.reviewsDocumentUrl, written.dataset, fetch);
     },
 
+    async createReviewStates(deck, states): Promise<void> {
+      const written = withReviewStates(createSolidDataset(), deck, states, randomId);
+      await checkWrite(written.dataset, written.subjects);
+      // A new dataset: saved only if nothing is there yet (If-None-Match: *).
+      await saveDataset(deck.reviewsDocumentUrl, written.dataset, fetch);
+    },
+
     async applyReviewChanges(deck, { save, remove }): Promise<void> {
       const dataset = await getSolidDatasetOrNull(deck.reviewsDocumentUrl, fetch);
       if (dataset === null) return;

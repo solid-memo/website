@@ -844,7 +844,38 @@
     "copyLeft": "Den halvfärdiga kopian kunde inte tas bort från din pod; den finns på {url}.",
     "close": "Stäng",
     "moved": "Dina studier finns i din pod nu.",
-    "movedNotTidied": "Dina studier finns i din pod nu. De kunde inte tas bort från den här webbläsaren: släng dem där när du inte längre behöver dem."
+    "movedNotTidied": "Dina studier finns i din pod nu. De kunde inte tas bort från den här webbläsaren: släng dem där när du inte längre behöver dem.",
+    "findingInstances": "Letar efter dina instanser…",
+    "mergeExplain": "Varje kortlek du studerat läggs till i en av dina instanser som en ny kortlek, med sina kort, dina framsteg, dina svar och dina kortleksgrupper. Instansen behåller sina egna inställningar: de du valde som gäst följer inte med. När alla kortlekar är på plats tas dina studier bort från den här webbläsaren.",
+    "addTo": "Lägg till i",
+    "addingTo": "Dina kortlekar läggs till i {name}.",
+    "readingStudy": "Läser dina studier…",
+    "decks": "Kortlekar att lägga till",
+    "noDecks": "Dina studier har inga kortlekar att lägga till.",
+    "sameRelease": "{name} har redan den här kortleken från samma utgåva i biblioteket. Den läggs till bredvid som en egen kortlek, med egna framsteg, och slås inte ihop med den: avmarkera den för att låta bli.",
+    "leftOut": "En kortlek du låter bli sparas inte: den försvinner med resten av dina studier i den här webbläsaren.",
+    "chooseDeck": "Välj minst en kortlek att lägga till, eller släng dina studier i stället.",
+    "addStart": "Lägg till i {name}",
+    "mergeProgressRegion": "Lägger till dina studier",
+    "mergeProgressLabel": "Förloppet när dina studier läggs till",
+    "mergeKeepOpen": "Håll sidan öppen tills dina studier är tillagda.",
+    "mergeStep": {
+      "read": "Läser och kontrollerar dina studier",
+      "decks": "Lägger till dina kortlekar",
+      "arrange": "Grupperar dina kortlekar",
+      "verify": "Kontrollerar att inget ändrats under tiden",
+      "tidy": "Tar bort dem från den här webbläsaren"
+    },
+    "mergeFailedRegion": "Det gick inte att lägga till",
+    "mergeFailedWhile": "Det gick inte att lägga till dina studier i steget ”{step}”:",
+    "keptDecks": {
+      "one": "Den här kortleken finns nu i {name}, hel:",
+      "other": "De här kortlekarna finns nu i {name}, hela:"
+    },
+    "nothingAdded": "Inget lades till i {name}.",
+    "stillHereRetry": "Dina studier finns kvar i den här webbläsaren. Försöker du igen läggs det till som ännu inte finns i {name}.",
+    "added": "Dina studier finns i {name} nu.",
+    "addedNotTidied": "Dina studier finns i {name} nu. De kunde inte tas bort från den här webbläsaren: släng dem där när du inte längre behöver dem."
   },
   "pager": {
     "label": "Kortsidor",
@@ -1141,6 +1172,12 @@
       "other": "Kopian i din Pod har inte det format Solid Memo förväntar sig ({count} problem), så dina studier lämnas som de var. Försök igen senare."
     },
     "guestUrlsLeft": "Kopian i din Pod pekar fortfarande på gästens studier, så dina studier lämnas som de var. Försök igen.",
+    "guestStudyInvalid": {
+      "one": "En del av dina studier i den här webbläsaren har inte det format Solid Memo förväntar sig ({count} problem), så inget av dem lades till i din Pod. De finns kvar här.",
+      "other": "En del av dina studier i den här webbläsaren har inte det format Solid Memo förväntar sig ({count} problem), så inget av dem lades till i din Pod. De finns kvar här."
+    },
+    "guestStudyTooNew": "En nyare version av Solid Memo har sparat en del av dina studier i den här webbläsaren, så den här versionen lägger inte till dem i din Pod. Ladda om sidan för att få den senaste versionen.",
+    "guestStudyChanged": "Dina studier i den här webbläsaren ändrades medan de lades till, kanske i en annan flik, så de finns kvar här. Försök igen för att lägga till det som ändrades.",
     "instanceChangedDuringCopy": "Instansen ändrades medan den kopierades, kanske i en annan flik eller app. Försök igen.",
     "resourceChangedDuringCopy": "En del av instansen ändrades medan den kopierades, kanske i en annan flik eller app. Försök igen.",
     "instanceBeingUpdated": "Solid Memo uppdaterar den här instansen och sparar inget i den förrän uppdateringen är klar. Vänta tills uppdateringen är klar och försök sedan igen.",

@@ -3,8 +3,12 @@ import { useId, useState } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import {
+  GUEST_MERGE_STEPS,
   GUEST_TRANSFER_STEPS,
   suggestedGuestLocation,
+  type GuestMergeOutcome,
+  type GuestMergeProgress,
+  type GuestMergeStep,
   type GuestTransferOutcome,
   type GuestTransferProgress,
   type GuestTransferStep,
@@ -18,7 +22,7 @@ import { RegistrationTargetChooser } from "./RegistrationTargetChooser";
 import { routeToHash } from "./router";
 import { StepProgress } from "./StepProgress";
 
-/** What each step of the move does, as the progress line names it. */
+/** What each step of the move into a new instance does, as the progress line names it. */
 function stepLabels(t: I18n["t"]): Record<GuestTransferStep, string> {
   return {
     stage: t("guestOffer.step.stage"),
@@ -31,28 +35,53 @@ function stepLabels(t: I18n["t"]): Record<GuestTransferStep, string> {
   };
 }
 
+/** What each step of adding the study to an instance does, as the progress line names it. */
+function mergeStepLabels(t: I18n["t"]): Record<GuestMergeStep, string> {
+  return {
+    read: t("guestOffer.mergeStep.read"),
+    decks: t("guestOffer.mergeStep.decks"),
+    arrange: t("guestOffer.mergeStep.arrange"),
+    verify: t("guestOffer.mergeStep.verify"),
+    tidy: t("guestOffer.mergeStep.tidy"),
+  };
+}
+
 type Stage = "offer" | "discard" | "form" | "dismissed";
+
+/** How keeping the study ended: moved into a new instance, or added to one the user has. */
+type KeepOutcome = { kind: "transfer"; outcome: GuestTransferOutcome } | { kind: "merge"; outcome: GuestMergeOutcome };
+
+/** Where the move under way is. */
+type KeepProgress = { kind: "transfer"; progress: GuestTransferProgress } | { kind: "merge"; progress: GuestMergeProgress };
 
 /**
  * For a user who logged in where a guest studied before (docs/guest-mode.md):
- * the offer to move the guest's study into their Pod — or to discard it, or
- * to leave it for now — then the move, step by step, and how it ended.
+ * the offer to keep the guest's study in their Pod — added to an instance
+ * they have, or, when they have none, as a new one — or to discard it, or
+ * to leave it for now; then the move, step by step, and how it ended.
  * Nothing to see when no guest studied in this browser.
  */
 export function GuestStudyOffer({ useCases, session }: { useCases: UseCases; session: Session }) {
   const { t } = useI18n();
-  const [outcome, setOutcome] = useState<GuestTransferOutcome | null>(null);
+  const [outcome, setOutcome] = useState<KeepOutcome | null>(null);
   // Mounted throughout, so a screen reader hears that the move succeeded: a
   // live region inserted along with its text often goes unheard. A failure
   // is heard through its panel, which takes the focus, so it is not said twice.
   return (
     <>
       <p class="visually-hidden" role="status">
-        {outcome?.ok === true ? (outcome.tidied ? t("guestOffer.moved") : t("guestOffer.movedNotTidied")) : ""}
+        {outcome === null ? "" : keptText(t, outcome)}
       </p>
       <GuestStudyOfferStage useCases={useCases} session={session} outcome={outcome} onOutcome={setOutcome} />
     </>
   );
+}
+
+/** What a move that succeeded says; nothing for one that failed. */
+function keptText(t: I18n["t"], { kind, outcome }: KeepOutcome): string {
+  if (!outcome.ok) return "";
+  if (kind === "transfer") return t(outcome.tidied ? "guestOffer.moved" : "guestOffer.movedNotTidied");
+  return t(outcome.tidied ? "guestOffer.added" : "guestOffer.addedNotTidied", { name: outcome.instance.name });
 }
 
 /**
@@ -69,15 +98,15 @@ function GuestStudyOfferStage({
 }: {
   useCases: UseCases;
   session: Session;
-  outcome: GuestTransferOutcome | null;
-  onOutcome: (outcome: GuestTransferOutcome | null) => void;
+  outcome: KeepOutcome | null;
+  onOutcome: (outcome: KeepOutcome | null) => void;
 }) {
   const { t, errorText } = useI18n();
   const queryClient = useQueryClient();
   const [stage, setStage] = useState<Stage>("offer");
   /** The user came back to the offer, from the form or the discard question: it takes the focus. */
   const [returned, setReturned] = useState(false);
-  const [progress, setProgress] = useState<GuestTransferProgress | null>(null);
+  const [progress, setProgress] = useState<KeepProgress | null>(null);
 
   const studyQuery = useQuery({
     queryKey: ["guestStudy"],
@@ -89,47 +118,77 @@ function GuestStudyOfferStage({
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["guestStudy"] }),
   });
 
+  /** The move is over: say how, and open the instance it went into. */
+  async function ended(result: KeepOutcome) {
+    setProgress(null);
+    onOutcome(result);
+    if (!result.outcome.ok) {
+      // Decks added before adding failed are in the instance: its lists, which may be on screen, are read again, while the user reads why.
+      if (result.kind === "merge" && result.outcome.added.length > 0) void queryClient.invalidateQueries();
+      return;
+    }
+    // The user's instances have changed, and so may every list of the instance: its decks, groups and statistics.
+    await queryClient.invalidateQueries();
+    window.location.hash = routeToHash({ screen: "home", instanceUrl: result.outcome.instance.url });
+  }
+
   const move = useMutation({
     mutationFn: (args: { instance: Instance; target: { containerUrl: string; registrationTarget: RegistrationTarget } }) =>
-      useCases.transferGuestStudy(session, args.instance, args.target, setProgress),
+      useCases.transferGuestStudy(session, args.instance, args.target, (step) =>
+        setProgress({ kind: "transfer", progress: step }),
+      ),
     // A new move starts without the last one's steps.
     onMutate: () => setProgress(null),
-    onSuccess: async (result) => {
-      setProgress(null);
-      onOutcome(result);
-      if (!result.ok) return;
-      await queryClient.invalidateQueries({ queryKey: ["instances", session.webId] });
-      await queryClient.invalidateQueries({ queryKey: ["guestStudy"] });
-      window.location.hash = routeToHash({ screen: "home", instanceUrl: result.instance.url });
-    },
+    onSuccess: (result) => ended({ kind: "transfer", outcome: result }),
+  });
+
+  const merge = useMutation({
+    mutationFn: (args: { instance: Instance; target: Instance; skip: string[] }) =>
+      useCases.mergeGuestStudy(session, args.instance, args.target, { skip: args.skip }, (step) =>
+        setProgress({ kind: "merge", progress: step }),
+      ),
+    onMutate: () => setProgress(null),
+    onSuccess: (result) => ended({ kind: "merge", outcome: result }),
   });
 
   // Only while the move runs: one that threw (rather than ending in a failed
   // outcome) goes back to the form in the same render as its error, so the
   // form comes back knowing it has one to show.
-  if (progress !== null && move.isPending) {
-    const labels = stepLabels(t);
-    const step = labels[progress.step];
-    return (
-      <StepProgress
+  if (progress !== null && (move.isPending || merge.isPending)) {
+    return progress.kind === "transfer" ? (
+      <KeepProgressPanel
+        labels={stepLabels(t)}
+        steps={GUEST_TRANSFER_STEPS}
+        progress={progress.progress}
         region={t("guestOffer.progressRegion")}
-        steps={GUEST_TRANSFER_STEPS.map((entry) => ({ step: entry, label: labels[entry] }))}
-        current={progress.step}
-        done={progress.done}
-        total={progress.total}
-        part={progress.part}
-        status={t("guestOffer.running", { step })}
         progressLabel={t("guestOffer.progressLabel")}
         hint={t("guestOffer.keepOpen")}
+      />
+    ) : (
+      <KeepProgressPanel
+        labels={mergeStepLabels(t)}
+        steps={GUEST_MERGE_STEPS}
+        progress={progress.progress}
+        region={t("guestOffer.mergeProgressRegion")}
+        progressLabel={t("guestOffer.mergeProgressLabel")}
+        hint={t("guestOffer.mergeKeepOpen")}
       />
     );
   }
 
   if (outcome !== null) {
-    return outcome.ok ? (
-      <GuestMoved tidied={outcome.tidied} onClose={() => onOutcome(null)} />
+    const close = () => onOutcome(null);
+    if (outcome.kind === "transfer") {
+      return outcome.outcome.ok ? (
+        <GuestMoved text={keptText(t, outcome)} onClose={close} />
+      ) : (
+        <GuestTransferFailed outcome={outcome.outcome} onClose={close} />
+      );
+    }
+    return outcome.outcome.ok ? (
+      <GuestMoved text={keptText(t, outcome)} onClose={close} />
     ) : (
-      <GuestTransferFailed outcome={outcome} onClose={() => onOutcome(null)} />
+      <GuestMergeFailed outcome={outcome.outcome} onClose={close} />
     );
   }
 
@@ -138,14 +197,17 @@ function GuestStudyOfferStage({
 
   if (stage === "form") {
     return (
-      <GuestTransferForm
+      <GuestKeepForm
         useCases={useCases}
         session={session}
-        busy={move.isPending}
-        error={errorText(move.error)}
+        guestInstance={first.instance}
+        busy={move.isPending || merge.isPending}
+        error={errorText(move.error ?? merge.error)}
         onMove={(target) => move.mutate({ instance: first.instance, target })}
+        onMerge={(target, skip) => merge.mutate({ instance: first.instance, target, skip })}
         onBack={() => {
           move.reset();
+          merge.reset();
           setStage("offer");
           setReturned(true);
         }}
@@ -204,6 +266,38 @@ function GuestStudyOfferStage({
   );
 }
 
+/** The move under way, step by step. */
+function KeepProgressPanel<Step extends string>({
+  labels,
+  steps,
+  progress,
+  region,
+  progressLabel,
+  hint,
+}: {
+  labels: Record<Step, string>;
+  steps: readonly Step[];
+  progress: { step: Step; done: number; total: number; part?: { done: number; total: number } };
+  region: string;
+  progressLabel: string;
+  hint: string;
+}) {
+  const { t } = useI18n();
+  return (
+    <StepProgress
+      region={region}
+      steps={steps.map((entry) => ({ step: entry, label: labels[entry] }))}
+      current={progress.step}
+      done={progress.done}
+      total={progress.total}
+      part={progress.part}
+      status={t("guestOffer.running", { step: labels[progress.step] })}
+      progressLabel={progressLabel}
+      hint={hint}
+    />
+  );
+}
+
 /**
  * The offer's region, described by what it asks (`bodyId`). It takes the
  * focus when `focus`; shown as the page loads, it leaves it be.
@@ -232,20 +326,235 @@ function GuestOfferRegion({
   );
 }
 
-/** Where in the user's Pod the study goes, and which type index registers it. */
-function GuestTransferForm({
+/**
+ * Where in the user's Pod the study goes: added to one of their
+ * instances, or, when they have none (or none could be listed), into a
+ * new one, at a place they choose.
+ */
+function GuestKeepForm({
+  useCases,
+  session,
+  guestInstance,
+  busy,
+  error,
+  onMove,
+  onMerge,
+  onBack,
+}: {
+  useCases: UseCases;
+  session: Session;
+  guestInstance: Instance;
+  busy: boolean;
+  /** Why the last move could not start, or null. */
+  error: ErrorText | null;
+  onMove: (target: { containerUrl: string; registrationTarget: RegistrationTarget }) => void;
+  onMerge: (target: Instance, skip: string[]) => void;
+  onBack: () => void;
+}) {
+  const { t } = useI18n();
+  const instancesQuery = useQuery({
+    queryKey: ["instances", session.webId],
+    queryFn: () => useCases.listInstances(session),
+  });
+  // Back after a move that threw once under way: the steps gave way, and the
+  // error, not the form's heading, is what takes their focus.
+  const [cameWithError] = useState(error !== null);
+  const ref = usePanelFocus<HTMLElement>(!cameWithError);
+  const instances = instancesQuery.data ?? [];
+
+  return (
+    <section ref={ref} class="guest-transfer" aria-label={t("guestOffer.formHeading")} tabIndex={-1}>
+      <h2>{t("guestOffer.formHeading")}</h2>
+      {instancesQuery.isPending ? (
+        <>
+          <p>{t("guestOffer.findingInstances")}</p>
+          <div class="edit-actions">
+            <button type="button" onClick={onBack}>
+              {t("guestOffer.back")}
+            </button>
+          </div>
+        </>
+      ) : instances.length > 0 ? (
+        <GuestMergeFields
+          useCases={useCases}
+          guestInstance={guestInstance}
+          instances={instances}
+          busy={busy}
+          error={error}
+          cameWithError={cameWithError}
+          onMerge={onMerge}
+          onBack={onBack}
+        />
+      ) : (
+        <GuestTransferFields
+          useCases={useCases}
+          session={session}
+          busy={busy}
+          error={error}
+          cameWithError={cameWithError}
+          onMove={onMove}
+          onBack={onBack}
+        />
+      )}
+    </section>
+  );
+}
+
+/** The form's buttons: start, and Back to the offer; both ignored while a move starts. */
+function FormActions({ start, busy, onBack }: { start: string; busy: boolean; onBack: () => void }) {
+  const { t } = useI18n();
+  return (
+    <div class="edit-actions">
+      <button type="submit" class="primary" aria-disabled={busy}>
+        {start}
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          if (!busy) onBack();
+        }}
+        aria-disabled={busy}
+      >
+        {t("guestOffer.back")}
+      </button>
+    </div>
+  );
+}
+
+/**
+ * Which of the user's instances the study is added to, and which of its
+ * decks: each guest deck is offered, ticked; one the instance has from
+ * the same library release says that it is added beside it, not merged.
+ */
+function GuestMergeFields({
+  useCases,
+  guestInstance,
+  instances,
+  busy,
+  error,
+  cameWithError,
+  onMerge,
+  onBack,
+}: {
+  useCases: UseCases;
+  guestInstance: Instance;
+  instances: readonly Instance[];
+  busy: boolean;
+  error: ErrorText | null;
+  cameWithError: boolean;
+  onMerge: (target: Instance, skip: string[]) => void;
+  onBack: () => void;
+}) {
+  const { t, errorText, readerText, readerLang } = useI18n();
+  const [chosen, setChosen] = useState<string | null>(null);
+  const target = instances.find((instance) => instance.url === chosen) ?? instances[0]!;
+  const planQuery = useQuery({
+    queryKey: ["guestMergePlan", guestInstance.url, target.url],
+    queryFn: () => useCases.planGuestMerge(guestInstance, target),
+  });
+  const [skipped, setSkipped] = useState<ReadonlySet<string>>(new Set());
+  const [noneChosen, setNoneChosen] = useState(false);
+  const idPrefix = useId();
+  const plan = planQuery.data;
+
+  function handleSubmit(event: Event) {
+    event.preventDefault();
+    if (busy || plan === undefined) return;
+    const skip = plan.decks.map(({ deck }) => deck.url).filter((url) => skipped.has(url));
+    if (plan.decks.length > 0 && skip.length === plan.decks.length) {
+      setNoneChosen(true);
+      return;
+    }
+    onMerge(target, skip);
+  }
+
+  function toggle(url: string) {
+    const next = new Set(skipped);
+    if (!next.delete(url)) next.add(url);
+    setSkipped(next);
+    setNoneChosen(false);
+  }
+
+  return (
+    <>
+      <p>{t("guestOffer.mergeExplain")}</p>
+      <form onSubmit={handleSubmit}>
+        {instances.length > 1 ? (
+          <fieldset>
+            <legend>{t("guestOffer.addTo")}</legend>
+            {instances.map((instance) => (
+              <label key={instance.url}>
+                <input
+                  type="radio"
+                  name="guest-target"
+                  checked={instance.url === target.url}
+                  onChange={() => setChosen(instance.url)}
+                  disabled={busy}
+                />
+                {instance.name}
+              </label>
+            ))}
+          </fieldset>
+        ) : (
+          <p>{t("guestOffer.addingTo", { name: target.name })}</p>
+        )}
+        {plan === undefined ? (
+          planQuery.isError ? (
+            <ErrorMessage error={errorText(planQuery.error)} />
+          ) : (
+            <p>{t("guestOffer.readingStudy")}</p>
+          )
+        ) : (
+          <fieldset>
+            <legend>{t("guestOffer.decks")}</legend>
+            {plan.decks.length === 0 && <p class="hint">{t("guestOffer.noDecks")}</p>}
+            {plan.decks.map(({ deck, sameRelease }, index) => {
+              const hintId = `${idPrefix}-same-${index}`;
+              return (
+                <div key={deck.url}>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={!skipped.has(deck.url)}
+                      onChange={() => toggle(deck.url)}
+                      aria-describedby={sameRelease.length > 0 ? hintId : undefined}
+                      disabled={busy}
+                    />
+                    <span lang={readerLang(deck.title)}>{readerText(deck.title)}</span>
+                  </label>
+                  {sameRelease.length > 0 && (
+                    <p id={hintId} class="hint">
+                      {t("guestOffer.sameRelease", { name: target.name })}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </fieldset>
+        )}
+        <p class="hint">{t("guestOffer.leftOut")}</p>
+        <ErrorMessage error={noneChosen ? t("guestOffer.chooseDeck") : error} focus={cameWithError} />
+        <FormActions start={t("guestOffer.addStart", { name: target.name })} busy={busy} onBack={onBack} />
+      </form>
+    </>
+  );
+}
+
+/** Where in the user's Pod a new instance holds the study, and which type index registers it. */
+function GuestTransferFields({
   useCases,
   session,
   busy,
   error,
+  cameWithError,
   onMove,
   onBack,
 }: {
   useCases: UseCases;
   session: Session;
   busy: boolean;
-  /** Why the last move could not start, or null. */
   error: ErrorText | null;
+  cameWithError: boolean;
   onMove: (target: { containerUrl: string; registrationTarget: RegistrationTarget }) => void;
   onBack: () => void;
 }) {
@@ -253,10 +562,6 @@ function GuestTransferForm({
   const storagesQuery = useQuery({
     queryKey: ["storages", session.webId],
     queryFn: () => useCases.listStorages(session),
-  });
-  const instancesQuery = useQuery({
-    queryKey: ["instances", session.webId],
-    queryFn: () => useCases.listInstances(session),
   });
   const optionsQuery = useQuery({
     queryKey: ["registrationOptions", session.webId],
@@ -267,20 +572,8 @@ function GuestTransferForm({
   const storageUrl = chosenStorage ?? storages[0]?.url ?? null;
   // Suggested from the storage until the user writes their own.
   const [typedLocation, setTypedLocation] = useState<string | null>(null);
-  const suggested =
-    storageUrl === null
-      ? ""
-      : suggestedGuestLocation(
-          storageUrl,
-          (instancesQuery.data ?? []).map((instance) => instance.url),
-          new Date().toISOString().slice(0, 10),
-        );
-  const location = typedLocation ?? suggested;
+  const location = typedLocation ?? (storageUrl === null ? "" : suggestedGuestLocation(storageUrl));
   const [target, setTarget] = useState<RegistrationTarget>("private");
-  // Back after a move that threw once under way: the steps gave way, and the
-  // error, not the form's heading, is what takes their focus.
-  const [cameWithError] = useState(error !== null);
-  const ref = usePanelFocus<HTMLElement>(!cameWithError);
 
   function handleSubmit(event: Event) {
     event.preventDefault();
@@ -289,8 +582,7 @@ function GuestTransferForm({
   }
 
   return (
-    <section ref={ref} class="guest-transfer" aria-label={t("guestOffer.formHeading")} tabIndex={-1}>
-      <h2>{t("guestOffer.formHeading")}</h2>
+    <>
       <p>{t("guestOffer.explain")}</p>
       <form onSubmit={handleSubmit}>
         {storagesQuery.isSuccess && storages.length === 0 && <p class="hint">{t("guestOffer.noStorage")}</p>}
@@ -324,45 +616,62 @@ function GuestTransferForm({
         />
         <RegistrationTargetChooser options={optionsQuery.data ?? null} value={target} onChange={setTarget} />
         <ErrorMessage error={error} focus={cameWithError} />
-        <div class="edit-actions">
-          <button type="submit" class="primary" aria-disabled={busy}>
-            {t("guestOffer.start")}
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              if (!busy) onBack();
-            }}
-            aria-disabled={busy}
-          >
-            {t("guestOffer.back")}
-          </button>
-        </div>
+        <FormActions start={t("guestOffer.start")} busy={busy} onBack={onBack} />
       </form>
-    </section>
+    </>
   );
 }
 
 /**
  * The move succeeded. It takes no focus: the status line above says so,
- * and the move opens the new instance, whose screen takes the focus.
+ * and the move opens the instance, whose screen takes the focus.
  */
-function GuestMoved({ tidied, onClose }: { tidied: boolean; onClose: () => void }) {
+function GuestMoved({ text, onClose }: { text: string; onClose: () => void }) {
   const { t } = useI18n();
   return (
     <div class="guest-moved">
       {/* Announced by the status line above; this is what is seen. */}
-      <p aria-hidden="true">{tidied ? t("guestOffer.moved") : t("guestOffer.movedNotTidied")}</p>
+      <p aria-hidden="true">{text}</p>
       <button onClick={onClose}>{t("guestOffer.close")}</button>
     </div>
   );
 }
 
 /**
- * Where the move failed and that the study is still here. It takes the
- * progress's place and its focus, read out with why as its description;
- * Close hands the focus to the screen.
+ * Where a move failed, and what is where now. It takes the progress's
+ * place and its focus, read out with why as its description; Close hands
+ * the focus to the screen.
  */
+function KeepFailedPanel({
+  region,
+  why,
+  error,
+  children,
+  onClose,
+}: {
+  region: string;
+  why: string;
+  error: unknown;
+  children: ComponentChildren;
+  onClose: () => void;
+}) {
+  const { t, errorText } = useI18n();
+  const ref = usePanelFocus<HTMLDivElement>();
+  const whyId = useId();
+  return (
+    <div ref={ref} class="warning migration" role="region" aria-label={region} aria-describedby={whyId} tabIndex={-1}>
+      <div id={whyId} class="failure-why">
+        <strong>{why}</strong> {errorText(error)}
+      </div>
+      {children}
+      <div class="edit-actions">
+        <button onClick={onClose}>{t("guestOffer.close")}</button>
+      </div>
+    </div>
+  );
+}
+
+/** The move into a new instance failed: the study is still here, and what became of the copy. */
 function GuestTransferFailed({
   outcome,
   onClose,
@@ -370,31 +679,56 @@ function GuestTransferFailed({
   outcome: Extract<GuestTransferOutcome, { ok: false }>;
   onClose: () => void;
 }) {
-  const { t, errorText } = useI18n();
-  const ref = usePanelFocus<HTMLDivElement>();
-  const whyId = useId();
+  const { t } = useI18n();
   return (
-    <div
-      ref={ref}
-      class="warning migration"
-      role="region"
-      aria-label={t("guestOffer.failedRegion")}
-      aria-describedby={whyId}
-      tabIndex={-1}
+    <KeepFailedPanel
+      region={t("guestOffer.failedRegion")}
+      why={t("guestOffer.failedWhile", { step: stepLabels(t)[outcome.step].toLowerCase() })}
+      error={outcome.error}
+      onClose={onClose}
     >
-      <div id={whyId} class="failure-why">
-        <strong>{t("guestOffer.failedWhile", { step: stepLabels(t)[outcome.step].toLowerCase() })}</strong>{" "}
-        {errorText(outcome.error)}
-      </div>
       <p>
         {t("guestOffer.stillHere")}{" "}
         {outcome.cleanedUp
           ? t("guestOffer.copyRemoved")
           : t("guestOffer.copyLeft", { url: String(outcome.leftoverUrl) })}
       </p>
-      <div class="edit-actions">
-        <button onClick={onClose}>{t("guestOffer.close")}</button>
-      </div>
-    </div>
+    </KeepFailedPanel>
+  );
+}
+
+/** Adding the study to an instance failed: which decks are there now, whole, and that the study is still here. */
+function GuestMergeFailed({
+  outcome,
+  onClose,
+}: {
+  outcome: Extract<GuestMergeOutcome, { ok: false }>;
+  onClose: () => void;
+}) {
+  const { t, readerText, readerLang } = useI18n();
+  const name = outcome.instance.name;
+  return (
+    <KeepFailedPanel
+      region={t("guestOffer.mergeFailedRegion")}
+      why={t("guestOffer.mergeFailedWhile", { step: mergeStepLabels(t)[outcome.step].toLowerCase() })}
+      error={outcome.error}
+      onClose={onClose}
+    >
+      {outcome.added.length === 0 ? (
+        <p>{t("guestOffer.nothingAdded", { name })}</p>
+      ) : (
+        <>
+          <p>{t("guestOffer.keptDecks", { name, count: outcome.added.length })}</p>
+          <ul>
+            {outcome.added.map((deck) => (
+              <li key={deck.url} lang={readerLang(deck.title)}>
+                {readerText(deck.title)}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+      <p>{t("guestOffer.stillHereRetry", { name })}</p>
+    </KeepFailedPanel>
   );
 }

@@ -17,6 +17,8 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
       instance: { url: "https://pod.example/solid-memo/main/", name: "My study" },
       tidied: true,
     })),
+    planGuestMerge: vi.fn(async () => ({ decks: [] })),
+    mergeGuestStudy: vi.fn(async (_session, _guest, target) => ({ ok: true as const, instance: target, added: [], tidied: true })),
     loginWithWebId: vi.fn(async () => undefined),
     loginWithProvider: vi.fn(async () => undefined),
     logout: vi.fn(async () => undefined),

@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { Answer } from "@solid-memo/domain/answer";
 import { createSolidAnswerLog } from "./solidAnswerLog";
 import type { WriteCheck } from "./writeCheck";
+import { MAX_PATCH_BYTES } from "./datasets";
 
 const INSTANCE = "https://pod.example/solid-memo/main/";
 const HISTORY = `${INSTANCE}history/`;
@@ -140,6 +141,53 @@ describe("createSolidAnswerLog", () => {
     await expect(createSolidAnswerLog({ fetch: fake.fetch }).append(INSTANCE, answer("2026-09-21"))).rejects.toMatchObject({
       code: "addFailed",
       detail: `url: ${SEPTEMBER}\nstatus: 500`,
+    });
+  });
+
+  it("adds many answers with one insert-only PATCH per month, checked first, and adding them again changes nothing", async () => {
+    const fake = pod();
+    const checkWrite = vi.fn<WriteCheck>(async () => undefined);
+    const log = createSolidAnswerLog({ fetch: fake.fetch, checkWrite });
+    const september = [answer("2026-09-21"), answer("2026-09-30", DECK, 6)];
+    const october = answer("2026-10-01");
+    await log.appendAll(INSTANCE, [september[0]!, october, september[1]!]);
+    expect(fake.requests.map((request) => [request.method, request.url, request.ifMatch])).toEqual([
+      ["PATCH", SEPTEMBER, null],
+      ["PATCH", `${HISTORY}2026-10.ttl`, null],
+    ]);
+    expect(checkWrite).toHaveBeenCalledWith(expect.anything(), september.map((given) => `${SEPTEMBER}#${given.id}`));
+    await log.appendAll(INSTANCE, september);
+    await expect(log.readMonth(INSTANCE, "2026-09")).resolves.toEqual(expect.arrayContaining(september));
+    expect(await log.readMonth(INSTANCE, "2026-09")).toHaveLength(2);
+    expect(fake.documents.get(SEPTEMBER)!.size).toBe(fake.requests[0]!.body.split("\n").length - 3);
+    await log.appendAll(INSTANCE, []);
+    expect(fake.writes()).toHaveLength(3);
+  });
+
+  it("splits a month's answers over several PATCHes rather than send one larger than a pod reads, each answer whole", async () => {
+    const fake = pod();
+    const log = createSolidAnswerLog({ fetch: fake.fetch });
+    const many = Array.from({ length: 300 }, () => answer("2026-09-21"));
+    await log.appendAll(INSTANCE, many);
+    const patches = fake.writes();
+    expect(patches.length).toBeGreaterThan(1);
+    for (const patch of patches) expect(new TextEncoder().encode(patch.body).length).toBeLessThanOrEqual(MAX_PATCH_BYTES + 32);
+    expect(await log.readMonth(INSTANCE, "2026-09")).toHaveLength(300);
+  });
+
+  it("adds no answer the check refuses, and says when the pod refuses some", async () => {
+    const fake = pod();
+    const refusing = createSolidAnswerLog({
+      fetch: fake.fetch,
+      checkWrite: async () => {
+        throw new Error("does not conform");
+      },
+    });
+    await expect(refusing.appendAll(INSTANCE, [answer("2026-09-21")])).rejects.toThrow("does not conform");
+    expect(fake.requests).toEqual([]);
+    fake.failNext(500);
+    await expect(createSolidAnswerLog({ fetch: fake.fetch }).appendAll(INSTANCE, [answer("2026-09-21")])).rejects.toMatchObject({
+      code: "addFailed",
     });
   });
 

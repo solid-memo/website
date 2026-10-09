@@ -202,7 +202,10 @@ export interface Deck {
    * URLs) the learner has completed: `sm:completedChapter` on the catalog
    * entry. Like a deck's `sm:position`, a triple outside the deck's shape
    * that every write of the entry keeps; only completing a chapter
-   * (DeckRepository.completeChapter) adds one. Absent when there is none.
+   * (DeckRepository.completeChapter) adds one, and adding a guest's deck
+   * to an instance (DeckRepository.addDeck, docs/guest-mode.md "Adding
+   * to an instance") writes the guest's with its new entry. Absent when
+   * there is none.
    */
   completedChapters?: string[];
 }

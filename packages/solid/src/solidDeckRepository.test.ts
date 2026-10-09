@@ -211,6 +211,88 @@ describe("applyCardChanges", () => {
     await makeRepository().applyCardChanges(deck, { save: [{ id: "no", front: { "": "Norway" }, back: { "": "Oslo" } }], remove: [] });
     expect(getThing(vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as SolidDataset, `${deck.cardsDocumentUrl}#no`)).not.toBeNull();
   });
+
+  it("makes a new card at the creation time given, as a card copied whole keeps its own", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await makeRepository().applyCardChanges(deck, {
+      save: [{ id: "no", front: { "": "Norway" }, back: { "": "Oslo" }, createdAt: "2026-01-02T03:04:05.000Z" }],
+      remove: [],
+    });
+    const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as SolidDataset;
+    expect(getDatetime(getThing(saved, `${deck.cardsDocumentUrl}#no`)!, DCTERMS.created)?.toISOString()).toBe(
+      "2026-01-02T03:04:05.000Z",
+    );
+  });
+});
+
+describe("addDeck", () => {
+  const added: Deck = {
+    ...deck,
+    id: "deck-2",
+    url: `${CATALOG}#deck-2`,
+    cardsDocumentUrl: `${INSTANCE}decks/deck-2.ttl`,
+    reviewsDocumentUrl: `${INSTANCE}reviews/deck-2.ttl`,
+    createdAt: "2026-01-02T03:04:05.000Z",
+    sourceUrl: "https://solid-memo.com/decks/solid-fundamentals/v1.ttl",
+    completedChapters: ["https://solid-memo.com/decks/solid-fundamentals/v1.ttl#ch-why-solid"],
+  };
+
+  it("adds the deck's entry as it is, at its own URLs, with its chapters completed, beside the decks there, checked first", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    const checkWrite = vi.fn(async () => undefined);
+    const written = await makeRepository(checkWrite).addDeck(added);
+    expect(written).toEqual({ ...added, formatVersion: 6 });
+    expect(checkWrite).toHaveBeenCalledWith(expect.anything(), [added.url, `${added.url}-cards`]);
+    const [saveUrl, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0]!;
+    expect(saveUrl).toBe(CATALOG);
+    const thing = getThing(saved as SolidDataset, added.url)!;
+    expect(getUrl(thing, SM.cardsDocument)).toBe(added.cardsDocumentUrl);
+    expect(getUrl(thing, PROV.wasDerivedFrom)).toBe(added.sourceUrl);
+    expect(getUrlAll(thing, SM.completedChapter)).toEqual(added.completedChapters);
+    expect(getDatetime(thing, DCTERMS.created)?.toISOString()).toBe("2026-01-02T03:04:05.000Z");
+    expect(getThing(saved as SolidDataset, deck.url)).not.toBeNull();
+  });
+
+  it("creates the catalog document when there is none, a deck without chapters stating none", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    const { completedChapters: _chapters, ...plain } = added;
+    await makeRepository().addDeck(plain);
+    const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0]![1] as SolidDataset;
+    expect(getUrlAll(getThing(saved, added.url)!, SM.completedChapter)).toEqual([]);
+  });
+
+  it("refuses an entry where the catalog has one, writing nothing", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    await expect(makeRepository().addDeck(deck)).rejects.toMatchObject({ code: "createdElsewhere" });
+    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+  });
+
+  const preconditionFailed = () => Object.assign(new Error("412 Precondition Failed"), { statusCode: 412 });
+
+  it("reads the catalog again and adds the entry to it when it changed elsewhere meanwhile, a few times at most", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    vi.mocked(saveSolidDatasetAt).mockRejectedValueOnce(preconditionFailed());
+    await expect(makeRepository().addDeck(added)).resolves.toEqual({ ...added, formatVersion: 6 });
+    expect(getSolidDatasetOrNull).toHaveBeenCalledTimes(2);
+    expect(saveSolidDatasetAt).toHaveBeenCalledTimes(2);
+
+    vi.mocked(saveSolidDatasetAt).mockReset().mockRejectedValue(preconditionFailed());
+    await expect(makeRepository().addDeck(added)).rejects.toMatchObject({ code: "changedElsewhere" });
+    expect(saveSolidDatasetAt).toHaveBeenCalledTimes(3);
+  });
+
+  it("refuses an entry another tab wrote meanwhile, and gives up at once on any other failure", async () => {
+    const withAdded = setThing(catalogWithDeck(), buildThing(createThing({ url: added.url })).addIri(RDF.type, SM.Deck).build());
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValueOnce(catalogWithDeck()).mockResolvedValueOnce(withAdded);
+    vi.mocked(saveSolidDatasetAt).mockRejectedValueOnce(preconditionFailed());
+    await expect(makeRepository().addDeck(added)).rejects.toMatchObject({ code: "createdElsewhere" });
+    expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
+
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    vi.mocked(saveSolidDatasetAt).mockReset().mockRejectedValueOnce(new Error("403"));
+    await expect(makeRepository().addDeck(added)).rejects.toThrow("403");
+    expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
+  });
 });
 
 describe("readCatalog and saveCatalog", () => {

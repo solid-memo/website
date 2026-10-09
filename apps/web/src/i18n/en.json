@@ -847,7 +847,38 @@
     "copyLeft": "The partial copy could not be removed from your Pod; it is at {url}.",
     "close": "Close",
     "moved": "Your study is in your Pod now.",
-    "movedNotTidied": "Your study is in your Pod now. It could not be removed from this browser: discard it there when you no longer need it."
+    "movedNotTidied": "Your study is in your Pod now. It could not be removed from this browser: discard it there when you no longer need it.",
+    "findingInstances": "Looking for your instances…",
+    "mergeExplain": "Each deck you studied is added to one of your instances as a new deck, with its cards, your progress, your answers and your deck groups. The instance keeps its own preferences: the ones you set as a guest are not carried over. Once every deck is in, your study is removed from this browser.",
+    "addTo": "Add it to",
+    "addingTo": "Your decks are added to {name}.",
+    "readingStudy": "Reading your study…",
+    "decks": "Decks to add",
+    "noDecks": "Your study has no decks to add.",
+    "sameRelease": "{name} already has this deck from the same library release. It is added beside it as a deck of its own, with its own progress, not merged into it: untick it to leave it out.",
+    "leftOut": "A deck you leave out is not kept: it goes with the rest of your study in this browser.",
+    "chooseDeck": "Choose at least one deck to add, or discard your study instead.",
+    "addStart": "Add to {name}",
+    "mergeProgressRegion": "Adding your study",
+    "mergeProgressLabel": "Progress of adding your study",
+    "mergeKeepOpen": "Keep this page open until your study is added.",
+    "mergeStep": {
+      "read": "Reading and checking your study",
+      "decks": "Adding your decks",
+      "arrange": "Grouping your decks",
+      "verify": "Checking nothing changed meanwhile",
+      "tidy": "Removing it from this browser"
+    },
+    "mergeFailedRegion": "Adding failed",
+    "mergeFailedWhile": "Adding your study failed while {step}:",
+    "keptDecks": {
+      "one": "This deck is in {name} now, whole:",
+      "other": "These decks are in {name} now, whole:"
+    },
+    "nothingAdded": "Nothing was added to {name}.",
+    "stillHereRetry": "Your study is still in this browser. Trying again adds what is not in {name} yet.",
+    "added": "Your study is in {name} now.",
+    "addedNotTidied": "Your study is in {name} now. It could not be removed from this browser: discard it there when you no longer need it."
   },
   "pager": {
     "label": "Card pages",
@@ -1144,6 +1175,12 @@
       "other": "The copy in your Pod is not in the format Solid Memo expects ({count} problems), so your study is left as it was. Try again later."
     },
     "guestUrlsLeft": "The copy in your Pod still points to the guest's study, so your study is left as it was. Try again.",
+    "guestStudyInvalid": {
+      "one": "Part of your study in this browser is not in the format Solid Memo expects ({count} problem), so none of it was added to your Pod. It is still here.",
+      "other": "Part of your study in this browser is not in the format Solid Memo expects ({count} problems), so none of it was added to your Pod. It is still here."
+    },
+    "guestStudyTooNew": "A newer version of Solid Memo saved part of your study in this browser, so this version does not add it to your Pod. Reload the page to get the latest version.",
+    "guestStudyChanged": "Your study in this browser changed while it was being added, perhaps in another tab, so it is kept here. Try again to add what changed.",
     "instanceChangedDuringCopy": "The instance changed while it was being copied, perhaps in another tab or app. Try again.",
     "resourceChangedDuringCopy": "Part of the instance changed while it was being copied, perhaps in another tab or app. Try again.",
     "instanceBeingUpdated": "Solid Memo is updating this instance and saves nothing to it until the update is done. Wait for the update to finish, then try again.",

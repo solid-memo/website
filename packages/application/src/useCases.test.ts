@@ -18,7 +18,7 @@ import type {
   GuestPod,
 } from "./ports";
 import type { Backup } from "@solid-memo/domain/backup";
-import { GUEST_INSTANCE_URL, GUEST_ORIGIN, GUEST_SESSION, GUEST_WEBID } from "@solid-memo/domain/guest";
+import { GUEST_INSTANCE_URL, GUEST_ORIGIN, GUEST_SESSION, GUEST_WEBID, guestDeckStamp } from "@solid-memo/domain/guest";
 import { createUseCases } from "./useCases";
 import type { InstanceDigest } from "@solid-memo/domain/studyDigest";
 import { CARD_FORMAT_VERSION, DECK_FORMAT_VERSION, type Card, type Deck } from "@solid-memo/domain/deck";
@@ -146,6 +146,7 @@ function makeDeps() {
     stateCardLanguages: vi.fn(async (_deck, ids) => ids.length),
     applyCardChanges: vi.fn(async () => undefined),
     importDeck: vi.fn(async () => deck),
+    addDeck: vi.fn(async (added) => added),
     readCardsSince: vi.fn(async (d) => ({ unchanged: false as const, value: await deckRepository.listCards(d), version: null })),
     readDeck: vi.fn(async () => deck),
     saveDecks: vi.fn(async () => true),
@@ -169,6 +170,7 @@ function makeDeps() {
     listReviewStates: vi.fn(async () => []),
     getReviewState: vi.fn(async () => null),
     saveReviewState: vi.fn(async () => undefined),
+    createReviewStates: vi.fn(async () => undefined),
     applyReviewChanges: vi.fn(async () => undefined),
     readReviewStatesSince: vi.fn(async (d) => ({
       unchanged: false as const,
@@ -2226,6 +2228,7 @@ describe("the answer log", () => {
         const month = answer.studyDay.slice(0, 7);
         byMonth.set(month, [...(byMonth.get(month) ?? []), answer]);
       }),
+      appendAll: vi.fn(async () => undefined),
       months: vi.fn(async () => [...byMonth.keys()].sort()),
       readMonth: vi.fn(async (_instanceUrl: string, month: string) => byMonth.get(month) ?? []),
       removeDay: vi.fn(async (_instanceUrl: string, deckUrl: string, studyDay: string) => {
@@ -3100,7 +3103,7 @@ describe("library deck upgrade", () => {
     it("transferGuestStudy keeps a catalogue-less study as it is, and adds answers still on their way first", async () => {
       const { deps } = guestDeps();
       vi.mocked(deps.deckRepository.readCatalog).mockResolvedValue(null);
-      const answerLog: AnswerLog = { append: vi.fn(async () => undefined), months: vi.fn(async () => []), readMonth: vi.fn(async () => []), removeDay: vi.fn(async () => undefined) };
+      const answerLog: AnswerLog = { append: vi.fn(async () => undefined), appendAll: vi.fn(async () => undefined), months: vi.fn(async () => []), readMonth: vi.fn(async () => []), removeDay: vi.fn(async () => undefined) };
       vi.mocked(answerLog.append).mockRejectedValueOnce(new Error("offline"));
       const useCases = createUseCases({ ...deps, answerLog });
       const guestDeck = { ...deck, url: `${GUEST_INSTANCE_URL}catalog.ttl#deck-1` };
@@ -3200,6 +3203,485 @@ describe("library deck upgrade", () => {
       ).toMatchObject({ ok: false, step: "verify", error: new AppError("instanceChangedDuringCopy") });
     });
 
+    describe("adding the study to an instance", () => {
+      const RELEASE = "https://solid-memo.com/decks/solid-fundamentals/v1.ttl";
+      const guestDeckOf = (id: string, extra: Partial<Deck> = {}): Deck => ({
+        ...deck,
+        id,
+        url: `${GUEST_INSTANCE_URL}catalog.ttl#${id}`,
+        title: { en: id },
+        cardsDocumentUrl: `${GUEST_INSTANCE_URL}decks/${id}.ttl`,
+        reviewsDocumentUrl: `${GUEST_INSTANCE_URL}reviews/${id}.ttl`,
+        ...extra,
+      });
+      const course = guestDeckOf("deck-g1", { sourceUrl: RELEASE, completedChapters: [`${RELEASE}#ch-1`] });
+      const own = guestDeckOf("deck-g2");
+      const guestCard: Card = {
+        ...card,
+        url: `${course.cardsDocumentUrl}#q-1`,
+        id: "q-1",
+        distractors: [{ id: "q-1-d1", text: { en: "No" } }],
+      };
+      const guestState: ReviewState = {
+        cardId: "q-1",
+        direction: "front-to-back",
+        easeFactor: 2.5,
+        intervalDays: 1,
+        repetitions: 1,
+        due: "2026-10-02",
+        firstReviewedAt: "2026-10-01T10:00:00.000Z",
+        lastReviewedAt: "2026-10-01T10:00:00.000Z",
+        formatVersion: 2,
+      };
+      const answerTo = (of: Deck, id: string, extra: Partial<Answer> = {}): Answer => ({
+        id,
+        deckUrl: of.url,
+        cardUrl: `${of.cardsDocumentUrl}#q-1`,
+        direction: "front-to-back",
+        grade: 4,
+        answeredAt: "2026-10-01T10:00:00.000Z",
+        studyDay: "2026-10-01",
+        nextIntervalDays: 1,
+        ...extra,
+      });
+      const added = (id: string, from: Deck): Deck => ({
+        ...from,
+        id,
+        url: `${TARGET}catalog.ttl#${id}`,
+        cardsDocumentUrl: `${TARGET}decks/${id}.ttl`,
+        reviewsDocumentUrl: `${TARGET}reviews/${id}.ttl`,
+        formatVersion: DECK_FORMAT_VERSION,
+      });
+      const target: Instance = { url: TARGET, name: "Main" };
+      const targetDeck: Deck = { ...deck, url: `${TARGET}catalog.ttl#deck-t`, sourceUrl: RELEASE };
+      const GROUP = { url: `${GUEST_INSTANCE_URL}catalog.ttl#group-g`, title: { en: "Solid" } };
+      const RESOURCES = [
+        `${GUEST_INSTANCE_URL}catalog.ttl`,
+        `${GUEST_INSTANCE_URL}decks/`,
+        `${GUEST_INSTANCE_URL}decks/deck-g1.ttl`,
+        `${GUEST_INSTANCE_URL}digest.ttl`,
+        `${GUEST_INSTANCE_URL}history/`,
+        `${GUEST_INSTANCE_URL}history/2026-10.ttl`,
+        `${GUEST_INSTANCE_URL}reviews/deck-g1.ttl`,
+      ];
+
+      function mergeDeps() {
+        const { deps, guestPod } = guestDeps();
+        const answers = [
+          answerTo(course, "answer-1", { mode: "multiple-choice", chosenDistractor: `${course.cardsDocumentUrl}#q-1-d1` }),
+          answerTo(own, "answer-2"),
+          // A deck the guest removed: its answers have no deck to go with.
+          answerTo(guestDeckOf("deck-gone"), "answer-3"),
+        ];
+        const answerLog: AnswerLog = {
+          append: vi.fn(async () => undefined),
+          appendAll: vi.fn(async () => undefined),
+          months: vi.fn(async (url: string) => (url === GUEST_INSTANCE_URL ? ["2026-10"] : [])),
+          readMonth: vi.fn(async () => answers),
+          removeDay: vi.fn(async () => undefined),
+        };
+        vi.mocked(deps.deckRepository.listDecks).mockImplementation(async (url) =>
+          url === GUEST_INSTANCE_URL ? [course, own] : [targetDeck],
+        );
+        vi.mocked(deps.deckRepository.readDeckTree).mockResolvedValue({
+          readOnly: false,
+          children: [{ kind: "group", group: GROUP, children: [{ kind: "deck", deck: course }] }, { kind: "deck", deck: own }],
+        });
+        vi.mocked(deps.deckRepository.listCards).mockImplementation(async (of) => (of.url === course.url ? [guestCard] : []));
+        vi.mocked(deps.reviewStateRepository.listReviewStates).mockImplementation(async (of) => (of.url === course.url ? [guestState] : []));
+        vi.mocked(deps.instanceCopier.listResources).mockResolvedValue(RESOURCES);
+        vi.mocked(deps.deckRepository.readDeck).mockResolvedValue(null);
+        let id = 0;
+        const journal = new Map<string, string>();
+        const updateJournal = {
+          begin: vi.fn((key: string, value: string) => void journal.set(key, value)),
+          end: vi.fn((key: string) => void journal.delete(key)),
+          staging: vi.fn((key: string) => journal.get(key) ?? null),
+        };
+        return {
+          deps: { ...deps, answerLog, updateJournal, newId: () => `n${++id}` },
+          guestPod,
+          answers,
+          journal,
+        };
+      }
+
+      type MergeDeps = ReturnType<typeof mergeDeps>["deps"];
+      /** A guest's deck's stamp as read with mergeDeps: the course's documents listed, the other deck's not. */
+      const stampOf = (of: Deck) => guestDeckStamp(of, (url) => (of.url === course.url ? `after ${url}` : ""));
+      /** The guest's arrangement around the decks it was added as, as a group's note stamps it. */
+      const arrangementOf = (first: Deck, second: Deck) =>
+        JSON.stringify([
+          { kind: "group", group: GROUP, children: [{ kind: "deck", url: first.url }] },
+          { kind: "deck", url: second.url },
+        ]);
+
+      it("planGuestMerge lists the guest's decks with the instance's from the same release", async () => {
+        const { deps } = mergeDeps();
+        expect(await createUseCases(deps).planGuestMerge(guestInstance, target)).toEqual({
+          decks: [
+            { deck: course, sameRelease: [targetDeck] },
+            { deck: own, sameRelease: [] },
+          ],
+        });
+      });
+
+      it("mergeGuestStudy adds each deck whole — documents, entry, answers — groups them as the guest did, then deletes the guest's", async () => {
+        const { deps, answers, journal } = mergeDeps();
+        const hold = vi.fn(() => vi.fn());
+        const progress: string[] = [];
+        const outcome = await createUseCases({ ...deps, writeFence: { hold, pass: () => () => undefined } }).mergeGuestStudy(
+          session,
+          guestInstance,
+          { ...target, url: TARGET.slice(0, -1) },
+          {},
+          (p) => progress.push(`${p.step} ${p.done}/${p.total}${p.part === undefined ? "" : ` (${p.part.done} of ${p.part.total})`}`),
+        );
+        const first = added("deck-n1", course);
+        const second = added("deck-n2", own);
+        expect(outcome).toEqual({ ok: true, instance: { ...target, url: TARGET.slice(0, -1) }, added: [first, second], tidied: true });
+        expect(hold).toHaveBeenCalledWith(GUEST_INSTANCE_URL);
+        // The guest's study, checked whole before anything is written.
+        expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(`${GUEST_INSTANCE_URL}history/2026-10.ttl`);
+        const { url: _url, formatVersion: _version, ...content } = guestCard;
+        expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledExactlyOnceWith(first, { save: [content], remove: [] }, { whole: true });
+        expect(deps.reviewStateRepository.createReviewStates).toHaveBeenCalledExactlyOnceWith(first, [guestState]);
+        expect(vi.mocked(deps.deckRepository.addDeck).mock.calls).toEqual([[first], [second]]);
+        // Documents before the entry that names them.
+        expect(vi.mocked(deps.deckRepository.applyCardChanges).mock.invocationCallOrder[0]).toBeLessThan(
+          vi.mocked(deps.reviewStateRepository.createReviewStates).mock.invocationCallOrder[0]!,
+        );
+        expect(vi.mocked(deps.reviewStateRepository.createReviewStates).mock.invocationCallOrder[0]).toBeLessThan(
+          vi.mocked(deps.deckRepository.addDeck).mock.invocationCallOrder[0]!,
+        );
+        expect(vi.mocked(deps.answerLog.appendAll).mock.calls).toEqual([
+          [
+            TARGET,
+            [
+              {
+                ...answers[0],
+                id: "answer-1-deck-n1",
+                deckUrl: first.url,
+                cardUrl: `${first.cardsDocumentUrl}#q-1`,
+                chosenDistractor: `${first.cardsDocumentUrl}#q-1-d1`,
+              },
+            ],
+          ],
+          [TARGET, [{ ...answers[1], id: "answer-2-deck-n2", deckUrl: second.url, cardUrl: `${second.cardsDocumentUrl}#q-1` }]],
+        ]);
+        expect(deps.deckRepository.editDeckTree).toHaveBeenCalledExactlyOnceWith(TARGET, {
+          kind: "graft",
+          nodes: [
+            { kind: "group", group: { url: `${TARGET}catalog.ttl#group-n3`, title: GROUP.title }, children: [{ kind: "deck", url: first.url }] },
+            { kind: "deck", url: second.url },
+          ],
+        });
+        // The target's preferences stay; the guest's are not read, nor anything registered.
+        expect(deps.preferencesRepository.savePreferences).not.toHaveBeenCalled();
+        expect(deps.instanceRepository.registerDataClasses).not.toHaveBeenCalled();
+        expect(deps.instanceRepository.deleteInstance).toHaveBeenCalledWith({ webId: GUEST_WEBID, instance: guestInstance });
+        // Each deck's note kept while the guest's study was here, then forgotten.
+        expect(deps.updateJournal.begin).toHaveBeenCalledWith(
+          `${course.url} added to ${TARGET}`,
+          JSON.stringify({ url: first.url, stamp: stampOf(course) }),
+        );
+        expect(deps.updateJournal.begin).toHaveBeenCalledWith(`${own.url} added to ${TARGET}`, JSON.stringify({ url: second.url, stamp: stampOf(own) }));
+        expect(deps.updateJournal.begin).toHaveBeenCalledWith(
+          `${GROUP.url} added to ${TARGET}`,
+          JSON.stringify({ url: `${TARGET}catalog.ttl#group-n3`, stamp: arrangementOf(first, second) }),
+        );
+        expect(journal.size).toBe(0);
+        expect(progress).toEqual([
+          "read 0/5 (0 of 2)",
+          "read 0/5 (1 of 2)",
+          "decks 1/5 (0 of 2)",
+          "decks 1/5 (1 of 2)",
+          "arrange 2/5",
+          "verify 3/5 (0 of 5)",
+          "verify 3/5 (1 of 5)",
+          "verify 3/5 (2 of 5)",
+          "verify 3/5 (3 of 5)",
+          "verify 3/5 (4 of 5)",
+          "tidy 4/5",
+          "tidy 5/5",
+        ]);
+      });
+
+      it("mergeGuestStudy leaves out the decks skipped, with their answers and places, and makes no groups when the guest made none", async () => {
+        const { deps, guestPod } = mergeDeps();
+        vi.mocked(deps.deckRepository.readDeckTree).mockResolvedValue({ readOnly: false, children: [] });
+        vi.mocked(deps.instanceRepository.deleteInstance).mockImplementation(async () => {
+          vi.mocked(deps.instanceRepository.listInstances).mockResolvedValue([]);
+          return { keptFolder: null };
+        });
+        const outcome = await createUseCases(deps).mergeGuestStudy(session, guestInstance, target, { skip: [course.url] });
+        expect(outcome).toMatchObject({ ok: true, added: [added("deck-n1", own)] });
+        expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
+        expect(deps.reviewStateRepository.createReviewStates).not.toHaveBeenCalled();
+        expect(deps.answerLog.appendAll).toHaveBeenCalledExactlyOnceWith(TARGET, [
+          expect.objectContaining({ id: "answer-2-deck-n1", deckUrl: `${TARGET}catalog.ttl#deck-n1` }),
+        ]);
+        expect(deps.deckRepository.editDeckTree).not.toHaveBeenCalled();
+        expect(guestPod.discard).toHaveBeenCalledOnce();
+      });
+
+      it("mergeGuestStudy adds a deck it added from this device before, unchanged since, only its answers again", async () => {
+        const { deps, journal } = mergeDeps();
+        const before = added("deck-earlier", course);
+        vi.mocked(deps.deckRepository.listDecks).mockImplementation(async (url) =>
+          url === GUEST_INSTANCE_URL ? [course, own] : [targetDeck, before],
+        );
+        journal.set(`${course.url} added to ${TARGET}`, JSON.stringify({ url: before.url, stamp: stampOf(course) }));
+        journal.set(
+          `${GROUP.url} added to ${TARGET}`,
+          JSON.stringify({ url: `${TARGET}catalog.ttl#group-earlier`, stamp: arrangementOf(before, added("deck-n1", own)) }),
+        );
+        // A note of a deck the instance no longer has is no reason to leave one out.
+        journal.set(`${own.url} added to ${TARGET}`, JSON.stringify({ url: `${TARGET}catalog.ttl#deck-removed`, stamp: stampOf(own) }));
+        const outcome = await createUseCases(deps).mergeGuestStudy(session, guestInstance, target);
+        expect(outcome).toMatchObject({ ok: true, added: [before, added("deck-n1", own)] });
+        expect(vi.mocked(deps.deckRepository.addDeck).mock.calls).toEqual([[added("deck-n1", own)]]);
+        // The same entries as before: adding them again changes nothing.
+        expect(deps.answerLog.appendAll).toHaveBeenCalledWith(TARGET, [expect.objectContaining({ id: "answer-1-deck-earlier", deckUrl: before.url })]);
+        expect(vi.mocked(deps.updateJournal.begin).mock.calls.map(([key]) => key)).toEqual([
+          `${own.url} added to ${TARGET}`,
+          `${GROUP.url} added to ${TARGET}`,
+        ]);
+        // The group an earlier run made is made under the same URL: a graft already made changes nothing.
+        expect(deps.deckRepository.editDeckTree).toHaveBeenCalledWith(TARGET, {
+          kind: "graft",
+          nodes: [
+            { kind: "group", group: { url: `${TARGET}catalog.ttl#group-earlier`, title: GROUP.title }, children: [{ kind: "deck", url: before.url }] },
+            { kind: "deck", url: `${TARGET}catalog.ttl#deck-n1` },
+          ],
+        });
+      });
+
+      it("mergeGuestStudy adds again, as a deck of its own, a deck the guest changed since it was added", async () => {
+        const { deps, journal } = mergeDeps();
+        const before = added("deck-earlier", course);
+        vi.mocked(deps.deckRepository.listDecks).mockImplementation(async (url) =>
+          url === GUEST_INSTANCE_URL ? [course] : [before],
+        );
+        journal.set(`${course.url} added to ${TARGET}`, JSON.stringify({ url: before.url, stamp: "older versions" }));
+        expect(await createUseCases(deps).mergeGuestStudy(session, guestInstance, target)).toMatchObject({
+          ok: true,
+          added: [added("deck-n1", course)],
+        });
+        // Its answers are entries of their own, beside those of the deck added before: no entry names two decks.
+        expect(deps.answerLog.appendAll).toHaveBeenCalledWith(TARGET, [
+          expect.objectContaining({ id: "answer-1-deck-n1", deckUrl: `${TARGET}catalog.ttl#deck-n1` }),
+        ]);
+      });
+
+      it("mergeGuestStudy adds again a deck whose entry alone the guest changed since, and makes groups arranged otherwise anew", async () => {
+        const { deps, journal } = mergeDeps();
+        const before = added("deck-earlier", course);
+        const renamed = { ...course, title: { en: "Renamed" }, newCardsPerDay: 5 };
+        vi.mocked(deps.deckRepository.listDecks).mockImplementation(async (url) =>
+          url === GUEST_INSTANCE_URL ? [renamed, own] : [targetDeck, before],
+        );
+        journal.set(`${course.url} added to ${TARGET}`, JSON.stringify({ url: before.url, stamp: stampOf(course) }));
+        journal.set(
+          `${GROUP.url} added to ${TARGET}`,
+          JSON.stringify({ url: `${TARGET}catalog.ttl#group-earlier`, stamp: arrangementOf(before, added("deck-n1", own)) }),
+        );
+        const outcome = await createUseCases(deps).mergeGuestStudy(session, guestInstance, target);
+        const again = added("deck-n1", renamed);
+        expect(outcome).toMatchObject({ ok: true, added: [again, added("deck-n2", own)] });
+        expect(deps.deckRepository.addDeck).toHaveBeenCalledWith(again);
+        expect(deps.deckRepository.editDeckTree).toHaveBeenCalledWith(TARGET, {
+          kind: "graft",
+          nodes: [
+            { kind: "group", group: { url: `${TARGET}catalog.ttl#group-n3`, title: GROUP.title }, children: [{ kind: "deck", url: again.url }] },
+            { kind: "deck", url: `${TARGET}catalog.ttl#deck-n2` },
+          ],
+        });
+      });
+
+      it("mergeGuestStudy refuses, before writing anything, to make groups in an arrangement a newer version wrote", async () => {
+        const { deps } = mergeDeps();
+        const guestTree = await deps.deckRepository.readDeckTree(GUEST_INSTANCE_URL);
+        vi.mocked(deps.deckRepository.readDeckTree).mockImplementation(async (url) =>
+          url === TARGET ? { readOnly: true, children: [] } : guestTree,
+        );
+        expect(await createUseCases(deps).mergeGuestStudy(session, guestInstance, target)).toMatchObject({
+          ok: false,
+          step: "read",
+          error: new AppError("deckTreeTooNew"),
+          added: [],
+        });
+        expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
+        expect(deps.deckRepository.addDeck).not.toHaveBeenCalled();
+        // A guest who made no group has nothing to arrange there.
+        vi.mocked(deps.deckRepository.readDeckTree).mockImplementation(async (url) =>
+          url === TARGET ? { readOnly: true, children: [] } : { readOnly: false, children: [] },
+        );
+        expect(await createUseCases(deps).mergeGuestStudy(session, guestInstance, target)).toMatchObject({ ok: true });
+      });
+
+      it("mergeGuestStudy adds only from the guest's pod to an instance of a user who logged in", async () => {
+        const { deps } = mergeDeps();
+        const useCases = createUseCases(deps);
+        const refusal = "A guest's study is added from the guest's pod to an instance of a user who logged in.";
+        await expect(useCases.mergeGuestStudy(GUEST_SESSION, guestInstance, target)).rejects.toThrow(refusal);
+        await expect(useCases.mergeGuestStudy(session, instance, target)).rejects.toThrow(refusal);
+        await expect(useCases.mergeGuestStudy(session, guestInstance, guestInstance)).rejects.toThrow(refusal);
+      });
+
+      it("mergeGuestStudy adds nothing from a guest's study that does not conform, or that a newer version wrote", async () => {
+        const { deps } = mergeDeps();
+        const violation = { message: { en: "x" }, severity: "violation" as const, constraint: "MinCount" };
+        vi.mocked(deps.shapeValidator.validateDocument).mockImplementation(async (url) => ({
+          url,
+          status: "checked" as const,
+          subjects: url.endsWith("catalog.ttl")
+            ? [{ url: `${url}#x`, status: "checked" as const, shape: "deck" as const, version: 6, violations: [violation] }]
+            : [],
+        }));
+        expect(await createUseCases(deps).mergeGuestStudy(session, guestInstance, target)).toEqual({
+          ok: false,
+          instance: target,
+          step: "read",
+          error: new AppError("guestStudyInvalid", { count: 1 }),
+          added: [],
+        });
+        vi.mocked(deps.shapeValidator.validateDocument).mockImplementation(async (url) => ({
+          url,
+          status: "checked" as const,
+          subjects: [{ url: `${url}#x`, status: "newer" as const, shape: "card" as const, version: 9, latest: 5 }],
+        }));
+        expect(await createUseCases(deps).mergeGuestStudy(session, guestInstance, target)).toMatchObject({
+          ok: false,
+          step: "read",
+          error: new AppError("guestStudyTooNew"),
+        });
+        expect(deps.deckRepository.addDeck).not.toHaveBeenCalled();
+        expect(deps.instanceRepository.deleteInstance).not.toHaveBeenCalled();
+      });
+
+      it("mergeGuestStudy writes nothing of a deck that would still name the guest's pod", async () => {
+        const { deps } = mergeDeps();
+        vi.mocked(deps.deckRepository.listCards).mockResolvedValue([{ ...guestCard, frontImageUrl: `${GUEST_ORIGIN}picture.png` }]);
+        expect(await createUseCases(deps).mergeGuestStudy(session, guestInstance, target)).toMatchObject({
+          ok: false,
+          step: "decks",
+          error: new AppError("guestUrlsLeft", { url: `${TARGET}catalog.ttl#deck-n1` }),
+          added: [],
+        });
+        expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
+      });
+
+      it("mergeGuestStudy stops at a deck it cannot add, keeping the decks added whole and the guest's study, deleting the deck's documents", async () => {
+        const { deps, journal } = mergeDeps();
+        vi.mocked(deps.deckRepository.listDecks).mockImplementation(async (url) =>
+          url === GUEST_INSTANCE_URL ? [own, course] : [targetDeck],
+        );
+        vi.mocked(deps.deckRepository.addDeck).mockResolvedValueOnce(added("deck-n1", own)).mockRejectedValueOnce(new Error("offline"));
+        vi.mocked(deps.deckRepository.deleteDocument).mockRejectedValueOnce(new Error("still offline"));
+        const outcome = await createUseCases(deps).mergeGuestStudy(session, guestInstance, target);
+        expect(outcome).toEqual({ ok: false, instance: target, step: "decks", error: new Error("offline"), added: [added("deck-n1", own)] });
+        // The entry was not written after all: the documents nothing names go.
+        expect(deps.deckRepository.readDeck).toHaveBeenCalledWith(`${TARGET}catalog.ttl#deck-n2`);
+        expect(vi.mocked(deps.deckRepository.deleteDocument).mock.calls).toEqual([
+          [`${TARGET}decks/deck-n2.ttl`],
+          [`${TARGET}reviews/deck-n2.ttl`],
+        ]);
+        expect(deps.instanceRepository.deleteInstance).not.toHaveBeenCalled();
+        expect(journal.size).toBe(1);
+        expect(deps.deckRepository.editDeckTree).not.toHaveBeenCalled();
+      });
+
+      it("mergeGuestStudy deletes only what it wrote of a deck it could not add, and counts a deck whose entry was written though its answer was lost", async () => {
+        const { deps } = mergeDeps();
+        vi.mocked(deps.reviewStateRepository.createReviewStates).mockRejectedValueOnce(new AppError("createdElsewhere", { url: "x" }));
+        expect(await createUseCases(deps).mergeGuestStudy(session, guestInstance, target)).toMatchObject({ ok: false, step: "decks", added: [] });
+        expect(deps.deckRepository.readDeck).not.toHaveBeenCalled();
+        // The cards document it wrote goes; the reviews document someone else created stays.
+        expect(vi.mocked(deps.deckRepository.deleteDocument).mock.calls).toEqual([[`${TARGET}decks/deck-n1.ttl`]]);
+
+        const lost = mergeDeps();
+        const there = added("deck-n1", course);
+        vi.mocked(lost.deps.deckRepository.addDeck).mockRejectedValueOnce(new Error("connection reset"));
+        vi.mocked(lost.deps.deckRepository.readDeck).mockResolvedValueOnce(there);
+        expect(await createUseCases(lost.deps).mergeGuestStudy(session, guestInstance, target)).toMatchObject({
+          ok: true,
+          added: [there, added("deck-n2", own)],
+        });
+        expect(lost.deps.deckRepository.deleteDocument).not.toHaveBeenCalled();
+
+        const unknown = mergeDeps();
+        vi.mocked(unknown.deps.deckRepository.applyCardChanges).mockRejectedValueOnce(new Error("connection reset"));
+        vi.mocked(unknown.deps.deckRepository.readDeck).mockRejectedValueOnce(new Error("offline"));
+        expect(await createUseCases(unknown.deps).mergeGuestStudy(session, guestInstance, target)).toMatchObject({ ok: false, step: "decks" });
+        // A write whose answer was lost may have been made: its document goes, as nothing names it.
+        expect(vi.mocked(unknown.deps.deckRepository.deleteDocument).mock.calls).toEqual([[`${TARGET}decks/deck-n1.ttl`]]);
+      });
+
+      it.each([
+        ["decks", (deps: MergeDeps) => vi.mocked(deps.answerLog.appendAll).mockRejectedValueOnce(new Error("boom")), 1],
+        ["arrange", (deps: MergeDeps) => vi.mocked(deps.deckRepository.editDeckTree).mockRejectedValueOnce(new Error("boom")), 2],
+      ] as const)("mergeGuestStudy failing at %s keeps the decks added and the guest's study", async (step, fail, count) => {
+        const { deps } = mergeDeps();
+        fail(deps);
+        const outcome = await createUseCases(deps).mergeGuestStudy(session, guestInstance, target);
+        expect(outcome).toMatchObject({
+          ok: false,
+          step,
+          error: new Error("boom"),
+          added: [added("deck-n1", course), added("deck-n2", own)].slice(0, count),
+        });
+        expect(deps.instanceRepository.deleteInstance).not.toHaveBeenCalled();
+      });
+
+      it("mergeGuestStudy keeps the guest's study when it changed while it was being added", async () => {
+        const { deps } = mergeDeps();
+        vi.mocked(deps.instanceCopier.listResources)
+          .mockResolvedValueOnce(RESOURCES)
+          .mockResolvedValueOnce([...RESOURCES, `${GUEST_INSTANCE_URL}new.ttl`]);
+        expect(await createUseCases(deps).mergeGuestStudy(session, guestInstance, target)).toMatchObject({
+          ok: false,
+          step: "verify",
+          error: new AppError("guestStudyChanged"),
+        });
+        const changed = mergeDeps();
+        let reads = 0;
+        vi.mocked(changed.deps.documentBackups.versionOf).mockImplementation(async (url) =>
+          url.endsWith("2026-10.ttl") && ++reads > 1 ? "newer" : `after ${url}`,
+        );
+        expect(await createUseCases(changed.deps).mergeGuestStudy(session, guestInstance, target)).toMatchObject({
+          ok: false,
+          step: "verify",
+          error: new AppError("guestStudyChanged", { url: `${GUEST_INSTANCE_URL}history/2026-10.ttl` }),
+        });
+        expect(changed.deps.instanceRepository.deleteInstance).not.toHaveBeenCalled();
+      });
+
+      it("mergeGuestStudy says the study was added even when the guest's could not be deleted, and keeps its notes", async () => {
+        const { deps, journal } = mergeDeps();
+        vi.mocked(deps.instanceRepository.deleteInstance).mockRejectedValue(new Error("offline"));
+        expect(await createUseCases(deps).mergeGuestStudy(session, guestInstance, target)).toMatchObject({ ok: true, tidied: false });
+        expect([...journal.keys()]).toEqual([
+          `${course.url} added to ${TARGET}`,
+          `${own.url} added to ${TARGET}`,
+          `${GROUP.url} added to ${TARGET}`,
+        ]);
+      });
+
+      it("mergeGuestStudy adds answers still on their way to the guest's log first", async () => {
+        const { deps } = mergeDeps();
+        vi.mocked(deps.answerLog.append).mockRejectedValueOnce(new Error("offline"));
+        const useCases = createUseCases(deps);
+        await useCases.recordReview(GUEST_INSTANCE_URL, own, { card, direction: "front-to-back" }, 4, new Date("2026-10-03T10:00:00.000Z"));
+        await vi.waitFor(() => expect(deps.answerLog.append).toHaveBeenCalledOnce());
+        await useCases.mergeGuestStudy(session, guestInstance, target);
+        expect(deps.answerLog.append).toHaveBeenCalledTimes(2);
+        expect(vi.mocked(deps.answerLog.append).mock.invocationCallOrder[1]).toBeLessThan(
+          vi.mocked(deps.instanceCopier.listResources).mock.invocationCallOrder[0]!,
+        );
+      });
+    });
+
     it("transferGuestStudy names the copy it could not remove", async () => {
       const { deps } = guestDeps();
       vi.mocked(deps.instanceCopier.copyResource).mockRejectedValueOnce("offline");
@@ -3282,6 +3764,7 @@ describe("courses", () => {
       append: vi.fn(async (_instanceUrl, answer) => {
         appended.push(answer);
       }),
+      appendAll: vi.fn(async () => undefined),
       months: vi.fn(async () => []),
       readMonth: vi.fn(async () => []),
       removeDay: vi.fn(async () => undefined),
