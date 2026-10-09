@@ -138,6 +138,12 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
     undoCardEdit: vi.fn(async () => undefined),
     resetCards: vi.fn(async (_instanceUrl, _deck, ids) => ids.length),
     rescheduleCards: vi.fn(async (_instanceUrl, _deck, ids) => ids.length),
+    transferCards: vi.fn(async (_instanceUrl, _from, _to, ids) => ({
+      cards: ids.map((id: string) => ({ from: id, to: id, present: false })),
+      missing: [],
+      target: { save: [], reviewSaves: [], reviewRemovals: [] },
+      source: { remove: [], reviewRemovals: [] },
+    })),
     planRepair: vi.fn(() => ({ repairs: [], unrepairable: [] })),
     applyRepairs: vi.fn(async () => undefined),
     planMigration: vi.fn(async () => ({

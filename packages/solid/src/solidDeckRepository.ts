@@ -536,7 +536,7 @@ export function createSolidDeckRepository({
   function withCardChanges(
     dataset: SolidDataset,
     deck: Deck,
-    { save: saved, remove }: { save: (CardContent & { id: string; retired?: true })[]; remove: string[] },
+    { save: saved, remove }: { save: (CardContent & { id: string; createdAt?: string; retired?: true })[]; remove: string[] },
   ): { dataset: SolidDataset; subjects: string[] } {
     const urlOf = (id: string) => `${deck.cardsDocumentUrl}#${id}`;
     let updated = dataset;

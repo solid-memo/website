@@ -5,8 +5,9 @@ Solid Memo Studio is a second app beside Solid Memo, at
 Later it is also where creators build decks and courses and publish
 them. For now it shows the decks of an instance in a table, changes
 several of them at once, arranges them into groups, lists a deck's
-cards to search, filter, sort, select and edit at once, and edits one
-card, its wrong options and its schedule included. It also edits what
+cards to search, filter, sort, select, edit at once and move or copy
+to another deck, and edits one card, its wrong options and its
+schedule included. It also edits what
 a deck says of itself (its authors and licence among it), a course's
 progress, and the instance's name and catalogue.
 
@@ -212,6 +213,8 @@ edits are:
 - **Set due date** and **Forget progress**, of the cards' review states
   in every direction ([below](#review-state)). A card not studied yet
   stays new. These have no Undo, and a forget asks first.
+- **Move to deck…** and **Copy to deck…**, to another deck of the
+  instance ([below](#moving-and-copying-cards)). These have no Undo.
 
 The domain plans each edit
 ([cardBulk.ts](../packages/domain/src/cardBulk.ts), `planCardEdit`). A
@@ -330,6 +333,61 @@ bring the deck's schedule in the digest up to date. The screens then
 read the review states afresh and drop the deck's study queue. The
 end-to-end tests hold both against real servers
 ([reviewStateEdits.integration.test.ts](../e2e/pod/src/reviewStateEdits.integration.test.ts)).
+
+## Moving and copying cards
+
+**Move to deck…** and **Copy to deck…** open a form
+([`TransferCardsDialog`](../apps/studio/src/ui/TransferCardsDialog.tsx)).
+It offers the instance's other decks, and **Keep their progress**,
+ticked to start with. It says what becomes of the cards' history. A
+moved card leaves the selection.
+
+The domain plans the transfer
+([cardTransfer.ts](../packages/domain/src/cardTransfer.ts),
+`planCardTransfer`):
+
+- A card keeps its id when the target's cards document has no subject
+  of that id, nor of its wrong options' ids. Else it gets the first free
+  id of `<id>-2`, `<id>-3` and so on. Its wrong options are then
+  renumbered after it (`<new id>-d1`, `-d2`…), as the inspector names
+  new ones. The status line says how many cards got a new id.
+- A card keeps its content, its creation time and whether it is
+  retired. The target's document keeps its own links: the card is its
+  deck's.
+- Only what Solid Memo knows of a card goes with it. Triples another
+  app put on the card or its wrong options are not copied to the
+  target, and a move removes them from the source with the card
+  ([data-model.md](data-model.md#write-discipline)).
+- With **Keep their progress**, the card's review states go with it,
+  under its id in the target, their snapshot for resetting the study
+  day included. Without, the card starts as new there.
+- A move then removes the cards from the source, with their review
+  states. A copy leaves the source as it is.
+- Past answers are not touched. They keep naming the source, so a
+  moved card's history starts again in the target
+  ([data-model.md](data-model.md#the-answer-log)).
+
+The use case `transferCards` writes the target first: its cards
+document in one write, made only if it is still as read (If-Match),
+then its reviews document. For a move, it then writes the source's
+reviews document, and last its cards document, If-Match too. A
+document changed meanwhile, or made since it was read as absent, has
+the whole transfer planned again, three times in all, then it stops with
+"changed elsewhere". Then the schedules of the decks it touched are
+brought up to date in the digest. The workbench reads both decks
+afresh, and the instance's decks for their counts.
+
+A move stopped half way (the target written, the source not, or only
+its review states) leaves the cards in both decks, never in neither.
+Making it again finishes it. The plan names the same ids each time,
+and a card the target holds already under its id, saying the same, is
+not written again; a state it has there is kept. Two cards of the
+source saying the same are never both found at one id. The source's
+states go before its cards: a card is never removed while its states
+stay behind, where nothing would clean them up. The end-to-end tests
+hold this against real servers, a move stopped before the source's
+cards were written included
+([cardTransfer.integration.test.ts](../e2e/pod/src/cardTransfer.integration.test.ts)).
 
 ## A deck's about screen
 

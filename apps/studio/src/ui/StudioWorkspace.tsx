@@ -171,6 +171,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             useCases={useCases}
             instance={activeInstance!}
             deck={activeDeck!}
+            decks={decksQuery.data!}
             query={route.query ?? DEFAULT_CARD_QUERY}
             // Like Home's view, the query is no Back stop.
             onQuery={(query) => replace({ ...route, query })}

@@ -1185,6 +1185,7 @@
     "distractorPublished": "이 오답 선택지는 덱을 가져온 릴리스에 들어 있어서 삭제할 수 없어요. 대신 사용 중지해 주세요.",
     "dailyLimitInvalid": "하루 한도는 0 이상의 정수여야 해요.",
     "dueDayInvalid": "‘{day}’은(는) 날짜가 아니에요. 카드를 복습할 날짜를 선택해 주세요.",
+    "cardTransferSameDeck": "카드가 이미 이 덱에 있어요. 다른 덱을 선택해 주세요.",
     "licenseUnknown": "제시된 라이선스 중 하나를 선택해 주세요.",
     "authorEmpty": "저자 이름을 입력해 주세요.",
     "authorTwice": "{author}이(가) 두 번 들어 있어요. 저자는 한 번씩만 입력해 주세요.",
@@ -1586,7 +1587,40 @@
         "other": "카드 {count}장은 그대로 두었어요."
       },
       "undo": "실행 취소",
-      "undone": "실행 취소했어요. 카드가 원래대로 돌아갔어요."
+      "undone": "실행 취소했어요. 카드가 원래대로 돌아갔어요.",
+      "moveTo": "덱으로 옮기기…",
+      "copyTo": "다른 덱으로 복사…",
+      "transfer": {
+        "deck": "대상 덱",
+        "keepProgress": "진행 상황 유지",
+        "moveHint": "다른 덱에 카드가 들어가면 이 덱에서는 카드가 빠져요. 지난 답변은 이 덱에 남으니, 그 덱에서는 기록이 새로 시작돼요.",
+        "copyHint": "이 덱의 카드는 그대로 남아요. 복사본의 기록은 다른 덱에서 새로 시작돼요.",
+        "noDeck": "이 인스턴스에는 카드를 넣을 다른 덱이 없어요.",
+        "move": {
+          "one": "카드 {count}장 옮기기",
+          "other": "카드 {count}장 옮기기"
+        },
+        "copy": {
+          "one": "카드 {count}장 복사",
+          "other": "카드 {count}장 복사"
+        },
+        "moved": {
+          "one": "카드 {count}장을 {deck}(으)로 옮겼어요.",
+          "other": "카드 {count}장을 {deck}(으)로 옮겼어요."
+        },
+        "copied": {
+          "one": "카드 {count}장을 {deck}(으)로 복사했어요.",
+          "other": "카드 {count}장을 {deck}(으)로 복사했어요."
+        },
+        "renamed": {
+          "one": "카드 {count}장에 새 ID를 붙였어요. 덱에 같은 ID의 카드가 이미 있었어요.",
+          "other": "카드 {count}장에 새 ID를 붙였어요. 덱에 같은 ID의 카드가 이미 있었어요."
+        },
+        "present": {
+          "one": "카드 {count}장은 이미 있었어요.",
+          "other": "카드 {count}장은 이미 있었어요."
+        }
+      }
     },
     "license": {
       "label": "라이선스",

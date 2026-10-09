@@ -17,6 +17,7 @@ import { instanceA, makeCard, makeDeck } from "../test/fixtures";
 const deck = makeDeck("deck-1", { en: "Kanji N5" });
 const water = { ...makeCard(deck, "water"), back: { en: "**Water**" }, textFormat: SM.markdown };
 const fire = makeCard(deck, "fire");
+const nouns = makeDeck("nouns", { en: "Nouns" });
 const today = studyDayOf(new Date(), DEFAULT_PREFERENCES.dayBoundaryHour);
 const dueToday: ReviewState = {
   cardId: "fire",
@@ -38,6 +39,7 @@ function renderContainer(useCases: UseCases, query: CardQuery = DEFAULT_CARD_QUE
         useCases={useCases}
         instance={instanceA}
         deck={of}
+        decks={[deck, nouns]}
         query={query}
         onQuery={() => undefined}
         cardHref={(card) => `../#/card?card=${card.id}`}
@@ -212,5 +214,58 @@ describe("CardWorkbenchContainer", () => {
     fireEvent.click(within(screen.getByRole("group", { name: "Selected cards" })).getByRole("button", { name: "Forget progress" }));
     await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("Pod unreachable"));
     vi.unstubAllGlobals();
+  });
+
+  it("moves the selected cards to another deck, says what it did, and reads both decks afresh", async () => {
+    let cards = [water, fire];
+    const useCases = makeUseCasesFake({
+      listCards: vi.fn(async (of) => (of.url === deck.url ? cards : [])),
+      transferCards: vi.fn(async () => {
+        cards = [water];
+        return {
+          cards: [{ from: "fire", to: "fire-2", present: false }],
+          missing: ["gone"],
+          target: { save: [], reviewSaves: [], reviewRemovals: [] },
+          source: { remove: ["fire"], reviewRemovals: [] },
+        };
+      }),
+    });
+    renderContainer(useCases);
+    fireEvent.click(await screen.findByRole("checkbox", { name: "Select fire" }));
+    const bulk = () => within(screen.getByRole("group", { name: "Selected cards" }));
+    fireEvent.click(bulk().getByRole("button", { name: "Move to deck…" }));
+    // The deck itself is no choice.
+    expect(within(screen.getByRole("combobox", { name: "To the deck" })).getAllByRole("option").map((o) => o.textContent)).toEqual(["Nouns"]);
+    fireEvent.click(screen.getByRole("button", { name: "Move 1 card" }));
+    expect(
+      await screen.findByText("Moved 1 card to Nouns. 1 card got a new id: the deck already had one with its id. 1 card was left as it was."),
+    ).toBeInTheDocument();
+    expect(useCases.transferCards).toHaveBeenCalledWith(instanceA.url, deck, nouns, ["fire"], { mode: "move", keepProgress: true });
+    await waitFor(() => expect(fronts()).toEqual(["water"]));
+    expect(screen.getByText("0 cards selected")).toBeInTheDocument();
+  });
+
+  it("says when a copy found cards there already, and why a transfer was not made", async () => {
+    const useCases = makeUseCasesFake({ listCards: vi.fn(async () => [water, fire]) });
+    vi.mocked(useCases.transferCards).mockResolvedValueOnce({
+      cards: [{ from: "fire", to: "fire", present: true }],
+      missing: [],
+      target: { save: [], reviewSaves: [], reviewRemovals: [] },
+      source: { remove: [], reviewRemovals: [] },
+    });
+    renderContainer(useCases);
+    fireEvent.click(await screen.findByRole("checkbox", { name: "Select fire" }));
+    const bulk = () => within(screen.getByRole("group", { name: "Selected cards" }));
+    fireEvent.click(bulk().getByRole("button", { name: "Copy to deck…" }));
+    fireEvent.click(screen.getByRole("button", { name: "Copy 1 card" }));
+    expect(await screen.findByText("Copied 1 card to Nouns. 1 card was there already.")).toBeInTheDocument();
+    // Still selected: a copy leaves the cards where they are.
+    expect(screen.getByText("1 card selected")).toBeInTheDocument();
+
+    vi.mocked(useCases.transferCards).mockRejectedValueOnce(new Error("Pod unreachable"));
+    await waitFor(() => expect(bulk().getByRole("button", { name: "Copy to deck…" })).toBeEnabled());
+    fireEvent.click(bulk().getByRole("button", { name: "Copy to deck…" }));
+    fireEvent.click(screen.getByRole("button", { name: "Copy 1 card" }));
+    await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("Pod unreachable"));
   });
 });

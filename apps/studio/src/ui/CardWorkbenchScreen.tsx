@@ -20,7 +20,9 @@ import { useI18n, type ErrorText } from "@solid-memo/ui/i18n";
 import { paginate, Pager } from "@solid-memo/ui/Pager";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
 import { RetiredTag } from "@solid-memo/ui/RetiredCards";
+import type { CardTransferPlan } from "@solid-memo/domain/cardTransfer";
 import { CardBulkActions, type ReviewEdit } from "./CardBulkActions";
+import type { CardTransfer } from "./TransferCardsDialog";
 
 /** The columns after the card's front, each sorted by its key. */
 const COLUMNS: readonly Exclude<CardSort, "front">[] = ["back", "due", "interval", "ease", "created", "id"];
@@ -39,6 +41,12 @@ export interface CardEditMade {
 export interface ReviewEditMade {
   edit: ReviewEdit;
   count: number;
+}
+
+/** A move or copy made, and what it did. */
+export interface TransferMade {
+  transfer: CardTransfer;
+  plan: CardTransferPlan;
 }
 
 /** How the status line names an edit made. */
@@ -73,7 +81,11 @@ function typedInto(target: EventTarget | null): boolean {
  * `onUndo`) until the next edit, or until the page is left. Deleted
  * cards leave the selection. Their review states can be forgotten or
  * set due on a day (`onReviewEdit`); the status line then says how many
- * cards changed (`reviewDone`), with no undo.
+ * cards changed (`reviewDone`), with no undo. They can be moved or
+ * copied to another of the instance's decks (`decks`, `onTransfer`);
+ * the status line then says how many went where, how many got a new id
+ * there and how many it had already (`transferDone`). Moved cards leave
+ * the selection.
  */
 export function CardWorkbenchScreen({
   deck,
@@ -93,6 +105,9 @@ export function CardWorkbenchScreen({
   today,
   onReviewEdit,
   reviewDone,
+  decks,
+  onTransfer,
+  transferDone,
   busy,
   error,
 }: {
@@ -124,6 +139,12 @@ export function CardWorkbenchScreen({
   onReviewEdit: (ids: readonly string[], edit: ReviewEdit) => Promise<boolean>;
   /** The last edit of review states made on this page. */
   reviewDone: ReviewEditMade | null;
+  /** The decks cards can be moved or copied to: the instance's others. */
+  decks: readonly Deck[];
+  /** Move or copy the cards of these ids; whether it was made. */
+  onTransfer: (ids: readonly string[], transfer: CardTransfer) => Promise<boolean>;
+  /** The last move or copy made on this page. */
+  transferDone: TransferMade | null;
   /** An edit, or its undo, is being made. */
   busy: boolean;
   error: ErrorText | null;
@@ -249,6 +270,7 @@ export function CardWorkbenchScreen({
               : t("studio.cardBulk.done.reschedule", { count: reviewDone.count, due: formatDate(reviewDone.edit.due) })}
         </p>
       )}
+      {transferDone !== null && <TransferStatus made={transferDone} />}
       <ErrorMessage error={error} />
       {total === 0 ? (
         <p>{t("studio.cards.empty")}</p>
@@ -315,6 +337,13 @@ export function CardWorkbenchScreen({
               }
               today={today}
               onReviewEdit={(edit) => onReviewEdit(ids, edit)}
+              decks={decks}
+              onTransfer={(transfer) =>
+                onTransfer(ids, transfer).then((ok) => {
+                  if (ok && transfer.mode === "move") toggle(selected.map((card) => card.url), false);
+                  return ok;
+                })
+              }
             />
           )}
           {rows.length === 0 ? (
@@ -393,4 +422,21 @@ export function CardWorkbenchScreen({
       )}
     </section>
   );
+}
+
+/** What a move or copy did: how many cards went where, how many got a new id, how many were there already. */
+function TransferStatus({ made: { transfer, plan } }: { made: TransferMade }) {
+  const { t, readerText } = useI18n();
+  const renamed = plan.cards.filter((card) => card.to !== card.from).length;
+  const present = plan.cards.filter((card) => card.present).length;
+  const parts = [
+    t(`studio.cardBulk.transfer.${transfer.mode === "move" ? "moved" : "copied"}`, {
+      count: plan.cards.length,
+      deck: readerText(transfer.to.title),
+    }),
+    ...(renamed > 0 ? [t("studio.cardBulk.transfer.renamed", { count: renamed })] : []),
+    ...(present > 0 ? [t("studio.cardBulk.transfer.present", { count: present })] : []),
+    ...(plan.missing.length > 0 ? [t("studio.cardBulk.skipped", { count: plan.missing.length })] : []),
+  ];
+  return <p role="status">{parts.join(" ")}</p>;
 }

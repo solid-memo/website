@@ -361,7 +361,8 @@ export interface ReviewStateRepository {
   createReviewStates(deck: Deck, states: readonly ReviewState[]): Promise<void>;
   /**
    * Write several states and drop others in ONE save of the reviews
-   * document, so a day reset cannot be left half-applied.
+   * document, so a day reset cannot be left half-applied. A deck without
+   * one gets it when there are states to save; else nothing is written.
    */
   applyReviewChanges(
     deck: Deck,
