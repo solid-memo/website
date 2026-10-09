@@ -14,7 +14,7 @@
 import { beforeAll, describe, expect, inject, it } from "vitest";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/sources";
 import { SM_NS as SM } from "@solid-memo/vocab/vocab.generated";
-import { createUseCases } from "@solid-memo/application/useCases";
+import { createUseCases, type UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
 import { createSolidAnswerLog } from "@solid-memo/solid/solidAnswerLog";
@@ -69,9 +69,10 @@ const CREATED = `dcterms:created "2026-10-01T10:00:00Z"^^<http://www.w3.org/2001
  * option, two of them studied (their answers in the log); Seabirds,
  * never studied, has a card of its own under the id `gull`. The decks'
  * names are ASCII: the catalog's PATCH carries them, which Community
- * Solid Server's in-memory store would cut short.
+ * Solid Server's in-memory store would cut short. With the page that
+ * made it, whose statistics wait for its answers to be logged.
  */
-async function seed(server: string): Promise<{ instanceUrl: string; birds: Deck; seabirds: Deck }> {
+async function seed(server: string): Promise<{ instanceUrl: string; birds: Deck; seabirds: Deck; useCases: UseCases }> {
   const base = new URL(`card-transfer-${crypto.randomUUID()}/`, server).href;
   const webId = `${base}profile/card.ttl#me`;
   const typeIndex = `${base}settings/privateTypeIndex.ttl`;
@@ -99,7 +100,7 @@ async function seed(server: string): Promise<{ instanceUrl: string; birds: Deck;
   for (const id of ["bird", "gull"]) {
     await useCases.recordReview(instance.url, birds, { card: cards[id]!, direction: "front-to-back" }, 5, new Date());
   }
-  return { instanceUrl: instance.url, birds, seabirds };
+  return { instanceUrl: instance.url, birds, seabirds, useCases };
 }
 
 const byId = async (deck: Deck) => Object.fromEntries((await page().listCards(deck)).map((card) => [card.id, card]));
@@ -116,8 +117,8 @@ describe.each(SERVERS)("moving and copying cards on $name", ({ url: server }) =>
   });
 
   it("moves cards with their wrong options and progress, a card whose id is taken given a new one, the answers left in the log", async () => {
-    const { instanceUrl, birds, seabirds } = await seed(server);
-    const useCases = page();
+    // The seed's page: its answers are logged in the background, which its statistics wait for.
+    const { instanceUrl, birds, seabirds, useCases } = await seed(server);
     const before = await useCases.getStatistics(instanceUrl, new Date(), { deckUrl: birds.url });
     expect(before.totals.answers).toBe(2);
 

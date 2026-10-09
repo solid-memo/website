@@ -21,8 +21,8 @@ import type { CardTransfer } from "./TransferCardsDialog";
  * and the instance's preferences, for the study day a card is due by.
  * The domain finds the cards the query keeps (queryCards), reading a
  * card in Markdown as its plain text, each text parsed once while the
- * cards stay the same, and sorting a side by the text the reader is
- * shown, in the UI's language.
+ * cards stay the same, and sorting a side by the text the table shows
+ * the reader: in the reader's languages, the UI's first.
  *
  * An edit of the selected cards is planned on the cards and review
  * states as read (planCardEdit) and made with the plan the user saw
@@ -57,7 +57,7 @@ export function CardWorkbenchContainer({
   cardHref: (card: Card) => string;
   onOpen: (card: Card) => void;
 }) {
-  const { t, errorText, readerText, locale } = useI18n();
+  const { t, errorText, locale } = useI18n();
   const queryClient = useQueryClient();
   const [lastEdit, setLastEdit] = useState<CardEditMade | null>(null);
   const [undone, setUndone] = useState(false);
@@ -82,12 +82,14 @@ export function CardWorkbenchContainer({
   const plain = useMemo(() => plainTexts(), [cards]);
   const today = preferencesQuery.data === undefined ? undefined : studyDayOf(new Date(), preferencesQuery.data.dayBoundaryHour);
   const states = reviewsQuery.data;
+  // As readerText reads them.
+  const languages = useMemo(() => [locale, ...navigator.languages], [locale]);
   const rows = useMemo(
     () =>
       cards === undefined || states === undefined || today === undefined
         ? undefined
-        : queryCards(cards, { direction: deck.direction, states }, query, today, plain, readerText, locale),
-    [cards, states, today, query, deck.direction, plain, readerText, locale],
+        : queryCards(cards, { direction: deck.direction, states }, query, today, plain, languages),
+    [cards, states, today, query, deck.direction, plain, languages],
   );
 
   const plan = useCallback(

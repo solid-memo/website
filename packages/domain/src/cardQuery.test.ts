@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import type { Card } from "./deck";
-import { shown, type LangText } from "./langText";
 import {
   cardLanguages,
   DEFAULT_CARD_QUERY,
@@ -47,8 +46,8 @@ const TODAY = "2026-10-09";
 /** Markdown as plain text, as far as these cards need: emphasis marks dropped. */
 const plain = (text: string) => text.replace(/\*/g, "");
 
-/** The text an English reader is shown. */
-const englishReader = (text: LangText) => shown(text, ["en"]);
+/** The languages of an English reader. */
+const englishReader = ["en"];
 
 const house = card("c-house", {
   front: { sv: "Hus" },
@@ -86,7 +85,7 @@ const reviews: DeckReviews = {
 };
 
 const ids = (query: Partial<CardQuery>, given: DeckReviews = reviews) =>
-  queryCards(cards, given, { ...DEFAULT_CARD_QUERY, ...query }, TODAY, plain, englishReader, "en").map((row) => row.card.id);
+  queryCards(cards, given, { ...DEFAULT_CARD_QUERY, ...query }, TODAY, plain, englishReader).map((row) => row.card.id);
 
 describe("the card query in the URL", () => {
   it("round-trips through the query, leaving out what is by default", () => {
@@ -123,7 +122,7 @@ describe("the card query in the URL", () => {
 
 describe("queryCards", () => {
   it("lists every card in the deck's order, each with the states of its directions and what needs the most work", () => {
-    const rows = queryCards(cards, reviews, DEFAULT_CARD_QUERY, TODAY, plain, englishReader, "en");
+    const rows = queryCards(cards, reviews, DEFAULT_CARD_QUERY, TODAY, plain, englishReader);
     expect(rows.map((row) => row.card.id)).toEqual(["c-house", "c-cafe", "c-iron", "c-old", "c-fresh"]);
     expect(rows[0]).toEqual({ card: house, states: [reviews.states[0]], due: "2026-11-01", intervalDays: 30, easeFactor: 2.6 });
     expect(rows[4]).toEqual({ card: fresh, states: [] });
@@ -137,7 +136,7 @@ describe("queryCards", () => {
         state("c-house", { direction: "back-to-front", intervalDays: 2, due: "2026-10-30", easeFactor: 2.7 }),
       ],
     };
-    const [row] = queryCards([house], both, DEFAULT_CARD_QUERY, TODAY, plain, englishReader, "en");
+    const [row] = queryCards([house], both, DEFAULT_CARD_QUERY, TODAY, plain, englishReader);
     expect(row).toMatchObject({ due: "2026-10-20", intervalDays: 2, easeFactor: 2.1 });
     expect(row!.states).toHaveLength(2);
   });
@@ -198,7 +197,7 @@ describe("queryCards", () => {
     expect(ids({ has: "distractors" })).toEqual(["c-cafe"]);
     // Only distractors in use count: a card whose only one is retired has none to offer.
     const retiredOnly = card("c-retired", { distractors: [{ id: "c-retired-d1", text: { en: "x" }, retired: true }] });
-    const only = queryCards([retiredOnly], reviews, { ...DEFAULT_CARD_QUERY, has: "distractors" }, TODAY, plain, englishReader, "en");
+    const only = queryCards([retiredOnly], reviews, { ...DEFAULT_CARD_QUERY, has: "distractors" }, TODAY, plain, englishReader);
     expect(only).toEqual([]);
     expect(ids({ has: "markdown" })).toEqual(["c-cafe"]);
     expect(ids({ has: "notes" })).toEqual(["c-house", "c-old"]);
@@ -225,18 +224,34 @@ describe("queryCards", () => {
       card("c-orange", { front: { en: "Orange", sv: "Apelsin" } }),
     ];
     const query: CardQuery = { ...DEFAULT_CARD_QUERY, sort: { key: "front", descending: false } };
-    const sorted = (text: (text: LangText) => string, locale: string) =>
-      queryCards(fruit, reviews, query, TODAY, plain, text, locale).map((row) => row.card.id);
-    const swedishReader = (text: LangText) => shown(text, ["sv"]);
-    expect(sorted(englishReader, "en")).toEqual(["c-apple", "c-orange", "c-zebra"]);
+    const sorted = (languages: readonly string[]) => queryCards(fruit, reviews, query, TODAY, plain, languages).map((row) => row.card.id);
+    expect(sorted(["en"])).toEqual(["c-apple", "c-orange", "c-zebra"]);
     // In Swedish, ä comes after z.
-    expect(sorted(swedishReader, "sv")).toEqual(["c-orange", "c-zebra", "c-apple"]);
-    expect(sorted(swedishReader, "en")).toEqual(["c-orange", "c-apple", "c-zebra"]);
+    expect(sorted(["sv", "en"])).toEqual(["c-orange", "c-zebra", "c-apple"]);
+    // A side not in the first language is shown in the next, sorted as the first sorts text: in German, ä is an a.
+    expect(sorted(["de", "sv"])).toEqual(["c-orange", "c-apple", "c-zebra"]);
+  });
+
+  it("sorts a side with case and accents aside, as the search reads it, numbers by value", () => {
+    const words = [
+      card("c-2", { front: { en: "été" } }),
+      card("c-1", { front: { en: "Ete" } }),
+      card("c-3", { front: { en: "Eta" } }),
+      card("c-10", { front: { en: "Item 10" }, back: { en: "**b**" }, textFormat: SM.markdown }),
+      card("c-9", { front: { en: "Item 9" }, back: { en: "a" }, textFormat: SM.markdown }),
+    ];
+    const sorted = (key: "front" | "back", descending = false) =>
+      queryCards(words, reviews, { ...DEFAULT_CARD_QUERY, sort: { key, descending } }, TODAY, plain, englishReader).map((row) => row.card.id);
+    // "été" and "Ete" sort as one word, so they keep the deck's order, either way.
+    expect(sorted("front")).toEqual(["c-3", "c-2", "c-1", "c-9", "c-10"]);
+    expect(sorted("front", true)).toEqual(["c-10", "c-9", "c-2", "c-1", "c-3"]);
+    // A side in Markdown sorts by its plain text: "b", not "**b**".
+    expect(sorted("back")).toEqual(["c-9", "c-10", "c-1", "c-2", "c-3"]);
   });
 
   it("puts a card without the key last, whichever comes first", () => {
     const query: CardQuery = { ...DEFAULT_CARD_QUERY, sort: { key: "due", descending: false } };
-    const sorted = (given: Card[]) => queryCards(given, reviews, query, TODAY, plain, englishReader, "en").map((row) => row.card.id);
+    const sorted = (given: Card[]) => queryCards(given, reviews, query, TODAY, plain, englishReader).map((row) => row.card.id);
     expect(sorted([fresh, iron])).toEqual(["c-iron", "c-fresh"]);
     expect(sorted([iron, fresh])).toEqual(["c-iron", "c-fresh"]);
   });
@@ -257,7 +272,7 @@ describe("queryCards", () => {
     };
     const query: CardQuery = { ...DEFAULT_CARD_QUERY, text: "méaning 4", state: "due", sort: { key: "back", descending: true } };
     const started = performance.now();
-    const rows = queryCards(many, states, query, TODAY, plain, englishReader, "en");
+    const rows = queryCards(many, states, query, TODAY, plain, englishReader);
     const took = performance.now() - started;
     expect(rows.length).toBeGreaterThan(0);
     expect(took).toBeLessThan(500);
