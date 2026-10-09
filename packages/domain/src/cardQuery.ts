@@ -1,6 +1,6 @@
 import { activeCards, isMarkdown, studyDirections, type Card, type DeckDirection } from "./deck";
 import { canonicalTag } from "./languageTag";
-import { folded, type LangText } from "./langText";
+import { folded, shown, type LangText } from "./langText";
 import { reviewKeyOf, type ReviewState } from "./review";
 import { MATURE_INTERVAL_DAYS } from "./statistics";
 
@@ -228,8 +228,12 @@ function least<T>(values: readonly T[], compare: (a: T, b: T) => number): T | un
  * card in Markdown as `plain` gives its texts (the plain text of
  * docs/markdown.md, injected so the domain does not parse Markdown).
  * `today` is the study day ("YYYY-MM-DD") a card is due by. A side is
- * sorted by the text the reader is shown of it (`text`), compared as the
- * reader's language sorts it (`locale`), case aside and numbers by value.
+ * sorted by the text the reader is shown of it: in the first of the
+ * reader's `languages` (preferred first) the side has, and as plain text
+ * when in Markdown. It is compared as the first of those languages sorts
+ * text: case and accents aside, as the search sets them aside, but a
+ * letter the language counts as one of its own as that letter (Swedish
+ * puts "ä" after "z"); and numbers by value.
  */
 export function queryCards(
   cards: readonly Card[],
@@ -237,8 +241,7 @@ export function queryCards(
   query: CardQuery,
   today: string,
   plain: (text: string) => string,
-  text: (text: LangText) => string,
-  locale: string,
+  languages: readonly string[],
 ): CardRow[] {
   const directions = studyDirections(reviews.direction);
   const stateOf = new Map(reviews.states.map((state) => [reviewKeyOf(state), state]));
@@ -270,8 +273,8 @@ export function queryCards(
   const sort = query.sort;
   if (sort === undefined) return rows;
   const sideText = (row: CardRow, side: "front" | "back") => {
-    const shown = text(row.card[side]);
-    return shown === "" ? undefined : isMarkdown(row.card.textFormat) ? plain(shown) : shown;
+    const text = shown(row.card[side], languages);
+    return text === "" ? undefined : isMarkdown(row.card.textFormat) ? plain(text) : text;
   };
   const keyOf = (row: CardRow): string | number | undefined => {
     switch (sort.key) {
@@ -290,7 +293,7 @@ export function queryCards(
         return row.easeFactor;
     }
   };
-  const collator = new Intl.Collator(locale, { sensitivity: "base", numeric: true });
+  const collator = new Intl.Collator([...languages], { sensitivity: "base", numeric: true });
   const keys = rows.map(keyOf);
   const compare = (a: string | number, b: string | number) =>
     typeof a === "number" && typeof b === "number" ? a - b : collator.compare(String(a), String(b));

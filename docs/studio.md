@@ -167,7 +167,10 @@ The URL holds how the cards are looked at. The domain applies it
 - `sort` and `order=desc`: by `id`, `created`, `front`, `back`, `due`,
   `interval` or `ease`. A column's name sorts by it, then the other way,
   then back to the deck's order, as on Home. A side sorts by the text
-  the table shows the reader, in the order of the UI's language. A card
+  the table shows the reader (as plain text, when in Markdown), in the
+  order of the UI's language. Case and accents count no more than in
+  the search, unless that language makes a letter of its own of one:
+  in Swedish, `ä` comes after `z`. Numbers sort by value. A card
   without the value (one never studied) comes last, either way.
 - `page` and `size`: 10, 50 (the default) or 200 cards a page, with the
   same pager as Solid Memo's Browser.
