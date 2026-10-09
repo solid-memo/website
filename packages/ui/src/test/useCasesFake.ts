@@ -124,6 +124,8 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
     }),
     removeCard: vi.fn(async () => undefined),
     stateCardLanguages: vi.fn(async () => 0),
+    editCards: vi.fn(async (_instanceUrl, _deck, _ids, _edit, previewed) => previewed),
+    undoCardEdit: vi.fn(async () => undefined),
     planRepair: vi.fn(() => ({ repairs: [], unrepairable: [] })),
     applyRepairs: vi.fn(async () => undefined),
     planMigration: vi.fn(async () => ({

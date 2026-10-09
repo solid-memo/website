@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "preact/hooks";
+import { useCallback, useEffect, useMemo, useRef, useState } from "preact/hooks";
 import {
   CARD_FEATURES,
   CARD_FIELDS,
@@ -11,19 +11,34 @@ import {
   type CardRow,
   type CardSort,
 } from "@solid-memo/domain/cardQuery";
+import type { CardEdit, CardEditPlan } from "@solid-memo/domain/cardBulk";
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import { CardRowBack, CardRowFront } from "@solid-memo/ui/CardFace";
 import { cardName } from "@solid-memo/ui/DataText";
-import { useI18n } from "@solid-memo/ui/i18n";
+import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
+import { useI18n, type ErrorText } from "@solid-memo/ui/i18n";
 import { paginate, Pager } from "@solid-memo/ui/Pager";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
 import { RetiredTag } from "@solid-memo/ui/RetiredCards";
+import { CardBulkActions } from "./CardBulkActions";
 
 /** The columns after the card's front, each sorted by its key. */
 const COLUMNS: readonly Exclude<CardSort, "front">[] = ["back", "due", "interval", "ease", "created", "id"];
 
 /** The columns of figures, aligned to compare. */
 const NUMBERS: ReadonlySet<CardSort> = new Set(["interval", "ease"]);
+
+/** An edit made, which can be undone while the page is open. */
+export interface CardEditMade {
+  edit: CardEdit;
+  /** The plan as written: its inverse undoes it. */
+  plan: CardEditPlan;
+}
+
+/** How the status line names an edit made. */
+function doneKey(edit: CardEdit) {
+  return edit.kind === "setTextFormat" ? (edit.markdown ? "markdownOn" : "markdownOff") : edit.kind;
+}
 
 /** Whether a key goes to a field the user types or chooses in (the search, a filter), which keeps it. */
 function typedInto(target: EventTarget | null): boolean {
@@ -44,6 +59,13 @@ function typedInto(target: EventTarget | null): boolean {
  * Enter opens it: its card in Solid Memo's editor (`cardHref`,
  * `onOpen`), as the link does. They work wherever the focus is, the
  * page's body too, as a reload or a cleared selection leaves it.
+ *
+ * The selected cards the query keeps (on any page; one it hides stays
+ * selected, but is left alone) can be edited at once (CardBulkActions):
+ * each edit is planned on them (`plan`) and made (`onEdit`), then the
+ * status line says what it did, with a way to undo it (`lastEdit`,
+ * `onUndo`) until the next edit, or until the page is left. Deleted
+ * cards leave the selection.
  */
 export function CardWorkbenchScreen({
   deck,
@@ -55,6 +77,13 @@ export function CardWorkbenchScreen({
   onQuery,
   cardHref,
   onOpen,
+  plan,
+  onEdit,
+  lastEdit,
+  undone,
+  onUndo,
+  busy,
+  error,
 }: {
   deck: Deck;
   /** The deck is a copy of a course: its cards are the course's questions. */
@@ -69,11 +98,30 @@ export function CardWorkbenchScreen({
   onQuery: (query: CardQuery) => void;
   cardHref: (card: Card) => string;
   onOpen: (card: Card) => void;
+  /** What an edit of the cards of these ids would do. */
+  plan: (ids: readonly string[], edit: CardEdit) => CardEditPlan;
+  /** Make the edit as planned; whether it was made. */
+  onEdit: (ids: readonly string[], edit: CardEdit, plan: CardEditPlan) => Promise<boolean>;
+  /** The last edit made on this page, while it can be undone. */
+  lastEdit: CardEditMade | null;
+  /** The last edit was undone. */
+  undone: boolean;
+  onUndo: () => void;
+  /** An edit, or its undo, is being made. */
+  busy: boolean;
+  error: ErrorText | null;
 }) {
   const { t, tx, readerText, languageLabel, formatDate } = useI18n();
   const [chosen, setChosen] = useState<ReadonlySet<string>>(new Set());
   const bodyRef = useRef<HTMLTableSectionElement>(null);
 
+  const selected = useMemo(
+    () => rows.filter((row) => chosen.has(row.card.url)).map((row) => row.card),
+    [rows, chosen],
+  );
+  const ids = useMemo(() => selected.map((card) => card.id), [selected]);
+  /** Planned again only when the selection or its cards change: a preview plans every selected card. */
+  const planSelected = useCallback((edit: CardEdit) => plan(ids, edit), [plan, ids]);
   const page = paginate([...rows], query.page, query.size);
   const shown = page.items;
   const count = chosen.size;
@@ -161,6 +209,21 @@ export function CardWorkbenchScreen({
         {course && <span class="studio-badge">{t("studio.decks.badge.course")}</span>}
       </header>
       {course && <p class="hint">{t("studio.cards.courseHint")}</p>}
+      {lastEdit !== null && (
+        <div class="studio-selection">
+          <p role="status">
+            {t(`studio.cardBulk.done.${doneKey(lastEdit.edit)}`, {
+              count: lastEdit.plan.save.length + lastEdit.plan.remove.length,
+            })}
+            {lastEdit.plan.skipped.length > 0 && ` ${t("studio.cardBulk.skipped", { count: lastEdit.plan.skipped.length })}`}
+          </p>
+          <button type="button" disabled={busy} onClick={onUndo}>
+            {t("studio.cardBulk.undo")}
+          </button>
+        </div>
+      )}
+      {undone && <p role="status">{t("studio.cardBulk.undone")}</p>}
+      <ErrorMessage error={error} />
       {total === 0 ? (
         <p>{t("studio.cards.empty")}</p>
       ) : (
@@ -212,6 +275,20 @@ export function CardWorkbenchScreen({
               </button>
             )}
           </div>
+          {selected.length > 0 && (
+            <CardBulkActions
+              cards={selected}
+              languages={languages}
+              busy={busy}
+              plan={planSelected}
+              onEdit={(edit, planned) =>
+                onEdit(ids, edit, planned).then((ok) => {
+                  if (ok && edit.kind === "remove") toggle(selected.map((card) => card.url), false);
+                  return ok;
+                })
+              }
+            />
+          )}
           {rows.length === 0 ? (
             <p>{t("studio.cards.noMatch")}</p>
           ) : (

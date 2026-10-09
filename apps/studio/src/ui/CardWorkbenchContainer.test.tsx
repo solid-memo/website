@@ -1,7 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen, within } from "@testing-library/preact";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
+import { AppError } from "@solid-memo/domain/appError";
 import { DEFAULT_CARD_QUERY, type CardQuery } from "@solid-memo/domain/cardQuery";
 import type { LibraryDeck } from "@solid-memo/domain/library";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
@@ -107,5 +108,60 @@ describe("CardWorkbenchContainer", () => {
       }),
     );
     expect(await screen.findByRole("alert")).toHaveTextContent("Pod unreachable");
+  });
+
+  it("makes an edit of the selected cards with the plan the user saw, reads them afresh, and undoes it", async () => {
+    let cards = [water, fire];
+    const useCases = makeUseCasesFake({
+      listCards: vi.fn(async () => cards),
+      listDeckReviewStates: vi.fn(async () => [dueToday]),
+    });
+    vi.mocked(useCases.editCards).mockImplementation(async (_instance, _deck, _ids, _edit, plan) => {
+      cards = [water, { ...fire, retired: true }];
+      return plan;
+    });
+    renderContainer(useCases);
+    fireEvent.click(await screen.findByRole("checkbox", { name: "Select fire" }));
+    fireEvent.click(within(screen.getByRole("group", { name: "Selected cards" })).getByRole("button", { name: "Retire" }));
+    expect(await screen.findByText("Retired 1 card.")).toBeInTheDocument();
+    expect(useCases.editCards).toHaveBeenCalledWith(
+      instanceA.url,
+      deck,
+      ["fire"],
+      { kind: "retire" },
+      expect.objectContaining({ save: [expect.objectContaining({ id: "fire", retired: true })] }),
+    );
+    // Read afresh: the card says it is retired.
+    await waitFor(() => expect(screen.getByRole("row", { name: /fire/ })).toHaveClass("retired"));
+    const undo = screen.getByRole("button", { name: "Undo" });
+    await waitFor(() => expect(undo).toBeEnabled());
+    fireEvent.click(undo);
+    expect(await screen.findByText("Undone: the cards are as they were.")).toBeInTheDocument();
+    expect(useCases.undoCardEdit).toHaveBeenCalledWith(instanceA.url, deck, vi.mocked(useCases.editCards).mock.calls[0]![4]);
+    expect(screen.queryByRole("button", { name: "Undo" })).not.toBeInTheDocument();
+  });
+
+  it("says why an edit, or its undo, was not made", async () => {
+    const useCases = makeUseCasesFake({
+      listCards: vi.fn(async () => [water, fire]),
+      editCards: vi.fn(async () => {
+        throw new AppError("changedElsewhere", { url: deck.cardsDocumentUrl });
+      }),
+    });
+    renderContainer(useCases);
+    fireEvent.click(await screen.findByRole("checkbox", { name: "Select fire" }));
+    fireEvent.click(within(screen.getByRole("group", { name: "Selected cards" })).getByRole("button", { name: "Retire" }));
+    await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("This was changed elsewhere"));
+    vi.mocked(useCases.editCards).mockImplementation(async (_instance, _deck, _ids, _edit, plan) => plan);
+    vi.mocked(useCases.undoCardEdit).mockRejectedValue(new AppError("changedElsewhere", { url: deck.cardsDocumentUrl }));
+    const retire = within(screen.getByRole("group", { name: "Selected cards" })).getByRole("button", { name: "Retire" });
+    await waitFor(() => expect(retire).toBeEnabled());
+    fireEvent.click(retire);
+    // The error goes as the edit is made again.
+    await waitFor(() => expect(screen.getByRole("alert")).toBeEmptyDOMElement());
+    const undo = await screen.findByRole("button", { name: "Undo" });
+    await waitFor(() => expect(undo).toBeEnabled());
+    fireEvent.click(undo);
+    await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("This was changed elsewhere"));
   });
 });

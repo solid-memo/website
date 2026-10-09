@@ -10,7 +10,9 @@ import type { CssAccount } from "../harness/cssAccount.ts";
  * (the session is Solid Memo's, which restores only there), and sees the
  * instance's decks in its table. In the card workbench they find a card
  * by its back (accents aside), sort the cards and select them with the
- * keyboard, the URL holding the view. On the Groups screen they group
+ * keyboard, the URL holding the view; they replace a word in the
+ * selected cards, checking the preview first, then retire both cards and
+ * undo that. On the Groups screen they group
  * the two decks, as Solid Memo's deck list would; back on Home, the
  * table shows the group, filters and sorts by what the URL says, gives
  * both decks a pace and moves them back to the top level at once, and
@@ -52,10 +54,17 @@ test("log in to the Studio and manage an instance's decks @studio", async ({ app
     await app.studio.clearCardSearch(alpha, ["Sun", "Moon"]);
     await app.studio.sortCardsBy(alpha, "front", ["Moon", "Sun"]);
     await app.studio.selectCardsWithKeys(alpha, 2);
+  });
+
+  await app.step("08 · Find and replace in the selected cards, then retire them and undo it", async () => {
+    await app.studio.findAndReplace("Sol", "Solen", 1);
+    await app.studio.expectBack(alpha, "Sun", "Solen");
+    await app.studio.retireSelectedCards(alpha, ["Moon", "Sun"]);
+    await app.studio.undoCardEdit(alpha, ["Moon", "Sun"]);
     await app.chrome.breadcrumb("breadcrumbs.decks");
   });
 
-  await app.step("08 · Group the two decks on the Groups screen", async () => {
+  await app.step("09 · Group the two decks on the Groups screen", async () => {
     await app.studio.openGroups();
     await app.groups.groupWithNeighbour(alpha);
     await app.groups.nameGroup(group);
@@ -64,13 +73,13 @@ test("log in to the Studio and manage an instance's decks @studio", async ({ app
     await app.studio.expectDeck(instance, beta, { cards: 0, due: 0, group });
   });
 
-  await app.step("09 · Filter the decks, then sort them by name", async () => {
+  await app.step("10 · Filter the decks, then sort them by name", async () => {
     await app.studio.filter(instance, "beta", [beta]);
     await app.studio.filter(instance, runId, [alpha, beta]);
     await app.studio.sortBy(instance, "title", [alpha, beta]);
   });
 
-  await app.step("10 · Give both decks a pace and move them to the top level", async () => {
+  await app.step("11 · Give both decks a pace and move them to the top level", async () => {
     await app.studio.select([alpha, beta]);
     await app.studio.setNewCardsPerDay(7, 2);
     await app.studio.moveToTopLevel(2);
@@ -78,19 +87,19 @@ test("log in to the Studio and manage an instance's decks @studio", async ({ app
     await app.studio.expectDeck(instance, beta, { cards: 0, due: 0, newCardsPerDay: "7" });
   });
 
-  await app.step("11 · Delete one deck, confirming", async () => {
+  await app.step("12 · Delete one deck, confirming", async () => {
     await app.studio.clearSelection();
     await app.studio.select([beta]);
     await app.studio.deleteSelected(instance, [beta]);
     await app.studio.expectDeck(instance, alpha, { cards: 2, due: 0 });
   });
 
-  await app.step("12 · Pick the instance from the instance picker", async () => {
+  await app.step("13 · Pick the instance from the instance picker", async () => {
     await app.studio.pickInstance(instance);
     await app.studio.expectDeck(instance, alpha, { cards: 2, due: 0 });
   });
 
-  await app.step("13 · Go back to Solid Memo and log in to it again", async () => {
+  await app.step("14 · Go back to Solid Memo and log in to it again", async () => {
     await app.studio.backToApp();
     await logInAgain(app, account);
     await app.decks.expectDeck(alpha);

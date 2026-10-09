@@ -179,8 +179,8 @@ export function cardLanguages(cards: readonly Card[]): string[] {
   return tags.has("") ? [...stated, UNSTATED] : stated;
 }
 
-/** Whether a text's tag is the language wanted: the tag itself, or a regional form of it ("sv" finds "sv-fi"). */
-function inLanguage(tag: string, lang: string): boolean {
+/** Whether a text's tag is the language wanted: the tag itself, or a regional form of it ("sv" finds "sv-fi"); UNSTATED wants untagged text. */
+export function inLanguage(tag: string, lang: string): boolean {
   return lang === UNSTATED ? tag === "" : tag === lang || tag.startsWith(`${lang}-`);
 }
 

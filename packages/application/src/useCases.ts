@@ -53,6 +53,14 @@ import { tidiedStated, type LangText } from "@solid-memo/domain/langText";
 import { canonicalTag } from "@solid-memo/domain/languageTag";
 import { unlikeRelease, withStatedLanguages, type StatedLanguages } from "@solid-memo/domain/deckLanguages";
 import {
+  planCardEdit,
+  planUndo,
+  sameCardEditPlan,
+  type CardChanges,
+  type CardEdit,
+  type CardEditPlan,
+} from "@solid-memo/domain/cardBulk";
+import {
   isOutdated,
   isReviewStateOutdated,
   planMigration,
@@ -426,6 +434,32 @@ export interface UseCases {
    */
   stateCardLanguages(deck: Deck, languages: StatedLanguages): Promise<number>;
   /**
+   * Make one bulk edit of the deck's cards (domain/cardBulk.ts), as the
+   * user previewed it: the edit is planned again on the cards as they
+   * are, and written in ONE write of the cards document, made only if it
+   * is still as read (If-Match), then, when cards go with their review
+   * states, ONE write of the reviews document; then the deck's schedule
+   * in the digest is brought up to date. A cards document changed
+   * meanwhile (or made since it was read as absent) is read and the edit
+   * planned again, up to three times in all; once that plan is not the
+   * one previewed, changedElsewhere, and nothing is written. Nothing is written when the plan saves and
+   * removes nothing. The deck's own entry is untouched, as updateCard
+   * leaves it. Resolves to the plan as written, whose inverse undoes it.
+   */
+  editCards(
+    instanceUrl: string,
+    deck: Deck,
+    ids: readonly string[],
+    edit: CardEdit,
+    previewed: CardEditPlan,
+  ): Promise<CardEditPlan>;
+  /**
+   * Undo an edit editCards made, the same way: its inverse is written
+   * while the cards are as the edit left them (planUndo), else
+   * changedElsewhere and nothing is written.
+   */
+  undoCardEdit(instanceUrl: string, deck: Deck, plan: CardEditPlan): Promise<void>;
+  /**
    * What bringing the instance's cards up to this app's format would
    * touch — reads every deck's cards, writes nothing. Empty when there is
    * nothing to migrate.
@@ -633,6 +667,34 @@ function fenceMovesElsewhere(journal: UpdateJournal, fence: WriteFence): (source
     });
   });
   return (sourceUrl) => held.has(sourceUrl);
+}
+
+/**
+ * How often a bulk edit of a deck's cards is planned and written, in
+ * all, while the cards document keeps changing elsewhere (412).
+ */
+const CARD_EDIT_ATTEMPTS = 3;
+
+/** Whether a write was refused because the document changed since it was read (a 412). */
+function changedElsewhere(error: unknown): boolean {
+  return error instanceof AppError && error.code === "changedElsewhere";
+}
+
+/**
+ * Whether a write of a cards document was refused because it changed
+ * since it was read, or was made since it was read as absent (a 412).
+ */
+function cardsChangedElsewhere(error: unknown): boolean {
+  return changedElsewhere(error) || (error instanceof AppError && error.code === "createdElsewhere");
+}
+
+/**
+ * A bulk edit's write of a cards document: one PUT of the whole document,
+ * which no pod cuts short, made only while the document is at the
+ * version read (none to check when the pod gave none).
+ */
+function wholeAt(version: string | null): { whole: true; version?: string } {
+  return version === null ? { whole: true } : { whole: true, version };
 }
 
 /** A read made without a known version, which always comes with the contents. */
@@ -990,6 +1052,58 @@ export function createUseCases({
 
   function noting(document: string, version: string, facts: Pick<DocumentReceipt, "conformedTo" | "latestFormat">) {
     return (digest: InstanceDigest) => withReceipt(digest, document, version, facts);
+  }
+
+  /**
+   * Write a bulk edit of the deck's cards (editCards, undoCardEdit): the
+   * changes `plan` makes of the cards and review states as they are now,
+   * in one conditional write of the cards document, again from a fresh
+   * read when it changed meanwhile; then one write of the reviews
+   * document, and the digest brought up to date. Resolves to the
+   * changes written.
+   */
+  async function writeCardEdit<T extends CardChanges>(
+    instanceUrl: string,
+    deck: Deck,
+    plan: (cards: Card[], reviews: ReviewState[]) => T,
+  ): Promise<T> {
+    for (let attempt = 1; ; attempt++) {
+      const [read, reviews] = await Promise.all([
+        readNow(deckRepository.readCardsSince(deck, undefined)),
+        reviewStateRepository.listReviewStates(deck),
+      ]);
+      const changes = plan(read.value, reviews);
+      if (changes.save.length === 0 && changes.remove.length === 0) return changes;
+      try {
+        await deckRepository.applyCardChanges(deck, { save: changes.save, remove: changes.remove }, wholeAt(read.version));
+      } catch (error) {
+        if (cardsChangedElsewhere(error) && attempt < CARD_EDIT_ATTEMPTS) continue;
+        throw error;
+      }
+      // A card joins before its state, and leaves before it: no state is ever without its card for long.
+      if (changes.reviewSaves.length > 0 || changes.reviewRemovals.length > 0) {
+        await reviewStateRepository.applyReviewChanges(deck, { save: changes.reviewSaves, remove: changes.reviewRemovals });
+      }
+      // The edit is made: a digest left behind is brought up to date by the next deck list.
+      await refreshStudyDigest(instanceUrl, deck).catch(() => undefined);
+      return changes;
+    }
+  }
+
+  async function refreshStudyDigest(instanceUrl: string, deck: Deck): Promise<void> {
+    await logAnswers();
+    const [prefs, cards, reviews] = await Promise.all([
+      getPreferences(instanceUrl),
+      deckRepository.readCardsSince(deck, undefined),
+      reviewStateRepository.readReviewStatesSince(deck, undefined),
+    ]);
+    if (cards.unchanged || reviews.unchanged) return;
+    noteSchedule(instanceUrl, deck, cards, reviews, prefs.dayBoundaryHour, now());
+    // The session changed the reviews document: check it now (it is small), not at the next visit.
+    const checked = await shapeValidator.validateDocumentSince(deck.reviewsDocumentUrl, undefined);
+    if (!checked.unchanged && checked.version !== null && summarize(instanceUrl, [checked.value]).conforms) {
+      remember(instanceUrl, noting(deck.reviewsDocumentUrl, checked.version, { conformedTo: ruleset }));
+    }
   }
 
   async function studyCountsAndSchedule(instanceUrl: string, deck: Deck, now: Date) {
@@ -1801,6 +1915,20 @@ export function createUseCases({
         .map((card) => card.id);
       return ids.length === 0 ? 0 : deckRepository.stateCardLanguages(deck, ids, stated);
     },
+    editCards(instanceUrl, deck, ids, edit, previewed) {
+      return writeCardEdit(instanceUrl, deck, (cards, reviews) => {
+        const plan = planCardEdit(cards, ids, edit, reviews);
+        if (!sameCardEditPlan(plan, previewed)) throw new AppError("changedElsewhere", { url: deck.cardsDocumentUrl });
+        return plan;
+      });
+    },
+    async undoCardEdit(instanceUrl, deck, plan) {
+      await writeCardEdit(instanceUrl, deck, (cards) => {
+        const inverse = planUndo(cards, plan);
+        if (inverse === null) throw new AppError("changedElsewhere", { url: deck.cardsDocumentUrl });
+        return inverse;
+      });
+    },
     planMigration: (instanceUrl) => planOf(instanceUrl),
     async updateInstance(session, instance, onProgress = () => undefined) {
       const instanceUrl = ensureTrailingSlash(instance.url);
@@ -1879,21 +2007,7 @@ export function createUseCases({
     getStudyCounts(instanceUrl, deck, now) {
       return studyCountsAndSchedule(instanceUrl, deck, now);
     },
-    async refreshStudyDigest(instanceUrl, deck) {
-      await logAnswers();
-      const [prefs, cards, reviews] = await Promise.all([
-        getPreferences(instanceUrl),
-        deckRepository.readCardsSince(deck, undefined),
-        reviewStateRepository.readReviewStatesSince(deck, undefined),
-      ]);
-      if (cards.unchanged || reviews.unchanged) return;
-      noteSchedule(instanceUrl, deck, cards, reviews, prefs.dayBoundaryHour, now());
-      // The session changed the reviews document: check it now (it is small), not at the next visit.
-      const checked = await shapeValidator.validateDocumentSince(deck.reviewsDocumentUrl, undefined);
-      if (!checked.unchanged && checked.version !== null && summarize(instanceUrl, [checked.value]).conforms) {
-        remember(instanceUrl, noting(deck.reviewsDocumentUrl, checked.version, { conformedTo: ruleset }));
-      }
-    },
+    refreshStudyDigest,
     recordReview(instanceUrl, deck, prompt, quality, now) {
       return applyGrade(
         instanceUrl,

@@ -1391,6 +1391,103 @@
         "other": "{count} dagar"
       },
       "notStudied": "Inte studerat än"
+    },
+    "cardBulk": {
+      "label": "Valda kort",
+      "retire": "Ta ur bruk",
+      "restore": "Ta i bruk igen",
+      "markdownOn": "Skriv i Markdown",
+      "markdownOff": "Skriv som vanlig text",
+      "stateLanguage": "Ange språk",
+      "findReplace": "Sök och ersätt",
+      "remove": "Ta bort",
+      "removeConfirm": {
+        "one": "Ta bort {count} kort och dess framsteg? Du kan ångra det tills du gör nästa ändring eller lämnar sidan.",
+        "other": "Ta bort {count} kort och deras framsteg? Du kan ångra det tills du gör nästa ändring eller lämnar sidan."
+      },
+      "nothing": "Inget av de valda korten skulle ändras.",
+      "tag": "Språkkod",
+      "side": "För",
+      "sides": {
+        "both": "Båda sidorna",
+        "front": "Framsidan",
+        "back": "Baksidan"
+      },
+      "stateHint": "Bara en sida vars språk inte är angivet ändras. Dess text förblir som den är.",
+      "find": "Sök",
+      "replaceWith": "Ersätt med",
+      "fields": "I",
+      "lang": "På språket",
+      "caseSensitive": "Skilj på stora och små bokstäver",
+      "wholeWord": "Bara hela ord",
+      "preview": "Förhandsvisning",
+      "previewEmpty": "Skriv texten att söka efter. Inget ändras förrän du bekräftar.",
+      "noChange": "Inget av de valda korten har den här texten.",
+      "changes": {
+        "one": "{count} kort ändras:",
+        "other": "{count} kort ändras:"
+      },
+      "skippedHeading": {
+        "one": "{count} kort lämnas som det är:",
+        "other": "{count} kort lämnas som de är:"
+      },
+      "reasons": {
+        "missing": "det finns inte längre i kortleken",
+        "unchanged": "inget i det ändras",
+        "wouldEmpty": "en sida eller ett felaktigt alternativ skulle bli tomt",
+        "unstatedLanguage": "dess text anger inget språk; ange det först",
+        "invalid": "kortet är inte giltigt som det är; rätta det i kortredigeraren"
+      },
+      "part": {
+        "front": "Framsida",
+        "back": "Baksida",
+        "frontNote": "Anteckning under framsidan",
+        "backNote": "Anteckning under baksidan",
+        "backLabel": "Etikett",
+        "distractor": "Felaktigt alternativ",
+        "distractorNote": "Anteckning till ett felaktigt alternativ"
+      },
+      "removed": "(borttagen)",
+      "confirmReplace": {
+        "one": "Ersätt i {count} kort",
+        "other": "Ersätt i {count} kort"
+      },
+      "done": {
+        "retire": {
+          "one": "Tog {count} kort ur bruk.",
+          "other": "Tog {count} kort ur bruk."
+        },
+        "restore": {
+          "one": "Tog {count} kort i bruk igen.",
+          "other": "Tog {count} kort i bruk igen."
+        },
+        "remove": {
+          "one": "Tog bort {count} kort.",
+          "other": "Tog bort {count} kort."
+        },
+        "replaceText": {
+          "one": "Ersatte text i {count} kort.",
+          "other": "Ersatte text i {count} kort."
+        },
+        "markdownOn": {
+          "one": "Skrev {count} kort i Markdown.",
+          "other": "Skrev {count} kort i Markdown."
+        },
+        "markdownOff": {
+          "one": "Skrev {count} kort som vanlig text.",
+          "other": "Skrev {count} kort som vanlig text."
+        },
+        "stateLanguage": {
+          "one": "Angav språket för {count} kort.",
+          "other": "Angav språket för {count} kort."
+        }
+      },
+      "skipped": {
+        "one": "{count} kort lämnades som det var.",
+        "other": "{count} kort lämnades som de var."
+      },
+      "undo": "Ångra",
+      "undone": "Ångrat: korten är som de var."
     }
   }
 }

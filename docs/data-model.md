@@ -771,9 +771,11 @@ sequenceDiagram
     (a format update) exceeds. Without `If-Match` (no strong ETag, below),
     such a PUT would undo a change made elsewhere since the read, where a
     PATCH keeps it. Stating the language of a deck's untagged card sides
-    (`stateCardLanguages`) is always one PUT (`saveDataset`'s `whole`):
-    Community Solid Server's in-memory store cuts a document short after
-    a PATCH holding text beyond ASCII, and such a bulk edit is all text;
+    (`stateCardLanguages`) and the Studio's bulk edits of cards
+    (`editCards`, [studio.md](studio.md#bulk-edits)) are always one PUT
+    (`saveDataset`'s `whole`): Community Solid Server's in-memory store
+    cuts a document short after a PATCH holding text beyond ASCII, and
+    such a bulk edit is all text;
   - a creation is sent with `If-None-Match: *` (by
     `@inrupt/solid-client` for datasets and containers, by the copier for
     files); had something appeared there meanwhile, 412;
@@ -785,9 +787,11 @@ sequenceDiagram
   A 412 surfaces as a `PreconditionFailedError` naming the document
   ("changed elsewhere … Reload and try again"); nothing retries on its
   own, except the writes that re-apply a change to the document as it
-  is then: [the digest](#the-digest) and an edit of the
+  is then: [the digest](#the-digest), an edit of the
   [deck groups](#deck-groups), which is read, applied and written again,
-  three times in all, before the 412 surfaces. Weak ETags (`W/"…"`) are never sent in `If-Match`, whose
+  three times in all, before the 412 surfaces, and a bulk edit of cards,
+  planned again on the cards as they are, three times in all, which
+  stops at once when that plan is not the one the user previewed. Weak ETags (`W/"…"`) are never sent in `If-Match`, whose
   comparison is strong; a document the pod gives no ETag, or one saved
   since it was read (pods need not return the new ETag), is written
   without `If-Match`. node-solid-server gives no ETag on a read and

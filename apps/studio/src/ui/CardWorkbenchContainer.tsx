@@ -1,6 +1,7 @@
-import { useMemo } from "preact/hooks";
-import { useQuery } from "@tanstack/react-query";
+import { useCallback, useMemo, useState } from "preact/hooks";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
+import { planCardEdit, type CardEdit, type CardEditPlan } from "@solid-memo/domain/cardBulk";
 import { cardLanguages, queryCards, type CardQuery } from "@solid-memo/domain/cardQuery";
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
@@ -10,7 +11,7 @@ import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { plainTexts } from "@solid-memo/ui/markdownCache";
-import { CardWorkbenchScreen } from "./CardWorkbenchScreen";
+import { CardWorkbenchScreen, type CardEditMade } from "./CardWorkbenchScreen";
 
 /**
  * The card workbench's data: the deck's cards and review states, read as
@@ -20,6 +21,13 @@ import { CardWorkbenchScreen } from "./CardWorkbenchScreen";
  * card in Markdown as its plain text, each text parsed once while the
  * cards stay the same, and sorting a side by the text the reader is
  * shown, in the UI's language.
+ *
+ * An edit of the selected cards is planned on the cards and review
+ * states as read (planCardEdit) and made with the plan the user saw
+ * (UseCases.editCards); the last one made can be undone
+ * (UseCases.undoCardEdit) for as long as this page stays open: its plan
+ * is kept here, never stored. After either, the deck's cards, review
+ * states and study queue are read afresh.
  */
 export function CardWorkbenchContainer({
   useCases,
@@ -40,6 +48,10 @@ export function CardWorkbenchContainer({
   onOpen: (card: Card) => void;
 }) {
   const { t, errorText, readerText, locale } = useI18n();
+  const queryClient = useQueryClient();
+  const [lastEdit, setLastEdit] = useState<CardEditMade | null>(null);
+  const [undone, setUndone] = useState(false);
+  const [failure, setFailure] = useState<unknown>(null);
   const cardsQuery = useQuery({
     queryKey: ["cards", deck.cardsDocumentUrl],
     queryFn: () => useCases.listCards(deck),
@@ -65,6 +77,40 @@ export function CardWorkbenchContainer({
     [cards, states, today, query, deck.direction, plain, readerText, locale],
   );
 
+  const plan = useCallback(
+    (ids: readonly string[], edit: CardEdit) => planCardEdit(cards!, ids, edit, states!),
+    [cards, states],
+  );
+  const reread = async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["cards", deck.cardsDocumentUrl] }),
+      queryClient.invalidateQueries({ queryKey: ["reviews", deck.reviewsDocumentUrl] }),
+    ]);
+    queryClient.removeQueries({ queryKey: ["studyQueue", deck.url] });
+  };
+  const editMutation = useMutation({
+    mutationFn: ({ ids, edit, plan }: { ids: readonly string[]; edit: CardEdit; plan: CardEditPlan }) =>
+      useCases.editCards(instance.url, deck, ids, edit, plan),
+    onMutate: () => {
+      setFailure(null);
+      setUndone(false);
+      setLastEdit(null);
+    },
+    onSuccess: (written, { edit }) => setLastEdit({ edit, plan: written }),
+    onError: (error) => setFailure(error),
+    onSettled: reread,
+  });
+  const undoMutation = useMutation({
+    mutationFn: (made: CardEditMade) => useCases.undoCardEdit(instance.url, deck, made.plan),
+    onMutate: () => setFailure(null),
+    onSuccess: () => {
+      setLastEdit(null);
+      setUndone(true);
+    },
+    onError: (error) => setFailure(error),
+    onSettled: reread,
+  });
+
   const error = cardsQuery.error ?? reviewsQuery.error ?? preferencesQuery.error;
   if (error) return <ErrorMessage error={errorText(error)} />;
   if (rows === undefined) return <Loading label={t("studio.cards.loading")} />;
@@ -80,6 +126,18 @@ export function CardWorkbenchContainer({
       onQuery={onQuery}
       cardHref={cardHref}
       onOpen={onOpen}
+      plan={plan}
+      onEdit={(ids, edit, planned) =>
+        editMutation.mutateAsync({ ids, edit, plan: planned }).then(
+          () => true,
+          () => false,
+        )
+      }
+      lastEdit={lastEdit}
+      undone={undone}
+      onUndo={() => undoMutation.mutate(lastEdit!)}
+      busy={editMutation.isPending || undoMutation.isPending}
+      error={errorText(failure)}
     />
   );
 }
