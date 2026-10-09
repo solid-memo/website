@@ -89,6 +89,7 @@ export function DeckListScreen({
   deckHref,
   preferencesHref,
   studioHref,
+  heading,
   courseHref = () => undefined,
   renderStudyAction,
   createDeckHref,
@@ -123,8 +124,10 @@ export function DeckListScreen({
   deckHref: (deck: Deck) => string;
   /** URL of a deck's preferences. */
   preferencesHref: (deck: Deck) => string;
-  /** URL of the instance in Solid Memo Studio, which each deck's menu offers. */
-  studioHref: string;
+  /** URL of the instance in Solid Memo Studio, which each deck's menu offers; none in the Studio itself. */
+  studioHref?: string;
+  /** The list's heading, where it is not the instance's deck list ("Decks"). */
+  heading?: string;
   /** URL of the course a deck is the copy of; undefined for a deck that is none. */
   courseHref?: (deck: Deck) => string | undefined;
   /**
@@ -429,7 +432,7 @@ export function DeckListScreen({
           <MenuLink href={courseHref(node.deck)!}>{t("deckList.continueCourse")}</MenuLink>
         )}
         {node.kind === "deck" && <MenuLink href={preferencesHref(node.deck)}>{t("deckList.preferences")}</MenuLink>}
-        {node.kind === "deck" && <MenuLink href={studioHref}>{t("studio.open")}</MenuLink>}
+        {node.kind === "deck" && studioHref !== undefined && <MenuLink href={studioHref}>{t("studio.open")}</MenuLink>}
         {/* A group's name is the arrangement's, a deck's its own. */}
         <MenuItem disabled={busy || (node.kind === "group" && readOnly)} onSelect={() => setNaming(key)}>
           {t("deckList.rename")}
@@ -506,7 +509,7 @@ export function DeckListScreen({
       <header>
         <h2 ref={headingRef} tabIndex={-1}>
           <CollectionIcon />
-          {t("deckList.heading")}
+          {heading ?? t("deckList.heading")}
         </h2>
         <span class="hint">
           {t("deckList.deckCount", { count: decksOf(shown.children).length })}

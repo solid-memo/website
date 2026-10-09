@@ -555,10 +555,11 @@ the top level, and the catalogue's `dcat:catalog` keeps its link.
 **Writing an arrangement.** The screen sends an edit, not a finished
 layout (`DeckTreeEdit` in
 [deckTree.ts](../packages/domain/src/deckTree.ts): move a node after a
-sibling, combine two into a new group, rename or remove a group, or, as
-[keeping a guest's study](guest-mode.md#adding-to-an-instance) does,
-graft new groups around decks the tree has at the end of the top level,
-which changes nothing once one of its groups is there), and
+sibling, combine two into a new group, rename or remove a group,
+gather several decks at the end of a group, as the Studio's bulk move
+does, or, as [keeping a guest's study](guest-mode.md#adding-to-an-instance)
+does, graft new groups around decks the tree has at the end of the top
+level, which changes nothing once one of its groups is there), and
 the repository (`editDeckTree` in
 [solidDeckRepository.ts](../packages/solid/src/solidDeckRepository.ts))
 applies it to `catalog.ttl` as the pod holds it then:
@@ -581,6 +582,13 @@ applies it to `catalog.ttl` as the pod holds it then:
 - **removing a deck** also removes it from every group's `dcat:dataset`,
   in the same write; its siblings keep their positions, and the next
   arrangement closes the gap.
+
+**Several decks at once.** The Studio changes several decks in one
+write of `catalog.ttl` ([studio.md](studio.md)). A move into a group is
+one `gather` edit, which leaves a deck already in the group where it is,
+so a retry changes nothing. A pace or a direction is one save of every
+entry (`saveDecks`). Removing decks deletes their cards and reviews
+documents first, then their entries in one save (`removeDecks`).
 
 ## Courses
 

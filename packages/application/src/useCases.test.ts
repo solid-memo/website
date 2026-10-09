@@ -137,7 +137,9 @@ function makeDeps() {
     createDeck: vi.fn(async () => deck),
     renameDeck: vi.fn(async () => deck),
     saveDeck: vi.fn(async (saved) => saved),
+    saveDecks: vi.fn(async (saved) => [...saved]),
     removeDeck: vi.fn(async () => undefined),
+    removeDecks: vi.fn(async () => undefined),
     readDeckTree: vi.fn(async () => ({ children: [{ kind: "deck" as const, deck }], readOnly: false })),
     editDeckTree: vi.fn(async () => ({ children: [{ kind: "deck" as const, deck }], readOnly: false })),
     listCards: vi.fn(async () => [card]),
@@ -683,6 +685,28 @@ describe("createUseCases", () => {
     await expect(useCases.setDeckPace(deck, { newCardsPerDay: 1.5 })).rejects.toThrow(
       "A daily limit is a whole number, 0 or more.",
     );
+  });
+
+  it("sets several decks' direction or pace in one save, and removes several decks at once", async () => {
+    const deps = makeDeps();
+    const useCases = createUseCases(deps);
+    const other = { ...deck, id: "deck-2", url: `${deck.url}-2`, newCardsPerDay: 9 };
+    await expect(useCases.setDecksDirection([deck, other], "back-to-front")).resolves.toEqual([
+      { ...deck, direction: "back-to-front" },
+      { ...other, direction: "back-to-front" },
+    ]);
+    await useCases.setDecksPace([deck, other], { maxReviewsPerDay: 40 });
+    expect(deps.deckRepository.saveDecks).toHaveBeenLastCalledWith([
+      { ...deck, maxReviewsPerDay: 40 },
+      { ...deck, id: "deck-2", url: `${deck.url}-2`, maxReviewsPerDay: 40 },
+    ]);
+    expect(deps.deckRepository.saveDecks).toHaveBeenCalledTimes(2);
+    await expect(useCases.setDecksPace([deck], { newCardsPerDay: -1 })).rejects.toThrow(
+      "A daily limit is a whole number, 0 or more.",
+    );
+    expect(deps.deckRepository.saveDecks).toHaveBeenCalledTimes(2);
+    await useCases.removeDecks([deck, other]);
+    expect(deps.deckRepository.removeDecks).toHaveBeenCalledWith([deck, other]);
   });
 
   it("createInstance trims inputs and passes the WebID", async () => {

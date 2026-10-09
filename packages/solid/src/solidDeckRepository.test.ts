@@ -696,6 +696,75 @@ describe("saveDeck", () => {
   });
 });
 
+describe("saveDecks", () => {
+  const second: Deck = { ...deck, id: "deck-2", url: `${CATALOG}#deck-2`, title: { en: "Verbs" } };
+  const elsewhere: Deck = { ...deck, id: "deck-3", url: "https://pod.example/solid-memo/b/catalog.ttl#deck-3" };
+  const entry = (of: Deck) => buildThing(createThing({ url: of.url })).addIri(RDF.type, SM.Deck).build();
+
+  it("writes the decks of a catalog document in one save, and each other document in one of its own", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockImplementation((async (url: string) =>
+      url === CATALOG
+        ? setThing(catalogWithDeck(), entry(second))
+        : setThing(mockSolidDatasetFrom(url), entry(elsewhere))) as never);
+
+    const saved = await makeRepository().saveDecks([
+      { ...deck, newCardsPerDay: 3 },
+      { ...elsewhere, newCardsPerDay: 3 },
+      { ...second, newCardsPerDay: 3 },
+    ]);
+
+    expect(saved.map((written) => [written.id, written.newCardsPerDay, written.formatVersion])).toEqual([
+      ["deck-1", 3, 6],
+      ["deck-3", 3, 6],
+      ["deck-2", 3, 6],
+    ]);
+    const saves = vi.mocked(saveSolidDatasetAt).mock.calls;
+    expect(saves.map(([url]) => url)).toEqual([CATALOG, "https://pod.example/solid-memo/b/catalog.ttl"]);
+    for (const written of [deck, second]) {
+      expect(getInteger(getThing(saves[0]![1] as SolidDataset, written.url)!, SM.deckNewCardsPerDay)).toBe(3);
+    }
+  });
+
+  it("writes nothing of a document when one of its decks is gone", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    await expect(makeRepository().saveDecks([deck, second])).rejects.toThrow("no longer exists");
+    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+  });
+});
+
+describe("removeDecks", () => {
+  it("deletes each deck's documents, once each, then their entries in one write", async () => {
+    const second: Deck = {
+      ...deck,
+      id: "deck-2",
+      url: `${CATALOG}#deck-2`,
+      cardsDocumentUrl: `${INSTANCE}decks/deck-2.ttl`,
+      // Another app pointed both decks at one reviews document.
+      reviewsDocumentUrl: deck.reviewsDocumentUrl,
+    };
+    const secondEntry = buildThing(createThing({ url: second.url }))
+      .addIri(RDF.type, SM.Deck)
+      .addStringNoLocale(DCTERMS.title, "Verbs")
+      .addIri(SM.cardsDocument, second.cardsDocumentUrl)
+      .addIri(SM.reviewsDocument, second.reviewsDocumentUrl)
+      .build();
+    vi.mocked(getSolidDatasetOrNull).mockImplementation((async (url: string) =>
+      url === CATALOG ? setThing(catalogWithDeck(), secondEntry) : mockSolidDatasetFrom(url)) as never);
+
+    await makeRepository().removeDecks([deck, second]);
+
+    expect(vi.mocked(deleteSolidDataset).mock.calls.map(([url]) => url)).toEqual([
+      deck.cardsDocumentUrl,
+      deck.reviewsDocumentUrl,
+      second.cardsDocumentUrl,
+    ]);
+    expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
+    const [, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
+    expect(getThing(saved as SolidDataset, deck.url)).toBeNull();
+    expect(getThing(saved as SolidDataset, second.url)).toBeNull();
+  });
+});
+
 describe("removeDeck", () => {
   it("deletes both documents and the catalog subject, its distribution and agents no other deck names", async () => {
     const authored: Deck = { ...deck, authors: ["Anton Wiklund", "A friend"] };

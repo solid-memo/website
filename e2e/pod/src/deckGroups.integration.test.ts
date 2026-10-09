@@ -7,7 +7,9 @@
  * edit made while another tab adds a deck keeps that deck, as the edit
  * is applied again to the document as it is (where the server refuses a
  * stale If-Match, preconditionsOf) or patched beside it (where not).
- * Every name is ASCII: the documents are PATCHed, which Community Solid
+ * Several decks are moved into a group, given a pace and a direction,
+ * and removed at once, as the Studio does (docs/studio.md), each one
+ * write of catalog.ttl. Every name is ASCII: the documents are PATCHed, which Community Solid
  * Server's in-memory store cuts short beyond ASCII (docs/testing.md).
  */
 import { beforeAll, describe, expect, inject, it } from "vitest";
@@ -136,6 +138,41 @@ describe.each(SERVERS)("deck groups on $name", ({ url: server }) => {
     // perhaps patched beside the new deck.
     if (conditional) expect(catalogWrites).toBe(2);
     expect(names((await page().listDeckTree(instanceUrl)).children)).toEqual([{ Pair: ["A", "B"] }, "C", "D", "E"]);
+    expect((await page().validateInstance(instanceUrl)).conforms).toBe(true);
+  });
+
+  it("moves, paces, directs and removes several decks at once, each one write of the catalog", async () => {
+    const { instanceUrl, decks } = await seed(server);
+    const writes: string[] = [];
+    const useCases = page(async (url) => {
+      writes.push(url);
+    });
+    const fresh = async () => names((await page().listDeckTree(instanceUrl)).children);
+
+    const pair = useCases.newDeckGroup(instanceUrl, { en: "Pair" });
+    await useCases.editDeckTree(instanceUrl, { kind: "combine", dragged: decks.B!.url, target: decks.A!.url, group: pair });
+    writes.length = 0;
+    await useCases.editDeckTree(instanceUrl, { kind: "gather", nodes: [decks.D!.url, decks.C!.url], parent: pair.url });
+    expect(await fresh()).toEqual([{ Pair: ["A", "B", "D", "C"] }]);
+
+    const all = (await page().listDecks(instanceUrl)).filter((deck) => [decks.A, decks.C].some((one) => one!.url === deck.url));
+    await useCases.setDecksPace(all, { newCardsPerDay: 3 });
+    const paced = await useCases.setDecksDirection(
+      (await page().listDecks(instanceUrl)).filter((deck) => all.some((one) => one.url === deck.url)),
+      "bidirectional",
+    );
+    // In the order the server lists them.
+    expect(paced.map((deck) => [deck.title.en, deck.newCardsPerDay, deck.direction]).sort()).toEqual([
+      ["A", 3, "bidirectional"],
+      ["C", 3, "bidirectional"],
+    ]);
+    const read = await page().listDecks(instanceUrl);
+    expect(read.filter((deck) => deck.newCardsPerDay === 3).map((deck) => deck.title.en).sort()).toEqual(["A", "C"]);
+
+    await useCases.removeDecks(read.filter((deck) => deck.title.en === "B" || deck.title.en === "D"));
+    expect(await fresh()).toEqual([{ Pair: ["A", "C"] }]);
+    // One write of the catalog each: the move, the pace, the direction and the removal.
+    expect(writes.filter((url) => url.endsWith("/catalog.ttl"))).toHaveLength(4);
     expect((await page().validateInstance(instanceUrl)).conforms).toBe(true);
   });
 });

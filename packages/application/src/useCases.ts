@@ -346,7 +346,17 @@ export interface UseCases {
    * instance's preferences again.
    */
   setDeckPace(deck: Deck, pace: DeckPace): Promise<Deck>;
+  /** Study several decks of an instance one way, as setDeckDirection, in one write of their catalog. */
+  setDecksDirection(decks: readonly Deck[], direction: DeckDirection): Promise<Deck[]>;
+  /**
+   * Give several decks of an instance the same daily limits, as
+   * setDeckPace, in one write of their catalog; a limit that is not a
+   * whole number is refused before any write.
+   */
+  setDecksPace(decks: readonly Deck[], pace: DeckPace): Promise<Deck[]>;
   removeDeck(deck: Deck): Promise<void>;
+  /** Remove several decks of an instance and their cards, their entries in one write of their catalog. */
+  removeDecks(decks: readonly Deck[]): Promise<void>;
   /** The ready-made decks the app offers for import. */
   listLibraryDecks(): Promise<LibraryDeck[]>;
   /** Copy a library deck, cards included, into an instance as a new deck. */
@@ -1657,8 +1667,17 @@ export function createUseCases({
     async setDeckPace(deck, pace) {
       return deckRepository.saveDeck(withPace(deck, pace));
     },
+    setDecksDirection(decks, direction) {
+      return deckRepository.saveDecks(decks.map((deck) => ({ ...deck, direction })));
+    },
+    async setDecksPace(decks, pace) {
+      return deckRepository.saveDecks(decks.map((deck) => withPace(deck, pace)));
+    },
     removeDeck(deck) {
       return deckRepository.removeDeck(deck);
+    },
+    removeDecks(decks) {
+      return deckRepository.removeDecks(decks);
     },
     listLibraryDecks() {
       return deckLibrary.listLibraryDecks();

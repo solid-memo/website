@@ -109,7 +109,8 @@
     "study": "학습",
     "statistics": "통계",
     "course": "코스",
-    "courseReview": "마무리 복습"
+    "courseReview": "마무리 복습",
+    "groups": "그룹"
   },
   "browser": {
     "heading": "카드 브라우저: {deck}",
@@ -1251,11 +1252,79 @@
       "caption": "{instance}의 덱",
       "loading": "덱을 불러오는 중…",
       "empty": "아직 덱이 없어요. {app}에서 만들거나 가져와 주세요.",
-      "deck": "덱",
-      "cards": "카드",
+      "groupsLink": "그룹 정리",
+      "filter": "이름이나 그룹으로 필터",
+      "shown": {
+        "one": "덱 {count}개 중 {shown}개",
+        "other": "덱 {count}개 중 {shown}개"
+      },
+      "noMatch": "‘{filter}’와(과) 일치하는 덱이 없어요.",
+      "select": "선택",
+      "selectAll": "표시된 덱 모두 선택",
+      "selectDeck": "{deck} 선택",
+      "title": "덱",
+      "group": "그룹",
+      "direction": "방향",
+      "newCardsPerDay": "하루 새 카드",
+      "maxReviewsPerDay": "하루 복습",
       "due": "오늘 복습",
+      "new": "오늘 새 카드",
+      "modified": "마지막 변경",
+      "cards": "카드",
+      "cardsOf": "{deck}의 카드",
+      "topLevel": "최상위",
+      "followsInstance": "(인스턴스)",
       "counting": "세는 중…",
-      "unreadable": "읽을 수 없음"
+      "unreadable": "읽을 수 없음",
+      "badge": {
+        "library": "라이브러리",
+        "course": "코스",
+        "invalid": "잘못된 데이터",
+        "unreadable": "읽을 수 없음"
+      }
+    },
+    "bulk": {
+      "label": "선택한 덱",
+      "selected": {
+        "one": "덱 {count}개 선택됨",
+        "other": "덱 {count}개 선택됨"
+      },
+      "move": "그룹으로 옮기기",
+      "pace": "학습량 설정",
+      "direction": "방향 설정",
+      "remove": "삭제",
+      "clear": "선택 해제",
+      "group": "그룹",
+      "topLevel": "최상위(그룹 없음)",
+      "moveReadOnly": "더 새로운 버전의 Solid Memo가 이 그룹들을 정리해서, 여기에서는 덱을 이 그룹으로 옮길 수 없어요.",
+      "newCardsPerDay": "하루 새 카드 수",
+      "maxReviewsPerDay": "하루 최대 복습 수",
+      "paceHint": "비워 둔 한도는 인스턴스 설정을 따라요.",
+      "apply": "적용",
+      "cancel": "취소",
+      "removeConfirm": {
+        "one": "{names} 덱과 그 안의 모든 카드를 삭제할까요? 되돌릴 수 없어요.",
+        "other": "덱 {count}개와 그 안의 모든 카드를 삭제할까요? 대상: {names}. 되돌릴 수 없어요."
+      },
+      "moved": {
+        "one": "덱 {count}개를 {group}(으)로 옮겼어요.",
+        "other": "덱 {count}개를 {group}(으)로 옮겼어요."
+      },
+      "paced": {
+        "one": "덱 {count}개의 학습량을 설정했어요.",
+        "other": "덱 {count}개의 학습량을 설정했어요."
+      },
+      "directed": {
+        "one": "덱 {count}개의 방향을 설정했어요.",
+        "other": "덱 {count}개의 방향을 설정했어요."
+      },
+      "removed": {
+        "one": "덱 {count}개를 삭제했어요.",
+        "other": "덱 {count}개를 삭제했어요."
+      }
+    },
+    "groups": {
+      "heading": "그룹"
     }
   }
 }

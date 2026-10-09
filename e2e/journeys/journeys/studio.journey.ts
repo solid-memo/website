@@ -5,36 +5,78 @@ import type { CssAccount } from "../harness/cssAccount.ts";
 
 /**
  * Solid Memo Studio beside Solid Memo, on one origin (docs/studio.md): a
- * learner with a deck opens the instance in the Studio from Solid Memo's
- * instance bar, logs in to it at the Solid server
- * (the session is Solid Memo's, which restores only there), sees the
- * instance's decks in its table, picks the instance again from the
- * picker, and goes back to Solid Memo, which takes a login of its own
- * again (docs/authentication.md).
+ * learner with two decks opens the instance in the Studio from Solid
+ * Memo's instance bar, logs in to it at the Solid server (the session is
+ * Solid Memo's, which restores only there), and sees the instance's
+ * decks in its table. On the Groups screen they group the two decks, as
+ * Solid Memo's deck list would; back on Home, the table shows the group,
+ * filters and sorts by what the URL says, gives both decks a pace and
+ * moves them back to the top level at once, and deletes one of them,
+ * once the user confirms. They pick the instance again from the picker,
+ * and go back to Solid Memo, which takes a login of its own again
+ * (docs/authentication.md) and lists the deck that is left.
  */
-test("log in to the Studio and see an instance's decks @studio", async ({ app, account, runId }) => {
+test("log in to the Studio and manage an instance's decks @studio", async ({ app, account, runId }) => {
   const instance = `Studio ${runId}`;
-  const deck = `Deck ${runId}`;
+  const alpha = `Alpha ${runId}`;
+  const beta = `Beta ${runId}`;
+  const group = `Pair ${runId}`;
 
   await app.step("01 · Visit Solid Memo", () => app.onboarding.visit());
   await app.step("02 · Log in with a WebID", () => logInAndCreateInstance(app, account, instance));
-  await app.step("03 · Create a deck", async () => {
+  await app.step("03 · Create two decks", async () => {
     await app.decks.openDeckCreator();
-    await app.deckCreator.create(deck);
+    await app.deckCreator.create(alpha);
+    await app.decks.openDeckCreator();
+    await app.deckCreator.create(beta);
   });
 
   await app.step("04 · Open the instance in Solid Memo Studio: its own login", () => app.studio.openFromApp());
   await app.step("05 · Log in to the Studio with the WebID", () => logInAgain(app, account));
-  await app.step("06 · See the instance's decks", () => app.studio.expectDeck(instance, deck, { cards: 0, due: 0 }));
-  await app.step("07 · Pick the instance from the instance picker", async () => {
-    await app.studio.pickInstance(instance);
-    await app.studio.expectDeck(instance, deck, { cards: 0, due: 0 });
+  await app.step("06 · See the instance's decks", async () => {
+    await app.studio.expectDeck(instance, alpha, { cards: 0, due: 0 });
+    await app.studio.expectDeck(instance, beta, { cards: 0, due: 0 });
   });
 
-  await app.step("08 · Go back to Solid Memo and log in to it again", async () => {
+  await app.step("07 · Group the two decks on the Groups screen", async () => {
+    await app.studio.openGroups();
+    await app.groups.groupWithNeighbour(alpha);
+    await app.groups.nameGroup(group);
+    await app.chrome.breadcrumb("breadcrumbs.decks");
+    await app.studio.expectDeck(instance, alpha, { cards: 0, due: 0, group });
+    await app.studio.expectDeck(instance, beta, { cards: 0, due: 0, group });
+  });
+
+  await app.step("08 · Filter the decks, then sort them by name", async () => {
+    await app.studio.filter(instance, "beta", [beta]);
+    await app.studio.filter(instance, runId, [alpha, beta]);
+    await app.studio.sortBy(instance, "title", [alpha, beta]);
+  });
+
+  await app.step("09 · Give both decks a pace and move them to the top level", async () => {
+    await app.studio.select([alpha, beta]);
+    await app.studio.setNewCardsPerDay(7, 2);
+    await app.studio.moveToTopLevel(2);
+    await app.studio.expectDeck(instance, alpha, { cards: 0, due: 0, newCardsPerDay: "7" });
+    await app.studio.expectDeck(instance, beta, { cards: 0, due: 0, newCardsPerDay: "7" });
+  });
+
+  await app.step("10 · Delete one deck, confirming", async () => {
+    await app.studio.clearSelection();
+    await app.studio.select([beta]);
+    await app.studio.deleteSelected(instance, [beta]);
+    await app.studio.expectDeck(instance, alpha, { cards: 0, due: 0 });
+  });
+
+  await app.step("11 · Pick the instance from the instance picker", async () => {
+    await app.studio.pickInstance(instance);
+    await app.studio.expectDeck(instance, alpha, { cards: 0, due: 0 });
+  });
+
+  await app.step("12 · Go back to Solid Memo and log in to it again", async () => {
     await app.studio.backToApp();
     await logInAgain(app, account);
-    await app.decks.expectDeck(deck);
+    await app.decks.expectDeck(alpha);
   });
 });
 

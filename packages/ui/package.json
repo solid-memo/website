@@ -22,6 +22,7 @@
     "./deckTree/dropZones": "./src/ui/deckTree/dropZones.ts",
     "./deckTree/useDragReorder": "./src/ui/deckTree/useDragReorder.ts",
     "./routerCore": "./src/ui/routerCore.ts",
+    "./deckTreeEditor": "./src/ui/deckTreeEditor.ts",
     "./test/setup": "./src/test/setup.ts",
     "./test/useCasesFake": "./src/test/useCasesFake.ts",
     "./*": "./src/ui/*.tsx"
