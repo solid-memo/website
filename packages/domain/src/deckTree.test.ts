@@ -7,6 +7,7 @@ import {
   combine,
   decksOf,
   deleteGroup,
+  gather,
   graft,
   isDescendant,
   locate,
@@ -275,6 +276,30 @@ describe("deleteGroup", () => {
   });
 });
 
+describe("gather", () => {
+  const sample = tree("a", "b", ["g1", "c", ["g2"]], "d");
+
+  it("puts the nodes at the end of the parent, in the order given", () => {
+    expect(shape(gather(sample, ["d", "a"], "g1"))).toEqual(["b", ["g1", "c", ["g2"], "d", "a"]]);
+    expect(shape(gather(sample, ["c", "a"], "g2"))).toEqual(["b", ["g1", ["g2", "c", "a"]], "d"]);
+    expect(shape(gather(sample, ["c"], null))).toEqual(["a", "b", ["g1", ["g2"]], "d", "c"]);
+  });
+
+  it("leaves a node already in the parent where it is, so that doing it again changes nothing", () => {
+    const once = gather(sample, ["a", "c"], "g1");
+    expect(shape(once)).toEqual(["b", ["g1", "c", ["g2"], "a"], "d"]);
+    expect(gather(once, ["a", "c"], "g1")).toBe(once);
+    expect(gather(sample, [], "g1")).toBe(sample);
+  });
+
+  it("refuses a parent or node that has gone, and a group put inside itself", () => {
+    changedError(() => gather(sample, ["a"], "gone"));
+    changedError(() => gather(sample, ["a"], "a"));
+    changedError(() => gather(sample, ["a", "gone"], "g1"));
+    changedError(() => gather(sample, ["g1"], "g2"));
+  });
+});
+
 describe("renameGroup", () => {
   const sample = tree(["g1", ["g2", "a"]]);
 
@@ -338,6 +363,7 @@ describe("applyDeckTreeEdit", () => {
       group: { title: { en: "x" } },
     });
     expect(shape(applyDeckTreeEdit(sample, { kind: "removeGroup", group: "g1" }))).toEqual(["a", "b"]);
+    expect(shape(applyDeckTreeEdit(sample, { kind: "gather", nodes: ["a"], parent: "g1" }))).toEqual([["g1", "b", "a"]]);
     expect(
       shape(applyDeckTreeEdit(sample, { kind: "graft", nodes: [{ kind: "group", group, children: [{ kind: "deck", url: "a" }] }] })),
     ).toEqual([["g1", "b"], ["n", "a"]]);

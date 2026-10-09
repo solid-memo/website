@@ -177,10 +177,23 @@ export interface DeckRepository {
    */
   saveDeck(deck: Deck): Promise<Deck>;
   /**
+   * Rewrite several decks' catalog entries as saveDeck does, in ONE save
+   * of their catalog document (one per document, should they be in
+   * several). Throws deckGone, before its document is written, when one
+   * of them is gone. Returns the decks as written.
+   */
+  saveDecks(decks: readonly Deck[]): Promise<Deck[]>;
+  /**
    * Removes the deck's catalog entry, cards document and reviews
    * document, and the deck from its group, in the same write.
    */
   removeDeck(deck: Deck): Promise<void>;
+  /**
+   * Removes several decks as removeDeck does: their cards and reviews
+   * documents, then their catalog entries in ONE write of their catalog
+   * document.
+   */
+  removeDecks(decks: readonly Deck[]): Promise<void>;
   /**
    * The instance's decks as the user arranged them into groups
    * (domain/deckTree.ts buildTree); an empty tree when it has no catalog

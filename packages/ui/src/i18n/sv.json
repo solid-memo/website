@@ -109,7 +109,8 @@
     "study": "Studera",
     "statistics": "Statistik",
     "course": "Kurs",
-    "courseReview": "Slutrepetition"
+    "courseReview": "Slutrepetition",
+    "groups": "Grupper"
   },
   "browser": {
     "heading": "Bläddra: {deck}",
@@ -1248,11 +1249,79 @@
       "caption": "Kortlekarna i {instance}",
       "loading": "Läser in kortlekar…",
       "empty": "Inga kortlekar än: skapa eller importera dem i {app}.",
-      "deck": "Kortlek",
-      "cards": "Kort",
+      "groupsLink": "Ordna grupper",
+      "filter": "Filtrera på namn eller grupp",
+      "shown": {
+        "one": "{shown} av {count} kortlek",
+        "other": "{shown} av {count} kortlekar"
+      },
+      "noMatch": "Ingen kortlek matchar ”{filter}”.",
+      "select": "Välj",
+      "selectAll": "Välj alla kortlekar som visas",
+      "selectDeck": "Välj {deck}",
+      "title": "Kortlek",
+      "group": "Grupp",
+      "direction": "Riktning",
+      "newCardsPerDay": "Nya per dag",
+      "maxReviewsPerDay": "Repetitioner per dag",
       "due": "Att repetera idag",
+      "new": "Nya idag",
+      "modified": "Senast ändrad",
+      "cards": "Kort",
+      "cardsOf": "kort i {deck}, i Solid Memo",
+      "topLevel": "Översta nivån",
+      "followsInstance": "(instansen)",
       "counting": "Räknar…",
-      "unreadable": "Kunde inte läsas"
+      "unreadable": "Kunde inte läsas",
+      "badge": {
+        "library": "Bibliotek",
+        "course": "Kurs",
+        "invalid": "Ogiltiga data",
+        "unreadable": "Oläslig"
+      }
+    },
+    "bulk": {
+      "label": "Valda kortlekar",
+      "selected": {
+        "one": "{count} kortlek vald",
+        "other": "{count} kortlekar valda"
+      },
+      "move": "Flytta till grupp",
+      "pace": "Ange takt",
+      "direction": "Ange riktning",
+      "remove": "Ta bort",
+      "clear": "Avmarkera alla",
+      "group": "Grupp",
+      "topLevel": "Översta nivån (ingen grupp)",
+      "moveReadOnly": "En nyare version av Solid Memo har ordnat grupperna, så kortlekar kan inte flyttas in i dem här.",
+      "newCardsPerDay": "Nya kort per dag",
+      "maxReviewsPerDay": "Högst antal repetitioner per dag",
+      "paceHint": "En gräns som lämnas tom följer instansens inställningar.",
+      "apply": "Verkställ",
+      "cancel": "Avbryt",
+      "removeConfirm": {
+        "one": "Ta bort kortleken {names} och alla dess kort? Det går inte att ångra.",
+        "other": "Ta bort {count} kortlekar och alla deras kort: {names}? Det går inte att ångra."
+      },
+      "moved": {
+        "one": "Flyttade {count} kortlek till {group}.",
+        "other": "Flyttade {count} kortlekar till {group}."
+      },
+      "paced": {
+        "one": "Angav takten för {count} kortlek.",
+        "other": "Angav takten för {count} kortlekar."
+      },
+      "directed": {
+        "one": "Angav riktningen för {count} kortlek.",
+        "other": "Angav riktningen för {count} kortlekar."
+      },
+      "removed": {
+        "one": "Tog bort {count} kortlek.",
+        "other": "Tog bort {count} kortlekar."
+      }
+    },
+    "groups": {
+      "heading": "Grupper"
     }
   }
 }

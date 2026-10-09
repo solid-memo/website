@@ -1257,12 +1257,110 @@ table.studio-decks tbody th {
   text-transform: none;
   color: var(--text);
   overflow-wrap: anywhere;
+  white-space: normal;
+  min-width: 10rem;
 }
 
-table.studio-decks td,
-table.studio-decks thead th:not(:first-child) {
+table.studio-decks .number {
   text-align: right;
   font-variant-numeric: tabular-nums;
+}
+
+/* Wide: it scrolls on its own, never the page, on a narrow screen. */
+.studio-table {
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+
+.studio-table table {
+  margin-bottom: 0;
+}
+
+table.studio-decks thead th,
+table.studio-decks td {
+  white-space: nowrap;
+}
+
+/* A column's name is the button that sorts by it, in the header's type. */
+table.studio-decks button.sort {
+  min-height: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  box-shadow: none;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+}
+
+table.studio-decks [aria-sort="ascending"] button.sort::after {
+  content: " ▲";
+}
+
+table.studio-decks [aria-sort="descending"] button.sort::after {
+  content: " ▼";
+}
+
+table.studio-decks input[type="checkbox"] {
+  min-height: 0;
+  margin: 0;
+}
+
+.studio-badge {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.1rem 0.5rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+.studio-filter input {
+  display: block;
+  width: 100%;
+  max-width: 24rem;
+  margin-top: 0.25rem;
+}
+
+/* What can be done with the selected decks, and the form an action opens. */
+.studio-bulk {
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-sunken);
+}
+
+.studio-bulk>p {
+  margin: 0 0 0.5rem;
+}
+
+.studio-bulk form {
+  margin-top: 0.75rem;
+}
+
+.studio-bulk label {
+  display: block;
+}
+
+.studio-bulk select,
+.studio-bulk input {
+  display: block;
+  font: inherit;
+  min-height: 2.75rem;
+  margin-top: 0.25rem;
+  max-width: 100%;
+}
+
+.studio-bulk select {
+  padding: 0.55rem 0.8rem;
+  color: var(--text);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  margin-bottom: 0.6rem;
 }
 
 .breadcrumbs ol {

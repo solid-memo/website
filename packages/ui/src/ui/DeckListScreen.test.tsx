@@ -160,6 +160,14 @@ function stubConfirm(answer: boolean) {
 }
 
 describe("DeckListScreen", () => {
+  it("takes a heading of its own, and leaves out the way to the Studio, as the Studio shows it", () => {
+    renderScreen(tree, { heading: "Groups", studioHref: undefined });
+    expect(screen.getByRole("heading", { name: "Groups" })).toBeInTheDocument();
+    openMenu("Kana");
+    expect(screen.queryByRole("menuitem", { name: "Open in Studio" })).toBeNull();
+    expect(screen.getByRole("menuitem", { name: "Preferences" })).toBeInTheDocument();
+  });
+
   it("lists every deck and group under a Decks heading, counting all decks", () => {
     renderScreen();
     expect(screen.getByRole("heading", { name: "Decks" })).toBeInTheDocument();

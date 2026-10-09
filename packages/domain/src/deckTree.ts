@@ -58,6 +58,8 @@ export type DeckTreeEdit =
   | { kind: "combine"; dragged: string; target: string; group: DeckGroup }
   | { kind: "rename"; group: string; title: LangText }
   | { kind: "removeGroup"; group: string }
+  /** Put the nodes at the end of `parent`, in this order: many decks moved into a group at once (`gather`). */
+  | { kind: "gather"; nodes: readonly string[]; parent: ParentId }
   /** Place `nodes` at the end of the top level: decks the tree has, and new groups (URLs minted by the client) holding them. */
   | { kind: "graft"; nodes: readonly GraftNode[] };
 
@@ -232,6 +234,26 @@ export function deleteGroup(tree: DeckTree, url: string): DeckTree {
   return withChildren(tree, at.parent, spliced(childrenOf(tree, at.parent)!, at.index, 1, ...at.node.children));
 }
 
+/**
+ * The tree with the nodes at the end of a parent, in the order given; a
+ * node already in it stays where it is. Done again, it changes nothing,
+ * so an edit retried after its write went through still succeeds. A
+ * parent or node that has gone, or a group to go inside itself, means
+ * the tree changed under the edit.
+ */
+export function gather(tree: DeckTree, ids: readonly string[], parent: ParentId): DeckTree {
+  if (childrenOf(tree, parent) === undefined) throw changed();
+  let result = tree;
+  for (const id of ids) {
+    const at = locate(result, id);
+    if (at === undefined) throw changed();
+    if (at.parent === parent) continue;
+    const last = childrenOf(result, parent)!.at(-1);
+    result = moveNode(result, id, { parent, after: last === undefined ? null : nodeId(last) });
+  }
+  return result;
+}
+
 /** The tree with a group renamed; a group that is gone means the tree changed under the edit. */
 export function renameGroup(tree: DeckTree, url: string, title: LangText): DeckTree {
   const at = locate(tree, url);
@@ -277,6 +299,8 @@ export function applyDeckTreeEdit(tree: DeckTree, edit: DeckTreeEdit): DeckTree 
       return renameGroup(tree, edit.group, edit.title);
     case "removeGroup":
       return deleteGroup(tree, edit.group);
+    case "gather":
+      return gather(tree, edit.nodes, edit.parent);
     case "graft":
       return graft(tree, edit.nodes);
   }

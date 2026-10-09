@@ -1,34 +1,82 @@
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useState } from "preact/hooks";
+import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
-import { activeCards, type Deck } from "@solid-memo/domain/deck";
+import { activeCards, type Deck, type DeckDirection } from "@solid-memo/domain/deck";
+import { deckPreferences, type DeckPace } from "@solid-memo/domain/deckPace";
+import { groupsOfDecks, groupTrails, type DeckFigure, type DeckTableRow, type DeckTableView } from "@solid-memo/domain/deckTable";
+import { decksOf, type DeckGroup } from "@solid-memo/domain/deckTree";
 import type { Instance } from "@solid-memo/domain/instance";
+import { setAsideDecks } from "@solid-memo/domain/validation";
 import { studyCountsQuery } from "@solid-memo/ui/DeckStudyAction";
+import { catalogScope, deckTreeKey, useCourseCopies } from "@solid-memo/ui/deckTreeEditor";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
-import { DeckTableScreen, type Count } from "./DeckTableScreen";
+import { DeckTableScreen, type DeckBadge } from "./DeckTableScreen";
+
+/** A bulk action on the selected decks. */
+type Bulk =
+  | { kind: "move"; decks: readonly Deck[]; parent: DeckGroup | null }
+  | { kind: "pace"; decks: readonly Deck[]; pace: DeckPace }
+  | { kind: "direction"; decks: readonly Deck[]; direction: DeckDirection }
+  | { kind: "remove"; decks: readonly Deck[] };
 
 /**
- * Home's data: the instance's decks, then each deck's cards and today's
- * counts, read as Solid Memo reads them (the same queries), each row's
- * figures as they come.
+ * Home's data: the instance's decks as the user arranged them (the same
+ * query as Solid Memo's deck list, so its groups come with them), the
+ * instance's preferences (the pace a deck without its own follows),
+ * then each deck's cards and today's counts, read as Solid Memo reads
+ * them, each row's figures as they come. The check of the instance
+ * (as Solid Memo makes it when it is opened) and which decks are
+ * courses come in later, as badges.
+ *
+ * A bulk action is one write wherever it can be: a move is one edit of
+ * the arrangement (`gather`), a pace or a direction one save of the
+ * catalog, a deletion one save of it after the decks' own documents. It
+ * is made in turn with the other writes of the catalog (catalogScope),
+ * and every query of the instance's decks, and their counts, is read
+ * afresh after it.
  */
 export function DeckTableContainer({
   useCases,
   instance,
+  view,
+  onView,
   appHref,
+  groupsHref,
+  deckHref,
+  cardsHref,
 }: {
   useCases: UseCases;
   instance: Instance;
+  view: DeckTableView;
+  onView: (view: DeckTableView) => void;
   /** Solid Memo, open at the instance's decks. */
   appHref: string;
+  groupsHref: string;
+  /** A deck's page in Solid Memo. */
+  deckHref: (deck: Deck) => string;
+  /** A deck's cards in Solid Memo. */
+  cardsHref: (deck: Deck) => string;
 }) {
   const { t, errorText } = useI18n();
-  const decksQuery = useQuery({
-    queryKey: ["decks", instance.url],
-    queryFn: () => useCases.listDecks(instance.url),
+  const queryClient = useQueryClient();
+  const [failure, setFailure] = useState<unknown>(null);
+  const treeQuery = useQuery({
+    queryKey: deckTreeKey(instance.url),
+    queryFn: () => useCases.listDeckTree(instance.url),
+    refetchOnWindowFocus: false,
   });
-  const decks = decksQuery.data ?? [];
+  const preferencesQuery = useQuery({
+    queryKey: ["preferences", instance.url],
+    queryFn: () => useCases.getPreferences(instance.url),
+  });
+  const checkQuery = useQuery({
+    queryKey: ["validation", instance.url],
+    queryFn: () => useCases.checkInstance(instance.url),
+    staleTime: Infinity,
+  });
+  const decks = decksOf(treeQuery.data?.children ?? []);
   const cardQueries = useQueries({
     queries: decks.map((deck) => ({
       queryKey: ["cards", deck.cardsDocumentUrl],
@@ -38,22 +86,99 @@ export function DeckTableContainer({
   const countQueries = useQueries({
     queries: decks.map((deck) => studyCountsQuery(useCases, instance.url, deck)),
   });
+  const isCourse = useCourseCopies(useCases, decks);
 
-  if (decksQuery.error) return <ErrorMessage error={errorText(decksQuery.error)} />;
-  if (decksQuery.data === undefined) return <Loading label={t("studio.decks.loading")} />;
+  const bulkMutation = useMutation({
+    scope: { id: catalogScope(instance.url) },
+    mutationFn: async (bulk: Bulk): Promise<void> => {
+      switch (bulk.kind) {
+        case "move":
+          await useCases.editDeckTree(instance.url, {
+            kind: "gather",
+            nodes: bulk.decks.map((deck) => deck.url),
+            parent: bulk.parent?.url ?? null,
+          });
+          return;
+        case "pace":
+          await useCases.setDecksPace(bulk.decks, bulk.pace);
+          return;
+        case "direction":
+          await useCases.setDecksDirection(bulk.decks, bulk.direction);
+          return;
+        case "remove":
+          await useCases.removeDecks(bulk.decks);
+      }
+    },
+    onMutate: () => setFailure(null),
+    onError: (error) => setFailure(error),
+    onSettled: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["decks", instance.url] }),
+        queryClient.invalidateQueries({ queryKey: ["studyQueue"] }),
+      ]),
+  });
+  const run = (bulk: Bulk) =>
+    bulkMutation.mutateAsync(bulk).then(
+      () => true,
+      () => false,
+    );
 
-  const count = <T,>(query: { data?: T; isError: boolean }, figure: (data: T) => number): Count =>
-    query.data !== undefined ? figure(query.data) : query.isError ? "unreadable" : "loading";
-  const at = (deck: Deck) => decks.indexOf(deck);
+  const error = treeQuery.error ?? preferencesQuery.error;
+  if (error) return <ErrorMessage error={errorText(error)} />;
+  if (treeQuery.data === undefined || preferencesQuery.data === undefined) {
+    return <Loading label={t("studio.decks.loading")} />;
+  }
+
+  const preferences = preferencesQuery.data;
+  const groups = groupsOfDecks(treeQuery.data);
+  const report = checkQuery.data !== undefined && !checkQuery.data.conforms ? checkQuery.data : null;
+  const queries = (deck: Deck) => {
+    const at = decks.indexOf(deck);
+    return { cards: cardQueries[at]!, counts: countQueries[at]! };
+  };
+  const rows = decks.map((deck): DeckTableRow => {
+    const { cards, counts } = queries(deck);
+    const pace = deckPreferences(preferences, deck);
+    return {
+      deck,
+      groups: groups.get(deck.url)!,
+      figures: {
+        ...(cards.data === undefined ? {} : { cards: activeCards(cards.data).length }),
+        ...(counts.data === undefined ? {} : { due: counts.data.dueCount, new: counts.data.newCount }),
+      },
+      newCardsPerDay: pace.newCardsPerDay,
+      maxReviewsPerDay: pace.maxReviewsPerDay,
+    };
+  });
+  const pending = (deck: Deck, figure: DeckFigure) => {
+    const { cards, counts } = queries(deck);
+    return (figure === "cards" ? cards : counts).isError ? "unreadable" : "loading";
+  };
+  const badges = (deck: Deck): DeckBadge[] => [
+    ...(deck.sourceUrl === undefined ? [] : [isCourse(deck) ? ("course" as const) : ("library" as const)]),
+    ...(report !== null && setAsideDecks(report, [deck]).size > 0 ? ["invalid" as const] : []),
+    ...(queries(deck).cards.isError ? ["unreadable" as const] : []),
+  ];
+
   return (
     <DeckTableScreen
       instance={instance}
-      decks={decks}
+      rows={rows}
+      view={view}
+      onView={onView}
+      pending={pending}
+      badges={badges}
+      groups={groupTrails(treeQuery.data)}
+      readOnly={treeQuery.data.readOnly}
+      deckHref={deckHref}
+      cardsHref={cardsHref}
       appHref={appHref}
-      figures={(deck) => ({
-        cards: count(cardQueries[at(deck)]!, (cards) => activeCards(cards).length),
-        due: count(countQueries[at(deck)]!, (counts) => counts.dueCount),
-      })}
+      groupsHref={groupsHref}
+      onMove={(selected, parent) => run({ kind: "move", decks: selected, parent })}
+      onPace={(selected, pace) => run({ kind: "pace", decks: selected, pace })}
+      onDirection={(selected, direction) => run({ kind: "direction", decks: selected, direction })}
+      onRemove={(selected) => run({ kind: "remove", decks: selected })}
+      error={errorText(failure)}
     />
   );
 }

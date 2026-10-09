@@ -1,5 +1,6 @@
 import { vi } from "vitest";
 import type { UseCases } from "@solid-memo/application/useCases";
+import type { Deck } from "@solid-memo/domain/deck";
 import { withAbout } from "@solid-memo/domain/deckAbout";
 import { applyDeckTreeEdit } from "@solid-memo/domain/deckTree";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
@@ -85,7 +86,10 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
     // As the real one does: keywords tidied, and left off when there are none.
     describeDeck: vi.fn(async (deck, about) => withAbout(deck, about)),
     setDeckPace: vi.fn(async (deck, pace) => ({ ...deck, ...pace })),
+    setDecksDirection: vi.fn(async (decks: readonly Deck[], direction) => decks.map((deck) => ({ ...deck, direction }))),
+    setDecksPace: vi.fn(async (decks: readonly Deck[], pace) => decks.map((deck) => ({ ...deck, ...pace }))),
     removeDeck: vi.fn(async () => undefined),
+    removeDecks: vi.fn(async () => undefined),
     listLibraryDecks: vi.fn(async () => []),
     importLibraryDeck: vi.fn(async () => {
       throw new Error("importLibraryDeck fake not configured");

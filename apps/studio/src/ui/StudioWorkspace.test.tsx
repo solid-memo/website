@@ -9,6 +9,7 @@ import { StudioWorkspace } from "./StudioWorkspace";
 import { instanceA, instanceB, makeDeck, session } from "../test/fixtures";
 
 const kanji = makeDeck("deck-1", { en: "Kanji N5" });
+const verbs = makeDeck("deck-2", { en: "Verbs" });
 
 function renderWorkspace(useCases: UseCases) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -44,7 +45,8 @@ describe("StudioWorkspace", () => {
     const trail = screen.getByRole("navigation", { name: "Breadcrumb" });
     expect(within(trail).getByRole("link", { name: "Instances" })).toHaveAttribute("href", "#/instances");
     expect(within(trail).getByRole("link", { name: "Decks" })).toHaveAttribute("aria-current", "page");
-    expect(within(screen.getByRole("banner")).getByText("The masthead")).toBeInTheDocument();
+    // The site's header (Home's own heading row is one too, in the test DOM's eyes).
+    expect(screen.getByText("The masthead").closest("header")).toHaveClass("site-header");
     expect(within(screen.getByRole("main")).getByText("A notice")).toBeInTheDocument();
   });
 
@@ -71,6 +73,48 @@ describe("StudioWorkspace", () => {
     fireEvent.click(screen.getByRole("button", { name: instanceB.name }));
     expect(await screen.findByRole("table", { name: "The decks of Deck set B" })).toBeInTheDocument();
     expect(useCases.listDecks).toHaveBeenCalledWith(instanceB.url);
+  });
+
+  it("keeps Home's filter and sort in the URL, replacing the entry, and links its decks to Solid Memo", async () => {
+    window.history.replaceState(null, "", home(instanceA.url));
+    const length = window.history.length;
+    renderWorkspace(
+      makeUseCasesFake({ listInstances: vi.fn(async () => [instanceA]), listDecks: vi.fn(async () => [kanji, verbs]) }),
+    );
+    fireEvent.input(await screen.findByRole("searchbox", { name: "Filter by name or group" }), { target: { value: "verb" } });
+    expect(parseStudioHash(window.location.hash)).toEqual({ screen: "home", instanceUrl: instanceA.url, view: { filter: "verb" } });
+    expect(screen.queryByRole("link", { name: "Kanji N5" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Cards" }));
+    expect(parseStudioHash(window.location.hash)).toEqual({
+      screen: "home",
+      instanceUrl: instanceA.url,
+      view: { filter: "verb", sort: { column: "cards", descending: false } },
+    });
+    expect(window.history.length).toBe(length);
+    const instance = encodeURIComponent(instanceA.url);
+    const deck = encodeURIComponent(verbs.url);
+    expect(screen.getByRole("link", { name: "Verbs" })).toHaveAttribute("href", `../#/deck?instance=${instance}&deck=${deck}`);
+    expect(await screen.findByRole("link", { name: /cards of Verbs/ })).toHaveAttribute(
+      "href",
+      `../#/browse?instance=${instance}&deck=${deck}`,
+    );
+  });
+
+  it("opens the instance's groups from Home, to arrange them as in Solid Memo", async () => {
+    window.history.replaceState(null, "", home(instanceA.url));
+    const useCases = makeUseCasesFake({ listInstances: vi.fn(async () => [instanceA]), listDecks: vi.fn(async () => [kanji]) });
+    renderWorkspace(useCases);
+    fireEvent.click(await screen.findByRole("link", { name: "Arrange groups" }));
+    expect(await screen.findByRole("heading", { name: "Groups" })).toBeInTheDocument();
+    expect(parseStudioHash(window.location.hash)).toEqual({ screen: "groups", instanceUrl: instanceA.url });
+    await waitFor(() => expect(document.title).toBe("Groups – Solid Memo Studio"));
+    const trail = screen.getByRole("navigation", { name: "Breadcrumb" });
+    expect(within(trail).getByRole("link", { name: "Decks" })).toHaveAttribute("href", home(instanceA.url));
+    expect(within(trail).getByRole("link", { name: "Groups" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "Kanji N5" })).toHaveAttribute(
+      "href",
+      `../#/deck?instance=${encodeURIComponent(instanceA.url)}&deck=${encodeURIComponent(kanji.url)}`,
+    );
   });
 
   it("falls back to the picker from an instance the user does not have", async () => {

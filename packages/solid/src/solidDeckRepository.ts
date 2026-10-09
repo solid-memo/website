@@ -189,17 +189,13 @@ export function createSolidDeckRepository({
 
     saveDeck,
 
-    async removeDeck(deck): Promise<void> {
-      const catalogUrl = documentUrlOf(deck.url);
-      const dataset = await getSolidDatasetOrNull(catalogUrl, fetch);
-      // A document another deck uses too (another app may point two decks at one) is kept.
-      const used = documentsInUse(dataset === null ? [] : toDecks(dataset).filter((other) => other.url !== deck.url));
-      for (const url of [deck.cardsDocumentUrl, deck.reviewsDocumentUrl]) {
-        if (!used.has(url)) await deleteDocumentIfPresent(url, fetch);
-      }
-      if (dataset === null) return;
-      await saveDataset(catalogUrl, withoutDeck(dataset, deck), fetch);
+    saveDecks,
+
+    removeDeck(deck): Promise<void> {
+      return removeDecks([deck]);
     },
+
+    removeDecks,
 
     async readDeckTree(instanceUrl) {
       const catalogUrl = catalogUrlOf(instanceUrl);
@@ -405,22 +401,43 @@ export function createSolidDeckRepository({
     },
   };
 
-  /**
-   * Rewrite a deck's catalog entry in place, in this app's format: the
-   * entry's own predicates are replaced from the deck, so unknown
-   * triples survive; its agents and distribution are written beside it.
-   * Returns the deck as written.
-   */
+  /** Rewrite a deck's catalog entry in place (saveDecks). */
   async function saveDeck(deck: Deck): Promise<Deck> {
-    const catalogUrl = documentUrlOf(deck.url);
-    const dataset = await getSolidDatasetOrNull(catalogUrl, fetch);
-    const thing = dataset === null ? null : getThing(dataset, deck.url);
-    if (dataset === null || thing === null) {
-      throw new AppError("deckGone", { deck: deck.title });
+    return (await saveDecks([deck]))[0]!;
+  }
+
+  /**
+   * Rewrite decks' catalog entries in place, in this app's format, one
+   * save per catalog document: each entry's own predicates are replaced
+   * from the deck, so unknown triples survive; its agents and
+   * distribution are written beside it. Returns the decks as written.
+   */
+  async function saveDecks(decks: readonly Deck[]): Promise<Deck[]> {
+    const written = decks.map((deck): Deck => ({ ...deck, formatVersion: DECK_FORMAT_VERSION }));
+    for (const [catalogUrl, inDocument] of byDocument(written)) {
+      const dataset = await getSolidDatasetOrNull(catalogUrl, fetch);
+      const gone = inDocument.find((deck) => dataset === null || getThing(dataset, deck.url) === null);
+      if (gone !== undefined) throw new AppError("deckGone", { deck: gone.title });
+      await save(catalogUrl, inDocument.reduce(withDeck, dataset!), inDocument.flatMap(deckSubjects));
     }
-    const written: Deck = { ...deck, formatVersion: DECK_FORMAT_VERSION };
-    await save(catalogUrl, withDeck(dataset, written), deckSubjects(written));
     return written;
+  }
+
+  /**
+   * Remove decks: their cards and reviews documents first, then their
+   * entries, in one write of each catalog document. A document a deck
+   * that stays uses too (another app may point two decks at one) is kept.
+   */
+  async function removeDecks(decks: readonly Deck[]): Promise<void> {
+    for (const [catalogUrl, inDocument] of byDocument(decks)) {
+      const dataset = await getSolidDatasetOrNull(catalogUrl, fetch);
+      const leaving = new Set(inDocument.map((deck) => deck.url));
+      const used = documentsInUse(dataset === null ? [] : toDecks(dataset).filter((other) => !leaving.has(other.url)));
+      const unused = [...documentsInUse(inDocument)].filter((url) => !used.has(url));
+      for (const url of unused) await deleteDocumentIfPresent(url, fetch);
+      if (dataset === null) continue;
+      await saveDataset(catalogUrl, inDocument.reduce(withoutDeck, dataset), fetch);
+    }
   }
 
   /**
@@ -565,6 +582,16 @@ function withoutCard(dataset: SolidDataset, cardUrl: string): SolidDataset {
   const card = getThing(dataset, cardUrl);
   const distractors = card === null ? [] : getUrlAll(card, SM.distractor);
   return [cardUrl, ...distractors].reduce((current, url) => removeUnlessNewer(current, url), dataset);
+}
+
+/** Decks by the catalog document their entries are in, in the order first met. */
+function byDocument<T extends Deck>(decks: readonly T[]): Map<string, T[]> {
+  const result = new Map<string, T[]>();
+  for (const deck of decks) {
+    const url = documentUrlOf(deck.url);
+    result.set(url, [...(result.get(url) ?? []), deck]);
+  }
+  return result;
 }
 
 async function deleteDocumentIfPresent(

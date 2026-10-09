@@ -1,11 +1,12 @@
 import { expect, type Locator } from "@playwright/test";
+import { escapeRegExp } from "../harness/strings.ts";
 import { Screen } from "./Screen.ts";
 
 /**
  * Solid Memo Studio, at studio/ of the same site (docs/studio.md): its
  * landing page (the same login as Solid Memo's, under the Studio's name),
- * its instance picker, Home's table of decks, and its way back to Solid
- * Memo.
+ * its instance picker, Home's table of decks (its filter, sort and bulk
+ * actions), its Groups screen, and its way back to Solid Memo.
  */
 export class Studio extends Screen {
   /** Home's table of the instance's decks ("The decks of {instance}"). */
@@ -26,13 +27,119 @@ export class Studio extends Screen {
     });
   }
 
-  /** Home lists the deck, in the instance's table: its name, its cards and what is due today. */
-  async expectDeck(instance: string, deck: string, figures: { cards: number; due: number }): Promise<void> {
+  /** The deck's row in the instance's table. */
+  row(instance: string, deck: string): Locator {
+    return this.decks(instance).getByRole("row").filter({ has: this.page.getByRole("rowheader", { name: deck, exact: true }) });
+  }
+
+  /**
+   * Home lists the deck, in the instance's table: its name, the groups
+   * it is in, what is due today and its cards (the row's cells after its
+   * checkbox: group, direction, pace twice, due, new, last changed, cards).
+   */
+  async expectDeck(
+    instance: string,
+    deck: string,
+    figures: { cards: number; due: number; group?: string; newCardsPerDay?: string },
+  ): Promise<void> {
     await this.intent(`See ${deck} in the Studio`, async () => {
       await expect(this.page.getByRole("heading", { name: this.t("studio.decks.heading"), level: 2 })).toBeVisible();
-      const row = this.decks(instance).getByRole("row").filter({ has: this.page.getByRole("rowheader", { name: deck, exact: true }) });
-      await expect(row.getByRole("cell")).toHaveText([String(figures.cards), String(figures.due)]);
+      const cells = this.row(instance, deck).getByRole("cell");
+      await expect(cells.nth(1)).toHaveText(figures.group ?? this.t("studio.decks.topLevel"));
+      if (figures.newCardsPerDay !== undefined) await expect(cells.nth(3)).toHaveText(figures.newCardsPerDay);
+      await expect(cells.nth(5)).toHaveText(String(figures.due));
+      await expect(cells.nth(8)).toContainText(String(figures.cards));
     });
+  }
+
+  /** Follows Home's link to the Groups screen, which arranges the decks as Solid Memo's list does (app.groups). */
+  async openGroups(): Promise<void> {
+    await this.intent("Open the Groups screen", async () => {
+      await this.page.getByRole("link", { name: this.t("studio.decks.groupsLink") }).click();
+      await expect(this.page.getByRole("heading", { name: this.t("studio.groups.heading"), level: 2 })).toBeVisible();
+      await this.app.chrome.expectBreadcrumbHere("breadcrumbs.groups");
+    });
+  }
+
+  /** Filters Home's table: only the decks named still show, and the URL holds the filter. */
+  async filter(instance: string, text: string, shown: string[]): Promise<void> {
+    await this.intent(`Filter the decks by ${text}`, async () => {
+      await this.page.getByRole("searchbox", { name: this.t("studio.decks.filter") }).fill(text);
+      await expect(this.page).toHaveURL(new RegExp(`[?&]q=${encodeURIComponent(text)}`));
+      await expect(this.decks(instance).getByRole("rowheader")).toHaveText(shown);
+    });
+  }
+
+  /** Sorts Home's table by a column (as its header names it), which says so; the URL holds the sort. */
+  async sortBy(instance: string, column: string, order: string[]): Promise<void> {
+    await this.intent(`Sort the decks by ${column}`, async () => {
+      // Named by its column, then the sort's arrow; the checkboxes' column names "deck" too.
+      const name = new RegExp(`^${escapeRegExp(this.t(`studio.decks.${column}`))}`);
+      const header = this.decks(instance).getByRole("columnheader", { name });
+      await header.getByRole("button").click();
+      await expect(header).toHaveAttribute("aria-sort", "ascending");
+      await expect(this.page).toHaveURL(new RegExp(`[?&]sort=${column}`));
+      await expect(this.decks(instance).getByRole("rowheader")).toHaveText(order);
+    });
+  }
+
+  /** Ticks the decks' checkboxes in Home's table. */
+  async select(decks: string[]): Promise<void> {
+    await this.intent(`Select ${decks.join(", ")}`, async () => {
+      for (const deck of decks) {
+        await this.page.getByRole("checkbox", { name: this.t("studio.decks.selectDeck", { deck }), exact: true }).check();
+      }
+      await expect(this.bulk.getByText(this.t("studio.bulk.selected", { count: decks.length }))).toBeVisible();
+    });
+  }
+
+  /** Clears the selection: the bulk actions go. */
+  async clearSelection(): Promise<void> {
+    await this.intent("Clear the selection", async () => {
+      await this.bulk.getByRole("button", { name: this.t("studio.bulk.clear") }).click();
+      await expect(this.bulk).toHaveCount(0);
+    });
+  }
+
+  /** Gives the selected decks their own number of new cards per day. */
+  async setNewCardsPerDay(count: number, decks: number): Promise<void> {
+    await this.intent(`Set the selected decks' new cards per day to ${count}`, async () => {
+      await this.bulk.getByRole("button", { name: this.t("studio.bulk.pace"), exact: true }).click();
+      await this.bulk.getByRole("spinbutton", { name: this.t("studio.bulk.newCardsPerDay") }).fill(String(count));
+      await this.bulk.getByRole("button", { name: this.t("studio.bulk.apply") }).click();
+      await this.expectStatus(this.t("studio.bulk.paced", { count: decks }));
+    });
+  }
+
+  /** Moves the selected decks out of their groups, to the top level. */
+  async moveToTopLevel(decks: number): Promise<void> {
+    await this.intent("Move the selected decks to the top level", async () => {
+      await this.bulk.getByRole("button", { name: this.t("studio.bulk.move"), exact: true }).click();
+      await this.bulk.getByRole("combobox", { name: this.t("studio.bulk.group") }).selectOption("");
+      await this.bulk.getByRole("button", { name: this.t("studio.bulk.apply") }).click();
+      await this.expectStatus(this.t("studio.bulk.moved", { count: decks, group: this.t("studio.bulk.topLevel") }));
+    });
+  }
+
+  /** Deletes the selected decks, confirming the question that names them; their rows go. */
+  async deleteSelected(instance: string, decks: string[]): Promise<void> {
+    await this.intent(`Delete ${decks.join(", ")}`, async () => {
+      const names = decks.map((deck) => `“${deck}”`).join(", ");
+      this.app.expectDialog(this.tp("studio.bulk.removeConfirm", { count: decks.length, names }));
+      await this.bulk.getByRole("button", { name: this.t("studio.bulk.remove"), exact: true }).click();
+      await this.expectStatus(this.t("studio.bulk.removed", { count: decks.length }));
+      for (const deck of decks) await expect(this.row(instance, deck)).toHaveCount(0);
+    });
+  }
+
+  /** What can be done with the selected decks. */
+  private get bulk(): Locator {
+    return this.page.getByRole("group", { name: this.t("studio.bulk.label") });
+  }
+
+  /** Home's status line (visually hidden) says this. */
+  private async expectStatus(message: string): Promise<void> {
+    await expect(this.page.getByRole("status").filter({ hasText: message })).toHaveCount(1);
   }
 
   /** Follows the trail to the instance picker and opens the instance named. */

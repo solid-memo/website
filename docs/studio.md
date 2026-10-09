@@ -3,7 +3,8 @@
 Solid Memo Studio is a second app beside Solid Memo, at
 `https://solid-memo.com/studio/`. It is where users manage their decks.
 Later it is also where creators build decks and courses and publish
-them. For now it shows the decks of an instance, read-only.
+them. For now it shows the decks of an instance in a table, changes
+several of them at once, and arranges them into groups.
 
 ## What it shares with Solid Memo
 
@@ -45,24 +46,82 @@ hash with the same core as Solid Memo's router (`routerCore.ts` in
 | Hash | Screen |
 | --- | --- |
 | `#/instances` | the instance picker. A new instance is made in Solid Memo, so its link goes to Solid Memo's storage picker. |
-| `#/?instance=…` | Home: every deck of the instance as a table, with its number of cards (retired ones aside) and how many are due today. |
+| `#/?instance=…[&q=…&sort=…&order=desc]` | Home: every deck of the instance as a table ([below](#home)). `q` filters it, `sort` names the column it is sorted by, and `order=desc` sorts it the other way. |
+| `#/groups?instance=…` | Groups: the instance's decks arranged into groups, as Solid Memo's deck list arranges them. |
 
 Anything else, `#/` among them, is the default route: the only
 instance's Home, or else the picker. An unknown instance falls back to
 the picker. Like Solid Memo's fallbacks, these replace the history
 entry.
 
+Changing Home's filter or sort replaces the history entry: it is the
+same screen, looked at another way, so Back leaves it.
+
 Solid Memo links to Home as `studio/#/?instance=…` ("Open in Studio",
 in its instance bar, each deck's actions menu and the deck page;
 [routing.md](routing.md)). The Studio has no screen of one deck yet, so
 a deck's link opens its instance's Home.
 
-The trail is Instances › Decks. The document title is the trail's last
+The trail is Instances › Decks, then › Groups on the Groups screen. The document title is the trail's last
 step and "Solid Memo Studio". After a move, the screen's heading takes
 the focus (`useScreenFocus`). The header has a link back to Solid Memo
 (`../#/`), at the open instance's decks when there is one. The landing
 page and the Pod connection screen have it too (`headerLink` in the
 Studio's `AppIdentity`), so a visitor who is not signed in can go back.
+
+## Home
+
+Home ([`DeckTableContainer`](../apps/studio/src/ui/DeckTableContainer.tsx))
+is a table with a row per deck. Its columns are:
+
+- the deck's name, a link to its page in Solid Memo, and its badges:
+  **Library** for a copy of a library deck (it has
+  `prov:wasDerivedFrom`), **Course** for a copy of a course, **Invalid
+  data** when the instance's check finds a problem in its entry or its
+  documents ([validation.md](validation.md)), and **Unreadable** when
+  its cards could not be read;
+- the groups it is in, outermost first, or "Top level";
+- its direction, and its pace: new cards and reviews per day. A limit
+  the deck does not set is the instance's, marked "(instance)";
+- how many cards are due today and how many are new, as Solid Memo
+  counts them (from the study digest when it is fresh);
+- when it last changed (`dcterms:modified`, else when it was made);
+- its cards, retired ones aside, a link to its card list in Solid Memo.
+
+The table starts in the order the user arranged the decks. A column's
+name sorts by it, then the other way, then back to that order; the
+sorted column says so (`aria-sort`). A figure not known yet sorts last,
+either way. The filter keeps the decks whose name, in any language, or
+whose groups' names hold its text, case and accents aside. The domain
+does both ([deckTable.ts](../packages/domain/src/deckTable.ts)).
+
+Decks are selected by their checkbox, or all those shown at once. The
+selected decks the table shows can be (a selected deck the filter hides
+stays selected, but is left alone until it is shown again):
+
+- **moved into a group**, or to the top level, at its end, in their
+  order in the table (not when a newer version arranged the groups);
+- **given a pace**: a limit left empty follows the instance's
+  preferences again;
+- **given a direction**;
+- **deleted**, with their cards, once the user confirms a question that
+  names each deck.
+
+Each is one write of `catalog.ttl`, made in turn with the other writes
+of the catalog, and the table is read afresh after it
+([data-model.md](data-model.md#deck-groups)). A deck whose data is
+invalid fails the write check, so a pace or direction that includes it
+is refused, and nothing is written.
+
+## Groups
+
+Groups ([`GroupsContainer`](../apps/studio/src/ui/GroupsContainer.tsx))
+is Solid Memo's deck list without the study: the same screen
+(`DeckListScreen`) and the same edits, kept by `useDeckTreeEditor` in
+`ui`, which Solid Memo's `DeckListContainer` uses too. Decks and groups
+are dragged, moved from their menus, grouped, renamed and deleted there.
+What is not arranging (a deck's page, its preferences, a course, a new
+deck, the library) opens in Solid Memo.
 
 ## How it is built and served
 

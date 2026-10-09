@@ -109,7 +109,8 @@
     "study": "Study",
     "statistics": "Statistics",
     "course": "Course",
-    "courseReview": "Final review"
+    "courseReview": "Final review",
+    "groups": "Groups"
   },
   "browser": {
     "heading": "Browser: {deck}",
@@ -1251,11 +1252,79 @@
       "caption": "The decks of {instance}",
       "loading": "Loading decks…",
       "empty": "No decks yet: create or import them in {app}.",
-      "deck": "Deck",
-      "cards": "Cards",
+      "groupsLink": "Arrange groups",
+      "filter": "Filter by name or group",
+      "shown": {
+        "one": "{shown} of {count} deck",
+        "other": "{shown} of {count} decks"
+      },
+      "noMatch": "No deck matches “{filter}”.",
+      "select": "Select",
+      "selectAll": "Select every deck shown",
+      "selectDeck": "Select {deck}",
+      "title": "Deck",
+      "group": "Group",
+      "direction": "Direction",
+      "newCardsPerDay": "New per day",
+      "maxReviewsPerDay": "Reviews per day",
       "due": "Due today",
+      "new": "New today",
+      "modified": "Last changed",
+      "cards": "Cards",
+      "cardsOf": "cards of {deck}, in Solid Memo",
+      "topLevel": "Top level",
+      "followsInstance": "(instance)",
       "counting": "Counting…",
-      "unreadable": "Could not be read"
+      "unreadable": "Could not be read",
+      "badge": {
+        "library": "Library",
+        "course": "Course",
+        "invalid": "Invalid data",
+        "unreadable": "Unreadable"
+      }
+    },
+    "bulk": {
+      "label": "Selected decks",
+      "selected": {
+        "one": "{count} deck selected",
+        "other": "{count} decks selected"
+      },
+      "move": "Move to group",
+      "pace": "Set pace",
+      "direction": "Set direction",
+      "remove": "Delete",
+      "clear": "Clear selection",
+      "group": "Group",
+      "topLevel": "Top level (no group)",
+      "moveReadOnly": "A newer version of Solid Memo arranged these groups, so decks cannot be moved into them here.",
+      "newCardsPerDay": "New cards per day",
+      "maxReviewsPerDay": "Max reviews per day",
+      "paceHint": "A limit left empty follows the instance's preferences.",
+      "apply": "Apply",
+      "cancel": "Cancel",
+      "removeConfirm": {
+        "one": "Delete the deck {names} and all its cards? This cannot be undone.",
+        "other": "Delete {count} decks and all their cards: {names}? This cannot be undone."
+      },
+      "moved": {
+        "one": "Moved {count} deck to {group}.",
+        "other": "Moved {count} decks to {group}."
+      },
+      "paced": {
+        "one": "Set the pace of {count} deck.",
+        "other": "Set the pace of {count} decks."
+      },
+      "directed": {
+        "one": "Set the direction of {count} deck.",
+        "other": "Set the direction of {count} decks."
+      },
+      "removed": {
+        "one": "Deleted {count} deck.",
+        "other": "Deleted {count} decks."
+      }
+    },
+    "groups": {
+      "heading": "Groups"
     }
   }
 }

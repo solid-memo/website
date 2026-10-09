@@ -1,5 +1,6 @@
 import { useEffect } from "preact/hooks";
 import { useQuery } from "@tanstack/react-query";
+import { DEFAULT_DECK_TABLE_VIEW } from "@solid-memo/domain/deckTable";
 import type { WorkspaceProps } from "@solid-memo/ui/App";
 import { Breadcrumbs, type Crumb } from "@solid-memo/ui/Breadcrumbs";
 import { useDocumentTitle } from "@solid-memo/ui/documentTitle";
@@ -7,18 +8,14 @@ import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { InstancePickerContainer } from "@solid-memo/ui/InstancePickerContainer";
 import { Loading } from "@solid-memo/ui/Loading";
-import { decksHref, routeToHash } from "@solid-memo/ui/router";
+import { decksHref, deckHref, routeToHash } from "@solid-memo/ui/router";
 import { useScreenFocus } from "@solid-memo/ui/screenFocus";
 import { MAIN_ID } from "@solid-memo/ui/SkipLink";
 import { useInstanceTheme } from "@solid-memo/ui/theme";
 import { DeckTableContainer } from "./DeckTableContainer";
+import { GroupsContainer } from "./GroupsContainer";
+import { learnerApp } from "./learnerApp";
 import { studioRouteToHash, useStudioRoute, type StudioRoute } from "./router";
-
-/**
- * Solid Memo itself, a folder up from the Studio on the same origin
- * (docs/studio.md), at one of its own routes (`hash`).
- */
-const learnerApp = (hash: string) => `../${hash}`;
 
 /**
  * The signed-in Studio: the site header, with a way back to Solid Memo,
@@ -35,7 +32,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
     queryFn: () => useCases.listInstances(session),
   });
   const instances = instancesQuery.data;
-  const instanceUrl = route?.screen === "home" ? route.instanceUrl : null;
+  const instanceUrl = route === null || route.screen === "instances" ? null : route.instanceUrl;
   const activeInstance = instanceUrl === null ? null : (instances?.find((i) => i.url === instanceUrl) ?? null);
 
   useInstanceTheme(useCases, activeInstance?.url ?? null);
@@ -57,7 +54,13 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
       ? []
       : route.screen === "instances"
         ? [instancesCrumb]
-        : [instancesCrumb, { label: t("breadcrumbs.decks"), route }];
+        : route.screen === "home"
+          ? [instancesCrumb, { label: t("breadcrumbs.decks"), route }]
+          : [
+              instancesCrumb,
+              { label: t("breadcrumbs.decks"), route: { screen: "home", instanceUrl: route.instanceUrl } },
+              { label: t("breadcrumbs.groups"), route },
+            ];
   // The page the trail ends at: "Decks – Solid Memo Studio".
   useDocumentTitle(crumbs.slice(-1).map((crumb) => crumb.label));
 
@@ -85,9 +88,19 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
           <DeckTableContainer
             useCases={useCases}
             instance={activeInstance!}
+            view={route.view ?? DEFAULT_DECK_TABLE_VIEW}
+            // How the table is looked at is no Back stop: the screen stays the same.
+            onView={(view) => replace({ ...route, view })}
             appHref={learnerApp(decksHref(route.instanceUrl))}
+            groupsHref={studioRouteToHash({ screen: "groups", instanceUrl: route.instanceUrl })}
+            deckHref={(deck) => learnerApp(deckHref(route.instanceUrl, deck.url))}
+            cardsHref={(deck) =>
+              learnerApp(routeToHash({ screen: "browser", instanceUrl: route.instanceUrl, deckUrl: deck.url }))
+            }
           />
         );
+      case "groups":
+        return <GroupsContainer useCases={useCases} instance={activeInstance!} />;
     }
   };
 
