@@ -234,7 +234,8 @@ what the versions make. Both check:
   `dcat:prev` / `dcat:previousVersion` naming the version before (none
   for version 1);
 - that no version drops a card, chapter, step or distractor of the one
-  before it;
+  before it, or gives one's id to another kind of subject (a step's id
+  to a chapter);
 - a course's outline, by the [course rules](#course-rules);
 - the index's course for newcomers (`newcomerProblems`): at most one, an
   IRI, a deck of the library (one of the catalogue's `dcat:dataset`s),
@@ -251,10 +252,41 @@ what the versions make. Both check:
 - every version and the index against Solid Memo's shapes, DCAT-AP (a
   version with the index beside it) and SKOS, with the reference data.
 
+### Where the rules live
+
+The rules that read a release's data live in the domain, in
+[`packages/domain/src/release/`](../packages/domain/src/release/), so
+the Studio can run them in the browser as the command does:
+
+| File | What |
+|---|---|
+| `releaseModel.ts` | A release as plain data: its metadata, every card, chapter, step and distractor (retired ones too), how it was made. |
+| `problems.ts` | `ReleaseProblem`: a code, a severity, the subject and field it is in, and what it needs to be worded. No text. |
+| `libraryRules.ts` | The layout and each version's metadata against its place. |
+| `continuityRules.ts` | A version against the one before it. |
+| `courseRules.ts` | The [course rules](#course-rules). |
+| `markdownFields.ts` | Which fields are Markdown, and by which rule; the check itself is passed in, since the domain reads no Markdown. |
+| `curationRules.ts` | A `LibraryPolicy`: what a library asks beyond the data. `repoPolicy` asks a title and description in English, keywords in English and Swedish and the theme `EDUC`; `podPolicy` asks nothing. |
+| `seriesEntry.ts` | What the index says of a deck. |
+
+The command builds each release's model from its quads
+([`quadsToReleaseModel.ts`](../packages/shacl/node/quadsToReleaseModel.ts)),
+words each problem in English
+([`releaseMessages.ts`](../packages/shacl/node/releaseMessages.ts)), and
+checks itself what only the text or the shapes can: `@base`, Turtle
+syntax, the shapes and the profiles. It does not run the curation
+rules: `LibraryDeckV5` states English and `EDUC` for this library. Nor
+does it name a version that is not the one before it plus one
+(`versionNotNext`): here the path fixes each version, and the metadata
+check names one other than its path says. A golden test
+([`deckLibrary.golden.test.ts`](../packages/shacl/node/deckLibrary.golden.test.ts))
+keeps what the rules say of published releases with faults put in.
+
 ### Course rules
 
-`courseProblems` checks what the shapes cannot say about a course. It
-runs on every version, and finds nothing in a plain deck:
+`courseProblems` (`courseRules.ts`) checks what the shapes cannot say
+about a course. It runs on every version, and finds nothing in a plain
+deck:
 
 - A release with chapters or steps is typed `schema:Course`, and a
   course has at least one chapter. It studies `sm:frontToBack`.
@@ -282,8 +314,9 @@ or on how a card is asked.
 
 ### Markdown rules
 
-`markdownProblems` checks, field by field, the text of every card, step
-and chapter that states `sm:textFormat sm:markdown`, by the
+`markdownProblems` (`markdownFields.ts`, with the markdown package's
+check) checks, field by field, the text of every card, step and
+chapter that states `sm:textFormat sm:markdown`, by the
 [rules for a release](markdown.md#rules-for-a-release). In short:
 
 - no raw HTML and no pictures;

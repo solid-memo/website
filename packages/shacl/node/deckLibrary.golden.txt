@@ -1,0 +1,181 @@
+## greek-alphabet: as published
+## greek-alphabet: at the next version's path
+decks/greek-alphabet/v2.ttl: states @base <https://solid-memo.com/decks/greek-alphabet/v1.ttl>; its path says @base <https://solid-memo.com/decks/greek-alphabet/v2.ttl>.
+decks/greek-alphabet/v2.ttl: expected the document itself to be its one solid-memo:Deck, found <https://solid-memo.com/decks/greek-alphabet/v1.ttl>.
+decks/greek-alphabet/v2.ttl: states dcat:version nothing; its path says "2".
+decks/greek-alphabet/v2.ttl: states dcat:inSeries nothing; its path says <https://solid-memo.com/decks/index.ttl#greek-alphabet>.
+decks/greek-alphabet/v2.ttl: states dcat:isVersionOf nothing; its path says <https://solid-memo.com/decks/index.ttl#greek-alphabet>.
+decks/greek-alphabet/v2.ttl: states dcterms:publisher nothing; its path says <https://solid-memo.com/decks/index.ttl#solid-memo>.
+decks/greek-alphabet/v2.ttl: states dcat:prev nothing; its path says <https://solid-memo.com/decks/greek-alphabet/v1.ttl>.
+decks/greek-alphabet/v2.ttl: states dcat:previousVersion nothing; its path says <https://solid-memo.com/decks/greek-alphabet/v1.ttl>.
+## greek-alphabet: everything retired
+## greek-alphabet: no outline links
+## greek-alphabet: an outline added
+decks/greek-alphabet/v1.ttl: has chapters or steps but is no schema:Course: type the release itself schema:Course.
+decks/greek-alphabet/v1.ttl: chapter <#zz-ch> is part of <https://x.example/>; a chapter is part of the release it is in (schema:isPartOf <>).
+decks/greek-alphabet/v1.ttl: <#zz-ch> names <#zz-none> by solid-memo:reviewQuestion, which is no card of this release.
+decks/greek-alphabet/v1.ttl: <#alpha> is checked by <#zz-st> and a review question of <#zz-ch>; a card is the one or the other.
+decks/greek-alphabet/v1.ttl: <#alpha> has too few distractors (0); a card a course asks has at least 2.
+## git-commands: as published
+## git-commands: at the next version's path
+decks/git-commands/v2.ttl: states @base <https://solid-memo.com/decks/git-commands/v1.ttl>; its path says @base <https://solid-memo.com/decks/git-commands/v2.ttl>.
+decks/git-commands/v2.ttl: expected the document itself to be its one solid-memo:Deck, found <https://solid-memo.com/decks/git-commands/v1.ttl>.
+decks/git-commands/v2.ttl: states dcat:version nothing; its path says "2".
+decks/git-commands/v2.ttl: states dcat:inSeries nothing; its path says <https://solid-memo.com/decks/index.ttl#git-commands>.
+decks/git-commands/v2.ttl: states dcat:isVersionOf nothing; its path says <https://solid-memo.com/decks/index.ttl#git-commands>.
+decks/git-commands/v2.ttl: states dcterms:publisher nothing; its path says <https://solid-memo.com/decks/index.ttl#solid-memo>.
+decks/git-commands/v2.ttl: states dcat:prev nothing; its path says <https://solid-memo.com/decks/git-commands/v1.ttl>.
+decks/git-commands/v2.ttl: states dcat:previousVersion nothing; its path says <https://solid-memo.com/decks/git-commands/v1.ttl>.
+## git-commands: everything retired
+## git-commands: no outline links
+## git-commands: an outline added
+decks/git-commands/v1.ttl: has chapters or steps but is no schema:Course: type the release itself schema:Course.
+decks/git-commands/v1.ttl: chapter <#zz-ch> is part of <https://x.example/>; a chapter is part of the release it is in (schema:isPartOf <>).
+decks/git-commands/v1.ttl: <#zz-ch> names <#zz-none> by solid-memo:reviewQuestion, which is no card of this release.
+decks/git-commands/v1.ttl: <#init> is checked by <#zz-st> and a review question of <#zz-ch>; a card is the one or the other.
+decks/git-commands/v1.ttl: <#init> has too few distractors (0); a card a course asks has at least 2.
+## solid-fundamentals: as published
+## solid-fundamentals: at the next version's path
+decks/solid-fundamentals/v2.ttl: states @base <https://solid-memo.com/decks/solid-fundamentals/v1.ttl>; its path says @base <https://solid-memo.com/decks/solid-fundamentals/v2.ttl>.
+decks/solid-fundamentals/v2.ttl: expected the document itself to be its one solid-memo:Deck, found <https://solid-memo.com/decks/solid-fundamentals/v1.ttl>.
+decks/solid-fundamentals/v2.ttl: states dcat:version nothing; its path says "2".
+decks/solid-fundamentals/v2.ttl: states dcat:inSeries nothing; its path says <https://solid-memo.com/decks/index.ttl#solid-fundamentals>.
+decks/solid-fundamentals/v2.ttl: states dcat:isVersionOf nothing; its path says <https://solid-memo.com/decks/index.ttl#solid-fundamentals>.
+decks/solid-fundamentals/v2.ttl: states dcterms:publisher nothing; its path says <https://solid-memo.com/decks/index.ttl#solid-memo>.
+decks/solid-fundamentals/v2.ttl: states dcat:prev nothing; its path says <https://solid-memo.com/decks/solid-fundamentals/v1.ttl>.
+decks/solid-fundamentals/v2.ttl: states dcat:previousVersion nothing; its path says <https://solid-memo.com/decks/solid-fundamentals/v1.ttl>.
+## solid-fundamentals: everything retired
+## solid-fundamentals: no outline links
+decks/solid-fundamentals/v1.ttl: chapter <#ch-why-solid> has no step in use; a chapter in use has at least one step that is not retired.
+decks/solid-fundamentals/v1.ttl: chapter <#ch-web-of-data> has no step in use; a chapter in use has at least one step that is not retired.
+decks/solid-fundamentals/v1.ttl: chapter <#ch-rdf-syntaxes> has no step in use; a chapter in use has at least one step that is not retired.
+decks/solid-fundamentals/v1.ttl: chapter <#ch-semantics> has no step in use; a chapter in use has at least one step that is not retired.
+decks/solid-fundamentals/v1.ttl: chapter <#ch-pods> has no step in use; a chapter in use has at least one step that is not retired.
+decks/solid-fundamentals/v1.ttl: chapter <#ch-read-write> has no step in use; a chapter in use has at least one step that is not retired.
+decks/solid-fundamentals/v1.ttl: chapter <#ch-identity> has no step in use; a chapter in use has at least one step that is not retired.
+decks/solid-fundamentals/v1.ttl: chapter <#ch-wac> has no step in use; a chapter in use has at least one step that is not retired.
+decks/solid-fundamentals/v1.ttl: chapter <#ch-sharing> has no step in use; a chapter in use has at least one step that is not retired.
+decks/solid-fundamentals/v1.ttl: chapter <#ch-notifications> has no step in use; a chapter in use has at least one step that is not retired.
+decks/solid-fundamentals/v1.ttl: chapter <#ch-interop> has no step in use; a chapter in use has at least one step that is not retired.
+decks/solid-fundamentals/v1.ttl: chapter <#ch-building-apps> has no step in use; a chapter in use has at least one step that is not retired.
+decks/solid-fundamentals/v1.ttl: chapter <#ch-security> has no step in use; a chapter in use has at least one step that is not retired.
+decks/solid-fundamentals/v1.ttl: chapter <#ch-read-an-app> has no step in use; a chapter in use has at least one step that is not retired.
+decks/solid-fundamentals/v1.ttl: chapter <#ch-app-walkthrough> has no step in use; a chapter in use has at least one step that is not retired.
+decks/solid-fundamentals/v1.ttl: chapter <#ch-difficulties> has no step in use; a chapter in use has at least one step that is not retired.
+decks/solid-fundamentals/v1.ttl: chapter <#ch-lws> has no step in use; a chapter in use has at least one step that is not retired.
+## solid-fundamentals: an outline added
+decks/solid-fundamentals/v1.ttl: chapter <#zz-ch> is part of <https://x.example/>; a chapter is part of the release it is in (schema:isPartOf <>).
+decks/solid-fundamentals/v1.ttl: <#zz-ch> names <#zz-none> by solid-memo:reviewQuestion, which is no card of this release.
+decks/solid-fundamentals/v1.ttl: <#q-why-solid-1a> is checked by <#ch-why-solid-1>, <#zz-st>; a card is checked by one step at most.
+decks/solid-fundamentals/v1.ttl: <#q-why-solid-1a> is checked by <#ch-why-solid-1>, <#zz-st> and a review question of <#zz-ch>; a card is the one or the other.
+## greek-alphabet: everything in Markdown
+## greek-alphabet: a next version that drops a third
+decks/greek-alphabet/v2.ttl: states @base <https://solid-memo.com/decks/greek-alphabet/v1.ttl>; its path says @base <https://solid-memo.com/decks/greek-alphabet/v2.ttl>.
+decks/greek-alphabet/v2.ttl: expected the document itself to be its one solid-memo:Deck, found <https://solid-memo.com/decks/greek-alphabet/v1.ttl>.
+decks/greek-alphabet/v2.ttl: states dcat:version nothing; its path says "2".
+decks/greek-alphabet/v2.ttl: states dcat:inSeries nothing; its path says <https://solid-memo.com/decks/index.ttl#greek-alphabet>.
+decks/greek-alphabet/v2.ttl: states dcat:isVersionOf nothing; its path says <https://solid-memo.com/decks/index.ttl#greek-alphabet>.
+decks/greek-alphabet/v2.ttl: states dcterms:publisher nothing; its path says <https://solid-memo.com/decks/index.ttl#solid-memo>.
+decks/greek-alphabet/v2.ttl: states dcat:prev nothing; its path says <https://solid-memo.com/decks/greek-alphabet/v1.ttl>.
+decks/greek-alphabet/v2.ttl: states dcat:previousVersion nothing; its path says <https://solid-memo.com/decks/greek-alphabet/v1.ttl>.
+decks/greek-alphabet/v2.ttl: drops <#gamma>, <#zeta>, <#iota>, <#mu>, <#omicron>, <#sigma>, <#phi>, <#omega>, which v1.ttl has. A card is never removed: retire it (owl:deprecated true), so the copies that have it keep it and its review history.
+## git-commands: everything in Markdown
+decks/git-commands/v1.ttl: <#clone> solid-memo:back has raw HTML, "<url>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#config-name> solid-memo:back has raw HTML, "<name>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#config-name> solid-memo:backNote@en has raw HTML, "<name>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#config-name> solid-memo:backNote@sv has raw HTML, "<name>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#config-email> solid-memo:back has raw HTML, "<email>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#config-email> solid-memo:backNote@en has raw HTML, "<email>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#config-email> solid-memo:backNote@sv has raw HTML, "<email>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#add-file> solid-memo:back has raw HTML, "<file>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#commit-message> solid-memo:back has raw HTML, "<message>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#restore> solid-memo:back has raw HTML, "<file>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#restore> solid-memo:backNote@en has raw HTML, "<file>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#restore> solid-memo:backNote@sv has raw HTML, "<file>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#restore-staged> solid-memo:back has raw HTML, "<file>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#restore-staged> solid-memo:backNote@en has raw HTML, "<file>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#restore-staged> solid-memo:backNote@sv has raw HTML, "<file>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#rm> solid-memo:back has raw HTML, "<file>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#rm-cached> solid-memo:back has raw HTML, "<file>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#mv> solid-memo:back has raw HTML, "<old>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#mv> solid-memo:back has raw HTML, "<new>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#branch-create> solid-memo:back has raw HTML, "<branch>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#switch> solid-memo:back has raw HTML, "<branch>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#switch> solid-memo:backNote@en has raw HTML, "<branch>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#switch> solid-memo:backNote@sv has raw HTML, "<branch>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#switch-create> solid-memo:back has raw HTML, "<branch>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#switch-create> solid-memo:backNote@en has raw HTML, "<branch>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#switch-create> solid-memo:backNote@sv has raw HTML, "<branch>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#branch-rename> solid-memo:back has raw HTML, "<new-name>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#branch-delete> solid-memo:back has raw HTML, "<branch>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#branch-force-delete> solid-memo:back has raw HTML, "<branch>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#branch-force-delete> solid-memo:backNote@en has raw HTML, "<branch>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#branch-force-delete> solid-memo:backNote@en has raw HTML, "<id>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#branch-force-delete> solid-memo:backNote@sv has raw HTML, "<branch>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#branch-force-delete> solid-memo:backNote@sv has raw HTML, "<id>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#merge> solid-memo:back has raw HTML, "<branch>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#rebase> solid-memo:back has raw HTML, "<branch>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#cherry-pick> solid-memo:back has raw HTML, "<commit>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#log-follow> solid-memo:back has raw HTML, "<file>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#show> solid-memo:back has raw HTML, "<commit>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#blame> solid-memo:back has raw HTML, "<file>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#remote-add> solid-memo:back has raw HTML, "<name>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#remote-add> solid-memo:back has raw HTML, "<url>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#push-upstream> solid-memo:back has raw HTML, "<branch>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#push-delete> solid-memo:back has raw HTML, "<branch>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#push-tag> solid-memo:back has raw HTML, "<tag>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#revert> solid-memo:back has raw HTML, "<commit>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#reset-hard> solid-memo:back has raw HTML, "<commit>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#tag-annotated> solid-memo:back has raw HTML, "<tag>", which is shown as its source: write it as code, or escape its "<" (\<).
+decks/git-commands/v1.ttl: <#tag-annotated> solid-memo:back has raw HTML, "<message>", which is shown as its source: write it as code, or escape its "<" (\<).
+## git-commands: a next version that drops a third
+decks/git-commands/v2.ttl: states @base <https://solid-memo.com/decks/git-commands/v1.ttl>; its path says @base <https://solid-memo.com/decks/git-commands/v2.ttl>.
+decks/git-commands/v2.ttl: expected the document itself to be its one solid-memo:Deck, found <https://solid-memo.com/decks/git-commands/v1.ttl>.
+decks/git-commands/v2.ttl: states dcat:version nothing; its path says "2".
+decks/git-commands/v2.ttl: states dcat:inSeries nothing; its path says <https://solid-memo.com/decks/index.ttl#git-commands>.
+decks/git-commands/v2.ttl: states dcat:isVersionOf nothing; its path says <https://solid-memo.com/decks/index.ttl#git-commands>.
+decks/git-commands/v2.ttl: states dcterms:publisher nothing; its path says <https://solid-memo.com/decks/index.ttl#solid-memo>.
+decks/git-commands/v2.ttl: states dcat:prev nothing; its path says <https://solid-memo.com/decks/git-commands/v1.ttl>.
+decks/git-commands/v2.ttl: states dcat:previousVersion nothing; its path says <https://solid-memo.com/decks/git-commands/v1.ttl>.
+decks/git-commands/v2.ttl: drops <#config-name>, <#add-file>, <#diff>, <#commit-amend>, <#rm>, <#branch-list>, <#switch-create>, <#branch-delete>, <#merge-abort>, <#rebase-abort>, <#log-oneline>, <#blame>, <#remote-add>, <#pull>, <#push-upstream>, <#stash>, <#stash-pop>, <#reset-hard>, which v1.ttl has. A card is never removed: retire it (owl:deprecated true), so the copies that have it keep it and its review history.
+## solid-fundamentals: no backs nor distractor text
+decks/solid-fundamentals/v1.ttl: <#q-why-solid-1a> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-why-solid-1b> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-why-solid-2a> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-why-solid-2b> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-why-solid-3a> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-why-solid-4a> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-why-solid-4b> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-why-solid-5a> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-why-solid-5b> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-why-solid-6a> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-why-solid-6b> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-why-solid-7a> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-why-solid-8a> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-why-solid-9a> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-why-solid-9b> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-why-solid-10a> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-why-solid-10b> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-why-solid-11a> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-why-solid-11b> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-why-solid-12a> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-web-of-data-1a> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-web-of-data-1b> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-web-of-data-2a> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-web-of-data-2b> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-web-of-data-3a> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-web-of-data-3b> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-web-of-data-3c> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-web-of-data-4a> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-web-of-data-4b> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-web-of-data-5a> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-web-of-data-5b> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-web-of-data-6a> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-web-of-data-7a> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-web-of-data-7b> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-web-of-data-8a> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-web-of-data-8b> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-rdf-syntaxes-1a> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-rdf-syntaxes-2a> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-rdf-syntaxes-2b> has no text on its back (solid-memo:back), the right one among the options a course offers.
+decks/solid-fundamentals/v1.ttl: <#q-rdf-syntaxes-3a> has no text on its back (solid-memo:back), the right one among the options a course offers.
