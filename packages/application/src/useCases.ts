@@ -23,6 +23,7 @@ import {
   type BackupRestore,
 } from "@solid-memo/domain/backup";
 import {
+  DECK_FORMAT_VERSION,
   validateCardContent,
   type Card,
   type CardContent,
@@ -130,12 +131,26 @@ import { applySm2, INITIAL_SM2_STATE } from "@solid-memo/domain/sm2";
 import type { Storage } from "@solid-memo/domain/storage";
 import { isSecureUrl, validateWebId } from "@solid-memo/domain/webId";
 import {
+  decodeGuestMergeNote,
+  encodeGuestMergeNote,
+  guestDeckStamp,
   GUEST_INSTANCE_URL,
+  GUEST_MERGE_STEPS,
   GUEST_ORIGIN,
   GUEST_SESSION,
   GUEST_TRANSFER_STEPS,
   GUEST_WEBID,
+  graftOfGuestTree,
+  guestMergeKey,
+  guestMergePlan,
   isGuestUrl,
+  mentionsGuest,
+  mergedAnswer,
+  mergedDeck,
+  type GuestMergeOutcome,
+  type GuestMergePlan,
+  type GuestMergeProgress,
+  type GuestMergeStep,
   type GuestStudy,
   type GuestTransferOutcome,
   type GuestTransferProgress,
@@ -193,6 +208,31 @@ export interface UseCases {
     target: { containerUrl: string; registrationTarget: RegistrationTarget },
     onProgress?: (progress: GuestTransferProgress) => void,
   ): Promise<GuestTransferOutcome>;
+  /**
+   * What adding the guest's study to `target`, an instance the user has,
+   * would add (domain/guest.ts GuestMergePlan): the guest's decks, each
+   * with the target's decks from the same library release. Reads only.
+   */
+  planGuestMerge(guestInstance: Instance, target: Instance): Promise<GuestMergePlan>;
+  /**
+   * Keep a guest's study in an instance the user has (docs/guest-mode.md
+   * "Adding to an instance"): the guest's study is read and checked, then
+   * each of its decks (but those in `skip`, by URL) is added to `target`
+   * as a new deck — its cards and review states, then its catalog entry,
+   * then its answers — the guest's deck groups made around them, and,
+   * once the guest's study is found unchanged since it was read, it is
+   * deleted from the device. The target's preferences stay; the guest's
+   * are not carried over. A failure leaves every deck added whole, and
+   * the guest's study as it was; run again, a deck already added from
+   * this device, and unchanged since, is not added twice.
+   */
+  mergeGuestStudy(
+    session: Session,
+    guestInstance: Instance,
+    target: Instance,
+    options?: { skip?: readonly string[] },
+    onProgress?: (progress: GuestMergeProgress) => void,
+  ): Promise<GuestMergeOutcome>;
   /** Rejects, without any network request, unless the WebID is an https URL. */
   loginWithWebId(webId: string): Promise<void>;
   /** Log in at a chosen identity provider; rejects unless it is an https URL. */
@@ -276,7 +316,8 @@ export interface UseCases {
   /**
    * Add the registrations dataClassRegistrations finds missing, titled
    * with the instance's name. Only on the user's say (or with a new
-   * instance, a format update, a guest's study kept): never on opening an
+   * instance, a format update, a guest's study kept as a new instance;
+   * adding one to an instance registers nothing): never on opening an
    * instance, where it would add back what the user, or another app,
    * removed.
    */
@@ -627,7 +668,7 @@ const NO_FENCE: WriteFence = { hold: () => () => undefined, pass: () => () => un
 const NO_DIGESTS: DigestRepository = { readDigest: async () => null, updateDigest: async () => undefined };
 const nothing = async () => undefined;
 const none = async (): Promise<never[]> => [];
-const NO_ANSWER_LOG: AnswerLog = { append: nothing, months: none, readMonth: none, removeDay: nothing };
+const NO_ANSWER_LOG: AnswerLog = { append: nothing, appendAll: nothing, months: none, readMonth: none, removeDay: nothing };
 const NO_GUEST_POD: GuestPod = {
   exists: async () => false,
   start: async () => {
@@ -1305,6 +1346,49 @@ export function createUseCases({
     if ((await instanceRepository.listInstances(GUEST_WEBID)).length === 0) await guestPod.discard();
   }
 
+  /**
+   * Add a guest's deck to the instance as a new deck, whole: its cards
+   * document, then its reviews document (each created only where nothing
+   * is), then its catalog entry, the write that makes it a deck of the
+   * instance. A failure before the entry deletes the documents it wrote
+   * (and one whose write may have been made, its answer lost), which
+   * nothing names, never one the pod refused to create; unless the entry
+   * was written after all, its answer lost on the way: then the deck is
+   * there, whole.
+   */
+  async function addGuestDeck(guest: Deck, instanceUrl: string): Promise<Deck> {
+    const deck = mergedDeck(guest, instanceUrl, `deck-${newId()}`, DECK_FORMAT_VERSION);
+    const [cards, states] = await Promise.all([deckRepository.listCards(guest), reviewStateRepository.listReviewStates(guest)]);
+    // A card is written by its fragment id, in this app's format, at the time it was made.
+    const content = cards.map(({ url: _url, formatVersion: _formatVersion, ...card }) => card);
+    if (mentionsGuest([deck, content, states])) throw new AppError("guestUrlsLeft", { url: deck.url });
+    const written: string[] = [];
+    const create = async (url: string, write: () => Promise<void>) => {
+      try {
+        await write();
+      } catch (error) {
+        if (!unsent(error)) written.push(url);
+        throw error;
+      }
+      written.push(url);
+    };
+    try {
+      // One PUT of the whole document: a PATCH of much text can be cut short (docs/testing.md).
+      if (content.length > 0) {
+        await create(deck.cardsDocumentUrl, () => deckRepository.applyCardChanges(deck, { save: content, remove: [] }, { whole: true }));
+      }
+      if (states.length > 0) {
+        await create(deck.reviewsDocumentUrl, () => reviewStateRepository.createReviewStates(deck, states));
+      }
+      return await deckRepository.addDeck(deck);
+    } catch (error) {
+      const entry = unsent(error) ? null : await deckRepository.readDeck(deck.url).catch(() => null);
+      if (entry !== null) return entry;
+      for (const url of written) await deckRepository.deleteDocument(url).catch(() => undefined);
+      throw error;
+    }
+  }
+
   async function createInstance(
     session: Session,
     { containerUrl, name, registrationTarget }: { containerUrl: string; name: string; registrationTarget: RegistrationTarget },
@@ -1443,6 +1527,119 @@ export function createUseCases({
       );
       progress.finished();
       return { ok: true, instance, tidied };
+    },
+    async planGuestMerge(guestInstance, target) {
+      const [guestDecks, targetDecks] = await Promise.all([
+        deckRepository.listDecks(guestInstance.url),
+        deckRepository.listDecks(target.url),
+      ]);
+      return guestMergePlan(guestDecks, targetDecks);
+    },
+    async mergeGuestStudy(session, guestInstance, target, { skip = [] } = {}, onProgress = () => undefined) {
+      const source = ensureTrailingSlash(guestInstance.url);
+      const targetUrl = ensureTrailingSlash(target.url);
+      if (session.guest === true || !isGuestUrl(source) || isGuestUrl(targetUrl)) {
+        throw new Error("A guest's study is added from the guest's pod to an instance of a user who logged in.");
+      }
+      const progress = stepReporter<GuestMergeStep>("read", GUEST_MERGE_STEPS.length, onProgress);
+      // The digest is what this device learned of the guest's pod's versions: it is not the guest's study.
+      const digest = digestUrlOf(source);
+      const listed = async () => (await instanceCopier.listResources(source)).filter((url) => url !== digest);
+      const versionsOf = async (resources: readonly string[]) =>
+        new Map(
+          await Promise.all(
+            resources
+              .filter((url) => !url.endsWith("/"))
+              .map(async (url) => [url, await documentBackups.versionOf(url)] as const),
+          ),
+        );
+      // Answers still on their way to the guest's log go there first, to be added with it.
+      await logAnswers();
+      const added: Deck[] = [];
+      const notes: string[] = [];
+      const release = writeFence.hold(source);
+      try {
+        // What the guest's study holds, at what version, before any of it is read; then all of it, checked.
+        progress.start(2);
+        const resources = await listed();
+        const versions = await versionsOf(resources);
+        const report = await validateInstance(source);
+        if (!report.conforms) throw new AppError("guestStudyInvalid", { count: report.violationCount });
+        if (report.documents.some((document) => document.subjects.some((subject) => subject.status === "newer"))) {
+          throw new AppError("guestStudyTooNew");
+        }
+        progress.stepped();
+        const [decks, tree, months, targetDecks, targetTree] = await Promise.all([
+          deckRepository.listDecks(source),
+          deckRepository.readDeckTree(source),
+          answerLog.months(source),
+          deckRepository.listDecks(targetUrl),
+          deckRepository.readDeckTree(targetUrl),
+        ]);
+        // Groups to make in an arrangement a newer version wrote could not be: refused before anything is written.
+        if (targetTree.readOnly && tree.children.some((node) => node.kind === "group")) throw new AppError("deckTreeTooNew");
+        const answers = (await Promise.all(months.map((month) => answerLog.readMonth(source, month)))).flat();
+        const chosen = decks.filter((deck) => !skip.includes(deck.url));
+
+        // Each deck whole, one after another: its documents, its entry, then its answers.
+        progress.finished("decks", chosen.length);
+        const into = new Map<string, Deck>();
+        for (const deck of chosen) {
+          const key = guestMergeKey(deck.url, targetUrl);
+          const stamp = guestDeckStamp(deck, (url) => versions.get(url) ?? "");
+          const note = decodeGuestMergeNote(updateJournal.staging(key));
+          // Added from this device before, its entry and documents unchanged since: there it is.
+          let merged = note?.stamp === stamp ? targetDecks.find((candidate) => candidate.url === note.url) : undefined;
+          if (merged === undefined) {
+            merged = await addGuestDeck(deck, targetUrl);
+            updateJournal.begin(key, encodeGuestMergeNote({ url: merged.url, stamp }));
+          }
+          notes.push(key);
+          into.set(deck.url, merged);
+          added.push(merged);
+          await answerLog.appendAll(
+            targetUrl,
+            answers.filter((answer) => answer.deckUrl === deck.url).map((answer) => mergedAnswer(answer, merged)),
+          );
+          progress.stepped();
+        }
+
+        // The guest's groups, new, around the decks added; each under the URL an earlier run gave it, if that run arranged the same.
+        progress.finished("arrange");
+        const arrangement = JSON.stringify(graftOfGuestTree(tree, into, (group) => group.url));
+        const nodes = graftOfGuestTree(tree, into, (group) => {
+          const key = guestMergeKey(group.url, targetUrl);
+          const note = decodeGuestMergeNote(updateJournal.staging(key));
+          const url = note?.stamp === arrangement ? note.url : deckGroupUrlOf(targetUrl, newId());
+          updateJournal.begin(key, encodeGuestMergeNote({ url, stamp: arrangement }));
+          notes.push(key);
+          return url;
+        });
+        if (nodes.length > 0) await deckRepository.editDeckTree(targetUrl, { kind: "graft", nodes });
+
+        // Listing the guest's study again, then each of its documents: what was added is what it holds.
+        progress.finished("verify", versions.size + 1);
+        if ((await listed()).join("\n") !== resources.join("\n")) throw new AppError("guestStudyChanged");
+        progress.stepped();
+        for (const [url, version] of versions) {
+          if ((await documentBackups.versionOf(url)) !== version) throw new AppError("guestStudyChanged", { url });
+          progress.stepped();
+        }
+      } catch (error) {
+        return { ok: false, instance: target, step: progress.step(), error, added };
+      } finally {
+        release();
+      }
+      // The study is in the instance now: what follows only tidies.
+      progress.finished("tidy");
+      const tidied = await removeGuestInstance(guestInstance).then(
+        () => true,
+        () => false,
+      );
+      // The notes would keep a deck from being added twice, while the guest's study is still here.
+      if (tidied) for (const key of notes) updateJournal.end(key);
+      progress.finished();
+      return { ok: true, instance: target, added, tidied };
     },
     language(preferred) {
       return pickLocale(languagePreference.chosen(), preferred);

@@ -236,6 +236,25 @@ describe("applyReviewChanges", () => {
     expect(saveSolidDatasetAt).not.toHaveBeenCalled();
   });
 
+  it("creates a deck's reviews document with its states in one write, each naming its card, checked first, reading nothing", async () => {
+    const checkWrite = vi.fn(async () => undefined);
+    const back: ReviewState = { ...state, direction: "back-to-front" };
+    await makeRepository(checkWrite).createReviewStates(deck, [state, back]);
+    expect(getSolidDatasetOrNull).not.toHaveBeenCalled();
+    expect(checkWrite).toHaveBeenCalledWith(expect.anything(), [
+      `${deck.reviewsDocumentUrl}#card-1`,
+      `${deck.reviewsDocumentUrl}#card-1@back-to-front`,
+    ]);
+    expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
+    const [saveUrl, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0]!;
+    expect(saveUrl).toBe(deck.reviewsDocumentUrl);
+    const dataset = saved as SolidDataset;
+    expect(toReviewState(getThing(dataset, `${deck.reviewsDocumentUrl}#card-1`)!, deck)).toEqual(state);
+    expect(getUrl(getThing(dataset, `${deck.reviewsDocumentUrl}#card-1@back-to-front`)!, SM.reviewOf)).toBe(
+      `${deck.cardsDocumentUrl}#card-1`,
+    );
+  });
+
   it("does nothing when the reviews document does not exist", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
     await makeRepository().applyReviewChanges(deck, {

@@ -241,17 +241,29 @@ export interface DeckRepository {
   stateCardLanguages(deck: Deck, cardIds: readonly string[], languages: StatedLanguages): Promise<number>;
   /**
    * Write cards by fragment id, new or existing (an existing card keeps
-   * its creation time and triples this app does not know), retired or
-   * not, and remove others, in one write of the cards document. `whole`
-   * writes it as one PUT of the whole document (with the same If-Match),
-   * for a bulk edit of text, which a PATCH could have cut short
-   * (docs/testing.md).
+   * its creation time and triples this app does not know; a new one is
+   * made at `createdAt` when given, else now), retired or not, and
+   * remove others, in one write of the cards document (created when
+   * there is none, only if nothing is there yet). `whole` writes it as
+   * one PUT of the whole document (with the same If-Match), for a bulk
+   * edit of text, which a PATCH could have cut short (docs/testing.md).
    */
   applyCardChanges(
     deck: Deck,
-    changes: { save: (CardContent & { id: string; retired?: true })[]; remove: string[] },
+    changes: { save: (CardContent & { id: string; retired?: true; createdAt?: string })[]; remove: string[] },
     options?: { whole?: boolean },
   ): Promise<void>;
+  /**
+   * Add a deck's catalog entry as the deck says it, its chapters
+   * completed (sm:completedChapter) included: for a deck whose documents
+   * are written already, at the URLs the caller chose for it in this
+   * instance, as when a guest's study is added to an instance. One write
+   * of the catalog document (If-Match the read; created when there is
+   * none), read and made again on a 412, a few times at most. Refuses
+   * (createdElsewhere, writing nothing) when the catalog has an entry at
+   * the deck's URL. The deck as written.
+   */
+  addDeck(deck: Deck): Promise<Deck>;
   /** The deck as its catalog entry says now; null when it has none (any more). */
   readDeck(deckUrl: string): Promise<Deck | null>;
   /**
@@ -304,6 +316,13 @@ export interface ReviewStateRepository {
   getReviewState(deck: Deck, key: ReviewKey): Promise<ReviewState | null>;
   saveReviewState(deck: Deck, state: ReviewState): Promise<void>;
   /**
+   * Create the deck's reviews document with these states, in ONE write
+   * made only if nothing is there yet (If-None-Match: *; else
+   * createdElsewhere, writing nothing): for a deck written whole, as when
+   * a guest's study is added to an instance.
+   */
+  createReviewStates(deck: Deck, states: readonly ReviewState[]): Promise<void>;
+  /**
    * Write several states and drop others in ONE save of the reviews
    * document, so a day reset cannot be left half-applied.
    */
@@ -349,6 +368,13 @@ export interface DigestRepository {
 export interface AnswerLog {
   /** Add an answer to its month's document, without reading it. */
   append(instanceUrl: string, answer: Answer): Promise<void>;
+  /**
+   * Add answers to their months' documents, without reading them: one
+   * insert-only PATCH per month, or more where one would be larger than
+   * every pod reads, each answer whole in one. An answer that is there
+   * already, as it was, changes nothing.
+   */
+  appendAll(instanceUrl: string, answers: readonly Answer[]): Promise<void>;
   /** The study months the log has a document for, "YYYY-MM", oldest first. */
   months(instanceUrl: string): Promise<string[]>;
   /** A month's answers; an answer that does not fit its shape is left out. */
@@ -497,8 +523,9 @@ export interface ThemePreference {
  * Driven port: a note of an update in progress, kept where the app runs
  * (the browser), so an update cut off half-way (a closed tab) can be
  * found: the format update's backup folder, a guest's study being moved
- * into its new folder, or what a library upgrade by an earlier version
- * of the app was moving. Best effort: it may forget.
+ * into its new folder, each guest's deck already added to an instance
+ * (domain/guest.ts GuestMergeNote), or what a library upgrade by an
+ * earlier version of the app was moving. Best effort: it may forget.
  */
 export interface UpdateJournal {
   begin(sourceUrl: string, stagingUrl: string): void;

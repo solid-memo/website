@@ -73,14 +73,16 @@ flowchart LR
   They are written when an instance is created, by a
   [format update](migrations.md#the-pod-migration) once it succeeded
   (a failure there leaves the update done), when a guest's study moves
-  into the pod ([guest-mode.md](guest-mode.md#keeping-the-study)), and
+  into the pod as a new instance ([guest-mode.md](guest-mode.md#as-a-new-instance)), and
   by **Register what is missing** under **Findable by other apps** in
   Preferences, which lists every registration that belongs in an index
   and whether it is there (not offered to a guest, whose pod no other
   app sees). A type index the profile links that cannot be read is
   left out there, and said to be unreadable; nothing is added to it. Never on opening an instance: that would fight other
   editors of the index, and add back what the user removed. Attaching
-  an instance by URL writes its `sm:Instance` registration alone.
+  an instance by URL writes its `sm:Instance` registration alone, and
+  adding a guest's study to an instance writes none: the decks it adds
+  are in the catalogue and the folders the registrations name.
 - **Writing a type index** reads it, makes the change and saves it with
   `If-Match` the version read; when the index changed meanwhile (412),
   it is read and the change made again, three attempts in all
@@ -446,11 +448,11 @@ graph LR
   document by the deck's own operations (import, adding, editing or
   removing a card, stating its languages, a course's question joining
   the deck, the format update's rewrite of outdated cards, a library
-  upgrade's new document) adds `<> dcterms:isPartOf
+  upgrade's new document, a guest's deck added to an instance) adds `<> dcterms:isPartOf
   <catalog.ttl#deck-X>` once, on the document itself, so an app that
   finds a cards document finds its deck. A [repair](validation.md#repair)
   from the data check and a copy of the instance (the format
-  update's, a guest's transfer) leave the document as it was, so one
+  update's, a guest's transfer into a new instance) leave the document as it was, so one
   untouched since vocabulary 1.16 does not say it yet. Another
   `dcterms:isPartOf` there stays: another app may point two decks at one
   document. The subject has no class, so no shape checks it, and the
@@ -491,7 +493,8 @@ instance listing one stays valid (held against real servers in
 [foreignData.integration.test.ts](../e2e/pod/src/foreignData.integration.test.ts)). It is written when an instance is created,
 and by the [format update](migrations.md) for an instance made before
 there were catalogues. Its registration is written with the instance's
-when the instance is created or a guest's study moves into the pod, and
+when the instance is created or a guest's study moves into the pod as a
+new instance, and
 by the format update and Preferences when missing
 ([Discovery chain](#discovery-chain)). The whole document
 conforms to DCAT-AP (a test holds what the app writes to it).
@@ -567,7 +570,10 @@ the top level, and the catalogue's `dcat:catalog` keeps its link.
 **Writing an arrangement.** The screen sends an edit, not a finished
 layout (`DeckTreeEdit` in
 [deckTree.ts](../packages/domain/src/deckTree.ts): move a node after a
-sibling, combine two into a new group, rename or remove a group), and
+sibling, combine two into a new group, rename or remove a group, or, as
+[keeping a guest's study](guest-mode.md#adding-to-an-instance) does,
+graft new groups around decks the tree has at the end of the top level,
+which changes nothing once one of its groups is there), and
 the repository (`editDeckTree` in
 [solidDeckRepository.ts](../packages/solid/src/solidDeckRepository.ts))
 applies it to `catalog.ttl` as the pod holds it then:
@@ -618,7 +624,10 @@ type-index entries:
   was passed. Like a deck's `sm:position`, it belongs to no shape, so
   every write of the entry keeps it and the deck format did not move. It
   is added with an If-Match PATCH, read and added again on a 412, three
-  attempts in all, as a [deck group](#deck-groups) edit is.
+  attempts in all, as a [deck group](#deck-groups) edit is. A deck
+  [added from a guest's study](guest-mode.md#adding-to-an-instance)
+  (`addDeck`) has the guest's completed chapters written with its new
+  entry, in the same way.
 - **Answers** go to the [answer log](#the-answer-log), with
   `sm:answerMode`.
 - **Everything else is derived**: a step is done when each card it is
@@ -648,7 +657,8 @@ data, since nothing could rebuild it.
   `history/<YYYY-MM>.ttl` (`historyUrlOf`, by the month of the study day,
   so a day is never split): reading a year of statistics is twelve GETs
   whatever the number of decks.
-- **One subject per answer**, `#answer-<time>-<random>`
+- **One subject per answer**, `#answer-<time>-<random>` (one added
+  from a guest's study followed by the id of the deck it was added to)
   ([answer.ts](../packages/domain/src/answer.ts)): the deck's catalog
   entry and the card it was given to (either may since be removed; a
   removed deck's answers stay, as a removed deck), the direction, the SM-2
@@ -665,7 +675,13 @@ data, since nothing could rebuild it.
   without a precondition, since an answer names a subject no other writer
   does. Every server tested creates the document and its container when
   missing and keeps every one of several concurrent inserts
-  (e2e/pod/src/history.integration.test.ts).
+  (e2e/pod/src/history.integration.test.ts). A
+  [guest's study added to an instance](guest-mode.md#adding-to-an-instance)
+  brings its answers the same way, a month's in one PATCH, or several
+  where one would pass 64 KiB (`appendAll`); each takes the guest's id
+  followed by the new deck's, so adding it again to the same deck
+  changes nothing, and adding it to another deck (the guest's deck
+  added anew) makes an entry of its own, never one naming two decks.
 - **After the review, not in its way**: `recordReview` saves the review
   state, then queues the answer; it is added in the background, and one
   that fails waits, with those after it, for the next answer, the end of
@@ -818,9 +834,12 @@ sequenceDiagram
   whole instance an earlier version's update left, or the updated
   instance that copy's restore replaces, is deleted document by
   document, its folder only once empty
-  ([deleting an instance](#discovery-chain)). Only a folder Solid Memo
+  ([deleting an instance](#discovery-chain)); the cards and reviews
+  documents adding a guest's deck to an instance just created, when it
+  fails before the deck's entry names them, are deleted each as read,
+  with `If-Match` ([guest-mode.md](guest-mode.md#adding-to-an-instance)). Only a folder Solid Memo
   made whole and nothing names yet is deleted recursively: the guest's
-  study moved, when it fails half-way or a closed tab left it behind,
+  study moved into a new instance, when it fails half-way or a closed tab left it behind,
   and a backup's folder a closed tab left before its manifest named
   anything (or a copy an earlier version's update left so): Solid Memo
   created it at a URL it found free, and all it holds is copies whose

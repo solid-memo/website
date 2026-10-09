@@ -64,10 +64,10 @@ export interface SolidDeckRepositoryDeps {
 }
 
 /**
- * How often an edit of the deck arrangement, or a chapter's completion,
- * is made, in all, while the catalog document keeps changing elsewhere
- * (412). The edit is applied again to the document as it is then, so a
- * retry keeps what changed.
+ * How often an edit of the deck arrangement, a chapter's completion, or
+ * the entry of a guest's deck added (addDeck) is made, in all, while the
+ * catalog document keeps changing elsewhere (412). The edit is applied
+ * again to the document as it is then, so a retry keeps what changed.
  */
 const TREE_ATTEMPTS = 3;
 
@@ -157,6 +157,27 @@ export function createSolidDeckRepository({
       }
       await saveCardsDocument(deck, cards, subjects);
       return registerDeck(deck);
+    },
+
+    async addDeck(deck): Promise<Deck> {
+      const catalogUrl = documentUrlOf(deck.url);
+      const written: Deck = { ...deck, formatVersion: DECK_FORMAT_VERSION };
+      for (let attempt = 1; ; attempt++) {
+        const dataset = (await getSolidDatasetOrNull(catalogUrl, fetch)) ?? createSolidDataset();
+        if (getThing(dataset, deck.url) !== null) throw new PreconditionFailedError(deck.url, "absent");
+        // sm:completedChapter is no shape's: added beside the entry, as completeChapter adds it.
+        let updated = withDeck(dataset, written);
+        const entry = buildThing(getThing(updated, deck.url)!);
+        for (const chapter of deck.completedChapters ?? []) entry.addIri(SM.completedChapter, chapter);
+        updated = setThing(updated, entry.build());
+        try {
+          // If-Match the read above: the catalog changed elsewhere meanwhile is read and the entry added again.
+          await save(catalogUrl, updated, deckSubjects(written));
+          return written;
+        } catch (error) {
+          if (!(error instanceof PreconditionFailedError) || attempt === TREE_ATTEMPTS) throw error;
+        }
+      }
     },
 
     renameDeck(deck, title): Promise<Deck> {

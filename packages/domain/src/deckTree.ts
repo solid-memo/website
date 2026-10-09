@@ -57,7 +57,14 @@ export type DeckTreeEdit =
   /** Make `group` (its URL minted by the client) at `target`'s place, holding target, then dragged. */
   | { kind: "combine"; dragged: string; target: string; group: DeckGroup }
   | { kind: "rename"; group: string; title: LangText }
-  | { kind: "removeGroup"; group: string };
+  | { kind: "removeGroup"; group: string }
+  /** Place `nodes` at the end of the top level: decks the tree has, and new groups (URLs minted by the client) holding them. */
+  | { kind: "graft"; nodes: readonly GraftNode[] };
+
+/** A node of a graft: a deck of the tree, by its URL, or a new group with what it holds. */
+export type GraftNode =
+  | { kind: "deck"; url: string }
+  | { kind: "group"; group: DeckGroup; children: readonly GraftNode[] };
 
 /** A group as the catalog document states it: its members' links as they are, each kind apart. */
 export interface StoredGroup {
@@ -234,6 +241,30 @@ export function renameGroup(tree: DeckTree, url: string, title: LangText): DeckT
   return withChildren(tree, at.parent, spliced(childrenOf(tree, at.parent)!, at.index, 1, node));
 }
 
+/**
+ * The tree with `nodes` at the end of the top level, in order: each deck
+ * taken from wherever it was, each group new, holding its own. A deck
+ * the tree no longer has is left out (removed meanwhile). Done again —
+ * one of its groups already there — it changes nothing, so an edit
+ * retried after its write went through still succeeds.
+ */
+export function graft(tree: DeckTree, nodes: readonly GraftNode[]): DeckTree {
+  const groups = (list: readonly GraftNode[]): string[] =>
+    list.flatMap((node) => (node.kind === "group" ? [node.group.url, ...groups(node.children)] : []));
+  if (groups(nodes).some((url) => locate(tree, url) !== undefined)) return tree;
+  let rest = tree;
+  const placed = (list: readonly GraftNode[]): TreeNode[] =>
+    list.flatMap((node): TreeNode[] => {
+      if (node.kind === "group") return [{ kind: "group", group: node.group, children: placed(node.children) }];
+      const at = locate(rest, node.url);
+      if (at?.node.kind !== "deck") return [];
+      rest = without(rest, at);
+      return [at.node];
+    });
+  const added = placed(nodes);
+  return { ...rest, children: [...rest.children, ...added] };
+}
+
 /** The tree an edit makes; a tree in a newer format than this app's cannot be edited. */
 export function applyDeckTreeEdit(tree: DeckTree, edit: DeckTreeEdit): DeckTree {
   if (tree.readOnly) throw new AppError("deckTreeTooNew");
@@ -246,6 +277,8 @@ export function applyDeckTreeEdit(tree: DeckTree, edit: DeckTreeEdit): DeckTree 
       return renameGroup(tree, edit.group, edit.title);
     case "removeGroup":
       return deleteGroup(tree, edit.group);
+    case "graft":
+      return graft(tree, edit.nodes);
   }
 }
 

@@ -319,15 +319,44 @@ function ownPatches(fetch: typeof globalThis.fetch, dataset: SolidDataset, whole
  * app is tested on creates the document (and its container) when it is
  * missing, and keeps every one of several concurrent inserts.
  */
-export async function appendToDocument(url: string, thing: Thing, fetch: typeof globalThis.fetch): Promise<void> {
-  const triples = [...toRdfJsDataset(setThing(createSolidDataset(), thing))].map(tripleLine);
-  forgetRead(url, fetch);
-  const response = await fetch(url, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/sparql-update" },
-    body: `INSERT DATA {\n${triples.join("\n")}\n};\n`,
-  });
-  if (!response.ok) throw new AppError("addFailed", { url, status: response.status });
+export function appendToDocument(url: string, thing: Thing, fetch: typeof globalThis.fetch): Promise<void> {
+  return appendAllToDocument(url, [thing], fetch);
+}
+
+/**
+ * Add several subjects' triples to a document without reading it, as
+ * appendToDocument adds one: one insert-only PATCH, or several in turn
+ * where one would be larger than MAX_PATCH_BYTES, each subject whole in
+ * one. A subject whose triples are there already changes nothing.
+ */
+export async function appendAllToDocument(
+  url: string,
+  things: readonly Thing[],
+  fetch: typeof globalThis.fetch,
+): Promise<void> {
+  const encoder = new TextEncoder();
+  const batches: (string | null)[][] = [];
+  let size = 0;
+  for (const thing of things) {
+    const lines = [...toRdfJsDataset(setThing(createSolidDataset(), thing))].map(tripleLine);
+    const bytes = encoder.encode(lines.join("\n")).length + 1;
+    if (batches.length === 0 || size + bytes > MAX_PATCH_BYTES) {
+      batches.push(lines);
+      size = bytes;
+    } else {
+      batches.at(-1)!.push(...lines);
+      size += bytes;
+    }
+  }
+  for (const triples of batches) {
+    forgetRead(url, fetch);
+    const response = await fetch(url, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/sparql-update" },
+      body: `INSERT DATA {\n${triples.join("\n")}\n};\n`,
+    });
+    if (!response.ok) throw new AppError("addFailed", { url, status: response.status });
+  }
 }
 
 /** Where @inrupt/solid-client names a Thing that has no URL yet: `<#name>` in the document. */

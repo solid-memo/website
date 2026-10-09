@@ -1,9 +1,9 @@
 import { createSolidDataset, getThingAll, removeThing, setThing } from "@inrupt/solid-client";
 import type { AnswerLog } from "@solid-memo/application/ports";
-import { monthOfStudyDay } from "@solid-memo/domain/answer";
+import { monthOfStudyDay, type Answer } from "@solid-memo/domain/answer";
 import { historyContainerOf, historyUrlOf, monthOfHistoryUrl } from "@solid-memo/domain/instanceLayout";
 import { listContainerTree } from "./containers";
-import { appendToDocument, getSolidDatasetOrNull, PreconditionFailedError, saveDataset } from "./datasets";
+import { appendAllToDocument, appendToDocument, getSolidDatasetOrNull, PreconditionFailedError, saveDataset } from "./datasets";
 import { toAnswer, toAnswerThing } from "./mappers/answerMapper";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
 import { unlessNewer } from "./records";
@@ -31,6 +31,19 @@ export function createSolidAnswerLog({
       const thing = toAnswerThing(url, answer);
       await checkWrite(setThing(createSolidDataset(), thing), [`${url}#${answer.id}`]);
       await appendToDocument(url, thing, fetch);
+    },
+
+    async appendAll(instanceUrl, answers) {
+      const byMonth = new Map<string, Answer[]>();
+      for (const answer of answers) {
+        const url = historyUrlOf(instanceUrl, monthOfStudyDay(answer.studyDay));
+        byMonth.set(url, [...(byMonth.get(url) ?? []), answer]);
+      }
+      for (const [url, month] of byMonth) {
+        const things = month.map((answer) => toAnswerThing(url, answer));
+        await checkWrite(things.reduce(setThing, createSolidDataset()), month.map((answer) => `${url}#${answer.id}`));
+        await appendAllToDocument(url, things, fetch);
+      }
     },
 
     async months(instanceUrl) {

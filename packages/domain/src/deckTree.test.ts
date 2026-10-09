@@ -7,6 +7,7 @@ import {
   combine,
   decksOf,
   deleteGroup,
+  graft,
   isDescendant,
   locate,
   moveNode,
@@ -14,6 +15,7 @@ import {
   renameGroup,
   treeChanges,
   type DeckTree,
+  type GraftNode,
   type StoredGroup,
   type StoredLayout,
   type TreeNode,
@@ -292,6 +294,35 @@ describe("renameGroup", () => {
   });
 });
 
+describe("graft", () => {
+  const made = (url: string, ...children: GraftNode[]): GraftNode => ({
+    kind: "group",
+    group: { url, title: { en: `Group ${url}` } },
+    children,
+  });
+  const deckNode = (url: string): GraftNode => ({ kind: "deck", url });
+
+  it("places new groups holding decks of the tree, and decks, at the end of the top level, in order", () => {
+    const grafted = graft(tree("a", "x", "y", "z"), [made("n1", deckNode("y"), made("n2", deckNode("x"))), deckNode("z"), made("n3")]);
+    expect(shape(grafted)).toEqual(["a", ["n1", "y", ["n2", "x"]], "z", ["n3"]]);
+    expect(locate(grafted, "n1")!.node).toMatchObject({ group: { title: { en: "Group n1" } } });
+  });
+
+  it("takes a deck from inside a group, and leaves out a deck the tree no longer has, or a group named as a deck", () => {
+    expect(shape(graft(tree(["g1", "a", "b"]), [made("n", deckNode("b"), deckNode("gone"), deckNode("g1"))]))).toEqual([
+      ["g1", "a"],
+      ["n", "b"],
+    ]);
+  });
+
+  it("changes nothing when done again", () => {
+    const nodes = [made("n", deckNode("a"))];
+    const once = graft(tree("a", "b"), nodes);
+    expect(graft(once, nodes)).toBe(once);
+    expect(graft(once, [made("other", made("n"))])).toBe(once);
+  });
+});
+
 describe("applyDeckTreeEdit", () => {
   const sample = tree("a", ["g1", "b"]);
 
@@ -307,6 +338,9 @@ describe("applyDeckTreeEdit", () => {
       group: { title: { en: "x" } },
     });
     expect(shape(applyDeckTreeEdit(sample, { kind: "removeGroup", group: "g1" }))).toEqual(["a", "b"]);
+    expect(
+      shape(applyDeckTreeEdit(sample, { kind: "graft", nodes: [{ kind: "group", group, children: [{ kind: "deck", url: "a" }] }] })),
+    ).toEqual([["g1", "b"], ["n", "a"]]);
   });
 
   it("refuses to edit a tree in a newer format", () => {

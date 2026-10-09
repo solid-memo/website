@@ -69,6 +69,14 @@ export const ERROR_TEMPLATES = {
   },
   guestUrlsLeft:
     "The copy in your Pod still points to the guest's study, so your study is left as it was. Try again.",
+  guestStudyInvalid: {
+    one: "Part of your study in this browser is not in the format Solid Memo expects ({count} problem), so none of it was added to your Pod. It is still here.",
+    other: "Part of your study in this browser is not in the format Solid Memo expects ({count} problems), so none of it was added to your Pod. It is still here.",
+  },
+  guestStudyTooNew:
+    "A newer version of Solid Memo saved part of your study in this browser, so this version does not add it to your Pod. Reload the page to get the latest version.",
+  guestStudyChanged:
+    "Your study in this browser changed while it was being added, perhaps in another tab, so it is kept here. Try again to add what changed.",
   instanceChangedDuringCopy:
     "The instance changed while it was being copied, perhaps in another tab or app. Try again.",
   resourceChangedDuringCopy:

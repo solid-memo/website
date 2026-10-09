@@ -37,7 +37,8 @@ stateDiagram-v2
 
 A user who logged out or whose session expired starts at **WebID**, not
 **Choose**. A guest studies in a pod kept in the browser until they log in
-and move their study into their Pod ([guest-mode.md](guest-mode.md)). A silently restored session skips onboarding entirely:
+and keep their study in their Pod, added to an instance they have or as a
+new one ([guest-mode.md](guest-mode.md)). A silently restored session skips onboarding entirely:
 `SessionGateway.restore()` reports `origin: "login"` only when a login
 redirect just completed.
 
