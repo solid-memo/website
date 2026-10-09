@@ -1,123 +1,17 @@
 import { render } from "preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createUseCases } from "@solid-memo/application/useCases";
-import { authFetch } from "@solid-memo/solid/authFetch";
-import { createWriteFence } from "@solid-memo/solid/writeFence";
-import { createSolidSessionGateway } from "@solid-memo/solid/solidSessionGateway";
-import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
-import { SHAPES_BASE, SITE, VOCAB_BASE } from "@solid-memo/vocab/ns";
-import { createSolidDeckLibrary } from "@solid-memo/solid/solidDeckLibrary";
-import { createSolidDeckRepository } from "@solid-memo/solid/solidDeckRepository";
-import { createSolidDigestRepository } from "@solid-memo/solid/solidDigestRepository";
-import { createSolidAnswerLog } from "@solid-memo/solid/solidAnswerLog";
-import { createSolidInstanceRepository } from "@solid-memo/solid/solidInstanceRepository";
-import { createSolidPreferencesRepository } from "@solid-memo/solid/solidPreferencesRepository";
-import { createLocalStorageLanguagePreference } from "@solid-memo/browser/localStorageLanguagePreference";
-import { createLocalStorageThemePreference } from "@solid-memo/browser/localStorageThemePreference";
-import { createLocalStorageUpdateJournal } from "@solid-memo/browser/localStorageUpdateJournal";
-import { createIndexedDbResourceStore } from "@solid-memo/browser/indexedDbResourceStore";
-import { GUEST_ORIGIN } from "@solid-memo/domain/guest";
-import { createLocalGuestPod } from "@solid-memo/solid/localGuestPod";
-import { createLocalPod } from "@solid-memo/solid/localPod";
-import { createMemoryResourceStore } from "@solid-memo/solid/memoryResourceStore";
-import { routedFetch } from "@solid-memo/solid/routedFetch";
-import { createSolidInstanceCopier } from "@solid-memo/solid/solidInstanceCopier";
-import { createSolidRepairRepository } from "@solid-memo/solid/solidRepairRepository";
-import { createSolidReviewStateRepository } from "@solid-memo/solid/solidReviewStateRepository";
-import { createSolidStorageGateway } from "@solid-memo/solid/solidStorageGateway";
-import { createSolidWebIdDocumentRepository } from "@solid-memo/solid/solidWebIdDocumentRepository";
+import { createAppUseCases } from "@solid-memo/composition/appUseCases";
 import { App } from "@solid-memo/ui/App";
 import "@solid-memo/ui/style.css";
 
-/**
- * A guest's pod, kept in this browser (docs/guest-mode.md); in memory, for
- * this page only, where the browser keeps no IndexedDB.
- */
-const guestStore = globalThis.indexedDB === undefined ? createMemoryResourceStore() : createIndexedDbResourceStore();
-const guestFetch = createLocalPod({
-  root: GUEST_ORIGIN,
-  store: guestStore,
-  newEtag: () => `"${crypto.randomUUID()}"`,
-});
-
-/**
- * Every pod request goes through the fence, so a guest's study being
- * moved cannot be written (docs/guest-mode.md); then to the guest's pod
- * or, as the logged-in user, to any other.
- */
-const writeFence = createWriteFence(routedFetch({ origin: GUEST_ORIGIN, local: guestFetch, remote: authFetch }));
-const podFetch = writeFence.fetch;
-
-/**
- * Reads a document the site publishes (the shapes, the vocabulary, the
- * deck library) from the site this page is served from: the same address
- * in production, the dev or preview server's copy of the repository's
- * otherwise. Its IRIs stay the published ones, which each document
- * states as its @base; any other request is passed on as it is.
- */
-const servedSite = new URL(".", document.baseURI).href;
-const siteFetch: typeof fetch = (input, init) => {
-  const url = String(input instanceof Request ? input.url : input);
-  if (!url.startsWith(SITE)) return globalThis.fetch(input, init);
-  const served = `${servedSite}${url.slice(SITE.length)}`;
-  // A Request keeps its method and headers at the served address.
-  return globalThis.fetch(input instanceof Request ? new Request(served, input) : served, init);
-};
-
-const shapeValidator = createShaclShapeValidator({
-  fetch: podFetch,
-  shapesFetch: siteFetch,
-  shapesBaseUrl: SHAPES_BASE,
-  vocabBaseUrl: VOCAB_BASE,
-  vendorBaseUrl: new URL("vendor/", document.baseURI).href,
-});
-/** Every write is checked against the shapes before it reaches the pod (docs/validation.md). */
-const checkWrite = shapeValidator.checkSubjects;
-
-const useCases = createUseCases({
-  sessionGateway: createSolidSessionGateway("Solid Memo"),
-  webIdDocumentRepository: createSolidWebIdDocumentRepository({
-    fetch: podFetch,
-  }),
-  storageGateway: createSolidStorageGateway({ fetch: podFetch }),
-  instanceRepository: createSolidInstanceRepository({
-    fetch: podFetch,
-    checkWrite,
-    now: () => new Date(),
-    randomId: () => crypto.randomUUID(),
-  }),
-  deckRepository: createSolidDeckRepository({
-    fetch: podFetch,
-    checkWrite,
-    now: () => new Date(),
-    randomId: () => crypto.randomUUID(),
-  }),
-  deckLibrary: createSolidDeckLibrary({
-    fetch: siteFetch,
-    // The library is published with the site, from decks/
-    // (docs/deck-library.md); VITE_LIBRARY_INDEX_URL points a build at
-    // another copy.
-    indexUrl: import.meta.env.VITE_LIBRARY_INDEX_URL ?? `${SITE}decks/index.ttl`,
-  }),
-  preferencesRepository: createSolidPreferencesRepository({
-    fetch: podFetch,
-    checkWrite,
-  }),
-  reviewStateRepository: createSolidReviewStateRepository({
-    fetch: podFetch,
-    checkWrite,
-  }),
-  shapeValidator,
-  repairRepository: createSolidRepairRepository({ fetch: podFetch }),
-  instanceCopier: createSolidInstanceCopier({ fetch: podFetch }),
-  updateJournal: createLocalStorageUpdateJournal(),
-  languagePreference: createLocalStorageLanguagePreference(),
-  themePreference: createLocalStorageThemePreference(),
-  writeFence,
-  digestRepository: createSolidDigestRepository({ fetch: podFetch, checkWrite }),
-  answerLog: createSolidAnswerLog({ fetch: podFetch, checkWrite }),
+const useCases = createAppUseCases({
+  clientName: "Solid Memo",
+  // The site is the folder this page is served from.
+  servedSite: new URL(".", document.baseURI).href,
+  // VITE_LIBRARY_INDEX_URL points a build at another copy of the deck library.
+  libraryIndexUrl: import.meta.env.VITE_LIBRARY_INDEX_URL,
   ruleset: __SHAPES_RULESET__,
-  guestPod: createLocalGuestPod({ fetch: guestFetch, store: guestStore }),
+  indexedDB: globalThis.indexedDB,
 });
 
 const queryClient = new QueryClient();

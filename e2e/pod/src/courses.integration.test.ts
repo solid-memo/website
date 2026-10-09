@@ -1,7 +1,7 @@
 // @vitest-environment node
 /**
  * A course against a real Solid server (docs/courses.md): the app's own
- * use cases and Solid adapters, wired as in main.tsx, every write checked
+ * use cases and Solid adapters, wired as in createAppUseCases, every write checked
  * against the shapes. Starting a course makes an empty deck; answering a
  * step's question writes its card, with its distractors, and its first
  * review state, and logs a multiple-choice answer; completing a chapter
@@ -102,7 +102,7 @@ const library: DeckLibrary = {
   fetchCourseOutline: async () => outline,
 };
 
-/** The app as main.tsx wires it, every write checked against the shapes read from this repository. */
+/** The app as createAppUseCases wires it, every write checked against the shapes read from this repository. */
 function app() {
   const shapeValidator = createShaclShapeValidator({ fetch, shapesFetch, ...SHAPE_SOURCES });
   const checkWrite = shapeValidator.checkSubjects;

@@ -402,7 +402,7 @@ Solid Memo spells it (`2.50` for 2.5).
 ### Proof on a real server
 
 `npm run test:pod` runs the update — the app's own use cases and Solid
-adapters, wired as in `main.tsx` — against real Solid servers (each the
+adapters, wired as in `createAppUseCases` — against real Solid servers (each the
 [tests start](testing.md#commands): two majors each of the Community Solid
 Server and node-solid-server), recording every HTTP request as the app
 attempts it and as it reaches the server

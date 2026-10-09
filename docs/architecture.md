@@ -11,7 +11,8 @@ where the layers meet.
 
 | Package | Folder | Responsibility |
 |---|---|---|
-| `@solid-memo/web` | `apps/web/` | The site: the composition root (`src/main.tsx`), the Vite build that also publishes `ns/` (the vocabulary and shapes) and `decks/` (the [deck library](deck-library.md)) with the app ([deployment.md](deployment.md)). |
+| `@solid-memo/web` | `apps/web/` | The site: its entry point (`src/main.tsx`), which renders the app over the use cases `composition` wires, and the Vite build that also publishes `ns/` (the vocabulary and shapes) and `decks/` (the [deck library](deck-library.md)) with the app ([deployment.md](deployment.md)). |
+| `@solid-memo/composition` | `packages/composition/` | The composition root (`createAppUseCases` in `src/appUseCases.ts`): every adapter behind its port, the guest's pod, the write fence, the site's documents read from where it is served, and the use cases over them. An app passes what is its own: its name, where it is served, the build's values. |
 | `@solid-memo/ui` | `packages/ui/` | The Preact UI: the components and the router (`src/ui/`), the messages in each language (`src/i18n/`), the theme and the styles (`src/style.css`). It receives `UseCases` and knows no adapter. |
 | `@solid-memo/application` | `packages/application/` | Use cases (what the app does) and ports (what the app needs). |
 | `@solid-memo/domain` | `packages/domain/` | Pure types and pure functions: the app's vocabulary, SRS, migrations. |
@@ -31,9 +32,10 @@ owns the interfaces, adapters conform to them.
 
 ```mermaid
 graph TD
-    web["apps/web<br/>main.tsx"] --> ui["ui<br/>the components"] & application
+    web["apps/web<br/>main.tsx"] --> ui["ui<br/>the components"]
     ui --> application
-    web -. main.tsx only .-> solid & browser
+    web -. main.tsx only .-> composition["composition<br/>the composition root"]
+    composition --> application & solid & browser
     ui -. src/ui/ only .-> markdown
     application --> domain --> vocab["vocab<br/>the data contract"]
     solid -. implements ports .-> application
@@ -58,8 +60,9 @@ files (`i18n/<locale>.json`).
 `format:turtle:check`, `library:check` and `build` in dependency order,
 cached by input. A task's inputs are its package's files and those of the
 packages it depends on; the few that also read `ns/` or `decks/` add them
-in their package's own `turbo.json` (`vocab`, `shacl`, `solid` and
-`apps/web`), so a deck edit reruns only the tasks that read the library.
+in their package's own `turbo.json` (`vocab`, `shacl`, `solid`,
+`composition` and `apps/web`), so a deck edit reruns only the tasks that
+read the library.
 
 ```sh
 npm run check     # every package: typecheck, tests (100% coverage), drift, formatting, the deck library; then boundaries
@@ -80,8 +83,9 @@ npm run crosscheck # the pySHACL cross-check CI runs (Python, scripts/requiremen
 ## Key objects
 
 - `UseCases` ([useCases.ts](../packages/application/src/useCases.ts)) —
-  the UI's only entry point. Created once by the composition root and
-  passed to `App` as a prop.
+  the UI's only entry point. Created once by the composition root,
+  `createAppUseCases` ([appUseCases.ts](../packages/composition/src/appUseCases.ts)),
+  which `apps/web/src/main.tsx` calls, and passed to `App` as a prop.
 - Ports ([ports.ts](../packages/application/src/ports.ts)) — narrow
   interfaces (one per external capability) implemented by factories in
   `packages/solid/src/` and `packages/browser/src/`.

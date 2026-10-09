@@ -1,0 +1,27 @@
+{
+  "name": "@solid-memo/composition",
+  "private": true,
+  "license": "MIT",
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p .",
+    "test": "vitest run --coverage",
+    "test:unit": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@solid-memo/application": "*",
+    "@solid-memo/browser": "*",
+    "@solid-memo/domain": "*",
+    "@solid-memo/solid": "*",
+    "@solid-memo/vocab": "*"
+  },
+  "devDependencies": {
+    "fake-indexeddb": "^6.2.5",
+    "happy-dom": "^20.14.5"
+  }
+}

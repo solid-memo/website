@@ -36,7 +36,7 @@ interface Recorded {
   status?: number;
 }
 
-/** A page of the app as main.tsx wires it, every request recorded; each call is a new page, with nothing in memory. */
+/** A page of the app as createAppUseCases wires it, every request recorded; each call is a new page, with nothing in memory. */
 function page() {
   const requests: Recorded[] = [];
   const recording: typeof fetch = async (input, init) => {

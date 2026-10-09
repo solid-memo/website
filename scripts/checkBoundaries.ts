@@ -30,7 +30,9 @@ const LAYERS: Record<string, string[]> = {
   browser: ["application", "domain"],
   // The components receive use cases and never reach solid or browser.
   ui: ["application", "domain", "vocab", "markdown"],
-  web: ["application", "domain", "vocab", "solid", "browser", "ui"],
+  // The composition root: every adapter behind its port, and the use cases over them.
+  composition: ["application", "domain", "vocab", "solid", "browser"],
+  web: ["application", "domain", "vocab", "ui", "composition"],
   "e2e-pod": ["application", "domain", "vocab", "solid"],
   // The journeys drive the built app in a browser; they read only its text.
   "e2e-journeys": ["ui"],
@@ -38,8 +40,8 @@ const LAYERS: Record<string, string[]> = {
 
 /** Within a package, files that alone may use some of its allowed packages. */
 const ONLY_FROM: Record<string, Record<string, RegExp>> = {
-  // Only the composition root wires the adapters; the build test imports none.
-  web: { solid: /^src\/main\.tsx$/, browser: /^src\/main\.tsx$/ },
+  // Only the app's entry point has the layers wired; the build test imports none.
+  web: { composition: /^src\/main\.tsx$/ },
   // Data text is rendered by the components alone (docs/markdown.md).
   ui: { markdown: /^src\/ui\// },
   // The generators read Turtle; the vocabulary the browser loads never does.
@@ -59,6 +61,7 @@ const BROWSER: Record<string, RegExp> = {
   shacl: /^src\//,
   solid: /^src\//,
   browser: /^src\//,
+  composition: /^src\//,
   ui: /^src\//,
   web: /^src\//,
 };

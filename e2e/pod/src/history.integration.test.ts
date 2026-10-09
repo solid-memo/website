@@ -15,7 +15,7 @@ import { createSolidAnswerLog } from "@solid-memo/solid/solidAnswerLog";
 
 const SERVERS = inject("solidServers");
 
-/** The answer log as main.tsx wires it: every answer checked against its shape before it is added. */
+/** The answer log as createAppUseCases wires it: every answer checked against its shape before it is added. */
 function answerLog() {
   const shapeValidator = createShaclShapeValidator({ fetch, shapesFetch, ...SHAPE_SOURCES });
   return createSolidAnswerLog({ fetch, checkWrite: shapeValidator.checkSubjects });

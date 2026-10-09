@@ -7,6 +7,6 @@ declare const __COMMIT_SHA__: string | null;
 declare const __SHAPES_RULESET__: string;
 
 interface ImportMetaEnv {
-  /** The deck library's index (main.tsx); the site's own, decks/index.ttl, when unset. */
+  /** The deck library's index, passed to createAppUseCases; the site's own, decks/index.ttl, when unset (docs/deck-library.md). */
   readonly VITE_LIBRARY_INDEX_URL?: string;
 }
