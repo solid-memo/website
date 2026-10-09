@@ -674,48 +674,6 @@ describe("Workspace", () => {
     expect(await screen.findByRole("heading", { name: "Decks" })).toBeInTheDocument();
   });
 
-  it("opens the previous version once its backup is restored from the preferences", async () => {
-    vi.stubGlobal("confirm", vi.fn(() => true));
-    let instances = [instanceA];
-    renderWorkspace(
-      makeUseCases({
-        listInstances: vi.fn(async () => instances),
-        readLegacyBackup: vi.fn(async () => ({ url: instanceB.url })),
-        restoreLegacyBackup: vi.fn(async () => {
-          instances = [instanceB];
-          return { instance: instanceB, keptFolder: null };
-        }),
-      }),
-    );
-    fireEvent.click(await screen.findByRole("link", { name: "Preferences" }));
-    fireEvent.click(await screen.findByRole("button", { name: "Restore previous version" }));
-    expect(await screen.findByRole("heading", { name: "Decks" })).toBeInTheDocument();
-    expect(screen.getByText("Deck set B")).toBeInTheDocument();
-    expect(screen.queryByText(/Solid Memo deleted its own data/)).not.toBeInTheDocument();
-    vi.unstubAllGlobals();
-  });
-
-  it("says, on the restored instance, that the updated instance's folder was kept for another app's files", async () => {
-    vi.stubGlobal("confirm", vi.fn(() => true));
-    let instances = [instanceA];
-    renderWorkspace(
-      makeUseCases({
-        listInstances: vi.fn(async () => instances),
-        readLegacyBackup: vi.fn(async () => ({ url: instanceB.url })),
-        restoreLegacyBackup: vi.fn(async () => {
-          instances = [instanceB];
-          return { instance: instanceB, keptFolder: instanceA.url };
-        }),
-      }),
-    );
-    fireEvent.click(await screen.findByRole("link", { name: "Preferences" }));
-    fireEvent.click(await screen.findByRole("button", { name: "Restore previous version" }));
-    expect(await screen.findByRole("heading", { name: "Decks" })).toBeInTheDocument();
-    const notice = await screen.findByText(/Solid Memo deleted its own data and kept/);
-    expect(within(notice).getByRole("link")).toHaveAttribute("href", instanceA.url);
-    vi.unstubAllGlobals();
-  });
-
   it("opens the preferences from home and navigates back", async () => {
     renderWorkspace(
       makeUseCases({ listInstances: vi.fn(async () => [instanceA]) }),

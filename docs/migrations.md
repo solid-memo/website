@@ -16,7 +16,7 @@ app writes today; `DECK_FORMAT_VERSION` and friends are aliases of it.
 
 | Class | 1 | 2 | Why the version moved |
 |---|---|---|---|
-| Instance | title, created | `dcterms:replaces` (the instance it is an updated copy of) and `dcterms:modified` (when it replaced it), both optional | The format update of that time wrote a copy and kept the original as a backup; the copy records which one, so the backup can be found, restored or deleted. The update now writes each document where it is and states neither; an instance an earlier update made keeps them ([The backup](#the-backup)). |
+| Instance | title, created | `dcterms:replaces` (the instance it is an updated copy of) and `dcterms:modified` (when it replaced it), both optional | The format update of that time wrote a copy and kept the original as a backup; the copy records which one. The update now writes each document where it is and states neither; an instance an earlier update made keeps them, and the app ignores them ([The backup](#the-backup)). |
 | Deck | title, document links, provenance | `sm:direction`, stated | A format-1 reader would study a bidirectional deck one way only and count the other way's review subjects against the day's budgets without matching them to any card. |
 | Card | `sm:front` and `sm:back`, both required | a side may be a picture (`sm:frontImage` / `sm:backImage`, an IRI), text, or both | A format-1 reader treats a card without `sm:front` as malformed and drops it, so picture-only cards must not be mistaken for format 1. |
 | Review state | the SM-2 fields; a snapshot and per-direction subjects were added without a bump, so format 1 admits them | the same fields; the snapshot is all five triples or none; the subject naming (`#<cardId>`, `#<cardId>@back-to-front`) is part of the contract | Stamping begins: a format-1 reader meeting a format-2 state would silently ignore the snapshot and the other direction, which is what a version is meant to flag. |
@@ -435,11 +435,7 @@ file and shared access, and checks that:
 - a large deck is updated in one PUT, held to the version read;
 - a subject a newer version of the app wrote is not written over;
 - a save of a document changed elsewhere since it was read fails (412)
-  and keeps the change; read again, it goes through;
-- a copy an earlier version's update left is still restored (the type
-  index switched back: every registration's link moved from the updated
-  instance to the original, none removed, and the original's catalogue
-  registered, the index having none of it) and deleted as before.
+  and keeps the change; read again, it goes through.
 
 On Community Solid Server 6, whose ETags are to the second, the
 update's test of a change made "elsewhere" waits for the next second
@@ -459,36 +455,12 @@ each step pure, its output conforming to the shape it moves to), as for
 every save, which applies the same steps with no backup.
 
 Until stable addresses, the format update copied the whole instance
-into a sibling folder (`<name>-<uuid>/`), updated the copy, and pointed
-the type index registrations at it; the original stayed as the backup,
-which the copy's `meta.ttl` names (`dcterms:replaces`, and
-`dcterms:modified` when it replaced it). Such a backup is listed in
-Preferences under **Previous version at another address** while the
-instance's meta names it, and handled as then:
-
-- **Restore previous version** switches the type indexes back to it
-  (`switchInstance`: the registrations' links to the instance's data
-  change, each to the same resource of the backup, in each index that
-  holds any of them, so the review states' and answers' in the private
-  index of an instance registered publicly move too, and an index that
-  registers the instance but no catalogue of it gains the backup's
-  catalogue, as before; one save per index with `If-Match`, the ones
-  switched undone when a later one fails), then deletes what the updated
-  instance holds of Solid Memo's;
-  what was studied since that update is lost with it (the confirmation
-  says so). This is the one way an instance's address still changes.
-- **Delete backup** clears `dcterms:replaces`, then deletes what the
-  original holds of Solid Memo's. Forgetting comes first, so a deletion
-  cut off half-way never leaves a backup that can still be restored.
-
-Both delete as deleting an instance does
-([data-model.md](data-model.md#discovery-chain)): document by document,
-the folder only once empty, kept and named when it holds what another
-app put there. A backup whose `meta.ttl` is gone is forgotten quietly,
-and restore checks this again before it switches. A partial copy that
-such an update's closed tab left, which this browser still remembers
-(`solid-memo:update:<instance>` in `localStorage`), is offered for
-removal on the next opening, whole, as before.
+into a sibling folder (`<name>-<uuid>/`), updated the copy, and kept the
+original as a backup, which the copy's `meta.ttl` names
+(`dcterms:replaces`). Such a backup, or a partial copy such an update's
+closed tab left, is now an ordinary folder that the app no longer lists
+or offers to restore, which the user may delete by hand; `meta.ttl`
+keeps `dcterms:replaces` and `dcterms:modified`, which the app ignores.
 
 Repairs edit in place, as the update does.
 
@@ -659,10 +631,9 @@ flowchart TD
   access control is written.
 - **Decks an earlier version moved** to `decks/<deckId>-<uuid>.ttl` and
   `reviews/<deckId>-<uuid>.ttl` are upgraded where they are: the catalog
-  entry is where a deck's documents are found. A note such an upgrade
-  left in the browser is still settled on a later visit to the deck,
-  once it is ten minutes old: whichever documents the entry points at
-  stay, the others are deleted, never one a deck of the catalog uses.
+  entry is where a deck's documents are found. Documents such an upgrade,
+  cut off, left beside the ones the entry names are not read, and stay
+  until the user deletes them.
 - **Progress.** The deck page shows every step, with a progress bar, in
   place of the offer; a failure says at which step, and whether the deck
   may have changed.

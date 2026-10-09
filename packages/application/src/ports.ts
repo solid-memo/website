@@ -128,27 +128,8 @@ export interface InstanceRepository {
    * is there, and none in an index that cannot be read.
    */
   registerDataClasses(args: { webId: string; instanceUrl: string; title: string }): Promise<void>;
-  /**
-   * Point every type index registration of the instance's data at the
-   * same resource of another container, in every index that holds one
-   * (the private index of an instance registered publicly holds its
-   * review states' and answers'), and register the other container's
-   * catalogue in an index that registers the instance but no catalogue
-   * of it: all indexes or none — when a later index fails, the earlier
-   * ones are switched back before rethrowing. An instance registered in
-   * no index is an error, and switches nothing. Only for restoring a
-   * backup an earlier version of the app's format update left as a copy
-   * of the whole instance (docs/migrations.md "The backup").
-   */
-  switchInstance(args: { webId: string; from: string; to: string; title: string }): Promise<void>;
   /** What the instance's meta document says; null when there is none. */
   readMeta(instanceUrl: string): Promise<InstanceMeta | null>;
-  /**
-   * Rewrite the meta document's subject in place, in this app's format.
-   * Fails when the document is missing: a meta document is created with
-   * its instance, never on its own.
-   */
-  saveMeta(instanceUrl: string, meta: InstanceMeta): Promise<void>;
   /**
    * For the format update: bring the meta document's subject up to this
    * app's format in place (unknown triples survive), in ONE save made
@@ -293,9 +274,9 @@ export interface DeckRepository {
    */
   upgradeDeckEntry(current: Deck, next: Deck): Promise<Deck>;
   /**
-   * Delete a document an upgrade by an earlier version of the app left
-   * behind (domain/deckUpgrade.ts DeckUpgradeNote); one that is gone
-   * counts as deleted.
+   * Delete a document no deck names, as one a guest's deck being added
+   * wrote before its catalog entry failed; one that is gone counts as
+   * deleted.
    */
   deleteDocument(url: string): Promise<void>;
   /**
@@ -471,8 +452,7 @@ export interface InstanceCopier {
   /**
    * Delete a container and everything below it; one that is gone counts
    * as deleted. Only for a copy this app made whole, at a URL it found
-   * free, before anything names it — a guest's study being moved, the
-   * partial copy of a whole instance an earlier version's update left — :
+   * free, before anything names it — a guest's study being moved — :
    * every resource in it is a copy whose original stays where it was. An
    * instance in use is deleted by what it holds of Solid Memo's
    * (InstanceRepository.deleteInstanceData), never whole.
@@ -508,11 +488,9 @@ export interface ThemePreference {
 /**
  * Driven port: a note of an update in progress, kept where the app runs
  * (the browser), so an update cut off half-way (a closed tab) can be
- * found: a guest's study being moved into its new folder, each guest's
- * deck already added to an instance (domain/guest.ts GuestMergeNote), or
- * what an update by an earlier version of the app was writing (the
- * partial copy of a whole instance, a deck's new documents). Best effort:
- * it may forget.
+ * found: a guest's study being moved into its new folder, or each
+ * guest's deck already added to an instance (domain/guest.ts
+ * GuestMergeNote). Best effort: it may forget.
  */
 export interface UpdateJournal {
   begin(sourceUrl: string, stagingUrl: string): void;

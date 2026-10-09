@@ -34,7 +34,6 @@ import {
   readInstanceRegistrations,
   readRegisteredClasses,
   removeInstanceRegistrations,
-  switchInstanceRegistrations,
   type InstanceRegistration,
 } from "./typeIndex";
 import { ensureTrailingSlash, lastPathSegment } from "./urls";
@@ -150,30 +149,6 @@ export function createSolidInstanceRepository({
       }
     },
 
-    async switchInstance({ webId, from, to, title }) {
-      const { privateIndexUrl, publicIndexUrl } = await locateTypeIndexes(webId, fetch);
-      const catalogId = `sm-cat-${randomId()}`;
-      // Every index where something changed, to switch back when a later one fails.
-      const changed: string[] = [];
-      try {
-        let switched = false;
-        for (const indexUrl of [privateIndexUrl, publicIndexUrl]) {
-          if (indexUrl === null) continue;
-          const result = await switchInstanceRegistrations(indexUrl, { from, to, title, catalogId }, fetch);
-          if (result.changed) changed.push(indexUrl);
-          switched ||= result.switched;
-        }
-        if (!switched) throw new AppError("notRegistered", { url: from });
-      } catch (error) {
-        for (const indexUrl of changed) {
-          await switchInstanceRegistrations(indexUrl, { from: to, to: from, title, catalogId }, fetch).catch(
-            () => undefined,
-          );
-        }
-        throw error;
-      }
-    },
-
     async readMeta(instanceUrl): Promise<InstanceMeta | null> {
       const metaUrl = metaUrlOf(instanceUrl);
       const dataset = await getSolidDatasetOrNull(metaUrl, fetch);
@@ -182,18 +157,6 @@ export function createSolidInstanceRepository({
       return subject === null ? null : toInstanceMeta(subject);
     },
 
-    async saveMeta(instanceUrl, meta): Promise<void> {
-      const metaUrl = metaUrlOf(instanceUrl);
-      const dataset = await getSolidDatasetOrNull(metaUrl, fetch);
-      const url = `${metaUrl}#it`;
-      const existing = dataset === null ? null : getThing(dataset, url);
-      if (dataset === null || existing === null) {
-        throw new AppError("noMetaToUpdate", { url: instanceUrl });
-      }
-      const updated = setThing(dataset, toInstanceMetaThing(url, meta, existing));
-      await checkWrite(updated, [url]);
-      await saveDataset(metaUrl, updated, fetch);
-    },
     async upgradeMeta(instanceUrl): Promise<boolean> {
       const metaUrl = metaUrlOf(instanceUrl);
       const dataset = await getSolidDatasetOrNull(metaUrl, fetch);

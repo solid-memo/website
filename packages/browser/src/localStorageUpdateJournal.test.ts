@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { createLocalStorageUpdateJournal } from "./localStorageUpdateJournal";
 
-const SOURCE = "https://pod.example/solid-memo/main/";
-const STAGING = "https://pod.example/solid-memo/main-0f3a/";
+const SOURCE = "https://guest.solid-memo.invalid/solid-memo/";
+const STAGING = "https://pod.example/solid-memo/main/";
 
 function memoryStorage(): Storage {
   const items = new Map<string, string>();
@@ -19,7 +19,7 @@ function memoryStorage(): Storage {
 }
 
 describe("createLocalStorageUpdateJournal", () => {
-  it("remembers the copy an update of an instance is writing until it ends", () => {
+  it("remembers the copy a move of a guest's study is writing until it ends", () => {
     const storage = memoryStorage();
     const journal = createLocalStorageUpdateJournal(() => storage);
     expect(journal.staging(SOURCE)).toBeNull();

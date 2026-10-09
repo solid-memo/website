@@ -223,8 +223,8 @@ guest's study exactly as it was: Solid Memo created the target's
 container where nothing was, and nothing names it before **register**,
 so all it holds is Solid Memo's copies. The update journal of this
 browser notes the run, so a copy left behind by a closed tab is offered
-for removal on the next opening of the guest's instance, as the partial
-copy an earlier version's [update](migrations.md#the-backup) left is. A guest's
+for removal on the next opening of the guest's instance
+(`InterruptedMoveContainer`), and removed whole. A guest's
 instance has no access control of its own, so the copy inherits the
 user's pod's defaults, the same as a newly created instance.
 

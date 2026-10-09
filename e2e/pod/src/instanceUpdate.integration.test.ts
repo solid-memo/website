@@ -771,60 +771,6 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
     expect(await triples(cards)).toContain('"99"');
   });
 
-  it("still restores, or deletes, the copy an update by an earlier version of the app left", async () => {
-    // As an earlier version left it: the updated copy registered, naming the original it replaced.
-    const pod = await seedPod(server);
-    const copy = await seedPod(server);
-    const updated: Instance = { url: copy.source, name: "Main" };
-    await fetch(`${copy.source}meta.ttl`, {
-      method: "PUT",
-      headers: { "content-type": "text/turtle" },
-      body: `${PREFIXES}<#it> a sm:Instance ; dcterms:title "Main" ; sm:formatVersion 2 ;
-    dcterms:created "2026-09-21T10:00:00Z"^^xsd:dateTime ;
-    dcterms:replaces <${pod.source}> ; dcterms:modified "2026-09-28T10:00:00Z"^^xsd:dateTime .`,
-    });
-    const { useCases } = app(copy);
-    const indexBefore = await registeredContainers(copy);
-    expect(indexBefore).toContain(`<${copy.source}>`);
-    await expect(useCases.readLegacyBackup(updated)).resolves.toEqual({ url: pod.source, replacedAt: "2026-09-28T10:00:00.000Z" });
-    await expect(useCases.restoreLegacyBackup({ webId: copy.webId }, updated)).resolves.toEqual({
-      instance: { url: pod.source, name: "Main" },
-      keptFolder: copy.source,
-    });
-    // Every registration's link moved from the updated instance to the original, none removed; and, as ever,
-    // the original's catalogue registered where the index registered no catalogue of it.
-    const lines = (text: string) => text.split("\n").filter((line) => line !== "");
-    const indexAfter = lines(await registeredContainers(copy));
-    expect(indexAfter.join("\n")).not.toContain(`<${copy.source}`);
-    const moved = lines(indexBefore.split(`<${copy.source}`).join(`<${pod.source}`));
-    expect(indexAfter).toEqual(expect.arrayContaining(moved));
-    const added = indexAfter.filter((line) => !moved.includes(line));
-    const [registration, ...others] = new Set(added.map((line) => line.slice(0, line.indexOf(" "))));
-    expect(others).toEqual([]);
-    expect(added.sort()).toEqual(
-      [
-        `${registration} <http://purl.org/dc/terms/title> "Main" .`,
-        `${registration} <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/solid/terms#TypeRegistration> .`,
-        `${registration} <http://www.w3.org/ns/solid/terms#forClass> <http://www.w3.org/ns/dcat#Catalog> .`,
-        `${registration} <http://www.w3.org/ns/solid/terms#instance> <${pod.source}catalog.ttl#catalog> .`,
-      ].sort(),
-    );
-    expect(await status(`${copy.source}meta.ttl`)).toBe(404);
-
-    // Deleting such a backup deletes what Solid Memo wrote of it, and keeps the unknown file.
-    const other = await seedPod(server);
-    await fetch(`${copy.source}meta.ttl`, {
-      method: "PUT",
-      headers: { "content-type": "text/turtle" },
-      body: `${PREFIXES}<#it> a sm:Instance ; dcterms:title "Main" ; sm:formatVersion 2 ;
-    dcterms:created "2026-09-21T10:00:00Z"^^xsd:dateTime ; dcterms:replaces <${other.source}> .`,
-    });
-    await expect(useCases.deleteLegacyBackup(updated)).resolves.toEqual({ keptFolder: other.source });
-    expect(await status(`${other.source}meta.ttl`)).toBe(404);
-    expect(new Uint8Array(await (await fetch(`${other.source}attachments/picture.png`)).arrayBuffer())).toEqual(PICTURE);
-    await expect(useCases.readLegacyBackup(updated)).resolves.toBeNull();
-  }, 60_000);
-
   it("never overwrites a change made since the document was read, where the server enforces If-Match: the save fails, the change stays", async (context) => {
     if (!conditional.edits) context.skip("this server ignores If-Match, so a change made elsewhere cannot be detected");
     if (!everyEdit) context.skip(ETAG_OUTLIVES_EDITS);

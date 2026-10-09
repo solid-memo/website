@@ -22,7 +22,6 @@ import {
   readInstanceRegistrations,
   readRegisteredClasses,
   removeInstanceRegistrations,
-  switchInstanceRegistrations,
 } from "./typeIndex";
 import { DCTERMS, SM } from "./vocab";
 import { deleteInstanceData } from "./instanceData";
@@ -66,7 +65,6 @@ beforeEach(() => {
   vi.mocked(createTypeIndex).mockReset();
   vi.mocked(readRegisteredClasses).mockReset();
   vi.mocked(addRegistrations).mockReset();
-  vi.mocked(switchInstanceRegistrations).mockReset();
   vi.mocked(removeInstanceRegistrations).mockReset();
   vi.mocked(deleteInstanceData).mockReset();
 });
@@ -117,69 +115,6 @@ describe("getRegistrationOptions", () => {
       privateIndexExists: false,
       publicIndexExists: true,
     });
-  });
-});
-
-describe("switchInstance", () => {
-  const COPY = "https://alice.example/solid-memo/main-0f3a/";
-  const args = { webId: WEBID, from: CONTAINER, to: COPY, title: "Main" };
-  const both = { privateIndexUrl: PRIVATE_INDEX, publicIndexUrl: PUBLIC_INDEX };
-
-  it("switches every index that registers the instance, or any of its data", async () => {
-    vi.mocked(locateTypeIndexes).mockResolvedValue(both);
-    vi.mocked(switchInstanceRegistrations).mockImplementation(async (url) => ({
-      switched: url === PUBLIC_INDEX,
-      changed: true,
-    }));
-    await makeRepository().switchInstance(args);
-    expect(vi.mocked(switchInstanceRegistrations).mock.calls.map((c) => [c[0], c[1]])).toEqual([
-      [PRIVATE_INDEX, { from: CONTAINER, to: COPY, title: "Main", catalogId: "sm-cat-fixed-id" }],
-      [PUBLIC_INDEX, { from: CONTAINER, to: COPY, title: "Main", catalogId: "sm-cat-fixed-id" }],
-    ]);
-  });
-
-  it("switches the one index there is", async () => {
-    vi.mocked(locateTypeIndexes).mockResolvedValue({ privateIndexUrl: null, publicIndexUrl: PUBLIC_INDEX });
-    vi.mocked(switchInstanceRegistrations).mockResolvedValue({ switched: true, changed: true });
-    await makeRepository().switchInstance(args);
-    expect(switchInstanceRegistrations).toHaveBeenCalledExactlyOnceWith(
-      PUBLIC_INDEX,
-      { from: CONTAINER, to: COPY, title: "Main", catalogId: "sm-cat-fixed-id" },
-      expect.anything(),
-    );
-  });
-
-  it("switches the earlier indexes that changed back when a later one fails, even if a switch back fails too", async () => {
-    vi.mocked(locateTypeIndexes).mockResolvedValue(both);
-    vi.mocked(switchInstanceRegistrations)
-      // A public instance's private index holds only its review states' and answers' registrations.
-      .mockResolvedValueOnce({ switched: false, changed: true })
-      .mockRejectedValueOnce(new Error("public index refused"))
-      .mockRejectedValueOnce(new Error("revert refused"));
-    await expect(makeRepository().switchInstance(args)).rejects.toThrow("public index refused");
-    expect(switchInstanceRegistrations).toHaveBeenCalledTimes(3);
-    expect(vi.mocked(switchInstanceRegistrations).mock.calls[2]).toEqual([
-      PRIVATE_INDEX,
-      { from: COPY, to: CONTAINER, title: "Main", catalogId: "sm-cat-fixed-id" },
-      expect.anything(),
-    ]);
-  });
-
-  it("refuses an instance no index registers, switching back any of its data it switched", async () => {
-    vi.mocked(locateTypeIndexes).mockResolvedValue(both);
-    vi.mocked(switchInstanceRegistrations)
-      .mockResolvedValueOnce({ switched: false, changed: false })
-      .mockResolvedValueOnce({ switched: false, changed: true })
-      .mockResolvedValueOnce({ switched: false, changed: true });
-    await expect(makeRepository().switchInstance(args)).rejects.toThrow(
-      `That instance is no longer on your list of instances, so there is nothing to switch. Reload the page and try again.\nurl: ${CONTAINER}`,
-    );
-    expect(switchInstanceRegistrations).toHaveBeenCalledTimes(3);
-    expect(vi.mocked(switchInstanceRegistrations).mock.calls[2]).toEqual([
-      PUBLIC_INDEX,
-      { from: COPY, to: CONTAINER, title: "Main", catalogId: "sm-cat-fixed-id" },
-      expect.anything(),
-    ]);
   });
 });
 
@@ -554,7 +489,7 @@ describe("deleteInstance", () => {
   });
 });
 
-describe("readMeta and saveMeta", () => {
+describe("readMeta and upgradeMeta", () => {
   const META = `${CONTAINER}meta.ttl`;
   const meta = { name: "Main", createdAt: "2026-09-21T10:00:00.000Z", formatVersion: 1 };
 
@@ -577,29 +512,6 @@ describe("readMeta and saveMeta", () => {
     await expect(makeRepository().readMeta(CONTAINER)).resolves.toBeNull();
     vi.mocked(getSolidDataset).mockResolvedValue(mockSolidDatasetFrom(META));
     await expect(makeRepository().readMeta(CONTAINER)).resolves.toBeNull();
-  });
-
-  it("rewrites the subject in place, keeping foreign triples", async () => {
-    vi.mocked(getSolidDataset).mockResolvedValue(metaDataset());
-    await makeRepository().saveMeta(CONTAINER, { ...meta, name: "Renamed" });
-    const [url, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
-    expect(url).toBe(META);
-    const thing = getThing(saved as SolidDataset, `${META}#it`)!;
-    expect(getStringNoLocale(thing, DCTERMS.title)).toBe("Renamed");
-    expect(getStringNoLocale(thing, "https://other.example/#note")).toBe("kept");
-    expect(getInteger(thing, SM.formatVersion)).toBe(2);
-  });
-
-  it("refuses to save when the meta document or its subject is missing", async () => {
-    vi.mocked(getSolidDataset).mockRejectedValue({ statusCode: 404 });
-    await expect(makeRepository().saveMeta(CONTAINER, meta)).rejects.toThrow(
-      `This instance has no description to update. Reload the page and try again.\nurl: ${CONTAINER}`,
-    );
-    vi.mocked(getSolidDataset).mockResolvedValue(mockSolidDatasetFrom(META));
-    await expect(makeRepository().saveMeta(CONTAINER, meta)).rejects.toThrow(
-      "has no description to update.",
-    );
-    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
   });
 
   it("brings an outdated subject up to this app's format as read, in place, checked first", async () => {

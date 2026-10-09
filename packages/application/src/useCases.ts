@@ -30,7 +30,6 @@ import type {
   DataClassRegistrations,
   Instance,
   InstanceDeletion,
-  InstanceMeta,
   RegistrationOptions,
   RegistrationTarget,
 } from "@solid-memo/domain/instance";
@@ -44,10 +43,7 @@ import {
 } from "@solid-memo/domain/libraryUpgrade";
 import {
   DECK_UPGRADE_STEPS,
-  decodeDeckUpgradeNote,
-  isAbandoned,
   sameCardChanges,
-  type DeckUpgradeNote,
   type DeckUpgradeOutcome,
   type DeckUpgradeProgress,
   type DeckUpgradeStep,
@@ -67,11 +63,9 @@ import {
   catalogUrlOf,
   deckGroupUrlOf,
   digestUrlOf,
-  documentsInUse,
   ensureTrailingSlash,
   historyUrlOf,
   instanceDocumentUrls,
-  instanceUrlOfDeck,
   metaUrlOf,
   preferencesUrlOf,
 } from "@solid-memo/domain/instanceLayout";
@@ -398,13 +392,6 @@ export interface UseCases {
     plan: LibraryUpgradePlan,
     onProgress?: (progress: DeckUpgradeProgress) => void,
   ): Promise<DeckUpgradeOutcome>;
-  /**
-   * Tidy away what an upgrade of the deck by an earlier version of the
-   * app, cut off half-way (a closed tab), left behind — its new documents
-   * before it switched the deck's entry over, the old ones after — never
-   * what the deck uses. Whether there was any to tidy.
-   */
-  tidyInterruptedDeckUpgrade(deck: Deck): Promise<boolean>;
   listCards(deck: Deck): Promise<Card[]>;
   /**
    * Rejects, without any pod write, unless each side has text or an
@@ -454,31 +441,13 @@ export interface UseCases {
     onProgress?: (progress: UpdateProgress) => void,
   ): Promise<UpdateOutcome>;
   /**
-   * The partial copy of the whole instance that a run cut off half-way (a
-   * closed tab) left behind, as this browser noted it: the guest's study
-   * moving into a new folder, or an update by an earlier version of the
-   * app; null when there is none (any more).
+   * The partial copy of the guest's instance that a move into a new
+   * folder (transferGuestStudy), cut off half-way by a closed tab, left
+   * behind, as this browser noted it; null when there is none (any more).
    */
-  findInterruptedUpdate(instance: Instance): Promise<string | null>;
-  /** Delete the partial copy an interrupted run left behind, and forget it. */
-  removeInterruptedUpdate(instance: Instance): Promise<void>;
-  /**
-   * The copy of the whole instance an update by an earlier version of the
-   * app left as its backup, at another address; null when there is none
-   * (any more).
-   */
-  readLegacyBackup(instance: Instance): Promise<{ url: string; replacedAt?: string } | null>;
-  /**
-   * Switch back to the earlier version's backup, then delete the updated
-   * instance's data (its folder kept when it holds what another app put
-   * there). Returns the backup, and what the deletion kept.
-   */
-  restoreLegacyBackup(session: Session, instance: Instance): Promise<{ instance: Instance } & InstanceDeletion>;
-  /**
-   * Delete the earlier version's backup's data (its folder kept when it
-   * holds what another app put there), and forget it.
-   */
-  deleteLegacyBackup(instance: Instance): Promise<InstanceDeletion>;
+  findInterruptedGuestMove(instance: Instance): Promise<string | null>;
+  /** Delete the partial copy an interrupted move left behind, and forget it. */
+  removeInterruptedGuestMove(instance: Instance): Promise<void>;
   /** Stored preferences overlaid on the defaults. */
   getPreferences(instanceUrl: string): Promise<StudyPreferences>;
   savePreferences(
@@ -611,7 +580,7 @@ export interface Dependencies {
   shapeValidator: ShapeValidator;
   repairRepository: RepairRepository;
   instanceCopier: InstanceCopier;
-  /** A note of updates in progress; by default none is kept. */
+  /** Notes of a guest's study being moved or added to an instance; by default none is kept. */
   updateJournal?: UpdateJournal;
   /** The language the user chose; by default none is kept. */
   languagePreference?: LanguagePreference;
@@ -821,38 +790,6 @@ export function createUseCases({
     });
   }
 
-  /**
-   * Settle an upgrade that is over, or was cut off: the side the deck's
-   * catalog entry does not point at is deleted — the new documents
-   * before the switch, the old ones after it (all of them when the deck
-   * is gone) — and the note is forgotten. Never deletes a document any
-   * deck of the catalog uses: another app may have pointed a second deck
-   * at the same one.
-   */
-  async function settleUpgrade(
-    deckUrl: string,
-    note: DeckUpgradeNote,
-    onDeleted: (count: number, of: number) => void = () => undefined,
-  ): Promise<{ switched: boolean; deck: Deck | null }> {
-    const decks = await deckRepository.listDecks(instanceUrlOfDeck(deckUrl));
-    const deck = decks.find((candidate) => candidate.url === deckUrl) ?? null;
-    const switched = deck?.cardsDocumentUrl === note.cards.to;
-    const moves = [note.cards, ...(note.reviews === undefined ? [] : [note.reviews])];
-    const losers =
-      deck === null
-        ? moves.flatMap((move) => [move.from, move.to])
-        : moves.map((move) => (switched ? move.from : move.to));
-    const used = documentsInUse(decks);
-    const deleting = losers.filter((url) => !used.has(url));
-    onDeleted(0, deleting.length);
-    for (const [index, url] of deleting.entries()) {
-      await deckRepository.deleteDocument(url);
-      onDeleted(index + 1, deleting.length);
-    }
-    updateJournal.end(deckUrl);
-    return { switched, deck };
-  }
-
   const preferenceReads = new Map<string, Promise<StoredPreferences | null>>();
 
   /** An instance's stored preferences, one read for callers that ask at once. */
@@ -970,7 +907,7 @@ export function createUseCases({
         "createdElsewhere",
         "writtenByNewerApp",
         "dataNotConforming",
-        "instanceBeingUpdated",
+        "guestStudyBeingMoved",
         "deckChangedDuringUpgrade",
       ].includes(error.code)
     );
@@ -1223,25 +1160,6 @@ export function createUseCases({
       }
       onChecked();
     }
-  }
-
-  /**
-   * Whether the backup an instance replaces is gone: its meta document,
-   * deleted last of all it holds, is no longer there. A folder that is
-   * still there, kept for what another app put in it, is no backup. When
-   * the pod cannot say, the backup is taken to be there.
-   */
-  async function backupGone(backupUrl: string): Promise<boolean> {
-    return instanceRepository.readMeta(backupUrl).then(
-      (backup) => backup === null,
-      () => false,
-    );
-  }
-
-  /** Clear what an instance's meta says it replaces. */
-  async function forgetBackup(instanceUrl: string, meta: InstanceMeta): Promise<void> {
-    const { replaces: _replaces, replacedAt: _replacedAt, ...rest } = meta;
-    await instanceRepository.saveMeta(instanceUrl, rest);
   }
 
   /**
@@ -1791,12 +1709,6 @@ export function createUseCases({
         return { ok: false, step, error, changed };
       }
     },
-    async tidyInterruptedDeckUpgrade(deck) {
-      const note = decodeDeckUpgradeNote(updateJournal.staging(deck.url));
-      if (note === null || !isAbandoned(note, now())) return false;
-      await settleUpgrade(deck.url, note);
-      return true;
-    },
     listCards(deck) {
       return deckRepository.listCards(deck);
     },
@@ -1859,8 +1771,10 @@ export function createUseCases({
       progress.finished();
       return { updated, failed };
     },
-    async findInterruptedUpdate(instance) {
+    async findInterruptedGuestMove(instance) {
       const source = ensureTrailingSlash(instance.url);
+      // Only a guest's study moves; a note on another instance is an earlier version's, and its folder is left alone.
+      if (!isGuestUrl(source)) return null;
       const staging = updateJournal.staging(source);
       if (staging === null) return null;
       const gone = await instanceCopier.ensureAbsent(staging).then(
@@ -1870,47 +1784,13 @@ export function createUseCases({
       if (gone) updateJournal.end(source);
       return gone ? null : staging;
     },
-    async removeInterruptedUpdate(instance) {
+    async removeInterruptedGuestMove(instance) {
       const source = ensureTrailingSlash(instance.url);
+      if (!isGuestUrl(source)) return;
       const staging = updateJournal.staging(source);
-      // Made whole by that update, at a URL it found free, and named nowhere: deleted whole.
+      // Made whole by that move, at a URL it found free, and named nowhere: deleted whole.
       if (staging !== null) await instanceCopier.deleteRecursively(staging);
       updateJournal.end(source);
-    },
-    async readLegacyBackup(instance) {
-      const meta = await instanceRepository.readMeta(instance.url);
-      if (meta?.replaces === undefined) return null;
-      if (await backupGone(meta.replaces)) {
-        await forgetBackup(instance.url, meta);
-        return null;
-      }
-      return { url: meta.replaces, ...(meta.replacedAt === undefined ? {} : { replacedAt: meta.replacedAt }) };
-    },
-    async restoreLegacyBackup(session, instance) {
-      const meta = await instanceRepository.readMeta(instance.url);
-      if (meta?.replaces === undefined) throw new AppError("noBackup", { instance: instance.name });
-      // Never switch to a backup that is no longer whole: the deletion below would leave nothing.
-      if ((await instanceRepository.readMeta(meta.replaces)) === null) {
-        await forgetBackup(instance.url, meta);
-        throw new AppError("noBackup", { instance: instance.name });
-      }
-      await instanceRepository.switchInstance({
-        webId: session.webId,
-        from: instance.url,
-        to: meta.replaces,
-        title: instance.name,
-      });
-      // The updated instance has been the one in use since the update: what else is in it now is not ours.
-      const { keptFolder } = await instanceRepository.deleteInstanceData(instance.url);
-      return { instance: { url: meta.replaces, name: instance.name }, keptFolder };
-    },
-    async deleteLegacyBackup(instance) {
-      const meta = await instanceRepository.readMeta(instance.url);
-      if (meta?.replaces === undefined) return { keptFolder: null };
-      // Forgotten first: a deletion cut off half-way must not leave a backup that can still be restored.
-      await forgetBackup(instance.url, meta);
-      // The backup is the folder as it was, where other apps may have put files, and may still.
-      return instanceRepository.deleteInstanceData(meta.replaces);
     },
     getPreferences,
     savePreferences(instanceUrl, preferences) {

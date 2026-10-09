@@ -18,12 +18,12 @@ export interface InstanceMeta {
   formatVersion: number;
   /**
    * For an instance a format update by an earlier version of the app
-   * made, as a copy: the container it replaced, kept in the pod as a
-   * backup until the user restores or deletes it. This app's update
-   * writes each document where it is, and states none.
+   * made, as a copy: the container it replaced (dcterms:replaces). The
+   * app does nothing with it; it is read only so that a write of the
+   * meta document keeps it, as it keeps any triple.
    */
   replaces?: string;
-  /** When it replaced that container (ISO dateTime). */
+  /** When it replaced that container (dcterms:modified, ISO dateTime); kept likewise. */
   replacedAt?: string;
 }
 
