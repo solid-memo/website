@@ -2,11 +2,8 @@ import type { ComponentChildren } from "preact";
 import { useEffect, useState } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
-import type { Deck } from "@solid-memo/domain/deck";
 import { cardName, cardNameText } from "./DataText";
 import { decksOf } from "@solid-memo/domain/deckTree";
-import { DEFAULT_INVALID_DATA_POLICY } from "@solid-memo/domain/invalidDataPolicy";
-import { arrangementSetAside, setAsideDecks } from "@solid-memo/domain/validation";
 import type { Instance, RegistrationTarget } from "@solid-memo/domain/instance";
 import type { LibraryDeck } from "@solid-memo/domain/library";
 import type { Session } from "@solid-memo/domain/session";
@@ -29,6 +26,7 @@ import { InstanceCreator } from "./InstanceCreator";
 import { InstancePickerContainer } from "./InstancePickerContainer";
 import { FindableContainer } from "./FindableContainer";
 import { DataCheckNotice } from "./DataCheckNotice";
+import { useDataCheck } from "./dataCheck";
 import { LibraryBrowserContainer } from "./LibraryBrowserContainer";
 import { LibraryCardScreen } from "./LibraryCardScreen";
 import { LibraryContainer } from "./LibraryContainer";
@@ -270,12 +268,8 @@ export function Workspace({
   // when it is opened (docs/validation.md); what happens with invalid
   // data is the user's invalid data policy. Writes are checked as they
   // are made, so the check runs again only after a repair or an update.
-  const checkQuery = useQuery({
-    queryKey: ["validation", instanceUrl],
-    queryFn: () => useCases.checkInstance(instanceUrl!),
-    enabled: activeInstance !== null,
-    staleTime: Infinity,
-  });
+  // The Studio's screens hold to the same check (useDataCheck).
+  const check = useDataCheck(useCases, activeInstance === null ? null : instanceUrl);
   // The deck list's arrangement (DeckListContainer's query) and counts are
   // fetched while the instance is checked, not after. Its decks are the
   // deck lookup's too, so the catalog is read once, and a deck opened
@@ -296,26 +290,17 @@ export function Workspace({
   }, [homeTreeQuery.data, instanceUrl]);
   // Until the preferences are read, the workspace waits as under "block
   // the instance": a user who chose it never sees data before the check.
-  const policy =
-    preferencesQuery.data?.invalidDataPolicy ??
-    (preferencesQuery.isPending ? "block-instance" : DEFAULT_INVALID_DATA_POLICY);
-  const invalidReport =
-    checkQuery.data !== undefined && !checkQuery.data.conforms ? checkQuery.data : null;
+  const { policy, report: invalidReport, isSetAside, arrangementSetAside: arrangementIsSetAside } = check;
   const decksOfCheck = useQuery({
     queryKey: ["decks", instanceUrl],
     queryFn: () => useCases.listDecks(instanceUrl!),
     enabled: invalidReport !== null && policy === "block-subject",
   });
-  const isSetAside = (deck: Deck) =>
-    invalidReport !== null && policy === "block-subject" && setAsideDecks(invalidReport, [deck]).size > 0;
-  /** The catalogue or a deck group is invalid: the deck list cannot be rearranged until it is repaired. */
-  const arrangementIsSetAside =
-    invalidReport !== null && policy === "block-subject" && arrangementSetAside(invalidReport);
   // Under "set invalid data aside" nothing is known to be set aside until
   // the check is done: until then a deck's pages wait for it and the list
   // cannot be rearranged, so no write lands on data the check would set
   // aside. A check that fails sets nothing aside.
-  const checkUnsettled = activeInstance !== null && policy === "block-subject" && checkQuery.isPending;
+  const checkUnsettled = activeInstance !== null && policy === "block-subject" && check.pending;
   /** Screens that stay reachable whatever the data: where the policy is changed and the report read. */
   const alwaysReachable = route?.screen === "preferences" || route?.screen === "validation";
 
@@ -778,7 +763,7 @@ export function Workspace({
 
   const blocked =
     activeInstance !== null && !alwaysReachable && policy === "block-instance" &&
-    (checkQuery.isPending || invalidReport !== null);
+    (check.pending || invalidReport !== null);
   const deckSetAside = activeDeck !== null && isSetAside(activeDeck);
   const deckWaits = activeDeck !== null && checkUnsettled;
   const shown = waiting ?? (blocked || deckWaits ? (
@@ -806,10 +791,10 @@ export function Workspace({
               session={session}
               instance={activeInstance}
             />
-            {checkQuery.error && (
+            {check.error && (
               // A div: the error may bring its technical details, a block.
               <div class="warning">
-                {tx("workspace.checkFailed", { error: errorText(checkQuery.error) })}
+                {tx("workspace.checkFailed", { error: errorText(check.error) })}
               </div>
             )}
             {invalidReport !== null && (

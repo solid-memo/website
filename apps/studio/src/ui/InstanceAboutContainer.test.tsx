@@ -6,7 +6,7 @@ import { defaultCatalogDescription, renamedCatalog, type Catalog } from "@solid-
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { InstanceAboutContainer } from "./InstanceAboutContainer";
 import { choose } from "../test/choose";
-import { instanceA, session } from "../test/fixtures";
+import { instanceA, invalidReport, session } from "../test/fixtures";
 
 const CC0 = "https://creativecommons.org/publicdomain/zero/1.0/";
 const catalog: Catalog = {
@@ -20,7 +20,7 @@ function renderContainer(useCases: UseCases) {
   const invalidate = vi.spyOn(queryClient, "invalidateQueries");
   render(
     <QueryClientProvider client={queryClient}>
-      <InstanceAboutContainer useCases={useCases} session={session} instance={instanceA} />
+      <InstanceAboutContainer useCases={useCases} session={session} instance={instanceA} healthHref="#/health" />
     </QueryClientProvider>,
   );
   return { invalidate };
@@ -40,6 +40,14 @@ describe("InstanceAboutContainer", () => {
     );
     expect(screen.getByLabelText("Description")).toHaveValue("My decks.");
     expect(screen.getByRole("combobox", { name: "Licence" })).toHaveValue("");
+  });
+
+  it("holds both forms while the catalogue is set aside, with a link to the health", async () => {
+    renderContainer(makeUseCasesFake({ readCatalog: vi.fn(async () => catalog), checkInstance: vi.fn(async () => invalidReport([], { catalogue: true })) }));
+    expect(await screen.findByText(/catalogue or one of its groups has invalid data/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Repair it on the health screen." })).toHaveAttribute("href", "#/health");
+    expect(screen.getByRole("button", { name: "Save name" })).toBeDisabled();
+    expect(screen.getByLabelText("Description")).toBeDisabled();
   });
 
   it("renames the instance, then reads the instances and the catalogue afresh", async () => {

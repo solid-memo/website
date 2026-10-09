@@ -4,6 +4,7 @@ import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import { deckLanguages, type StatedLanguages } from "@solid-memo/domain/deckLanguages";
 import type { Instance } from "@solid-memo/domain/instance";
+import { useDataCheck } from "@solid-memo/ui/dataCheck";
 import { useDeckReleaseQuery } from "@solid-memo/ui/deckRelease";
 import { useCourseCopies } from "@solid-memo/ui/deckTreeEditor";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
@@ -27,18 +28,23 @@ interface Save {
  * setDeckProvenance, setDeckPace then setDeckDirection, setCompletedChapters,
  * stateCardLanguages), one at a time; then the decks are read afresh, so
  * the workspace's deck is the one saved, and the deck's study queue is
- * dropped, as Solid Memo does after a change of its pace.
+ * dropped, as Solid Memo does after a change of its pace. Until the
+ * instance's data check is done, and while the deck is set aside
+ * (useDataCheck), nothing can be saved.
  */
 export function DeckAboutContainer({
   useCases,
   instance,
   deck,
   appHref,
+  healthHref,
 }: {
   useCases: UseCases;
   instance: Instance;
   deck: Deck;
   appHref: string;
+  /** The deck's health, where data set aside is repaired. */
+  healthHref: string;
 }) {
   const { t, errorText } = useI18n();
   const queryClient = useQueryClient();
@@ -49,6 +55,8 @@ export function DeckAboutContainer({
     queryKey: ["preferences", instance.url],
     queryFn: () => useCases.getPreferences(instance.url),
   });
+  // After the preferences' own query, which reads them.
+  const readOnly = useDataCheck(useCases, instance.url).readOnly(deck);
   const cardsQuery = useQuery({
     queryKey: ["cards", deck.cardsDocumentUrl],
     queryFn: () => useCases.listCards(deck),
@@ -85,6 +93,8 @@ export function DeckAboutContainer({
     <DeckAboutScreen
       deck={deck}
       appHref={appHref}
+      readOnly={readOnly}
+      healthHref={healthHref}
       preferences={preferencesQuery.data}
       preferencesHref={routeToHash({ screen: "preferences", instanceUrl: instance.url })}
       languages={languages}

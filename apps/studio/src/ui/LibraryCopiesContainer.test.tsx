@@ -5,7 +5,7 @@ import type { UseCases } from "@solid-memo/application/useCases";
 import type { DeckUpgradeOutcome } from "@solid-memo/domain/deckUpgrade";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { LibraryCopiesContainer } from "./LibraryCopiesContainer";
-import { capitals, instanceA, makeCopy, makePlan } from "../test/fixtures";
+import { capitals, instanceA, invalidReport, makeCopy, makePlan } from "../test/fixtures";
 
 const old = makeCopy("deck-1", { en: "Capitals" }, "1");
 const other = makeCopy("deck-2", { en: "More capitals" }, "1");
@@ -21,6 +21,7 @@ function renderContainer(useCases: UseCases) {
         instance={instanceA}
         deckHref={(deck) => `#/about?deck=${deck.id}`}
         libraryHref="#/library"
+        healthHref="#/health"
       />
     </QueryClientProvider>,
   );
@@ -28,6 +29,26 @@ function renderContainer(useCases: UseCases) {
 }
 
 describe("LibraryCopiesContainer", () => {
+  it("offers no copy to update while the data is checked, nor after it one set aside", async () => {
+    let checked: (report: ReturnType<typeof invalidReport>) => void = () => undefined;
+    const useCases = makeUseCasesFake({
+      listLibraryUpdates: vi.fn(async () => [
+        { deck: old, series: capitals, version: "1", newer: true },
+        { deck: other, series: capitals, version: "1", newer: true },
+      ]),
+      planLibraryUpgrade: vi.fn(async (deck) => makePlan(deck)),
+      checkInstance: vi.fn(() => new Promise<ReturnType<typeof invalidReport>>((resolve) => (checked = resolve))),
+    });
+    renderContainer(useCases);
+    await waitFor(() => expect(screen.getAllByText(/updating adds 1 card/)).toHaveLength(2));
+    expect(screen.getByText(/being checked/)).toBeInTheDocument();
+    expect(screen.queryByRole("checkbox")).toBeNull();
+    checked(invalidReport([old]));
+    expect(await screen.findByRole("checkbox", { name: "Select More capitals" })).toBeInTheDocument();
+    expect(screen.queryByRole("checkbox", { name: "Select Capitals" })).toBeNull();
+    expect(screen.getByText(/Decks with invalid data are set aside/)).toBeInTheDocument();
+  });
+
   it("lists the copies, plans the update of those the library has a newer release of, and updates them in turn", async () => {
     const useCases = makeUseCasesFake({
       listLibraryUpdates: vi.fn(async () => [

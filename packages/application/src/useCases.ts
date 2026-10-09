@@ -1339,7 +1339,8 @@ export function createUseCases({
       }
       // A card joins before its state, and leaves before it: no state is ever without its card for long.
       if (changes.reviewSaves.length > 0 || changes.reviewRemovals.length > 0) {
-        await reviewStateRepository.applyReviewChanges(deck, { save: changes.reviewSaves, remove: changes.reviewRemovals });
+        // A card removed takes every state it has with it, as removing a card does; another scheduler's stays.
+        await reviewStateRepository.applyReviewChanges(deck, { save: changes.reviewSaves, remove: changes.reviewRemovals, every: true });
       }
       // The edit is made: a digest left behind is brought up to date by the next deck list.
       await refreshStudyDigest(instanceUrl, deck).catch(() => undefined);
@@ -1360,7 +1361,8 @@ export function createUseCases({
   ): Promise<number> {
     const cards = new Set([...changes.save, ...changes.remove].map((key) => key.cardId));
     if (cards.size === 0) return 0;
-    await reviewStateRepository.applyReviewChanges(deck, changes);
+    // A card forgotten loses every SM-2 state it has that way, so none is read in its place.
+    await reviewStateRepository.applyReviewChanges(deck, { ...changes, every: true });
     // The edit is made: a digest left behind is brought up to date by the next deck list.
     await refreshStudyDigest(instanceUrl, deck).catch(() => undefined);
     return cards.size;
@@ -1394,12 +1396,12 @@ export function createUseCases({
       await deckRepository.applyCardChanges(to, { save: plan.target.save, remove: [] }, wholeAt(targetCards.version));
     }
     if (plan.target.reviewSaves.length > 0 || plan.target.reviewRemovals.length > 0) {
-      await reviewStateRepository.applyReviewChanges(to, { save: plan.target.reviewSaves, remove: plan.target.reviewRemovals });
+      await reviewStateRepository.applyReviewChanges(to, { save: plan.target.reviewSaves, remove: plan.target.reviewRemovals, every: true });
     }
     // The source's states before its cards: a move stopped between leaves the cards in the
     // source without progress, which the target has, and making it again finishes it.
     if (plan.source.reviewRemovals.length > 0) {
-      await reviewStateRepository.applyReviewChanges(from, { save: [], remove: plan.source.reviewRemovals });
+      await reviewStateRepository.applyReviewChanges(from, { save: [], remove: plan.source.reviewRemovals, every: true });
     }
     if (plan.source.remove.length > 0) {
       await deckRepository.applyCardChanges(from, { save: [], remove: plan.source.remove }, wholeAt(sourceCards.version));

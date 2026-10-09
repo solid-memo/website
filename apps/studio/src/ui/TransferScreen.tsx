@@ -2,9 +2,11 @@ import { useState } from "preact/hooks";
 import type { Deck } from "@solid-memo/domain/deck";
 import { DECK_FILE_FORMATS, hasProgress, type DeckFile, type DeckFileFormat, type DeckFileOptions } from "@solid-memo/domain/deckFile";
 import type { Instance } from "@solid-memo/domain/instance";
+import type { ReadOnlyReason } from "@solid-memo/ui/dataCheck";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n, type ErrorText } from "@solid-memo/ui/i18n";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
+import { ReadOnlyScope } from "./ReadOnly";
 
 /** How far an export of several decks is. */
 export interface ExportRun {
@@ -21,7 +23,9 @@ export interface ExportRun {
  * user's progress when asked. Import: a file the user picks, what it
  * holds (its deck, its cards, any progress, and what of it was brought
  * up to date or left out), then a new deck of the instance made of it,
- * with its progress when asked.
+ * with its progress when asked. An import adds to the catalogue, so it
+ * is held while the catalogue may not be changed (`importReadOnly`); a
+ * file can still be read, and every deck exported.
  */
 export function TransferScreen({
   instance,
@@ -40,6 +44,8 @@ export function TransferScreen({
   imported,
   importError,
   onImport,
+  importReadOnly,
+  healthHref,
   cardsHref,
 }: {
   instance: Instance;
@@ -64,6 +70,10 @@ export function TransferScreen({
   imported: Deck | null;
   importError: ErrorText | null;
   onImport: (withProgress: boolean) => void;
+  /** Why no deck can be imported now (useDataCheck); null when one can. */
+  importReadOnly: ReadOnlyReason | null;
+  /** The instance's health, where data set aside is repaired. */
+  healthHref: string;
   /** A deck's cards, in the workbench. */
   cardsHref: (deck: Deck) => string;
 }) {
@@ -156,38 +166,40 @@ export function TransferScreen({
         </p>
         <ErrorMessage error={openError} />
         {opening && <p role="status">{t("studio.transfer.reading")}</p>}
-        {file !== null && (
-          <form
-            class="card-edit"
-            aria-labelledby="transfer-file-heading"
-            onSubmit={(event) => {
-              event.preventDefault();
-              onImport(hasProgress(file.content) && importProgress);
-            }}
-          >
-            <h4 id="transfer-file-heading">
-              {tx("studio.transfer.file", { name: file.name, deck: <ReaderText text={file.content.deck.title} /> })}
-            </h4>
-            <ul>
-              <li>{t("studio.transfer.cards", { count: file.content.cards.length })}</li>
-              {file.content.reviews !== undefined && <li>{t("studio.transfer.states", { count: file.content.reviews.length })}</li>}
-              {file.content.deck.completedChapters !== undefined && (
-                <li>{t("studio.transfer.chapters", { count: file.content.deck.completedChapters.length })}</li>
+        <ReadOnlyScope reason={importReadOnly} subject="catalogue" healthHref={healthHref}>
+          {file !== null && (
+            <form
+              class="card-edit"
+              aria-labelledby="transfer-file-heading"
+              onSubmit={(event) => {
+                event.preventDefault();
+                onImport(hasProgress(file.content) && importProgress);
+              }}
+            >
+              <h4 id="transfer-file-heading">
+                {tx("studio.transfer.file", { name: file.name, deck: <ReaderText text={file.content.deck.title} /> })}
+              </h4>
+              <ul>
+                <li>{t("studio.transfer.cards", { count: file.content.cards.length })}</li>
+                {file.content.reviews !== undefined && <li>{t("studio.transfer.states", { count: file.content.reviews.length })}</li>}
+                {file.content.deck.completedChapters !== undefined && (
+                  <li>{t("studio.transfer.chapters", { count: file.content.deck.completedChapters.length })}</li>
+                )}
+                {file.content.upgraded.length > 0 && <li>{t("studio.transfer.upgraded", { count: file.content.upgraded.length })}</li>}
+                {file.content.dropped.length > 0 && <li>{t("studio.transfer.dropped", { count: file.content.dropped.length })}</li>}
+              </ul>
+              {hasProgress(file.content) && (
+                <label>
+                  <input type="checkbox" checked={importProgress} onChange={(event) => setImportProgress(event.currentTarget.checked)} />
+                  {t("studio.transfer.importProgress")}
+                </label>
               )}
-              {file.content.upgraded.length > 0 && <li>{t("studio.transfer.upgraded", { count: file.content.upgraded.length })}</li>}
-              {file.content.dropped.length > 0 && <li>{t("studio.transfer.dropped", { count: file.content.dropped.length })}</li>}
-            </ul>
-            {hasProgress(file.content) && (
-              <label>
-                <input type="checkbox" checked={importProgress} onChange={(event) => setImportProgress(event.currentTarget.checked)} />
-                {t("studio.transfer.importProgress")}
-              </label>
-            )}
-            <button type="submit" class="primary" disabled={importing}>
-              {t("studio.transfer.importButton", { instance: instance.name })}
-            </button>
-          </form>
-        )}
+              <button type="submit" class="primary" disabled={importing}>
+                {t("studio.transfer.importButton", { instance: instance.name })}
+              </button>
+            </form>
+          )}
+        </ReadOnlyScope>
         <p role="status">
           {importing
             ? t("studio.transfer.importing")

@@ -177,7 +177,13 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
           />
         );
       case "groups":
-        return <GroupsContainer useCases={useCases} instance={activeInstance!} />;
+        return (
+          <GroupsContainer
+            useCases={useCases}
+            instance={activeInstance!}
+            healthHref={studioRouteToHash({ screen: "health", instanceUrl: route.instanceUrl })}
+          />
+        );
       case "health":
         return (
           <HealthContainer
@@ -196,6 +202,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             instance={activeInstance!}
             deckHref={(deck) => studioRouteToHash({ screen: "about", deckUrl: deck.url })}
             libraryHref={libraryHref(route.instanceUrl)}
+            healthHref={studioRouteToHash({ screen: "health", instanceUrl: route.instanceUrl })}
           />
         );
       case "transfer":
@@ -209,11 +216,20 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             // Like Home's view, which decks are ticked is no Back stop.
             onChoose={(urls) => replace({ screen: "transfer", instanceUrl: route.instanceUrl, ...(urls.length === 0 ? {} : { deckUrls: urls }) })}
             cardsHref={(deck) => studioRouteToHash({ screen: "cards", deckUrl: deck.url })}
+            healthHref={studioRouteToHash({ screen: "health", instanceUrl: route.instanceUrl })}
           />
         );
       case "instance":
         // Another instance: its forms start afresh.
-        return <InstanceAboutContainer key={route.instanceUrl} useCases={useCases} session={session} instance={activeInstance!} />;
+        return (
+          <InstanceAboutContainer
+            key={route.instanceUrl}
+            useCases={useCases}
+            session={session}
+            instance={activeInstance!}
+            healthHref={studioRouteToHash({ screen: "health", instanceUrl: route.instanceUrl })}
+          />
+        );
       case "about":
         return (
           <DeckAboutContainer
@@ -223,6 +239,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             instance={activeInstance!}
             deck={activeDeck!}
             appHref={deckHref(activeInstance!.url, route.deckUrl)}
+            healthHref={studioRouteToHash({ screen: "health", instanceUrl: activeInstance!.url, deckUrl: route.deckUrl })}
           />
         );
       case "cards": {
@@ -275,6 +292,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             // Like the workbench's query, the tab is no Back stop.
             onTab={(tab) => replace({ screen: "card", deckUrl: route.deckUrl, cardUrl: route.cardUrl, tab })}
             appHref={routeToHash({ screen: "card", instanceUrl: activeInstance!.url, deckUrl: route.deckUrl, cardUrl: route.cardUrl })}
+            healthHref={studioRouteToHash({ screen: "health", instanceUrl: activeInstance!.url, deckUrl: route.deckUrl })}
             onRemoved={() => replace({ screen: "cards", deckUrl: route.deckUrl })}
           />
         );

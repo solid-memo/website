@@ -9,8 +9,12 @@
  * cards in both decks, and making it again finishes it without writing
  * a card twice nor leaving a state behind; a target changed by another app
  * meanwhile has the transfer planned again; the answer log is never
- * rewritten, and every document stays valid.
+ * rewritten, and every document stays valid. A state another app named
+ * its own way goes with its card, and names the target's card there;
+ * another scheduler's state stays where it is. A card written in the
+ * target names its wrong options with schema:suggestedAnswer too.
  */
+import { Parser, Writer } from "n3";
 import { beforeAll, describe, expect, inject, it } from "vitest";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/sources";
 import { SM_NS as SM } from "@solid-memo/vocab/vocab.generated";
@@ -103,6 +107,12 @@ async function seed(server: string): Promise<{ instanceUrl: string; birds: Deck;
   return { instanceUrl: instance.url, birds, seabirds, useCases };
 }
 
+/** A document as N-Triples: every IRI written out in full, whatever the server's Turtle abbreviates. */
+async function triples(url: string): Promise<string> {
+  const turtle = await fetch(url, { headers: { accept: "text/turtle" } }).then((response) => response.text());
+  return new Writer({ format: "N-Triples" }).quadsToString(new Parser({ baseIRI: url }).parse(turtle));
+}
+
 const byId = async (deck: Deck) => Object.fromEntries((await page().listCards(deck)).map((card) => [card.id, card]));
 const statesOf = async (deck: Deck) => (await page().listDeckReviewStates(deck)).map((state) => state.cardId).sort();
 
@@ -140,6 +150,44 @@ describe.each(SERVERS)("moving and copying cards on $name", ({ url: server }) =>
     // The log is not rewritten: the answers still count for Birds.
     const after = await page().getStatistics(instanceUrl, new Date(), { deckUrl: birds.url });
     expect(after.totals).toEqual(before.totals);
+    expect((await page().validateInstance(instanceUrl)).conforms).toBe(true);
+  });
+
+  it("moves a state another app named by the card it names, re-targeted, leaving another scheduler's state behind", async () => {
+    const { instanceUrl, birds, seabirds } = await seed(server);
+    const reviews = birds.reviewsDocumentUrl;
+    const dateTime = "<http://www.w3.org/2001/XMLSchema#dateTime>";
+    // Another app's SM-2 state of owl, named its own way, and another scheduler's state of bird.
+    const patch = await fetch(reviews, {
+      method: "PATCH",
+      headers: { "content-type": "application/sparql-update" },
+      body: `INSERT DATA {
+        <${reviews}#theirs> a <${SM}ReviewState> ; <${SM}reviewOf> <${birds.cardsDocumentUrl}#owl> ; <${SM}reviewDirection> <${SM}frontToBack> ;
+          <${SM}easeFactor> 2.5 ; <${SM}intervalDays> 3 ; <${SM}repetitions> 2 ; <${SM}due> "2026-10-12" ;
+          <${SM}firstReviewedAt> "2026-10-01T10:00:00Z"^^${dateTime} ; <${SM}lastReviewedAt> "2026-10-09T10:00:00Z"^^${dateTime} .
+        <${reviews}#fsrs-bird> a <${SM}ReviewState> ; <${SM}reviewOf> <${birds.cardsDocumentUrl}#bird> ;
+          <${SM}scheduler> <https://fsrs.example/ns#fsrs> ; <https://fsrs.example/ns#stability> 4.2 .
+      }`,
+    });
+    expect(patch.ok, `PATCH ${reviews}: ${patch.status}`).toBe(true);
+    expect(await statesOf(birds)).toEqual(["bird", "gull", "owl"]);
+
+    await page().transferCards(instanceUrl, birds, seabirds, ["bird", "owl"], { mode: "move", keepProgress: true });
+
+    expect(await statesOf(seabirds)).toEqual(["bird", "owl"]);
+    const target = await triples(seabirds.reviewsDocumentUrl);
+    expect(target).toContain(`<${seabirds.reviewsDocumentUrl}#owl> <${SM}reviewOf> <${seabirds.cardsDocumentUrl}#owl> .`);
+    expect(target).toContain(`<${seabirds.reviewsDocumentUrl}#owl> <${SM}intervalDays> "3"^^<http://www.w3.org/2001/XMLSchema#integer> .`);
+    expect(target).not.toContain("https://fsrs.example/ns#");
+    const source = await triples(reviews);
+    expect(source).not.toContain(`<${reviews}#theirs>`);
+    expect(source).toContain(`<${reviews}#fsrs-bird> <https://fsrs.example/ns#stability>`);
+    expect(await statesOf(birds)).toEqual(["gull"]);
+    // The card in the target names its wrong option both ways, typed as Solid Memo types it.
+    const cards = await triples(seabirds.cardsDocumentUrl);
+    expect(cards).toContain(`<${seabirds.cardsDocumentUrl}#bird> <${SM}distractor> <${seabirds.cardsDocumentUrl}#bird-d1> .`);
+    expect(cards).toContain(`<${seabirds.cardsDocumentUrl}#bird> <https://schema.org/suggestedAnswer> <${seabirds.cardsDocumentUrl}#bird-d1> .`);
+    expect(cards).toContain(`<${seabirds.cardsDocumentUrl}#bird-d1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://schema.org/Answer> .`);
     expect((await page().validateInstance(instanceUrl)).conforms).toBe(true);
   });
 

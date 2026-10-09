@@ -4,6 +4,9 @@ import type { DeckPace } from "@solid-memo/domain/deckPace";
 import type { DeckGroup } from "@solid-memo/domain/deckTree";
 import { useI18n } from "@solid-memo/ui/i18n";
 
+/** Why no deck can be moved into a group: a newer version arranged them, or the arrangement has invalid data, set aside. */
+export type MoveLock = "newerVersion" | "setAside";
+
 /** The form a bulk action opens, to say how. */
 type Form = "move" | "pace" | "direction";
 
@@ -18,7 +21,7 @@ type Form = "move" | "pace" | "direction";
 export function DeckBulkActions({
   selected,
   groups,
-  readOnly,
+  moveLocked,
   busy,
   exportHref,
   onMove,
@@ -30,8 +33,8 @@ export function DeckBulkActions({
   selected: readonly Deck[];
   /** Every group, in the arrangement's order, each with its trail (the groups it is in, then itself). */
   groups: readonly { group: DeckGroup; trail: readonly DeckGroup[] }[];
-  /** A newer version arranged the decks: none can be moved. */
-  readOnly: boolean;
+  /** Why none can be moved into a group; null when they can. */
+  moveLocked: MoveLock | null;
   busy: boolean;
   /** Import and export, the selected decks ticked to export. */
   exportHref: string;
@@ -95,8 +98,8 @@ export function DeckBulkActions({
         </button>
       </div>
       {form === "move" &&
-        (readOnly ? (
-          <p class="hint">{t("studio.bulk.moveReadOnly")}</p>
+        (moveLocked !== null ? (
+          <p class="hint">{t(moveLocked === "newerVersion" ? "studio.bulk.moveReadOnly" : "studio.bulk.moveSetAside")}</p>
         ) : (
           <form
             onSubmit={(event) => {

@@ -51,6 +51,8 @@ function renderScreen(overrides: Partial<Props> = {}) {
     imported: null,
     importError: null,
     onImport: vi.fn(),
+    importReadOnly: null,
+    healthHref: "#/health",
     cardsHref: (deck) => `#/cards?deck=${deck.id}`,
     ...overrides,
   };
@@ -117,6 +119,14 @@ describe("TransferScreen", () => {
     fireEvent.click(screen.getByRole("checkbox", { name: "Import the progress too" }));
     fireEvent.click(screen.getByRole("button", { name: "Import into Deck set A" }));
     expect(props.onImport).toHaveBeenLastCalledWith(false);
+  });
+
+  it("holds the import while the catalogue may not be changed, a file still read", () => {
+    const props = renderScreen({ file, importReadOnly: "setAside" });
+    expect(screen.getByText(/catalogue or one of its groups has invalid data/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Import into Deck set A" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Choose a file…" })).toBeEnabled();
+    expect(props.onImport).not.toHaveBeenCalled();
   });
 
   it("offers no progress to import when the file has none", () => {

@@ -8,7 +8,7 @@ import { CH1, CH2, courseDeck, courseInstance, courseLibraryDeck, makeCourse } f
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { DeckAboutContainer } from "./DeckAboutContainer";
 import { choose } from "../test/choose";
-import { instanceA, makeCard, makeDeck } from "../test/fixtures";
+import { instanceA, invalidReport, makeCard, makeDeck } from "../test/fixtures";
 
 const CC0 = "https://creativecommons.org/publicdomain/zero/1.0/";
 const BY = "https://creativecommons.org/licenses/by/4.0/";
@@ -19,7 +19,7 @@ function renderContainer(useCases: UseCases, deck: Deck = kanji, instance = inst
   const invalidate = vi.spyOn(queryClient, "invalidateQueries");
   render(
     <QueryClientProvider client={queryClient}>
-      <DeckAboutContainer useCases={useCases} instance={instance} deck={deck} appHref="#/deck" />
+      <DeckAboutContainer useCases={useCases} instance={instance} deck={deck} appHref="#/deck" healthHref="#/health" />
     </QueryClientProvider>,
   );
   return { invalidate };
@@ -42,6 +42,17 @@ describe("DeckAboutContainer", () => {
     );
     expect(await screen.findByText("Every card says which language its text is in.")).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Course progress" })).toBeNull();
+  });
+
+  it("holds every form while the data is checked, then while the deck is set aside, with a link to its health", async () => {
+    let checked: (report: ReturnType<typeof invalidReport>) => void = () => undefined;
+    renderContainer(makeUseCasesFake({ checkInstance: vi.fn(() => new Promise<ReturnType<typeof invalidReport>>((resolve) => (checked = resolve))) }));
+    expect(await screen.findByText(/being checked/)).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "Front → back" })).toBeDisabled();
+    checked(invalidReport([kanji]));
+    expect(await screen.findByRole("link", { name: "Repair it on the health screen." })).toHaveAttribute("href", "#/health");
+    expect(screen.getByRole("radio", { name: "Front → back" })).toBeDisabled();
+    expect(screen.getByRole("link", { name: "Open this deck in Solid Memo" })).toBeInTheDocument();
   });
 
   it("renames the deck, asking the language of a translation first", async () => {

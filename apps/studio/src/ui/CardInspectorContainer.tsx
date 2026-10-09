@@ -8,6 +8,7 @@ import { fragmentIdOf } from "@solid-memo/domain/subjectUrl";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import { untouched } from "@solid-memo/domain/libraryUpgrade";
 import { CardContainer } from "@solid-memo/ui/CardContainer";
+import { useDataCheck } from "@solid-memo/ui/dataCheck";
 import { publishedDistractorIds, useDeckRelease } from "@solid-memo/ui/deckRelease";
 import { DistractorFields } from "@solid-memo/ui/DistractorFields";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
@@ -16,6 +17,7 @@ import { Loading } from "@solid-memo/ui/Loading";
 import { CardHistoryScreen } from "./CardHistoryScreen";
 import { CardInspectorScreen, type CardReleaseLink } from "./CardInspectorScreen";
 import { CardScheduleContainer } from "./CardScheduleContainer";
+import { ReadOnlyScope } from "./ReadOnly";
 import type { CardTab } from "./router";
 
 /** How the card stands to the release (`release`, as useDeckRelease reads it): unknown while it is read, or when it cannot be. */
@@ -41,7 +43,10 @@ export function releaseLinkOf(card: Card, release: LibraryDeckContent | null | u
  * the answer log), and the wrong options' tab says from them how often
  * each option was chosen, once they are read. Opened at a field (`field`,
  * as the health screen links to one), that is where the user arrives: a
- * text of the content, or a wrong option's Edit button.
+ * text of the content, or a wrong option's Edit button. Until the
+ * instance's data check is done, and while the deck is set aside
+ * (useDataCheck), every tab is shown but nothing can be changed
+ * (ReadOnlyScope), with a link to the deck's health (`healthHref`).
  */
 export function CardInspectorContainer({
   useCases,
@@ -52,6 +57,7 @@ export function CardInspectorContainer({
   tabHref,
   onTab,
   appHref,
+  healthHref,
   onRemoved,
 }: {
   useCases: UseCases;
@@ -63,12 +69,15 @@ export function CardInspectorContainer({
   tabHref: (tab: CardTab) => string;
   onTab: (tab: CardTab) => void;
   appHref: string;
+  /** The deck's health, where data set aside is repaired. */
+  healthHref: string;
   /** The card is gone; leave its page. */
   onRemoved: () => void;
 }) {
   const { t, errorText } = useI18n();
   const queryClient = useQueryClient();
   const release = useDeckRelease(useCases, deck);
+  const readOnly = useDataCheck(useCases, instanceUrlOfDeck(deck.url)).readOnly(deck);
   const answersQuery = useQuery({
     queryKey: ["cardAnswers", deck.url, card.id],
     queryFn: () => useCases.cardAnswers(instanceUrlOfDeck(deck.url), deck, card.id),
@@ -89,48 +98,50 @@ export function CardInspectorContainer({
 
   return (
     <CardInspectorScreen card={card} release={releaseLinkOf(card, release)} tab={tab} tabHref={tabHref} onTab={onTab} appHref={appHref}>
-      {tab === "content" ? (
-        <CardContainer
-          useCases={useCases}
-          deck={deck}
-          card={card}
-          onRemoved={onRemoved}
-          heading={false}
-          withDistractors={false}
-          // A field the content does not have marks none.
-          arrival={field as CardTextPart | undefined}
-        />
-      ) : tab === "schedule" ? (
-        <CardScheduleContainer useCases={useCases} deck={deck} card={card} />
-      ) : tab === "history" ? (
-        answersQuery.error ? (
-          <ErrorMessage error={errorText(answersQuery.error)} />
-        ) : answers === undefined ? (
-          <Loading label={t("studio.history.loading")} />
-        ) : (
-          <CardHistoryScreen card={card} answers={answers} />
-        )
-      ) : (
-        <>
-          <DistractorFields
-            cardId={card.id}
-            distractors={card.distractors ?? []}
-            published={publishedDistractorIds(release, card)}
-            back={card.back}
-            textFormat={card.textFormat}
-            busy={saveMutation.isPending}
-            suggestions={Object.keys(card.back).filter((tag) => tag !== "")}
-            picks={picks}
-            arrival={field}
-            onChange={(distractors) => saveMutation.mutateAsync(distractors).then(() => true, () => false)}
+      <ReadOnlyScope reason={readOnly} subject="deck" healthHref={healthHref}>
+        {tab === "content" ? (
+          <CardContainer
+            useCases={useCases}
+            deck={deck}
+            card={card}
+            onRemoved={onRemoved}
+            heading={false}
+            withDistractors={false}
+            // A field the content does not have marks none.
+            arrival={field as CardTextPart | undefined}
           />
-          {/* Mounted throughout, so each save is heard. */}
-          <p class="hint" role="status">
-            {saveMutation.isSuccess ? t("card.saved") : ""}
-          </p>
-          <ErrorMessage error={errorText(saveMutation.error)} />
-        </>
-      )}
+        ) : tab === "schedule" ? (
+          <CardScheduleContainer useCases={useCases} deck={deck} card={card} />
+        ) : tab === "history" ? (
+          answersQuery.error ? (
+            <ErrorMessage error={errorText(answersQuery.error)} />
+          ) : answers === undefined ? (
+            <Loading label={t("studio.history.loading")} />
+          ) : (
+            <CardHistoryScreen card={card} answers={answers} />
+          )
+        ) : (
+          <>
+            <DistractorFields
+              cardId={card.id}
+              distractors={card.distractors ?? []}
+              published={publishedDistractorIds(release, card)}
+              back={card.back}
+              textFormat={card.textFormat}
+              busy={saveMutation.isPending}
+              suggestions={Object.keys(card.back).filter((tag) => tag !== "")}
+              picks={picks}
+              arrival={field}
+              onChange={(distractors) => saveMutation.mutateAsync(distractors).then(() => true, () => false)}
+            />
+            {/* Mounted throughout, so each save is heard. */}
+            <p class="hint" role="status">
+              {saveMutation.isSuccess ? t("card.saved") : ""}
+            </p>
+            <ErrorMessage error={errorText(saveMutation.error)} />
+          </>
+        )}
+      </ReadOnlyScope>
     </CardInspectorScreen>
   );
 }

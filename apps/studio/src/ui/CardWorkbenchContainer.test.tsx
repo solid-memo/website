@@ -13,7 +13,7 @@ import { firstRelease } from "@solid-memo/domain/testing/libraryDeck";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { CardWorkbenchContainer } from "./CardWorkbenchContainer";
-import { instanceA, makeCard, makeDeck } from "../test/fixtures";
+import { instanceA, invalidReport, makeCard, makeDeck } from "../test/fixtures";
 
 const deck = makeDeck("deck-1", { en: "Kanji N5" });
 const water = { ...makeCard(deck, "water"), back: { en: "**Water**" }, textFormat: SM.markdown };
@@ -32,7 +32,7 @@ const dueToday: ReviewState = {
   formatVersion: 2,
 };
 
-function renderContainer(useCases: UseCases, query: CardQuery = DEFAULT_CARD_QUERY, of = deck) {
+function renderContainer(useCases: UseCases, query: CardQuery = DEFAULT_CARD_QUERY, of = deck, decks = [deck, nouns]) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={queryClient}>
@@ -40,7 +40,7 @@ function renderContainer(useCases: UseCases, query: CardQuery = DEFAULT_CARD_QUE
         useCases={useCases}
         instance={instanceA}
         deck={of}
-        decks={[deck, nouns]}
+        decks={decks}
         query={query}
         onQuery={() => undefined}
         cardHref={(card) => `#/card?card=${card.id}`}
@@ -287,6 +287,21 @@ describe("CardWorkbenchContainer", () => {
     expect(useCases.transferCards).toHaveBeenCalledWith(instanceA.url, deck, nouns, ["fire"], { mode: "move", keepProgress: true });
     await waitFor(() => expect(fronts()).toEqual(["water"]));
     expect(screen.getByText("0 cards selected")).toBeInTheDocument();
+  });
+
+  it("offers no deck set aside to move cards to, and no edit of a deck set aside", async () => {
+    const verbs = makeDeck("verbs", { en: "Verbs" });
+    const useCases = makeUseCasesFake({ listCards: vi.fn(async () => [water, fire]), checkInstance: vi.fn(async () => invalidReport([nouns])) });
+    const { unmount } = renderContainer(useCases, DEFAULT_CARD_QUERY, deck, [deck, nouns, verbs]);
+    fireEvent.click(await screen.findByRole("checkbox", { name: "Select fire" }));
+    const bulk = await screen.findByRole("group", { name: "Selected cards" });
+    fireEvent.click(within(bulk).getByRole("button", { name: "Move to deck…" }));
+    expect(within(screen.getByRole("combobox", { name: "To the deck" })).getAllByRole("option").map((o) => o.textContent)).toEqual(["Verbs"]);
+    unmount();
+    renderContainer(makeUseCasesFake({ listCards: vi.fn(async () => [water, fire]), checkInstance: vi.fn(async () => invalidReport([deck])) }));
+    fireEvent.click(await screen.findByRole("checkbox", { name: "Select fire" }));
+    expect(await screen.findByText(/This deck has invalid data/)).toBeInTheDocument();
+    expect(screen.queryByRole("group", { name: "Selected cards" })).toBeNull();
   });
 
   it("says when a copy found cards there already, and why a transfer was not made", async () => {

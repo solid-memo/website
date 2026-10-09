@@ -65,11 +65,15 @@ const DIRECTIONS: readonly StudyDirection[] = ["front-to-back", "back-to-front"]
  * The target's cards document keeps its own links: the cards written
  * there are its deck's, and hold only what this app knows of a card
  * (a move drops the triples another app put on it). With `keepProgress`, a card's review states go
- * with it, under its id in the target; a card present in the target
+ * with it, under its id in the target, where they are written naming the
+ * card there (sm:reviewOf); a card present in the target
  * keeps a state it has there. Without, a card new to the target starts
  * as new there, a state left at its id removed. A move then removes the
- * cards from the source, with their states; a copy leaves the source as
- * it is. The answer log is not the plan's: past answers keep naming the
+ * cards from the source, with their states (every SM-2 state of them,
+ * read or not, when written: UseCases.transferCards); a copy leaves the
+ * source as it is. The states are those read, joined to their cards by
+ * sm:reviewOf (domain/reviewRecord.ts): another scheduler's are never
+ * among them, and stay where they are. The answer log is not the plan's: past answers keep naming the
  * cards in the source (docs/data-model.md).
  *
  * Refuses a transfer to the source itself (cardTransferSameDeck).

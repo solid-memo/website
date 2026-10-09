@@ -59,7 +59,8 @@ interface FocusRequest {
  * confirms, takes its cards with it. A list arranged by a newer version,
  * or one whose arrangement has invalid data set aside, cannot be
  * rearranged, nor its groups renamed or deleted, but its decks can still
- * be renamed and deleted: that is the deck's own data. Nor can a list
+ * be renamed and deleted: that is the deck's own data, unless the
+ * container holds the deck (`deckHeld`). Nor can a list
  * be rearranged while the data is still being checked, under a policy
  * that may set its arrangement aside.
  *
@@ -77,6 +78,7 @@ export function DeckListScreen({
   tree,
   arrangementSetAside = false,
   checking = false,
+  deckHeld = () => false,
   collapsed,
   onToggle,
   onUnfold,
@@ -100,6 +102,11 @@ export function DeckListScreen({
   arrangementSetAside?: boolean;
   /** The data is still being checked, and the arrangement may yet be set aside: it cannot be rearranged until the check is done. */
   checking?: boolean;
+  /**
+   * A deck that cannot be renamed or deleted now, though its row is
+   * shown (the Studio's, for a deck its data check holds); none in Solid Memo.
+   */
+  deckHeld?: (deck: Deck) => boolean;
   /** The groups folded shut, by URL. */
   collapsed: ReadonlySet<string>;
   onToggle: (groupUrl: string) => void;
@@ -420,6 +427,7 @@ export function DeckListScreen({
   function actionsMenu(node: TreeNode, parent: DeckGroup | null) {
     const key = nodeId(node);
     const busy = removing.has(key);
+    const held = node.kind === "deck" ? deckHeld(node.deck) : readOnly;
     return (
       <ActionsMenu
         label={t("deckList.actions", { name: nameOf(node) })}
@@ -434,7 +442,7 @@ export function DeckListScreen({
         {node.kind === "deck" && <MenuLink href={preferencesHref(node.deck)}>{t("deckList.preferences")}</MenuLink>}
         {node.kind === "deck" && studioHref !== undefined && <MenuLink href={studioHref}>{t("studio.open")}</MenuLink>}
         {/* A group's name is the arrangement's, a deck's its own. */}
-        <MenuItem disabled={busy || (node.kind === "group" && readOnly)} onSelect={() => setNaming(key)}>
+        <MenuItem disabled={busy || held} onSelect={() => setNaming(key)}>
           {t("deckList.rename")}
         </MenuItem>
         <MenuSeparator />
@@ -447,11 +455,11 @@ export function DeckListScreen({
         />
         <MenuSeparator />
         {node.kind === "deck" ? (
-          <MenuItem danger disabled={busy} onSelect={() => removeDeck(node.deck)}>
+          <MenuItem danger disabled={busy || held} onSelect={() => removeDeck(node.deck)}>
             {t("deckList.deleteDeck")}
           </MenuItem>
         ) : (
-          <MenuItem danger disabled={readOnly} onSelect={() => remove(node, parent)}>
+          <MenuItem danger disabled={held} onSelect={() => remove(node, parent)}>
             {t("deckList.deleteGroup")}
           </MenuItem>
         )}

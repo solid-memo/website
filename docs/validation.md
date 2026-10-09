@@ -190,6 +190,11 @@ not conform is a preference, `sm:invalidDataPolicy`, a concept of
 - A check that cannot run (the shapes unreachable, say) is a warning,
   not a block: the app does not lock a user out of their data over its
   own trouble.
+- **The Studio holds to the same check and policy** (`useDataCheck` in
+  `ui`, which Solid Memo's workspace uses too): it shows a deck set
+  aside, or every deck of an instance blocked, read-only, leaves it out
+  of every bulk action, and changes nothing until the check is done
+  ([studio.md](studio.md#data-set-aside)).
 
 ### Data another app wrote
 

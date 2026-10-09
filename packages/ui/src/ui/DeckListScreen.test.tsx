@@ -1009,6 +1009,21 @@ describe("DeckListScreen", () => {
     expect(onEdit).not.toHaveBeenCalled();
   });
 
+  it("neither renames nor deletes a deck the container holds, the others and the groups as before", () => {
+    renderScreen(tree, { deckHeld: (each) => each.url === kana.url });
+    openMenu("Kana");
+    expect(screen.getByRole("menuitem", { name: "Rename" })).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("menuitem", { name: "Delete deck" })).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("menuitem", { name: "Move out of Japanese" })).not.toHaveAttribute("aria-disabled");
+    openMenu("Kana");
+    openMenu("Kanji N5");
+    expect(screen.getByRole("menuitem", { name: "Rename" })).not.toHaveAttribute("aria-disabled");
+    expect(screen.getByRole("menuitem", { name: "Delete deck" })).not.toHaveAttribute("aria-disabled");
+    openMenu("Kanji N5");
+    openMenu("Japanese");
+    expect(screen.getByRole("menuitem", { name: "Rename" })).not.toHaveAttribute("aria-disabled");
+  });
+
   it("says why an edit was not made", () => {
     renderScreen(tree, { error: "Your decks were rearranged elsewhere." });
     expect(screen.getByRole("alert")).toHaveTextContent("Your decks were rearranged elsewhere.");

@@ -55,6 +55,7 @@ function Harness({ initial = DEFAULT_CARD_QUERY, onQuery, ...overrides }: Partia
       decks={[nouns]}
       onTransfer={async () => true}
       transferDone={null}
+      readOnly={null}
       busy={false}
       error={null}
       {...overrides}
@@ -294,6 +295,17 @@ describe("CardWorkbenchScreen", () => {
     fireEvent.click(within(bulk).getByRole("button", { name: "Delete" }));
     await waitFor(() => expect(screen.getAllByRole("status")[0]).toHaveTextContent("0 cards selected"));
     vi.unstubAllGlobals();
+  });
+
+  it("offers no edit while the deck may not be changed, saying why, the cards still found and selected", () => {
+    const plan = planCardEdit([water, fire], ["water"], { kind: "retire" });
+    render(<Harness readOnly="setAside" lastEdit={{ edit: { kind: "retire" }, plan }} />);
+    expect(screen.getByText(/This deck has invalid data, so it is set aside/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Repair it on the health screen." })).toHaveAttribute("href", "#/health");
+    fireEvent.click(screen.getByRole("checkbox", { name: "Select 水" }));
+    expect(screen.getByText("1 card selected")).toBeInTheDocument();
+    expect(screen.queryByRole("group", { name: "Selected cards" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Undo" })).toBeDisabled();
   });
 
   it("forgets or reschedules the selected cards' progress, and says what it did", () => {

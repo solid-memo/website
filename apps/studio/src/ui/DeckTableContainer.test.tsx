@@ -10,7 +10,7 @@ import type { ValidationReport } from "@solid-memo/domain/validation";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { DeckTableContainer } from "./DeckTableContainer";
 import { choose } from "../test/choose";
-import { instanceA, makeCard, makeDeck } from "../test/fixtures";
+import { instanceA, invalidReport, makeCard, makeDeck } from "../test/fixtures";
 
 const kanji = makeDeck("deck-1", { en: "Kanji N5" });
 const verbs = makeDeck("deck-2", { en: "Verbs" });
@@ -130,6 +130,30 @@ describe("DeckTableContainer", () => {
     await waitFor(() => expect(screen.getByRole("rowheader", { name: /Verbs/ })).toHaveTextContent("VerbsInvalid data"));
     await waitFor(() => expect(screen.getByRole("rowheader", { name: /Solid/ })).toHaveTextContent("SolidCourse"));
     expect(screen.getByRole("rowheader", { name: /Capitals/ })).toHaveTextContent("CapitalsLibrary");
+  });
+
+  it("leaves a deck set aside out of the bulk actions, and moves none while the arrangement is set aside", async () => {
+    const useCases = makeUseCasesFake({
+      listDecks: vi.fn(async () => [kanji, verbs]),
+      checkInstance: vi.fn(async () => invalidReport([kanji], { catalogue: true })),
+    });
+    renderContainer(useCases);
+    await waitFor(() => expect(screen.getByRole("checkbox", { name: "Select Verbs" })).toBeEnabled());
+    expect(screen.getByRole("checkbox", { name: "Select Kanji N5" })).toBeDisabled();
+    expect(screen.getByText(/Decks with invalid data are set aside/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Select Verbs" }));
+    fireEvent.click(screen.getByRole("button", { name: "Move to group" }));
+    expect(screen.getByText(/The arrangement of these decks has invalid data/)).toBeInTheDocument();
+  });
+
+  it("moves no deck into a group that a newer version arranged", async () => {
+    const useCases = makeUseCasesFake({ listDecks: vi.fn(async () => [kanji, verbs]) });
+    vi.mocked(useCases.listDeckTree).mockImplementation(async () => ({ readOnly: true, children: [kanji, verbs].map((deck) => ({ kind: "deck" as const, deck })) }));
+    renderContainer(useCases);
+    await waitFor(() => expect(screen.getByRole("checkbox", { name: "Select Verbs" })).toBeEnabled());
+    fireEvent.click(screen.getByRole("checkbox", { name: "Select Verbs" }));
+    fireEvent.click(screen.getByRole("button", { name: "Move to group" }));
+    expect(screen.getByText(/A newer version of Solid Memo arranged these groups/)).toBeInTheDocument();
   });
 
   it("moves, paces, directs and deletes the selected decks, each in one call, and reads the decks afresh after", async () => {

@@ -139,15 +139,12 @@ export function placeText(spot: CardSpot, t: I18n["t"], readerText: I18n["reader
   }
 }
 
-/** A problem's place in a card, as a link to that field of the card inspector (`spotHref`). */
-function SpotLink({ spot, spotHref, language }: { spot: CardSpot; spotHref: (spot: CardSpot) => string; language?: string }) {
+/** A problem's place in a card, as a link to that field of the card inspector (`spotHref`); named only, with none. */
+function SpotLink({ spot, spotHref, language }: { spot: CardSpot; spotHref: ((spot: CardSpot) => string) | null; language?: string }) {
   const { t, readerText, languageParts } = useI18n();
   const place = placeText(spot, t, readerText);
-  return (
-    <a href={spotHref(spot)}>
-      {language === undefined || language === "" ? place : t("studio.health.language", { place, language: languageParts(language).name })}
-    </a>
-  );
+  const text = language === undefined || language === "" ? place : t("studio.health.language", { place, language: languageParts(language).name });
+  return spotHref === null ? <>{text}</> : <a href={spotHref(spot)}>{text}</a>;
 }
 
 /** The heading of a part of the health screen, and what it says when nothing in it is wrong. */
@@ -167,7 +164,10 @@ function Part({ id, heading, fine, children }: { id: string; heading: string; fi
  * entry and its distribution to its about screen), the sides that state no language, the
  * cards that say the same, and the text in Markdown that would not show
  * as meant, each linking to its field (`spotHref`). "Check again" reads
- * it all afresh.
+ * it all afresh. While the deck is held (`held`: set aside, or the whole
+ * instance blocked), its forms change nothing, so the places are named,
+ * not linked, and a line says so: the repairs and removals here are the
+ * way out.
  */
 export function DeckHealthScreen({
   deck,
@@ -178,6 +178,7 @@ export function DeckHealthScreen({
   repairs,
   spotHref,
   aboutHref,
+  held = false,
 }: {
   deck: Deck;
   health: DeckHealth<MarkdownProblem>;
@@ -189,14 +190,18 @@ export function DeckHealthScreen({
   spotHref: (spot: CardSpot) => string;
   /** What the deck says of itself, where its entry and its languages are set. */
   aboutHref: string;
+  /** Nothing in the deck can be changed until its data is repaired (useDataCheck). */
+  held?: boolean;
 }) {
   const { t, tx } = useI18n();
   const count = healthProblemCount(health);
+  const about = (text: string) => (held ? text : <a href={aboutHref}>{text}</a>);
+  const toSpot = held ? null : spotHref;
   const link: SubjectLink = (subjectUrl, path) => {
-    if (subjectUrl === deck.url) return <a href={aboutHref}>{t("studio.health.deckEntry")}</a>;
-    if (subjectUrl === distributionUrlOf(deck.url)) return <a href={aboutHref}>{t("studio.health.deckDistribution")}</a>;
+    if (subjectUrl === deck.url) return about(t("studio.health.deckEntry"));
+    if (subjectUrl === distributionUrlOf(deck.url)) return about(t("studio.health.deckDistribution"));
     const spot = cardSpotOf(deck, cards, subjectUrl, path);
-    return spot === null ? <ExternalLink url={subjectUrl} /> : <SpotLink spot={spot} spotHref={spotHref} />;
+    return spot === null ? <ExternalLink url={subjectUrl} /> : <SpotLink spot={spot} spotHref={toSpot} />;
   };
   const unstated = health.unstated;
   return (
@@ -211,6 +216,7 @@ export function DeckHealthScreen({
       <p class={count === 0 ? "hint" : "warning"} role="status">
         {checking ? "" : count === 0 ? t("studio.health.allWell") : t("studio.health.summary", { count })}
       </p>
+      {held && <p class="warning">{t("studio.health.held")}</p>}
       <DataCheckSection report={health.report} hint={t("studio.health.dataHint")} link={link} repairs={repairs} />
       <Part
         id="health-languages"
@@ -218,12 +224,12 @@ export function DeckHealthScreen({
         fine={unstated === null ? t("studio.health.languagesUnchecked") : unstated.length === 0 ? t("studio.health.languagesFine") : null}
       >
         <p>
-          {t("studio.health.unstated", { count: unstated?.length ?? 0 })} <a href={aboutHref}>{t("studio.health.unstatedLink")}</a>
+          {t("studio.health.unstated", { count: unstated?.length ?? 0 })} {!held && <a href={aboutHref}>{t("studio.health.unstatedLink")}</a>}
         </p>
         <ul class="studio-health-list">
           {unstated?.map((spot, index) => (
             <li key={index}>
-              <SpotLink spot={spot} spotHref={spotHref} />
+              <SpotLink spot={spot} spotHref={toSpot} />
             </li>
           ))}
         </ul>
@@ -241,7 +247,7 @@ export function DeckHealthScreen({
               {group.map((card, index) => (
                 <span key={card.id}>
                   {index > 0 && ", "}
-                  <SpotLink spot={{ card, place: { tab: "content" } }} spotHref={spotHref} />
+                  <SpotLink spot={{ card, place: { tab: "content" } }} spotHref={toSpot} />
                 </span>
               ))}
             </li>
@@ -257,7 +263,7 @@ export function DeckHealthScreen({
         <ul class="studio-health-list">
           {health.markdown.map((problem, index) => (
             <li key={index}>
-              <SpotLink spot={problem} spotHref={spotHref} language={problem.language} />: {problemText(problem.finding, t)}
+              <SpotLink spot={problem} spotHref={toSpot} language={problem.language} />: {problemText(problem.finding, t)}
             </li>
           ))}
         </ul>

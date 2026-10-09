@@ -1,10 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { CardSpot } from "@solid-memo/domain/deckHealth";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { Unrepairable } from "@solid-memo/domain/repair";
 import type { ValidationReport } from "@solid-memo/domain/validation";
+import { useDataCheck } from "@solid-memo/ui/dataCheck";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
@@ -20,7 +21,11 @@ import { DeckHealthScreen, InstanceHealthScreen, type RepairActions } from "./He
  * Repairs are Solid Memo's own (planRepair, applyRepairs), of what the
  * check shown found: a deck's only, on a deck's health. A removal is
  * made once the user confirms it. After either, every check of the
- * instance is read afresh.
+ * instance is read afresh. A deck held by the instance's check (set
+ * aside, or the whole instance blocked: useDataCheck) has its problems
+ * named, not linked to its forms, which change nothing until then; a
+ * deck's "Check again" makes the instance's check again too, so a deck
+ * mended in the pod by other means is let go.
  */
 export function HealthContainer({
   useCases,
@@ -82,7 +87,9 @@ function DeckHealthContainer({
   aboutHref: (deck: Deck) => string;
 }) {
   const { t, errorText } = useI18n();
+  const queryClient = useQueryClient();
   const repairs = useRepairs(useCases, instance);
+  const reason = useDataCheck(useCases, instance.url).readOnly(deck);
   // Read afresh each time the screen opens, as a card edited since may have mended (or made) a problem.
   const healthQuery = useQuery({ ...deckHealthQuery(useCases, instance.url, deck), refetchOnMount: "always" });
   const cardsQuery = useQuery({
@@ -98,10 +105,13 @@ function DeckHealthContainer({
       health={healthQuery.data}
       cards={cardsQuery.data}
       checking={healthQuery.isFetching}
-      onCheck={() => void healthQuery.refetch()}
+      // Every check of the instance (by prefix): the deck's, and the one that holds it.
+      onCheck={() => void queryClient.invalidateQueries({ queryKey: ["validation", instance.url] })}
       repairs={repairs(healthQuery.data.report)}
       spotHref={(spot) => spotHref(deck, spot)}
       aboutHref={aboutHref(deck)}
+      // Only once the check says so: while it is made, the links stay.
+      held={reason === "setAside" || reason === "blocked"}
     />
   );
 }
