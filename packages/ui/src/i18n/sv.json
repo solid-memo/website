@@ -13,7 +13,9 @@
       "frontNote": "Språk för anteckningen under framsidan",
       "backLabel": "Språk för etiketten",
       "backNote": "Språk för anteckningen under baksidan",
-      "pictureDescription": "Språk för bildens beskrivning"
+      "pictureDescription": "Språk för bildens beskrivning",
+      "distractor": "Språk för det felaktiga alternativet",
+      "distractorNote": "Språk för anteckningen till det felaktiga alternativet"
     },
     "none": "Inget språk (koder, siffror, symboler)",
     "otherOption": "Annat språk…",
@@ -35,7 +37,9 @@
       "backLabel": "etiketten",
       "backNote": "anteckningen under baksidan",
       "frontImageDescription": "beskrivningen av framsidans bild",
-      "backImageDescription": "beskrivningen av baksidans bild"
+      "backImageDescription": "beskrivningen av baksidans bild",
+      "distractor": "det felaktiga alternativet",
+      "distractorNote": "anteckningen till det felaktiga alternativet"
     }
   },
   "theme": {
@@ -169,6 +173,38 @@
     "markdownDiffersTranslation": "En del av kortets översättningar läses annorlunda som Markdown: titta på dem innan du sparar.",
     "preview": "Förhandsvisning",
     "previewOption": "Som svarsalternativ:"
+  },
+  "distractorFields": {
+    "legend": "Felaktiga alternativ",
+    "hint": "Visas bredvid baksidan, det rätta svaret, när kortet ställs som en flervalsfråga, så som en kurs ställer det. Vart och ett är tänkt att finnas på baksidans språk.",
+    "none": "Det här kortet har inga felaktiga alternativ.",
+    "retiredTag": "Ur bruk",
+    "text": "Felaktigt alternativ",
+    "note": "Varför det är fel (valfritt)",
+    "noteHint": "Visas för den som väljer det här alternativet.",
+    "add": "Lägg till ett felaktigt alternativ",
+    "addDone": "Lägg till",
+    "update": "Uppdatera",
+    "cancel": "Avbryt",
+    "edit": "Redigera",
+    "editLabel": "Redigera det felaktiga alternativet ”{option}”",
+    "retire": "Ta ur bruk",
+    "retireLabel": "Ta det felaktiga alternativet ”{option}” ur bruk",
+    "restore": "Återställ",
+    "restoreLabel": "Återställ det felaktiga alternativet ”{option}”",
+    "delete": "Ta bort",
+    "deleteLabel": "Ta bort det felaktiga alternativet ”{option}”",
+    "deleteConfirm": "Ta bort det felaktiga alternativet ”{option}”?",
+    "noLanguage": "inget angivet språk",
+    "issues": "Värt att se över",
+    "issue": {
+      "missing": "”{option}” har ingen text på {languages}, som baksidan finns på.",
+      "extra": "”{option}” finns på {languages}, som baksidan inte finns på.",
+      "few": {
+        "one": "{count} felaktigt alternativ används; en kurs ställer en fråga med minst {least}.",
+        "other": "{count} felaktiga alternativ används; en kurs ställer en fråga med minst {least}."
+      }
+    }
   },
   "cardCreator": {
     "heading": "Nytt kort",
@@ -1142,6 +1178,8 @@
     "textLanguageInvalid": "”{tag}” är ingen språkkod.",
     "textLanguageTaken": "Det finns redan text på {language}. Ändra eller ta bort den först.",
     "textMixesUnstated": "Den här texten anger inte vilket språk den är på, så den kan inte ha översättningar. Välj dess språk först.",
+    "distractorEmpty": "Ett felaktigt alternativ behöver text.",
+    "distractorPublished": "Det här felaktiga alternativet finns i utgåvan som kortleken kommer från, så det kan inte tas bort. Ta det ur bruk i stället.",
     "dailyLimitInvalid": "En daglig gräns är ett heltal, 0 eller mer.",
     "webIdEmpty": "Ange ditt WebID.",
     "webIdInvalidUrl": "Det är ingen giltig URL. Ett WebID ser ut som https://du.example/profile/card#me.",
@@ -1391,6 +1429,17 @@
         "other": "{count} dagar"
       },
       "notStudied": "Inte studerat än"
+    },
+    "card": {
+      "heading": "Kort: {card}",
+      "tabs": "Vad som ska redigeras",
+      "tab": {
+        "content": "Innehåll",
+        "distractors": "Felaktiga alternativ ({count})"
+      },
+      "releaseSame": "Det här kortet är som i utgåvan som kortleken kopierades från, så en nyare utgåva uppdaterar det. En ändring kopplar loss det: nyare utgåvor uppdaterar det inte längre, men kan fortfarande ta det ur bruk.",
+      "releaseChanged": "Det här kortet har ändrats sedan utgåvan som kortleken kopierades från, så nyare utgåvor uppdaterar det inte längre, men kan fortfarande ta det ur bruk.",
+      "openInApp": "Öppna kortet i Solid Memo"
     },
     "cardBulk": {
       "label": "Valda kort",

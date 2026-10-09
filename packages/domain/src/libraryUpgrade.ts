@@ -258,7 +258,7 @@ function contentAction(
   return libraryChanged ? "kept" : "none";
 }
 
-/** Whether two cards have the same distractors, matched by id: RDF keeps no order among a card's sm:distractor. */
+/** Whether two cards have the same distractors, matched by id (RDF keeps no order among a card's sm:distractor), each in use or retired alike. */
 function sameDistractors(a: CardContent, b: CardContent): boolean {
   const mine = a.distractors ?? [];
   const theirs = new Map((b.distractors ?? []).map((distractor) => [distractor.id, distractor]));
@@ -266,7 +266,12 @@ function sameDistractors(a: CardContent, b: CardContent): boolean {
     mine.length === theirs.size &&
     mine.every((distractor) => {
       const other = theirs.get(distractor.id);
-      return other !== undefined && sameText(distractor.text, other.text) && sameText(distractor.note, other.note);
+      return (
+        other !== undefined &&
+        sameText(distractor.text, other.text) &&
+        sameText(distractor.note, other.note) &&
+        distractor.retired === other.retired
+      );
     })
   );
 }

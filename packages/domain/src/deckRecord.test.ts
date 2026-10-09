@@ -296,10 +296,11 @@ describe("distractor records", () => {
     expect(distractorToRecord({ id: "q-d2", text: { "": "404" } })).toEqual({ text: { "": "404" } });
   });
 
-  it("leave out an empty note, and have none when the text is empty or the distractor is retired", () => {
+  it("leave out an empty note, have none when the text is empty, and keep a retired distractor marked so", () => {
     expect(distractorFromRecord(`${CARDS}#d`, { text: { en: "x" }, note: {} })).toEqual({ id: "d", text: { en: "x" } });
     expect(distractorFromRecord(`${CARDS}#d`, { text: {} })).toBeNull();
-    expect(distractorFromRecord(`${CARDS}#d`, { text: { en: "x" }, deprecated: true })).toBeNull();
+    expect(distractorFromRecord(`${CARDS}#d`, { text: { en: "x" }, deprecated: true })).toEqual({ id: "d", text: { en: "x" }, retired: true });
+    expect(distractorToRecord({ id: "d", text: { en: "x" }, retired: true })).toEqual({ text: { en: "x" }, deprecated: true });
     expect(distractorFromRecord(`${CARDS}#d`, { text: { en: "x" }, deprecated: false })).toEqual({ id: "d", text: { en: "x" } });
   });
 });

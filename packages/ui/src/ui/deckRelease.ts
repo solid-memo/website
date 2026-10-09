@@ -28,3 +28,19 @@ export function useDeckReleaseQuery(
   });
   return deck.sourceUrl === undefined ? { release: null, error: null } : { release: query.data, error: query.error };
 }
+
+/**
+ * The ids of a card's distractors the release its deck came from
+ * published (domain/distractors.ts: never deleted, only retired): none for
+ * a deck not from the library or a card the release lacks, and, while the
+ * release is read or when it cannot be, every one the card has, so none
+ * is deleted before it is known.
+ */
+export function publishedDistractorIds(
+  release: LibraryDeckContent | null | undefined,
+  card: { id: string; distractors?: readonly { id: string }[] },
+): ReadonlySet<string> {
+  if (release === undefined) return new Set((card.distractors ?? []).map((distractor) => distractor.id));
+  const published = release?.cards.find((released) => released.id === card.id);
+  return new Set((published?.distractors ?? []).map((distractor) => distractor.id));
+}

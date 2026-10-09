@@ -80,6 +80,28 @@ describe("CardContainer", () => {
     await waitFor(() => expect(document.getElementById("card-back-label-language-0")).toHaveTextContent("Language: Swedish"));
   });
 
+  it("deletes none of the wrong options the deck's release published, nor any while it is read", async () => {
+    const withOptions: Card = { ...card, distractors: [{ id: "card-1-d1", text: { en: "fire" } }, { id: "card-1-d2", text: { en: "air" } }] };
+    const release = { cards: [{ ...withOptions, distractors: [withOptions.distractors![0]!] }] };
+    let read: (value: never) => void = () => undefined;
+    const deckRelease = vi.fn(() => new Promise<never>((resolve) => (read = resolve)));
+    const of = { ...deck, sourceUrl: "https://solid-memo.com/decks/kanji/v1.ttl" };
+    renderContainer(makeUseCasesFake({ deckRelease }), { shown: withOptions, of });
+    const confirm = vi.fn(() => false);
+    vi.stubGlobal("confirm", confirm);
+    const refusal = "This wrong option is in the release the deck came from, so it cannot be deleted. Retire it instead.";
+    fireEvent.click(screen.getByRole("button", { name: "Delete the wrong option “air”" }));
+    expect(await screen.findByText(refusal)).toBeInTheDocument();
+    await waitFor(() => expect(deckRelease).toHaveBeenCalled());
+    read(release as never);
+    await waitFor(() => {
+      fireEvent.click(screen.getByRole("button", { name: "Delete the wrong option “air”" }));
+      expect(confirm).toHaveBeenCalledWith("Delete the wrong option “air”?");
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Delete the wrong option “fire”" }));
+    expect(confirm).toHaveBeenCalledOnce();
+  });
+
   it("shows a save error", async () => {
     renderContainer(
       makeUseCasesFake({

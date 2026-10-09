@@ -228,6 +228,12 @@ describe("multiple-choice questions", () => {
     expect(choicesOf(card, first)).toEqual([d1, d2, right]);
   });
 
+  it("never offer a retired distractor", () => {
+    const [d1, d2] = card.distractors!;
+    const retired = { ...card, distractors: [d1!, { ...d2!, retired: true as const }] };
+    expect(choicesOf(retired, last).map((choice) => choice.key)).toEqual(["back", "distractor:q1-d1"]);
+  });
+
   it("offer only the back of a card without distractors", () => {
     expect(choicesOf({ front: { en: "Q" }, back: { en: "A" } }, first)).toEqual([{ key: "back", text: { en: "A" }, correct: true }]);
   });

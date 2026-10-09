@@ -1,4 +1,4 @@
-import { isMarkdown, studyDirections, type Card, type DeckDirection } from "./deck";
+import { activeCards, isMarkdown, studyDirections, type Card, type DeckDirection } from "./deck";
 import { canonicalTag } from "./languageTag";
 import { folded, type LangText } from "./langText";
 import { reviewKeyOf, type ReviewState } from "./review";
@@ -189,7 +189,7 @@ function hasFeature(card: Card, feature: CardFeature): boolean {
     case "picture":
       return card.frontImageUrl !== undefined || card.backImageUrl !== undefined;
     case "distractors":
-      return (card.distractors?.length ?? 0) > 0;
+      return activeCards(card.distractors ?? []).length > 0;
     case "markdown":
       return isMarkdown(card.textFormat);
     case "notes":

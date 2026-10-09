@@ -415,6 +415,59 @@ describe("CardScreen", () => {
     expect(alertTexts()).toEqual(["The back needs text or an image."]);
   });
 
+  it("saves the card with its wrong options once they are changed, and without them while they are not", () => {
+    const options = { ...card, distractors: [{ id: "card-1-d1", text: { en: "fire" } }] };
+    const { props } = renderScreen({ card: options });
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    expect(props.onSave).toHaveBeenLastCalledWith({ front: { ja: "水" }, back: { en: "water" } });
+    fireEvent.click(screen.getByRole("button", { name: "Add a wrong option" }));
+    fireEvent.input(screen.getByLabelText("Wrong option"), { target: { value: "earth" } });
+    fireEvent.click(screen.getByRole("button", { name: "Add" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    expect(props.onSave).toHaveBeenLastCalledWith({
+      front: { ja: "水" },
+      back: { en: "water" },
+      distractors: [
+        { id: "card-1-d1", text: { en: "fire" } },
+        { id: "card-1-d2", text: { en: "earth" } },
+      ],
+    });
+  });
+
+  it("shows the wrong options as the card is read afresh while they are not changed here, and states them only once they are", () => {
+    const options = { ...card, distractors: [{ id: "card-1-d1", text: { en: "fire" } }] };
+    const { props, rerender } = renderScreen({ card: options });
+    // Changed elsewhere (the Studio) meanwhile: an option added, one retired.
+    const afresh = { ...card, distractors: [{ id: "card-1-d1", text: { en: "fire" }, retired: true as const }, { id: "card-1-d2", text: { en: "air" } }] };
+    rerender(<CardScreen {...props} card={afresh} />);
+    expect(screen.getByRole("button", { name: "Restore the wrong option “fire”" })).toBeInTheDocument();
+    expect(screen.getByText("air")).toBeInTheDocument();
+    fireEvent.input(screen.getByLabelText("Back"), { target: { value: "H2O" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    expect(props.onSave).toHaveBeenLastCalledWith({ front: { ja: "水" }, back: { en: "H2O" } });
+    // Changed here, then saved: the card read afresh is shown again.
+    fireEvent.click(screen.getByRole("button", { name: "Restore the wrong option “fire”" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    expect(props.onSave).toHaveBeenLastCalledWith(
+      expect.objectContaining({ distractors: [{ id: "card-1-d1", text: { en: "fire" } }, { id: "card-1-d2", text: { en: "air" } }] }),
+    );
+    rerender(<CardScreen {...props} card={options} saved />);
+    expect(screen.queryByText("air")).toBeNull();
+  });
+
+  it("leaves out its heading and the wrong options for a page that has its own", () => {
+    renderScreen({ card: { ...card, distractors: [{ id: "card-1-d1", text: { en: "fire" } }] }, heading: false, withDistractors: false });
+    expect(screen.queryByRole("heading", { name: "Card" })).toBeNull();
+    expect(screen.queryByRole("group", { name: "Wrong options" })).toBeNull();
+  });
+
+  it("only retires a wrong option the deck's release published, refusing to delete it", () => {
+    renderScreen({ card: { ...card, distractors: [{ id: "card-1-d1", text: { en: "fire" } }] }, published: new Set(["card-1-d1"]) });
+    expect(screen.getByRole("button", { name: "Retire the wrong option “fire”" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Delete the wrong option “fire”" }));
+    expect(alertTexts()).toContain("This wrong option is in the release the deck came from, so it cannot be deleted. Retire it instead.");
+  });
+
   it("names a picture-only card by its back in the removal prompt", () => {
     const confirm = vi.fn(() => false);
     vi.stubGlobal("confirm", confirm);

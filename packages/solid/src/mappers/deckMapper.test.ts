@@ -6,7 +6,7 @@ import {
   type ThingPersisted,
 } from "@inrupt/solid-client";
 import { mockSolidDatasetFrom, setThing } from "@inrupt/solid-client";
-import { getInteger, getThing, getUrlAll, getStringNoLocale } from "@inrupt/solid-client";
+import { getBoolean, getInteger, getThing, getUrlAll, getStringNoLocale } from "@inrupt/solid-client";
 import { fragmentIdOf, toCard, toCards, toCatalog, toDeck, toDecks, toDistractor, withCatalog, withDeck, withDistractors, withoutDeck } from "./deckMapper";
 import type { Deck } from "@solid-memo/domain/deck";
 import { DCAT, DCTERMS, RDF, SM } from "../vocab";
@@ -374,7 +374,7 @@ describe("toCard", () => {
     ).toBeNull();
   });
 
-  it("reads the distractors a card names from its document, by id, leaving out one that is missing, does not fit or is retired", () => {
+  it("reads the distractors a card names from its document, by id, leaving out one that is missing or does not fit, and marking a retired one", () => {
     const distractor = (id: string, build: (t: ThingBuilder<ThingPersisted>) => ThingBuilder<ThingPersisted>) =>
       build(buildThing(createThing({ url: `${CARDS_DOC}#${id}` })).addIri(RDF.type, SM.Distractor)).build();
     const card = cardThing((t) =>
@@ -399,6 +399,7 @@ describe("toCard", () => {
     expect(toCard(card, dataset)!.distractors).toEqual([
       { id: "d1", text: { en: "Only web pages" }, note: { en: "A URL is one kind of IRI." } },
       { id: "d2", text: { "": "404" } },
+      { id: "retired", text: { "": "500" }, retired: true },
     ]);
     expect(toCards(dataset)).toHaveLength(1);
     expect(toDistractor(card)).toBeNull();
@@ -419,6 +420,16 @@ describe("withDistractors", () => {
     expect(getInteger(d1, SM.formatVersion)).toBe(1);
     expect(getUrlAll(d1, RDF.type)).toEqual([SM.Distractor, "https://schema.org/Answer"]);
     expect(getStringNoLocale(d1, "https://example.org/other")).toBe("kept");
+  });
+
+  it("retires a distractor, and restores it, keeping it named", () => {
+    const url = `${CARDS_DOC}#d1`;
+    const retired = withDistractors(mockSolidDatasetFrom(CARDS_DOC), CARDS_DOC, [{ id: "d1", text: { en: "One" }, retired: true }], []);
+    expect(getBoolean(getThing(retired.dataset, url)!, OWL_DEPRECATED)).toBe(true);
+    expect(toDistractor(getThing(retired.dataset, url)!)).toEqual({ id: "d1", text: { en: "One" }, retired: true });
+    const restored = withDistractors(retired.dataset, CARDS_DOC, [{ id: "d1", text: { en: "One" } }], [url]);
+    expect(getBoolean(getThing(restored.dataset, url)!, OWL_DEPRECATED)).toBeNull();
+    expect(toDistractor(getThing(restored.dataset, url)!)).toEqual({ id: "d1", text: { en: "One" } });
   });
 });
 

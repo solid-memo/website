@@ -16,7 +16,9 @@ export type LanguageRole =
   | "frontNote"
   | "backLabel"
   | "backNote"
-  | "pictureDescription";
+  | "pictureDescription"
+  | "distractor"
+  | "distractorNote";
 
 const LEGENDS: Record<LanguageRole, MessageKey> = {
   front: "language.legend.front",
@@ -28,6 +30,8 @@ const LEGENDS: Record<LanguageRole, MessageKey> = {
   backLabel: "language.legend.backLabel",
   backNote: "language.legend.backNote",
   pictureDescription: "language.legend.pictureDescription",
+  distractor: "language.legend.distractor",
+  distractorNote: "language.legend.distractorNote",
 };
 
 /** Whose recent choices a role offers first: a deck's own text, or a card's. */

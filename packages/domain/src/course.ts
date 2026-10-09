@@ -1,5 +1,5 @@
 import type { ChapterV1, StepV1 } from "@solid-memo/vocab/types.generated";
-import type { CardContent } from "./deck";
+import { activeCards, type CardContent } from "./deck";
 import { sameText, type LangText } from "./langText";
 import type { ReviewQuality, ReviewState } from "./review";
 import { shuffle, studyDayOf } from "./scheduling";
@@ -221,12 +221,12 @@ export interface Choice {
   note?: LangText;
 }
 
-/** The options a card is asked with: its back and each of its distractors, shuffled by `random`. */
+/** The options a card is asked with: its back and each of its distractors in use (a retired one is never offered), shuffled by `random`. */
 export function choicesOf(card: CardContent, random: () => number): Choice[] {
   return shuffle(
     [
       { key: "back", text: card.back, correct: true },
-      ...(card.distractors ?? []).map(
+      ...activeCards(card.distractors ?? []).map(
         (distractor): Choice => ({
           key: `distractor:${distractor.id}`,
           text: distractor.text,

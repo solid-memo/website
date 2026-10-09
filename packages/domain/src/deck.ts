@@ -3,6 +3,7 @@ import type { LangTexts } from "./keywords";
 import { shown, tidied, tidiedSideText, tidiedTagged, type LangText } from "./langText";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import { SM } from "@solid-memo/vocab/vocab.generated";
+import { tidiedDistractor } from "./distractors";
 import { isHttpUrl } from "./webId";
 
 /**
@@ -283,6 +284,11 @@ export interface Distractor {
   text: LangText;
   /** Why it is wrong, shown to whoever chose it: per language. */
   note?: LangText;
+  /**
+   * Set when it is retired (`owl:deprecated true`): kept, with its id,
+   * which a learner's answers may name, but never offered (choicesOf).
+   */
+  retired?: true;
 }
 
 export interface Card extends CardContent {
@@ -358,7 +364,7 @@ export function isMarkdown(textFormat: string | undefined): boolean {
  * format but plain text, one this app does not know too, for it may give
  * them meaning.
  */
-function isFormatted(textFormat: string | undefined): boolean {
+export function isFormatted(textFormat: string | undefined): boolean {
   return textFormat !== undefined && textFormat !== SM.plainText;
 }
 
@@ -376,7 +382,9 @@ function isFormatted(textFormat: string | undefined): boolean {
  * or given a translation (untagged and tagged text never mix), it needs
  * its language (textNeedsLanguage, textMixesUnstated). A note, the label
  * and a picture's description are always in a stated language, English
- * or not.
+ * or not. The card's distractors, when the input states them, are tidied
+ * as their own editor does (tidiedDistractor), their ids and retirement
+ * kept; none stated keeps the card's (DeckRepository.updateCard).
  */
 export function validateCardContent(
   input: CardContent,
@@ -411,6 +419,17 @@ export function validateCardContent(
   if (isEmptyText(back) && backImageUrl === undefined) {
     return { ok: false, error: new AppError("cardBackEmpty") };
   }
+  const distractors: Distractor[] = [];
+  for (const distractor of input.distractors ?? []) {
+    const tidy = tidiedDistractor(distractor, formatted);
+    if (!tidy.ok) return { ok: false, error: tidy.error };
+    distractors.push({
+      id: distractor.id,
+      text: tidy.text,
+      ...(tidy.note === undefined ? {} : { note: tidy.note }),
+      ...(distractor.retired ? { retired: true } : {}),
+    });
+  }
   return {
     ok: true,
     content: {
@@ -423,6 +442,7 @@ export function validateCardContent(
       ...(own.frontNote === undefined ? {} : { frontNote: own.frontNote }),
       ...(own.backLabel === undefined ? {} : { backLabel: own.backLabel }),
       ...(own.backNote === undefined ? {} : { backNote: own.backNote }),
+      ...(input.distractors === undefined ? {} : { distractors }),
       ...(input.textFormat === undefined ? {} : { textFormat: input.textFormat }),
     },
   };

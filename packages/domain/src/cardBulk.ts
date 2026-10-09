@@ -148,8 +148,8 @@ function editOf(edit: Exclude<CardEdit, { kind: "remove" }>): (card: Card) => Ca
 /**
  * The card with the content given, as it is saved, once it passes
  * validateCardContent; why not when it does not (a side the edit
- * empties is caught before: see replacing). Its distractors are kept as
- * `content` has them: the validation leaves them out.
+ * empties is caught before: see replacing). Its distractors, when
+ * `content` states them, are those the validation checked and tidied.
  */
 function validated(card: Card, content: CardContent, retired: boolean): Card | SkipReason {
   const valid = validateCardContent(content, card);
@@ -168,7 +168,6 @@ function validated(card: Card, content: CardContent, retired: boolean): Card | S
     createdAt: card.createdAt,
     formatVersion: CARD_FORMAT_VERSION,
     ...valid.content,
-    ...(content.distractors === undefined ? {} : { distractors: content.distractors }),
     ...(retired ? { retired: true } : {}),
   };
 }

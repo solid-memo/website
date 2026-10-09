@@ -235,7 +235,7 @@ export function toCards(dataset: SolidDataset): Card[] {
     .filter((card): card is Card => card !== null);
 }
 
-/** A distractor subject; null when it is not an sm:Distractor that fits its shape, its text is empty, or it is retired. */
+/** A distractor subject, a retired one marked so; null when it is not an sm:Distractor that fits its shape, or its text is empty. */
 export function toDistractor(thing: Thing): Distractor | null {
   const read = readVersioned(thing, "distractor");
   if (read === null) return null;
@@ -245,8 +245,9 @@ export function toDistractor(thing: Thing): Distractor | null {
 /**
  * The distractors a card names, ordered by id (RDF keeps no order among
  * a card's sm:distractor, so every reader gets the same one), as the
- * document has them: one that is missing, does not fit its shape or is
- * retired (owl:deprecated true) is left out.
+ * document has them: one that is missing or does not fit its shape is
+ * left out. A retired one (owl:deprecated true) is kept, marked so, for
+ * the card's editor and its learners' history; it is never offered.
  */
 export function distractorsOf(dataset: SolidDataset, urls: readonly string[]): Distractor[] {
   return urls

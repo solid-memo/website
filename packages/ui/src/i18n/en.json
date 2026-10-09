@@ -13,7 +13,9 @@
       "frontNote": "Language of the note under the front",
       "backLabel": "Language of the label",
       "backNote": "Language of the note under the back",
-      "pictureDescription": "Language of the picture's description"
+      "pictureDescription": "Language of the picture's description",
+      "distractor": "Language of the wrong option",
+      "distractorNote": "Language of the note on the wrong option"
     },
     "none": "No language (codes, numbers, symbols)",
     "otherOption": "Other language…",
@@ -35,7 +37,9 @@
       "backLabel": "the label",
       "backNote": "the note under the back",
       "frontImageDescription": "the front picture's description",
-      "backImageDescription": "the back picture's description"
+      "backImageDescription": "the back picture's description",
+      "distractor": "the wrong option",
+      "distractorNote": "the note on the wrong option"
     }
   },
   "theme": {
@@ -169,6 +173,38 @@
     "markdownDiffersTranslation": "Some of this card's translations read differently as Markdown: check them before you save.",
     "preview": "Preview",
     "previewOption": "As an option:"
+  },
+  "distractorFields": {
+    "legend": "Wrong options",
+    "hint": "Shown beside the back, the right answer, when the card is asked as a multiple-choice question, as a course asks it. Each is meant to be in the back's languages.",
+    "none": "This card has no wrong options.",
+    "retiredTag": "Retired",
+    "text": "Wrong option",
+    "note": "Why it is wrong (optional)",
+    "noteHint": "Shown to whoever chooses this option.",
+    "add": "Add a wrong option",
+    "addDone": "Add",
+    "update": "Update",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "editLabel": "Edit the wrong option “{option}”",
+    "retire": "Retire",
+    "retireLabel": "Retire the wrong option “{option}”",
+    "restore": "Restore",
+    "restoreLabel": "Restore the wrong option “{option}”",
+    "delete": "Delete",
+    "deleteLabel": "Delete the wrong option “{option}”",
+    "deleteConfirm": "Delete the wrong option “{option}”?",
+    "noLanguage": "no stated language",
+    "issues": "Worth a look",
+    "issue": {
+      "missing": "“{option}” has no text in {languages}, which the back is in.",
+      "extra": "“{option}” is in {languages}, which the back is not.",
+      "few": {
+        "one": "{count} wrong option is in use; a course asks a question with at least {least}.",
+        "other": "{count} wrong options are in use; a course asks a question with at least {least}."
+      }
+    }
   },
   "cardCreator": {
     "heading": "New card",
@@ -1145,6 +1181,8 @@
     "textLanguageInvalid": "“{tag}” is not a language code.",
     "textLanguageTaken": "There is already text in {language}. Edit or remove it first.",
     "textMixesUnstated": "This text does not say which language it is in, so it cannot have translations. Choose its language first.",
+    "distractorEmpty": "A wrong option needs text.",
+    "distractorPublished": "This wrong option is in the release the deck came from, so it cannot be deleted. Retire it instead.",
     "dailyLimitInvalid": "A daily limit is a whole number, 0 or more.",
     "webIdEmpty": "Enter your WebID.",
     "webIdInvalidUrl": "That is not a valid URL. A WebID looks like https://you.example/profile/card#me.",
@@ -1394,6 +1432,17 @@
         "other": "{count} days"
       },
       "notStudied": "Not studied yet"
+    },
+    "card": {
+      "heading": "Card: {card}",
+      "tabs": "What to edit",
+      "tab": {
+        "content": "Content",
+        "distractors": "Wrong options ({count})"
+      },
+      "releaseSame": "This card is as the release this deck was copied from has it, so a newer release updates it. An edit detaches it: newer releases no longer update it, though they may still retire it.",
+      "releaseChanged": "This card was changed from the release this deck was copied from, so newer releases no longer update it, though they may still retire it.",
+      "openInApp": "Open this card in Solid Memo"
     },
     "cardBulk": {
       "label": "Selected cards",

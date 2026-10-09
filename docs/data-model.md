@@ -236,10 +236,12 @@ data.
 │                        side and sm:backLabel above the back, each with
 │                        sm:formatVersion; a retired card
 │                        (owl:deprecated true) is kept but not studied;
-│                        a course's card names its wrong options
+│                        a card names its wrong options
 │                        (sm:distractor, and schema:suggestedAnswer),
-│                        sm:Distractor subjects beside it; the document
-│                        itself (<>) dcterms:isPartOf the deck's entry
+│                        sm:Distractor subjects beside it; a retired
+│                        one (owl:deprecated true) is kept but never
+│                        offered; the document itself (<>)
+│                        dcterms:isPartOf the deck's entry
 ├── reviews/<deckId>.ttl  SM-2 state: one sm:ReviewState per card and
 │                        direction (fast churn) — #<cardId> front→back,
 │                        #<cardId>@back-to-front the other way — naming
@@ -589,6 +591,34 @@ one `gather` edit, which leaves a deck already in the group where it is,
 so a retry changes nothing. A pace or a direction is one save of every
 entry (`saveDecks`). Removing decks deletes their cards and reviews
 documents first, then their entries in one save (`removeDecks`).
+
+## Wrong options
+
+Any card may have wrong options, shown beside its back when it is asked
+as a multiple-choice question ([courses.md](courses.md)). Each is an
+`sm:Distractor` subject of the card's document, typed `schema:Answer`
+too, with `sm:formatVersion 1`, its text (`sm:distractorText`) and,
+optionally, why it is wrong (`sm:distractorNote`). The card names each
+with `sm:distractor`. Solid Memo's card editor and the Studio's card
+inspector edit them ([studio.md](studio.md#card-inspector); the domain
+is [distractors.ts](../packages/domain/src/distractors.ts)):
+
+- **A new one** is written once it has text, as `#<card>-d<n>`, `n` one
+  more than the highest such id the card or the release the deck came
+  from has used. An id the release published is never used again: a
+  learner's answers may name one (`sm:chosenDistractor`). One deleted
+  before it was published may be.
+- **Retiring** one writes `owl:deprecated true` on its subject, and
+  restoring it removes that. A retired one stays named by the card, and
+  is never offered.
+- **Deleting** one removes its subject and the card's link to it, in the
+  one write of the card. Only one the deck's release never published
+  can be deleted; one it did is retired instead.
+- Each change is a write of the card (`updateCard`): the card and its
+  distractors are written, those it names no more removed, triples this
+  app does not know kept (`withDistractors`).
+- A wrong option is meant to be in the back's languages. One that is not
+  is a warning, never a refusal, in a pod's deck.
 
 ## Courses
 

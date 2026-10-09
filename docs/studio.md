@@ -4,8 +4,9 @@ Solid Memo Studio is a second app beside Solid Memo, at
 `https://solid-memo.com/studio/`. It is where users manage their decks.
 Later it is also where creators build decks and courses and publish
 them. For now it shows the decks of an instance in a table, changes
-several of them at once, arranges them into groups, and lists a deck's
-cards to search, filter, sort, select and edit at once.
+several of them at once, arranges them into groups, lists a deck's
+cards to search, filter, sort, select and edit at once, and edits one
+card, its wrong options included.
 
 ## What it shares with Solid Memo
 
@@ -50,23 +51,26 @@ hash with the same core as Solid Memo's router (`routerCore.ts` in
 | `#/?instance=…[&q=…&sort=…&order=desc]` | Home: every deck of the instance as a table ([below](#home)). `q` filters it, `sort` names the column it is sorted by, and `order=desc` sorts it the other way. |
 | `#/groups?instance=…` | Groups: the instance's decks arranged into groups, as Solid Memo's deck list arranges them. |
 | `#/cards?deck=…[&q&field&lang&state&has&sort&order&page&size]` | the card workbench: a deck's cards as a table ([below](#card-workbench)). The deck names the instance: its catalog's folder. |
+| `#/card?deck=…&card=…[&tab=distractors]` | the card inspector: one card, its content, or with `tab=distractors` its wrong options ([below](#card-inspector)). The content is the default tab, and is left out of the URL. |
 
 Anything else, `#/` among them, is the default route: the only
 instance's Home, or else the picker. An unknown instance falls back to
-the picker, and an unknown deck to its instance's Home. Like Solid
-Memo's fallbacks, these replace the history entry.
+the picker, an unknown deck to its instance's Home, and an unknown card
+(one removed, say) to its deck's cards. Like Solid Memo's fallbacks,
+these replace the history entry.
 
-Changing Home's filter or sort, or the workbench's query, replaces the
-history entry: it is the same screen, looked at another way, so Back
-leaves it.
+Changing Home's filter or sort, the workbench's query, or the
+inspector's tab, replaces the history entry: it is the same screen,
+looked at another way, so Back leaves it.
 
 Solid Memo links to Home as `studio/#/?instance=…` ("Open in Studio",
 in its instance bar, each deck's actions menu and the deck page;
 [routing.md](routing.md)). The Studio has no screen of one deck yet, so
 a deck's link opens its instance's Home.
 
-The trail is Instances › Decks, then › Groups on the Groups screen, or
-› Cards of *deck* in the workbench. The document title is the trail's
+The trail is Instances › Decks, then › Groups on the Groups screen,
+› Cards of *deck* in the workbench, or › Cards of *deck* › *card* in the
+inspector. The document title is the trail's
 last step and "Solid Memo Studio". After a move, the screen's heading
 takes the focus (`useScreenFocus`). The header has a link back to
 Solid Memo (`../#/`), at the open instance's decks when there is one.
@@ -169,7 +173,7 @@ are left to the search and the filters while they have the focus.
 
 The selected cards can be edited at once ([below](#bulk-edits)).
 
-A card opens in Solid Memo's card editor (`../#/card?…`), for now. The
+A card opens in the [card inspector](#card-inspector). The
 workbench reads the cards and the review states with the same queries
 as Solid Memo, and the instance's preferences for today's study day.
 A time-budget test keeps a query over 5,000 cards fast.
@@ -226,6 +230,63 @@ it: `undoCardEdit` writes the plan's inverse the same way, the deleted
 cards' review states included. It does so only while the cards are as
 the edit left them. The plan is kept in the page, never stored, so
 Undo goes with the next edit, another deck, or leaving the page.
+
+## Card inspector
+
+The card inspector ([`CardInspectorContainer`](../apps/studio/src/ui/CardInspectorContainer.tsx))
+shows one card of a deck, named in its heading, with a link to its page
+in Solid Memo. Its two tabs are links, the one shown marked
+(`aria-current`):
+
+- **Content**: Solid Memo's card editor (`CardContainer` in `ui`): the
+  card as it is studied, its sides, pictures, notes, label and Markdown,
+  Save, and Remove, which goes back to the deck's cards. Its wrong
+  options are left to their own tab.
+- **Wrong options**, with their number: the card's distractors
+  ([`DistractorFields`](../packages/ui/src/ui/DistractorFields.tsx) in
+  `ui`). Each shows its text, its note on why it is wrong and its id,
+  and is edited, retired, restored or deleted there. "Add a wrong
+  option" writes a new one, in the back's language to start with. Each
+  change is saved as it is made, as one write of the card
+  (`updateCard`), and the status line says so. An option being written
+  stays open until it is saved, so a failed save loses none of it.
+
+The domain makes each change
+([distractors.ts](../packages/domain/src/distractors.ts)):
+
+- `addDistractor` creates one only once it has text, under
+  `nextDistractorId`: `<card>-d<n>`, `n` one more than the highest such
+  id the card or its release has used. So an id the release published
+  is never used again; one deleted before it was published may be.
+- `editDistractor` changes its text and note, keeping its id and
+  whether it is retired.
+- `retireDistractor` and `restoreDistractor` mark it retired
+  (`owl:deprecated true`), or in use again. A retired one is kept, but
+  never offered.
+- `deleteDistractor` removes it, once the user confirms, but only one
+  the release the deck came from never published. One it did is refused
+  at once: a learner's history may name it, so it is retired instead.
+  While the release is read, every one counts as published.
+- `distractorIssues` lists what is worth a look: an option in use that
+  is not in exactly the back's languages, and fewer than two in use,
+  which a course asks with. In a pod's deck these are warnings, never
+  refusals.
+
+A copy of a library deck or a course says how the card stands to the
+release it came from. A card still as the release has it gets a
+warning: an edit, of its content or its wrong options, detaches it, so
+a newer release no longer updates it (it may still retire it). A card
+already changed says that newer releases no longer update it
+([migrations.md](migrations.md#catching-up-with-the-library)).
+
+Solid Memo's own card page edits the wrong options too, under the
+card's fields. There they are saved with the card, by its Save. Left as
+they were, they follow the card as it is read afresh (a change in the
+inspector meanwhile included), and the save does not state them, so the
+card keeps its own.
+
+The inspector reads the deck's cards with the same query as the
+workbench and Solid Memo, so an edit in one shows in the others.
 
 ## Groups
 

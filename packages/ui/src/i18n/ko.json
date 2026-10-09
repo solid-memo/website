@@ -13,7 +13,9 @@
       "frontNote": "앞면 아래 메모의 언어",
       "backLabel": "레이블의 언어",
       "backNote": "뒷면 아래 메모의 언어",
-      "pictureDescription": "그림 설명의 언어"
+      "pictureDescription": "그림 설명의 언어",
+      "distractor": "오답 선택지의 언어",
+      "distractorNote": "오답 선택지 메모의 언어"
     },
     "none": "언어 없음(코드, 숫자, 기호)",
     "otherOption": "다른 언어…",
@@ -35,7 +37,9 @@
       "backLabel": "레이블",
       "backNote": "뒷면 아래 메모",
       "frontImageDescription": "앞면 그림 설명",
-      "backImageDescription": "뒷면 그림 설명"
+      "backImageDescription": "뒷면 그림 설명",
+      "distractor": "오답 선택지",
+      "distractorNote": "오답 선택지 메모"
     }
   },
   "theme": {
@@ -169,6 +173,38 @@
     "markdownDiffersTranslation": "이 카드의 번역 중 일부가 Markdown으로는 다르게 읽혀요. 저장하기 전에 확인해 주세요.",
     "preview": "미리보기",
     "previewOption": "선택지로 볼 때:"
+  },
+  "distractorFields": {
+    "legend": "오답 선택지",
+    "hint": "코스처럼 카드를 객관식 질문으로 물어볼 때 정답인 뒷면 옆에 보여 줘요. 각 선택지는 뒷면과 같은 언어로 써야 해요.",
+    "none": "이 카드에는 오답 선택지가 없어요.",
+    "retiredTag": "사용 중지됨",
+    "text": "오답 선택지",
+    "note": "틀린 이유(선택)",
+    "noteHint": "이 선택지를 고른 사람에게 보여 줘요.",
+    "add": "오답 선택지 추가",
+    "addDone": "추가",
+    "update": "업데이트",
+    "cancel": "취소",
+    "edit": "편집",
+    "editLabel": "오답 선택지 ‘{option}’ 편집",
+    "retire": "사용 중지",
+    "retireLabel": "오답 선택지 ‘{option}’ 사용 중지",
+    "restore": "복원",
+    "restoreLabel": "오답 선택지 ‘{option}’ 복원",
+    "delete": "삭제",
+    "deleteLabel": "오답 선택지 ‘{option}’ 삭제",
+    "deleteConfirm": "오답 선택지 ‘{option}’을(를) 삭제할까요?",
+    "noLanguage": "언어 지정 안 됨",
+    "issues": "확인해 볼 점",
+    "issue": {
+      "missing": "‘{option}’에는 뒷면의 언어인 {languages} 텍스트가 없어요.",
+      "extra": "‘{option}’은(는) 뒷면의 언어가 아닌 {languages}(으)로 쓰여 있어요.",
+      "few": {
+        "one": "사용 중인 오답 선택지가 {count}개예요. 코스는 질문마다 오답 선택지를 {least}개 이상 사용해요.",
+        "other": "사용 중인 오답 선택지가 {count}개예요. 코스는 질문마다 오답 선택지를 {least}개 이상 사용해요."
+      }
+    }
   },
   "cardCreator": {
     "heading": "새 카드",
@@ -1145,6 +1181,8 @@
     "textLanguageInvalid": "‘{tag}’은(는) 언어 코드가 아니에요.",
     "textLanguageTaken": "{language} 텍스트가 이미 있어요. 먼저 그 텍스트를 수정하거나 제거해 주세요.",
     "textMixesUnstated": "이 텍스트는 어떤 언어인지 정해지지 않아서 번역을 추가할 수 없어요. 먼저 언어를 선택해 주세요.",
+    "distractorEmpty": "오답 선택지에 텍스트를 입력해 주세요.",
+    "distractorPublished": "이 오답 선택지는 덱을 가져온 릴리스에 들어 있어서 삭제할 수 없어요. 대신 사용 중지해 주세요.",
     "dailyLimitInvalid": "하루 한도는 0 이상의 정수여야 해요.",
     "webIdEmpty": "WebID를 입력해 주세요.",
     "webIdInvalidUrl": "올바른 URL이 아니에요. WebID는 https://you.example/profile/card#me 같은 형태예요.",
@@ -1394,6 +1432,17 @@
         "other": "{count}일"
       },
       "notStudied": "아직 학습하지 않음"
+    },
+    "card": {
+      "heading": "카드: {card}",
+      "tabs": "편집할 내용",
+      "tab": {
+        "content": "내용",
+        "distractors": "오답 선택지({count})"
+      },
+      "releaseSame": "이 카드는 이 덱을 복사해 온 릴리스와 같아서, 새 릴리스가 나오면 업데이트돼요. 편집하면 릴리스와 분리돼요. 새 릴리스가 더 이상 업데이트하지 않지만, 사용 중지할 수는 있어요.",
+      "releaseChanged": "이 카드는 이 덱을 복사해 온 릴리스와 달라져서, 새 릴리스가 더 이상 업데이트하지 않아요. 다만 사용 중지할 수는 있어요.",
+      "openInApp": "Solid Memo에서 이 카드 열기"
     },
     "cardBulk": {
       "label": "선택한 카드",
