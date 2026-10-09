@@ -3,6 +3,8 @@ import type { Deck } from "./deck";
 import {
   filterLibraryDecks,
   isCopyOf,
+  libraryCopiesOf,
+  offersNewerRelease,
   topicLabels,
   topicsOf,
   type LibraryDeck,
@@ -41,6 +43,31 @@ describe("isCopyOf", () => {
     expect(isCopyOf({ sourceUrl: "https://solid-memo.com/decks/capitals/v3.ttl" } as Deck, capitals)).toBe(true);
     expect(isCopyOf(deck, http)).toBe(false);
     expect(isCopyOf({} as Deck, capitals)).toBe(false);
+  });
+});
+
+describe("offersNewerRelease and libraryCopiesOf", () => {
+  const v1 = "https://solid-memo.com/decks/capitals/v1.ttl";
+  const v2 = "https://solid-memo.com/decks/capitals/v2.ttl";
+  const series = { ...capitals, releases: [{ url: v1, version: "1" }, { url: v2, version: "2" }] };
+  const copy = (id: string, sourceUrl?: string) => ({ id, ...(sourceUrl === undefined ? {} : { sourceUrl }) }) as Deck;
+
+  it("tell a copy of an older release from one of the current release, or of one listed as no older", () => {
+    expect(offersNewerRelease(copy("a", v1), series)).toBe(true);
+    expect(offersNewerRelease(copy("a", v2), series)).toBe(false);
+    expect(offersNewerRelease(copy("a", v1), { ...series, url: "https://solid-memo.com/decks/capitals/v3.ttl", version: "1" })).toBe(false);
+    // A release the index does not list may be older.
+    expect(offersNewerRelease(copy("a", "https://solid-memo.com/decks/capitals/v0.ttl"), series)).toBe(true);
+  });
+
+  it("list each copy with its deck in the library and its version, leaving home-made decks out", () => {
+    const decks = [copy("a", v1), copy("home"), copy("b", v2), copy("gone", "https://solid-memo.com/decks/gone/v1.ttl"), copy("c", "https://solid-memo.com/decks/capitals/v9.ttl")];
+    expect(libraryCopiesOf(decks, [http, series])).toEqual([
+      { deck: decks[0], series, version: "1", newer: true },
+      { deck: decks[2], series, version: "2", newer: false },
+      { deck: decks[3], series: null, version: null, newer: false },
+      { deck: decks[4], series, version: null, newer: true },
+    ]);
   });
 });
 

@@ -1665,6 +1665,20 @@ describe("createUseCases", () => {
     expect(deps.deckRepository.saveDeck).not.toHaveBeenCalled();
   });
 
+  it("planLibraryUpgrade does not read the index again for a series it is given", async () => {
+    const deps = makeDeps();
+    const copy: Deck = { ...deck, sourceUrl: libraryDeck.url };
+    const current: LibraryDeck = { ...libraryDeck, url: "https://solid-memo.com/decks/capitals/v2.ttl", version: "2" };
+    vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) =>
+      url === current.url
+        ? { ...libraryContent, url, version: "2", cards: [...libraryContent.cards, { id: "norway", front: { "": "Norway" }, back: { "": "Oslo" }, formatVersion: 1 }] }
+        : libraryContent,
+    );
+    vi.mocked(deps.deckRepository.listCards).mockResolvedValue([]);
+    await expect(createUseCases(deps).planLibraryUpgrade(copy, current)).resolves.toMatchObject({ toVersion: "2", add: [{ id: "norway" }] });
+    expect(deps.deckLibrary.listLibraryDecks).not.toHaveBeenCalled();
+  });
+
   it("planLibraryUpgrade plans a copy more than one release behind with the releases in between, whose cards are the library's", async () => {
     const deps = makeDeps();
     const LIB = "https://solid-memo.com/decks/capitals/";
@@ -1707,6 +1721,27 @@ describe("createUseCases", () => {
     await expect(createUseCases(deps).planLibraryUpgrade({ ...deck, sourceUrl: v2 })).resolves.toBeNull();
     expect(deps.deckLibrary.fetchLibraryDeck).not.toHaveBeenCalled();
     expect(deps.deckRepository.listCards).not.toHaveBeenCalled();
+  });
+
+  it("listLibraryUpdates lists the instance's copies from one read of the library's index, and reads none without a copy", async () => {
+    const deps = makeDeps();
+    const v2 = "https://solid-memo.com/decks/capitals/v2.ttl";
+    const current: LibraryDeck = { ...libraryDeck, url: v2, version: "2", releases: [...libraryDeck.releases, { url: v2, version: "2" }] };
+    vi.mocked(deps.deckLibrary.listLibraryDecks).mockResolvedValue([current]);
+    const old: Deck = { ...deck, url: `${deck.url}-old`, sourceUrl: libraryDeck.url };
+    const fresh: Deck = { ...deck, url: `${deck.url}-fresh`, sourceUrl: v2 };
+    vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([deck, old, fresh]);
+    const useCases = createUseCases(deps);
+    await expect(useCases.listLibraryUpdates(instance.url)).resolves.toEqual([
+      { deck: old, series: current, version: "1", newer: true },
+      { deck: fresh, series: current, version: "2", newer: false },
+    ]);
+    expect(deps.deckRepository.listDecks).toHaveBeenCalledWith(instance.url);
+    expect(deps.deckLibrary.listLibraryDecks).toHaveBeenCalledTimes(1);
+    expect(deps.deckLibrary.fetchLibraryDeck).not.toHaveBeenCalled();
+    vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([deck]);
+    await expect(useCases.listLibraryUpdates(instance.url)).resolves.toEqual([]);
+    expect(deps.deckLibrary.listLibraryDecks).toHaveBeenCalledTimes(1);
   });
 
   it("addReleaseLanguages gives a copy the languages its release adds, and saves it; nothing for a home-made deck or nothing to add", async () => {

@@ -14,6 +14,7 @@ import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { DeckTableScreen, type DeckBadge } from "./DeckTableScreen";
 import { HealthBadge } from "./HealthBadge";
+import { UpdateBadge } from "./UpdateBadge";
 
 /** A bulk action on the selected decks. */
 type Bulk =
@@ -29,7 +30,8 @@ type Bulk =
  * then each deck's cards and today's counts, read as Solid Memo reads
  * them, each row's figures as they come. The check of the instance
  * (as Solid Memo makes it when it is opened) and which decks are
- * courses come in later, as badges; each deck's health (HealthBadge)
+ * courses come in later, as badges; each deck's health (HealthBadge),
+ * and for a library copy whether a newer release is out (UpdateBadge),
  * only once its row is on the screen.
  *
  * A bulk action is one write wherever it can be: a move is one edit of
@@ -48,6 +50,7 @@ export function DeckTableContainer({
   groupsHref,
   instanceHref,
   healthHref,
+  libraryHref,
   deckHref,
   cardsHref,
 }: {
@@ -62,6 +65,8 @@ export function DeckTableContainer({
   instanceHref: string;
   /** The health of a deck, or (none named) of the instance. */
   healthHref: (deck?: Deck) => string;
+  /** The instance's copies of library releases. */
+  libraryHref: string;
   /** What a deck says of itself, in the Studio. */
   deckHref: (deck: Deck) => string;
   /** A deck's cards, in the card workbench. */
@@ -186,6 +191,11 @@ export function DeckTableContainer({
       healthHref={healthHref()}
       // Checked only as its row comes into view; quiet when all is well.
       healthBadge={(deck) => <HealthBadge useCases={useCases} instanceUrl={instance.url} deck={deck} href={healthHref(deck)} quiet />}
+      libraryHref={libraryHref}
+      // A copy only, looked up as its row comes into view; nothing while it is up to date.
+      updateBadge={(deck) =>
+        deck.sourceUrl === undefined ? null : <UpdateBadge useCases={useCases} instanceUrl={instance.url} deck={deck} href={libraryHref} />
+      }
       onMove={(selected, parent) => run({ kind: "move", decks: selected, parent })}
       onPace={(selected, pace) => run({ kind: "pace", decks: selected, pace })}
       onDirection={(selected, direction) => run({ kind: "direction", decks: selected, direction })}

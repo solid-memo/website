@@ -1,5 +1,7 @@
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
+import type { LibraryDeck } from "@solid-memo/domain/library";
+import type { LibraryUpgradePlan } from "@solid-memo/domain/libraryUpgrade";
 import type { Session } from "@solid-memo/domain/session";
 
 /** What the Studio's tests share: a user, two instances, and decks and cards in the first. */
@@ -31,5 +33,46 @@ export function makeCard(deck: Deck, id: string, retired = false): Card {
     createdAt: "2026-09-21T10:00:00.000Z",
     formatVersion: 3,
     ...(retired ? { retired: true as const } : {}),
+  };
+}
+
+/** A library deck at release 2, and a copy of a release of it. */
+export const capitals: LibraryDeck = {
+  url: "https://solid-memo.com/decks/capitals/v2.ttl",
+  seriesUrl: "https://solid-memo.com/decks/index.ttl#capitals",
+  version: "2",
+  releases: [
+    { url: "https://solid-memo.com/decks/capitals/v1.ttl", version: "1" },
+    { url: "https://solid-memo.com/decks/capitals/v2.ttl", version: "2", notes: "Norway added." },
+  ],
+  themes: [],
+  keywords: {},
+  title: { en: "Capitals" },
+  cardCount: 3,
+  authors: [],
+  direction: "front-to-back",
+  sources: [],
+};
+
+export function makeCopy(id: string, title: Deck["title"], version: "1" | "2"): Deck {
+  return { ...makeDeck(id, title), sourceUrl: `https://solid-memo.com/decks/capitals/v${version}.ttl` };
+}
+
+/** What upgrading a copy of release 1 to release 2 does: a card added, one changed, one removed. */
+export function makePlan(deck: Deck): LibraryUpgradePlan {
+  return {
+    fromVersion: "1",
+    toVersion: "2",
+    releaseUrl: capitals.url,
+    notes: [{ version: "2", notes: "Norway added." }],
+    add: [{ id: "norway", front: { en: "Norway" }, back: { en: "Oslo" }, formatVersion: 3 }],
+    change: [{ id: "sweden", front: { en: "Sweden" }, back: { en: "Stockholm" }, formatVersion: 3 }],
+    retire: [],
+    restore: [],
+    remove: [makeCard(deck, "latvia")],
+    kept: [],
+    applied: [],
+    gone: [],
+    appliedAbout: [],
   };
 }

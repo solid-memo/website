@@ -173,3 +173,46 @@ export function filterLibraryDecks(
       matchesQuery([...Object.values(deck.title), ...Object.values(deck.description ?? {}), ...allKeywords(deck.keywords)], query),
   );
 }
+
+/**
+ * Whether the library has a release of the copy's deck newer than the
+ * one the copy came from, as its index tells without reading a release
+ * or the copy's cards: not when the copy is of the current release, or
+ * of one the index lists as no older. A release the index does not list
+ * may be older: planLibraryUpgrade reads both to tell.
+ */
+export function offersNewerRelease(deck: Deck, series: LibraryDeck): boolean {
+  if (series.url === deck.sourceUrl) return false;
+  const copied = series.releases.find((release) => release.url === deck.sourceUrl);
+  return copied === undefined || Number(series.version) > Number(copied.version);
+}
+
+/** A deck in the pod copied from a library release (it has prov:wasDerivedFrom), as the library's index sees it. */
+export interface LibraryCopy {
+  deck: Deck;
+  /** The library deck it is a copy of; null when the index no longer lists its series. */
+  series: LibraryDeck | null;
+  /** The version of the release it was copied from; null when the index does not list that release. */
+  version: string | null;
+  /** Whether the library has a newer release to offer (offersNewerRelease); planLibraryUpgrade says what it would change. */
+  newer: boolean;
+}
+
+/**
+ * The decks copied from a library release, in their order, each with its
+ * deck in the library: the index is looked up once a series, however
+ * many copies of it there are. Home-made decks are left out.
+ */
+export function libraryCopiesOf(decks: readonly Deck[], library: readonly LibraryDeck[]): LibraryCopy[] {
+  const bySeries = new Map(library.map((libraryDeck) => [libraryDeck.seriesUrl, libraryDeck]));
+  return decks.flatMap((deck): LibraryCopy[] => {
+    if (deck.sourceUrl === undefined) return [];
+    const series = bySeries.get(librarySeriesUrlOf(deck.sourceUrl)) ?? null;
+    if (series === null) return [{ deck, series, version: null, newer: false }];
+    const version =
+      series.url === deck.sourceUrl
+        ? series.version
+        : (series.releases.find((release) => release.url === deck.sourceUrl)?.version ?? null);
+    return [{ deck, series, version, newer: offersNewerRelease(deck, series) }];
+  });
+}

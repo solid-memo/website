@@ -825,8 +825,9 @@ in Solid Memo; the [Studio](studio.md) closes the gaps one by one.
   progress (a chapter marked not done, the course restarted), the
   instance's name and the catalogue's description and licence, a
   card's wrong options, edits of many cards at once, a card's review
-  state (forgotten, or given a due day), and the deck a card is in
-  (moved or copied to another).
+  state (forgotten, or given a due day), the deck a card is in
+  (moved or copied to another), and several library copies upgraded at
+  once.
 - **Shown only**: the answer log, as statistics, and in the Studio as a
   card's history, the wrong options chosen, lapses and leeches; the
   schedule in the digest, as counts, and in the Studio as a forecast;

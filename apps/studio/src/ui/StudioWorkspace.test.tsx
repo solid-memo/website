@@ -246,6 +246,27 @@ describe("StudioWorkspace", () => {
     expect(screen.getByRole("link", { name: "Wrong options (0)" })).toHaveAttribute("href", studioRouteToHash({ ...route, tab: "distractors" }));
   });
 
+  it("opens the instance's library copies from Home, with a link to the library in Solid Memo and each deck's about screen", async () => {
+    const copy = { ...kanji, sourceUrl: "https://solid-memo.com/decks/capitals/v1.ttl" };
+    window.history.replaceState(null, "", home(instanceA.url));
+    renderWorkspace(
+      makeUseCasesFake({
+        listInstances: vi.fn(async () => [instanceA]),
+        listDecks: vi.fn(async () => [copy]),
+        listLibraryUpdates: vi.fn(async () => [{ deck: copy, series: null, version: null, newer: false }]),
+      }),
+    );
+    fireEvent.click(await screen.findByRole("link", { name: "Library copies" }));
+    expect(await screen.findByRole("heading", { name: "Library copies in Deck set A" })).toBeInTheDocument();
+    expect(parseStudioHash(window.location.hash)).toEqual({ screen: "library", instanceUrl: instanceA.url });
+    await waitFor(() => expect(document.title).toBe("Library copies – Solid Memo Studio"));
+    expect(screen.getByRole("link", { name: "Browse the deck library" })).toHaveAttribute(
+      "href",
+      `#/library?instance=${encodeURIComponent(instanceA.url)}`,
+    );
+    expect(screen.getByRole("link", { name: "Kanji N5" })).toHaveAttribute("href", studioRouteToHash({ screen: "about", deckUrl: kanji.url }));
+  });
+
   it("links a deck's cards to its health", async () => {
     window.history.replaceState(null, "", studioRouteToHash({ screen: "cards", deckUrl: kanji.url }));
     renderWorkspace(makeUseCasesFake({ listInstances: vi.fn(async () => [instanceA]), listDecks: vi.fn(async () => [kanji]) }));

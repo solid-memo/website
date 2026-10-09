@@ -1,6 +1,6 @@
 import type { JSX } from "preact";
 import { useState } from "preact/hooks";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
@@ -10,6 +10,33 @@ import { courseKey } from "./CourseContainer";
 import { useI18n } from "./i18n";
 import { LibraryUpgradeNotice } from "./LibraryUpgradeNotice";
 import { DECK_UPGRADE_SCREEN_STEPS, DeckUpgradeFailure, DeckUpgradeProgress, type DeckUpgradeScreenStep } from "./DeckUpgrade";
+
+/**
+ * What upgrading the deck would do (UseCases.planLibraryUpgrade), kept
+ * for the session. Planned for the deck as it is: once an upgrade moves
+ * it to another release, the plan for the deck as it was no longer
+ * applies.
+ */
+export function libraryUpgradeQuery(useCases: UseCases, deck: Deck) {
+  return {
+    queryKey: ["libraryUpgrade", deck.url, deck.sourceUrl, deck.cardsDocumentUrl],
+    queryFn: () => useCases.planLibraryUpgrade(deck),
+    staleTime: Infinity,
+  };
+}
+
+/** After a deck's upgrade, everything it touched is read again at once, so the deck changes on screen in one go. */
+export function refreshUpgradedDeck(queryClient: QueryClient, instanceUrl: string, deck: Deck): Promise<unknown> {
+  queryClient.removeQueries({ queryKey: ["studyQueue", deck.url] });
+  return Promise.all([
+    queryClient.invalidateQueries({ queryKey: ["decks"] }),
+    queryClient.invalidateQueries({ queryKey: ["cards", deck.cardsDocumentUrl] }),
+    queryClient.invalidateQueries({ queryKey: ["reviews", deck.reviewsDocumentUrl] }),
+    queryClient.invalidateQueries({ queryKey: ["migration", instanceUrl] }),
+    // A course's deck now follows the newer release, and its outline with it.
+    queryClient.invalidateQueries({ queryKey: courseKey(deck.url) }),
+  ]);
+}
 
 /**
  * Checks whether the library has a newer release of an imported deck
@@ -37,14 +64,7 @@ export function LibraryUpgradeContainer({
   const { t, readerText, readerLang, errorText } = useI18n();
   const queryClient = useQueryClient();
 
-  const planQuery = useQuery({
-    // Planned for the deck as it is: once an upgrade moves it to another
-    // release, the plan for the deck as it was no longer applies.
-    queryKey: ["libraryUpgrade", deck.url, deck.sourceUrl, deck.cardsDocumentUrl],
-    queryFn: () => useCases.planLibraryUpgrade(deck),
-    enabled: deck.sourceUrl !== undefined,
-    staleTime: Infinity,
-  });
+  const planQuery = useQuery({ ...libraryUpgradeQuery(useCases, deck), enabled: deck.sourceUrl !== undefined });
 
   useQuery({
     queryKey: ["releaseLanguages", deck.url, deck.sourceUrl],
@@ -81,17 +101,8 @@ export function LibraryUpgradeContainer({
         ]);
         return outcome;
       }
-      // Everything the upgrade touched is read again at once, so the deck changes on screen in one go.
       setProgress({ step: "refresh", done: DECK_UPGRADE_SCREEN_STEPS.length - 1 });
-      queryClient.removeQueries({ queryKey: ["studyQueue", deck.url] });
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["decks"] }),
-        queryClient.invalidateQueries({ queryKey: ["cards", deck.cardsDocumentUrl] }),
-        queryClient.invalidateQueries({ queryKey: ["reviews", deck.reviewsDocumentUrl] }),
-        queryClient.invalidateQueries({ queryKey: ["migration", instance.url] }),
-        // A course's deck now follows the newer release, and its outline with it.
-        queryClient.invalidateQueries({ queryKey: courseKey(deck.url) }),
-      ]);
+      await refreshUpgradedDeck(queryClient, instance.url, deck);
       return outcome;
     },
   });

@@ -11,7 +11,7 @@ import { Screen } from "./Screen.ts";
  * selection and bulk edits, with their Undo, its edits of review
  * states, and its moves to another deck), the card inspector (a card's content, its wrong options,
  * its schedule and its history), a deck's schedule, a deck's and the
- * instance's health, a deck's about screen (its
+ * instance's health, its library copies, a deck's about screen (its
  * authors and licence), the instance's name and catalogue, and its way
  * back to Solid Memo.
  */
@@ -364,6 +364,23 @@ export class Studio extends Screen {
           this.t("studio.health.badge.healthy"),
         );
       }
+    });
+  }
+
+  /**
+   * Follows Home's link to the instance's library copies: the deck is
+   * listed there, copied from the library's current release, so up to
+   * date, with nothing to update.
+   */
+  async openLibraryCopies(instance: string, deck: string): Promise<void> {
+    await this.intent("Open the instance's library copies", async () => {
+      await this.page.getByRole("link", { name: this.t("studio.decks.libraryLink"), exact: true }).click();
+      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.library.heading", { instance }) })).toBeVisible();
+      await this.app.chrome.expectBreadcrumbHere("studio.library.crumb");
+      const table = this.page.getByRole("table", { name: this.t("studio.library.caption", { instance }) });
+      const row = table.getByRole("row").filter({ has: this.page.getByRole("rowheader", { name: deck, exact: true }) });
+      await expect(row.getByRole("cell").nth(3)).toHaveText(this.t("studio.library.upToDate"));
+      await expect(row.getByRole("checkbox")).toHaveCount(0);
     });
   }
 

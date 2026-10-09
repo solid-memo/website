@@ -9,7 +9,8 @@ cards to search, filter, sort, select, edit at once and move or copy
 to another deck, and edits one card, its wrong options and its
 schedule included, with its history of answers. It shows a deck's
 schedule to come, its lapses and leeches, and everything wrong with a
-deck or the instance. It also edits what
+deck or the instance. It lists the decks copied from the library, and
+upgrades them to newer releases. It also edits what
 a deck says of itself (its authors and licence among it), a course's
 progress, and the instance's name and catalogue.
 
@@ -75,6 +76,7 @@ others.
 | `#/studio/about?deck=…` | a deck's about screen: what it says of itself, how it is studied and, for a course, the learner's progress ([below](#a-decks-about-screen)). |
 | `#/studio/instance?instance=…` | the instance's name and its catalogue ([below](#the-instance)). |
 | `#/studio/health?instance=…[&deck=…]` | everything wrong with the instance, or with one of its decks ([below](#health)). |
+| `#/studio/library?instance=…` | the instance's copies of library releases, the newer releases and what upgrading would change ([below](#library-copies)). |
 
 `#/studio/` and its query count as `#/studio`. Anything else under
 `#/studio`, `#/studio` itself among them, is the default route: the only
@@ -95,7 +97,8 @@ The trail is Instances › Decks, then › Groups on the Groups screen,
 › Cards of *deck* in the workbench, › Cards of *deck* › *card* in the
 inspector, › Cards of *deck* › Schedule on a deck's schedule, › About *deck* on a deck's about screen, or › Name and
 catalogue on the instance's screen, › Health on the instance's health,
-and › Health › *deck* on a deck's. The document title is the trail's
+› Health › *deck* on a deck's, and › Library copies on the library
+copies. The document title is the trail's
 last step and "Solid Memo Studio". After a move, the screen's heading
 takes the focus (`useScreenFocus`). The header has a link back to
 Solid Memo, at the open instance's decks when there is one, and the
@@ -138,9 +141,15 @@ link to the deck's health. A deck is checked only once its row is on
 the screen (`IntersectionObserver`), so a long table checks only the
 decks the user scrolls to. A deck with no problem gets no badge.
 
+Beside a library copy's name, "Release 2 out" when the library has a
+newer release of it, a link to the [library copies](#library-copies).
+It too is looked up once its row is on the screen: one read of the
+library's index for every copy (`listLibraryUpdates`). A copy up to
+date, or one whose library cannot be read, gets no badge.
+
 Above the table are links to the [Groups](#groups) screen, to the
-instance's [name and catalogue](#the-instance) and to its
-[health](#health); with no decks yet, the name and catalogue is still
+instance's [name and catalogue](#the-instance), to its
+[health](#health) and to its [library copies](#library-copies); with no decks yet, the name and catalogue is still
 there.
 
 The table starts in the order the user arranged the decks. A column's
@@ -606,6 +615,55 @@ screen opens. The
 end-to-end tests hold `checkDeck` against real servers, the documents
 it checks again and a removal that clears it included
 ([deckHealth.integration.test.ts](../e2e/pod/src/deckHealth.integration.test.ts)).
+
+## Library copies
+
+The library copies screen ([`LibraryCopiesContainer`](../apps/studio/src/ui/LibraryCopiesContainer.tsx))
+lists the instance's decks copied from a library release (they have
+`prov:wasDerivedFrom`), a row each: the release it came from, the
+library's current one, and what upgrading would change. It links to
+Solid Memo's deck library.
+
+The use case `listLibraryUpdates` reads the instance's decks and the
+library's index once, however many copies of a deck there are. The
+domain puts them together
+([library.ts](../packages/domain/src/library.ts), `libraryCopiesOf`): a
+copy of the current release, or of one the index lists as no older, is
+up to date (`offersNewerRelease`, as Solid Memo's offer tells it). A copy
+whose deck the index no longer lists says so. A release the index does
+not list is an unknown release.
+
+For each copy with a newer release, the screen asks what upgrading
+would do (`planLibraryUpgrade`, the plan Solid Memo's deck page offers;
+[migrations.md](migrations.md#catching-up-with-the-library)). It gives
+the copy's series, as the index listed it, so the index is not read
+again for each copy. It says so in a sentence, as Solid Memo does, and
+"What changes" folds out the
+rest: what history is kept, the new releases' notes, and the cards
+added, changed, retired, brought back, removed, and left as the user
+has them. A newer release with nothing for the copy says so.
+
+The copies that can be upgraded are selected by their checkbox, or all
+at once. **Update 2 decks** (as many as are selected) upgrades them one
+after another, each with Solid Memo's own upgrade (`applyLibraryUpgrade`), on the plan the user saw: a
+deck changed since is refused, and left as it was. Nothing about an
+upgrade is new here. While it runs, the screen names the deck, "2 of 3",
+and its steps. Then a line for each deck says the release it is at now,
+or the step it failed at and whether the deck changed: one cut off
+part-way can be studied as it is, and updating it again finishes it
+([migrations.md](migrations.md#how-an-upgrade-is-applied)). A failure is
+that deck's alone; the next is upgraded all the same. Everything an
+upgrade touched is read afresh, the copies among it, and so is a failed
+deck the upgrade changed in part. A failed deck is planned again too: it
+may have changed in another tab. Each
+upgrade still reads the index once more, to plan again with the deck as
+it now is. The end-to-end tests hold `listLibraryUpdates` and a
+batch of two upgrades against real servers
+([deckUpgrade.integration.test.ts](../e2e/pod/src/deckUpgrade.integration.test.ts)).
+
+A copy of a release outside the library's index (one imported by its
+URL, once that can be) shows as no longer in the library: there is no
+index to find a newer release in.
 
 ## Groups
 

@@ -43,6 +43,8 @@ function Harness({ initial = { filter: "" }, ...overrides }: Partial<Props> & { 
       instanceHref="#/instance?instance=a"
       healthHref="#/health?instance=a"
       healthBadge={() => null}
+      libraryHref="#/library?instance=a"
+      updateBadge={() => null}
       onMove={async () => true}
       onPace={async () => true}
       onDirection={async () => true}
@@ -114,6 +116,13 @@ describe("DeckTableScreen", () => {
     expect(screen.getByRole("link", { name: "Health" })).toHaveAttribute("href", "#/health?instance=a");
     const kanjiRow = within(table()).getAllByRole("rowheader")[0]!;
     expect(within(kanjiRow).getByRole("link", { name: "Health of deck-1" })).toHaveAttribute("href", "#/health?deck=deck-1");
+  });
+
+  it("links to the instance's library copies, and puts a deck's update beside its name", () => {
+    render(<Harness updateBadge={(deck) => (deck.url === kanji.url ? <a href="#/library?instance=a">Release 2 out</a> : null)} />);
+    expect(screen.getByRole("link", { name: "Library copies" })).toHaveAttribute("href", "#/library?instance=a");
+    const kanjiRow = within(table()).getAllByRole("rowheader")[0]!;
+    expect(within(kanjiRow).getByRole("link", { name: "Release 2 out" })).toHaveAttribute("href", "#/library?instance=a");
   });
 
   it("sorts by a column, then the other way, then as arranged, saying so on the column", () => {
