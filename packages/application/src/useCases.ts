@@ -102,9 +102,11 @@ import {
 } from "@solid-memo/domain/preferences";
 import {
   REVIEW_STATE_FORMAT_VERSION,
+  type ReviewKey,
   type ReviewQuality,
   type ReviewState,
 } from "@solid-memo/domain/review";
+import { isStudyDay, rescheduleStates, resetStates } from "@solid-memo/domain/reviewStateEdits";
 import {
   buildStudyQueue,
   nextDueDate,
@@ -476,6 +478,30 @@ export interface UseCases {
    * changedElsewhere and nothing is written.
    */
   undoCardEdit(instanceUrl: string, deck: Deck, plan: CardEditPlan): Promise<void>;
+  /**
+   * Forget the cards of these ids, in one direction or (absent) in both
+   * (domain/reviewStateEdits.ts, resetStates): their review states go,
+   * so the scheduler sees them as new; their answers stay in the log.
+   * One write of the reviews document, none when no card has a state;
+   * then the deck's schedule in the digest is brought up to date. How
+   * many cards were forgotten.
+   */
+  resetCards(instanceUrl: string, deck: Deck, ids: readonly string[], direction?: StudyDirection): Promise<number>;
+  /**
+   * Set the cards of these ids due on `due` (a study day), in one
+   * direction or (absent) in both, their snapshot for resetting the
+   * study day dropped (rescheduleStates). Refuses a day that is no date
+   * (dueDayInvalid) before any read. A card never studied stays new.
+   * One write of the reviews document, as resetCards. How many cards
+   * were set due.
+   */
+  rescheduleCards(
+    instanceUrl: string,
+    deck: Deck,
+    ids: readonly string[],
+    due: string,
+    direction?: StudyDirection,
+  ): Promise<number>;
   /**
    * What bringing the instance's cards up to this app's format would
    * touch — reads every deck's cards, writes nothing. Empty when there is
@@ -1153,6 +1179,25 @@ export function createUseCases({
       await refreshStudyDigest(instanceUrl, deck).catch(() => undefined);
       return changes;
     }
+  }
+
+  /**
+   * Write an edit of the deck's review states (resetCards,
+   * rescheduleCards) in one write of the reviews document, none when it
+   * changes nothing; then bring the digest up to date. How many cards it
+   * changed.
+   */
+  async function writeReviewEdit(
+    instanceUrl: string,
+    deck: Deck,
+    changes: { save: ReviewState[]; remove: ReviewKey[] },
+  ): Promise<number> {
+    const cards = new Set([...changes.save, ...changes.remove].map((key) => key.cardId));
+    if (cards.size === 0) return 0;
+    await reviewStateRepository.applyReviewChanges(deck, changes);
+    // The edit is made: a digest left behind is brought up to date by the next deck list.
+    await refreshStudyDigest(instanceUrl, deck).catch(() => undefined);
+    return cards.size;
   }
 
   async function refreshStudyDigest(instanceUrl: string, deck: Deck): Promise<void> {
@@ -2000,6 +2045,15 @@ export function createUseCases({
         if (inverse === null) throw new AppError("changedElsewhere", { url: deck.cardsDocumentUrl });
         return inverse;
       });
+    },
+    async resetCards(instanceUrl, deck, ids, direction) {
+      const remove = resetStates(await reviewStateRepository.listReviewStates(deck), ids, direction);
+      return writeReviewEdit(instanceUrl, deck, { save: [], remove });
+    },
+    async rescheduleCards(instanceUrl, deck, ids, due, direction) {
+      if (!isStudyDay(due)) throw new AppError("dueDayInvalid", { day: due });
+      const save = rescheduleStates(await reviewStateRepository.listReviewStates(deck), ids, due, direction);
+      return writeReviewEdit(instanceUrl, deck, { save, remove: [] });
     },
     planMigration: (instanceUrl) => planOf(instanceUrl),
     async updateInstance(session, instance, onProgress = () => undefined) {

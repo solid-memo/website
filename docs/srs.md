@@ -231,7 +231,7 @@ decides, per card reviewed today:
 |---|---|
 | introduced today (`firstReviewedAt` is today) | removes its state — it is a new card again |
 | reviewed today, has a snapshot | restores the snapshot (ease, interval, repetitions, due, last review) |
-| reviewed today, no snapshot (state written before snapshots existed) | can't be restored: made due today, so it can at least be studied again |
+| reviewed today, no snapshot (state written before snapshots existed, or given a due day in the Studio) | can't be restored: made due today, so it can at least be studied again |
 | not reviewed today | untouched |
 
 ```mermaid
@@ -253,6 +253,14 @@ The day's answers of that deck then leave the
 match the cards: answers still on their way to the log are added first,
 then removed with the rest.
 "Today" honours the instance's `dayBoundaryHour`, like the queue.
+
+The [Studio](studio.md#card-inspector) changes a state outside a review.
+Setting a card's due day (`rescheduleState`, in
+[reviewStateEdits.ts](../packages/domain/src/reviewStateEdits.ts)) drops
+its snapshot. Otherwise a reset of the day would bring back a state from
+before the new due day, and the due day would be lost. Forgetting a card
+(`resetStates`) removes its state, so a reset of the day has nothing of
+it to restore. Neither touches the answer log.
 
 In a [course](courses.md)'s deck, a reset treats the day's course
 answers like study answers:

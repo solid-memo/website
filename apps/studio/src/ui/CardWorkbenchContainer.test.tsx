@@ -164,4 +164,53 @@ describe("CardWorkbenchContainer", () => {
     fireEvent.click(undo);
     await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("This was changed elsewhere"));
   });
+
+  it("forgets or reschedules the selected cards' progress, says what it did, and reads the review states afresh", async () => {
+    let states = [dueToday];
+    const useCases = makeUseCasesFake({
+      listCards: vi.fn(async () => [water, fire]),
+      listDeckReviewStates: vi.fn(async () => states),
+      rescheduleCards: vi.fn(async () => {
+        states = [{ ...dueToday, due: "2099-01-01" }];
+        return 1;
+      }),
+    });
+    vi.mocked(useCases.editCards).mockImplementation(async (_instance, _deck, _ids, _edit, plan) => plan);
+    renderContainer(useCases);
+    fireEvent.click(await screen.findByRole("checkbox", { name: "Select fire" }));
+    const bulk = () => within(screen.getByRole("group", { name: "Selected cards" }));
+    fireEvent.click(bulk().getByRole("button", { name: "Retire" }));
+    expect(await screen.findByRole("button", { name: "Undo" })).toBeInTheDocument();
+    await waitFor(() => expect(bulk().getByRole("button", { name: "Set due date" })).toBeEnabled());
+    fireEvent.click(bulk().getByRole("button", { name: "Set due date" }));
+    expect(screen.getByLabelText("Due on")).toHaveValue(today);
+    fireEvent.input(screen.getByLabelText("Due on"), { target: { value: "2099-01-01" } });
+    fireEvent.click(screen.getByRole("button", { name: "Apply" }));
+    expect(await screen.findByText("Set 1 card due on January 1, 2099.")).toBeInTheDocument();
+    expect(useCases.rescheduleCards).toHaveBeenCalledWith(instanceA.url, deck, ["fire"], "2099-01-01");
+    // The card edit before it is no longer the last one: it cannot be undone.
+    expect(screen.queryByRole("button", { name: "Undo" })).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.getByRole("row", { name: /fire/ })).toHaveTextContent("January 1, 2099"));
+
+    vi.stubGlobal("confirm", () => true);
+    fireEvent.click(bulk().getByRole("button", { name: "Forget progress" }));
+    expect(await screen.findByText("Forgot the progress of 1 card.")).toBeInTheDocument();
+    expect(useCases.resetCards).toHaveBeenCalledWith(instanceA.url, deck, ["fire"]);
+    vi.unstubAllGlobals();
+  });
+
+  it("says why progress could not be forgotten", async () => {
+    vi.stubGlobal("confirm", () => true);
+    const useCases = makeUseCasesFake({
+      listCards: vi.fn(async () => [water, fire]),
+      resetCards: vi.fn(async () => {
+        throw new Error("Pod unreachable");
+      }),
+    });
+    renderContainer(useCases);
+    fireEvent.click(await screen.findByRole("checkbox", { name: "Select fire" }));
+    fireEvent.click(within(screen.getByRole("group", { name: "Selected cards" })).getByRole("button", { name: "Forget progress" }));
+    await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("Pod unreachable"));
+    vi.unstubAllGlobals();
+  });
 });

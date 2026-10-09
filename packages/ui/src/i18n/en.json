@@ -1184,6 +1184,7 @@
     "distractorEmpty": "A wrong option needs text.",
     "distractorPublished": "This wrong option is in the release the deck came from, so it cannot be deleted. Retire it instead.",
     "dailyLimitInvalid": "A daily limit is a whole number, 0 or more.",
+    "dueDayInvalid": "“{day}” is not a day. Choose the day the card is due.",
     "licenseUnknown": "Choose one of the licences offered.",
     "authorEmpty": "An author needs a name.",
     "authorTwice": "{author} is named twice. Name each author once.",
@@ -1446,11 +1447,32 @@
       "tabs": "What to edit",
       "tab": {
         "content": "Content",
-        "distractors": "Wrong options ({count})"
+        "distractors": "Wrong options ({count})",
+        "schedule": "Schedule"
       },
       "releaseSame": "This card is as the release this deck was copied from has it, so a newer release updates it. An edit detaches it: newer releases no longer update it, though they may still retire it.",
       "releaseChanged": "This card was changed from the release this deck was copied from, so newer releases no longer update it, though they may still retire it.",
       "openInApp": "Open this card in Solid Memo"
+    },
+    "schedule": {
+      "loading": "Loading the schedule…",
+      "notStudiedSo": "The deck is no longer studied this way. The card's progress this way is kept.",
+      "new": "Not studied this way yet: the card is new.",
+      "due": "Due",
+      "interval": "Interval",
+      "ease": "Ease",
+      "repetitions": "Right in a row",
+      "firstReviewed": "First reviewed",
+      "lastReviewed": "Last reviewed",
+      "dueLabel": "Due on",
+      "reschedule": "Set due date",
+      "reset": "Forget progress",
+      "resetConfirm": "Forget the card's progress this way? It becomes new again. Its answers stay in the history.",
+      "hint": "Neither changes the card's answers: they stay in the history and the statistics.",
+      "done": {
+        "reset": "Forgot the card's progress in the direction “{direction}”.",
+        "reschedule": "“{direction}” is now due on {due}."
+      }
     },
     "cardBulk": {
       "label": "Selected cards",
@@ -1460,11 +1482,20 @@
       "markdownOff": "Write as plain text",
       "stateLanguage": "State language",
       "findReplace": "Find and replace",
+      "reschedule": "Set due date",
+      "reset": "Forget progress",
       "remove": "Delete",
       "removeConfirm": {
         "one": "Delete {count} card and its progress? You can undo it until your next edit or until you leave this page.",
         "other": "Delete {count} cards and their progress? You can undo it until your next edit or until you leave this page."
       },
+      "resetConfirm": {
+        "one": "Forget the progress of {count} card? It becomes new again. Its answers stay in the history.",
+        "other": "Forget the progress of {count} cards? They become new again. Their answers stay in the history."
+      },
+      "dueLabel": "Due on",
+      "rescheduleHint": "A card not studied yet stays new.",
+      "notStudied": "None of the selected cards has been studied yet.",
       "nothing": "None of the selected cards would change.",
       "tag": "Language code",
       "side": "Of",
@@ -1540,6 +1571,14 @@
         "stateLanguage": {
           "one": "Stated the language of {count} card.",
           "other": "Stated the language of {count} cards."
+        },
+        "reset": {
+          "one": "Forgot the progress of {count} card.",
+          "other": "Forgot the progress of {count} cards."
+        },
+        "reschedule": {
+          "one": "Set {count} card due on {due}.",
+          "other": "Set {count} cards due on {due}."
         }
       },
       "skipped": {

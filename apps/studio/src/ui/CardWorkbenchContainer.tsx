@@ -11,7 +11,8 @@ import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { plainTexts } from "@solid-memo/ui/markdownCache";
-import { CardWorkbenchScreen, type CardEditMade } from "./CardWorkbenchScreen";
+import type { ReviewEdit } from "./CardBulkActions";
+import { CardWorkbenchScreen, type CardEditMade, type ReviewEditMade } from "./CardWorkbenchScreen";
 
 /**
  * The card workbench's data: the deck's cards and review states, read as
@@ -26,8 +27,10 @@ import { CardWorkbenchScreen, type CardEditMade } from "./CardWorkbenchScreen";
  * states as read (planCardEdit) and made with the plan the user saw
  * (UseCases.editCards); the last one made can be undone
  * (UseCases.undoCardEdit) for as long as this page stays open: its plan
- * is kept here, never stored. After either, the deck's cards, review
- * states and study queue are read afresh.
+ * is kept here, never stored. The selected cards' review states are
+ * forgotten (UseCases.resetCards) or set due on a day
+ * (UseCases.rescheduleCards), with no undo. After any of these, the
+ * deck's cards, review states and study queue are read afresh.
  */
 export function CardWorkbenchContainer({
   useCases,
@@ -52,6 +55,7 @@ export function CardWorkbenchContainer({
   const [lastEdit, setLastEdit] = useState<CardEditMade | null>(null);
   const [undone, setUndone] = useState(false);
   const [failure, setFailure] = useState<unknown>(null);
+  const [reviewDone, setReviewDone] = useState<ReviewEditMade | null>(null);
   const cardsQuery = useQuery({
     queryKey: ["cards", deck.cardsDocumentUrl],
     queryFn: () => useCases.listCards(deck),
@@ -95,8 +99,25 @@ export function CardWorkbenchContainer({
       setFailure(null);
       setUndone(false);
       setLastEdit(null);
+      setReviewDone(null);
     },
     onSuccess: (written, { edit }) => setLastEdit({ edit, plan: written }),
+    onError: (error) => setFailure(error),
+    onSettled: reread,
+  });
+  const reviewMutation = useMutation({
+    mutationFn: ({ ids, edit }: { ids: readonly string[]; edit: ReviewEdit }) =>
+      edit.kind === "reset"
+        ? useCases.resetCards(instance.url, deck, ids)
+        : useCases.rescheduleCards(instance.url, deck, ids, edit.due),
+    onMutate: () => {
+      setFailure(null);
+      setUndone(false);
+      // The last card edit can no longer be undone: it is not the last edit.
+      setLastEdit(null);
+      setReviewDone(null);
+    },
+    onSuccess: (count, { edit }) => setReviewDone({ edit, count }),
     onError: (error) => setFailure(error),
     onSettled: reread,
   });
@@ -136,7 +157,15 @@ export function CardWorkbenchContainer({
       lastEdit={lastEdit}
       undone={undone}
       onUndo={() => undoMutation.mutate(lastEdit!)}
-      busy={editMutation.isPending || undoMutation.isPending}
+      today={today!}
+      onReviewEdit={(ids, edit) =>
+        reviewMutation.mutateAsync({ ids, edit }).then(
+          () => true,
+          () => false,
+        )
+      }
+      reviewDone={reviewDone}
+      busy={editMutation.isPending || undoMutation.isPending || reviewMutation.isPending}
       error={errorText(failure)}
     />
   );

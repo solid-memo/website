@@ -6,9 +6,9 @@ Later it is also where creators build decks and courses and publish
 them. For now it shows the decks of an instance in a table, changes
 several of them at once, arranges them into groups, lists a deck's
 cards to search, filter, sort, select and edit at once, and edits one
-card, its wrong options included. It also edits what a deck says of
-itself (its authors and licence among it), a course's progress, and
-the instance's name and catalogue.
+card, its wrong options and its schedule included. It also edits what
+a deck says of itself (its authors and licence among it), a course's
+progress, and the instance's name and catalogue.
 
 ## What it shares with Solid Memo
 
@@ -53,7 +53,7 @@ hash with the same core as Solid Memo's router (`routerCore.ts` in
 | `#/?instance=…[&q=…&sort=…&order=desc]` | Home: every deck of the instance as a table ([below](#home)). `q` filters it, `sort` names the column it is sorted by, and `order=desc` sorts it the other way. |
 | `#/groups?instance=…` | Groups: the instance's decks arranged into groups, as Solid Memo's deck list arranges them. |
 | `#/cards?deck=…[&q&field&lang&state&has&sort&order&page&size]` | the card workbench: a deck's cards as a table ([below](#card-workbench)). The deck names the instance: its catalog's folder. |
-| `#/card?deck=…&card=…[&tab=distractors]` | the card inspector: one card, its content, or with `tab=distractors` its wrong options ([below](#card-inspector)). The content is the default tab, and is left out of the URL. |
+| `#/card?deck=…&card=…[&tab=distractors\|schedule]` | the card inspector: one card, its content, with `tab=distractors` its wrong options, or with `tab=schedule` its review state ([below](#card-inspector)). The content is the default tab, and is left out of the URL. |
 | `#/about?deck=…` | a deck's about screen: what it says of itself, how it is studied and, for a course, the learner's progress ([below](#a-decks-about-screen)). |
 | `#/instance?instance=…` | the instance's name and its catalogue ([below](#the-instance)). |
 
@@ -209,6 +209,9 @@ edits are:
   and after, and every card it leaves as it is, and why. Nothing is
   written until the user confirms.
 - **Delete**, with the cards' review states, once the user confirms.
+- **Set due date** and **Forget progress**, of the cards' review states
+  in every direction ([below](#review-state)). A card not studied yet
+  stays new. These have no Undo, and a forget asks first.
 
 The domain plans each edit
 ([cardBulk.ts](../packages/domain/src/cardBulk.ts), `planCardEdit`). A
@@ -244,7 +247,7 @@ Undo goes with the next edit, another deck, or leaving the page.
 
 The card inspector ([`CardInspectorContainer`](../apps/studio/src/ui/CardInspectorContainer.tsx))
 shows one card of a deck, named in its heading, with a link to its page
-in Solid Memo. Its two tabs are links, the one shown marked
+in Solid Memo. Its three tabs are links, the one shown marked
 (`aria-current`):
 
 - **Content**: Solid Memo's card editor (`CardContainer` in `ui`): the
@@ -259,6 +262,13 @@ in Solid Memo. Its two tabs are links, the one shown marked
   change is saved as it is made, as one write of the card
   (`updateCard`), and the status line says so. An option being written
   stays open until it is saved, so a failed save loses none of it.
+- **Schedule**: the card's review state in each direction the deck
+  studies, and in one it no longer does while a state is kept there
+  ([`CardScheduleContainer`](../apps/studio/src/ui/CardScheduleContainer.tsx)).
+  It shows when the card is due, its interval, ease and right answers in
+  a row, and when it was first and last reviewed. A direction never
+  studied says the card is new that way. Each state can be given a due
+  day, or forgotten, once the user confirms ([below](#review-state)).
 
 The domain makes each change
 ([distractors.ts](../packages/domain/src/distractors.ts)):
@@ -295,7 +305,31 @@ inspector meanwhile included), and the save does not state them, so the
 card keeps its own.
 
 The inspector reads the deck's cards with the same query as the
-workbench and Solid Memo, so an edit in one shows in the others.
+workbench and Solid Memo, so an edit in one shows in the others. The
+schedule tab reads the review states with the workbench's query too.
+
+## Review state
+
+The domain makes both changes
+([reviewStateEdits.ts](../packages/domain/src/reviewStateEdits.ts)):
+
+- `resetStates` forgets cards: their states go, so the scheduler sees
+  them as new. The inspector forgets one direction; the workbench
+  forgets every direction of the selected cards.
+- `rescheduleState` sets a state's due day. Its interval, ease and
+  repetitions stay. It drops the state's snapshot for resetting the
+  study day (`previous`, [srs.md](srs.md#resetting-the-day)), so that
+  reset can never bring back a state from before the new due day. A
+  day that is no date is refused.
+
+Neither touches the answer log: the card's answers stay in its history
+and in the statistics. The use cases `resetCards` and
+`rescheduleCards` read the deck's review states, write the change in
+one write of the reviews document (none when no card has a state), and
+bring the deck's schedule in the digest up to date. The screens then
+read the review states afresh and drop the deck's study queue. The
+end-to-end tests hold both against real servers
+([reviewStateEdits.integration.test.ts](../e2e/pod/src/reviewStateEdits.integration.test.ts)).
 
 ## A deck's about screen
 

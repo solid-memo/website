@@ -2,7 +2,7 @@ import type { ComponentChildren } from "preact";
 import type { Card } from "@solid-memo/domain/deck";
 import { cardName } from "@solid-memo/ui/DataText";
 import { useI18n } from "@solid-memo/ui/i18n";
-import type { CardTab } from "./router";
+import { CARD_TABS, type CardTab } from "./router";
 
 /**
  * How a card stands to the release its deck was copied from:
@@ -12,15 +12,14 @@ import type { CardTab } from "./router";
  */
 export type CardReleaseLink = "none" | "same" | "changed";
 
-const TABS: readonly CardTab[] = ["content", "distractors"];
-
 /**
  * The card inspector: one card of a deck, its name as the heading, then
  * a word on its release when the deck is a copy of a library deck or a
  * course (an edit of a card still as the release has it detaches it: a
  * newer release no longer updates it), the tabs (`tab`, in the URL:
- * the card's content or its wrong options, each a link, which changes
- * the view without a Back stop through `onTab`), and the tab's panel.
+ * the card's content, its wrong options or its schedule, each a link,
+ * which changes the view without a Back stop through `onTab`), and the
+ * tab's panel.
  */
 export function CardInspectorScreen({
   card,
@@ -61,7 +60,7 @@ export function CardInspectorScreen({
       )}
       <nav class="studio-tabs" aria-label={t("studio.card.tabs")}>
         <ul>
-          {TABS.map((each) => (
+          {CARD_TABS.map((each) => (
             <li key={each}>
               <a
                 href={tabHref(each)}
@@ -71,7 +70,7 @@ export function CardInspectorScreen({
                   onTab(each);
                 }}
               >
-                {each === "content" ? t("studio.card.tab.content") : t("studio.card.tab.distractors", { count })}
+                {each === "distractors" ? t("studio.card.tab.distractors", { count }) : t(`studio.card.tab.${each}`)}
               </a>
             </li>
           ))}

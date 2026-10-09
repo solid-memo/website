@@ -8,7 +8,10 @@ import { useI18n } from "@solid-memo/ui/i18n";
 import { FindReplaceDialog } from "./FindReplaceDialog";
 
 /** The form an edit opens, to say how. */
-type Form = "language" | "replace";
+type Form = "language" | "replace" | "reschedule";
+
+/** An edit of the selected cards' review states: forget them, or set the day they are due. */
+export type ReviewEdit = { kind: "reset" } | { kind: "reschedule"; due: string };
 
 /**
  * What can be done with the cards selected in the workbench, all at
@@ -18,7 +21,9 @@ type Form = "language" | "replace";
  * user confirms. Each edit is planned on the cards as they are (`plan`)
  * and made with that plan (`onEdit`), which resolves to whether it was
  * made; an edit that would change none of them is not made, and says
- * so. Only one is made at a time (`busy`).
+ * so. Their review states can be forgotten, once the user confirms, or
+ * set due on a day, today to start with (`onReviewEdit`, which resolves
+ * to whether it was made). Only one is made at a time (`busy`).
  */
 export function CardBulkActions({
   cards,
@@ -26,6 +31,8 @@ export function CardBulkActions({
   busy,
   plan,
   onEdit,
+  today,
+  onReviewEdit,
 }: {
   /** The selected cards the table shows. */
   cards: readonly Card[];
@@ -34,6 +41,9 @@ export function CardBulkActions({
   busy: boolean;
   plan: (edit: CardEdit) => CardEditPlan;
   onEdit: (edit: CardEdit, plan: CardEditPlan) => Promise<boolean>;
+  /** Today's study day, the due day offered. */
+  today: string;
+  onReviewEdit: (edit: ReviewEdit) => Promise<boolean>;
 }) {
   const { t, errorText } = useI18n();
   const [form, setForm] = useState<Form | null>(null);
@@ -41,6 +51,7 @@ export function CardBulkActions({
   const [tag, setTag] = useState("");
   const [side, setSide] = useState<StatedSide | "">("");
   const [tagError, setTagError] = useState<AppError | null>(null);
+  const [due, setDue] = useState(today);
 
   const toggle = (which: Form) => {
     setNothing(false);
@@ -61,6 +72,19 @@ export function CardBulkActions({
     setForm(null);
     if (!window.confirm(t("studio.cardBulk.removeConfirm", { count: cards.length }))) return;
     edit({ kind: "remove" });
+  }
+
+  function reviewEdit(change: ReviewEdit) {
+    setNothing(false);
+    void onReviewEdit(change).then((ok) => {
+      if (ok) setForm(null);
+    });
+  }
+
+  function reset() {
+    if (!window.confirm(t("studio.cardBulk.resetConfirm", { count: cards.length }))) return;
+    setForm(null);
+    reviewEdit({ kind: "reset" });
   }
 
   function stateLanguage() {
@@ -92,11 +116,14 @@ export function CardBulkActions({
         {simple(t("studio.cardBulk.restore"), { kind: "restore" })}
         {simple(t("studio.cardBulk.markdownOn"), { kind: "setTextFormat", markdown: true })}
         {simple(t("studio.cardBulk.markdownOff"), { kind: "setTextFormat", markdown: false })}
-        {(["language", "replace"] as const).map((which) => (
+        {(["language", "replace", "reschedule"] as const).map((which) => (
           <button key={which} type="button" aria-expanded={form === which} disabled={busy} onClick={() => toggle(which)}>
-            {t(which === "language" ? "studio.cardBulk.stateLanguage" : "studio.cardBulk.findReplace")}
+            {t(`studio.cardBulk.${which === "language" ? "stateLanguage" : which === "replace" ? "findReplace" : "reschedule"}`)}
           </button>
         ))}
+        <button type="button" disabled={busy} onClick={reset}>
+          {t("studio.cardBulk.reset")}
+        </button>
         <button type="button" class="danger" disabled={busy} onClick={remove}>
           {t("studio.cardBulk.remove")}
         </button>
@@ -123,6 +150,28 @@ export function CardBulkActions({
           </label>
           <p class="hint">{t("studio.cardBulk.stateHint")}</p>
           <ErrorMessage error={errorText(tagError)} />
+          <p class="actions">
+            <button type="submit" class="primary" disabled={busy}>
+              {t("studio.bulk.apply")}
+            </button>
+            <button type="button" onClick={() => setForm(null)}>
+              {t("studio.bulk.cancel")}
+            </button>
+          </p>
+        </form>
+      )}
+      {form === "reschedule" && (
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            reviewEdit({ kind: "reschedule", due });
+          }}
+        >
+          <label>
+            {t("studio.cardBulk.dueLabel")}
+            <input type="date" value={due} required disabled={busy} onInput={(event) => setDue(event.currentTarget.value)} />
+          </label>
+          <p class="hint">{t("studio.cardBulk.rescheduleHint")}</p>
           <p class="actions">
             <button type="submit" class="primary" disabled={busy}>
               {t("studio.bulk.apply")}

@@ -25,17 +25,18 @@ export type StudioRoute =
   | { screen: "groups"; instanceUrl: string }
   /** The card workbench: a deck's cards, searched, filtered, sorted and paged as `query` says (all, as listed, when absent). */
   | { screen: "cards"; deckUrl: string; query?: CardQuery }
-  /** The card inspector: one card of a deck, its content or its wrong options (`tab`; the content when absent). */
+  /** The card inspector: one card of a deck, its content, its wrong options or its schedule (`tab`; the content when absent). */
   | { screen: "card"; deckUrl: string; cardUrl: string; tab?: CardTab }
   /** What a deck says of itself, how it is studied and, for a course, the learner's progress through it. */
   | { screen: "about"; deckUrl: string }
   /** The instance's name and its catalogue's description and licence. */
   | { screen: "instance"; instanceUrl: string };
 
-/** What the card inspector shows: the card's content, or its wrong options. */
-export type CardTab = "content" | "distractors";
+/** What the card inspector shows: the card's content, its wrong options, or its review state in each direction. */
+export type CardTab = "content" | "distractors" | "schedule";
 
-const CARD_TABS: readonly CardTab[] = ["content", "distractors"];
+/** The inspector's tabs, in their order. */
+export const CARD_TABS: readonly CardTab[] = ["content", "distractors", "schedule"];
 
 /** The instance a route is in: the one it names, or the one of the deck it names; null for the picker. */
 export function instanceOfRoute(route: StudioRoute): string | null {

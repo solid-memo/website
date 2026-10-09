@@ -1184,6 +1184,7 @@
     "distractorEmpty": "오답 선택지에 텍스트를 입력해 주세요.",
     "distractorPublished": "이 오답 선택지는 덱을 가져온 릴리스에 들어 있어서 삭제할 수 없어요. 대신 사용 중지해 주세요.",
     "dailyLimitInvalid": "하루 한도는 0 이상의 정수여야 해요.",
+    "dueDayInvalid": "‘{day}’은(는) 날짜가 아니에요. 카드를 복습할 날짜를 선택해 주세요.",
     "licenseUnknown": "제시된 라이선스 중 하나를 선택해 주세요.",
     "authorEmpty": "저자 이름을 입력해 주세요.",
     "authorTwice": "{author}이(가) 두 번 들어 있어요. 저자는 한 번씩만 입력해 주세요.",
@@ -1446,11 +1447,32 @@
       "tabs": "편집할 내용",
       "tab": {
         "content": "내용",
-        "distractors": "오답 선택지({count})"
+        "distractors": "오답 선택지({count})",
+        "schedule": "복습 일정"
       },
       "releaseSame": "이 카드는 이 덱을 복사해 온 릴리스와 같아서, 새 릴리스가 나오면 업데이트돼요. 편집하면 릴리스와 분리돼요. 새 릴리스가 더 이상 업데이트하지 않지만, 사용 중지할 수는 있어요.",
       "releaseChanged": "이 카드는 이 덱을 복사해 온 릴리스와 달라져서, 새 릴리스가 더 이상 업데이트하지 않아요. 다만 사용 중지할 수는 있어요.",
       "openInApp": "Solid Memo에서 이 카드 열기"
+    },
+    "schedule": {
+      "loading": "복습 일정을 불러오는 중…",
+      "notStudiedSo": "이 덱은 더 이상 이 방향으로 학습하지 않아요. 이 방향의 카드 진행 상황은 유지돼요.",
+      "new": "아직 이 방향으로 학습하지 않았어요. 새 카드예요.",
+      "due": "다음 복습일",
+      "interval": "복습 간격",
+      "ease": "난이도 계수",
+      "repetitions": "연속 정답",
+      "firstReviewed": "첫 복습",
+      "lastReviewed": "마지막 복습",
+      "dueLabel": "다음 복습일",
+      "reschedule": "복습일 지정",
+      "reset": "진행 상황 초기화",
+      "resetConfirm": "이 방향의 카드 진행 상황을 초기화할까요? 카드가 다시 새 카드가 돼요. 답변은 기록에 남아요.",
+      "hint": "어느 쪽도 카드의 답변은 바꾸지 않아요. 답변은 기록과 통계에 남아요.",
+      "done": {
+        "reset": "‘{direction}’ 방향의 카드 진행 상황을 초기화했어요.",
+        "reschedule": "이제 ‘{direction}’의 다음 복습일은 {due}이에요."
+      }
     },
     "cardBulk": {
       "label": "선택한 카드",
@@ -1460,11 +1482,20 @@
       "markdownOff": "일반 텍스트로 쓰기",
       "stateLanguage": "언어 지정",
       "findReplace": "찾아 바꾸기",
+      "reschedule": "복습일 지정",
+      "reset": "진행 상황 초기화",
       "remove": "삭제",
       "removeConfirm": {
         "one": "카드 {count}장과 진행 상황을 삭제할까요? 다음에 편집하거나 이 페이지를 떠나기 전까지는 되돌릴 수 있어요.",
         "other": "카드 {count}장과 진행 상황을 삭제할까요? 다음에 편집하거나 이 페이지를 떠나기 전까지는 되돌릴 수 있어요."
       },
+      "resetConfirm": {
+        "one": "카드 {count}장의 진행 상황을 초기화할까요? 다시 새 카드가 돼요. 답변은 기록에 남아요.",
+        "other": "카드 {count}장의 진행 상황을 초기화할까요? 다시 새 카드가 돼요. 답변은 기록에 남아요."
+      },
+      "dueLabel": "다음 복습일",
+      "rescheduleHint": "아직 학습하지 않은 카드는 새 카드로 남아요.",
+      "notStudied": "선택한 카드 중 아직 학습한 카드가 없어요.",
       "nothing": "선택한 카드 중 바뀌는 카드가 없어요.",
       "tag": "언어 코드",
       "side": "대상",
@@ -1540,6 +1571,14 @@
         "stateLanguage": {
           "one": "카드 {count}장의 언어를 지정했어요.",
           "other": "카드 {count}장의 언어를 지정했어요."
+        },
+        "reset": {
+          "one": "카드 {count}장의 진행 상황을 초기화했어요.",
+          "other": "카드 {count}장의 진행 상황을 초기화했어요."
+        },
+        "reschedule": {
+          "one": "카드 {count}장의 다음 복습일을 {due}(으)로 지정했어요.",
+          "other": "카드 {count}장의 다음 복습일을 {due}(으)로 지정했어요."
         }
       },
       "skipped": {

@@ -20,7 +20,7 @@ import { useI18n, type ErrorText } from "@solid-memo/ui/i18n";
 import { paginate, Pager } from "@solid-memo/ui/Pager";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
 import { RetiredTag } from "@solid-memo/ui/RetiredCards";
-import { CardBulkActions } from "./CardBulkActions";
+import { CardBulkActions, type ReviewEdit } from "./CardBulkActions";
 
 /** The columns after the card's front, each sorted by its key. */
 const COLUMNS: readonly Exclude<CardSort, "front">[] = ["back", "due", "interval", "ease", "created", "id"];
@@ -33,6 +33,12 @@ export interface CardEditMade {
   edit: CardEdit;
   /** The plan as written: its inverse undoes it. */
   plan: CardEditPlan;
+}
+
+/** An edit of review states made, and how many cards it changed. */
+export interface ReviewEditMade {
+  edit: ReviewEdit;
+  count: number;
 }
 
 /** How the status line names an edit made. */
@@ -65,7 +71,9 @@ function typedInto(target: EventTarget | null): boolean {
  * each edit is planned on them (`plan`) and made (`onEdit`), then the
  * status line says what it did, with a way to undo it (`lastEdit`,
  * `onUndo`) until the next edit, or until the page is left. Deleted
- * cards leave the selection.
+ * cards leave the selection. Their review states can be forgotten or
+ * set due on a day (`onReviewEdit`); the status line then says how many
+ * cards changed (`reviewDone`), with no undo.
  */
 export function CardWorkbenchScreen({
   deck,
@@ -82,6 +90,9 @@ export function CardWorkbenchScreen({
   lastEdit,
   undone,
   onUndo,
+  today,
+  onReviewEdit,
+  reviewDone,
   busy,
   error,
 }: {
@@ -107,6 +118,12 @@ export function CardWorkbenchScreen({
   /** The last edit was undone. */
   undone: boolean;
   onUndo: () => void;
+  /** Today's study day. */
+  today: string;
+  /** Make an edit of the review states of the cards of these ids; whether it was made. */
+  onReviewEdit: (ids: readonly string[], edit: ReviewEdit) => Promise<boolean>;
+  /** The last edit of review states made on this page. */
+  reviewDone: ReviewEditMade | null;
   /** An edit, or its undo, is being made. */
   busy: boolean;
   error: ErrorText | null;
@@ -223,6 +240,15 @@ export function CardWorkbenchScreen({
         </div>
       )}
       {undone && <p role="status">{t("studio.cardBulk.undone")}</p>}
+      {reviewDone !== null && (
+        <p role="status">
+          {reviewDone.count === 0
+            ? t("studio.cardBulk.notStudied")
+            : reviewDone.edit.kind === "reset"
+              ? t("studio.cardBulk.done.reset", { count: reviewDone.count })
+              : t("studio.cardBulk.done.reschedule", { count: reviewDone.count, due: formatDate(reviewDone.edit.due) })}
+        </p>
+      )}
       <ErrorMessage error={error} />
       {total === 0 ? (
         <p>{t("studio.cards.empty")}</p>
@@ -287,6 +313,8 @@ export function CardWorkbenchScreen({
                   return ok;
                 })
               }
+              today={today}
+              onReviewEdit={(edit) => onReviewEdit(ids, edit)}
             />
           )}
           {rows.length === 0 ? (

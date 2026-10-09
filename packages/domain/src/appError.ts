@@ -34,6 +34,7 @@ export const ERROR_TEMPLATES = {
   distractorEmpty: "A wrong option needs text.",
   distractorPublished: "This wrong option is in the release the deck came from, so it cannot be deleted. Retire it instead.",
   dailyLimitInvalid: "A daily limit is a whole number, 0 or more.",
+  dueDayInvalid: "“{day}” is not a day. Choose the day the card is due.",
   licenseUnknown: "Choose one of the licences offered.",
   authorEmpty: "An author needs a name.",
   authorTwice: "{author} is named twice. Name each author once.",

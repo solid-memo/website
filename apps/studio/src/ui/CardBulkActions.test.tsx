@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { planCardEdit, type CardEdit } from "@solid-memo/domain/cardBulk";
 import { SM } from "@solid-memo/vocab/vocab.generated";
-import { CardBulkActions } from "./CardBulkActions";
+import { CardBulkActions, type ReviewEdit } from "./CardBulkActions";
 import { choose } from "../test/choose";
 import { makeCard, makeDeck } from "../test/fixtures";
 
@@ -11,10 +11,24 @@ const water = { ...makeCard(deck, "water"), front: { "": "水" }, back: { en: "w
 const fire = { ...makeCard(deck, "fire", true), front: { ja: "火" }, back: { en: "fire" }, textFormat: SM.markdown };
 const cards = [water, fire];
 
-function renderActions(onEdit = vi.fn(async (_edit: CardEdit, _plan: unknown) => true), busy = false) {
+function renderActions(
+  onEdit = vi.fn(async (_edit: CardEdit, _plan: unknown) => true),
+  busy = false,
+  onReviewEdit = vi.fn(async (_edit: ReviewEdit) => true),
+) {
   const plan = vi.fn((edit: CardEdit) => planCardEdit(cards, ["water", "fire"], edit));
-  render(<CardBulkActions cards={cards} languages={["en", "ja"]} busy={busy} plan={plan} onEdit={onEdit} />);
-  return { plan, onEdit };
+  render(
+    <CardBulkActions
+      cards={cards}
+      languages={["en", "ja"]}
+      busy={busy}
+      plan={plan}
+      onEdit={onEdit}
+      today="2026-10-09"
+      onReviewEdit={onReviewEdit}
+    />,
+  );
+  return { plan, onEdit, onReviewEdit };
 }
 
 const bulk = () => screen.getByRole("group", { name: "Selected cards" });
@@ -39,7 +53,9 @@ describe("CardBulkActions", () => {
   it("makes no edit that would change none of the cards, and says so", () => {
     const { onEdit } = renderActions();
     const markdownOnly = vi.fn((edit: CardEdit) => planCardEdit([fire], ["fire"], edit));
-    render(<CardBulkActions cards={[fire]} languages={[]} busy={false} plan={markdownOnly} onEdit={onEdit} />);
+    render(
+      <CardBulkActions cards={[fire]} languages={[]} busy={false} plan={markdownOnly} onEdit={onEdit} today="2026-10-09" onReviewEdit={vi.fn()} />,
+    );
     fireEvent.click(within(screen.getAllByRole("group", { name: "Selected cards" })[1]!).getByRole("button", { name: "Retire" }));
     expect(onEdit).not.toHaveBeenCalled();
     expect(screen.getByRole("status")).toHaveTextContent("None of the selected cards would change.");
@@ -100,9 +116,53 @@ describe("CardBulkActions", () => {
     expect(screen.queryByRole("form", { name: "Find and replace" })).not.toBeInTheDocument();
   });
 
+  it("forgets the cards' progress once the user confirms, an open form closing only then", async () => {
+    const confirm = vi.fn(() => false);
+    vi.stubGlobal("confirm", confirm);
+    const { onReviewEdit } = renderActions();
+    press("Find and replace");
+    press("Forget progress");
+    expect(confirm).toHaveBeenCalledWith("Forget the progress of 2 cards? They become new again. Their answers stay in the history.");
+    expect(onReviewEdit).not.toHaveBeenCalled();
+    expect(screen.getByRole("textbox", { name: "Find" })).toBeInTheDocument();
+    confirm.mockReturnValue(true);
+    press("Forget progress");
+    expect(onReviewEdit).toHaveBeenCalledWith({ kind: "reset" });
+    expect(screen.queryByRole("textbox", { name: "Find" })).not.toBeInTheDocument();
+  });
+
+  it("sets the cards due on a day, today to start with, the form closing once it is done", async () => {
+    const { onReviewEdit } = renderActions(undefined, false, vi.fn(async () => false));
+    press("Set due date");
+    const day = screen.getByLabelText("Due on");
+    expect(day).toHaveValue("2026-10-09");
+    expect(screen.getByText("A card not studied yet stays new.")).toBeInTheDocument();
+    fireEvent.input(day, { target: { value: "2026-10-20" } });
+    fireEvent.click(screen.getByRole("button", { name: "Apply" }));
+    expect(onReviewEdit).toHaveBeenCalledWith({ kind: "reschedule", due: "2026-10-20" });
+    // Not made: the form stays.
+    await Promise.resolve();
+    expect(screen.getByLabelText("Due on")).toBeInTheDocument();
+    onReviewEdit.mockResolvedValue(true);
+    fireEvent.click(screen.getByRole("button", { name: "Apply" }));
+    await waitFor(() => expect(screen.queryByLabelText("Due on")).not.toBeInTheDocument());
+    press("Set due date");
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(screen.queryByLabelText("Due on")).not.toBeInTheDocument();
+  });
+
+  it("takes no due day while an edit is being made", () => {
+    const props = { cards, languages: [], plan: vi.fn(), onEdit: vi.fn(), today: "2026-10-09", onReviewEdit: vi.fn() };
+    const { rerender } = render(<CardBulkActions {...props} busy={false} />);
+    press("Set due date");
+    rerender(<CardBulkActions {...props} busy={true} />);
+    expect(screen.getByLabelText("Due on")).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Apply" })).toBeDisabled();
+  });
+
   it("makes nothing while an edit is being made", () => {
     renderActions(undefined, true);
-    for (const name of ["Retire", "Restore", "Write in Markdown", "Write as plain text", "State language", "Find and replace", "Delete"]) {
+    for (const name of ["Retire", "Restore", "Write in Markdown", "Write as plain text", "State language", "Find and replace", "Set due date", "Forget progress", "Delete"]) {
       expect(within(bulk()).getByRole("button", { name })).toBeDisabled();
     }
   });

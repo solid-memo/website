@@ -7,8 +7,9 @@ import { Screen } from "./Screen.ts";
  * landing page (the same login as Solid Memo's, under the Studio's name),
  * its instance picker, Home's table of decks (its filter, sort and bulk
  * actions), its Groups screen, the card workbench (its search, sort,
- * selection and bulk edits, with their Undo), the card inspector (a
- * card's content and its wrong options), a deck's about screen (its
+ * selection and bulk edits, with their Undo, and its edits of review
+ * states), the card inspector (a card's content, its wrong options and
+ * its schedule), a deck's about screen (its
  * authors and licence), the instance's name and catalogue, and its way
  * back to Solid Memo.
  */
@@ -299,6 +300,47 @@ export class Studio extends Screen {
       await this.wrongOptions.getByRole("button", { name: this.t("distractorFields.deleteLabel", { option: text }) }).click();
       await expect(this.wrongOption(text)).toHaveCount(0);
     });
+  }
+
+  /** Follows the inspector's tab of the card's schedule, which the URL holds: the card was studied front to back. */
+  async openSchedule(): Promise<void> {
+    await this.intent("Open the card's schedule", async () => {
+      await this.page.getByRole("link", { name: this.t("studio.card.tab.schedule") }).click();
+      await expect(this.page).toHaveURL(/[?&]tab=schedule/);
+      await expect(this.scheduleOf("frontToBack").getByRole("term")).toHaveText([
+        this.t("studio.schedule.due"),
+        this.t("studio.schedule.interval"),
+        this.t("studio.schedule.ease"),
+        this.t("studio.schedule.repetitions"),
+        this.t("studio.schedule.firstReviewed"),
+        this.t("studio.schedule.lastReviewed"),
+      ]);
+    });
+  }
+
+  /** Forgets the card's progress front to back, confirming: it is new that way. */
+  async forgetProgress(): Promise<void> {
+    await this.intent("Forget the card's progress front to back", async () => {
+      this.app.expectDialog(this.tp("studio.schedule.resetConfirm"));
+      await this.scheduleOf("frontToBack").getByRole("button", { name: this.t("studio.schedule.reset") }).click();
+      await this.expectStatus(this.t("studio.schedule.done.reset", { direction: this.t("common.direction.frontToBack") }));
+      await expect(this.scheduleOf("frontToBack").getByText(this.t("studio.schedule.new"))).toBeVisible();
+    });
+  }
+
+  /** Sets the selected cards due today, the day the form offers; the status line counts those studied. */
+  async rescheduleSelectedToday(count: number): Promise<void> {
+    await this.intent("Set the selected cards due today", async () => {
+      await this.cardBulk.getByRole("button", { name: this.t("studio.cardBulk.reschedule") }).click();
+      await expect(this.cardBulk.getByLabel(this.t("studio.cardBulk.dueLabel"))).not.toHaveValue("");
+      await this.cardBulk.getByRole("button", { name: this.t("studio.bulk.apply") }).click();
+      await expect(this.page.getByRole("status").filter({ hasText: this.tp("studio.cardBulk.done.reschedule", { count }) })).toHaveCount(1);
+    });
+  }
+
+  /** The schedule tab's section of one direction. */
+  private scheduleOf(direction: "frontToBack" | "backToFront"): Locator {
+    return this.page.getByRole("region", { name: this.t(`common.direction.${direction}`) });
   }
 
   /** Follows a deck's name on Home to what it says of itself. */

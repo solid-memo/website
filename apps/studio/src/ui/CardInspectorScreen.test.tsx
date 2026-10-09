@@ -30,7 +30,7 @@ describe("CardInspectorScreen", () => {
     const props = renderScreen({ tab: "distractors" });
     expect(screen.getByRole("heading", { name: "Card: water" })).toBeInTheDocument();
     const tabs = screen.getByRole("navigation", { name: "What to edit" });
-    expect(tabs).toHaveTextContent("ContentWrong options (1)");
+    expect(tabs).toHaveTextContent("ContentWrong options (1)Schedule");
     expect(screen.getByRole("link", { name: "Wrong options (1)" })).toHaveAttribute("aria-current", "page");
     const content = screen.getByRole("link", { name: "Content" });
     expect(content).toHaveAttribute("href", "#/card?tab=content");
