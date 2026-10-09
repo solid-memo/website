@@ -17,12 +17,14 @@ export type LangText = Readonly<Record<string, string>>;
 export type LangTexts = Readonly<Record<string, readonly string[]>>;
 
 /** The record kinds the shapes describe (see docs/shapes.md). */
-export type ShapeName = "agent" | "answer" | "card" | "catalog" | "chapter" | "deck" | "deckGroup" | "deckSchedule" | "distractor" | "distribution" | "documentReceipt" | "instance" | "libraryDeck" | "libraryDeckSeries" | "preferences" | "reviewState" | "step";
+export type ShapeName = "agent" | "answer" | "backup" | "backupEntry" | "card" | "catalog" | "chapter" | "deck" | "deckGroup" | "deckSchedule" | "distractor" | "distribution" | "documentReceipt" | "instance" | "libraryDeck" | "libraryDeckSeries" | "preferences" | "reviewState" | "step";
 
 /** The shape version this app writes for each kind. */
 export const LATEST_VERSION = {
   agent: 1,
   answer: 1,
+  backup: 1,
+  backupEntry: 1,
   card: 5,
   catalog: 1,
   chapter: 1,
@@ -58,6 +60,21 @@ export interface AnswerV1 {
   readonly nextIntervalDays: number;
   readonly mode?: "https://solid-memo.com/ns/vocab/v1.ttl#recall" | "https://solid-memo.com/ns/vocab/v1.ttl#multipleChoice";
   readonly chosenDistractor?: string;
+}
+
+/** Backup format 1: what it was made for (the instance or a deck), when it was made, and for a deck the library release it came from. */
+export interface BackupV1 {
+  readonly backupOf: string;
+  readonly created: string;
+  readonly release?: string;
+}
+
+/** Backup entry format 1: the document; where its earlier version is kept and the version that was, unless there was no document; the version the update left it at, once it wrote it. */
+export interface BackupEntryV1 {
+  readonly document: string;
+  readonly copy?: string;
+  readonly versionBackedUp?: string;
+  readonly versionUpdated?: string;
 }
 
 /** Card format 1: front and back text, both required. */
@@ -523,6 +540,8 @@ export interface StepV1 {
 
 export type AgentRecord = { version: 1; data: AgentV1 };
 export type AnswerRecord = { version: 1; data: AnswerV1 };
+export type BackupRecord = { version: 1; data: BackupV1 };
+export type BackupEntryRecord = { version: 1; data: BackupEntryV1 };
 export type CardRecord = { version: 1; data: CardV1 } | { version: 2; data: CardV2 } | { version: 3; data: CardV3 } | { version: 4; data: CardV4 } | { version: 5; data: CardV5 };
 export type CatalogRecord = { version: 1; data: CatalogV1 };
 export type ChapterRecord = { version: 1; data: ChapterV1 };
@@ -543,6 +562,8 @@ export type StepRecord = { version: 1; data: StepV1 };
 export type VersionedRecord = {
   agent: AgentRecord;
   answer: AnswerRecord;
+  backup: BackupRecord;
+  backupEntry: BackupEntryRecord;
   card: CardRecord;
   catalog: CatalogRecord;
   chapter: ChapterRecord;
@@ -564,6 +585,8 @@ export type VersionedRecord = {
 export type LatestRecord = {
   agent: AgentV1;
   answer: AnswerV1;
+  backup: BackupV1;
+  backupEntry: BackupEntryV1;
   card: CardV5;
   catalog: CatalogV1;
   chapter: ChapterV1;

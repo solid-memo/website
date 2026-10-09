@@ -5,14 +5,12 @@ import type { LibraryUpgradePlan } from "./libraryUpgrade";
 import type { ReviewState } from "./review";
 import {
   decodeDeckUpgradeNote,
-  encodeDeckUpgradeNote,
   isAbandoned,
   sameCardChanges,
   sameCards,
   sameDeckState,
   sameReviewStates,
   isCardsDocumentOf,
-  stagedDocumentUrl,
   upgradedCardList,
   withDeckChanges,
 } from "./deckUpgrade";
@@ -55,16 +53,8 @@ const plan: LibraryUpgradePlan = {
   restore: [podCard("is", "Reykjavik", true)],
   remove: [podCard("lv", "Riga")],
   kept: [],
+  applied: [],
 };
-
-describe("stagedDocumentUrl", () => {
-  it("names a new document beside the old one by the deck and the upgrade, however often it was upgraded", () => {
-    expect(stagedDocumentUrl(CARDS, "deck-1", "u1")).toBe("https://pod.example/a/decks/deck-1-u1.ttl");
-    expect(stagedDocumentUrl("https://pod.example/a/decks/deck-1-u1.ttl", "deck-1", "u2")).toBe(
-      "https://pod.example/a/decks/deck-1-u2.ttl",
-    );
-  });
-});
 
 describe("isCardsDocumentOf", () => {
   const deck = { id: "deck-1", cardsDocumentUrl: "https://pod.example/a/decks/deck-1-u2.ttl" };
@@ -87,10 +77,12 @@ describe("isCardsDocumentOf", () => {
 describe("deck upgrade notes", () => {
   const startedAt = "2026-10-03T10:00:00.000Z";
 
-  it("round-trip, with or without a reviews move", () => {
+  it("are read as JSON, as an earlier version stored them, with or without a reviews move", () => {
     const note = { startedAt, cards: { from: "a", to: "b" }, reviews: { from: "c", to: "d" } };
-    expect(decodeDeckUpgradeNote(encodeDeckUpgradeNote(note))).toEqual(note);
-    expect(decodeDeckUpgradeNote(encodeDeckUpgradeNote({ startedAt, cards: note.cards }))).toEqual({ startedAt, cards: note.cards });
+    expect(
+      decodeDeckUpgradeNote(`{"startedAt": "${startedAt}", "cards": {"from": "a", "to": "b"}, "reviews": {"from": "c", "to": "d"}}`),
+    ).toEqual(note);
+    expect(decodeDeckUpgradeNote(`{"startedAt": "${startedAt}", "cards": {"from": "a", "to": "b"}}`)).toEqual({ startedAt, cards: note.cards });
   });
 
   it("are null when missing or not a note", () => {

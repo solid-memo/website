@@ -67,4 +67,53 @@ describe("createWriteFence", () => {
     await fetch(`${MAIN}meta.ttl`, { method: "PUT" });
     expect(inner).toHaveBeenCalledOnce();
   });
+
+  describe("passes", () => {
+    it("let an update's writes through a hold, under a container or to a document, until released", async () => {
+      const { inner, fetch, hold, pass } = fence();
+      hold(MAIN);
+      const backups = pass(`${MAIN}backups/20261009T100000Z-0f3a1b2c/`);
+      const meta = pass(`${MAIN}meta.ttl`);
+      await fetch(`${MAIN}backups/20261009T100000Z-0f3a1b2c/decks/deck-1.ttl`, { method: "PUT" });
+      await fetch(`${MAIN}meta.ttl`, { method: "PATCH" });
+      await expect(fetch(`${MAIN}catalog.ttl`, { method: "PATCH" })).rejects.toMatchObject({ code: "instanceBeingUpdated" });
+      backups();
+      meta();
+      await expect(fetch(`${MAIN}meta.ttl`, { method: "PATCH" })).rejects.toThrow("container:");
+      expect(inner).toHaveBeenCalledTimes(2);
+    });
+
+    it("hold the first accepted write to the document to an ETag, whatever the writer read, and none after it", async () => {
+      const responses = [new Response(null, { status: 412 }), new Response(null, { status: 205 }), new Response("ok")];
+      const inner = vi.fn(async (_url: RequestInfo | URL, _init?: RequestInit) => responses.shift()!);
+      const { fetch, hold, pass } = createWriteFence(inner as unknown as typeof globalThis.fetch);
+      hold(MAIN);
+      pass(`${MAIN}meta.ttl`, '"v1"');
+      expect((await fetch(`${MAIN}meta.ttl`, { method: "PATCH", headers: { "If-Match": '"v0"' } })).status).toBe(412);
+      await fetch(new Request(`${MAIN}meta.ttl`, { method: "PUT", headers: { "Content-Type": "text/turtle" } }));
+      await fetch(`${MAIN}meta.ttl`, { method: "PATCH", headers: { "If-Match": '"v2"' } });
+      const sent = inner.mock.calls.map(([, init]) => new Headers(init?.headers));
+      expect(sent.map((headers) => headers.get("If-Match"))).toEqual(['"v1"', '"v1"', '"v2"']);
+      expect(sent[1]!.get("Content-Type")).toBe("text/turtle");
+    });
+
+    it("check a version that is no strong ETag just before the write, and answer 412 when it moved", async () => {
+      const versions = ["Last-Modified: Fri, 09 Oct 2026 10:00:00 GMT", "Last-Modified: Fri, 09 Oct 2026 10:00:05 GMT"];
+      const inner = vi.fn(async (_url: RequestInfo | URL, init?: RequestInit) => {
+        if (init?.method === undefined) {
+          return new Response("x", { headers: { "Last-Modified": versions.shift()!.slice("Last-Modified: ".length) } });
+        }
+        return new Response("ok");
+      });
+      const { fetch, hold, pass } = createWriteFence(inner as unknown as typeof globalThis.fetch);
+      hold(MAIN);
+      pass(`${MAIN}meta.ttl`, "Last-Modified: Fri, 09 Oct 2026 10:00:00 GMT");
+      expect((await fetch(`${MAIN}meta.ttl`, { method: "PATCH" })).status).toBe(200);
+      expect(new Headers(inner.mock.calls[1]![1]?.headers).get("If-Match")).toBeNull();
+      const other = pass(`${MAIN}catalog.ttl`, "Last-Modified: Fri, 09 Oct 2026 10:00:00 GMT");
+      expect((await fetch(`${MAIN}catalog.ttl`, { method: "PATCH" })).status).toBe(412);
+      other();
+      expect(inner.mock.calls.map(([, init]) => init?.method ?? "GET")).toEqual(["GET", "PATCH", "GET"]);
+    });
+  });
 });

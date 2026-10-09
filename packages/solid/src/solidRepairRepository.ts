@@ -16,7 +16,7 @@ import { defaultDeckDescription, defaultDeckDescriptionText } from "@solid-memo/
 import type { Repair, RepairKind } from "@solid-memo/domain/repair";
 import { getSolidDatasetOrNull, saveDataset } from "./datasets";
 import { foreignSubjects } from "./ownership";
-import { readText } from "./records";
+import { readText, unlessNewer } from "./records";
 import { DCAT, DCTERMS, RDF, SM } from "./vocab";
 
 const FOAF_NAME = "http://xmlns.com/foaf/0.1/name";
@@ -67,6 +67,8 @@ const MEMBERSHIP = [
 function applyRepair(dataset: SolidDataset, repair: Repair): SolidDataset {
   const thing = getThing(dataset, repair.subjectUrl);
   if (thing === null) return dataset;
+  // A repair is of what this version found: never of a subject a newer one has written since.
+  unlessNewer(thing);
   if (repair.kind === "remove-subject") {
     return withoutMembershipsOf(removeThing(dataset, thing), repair.documentUrl, repair.subjectUrl);
   }

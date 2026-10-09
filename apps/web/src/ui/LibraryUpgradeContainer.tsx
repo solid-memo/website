@@ -18,10 +18,10 @@ import { DECK_UPGRADE_SCREEN_STEPS, DeckUpgradeFailure, DeckUpgradeProgress, typ
  * Home-made decks render nothing at all. Once a session, it also gives
  * the deck the languages its own release states its title and
  * description in and the copy lacks, which upgrades made before they
- * brought the texts along left out, and tidies away what an upgrade cut
- * off half-way left in the pod. While an upgrade runs, its steps are
- * shown in place of the offer; a failed one says where it failed and
- * that the deck is as it was.
+ * brought the texts along left out, and tidies away what an upgrade by an
+ * earlier version of the app, cut off half-way, left in the pod. While an
+ * upgrade runs, its steps are shown in place of the offer; a failed one
+ * says where it failed and whether the deck is as it was.
  */
 export function LibraryUpgradeContainer({
   useCases,
@@ -37,7 +37,7 @@ export function LibraryUpgradeContainer({
 
   const planQuery = useQuery({
     // Planned for the deck as it is: once an upgrade moves it to another
-    // release and documents, the plan for the deck as it was no longer applies.
+    // release, the plan for the deck as it was no longer applies.
     queryKey: ["libraryUpgrade", deck.url, deck.sourceUrl, deck.cardsDocumentUrl],
     queryFn: () => useCases.planLibraryUpgrade(deck),
     enabled: deck.sourceUrl !== undefined,
@@ -73,10 +73,18 @@ export function LibraryUpgradeContainer({
       setProgress({ step: "read", done: 0 });
       const outcome = await useCases.applyLibraryUpgrade(deck, plan, setProgress);
       if (!outcome.ok) {
-        // An offer the deck no longer calls for is looked at again, with the deck as it now is.
+        // An offer the deck no longer calls for is looked at again, with the deck as it now is; a deck
+        // not put back as it was is read again, and so are the backups, which keep it.
         await Promise.all([
           queryClient.invalidateQueries({ queryKey: ["decks"] }),
           queryClient.invalidateQueries({ queryKey: ["libraryUpgrade", deck.url] }),
+          ...(outcome.asItWas
+            ? []
+            : [
+                queryClient.invalidateQueries({ queryKey: ["cards", deck.cardsDocumentUrl] }),
+                queryClient.invalidateQueries({ queryKey: ["reviews", deck.reviewsDocumentUrl] }),
+                queryClient.invalidateQueries({ queryKey: ["backups", instance.url] }),
+              ]),
         ]);
         return outcome;
       }

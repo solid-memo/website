@@ -246,35 +246,6 @@ describe("applyReviewChanges", () => {
   });
 });
 
-describe("stageReviewChanges", () => {
-  const STAGED = `${INSTANCE}reviews/deck-1-u1.ttl`;
-  const STAGED_CARDS = `${INSTANCE}decks/deck-1-u1.ttl`;
-  const staged = { cardsDocumentUrl: STAGED_CARDS, reviewsDocumentUrl: STAGED };
-  const other: ReviewState = { ...state, cardId: "card-2" };
-
-  it("writes the states, but the removed ones, into a new document, moving them to it", async () => {
-    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
-      setThing(reviewsDataset(), named(other)) as never,
-    );
-    await makeRepository().stageReviewChanges(deck, staged, [
-      { cardId: "card-2", direction: "front-to-back" },
-    ]);
-    const [url, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
-    expect(url).toBe(STAGED);
-    expect(toReviewState(getThing(saved as SolidDataset, `${STAGED}#card-1`)!, { ...deck, cardsDocumentUrl: STAGED_CARDS })).toEqual(state);
-    expect(getThing(saved as SolidDataset, `${STAGED}#card-2`)).toBeNull();
-    expect(getThing(saved as SolidDataset, `${deck.reviewsDocumentUrl}#card-1`)).toBeNull();
-    // Each state's link to its card moves with the cards document.
-    expect(getUrl(getThing(saved as SolidDataset, `${STAGED}#card-1`)!, SM.reviewOf)).toBe(`${STAGED_CARDS}#card-1`);
-  });
-
-  it("writes an empty document for a deck without one", async () => {
-    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
-    await makeRepository().stageReviewChanges(deck, staged, []);
-    expect(vi.mocked(saveSolidDatasetAt).mock.calls[0][0]).toBe(STAGED);
-  });
-});
-
 describe("states that name their card", () => {
   it("read a state another app named any way by its card and direction", async () => {
     const reverse: ReviewState = { ...state, direction: "back-to-front" };

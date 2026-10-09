@@ -16,7 +16,7 @@ app writes today; `DECK_FORMAT_VERSION` and friends are aliases of it.
 
 | Class | 1 | 2 | Why the version moved |
 |---|---|---|---|
-| Instance | title, created | `dcterms:replaces` (the instance it is an updated copy of) and `dcterms:modified` (when it replaced it), both optional | The format update writes a copy and keeps the original as a backup; the copy records which one, so the backup can be found, restored or deleted. |
+| Instance | title, created | `dcterms:replaces` (the instance it is an updated copy of) and `dcterms:modified` (when it replaced it), both optional | The format update of that time wrote a copy and kept the original as a backup; the copy records which one, so the backup can be found, restored or deleted. Since vocabulary 1.17 the update writes in place and no longer states either ([backups](#the-backup)). |
 | Deck | title, document links, provenance | `sm:direction`, stated | A format-1 reader would study a bidirectional deck one way only and count the other way's review subjects against the day's budgets without matching them to any card. |
 | Card | `sm:front` and `sm:back`, both required | a side may be a picture (`sm:frontImage` / `sm:backImage`, an IRI), text, or both | A format-1 reader treats a card without `sm:front` as malformed and drops it, so picture-only cards must not be mistaken for format 1. |
 | Review state | the SM-2 fields; a snapshot and per-direction subjects were added without a bump, so format 1 admits them | the same fields; the snapshot is all five triples or none; the subject naming (`#<cardId>`, `#<cardId>@back-to-front`) is part of the contract | Stamping begins: a format-1 reader meeting a format-2 state would silently ignore the snapshot and the other direction, which is what a version is meant to flag. |
@@ -183,15 +183,40 @@ format version:
   distractors keeps its suggested answers as they were, naming
   distractors it removed; this app cannot tell those from another app's,
   and keeps them.
-- **A link to a card outlives a library upgrade.** An
-  [upgrade](#how-an-upgrade-is-applied) moves the cards to a new
-  document and, unless a removed card has states, keeps the reviews
-  document, whose links still name the old one. The app reads a link
-  into any cards document the deck has had (`decks/<deckId>.ttl` or
-  `decks/<deckId>-<uuid>.ttl`) by its fragment, so an upgrade by this
-  app or an older one loses no state.
+- **A link to a card outlives an upgrade by an earlier version.** Until
+  stable addresses, a library [upgrade](#how-an-upgrade-is-applied)
+  moved the cards to a new document (`decks/<deckId>-<uuid>.ttl`) and,
+  unless a removed card had states, kept the reviews document, whose
+  links still named the old one. The app reads a link into any cards
+  document the deck has had (`decks/<deckId>.ttl` or
+  `decks/<deckId>-<uuid>.ttl`) by its fragment, so such a deck loses no
+  state. This app's upgrade writes in place: the links it writes name
+  the document the cards are in, and it moves none.
 - **One full re-check.** The shape files changed, so the rules' hash
   changed: every instance is checked in full once on its next opening.
+
+[Backups](#the-backup) (vocabulary 1.17) need no migration and moved no
+format version:
+
+- **A backup is new data in a place of its own.** `sm:Backup` and
+  `sm:BackupEntry` are new classes (backup and backup entry format 1),
+  the subjects of a manifest in the instance's `backups/` folder, which
+  no older format describes. An older app takes the folder for another
+  app's files: it reads nothing in it, and keeps it (and the instance's
+  folder with it) when it deletes the instance; this app deletes it with
+  the instance.
+- **The instance's record says nothing of it.** The backups are found
+  by listing `backups/`, not through `meta.ttl`: the update writes
+  `meta.ttl` only when its own format is outdated, like any document, so
+  a restore that puts `meta.ttl` back cannot lose track of a backup, and
+  a second run does not write over the first run's record. Instance
+  format 2 is unchanged: an update no longer states `dcterms:replaces`
+  or `dcterms:modified`, both optional, and an instance an earlier
+  version's update made keeps them, naming the copy it replaced, which
+  stays restorable ([Backups an earlier version made](#backups-an-earlier-version-made)).
+- **One full re-check.** Two shape files were added, so the rules'
+  hash changed: every instance is checked in full once on its next
+  opening.
 
 Rules that hold across versions:
 
@@ -201,10 +226,24 @@ Rules that hold across versions:
 - **Every write is in the current format.** `recordThing` stamps the
   descriptor's version on every subject it writes: adding or editing a
   card, saving a deck, a review, the preferences, an import.
-- **Newer data passes through.** A stored version above the latest is
-  read with the latest shape this app has; the model keeps the stored
-  version, and the migration plan never counts it. The library import
-  refuses newer data instead, with a clear message.
+- **Newer data passes through, and is never written over.** A stored
+  version above the latest is read with the latest shape this app has;
+  the model keeps the stored version, and the migration plan never
+  counts it. Writing it would lose what the newer format says, so
+  `recordThing`, through which every subject is written
+  ([records.ts](../packages/solid/src/records.ts)), refuses one whose
+  stored version is above the version it writes for that kind
+  (`writtenByNewerApp`: "A newer version of Solid Memo has updated this
+  data, so this version does not save over it. Reload the page…"),
+  before anything is sent; and `unlessNewer` refuses the same for the
+  writes that change or remove a subject without recording it (a deck's
+  position or completed chapter, a deck group's removal, the catalogue's
+  links, a repair, and the removal of a card, a distractor, a review
+  state, a deck entry or a day's answers): a subject stamped above every
+  version this app writes for its class. This is what keeps a tab opened before a
+  deploy from writing older formats over what the update wrote in
+  place; a tab of a version from before this rule has no such guard.
+  The library import refuses newer data too, with a clear message.
 
 ## The chain
 
@@ -242,10 +281,13 @@ real shapes — that every step's output conforms to the shape it moves to.
 
 ## The pod migration
 
-The format update never writes the user's instance. It copies the
-instance into a new sibling container, updates and checks the copy,
-and only then points the type index at it; the original stays in the
-pod as a backup.
+The format update changes the user's documents where they are. Before
+it writes one, it copies it into a backup inside the instance; it then
+writes each document only while it is still as it was copied, and
+checks the instance after. No document, subject or folder changes its
+address, and nothing in the type index changes
+([instanceUpdate.ts](../packages/domain/src/instanceUpdate.ts),
+`updateInstance` in [useCases.ts](../packages/application/src/useCases.ts)).
 
 ```mermaid
 flowchart TD
@@ -253,15 +295,14 @@ flowchart TD
     plan -->|nothing outdated| quiet["(nothing shown)"]
     plan -->|outdated| notice["Notice: what will change"]
     notice -->|Update…| confirm["Confirm: how the update<br/>keeps the data safe"]
-    confirm -->|Start the update| stage["1 stage: main-&lt;uuid&gt;/ must not exist;<br/>remembered in the browser"]
-    stage --> access["2 access: the container's own<br/>.acl / .acr, rebased"]
-    access --> copy["3 copy: every resource, rebased<br/>(RDF: IRIs rewritten; other files<br/>byte for byte) and its own ACL"]
-    copy --> upgrade["4 upgrade: the copy in place,<br/>with dcterms:replaces the original"]
-    upgrade --> validate["5 validate: validateInstance(copy)<br/>must conform"]
-    validate --> verify["6 verify: the original's listing unchanged,<br/>each copied version still current (304)"]
-    verify --> switch["7 switch: both type indexes<br/>point at the copy"]
-    switch --> done["The updated instance opens;<br/>the original is the backup"]
-    stage & access & copy & upgrade & validate & verify & switch -->|error| undo["Revert indexes switched so far,<br/>delete the copy, show the error"]
+    confirm -->|Start the update| stage["1 stage: read afresh what is outdated,<br/>check what of it already fails;<br/>remembered in the browser"]
+    stage --> backup["2 backup: backups/&lt;stamp&gt;/manifest.ttl,<br/>then a copy of each document (and its own ACL),<br/>each created where nothing is"]
+    backup --> upgrade["3 upgrade: each document in place,<br/>only while still at the version backed up;<br/>the version it left noted in the manifest"]
+    upgrade --> validate["4 validate: validateInstance;<br/>nothing it wrote may fail anew"]
+    validate --> done["Updated, at the same address;<br/>the backup in Preferences"]
+    stage & backup -->|error| clean["Delete what was backed up,<br/>show the error: nothing changed"]
+    upgrade -->|"a document changed elsewhere (412)"| partly["Stop: what was updated stays updated,<br/>the backup is kept; run again to finish"]
+    validate -->|new violation| offer["Report it, keep the backup,<br/>offer Restore"]
 ```
 
 - **Plan first, write nothing.** Opening an instance reads the meta
@@ -270,148 +311,279 @@ flowchart TD
   cached for the session per instance.
 - **The user decides.** The notice names what is outdated and which
   formats this app now writes; its button opens a confirmation that
-  explains the copy, the backup, the copied access and the new address.
-  Until **Start the update** is pressed the app keeps working on the old
-  format. Once started the run cannot be cancelled (a half-cancelled run
-  is the risky state); a progress bar shows the step and, while copying,
-  the document count.
-- **The original is read-only while the update runs.** Every adapter
-  talks to the pod through one fetch wrapped by the write fence
-  ([writeFence.ts](../packages/solid/src/writeFence.ts)).
-  `updateInstance` holds the original's container from its first step
-  until it returns, and while it is held any request under it other than
-  GET, HEAD or OPTIONS is refused before it leaves the browser — whether
-  it comes from the update (a link it failed to rebase, say) or from
-  anything else in the tab. Other tabs and apps cannot be fenced; the
-  verify step catches them.
-- **A copy, named with a UUID.** `…/solid-memo/main/` is copied to
-  `…/solid-memo/main-<uuid>/` (`stagingUrlOf`). The target must not
-  exist (`ensureAbsent`), and every document of the copy is created with
-  `If-None-Match: *`, so nothing is ever overwritten: had something
-  appeared there meanwhile, the pod answers 412 and the run stops.
-- **Access control first.** The instance container's own ACL document
-  (WAC `.acl` or ACP `.acr`, found through `Link: rel="acl"`) is copied
-  with its IRIs rebased before any data, so the copy is never more open
-  than the original; so is the ACL of every copied resource that has
-  one. An ACL that cannot be read or placed stops the run.
-- **Rebased, not reinterpreted.** Turtle documents are read, every IRI
-  under the old container is rewritten to the new one (`mapIris`, in the
-  lazy SHACL chunk), and the result is saved; literals, blank nodes and
-  foreign IRIs are left as they are. Other files are copied byte for
-  byte with their content type, so files Solid Memo does not know survive.
-- **The copy is updated in place**, exactly as the old in-place update
-  did: meta → preferences → per deck (entry, cards, review states) →
-  catalogue (last, since it lists the decks as DCAT datasets, which
-  older entries are not), each an in-place edit so unknown triples survive. Each subject
-  is written from the model the chain brought up to date, so content does
-  not change, only its version. An instance without a catalogue gets one,
-  published by the signed-in user ([data-model.md](data-model.md#the-catalogue)).
-  The copy's `meta.ttl` gains `dcterms:replaces <original>` and
-  `dcterms:modified`.
-- **Validation is the gate.** The whole copy is checked with
-  `validateInstance` ([validation.md](validation.md)); a single violation
-  stops the run. The invalid-data policy does not apply here: an update
-  never produces data that needs a repair. What another app wrote in
-  the instance has only warnings ([validation.md](validation.md#data-another-app-wrote)),
-  so it never stops an update.
-- **Nothing changed meanwhile.** Each resource's version is taken from
-  the very response it was copied from: its ETag (with the request's
-  `Accept`, since an ETag belongs to one representation), else its
-  Last-Modified, else a SHA-256 of the body. The original is listed
-  again, and the pod is asked of each resource whether it is still that
-  version — a HEAD with `If-None-Match: <ETag>` (or `If-Modified-Since`),
-  which answers 304 when it is. A review saved in another tab during the
-  copy stops the run, so no study is lost.
-- **One commit point.** `switchInstance` points the `sm:Instance`
-  registration (and the `dcat:Catalog` one, adding it if missing) at
-  the copy, changing only their links to the original, in
-  each type index that registers the original, one save per index, each
-  with `If-Match`: an index another app changed since it was read is
-  not overwritten (412), and the switch is undone. If a
-  later index fails, the ones already switched are switched back. Until
-  this step nothing is visible to the user or to other apps.
-- **Failure leaves nothing behind.** Any error deletes the copy, whole
-  (a recursive delete, as of every copy Solid Memo made whole: it
-  created the copy's container where nothing was, and nothing names it
-  yet; see [Write discipline](data-model.md#write-discipline)), and
-  reports the step, the error and "No changes were made to your data".
-  If the delete fails too, the copy's address is shown with **Try
-  removing it again**.
-- **A closed tab.** Step 1 remembers the copy in `localStorage`
-  (`solid-memo:update:<instance>`), cleared on success or cleanup. On
-  the next opening of the instance, a copy still there is offered for
-  removal ("An update … was cut off"). Another browser does not know of
-  it; the copy's `meta.ttl` names its original (`dcterms:replaces`), so
-  it can be recognised by hand.
-- **The address changes.** The updated instance lives at the new URL;
-  the app opens it, and old bookmarks lead to the instance picker.
+  explains the backup, the in-place writes, the unchanged addresses and
+  sharing, and what happens when another tab writes meanwhile. Until
+  **Start the update** is pressed the app keeps working on the old
+  format. Once started the run cannot be cancelled; a progress bar shows
+  the step and, while backing up or updating, the document count.
+- **What changes is read afresh.** The update reads the instance again
+  rather than trusting the plan, and lists the documents it will write,
+  in the order it writes them: `meta.ttl` (when its format is
+  outdated), `preferences.ttl` (likewise), each deck's cards document
+  and reviews document (when a card, or a state, is outdated), and last
+  `catalog.ttl` (when a deck entry is outdated or the catalogue is
+  missing), which lists the decks as DCAT datasets, which older entries
+  are not. A document two decks share (another app may point two decks
+  at one) is backed up once, and each deck's part of it written in turn.
+  When nothing is outdated any more (another tab updated it), nothing is
+  backed up or written.
+- **The backup first.** The update makes a backup in
+  `backups/<stamp>/` (`backupFolderOf`: the time to the second, UTC,
+  and the first characters of a fresh id): it reads each document,
+  noting the version of that very response (its ETag, else its
+  modification time, else a hash of its content), then writes the
+  manifest, `manifest.ttl`, naming every document, its copy and that
+  version, then a copy of each document at its own path below the folder
+  (`decks/deck-1.ttl` at `backups/<stamp>/decks/deck-1.ttl`; a document
+  outside the instance, which a deck's catalog entry may name, at
+  `elsewhere/<n>.ttl`, numbered in the order of the manifest), its
+  triples as they were, every IRI unchanged. Each copy is then given the
+  access its document has, as an access control of its own: the
+  document's own, rebased, or, when it inherits, the rules of the
+  nearest folder above it with an access control of its own that its
+  contents inherit (`acl:default`), each now of the copy alone
+  (`copyEffectiveAccessControl`). A copy is thus exactly as open as its
+  document, wherever that is shared from, but for the moment between
+  its creation and its access control's, when it has the backup
+  folder's (the instance's). Every one of these is created only where
+  nothing is (`If-None-Match: *`). The manifest is written
+  first so that whatever was copied is named, and so deleted with it.
+  The run is remembered in `localStorage` (`solid-memo:update:<instance>`,
+  the backup's folder) until it ends.
+- **Each document in place, once, only as it was copied.** Each
+  document is then read again and written with the same edits as ever
+  (an in-place PATCH of what changed, or one PUT of the whole document
+  for a large edit, so unknown triples survive): each subject from the
+  model the chain brought up to date, so content does not change, only
+  its version. The catalog document's entries and its catalogue, when
+  it has none (published by the signed-in user,
+  [data-model.md](data-model.md#the-catalogue)), go in one write
+  (`saveDecks`), so every document is written once. That write is made
+  only if the document is still at the version backed up: the write
+  fence lets it through with `If-Match: <that ETag>` (whatever version
+  the writer read), and on a server without ETags checks the document's
+  version just before the write and answers 412 itself when it moved.
+  The version the write left the document at is then noted in the
+  manifest (`sm:versionUpdated`), for a restore to tell a document
+  changed since.
+- **A document changed elsewhere stops the update, and loses nothing.**
+  A 412 (another tab or device wrote the document after it was backed
+  up) stops the run at that document: the documents already written stay
+  updated, each whole and in the newer format, and the others are as
+  they were. Every reader takes a subject at its own stated version
+  (see [Versions](#versions)), so an instance updated part of the way
+  reads and conforms; the catalogue is last, so its deck entries stay
+  in the format older readers know until every deck's documents are
+  done. The user is told how many documents were updated, which one
+  changed elsewhere, and that running the update again finishes it: a
+  second run reads afresh and touches only what is still outdated,
+  with a backup of its own.
+- **The instance is read-only to the rest of the tab while it runs.**
+  Every adapter talks to the pod through one fetch wrapped by the write
+  fence ([writeFence.ts](../packages/solid/src/writeFence.ts)).
+  `updateInstance` holds the instance's container from its first step
+  until it returns: any request under it other than GET, HEAD or
+  OPTIONS is refused before it leaves the browser, but those the update
+  passes: the backup's folder, for the whole run, and each document
+  while it writes it, held to the version backed up. Other tabs and
+  apps cannot be fenced; the version each write is held to catches
+  them.
+- **Validation is the check.** Before the backup, the update checks the
+  documents it is about to write, and notes each subject that already
+  fails its shape; after its writes, it checks the instance with
+  `validateInstance` ([validation.md](validation.md)). The update writes
+  nothing a valid instance would not hold, so a subject of a document it
+  wrote that fails, and did not before, is a fault of the app: it is
+  reported, the backup is kept, and the failure offers **Restore the
+  previous version** at once. What failed before the update (a deck the
+  [policy](validation.md) sets aside, say) is not its doing: it neither
+  stops the update nor counts against it, and the policy acts on it as
+  before. What another app wrote in the instance has only warnings
+  ([validation.md](validation.md#data-another-app-wrote)), so it never
+  stops an update either.
+- **A failure before the first write leaves nothing.** The backup is
+  deleted (its copies and manifest, as the manifest names them), and
+  the user is told no changes were made; a backup that could not be
+  deleted is named, and listed in Preferences to delete. A write that
+  fails without saying it was not made (its answer lost on the way, not
+  a 412 or this app's own refusal) may have reached the pod: the backup
+  is kept, and the document counts as changed since, so a restore keeps
+  it as it is.
+- **A closed tab.** On the next opening of the instance, an update
+  this browser remembers is reported: when its backup's manifest is
+  there, the update was cut off after its backup, what it updated stays
+  updated and the backup is in Preferences; when the folder is there
+  without a manifest (cut off while writing the manifest), it holds
+  nothing a backup names, and is offered for removal, whole. Another
+  browser does not know of the run, but finds its backup in Preferences.
+- **The address does not change.** Bookmarks, the type index
+  registrations and other apps' links to the instance's documents and
+  subjects all still hold after an update.
+
+On a server that ignores `If-Match` (node-solid-server), the check just
+before a write and the write are two requests: a change another device
+makes between them is not seen, and the update writes over it (a PATCH
+keeps it, as it changes only the update's triples; a PUT of a whole
+large document does not). Such a server gives no ETag, so the version
+is the content's hash: a change made a moment before the check is seen.
+
+On every server, the version an update notes for a document it wrote
+(`sm:versionUpdated`) is read with a GET just after the write, not
+taken from the write's answer: a change another device makes between
+the two is taken for the update's own, and a restore would put the
+earlier version back over it.
 
 ### Proof on a real server
 
 `npm run test:pod` runs the update — the app's own use cases and Solid
 adapters, wired as in `main.tsx` — against real Solid servers (each the
 [tests start](testing.md#commands): two majors each of the Community Solid
-Server and node-solid-server), recording every HTTP request ([instanceUpdate.integration.test.ts](../e2e/pod/src/instanceUpdate.integration.test.ts)).
-It seeds an old-format instance with an unknown file and shared access,
-and checks that:
+Server and node-solid-server), recording every HTTP request as the app
+attempts it and as it reaches the server
+([instanceUpdate.integration.test.ts](../e2e/pod/src/instanceUpdate.integration.test.ts)).
+It seeds an old-format instance with another app's triple, an unknown
+file and shared access, and checks that:
 
-- not one write is attempted on the original, which is byte for byte
-  (ACLs included) what it was, after the update and after a restore;
-- every write goes to the copy, but for the type index, which is
-  written last, after the whole copy was read back and validated;
-- every write is conditional (each PUT `If-None-Match: *`, each PATCH
-  `If-Match`), and the check that nothing changed got a 304 for every
-  version it asked about;
-- a document that appears where the copy is about to create one stops
-  the update (412), leaving no trace;
-- a save of a document changed in another tab since it was read fails
-  (412) and keeps the other tab's change; read again, it goes through;
-- the copy is updated and conforms, keeps the unknown file byte for
-  byte, and has its ACLs rebased;
-- restoring the backup, or deleting it, deletes what the folder holds
-  of Solid Memo's and keeps the unknown file, and the folder with it;
-- a write to the original from the same tab during the update is
+- every write goes to a document the backup's manifest names, or into
+  the backup; none to the type index, which is as it was;
+- the backup's copy of a document shared on its own is shared alike,
+  and the copy of one that inherits its access is given that access as
+  its own;
+- each document is written once, after the manifest and its own copy,
+  with `If-Match` the version backed up where the server enforces it,
+  else right after a read of it (the fence's check); everything the
+  backup holds is created with `If-None-Match: *`;
+- the instance is updated, conforms and has nothing left to update, its
+  decks and documents at the addresses they had; the other app's triple,
+  the unknown file and the access rules are as they were;
+- a restore puts back every document still as the update left it,
+  triple for triple, each with `If-Match` the version the update left
+  it at where the server enforces it, else right after a read of it,
+  and keeps one changed since, unwritten; the backup's deletion deletes
+  its manifest and copies and keeps another app's file in its folder,
+  and the folder with it, and once that file is gone leaves no folder;
+- a document another device changes after it was backed up stops the
+  update (412) with the other device's change kept, the documents
+  written before it updated and the instance valid and readable; a
+  second run finishes it, with a backup of only what was left;
+- a write to the instance from the same tab during the update is
   refused by the fence;
-- a failure while copying a document, copying access control, updating
-  the copy, or switching the type index leaves the original and the
-  type index as they were, and no copy;
-- a change made to an already copied document by another tab makes the
-  update give up at the verify step, leaving no trace.
+- a failure while making the backup leaves every document as it was and
+  no backup;
+- a large deck is updated in one PUT, held to the version backed up;
+- a subject a newer version of the app wrote is not written over;
+- a copy an earlier version's update left is still restored (the type
+  index switched back) and deleted as before.
 
-The tests start a Community Solid Server in memory themselves; set
-`SOLID_SERVER_URL` to use another server that lets anyone read and
-write. `npm test` does not run them.
+On node-solid-server and Community Solid Server 6, whose versions are
+to the second, a change the test makes "elsewhere" waits for the next
+second first. The tests start a Community Solid Server in memory
+themselves; set `SOLID_SERVER_URL` to use another server that lets
+anyone read and write. `npm test` does not run them.
 
 ### The backup
 
-The original is left untouched and unregistered. Preferences show it
-under **Previous version** while the instance's meta names it:
+A backup is a folder of the instance's `backups/`, holding the earlier
+version of each document an update (the format update, or a
+[library upgrade](#how-an-upgrade-is-applied) cut off half-way) was to
+change, and its manifest
+([backupData.ts](../packages/solid/src/backupData.ts),
+[solidDocumentBackups.ts](../packages/solid/src/solidDocumentBackups.ts)):
 
-- **Restore previous version** switches the type indexes back, then
+```turtle
+# backups/20261009T100000Z-0f3a1b2c/manifest.ttl
+<#it> a sm:Backup ; sm:formatVersion 1 ;
+    sm:backupOf <https://pod.example/solid-memo/main/> ;
+    dcterms:created "2026-10-09T10:00:00Z"^^xsd:dateTime .
+<#entry-1> a sm:BackupEntry ; sm:formatVersion 1 ;
+    sm:backedUpDocument <https://pod.example/solid-memo/main/decks/deck-1.ttl> ;
+    sm:backupCopy <https://pod.example/solid-memo/main/backups/20261009T100000Z-0f3a1b2c/decks/deck-1.ttl> ;
+    sm:versionBackedUp "\"a1\"" ; sm:versionUpdated "\"a2\"" .
+<#entry-2> a sm:BackupEntry ; sm:formatVersion 1 ;
+    sm:backedUpDocument <https://pod.example/solid-memo/main/catalog.ttl> .
+```
+
+A library upgrade's backup is of the deck's catalog entry, and names
+the release the deck came from when it was made:
+
+```turtle
+<#it> a sm:Backup ; sm:formatVersion 1 ;
+    sm:backupOf <https://pod.example/solid-memo/main/catalog.ttl#deck-1> ;
+    sm:releaseBackedUp <https://solid-memo.com/decks/capitals/v1.ttl> ;
+    dcterms:created "2026-10-09T10:00:00Z"^^xsd:dateTime .
+```
+
+An entry without a copy is of a document that was not there (the
+update was to create it, as a missing catalogue); `sm:versionUpdated`
+is noted once the update wrote the document. `sm:backupOf` says what
+the backup was made for: the instance (the format update) or a deck's
+entry (a library upgrade). Preferences lists every backup, newest
+first, under **Previous versions**: when it was made, for what, and a
+link to its folder.
+
+- **Restore this version** first makes sure the backup is the
+  instance's own as an update made it, since anyone who may write in
+  the instance could leave a manifest naming any document: its folder
+  in the instance's `backups/`, every copy in that folder, every
+  document in the instance (not in `backups/`) or one the catalog names
+  for a deck, and made for the instance or, naming its release, for a
+  deck. Else nothing is read or written (`backupNotOurs`); the backup
+  can still be deleted, which touches only its folder. A deck's backup
+  holds its release's cards, so it is restored only while the deck's
+  entry still names `sm:releaseBackedUp`; once the deck is gone or has
+  moved to another release, restoring it would not put the deck back
+  as it was, and is refused (`deckBackupOutdated`). It then puts back,
+  last written first, each document still at the version the update
+  left it at (`If-Match` that version,
+  or checked just before where the server gives no ETag): its copy's
+  triples, written whole, or, for a document the update created, its
+  deletion. A document at another version was changed since (studied
+  since, say) and is kept as it is now; so is one the update had not
+  noted (a closed tab, or a write whose answer was lost), as nothing
+  tells its change from another app's; one the update never wrote and
+  still at its backed-up version needs nothing. The user is told how
+  many documents were put back and which were kept (the confirmation
+  says so first), above the list, as the backup may leave it. The
+  backup is deleted once nothing of it was kept; else it stays, holding
+  the earlier version of what was kept.
+- **Delete this backup** deletes each copy the manifest names below the
+  folder (a copy's access control goes with it), then the manifest,
+  then each folder below it and the folder itself, each only once
+  empty, and `backups/` once it holds no other backup. A folder holding
+  what another app put there is kept, and the user is told so, with a
+  link to it. Deleting the instance deletes its backups the same way
+  ([data-model.md](data-model.md#discovery-chain)).
+
+#### Backups an earlier version made
+
+Until stable addresses, the format update copied the whole instance
+into a sibling folder (`<name>-<uuid>/`), updated the copy, and pointed
+the type index registrations at it; the original stayed as the backup,
+which the copy's `meta.ttl` names (`dcterms:replaces`, and
+`dcterms:modified` when it replaced it). Such a backup is listed under
+**Previous version at another address** while the instance's meta names
+it, and handled as then:
+
+- **Restore previous version** switches the type indexes back to it
+  (`switchInstance`: only the registrations' links to the instance
+  change, in each index that registers it, one save per index with
+  `If-Match`, the ones switched undone when a later one fails), then
   deletes what the updated instance holds of Solid Memo's; what was
-  studied since the update is lost with it (the confirmation says so).
+  studied since that update is lost with it (the confirmation says
+  so). This is the one way an instance's address still changes.
 - **Delete backup** clears `dcterms:replaces`, then deletes what the
   original holds of Solid Memo's. Forgetting comes first, so a deletion
-  cut off half-way never leaves a backup that can still be restored;
-  what it did not get to stays in the folder.
+  cut off half-way never leaves a backup that can still be restored.
 
 Both delete as deleting an instance does
 ([data-model.md](data-model.md#discovery-chain)): document by document,
-the folder only once empty. A folder that holds what Solid Memo did not
-write is kept, and the user is told so, with a link to it. The original
-is where other apps may have put files, and may still; the updated
-instance has been in use since the update, and holds the copies of
-those files besides, which stay with it.
+the folder only once empty, kept and named when it holds what another
+app put there. A backup whose `meta.ttl` is gone is forgotten quietly,
+and restore checks this again before it switches. A partial copy that
+such an update's closed tab left, which this browser still remembers,
+is offered for removal on the next opening, whole, as before.
 
-A backup whose `meta.ttl` is gone (deleted by another app, or by a
-deletion that cut off after it) is forgotten quietly, even when its
-folder is still there: `meta.ttl` is the last document a deletion
-removes, so without it the folder is no longer a whole instance. Restore
-checks this again before it switches, and refuses a backup that is no
-longer there, leaving the updated instance as it was.
-Repairs still edit in place. Library upgrades copy the deck's own
-documents and switch the deck over to them
-([below](#how-an-upgrade-is-applied)).
+Repairs edit in place, as the update does.
 
 ## Catching up with the library
 
@@ -435,6 +607,7 @@ changes reach only what the user left as the library had it:
 | Retired before, in use again | Retired | Brings it back, with the review states it had |
 | Removed | As the old release had it | Removes it, and its review states |
 | Anything | Removed by the user | Leaves it removed |
+| Added, changed, retired or in use again | Already as the new release has it | Nothing to write, but the deck still moves to the release |
 
 Retiring is not a change of the card's content, so it applies to cards
 the user changed too: nothing of theirs is lost. A library release never
@@ -480,65 +653,97 @@ before upgrades brought these texts along is given its own release's
 languages, the same way, once a session when its page opens
 (`addReleaseLanguages`): nothing the user wrote changes. The notice lists the notes of every release in between.
 Nothing is offered for a release that is not newer, uses a card format
-this app does not know, or would change nothing. Review history of every
-card but the removed ones is kept.
+this app does not know, or would change nothing. A copy with cards
+already as the newer release has them (`applied`: an upgrade cut off
+after writing them, or the user's own edits alike) is still offered the
+release, which moves its entry and writes nothing to those cards: a deck
+left naming the older release would have a later upgrade take the
+newer release's changes for the user's. Review history of every card
+but the removed ones is kept.
 
 ### How an upgrade is applied
 
-Like the format update, an upgrade never writes the deck's documents
+Like the format update, an upgrade writes the deck's documents where
+they are, after backing them up
 ([domain/deckUpgrade.ts](../packages/domain/src/deckUpgrade.ts),
 `applyLibraryUpgrade` in
-[useCases.ts](../packages/application/src/useCases.ts)). It writes the
-upgraded deck into new documents beside the old ones, and points the
-deck's catalog entry at them only once everything checks out. The deck
-keeps its URL and its cards keep their ids, so the answer log still
-names them (statistics count a card by its deck and id, not by its
-document).
+[useCases.ts](../packages/application/src/useCases.ts)). The deck keeps
+its URL, its documents theirs and its cards their ids, so the answer
+log still names them (statistics count a card by its deck and id, not
+by its document), and so does any link another app made.
 
 ```mermaid
 flowchart TD
     offer["Notice: what the upgrade changes"] -->|Update to release n| read["1 read: the deck's entry and cards (and,<br/>when removed cards have some, review states);<br/>the plan again must change the same cards"]
-    read --> write["2 write: decks/&lt;deck&gt;-&lt;uuid&gt;.ttl (and reviews/…)<br/>as new documents (If-None-Match: *), their own ACL copied;<br/>remembered in the browser"]
-    write --> check["3 check: the new documents read back<br/>as what was meant to be written"]
-    check --> verify["4 verify: the old documents still as read<br/>(304, or the same contents)"]
-    verify --> switch["5 switch: the catalog entry, still as read,<br/>points at the new documents (one write, If-Match)"]
-    switch --> tidy["6 tidy: the old documents deleted"]
+    read --> backup["2 backup: a copy of the cards document<br/>(and the reviews document) in backups/;<br/>both found still as read"]
+    backup --> write["3 write: each in place (If-Match the version<br/>backed up), the cards in one PUT"]
+    write --> check["4 check: each read back<br/>as what was meant to be written"]
+    check --> entry["5 entry: the catalog entry, still as read,<br/>moved to the new release (one write, If-Match)"]
+    entry --> tidy["6 tidy: the backup deleted"]
     tidy --> refresh["The deck page reads everything again at once"]
-    read & write & check & verify & switch -->|error| undo["Delete the new documents,<br/>show where it failed; the deck is as it was"]
+    read & backup -->|error| none["Delete the backup;<br/>the deck is as it was"]
+    write & check & entry -->|error| undo["Put back each document still as<br/>the upgrade left it; the deck is as it was,<br/>or (one changed since) the backup stays"]
 ```
 
-- **One commit.** The catalog entry is the only thing that says where
-  the deck's cards and review states are, so its single conditional
-  write is the switch: before it the deck is the old one, after it the
-  new one. A switch whose answer was lost is settled by reading the
-  entry: whichever documents it points at stay, the others are deleted.
-- **Review states move only when they must.** When no removed card has
-  review states the deck keeps its reviews document, and reviews saved
-  meanwhile on another device land where they always did. Its states
-  still name their cards (`sm:reviewOf`) in the old cards document,
-  which the app reads as the deck's ([data-model.md](data-model.md#decks-and-cards))
-  and names anew on the state's next write. When the reviews document
-  does move, every link to a card moves with it to the new cards
-  document.
-- **Nothing written meanwhile is lost.** While it runs, the write fence
-  refuses this tab's writes to the documents being replaced; the verify
-  step catches another device's. On a server whose ETag outlives an edit
-  made in the same second (Community Solid Server 6), a change made in
-  that second can look unchanged — as for the format update.
-- **Shared documents are kept.** Solid Memo gives every deck its own
-  documents, but another app may point two decks at one. The tidy, like
-  removing a deck, deletes no document any deck of the catalog still
-  uses.
-- **Sharing.** A document with its own ACL gets a copy of it, rebased;
-  between its creation and that copy the new document inherits its
-  container's access.
-- **Interrupted upgrades.** The browser notes what an upgrade moves
-  before it writes; a note left by a closed tab is settled the same way
-  (by the entry) on a later visit to the deck, once it is ten minutes
-  old, so another tab's upgrade under way is left alone.
+- **Planned on the deck as read.** The backup's copy is made after the
+  read the plan was made from, so the documents are read again once
+  backed up: one that changed meanwhile (its version, or where the
+  server gives none, its contents) stops the upgrade before it writes,
+  and the backup is deleted. From then on each write is held to the
+  version backed up, as the format update's are.
+- **Review states change only when they must.** When no removed card
+  has review states the deck's reviews document is not touched, and
+  reviews saved meanwhile on another device land where they always did.
+  When one does, the reviews document is written in place without the
+  removed cards' states.
+- **The entry is the last write.** The catalog entry says which release
+  the deck is, so its single conditional write moves the deck to the
+  new release once its cards read back as meant: before it, the deck is
+  the old release's (its cards put back when anything fails), after it
+  the new one's. An entry's write whose answer was lost is settled by
+  reading the entry: when it names the new release, the upgrade is done.
+- **A failure after a write puts the deck back.** Each document the
+  upgrade wrote is put back from the backup while it is still as the
+  upgrade left it, and the backup is deleted: the deck is as it was. A
+  document changed since (another device studied meanwhile) is kept as
+  it is: the user is told the deck is not as it was, and the backup
+  stays, in Preferences, to restore or delete. So is a document whose
+  write failed without saying it was not made (its answer lost): it is
+  put back only when it is still as backed up, which shows the write
+  never happened; else it counts as changed, and the backup stays.
+- **Nothing written meanwhile in this tab is lost.** While it runs, the
+  write fence refuses this tab's other writes to the documents being
+  changed. On a server whose ETag outlives an edit made in the same
+  second (Community Solid Server 6), a change made in that second can
+  look unchanged — as for the format update.
+- **Sharing is untouched.** The documents keep their access control;
+  the backup's copy of each is given the access the document has, as
+  its own (see [The pod migration](#the-pod-migration)).
+- **Interrupted upgrades.** An upgrade cut off half-way (a closed tab)
+  leaves its backup, which Preferences lists as made before the deck's
+  update. The deck reads as it is: cut off after its cards were written
+  and before its entry moved, its cards are the new release's while its
+  entry still names the old one. The plan then counts those cards as
+  already applied, so the offer comes again, saying so, and moves the
+  entry; a release that only removed cards is the exception, as nothing
+  tells a card it removed from one the user deleted (releases no longer
+  remove cards). Restoring the backup instead puts the deck back, while
+  its entry still names the release the backup was made at
+  (`sm:releaseBackedUp`); once the entry names another (the upgrade
+  finished and only deleting its backup failed, or it was offered again
+  and done), restoring it would mix two releases, so it is refused and
+  the backup can only be deleted. A note an upgrade by an
+  earlier version left in the browser, which moved decks to new
+  documents, is still settled by the entry on a later visit to the
+  deck, once it is ten minutes old: whichever documents the entry
+  points at stay, the others are deleted, never one a deck of the
+  catalog uses.
+- **Decks an earlier version moved** to `decks/<deckId>-<uuid>.ttl` and
+  `reviews/<deckId>-<uuid>.ttl` are upgraded where they are: the catalog
+  entry is where a deck's documents are found.
 - **Progress.** The deck page shows every step, with a progress bar, in
-  place of the offer; a failure says at which step, and that the deck
-  was not changed.
+  place of the offer; a failure says at which step, and whether the deck
+  is as it was.
 
 ## Adding a format version
 

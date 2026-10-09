@@ -37,6 +37,7 @@ const plan: LibraryUpgradePlan = {
   restore: [],
   remove: [],
   kept: [],
+  applied: [],
 };
 
 function renderContainer(useCases: UseCases, deck: Deck = imported) {
@@ -148,23 +149,23 @@ describe("LibraryUpgradeContainer", () => {
     // The first step is said a frame after the region is up, so screen readers hear it.
     expect(within(region).getByRole("status").textContent).toBe("");
     await waitFor(() => expect(within(region).getByRole("status")).toHaveTextContent("Reading the deck and its cards…"));
-    act(() => report!({ step: "verify", done: 3, total: 6 }));
-    expect(within(region).getByRole("status")).toHaveTextContent("Checking nothing changed meanwhile…");
+    act(() => report!({ step: "check", done: 3, total: 6 }));
+    expect(within(region).getByRole("status")).toHaveTextContent("Checking what was written…");
     expect(screen.getByRole("progressbar", { name: "Update progress" })).toHaveAttribute("value", "3");
     expect(screen.getByRole("progressbar", { name: "Update progress" })).toHaveAttribute("max", "7");
     const steps = within(region).getAllByRole("listitem");
     expect(steps.map((step) => step.textContent)).toEqual([
       "✓Reading the deck and its cards (done)",
-      "✓Writing the updated cards to new documents (done)",
-      "✓Checking what was written (done)",
-      "➜Checking nothing changed meanwhile (in progress)",
-      "·Switching the deck over",
-      "·Removing the old documents",
+      "✓Keeping a copy of the deck as it is (done)",
+      "✓Writing the updated cards (done)",
+      "➜Checking what was written (in progress)",
+      "·Moving the deck to the new release",
+      "·Removing the copy",
       "·Showing the updated deck",
     ]);
     expect(steps[3]).toHaveAttribute("aria-current", "step");
-    act(() => report!({ step: "verify", done: 3, total: 6, part: { done: 1, total: 2 } }));
-    expect(within(region).getByRole("status")).toHaveTextContent(/^Checking nothing changed meanwhile…$/);
+    act(() => report!({ step: "check", done: 3, total: 6, part: { done: 1, total: 2 } }));
+    expect(within(region).getByRole("status")).toHaveTextContent(/^Checking what was written…$/);
     expect(within(region).getByText("1 of 2")).toBeInTheDocument();
     expect(screen.getByRole("progressbar", { name: "Update progress" })).toHaveAttribute("value", "3.5");
     expect(screen.queryByRole("button", { name: "Update to release 2" })).toBeNull();
@@ -181,14 +182,14 @@ describe("LibraryUpgradeContainer", () => {
   });
 
   it("offers nothing more once the deck is upgraded, though the offer is looked at again with the deck as it was", async () => {
-    // The pod as the use cases see it: the deck moves to new documents and the next release.
+    // The pod as the use cases see it: the deck moves to the next release, its documents where they were.
     let stored: Deck = imported;
     const useCases = makeUseCasesFake({
       listDecks: vi.fn(async () => [stored]),
       // As the real use case: a plan for a deck still on the old release, whatever deck object it is given.
       planLibraryUpgrade: vi.fn(async (deck: Deck) => (deck.sourceUrl === imported.sourceUrl ? plan : null)),
       applyLibraryUpgrade: vi.fn(async (deck: Deck, applied: LibraryUpgradePlan): Promise<DeckUpgradeOutcome> => {
-        stored = { ...deck, sourceUrl: applied.releaseUrl, cardsDocumentUrl: `${instance.url}decks/deck-1-u1.ttl` };
+        stored = { ...deck, sourceUrl: applied.releaseUrl };
         return { ok: true, deck: stored, tidied: true };
       }),
     });
@@ -205,9 +206,9 @@ describe("LibraryUpgradeContainer", () => {
   it("says where a failed upgrade stopped and that the deck is as it was, and lets the user try again or close", async () => {
     const failed: DeckUpgradeOutcome = {
       ok: false,
-      step: "verify",
+      step: "backup",
       error: new AppError("deckChangedDuringUpgrade", { url: imported.cardsDocumentUrl }),
-      cleanedUp: true,
+      asItWas: true,
     };
     const useCases = makeUseCasesFake({
       planLibraryUpgrade: vi.fn(async () => plan),
@@ -219,11 +220,11 @@ describe("LibraryUpgradeContainer", () => {
     const region = await screen.findByRole("region", { name: "Update failed" });
     // It takes the progress's focus, read out with why as its description.
     expect(region).toHaveFocus();
-    expect(region).toHaveAccessibleDescription(/The update failed while checking nothing changed meanwhile/);
+    expect(region).toHaveAccessibleDescription(/The update failed while keeping a copy of the deck as it is/);
     expect(region).toHaveTextContent(
-      "The update failed while checking nothing changed meanwhile: The deck changed while it was being updated, perhaps in another tab or app. Try again.",
+      "The update failed while keeping a copy of the deck as it is: The deck changed while it was being updated, perhaps in another tab or app. Try again.",
     );
-    expect(region).toHaveTextContent("Your deck was not changed. The new documents were removed.");
+    expect(region).toHaveTextContent("Your deck is as it was.");
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["libraryUpgrade", imported.url] });
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["decks"] });
     expect(invalidate).not.toHaveBeenCalledWith({ queryKey: ["cards", imported.cardsDocumentUrl] });
@@ -234,20 +235,22 @@ describe("LibraryUpgradeContainer", () => {
     expect(await screen.findByRole("button", { name: "Update to release 2" })).toBeEnabled();
   });
 
-  it("says when the new documents are left for later, and closes when the offer is gone", async () => {
+  it("says when the deck is not as it was, its backup kept, and closes when the offer is gone", async () => {
     let current: LibraryUpgradePlan | null = plan;
     const useCases = makeUseCasesFake({
       planLibraryUpgrade: vi.fn(async () => current),
       applyLibraryUpgrade: vi.fn(async (): Promise<DeckUpgradeOutcome> => {
         current = null;
-        return { ok: false, step: "read", error: new AppError("deckChangedSinceOffer"), cleanedUp: false };
+        return { ok: false, step: "entry", error: new AppError("deckChangedDuringUpgrade", { url: imported.url }), asItWas: false };
       }),
     });
-    const { container } = renderContainer(useCases);
+    const { container, invalidate } = renderContainer(useCases);
     fireEvent.click(await screen.findByRole("button", { name: "Update to release 2" }));
     expect(await screen.findByRole("region", { name: "Update failed" })).toHaveTextContent(
-      "The new documents could not be removed yet",
+      "Part of the update could not be undone, as the deck changed meanwhile",
     );
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ["cards", imported.cardsDocumentUrl] });
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ["backups", instance.url] });
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
     await waitFor(() => expect(container.textContent).toBe(""));
     expect(useCases.applyLibraryUpgrade).toHaveBeenCalledOnce();

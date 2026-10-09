@@ -74,7 +74,9 @@ flowchart LR
   catalogue goes can be retried and find the decks again (a catalogue
   the pod serves but that cannot be read, as another app might leave
   it, is kept, and so are the decks' documents, which nothing else
-  names; the rest goes as ever); then
+  names; the rest goes as ever); then every [backup](migrations.md#the-backup)
+  in `backups/`, each as its manifest names what it holds, and
+  `backups/` once empty; then
   `decks/`, `reviews/` and `history/`, each only if it is then empty;
   then `meta.ttl`, last of the documents, so a half-deleted instance
   still attaches by URL; and the container itself only if it is then
@@ -86,9 +88,10 @@ flowchart LR
   so is every container on its path: the user is told the folder was
   kept, and why, with a link to it (`KeptFolderNotice`). Data goes
   before registration so a failure leaves the instance listed and the
-  delete retryable. Restoring a format update's backup deletes the
-  updated instance, and deleting the backup the original, the same way
-  ([migrations.md](migrations.md#the-backup)). Every blocking server
+  delete retryable. Restoring the copy of a whole instance an earlier
+  version's format update left deletes the updated instance, and
+  deleting that copy the original, the same way
+  ([migrations.md](migrations.md#backups-an-earlier-version-made)). Every blocking server
   the end-to-end tests start ([testing.md](testing.md#commands)), and
   Pivot and Community Solid Server 8, keeps another app's file and its
   folder, and deletes a folder holding only Solid Memo's documents with
@@ -102,7 +105,8 @@ flowchart LR
 ```
 <storage>solid-memo/<name>/          (default path; user-editable)
 ├── meta.ttl        #it: a sm:Instance; dcterms:title; dcterms:created;
-│                        after a format update dcterms:replaces (the
+│                        on an instance an earlier version's format
+│                        update made, dcterms:replaces (that update's
 │                        backup) and dcterms:modified; sm:formatVersion 2
 ├── preferences.ttl #it: a sm:Preferences (created on first explicit save):
 │                        study caps, sm:answerScale, sm:developerMode,
@@ -145,16 +149,25 @@ flowchart LR
 ├── history/<YYYY-MM>.ttl  the answer log (below): one sm:Answer per grade
 │                        given in study or a course that month,
 │                        appended, never edited; sm:formatVersion 1
-└── digest.ttl      derived data (below): a sm:DocumentReceipt per document
-                         (#receipt-<path>) and a sm:DeckSchedule per deck
-                         (#schedule-<path>), each stamped with the versions
-                         it was learned from; sm:formatVersion 1
+├── digest.ttl      derived data (below): a sm:DocumentReceipt per document
+│                        (#receipt-<path>) and a sm:DeckSchedule per deck
+│                        (#schedule-<path>), each stamped with the versions
+│                        it was learned from; sm:formatVersion 1
+└── backups/<stamp>/  a backup an update made before it changed documents
+                         in place (migrations.md#the-backup): manifest.ttl
+                         (#it a sm:Backup, #entry-<n> a sm:BackupEntry per
+                         document, sm:formatVersion 1), and each
+                         document's earlier version at its own path (one
+                         outside the instance at elsewhere/<n>.ttl), with
+                         the access its document has as its own
 ```
 
 A deck's documents are found through its catalog entry
 (`sm:cardsDocument`, `sm:reviewsDocument`), never by name: a library
-upgrade moves them to `decks/<deckId>-<uuid>.ttl` and
-`reviews/<deckId>-<uuid>.ttl` ([migrations](migrations.md#how-an-upgrade-is-applied)).
+upgrade by an earlier version of the app moved them to
+`decks/<deckId>-<uuid>.ttl` and `reviews/<deckId>-<uuid>.ttl`. This
+app's upgrade writes them where they are
+([migrations](migrations.md#how-an-upgrade-is-applied)).
 
 ## Decks and cards
 
@@ -276,9 +289,10 @@ graph LR
     state another app named `#state-7f3a` is read when it names its card,
     and `#card-1` naming card 2 is a state of card 2.
   - **A link into a cards document the deck had** names its card too.
-    A [library upgrade](migrations.md#how-an-upgrade-is-applied) moves
-    the cards to `decks/<deckId>-<uuid>.ttl` and may keep the reviews
-    document, whose links still name the old document; so `sm:reviewOf`
+    A [library upgrade](migrations.md#how-an-upgrade-is-applied) by an
+    earlier version of the app moved the cards to
+    `decks/<deckId>-<uuid>.ttl` and may have kept the reviews document,
+    whose links still name the old document; so `sm:reviewOf`
     into any document beside the cards named `<deckId>.ttl` or
     `<deckId>-<…>.ttl` is read by its fragment, and the state's next
     write names the current cards document.
@@ -358,15 +372,20 @@ removes both registrations: the `sm:Instance` one by its container, the
 container, where another app may have registered a catalogue of its
 own. A registration that also registers something else keeps it, and
 loses only the link to the instance. Switching the registrations to
-another container, as the format update and a restore do, likewise
-replaces only the links to the instance: the other things a shared
-registration names, and its title, stay as they were.
+another container, as restoring the copy an earlier version's format
+update left does, likewise replaces only the links to the instance: the
+other things a shared registration names, and its title, stay as they
+were.
 
-An instance's URL is not permanent: the [format update](migrations.md#the-pod-migration)
-writes an updated copy at `<name>-<uuid>/` and switches the type index
-registrations to it, keeping the original as a backup that the copy's
-`dcterms:replaces` names. Anything that stores an instance URL must
-expect it to move and find the instance through the type index again.
+An instance's URL is permanent, and so is every document's and
+subject's in it: the [format update](migrations.md#the-pod-migration)
+and the [library upgrade](migrations.md#how-an-upgrade-is-applied)
+write the documents where they are, after backing them up inside the
+instance, and change no registration. Another app may keep a link to
+the instance, a deck, a card or a review state. The one way an
+instance's address still changes is restoring the copy of a whole
+instance that a format update by an earlier version of the app left as
+its backup, which switches the registrations back to that copy.
 
 ## The catalogue
 
@@ -391,7 +410,10 @@ described there, so that class check does not hold it to its class
 instance listing one stays valid (held against real servers in
 [foreignData.integration.test.ts](../e2e/pod/src/foreignData.integration.test.ts)). It is written when an instance is created,
 and by the [format update](migrations.md) for an instance made before
-there were catalogues; its registration is written when the update switches over. The whole document
+there were catalogues. Its registration is written with the instance's
+when the instance is created or a guest's study moves into the pod; the
+format update changes no registration, so an instance made before
+there were catalogues and updated since has none. The whole document
 conforms to DCAT-AP (a test holds what the app writes to it).
 
 A deck's description, topics and keywords are edited in its Browser
@@ -634,9 +656,10 @@ sequenceDiagram
 - **A pod without ETags gains nothing.** node-solid-server (5.x, 6.0.0) gives no
   ETag on a read: nothing can be known to be unchanged, so nothing is
   kept, and every visit reads everything, as before.
-- The [format update](migrations.md#the-pod-migration) copies the digest
-  with the rest; the copy's documents have other versions, so it is
-  relearned on the first visit.
+- The [format update](migrations.md#the-pod-migration) does not write
+  the digest; the documents it writes, and those a restore puts back,
+  have new versions, so what it says of them is relearned on the next
+  visit.
 
 ## Write discipline
 
@@ -711,17 +734,31 @@ sequenceDiagram
   write touches only the triples it changes (a deck save adds or
   removes its own `dcat:dataset` link, never another app's), and a
   delete only resources Solid Memo knows it wrote: an instance, a
-  format update's backup, or the updated instance a restore replaces,
-  is deleted document by document, its folder only once empty
-  ([deleting an instance](#discovery-chain)). Only a copy Solid Memo
-  made whole and nothing names yet is deleted recursively, the format
-  update's or the guest's study moved, when it fails half-way or a
-  closed tab left it behind: Solid Memo created its container at a URL
-  it found free, and all it holds is copies whose originals stay where
-  they were.
-- No `.acl`/`.acr` resource is ever written except as a rebased copy of
-  one that exists, by the [format update](migrations.md#the-pod-migration):
-  a resource without its own ACL safely inherits its ancestors' access,
-  while a malformed one replaces inheritance entirely and can lock the
-  owner out (WAC) or expose data. Access control stays whatever the
-  user's server dictates.
+  backup (each copy its manifest names, then the manifest), a copy of a
+  whole instance an earlier version's update left, or the updated
+  instance that copy's restore replaces, is deleted document by
+  document, its folder only once empty
+  ([deleting an instance](#discovery-chain)). Only a folder Solid Memo
+  made whole and nothing names yet is deleted recursively: the guest's
+  study moved, when it fails half-way or a closed tab left it behind,
+  and a backup's folder a closed tab left before its manifest named
+  anything (or a copy an earlier version's update left so): Solid Memo
+  created it at a URL it found free, and all it holds is copies whose
+  originals stay where they were.
+- **An update writes only what it backed up, as it backed it up.** The
+  format update and the library upgrade write a document only while it
+  is at the version their backup copied (`If-Match`, or checked just
+  before where the server gives no ETag), held so by the write fence
+  ([migrations.md](migrations.md#the-pod-migration)); and no write puts
+  an older format over a subject a newer version of the app wrote
+  ([migrations.md](migrations.md#versions)).
+- No `.acl`/`.acr` resource is ever written but a
+  [backup](migrations.md#the-backup)'s copy's own, made from the access
+  its document has: the document's own access control, rebased, or,
+  when it inherits, the rules its nearest folder with an access control
+  of its own gives what is inside it (`acl:default`), each now of the
+  copy alone. Nothing else's access changes: a resource without its own
+  ACL safely inherits its ancestors' access, while a malformed one
+  replaces inheritance entirely and can lock the owner out (WAC) or
+  expose data. Access control stays whatever the user's server
+  dictates.

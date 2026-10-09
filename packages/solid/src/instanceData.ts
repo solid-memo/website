@@ -12,6 +12,7 @@ import {
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { deleteContainerIfEmpty, listContainerTree } from "./containers";
 import { deleteIfPresent, getSolidDatasetOrNull } from "./datasets";
+import { listBackupsOf, removeBackup } from "./backupData";
 import { RDF, SM } from "./vocab";
 
 /**
@@ -29,10 +30,12 @@ import { RDF, SM } from "./vocab";
  *    decks' documents, so a delete that fails before it can be retried
  *    (a catalogue the pod serves but that cannot be read is kept, and
  *    with it the decks' documents, which nothing else names);
- * 4. `decks/`, `reviews/` and `history/`, each only if it is then empty;
- * 5. `meta.ttl` last of the documents, so a partly deleted instance still
+ * 4. every backup in `backups/`, as its manifest names what it holds
+ *    (backupData.ts), and `backups/` once empty;
+ * 5. `decks/`, `reviews/` and `history/`, each only if it is then empty;
+ * 6. `meta.ttl` last of the documents, so a partly deleted instance still
  *    attaches by URL;
- * 6. the instance's container, only if it is then empty.
+ * 7. the instance's container, only if it is then empty.
  *
  * A document's access control (its `.acl`) goes with it: the Solid
  * Protocol has the server delete a resource's auxiliary resources with
@@ -64,6 +67,7 @@ export async function deleteInstanceData(
   ]) {
     await deleteIfPresent(url, fetch);
   }
+  for (const backup of await listBackupsOf(container, fetch)) await removeBackup(backup, fetch);
   for (const subcontainer of [`${container}decks/`, `${container}reviews/`, history]) {
     await deleteContainerIfEmpty(subcontainer, fetch);
   }

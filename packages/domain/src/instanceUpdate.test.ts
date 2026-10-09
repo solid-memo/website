@@ -1,16 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { rebaseIri, stagingUrlOf, UPDATE_STEP_LABELS } from "./instanceUpdate";
+import { rebaseIri, UPDATE_STEPS } from "./instanceUpdate";
 
 const MAIN = "https://pod.example/solid-memo/main/";
-
-describe("stagingUrlOf", () => {
-  it("names a sibling of the instance after it and a UUID", () => {
-    expect(stagingUrlOf(MAIN, "0f3a")).toBe("https://pod.example/solid-memo/main-0f3a/");
-    expect(stagingUrlOf("https://pod.example/solid-memo/main", "0f3a")).toBe(
-      "https://pod.example/solid-memo/main-0f3a/",
-    );
-  });
-});
 
 describe("rebaseIri", () => {
   const TO = "https://pod.example/solid-memo/main-0f3a/";
@@ -30,8 +21,8 @@ describe("rebaseIri", () => {
   });
 });
 
-describe("UPDATE_STEP_LABELS", () => {
-  it("names every step for the user", () => {
-    expect(Object.keys(UPDATE_STEP_LABELS)).toEqual(["stage", "access", "copy", "upgrade", "validate", "verify", "switch"]);
+describe("UPDATE_STEPS", () => {
+  it("are the steps the user sees, in order", () => {
+    expect(UPDATE_STEPS).toEqual(["stage", "backup", "upgrade", "validate"]);
   });
 });

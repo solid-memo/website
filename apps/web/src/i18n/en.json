@@ -93,16 +93,35 @@
     "connectingTitle": "Connecting your Pod"
   },
   "backup": {
-    "heading": "Previous version",
-    "kept": "The last format update kept your data as it was before, in {link}.",
-    "keptOn": "The last format update kept your data as it was before ({date}), in {link}.",
+    "heading": "Previous versions",
     "folder": "a backup folder in your Pod",
-    "restoreConfirm": "Go back to the previous version of {name}? What you studied since the update is lost with the updated version.",
-    "restore": "Restore previous version",
+    "restoreConfirm": "Put back the documents of {name} this backup holds? Each goes back to how it was before the update, unless it changed since (you studied since): that one is kept as it is now.",
+    "restore": "Restore this version",
     "restoring": "Restoring…",
-    "deleteConfirm": "Delete the previous version for good? This cannot be undone.",
-    "delete": "Delete backup",
-    "deleting": "Deleting…"
+    "deleteConfirm": "Delete this backup for good? Your data stays as it is now. This cannot be undone.",
+    "delete": "Delete this backup",
+    "deleting": "Deleting…",
+    "ofUpdate": {
+      "one": "Kept on {date}, before the format update: {count} document as it was, in {link}.",
+      "other": "Kept on {date}, before the format update: {count} documents as they were, in {link}."
+    },
+    "ofDeck": "Kept on {date}, before {deck} was updated from the library, in {link}.",
+    "ofSomeDeck": "Kept on {date}, before a deck was updated from the library, in {link}.",
+    "restored": {
+      "one": "Put back {count} document as it was.",
+      "other": "Put back {count} documents as they were."
+    },
+    "keptSince": "Kept as they are now, changed since the update: {documents}.",
+    "legacy": {
+      "heading": "Previous version at another address",
+      "kept": "An update by an earlier version of Solid Memo kept your data as it was before, in {link}.",
+      "keptOn": "An update by an earlier version of Solid Memo kept your data as it was before ({date}), in {link}.",
+      "folder": "a backup folder in your Pod",
+      "restoreConfirm": "Go back to the previous version of {name}? What you studied since the update is lost with the updated version.",
+      "restore": "Restore previous version",
+      "deleteConfirm": "Delete the previous version for good? This cannot be undone.",
+      "delete": "Delete backup"
+    }
   },
   "breadcrumbs": {
     "label": "Breadcrumb",
@@ -531,7 +550,7 @@
   "instanceUpdate": {
     "confirmRegion": "Start the update",
     "confirmHeading": "How the update keeps your data safe.",
-    "confirmBody": "Solid Memo copies {name} into a new folder in your pod, updates the copy, and checks it. Only if every check passes does it switch over to the copy. Your current data is not changed: it is kept as a backup, which you can restore or delete in Preferences. Who you shared it with is copied along. The instance gets a new address, so bookmarks to it lead to the instance picker. If anything goes wrong, the copy is removed and nothing else changes.",
+    "confirmBody": "Solid Memo first keeps a copy of every document of {name} that the update changes, in a backup folder inside it. Then it updates each document where it is, only if it is still as it was copied, and checks the result. Every address stays the same, and so does who you shared it with. In Preferences you can restore the previous version, which keeps whatever you studied since, or delete it. If another tab or app changes a document while the update runs, the update stops: what it updated stays updated, and you can run it again to finish.",
     "start": "Start the update",
     "notNow": "Not now",
     "progressRegion": "Updating",
@@ -539,21 +558,21 @@
     "progressLabel": "Update progress",
     "keepOpen": "Keep this page open until the update is done.",
     "step": {
-      "stage": "Preparing a new copy",
-      "access": "Copying who may access it",
-      "copy": "Copying documents",
-      "upgrade": "Updating the copy's formats",
-      "validate": "Checking the new copy",
-      "verify": "Checking nothing changed meanwhile",
-      "switch": "Switching over to the new copy"
+      "stage": "Finding what to update",
+      "backup": "Keeping a copy of what changes",
+      "upgrade": "Updating the documents",
+      "validate": "Checking the instance"
     },
     "failedRegion": "Update failed",
     "failedWhile": "The update failed while {step}:",
     "noChanges": "No changes were made to your data.",
-    "copyRemoved": "The partial copy was removed.",
-    "copyLeft": "The partial copy could not be removed; it is at {url}.",
-    "tryAgain": "Try removing it again",
-    "close": "Close"
+    "close": "Close",
+    "backupLeft": "Its partial backup could not be removed; you can delete it in Preferences.",
+    "partlyUpdated": {
+      "one": "{count} document was brought up to date before the update stopped, and stays so; the others are as they were. Run the update again to finish it. A backup of everything it was to change is kept in Preferences.",
+      "other": "{count} documents were brought up to date before the update stopped, and stay so; the others are as they were. Run the update again to finish it. A backup of everything it was to change is kept in Preferences."
+    },
+    "restore": "Restore the previous version"
   },
   "library": {
     "heading": "Deck library",
@@ -655,23 +674,22 @@
     "progressRegion": "Updating the deck",
     "running": "{step}…",
     "progressLabel": "Update progress",
-    "keepOpen": "Keep this page open until the update is done. Your deck is only switched over once everything checks out.",
+    "keepOpen": "Keep this page open until the update is done. If anything goes wrong, Solid Memo puts the deck back as it was.",
     "step": {
       "read": "Reading the deck and its cards",
-      "write": "Writing the updated cards to new documents",
+      "backup": "Keeping a copy of the deck as it is",
+      "write": "Writing the updated cards",
       "check": "Checking what was written",
-      "verify": "Checking nothing changed meanwhile",
-      "switch": "Switching the deck over",
-      "tidy": "Removing the old documents",
+      "entry": "Moving the deck to the new release",
+      "tidy": "Removing the copy",
       "refresh": "Showing the updated deck"
     },
     "failedRegion": "Update failed",
     "failedWhile": "The update failed while {step}:",
-    "noChanges": "Your deck was not changed.",
-    "copyRemoved": "The new documents were removed.",
-    "copyLeft": "The new documents could not be removed yet; Solid Memo removes them on a later visit to the deck.",
+    "noChanges": "Your deck is as it was.",
     "tryAgain": "Try again",
-    "close": "Close"
+    "close": "Close",
+    "notAsItWas": "Part of the update could not be undone, as the deck changed meanwhile, perhaps in another tab or app. What changed is kept, and the deck as it was before the update is kept as a backup in Preferences."
   },
   "libraryUpgradeNotice": {
     "region": "Newer library release",
@@ -697,6 +715,10 @@
       "one": "removes {count} card",
       "other": "removes {count} cards"
     },
+    "alreadyApplied": {
+      "one": "keeps {count} card already as the release has it",
+      "other": "keeps {count} cards already as the release has them"
+    },
     "studies": "studies it {direction}",
     "describes": "updates the deck's name, description or keywords",
     "noStudiedChanges": "updates cards you no longer study",
@@ -716,9 +738,11 @@
   },
   "migration": {
     "interruptedRegion": "Interrupted update",
-    "interrupted": "An update of {name} was cut off before it finished; your data is as it was. A partial copy remains at {url}.",
+    "interrupted": "An update of {name} was cut off before it finished; your data is as it was. What it had begun to write remains at {url}.",
     "removing": "Removing…",
-    "removeIt": "Remove it"
+    "removeIt": "Remove it",
+    "interruptedBackedUp": "An update of {name} was cut off before it finished. What it updated stays updated and the rest is as it was; update again to finish. A backup of what it was to change is kept in Preferences.",
+    "understood": "OK"
   },
   "migrationNotice": {
     "region": "Format update",
@@ -728,7 +752,7 @@
       "other": "{outdated} are stored in an older format."
     },
     "writes": "Solid Memo now writes {formats}.",
-    "howItWorks": "Updating makes an updated copy and switches over to it once it is checked, keeping your current data as a backup; deck names, card text, directions, your review history and your settings stay as they are, and a deck without a description gets a short one you can change.",
+    "howItWorks": "Updating keeps a copy of each document it changes as a backup, then updates each one where it is and checks the result, so every address stays the same; deck names, card text, directions, your review history and your settings stay as they are, and a deck without a description gets a short one you can change.",
     "listAnd": "{rest} and {last}",
     "instanceRecord": "the instance record",
     "instanceCatalogue": "the instance's catalogue",
@@ -1087,9 +1111,9 @@
     "notRegistered": "That instance is no longer on your list of instances, so there is nothing to switch. Reload the page and try again.",
     "noMetaToUpdate": "This instance has no description to update. Reload the page and try again.",
     "noBackup": "{instance} has no backup to restore.",
-    "updatedCopyInvalid": {
-      "one": "The updated copy is not in the format Solid Memo expects ({count} problem), so your data is left as it was. Try again later.",
-      "other": "The updated copy is not in the format Solid Memo expects ({count} problems), so your data is left as it was. Try again later."
+    "updatedInstanceInvalid": {
+      "one": "After the update, part of your data is not in the format Solid Memo expects ({count} problem). Restore the previous version the update kept, then try again later.",
+      "other": "After the update, part of your data is not in the format Solid Memo expects ({count} problems). Restore the previous version the update kept, then try again later."
     },
     "movedCopyInvalid": {
       "one": "The copy in your Pod is not in the format Solid Memo expects ({count} problem), so your study is left as it was. Try again later.",
@@ -1106,6 +1130,10 @@
     "deckBeingUpgraded": "Solid Memo is updating this deck and saves nothing to it until the update is done. Wait for the update to finish, then try again.",
     "changedElsewhere": "This was changed elsewhere, perhaps in another tab or app, since Solid Memo read it, so nothing was saved. Reload the page and try again.",
     "deckTreeChanged": "Your decks were rearranged elsewhere, perhaps in another tab or app, so this change was not made. The list now shows them as they are.",
+    "backupGone": "The backup this update made can no longer be found, so the update stopped. Run the update again.",
+    "backupNotOurs": "This backup names documents that are not part of {instance}, so Solid Memo does not restore it. You can delete it: only what it holds in its own folder is deleted.",
+    "deckBackupOutdated": "The deck this backup is of has been removed, or updated to a newer library release, since the backup was made, so restoring it would not put the deck back as it was. Nothing was changed; you can delete the backup.",
+    "writtenByNewerApp": "A newer version of Solid Memo has updated this data, so this version does not save over it. Reload the page to get the latest version.",
     "deckTreeTooNew": "A newer version of Solid Memo arranged these decks, so this one cannot rearrange them. Reload the page to get the latest version.",
     "createdElsewhere": "This was created elsewhere, perhaps in another tab or app, just as Solid Memo was about to create it, so nothing was saved. Reload the page and try again.",
     "alreadyExists": "Something is already kept at that place in your Pod. Choose another place.",

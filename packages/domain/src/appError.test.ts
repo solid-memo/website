@@ -22,8 +22,8 @@ describe("AppError", () => {
   });
 
   it("picks the singular for a count of one, the plural otherwise", () => {
-    expect(new AppError("updatedCopyInvalid", { count: 1 }).message).toContain("(1 problem)");
-    expect(new AppError("updatedCopyInvalid", { count: 3 }).message).toContain("(3 problems)");
+    expect(new AppError("updatedInstanceInvalid", { count: 1 }).message).toContain("(1 problem)");
+    expect(new AppError("updatedInstanceInvalid", { count: 3 }).message).toContain("(3 problems)");
   });
 
   it("keeps the values its text leaves out as its technical detail, after the text in its message", () => {

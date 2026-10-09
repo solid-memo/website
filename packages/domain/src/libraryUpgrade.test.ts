@@ -81,6 +81,45 @@ describe("planLibraryUpgrade", () => {
       restore: [],
       remove: [podCard("is", "Reykjavik")],
       kept: [podCard("fi", "Helsinki, my note"), podCard("lv", "Riga, mine")],
+      // A card the copy already has as the release adds it.
+      applied: [podCard("mine", "Mine")],
+    });
+  });
+
+  it("offers to move a copy whose cards are already as the newer release has them, as an upgrade cut off before its entry leaves it", () => {
+    const now = release(2, [
+      libraryCard("se", "Stockholm"),
+      { ...libraryCard("dk", "Copenhagen"), retired: true },
+      ...from.cards.filter((card) => card.id !== "se" && card.id !== "dk"),
+      libraryCard("no", "Oslo"),
+    ]);
+    const written = [
+      podCard("se", "Stockholm"),
+      { ...podCard("dk", "Copenhagen"), retired: true as const },
+      ...cards.filter((card) => card.id !== "se" && card.id !== "dk"),
+      podCard("no", "Oslo"),
+    ];
+    expect(planLibraryUpgrade({ deck, cards: written, from, to: now, releases })).toMatchObject({
+      releaseUrl: `${DECKS}capitals/v2.ttl`,
+      add: [],
+      change: [],
+      retire: [],
+      remove: [],
+      applied: [podCard("se", "Stockholm"), { ...podCard("dk", "Copenhagen"), retired: true }, podCard("no", "Oslo")],
+    });
+    // A card the library changes is changed, though it is already retired as the release has it.
+    const retiredAndFixed = release(2, from.cards.map((card) => (card.id === "se" ? { ...libraryCard("se", "Stockholm"), retired: true as const } : card)));
+    const retiredMine = cards.map((card) => (card.id === "se" ? { ...card, retired: true as const } : card));
+    expect(planLibraryUpgrade({ deck, cards: retiredMine, from, to: retiredAndFixed, releases })).toMatchObject({
+      change: [{ ...libraryCard("se", "Stockholm"), retired: true }],
+      applied: [],
+    });
+    // A card the user changed, then the library changed alike, is the release's too.
+    const fixed = release(2, from.cards.map((card) => (card.id === "fi" ? libraryCard("fi", "Helsinki, my note") : card)));
+    expect(planLibraryUpgrade({ deck, cards, from, to: fixed, releases })).toMatchObject({
+      change: [],
+      kept: [],
+      applied: [podCard("fi", "Helsinki, my note")],
     });
   });
 
@@ -230,10 +269,13 @@ describe("planLibraryUpgrade", () => {
     expect(planLibraryUpgrade({ deck, cards: reached, from, to: added, releases, course: true })).toBeNull();
   });
 
-  it("takes a retirement the copy already has as done", () => {
+  it("takes a retirement the copy already has as done, and only moves the deck to the release", () => {
     const now = release(2, from.cards.map((card) => (card.id === "dk" ? { ...card, retired: true as const } : card)));
     const mine = cards.map((card) => (card.id === "dk" ? { ...card, retired: true as const } : card));
-    expect(planLibraryUpgrade({ deck, cards: mine, from, to: now, releases })).toBeNull();
+    expect(planLibraryUpgrade({ deck, cards: mine, from, to: now, releases })).toMatchObject({
+      retire: [],
+      applied: [{ ...podCard("dk", "Copenhagen"), retired: true }],
+    });
   });
 });
 
@@ -262,7 +304,7 @@ describe("upgradedCards", () => {
 
 describe("applyLibraryUpgrade", () => {
   it("moves the copy to the newer release, and to its direction when that changes", () => {
-    const plan = { fromVersion: "1", toVersion: "3", releaseUrl: `${DECKS}capitals/v3.ttl`, notes: [], add: [], change: [], retire: [], restore: [], remove: [], kept: [] };
+    const plan = { fromVersion: "1", toVersion: "3", releaseUrl: `${DECKS}capitals/v3.ttl`, notes: [], add: [], change: [], retire: [], restore: [], remove: [], kept: [], applied: [] };
     expect(applyLibraryUpgrade(deck, plan)).toEqual({ ...deck, sourceUrl: `${DECKS}capitals/v3.ttl` });
     expect(applyLibraryUpgrade(deck, { ...plan, direction: "bidirectional" })).toEqual({
       ...deck,

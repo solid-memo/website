@@ -18,8 +18,8 @@
     a owl:Ontology ;
     dcterms:title "Solid Memo vocabulary, v1" ;
     dcterms:description "Terms for spaced-repetition flashcards stored in a Solid pod: instances, decks, cards, SM-2 review state and study preferences." ;
-    owl:versionInfo "1.16" ;
-    skos:changeNote "1.0: Instance, Deck, Card, ReviewState, Preferences, formatVersion, cardsDocument, reviewsDocument, front, back, the SM-2 fields and the study caps. 1.1: developerMode. 1.2: the previous* snapshot. 1.3: frontImage, backImage (card format 2). 1.4: cardCount (library index). 1.5: direction (deck format 2). 1.6: the StudyDirections and InvalidDataPolicies concept schemes, studyDirection (deck format 3) and invalidDataPolicy (preferences format 3); direction deprecated. 1.7: deckNewCardsPerDay, deckMaxReviewsPerDay (a deck's own study caps). 1.8: frontNote, backLabel, backNote (card format 3). 1.9: DocumentReceipt and DeckSchedule, the instance digest that lets a visit skip documents that have not changed. 1.10: Answer, the answer log the study statistics are computed from. 1.11: the Themes concept scheme and theme (preferences format 4). 1.12: frontImageDescription, backImageDescription (card format 4, without a version bump). 1.13: DeckGroup and position, the user's arrangement of the deck list (deck group format 1; on a deck, position needs no deck format bump). 1.14: Chapter, Step and Distractor, the outline of a course (a library deck that is also a schema:Course), its theory and the wrong options of its multiple-choice questions (chapter, step and distractor format 1; distractor on a card without a card format bump); completedChapter, a course's progress on the user's copy; the AnswerModes concept scheme, answerMode and chosenDistractor (on an answer, without an answer format bump). 1.15: the TextFormats concept scheme and textFormat, how the texts of a card, a course step or a chapter are written, plain or Markdown (on each without a format bump). 1.16: reviewOf and reviewDirection, the card and direction a review state is of, and scheduler with the Schedulers concept scheme (review-state format 2, without a format bump)." .
+    owl:versionInfo "1.17" ;
+    skos:changeNote "1.0: Instance, Deck, Card, ReviewState, Preferences, formatVersion, cardsDocument, reviewsDocument, front, back, the SM-2 fields and the study caps. 1.1: developerMode. 1.2: the previous* snapshot. 1.3: frontImage, backImage (card format 2). 1.4: cardCount (library index). 1.5: direction (deck format 2). 1.6: the StudyDirections and InvalidDataPolicies concept schemes, studyDirection (deck format 3) and invalidDataPolicy (preferences format 3); direction deprecated. 1.7: deckNewCardsPerDay, deckMaxReviewsPerDay (a deck's own study caps). 1.8: frontNote, backLabel, backNote (card format 3). 1.9: DocumentReceipt and DeckSchedule, the instance digest that lets a visit skip documents that have not changed. 1.10: Answer, the answer log the study statistics are computed from. 1.11: the Themes concept scheme and theme (preferences format 4). 1.12: frontImageDescription, backImageDescription (card format 4, without a version bump). 1.13: DeckGroup and position, the user's arrangement of the deck list (deck group format 1; on a deck, position needs no deck format bump). 1.14: Chapter, Step and Distractor, the outline of a course (a library deck that is also a schema:Course), its theory and the wrong options of its multiple-choice questions (chapter, step and distractor format 1; distractor on a card without a card format bump); completedChapter, a course's progress on the user's copy; the AnswerModes concept scheme, answerMode and chosenDistractor (on an answer, without an answer format bump). 1.15: the TextFormats concept scheme and textFormat, how the texts of a card, a course step or a chapter are written, plain or Markdown (on each without a format bump). 1.16: reviewOf and reviewDirection, the card and direction a review state is of, and scheduler with the Schedulers concept scheme (review-state format 2, without a format bump). 1.17: Backup and BackupEntry, backupOf, backedUpDocument, backupCopy, versionBackedUp, versionUpdated and releaseBackedUp: the backup an update makes of each document before it changes it in place, which the update can be undone by (backup and backup entry format 1)." .
 
 #################### Classes ####################
 
@@ -110,6 +110,20 @@ solid-memo:Distractor
     rdfs:comment "A wrong option of a card asked as a multiple-choice question, the card's back being the right one. A subject of the document that holds its card, which names it with solid-memo:distractor; copied with the card." ;
     rdfs:isDefinedBy <> ;
     skos:historyNote "Added in 1.14." .
+
+solid-memo:Backup
+    a owl:Class ;
+    rdfs:label "Backup" ;
+    rdfs:comment "What an update saved before it changed documents in place: the earlier version of each document it was to change, one solid-memo:BackupEntry each, kept in the instance's backups/ folder. The subject #it of the backup's manifest.ttl, beside the copies; the entries are subjects of the same document. A restore puts back each document still as the update left it, and keeps any changed since." ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.17." .
+
+solid-memo:BackupEntry
+    a owl:Class ;
+    rdfs:label "Backup entry" ;
+    rdfs:comment "One document of a backup: the document, where its earlier version is kept, the version it was copied at, and the version the update left it at once it wrote it. A subject of the backup's manifest." ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.17." .
 
 #################### Shared ####################
 
@@ -617,6 +631,62 @@ solid-memo:introducedOnDayCount
     rdfs:range xsd:integer ;
     rdfs:isDefinedBy <> ;
     skos:historyNote "Added in 1.9." .
+
+#################### Backup ####################
+
+solid-memo:backupOf
+    a owl:ObjectProperty ;
+    rdfs:label "backup of" ;
+    rdfs:comment "What the backup was made for: the instance (its container) for a format update, the deck (its catalog entry) for a library upgrade." ;
+    rdfs:domain solid-memo:Backup ;
+    rdfs:range rdfs:Resource ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.17." .
+
+solid-memo:backedUpDocument
+    a owl:ObjectProperty ;
+    rdfs:label "backed-up document" ;
+    rdfs:comment "The document a backup entry is of, at its own address, which the update did not change." ;
+    rdfs:domain solid-memo:BackupEntry ;
+    rdfs:range rdfs:Resource ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.17." .
+
+solid-memo:backupCopy
+    a owl:ObjectProperty ;
+    rdfs:label "backup copy" ;
+    rdfs:comment "Where the backup keeps the document's earlier version: a document in the backup's folder holding the triples the document held, their IRIs as they were. Absent when there was no document: the update was to create it, and a restore deletes it." ;
+    rdfs:domain solid-memo:BackupEntry ;
+    rdfs:range rdfs:Resource ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.17." .
+
+solid-memo:versionBackedUp
+    a owl:DatatypeProperty ;
+    rdfs:label "version backed up" ;
+    rdfs:comment "The version of the document the copy was made from, as the pod gave it: its ETag, else \"Last-Modified: \" and its modification time, else \"sha256:\" and a hash of its content. The update writes the document only while it is still at this version. Absent when there was no document." ;
+    rdfs:domain solid-memo:BackupEntry ;
+    rdfs:range xsd:string ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.17." .
+
+solid-memo:versionUpdated
+    a owl:DatatypeProperty ;
+    rdfs:label "version updated" ;
+    rdfs:comment "The version the update left the document at, in the form versionBackedUp has, once it wrote it; absent until then. A restore puts the earlier version back only while the document is still at this version." ;
+    rdfs:domain solid-memo:BackupEntry ;
+    rdfs:range xsd:string ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.17." .
+
+solid-memo:releaseBackedUp
+    a owl:ObjectProperty ;
+    rdfs:label "release backed up" ;
+    rdfs:comment "On the backup a library upgrade makes: the library release the deck came from when the backup was made, which its catalog entry names (prov:wasDerivedFrom). The backup's copies are of that release's cards, so it is restored only while the entry still names it." ;
+    rdfs:domain solid-memo:Backup ;
+    rdfs:range rdfs:Resource ;
+    rdfs:isDefinedBy <> ;
+    skos:historyNote "Added in 1.17." .
 
 #################### Course ####################
 

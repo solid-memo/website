@@ -3,31 +3,17 @@ import { ensureTrailingSlash } from "./instanceLayout";
 
 /**
  * The format update of an instance, done safely (see docs/migrations.md):
- * the instance is copied into a new sibling container, the copy is
- * brought up to this app's formats and validated, and only then are the
- * type index registrations switched to it. The original is never
- * written; it stays in the pod as a backup. A failure before the switch
- * deletes the copy.
+ * every document it is about to change is first copied into a backup in
+ * the instance's backups/ folder; then each is brought up to this app's
+ * formats in place, only while it is still as it was copied; then the
+ * instance is checked. Every document keeps its address. A document
+ * changed elsewhere meanwhile stops the update: what it updated stays
+ * updated, and running it again finishes it.
  */
 
-export type UpdateStep =
-  | "stage"
-  | "access"
-  | "copy"
-  | "upgrade"
-  | "validate"
-  | "verify"
-  | "switch";
+export type UpdateStep = "stage" | "backup" | "upgrade" | "validate";
 
-export const UPDATE_STEP_LABELS: Record<UpdateStep, string> = {
-  stage: "Preparing a new copy",
-  access: "Copying who may access it",
-  copy: "Copying documents",
-  upgrade: "Updating the copy's formats",
-  validate: "Checking the new copy",
-  verify: "Checking nothing changed meanwhile",
-  switch: "Switching over to the new copy",
-};
+export const UPDATE_STEPS: readonly UpdateStep[] = ["stage", "backup", "upgrade", "validate"];
 
 export interface UpdateProgress {
   step: UpdateStep;
@@ -39,20 +25,22 @@ export interface UpdateProgress {
 }
 
 export type UpdateOutcome =
-  /** Switched over: the instance now lives at `instanceUrl`; `backupUrl` is the original. */
-  | { ok: true; instanceUrl: string; backupUrl: string }
   /**
-   * Failed before switching over, at `step`: the original is untouched.
-   * `cleanedUp` says whether the partial copy was deleted; when it was
-   * not, `leftoverUrl` is where it remains. `error` is what went wrong: an
-   * AppError the app can show in the reader's language, or any other error.
+   * Done: every document is in this app's formats. `backupUrl` is the
+   * backup of what changed; absent when nothing did (another tab or app
+   * brought it up to date meanwhile).
    */
-  | { ok: false; step: UpdateStep; error: unknown; cleanedUp: boolean; leftoverUrl?: string };
-
-/** The container an update copies an instance into: a sibling, `…/main/` → `…/main-<uuid>/`. */
-export function stagingUrlOf(sourceUrl: string, uuid: string): string {
-  return `${ensureTrailingSlash(sourceUrl).replace(/\/$/, "")}-${uuid}/`;
-}
+  | { ok: true; backupUrl?: string }
+  /**
+   * Stopped at `step`. `updated` lists the documents brought up to date
+   * before it stopped, which stay so: each is whole and in the newer
+   * format, and the others as they were. `backupUrl` is the backup of
+   * every document the update was to change, kept when any was updated
+   * (or it could not be removed). `error` is what went wrong: an
+   * AppError the app can show in the reader's language (changedElsewhere
+   * naming the document changed meanwhile), or any other error.
+   */
+  | { ok: false; step: UpdateStep; error: unknown; updated: string[]; backupUrl?: string };
 
 /** An IRI under the `from` container moved under `to`; any other IRI as it is. */
 export function rebaseIri(iri: string, from: string, to: string): string {

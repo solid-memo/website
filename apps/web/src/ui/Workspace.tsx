@@ -805,7 +805,6 @@ export function Workspace({
               useCases={useCases}
               session={session}
               instance={activeInstance}
-              onUpdated={(updated) => replace({ screen: "home", instanceUrl: updated.url })}
             />
             {restoredKeptFolder?.instanceUrl === activeInstance.url && (
               <KeptFolderNotice url={restoredKeptFolder.folder} />

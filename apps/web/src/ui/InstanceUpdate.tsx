@@ -1,4 +1,6 @@
+import type { BackupRestore } from "@solid-memo/domain/backup";
 import type { UpdateOutcome, UpdateProgress, UpdateStep } from "@solid-memo/domain/instanceUpdate";
+import type { ComponentChildren } from "preact";
 import { useId } from "preact/hooks";
 import { useI18n, type I18n } from "./i18n";
 import { usePanelFocus } from "./panelFocus";
@@ -8,12 +10,9 @@ import { StepProgress } from "./StepProgress";
 function stepLabels(t: I18n["t"]): Record<UpdateStep, string> {
   return {
     stage: t("instanceUpdate.step.stage"),
-    access: t("instanceUpdate.step.access"),
-    copy: t("instanceUpdate.step.copy"),
+    backup: t("instanceUpdate.step.backup"),
     upgrade: t("instanceUpdate.step.upgrade"),
     validate: t("instanceUpdate.step.validate"),
-    verify: t("instanceUpdate.step.verify"),
-    switch: t("instanceUpdate.step.switch"),
   };
 }
 
@@ -78,23 +77,34 @@ export function InstanceUpdateProgress({ progress }: { progress: UpdateProgress 
 }
 
 /**
- * When the update failed: where, why, and that the user's data is as it
- * was. It takes the progress's place and its focus, so the failure is read out.
+ * When the update stopped: where, why, and what it left: nothing changed,
+ * or the documents it updated, which stay so, and the backup in
+ * Preferences. An instance that does not conform after the update (which
+ * should not happen) can be put back from the backup at once. It takes
+ * the progress's place and its focus, so the failure is read out.
  */
 export function InstanceUpdateFailure({
   outcome,
   busy,
-  onRemoveLeftover,
+  restored,
+  onRestore,
   onDismiss,
+  children,
 }: {
   outcome: Extract<UpdateOutcome, { ok: false }>;
   busy: boolean;
-  onRemoveLeftover: () => void;
+  /** What restoring the backup did, once it did. */
+  restored: BackupRestore | undefined;
+  onRestore: () => void;
   onDismiss: () => void;
+  /** The restore's error, if any. */
+  children?: ComponentChildren;
 }) {
   const { t, errorText } = useI18n();
   const ref = usePanelFocus<HTMLDivElement>();
   const whyId = useId();
+  const updated = outcome.updated.length;
+  const offersRestore = outcome.step === "validate" && outcome.backupUrl !== undefined && restored === undefined;
   return (
     <div
       ref={ref}
@@ -109,20 +119,20 @@ export function InstanceUpdateFailure({
         {errorText(outcome.error)}
       </div>
       <p>
-        {t("instanceUpdate.noChanges")}{" "}
-        {outcome.cleanedUp
-          ? t("instanceUpdate.copyRemoved")
-          : t("instanceUpdate.copyLeft", { url: String(outcome.leftoverUrl) })}
+        {updated === 0
+          ? `${t("instanceUpdate.noChanges")}${outcome.backupUrl === undefined ? "" : ` ${t("instanceUpdate.backupLeft")}`}`
+          : t("instanceUpdate.partlyUpdated", { count: updated })}
       </p>
+      {restored !== undefined && <RestoreResult restored={restored} />}
       <div class="edit-actions">
-        {!outcome.cleanedUp && (
+        {offersRestore && (
           <button
             onClick={() => {
-              if (!busy) onRemoveLeftover();
+              if (!busy) onRestore();
             }}
             aria-disabled={busy}
           >
-            {t("instanceUpdate.tryAgain")}
+            {busy ? t("backup.restoring") : t("instanceUpdate.restore")}
           </button>
         )}
         <button
@@ -134,6 +144,18 @@ export function InstanceUpdateFailure({
           {t("instanceUpdate.close")}
         </button>
       </div>
+      {children}
     </div>
+  );
+}
+
+/** What restoring a backup did: how many documents it put back, and which it kept, changed since the update. */
+export function RestoreResult({ restored }: { restored: BackupRestore }) {
+  const { t } = useI18n();
+  return (
+    <p role="status">
+      {t("backup.restored", { count: restored.restored.length })}
+      {restored.kept.length > 0 && ` ${t("backup.keptSince", { documents: restored.kept.join(", ") })}`}
+    </p>
   );
 }

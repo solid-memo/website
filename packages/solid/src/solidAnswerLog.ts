@@ -6,6 +6,7 @@ import { listContainerTree } from "./containers";
 import { appendToDocument, getSolidDatasetOrNull, PreconditionFailedError, saveDataset } from "./datasets";
 import { toAnswer, toAnswerThing } from "./mappers/answerMapper";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
+import { unlessNewer } from "./records";
 
 /** Tries at removing a day's answers while other writes keep adding to the document. */
 const ATTEMPTS = 3;
@@ -57,7 +58,7 @@ export function createSolidAnswerLog({
         });
         if (day.length === 0) return;
         try {
-          await saveDataset(url, day.reduce(removeThing, dataset), fetch);
+          await saveDataset(url, day.map(unlessNewer).reduce(removeThing, dataset), fetch);
           return;
         } catch (error) {
           if (!(error instanceof PreconditionFailedError) || attempt === ATTEMPTS) throw error;

@@ -53,6 +53,19 @@ beforeEach(() => {
 });
 
 describe("applyRepairs", () => {
+  it("refuses to repair a subject a newer version of the app has written since, writing nothing", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      documentOf(
+        CATALOG,
+        buildThing(createThing({ url: `${CATALOG}#deck-1` })).addIri(RDF.type, SM.Deck).addInteger(SM.formatVersion, 99).build(),
+      ),
+    );
+    await expect(repository().applyRepairs([repair("remove-subject", `${CATALOG}#deck-1`)])).rejects.toMatchObject({
+      code: "writtenByNewerApp",
+    });
+    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+  });
+
   it("fills in a deck's description and direction, in the deck's own format, with one write per document", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
       documentOf(

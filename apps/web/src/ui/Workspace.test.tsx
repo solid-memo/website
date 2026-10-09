@@ -644,29 +644,34 @@ describe("Workspace", () => {
     ).toBeInTheDocument();
   });
 
-  it("opens the updated instance at its new address once a format update switched over", async () => {
-    let instances = [instanceA];
-    renderWorkspace(
-      makeUseCases({
-        listInstances: vi.fn(async () => instances),
-        planMigration: vi.fn(async () => ({
-          decks: [],
-          deckCount: 0,
-          cardCount: 0,
-          reviewCount: 0,
-          preferencesOutdated: true,
-          instanceOutdated: false,
-          catalogMissing: false,
-        })),
-        updateInstance: vi.fn(async () => {
-          instances = [instanceB];
-          return { ok: true as const, instanceUrl: instanceB.url, backupUrl: instanceA.url };
-        }),
+  it("stays on the instance, at its address, and reads it again once a format update is done", async () => {
+    let outdated = true;
+    const planMigration = vi.fn(async () => ({
+      decks: [],
+      deckCount: 0,
+      cardCount: 0,
+      reviewCount: 0,
+      preferencesOutdated: outdated,
+      instanceOutdated: false,
+      catalogMissing: false,
+    }));
+    const useCases = makeUseCases({
+      listInstances: vi.fn(async () => [instanceA]),
+      planMigration,
+      updateInstance: vi.fn(async () => {
+        outdated = false;
+        return { ok: true as const, backupUrl: `${instanceA.url}backups/x/` };
       }),
-    );
+    });
+    renderWorkspace(useCases);
     fireEvent.click(await screen.findByRole("button", { name: "Update preferences" }));
+    const decksRead = vi.mocked(useCases.listDecks).mock.calls.length;
     fireEvent.click(screen.getByRole("button", { name: "Start the update" }));
-    expect(await screen.findByText("Deck set B")).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByRole("region", { name: "Format update" })).toBeNull());
+    await waitFor(() => expect(planMigration).toHaveBeenCalledTimes(2));
+    expect(vi.mocked(useCases.listDecks).mock.calls.length).toBeGreaterThan(decksRead);
+    expect(planMigration).toHaveBeenLastCalledWith(instanceA.url);
+    expect(await screen.findByRole("heading", { name: "Decks" })).toBeInTheDocument();
   });
 
   it("opens the previous version once its backup is restored from the preferences", async () => {
@@ -675,8 +680,8 @@ describe("Workspace", () => {
     renderWorkspace(
       makeUseCases({
         listInstances: vi.fn(async () => instances),
-        readBackup: vi.fn(async () => ({ url: instanceB.url })),
-        restoreBackup: vi.fn(async () => {
+        readLegacyBackup: vi.fn(async () => ({ url: instanceB.url })),
+        restoreLegacyBackup: vi.fn(async () => {
           instances = [instanceB];
           return { instance: instanceB, keptFolder: null };
         }),
@@ -696,8 +701,8 @@ describe("Workspace", () => {
     renderWorkspace(
       makeUseCases({
         listInstances: vi.fn(async () => instances),
-        readBackup: vi.fn(async () => ({ url: instanceB.url })),
-        restoreBackup: vi.fn(async () => {
+        readLegacyBackup: vi.fn(async () => ({ url: instanceB.url })),
+        restoreLegacyBackup: vi.fn(async () => {
           instances = [instanceB];
           return { instance: instanceB, keptFolder: instanceA.url };
         }),

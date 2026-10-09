@@ -6,7 +6,6 @@ import {
   getThingAll,
   getUrl,
   getUrlAll,
-  removeThing,
   setThing,
   type SolidDataset,
 } from "@inrupt/solid-client";
@@ -15,7 +14,7 @@ import type { StoredGroup, StoredLayout, TreeChanges } from "@solid-memo/domain/
 import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { DECK_GROUP_V1 } from "@solid-memo/vocab/descriptors.generated";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
-import { readVersioned, recordThing, storedVersionOf } from "../records";
+import { readVersioned, recordThing, removeUnlessNewer, storedVersionOf, unlessNewer } from "../records";
 import { DCAT, DCTERMS, RDF, SM } from "../vocab";
 import { toDecks } from "./deckMapper";
 
@@ -95,7 +94,7 @@ export function withTreeChanges(
   };
 
   let updated = dataset;
-  for (const url of changes.groupsRemoved) updated = removeThing(updated, url);
+  for (const url of changes.groupsRemoved) updated = removeUnlessNewer(updated, url);
 
   const stored = new Map(layout.groups.map((entry) => [entry.group.url, entry]));
   const titles = new Map([...changes.groupsAdded, ...changes.groupsRetitled].map((group) => [group.url, group]));
@@ -127,12 +126,12 @@ export function withTreeChanges(
 
   for (const [url, position] of changes.positions) {
     if (written.has(url)) continue;
-    updated = setThing(updated, buildThing(getThing(updated, url)!).setInteger(SM.position, position).build());
+    updated = setThing(updated, buildThing(unlessNewer(getThing(updated, url)!)).setInteger(SM.position, position).build());
   }
 
   if (changes.rootGroups !== undefined) {
     if (root === null) throw noCatalogue();
-    let builder = buildThing(getThing(updated, rootUrl)!).removeAll(DCAT.catalog);
+    let builder = buildThing(unlessNewer(getThing(updated, rootUrl)!)).removeAll(DCAT.catalog);
     for (const url of [...changes.rootGroups, ...foreign(getUrlAll(root!, DCAT.catalog), catalogs)]) {
       builder = builder.addIri(DCAT.catalog, url);
     }

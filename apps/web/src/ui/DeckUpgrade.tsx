@@ -47,8 +47,10 @@ export function DeckUpgradeProgress({
 }
 
 /**
- * When the upgrade failed: where, why, and that the deck is as it was.
- * It takes the progress's place and its focus, so the failure is read out.
+ * When the upgrade failed: where, why, and whether the deck is as it was
+ * (else what was changed since is kept, and the backup is in
+ * Preferences). It takes the progress's place and its focus, so the
+ * failure is read out.
  */
 export function DeckUpgradeFailure({
   outcome,
@@ -75,10 +77,7 @@ export function DeckUpgradeFailure({
         <strong>{t("deckUpgrade.failedWhile", { step: stepLabel(t, outcome.step).toLowerCase() })}</strong>{" "}
         {errorText(outcome.error)}
       </div>
-      <p>
-        {t("deckUpgrade.noChanges")}{" "}
-        {outcome.cleanedUp ? t("deckUpgrade.copyRemoved") : t("deckUpgrade.copyLeft")}
-      </p>
+      <p>{outcome.asItWas ? t("deckUpgrade.noChanges") : t("deckUpgrade.notAsItWas")}</p>
       <div class="edit-actions">
         <button class="primary" onClick={onRetry}>
           {t("deckUpgrade.tryAgain")}
