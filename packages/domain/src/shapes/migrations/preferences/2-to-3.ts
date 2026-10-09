@@ -4,8 +4,8 @@ import type { MigrationStep } from "../step";
 
 /**
  * Preferences format 3 states what to do with invalid data; preferences
- * saved before there was a choice get the default, which blocks the
- * instance until the data is repaired.
+ * saved before there was a choice get the default, which sets a deck
+ * with invalid data aside until it is repaired.
  */
 export const PREFERENCES_2_TO_3: MigrationStep<"preferences", 2, 3> = {
   shape: "preferences",

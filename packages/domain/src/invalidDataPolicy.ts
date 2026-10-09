@@ -11,8 +11,11 @@ export const INVALID_DATA_POLICIES: readonly InvalidDataPolicy[] = [
   "warn-only",
 ];
 
-/** Until the user says otherwise, invalid data stops the instance. */
-export const DEFAULT_INVALID_DATA_POLICY: InvalidDataPolicy = "block-instance";
+/**
+ * Until the user says otherwise, a deck with invalid data is set aside
+ * and everything else keeps working.
+ */
+export const DEFAULT_INVALID_DATA_POLICY: InvalidDataPolicy = "block-subject";
 
 export function isInvalidDataPolicy(value: string): value is InvalidDataPolicy {
   return (INVALID_DATA_POLICIES as readonly string[]).includes(value);

@@ -110,6 +110,36 @@ describe("ValidationScreen", () => {
     expect(screen.getAllByRole("row")[1]).toHaveTextContent("DCAT-AP: Class constraint failed.");
   });
 
+  it("says what another app wrote is only warned about, its results warnings", () => {
+    const warning = { message: { en: "Less than 1 values" }, severity: "warning" as const, constraint: "MinCount" };
+    render(
+      <ValidationScreen
+        report={{
+          instanceUrl: INSTANCE,
+          violationCount: 0,
+          conforms: true,
+          documents: [
+            {
+              url: `${INSTANCE}catalog.ttl`,
+              status: "checked",
+              subjects: [
+                { url: `${INSTANCE}catalog.ttl#their-agent`, status: "checked", shape: "agent", version: 1, violations: [warning], foreign: true },
+                { url: `${INSTANCE}catalog.ttl#their-dataset`, status: "profiled", violations: [{ ...warning, profile: "dcat-ap" }], foreign: true },
+              ],
+            },
+          ],
+        }}
+      />,
+    );
+    expect(screen.getByText("The 1 document conforms.")).toHaveClass("hint");
+    const [agent, dataset] = screen.getAllByRole("listitem");
+    expect(agent).toHaveTextContent("written by another app; Solid Memo only warns about it:");
+    expect(agent).not.toHaveTextContent("agent format 1");
+    expect(dataset).toHaveTextContent("written by another app; Solid Memo only warns about it:");
+    expect(screen.getAllByRole("row")[1]).toHaveTextContent("warning");
+    expect(screen.getAllByRole("row")[3]).toHaveTextContent("DCAT-AP: Less than 1 values");
+  });
+
   it("says so when everything conforms", () => {
     render(
       <ValidationScreen

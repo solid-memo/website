@@ -797,7 +797,7 @@ solid-memo:InvalidDataPolicies
 solid-memo:blockInstance
     a skos:Concept ;
     skos:prefLabel "Block the instance"@en ;
-    skos:definition "Any invalid data stops the app from using the instance until it is repaired. The default."@en ;
+    skos:definition "Any invalid data stops the app from using the instance until it is repaired."@en ;
     skos:notation "block-instance" ;
     skos:inScheme solid-memo:InvalidDataPolicies ;
     skos:topConceptOf solid-memo:InvalidDataPolicies ;
@@ -807,7 +807,7 @@ solid-memo:blockInstance
 solid-memo:blockSubject
     a skos:Concept ;
     skos:prefLabel "Set invalid data aside"@en ;
-    skos:definition "Decks with invalid data are set aside until they are repaired; everything else keeps working."@en ;
+    skos:definition "Decks with invalid data are set aside until they are repaired; everything else keeps working. The default."@en ;
     skos:notation "block-subject" ;
     skos:inScheme solid-memo:InvalidDataPolicies ;
     skos:topConceptOf solid-memo:InvalidDataPolicies ;

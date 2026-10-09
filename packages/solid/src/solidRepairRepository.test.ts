@@ -221,7 +221,7 @@ describe("applyRepairs", () => {
   // Another app's dataset, described in its own document.
   const FOREIGN_DATASET = "https://pod.example/recipes/index.ttl#cookbook";
 
-  it("drops a catalogue's and a deck group's links to decks and groups the document does not describe, never one to another document", async () => {
+  it("drops a catalogue's and a deck group's links to decks and groups the document does not describe, never one to another document or to another app's subject", async () => {
     const group = (url: string) => buildThing(createThing({ url })).addIri(RDF.type, SM.DeckGroup).addIri(RDF.type, DCAT.Catalog);
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
       documentOf(
@@ -231,6 +231,7 @@ describe("applyRepairs", () => {
           .addUrl(DCAT.dataset, `${CATALOG}#deck-1`)
           .addUrl(DCAT.dataset, `${CATALOG}#deck-old`)
           .addUrl(DCAT.dataset, FOREIGN_DATASET)
+          .addUrl(DCAT.dataset, `${CATALOG}#recipes`)
           .addUrl(DCAT.catalog, `${CATALOG}#group-1`)
           .addUrl(DCAT.catalog, `${CATALOG}#group-gone`)
           .addUrl(DCAT.catalog, `${CATALOG}#group-old`)
@@ -247,6 +248,8 @@ describe("applyRepairs", () => {
         // A deck or group that lost its DCAT class is still one: the catalogue keeps it.
         buildThing(createThing({ url: `${CATALOG}#deck-old` })).addIri(RDF.type, SM.Deck).build(),
         buildThing(createThing({ url: `${CATALOG}#group-old` })).addIri(RDF.type, SM.DeckGroup).build(),
+        // Another app's dataset, described in this document with a class of its own.
+        buildThing(createThing({ url: `${CATALOG}#recipes` })).addIri(RDF.type, "https://schema.org/Dataset").build(),
       ),
     );
     await repository().applyRepairs([
@@ -254,7 +257,7 @@ describe("applyRepairs", () => {
       repair("drop-dangling-members", `${CATALOG}#group-1`, 1),
     ]);
     const catalog = getThing(saved(), `${CATALOG}#catalog`)!;
-    expect(getUrlAll(catalog, DCAT.dataset)).toEqual([`${CATALOG}#deck-1`, `${CATALOG}#deck-old`, FOREIGN_DATASET]);
+    expect(getUrlAll(catalog, DCAT.dataset)).toEqual([`${CATALOG}#deck-1`, `${CATALOG}#deck-old`, FOREIGN_DATASET, `${CATALOG}#recipes`]);
     expect(getUrlAll(catalog, DCAT.catalog)).toEqual([`${CATALOG}#group-1`, `${CATALOG}#group-old`]);
     const group1 = getThing(saved(), `${CATALOG}#group-1`)!;
     expect(getUrlAll(group1, DCAT.dataset)).toEqual([`${CATALOG}#deck-1`]);

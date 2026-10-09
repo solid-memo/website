@@ -56,13 +56,13 @@ export const INVALID_DATA_POLICIES = {
     {
       iri: "https://solid-memo.com/ns/vocab/v1.ttl#blockInstance",
       label: { en: "Block the instance" },
-      definition: { en: "Any invalid data stops the app from using the instance until it is repaired. The default." },
+      definition: { en: "Any invalid data stops the app from using the instance until it is repaired." },
       notation: "block-instance",
     },
     {
       iri: "https://solid-memo.com/ns/vocab/v1.ttl#blockSubject",
       label: { en: "Set invalid data aside" },
-      definition: { en: "Decks with invalid data are set aside until they are repaired; everything else keeps working." },
+      definition: { en: "Decks with invalid data are set aside until they are repaired; everything else keeps working. The default." },
       notation: "block-subject",
     },
     {

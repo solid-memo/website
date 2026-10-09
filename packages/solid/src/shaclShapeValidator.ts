@@ -13,6 +13,7 @@ import { getSolidDatasetOrNull } from "./datasets";
 import { readSince } from "./readSince";
 import { storedVersionOf } from "./records";
 import type { WriteCheck } from "./writeCheck";
+import { foreignSubjects } from "./ownership";
 import { RDF } from "./vocab";
 import type { ShapeEngine } from "@solid-memo/shacl/engine";
 import { coreOnly } from "@solid-memo/shacl/profiles";
@@ -73,12 +74,48 @@ function isMemberElsewhere(focusNode: string, violation: Violation): boolean {
 }
 
 /**
+ * A result about a catalogue's or deck group's link to a member another
+ * app wrote: a subject of the document that is not Solid Memo's, or a
+ * blank node, which Solid Memo never writes. The member is that app's
+ * data, and what is wrong with the link is no fault of the catalogue's.
+ */
+function isForeignMember(
+  quads: readonly Quad[],
+  foreign: ReadonlySet<string>,
+  focusNode: string,
+  violation: Violation,
+): boolean {
+  const { path, value } = violation;
+  if (!MEMBER_LINKS.includes(path) || value === undefined) return false;
+  return (
+    foreign.has(value) ||
+    quads.some(
+      (q) =>
+        q.subject.value === focusNode &&
+        q.predicate.value === path &&
+        q.object.termType === "BlankNode" &&
+        q.object.value === value,
+    )
+  );
+}
+
+/**
+ * What is wrong with another app's data is reported, never acted on: a
+ * warning, so it sets no deck aside and blocks no instance.
+ */
+function asWarning(violation: Violation): Violation {
+  return violation.severity === "violation" ? { ...violation, severity: "warning" } : violation;
+}
+
+/**
  * The ShapeValidator port over the SHACL engine: every subject of a
  * document with a Solid Memo class is checked against the shape of its
  * class and stored version, chosen exactly as the app chooses it when
  * reading (registry.pickShape); a document with DCAT or FOAF subjects is
  * also checked against the DCAT-AP profile, with the reference data
- * beside it (see docs/validation.md).
+ * beside it (see docs/validation.md). A subject another app wrote is
+ * checked too, but marked `foreign`, its results warnings, and so are
+ * the results about a catalogue's link to a member another app wrote.
  */
 export function createShaclShapeValidator({
   fetch,
@@ -132,6 +169,10 @@ export function createShaclShapeValidator({
   /** Every result about a subject: its own shape's, and DCAT-AP's for a profiled document. */
   async function subjectViolations(dataset: SolidDataset, subjects: readonly string[]): Promise<string[]> {
     const data = toRdfJsDataset(dataset);
+    const quads = [...(data as Iterable<Quad>)];
+    const foreign = foreignSubjects(dataset);
+    const counts = (subject: string, v: Violation) =>
+      v.severity === "violation" && !isForeignMember(quads, foreign, subject, v);
     const problems: string[] = [];
     const describe = (subject: string, v: Violation) =>
       `<${subject}>${v.path === undefined ? "" : ` (${v.path})`}: ${v.profile === "dcat-ap" ? "DCAT-AP: " : ""}${shown(v.message)}`;
@@ -142,7 +183,7 @@ export function createShaclShapeValidator({
       if (pick.kind !== "shape") continue;
       const engine = await engineFor(pick.descriptor);
       for (const v of await engine.validateNode(data, subject, pick.descriptor.shapeIri)) {
-        if (v.severity === "violation") problems.push(describe(subject, v));
+        if (counts(subject, v)) problems.push(describe(subject, v));
       }
     }
     const profiled = subjects.some((subject) => {
@@ -152,7 +193,7 @@ export function createShaclShapeValidator({
     if (profiled) {
       for (const [subject, violations] of await profileViolations(data)) {
         if (!subjects.includes(subject)) continue;
-        problems.push(...violations.map((v) => describe(subject, v)));
+        problems.push(...violations.filter((v) => counts(subject, v)).map((v) => describe(subject, v)));
       }
     }
     return problems;
@@ -162,7 +203,12 @@ export function createShaclShapeValidator({
   async function reportOf(url: string, dataset: SolidDataset | null): Promise<DocumentReport> {
     if (dataset === null) return { url, status: "missing", subjects: [] };
     const data = toRdfJsDataset(dataset);
+    const quads = [...(data as Iterable<Quad>)];
     const subjects: SubjectReport[] = [];
+    const foreign = foreignSubjects(dataset);
+    /** A subject's results: all warnings for another app's subject, and for its links to another app's members. */
+    const attributed = (subject: string, violations: Violation[]) =>
+      violations.map((v) => (foreign.has(subject) || isForeignMember(quads, foreign, subject, v) ? asWarning(v) : v));
     for (const thing of getThingAll(dataset)) {
       const subject = asUrl(thing);
       const version = storedVersionOf(thing);
@@ -182,25 +228,30 @@ export function createShaclShapeValidator({
         continue;
       }
       const engine = await engineFor(pick.descriptor);
+      const violations = await engine.validateNode(data, subject, pick.descriptor.shapeIri);
       subjects.push({
         url: subject,
         status: "checked",
         shape: pick.descriptor.shape,
         version: pick.descriptor.version,
-        violations: await engine.validateNode(data, subject, pick.descriptor.shapeIri),
+        violations: attributed(subject, violations),
+        ...(foreign.has(subject) && { foreign: true }),
       });
     }
     const profiled = getThingAll(dataset).some((thing) =>
       getUrlAll(thing, RDF.type).some((type) => PROFILED_CLASSES.includes(type)),
     );
     if (profiled) {
-      for (const [subject, violations] of await profileViolations(data)) {
+      for (const [subject, found] of await profileViolations(data)) {
         const index = subjects.findIndex((s) => s.url === subject);
         const report = subjects[index];
+        const violations = attributed(subject, found);
         // Every subject already has a report: newer data is left alone,
         // an untyped subject becomes a profiled one.
         if (report?.status === "checked") report.violations.push(...violations);
-        else if (report?.status === "untyped") subjects[index] = { url: subject, status: "profiled", violations };
+        else if (report?.status === "untyped") {
+          subjects[index] = { url: subject, status: "profiled", violations, ...(foreign.has(subject) && { foreign: true }) };
+        }
       }
     }
     return { url, status: "checked", subjects };

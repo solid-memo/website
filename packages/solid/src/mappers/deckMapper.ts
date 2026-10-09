@@ -30,6 +30,7 @@ import { distributionUrlOf } from "@solid-memo/domain/dcat";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { AGENT_V1, CATALOG_V1, DECK_V6, DISTRACTOR_V1, DISTRIBUTION_V1 } from "@solid-memo/vocab/descriptors.generated";
+import { foreignSubjects } from "../ownership";
 import { readVersioned, recordThing } from "../records";
 import { DCAT, DCTERMS, RDF, SM } from "../vocab";
 
@@ -178,17 +179,19 @@ export function toCatalog(dataset: SolidDataset, documentUrl: string): Catalog |
 /**
  * The catalog document with its catalogue written, onto the existing
  * subject when there is one, listing every deck of the document besides
- * the datasets it already lists: one in another document (another app's)
- * or one this document describes as a dataset. Only a link to a subject
- * of this document that is no dataset (left by a deck removed) goes, as
- * the catalogue could not be written with it. Its publisher is described
- * beside it.
+ * the datasets it already lists: one in another document (another app's),
+ * one this document describes as a dataset, or one another app described
+ * in this document, whatever its class. Only a link to a subject of this
+ * document that is no dataset of Solid Memo's (left by a deck removed)
+ * goes, as the catalogue could not be written with it. Its publisher is
+ * described beside it.
  */
 export function withCatalog(dataset: SolidDataset, documentUrl: string, catalog: Catalog): SolidDataset {
   const url = `${documentUrl}#catalog`;
   const existing = getThing(dataset, url);
+  const foreign = foreignSubjects(dataset);
   const kept = (existing === null ? [] : getUrlAll(existing, DCAT.dataset)).filter(
-    (link) => documentUrlOf(link) !== documentUrl || isTyped(dataset, link, DCAT.Dataset),
+    (link) => documentUrlOf(link) !== documentUrl || isTyped(dataset, link, DCAT.Dataset) || foreign.has(link),
   );
   const datasets = [...new Set([...kept, ...deckUrlsOf(dataset)])];
   const withNode = setThing(dataset, recordThing(url, CATALOG_V1, catalogToRecord(catalog, datasets), existing));

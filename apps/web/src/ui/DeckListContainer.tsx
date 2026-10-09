@@ -64,11 +64,17 @@ export function DeckListContainer({
   useCases,
   instance,
   isSetAside = () => false,
+  arrangementSetAside = false,
+  checking = false,
   onStudyDeck,
 }: {
   useCases: UseCases;
   instance: Instance;
   isSetAside?: (deck: Deck) => boolean;
+  /** The catalogue or a deck group is invalid, and the policy sets it aside: the list cannot be rearranged. */
+  arrangementSetAside?: boolean;
+  /** The instance's data is still being checked, under a policy that may set some of it aside: the list cannot be rearranged yet. */
+  checking?: boolean;
   onStudyDeck: (deck: Deck) => void;
 }) {
   const { t, errorText } = useI18n();
@@ -187,6 +193,8 @@ export function DeckListContainer({
       <TodaySummaryContainer useCases={useCases} instance={instance} />
       <DeckListScreen
         tree={treeQuery.data}
+        arrangementSetAside={arrangementSetAside}
+        checking={checking}
         collapsed={new Set(collapsed)}
         onToggle={(url) =>
           remember(collapsed.includes(url) ? collapsed.filter((other) => other !== url) : [...collapsed, url])

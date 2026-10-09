@@ -180,7 +180,7 @@ flowchart LR
     s2 -->|libraryDeckSeries/2-to-3<br/>keywords: untagged kept| s3["LibraryDeckSeriesV3"]
     r1["ReviewStateV1"] -->|reviewState/1-to-2<br/>partial snapshot dropped| r2["ReviewStateV2"]
     p1["PreferencesV1"] -->|preferences/1-to-2<br/>defaults filled| p2["PreferencesV2"]
-    p2 -->|preferences/2-to-3<br/>block the instance on invalid data| p3["PreferencesV3"]
+    p2 -->|preferences/2-to-3<br/>the default invalid data policy:<br/>set invalid data aside| p3["PreferencesV3"]
     p3 -->|preferences/3-to-4<br/>theme as the browser prefers| p4["PreferencesV4"]
 ```
 
@@ -265,7 +265,9 @@ flowchart TD
 - **Validation is the gate.** The whole copy is checked with
   `validateInstance` ([validation.md](validation.md)); a single violation
   stops the run. The invalid-data policy does not apply here: an update
-  never produces data that needs a repair.
+  never produces data that needs a repair. What another app wrote in
+  the instance has only warnings ([validation.md](validation.md#data-another-app-wrote)),
+  so it never stops an update.
 - **Nothing changed meanwhile.** Each resource's version is taken from
   the very response it was copied from: its ETag (with the request's
   `Accept`, since an ETag belongs to one representation), else its

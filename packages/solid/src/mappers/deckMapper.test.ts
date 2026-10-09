@@ -439,18 +439,23 @@ describe("the catalogue node", () => {
     expect(listed()).toEqual([FOREIGN, LOCAL].sort());
   });
 
-  it("drops, when written whole, only a link to a subject of its own document that is no dataset", () => {
+  it("drops, when written whole, only a link to a subject of its own document that is no dataset, never one another app described there", () => {
     let dataset = withCatalog(withDeck(mockSolidDatasetFrom(CATALOG), deck), CATALOG, catalog);
     dataset = setThing(
       dataset,
-      buildThing(getThing(dataset, `${CATALOG}#catalog`)!).addIri(DATASET, `${CATALOG}#deck-gone`).build(),
+      buildThing(getThing(dataset, `${CATALOG}#catalog`)!)
+        .addIri(DATASET, `${CATALOG}#deck-gone`)
+        .addIri(DATASET, `${CATALOG}#recipes`)
+        .build(),
     );
+    // Another app's dataset, described beside the decks with a class of its own.
+    dataset = setThing(dataset, buildThing(createThing({ url: `${CATALOG}#recipes` })).addIri(RDF.type, "https://schema.org/Dataset").build());
     // A deck save leaves it…
     dataset = withDeck(dataset, deck);
     expect(getUrlAll(getThing(dataset, `${CATALOG}#catalog`)!, DATASET)).toContain(`${CATALOG}#deck-gone`);
     // …the catalogue, written whole and checked, cannot keep it.
     dataset = withCatalog(dataset, CATALOG, catalog);
-    expect(getUrlAll(getThing(dataset, `${CATALOG}#catalog`)!, DATASET)).toEqual([deck.url]);
+    expect(getUrlAll(getThing(dataset, `${CATALOG}#catalog`)!, DATASET)).toEqual([deck.url, `${CATALOG}#recipes`]);
   });
 
   it("names its publisher by the WebID when no agent node describes them", () => {

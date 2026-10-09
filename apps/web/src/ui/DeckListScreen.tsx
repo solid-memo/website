@@ -56,9 +56,12 @@ interface FocusRequest {
  * (deckTree/useDragReorder.ts): between rows, into a group by its
  * header, or onto another deck or group to make a new group of the two.
  * Deleting a group keeps what it holds; deleting a deck, once the user
- * confirms, takes its cards with it. A list arranged by a newer version
- * cannot be rearranged, nor its groups renamed or deleted, but its
- * decks can still be renamed and deleted: that is the deck's own data.
+ * confirms, takes its cards with it. A list arranged by a newer version,
+ * or one whose arrangement has invalid data set aside, cannot be
+ * rearranged, nor its groups renamed or deleted, but its decks can still
+ * be renamed and deleted: that is the deck's own data. Nor can a list
+ * be rearranged while the data is still being checked, under a policy
+ * that may set its arrangement aside.
  *
  * While a row is dragged the list stays as it was when it was lifted,
  * whatever comes in meanwhile, so that what the user aims at stays put;
@@ -72,6 +75,8 @@ interface FocusRequest {
  */
 export function DeckListScreen({
   tree,
+  arrangementSetAside = false,
+  checking = false,
   collapsed,
   onToggle,
   onUnfold,
@@ -88,6 +93,10 @@ export function DeckListScreen({
   createDeckHref,
 }: {
   tree: DeckTree;
+  /** The catalogue or a deck group has invalid data, set aside: the list cannot be rearranged. */
+  arrangementSetAside?: boolean;
+  /** The data is still being checked, and the arrangement may yet be set aside: it cannot be rearranged until the check is done. */
+  checking?: boolean;
   /** The groups folded shut, by URL. */
   collapsed: ReadonlySet<string>;
   onToggle: (groupUrl: string) => void;
@@ -123,6 +132,7 @@ export function DeckListScreen({
   createDeckHref: string;
 }) {
   const { t, locale, readerText } = useI18n();
+  const readOnly = tree.readOnly || arrangementSetAside || checking;
   /** The deck or group whose name field is open. */
   const [naming, setNaming] = useState<string | null>(null);
   /** The deck or group whose actions menu is open. */
@@ -368,7 +378,7 @@ export function DeckListScreen({
   const drag = useDragReorder({
     containerRef: listRef,
     rows: () => flatten(shown, collapsed),
-    enabled: !tree.readOnly && naming === null,
+    enabled: !readOnly && naming === null,
     onDrop: dropped,
     onCancel: () => setAnnouncement(t("deckList.dragCancelled")),
     describe: (label: GapLabel) => {
@@ -411,14 +421,14 @@ export function DeckListScreen({
         )}
         {node.kind === "deck" && <MenuLink href={preferencesHref(node.deck)}>{t("deckList.preferences")}</MenuLink>}
         {/* A group's name is the arrangement's, a deck's its own. */}
-        <MenuItem disabled={busy || (node.kind === "group" && tree.readOnly)} onSelect={() => setNaming(key)}>
+        <MenuItem disabled={busy || (node.kind === "group" && readOnly)} onSelect={() => setNaming(key)}>
           {t("deckList.rename")}
         </MenuItem>
         <MenuSeparator />
         <MoveItems
           tree={shown}
           nodeKey={key}
-          readOnly={tree.readOnly || busy}
+          readOnly={readOnly || busy}
           onMove={(to) => move(node, { kind: "move", node: key, to })}
           onCombine={(dragged, target) => combine(locate(tree, dragged)!.node, locate(tree, target)!.node)}
         />
@@ -428,7 +438,7 @@ export function DeckListScreen({
             {t("deckList.deleteDeck")}
           </MenuItem>
         ) : (
-          <MenuItem danger disabled={tree.readOnly} onSelect={() => remove(node, parent)}>
+          <MenuItem danger disabled={readOnly} onSelect={() => remove(node, parent)}>
             {t("deckList.deleteGroup")}
           </MenuItem>
         )}
@@ -492,7 +502,11 @@ export function DeckListScreen({
           {t("deckList.deckCount", { count: decksOf(shown.children).length })}
         </span>
       </header>
-      {tree.readOnly && <p class="hint">{t("deckList.readOnly")}</p>}
+      {tree.readOnly ? (
+        <p class="hint">{t("deckList.readOnly")}</p>
+      ) : (
+        arrangementSetAside && <p class="hint">{t("deckList.arrangementSetAside")}</p>
+      )}
       <div
         class="deck-tree"
         ref={listRef}

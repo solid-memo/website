@@ -297,6 +297,7 @@
       "other": "{names} are set aside until repaired; the rest keeps working."
     },
     "keepsWorking": "Solid Memo keeps working with it.",
+    "arrangementSetAside": "The deck list cannot be rearranged until its arrangement is repaired.",
     "policyHint": "What happens with invalid data is set in {preferences}.",
     "preferences": "Preferences",
     "repair": "Repair"
@@ -366,6 +367,7 @@
     "libraryLink": "Deck library",
     "emptyGroup": "Nothing in this group yet.",
     "readOnly": "A newer version of Solid Memo arranged these decks, so they cannot be rearranged here. Reload the page to get the latest version.",
+    "arrangementSetAside": "The arrangement of these decks has invalid data, so they cannot be rearranged until it is repaired.",
     "newGroupName": "New group",
     "groupName": "Group name",
     "saveName": "Save name",
@@ -873,11 +875,11 @@
       "legend": "When data does not conform",
       "blockInstance": {
         "label": "Block the instance",
-        "hint": "Any invalid data stops the app from using the instance until it is repaired. The default."
+        "hint": "Any invalid data stops the app from using the instance until it is repaired."
       },
       "blockSubject": {
         "label": "Set invalid data aside",
-        "hint": "Decks with invalid data are set aside until they are repaired; everything else keeps working."
+        "hint": "Decks with invalid data are set aside until they are repaired; everything else keeps working. The default."
       },
       "warnOnly": {
         "label": "Warn only",
@@ -994,6 +996,7 @@
     "untyped": "{name} — not a Solid Memo subject.",
     "newer": "{name} — {shape} format {version} is newer than this app knows (up to {latest}); skipped.",
     "profiled": "{name} — not a Solid Memo subject; DCAT-AP says:",
+    "foreign": "{name} — written by another app; Solid Memo only warns about it:",
     "conforms": "{name} — conforms to {shape} format {version}.",
     "checked": "{name} — {shape} format {version}:",
     "severity": "Severity",

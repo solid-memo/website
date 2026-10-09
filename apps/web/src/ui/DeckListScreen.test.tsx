@@ -956,6 +956,33 @@ describe("DeckListScreen", () => {
     expect(screen.getByRole("textbox", { name: "Deck name" })).toHaveFocus();
   });
 
+  it("only shows a list whose arrangement is set aside for invalid data, saying so, with nothing to rearrange it", () => {
+    const { onEdit } = renderScreen(tree, { arrangementSetAside: true });
+    expect(
+      screen.getByText("The arrangement of these decks has invalid data, so they cannot be rearranged until it is repaired."),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/A newer version of Solid Memo arranged these decks/)).toBeNull();
+    openMenu("Japanese");
+    for (const item of screen.getAllByRole("menuitem")) expect(item).toHaveAttribute("aria-disabled", "true");
+    openMenu("Japanese");
+    openMenu("Kana");
+    const enabled = screen.getAllByRole("menuitem").filter((item) => !item.hasAttribute("aria-disabled"));
+    expect(enabled.map((item) => item.textContent)).toEqual(["Preferences", "Rename", "Delete deck"]);
+    fireEvent.click(screen.getByRole("menuitem", { name: "Move out of Japanese" }));
+    expect(onEdit).not.toHaveBeenCalled();
+  });
+
+  it("cannot be rearranged while the data is still being checked, saying nothing of it", () => {
+    const { onEdit } = renderScreen(tree, { checking: true });
+    expect(screen.queryByText(/cannot be rearranged/)).toBeNull();
+    openMenu("Japanese");
+    for (const item of screen.getAllByRole("menuitem")) expect(item).toHaveAttribute("aria-disabled", "true");
+    openMenu("Japanese");
+    openMenu("Kana");
+    fireEvent.click(screen.getByRole("menuitem", { name: "Move out of Japanese" }));
+    expect(onEdit).not.toHaveBeenCalled();
+  });
+
   it("says why an edit was not made", () => {
     renderScreen(tree, { error: "Your decks were rearranged elsewhere." });
     expect(screen.getByRole("alert")).toHaveTextContent("Your decks were rearranged elsewhere.");
@@ -1259,6 +1286,18 @@ describe("DeckListScreen dragging", () => {
     unmount();
     renderScreen();
     choose("Japanese", "Rename");
+    pointer("touch").down(handle(kanji.url), yOf(0));
+    wait(400);
+    expect(dragging()).toBe(false);
+  });
+
+  it("starts no drag on a list whose arrangement is set aside for invalid data, nor while the data is being checked", () => {
+    const { unmount } = renderScreen(tree, { arrangementSetAside: true });
+    pointer("touch").down(handle(kanji.url), yOf(0));
+    wait(400);
+    expect(dragging()).toBe(false);
+    unmount();
+    renderScreen(tree, { checking: true });
     pointer("touch").down(handle(kanji.url), yOf(0));
     wait(400);
     expect(dragging()).toBe(false);

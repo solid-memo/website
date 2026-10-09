@@ -174,9 +174,9 @@ export const SM = {
   bidirectional: `${SM_NS}bidirectional`,
   /** What the app does when data in an instance does not conform to its shapes. (Added in 1.6.) */
   InvalidDataPolicies: `${SM_NS}InvalidDataPolicies`,
-  /** Any invalid data stops the app from using the instance until it is repaired. The default. (Added in 1.6.) */
+  /** Any invalid data stops the app from using the instance until it is repaired. (Added in 1.6.) */
   blockInstance: `${SM_NS}blockInstance`,
-  /** Decks with invalid data are set aside until they are repaired; everything else keeps working. (Added in 1.6.) */
+  /** Decks with invalid data are set aside until they are repaired; everything else keeps working. The default. (Added in 1.6.) */
   blockSubject: `${SM_NS}blockSubject`,
   /** Invalid data is reported, and the app keeps working with it. (Added in 1.6.) */
   warnOnly: `${SM_NS}warnOnly`,

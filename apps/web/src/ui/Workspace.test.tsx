@@ -103,6 +103,7 @@ describe("Workspace", () => {
       const useCases = makeUseCases({
         listInstances: vi.fn(async () => [instanceA]),
         listDecks: vi.fn(async () => [deck]),
+        getPreferences: withPolicy("block-instance"),
         validateInstance: vi.fn(() => new Promise<typeof invalid>((r) => pending.push(r))),
         planRepair: vi.fn(() => ({
           repairs: [{ kind: "describe-deck" as const, documentUrl: `${instanceA.url}catalog.ttl`, subjectUrl: deck.url, version: 3 }],
@@ -134,6 +135,7 @@ describe("Workspace", () => {
       renderWorkspace(
         makeUseCases({
           listInstances: vi.fn(async () => [instanceA]),
+          getPreferences: withPolicy("block-instance"),
           validateInstance: vi.fn(async () => invalid),
         }),
       );
@@ -159,6 +161,104 @@ describe("Workspace", () => {
       expect(screen.getByText("Capitals")).toBeInTheDocument();
     });
 
+    it("sets invalid data aside by default, when the preferences state no policy", async () => {
+      renderWorkspace(
+        makeUseCases({
+          listInstances: vi.fn(async () => [instanceA]),
+          listDecks: vi.fn(async () => [deck]),
+          validateInstance: vi.fn(async () => invalid),
+        }),
+      );
+      const notice = await screen.findByRole("region", { name: "Data check" });
+      await waitFor(() => {
+        expect(notice).toHaveTextContent("Kanji N5 is set aside until repaired; the rest keeps working.");
+      });
+      expect(await screen.findByText("Set aside: its data needs repair")).toBeInTheDocument();
+    });
+
+    it("waits for the check while the preferences are read, as a user who blocks the instance would", async () => {
+      const answers: ((preferences: typeof DEFAULT_PREFERENCES) => void)[] = [];
+      const pending: ((report: typeof invalid) => void)[] = [];
+      renderWorkspace(
+        makeUseCases({
+          listInstances: vi.fn(async () => [instanceA]),
+          listDecks: vi.fn(async () => [deck]),
+          getPreferences: vi.fn(() => new Promise<typeof DEFAULT_PREFERENCES>((resolve) => answers.push(resolve))),
+          validateInstance: vi.fn(() => new Promise<typeof invalid>((r) => pending.push(r))),
+        }),
+      );
+      expect(await screen.findByText("Checking this instance's data…")).toBeInTheDocument();
+      await waitFor(() => {
+        expect(answers.length).toBeGreaterThan(0);
+      });
+      answers.forEach((answer) => answer(DEFAULT_PREFERENCES));
+      expect(await screen.findByRole("heading", { name: "Decks" })).toBeInTheDocument();
+      expect(screen.queryByText("Checking this instance's data…")).toBeNull();
+      pending.forEach((resolve) => resolve(invalid));
+    });
+
+    it("blocks nothing over what another app wrote, whose problems the check reports as warnings", async () => {
+      const foreign = {
+        instanceUrl: instanceA.url,
+        violationCount: 0,
+        conforms: true,
+        documents: [
+          {
+            url: `${instanceA.url}catalog.ttl`,
+            status: "checked" as const,
+            subjects: [
+              {
+                url: `${instanceA.url}catalog.ttl#theirs`,
+                status: "profiled" as const,
+                violations: [{ message: { en: "Less than 1 values" }, severity: "warning" as const, constraint: "MinCount", profile: "dcat-ap" as const }],
+                foreign: true as const,
+              },
+            ],
+          },
+        ],
+      };
+      renderWorkspace(
+        makeUseCases({
+          listInstances: vi.fn(async () => [instanceA]),
+          listDecks: vi.fn(async () => [deck]),
+          getPreferences: withPolicy("block-instance"),
+          validateInstance: vi.fn(async () => foreign),
+        }),
+      );
+      expect(await screen.findByText("Kanji N5")).toBeInTheDocument();
+      expect(screen.queryByRole("region", { name: "Data check" })).toBeNull();
+    });
+
+    it("keeps the deck list from being rearranged while the catalogue or a deck group is set aside", async () => {
+      const catalog = {
+        ...invalid,
+        documents: [
+          {
+            ...invalid.documents[0],
+            subjects: [{ ...invalid.documents[0].subjects[0], url: `${instanceA.url}catalog.ttl#catalog`, shape: "catalog" as const, version: 1 }],
+          },
+        ],
+      };
+      renderWorkspace(
+        makeUseCases({
+          listInstances: vi.fn(async () => [instanceA]),
+          listDecks: vi.fn(async () => [deck]),
+          validateInstance: vi.fn(async () => catalog),
+        }),
+      );
+      const notice = await screen.findByRole("region", { name: "Data check" });
+      await waitFor(() => {
+        expect(notice).toHaveTextContent(
+          "The rest keeps working. The deck list cannot be rearranged until its arrangement is repaired.",
+        );
+      });
+      expect(
+        await screen.findByText("The arrangement of these decks has invalid data, so they cannot be rearranged until it is repaired."),
+      ).toBeInTheDocument();
+      expect(screen.getByText("Kanji N5")).toBeInTheDocument();
+      expect(screen.queryByText("Set aside: its data needs repair")).toBeNull();
+    });
+
     it("says a set-aside deck is set aside when it is opened", async () => {
       window.history.replaceState(null, "", routeToHash({ screen: "browser", instanceUrl: instanceA.url, deckUrl: deck.url }));
       renderWorkspace(
@@ -170,6 +270,27 @@ describe("Workspace", () => {
         }),
       );
       expect(await screen.findByText(/This deck is set aside/)).toBeInTheDocument();
+    });
+
+    it("holds a deck's pages under the default policy until the check says whether the deck is set aside", async () => {
+      window.history.replaceState(null, "", routeToHash({ screen: "browser", instanceUrl: instanceA.url, deckUrl: deck.url }));
+      const pending: ((report: typeof invalid) => void)[] = [];
+      renderWorkspace(
+        makeUseCases({
+          listInstances: vi.fn(async () => [instanceA]),
+          listDecks: vi.fn(async () => [deck]),
+          validateInstance: vi.fn(() => new Promise<typeof invalid>((r) => pending.push(r))),
+        }),
+      );
+      await waitFor(() => {
+        expect(pending.length).toBeGreaterThan(0);
+      });
+      expect(await screen.findByText("Checking this instance's data…")).toBeInTheDocument();
+      pending.forEach((resolve) => resolve({ ...invalid, violationCount: 0, conforms: true, documents: [] }));
+      await waitFor(() => {
+        expect(screen.queryByText("Checking this instance's data…")).toBeNull();
+      });
+      expect(screen.queryByText(/This deck is set aside/)).toBeNull();
     });
 
     it("only warns under the warn-only policy, and says so when nothing is set aside", async () => {

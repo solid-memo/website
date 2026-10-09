@@ -79,7 +79,7 @@ describe("getPreferences", () => {
         dayBoundaryHour: 3,
         answerScale: "minimal",
         developerMode: true,
-        invalidDataPolicy: "block-instance" as const,
+        invalidDataPolicy: "block-subject" as const,
         theme: "system" as const,
       },
       formatVersion: 1,
