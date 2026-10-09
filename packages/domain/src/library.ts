@@ -46,6 +46,8 @@ export interface LibraryDeck {
    * cards, studied through the course before they join the learner's deck.
    */
   isCourse?: true;
+  /** Set on the course the library's index offers to newcomers (solid-memo:newcomerCourse on its catalogue): at most one deck, always a course. */
+  forNewcomers?: true;
 }
 
 /** One release of a library deck, as the index describes it. */

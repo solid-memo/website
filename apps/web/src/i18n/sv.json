@@ -418,6 +418,12 @@
     "remembered": "{percent} ihågkomna",
     "allStatistics": "All statistik"
   },
+  "newcomerCourse": {
+    "eyebrow": "Ny här?",
+    "pitch": "Börja här: en kurs för dig som är ny. Varje fråga du svarar på blir ett kort i din kortlek.",
+    "start": "Börja kursen",
+    "about": "Om kursen"
+  },
   "deckPreferences": {
     "loading": "Läser in inställningar…",
     "heading": "Inställningar: {deck}",

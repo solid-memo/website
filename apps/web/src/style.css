@@ -53,6 +53,8 @@
   --zoom-backdrop: rgba(22, 32, 42, 0.85);
 
   --heading-pop: var(--accent-yellow);
+  /* The glint that sweeps across the course for newcomers: decoration only. */
+  --shine: rgb(255 255 255 / 0.55);
 
   --font-mono:
     ui-monospace, "SFMono-Regular", "Cascadia Mono", "Menlo", "Consolas",
@@ -117,6 +119,7 @@
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 28px -14px rgba(0, 0, 0, 0.6);
   --zoom-backdrop: rgba(0, 0, 0, 0.88);
+  --shine: rgb(255 255 255 / 0.08);
 }
 
 *,
@@ -3277,6 +3280,164 @@ p[role="status"]:not(.loading) {
 .today-numbers {
   color: var(--text-muted);
   font-size: 0.9rem;
+}
+
+/* The library's course for newcomers, under an empty deck list's
+   heading: a card dealt in, a fan of cards beside its text that opens
+   out, and a glint that sweeps across it twice and stops (well inside
+   WCAG 2.2.2's five seconds). Each part's own style is where it comes to rest, so with
+   motion reduced (the rule above takes every animation and transition
+   away) the card simply stands there, its fan open, the glint off it. */
+.newcomer-course {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 1rem 1.5rem;
+  margin: 0 0 1rem;
+  padding: 1.25rem 1.5rem;
+  background:
+    radial-gradient(circle at 100% 0, var(--paper-yellow), transparent 60%),
+    var(--primary-soft);
+  border: 2px solid color-mix(in srgb, var(--primary) 35%, transparent);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  animation: deal-in 0.5s cubic-bezier(0.2, 0.8, 0.3, 1) backwards;
+}
+
+/* Under the card's content, so its text and buttons stay as they are. */
+.newcomer-course::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 40%, var(--shine) 50%, transparent 60%);
+  transform: translateX(-150%);
+  pointer-events: none;
+  animation: newcomer-shine 1.4s ease-in-out 0.7s 2;
+}
+
+.newcomer-course>* {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes newcomer-shine {
+  to {
+    transform: translateX(150%);
+  }
+}
+
+/* Three cards held in a hand, a question on the top one. */
+.newcomer-course-fan {
+  width: 4.25rem;
+  height: 5.5rem;
+  margin: 0.5rem 0.75rem 0 1rem;
+}
+
+.newcomer-course-fan>span {
+  position: absolute;
+  inset: 0;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-top: 0.45rem solid var(--primary);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  transform-origin: 50% 120%;
+  transform: rotate(var(--fan));
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.3, 1);
+  animation: fan-out 0.5s cubic-bezier(0.2, 0.8, 0.3, 1) 0.25s backwards;
+}
+
+.newcomer-course-fan>span:nth-child(1) {
+  --fan: -14deg;
+  border-top-color: var(--accent-blue);
+}
+
+.newcomer-course-fan>span:nth-child(2) {
+  --fan: 0deg;
+  border-top-color: var(--accent-yellow);
+  animation-delay: 0.35s;
+}
+
+.newcomer-course-fan>span:nth-child(3) {
+  --fan: 14deg;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: 2rem;
+  color: var(--primary);
+  text-shadow: 0.06em 0.06em 0 var(--heading-pop);
+  animation-delay: 0.45s;
+}
+
+.newcomer-course-fan>span:nth-child(3)::after {
+  content: "?";
+}
+
+/* The hand opens a little further while the card is pointed at or in use. */
+.newcomer-course:hover .newcomer-course-fan>span,
+.newcomer-course:focus-within .newcomer-course-fan>span {
+  transform: rotate(calc(var(--fan) * 1.5)) translateY(-0.2rem);
+}
+
+@keyframes fan-out {
+  from {
+    opacity: 0;
+    transform: rotate(0) translateY(0.5rem);
+  }
+}
+
+.newcomer-course-body {
+  min-width: 0;
+}
+
+.newcomer-course-body p {
+  margin: 0 0 0.5rem;
+}
+
+.newcomer-course-body .newcomer-course-eyebrow {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.newcomer-course-eyebrow::before {
+  content: "\2726  " / "";
+  color: var(--accent-yellow);
+}
+
+.newcomer-course-body .newcomer-course-title {
+  margin: 0.15rem 0 0.4rem;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  line-height: 1.1;
+  letter-spacing: 0.04em;
+  word-spacing: 0.1em;
+  overflow-wrap: anywhere;
+  text-shadow: 0.06em 0.06em 0 var(--heading-pop);
+}
+
+.newcomer-course .edit-actions {
+  margin: 0.75rem 0 0;
+}
+
+.newcomer-course .edit-actions button.primary {
+  animation: bounce-in 0.36s cubic-bezier(0.2, 0.8, 0.3, 1) 0.4s backwards;
+}
+
+/* On a narrow screen the text has the card to itself. */
+@media (max-width: 26rem) {
+  .newcomer-course {
+    grid-template-columns: 1fr;
+    padding: 1.25rem;
+  }
+
+  .newcomer-course-fan {
+    display: none;
+  }
 }
 
 .statistics figure {

@@ -4,6 +4,7 @@ import { text, textPattern, type Locale } from "../harness/strings.ts";
 import { CardCreator } from "./CardCreator.ts";
 import { CardEditor } from "./CardEditor.ts";
 import { Chrome } from "./Chrome.ts";
+import { Course } from "./Course.ts";
 import { CssLogin } from "./CssLogin.ts";
 import { DeckBrowser } from "./DeckBrowser.ts";
 import { DeckCreator } from "./DeckCreator.ts";
@@ -48,6 +49,7 @@ export class App {
   readonly library = new Library(this);
   readonly libraryDeck = new LibraryDeck(this);
   readonly libraryPreview = new LibraryPreview(this);
+  readonly course = new Course(this);
 
   constructor(
     readonly page: Page,

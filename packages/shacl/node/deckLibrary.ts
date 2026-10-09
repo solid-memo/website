@@ -62,6 +62,9 @@ export const INDEX_FILE = "index.ttl";
 export const INDEX_URL = `${DECKS_BASE}${INDEX_FILE}`;
 export const PUBLISHER_URL = `${INDEX_URL}#solid-memo`;
 
+/** The deck whose series the index names the course for newcomers (solid-memo:newcomerCourse); undefined names none. See docs/deck-library.md. */
+export const NEWCOMER_COURSE: string | undefined = "getting-started";
+
 /**
  * The format of the series the index describes (the app's
  * deck-series/v3.ttl, LibraryDeckSeriesV3): what buildIndex writes.
@@ -179,8 +182,11 @@ function literalsOf(quads: readonly Quad[], subject: string, predicate: string):
  * rdfs:comment, and of its prov:Activity nodes all but the type of the
  * one that generated it; the release itself carries them), plus sm:cardCount, the cards it has in use (retired
  * ones not counted) — so the library can be listed from the index alone. The releases must be sorted by deck then version.
+ * The catalogue names `newcomerCourse`'s series the course for newcomers
+ * (solid-memo:newcomerCourse), even when there is no such deck, which
+ * newcomerProblems then reports.
  */
-export function buildIndex(releases: readonly DeckRelease[]): string {
+export function buildIndex(releases: readonly DeckRelease[], newcomerCourse?: string): string {
   const { namedNode, literal, quad } = DataFactory;
   const out: Quad[] = [];
   const add = (s: string, p: string, o: Quad_Object) => out.push(quad(namedNode(s), namedNode(p), o));
@@ -201,6 +207,7 @@ export function buildIndex(releases: readonly DeckRelease[]): string {
   add(INDEX_URL, `${DCAT}themeTaxonomy`, iri(DATA_THEMES));
   add(INDEX_URL, `${DCAT}themeTaxonomy`, iri(TOPICS));
   for (const deck of decks) add(INDEX_URL, `${DCAT}dataset`, iri(seriesUrlOf(deck)));
+  if (newcomerCourse !== undefined) add(INDEX_URL, `${SM_NS}newcomerCourse`, iri(seriesUrlOf(newcomerCourse)));
   add(PUBLISHER_URL, RDF_TYPE, iri(`${FOAF}Agent`));
   add(PUBLISHER_URL, `${FOAF}name`, literal("Solid Memo"));
 
@@ -621,6 +628,32 @@ export function markdownProblems(release: DeckRelease): string[] {
   return problems;
 }
 
+/**
+ * What the shapes cannot say about the course the index offers to
+ * newcomers (solid-memo:newcomerCourse on its catalogue, which no shape
+ * owns): at most one, a deck of the library whose current release is a
+ * schema:Course.
+ */
+export function newcomerProblems(indexQuads: readonly Quad[]): string[] {
+  const label = `decks/${INDEX_FILE}`;
+  const problems: string[] = [];
+  const named = objectsOf(indexQuads, INDEX_URL, `${SM_NS}newcomerCourse`);
+  if (named.length > 1) {
+    problems.push(`${label}: names ${named.length} courses for newcomers by solid-memo:newcomerCourse: at most one.`);
+  }
+  const decks = new Set(objectsOf(indexQuads, INDEX_URL, `${DCAT}dataset`).map((o) => o.value));
+  const isCourse = (release: Quad_Object) => objectsOf(indexQuads, release.value, RDF_TYPE).some((o) => o.value === `${SCHEMA}Course`);
+  for (const course of named) {
+    const shown = `${label}: names ${shownValues([course])} by solid-memo:newcomerCourse`;
+    if (course.termType !== "NamedNode") problems.push(`${shown}, which is no IRI.`);
+    else if (!decks.has(course.value)) problems.push(`${shown}, which is no deck of the library.`);
+    else if (!objectsOf(indexQuads, course.value, `${DCAT}hasCurrentVersion`).some(isCourse)) {
+      problems.push(`${shown}, which is not a course: its current release is no schema:Course.`);
+    }
+  }
+  return problems;
+}
+
 /** The problems a check that throws one Error per document reports, or none. */
 async function problemsOf(check: Promise<void>): Promise<string[]> {
   try {
@@ -640,7 +673,8 @@ async function problemsOf(check: Promise<void>): Promise<string[]> {
  * text written in Markdown (markdownProblems), and Solid Memo's shapes,
  * DCAT-AP (a release with the index beside it, where its series and
  * publisher are described) and SKOS, with the reference data; then the
- * index, to the shapes and the profiles too.
+ * index's course for newcomers (newcomerProblems), and the index to the
+ * shapes and the profiles too.
  */
 export async function validateLibrary(
   releases: readonly DeckRelease[],
@@ -679,6 +713,7 @@ export async function validateLibrary(
     );
   }
   const label = `decks/${INDEX_FILE}`;
+  problems.push(...newcomerProblems(indexQuads));
   problems.push(
     ...(await problemsOf(validateTurtleDocument(label, indexQuads, validators.shapes, "library"))),
     ...(await problemsOf(validateProfile(label, indexQuads, validators.dcatAp, validators.reference))),
@@ -715,6 +750,8 @@ export interface LibraryIo {
   readFilesAt(ref: string): Promise<LibraryFiles>;
   writeIndex(text: string): Promise<void>;
   loadValidators(): Promise<LibraryValidators>;
+  /** The deck the index names the course for newcomers; none when undefined. */
+  newcomerCourse?: string;
   log(message: string): void;
 }
 
@@ -741,7 +778,7 @@ export async function main(argv: readonly string[], io: LibraryIo): Promise<numb
   try {
     const files = await io.readFiles();
     const { releases, problems } = releasesOf(files);
-    const index = buildIndex(releases);
+    const index = buildIndex(releases, io.newcomerCourse);
     if (ref !== undefined) problems.push(...baseProblems(files, await io.readFilesAt(ref), ref));
     if (check) {
       const stated = files.get(INDEX_FILE);
@@ -798,6 +835,7 @@ export function defaultIo(repo: string): LibraryIo {
     writeIndex: (text) => writeFile(join(dir, INDEX_FILE), text),
     loadValidators,
     log: (message) => console.log(message),
+    newcomerCourse: NEWCOMER_COURSE,
   };
 }
 

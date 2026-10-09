@@ -152,6 +152,38 @@ describe("toLibraryDecks", () => {
     expect(deck).not.toHaveProperty("isCourse");
   });
 
+  it("flags the course the catalogue offers to newcomers, if it is listed and is a course", async () => {
+    const turtle = (named: string, types: string) => `
+@prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix schema: <https://schema.org/> .
+<> a dcat:Catalog ; dcterms:title "Library" ; dcterms:description "Decks." ; dcterms:publisher <#solid-memo> ; dcat:dataset <#solid> ${named} .
+<#solid> a dcat:DatasetSeries, dcat:Dataset ; sm:formatVersion 3 ;
+   dcterms:title "Solid"@en ; dcterms:description "Solid."@en ;
+   dcterms:publisher <#solid-memo> ; dcat:first <solid/v1.ttl> ; dcat:last <solid/v1.ttl> ;
+   dcat:hasVersion <solid/v1.ttl> ; dcat:hasCurrentVersion <solid/v1.ttl> .
+<solid/v1.ttl> a ${types} ; sm:formatVersion 5 ;
+   dcterms:title "Solid"@en ; dcterms:description "Solid fundamentals."@en ;
+   dcterms:publisher <#solid-memo> ; sm:studyDirection sm:frontToBack ; dcat:theme <${EDUC}> ;
+   dcat:version "1" ; dcat:inSeries <#solid> ; dcat:isVersionOf <#solid> ; dcat:distribution <solid/v1.ttl#turtle> .
+`;
+    const COURSE = "sm:Deck, dcat:Dataset, schema:Course";
+    const decksOf = async (named: string, types: string) => toLibraryDecks(await datasetFromIndex(turtle(named, types)));
+    expect(await decksOf("; sm:newcomerCourse <#solid>", COURSE)).toEqual([
+      expect.objectContaining({ isCourse: true, forNewcomers: true }),
+    ]);
+    for (const [named, types] of [
+      ["", COURSE],
+      ["; sm:newcomerCourse <#nowhere>", COURSE],
+      ["; sm:newcomerCourse <#solid>", "sm:Deck, dcat:Dataset"],
+    ]) {
+      const decks = await decksOf(named, types);
+      expect(decks, named).toHaveLength(1);
+      expect(decks[0], named).not.toHaveProperty("forNewcomers");
+    }
+  });
+
   it("keeps the title and description of a deck of format 4 in every language", async () => {
     const index = await datasetFromIndex(`
 @prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .

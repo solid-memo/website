@@ -42,6 +42,11 @@ new one ([guest-mode.md](guest-mode.md)). A silently restored session skips onbo
 `SessionGateway.restore()` reports `origin: "login"` only when a login
 redirect just completed.
 
+Onboarding ends on an instance's deck list. A new instance has no decks
+yet, so the list offers the deck library's course for newcomers under
+its heading, started in one click
+([courses.md](courses.md#the-course-for-newcomers)).
+
 ## Pod providers
 
 [packages/domain/src/podProvider.ts](../packages/domain/src/podProvider.ts) lists the

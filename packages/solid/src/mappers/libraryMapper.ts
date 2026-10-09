@@ -34,8 +34,10 @@ import { AppError } from "@solid-memo/domain/appError";
  * catalogue's datasets are the decks' series, each described by its
  * current release, which the index carries in full but for its cards.
  * A series or release that does not fit its shape is left out. The
- * index is a document of relative IRIs, so every URL here is where it
- * can be fetched from.
+ * course the catalogue offers to newcomers (sm:newcomerCourse) is
+ * flagged forNewcomers, if it is listed and is a course. The index is a
+ * document of relative IRIs, so every URL here is where it can be
+ * fetched from.
  */
 export function toLibraryDecks(index: SolidDataset): LibraryDeck[] {
   const catalog = getThingAll(index).find((thing) =>
@@ -43,9 +45,15 @@ export function toLibraryDecks(index: SolidDataset): LibraryDeck[] {
   );
   if (catalog === undefined) return [];
   const names = agentNamesOf(index);
+  const newcomerCourse = getUrl(catalog, SM.newcomerCourse);
   return getUrlAll(catalog, DCAT.dataset)
     .map((seriesUrl) => toLibraryDeck(index, seriesUrl, names))
-    .filter((deck): deck is LibraryDeck => deck !== null);
+    .filter((deck): deck is LibraryDeck => deck !== null)
+    .map((deck) =>
+      deck.seriesUrl === newcomerCourse && deck.isCourse === true
+        ? { ...deck, forNewcomers: true as const }
+        : deck,
+    );
 }
 
 function toLibraryDeck(

@@ -106,7 +106,10 @@ string, so other applications can look up what it means:
   5, step format 1 and chapter format 1 the first way
   ([Text formats](#text-formats)), and 1.16's `sm:reviewOf`,
   `sm:reviewDirection` and `sm:scheduler` review-state format 2
-  ([Review states](#review-states)).
+  ([Review states](#review-states)). 1.17's `sm:newcomerCourse` is written
+  on the library index's catalogue outside `CatalogV1`, as `sm:position`
+  is on a deck, so the catalogue format did not move
+  ([The library index](#the-library-index)).
 - **A new concept of a scheme whose property shape lists no `sh:in`
   needs no format bump.** `sm:textFormat` is such a property: its shape
   says only "at most one IRI", so a reader that meets a concept it does
@@ -239,6 +242,15 @@ schedules by another algorithm can keep its states beside Solid Memo's.
   cards document states `dcterms:isPartOf` the deck's catalog entry on
   the document itself. Neither belongs to a shape, so neither moved a
   format; Solid Memo reads neither.
+
+## The library index
+
+Two terms are written only in the [deck library](deck-library.md)'s
+index, on subjects whose shapes do not own them: `sm:cardCount`, the
+cards in use of a listed release, and, since 1.17, `sm:newcomerCourse`
+(`dcat:Catalog` → `dcat:DatasetSeries`), the course the app offers to
+someone with no decks yet ([courses.md](courses.md#the-course-for-newcomers)).
+Absent, none is offered. A pod's `catalog.ttl` never has it.
 
 ## The language of text
 

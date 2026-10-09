@@ -174,6 +174,40 @@ How each answer is graded, and when it is graded at all, is in
 [srs.md](srs.md#multiple-choice-answers-in-a-course). The screens and
 their routes are in [routing.md](routing.md).
 
+## The course for newcomers
+
+The library's index may name one course as the one to offer someone
+who has no decks yet: `sm:newcomerCourse` on its catalogue, pointing at
+the course's series ([deck-library.md](deck-library.md#courses)). The
+app marks that deck `LibraryDeck.forNewcomers`, but only when its
+series is in the index and its current release is a course; anything
+else offers nothing.
+
+- **Where it shows.** On the deck list of an instance that has no decks
+  (empty groups do not count), right under the Decks heading, a card
+  offers the course: its title, what it is, its card count, "Start the
+  course" and a link to its library page (`NewcomerCourseContainer`,
+  `NewcomerCourseOffer`). It is a labelled landmark, not a section with
+  a heading, and takes no focus, but comes next after the heading the
+  screen focuses, in reading and Tab order. While the library loads,
+  when it cannot be read, or when it names no course, there is no card.
+  Creating an instance starts reading the library at once, so the card
+  usually comes with the list rather than pushing it down.
+- **Starting it** is `startCourse`, as from the course's library page:
+  the deck list is read afresh, and the course opens. Its deck is then
+  on the list, so the card is gone; it does not come back while the
+  instance has a deck. Once the course is started it opens, even when
+  the instance's decks could not be read afresh: the course screen
+  reads them itself.
+- **Which course** is the library's choice, not the app's: the app
+  names no course. `NEWCOMER_COURSE` in
+  [deckLibrary.ts](../packages/shacl/node/deckLibrary.ts) names the
+  deck, and `npm run library` writes it into the index; set it to
+  another course, or to `undefined` for none, and run `npm run library`
+  again. The app needs no change, but with none named the journey
+  `newcomer-course.journey.ts`, which expects an offer, is to be
+  retired too ([testing.md](testing.md)).
+
 ## Use cases and ports
 
 | Use case | Does |

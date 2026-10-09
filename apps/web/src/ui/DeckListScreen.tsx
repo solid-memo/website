@@ -91,6 +91,7 @@ export function DeckListScreen({
   courseHref = () => undefined,
   renderStudyAction,
   createDeckHref,
+  offer,
 }: {
   tree: DeckTree;
   /** The catalogue or a deck group has invalid data, set aside: the list cannot be rearranged. */
@@ -130,6 +131,11 @@ export function DeckListScreen({
   renderStudyAction: (deck: Deck) => ComponentChildren;
   /** URL of the deck creator. */
   createDeckHref: string;
+  /**
+   * What the container offers under the heading, before the list (the
+   * course for newcomers): next after the heading in reading and Tab order.
+   */
+  offer?: ComponentChildren;
 }) {
   const { t, locale, readerText } = useI18n();
   const readOnly = tree.readOnly || arrangementSetAside || checking;
@@ -502,6 +508,7 @@ export function DeckListScreen({
           {t("deckList.deckCount", { count: decksOf(shown.children).length })}
         </span>
       </header>
+      {offer}
       {tree.readOnly ? (
         <p class="hint">{t("deckList.readOnly")}</p>
       ) : (

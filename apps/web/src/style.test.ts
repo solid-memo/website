@@ -279,6 +279,18 @@ describe("contrast", () => {
     expect(contrast(light["--text-muted"], "#d4e2ea")).toBeGreaterThanOrEqual(4.5);
   });
 
+  it.each(Object.entries(themes))("keeps text on the course for newcomers' card at 4.5:1 or more in the %s theme", (_, theme) => {
+    for (const text of ["--text", "--text-muted"]) {
+      expect(contrast(theme[text], theme["--primary-soft"])).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  it("keeps muted text readable under the course for newcomers' yellow glow", () => {
+    // --paper-yellow, rgba(232, 171, 20, 0.16) and 0.05 in the dark, laid over --primary-soft.
+    expect(contrast(light["--text-muted"], "#e6e6c6")).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(themes.dark["--text-muted"], "#253923")).toBeGreaterThanOrEqual(4.5);
+  });
+
   it.each(["input", "textarea"])("edges a resting %s with the control border", (tag) => {
     document.body.innerHTML = `<${tag}></${tag}>`;
     expect(getComputedStyle(document.querySelector(tag)!).borderColor).toBe(light["--control-border"]);
@@ -508,5 +520,58 @@ describe("Markdown from data", () => {
     const blocks = document.querySelector(".md")!;
     expect(lastMatching(blocks, "grid-column")).toBe("1 / -1");
     expect(lastMatching(blocks, "font-size")).toBeUndefined();
+  });
+});
+
+/*
+ * The course for newcomers moves only as it comes in (WCAG 2.2.2), and
+ * not at all with motion reduced: each part's own style is where its
+ * animation ends, so taking the animations away leaves it at rest.
+ */
+describe("the course for newcomers", () => {
+  /** The rules, at the top level or in the media query `condition`, whose selector is `selector` (spaced as one line). */
+  function rules(selector: string, condition?: string): CSSStyleRule[] {
+    return [...document.styleSheets]
+      .flatMap((sheet) => [...sheet.cssRules])
+      .flatMap((rule) =>
+        condition === undefined
+          ? [rule]
+          : rule instanceof CSSMediaRule && rule.conditionText === condition
+            ? [...rule.cssRules]
+            : [],
+      )
+      .filter(
+        (rule): rule is CSSStyleRule =>
+          rule instanceof CSSStyleRule && rule.selectorText.replace(/\s+/g, " ") === selector,
+      );
+  }
+
+  it("sweeps its glint across twice and no more, off the card when it rests", () => {
+    const [glint] = rules(".newcomer-course::after");
+    expect(glint!.style.getPropertyValue("animation")).toMatch(/^newcomer-shine .* 2$/);
+    expect(glint!.style.getPropertyValue("transform")).toBe("translateX(-150%)");
+    expect(glint!.style.getPropertyValue("pointer-events")).toBe("none");
+    document.body.innerHTML = `<aside class="newcomer-course"></aside>`;
+    expect(getComputedStyle(document.querySelector("aside")!).overflow).toBe("hidden");
+  });
+
+  it("rests with its fan open", () => {
+    document.body.innerHTML = `<aside class="newcomer-course"><span class="newcomer-course-fan"><span></span><span></span><span></span></span></aside>`;
+    for (const card of document.querySelectorAll(".newcomer-course-fan>span")) {
+      expect(lastMatching(card, "transform")).toBe("rotate(var(--fan))");
+    }
+  });
+
+  it("is still with motion reduced: no animation or transition, its glint included", () => {
+    const [still] = rules("*, *::before, *::after", "(prefers-reduced-motion: reduce)");
+    expect(still!.style.getPropertyValue("animation")).toBe("none");
+    expect(still!.style.getPropertyPriority("animation")).toBe("important");
+    expect(still!.style.getPropertyValue("transition")).toBe("none");
+    expect(still!.style.getPropertyPriority("transition")).toBe("important");
+  });
+
+  it("leaves out the fan on a narrow screen", () => {
+    const [narrow] = rules(".newcomer-course-fan", "(max-width: 26rem)");
+    expect(narrow!.style.getPropertyValue("display")).toBe("none");
   });
 });

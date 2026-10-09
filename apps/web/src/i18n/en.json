@@ -418,6 +418,12 @@
     "remembered": "{percent} remembered",
     "allStatistics": "All statistics"
   },
+  "newcomerCourse": {
+    "eyebrow": "New here?",
+    "pitch": "Start here: a course made for newcomers. Every question you answer becomes a card in your deck.",
+    "start": "Start the course",
+    "about": "About this course"
+  },
   "deckPreferences": {
     "loading": "Loading preferences…",
     "heading": "Preferences: {deck}",

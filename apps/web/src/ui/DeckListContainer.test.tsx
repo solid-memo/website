@@ -49,16 +49,18 @@ function renderContainer(
   });
   seed(queryClient);
   const onStudyDeck = vi.fn();
+  const onCourseStarted = vi.fn();
   const view = render(
     <QueryClientProvider client={queryClient}>
       <DeckListContainer
         useCases={useCases}
         instance={instance}
         onStudyDeck={onStudyDeck}
+        onCourseStarted={onCourseStarted}
       />
     </QueryClientProvider>,
   );
-  return { ...view, onStudyDeck, queryClient };
+  return { ...view, onStudyDeck, onCourseStarted, queryClient };
 }
 
 describe("DeckListContainer", () => {
@@ -117,6 +119,64 @@ describe("DeckListContainer", () => {
     renderContainer(useCases);
     await screen.findByRole("link", { name: "Kanji N5" });
     expect(useCases.listLibraryDecks).not.toHaveBeenCalled();
+  });
+
+  describe("the course for newcomers", () => {
+    const newcomerCourse = { ...courseLibraryDeck, forNewcomers: true as const };
+    const offer = () => screen.queryByRole("complementary", { name: "Solid fundamentals" });
+
+    it("is offered to an instance with no decks, next after the Decks heading the screen focuses", async () => {
+      renderContainer(makeUseCasesFake({ listLibraryDecks: vi.fn(async () => [newcomerCourse]) }));
+      const aside = await screen.findByRole("complementary", { name: "Solid fundamentals" });
+      const heading = screen.getByRole("heading", { name: "Decks" });
+      const empty = screen.getByText(/^No decks yet\./);
+      expect(heading.compareDocumentPosition(aside) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+      expect(aside.compareDocumentPosition(empty) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+
+    it("is offered when the instance has only groups, empty", async () => {
+      const groupOnly: DeckTree = {
+        children: [{ kind: "group", group: { url: `${instance.url}catalog.ttl#group-1`, title: { en: "Later" } }, children: [] }],
+        readOnly: false,
+      };
+      renderContainer(
+        makeUseCasesFake({
+          listDeckTree: vi.fn(async () => groupOnly),
+          listLibraryDecks: vi.fn(async () => [newcomerCourse]),
+        }),
+      );
+      expect(await screen.findByRole("complementary", { name: "Solid fundamentals" })).toBeInTheDocument();
+    });
+
+    it("is not offered once the instance has a deck", async () => {
+      const useCases = makeUseCasesFake({
+        listDecks: vi.fn(async () => [deck]),
+        listLibraryDecks: vi.fn(async () => [newcomerCourse]),
+      });
+      renderContainer(useCases);
+      await screen.findByRole("link", { name: "Kanji N5" });
+      expect(offer()).toBeNull();
+      expect(useCases.listLibraryDecks).not.toHaveBeenCalled();
+    });
+
+    it("opens the course once started, though the deck it brings takes the offer away", async () => {
+      let started = false;
+      const fromCourse = { ...deck, title: { en: "Solid fundamentals" }, sourceUrl: newcomerCourse.url };
+      const useCases = makeUseCasesFake({
+        listDecks: vi.fn(async () => (started ? [fromCourse] : [])),
+        listLibraryDecks: vi.fn(async () => [newcomerCourse]),
+        startCourse: vi.fn(async () => {
+          started = true;
+          return fromCourse;
+        }),
+      });
+      const { onCourseStarted } = renderContainer(useCases);
+      fireEvent.click(await screen.findByRole("button", { name: "Start the course" }));
+      await waitFor(() => expect(onCourseStarted).toHaveBeenCalledWith(fromCourse));
+      expect(await screen.findByRole("link", { name: "Solid fundamentals" })).toBeInTheDocument();
+      expect(offer()).toBeNull();
+      expect(useCases.listDeckTree).toHaveBeenCalledTimes(2);
+    });
   });
 
   it("links to this instance's deck creator", async () => {

@@ -1,6 +1,6 @@
 /* Generated from ns/vocab/v1.ttl by `npm run generate`. Do not edit: change the source and regenerate. */
 
-/** Solid Memo's own vocabulary, version 1.16 (see docs/vocab.md). */
+/** Solid Memo's own vocabulary, version 1.17 (see docs/vocab.md). */
 export const SM_NS = "https://solid-memo.com/ns/vocab/v1.ttl#";
 
 export const SM = {
@@ -44,6 +44,8 @@ export const SM = {
   studyDirection: `${SM_NS}studyDirection`,
   /** In the deck library's index only: how many cards a listed deck document holds. (Added in 1.4 for the library index.) */
   cardCount: `${SM_NS}cardCount`,
+  /** In the deck library's index only: the series (dcat:DatasetSeries) of a course the app offers to someone who has no decks yet, to start with. Absent means none is offered. (Added in 1.17 for the library index. It belongs to no shape: CatalogV1 does not own it, so the catalogue format did not move.) */
+  newcomerCourse: `${SM_NS}newcomerCourse`,
   /** Maximum unseen cards of this deck introduced per study day, in place of the instance's newCardsPerDay. Absent means the instance's. (Added in 1.7.) */
   deckNewCardsPerDay: `${SM_NS}deckNewCardsPerDay`,
   /** Maximum due-card reviews of this deck per study day, in place of the instance's maxReviewsPerDay. Absent means the instance's. (Added in 1.7.) */

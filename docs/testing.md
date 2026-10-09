@@ -189,7 +189,8 @@ served by `vite preview` at http://127.0.0.1:4173/) in Chromium with
 [Playwright](https://playwright.dev/), through whole journeys a user
 takes: logging in with a WebID at a real identity provider, setting
 preferences, making and studying decks, grouping them, importing from
-the library, describing a deck in two languages, validating the
+the library, starting the library's course for newcomers from an empty
+deck list, describing a deck in two languages, validating the
 instance, logging out. Each journey runs against a fresh account, pod
 and WebID on a Community Solid Server 7
 ([css/compose.yml](../e2e/journeys/css/compose.yml)) that the global
