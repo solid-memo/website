@@ -1271,7 +1271,7 @@
       "new": "New today",
       "modified": "Last changed",
       "cards": "Cards",
-      "cardsOf": "cards of {deck}, in Solid Memo",
+      "cardsOf": "cards of {deck}",
       "topLevel": "Top level",
       "followsInstance": "(instance)",
       "counting": "Counting…",
@@ -1325,6 +1325,75 @@
     },
     "groups": {
       "heading": "Groups"
+    },
+    "cards": {
+      "crumb": "Cards of {deck}",
+      "heading": "Cards: {deck}",
+      "loading": "Loading cards…",
+      "courseHint": "A copy of a course: its cards are the course's questions.",
+      "empty": "No cards in this deck yet.",
+      "search": "Search",
+      "field": "In",
+      "fields": {
+        "any": "Any text",
+        "front": "Front",
+        "back": "Back",
+        "note": "Notes",
+        "label": "Label",
+        "distractor": "Wrong options"
+      },
+      "lang": "Language",
+      "anyLang": "Any language",
+      "unstated": "No language stated",
+      "state": "State",
+      "anyState": "Any state",
+      "states": {
+        "live": "In use",
+        "retired": "Retired",
+        "new": "New",
+        "learning": "Learning",
+        "young": "Young",
+        "mature": "Mature",
+        "due": "Due"
+      },
+      "has": "Has",
+      "anything": "Anything",
+      "features": {
+        "picture": "A picture",
+        "distractors": "Wrong options",
+        "markdown": "Markdown",
+        "notes": "Notes"
+      },
+      "pageSize": "Cards per page",
+      "shown": {
+        "one": "{shown} of {count} card",
+        "other": "{shown} of {count} cards"
+      },
+      "keys": "Keys: {j} and {k} move between the cards, {x} selects one, {enter} opens it.",
+      "selected": {
+        "one": "{count} card selected",
+        "other": "{count} cards selected"
+      },
+      "clear": "Clear selection",
+      "noMatch": "No card matches.",
+      "caption": "The cards of {deck}",
+      "select": "Select",
+      "selectAll": "Select every card on this page",
+      "selectCard": "Select {card}",
+      "column": {
+        "front": "Front",
+        "back": "Back",
+        "due": "Due",
+        "interval": "Interval",
+        "ease": "Ease",
+        "created": "Added",
+        "id": "Id"
+      },
+      "days": {
+        "one": "{count} day",
+        "other": "{count} days"
+      },
+      "notStudied": "Not studied yet"
     }
   }
 }

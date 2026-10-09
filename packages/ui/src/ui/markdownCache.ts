@@ -1,6 +1,7 @@
 import { chunksOf } from "@solid-memo/markdown/chunks";
 import { parseInlineMarkdown } from "@solid-memo/markdown/inline";
 import { parseMarkdown, type MdBlock, type MdPhrase } from "@solid-memo/markdown/parse";
+import { plainText } from "@solid-memo/markdown/plainText";
 
 /** How many texts each cache keeps; the oldest goes first. */
 export const CACHE_SIZE = 500;
@@ -37,3 +38,20 @@ export const markdownChunks: (text: string) => MdBlock[][] | null = remembered((
   const blocks = markdownBlocks(text);
   return blocks === null ? null : chunksOf(blocks);
 });
+
+/**
+ * A plainText that remembers every text it was given, however many: one
+ * for each list of texts searched again and again, such as a deck's cards
+ * in the Studio's workbench, which holds more texts than CACHE_SIZE.
+ */
+export function plainTexts(): (text: string) => string {
+  const cache = new Map<string, string>();
+  return (text) => {
+    let plain = cache.get(text);
+    if (plain === undefined) {
+      plain = plainText(text);
+      cache.set(text, plain);
+    }
+    return plain;
+  };
+}

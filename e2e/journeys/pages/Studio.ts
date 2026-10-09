@@ -6,7 +6,8 @@ import { Screen } from "./Screen.ts";
  * Solid Memo Studio, at studio/ of the same site (docs/studio.md): its
  * landing page (the same login as Solid Memo's, under the Studio's name),
  * its instance picker, Home's table of decks (its filter, sort and bulk
- * actions), its Groups screen, and its way back to Solid Memo.
+ * actions), its Groups screen, the card workbench (its search, sort and
+ * selection), and its way back to Solid Memo.
  */
 export class Studio extends Screen {
   /** Home's table of the instance's decks ("The decks of {instance}"). */
@@ -129,6 +130,71 @@ export class Studio extends Screen {
       await this.bulk.getByRole("button", { name: this.t("studio.bulk.remove"), exact: true }).click();
       await this.expectStatus(this.t("studio.bulk.removed", { count: decks.length }));
       for (const deck of decks) await expect(this.row(instance, deck)).toHaveCount(0);
+    });
+  }
+
+  /** The card workbench's table of a deck's cards ("The cards of {deck}"). */
+  cards(deck: string): Locator {
+    return this.page.getByRole("table", { name: this.t("studio.cards.caption", { deck }) });
+  }
+
+  /** Follows the deck's number of cards on Home to its cards in the workbench, which lists their fronts. */
+  async openCards(instance: string, deck: string, fronts: string[]): Promise<void> {
+    await this.intent(`Open the cards of ${deck}`, async () => {
+      const name = new RegExp(escapeRegExp(this.t("studio.decks.cardsOf", { deck })));
+      await this.row(instance, deck).getByRole("link", { name }).click();
+      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.cards.heading", { deck }) })).toBeVisible();
+      await expect(this.page).toHaveURL(/#\/cards\?deck=/);
+      await expect(this.cards(deck).getByRole("rowheader")).toHaveText(fronts);
+    });
+  }
+
+  /** Searches the deck's cards: only the fronts named still show, and the URL holds the search. */
+  async searchCards(deck: string, text: string, fronts: string[]): Promise<void> {
+    await this.intent(`Search the cards for ${text}`, async () => {
+      await this.page.getByRole("searchbox", { name: this.t("studio.cards.search") }).fill(text);
+      await expect(this.page).toHaveURL(new RegExp(`[?&]q=${encodeURIComponent(text)}`));
+      await expect(this.cards(deck).getByRole("rowheader")).toHaveText(fronts);
+    });
+  }
+
+  /** Empties the search: every card shows again, and the URL holds no search. */
+  async clearCardSearch(deck: string, fronts: string[]): Promise<void> {
+    await this.intent("Clear the search", async () => {
+      await this.page.getByRole("searchbox", { name: this.t("studio.cards.search") }).fill("");
+      await expect(this.page).not.toHaveURL(/[?&]q=/);
+      await expect(this.cards(deck).getByRole("rowheader")).toHaveText(fronts);
+    });
+  }
+
+  /** Sorts the deck's cards by a column (its key, as the header names it), which says so; the URL holds the sort. */
+  async sortCardsBy(deck: string, column: string, fronts: string[]): Promise<void> {
+    await this.intent(`Sort the cards by ${column}`, async () => {
+      // Named by its column, then the sort's arrow.
+      const name = new RegExp(`^${escapeRegExp(this.t(`studio.cards.column.${column}`))}`);
+      const header = this.cards(deck).getByRole("columnheader", { name });
+      await header.getByRole("button").click();
+      await expect(header).toHaveAttribute("aria-sort", "ascending");
+      await expect(this.page).toHaveURL(new RegExp(`[?&]sort=${column}`));
+      await expect(this.cards(deck).getByRole("rowheader")).toHaveText(fronts);
+    });
+  }
+
+  /**
+   * Selects the first `count` cards with the keyboard, as the screen's
+   * hint says: j goes to the first row from wherever the focus is, x
+   * selects it and j moves on. The status line counts them.
+   */
+  async selectCardsWithKeys(deck: string, count: number): Promise<void> {
+    await this.intent(`Select ${count} cards with the keyboard`, async () => {
+      await expect(this.page.getByText(this.t("studio.cards.keys", { j: "j", k: "k", x: "x", enter: "Enter" }))).toBeVisible();
+      await this.page.keyboard.press("j");
+      await expect(this.cards(deck).getByRole("rowheader").first().getByRole("link")).toBeFocused();
+      for (let index = 0; index < count; index++) {
+        await this.page.keyboard.press("x");
+        await this.page.keyboard.press("j");
+      }
+      await this.expectStatus(this.t("studio.cards.selected", { count }));
     });
   }
 

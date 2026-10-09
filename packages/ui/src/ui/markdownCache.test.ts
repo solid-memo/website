@@ -1,6 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { MAX_CHARS } from "@solid-memo/markdown/parse";
-import { CACHE_SIZE, markdownBlocks, markdownChunks, markdownPhrases } from "./markdownCache";
+import { plainText } from "@solid-memo/markdown/plainText";
+import { CACHE_SIZE, markdownBlocks, markdownChunks, markdownPhrases, plainTexts } from "./markdownCache";
+
+vi.mock("@solid-memo/markdown/plainText", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@solid-memo/markdown/plainText")>();
+  return { plainText: vi.fn(original.plainText) };
+});
 
 describe("markdownBlocks and markdownPhrases", () => {
   it("parse a text once, giving back what they gave before", () => {
@@ -35,5 +41,18 @@ describe("markdownChunks", () => {
 
   it("is null for a text to be shown as plain text", () => {
     expect(markdownChunks("a".repeat(MAX_CHARS + 1))).toBeNull();
+  });
+});
+
+describe("plainTexts", () => {
+  it("gives Markdown as plain text, read once however many texts it is given", () => {
+    vi.mocked(plainText).mockClear();
+    const plain = plainTexts();
+    expect(plain("**Coffee** shop")).toBe("Coffee shop");
+    for (let index = 0; index <= CACHE_SIZE; index++) plain(`*text* ${index}`);
+    expect(plain("**Coffee** shop")).toBe("Coffee shop");
+    expect(plain("*text* 0")).toBe("text 0");
+    expect(plainText).toHaveBeenCalledTimes(CACHE_SIZE + 2);
+    expect(vi.mocked(plainText).mock.calls.filter(([text]) => text === "**Coffee** shop")).toHaveLength(1);
   });
 });

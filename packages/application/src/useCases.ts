@@ -403,6 +403,8 @@ export interface UseCases {
     onProgress?: (progress: DeckUpgradeProgress) => void,
   ): Promise<DeckUpgradeOutcome>;
   listCards(deck: Deck): Promise<Card[]>;
+  /** The deck's review states, every direction's, as stored: the Studio's card workbench lists them with the cards. */
+  listDeckReviewStates(deck: Deck): Promise<ReviewState[]>;
   /**
    * Rejects, without any pod write, unless each side has text or an
    * http(s) image URL, and every text states its language
@@ -1767,6 +1769,9 @@ export function createUseCases({
     },
     listCards(deck) {
       return deckRepository.listCards(deck);
+    },
+    listDeckReviewStates(deck) {
+      return reviewStateRepository.listReviewStates(deck);
     },
     async addCard(deck, content) {
       return deckRepository.addCard(deck, validContent(content));

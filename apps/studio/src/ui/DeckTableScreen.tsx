@@ -49,8 +49,9 @@ const COLUMNS: readonly Exclude<DeckColumn, "title">[] = [
  * Rows are selected by their checkbox, or all those shown at once, and
  * DeckBulkActions does what can be done with those shown, in the
  * table's order, one action at a time: a deck the filter hides stays
- * selected, but is left alone until shown again. A deck's name opens it in Solid Memo (`deckHref`), its number of
- * cards its cards there (`cardsHref`).
+ * selected, but is left alone until shown again. A deck's name opens it
+ * in Solid Memo (`deckHref`), its number of cards its cards in the
+ * Studio's card workbench (`cardsHref`).
  */
 export function DeckTableScreen({
   instance,
@@ -188,7 +189,7 @@ export function DeckTableScreen({
         <p>{t("studio.decks.noMatch", { filter: view.filter.trim() })}</p>
       ) : (
         <div class="studio-table">
-          <table class="studio-decks">
+          <table class="studio-list">
             <caption>{t("studio.decks.caption", { instance: instance.name })}</caption>
             <thead>
               <tr>

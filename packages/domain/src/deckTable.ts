@@ -1,6 +1,6 @@
 import { DECK_DIRECTIONS, type Deck } from "./deck";
 import type { DeckGroup, DeckTree, TreeNode } from "./deckTree";
-import type { LangText } from "./langText";
+import { folded, type LangText } from "./langText";
 
 /**
  * The Studio's table of an instance's decks (docs/studio.md): a row per
@@ -112,11 +112,6 @@ export function groupTrails(tree: DeckTree): { group: DeckGroup; trail: readonly
   };
   walk(tree.children, []);
   return result;
-}
-
-/** Text as it is matched: lower case, without diacritics ("Ö" is "o"). */
-function folded(text: string): string {
-  return text.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
 }
 
 /** Whether a row's title, in any language, or one of its groups' names holds the filter, case and diacritics aside. */

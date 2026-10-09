@@ -67,7 +67,7 @@ describe("DeckTableContainer", () => {
         "2",
         "5",
         "September 21, 2026",
-        "2 cards of Kanji N5, in Solid Memo",
+        "2 cards of Kanji N5",
       ]),
     );
     expect(useCases.listDeckTree).toHaveBeenCalledWith(instanceA.url);

@@ -56,7 +56,7 @@ export function DeckTableContainer({
   groupsHref: string;
   /** A deck's page in Solid Memo. */
   deckHref: (deck: Deck) => string;
-  /** A deck's cards in Solid Memo. */
+  /** A deck's cards, in the card workbench. */
   cardsHref: (deck: Deck) => string;
 }) {
   const { t, errorText } = useI18n();

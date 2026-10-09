@@ -115,6 +115,7 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
       deck: { ...deck, sourceUrl: plan.releaseUrl },
     })),
     listCards: vi.fn(async () => []),
+    listDeckReviewStates: vi.fn(async () => []),
     addCard: vi.fn(async () => {
       throw new Error("addCard fake not configured");
     }),
