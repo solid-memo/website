@@ -2,6 +2,9 @@ import { vi } from "vitest";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import { withAbout } from "@solid-memo/domain/deckAbout";
+import { withProvenance } from "@solid-memo/domain/deckProvenance";
+import { editCompletedChapters } from "@solid-memo/domain/course";
+import { describedCatalog } from "@solid-memo/domain/catalog";
 import { applyDeckTreeEdit } from "@solid-memo/domain/deckTree";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import { statisticsOf } from "@solid-memo/domain/statistics";
@@ -86,6 +89,8 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
     // As the real one does: keywords tidied, and left off when there are none.
     describeDeck: vi.fn(async (deck, about) => withAbout(deck, about)),
     setDeckPace: vi.fn(async (deck, pace) => ({ ...deck, ...pace })),
+    // As the real one does: authors tidied, the licence one offered.
+    setDeckProvenance: vi.fn(async (deck, provenance) => withProvenance(deck, provenance)),
     setDecksDirection: vi.fn(async (decks: readonly Deck[], direction) => decks.map((deck) => ({ ...deck, direction }))),
     setDecksPace: vi.fn(async (decks: readonly Deck[], pace) => decks.map((deck) => ({ ...deck, ...pace }))),
     removeDeck: vi.fn(async () => undefined),
@@ -108,6 +113,11 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
       ...deck,
       completedChapters: [...(deck.completedChapters ?? []), chapterUrl],
     })),
+    setCompletedChapters: vi.fn(async (deck, edit) => {
+      const { completedChapters, ...rest } = deck;
+      const after = editCompletedChapters(completedChapters ?? [], edit);
+      return after.length === 0 ? rest : { ...rest, completedChapters: after };
+    }),
     addReleaseLanguages: vi.fn(async () => null),
     deckRelease: vi.fn(async () => null),
     applyLibraryUpgrade: vi.fn(async (deck, plan) => ({
@@ -142,6 +152,14 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
     removeInterruptedGuestMove: vi.fn(async () => undefined),
     getPreferences: vi.fn(async () => DEFAULT_PREFERENCES),
     savePreferences: vi.fn(async () => undefined),
+    renameInstance: vi.fn(async (_session, instance, name) => ({ ...instance, name: name.trim() })),
+    readCatalog: vi.fn(async (instanceUrl) => ({
+      title: "Main",
+      description: "My decks.",
+      publisher: { webId: `${new URL(instanceUrl).origin}/profile/card#me`, name: "Alice" },
+    })),
+    // As the real one does: of the catalogue as it is read.
+    describeCatalog: vi.fn(async (instanceUrl, about) => describedCatalog((await fake.readCatalog(instanceUrl))!, about)),
     getStudyQueue: vi.fn(async () => ({
       due: [],
       newPrompts: [],

@@ -34,6 +34,7 @@ import {
   readInstanceRegistrations,
   readRegisteredClasses,
   removeInstanceRegistrations,
+  renameInstanceRegistrations,
   type InstanceRegistration,
 } from "./typeIndex";
 import { ensureTrailingSlash, lastPathSegment } from "./urls";
@@ -149,12 +150,34 @@ export function createSolidInstanceRepository({
       }
     },
 
+    async renameRegistrations({ webId, instanceUrl, title }) {
+      const { privateIndexUrl, publicIndexUrl } = await locateTypeIndexes(webId, fetch);
+      for (const indexUrl of [privateIndexUrl, publicIndexUrl]) {
+        if (indexUrl === null) continue;
+        await renameInstanceRegistrations(indexUrl, { containerUrl: instanceUrl, title }, fetch);
+      }
+    },
+
     async readMeta(instanceUrl): Promise<InstanceMeta | null> {
       const metaUrl = metaUrlOf(instanceUrl);
       const dataset = await getSolidDatasetOrNull(metaUrl, fetch);
       if (dataset === null) return null;
       const subject = getThing(dataset, `${metaUrl}#it`);
       return subject === null ? null : toInstanceMeta(subject);
+    },
+
+    async saveMeta(instanceUrl, meta): Promise<void> {
+      const metaUrl = metaUrlOf(instanceUrl);
+      const dataset = await getSolidDatasetOrNull(metaUrl, fetch);
+      const url = `${metaUrl}#it`;
+      const existing = dataset === null ? null : getThing(dataset, url);
+      if (dataset === null || existing === null) {
+        throw new AppError("noMetaToUpdate", { url: instanceUrl });
+      }
+      const updated = setThing(dataset, toInstanceMetaThing(url, meta, existing));
+      await checkWrite(updated, [url]);
+      // If-Match the read above.
+      await saveDataset(metaUrl, updated, fetch);
     },
 
     async upgradeMeta(instanceUrl): Promise<boolean> {

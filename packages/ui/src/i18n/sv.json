@@ -1181,6 +1181,13 @@
     "distractorEmpty": "Ett felaktigt alternativ behöver text.",
     "distractorPublished": "Det här felaktiga alternativet finns i utgåvan som kortleken kommer från, så det kan inte tas bort. Ta det ur bruk i stället.",
     "dailyLimitInvalid": "En daglig gräns är ett heltal, 0 eller mer.",
+    "licenseUnknown": "Välj en av licenserna som erbjuds.",
+    "authorEmpty": "En upphovsperson behöver ett namn.",
+    "authorTwice": "{author} nämns två gånger. Nämn varje upphovsperson en gång.",
+    "instanceNameEmpty": "En instans behöver ett namn.",
+    "catalogNeedsDescription": "Katalogen behöver en beskrivning.",
+    "noCatalogToUpdate": "Den här instansen har ingen katalog än. Uppdatera instansen i Solid Memo först.",
+    "noMetaToUpdate": "Den här instansen har ingen beskrivning att uppdatera. Läs in sidan igen och försök på nytt.",
     "webIdEmpty": "Ange ditt WebID.",
     "webIdInvalidUrl": "Det är ingen giltig URL. Ett WebID ser ut som https://du.example/profile/card#me.",
     "webIdNotHttps": "Ett WebID måste börja med https://.",
@@ -1288,6 +1295,7 @@
       "loading": "Läser in kortlekar…",
       "empty": "Inga kortlekar än: skapa eller importera dem i {app}.",
       "groupsLink": "Ordna grupper",
+      "instanceLink": "Namn och katalog",
       "filter": "Filtrera på namn eller grupp",
       "shown": {
         "one": "{shown} av {count} kortlek",
@@ -1537,6 +1545,59 @@
       },
       "undo": "Ångra",
       "undone": "Ångrat: korten är som de var."
+    },
+    "license": {
+      "label": "Licens",
+      "none": "Ingen angiven"
+    },
+    "about": {
+      "crumb": "Om {deck}",
+      "heading": "Om: {deck}",
+      "openInApp": "Öppna kortleken i Solid Memo",
+      "name": "Namn",
+      "rename": "Byt namn",
+      "provenance": "Upphovspersoner och licens",
+      "noProvenance": "Inga upphovspersoner eller licens angivna.",
+      "editProvenance": "Redigera upphovspersoner och licens",
+      "authors": "Upphovspersoner",
+      "authorsHint": "Ett namn, eller ett namn och en e-postadress: Ada Lovelace <ada@example.org>. Lämna en rad tom för att ta bort den.",
+      "author": "Upphovsperson {number}",
+      "removeAuthor": "Ta bort upphovsperson {number}",
+      "addAuthor": "Lägg till en upphovsperson",
+      "saveProvenance": "Spara upphovspersoner och licens",
+      "study": "Studier",
+      "saveStudy": "Spara studieinställningar",
+      "progress": "Framsteg i kursen",
+      "progressLoading": "Läser in kursen…",
+      "chapter": {
+        "done": "Klart",
+        "open": "Öppet",
+        "locked": "Låst"
+      },
+      "notDone": "Markera som inte klart",
+      "notDoneLabel": "Markera {chapter} som inte klart",
+      "goneChapters": "Avklarade kapitel som kursen inte längre har:",
+      "progressHint": "Dina svar och dina framsteg med korten blir kvar som de är.",
+      "restart": "Börja om kursen",
+      "restartConfirm": "Börja om kursen? Alla kapitel markeras som inte klara, så det första öppnas igen. Dina svar och dina framsteg med korten blir kvar.",
+      "saved": "Sparat."
+    },
+    "instance": {
+      "crumb": "Namn och katalog",
+      "heading": "Instans: {instance}",
+      "loading": "Läser in katalogen…",
+      "preferencesLink": "Studieinställningar i Solid Memo",
+      "address": "Adress",
+      "name": "Namn",
+      "nameLabel": "Instansens namn",
+      "nameHint": "Sparas i instansen, i dess katalog och i din Pods listor över data, där andra appar hittar den.",
+      "saveName": "Spara namn",
+      "catalog": "Katalog",
+      "noCatalog": "Den här instansen har ingen katalog än. Öppna den i Solid Memo för att uppdatera den.",
+      "publisher": "Utgivare",
+      "description": "Beskrivning",
+      "licenseHint": "Licensen som kortlekarna erbjuds under, för appar som läser katalogen.",
+      "saveCatalog": "Spara katalog"
     }
   }
 }

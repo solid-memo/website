@@ -8,7 +8,9 @@ import { Screen } from "./Screen.ts";
  * its instance picker, Home's table of decks (its filter, sort and bulk
  * actions), its Groups screen, the card workbench (its search, sort,
  * selection and bulk edits, with their Undo), the card inspector (a
- * card's content and its wrong options), and its way back to Solid Memo.
+ * card's content and its wrong options), a deck's about screen (its
+ * authors and licence), the instance's name and catalogue, and its way
+ * back to Solid Memo.
  */
 export class Studio extends Screen {
   /** Home's table of the instance's decks ("The decks of {instance}"). */
@@ -296,6 +298,58 @@ export class Studio extends Screen {
       this.app.expectDialog(this.tp("distractorFields.deleteConfirm", { option: text }));
       await this.wrongOptions.getByRole("button", { name: this.t("distractorFields.deleteLabel", { option: text }) }).click();
       await expect(this.wrongOption(text)).toHaveCount(0);
+    });
+  }
+
+  /** Follows a deck's name on Home to what it says of itself. */
+  async openAbout(instance: string, deck: string): Promise<void> {
+    await this.intent(`Open what ${deck} says of itself`, async () => {
+      await this.row(instance, deck).getByRole("rowheader").getByRole("link", { name: deck, exact: true }).click();
+      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.about.heading", { deck }) })).toBeVisible();
+      await expect(this.page).toHaveURL(/#\/about\?deck=/);
+    });
+  }
+
+  /** Gives the deck one author and a licence (by its name), which the about screen then shows. */
+  async setAuthorAndLicence(author: string, licence: string): Promise<void> {
+    await this.intent(`Name ${author} the author, under ${licence}`, async () => {
+      const section = this.page.getByRole("region", { name: this.t("studio.about.provenance") });
+      await section.getByRole("button", { name: this.t("studio.about.editProvenance") }).click();
+      await section.getByRole("textbox", { name: this.t("studio.about.author", { number: 1 }) }).fill(author);
+      await section.getByRole("combobox", { name: this.t("studio.license.label") }).selectOption({ label: licence });
+      await section.getByRole("button", { name: this.t("studio.about.saveProvenance") }).click();
+      await this.expectStatus(this.t("studio.about.saved"));
+      await expect(section).toContainText(author);
+      await expect(section.getByRole("link", { name: new RegExp(escapeRegExp(licence)) })).toBeVisible();
+    });
+  }
+
+  /** Follows Home's link to the instance's name and catalogue. */
+  async openInstance(instance: string): Promise<void> {
+    await this.intent("Open the instance's name and catalogue", async () => {
+      await this.page.getByRole("link", { name: this.t("studio.decks.instanceLink") }).click();
+      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.instance.heading", { instance }) })).toBeVisible();
+      await this.app.chrome.expectBreadcrumbHere("studio.instance.crumb");
+    });
+  }
+
+  /** Renames the instance: the screen names it anew once its registrations say so. */
+  async renameInstance(name: string): Promise<void> {
+    await this.intent(`Rename the instance ${name}`, async () => {
+      await this.page.getByLabel(this.t("studio.instance.nameLabel"), { exact: true }).fill(name);
+      await this.page.getByRole("button", { name: this.t("studio.instance.saveName") }).click();
+      await this.expectStatus(this.t("studio.about.saved"));
+      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.instance.heading", { instance: name }) })).toBeVisible();
+    });
+  }
+
+  /** Describes the instance's catalogue and gives it a licence (by its name). */
+  async describeCatalog(description: string, licence: string): Promise<void> {
+    await this.intent(`Describe the catalogue, under ${licence}`, async () => {
+      await this.page.getByLabel(this.t("studio.instance.description"), { exact: true }).fill(description);
+      await this.page.getByRole("combobox", { name: this.t("studio.license.label") }).selectOption({ label: licence });
+      await this.page.getByRole("button", { name: this.t("studio.instance.saveCatalog") }).click();
+      await this.expectStatus(this.t("studio.about.saved"));
     });
   }
 

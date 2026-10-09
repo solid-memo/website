@@ -27,6 +27,7 @@ function renderContainer(useCases: UseCases) {
         onView={() => undefined}
         appHref="../#/decks"
         groupsHref="#/groups"
+        instanceHref="#/instance"
         deckHref={(deck) => `../#/deck?deck=${deck.id}`}
         cardsHref={(deck) => `../#/browse?deck=${deck.id}`}
       />

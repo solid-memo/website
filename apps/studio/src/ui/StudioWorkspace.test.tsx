@@ -76,7 +76,7 @@ describe("StudioWorkspace", () => {
     expect(useCases.listDecks).toHaveBeenCalledWith(instanceB.url);
   });
 
-  it("keeps Home's filter and sort in the URL, replacing the entry, and links its decks to Solid Memo, their cards to the workbench", async () => {
+  it("keeps Home's filter and sort in the URL, replacing the entry, and links its decks to their about screen, their cards to the workbench", async () => {
     window.history.replaceState(null, "", home(instanceA.url));
     const length = window.history.length;
     renderWorkspace(
@@ -94,8 +94,36 @@ describe("StudioWorkspace", () => {
     expect(window.history.length).toBe(length);
     const instance = encodeURIComponent(instanceA.url);
     const deck = encodeURIComponent(verbs.url);
-    expect(screen.getByRole("link", { name: "Verbs" })).toHaveAttribute("href", `../#/deck?instance=${instance}&deck=${deck}`);
+    expect(screen.getByRole("link", { name: "Verbs" })).toHaveAttribute("href", `#/about?deck=${deck}`);
     expect(await screen.findByRole("link", { name: /cards of Verbs/ })).toHaveAttribute("href", `#/cards?deck=${deck}`);
+    expect(screen.getByRole("link", { name: "Name and catalogue" })).toHaveAttribute("href", `#/instance?instance=${instance}`);
+  });
+
+  it("opens what a deck says of itself from Home: its trail and title, its page in Solid Memo", async () => {
+    window.history.replaceState(null, "", home(instanceA.url));
+    renderWorkspace(makeUseCasesFake({ listInstances: vi.fn(async () => [instanceA]), listDecks: vi.fn(async () => [kanji]) }));
+    fireEvent.click(await screen.findByRole("link", { name: "Kanji N5" }));
+    expect(await screen.findByRole("heading", { name: "About: Kanji N5" })).toBeInTheDocument();
+    expect(parseStudioHash(window.location.hash)).toEqual({ screen: "about", deckUrl: kanji.url });
+    await waitFor(() => expect(document.title).toBe("About Kanji N5 – Solid Memo Studio"));
+    const trail = screen.getByRole("navigation", { name: "Breadcrumb" });
+    expect(within(trail).getByRole("link", { name: "Decks" })).toHaveAttribute("href", home(instanceA.url));
+    expect(within(trail).getByRole("link", { name: "About Kanji N5" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "Open this deck in Solid Memo" })).toHaveAttribute(
+      "href",
+      `../#/deck?instance=${encodeURIComponent(instanceA.url)}&deck=${encodeURIComponent(kanji.url)}`,
+    );
+  });
+
+  it("opens the instance's name and catalogue from Home", async () => {
+    window.history.replaceState(null, "", home(instanceA.url));
+    renderWorkspace(makeUseCasesFake({ listInstances: vi.fn(async () => [instanceA]) }));
+    fireEvent.click(await screen.findByRole("link", { name: "Name and catalogue" }));
+    expect(await screen.findByRole("heading", { name: "Instance: Deck set A" })).toBeInTheDocument();
+    expect(parseStudioHash(window.location.hash)).toEqual({ screen: "instance", instanceUrl: instanceA.url });
+    await waitFor(() => expect(document.title).toBe("Name and catalogue – Solid Memo Studio"));
+    const trail = screen.getByRole("navigation", { name: "Breadcrumb" });
+    expect(within(trail).getByRole("link", { name: "Name and catalogue" })).toHaveAttribute("aria-current", "page");
   });
 
   it("opens the instance's groups from Home, to arrange them as in Solid Memo", async () => {

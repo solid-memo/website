@@ -5,7 +5,7 @@ import {
   type ThingBuilder,
   type ThingPersisted,
 } from "@inrupt/solid-client";
-import { mockSolidDatasetFrom, setThing } from "@inrupt/solid-client";
+import { mockSolidDatasetFrom, removeThing, setThing, type SolidDataset } from "@inrupt/solid-client";
 import { getBoolean, getInteger, getThing, getUrlAll, getStringNoLocale } from "@inrupt/solid-client";
 import { fragmentIdOf, toCard, toCards, toCatalog, toDeck, toDecks, toDistractor, withCatalog, withDeck, withDistractors, withoutDeck } from "./deckMapper";
 import type { Deck } from "@solid-memo/domain/deck";
@@ -517,6 +517,41 @@ describe("the catalogue node", () => {
       buildThing(getThing(written, catalog.publisher.webId)!).removeAll(RDF.type).build(),
     );
     expect(toCatalog(withoutAgent, CATALOG)?.publisher.name).toBe(catalog.publisher.webId);
+  });
+
+  it("types its licence a licence document, as DCAT-AP asks, and lets go of one it no longer states", () => {
+    const CC0 = "https://creativecommons.org/publicdomain/zero/1.0/";
+    const BY = "https://creativecommons.org/licenses/by/4.0/";
+    const typeOf = (dataset: SolidDataset, url: string) => {
+      const node = getThing(dataset, url);
+      return node === null ? null : getUrlAll(node, RDF.type);
+    };
+    let dataset = withCatalog(mockSolidDatasetFrom(CATALOG), CATALOG, { ...catalog, license: CC0 });
+    expect(typeOf(dataset, CC0)).toEqual([DCTERMS.LicenseDocument]);
+    expect(toCatalog(dataset, CATALOG)).toEqual({ ...catalog, license: CC0 });
+    // Written again, it is typed once.
+    dataset = withCatalog(dataset, CATALOG, { ...catalog, license: CC0 });
+    expect(typeOf(dataset, CC0)).toEqual([DCTERMS.LicenseDocument]);
+
+    // Another licence: the old one goes, having nothing else said of it.
+    dataset = withCatalog(dataset, CATALOG, { ...catalog, license: BY });
+    expect(typeOf(dataset, CC0)).toBeNull();
+    expect(typeOf(dataset, BY)).toEqual([DCTERMS.LicenseDocument]);
+
+    // One another app says more of, or that a deck names, keeps that.
+    dataset = setThing(dataset, buildThing(getThing(dataset, BY)!).addStringNoLocale(DCTERMS.title, "CC BY").build());
+    dataset = withCatalog(dataset, CATALOG, catalog);
+    expect(typeOf(dataset, BY)).toEqual([]);
+    expect(getStringNoLocale(getThing(dataset, BY)!, DCTERMS.title)).toBe("CC BY");
+    dataset = withCatalog(withDeck(dataset, { ...deck, license: CC0 }), CATALOG, { ...catalog, license: CC0 });
+    dataset = withCatalog(dataset, CATALOG, catalog);
+    expect(typeOf(dataset, CC0)).toEqual([DCTERMS.LicenseDocument]);
+
+    // One another app stated without describing it: nothing to let go of.
+    dataset = removeThing(withCatalog(dataset, CATALOG, { ...catalog, license: BY }), BY);
+    dataset = withCatalog(dataset, CATALOG, catalog);
+    expect(typeOf(dataset, BY)).toBeNull();
+    expect(toCatalog(dataset, CATALOG)).toEqual(catalog);
   });
 
   it("is absent from a document without one, or with one that does not fit its shape", () => {

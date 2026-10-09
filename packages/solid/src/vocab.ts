@@ -46,6 +46,8 @@ export const DCTERMS = {
   license: "http://purl.org/dc/terms/license",
   /** A deck's blurb: what it covers, where its content came from. */
   description: "http://purl.org/dc/terms/description",
+  /** What a catalogue's licence is, as DCAT-AP asks of it. */
+  LicenseDocument: "http://purl.org/dc/terms/LicenseDocument",
   /** On a deck's cards document itself (`<>`): the deck's catalog entry, whose cards it holds. */
   isPartOf: "http://purl.org/dc/terms/isPartOf",
 } as const;

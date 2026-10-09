@@ -5,6 +5,7 @@ import {
   courseAnswerEffect,
   courseOutlineFromRecords,
   courseProgress,
+  editCompletedChapters,
   finalReviewQueue,
   gradeOfChoice,
   sameOutline,
@@ -288,5 +289,19 @@ describe("a course answer's effect on the schedule", () => {
     // 03:00 with a boundary of 4 is still 6 October.
     const early = state(new Date(2026, 9, 7, 3, 0), "2026-10-07");
     expect(courseAnswerEffect(early, true, now, 4)).toEqual({ kind: "review", grade: 3 });
+  });
+});
+
+describe("editing the chapters completed", () => {
+  const v1 = "https://solid-memo.com/decks/c/v1.ttl";
+  const v2 = "https://solid-memo.com/decks/c/v2.ttl";
+  const completed = [`${v1}#ch-a`, `${v2}#ch-a`, `${v2}#ch-b`];
+
+  it("marks a chapter not done, in every release", () => {
+    expect(editCompletedChapters(completed, { kind: "notDone", chapterUrl: `${v2}#ch-a` })).toEqual([`${v2}#ch-b`]);
+  });
+
+  it("restarts the course: no chapter completed", () => {
+    expect(editCompletedChapters(completed, { kind: "restart" })).toEqual([]);
   });
 });

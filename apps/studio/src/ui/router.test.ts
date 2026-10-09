@@ -23,6 +23,8 @@ describe("the Studio's routes", () => {
       cardUrl: "https://pod.example/solid-memo/a/decks/deck-1.ttl#c1",
       tab: "distractors",
     },
+    { screen: "about", deckUrl: "https://pod.example/solid-memo/a/catalog.ttl#deck-1" },
+    { screen: "instance", instanceUrl: "https://pod.example/solid-memo/a/" },
   ];
 
   it("round-trip through the hash", () => {
@@ -66,8 +68,15 @@ describe("the Studio's routes", () => {
     expect(parseStudioHash("#/card?card=c")).toBeNull();
   });
 
+  it("keep a deck's about screen and the instance's screen in their query", () => {
+    expect(studioRouteToHash(routes[8]!)).toBe("#/about?deck=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2Fcatalog.ttl%23deck-1");
+    expect(studioRouteToHash(routes[9]!)).toBe("#/instance?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2F");
+    expect(parseStudioHash("#/about")).toBeNull();
+    expect(parseStudioHash("#/instance")).toBeNull();
+  });
+
   it("name the instance a route is in, the deck's for the workbench", () => {
-    expect(routes.map(instanceOfRoute)).toEqual([null, ...Array(7).fill("https://pod.example/solid-memo/a/")]);
+    expect(routes.map(instanceOfRoute)).toEqual([null, ...Array(9).fill("https://pod.example/solid-memo/a/")]);
   });
 
   it("leave the root without an instance, and anything unknown, to the default route", () => {

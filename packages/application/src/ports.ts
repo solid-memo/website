@@ -4,7 +4,7 @@ import type { LangText } from "@solid-memo/domain/langText";
 import type { ThemeChoice } from "@solid-memo/domain/theme";
 import type { Repair } from "@solid-memo/domain/repair";
 import type { Card, CardContent, Deck } from "@solid-memo/domain/deck";
-import type { CourseOutline } from "@solid-memo/domain/course";
+import type { CompletedChaptersEdit, CourseOutline } from "@solid-memo/domain/course";
 import type { StatedLanguages } from "@solid-memo/domain/deckLanguages";
 import type { DeckTree, DeckTreeEdit } from "@solid-memo/domain/deckTree";
 import type {
@@ -128,8 +128,24 @@ export interface InstanceRepository {
    * is there, and none in an index that cannot be read.
    */
   registerDataClasses(args: { webId: string; instanceUrl: string; title: string }): Promise<void>;
+  /**
+   * Give the instance's registrations a new title, in every type index
+   * that registers it: its sm:Instance registration, which names it in
+   * the instance list, and its catalogue's dcat:Catalog registration.
+   * One write per index, made only if the index is as it was read
+   * (If-Match), else read and written again, a few times. An index
+   * already saying so is not written.
+   */
+  renameRegistrations(args: { webId: string; instanceUrl: string; title: string }): Promise<void>;
   /** What the instance's meta document says; null when there is none. */
   readMeta(instanceUrl: string): Promise<InstanceMeta | null>;
+  /**
+   * Rewrite the meta document's subject in place, in this app's format,
+   * in ONE save made only if the document is still as it was read
+   * (If-Match): the Studio's rename. Fails when the document is missing:
+   * a meta document is created with its instance, never on its own.
+   */
+  saveMeta(instanceUrl: string, meta: InstanceMeta): Promise<void>;
   /**
    * For the format update: bring the meta document's subject up to this
    * app's format in place (unknown triples survive), in ONE save made
@@ -303,6 +319,15 @@ export interface DeckRepository {
    * no entry.
    */
   completeChapter(deck: Deck, chapterUrl: string): Promise<Deck>;
+  /**
+   * Change the chapters a course's deck completed as `edit` says, of
+   * those its entry names now, as completeChapter adds one: one save,
+   * If-Match, a few attempts, then changedElsewhere. Unlike a learner's
+   * completion, the entry passes the write check. An edit that changes
+   * nothing writes nothing. Returns the deck as its entry says then;
+   * throws deckGone when it has no entry.
+   */
+  setCompletedChapters(deck: Deck, edit: CompletedChaptersEdit): Promise<Deck>;
 }
 
 /** Driven port: the app's read-only library of ready-made decks. */

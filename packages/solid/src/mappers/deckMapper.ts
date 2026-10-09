@@ -1,9 +1,12 @@
 import {
   asUrl,
   buildThing,
+  createThing,
+  getPropertyAll,
   getThing,
   getThingAll,
   getUrlAll,
+  removeThing,
   setThing,
   type SolidDataset,
   type Thing,
@@ -185,21 +188,37 @@ export function toCatalog(dataset: SolidDataset, documentUrl: string): Catalog |
  * document that is no dataset of Solid Memo's (left by a deck removed)
  * goes, as the catalogue could not be written with it. Its publisher is
  * described beside it.
+ * Its licence, when it states one, is typed a dcterms:LicenseDocument,
+ * as DCAT-AP asks. A licence it no longer states loses that type, unless
+ * the document still names it a licence elsewhere; with nothing else said
+ * of it, it goes.
  */
 export function withCatalog(dataset: SolidDataset, documentUrl: string, catalog: Catalog): SolidDataset {
   const url = `${documentUrl}#catalog`;
   const existing = getThing(dataset, url);
+  const before = existing === null ? [] : getUrlAll(existing, DCTERMS.license);
   const foreign = foreignSubjects(dataset);
   const kept = (existing === null ? [] : getUrlAll(existing, DCAT.dataset)).filter(
     (link) => documentUrlOf(link) !== documentUrl || isTyped(dataset, link, DCAT.Dataset) || foreign.has(link),
   );
   const datasets = [...new Set([...kept, ...deckUrlsOf(dataset)])];
-  const withNode = setThing(dataset, recordThing(url, CATALOG_V1, catalogToRecord(catalog, datasets), existing));
+  let updated = setThing(dataset, recordThing(url, CATALOG_V1, catalogToRecord(catalog, datasets), existing));
   const publisher = catalog.publisher.webId;
-  return setThing(
-    withNode,
-    recordThing(publisher, AGENT_V1, publisherToRecord(catalog), getThing(withNode, publisher)),
-  );
+  updated = setThing(updated, recordThing(publisher, AGENT_V1, publisherToRecord(catalog), getThing(updated, publisher)));
+  const named = new Set(getThingAll(updated).flatMap((thing) => getUrlAll(thing, DCTERMS.license)));
+  for (const license of before.filter((license) => license !== catalog.license && !named.has(license))) {
+    const node = getThing(updated, license);
+    if (node === null) continue;
+    const untyped = buildThing(node).removeUrl(RDF.type, DCTERMS.LicenseDocument).build();
+    updated = getPropertyAll(untyped).length === 0 ? removeThing(updated, license) : setThing(updated, untyped);
+  }
+  if (catalog.license !== undefined) {
+    const node = getThing(updated, catalog.license) ?? createThing({ url: catalog.license });
+    if (!getUrlAll(node, RDF.type).includes(DCTERMS.LicenseDocument)) {
+      updated = setThing(updated, buildThing(node).addIri(RDF.type, DCTERMS.LicenseDocument).build());
+    }
+  }
+  return updated;
 }
 
 /** Agent nodes this app wrote (`#agent-…`) that nothing in the document names. */

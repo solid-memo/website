@@ -26,7 +26,7 @@ import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import type { ThemeChoice } from "@solid-memo/domain/theme";
 import type { ReviewState } from "@solid-memo/domain/review";
 import type { Answer } from "@solid-memo/domain/answer";
-import type { Catalog } from "@solid-memo/domain/catalog";
+import { defaultCatalogDescription, type Catalog } from "@solid-memo/domain/catalog";
 import type { Session } from "@solid-memo/domain/session";
 import type { Storage } from "@solid-memo/domain/storage";
 import type { WebIdDocument } from "@solid-memo/domain/webIdDocument";
@@ -127,6 +127,8 @@ function makeDeps() {
     deleteInstance: vi.fn(async () => ({ keptFolder: null })),
     deleteInstanceData: vi.fn(async () => ({ keptFolder: null })),
     readMeta: vi.fn(async () => null),
+    saveMeta: vi.fn(async () => undefined),
+    renameRegistrations: vi.fn(async () => undefined),
     upgradeMeta: vi.fn(async () => true),
     readDataClassRegistrations: vi.fn(async () => ({ registrations: [], privateIndexMissing: false, unreadableIndexes: [] })),
     registerDataClasses: vi.fn(async () => undefined),
@@ -161,6 +163,7 @@ function makeDeps() {
       ...completed,
       completedChapters: [...(completed.completedChapters ?? []), chapterUrl],
     })),
+    setCompletedChapters: vi.fn(async (edited) => edited),
   };
   const deckLibrary: DeckLibrary = {
     listLibraryDecks: vi.fn(async () => [libraryDeck]),
@@ -3554,6 +3557,12 @@ describe("courses", () => {
     expect(deps.deckRepository.completeChapter).toHaveBeenCalledWith(courseDeck, at("ch-1"));
   });
 
+  it("setCompletedChapters changes the chapters completed on the deck", async () => {
+    const { deps, useCases } = setup();
+    await useCases.setCompletedChapters(courseDeck, { kind: "restart" });
+    expect(deps.deckRepository.setCompletedChapters).toHaveBeenCalledWith(courseDeck, { kind: "restart" });
+  });
+
   it("planLibraryUpgrade adds no card to a course's deck, whichever release says it is a course", async () => {
     const { deps, useCases } = setup();
     const v2 = "https://solid-memo.com/decks/solid/v2.ttl";
@@ -3594,5 +3603,128 @@ describe("courses", () => {
     };
     vi.mocked(deps.deckLibrary.fetchCourseOutline).mockImplementation(async (url) => (url === v2 ? rewritten : outline));
     await expect(useCases.planLibraryUpgrade(courseDeck)).resolves.toMatchObject({ toVersion: "2", change: [], outline: true });
+  });
+});
+
+describe("metadata", () => {
+  const CC0 = "https://creativecommons.org/publicdomain/zero/1.0/";
+  const changed = () => new AppError("changedElsewhere", { url: "x" });
+
+  describe("setDeckProvenance", () => {
+    it("gives the deck, as its entry says now, its authors and licence", async () => {
+      const deps = makeDeps();
+      const now = { ...deck, title: { en: "Renamed elsewhere" } };
+      vi.mocked(deps.deckRepository.readDeck).mockResolvedValue(now);
+      const useCases = createUseCases(deps);
+      await expect(useCases.setDeckProvenance(deck, { authors: [" Ada "], license: CC0 })).resolves.toEqual({
+        ...now,
+        authors: ["Ada"],
+        license: CC0,
+      });
+      expect(deps.deckRepository.readDeck).toHaveBeenCalledWith(deck.url);
+    });
+
+    it("reads and makes the edit again while the catalog changes elsewhere, three times in all", async () => {
+      const deps = makeDeps();
+      vi.mocked(deps.deckRepository.saveDeck).mockRejectedValueOnce(changed()).mockRejectedValueOnce(changed());
+      const useCases = createUseCases(deps);
+      await expect(useCases.setDeckProvenance(deck, { authors: ["Ada"] })).resolves.toMatchObject({ authors: ["Ada"] });
+      expect(deps.deckRepository.readDeck).toHaveBeenCalledTimes(3);
+      vi.mocked(deps.deckRepository.saveDeck).mockRejectedValue(changed());
+      await expect(useCases.setDeckProvenance(deck, { authors: [] })).rejects.toMatchObject({ code: "changedElsewhere" });
+      expect(deps.deckRepository.saveDeck).toHaveBeenCalledTimes(6);
+    });
+
+    it("refuses a deck that is gone, and stops at once on another failure", async () => {
+      const deps = makeDeps();
+      vi.mocked(deps.deckRepository.readDeck).mockResolvedValueOnce(null);
+      const useCases = createUseCases(deps);
+      await expect(useCases.setDeckProvenance(deck, { authors: [] })).rejects.toMatchObject({ code: "deckGone" });
+      await expect(useCases.setDeckProvenance(deck, { authors: [], license: "https://example.org/x" })).rejects.toMatchObject({
+        code: "licenseUnknown",
+      });
+      expect(deps.deckRepository.readDeck).toHaveBeenCalledTimes(2);
+      expect(deps.deckRepository.saveDeck).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("renameInstance", () => {
+    const meta = { name: "Main", createdAt: "2026-09-21T10:00:00.000Z", formatVersion: 2 };
+
+    it("writes the new name to the meta document, the catalogue and the type index registrations", async () => {
+      const deps = makeDeps();
+      vi.mocked(deps.instanceRepository.readMeta).mockResolvedValue(meta);
+      vi.mocked(deps.deckRepository.readCatalog).mockResolvedValue({ ...catalog, description: defaultCatalogDescription("Main") });
+      const useCases = createUseCases(deps);
+      await expect(useCases.renameInstance(session, instance, " Languages ")).resolves.toEqual({ ...instance, name: "Languages" });
+      expect(deps.instanceRepository.saveMeta).toHaveBeenCalledWith(instance.url, { ...meta, name: "Languages" });
+      expect(deps.deckRepository.saveCatalog).toHaveBeenCalledWith(instance.url, {
+        ...catalog,
+        title: "Languages",
+        description: defaultCatalogDescription("Languages"),
+      });
+      expect(deps.instanceRepository.renameRegistrations).toHaveBeenCalledWith({
+        webId: session.webId,
+        instanceUrl: instance.url,
+        title: "Languages",
+      });
+    });
+
+    it("writes only where the name is not yet the new one, and no catalogue there is none of", async () => {
+      const deps = makeDeps();
+      vi.mocked(deps.instanceRepository.readMeta).mockResolvedValue({ ...meta, name: "Languages" });
+      vi.mocked(deps.deckRepository.readCatalog).mockResolvedValueOnce({ ...catalog, title: "Languages" }).mockResolvedValueOnce(null);
+      const useCases = createUseCases(deps);
+      await useCases.renameInstance(session, instance, "Languages");
+      await useCases.renameInstance(session, instance, "Languages");
+      expect(deps.instanceRepository.saveMeta).not.toHaveBeenCalled();
+      expect(deps.deckRepository.saveCatalog).not.toHaveBeenCalled();
+      expect(deps.instanceRepository.renameRegistrations).toHaveBeenCalledTimes(2);
+    });
+
+    it("reads and writes each document again while it changes elsewhere", async () => {
+      const deps = makeDeps();
+      vi.mocked(deps.instanceRepository.readMeta).mockResolvedValue(meta);
+      vi.mocked(deps.instanceRepository.saveMeta).mockRejectedValueOnce(changed());
+      vi.mocked(deps.deckRepository.saveCatalog).mockRejectedValueOnce(changed());
+      await createUseCases(deps).renameInstance(session, instance, "Languages");
+      expect(deps.instanceRepository.readMeta).toHaveBeenCalledTimes(2);
+      expect(deps.deckRepository.readCatalog).toHaveBeenCalledTimes(2);
+      expect(deps.instanceRepository.renameRegistrations).toHaveBeenCalledOnce();
+    });
+
+    it("refuses an empty name, and an instance without a meta document, writing nothing", async () => {
+      const deps = makeDeps();
+      const useCases = createUseCases(deps);
+      await expect(useCases.renameInstance(session, instance, " ")).rejects.toMatchObject({ code: "instanceNameEmpty" });
+      await expect(useCases.renameInstance(session, instance, "Languages")).rejects.toMatchObject({ code: "noMetaToUpdate" });
+      expect(deps.deckRepository.saveCatalog).not.toHaveBeenCalled();
+      expect(deps.instanceRepository.renameRegistrations).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("the catalogue", () => {
+    it("is read as it is", async () => {
+      await expect(createUseCases(makeDeps()).readCatalog(instance.url)).resolves.toEqual(catalog);
+    });
+
+    it("gets its description and licence, of the catalogue as it is now, again when it changed meanwhile", async () => {
+      const deps = makeDeps();
+      vi.mocked(deps.deckRepository.saveCatalog).mockRejectedValueOnce(changed());
+      const useCases = createUseCases(deps);
+      const described = { ...catalog, description: "Shared decks.", license: CC0 };
+      await expect(useCases.describeCatalog(instance.url, { description: " Shared decks. ", license: CC0 })).resolves.toEqual(described);
+      expect(deps.deckRepository.readCatalog).toHaveBeenCalledTimes(2);
+      expect(deps.deckRepository.saveCatalog).toHaveBeenLastCalledWith(instance.url, described);
+    });
+
+    it("refuses an instance without one", async () => {
+      const deps = makeDeps();
+      vi.mocked(deps.deckRepository.readCatalog).mockResolvedValue(null);
+      await expect(createUseCases(deps).describeCatalog(instance.url, { description: "x" })).rejects.toMatchObject({
+        code: "noCatalogToUpdate",
+      });
+      expect(deps.deckRepository.saveCatalog).not.toHaveBeenCalled();
+    });
   });
 });

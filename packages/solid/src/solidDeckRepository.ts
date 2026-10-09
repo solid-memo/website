@@ -22,6 +22,7 @@ import {
   type DeckDirection,
 } from "@solid-memo/domain/deck";
 import { cardToRecord } from "@solid-memo/domain/deckRecord";
+import { editCompletedChapters as completedChaptersAfter } from "@solid-memo/domain/course";
 import { withStatedLanguages } from "@solid-memo/domain/deckLanguages";
 import {
   cardsContainerOf,
@@ -358,25 +359,24 @@ export function createSolidDeckRepository({
       return deleteDocumentIfPresent(url, fetch);
     },
 
-    async completeChapter(deck, chapterUrl) {
-      const catalogUrl = documentUrlOf(deck.url);
-      for (let attempt = 1; ; attempt++) {
-        const dataset = await getSolidDatasetOrNull(catalogUrl, fetch);
-        const stored = dataset === null ? undefined : toDecks(dataset).find((candidate) => candidate.url === deck.url);
-        if (stored === undefined) throw new AppError("deckGone", { deck: deck.title });
+    completeChapter(deck, chapterUrl) {
+      return editCompletedChapters(deck, (completed) =>
         // Completed in any release: a chapter keeps its fragment id from one release to the next.
-        if (stored.completedChapters?.some((url) => fragmentIdOf(url) === fragmentIdOf(chapterUrl)) === true) return stored;
-        // sm:completedChapter is no shape's (like a deck's sm:position): nothing a shape owns changes, so nothing is checked.
-        const thing = buildThing(unlessNewer(getThing(dataset!, deck.url)!)).addIri(SM.completedChapter, chapterUrl).build();
-        const updated = setThing(dataset!, thing);
-        try {
-          // A PATCH adding the one triple, If-Match the read above.
-          await saveDataset(catalogUrl, updated, fetch);
-          return { ...stored, completedChapters: [...(stored.completedChapters ?? []), chapterUrl] };
-        } catch (error) {
-          if (!(error instanceof PreconditionFailedError) || attempt === TREE_ATTEMPTS) throw error;
-        }
-      }
+        completed.some((url) => fragmentIdOf(url) === fragmentIdOf(chapterUrl)) ? null : { add: [chapterUrl], remove: [] },
+      );
+    },
+
+    setCompletedChapters(deck, edit) {
+      return editCompletedChapters(
+        deck,
+        (completed) => {
+          const kept = new Set(completedChaptersAfter(completed, edit));
+          const remove = completed.filter((url) => !kept.has(url));
+          return remove.length === 0 ? null : { add: [], remove };
+        },
+        // The Studio's edit: the deck's entry must be as its shape says, as for any other edit of it.
+        true,
+      );
     },
 
     async removeCard(deck, card): Promise<void> {
@@ -401,6 +401,46 @@ export function createSolidDeckRepository({
       }
     },
   };
+
+  /**
+   * Change the chapters a course's deck completed (sm:completedChapter):
+   * what `change` adds and removes of them as the entry has them now, in
+   * ONE save made only if the catalog document is as it was read
+   * (If-Match), else read and changed again, TREE_ATTEMPTS times in all.
+   * No change (null) writes nothing. sm:completedChapter is no shape's
+   * (like a deck's sm:position): a learner's completion checks nothing a
+   * shape owns, while an edit in the Studio (`checked`) has the entry
+   * checked as any other edit of it is.
+   */
+  async function editCompletedChapters(
+    deck: Deck,
+    change: (completed: readonly string[]) => { add: string[]; remove: string[] } | null,
+    checked = false,
+  ): Promise<Deck> {
+    const catalogUrl = documentUrlOf(deck.url);
+    for (let attempt = 1; ; attempt++) {
+      const dataset = await getSolidDatasetOrNull(catalogUrl, fetch);
+      const stored = dataset === null ? undefined : toDecks(dataset).find((candidate) => candidate.url === deck.url);
+      if (stored === undefined) throw new AppError("deckGone", { deck: deck.title });
+      const completed = stored.completedChapters ?? [];
+      const changed = change(completed);
+      if (changed === null) return stored;
+      let builder = buildThing(unlessNewer(getThing(dataset!, deck.url)!));
+      for (const url of changed.remove) builder = builder.removeUrl(SM.completedChapter, url);
+      for (const url of changed.add) builder = builder.addIri(SM.completedChapter, url);
+      const updated = setThing(dataset!, builder.build());
+      if (checked) await checkWrite(updated, [deck.url]);
+      try {
+        // A PATCH of the triples changed, If-Match the read above.
+        await saveDataset(catalogUrl, updated, fetch);
+        const after = [...completed.filter((url) => !changed.remove.includes(url)), ...changed.add];
+        const { completedChapters: _, ...rest } = stored;
+        return after.length === 0 ? rest : { ...rest, completedChapters: after };
+      } catch (error) {
+        if (!(error instanceof PreconditionFailedError) || attempt === TREE_ATTEMPTS) throw error;
+      }
+    }
+  }
 
   /** Rewrite a deck's catalog entry in place (saveDecks). */
   async function saveDeck(deck: Deck): Promise<Deck> {

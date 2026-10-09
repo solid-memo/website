@@ -23,6 +23,7 @@ import {
   readInstanceRegistrations,
   readRegisteredClasses,
   removeInstanceRegistrations,
+  renameInstanceRegistrations,
 } from "./typeIndex";
 import { DCAT, DCTERMS, FOAF, PIM, RDF, RDFS, SM, SOLID } from "./vocab";
 
@@ -907,5 +908,89 @@ describe("removeInstanceRegistrations", () => {
     );
 
     expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+  });
+});
+
+describe("renameInstanceRegistrations", () => {
+  const MAIN = "https://alice.example/solid-memo/main/";
+  const args = { containerUrl: MAIN, title: "Languages" };
+
+  function registration(id: string, forClass: string, predicate: string, url: string, title = "Main") {
+    return buildThing(createThing({ url: `${PRIVATE_INDEX}#${id}` }))
+      .addIri(RDF.type, SOLID.TypeRegistration)
+      .addIri(SOLID.forClass, forClass)
+      .addIri(predicate, url)
+      .addStringNoLocale(DCTERMS.title, title)
+      .build();
+  }
+
+  function index(...things: ThingPersisted[]): SolidDataset {
+    return things.reduce((dataset, thing) => setThing(dataset, thing), mockSolidDatasetFrom(PRIVATE_INDEX));
+  }
+
+  const titleOf = (saved: SolidDataset, id: string) => getStringNoLocale(getThing(saved, `${PRIVATE_INDEX}#${id}`)!, DCTERMS.title);
+
+  it("renames the registration of each class of the instance's data, in one save, and no other", async () => {
+    mockDatasets({
+      [PRIVATE_INDEX]: index(
+        registration("inst", SM.Instance, SOLID.instance, "https://alice.example/solid-memo/main"),
+        registration("cat", DCAT.Catalog, SOLID.instance, `${MAIN}catalog.ttl#catalog`),
+        registration("deck", SM.Deck, SOLID.instance, `${MAIN}catalog.ttl`),
+        registration("card", SM.Card, SOLID.instanceContainer, `${MAIN}decks/`),
+        registration("other", SM.Instance, SOLID.instanceContainer, "https://alice.example/solid-memo/b/"),
+        registration("other-cat", DCAT.Catalog, SOLID.instance, "https://alice.example/solid-memo/b/catalog.ttl#catalog"),
+        buildThing(createThing({ url: `${PRIVATE_INDEX}#note` })).addStringNoLocale(DCTERMS.title, "x").build(),
+      ),
+    });
+    await renameInstanceRegistrations(PRIVATE_INDEX, args, noFetch);
+    expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
+    const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as SolidDataset;
+    expect(titleOf(saved, "inst")).toBe("Languages");
+    expect(titleOf(saved, "cat")).toBe("Languages");
+    expect(titleOf(saved, "deck")).toBe("Languages");
+    expect(titleOf(saved, "card")).toBe("Languages");
+    expect(titleOf(saved, "other")).toBe("Main");
+    expect(titleOf(saved, "other-cat")).toBe("Main");
+    expect(titleOf(saved, "note")).toBe("x");
+  });
+
+  it("leaves the registrations of an instance kept inside this one", async () => {
+    mockDatasets({
+      [PRIVATE_INDEX]: index(
+        registration("inst", SM.Instance, SOLID.instanceContainer, MAIN),
+        registration("nested", SM.Instance, SOLID.instanceContainer, `${MAIN}archive/`),
+        registration("nested-cat", DCAT.Catalog, SOLID.instance, `${MAIN}archive/catalog.ttl#catalog`),
+      ),
+    });
+    await renameInstanceRegistrations(PRIVATE_INDEX, args, noFetch);
+    const saved = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as SolidDataset;
+    expect(titleOf(saved, "inst")).toBe("Languages");
+    expect(titleOf(saved, "nested")).toBe("Main");
+    expect(titleOf(saved, "nested-cat")).toBe("Main");
+  });
+
+  it("saves nothing when the registrations already say so", async () => {
+    mockDatasets({ [PRIVATE_INDEX]: index(registration("inst", SM.Instance, SOLID.instanceContainer, MAIN, "Languages")) });
+    await renameInstanceRegistrations(PRIVATE_INDEX, args, noFetch);
+    expect(saveSolidDatasetAt).not.toHaveBeenCalled();
+  });
+
+  it("reads and renames again while the index changes elsewhere, three times in all", async () => {
+    mockDatasets({ [PRIVATE_INDEX]: index(registration("inst", SM.Instance, SOLID.instanceContainer, MAIN)) });
+    const changed = Object.assign(new Error("412"), { statusCode: 412 });
+    vi.mocked(saveSolidDatasetAt).mockRejectedValueOnce(changed);
+    await renameInstanceRegistrations(PRIVATE_INDEX, args, noFetch);
+    expect(saveSolidDatasetAt).toHaveBeenCalledTimes(2);
+
+    vi.mocked(saveSolidDatasetAt).mockReset().mockRejectedValue(changed);
+    await expect(renameInstanceRegistrations(PRIVATE_INDEX, args, noFetch)).rejects.toMatchObject({ code: "changedElsewhere" });
+    expect(saveSolidDatasetAt).toHaveBeenCalledTimes(3);
+  });
+
+  it("gives up at once on any other failure", async () => {
+    mockDatasets({ [PRIVATE_INDEX]: index(registration("inst", SM.Instance, SOLID.instanceContainer, MAIN)) });
+    vi.mocked(saveSolidDatasetAt).mockRejectedValue(Object.assign(new Error("403"), { statusCode: 403 }));
+    await expect(renameInstanceRegistrations(PRIVATE_INDEX, args, noFetch)).rejects.toThrow("403");
+    expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
   });
 });
