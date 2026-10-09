@@ -71,6 +71,12 @@ describe("CardScreen", () => {
     expect(screen.getByLabelText("Back")).toHaveValue("water");
   });
 
+  it("marks the main text of the field a link opens the page at as where the user arrives", () => {
+    renderScreen({ arrival: "back" });
+    expect(document.getElementById("card-back")).toHaveAttribute("data-arrival");
+    expect(document.getElementById("card-front")).not.toHaveAttribute("data-arrival");
+  });
+
   it("saves the edited card with trimmed values", () => {
     const { props } = renderScreen();
     fireEvent.input(screen.getByLabelText("Front"), {

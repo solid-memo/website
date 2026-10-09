@@ -5,6 +5,7 @@ import { withAbout } from "@solid-memo/domain/deckAbout";
 import { withProvenance } from "@solid-memo/domain/deckProvenance";
 import { editCompletedChapters } from "@solid-memo/domain/course";
 import { describedCatalog } from "@solid-memo/domain/catalog";
+import { deckHealth } from "@solid-memo/domain/deckHealth";
 import { applyDeckTreeEdit } from "@solid-memo/domain/deckTree";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import { statisticsOf } from "@solid-memo/domain/statistics";
@@ -204,6 +205,10 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
       return { dueCount: queue.due.length, newCount: queue.newPrompts.length };
     }),
     checkInstance: vi.fn((instanceUrl) => fake.validateInstance(instanceUrl)),
+    // A deck's health, of the instance's check, its cards, and no release.
+    checkDeck: vi.fn(async (instanceUrl, deck, text) =>
+      deckHealth(deck, await fake.checkInstance(instanceUrl), await fake.listCards(deck), [], text),
+    ) as UseCases["checkDeck"],
     refreshStudyDigest: vi.fn(async () => undefined),
     ...overrides,
   };

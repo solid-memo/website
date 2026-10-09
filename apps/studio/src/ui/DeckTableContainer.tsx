@@ -13,6 +13,7 @@ import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { DeckTableScreen, type DeckBadge } from "./DeckTableScreen";
+import { HealthBadge } from "./HealthBadge";
 
 /** A bulk action on the selected decks. */
 type Bulk =
@@ -28,7 +29,8 @@ type Bulk =
  * then each deck's cards and today's counts, read as Solid Memo reads
  * them, each row's figures as they come. The check of the instance
  * (as Solid Memo makes it when it is opened) and which decks are
- * courses come in later, as badges.
+ * courses come in later, as badges; each deck's health (HealthBadge)
+ * only once its row is on the screen.
  *
  * A bulk action is one write wherever it can be: a move is one edit of
  * the arrangement (`gather`), a pace or a direction one save of the
@@ -45,6 +47,7 @@ export function DeckTableContainer({
   appHref,
   groupsHref,
   instanceHref,
+  healthHref,
   deckHref,
   cardsHref,
 }: {
@@ -57,6 +60,8 @@ export function DeckTableContainer({
   groupsHref: string;
   /** The instance's name and catalogue. */
   instanceHref: string;
+  /** The health of a deck, or (none named) of the instance. */
+  healthHref: (deck?: Deck) => string;
   /** What a deck says of itself, in the Studio. */
   deckHref: (deck: Deck) => string;
   /** A deck's cards, in the card workbench. */
@@ -178,6 +183,9 @@ export function DeckTableContainer({
       appHref={appHref}
       groupsHref={groupsHref}
       instanceHref={instanceHref}
+      healthHref={healthHref()}
+      // Checked only as its row comes into view; quiet when all is well.
+      healthBadge={(deck) => <HealthBadge useCases={useCases} instanceUrl={instance.url} deck={deck} href={healthHref(deck)} quiet />}
       onMove={(selected, parent) => run({ kind: "move", decks: selected, parent })}
       onPace={(selected, pace) => run({ kind: "pace", decks: selected, pace })}
       onDirection={(selected, direction) => run({ kind: "direction", decks: selected, direction })}

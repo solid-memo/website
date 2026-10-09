@@ -8,7 +8,8 @@ several of them at once, arranges them into groups, lists a deck's
 cards to search, filter, sort, select, edit at once and move or copy
 to another deck, and edits one card, its wrong options and its
 schedule included, with its history of answers. It shows a deck's
-schedule to come, its lapses and leeches. It also edits what
+schedule to come, its lapses and leeches, and everything wrong with a
+deck or the instance. It also edits what
 a deck says of itself (its authors and licence among it), a course's
 progress, and the instance's name and catalogue.
 
@@ -69,10 +70,11 @@ others.
 | `#/studio?instance=…[&q=…&sort=…&order=desc]` | Home: every deck of the instance as a table ([below](#home)). `q` filters it, `sort` names the column it is sorted by, and `order=desc` sorts it the other way. |
 | `#/studio/groups?instance=…` | Groups: the instance's decks arranged into groups, as Solid Memo's deck list arranges them. |
 | `#/studio/cards?deck=…[&q&field&lang&state&has&sort&order&page&size]` | the card workbench: a deck's cards as a table ([below](#card-workbench)). The deck names the instance: its catalog's folder. |
-| `#/studio/card?deck=…&card=…[&tab=distractors\|schedule\|history]` | the card inspector: one card, its content, with `tab=distractors` its wrong options, with `tab=schedule` its review state, or with `tab=history` its answers ([below](#card-inspector)). The content is the default tab, and is left out of the URL. |
+| `#/studio/card?deck=…&card=…[&tab=distractors\|schedule\|history&field=…]` | the card inspector: one card, its content, with `tab=distractors` its wrong options, with `tab=schedule` its review state, or with `tab=history` its answers ([below](#card-inspector)). The content is the default tab, and is left out of the URL. `field` opens it at one field: a text of the content (`front`, `backNote`…), or a wrong option by its id. |
 | `#/studio/schedule?deck=…` | a deck's schedule: the reviews to come, its intervals and eases, its lapses and leeches ([below](#a-decks-schedule)). |
 | `#/studio/about?deck=…` | a deck's about screen: what it says of itself, how it is studied and, for a course, the learner's progress ([below](#a-decks-about-screen)). |
 | `#/studio/instance?instance=…` | the instance's name and its catalogue ([below](#the-instance)). |
+| `#/studio/health?instance=…[&deck=…]` | everything wrong with the instance, or with one of its decks ([below](#health)). |
 
 `#/studio/` and its query count as `#/studio`. Anything else under
 `#/studio`, `#/studio` itself among them, is the default route: the only
@@ -92,7 +94,8 @@ in its instance bar, each deck's actions menu and the deck page;
 The trail is Instances › Decks, then › Groups on the Groups screen,
 › Cards of *deck* in the workbench, › Cards of *deck* › *card* in the
 inspector, › Cards of *deck* › Schedule on a deck's schedule, › About *deck* on a deck's about screen, or › Name and
-catalogue on the instance's screen. The document title is the trail's
+catalogue on the instance's screen, › Health on the instance's health,
+and › Health › *deck* on a deck's. The document title is the trail's
 last step and "Solid Memo Studio". After a move, the screen's heading
 takes the focus (`useScreenFocus`). The header has a link back to
 Solid Memo, at the open instance's decks when there is one, and the
@@ -130,9 +133,15 @@ is a table with a row per deck. Its columns are:
 - its cards, retired ones aside, a link to its cards in the
   [workbench](#card-workbench).
 
-Above the table are links to the [Groups](#groups) screen and to the
-instance's [name and catalogue](#the-instance); with no decks yet, the
-latter is still there.
+Beside a deck's name, its problems ([health](#health)), "3 problems", a
+link to the deck's health. A deck is checked only once its row is on
+the screen (`IntersectionObserver`), so a long table checks only the
+decks the user scrolls to. A deck with no problem gets no badge.
+
+Above the table are links to the [Groups](#groups) screen, to the
+instance's [name and catalogue](#the-instance) and to its
+[health](#health); with no decks yet, the name and catalogue is still
+there.
 
 The table starts in the order the user arranged the decks. A column's
 name sorts by it, then the other way, then back to that order; the
@@ -220,7 +229,7 @@ answer in it: "since March 2025". The workbench reads the whole log once (`loadA
 it is read, the cards show without their lapses, and a query that needs
 them (`state=leech`, `sort=lapses`) waits. When it cannot be read, the
 line says so, and such a query shows why. The header links to the
-deck's [schedule](#a-decks-schedule).
+deck's [schedule](#a-decks-schedule) and its [health](#health).
 
 A card opens in the [card inspector](#card-inspector). The
 workbench reads the cards and the review states with the same queries
@@ -357,6 +366,11 @@ card's fields. There they are saved with the card, by its Save. Left as
 they were, they follow the card as it is read afresh (a change in the
 inspector meanwhile included), and the save does not state them, so the
 card keeps its own.
+
+Opened at a field (`field`, as the [health](#health) screen links to
+one), the inspector puts the focus there: on the text, or on the wrong
+option's Edit button (`data-arrival`, as `useScreenFocus` in `ui`
+takes it). Another tab opens at none.
 
 The inspector reads the deck's cards with the same query as the
 workbench and Solid Memo, so an edit in one shows in the others. The
@@ -537,6 +551,61 @@ index renames have no shape, so they are If-Match writes only. Each
 write is made again from a fresh read on a 412, three times in all. The end-to-end tests hold these edits
 against real servers
 ([metadata.integration.test.ts](../e2e/pod/src/metadata.integration.test.ts)).
+
+## Health
+
+The health screen ([`HealthContainer`](../apps/studio/src/ui/HealthContainer.tsx))
+shows everything wrong with a deck, or with the instance. It is there
+for every user, not only in developer mode. "Check again" reads it all
+afresh.
+
+A deck's health is the use case `checkDeck`. The domain puts it
+together ([deckHealth.ts](../packages/domain/src/deckHealth.ts)). A line
+counts the problems, then the screen has four parts:
+
+- **Data check**: the [shape check](validation.md) of the deck's
+  subjects in the catalogue (its entry, its distribution and its
+  authors' agent nodes), and of its cards and reviews documents
+  (`deckReport`). It is made as the check made when
+  an instance is opened: a document still at the version the
+  [digest](data-model.md#the-digest) says conformed is not checked
+  again. Each result says what is wrong, in the shape's own words, and
+  links to where it is fixed: a card's field in the inspector
+  (`cardSpotOf`, by the result's predicate), a wrong option, a review
+  state on the schedule tab, or the deck's about screen (for its entry
+  and its distribution). Solid Memo's
+  own [repairs](validation.md#repair) of these are offered, and a
+  subject no repair covers can be removed once the user confirms.
+- **Languages**: the card sides that state no language, of the cards
+  the user may settle (`unstatedSides`, as
+  [deckLanguages.ts](../packages/domain/src/deckLanguages.ts) leaves out
+  a card still as its release has it), each a link to its side, and a
+  link to the about screen, which states them all at once. When the
+  release cannot be read, which those are is not known, and it says so.
+- **Cards that say the same** (`duplicateCardsOf`): cards in use with
+  the same front and back, as plain text, in the same languages, and
+  the same pictures. White space aside, case counts.
+- **Markdown**: what the markdown package's check (`markdownProblems`)
+  finds in the cards written in Markdown, field by field, held to the
+  rules of the card editor's hints ([markdown.md](markdown.md)). The
+  domain reads no Markdown: the screen passes the check in
+  (`deckTextCheck` in `ui`).
+
+Each counts toward the badge on [Home](#home): every violation
+(warnings aside), every side to settle, every group of cards that say
+the same, and every Markdown finding (`healthProblemCount`).
+
+The instance's health is the check made when it is opened
+(`checkInstance`, the same query as Home's), with its repairs, then
+every deck with its badge, a link to its own health. A result about a
+deck (its entry, its distribution, a subject of its documents) links
+to that deck's health. A badge checks its deck once: a repair or a
+removal reads every check of the instance afresh (their queries are
+under its key), and the deck's health is read afresh each time its
+screen opens. The
+end-to-end tests hold `checkDeck` against real servers, the documents
+it checks again and a removal that clears it included
+([deckHealth.integration.test.ts](../e2e/pod/src/deckHealth.integration.test.ts)).
 
 ## Groups
 

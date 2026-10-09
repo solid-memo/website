@@ -49,6 +49,12 @@ describe("DistractorFields", () => {
     expect(fields()).not.toHaveTextContent("Chosen");
   });
 
+  it("marks the Edit button of the option a link opens the page at as where the user arrives", () => {
+    renderFields({ arrival: "q-d2" });
+    expect(screen.getByRole("button", { name: "Edit the wrong option “Only people”" })).toHaveAttribute("data-arrival");
+    expect(screen.getByRole("button", { name: "Edit the wrong option “Only web pages”" })).not.toHaveAttribute("data-arrival");
+  });
+
   it("says when the card has none", () => {
     renderFields({ distractors: [] });
     expect(screen.getByText("This card has no wrong options.")).toBeInTheDocument();

@@ -92,7 +92,8 @@ function typedInto(target: EventTarget | null): boolean {
  * read, or when it cannot be, `lapsesFailed`) count its wrong answers
  * since the month of the deck's first answer in the log, which a line
  * above the table names.
- * A link goes to the deck's schedule (`scheduleHref`).
+ * Links go to the deck's schedule (`scheduleHref`) and its health
+ * (`healthHref`).
  */
 export function CardWorkbenchScreen({
   deck,
@@ -103,6 +104,7 @@ export function CardWorkbenchScreen({
   lapses,
   lapsesFailed,
   scheduleHref,
+  healthHref,
   query,
   onQuery,
   cardHref,
@@ -136,6 +138,8 @@ export function CardWorkbenchScreen({
   lapsesFailed: boolean;
   /** The deck's schedule screen. */
   scheduleHref: string;
+  /** The deck's health. */
+  healthHref: string;
   query: CardQuery;
   onQuery: (query: CardQuery) => void;
   cardHref: (card: Card) => string;
@@ -261,7 +265,7 @@ export function CardWorkbenchScreen({
       <header>
         <h2>{tx("studio.cards.heading", { deck: <ReaderText text={deck.title} /> })}</h2>
         {course && <span class="studio-badge">{t("studio.decks.badge.course")}</span>}
-        <a href={scheduleHref}>{t("studio.cards.scheduleLink")}</a>
+        <a href={scheduleHref}>{t("studio.cards.scheduleLink")}</a> <a href={healthHref}>{t("studio.cards.healthLink")}</a>
       </header>
       {course && <p class="hint">{t("studio.cards.courseHint")}</p>}
       {lastEdit !== null && (

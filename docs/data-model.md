@@ -829,7 +829,9 @@ in Solid Memo; the [Studio](studio.md) closes the gaps one by one.
   (moved or copied to another).
 - **Shown only**: the answer log, as statistics, and in the Studio as a
   card's history, the wrong options chosen, lapses and leeches; the
-  schedule in the digest, as counts, and in the Studio as a forecast.
+  schedule in the digest, as counts, and in the Studio as a forecast;
+  the check of the shapes, in developer mode, and in the Studio as a
+  deck's or the instance's health.
 - **Not shown**: a catalogue's `dcterms:modified`, which the app keeps
   but never writes; a library copy's release provenance beyond its
   authors, licence and sources.

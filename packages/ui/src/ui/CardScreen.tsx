@@ -1,5 +1,5 @@
 import { useLayoutEffect, useMemo, useRef, useState } from "preact/hooks";
-import { isMarkdown, type Card, type CardContent, type Distractor } from "@solid-memo/domain/deck";
+import { isMarkdown, type Card, type CardContent, type CardTextPart, type Distractor } from "@solid-memo/domain/deck";
 import { cardName } from "./DataText";
 import type { DeckLanguages } from "@solid-memo/domain/deckLanguages";
 import type { LangText } from "@solid-memo/domain/langText";
@@ -53,6 +53,7 @@ export function CardScreen({
   published = NONE_PUBLISHED,
   heading = true,
   withDistractors = true,
+  arrival,
   busy,
   saved,
   error,
@@ -70,6 +71,8 @@ export function CardScreen({
   heading?: boolean;
   /** Whether the editor edits the card's wrong options too. */
   withDistractors?: boolean;
+  /** The text the page was opened at (a link to it): where the user arrives. */
+  arrival?: CardTextPart;
   busy: boolean;
   /** The last save succeeded (and nothing was edited since). */
   saved: boolean;
@@ -172,6 +175,7 @@ export function CardScreen({
           busy={busy}
           invalid={invalid}
           suggestions={hints.suggestions}
+          arrival={arrival}
           onChange={(next) => {
             // A language asked for is answered as the user changes the card.
             if (invalid?.entry !== undefined) setInvalid(null);

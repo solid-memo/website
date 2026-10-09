@@ -1,7 +1,7 @@
 import { useMemo } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
-import type { Card, CardContent, Deck } from "@solid-memo/domain/deck";
+import type { Card, CardContent, CardTextPart, Deck } from "@solid-memo/domain/deck";
 import { deckLanguages } from "@solid-memo/domain/deckLanguages";
 import { CardScreen } from "./CardScreen";
 import { publishedDistractorIds, useDeckRelease } from "./deckRelease";
@@ -22,6 +22,7 @@ export function CardContainer({
   onRemoved,
   heading,
   withDistractors,
+  arrival,
 }: {
   useCases: UseCases;
   deck: Deck;
@@ -31,6 +32,8 @@ export function CardContainer({
   /** As CardScreen's: whether it heads the card, and edits its wrong options. */
   heading?: boolean;
   withDistractors?: boolean;
+  /** The text the page was opened at: where the user arrives. */
+  arrival?: CardTextPart;
 }) {
   const { errorText } = useI18n();
   const queryClient = useQueryClient();
@@ -75,6 +78,7 @@ export function CardContainer({
       published={publishedDistractorIds(release, card)}
       heading={heading}
       withDistractors={withDistractors}
+      arrival={arrival}
       busy={updateCardMutation.isPending || removeCardMutation.isPending}
       saved={updateCardMutation.isSuccess}
       error={

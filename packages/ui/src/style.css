@@ -1318,6 +1318,18 @@ table.studio-list input[type="checkbox"] {
   font-weight: 400;
 }
 
+/* A deck's problems, as a link to its health. */
+.studio-badge-warning {
+  border-color: var(--warning-border);
+  background: var(--warning-soft);
+  color: var(--warning-text);
+}
+
+.studio-health-list li {
+  margin-bottom: 0.25rem;
+  overflow-wrap: anywhere;
+}
+
 .studio-filter input {
   display: block;
   width: 100%;

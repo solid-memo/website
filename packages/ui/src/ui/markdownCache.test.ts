@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { MAX_CHARS } from "@solid-memo/markdown/parse";
 import { plainText } from "@solid-memo/markdown/plainText";
-import { CACHE_SIZE, markdownBlocks, markdownChunks, markdownPhrases, plainTexts } from "./markdownCache";
+import { CACHE_SIZE, deckTextCheck, markdownBlocks, markdownChunks, markdownPhrases, plainTexts } from "./markdownCache";
 
 vi.mock("@solid-memo/markdown/plainText", async (importOriginal) => {
   const original = await importOriginal<typeof import("@solid-memo/markdown/plainText")>();
@@ -54,5 +54,15 @@ describe("plainTexts", () => {
     expect(plain("*text* 0")).toBe("text 0");
     expect(plainText).toHaveBeenCalledTimes(CACHE_SIZE + 2);
     expect(vi.mocked(plainText).mock.calls.filter(([text]) => text === "**Coffee** shop")).toHaveLength(1);
+  });
+});
+
+describe("deckTextCheck", () => {
+  it("reads plain text and checks each field by the markdown package's rule", () => {
+    const text = deckTextCheck();
+    expect(text.plain("**Coffee**")).toBe("Coffee");
+    expect(text.check("[a](https://example.org)", "side")).toEqual([{ code: "link", source: "[a](https://example.org)", autolink: false }]);
+    expect(text.check("[example.org](https://example.org)", "prose")).toEqual([]);
+    expect(text.check("a\n\nb", "option")).toEqual([{ code: "notOneParagraph" }]);
   });
 });

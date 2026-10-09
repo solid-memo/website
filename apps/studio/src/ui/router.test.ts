@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { act, renderHook } from "@testing-library/preact";
 import { isStudioHash, studioHref } from "@solid-memo/ui/router";
 import { DEFAULT_CARD_QUERY } from "@solid-memo/domain/cardQuery";
-import { instanceOfRoute, parseStudioHash, studioRouteToHash, useStudioRoute, type StudioRoute } from "./router";
+import type { Card } from "@solid-memo/domain/deck";
+import { instanceOfRoute, parseStudioHash, spotRoute, studioRouteToHash, useStudioRoute, type StudioRoute } from "./router";
 
 describe("the Studio's routes", () => {
   const routes: StudioRoute[] = [
@@ -26,6 +27,15 @@ describe("the Studio's routes", () => {
     { screen: "about", deckUrl: "https://pod.example/solid-memo/a/catalog.ttl#deck-1" },
     { screen: "instance", instanceUrl: "https://pod.example/solid-memo/a/" },
     { screen: "schedule", deckUrl: "https://pod.example/solid-memo/a/catalog.ttl#deck-1" },
+    { screen: "health", instanceUrl: "https://pod.example/solid-memo/a/" },
+    { screen: "health", instanceUrl: "https://pod.example/solid-memo/a/", deckUrl: "https://pod.example/solid-memo/a/catalog.ttl#deck-1" },
+    {
+      screen: "card",
+      deckUrl: "https://pod.example/solid-memo/a/catalog.ttl#deck-1",
+      cardUrl: "https://pod.example/solid-memo/a/decks/deck-1.ttl#c1",
+      tab: "distractors",
+      field: "c1-d2",
+    },
   ];
 
   it("round-trip through the hash", () => {
@@ -88,8 +98,28 @@ describe("the Studio's routes", () => {
     expect(parseStudioHash("#/studio/schedule")).toBeNull();
   });
 
+  it("keep the health screen's instance and deck, and the field the inspector opens at, in their query", () => {
+    expect(studioRouteToHash(routes[11]!)).toBe("#/studio/health?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2F");
+    expect(studioRouteToHash(routes[12]!)).toBe(
+      "#/studio/health?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2F&deck=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2Fcatalog.ttl%23deck-1",
+    );
+    expect(parseStudioHash("#/studio/health?deck=d")).toBeNull();
+    expect(studioRouteToHash(routes[13]!)).toMatch(/&tab=distractors&field=c1-d2$/);
+    expect(parseStudioHash(`${studioRouteToHash(routes[6]!)}&field=back`)).toEqual({ ...routes[6], field: "back" });
+  });
+
+  it("open the card inspector where in a card a problem is", () => {
+    const deckUrl = "https://pod.example/solid-memo/a/catalog.ttl#deck-1";
+    const card = { id: "c1", url: "https://pod.example/solid-memo/a/decks/deck-1.ttl#c1" } as Card;
+    const at = { screen: "card", deckUrl, cardUrl: card.url } as const;
+    expect(spotRoute(deckUrl, { card, place: { tab: "content", part: "backNote" } })).toEqual({ ...at, tab: "content", field: "backNote" });
+    expect(spotRoute(deckUrl, { card, place: { tab: "content" } })).toEqual({ ...at, tab: "content" });
+    expect(spotRoute(deckUrl, { card, place: { tab: "distractors", distractor: "c1-d1", part: "note" } })).toEqual({ ...at, tab: "distractors", field: "c1-d1" });
+    expect(spotRoute(deckUrl, { card, place: { tab: "schedule" } })).toEqual({ ...at, tab: "schedule" });
+  });
+
   it("name the instance a route is in, the deck's for the workbench", () => {
-    expect(routes.map(instanceOfRoute)).toEqual([null, ...Array(10).fill("https://pod.example/solid-memo/a/")]);
+    expect(routes.map(instanceOfRoute)).toEqual([null, ...Array(13).fill("https://pod.example/solid-memo/a/")]);
   });
 
   it("leave the root without an instance, and anything unknown, to the default route", () => {

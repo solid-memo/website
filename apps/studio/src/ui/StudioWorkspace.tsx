@@ -21,8 +21,9 @@ import { DeckAboutContainer } from "./DeckAboutContainer";
 import { DeckInsightContainer } from "./DeckInsightContainer";
 import { DeckTableContainer } from "./DeckTableContainer";
 import { GroupsContainer } from "./GroupsContainer";
+import { HealthContainer } from "./HealthContainer";
 import { InstanceAboutContainer } from "./InstanceAboutContainer";
-import { instanceOfRoute, studioRouteToHash, useStudioRoute, type StudioRoute } from "./router";
+import { instanceOfRoute, spotRoute, studioRouteToHash, useStudioRoute, type StudioRoute } from "./router";
 
 /**
  * The signed-in Studio: the site header, with a way back to Solid Memo,
@@ -43,7 +44,11 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
   const instanceUrl = route === null ? null : instanceOfRoute(route);
   const activeInstance = instanceUrl === null ? null : (instances?.find((i) => i.url === instanceUrl) ?? null);
   const deckUrl =
-    route?.screen === "cards" || route?.screen === "card" || route?.screen === "about" || route?.screen === "schedule" ? route.deckUrl : null;
+    route?.screen === "cards" || route?.screen === "card" || route?.screen === "about" || route?.screen === "schedule"
+      ? route.deckUrl
+      : route?.screen === "health"
+        ? (route.deckUrl ?? null)
+        : null;
   const decksQuery = useQuery({
     queryKey: ["decks", instanceUrl],
     queryFn: () => useCases.listDecks(instanceUrl!),
@@ -89,6 +94,12 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
         return [instancesCrumb, decks, { label: t("breadcrumbs.groups"), route }];
       case "instance":
         return [instancesCrumb, decks, { label: t("studio.instance.crumb"), route }];
+      case "health": {
+        const health: Crumb<StudioRoute> = { label: t("studio.health.crumb"), route: { screen: "health", instanceUrl: route.instanceUrl } };
+        return route.deckUrl === undefined
+          ? [instancesCrumb, decks, health]
+          : [instancesCrumb, decks, health, { label: readerText(activeDeck!.title), route }];
+      }
       case "about":
         return [instancesCrumb, decks, { label: t("studio.about.crumb", { deck: readerText(activeDeck!.title) }), route }];
       case "cards":
@@ -150,12 +161,24 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             appHref={decksHref(route.instanceUrl)}
             groupsHref={studioRouteToHash({ screen: "groups", instanceUrl: route.instanceUrl })}
             instanceHref={studioRouteToHash({ screen: "instance", instanceUrl: route.instanceUrl })}
+            healthHref={(deck) => studioRouteToHash({ screen: "health", instanceUrl: route.instanceUrl, ...(deck === undefined ? {} : { deckUrl: deck.url }) })}
             deckHref={(deck) => studioRouteToHash({ screen: "about", deckUrl: deck.url })}
             cardsHref={(deck) => studioRouteToHash({ screen: "cards", deckUrl: deck.url })}
           />
         );
       case "groups":
         return <GroupsContainer useCases={useCases} instance={activeInstance!} />;
+      case "health":
+        return (
+          <HealthContainer
+            useCases={useCases}
+            instance={activeInstance!}
+            deck={activeDeck}
+            spotHref={(deck, spot) => studioRouteToHash(spotRoute(deck.url, spot))}
+            aboutHref={(deck) => studioRouteToHash({ screen: "about", deckUrl: deck.url })}
+            deckHref={(deck) => studioRouteToHash({ screen: "health", instanceUrl: route.instanceUrl, deckUrl: deck.url })}
+          />
+        );
       case "instance":
         // Another instance: its forms start afresh.
         return <InstanceAboutContainer key={route.instanceUrl} useCases={useCases} session={session} instance={activeInstance!} />;
@@ -186,6 +209,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             cardHref={(card) => studioRouteToHash(inspector(card))}
             onOpen={(card) => navigate(inspector(card))}
             scheduleHref={studioRouteToHash({ screen: "schedule", deckUrl: route.deckUrl })}
+            healthHref={studioRouteToHash({ screen: "health", instanceUrl: activeInstance!.url, deckUrl: route.deckUrl })}
           />
         );
       }
@@ -212,9 +236,11 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             deck={activeDeck!}
             card={activeCard!}
             tab={route.tab ?? "content"}
-            tabHref={(tab) => studioRouteToHash({ ...route, tab })}
+            field={route.field}
+            // Another tab is opened at none of its fields.
+            tabHref={(tab) => studioRouteToHash({ screen: "card", deckUrl: route.deckUrl, cardUrl: route.cardUrl, tab })}
             // Like the workbench's query, the tab is no Back stop.
-            onTab={(tab) => replace({ ...route, tab })}
+            onTab={(tab) => replace({ screen: "card", deckUrl: route.deckUrl, cardUrl: route.cardUrl, tab })}
             appHref={routeToHash({ screen: "card", instanceUrl: activeInstance!.url, deckUrl: route.deckUrl, cardUrl: route.cardUrl })}
             onRemoved={() => replace({ screen: "cards", deckUrl: route.deckUrl })}
           />

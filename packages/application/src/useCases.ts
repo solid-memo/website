@@ -87,6 +87,8 @@ import {
   preferencesUrlOf,
 } from "@solid-memo/domain/instanceLayout";
 import { summarize, type DocumentReport, type ValidationReport } from "@solid-memo/domain/validation";
+import { deckHealth, type DeckHealth, type DeckTextCheck } from "@solid-memo/domain/deckHealth";
+import type { MarkdownFinding } from "@solid-memo/domain/release/problems";
 import {
   emptyDigest,
   scheduleOf,
@@ -291,6 +293,18 @@ export interface UseCases {
    * is not checked (nor downloaded) again.
    */
   checkInstance(instanceUrl: string): Promise<ValidationReport>;
+  /**
+   * Everything wrong with one deck of the instance (domain/deckHealth.ts):
+   * the check of its entry in the catalog and of its cards and reviews
+   * documents, made as checkInstance makes it (a document still at the
+   * version the digest says conformed is not checked again); the sides
+   * whose language is not stated, of the cards the user may settle
+   * (unknown when the release the deck was copied from cannot be read);
+   * the cards that say the same; and what `text` (the markdown package's
+   * plain text and check, which the caller passes in) finds in its text
+   * written in Markdown. Writes nothing but the digest's receipts.
+   */
+  checkDeck<F extends MarkdownFinding>(instanceUrl: string, deck: Deck, text: DeckTextCheck<F>): Promise<DeckHealth<F>>;
   /** What the app can repair of what a check found, and what it leaves to the user. */
   planRepair(report: ValidationReport): RepairPlan;
   /** Apply repairs (the planned ones, or removals the user chose). */
@@ -1414,8 +1428,13 @@ export function createUseCases({
 
   async function checkInstance(instanceUrl: string): Promise<ValidationReport> {
     const [decks, digest] = await Promise.all([deckRepository.listDecks(instanceUrl), digestOf(instanceUrl)]);
+    return checkDocuments(instanceUrl, instanceDocumentUrls(instanceUrl, decks), digest);
+  }
+
+  /** The check of these documents of the instance, each not checked again while still at the version the digest says conformed. */
+  async function checkDocuments(instanceUrl: string, urls: readonly string[], digest: InstanceDigest): Promise<ValidationReport> {
     const documents = await Promise.all(
-      instanceDocumentUrls(instanceUrl, decks).map(async (url): Promise<DocumentReport> => {
+      urls.map(async (url): Promise<DocumentReport> => {
         const receipt = digest.receipts[url];
         const since = await shapeValidator.validateDocumentSince(
           url,
@@ -1986,6 +2005,22 @@ export function createUseCases({
     },
     validateInstance: (instanceUrl) => validateInstance(instanceUrl),
     checkInstance,
+    async checkDeck(instanceUrl, deck, text) {
+      const [report, cards, release] = await Promise.all([
+        digestOf(instanceUrl).then((digest) =>
+          checkDocuments(instanceUrl, [catalogUrlOf(instanceUrl), deck.cardsDocumentUrl, deck.reviewsDocumentUrl], digest),
+        ),
+        deckRepository.listCards(deck),
+        // A release that cannot be read leaves the sides to settle unknown, not the rest of the check.
+        deck.sourceUrl === undefined
+          ? []
+          : deckLibrary.fetchLibraryDeck(deck.sourceUrl).then(
+              (release) => release.cards,
+              () => undefined,
+            ),
+      ]);
+      return deckHealth(deck, report, cards, release, text);
+    },
     viewWebIdDocument(session) {
       return webIdDocumentRepository.fetchWebIdDocument(session.webId);
     },

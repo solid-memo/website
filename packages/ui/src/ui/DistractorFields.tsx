@@ -63,6 +63,7 @@ export function DistractorFields({
   busy,
   suggestions,
   picks,
+  arrival,
   onChange,
 }: {
   cardId: string;
@@ -78,6 +79,8 @@ export function DistractorFields({
   suggestions: string[];
   /** How often each option (by id) was chosen in a wrong answer; none counts as 0. Not shown when absent. */
   picks?: ReadonlyMap<string, number>;
+  /** The option (by id) the screen was opened at (a link to it): its Edit button is where the user arrives. */
+  arrival?: string;
   /** Nothing, or, for a change saved at once, whether it was saved. */
   onChange: (distractors: Distractor[]) => void | Promise<boolean>;
 }) {
@@ -263,6 +266,7 @@ export function DistractorFields({
                   <button
                     type="button"
                     id={editButtonId(distractor.id)}
+                    data-arrival={distractor.id === arrival || undefined}
                     class="secondary"
                     aria-label={t("distractorFields.editLabel", { option: named(distractor) })}
                     aria-disabled={busy || editing !== null}

@@ -7,6 +7,8 @@ import { DataLine } from "./DataText";
 import { useI18n, type I18n, type MessageKey } from "./i18n";
 import type { LangTextDraft } from "./LangTextField";
 
+export type { MarkdownProblem };
+
 /** The width from which the card editor's preview starts open: narrower, it starts as a closed disclosure. */
 export const WIDE_EDITOR = "(min-width: 34rem)";
 

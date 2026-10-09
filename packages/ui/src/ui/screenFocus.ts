@@ -15,8 +15,9 @@ import type { RouteChange } from "./routerCore";
  * holding the screen, and the first h2 to appear in it is focused. A
  * screen without one, once it shows something that is not loading, is focused itself.
  * Any app's routes will do: a new route object is a new screen.
- * A screen opened at one of its parts (a link to a section) marks that
- * part's heading `data-arrival`, and that heading is focused instead.
+ * A screen opened at one of its parts (a link to a section, or to a
+ * field) marks that part's heading, or the field, `data-arrival`, and
+ * that is focused instead.
  */
 export function useScreenFocus(route: unknown, change: RouteChange) {
   const screenRef = useRef<HTMLDivElement>(null);
@@ -39,8 +40,9 @@ export function useScreenFocus(route: unknown, change: RouteChange) {
           ? screen
           : null);
       if (target === null) return false;
-      // Focusable from script only: not a Tab stop of its own.
-      if (!target.hasAttribute("tabindex")) target.setAttribute("tabindex", "-1");
+      // Focusable from script only: not a Tab stop of its own. A form
+      // field (a link to one) is one already, and stays one.
+      if (target.tabIndex < 0 && !target.hasAttribute("tabindex")) target.setAttribute("tabindex", "-1");
       target.focus();
       pending.current = false;
       return true;

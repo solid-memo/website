@@ -51,6 +51,7 @@ export function CardWorkbenchContainer({
   cardHref,
   onOpen,
   scheduleHref,
+  healthHref,
 }: {
   useCases: UseCases;
   instance: Instance;
@@ -64,6 +65,8 @@ export function CardWorkbenchContainer({
   onOpen: (card: Card) => void;
   /** The deck's schedule screen. */
   scheduleHref: string;
+  /** The deck's health. */
+  healthHref: string;
 }) {
   const { t, errorText, locale } = useI18n();
   const queryClient = useQueryClient();
@@ -182,6 +185,7 @@ export function CardWorkbenchContainer({
       lapses={lapses}
       lapsesFailed={answersQuery.error !== null}
       scheduleHref={scheduleHref}
+      healthHref={healthHref}
       query={query}
       onQuery={onQuery}
       cardHref={cardHref}

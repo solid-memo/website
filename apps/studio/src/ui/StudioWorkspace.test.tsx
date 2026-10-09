@@ -3,6 +3,7 @@ import { fireEvent, render, screen, waitFor, within } from "@testing-library/pre
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { DEFAULT_CARD_QUERY } from "@solid-memo/domain/cardQuery";
+import { SM } from "@solid-memo/vocab/vocab.generated";
 import { AppName } from "@solid-memo/ui/documentTitle";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { parseStudioHash, studioRouteToHash } from "./router";
@@ -210,6 +211,48 @@ describe("StudioWorkspace", () => {
       deckUrl: kanji.url,
       query: { ...DEFAULT_CARD_QUERY, state: "leech", sort: { key: "lapses", descending: true } },
     });
+  });
+
+  it("opens the instance's health from Home, a deck's from there, and a problem's field in the inspector", async () => {
+    const twin = makeCard(kanji, "water");
+    const marked = { ...makeCard(kanji, "fire"), backNote: { en: "<b>hot</b>" }, textFormat: SM.markdown };
+    window.history.replaceState(null, "", home(instanceA.url));
+    renderWorkspace(
+      makeUseCasesFake({
+        listInstances: vi.fn(async () => [instanceA]),
+        listDecks: vi.fn(async () => [kanji]),
+        listCards: vi.fn(async () => [twin, { ...twin, id: "water-2", url: `${twin.url}-2` }, marked]),
+      }),
+    );
+    fireEvent.click(await screen.findByRole("link", { name: "Health" }));
+    expect(await screen.findByRole("heading", { name: "Health of Deck set A" })).toBeInTheDocument();
+    expect(parseStudioHash(window.location.hash)).toEqual({ screen: "health", instanceUrl: instanceA.url });
+    await waitFor(() => expect(document.title).toBe("Health – Solid Memo Studio"));
+
+    fireEvent.click(within(screen.getByRole("region", { name: "Decks" })).getByRole("link", { name: "Kanji N5" }));
+    expect(await screen.findByRole("heading", { name: "Health of Kanji N5" })).toBeInTheDocument();
+    expect(parseStudioHash(window.location.hash)).toEqual({ screen: "health", instanceUrl: instanceA.url, deckUrl: kanji.url });
+    await waitFor(() => expect(document.title).toBe("Kanji N5 – Solid Memo Studio"));
+    const trail = screen.getByRole("navigation", { name: "Breadcrumb" });
+    expect(within(trail).getByRole("link", { name: "Health" })).toHaveAttribute("href", studioRouteToHash({ screen: "health", instanceUrl: instanceA.url }));
+    expect(within(screen.getByRole("region", { name: "Cards that say the same" })).getAllByRole("link")).toHaveLength(2);
+
+    // Each tag of the HTML is a problem of its own.
+    fireEvent.click((await screen.findAllByRole("link", { name: "fire, note under the back (English)" }))[0]!);
+    const route = { screen: "card" as const, deckUrl: kanji.url, cardUrl: marked.url };
+    expect(parseStudioHash(window.location.hash)).toEqual({ ...route, field: "backNote" });
+    await waitFor(() => expect(document.getElementById("card-back-note")).toHaveFocus());
+    // Another tab opens at none of the fields.
+    expect(screen.getByRole("link", { name: "Wrong options (0)" })).toHaveAttribute("href", studioRouteToHash({ ...route, tab: "distractors" }));
+  });
+
+  it("links a deck's cards to its health", async () => {
+    window.history.replaceState(null, "", studioRouteToHash({ screen: "cards", deckUrl: kanji.url }));
+    renderWorkspace(makeUseCasesFake({ listInstances: vi.fn(async () => [instanceA]), listDecks: vi.fn(async () => [kanji]) }));
+    expect(await screen.findByRole("link", { name: "Health" })).toHaveAttribute(
+      "href",
+      studioRouteToHash({ screen: "health", instanceUrl: instanceA.url, deckUrl: kanji.url }),
+    );
   });
 
   it("inspects a card: its trail and title, its tabs in the URL, its page in Solid Memo", async () => {

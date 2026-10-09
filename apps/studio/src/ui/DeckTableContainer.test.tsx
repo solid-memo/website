@@ -28,6 +28,7 @@ function renderContainer(useCases: UseCases) {
         appHref="#/decks"
         groupsHref="#/groups"
         instanceHref="#/instance"
+        healthHref={(deck) => (deck === undefined ? "#/health" : `#/health?deck=${deck.id}`)}
         deckHref={(deck) => `#/deck?deck=${deck.id}`}
         cardsHref={(deck) => `#/browse?deck=${deck.id}`}
       />
