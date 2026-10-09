@@ -204,6 +204,10 @@
         "one": "{count} wrong option is in use; a course asks a question with at least {least}.",
         "other": "{count} wrong options are in use; a course asks a question with at least {least}."
       }
+    },
+    "picks": {
+      "one": "Chosen {count} time",
+      "other": "Chosen {count} times"
     }
   },
   "cardCreator": {
@@ -1404,7 +1408,8 @@
         "learning": "Learning",
         "young": "Young",
         "mature": "Mature",
-        "due": "Due"
+        "due": "Due",
+        "leech": "Leech: often forgotten"
       },
       "has": "Has",
       "anything": "Anything",
@@ -1436,6 +1441,7 @@
         "due": "Due",
         "interval": "Interval",
         "ease": "Ease",
+        "lapses": "Lapses",
         "created": "Added",
         "id": "Id"
       },
@@ -1443,7 +1449,12 @@
         "one": "{count} day",
         "other": "{count} days"
       },
-      "notStudied": "Not studied yet"
+      "notStudied": "Not studied yet",
+      "lapsesSince": "Lapses count the card's wrong answers since {month}, the month of the deck's first answer in the log.",
+      "lapsesNone": "Lapses count the card's wrong answers: none are logged yet.",
+      "lapsesLoading": "Reading the answer log for the lapses…",
+      "lapsesFailed": "The answer log could not be read, so the lapses are not known.",
+      "scheduleLink": "Schedule, lapses and leeches"
     },
     "card": {
       "heading": "Card: {card}",
@@ -1451,7 +1462,8 @@
       "tab": {
         "content": "Content",
         "distractors": "Wrong options ({count})",
-        "schedule": "Schedule"
+        "schedule": "Schedule",
+        "history": "History"
       },
       "releaseSame": "This card is as the release this deck was copied from has it, so a newer release updates it. An edit detaches it: newer releases no longer update it, though they may still retire it.",
       "releaseChanged": "This card was changed from the release this deck was copied from, so newer releases no longer update it, though they may still retire it.",
@@ -1476,6 +1488,70 @@
         "reset": "Forgot the card's progress in the direction “{direction}”.",
         "reschedule": "“{direction}” is now due on {due}."
       }
+    },
+    "history": {
+      "loading": "Loading the card's answers…",
+      "empty": "No answers to this card in this deck yet.",
+      "summary": {
+        "one": "{count} answer, {forgotten} forgotten.",
+        "other": "{count} answers, {forgotten} forgotten."
+      },
+      "caption": "The card's answers, newest first",
+      "column": {
+        "when": "When",
+        "direction": "Direction",
+        "grade": "Grade",
+        "mode": "How",
+        "chosen": "Wrong option chosen"
+      },
+      "mode": {
+        "recall": "Recalled",
+        "multiple-choice": "Multiple choice"
+      },
+      "unknownOption": "{id} (no longer on the card)",
+      "hint": "Only the answers given in this deck are listed: a card moved here from another deck starts its history again. Forgetting the card's progress keeps its answers."
+    },
+    "insight": {
+      "crumb": "Schedule",
+      "heading": "Schedule: {deck}",
+      "loading": "Loading the schedule…",
+      "today": "Reviews today",
+      "week": "Reviews, the next {count} days",
+      "scheduled": "Studied, each way",
+      "leeches": "Leeches",
+      "forecastHeading": "Reviews to come",
+      "capDeck": "At most {max} reviews a day, as this deck sets it: what the cap holds back waits for the next day. Today counts every card due by today.",
+      "capInstance": "At most {max} reviews a day, as the instance's preferences set it: what the cap holds back waits for the next day. Today counts every card due by today.",
+      "forecast": "Reviews, the next {count} days",
+      "forecastLabel": "Reviews on each of the next {count} days, as the daily cap lets them through.",
+      "forecastDay": "{date}: {reviews} to review, {due} falling due.",
+      "due": "Falling due",
+      "reviews": "To review",
+      "spreadHeading": "Intervals and eases",
+      "noneScheduled": "No card of this deck is studied yet.",
+      "intervals": "Intervals",
+      "intervalsLabel": "How many cards, each way, have each interval.",
+      "interval": "Interval",
+      "intervalRange": "{from}–{to} days",
+      "intervalFrom": "{from} days or more",
+      "eases": "Eases",
+      "easesLabel": "How many cards, each way, have each ease.",
+      "ease": "Ease",
+      "easeRange": "{from} to under {to}",
+      "easeFrom": "{from} or more",
+      "prompts": "Cards, each way",
+      "binText": "{range}: {count}.",
+      "pointAtBar": "Point at a bar to see its count, or open the table below.",
+      "lapsesHeading": "Lapses and leeches",
+      "lapsesSince": "Lapses count the wrong answers since {month}, the month of the deck's first answer in the log.",
+      "noAnswers": "No answers are logged yet.",
+      "leechHint": "A leech is a card forgotten {count} times or more. It keeps costing reviews: rewrite it, split it or retire it.",
+      "noLeeches": "No leeches.",
+      "leechLapses": {
+        "one": "forgotten {count} time",
+        "other": "forgotten {count} times"
+      },
+      "allLeeches": "Show the leeches among the deck's cards"
     },
     "cardBulk": {
       "label": "Selected cards",

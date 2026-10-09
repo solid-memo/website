@@ -7,7 +7,8 @@ them. For now it shows the decks of an instance in a table, changes
 several of them at once, arranges them into groups, lists a deck's
 cards to search, filter, sort, select, edit at once and move or copy
 to another deck, and edits one card, its wrong options and its
-schedule included. It also edits what
+schedule included, with its history of answers. It shows a deck's
+schedule to come, its lapses and leeches. It also edits what
 a deck says of itself (its authors and licence among it), a course's
 progress, and the instance's name and catalogue.
 
@@ -68,7 +69,8 @@ others.
 | `#/studio?instance=…[&q=…&sort=…&order=desc]` | Home: every deck of the instance as a table ([below](#home)). `q` filters it, `sort` names the column it is sorted by, and `order=desc` sorts it the other way. |
 | `#/studio/groups?instance=…` | Groups: the instance's decks arranged into groups, as Solid Memo's deck list arranges them. |
 | `#/studio/cards?deck=…[&q&field&lang&state&has&sort&order&page&size]` | the card workbench: a deck's cards as a table ([below](#card-workbench)). The deck names the instance: its catalog's folder. |
-| `#/studio/card?deck=…&card=…[&tab=distractors\|schedule]` | the card inspector: one card, its content, with `tab=distractors` its wrong options, or with `tab=schedule` its review state ([below](#card-inspector)). The content is the default tab, and is left out of the URL. |
+| `#/studio/card?deck=…&card=…[&tab=distractors\|schedule\|history]` | the card inspector: one card, its content, with `tab=distractors` its wrong options, with `tab=schedule` its review state, or with `tab=history` its answers ([below](#card-inspector)). The content is the default tab, and is left out of the URL. |
+| `#/studio/schedule?deck=…` | a deck's schedule: the reviews to come, its intervals and eases, its lapses and leeches ([below](#a-decks-schedule)). |
 | `#/studio/about?deck=…` | a deck's about screen: what it says of itself, how it is studied and, for a course, the learner's progress ([below](#a-decks-about-screen)). |
 | `#/studio/instance?instance=…` | the instance's name and its catalogue ([below](#the-instance)). |
 
@@ -89,7 +91,7 @@ in its instance bar, each deck's actions menu and the deck page;
 
 The trail is Instances › Decks, then › Groups on the Groups screen,
 › Cards of *deck* in the workbench, › Cards of *deck* › *card* in the
-inspector, › About *deck* on a deck's about screen, or › Name and
+inspector, › Cards of *deck* › Schedule on a deck's schedule, › About *deck* on a deck's about screen, or › Name and
 catalogue on the instance's screen. The document title is the trail's
 last step and "Solid Memo Studio". After a move, the screen's heading
 takes the focus (`useScreenFocus`). The header has a link back to
@@ -161,8 +163,8 @@ is refused, and nothing is written.
 
 The workbench ([`CardWorkbenchContainer`](../apps/studio/src/ui/CardWorkbenchContainer.tsx))
 lists a deck's cards in a table, a row each: the front (a link to the
-card), the back, when it is due, its interval and its ease, when it
-was added, and its id. A retired card says so. A card studied both
+card), the back, when it is due, its interval and its ease, its lapses
+([below](#a-decks-schedule)), when it was added, and its id. A retired card says so. A card studied both
 ways shows the direction that needs the most work: the earliest due
 day, the shortest interval and the lowest ease. A deck that is a copy
 of a course says so: its cards are the course's questions.
@@ -185,11 +187,12 @@ The URL holds how the cards are looked at. The domain applies it
   answered wrong last time. `young` has an interval under 21 days and
   `mature` one of 21 or more (`MATURE_INTERVAL_DAYS`, as in the
   statistics). `due` is due by today's study day. A card studied both
-  ways is in a state when either direction is.
+  ways is in a state when either direction is. `leech` was forgotten 4
+  times or more (`LEECH_LAPSES`, [below](#a-decks-schedule)).
 - `has`: a `picture`, `distractors` (wrong options), `markdown` or
   `notes`.
 - `sort` and `order=desc`: by `id`, `created`, `front`, `back`, `due`,
-  `interval` or `ease`. A column's name sorts by it, then the other way,
+  `interval`, `ease` or `lapses`. A column's name sorts by it, then the other way,
   then back to the deck's order, as on Home. A side sorts by the text
   the table shows the reader (as plain text, when in Markdown), in the
   order of the UI's language. Case and accents count no more than in
@@ -209,6 +212,15 @@ focus is: from outside the table, **j** goes to the first row. The keys
 are left to the search and the filters while they have the focus.
 
 The selected cards can be edited at once ([below](#bulk-edits)).
+
+The lapses column counts each card's wrong answers (below grade 3) in
+the [answer log](data-model.md#the-answer-log). The log goes back only
+so far, so a line above the table names the month of the deck's first
+answer in it: "since March 2025". The workbench reads the whole log once (`loadAnswerLog`). While
+it is read, the cards show without their lapses, and a query that needs
+them (`state=leech`, `sort=lapses`) waits. When it cannot be read, the
+line says so, and such a query shows why. The header links to the
+deck's [schedule](#a-decks-schedule).
 
 A card opens in the [card inspector](#card-inspector). The
 workbench reads the cards and the review states with the same queries
@@ -277,7 +289,7 @@ Undo goes with the next edit, another deck, or leaving the page.
 
 The card inspector ([`CardInspectorContainer`](../apps/studio/src/ui/CardInspectorContainer.tsx))
 shows one card of a deck, named in its heading, with a link to its page
-in Solid Memo. Its three tabs are links, the one shown marked
+in Solid Memo. Its four tabs are links, the one shown marked
 (`aria-current`):
 
 - **Content**: Solid Memo's card editor (`CardContainer` in `ui`): the
@@ -286,8 +298,9 @@ in Solid Memo. Its three tabs are links, the one shown marked
   options are left to their own tab.
 - **Wrong options**, with their number: the card's distractors
   ([`DistractorFields`](../packages/ui/src/ui/DistractorFields.tsx) in
-  `ui`). Each shows its text, its note on why it is wrong and its id,
-  and is edited, retired, restored or deleted there. "Add a wrong
+  `ui`). Each shows its text, its note on why it is wrong, its id and
+  how often a learner chose it (from the card's answers, as in its
+  history), and is edited, retired, restored or deleted there. "Add a wrong
   option" writes a new one, in the back's language to start with. Each
   change is saved as it is made, as one write of the card
   (`updateCard`), and the status line says so. An option being written
@@ -299,6 +312,17 @@ in Solid Memo. Its three tabs are links, the one shown marked
   a row, and when it was first and last reviewed. A direction never
   studied says the card is new that way. Each state can be given a due
   day, or forgotten, once the user confirms ([below](#review-state)).
+- **History**: the card's answers in its deck, newest first
+  ([`CardHistoryScreen`](../apps/studio/src/ui/CardHistoryScreen.tsx)):
+  when each was given, which way, its grade, how (recalled, or chosen
+  among options in a course) and, for a wrong choice, the wrong option
+  chosen. One no longer on the card is named by its id. A line says
+  how many answers there are, and how many forgot the card. The use
+  case `cardAnswers` reads them from the
+  [answer log](data-model.md#the-answer-log) (`loadAnswerLog`). Only the
+  deck's answers count: a card moved in from another deck starts its
+  history again ([below](#moving-and-copying-cards)). Answers given
+  before a library upgrade count, named by the card's id.
 
 The domain makes each change
 ([distractors.ts](../packages/domain/src/distractors.ts)):
@@ -415,6 +439,44 @@ stay behind, where nothing would clean them up. The end-to-end tests
 hold this against real servers, a move stopped before the source's
 cards were written included
 ([cardTransfer.integration.test.ts](../e2e/pod/src/cardTransfer.integration.test.ts)).
+
+## A deck's schedule
+
+A deck's schedule ([`DeckInsightContainer`](../apps/studio/src/ui/DeckInsightContainer.tsx))
+shows what its study will be. The domain computes it
+([scheduleInsight.ts](../packages/domain/src/scheduleInsight.ts),
+[cardHistory.ts](../packages/domain/src/cardHistory.ts)), and the use
+case `deckInsight` reads what it needs. It writes nothing to the deck.
+
+- **Tiles**: the reviews today and in the next 7 days, the cards
+  studied (each way), and the leeches.
+- **Reviews to come**, the next 30 days (`forecastOf`), as bars, with a
+  table. A day counts what falls due on it, and today what is due by
+  today. The reviews a day are capped as study caps them: by the deck's
+  pace, else the instance's preferences (`deckPreferences`), today's
+  less what was reviewed today. What the cap holds back waits for the
+  next day. The due days come from the deck's schedule in the
+  [digest](data-model.md#the-digest) (`sm:dueOnDay`) while it was
+  computed from the documents as they are (`freshSchedule`: the same
+  versions, direction and day boundary). Else they come from the review
+  states, and the digest is brought up to date.
+- **Intervals and eases**, as bars, with tables: how many cards, each
+  way, have each interval (1 day, 2–3, 4–7, up to a year and more) and
+  each ease (from 1.3, in steps of 0.2). Only cards in use count, in
+  the directions the deck studies.
+- **Lapses and leeches.** A lapse is a wrong answer, below grade 3
+  (`lapseIndex`), in the deck's answers in the
+  [answer log](data-model.md#the-answer-log). The log goes back only
+  so far, so the screen names the month of the deck's first answer in
+  it. A leech is a card in use
+  forgotten 4 times or more (`LEECH_LAPSES`, `leechesOf`), the most
+  forgotten first. Each links to its card's history, and a link shows
+  them all in the workbench (`state=leech&sort=lapses&order=desc`).
+  A time-budget test keeps `lapseIndex` fast over five years of answers.
+
+The charts are the statistics' own (`BarChart` and `StatTile` in `ui`):
+a bar pointed at, or tapped, says what it holds, and each chart has its
+figures as a table.
 
 ## A deck's about screen
 

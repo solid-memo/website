@@ -1505,6 +1505,26 @@ table.studio-cards tbody td p {
   margin-bottom: 0;
 }
 
+/* A card's answers: one that forgot the card is marked, as the
+   statistics mark a day's forgotten answers. */
+table.studio-list tr.forgotten td:nth-child(3) {
+  color: var(--danger);
+}
+
+/* A deck's schedule: its charts' sections apart, its leeches a list. */
+.studio-insight .bar-chart {
+  margin: 0 0 1.25rem;
+}
+
+.studio-leeches {
+  margin: 0 0 0.75rem;
+  padding-left: 1.5rem;
+}
+
+.studio-leeches li {
+  margin: 0.35rem 0;
+}
+
 /* A course's chapters, each with its state and what can be done with it. */
 .studio-chapters {
   margin: 0 0 0.75rem;
@@ -4007,28 +4027,28 @@ p[role="status"]:not(.loading) {
   margin: 0 1px;
 }
 
-.day-bars svg {
+.bar-chart svg {
   display: block;
   width: 100%;
   max-width: 32rem;
   height: 4rem;
 }
 
-.day-bars .baseline {
+.bar-chart .baseline {
   stroke: var(--border-strong);
   stroke-width: 1;
   vector-effect: non-scaling-stroke;
 }
 
-.day-bars .bar {
+.bar-chart .bar {
   fill: var(--primary);
 }
 
-.day-bars .bar.pointed {
+.bar-chart .bar.pointed {
   fill: var(--primary-hover);
 }
 
-.day-bars .bar-hit {
+.bar-chart .bar-hit {
   fill: transparent;
 }
 

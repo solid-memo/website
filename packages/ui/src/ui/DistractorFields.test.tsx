@@ -39,6 +39,16 @@ describe("DistractorFields", () => {
     expect(screen.getByRole("button", { name: "Restore the wrong option “Only people”" })).toBeInTheDocument();
   });
 
+  it("says how often each option was chosen, when told", () => {
+    renderFields({ picks: new Map([["q-d1", 3]]) });
+    const items = within(fields()).getAllByRole("listitem");
+    expect(items[0]).toHaveTextContent("Chosen 3 times");
+    expect(items[1]).toHaveTextContent("Chosen 0 times");
+    cleanup();
+    renderFields();
+    expect(fields()).not.toHaveTextContent("Chosen");
+  });
+
   it("says when the card has none", () => {
     renderFields({ distractors: [] });
     expect(screen.getByText("This card has no wrong options.")).toBeInTheDocument();

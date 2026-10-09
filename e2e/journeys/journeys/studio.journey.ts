@@ -15,7 +15,9 @@ import { test } from "../fixtures.ts";
  * selected cards, checking the preview first, then retire both cards and
  * undo that. They inspect one card, give it two wrong options (saved as
  * each is added), retire one and delete the other, then forget its
- * progress on its schedule tab. Back in the workbench they set the other
+ * progress on its schedule tab; its history still has its answer. The
+ * deck's schedule counts the other card's review tomorrow, and no leech.
+ * Back in the workbench they set the other
  * card due today, which Home then counts as due, and move it, with its
  * progress, to the other deck, where Home then counts it. From Home they open a
  * deck's about screen and name its author and licence. On the Groups screen they group
@@ -100,7 +102,20 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     await app.studio.expectDeck(instance, alpha, { cards: 2, due: 0 });
   });
 
-  await app.step("11 · Set the other card due today in the workbench: Home counts it due", async () => {
+  await app.step("11 · See the card's answer on its history tab, kept though its progress is forgotten", async () => {
+    await app.studio.openCards(instance, alpha, ["Sun", "Moon"]);
+    await app.studio.openCard(alpha, "Moon");
+    await app.studio.openHistory([{ grade: "good", mode: "recall" }]);
+    await app.chrome.breadcrumb("breadcrumbs.decks");
+  });
+
+  await app.step("12 · Open the deck's schedule: one review tomorrow, and no leech", async () => {
+    await app.studio.openCards(instance, alpha, ["Sun", "Moon"]);
+    await app.studio.openDeckSchedule(alpha, { today: 0, week: 1, studied: 1 });
+    await app.chrome.breadcrumb("breadcrumbs.decks");
+  });
+
+  await app.step("13 · Set the other card due today in the workbench: Home counts it due", async () => {
     await app.studio.openCards(instance, alpha, ["Sun", "Moon"]);
     await app.studio.selectCardsWithKeys(alpha, 2);
     await app.studio.rescheduleSelectedToday(1);
@@ -108,7 +123,7 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     await app.studio.expectDeck(instance, alpha, { cards: 2, due: 1 });
   });
 
-  await app.step("12 · Move the card due today to the other deck, with its progress: Home counts it there", async () => {
+  await app.step("14 · Move the card due today to the other deck, with its progress: Home counts it there", async () => {
     await app.studio.openCards(instance, alpha, ["Sun", "Moon"]);
     await app.studio.selectCardsWithKeys(alpha, 1);
     await app.studio.moveSelectedCards(alpha, beta, 1, ["Moon"]);
@@ -117,13 +132,13 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     await app.studio.expectDeck(instance, beta, { cards: 1, due: 1 });
   });
 
-  await app.step("13 · Name a deck's author and licence on its about screen", async () => {
+  await app.step("15 · Name a deck's author and licence on its about screen", async () => {
     await app.studio.openAbout(instance, beta);
     await app.studio.setAuthorAndLicence("Ada Lovelace", "CC BY 4.0");
     await app.chrome.breadcrumb("breadcrumbs.decks");
   });
 
-  await app.step("14 · Group the two decks on the Groups screen", async () => {
+  await app.step("16 · Group the two decks on the Groups screen", async () => {
     await app.studio.openGroups();
     await app.groups.groupWithNeighbour(alpha);
     await app.groups.nameGroup(group);
@@ -132,13 +147,13 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     await app.studio.expectDeck(instance, beta, { cards: 1, due: 1, group });
   });
 
-  await app.step("15 · Filter the decks, then sort them by name", async () => {
+  await app.step("17 · Filter the decks, then sort them by name", async () => {
     await app.studio.filter(instance, "beta", [beta]);
     await app.studio.filter(instance, runId, [alpha, beta]);
     await app.studio.sortBy(instance, "title", [alpha, beta]);
   });
 
-  await app.step("16 · Give both decks a pace and move them to the top level", async () => {
+  await app.step("18 · Give both decks a pace and move them to the top level", async () => {
     await app.studio.select([alpha, beta]);
     await app.studio.setNewCardsPerDay(7, 2);
     await app.studio.moveToTopLevel(2);
@@ -146,25 +161,25 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     await app.studio.expectDeck(instance, beta, { cards: 1, due: 1, newCardsPerDay: "7" });
   });
 
-  await app.step("17 · Delete one deck, confirming", async () => {
+  await app.step("19 · Delete one deck, confirming", async () => {
     await app.studio.clearSelection();
     await app.studio.select([beta]);
     await app.studio.deleteSelected(instance, [beta]);
     await app.studio.expectDeck(instance, alpha, { cards: 1, due: 0 });
   });
 
-  await app.step("18 · Rename the instance and describe its catalogue", async () => {
+  await app.step("20 · Rename the instance and describe its catalogue", async () => {
     await app.studio.openInstance(instance);
     await app.studio.renameInstance(renamed);
     await app.studio.describeCatalog("Decks for the Studio journey.", "CC0 1.0");
   });
 
-  await app.step("19 · Pick the instance, by its new name, from the instance picker", async () => {
+  await app.step("21 · Pick the instance, by its new name, from the instance picker", async () => {
     await app.studio.pickInstance(renamed);
     await app.studio.expectDeck(renamed, alpha, { cards: 1, due: 0 });
   });
 
-  await app.step("20 · Go back to Solid Memo, still logged in", async () => {
+  await app.step("22 · Go back to Solid Memo, still logged in", async () => {
     await app.studio.backToApp();
     await app.chrome.expectLoggedInAs(account.webId);
     await app.decks.expectDeck(alpha);

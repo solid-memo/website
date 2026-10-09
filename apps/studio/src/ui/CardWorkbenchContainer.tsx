@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { planCardEdit, type CardEdit, type CardEditPlan } from "@solid-memo/domain/cardBulk";
+import { deckAnswers, lapseIndex } from "@solid-memo/domain/cardHistory";
 import { cardLanguages, queryCards, type CardQuery } from "@solid-memo/domain/cardQuery";
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
@@ -22,7 +23,11 @@ import type { CardTransfer } from "./TransferCardsDialog";
  * The domain finds the cards the query keeps (queryCards), reading a
  * card in Markdown as its plain text, each text parsed once while the
  * cards stay the same, and sorting a side by the text the table shows
- * the reader: in the reader's languages, the UI's first.
+ * the reader: in the reader's languages, the UI's first. The instance's
+ * answer log (UseCases.loadAnswerLog) says how often each card was
+ * forgotten (lapseIndex), for the lapses column, the leech filter and
+ * the sort by lapses; while it is read, a query that needs it waits,
+ * and the others show the cards without.
  *
  * An edit of the selected cards is planned on the cards and review
  * states as read (planCardEdit) and made with the plan the user saw
@@ -45,6 +50,7 @@ export function CardWorkbenchContainer({
   onQuery,
   cardHref,
   onOpen,
+  scheduleHref,
 }: {
   useCases: UseCases;
   instance: Instance;
@@ -56,6 +62,8 @@ export function CardWorkbenchContainer({
   /** A card's editor in Solid Memo. */
   cardHref: (card: Card) => string;
   onOpen: (card: Card) => void;
+  /** The deck's schedule screen. */
+  scheduleHref: string;
 }) {
   const { t, errorText, locale } = useI18n();
   const queryClient = useQueryClient();
@@ -77,6 +85,13 @@ export function CardWorkbenchContainer({
     queryKey: ["preferences", instance.url],
     queryFn: () => useCases.getPreferences(instance.url),
   });
+  const answersQuery = useQuery({
+    queryKey: ["answerLog", instance.url],
+    queryFn: () => useCases.loadAnswerLog(instance.url),
+  });
+  const answers = answersQuery.data;
+  const lapses = useMemo(() => (answers === undefined ? undefined : lapseIndex(deckAnswers(answers, deck))), [answers, deck]);
+  const needsLapses = query.state === "leech" || query.sort?.key === "lapses";
   const isCourse = useCourseCopies(useCases, [deck]);
   const cards = cardsQuery.data;
   const plain = useMemo(() => plainTexts(), [cards]);
@@ -86,10 +101,10 @@ export function CardWorkbenchContainer({
   const languages = useMemo(() => [locale, ...navigator.languages], [locale]);
   const rows = useMemo(
     () =>
-      cards === undefined || states === undefined || today === undefined
+      cards === undefined || states === undefined || today === undefined || (needsLapses && lapses === undefined)
         ? undefined
-        : queryCards(cards, { direction: deck.direction, states }, query, today, plain, languages),
-    [cards, states, today, query, deck.direction, plain, languages],
+        : queryCards(cards, { direction: deck.direction, states }, query, today, plain, languages, lapses?.lapses),
+    [cards, states, today, query, deck.direction, plain, languages, lapses, needsLapses],
   );
 
   const plan = useCallback(
@@ -153,7 +168,7 @@ export function CardWorkbenchContainer({
     onSettled: () => reread(),
   });
 
-  const error = cardsQuery.error ?? reviewsQuery.error ?? preferencesQuery.error;
+  const error = cardsQuery.error ?? reviewsQuery.error ?? preferencesQuery.error ?? (needsLapses ? answersQuery.error : null);
   if (error) return <ErrorMessage error={errorText(error)} />;
   if (rows === undefined) return <Loading label={t("studio.cards.loading")} />;
 
@@ -164,6 +179,9 @@ export function CardWorkbenchContainer({
       rows={rows}
       total={cards!.length}
       languages={cardLanguages(cards!)}
+      lapses={lapses}
+      lapsesFailed={answersQuery.error !== null}
+      scheduleHref={scheduleHref}
       query={query}
       onQuery={onQuery}
       cardHref={cardHref}

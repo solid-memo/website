@@ -204,6 +204,10 @@
         "one": "사용 중인 오답 선택지가 {count}개예요. 코스는 질문마다 오답 선택지를 {least}개 이상 사용해요.",
         "other": "사용 중인 오답 선택지가 {count}개예요. 코스는 질문마다 오답 선택지를 {least}개 이상 사용해요."
       }
+    },
+    "picks": {
+      "one": "{count}번 선택됨",
+      "other": "{count}번 선택됨"
     }
   },
   "cardCreator": {
@@ -1404,7 +1408,8 @@
         "learning": "학습 중",
         "young": "익히는 중",
         "mature": "익숙함",
-        "due": "복습 예정"
+        "due": "복습 예정",
+        "leech": "자주 잊는 카드"
       },
       "has": "포함",
       "anything": "전체",
@@ -1436,6 +1441,7 @@
         "due": "다음 복습일",
         "interval": "복습 간격",
         "ease": "난이도 계수",
+        "lapses": "잊은 횟수",
         "created": "추가한 날",
         "id": "ID"
       },
@@ -1443,7 +1449,12 @@
         "one": "{count}일",
         "other": "{count}일"
       },
-      "notStudied": "아직 학습하지 않음"
+      "notStudied": "아직 학습하지 않음",
+      "lapsesSince": "잊은 횟수는 기록에 남은 이 덱의 첫 답변이 있는 달인 {month}부터 이 카드에 틀리게 답한 횟수예요.",
+      "lapsesNone": "잊은 횟수는 이 카드에 틀리게 답한 횟수예요. 아직 기록된 답변이 없어요.",
+      "lapsesLoading": "잊은 횟수를 알기 위해 답변 기록을 읽는 중…",
+      "lapsesFailed": "답변 기록을 읽을 수 없어서 잊은 횟수를 알 수 없어요.",
+      "scheduleLink": "복습 일정, 잊은 횟수, 자주 잊는 카드"
     },
     "card": {
       "heading": "카드: {card}",
@@ -1451,7 +1462,8 @@
       "tab": {
         "content": "내용",
         "distractors": "오답 선택지({count})",
-        "schedule": "복습 일정"
+        "schedule": "복습 일정",
+        "history": "기록"
       },
       "releaseSame": "이 카드는 이 덱을 복사해 온 릴리스와 같아서, 새 릴리스가 나오면 업데이트돼요. 편집하면 릴리스와 분리돼요. 새 릴리스가 더 이상 업데이트하지 않지만, 사용 중지할 수는 있어요.",
       "releaseChanged": "이 카드는 이 덱을 복사해 온 릴리스와 달라져서, 새 릴리스가 더 이상 업데이트하지 않아요. 다만 사용 중지할 수는 있어요.",
@@ -1476,6 +1488,70 @@
         "reset": "‘{direction}’ 방향의 카드 진행 상황을 초기화했어요.",
         "reschedule": "이제 ‘{direction}’의 다음 복습일은 {due}이에요."
       }
+    },
+    "history": {
+      "loading": "카드의 답변을 불러오는 중…",
+      "empty": "이 덱에서 이 카드에 대한 답변이 아직 없어요.",
+      "summary": {
+        "one": "답변 {count}개, 잊음 {forgotten}번.",
+        "other": "답변 {count}개, 잊음 {forgotten}번."
+      },
+      "caption": "카드의 답변(최신순)",
+      "column": {
+        "when": "날짜",
+        "direction": "방향",
+        "grade": "등급",
+        "mode": "방식",
+        "chosen": "고른 오답"
+      },
+      "mode": {
+        "recall": "기억해 내기",
+        "multiple-choice": "객관식"
+      },
+      "unknownOption": "{id}(더 이상 카드에 없음)",
+      "hint": "이 덱에서 한 답변만 나와요. 다른 덱에서 옮겨 온 카드는 기록이 새로 시작돼요. 카드의 진행 상황을 초기화해도 답변은 남아요."
+    },
+    "insight": {
+      "crumb": "복습 일정",
+      "heading": "복습 일정: {deck}",
+      "loading": "복습 일정을 불러오는 중…",
+      "today": "오늘 복습",
+      "week": "앞으로 {count}일 동안의 복습",
+      "scheduled": "학습 중(방향별)",
+      "leeches": "자주 잊는 카드",
+      "forecastHeading": "앞으로의 복습",
+      "capDeck": "이 덱의 설정에 따라 하루 최대 {max}번 복습해요. 한도를 넘은 복습은 다음 날로 넘어가요. 오늘에는 오늘까지 복습할 모든 카드가 포함돼요.",
+      "capInstance": "인스턴스 설정에 따라 하루 최대 {max}번 복습해요. 한도를 넘은 복습은 다음 날로 넘어가요. 오늘에는 오늘까지 복습할 모든 카드가 포함돼요.",
+      "forecast": "앞으로 {count}일 동안의 복습",
+      "forecastLabel": "하루 한도 안에서 앞으로 {count}일 동안 날짜별로 할 복습.",
+      "forecastDay": "{date}: 복습 {reviews}, 새로 돌아오는 복습 {due}.",
+      "due": "새로 돌아오는 복습",
+      "reviews": "할 복습",
+      "spreadHeading": "복습 간격과 난이도 계수",
+      "noneScheduled": "이 덱에서 아직 학습한 카드가 없어요.",
+      "intervals": "복습 간격",
+      "intervalsLabel": "복습 간격별 카드 수(방향별).",
+      "interval": "복습 간격",
+      "intervalRange": "{from}–{to}일",
+      "intervalFrom": "{from}일 이상",
+      "eases": "난이도 계수",
+      "easesLabel": "난이도 계수별 카드 수(방향별).",
+      "ease": "난이도 계수",
+      "easeRange": "{from} 이상 {to} 미만",
+      "easeFrom": "{from} 이상",
+      "prompts": "카드(방향별)",
+      "binText": "{range}: {count}.",
+      "pointAtBar": "막대를 가리키면 개수가 보여요. 아래 표를 열어 볼 수도 있어요.",
+      "lapsesHeading": "잊은 횟수와 자주 잊는 카드",
+      "lapsesSince": "잊은 횟수는 기록에 남은 이 덱의 첫 답변이 있는 달인 {month}부터 틀리게 답한 횟수예요.",
+      "noAnswers": "아직 기록된 답변이 없어요.",
+      "leechHint": "자주 잊는 카드는 {count}번 이상 잊은 카드예요. 계속 복습을 잡아먹으니, 다시 쓰거나 나누거나 사용 중지해 주세요.",
+      "noLeeches": "자주 잊는 카드가 없어요.",
+      "leechLapses": {
+        "one": "{count}번 잊음",
+        "other": "{count}번 잊음"
+      },
+      "allLeeches": "덱의 카드 중 자주 잊는 카드 보기"
     },
     "cardBulk": {
       "label": "선택한 카드",

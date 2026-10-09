@@ -1,10 +1,11 @@
+import type { ComponentChildren } from "preact";
 import { useId, useState } from "preact/hooks";
 import { shiftStudyDay, type DayActivity, type Recall } from "@solid-memo/domain/statistics";
 import { useI18n } from "./i18n";
 
 /**
  * The pieces the statistics are shown with: a number in a tile, an
- * activity calendar, a bar chart of recent days, and a line under each
+ * activity calendar, a bar chart (of recent days, or of any figures), and a line under each
  * chart that says what a day held when it is pointed at (or tapped), with
  * the same days as a table for whoever cannot see the chart. One series
  * each, in one hue: more answers, a stronger green.
@@ -63,13 +64,8 @@ function useDayText() {
  * Not a live region: sweeping the pointer over the grid would read out
  * every day crossed, and the table below says the same to everyone.
  */
-function Inspector({ text }: { text: string | null }) {
-  const { t } = useI18n();
-  return (
-    <p class="chart-inspector hint">
-      {text ?? t("statistics.pointAtDay")}
-    </p>
-  );
+function Inspector({ text, prompt }: { text: string | null; prompt: string }) {
+  return <p class="chart-inspector hint">{text ?? prompt}</p>;
 }
 
 /** The days with answers as a table, newest first. */
@@ -155,42 +151,58 @@ export function ActivityCalendar({
         ))}
         {t("statistics.more")}
       </div>
-      <Inspector text={pointed === null ? null : dayText(pointed, byDay.get(pointed))} />
+      <Inspector text={pointed === null ? null : dayText(pointed, byDay.get(pointed))} prompt={t("statistics.pointAtDay")} />
       <DayTable days={days} />
     </figure>
   );
 }
 
-/** Answers on each of the last `count` study days up to today, as bars on one baseline. */
-export function DayBars({ days, today, count = 30 }: { days: readonly DayActivity[]; today: string; count?: number }) {
-  const { t } = useI18n();
-  const dayText = useDayText();
+/** One bar of a BarChart: its key, its figure, and what it holds, in words. */
+export interface Bar {
+  key: string;
+  value: number;
+  text: string;
+}
+
+/**
+ * Figures as bars on one baseline, scaled to the largest, then the line
+ * that says what a bar holds when it is pointed at (or tapped), or how
+ * to point at one (`prompt`), then `children`: the same figures as a
+ * table, for whoever cannot see the chart.
+ */
+export function BarChart({
+  caption,
+  label,
+  bars,
+  prompt,
+  children,
+}: {
+  caption: string;
+  /** The chart's text alternative. */
+  label: string;
+  bars: readonly Bar[];
+  prompt: string;
+  children: ComponentChildren;
+}) {
   const [pointed, setPointed] = useState<string | null>(null);
-  const byDay = new Map(days.map((day) => [day.studyDay, day]));
-  const shown = Array.from({ length: count }, (_, i) => shiftStudyDay(today, i - count + 1));
-  const most = Math.max(1, ...shown.map((day) => byDay.get(day)?.answers ?? 0));
+  const most = Math.max(1, ...bars.map((bar) => bar.value));
   const width = 8;
   const gap = 2;
   const height = 64;
+  const count = bars.length;
   return (
-    <figure class="day-bars">
-      <figcaption>{t("statistics.lastDays", { count })}</figcaption>
-      <svg
-        viewBox={`0 0 ${count * (width + gap)} ${height}`}
-        preserveAspectRatio="none"
-        role="img"
-        aria-label={t("statistics.lastDaysLabel", { count })}
-      >
+    <figure class="bar-chart">
+      <figcaption>{caption}</figcaption>
+      <svg viewBox={`0 0 ${count * (width + gap)} ${height}`} preserveAspectRatio="none" role="img" aria-label={label}>
         <line class="baseline" x1="0" x2={count * (width + gap)} y1={height - 0.5} y2={height - 0.5} />
-        {shown.map((day, i) => {
-          const answers = byDay.get(day)?.answers ?? 0;
-          const bar = answers === 0 ? 0 : Math.max(2, (answers / most) * (height - 4));
+        {bars.map(({ key, value }, i) => {
+          const bar = value === 0 ? 0 : Math.max(2, (value / most) * (height - 4));
           return (
-            <g key={day} data-day={day} onPointerEnter={() => setPointed(day)} onClick={() => setPointed(day)}>
+            <g key={key} data-bar={key} onPointerEnter={() => setPointed(key)} onClick={() => setPointed(key)}>
               <rect class="bar-hit" x={i * (width + gap)} y="0" width={width + gap} height={height} />
               {bar > 0 && (
                 <rect
-                  class={`bar${day === pointed ? " pointed" : ""}`}
+                  class={`bar${key === pointed ? " pointed" : ""}`}
                   x={i * (width + gap)}
                   y={height - bar}
                   width={width}
@@ -202,8 +214,26 @@ export function DayBars({ days, today, count = 30 }: { days: readonly DayActivit
           );
         })}
       </svg>
-      <Inspector text={pointed === null ? null : dayText(pointed, byDay.get(pointed))} />
-      <DayTable days={days.filter((day) => day.studyDay >= shown[0]!)} />
+      <Inspector text={bars.find((bar) => bar.key === pointed)?.text ?? null} prompt={prompt} />
+      {children}
     </figure>
+  );
+}
+
+/** Answers on each of the last `count` study days up to today, as bars on one baseline. */
+export function DayBars({ days, today, count = 30 }: { days: readonly DayActivity[]; today: string; count?: number }) {
+  const { t } = useI18n();
+  const dayText = useDayText();
+  const byDay = new Map(days.map((day) => [day.studyDay, day]));
+  const shown = Array.from({ length: count }, (_, i) => shiftStudyDay(today, i - count + 1));
+  return (
+    <BarChart
+      caption={t("statistics.lastDays", { count })}
+      label={t("statistics.lastDaysLabel", { count })}
+      bars={shown.map((day) => ({ key: day, value: byDay.get(day)?.answers ?? 0, text: dayText(day, byDay.get(day)) }))}
+      prompt={t("statistics.pointAtDay")}
+    >
+      <DayTable days={days.filter((day) => day.studyDay >= shown[0]!)} />
+    </BarChart>
   );
 }

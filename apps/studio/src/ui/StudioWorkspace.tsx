@@ -18,6 +18,7 @@ import { useInstanceTheme } from "@solid-memo/ui/theme";
 import { CardInspectorContainer } from "./CardInspectorContainer";
 import { CardWorkbenchContainer } from "./CardWorkbenchContainer";
 import { DeckAboutContainer } from "./DeckAboutContainer";
+import { DeckInsightContainer } from "./DeckInsightContainer";
 import { DeckTableContainer } from "./DeckTableContainer";
 import { GroupsContainer } from "./GroupsContainer";
 import { InstanceAboutContainer } from "./InstanceAboutContainer";
@@ -41,7 +42,8 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
   const instances = instancesQuery.data;
   const instanceUrl = route === null ? null : instanceOfRoute(route);
   const activeInstance = instanceUrl === null ? null : (instances?.find((i) => i.url === instanceUrl) ?? null);
-  const deckUrl = route?.screen === "cards" || route?.screen === "card" || route?.screen === "about" ? route.deckUrl : null;
+  const deckUrl =
+    route?.screen === "cards" || route?.screen === "card" || route?.screen === "about" || route?.screen === "schedule" ? route.deckUrl : null;
   const decksQuery = useQuery({
     queryKey: ["decks", instanceUrl],
     queryFn: () => useCases.listDecks(instanceUrl!),
@@ -91,6 +93,13 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
         return [instancesCrumb, decks, { label: t("studio.about.crumb", { deck: readerText(activeDeck!.title) }), route }];
       case "cards":
         return [instancesCrumb, decks, { label: t("studio.cards.crumb", { deck: readerText(activeDeck!.title) }), route }];
+      case "schedule":
+        return [
+          instancesCrumb,
+          decks,
+          { label: t("studio.cards.crumb", { deck: readerText(activeDeck!.title) }), route: { screen: "cards", deckUrl: route.deckUrl } },
+          { label: t("studio.insight.crumb"), route },
+        ];
       case "card":
         return [
           instancesCrumb,
@@ -176,9 +185,24 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             onQuery={(query) => replace({ ...route, query })}
             cardHref={(card) => studioRouteToHash(inspector(card))}
             onOpen={(card) => navigate(inspector(card))}
+            scheduleHref={studioRouteToHash({ screen: "schedule", deckUrl: route.deckUrl })}
           />
         );
       }
+      case "schedule":
+        return (
+          <DeckInsightContainer
+            useCases={useCases}
+            instance={activeInstance!}
+            deck={activeDeck!}
+            cardHref={(card) => studioRouteToHash({ screen: "card", deckUrl: route.deckUrl, cardUrl: card.url, tab: "history" })}
+            leechesHref={studioRouteToHash({
+              screen: "cards",
+              deckUrl: route.deckUrl,
+              query: { ...DEFAULT_CARD_QUERY, state: "leech", sort: { key: "lapses", descending: true } },
+            })}
+          />
+        );
       case "card":
         return (
           <CardInspectorContainer

@@ -1,6 +1,7 @@
 import { activeCards, isMarkdown, studyDirections, type Card, type DeckDirection } from "./deck";
 import { canonicalTag } from "./languageTag";
 import { folded, shown, type LangText } from "./langText";
+import { LEECH_LAPSES } from "./cardHistory";
 import { reviewKeyOf, type ReviewState } from "./review";
 import { MATURE_INTERVAL_DAYS } from "./statistics";
 
@@ -21,11 +22,13 @@ export const CARD_FIELDS: readonly CardField[] = ["any", "front", "back", "note"
  * new; one answered wrong last time (no successful repetition in a row)
  * is learning; one at an interval below MATURE_INTERVAL_DAYS is young,
  * and at it or above mature; one whose due day has come is due. A card
- * studied both ways is in a state when either of its prompts is.
+ * studied both ways is in a state when either of its prompts is. A
+ * leech was forgotten LEECH_LAPSES times or more, as the answer log
+ * tells (domain/cardHistory.ts).
  */
-export type CardState = "live" | "retired" | "new" | "learning" | "young" | "mature" | "due";
+export type CardState = "live" | "retired" | "new" | "learning" | "young" | "mature" | "due" | "leech";
 
-export const CARD_STATES: readonly CardState[] = ["live", "retired", "new", "learning", "young", "mature", "due"];
+export const CARD_STATES: readonly CardState[] = ["live", "retired", "new", "learning", "young", "mature", "due", "leech"];
 
 /** What a card has: a picture on either side, distractors, Markdown text, or a note under either side. */
 export type CardFeature = "picture" | "distractors" | "markdown" | "notes";
@@ -33,9 +36,9 @@ export type CardFeature = "picture" | "distractors" | "markdown" | "notes";
 export const CARD_FEATURES: readonly CardFeature[] = ["picture", "distractors", "markdown", "notes"];
 
 /** What the cards can be sorted by. */
-export type CardSort = "id" | "created" | "front" | "back" | "due" | "interval" | "ease";
+export type CardSort = "id" | "created" | "front" | "back" | "due" | "interval" | "ease" | "lapses";
 
-export const CARD_SORTS: readonly CardSort[] = ["id", "created", "front", "back", "due", "interval", "ease"];
+export const CARD_SORTS: readonly CardSort[] = ["id", "created", "front", "back", "due", "interval", "ease", "lapses"];
 
 /** How many cards a page shows. */
 export const CARD_PAGE_SIZES = [10, 50, 200] as const;
@@ -80,6 +83,8 @@ export interface CardRow {
   due?: string;
   intervalDays?: number;
   easeFactor?: number;
+  /** How often the card was forgotten, as the answer log tells; absent while the log is not read. */
+  lapses?: number;
 }
 
 /** The query a route states; anything it does not know is left out (or, for the page and its size, as by default). */
@@ -197,8 +202,18 @@ function hasFeature(card: Card, feature: CardFeature): boolean {
   }
 }
 
-/** Whether a card is in the state; a card's prompts are those of `directions`, `states` their review states (absent: never reviewed). */
-function inState(card: Card, state: CardState, states: readonly (ReviewState | undefined)[], today: string): boolean {
+/**
+ * Whether a card is in the state; a card's prompts are those of
+ * `directions`, `states` their review states (absent: never reviewed),
+ * and `lapses` how often it was forgotten (absent: not known).
+ */
+function inState(
+  card: Card,
+  state: CardState,
+  states: readonly (ReviewState | undefined)[],
+  today: string,
+  lapses: number | undefined,
+): boolean {
   if (state === "retired") return card.retired === true;
   if (card.retired === true) return false;
   switch (state) {
@@ -214,6 +229,8 @@ function inState(card: Card, state: CardState, states: readonly (ReviewState | u
       return states.some((s) => s !== undefined && s.intervalDays >= MATURE_INTERVAL_DAYS);
     case "due":
       return states.some((s) => s !== undefined && s.due <= today);
+    case "leech":
+      return (lapses ?? 0) >= LEECH_LAPSES;
   }
 }
 
@@ -233,7 +250,10 @@ function least<T>(values: readonly T[], compare: (a: T, b: T) => number): T | un
  * when in Markdown. It is compared as the first of those languages sorts
  * text: case and accents aside, as the search sets them aside, but a
  * letter the language counts as one of its own as that letter (Swedish
- * puts "ä" after "z"); and numbers by value.
+ * puts "ä" after "z"); and numbers by value. `lapses`, by card IRI, says
+ * how often each card was forgotten (lapseIndex; a card it leaves out
+ * never was): without it, no card is a leech, and sorting by lapses
+ * keeps the deck's order.
  */
 export function queryCards(
   cards: readonly Card[],
@@ -242,6 +262,7 @@ export function queryCards(
   today: string,
   plain: (text: string) => string,
   languages: readonly string[],
+  lapses?: ReadonlyMap<string, number>,
 ): CardRow[] {
   const directions = studyDirections(reviews.direction);
   const stateOf = new Map(reviews.states.map((state) => [reviewKeyOf(state), state]));
@@ -252,7 +273,8 @@ export function queryCards(
   for (const card of cards) {
     if (query.has !== undefined && !hasFeature(card, query.has)) continue;
     const prompts = directions.map((direction) => stateOf.get(reviewKeyOf({ cardId: card.id, direction })));
-    if (query.state !== undefined && !inState(card, query.state, prompts, today)) continue;
+    const forgotten = lapses === undefined ? undefined : (lapses.get(card.url) ?? 0);
+    if (query.state !== undefined && !inState(card, query.state, prompts, today, forgotten)) continue;
     if (wanted !== "" || query.lang !== undefined) {
       const texts = fieldTexts(card, query.field).filter((text) => query.lang === undefined || inLanguage(text.tag, query.lang));
       if (!texts.some((text) => wanted === "" || folded(readable(text)).includes(wanted))) continue;
@@ -267,6 +289,7 @@ export function queryCards(
       ...(due === undefined ? {} : { due }),
       ...(intervalDays === undefined ? {} : { intervalDays }),
       ...(easeFactor === undefined ? {} : { easeFactor }),
+      ...(forgotten === undefined ? {} : { lapses: forgotten }),
     });
   }
 
@@ -291,6 +314,8 @@ export function queryCards(
         return row.intervalDays;
       case "ease":
         return row.easeFactor;
+      case "lapses":
+        return row.lapses;
     }
   };
   const collator = new Intl.Collator([...languages], { sensitivity: "base", numeric: true });

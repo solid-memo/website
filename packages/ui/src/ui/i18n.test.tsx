@@ -153,6 +153,8 @@ describe("createI18n", () => {
   it("writes out a day in the spoken language", () => {
     expect(createI18n("en").formatDate("2026-09-22T00:00:00.000Z")).toBe("September 22, 2026");
     expect(createI18n("sv").formatDate("2026-09-22T00:00:00.000Z")).toBe("22 september 2026");
+    expect(createI18n("en").formatMonth("2025-03")).toBe("March 2025");
+    expect(createI18n("sv").formatMonth("2025-03")).toBe("mars 2025");
     expect(createI18n("ko").formatDate("2026-09-22T00:00:00.000Z")).toBe("2026년 9월 22일");
   });
 

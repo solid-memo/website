@@ -15,7 +15,7 @@ const fire = { ...makeCard(deck, "fire", true), front: { ja: "火" }, back: { en
 const tree = { ...makeCard(deck, "tree"), front: { ja: "木" }, back: { en: "Tree" } };
 
 const rows: CardRow[] = [
-  { card: water, states: [], due: "2026-10-12", intervalDays: 1, easeFactor: 2.5 },
+  { card: water, states: [], due: "2026-10-12", intervalDays: 1, easeFactor: 2.5, lapses: 2 },
   { card: fire, states: [] },
   { card: tree, states: [], due: "2026-11-02", intervalDays: 21, easeFactor: 2.36 },
 ];
@@ -32,6 +32,9 @@ function Harness({ initial = DEFAULT_CARD_QUERY, onQuery, ...overrides }: Partia
       rows={rows}
       total={4}
       languages={["en", "ja", "unstated"]}
+      lapses={{ lapses: new Map([[water.url, 2]]), since: "2025-03" }}
+      lapsesFailed={false}
+      scheduleHref="#/schedule"
       query={query}
       onQuery={(next) => {
         onQuery?.(next);
@@ -63,6 +66,18 @@ const link = (front: string | RegExp) => within(table()).getByRole("link", { nam
 const key = (target: Element, name: string, extra: KeyboardEventInit = {}) => fireEvent.keyDown(target, { key: name, ...extra });
 
 describe("CardWorkbenchScreen", () => {
+  it("shows each card's lapses, says since when they count, and links to the deck's schedule", () => {
+    const { rerender } = render(<Harness />);
+    expect(screen.getByText("Lapses count the card's wrong answers since March 2025, the month of the deck's first answer in the log.")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Schedule, lapses and leeches" })).toHaveAttribute("href", "#/schedule");
+    rerender(<Harness lapses={undefined} />);
+    expect(screen.getByText("Reading the answer log for the lapses…")).toBeInTheDocument();
+    rerender(<Harness lapses={{ lapses: new Map(), since: null }} />);
+    expect(screen.getByText("Lapses count the card's wrong answers: none are logged yet.")).toBeInTheDocument();
+    rerender(<Harness lapsesFailed={true} />);
+    expect(screen.getByText("The answer log could not be read, so the lapses are not known.")).toBeInTheDocument();
+  });
+
   it("has a row per card, named by its front, with its back, schedule, when it was added and its id", () => {
     render(<Harness />);
     expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent("Cards: Kanji N5");
@@ -73,6 +88,7 @@ describe("CardWorkbenchScreen", () => {
       "Due",
       "Interval",
       "Ease",
+      "Lapses",
       "Added",
       "Id",
     ]);
@@ -85,6 +101,7 @@ describe("CardWorkbenchScreen", () => {
       "October 12, 2026",
       "1 day",
       "2.50",
+      "2",
       "September 21, 2026",
       "water",
     ]);

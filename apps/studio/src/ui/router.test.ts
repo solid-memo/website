@@ -25,6 +25,7 @@ describe("the Studio's routes", () => {
     },
     { screen: "about", deckUrl: "https://pod.example/solid-memo/a/catalog.ttl#deck-1" },
     { screen: "instance", instanceUrl: "https://pod.example/solid-memo/a/" },
+    { screen: "schedule", deckUrl: "https://pod.example/solid-memo/a/catalog.ttl#deck-1" },
   ];
 
   it("round-trip through the hash", () => {
@@ -69,6 +70,8 @@ describe("the Studio's routes", () => {
     const schedule = { ...routes[6]!, tab: "schedule" } as StudioRoute;
     expect(studioRouteToHash(schedule)).toMatch(/&tab=schedule$/);
     expect(parseStudioHash(studioRouteToHash(schedule))).toEqual(schedule);
+    const history = { ...routes[6]!, tab: "history" } as StudioRoute;
+    expect(parseStudioHash(studioRouteToHash(history))).toEqual(history);
     expect(parseStudioHash("#/studio/card?deck=d")).toBeNull();
     expect(parseStudioHash("#/studio/card?card=c")).toBeNull();
   });
@@ -80,8 +83,13 @@ describe("the Studio's routes", () => {
     expect(parseStudioHash("#/studio/instance")).toBeNull();
   });
 
+  it("keep a deck's schedule screen's deck in its query", () => {
+    expect(studioRouteToHash(routes[10]!)).toBe("#/studio/schedule?deck=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2Fcatalog.ttl%23deck-1");
+    expect(parseStudioHash("#/studio/schedule")).toBeNull();
+  });
+
   it("name the instance a route is in, the deck's for the workbench", () => {
-    expect(routes.map(instanceOfRoute)).toEqual([null, ...Array(9).fill("https://pod.example/solid-memo/a/")]);
+    expect(routes.map(instanceOfRoute)).toEqual([null, ...Array(10).fill("https://pod.example/solid-memo/a/")]);
   });
 
   it("leave the root without an instance, and anything unknown, to the default route", () => {

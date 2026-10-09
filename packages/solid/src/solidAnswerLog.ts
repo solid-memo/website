@@ -1,12 +1,18 @@
-import { createSolidDataset, getThingAll, removeThing, setThing } from "@inrupt/solid-client";
+import { createSolidDataset, getThingAll, removeThing, setThing, type SolidDataset } from "@inrupt/solid-client";
 import type { AnswerLog } from "@solid-memo/application/ports";
 import { monthOfStudyDay, type Answer } from "@solid-memo/domain/answer";
 import { historyContainerOf, historyUrlOf, monthOfHistoryUrl } from "@solid-memo/domain/instanceLayout";
 import { listContainerTree } from "./containers";
 import { appendAllToDocument, appendToDocument, getSolidDatasetOrNull, PreconditionFailedError, saveDataset } from "./datasets";
 import { toAnswer, toAnswerThing } from "./mappers/answerMapper";
+import { mapSince, readSince } from "./readSince";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
 import { unlessNewer } from "./records";
+
+/** The answers of a month's document (none when there is none), each that fits its shape. */
+function answersIn(dataset: SolidDataset | null): Answer[] {
+  return dataset === null ? [] : getThingAll(dataset).flatMap((thing) => toAnswer(thing) ?? []);
+}
 
 /** Tries at removing a day's answers while other writes keep adding to the document. */
 const ATTEMPTS = 3;
@@ -55,9 +61,11 @@ export function createSolidAnswerLog({
     },
 
     async readMonth(instanceUrl, month) {
-      const dataset = await getSolidDatasetOrNull(historyUrlOf(instanceUrl, month), fetch);
-      if (dataset === null) return [];
-      return getThingAll(dataset).flatMap((thing) => toAnswer(thing) ?? []);
+      return answersIn(await getSolidDatasetOrNull(historyUrlOf(instanceUrl, month), fetch));
+    },
+
+    async readMonthSince(instanceUrl, month, version) {
+      return mapSince(await readSince(historyUrlOf(instanceUrl, month), version, fetch), answersIn);
     },
 
     async removeDay(instanceUrl, deckUrl, studyDay) {

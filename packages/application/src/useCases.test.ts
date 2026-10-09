@@ -15,6 +15,7 @@ import type {
   RepairRepository,
   InstanceCopier,
   GuestPod,
+  Since,
 } from "./ports";
 import { GUEST_INSTANCE_URL, GUEST_ORIGIN, GUEST_SESSION, GUEST_WEBID, guestDeckStamp } from "@solid-memo/domain/guest";
 import { createUseCases } from "./useCases";
@@ -2297,17 +2298,26 @@ describe("the answer log", () => {
   /** An answer log kept in memory, by study month. */
   function memoryLog() {
     const byMonth = new Map<string, Answer[]>();
+    /** Each month's version: how often it changed. */
+    const versions = new Map<string, number>();
+    const changed = (month: string) => versions.set(month, (versions.get(month) ?? 0) + 1);
     const log = {
       append: vi.fn(async (_instanceUrl: string, answer: Answer) => {
         const month = answer.studyDay.slice(0, 7);
         byMonth.set(month, [...(byMonth.get(month) ?? []), answer]);
+        changed(month);
       }),
       appendAll: vi.fn(async () => undefined),
       months: vi.fn(async () => [...byMonth.keys()].sort()),
       readMonth: vi.fn(async (_instanceUrl: string, month: string) => byMonth.get(month) ?? []),
+      readMonthSince: vi.fn(async (_instanceUrl: string, month: string, version: string | undefined): Promise<Since<Answer[]>> => {
+        const now = `v${versions.get(month) ?? 0}`;
+        return version === now ? { unchanged: true } : { unchanged: false, value: byMonth.get(month) ?? [], version: now };
+      }),
       removeDay: vi.fn(async (_instanceUrl: string, deckUrl: string, studyDay: string) => {
         for (const [month, answers] of byMonth) {
           byMonth.set(month, answers.filter((a) => a.deckUrl !== deckUrl || a.studyDay !== studyDay));
+          changed(month);
         }
       }),
     } satisfies AnswerLog;
@@ -2395,6 +2405,161 @@ describe("the answer log", () => {
     expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(`${instance.url}history/2026-09.ttl`);
     const plain = createUseCases(makeDeps());
     await expect(plain.getStatistics(instance.url, noon)).resolves.toMatchObject({ totals: { answers: 0, studyDays: 0, cards: 0 } });
+  });
+});
+
+describe("the Studio's answer history and schedule insight", () => {
+  const at = new Date("2026-10-09T12:00:00.000Z");
+  const live: Card = { ...card, formatVersion: CARD_FORMAT_VERSION };
+  const other: Card = { ...live, id: "card-2", url: `${deck.cardsDocumentUrl}#card-2` };
+  const retired: Card = { ...live, id: "card-3", url: `${deck.cardsDocumentUrl}#card-3`, retired: true };
+  const state = (cardId: string, extra: Partial<ReviewState> = {}): ReviewState => ({
+    cardId,
+    direction: "front-to-back",
+    easeFactor: 2.5,
+    intervalDays: 3,
+    repetitions: 1,
+    due: "2026-10-10",
+    firstReviewedAt: "2026-10-01T10:00:00.000Z",
+    lastReviewedAt: "2026-10-07T10:00:00.000Z",
+    formatVersion: 2,
+    ...extra,
+  });
+  const states = [state("card-1"), state("card-2", { due: "2026-10-09", intervalDays: 40, easeFactor: 1.3 }), state("card-3")];
+  let n = 0;
+  const answer = (cardId: string, grade: Answer["grade"], studyDay = "2026-10-01", extra: Partial<Answer> = {}): Answer => ({
+    id: `answer-${++n}`,
+    deckUrl: deck.url,
+    // Answered before an upgrade moved the cards into another document.
+    cardUrl: `${instance.url}decks/deck-1-old.ttl#${cardId}`,
+    direction: "front-to-back",
+    grade,
+    answeredAt: `${studyDay}T10:00:00.000Z`,
+    studyDay,
+    nextIntervalDays: 1,
+    ...extra,
+  });
+
+  /** An answer log of two months, at versions "s1" and "o1"; cards at "c1", reviews at "r1"; a digest kept in memory. */
+  function setup(digest: InstanceDigest | null = null) {
+    const deps = makeDeps();
+    const months: Record<string, Answer[]> = {
+      "2026-09": [answer("card-1", 1, "2026-09-12"), answer("card-1", 2, "2026-09-13")],
+      "2026-10": [
+        answer("card-1", 0),
+        answer("card-1", 2, "2026-10-02", { mode: "multiple-choice", chosenDistractor: `${instance.url}decks/deck-1-old.ttl#card-1-d1` }),
+        answer("card-1", 4, "2026-10-03"),
+        answer("card-2", 1),
+        answer("card-3", 0),
+        answer("card-3", 0),
+        answer("card-3", 0),
+        answer("card-3", 0),
+        answer("card-1", 0, "2026-10-04", { deckUrl: `${instance.url}catalog.ttl#deck-2` }),
+      ],
+    };
+    const versions: Record<string, string> = { "2026-09": "s1", "2026-10": "o1" };
+    const answerLog: AnswerLog = {
+      append: vi.fn(async () => undefined),
+      appendAll: vi.fn(async () => undefined),
+      months: vi.fn(async () => Object.keys(months)),
+      readMonth: vi.fn(),
+      readMonthSince: vi.fn(async (_instanceUrl: string, month: string, version: string | undefined) =>
+        version === versions[month] ? { unchanged: true as const } : { unchanged: false as const, value: months[month]!, version: versions[month]! },
+      ),
+      removeDay: vi.fn(),
+    };
+    let stored = digest;
+    const digestRepository: DigestRepository = {
+      readDigest: vi.fn(async () => stored),
+      updateDigest: vi.fn(async (_instanceUrl, change) => {
+        stored = change(stored);
+      }),
+    };
+    vi.mocked(deps.deckRepository.readCardsSince).mockResolvedValue({ unchanged: false, value: [live, other, retired], version: "c1" });
+    vi.mocked(deps.reviewStateRepository.readReviewStatesSince).mockResolvedValue({ unchanged: false, value: states, version: "r1" });
+    const useCases = createUseCases({ ...deps, answerLog, digestRepository });
+    return { deps, useCases, answerLog, months, versions, digestRepository, stored: () => stored };
+  }
+
+  it("loads every month of the answer log, and reads one again only once it changed", async () => {
+    const { useCases, answerLog, months, versions } = setup();
+    await expect(useCases.loadAnswerLog(instance.url)).resolves.toHaveLength(11);
+    expect(answerLog.readMonthSince).toHaveBeenCalledWith(instance.url, "2026-09", undefined);
+    months["2026-10"] = [...months["2026-10"]!, answer("card-2", 5, "2026-10-08")];
+    versions["2026-10"] = "o2";
+    vi.mocked(answerLog.readMonthSince).mockClear();
+    await expect(useCases.loadAnswerLog(instance.url)).resolves.toHaveLength(12);
+    expect(answerLog.readMonthSince).toHaveBeenCalledWith(instance.url, "2026-09", "s1");
+    expect(answerLog.readMonthSince).toHaveBeenCalledWith(instance.url, "2026-10", "o1");
+    // Unchanged months come from what was read before.
+    await expect(useCases.loadAnswerLog(instance.url)).resolves.toHaveLength(12);
+  });
+
+  it("keeps no month the log gave no version of, and reads it again each time", async () => {
+    const { useCases, answerLog } = setup();
+    vi.mocked(answerLog.readMonthSince).mockResolvedValue({ unchanged: false, value: [answer("card-1", 3)], version: null });
+    await useCases.loadAnswerLog(instance.url);
+    vi.mocked(answerLog.readMonthSince).mockClear();
+    await expect(useCases.loadAnswerLog(instance.url)).resolves.toHaveLength(2);
+    expect(answerLog.readMonthSince).toHaveBeenCalledWith(instance.url, "2026-09", undefined);
+  });
+
+  it("gives a card's answers in its deck, newest first, named in the deck's cards document as it is now", async () => {
+    const { useCases } = setup();
+    const answers = await useCases.cardAnswers(instance.url, deck, "card-1");
+    expect(answers.map((each) => [each.studyDay, each.grade])).toEqual([
+      ["2026-10-03", 4],
+      ["2026-10-02", 2],
+      ["2026-10-01", 0],
+      ["2026-09-13", 2],
+      ["2026-09-12", 1],
+    ]);
+    expect(answers[1]).toMatchObject({ cardUrl: live.url, chosenDistractor: `${deck.cardsDocumentUrl}#card-1-d1` });
+  });
+
+  it("forecasts the deck's reviews capped by its pace, spreads its prompts, and finds its leeches in use", async () => {
+    const { useCases, digestRepository, stored } = setup();
+    const insight = await useCases.deckInsight(instance.url, { ...deck, maxReviewsPerDay: 1 }, at, DEFAULT_PREFERENCES);
+    expect(insight.today).toBe("2026-10-09");
+    expect(insight.maxReviewsPerDay).toBe(1);
+    expect(insight.forecast).toHaveLength(30);
+    expect(insight.forecast.slice(0, 3)).toEqual([
+      { studyDay: "2026-10-09", due: 1, reviews: 1 },
+      { studyDay: "2026-10-10", due: 1, reviews: 1 },
+      { studyDay: "2026-10-11", due: 0, reviews: 0 },
+    ]);
+    // The retired card is not scheduled.
+    expect(insight.scheduled).toBe(2);
+    expect(insight.intervals.find((bin) => bin.from === 2)).toMatchObject({ count: 1 });
+    expect(insight.eases[0]).toMatchObject({ from: 1.3, count: 1 });
+    expect(insight.lapses.since).toBe("2026-09");
+    expect(insight.lapses.lapses.get(live.url)).toBe(4);
+    // card-3 is forgotten as often, but retired.
+    expect(insight.leeches).toEqual([{ card: live, lapses: 4 }]);
+    // The schedule was computed afresh, and kept.
+    await vi.waitFor(() => expect(digestRepository.updateDigest).toHaveBeenCalled());
+    expect(stored()!.schedules[deck.url]).toMatchObject({ cardsVersion: "c1", reviewsVersion: "r1" });
+  });
+
+  it("forecasts from the digest's schedule while it is of the documents as they are, with the instance's pace", async () => {
+    const schedule = {
+      direction: "front-to-back" as const,
+      dayBoundaryHour: DEFAULT_PREFERENCES.dayBoundaryHour,
+      dueByDay: { "2026-10-11": 7 },
+      unreviewed: 0,
+      studyDay: "2026-10-09",
+      reviewedOnDay: 0,
+      introducedOnDay: 0,
+    };
+    const { useCases, digestRepository } = setup({
+      receipts: {},
+      schedules: { [deck.url]: { deck: deck.url, cardsVersion: "c1", reviewsVersion: "r1", schedule } },
+    });
+    const insight = await useCases.deckInsight(instance.url, deck, at, DEFAULT_PREFERENCES);
+    expect(insight.maxReviewsPerDay).toBe(DEFAULT_PREFERENCES.maxReviewsPerDay);
+    expect(insight.forecast[2]).toEqual({ studyDay: "2026-10-11", due: 7, reviews: 7 });
+    expect(insight.forecast[0]).toEqual({ studyDay: "2026-10-09", due: 0, reviews: 0 });
+    expect(digestRepository.updateDigest).not.toHaveBeenCalled();
   });
 });
 
@@ -3000,7 +3165,14 @@ describe("library deck upgrade", () => {
     it("transferGuestStudy keeps a catalogue-less study as it is, and adds answers still on their way first", async () => {
       const { deps } = guestDeps();
       vi.mocked(deps.deckRepository.readCatalog).mockResolvedValue(null);
-      const answerLog: AnswerLog = { append: vi.fn(async () => undefined), appendAll: vi.fn(async () => undefined), months: vi.fn(async () => []), readMonth: vi.fn(async () => []), removeDay: vi.fn(async () => undefined) };
+      const answerLog: AnswerLog = {
+        append: vi.fn(async () => undefined),
+        appendAll: vi.fn(async () => undefined),
+        months: vi.fn(async () => []),
+        readMonth: vi.fn(async () => []),
+        readMonthSince: vi.fn(),
+        removeDay: vi.fn(async () => undefined),
+      };
       vi.mocked(answerLog.append).mockRejectedValueOnce(new Error("offline"));
       const useCases = createUseCases({ ...deps, answerLog });
       const guestDeck = { ...deck, url: `${GUEST_INSTANCE_URL}catalog.ttl#deck-1` };
@@ -3175,6 +3347,7 @@ describe("library deck upgrade", () => {
           appendAll: vi.fn(async () => undefined),
           months: vi.fn(async (url: string) => (url === GUEST_INSTANCE_URL ? ["2026-10"] : [])),
           readMonth: vi.fn(async () => answers),
+          readMonthSince: vi.fn(),
           removeDay: vi.fn(async () => undefined),
         };
         vi.mocked(deps.deckRepository.listDecks).mockImplementation(async (url) =>
@@ -3666,6 +3839,7 @@ describe("courses", () => {
       appendAll: vi.fn(async () => undefined),
       months: vi.fn(async () => []),
       readMonth: vi.fn(async () => []),
+      readMonthSince: vi.fn(),
       removeDay: vi.fn(async () => undefined),
     };
     let id = 0;

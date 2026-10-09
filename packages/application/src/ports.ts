@@ -435,6 +435,12 @@ export interface AnswerLog {
   months(instanceUrl: string): Promise<string[]>;
   /** A month's answers; an answer that does not fit its shape is left out. */
   readMonth(instanceUrl: string, month: string): Promise<Answer[]>;
+  /**
+   * A month's answers, as readMonth reads them, unless its document is
+   * still at `version` (undefined: read them); a month with no document
+   * is at ABSENT_VERSION, with no answers.
+   */
+  readMonthSince(instanceUrl: string, month: string, version: string | undefined): Promise<Since<Answer[]>>;
   /** Remove a deck's answers of a study day: what resetting the day undoes. */
   removeDay(instanceUrl: string, deckUrl: string, studyDay: string): Promise<void>;
 }

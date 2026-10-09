@@ -28,18 +28,20 @@ export type StudioRoute =
   | { screen: "groups"; instanceUrl: string }
   /** The card workbench: a deck's cards, searched, filtered, sorted and paged as `query` says (all, as listed, when absent). */
   | { screen: "cards"; deckUrl: string; query?: CardQuery }
-  /** The card inspector: one card of a deck, its content, its wrong options or its schedule (`tab`; the content when absent). */
+  /** The card inspector: one card of a deck, its content, its wrong options, its schedule or its history (`tab`; the content when absent). */
   | { screen: "card"; deckUrl: string; cardUrl: string; tab?: CardTab }
+  /** A deck's schedule: the reviews to come, how its intervals and eases are spread, its lapses and leeches. */
+  | { screen: "schedule"; deckUrl: string }
   /** What a deck says of itself, how it is studied and, for a course, the learner's progress through it. */
   | { screen: "about"; deckUrl: string }
   /** The instance's name and its catalogue's description and licence. */
   | { screen: "instance"; instanceUrl: string };
 
-/** What the card inspector shows: the card's content, its wrong options, or its review state in each direction. */
-export type CardTab = "content" | "distractors" | "schedule";
+/** What the card inspector shows: the card's content, its wrong options, its review state in each direction, or its answers. */
+export type CardTab = "content" | "distractors" | "schedule" | "history";
 
 /** The inspector's tabs, in their order. */
-export const CARD_TABS: readonly CardTab[] = ["content", "distractors", "schedule"];
+export const CARD_TABS: readonly CardTab[] = ["content", "distractors", "schedule", "history"];
 
 /** The instance a route is in: the one it names, or the one of the deck it names; null for the picker. */
 export function instanceOfRoute(route: StudioRoute): string | null {
@@ -49,6 +51,7 @@ export function instanceOfRoute(route: StudioRoute): string | null {
     case "cards":
     case "card":
     case "about":
+    case "schedule":
       return instanceUrlOfDeck(route.deckUrl);
     default:
       return route.instanceUrl;
@@ -69,6 +72,8 @@ export function studioRouteToHash(route: StudioRoute): string {
       return `#${STUDIO_PATH}/card${hashParams({ deck: route.deckUrl, card: route.cardUrl, ...(route.tab === undefined || route.tab === "content" ? {} : { tab: route.tab }) })}`;
     case "about":
       return `#${STUDIO_PATH}/about${hashParams({ deck: route.deckUrl })}`;
+    case "schedule":
+      return `#${STUDIO_PATH}/schedule${hashParams({ deck: route.deckUrl })}`;
     case "instance":
       return `#${STUDIO_PATH}/instance${hashParams({ instance: route.instanceUrl })}`;
   }
@@ -105,6 +110,10 @@ export function parseStudioHash(hash: string): StudioRoute | null {
     case "/about": {
       const deckUrl = query.get("deck");
       return deckUrl === null ? null : { screen: "about", deckUrl };
+    }
+    case "/schedule": {
+      const deckUrl = query.get("deck");
+      return deckUrl === null ? null : { screen: "schedule", deckUrl };
     }
     case "/cards": {
       const deckUrl = query.get("deck");

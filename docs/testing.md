@@ -336,7 +336,7 @@ Dependency inversion gives every layer a seam that makes mocks trivial:
 
 | Layer | Seam | Technique |
 |---|---|---|
-| Domain | none needed | Pure functions; inputs (including `now: Date`) passed as parameters. Plain assertions. |
+| Domain | none needed | Pure functions; inputs (including `now: Date`) passed as parameters. Plain assertions. Time budgets keep what runs over a whole deck or log fast: `queryCards` over 5,000 cards, `lapseIndex` over five years of answers. |
 | Application | ports | Inject fake port objects (`vi.fn` per method). No module mocking. |
 | UI | `UseCases` prop | Render with a fake `UseCases`; assert via testing-library queries. Query-dependent components get a fresh `QueryClient` (retries off). |
 | Infrastructure mappers | none needed | Pure `SolidDataset`/`Thing` → domain functions; feed in-memory datasets built with `mockSolidDatasetFrom`/`buildThing`. |
