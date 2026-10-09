@@ -180,6 +180,7 @@ jobs:
         run: npx playwright install --with-deps chromium
       - if: steps.browsers.outputs.cache-hit == 'true'
         run: npx playwright install-deps chromium
+      # The site, the Studio at studio/ included (apps/web/turbo.json).
       - run: npx turbo run build --filter=@solid-memo/web
       - id: images
         uses: ./.github/actions/e2e-images

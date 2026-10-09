@@ -12,13 +12,13 @@ runs when the CI workflow has finished on `main`
 
 ```mermaid
 flowchart LR
-    push["push to main"] --> ci["CI: npm run check,<br/>build, pySHACL, pods"] -->|success| build["deploy.yml:<br/>npm run build"] --> guard["ns/ and decks/<br/>in the artifact?"] --> pages["deploy apps/web/dist/<br/>to GitHub Pages"]
+    push["push to main"] --> ci["CI: npm run check,<br/>build, pySHACL, pods"] -->|success| build["deploy.yml:<br/>npm run build"] --> guard["ns/, decks/ and studio/<br/>in the artifact?"] --> pages["deploy apps/web/dist/<br/>to GitHub Pages"]
 ```
 
 A red CI run never deploys; `workflow_dispatch` deploys by hand. The
 workflow builds the commit CI checked, enables Pages for the repository
-on its first run, and stops before deploying if the vocabulary or the
-deck library is missing from the build. Pushes that touch `ns/` or
+on its first run, and stops before deploying if the vocabulary, the
+deck library or the Studio is missing from the build. Pushes that touch `ns/` or
 `decks/` also run the [ns workflow](../.github/workflows/ns.yml)
 ([deck-library.md](deck-library.md#checks)).
 
@@ -30,6 +30,7 @@ data it reads:
 | Path | From | What |
 |---|---|---|
 | `/` (`index.html`, `assets/`) | `apps/web/` | The app. |
+| `/studio/` (`index.html`, `assets/`) | `apps/studio/` | [Solid Memo Studio](studio.md), built first and copied in by Solid Memo's build (`builtAppPlugin` in [publishApp.ts](../packages/vocab/tooling/publishApp.ts)). |
 | `/ns/vocab/*.ttl`, `/ns/shapes/<class>/v<N>.ttl` | [`ns/`](../ns/) | The vocabulary and the shapes ([vocab.md](vocab.md), [shapes.md](shapes.md)). |
 | `/decks/index.ttl`, `/decks/<name>/v<N>.ttl` | [`decks/`](../decks/) | The deck library ([deck-library.md](deck-library.md)). |
 | `/vendor/…` | [`packages/vocab/vendor/`](../packages/vocab/vendor/) | The vendored DCAT-AP and SKOS shapes. |
@@ -87,8 +88,8 @@ it, so they resolve only once it serves this site.
 ## Manual publish (any static web space)
 
 `npm run build`, then upload the **contents** of `apps/web/dist/` to the web
-root (or any subfolder) via SFTP or a file manager, `ns/`, `decks/` and
-`vendor/` included. Verify a build
+root (or any subfolder) via SFTP or a file manager, `ns/`, `decks/`,
+`vendor/` and `studio/` included. Verify a build
 locally with `npm start` (builds, then serves `dist/` at
 http://localhost:4173), or `npm run preview -w @solid-memo/web` to serve
 the last build.

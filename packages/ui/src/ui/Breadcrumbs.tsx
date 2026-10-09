@@ -2,11 +2,11 @@ import { useI18n, type I18n } from "./i18n";
 import { routeToHash, type RouteRef } from "./router";
 
 /** One step of the trail. The last crumb is the current page. */
-export interface Crumb {
+export interface Crumb<Route = RouteRef> {
   label: string;
   /** The language a deck's or card's name is in, when not the page's (readerLang). */
   lang?: string;
-  route: RouteRef;
+  route: Route;
 }
 
 /** Display names the route itself (URLs only) cannot supply. */
@@ -151,7 +151,17 @@ export function breadcrumbsFor(route: RouteRef, names: CrumbNames, t: I18n["t"])
     : [decks, deck, course, chapter, { label: t("breadcrumbs.courseReview"), route }];
 }
 
-export function Breadcrumbs({ crumbs }: { crumbs: Crumb[] }) {
+/**
+ * The trail as links. An app with routes of its own (the Studio) passes
+ * its crumbs and how its routes become hashes; Solid Memo's are the default.
+ */
+export function Breadcrumbs<Route = RouteRef>({
+  crumbs,
+  toHash = routeToHash as (route: Route) => string,
+}: {
+  crumbs: Crumb<Route>[];
+  toHash?: (route: Route) => string;
+}) {
   const { t } = useI18n();
   return (
     <nav class="breadcrumbs" aria-label={t("breadcrumbs.label")}>
@@ -159,7 +169,7 @@ export function Breadcrumbs({ crumbs }: { crumbs: Crumb[] }) {
         {crumbs.map((crumb, index) => (
           <li key={index}>
             <a
-              href={routeToHash(crumb.route)}
+              href={toHash(crumb.route)}
               aria-current={index === crumbs.length - 1 ? "page" : undefined}
               lang={crumb.lang}
             >

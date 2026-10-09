@@ -11,6 +11,12 @@ defines the serializable `RouteRef` union, the `routeToHash` /
 `parseHash` pair, and the `useHashRoute` hook. `Workspace` owns the
 mapping from a `RouteRef` to a rendered screen.
 
+The hook itself is `useHashRouter` in
+[`routerCore.ts`](../packages/ui/src/ui/routerCore.ts), over any app's
+routes and its pair of functions. The [Studio](studio.md) has routes of
+its own and keeps them with the same core; this page is about Solid
+Memo's.
+
 ## Hash routing, not pathname routing
 
 The route is kept in `location.hash`:

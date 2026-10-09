@@ -23,9 +23,10 @@ import { DeckPreferencesContainer } from "./DeckPreferencesContainer";
 import { DeckListContainer } from "./DeckListContainer";
 import { studyCountsQuery } from "./DeckStudyAction";
 import { ErrorMessage } from "./ErrorMessage";
+import { GuestStudyOffer } from "./GuestStudyOffer";
 import { InstanceBar } from "./InstanceBar";
 import { InstanceCreator } from "./InstanceCreator";
-import { InstancePicker } from "./InstancePicker";
+import { InstancePickerContainer } from "./InstancePickerContainer";
 import { FindableContainer } from "./FindableContainer";
 import { DataCheckNotice } from "./DataCheckNotice";
 import { LibraryBrowserContainer } from "./LibraryBrowserContainer";
@@ -70,7 +71,7 @@ export function Workspace({
   session: Session;
   /** What the site header shows above the instance bar (the masthead). */
   banner?: ComponentChildren;
-  /** What the main content starts with, above the instance's notices. */
+  /** What the main content starts with, above the offer of a guest's study (to a user logged in) and the instance's notices. */
   children?: ComponentChildren;
 }) {
   const { t, tx, readerText, readerLang, errorText } = useI18n();
@@ -340,9 +341,7 @@ export function Workspace({
   const registrationOptionsQuery = useQuery({
     queryKey: ["registrationOptions", webId],
     queryFn: () => useCases.getRegistrationOptions(session),
-    enabled:
-      route?.screen === "instanceCreator" ||
-      route?.screen === "instancePicker",
+    enabled: route?.screen === "instanceCreator",
   });
   const registrationOptions = registrationOptionsQuery.data ?? null;
 
@@ -371,25 +370,6 @@ export function Workspace({
       });
       await queryClient.invalidateQueries({ queryKey: ["instances", webId] });
       navigate({ screen: "home", instanceUrl: instance.url });
-    },
-  });
-
-  const attachInstanceMutation = useMutation({
-    mutationFn: (args: { url: string; target: RegistrationTarget }) =>
-      useCases.attachInstanceByUrl(session, args.url, args.target),
-    onSuccess: async (instance) => {
-      await queryClient.invalidateQueries({ queryKey: ["instances", webId] });
-      navigate({ screen: "home", instanceUrl: instance.url });
-    },
-  });
-
-  const deleteInstanceMutation = useMutation({
-    mutationFn: (instance: Instance) =>
-      useCases.deleteInstance(session, instance),
-    onSuccess: async (_, instance) => {
-      queryClient.removeQueries({ queryKey: ["decks", instance.url] });
-      queryClient.removeQueries({ queryKey: ["preferences", instance.url] });
-      await queryClient.invalidateQueries({ queryKey: ["instances", webId] });
     },
   });
 
@@ -503,26 +483,12 @@ export function Workspace({
         );
       case "instancePicker":
         return (
-          <InstancePicker
+          <InstancePickerContainer
+            useCases={useCases}
+            session={session}
             instances={instances}
-            options={registrationOptions}
-            busy={
-              attachInstanceMutation.isPending ||
-              deleteInstanceMutation.isPending
-            }
-            error={
-              errorText(attachInstanceMutation.error) ??
-              errorText(deleteInstanceMutation.error)
-            }
-            onSelect={(instance: Instance) =>
-              navigate({ screen: "home", instanceUrl: instance.url })
-            }
             newInstanceHref={routeToHash({ screen: "storagePicker" })}
-            onAttach={(url, target) =>
-              attachInstanceMutation.mutate({ url, target })
-            }
-            onDelete={(instance) => deleteInstanceMutation.mutate(instance)}
-            keptFolder={deleteInstanceMutation.data?.keptFolder ?? null}
+            onOpen={(instance) => navigate({ screen: "home", instanceUrl: instance.url })}
           />
         );
       case "instanceCreator":
@@ -831,6 +797,7 @@ export function Workspace({
       </header>
       <main id={MAIN_ID} tabIndex={-1} class="workspace">
         {children}
+        {session.guest !== true && <GuestStudyOffer useCases={useCases} session={session} />}
         {waiting === null && activeInstance !== null && (
           <>
             <InterruptedMoveContainer useCases={useCases} instance={activeInstance} />

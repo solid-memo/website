@@ -250,6 +250,20 @@ describe("Breadcrumbs", () => {
   });
 });
 
+describe("Breadcrumbs of another app's routes", () => {
+  it("links each crumb to the hash the app makes of its route", () => {
+    type Route = { page: string };
+    render(
+      <Breadcrumbs<Route>
+        crumbs={[{ label: "Top", route: { page: "top" } }, { label: "Here", route: { page: "here" } }]}
+        toHash={(route) => `#/${route.page}`}
+      />,
+    );
+    expect(screen.getByRole("link", { name: "Top" }).getAttribute("href")).toBe("#/top");
+    expect(screen.getByRole("link", { name: "Here" }).getAttribute("aria-current")).toBe("page");
+  });
+});
+
 describe("breadcrumbs in Swedish", () => {
   it("names the steps and the trail in the reader's language", () => {
     render(

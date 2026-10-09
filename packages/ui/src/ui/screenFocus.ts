@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef } from "preact/hooks";
-import type { RouteChange, RouteRef } from "./router";
+import type { RouteChange } from "./routerCore";
 
 /**
  * Focus for a new screen. After the user moves to another screen
@@ -14,10 +14,11 @@ import type { RouteChange, RouteRef } from "./router";
  * first), so focus waits for it: the returned ref goes on the element
  * holding the screen, and the first h2 to appear in it is focused. A
  * screen without one, once it shows something that is not loading, is focused itself.
+ * Any app's routes will do: a new route object is a new screen.
  * A screen opened at one of its parts (a link to a section) marks that
  * part's heading `data-arrival`, and that heading is focused instead.
  */
-export function useScreenFocus(route: RouteRef | null, change: RouteChange) {
+export function useScreenFocus(route: unknown, change: RouteChange) {
   const screenRef = useRef<HTMLDivElement>(null);
   const pending = useRef(false);
 

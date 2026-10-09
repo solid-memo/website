@@ -8,7 +8,8 @@ import {
   within,
 } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { App } from "./App";
+import { App, AppShell } from "./App";
+import { Workspace } from "./Workspace";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { SolidAccount } from "@solid-memo/domain/account";
 import type { EstablishedSession, Session } from "@solid-memo/domain/session";
@@ -224,6 +225,29 @@ describe("App", () => {
       ).toBeInTheDocument();
       expect(within(screen.getByRole("main")).queryByRole("navigation", { name: "Instance" })).toBeNull();
     });
+  });
+
+  it("shows an app's link out in the header before it is signed in", async () => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={queryClient}>
+        <AppShell
+          useCases={makeUseCases()}
+          commitSha={null}
+          identity={{
+            name: "app.documentTitle",
+            tagline: "app.tagline",
+            headerLink: { href: "../#/", label: "studio.backToApp" },
+          }}
+          workspace={Workspace}
+        />
+      </QueryClientProvider>,
+    );
+    await screen.findByRole("heading", { name: "Set up your Solid Pod" });
+    expect(within(screen.getByRole("banner")).getByRole("link", { name: "Back to Solid Memo" })).toHaveAttribute(
+      "href",
+      "../#/",
+    );
   });
 
   it("shows a restoring indicator while the session check is pending", () => {

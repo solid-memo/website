@@ -37,11 +37,12 @@ configs may also use the shared test tooling of the root `package.json`.
 | `ui` | `application`, `domain`, `vocab`, `markdown` | `markdown`: `src/ui/` only |
 | `composition` | `application`, `domain`, `vocab`, `solid`, `browser` | |
 | `web` | `application`, `domain`, `vocab`, `ui`, `composition` | `composition`: `src/main.tsx` only |
+| `studio` | `application`, `domain`, `vocab`, `ui`, `composition` | `composition`: `src/main.tsx` only |
 | `e2e-pod` | `application`, `domain`, `vocab`, `solid` | |
 | `e2e-journeys` | `ui` | `ui`: `harness/strings.ts` only, for the app's messages |
 
 Browser code: `src/` of `markdown`, `vocab`, `domain`, `application`, `shacl`,
-`solid`, `browser`, `composition`, `ui` and `web`; `vocab`'s `tooling/` is node-only.
+`solid`, `browser`, `composition`, `ui`, `web` and `studio`; `vocab`'s `tooling/` is node-only.
 
 ## Vendor libraries
 
@@ -51,7 +52,7 @@ used nowhere else):
 | Library | Package | Notes |
 |---|---|---|
 | `@inrupt/solid-client`, `@inrupt/solid-client-authn-browser` | `solid` | `shacl` also uses `@inrupt/solid-client` to parse shape documents |
-| `@tanstack/react-query`, `preact` | `ui`, `web` | the components; in `web`, `main.tsx` only, to render the app |
+| `@tanstack/react-query`, `preact` | `ui`, `web`, `studio` | the components; in `web`, `main.tsx` only, to render the app; in `studio`, its screens too |
 | `@fontsource/*`, `@fontsource-variable/*` | `ui` | `src/style.css` only |
 | `rdf-validate-shacl` | `shacl` | `src/engine.ts` only, loaded lazily |
 | `mdast-util-from-markdown`, `micromark-extension-gfm-table`, `mdast-util-gfm-table`, `micromark-extension-cjk-friendly` | `markdown` | `src/parse.ts` only; the package's API is its own types, never `mdast`'s ([markdown.md](markdown.md)) |

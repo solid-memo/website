@@ -22,6 +22,7 @@ import { Onboarding } from "./Onboarding.ts";
 import { Preferences } from "./Preferences.ts";
 import { Statistics } from "./Statistics.ts";
 import { Study } from "./Study.ts";
+import { Studio } from "./Studio.ts";
 import { Validation } from "./Validation.ts";
 
 /**
@@ -52,6 +53,7 @@ export class App {
   readonly library = new Library(this);
   readonly libraryDeck = new LibraryDeck(this);
   readonly libraryPreview = new LibraryPreview(this);
+  readonly studio = new Studio(this);
   readonly course = new Course(this);
   readonly chapter = new Chapter(this);
   readonly chapterReview = new ChapterReview(this);
