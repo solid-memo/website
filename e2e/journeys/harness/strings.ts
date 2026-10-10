@@ -1,20 +1,23 @@
 import en from "@solid-memo/ui/i18n/en.json" with { type: "json" };
 import sv from "@solid-memo/ui/i18n/sv.json" with { type: "json" };
 import ko from "@solid-memo/ui/i18n/ko.json" with { type: "json" };
+import de from "@solid-memo/ui/i18n/de.json" with { type: "json" };
+import es from "@solid-memo/ui/i18n/es.json" with { type: "json" };
+import fr from "@solid-memo/ui/i18n/fr.json" with { type: "json" };
 
 /**
  * The app's own text, as its i18n files have it (packages/ui/src/i18n), so
  * a journey finds buttons and messages by what the user reads, in any of its
  * languages, and a change of wording changes the journeys with it.
  */
-export type Locale = "en" | "sv" | "ko";
+export type Locale = "en" | "sv" | "ko" | "de" | "es" | "fr";
 
 type Plural = Partial<Record<Intl.LDMLPluralRule, string>> & { other: string };
 interface Messages {
   [key: string]: string | Plural | Messages;
 }
 
-const CATALOGS: Record<Locale, Messages> = { en, sv, ko };
+const CATALOGS: Record<Locale, Messages> = { en, sv, ko, de, es, fr };
 
 const isPlural = (node: unknown): node is Plural =>
   typeof node === "object" && node !== null && typeof (node as Plural).other === "string";

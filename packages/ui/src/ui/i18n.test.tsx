@@ -7,6 +7,9 @@ import { createI18n, I18nProvider, useI18n, type MessageKey } from "./i18n";
 import en from "../i18n/en.json";
 import sv from "../i18n/sv.json";
 import ko from "../i18n/ko.json";
+import de from "../i18n/de.json";
+import es from "../i18n/es.json";
+import fr from "../i18n/fr.json";
 
 /** Every message's key, and its placeholders, in a message file; a plural message's marked as one. */
 function shape(messages: object, prefix = ""): Record<string, string[]> {
@@ -48,6 +51,9 @@ describe("the message files", () => {
   it.each([
     ["sv", sv],
     ["ko", ko],
+    ["de", de],
+    ["es", es],
+    ["fr", fr],
   ])("say the same things in %s as in English, with the same placeholders", (_locale, messages) => {
     expect(shape(messages)).toEqual(shape(en));
   });
@@ -56,6 +62,9 @@ describe("the message files", () => {
     ["en", en],
     ["sv", sv],
     ["ko", ko],
+    ["de", de],
+    ["es", es],
+    ["fr", fr],
   ])("give each plural message in %s exactly the forms its plural rules name", (locale, messages) => {
     const categories = [...new Intl.PluralRules(locale).resolvedOptions().pluralCategories].sort();
     const forms = pluralForms(messages);
@@ -97,6 +106,15 @@ describe("createI18n", () => {
     expect(createI18n("en").t("common.cardCount")).toBe("{count} cards");
   });
 
+  it("picks the forms of the languages with more than two", () => {
+    expect(createI18n("fr").t("common.cardCount", { count: 0 })).toBe("0 carte");
+    expect(createI18n("fr").t("common.cardCount", { count: 2 })).toBe("2 cartes");
+    expect(createI18n("fr").t("common.cardCount", { count: 1_000_000 })).toBe("1\u202f000\u202f000 de cartes");
+    expect(createI18n("es").t("common.cardCount", { count: 1 })).toBe("1 tarjeta");
+    expect(createI18n("es").t("common.cardCount", { count: 1_000_000 })).toBe("1.000.000 de tarjetas");
+    expect(createI18n("de").t("common.cardCount", { count: 1 })).toBe("1 Karte");
+  });
+
   it("writes numbers as the language writes them, and text as it is", () => {
     expect(createI18n("en").t("common.cardCount", { count: 3010 })).toBe("3,010 cards");
     expect(createI18n("sv").t("common.cardCount", { count: 3010 })).toBe("3\u00a0010 kort");
@@ -112,6 +130,14 @@ describe("createI18n", () => {
 
   it("speaks Korean when asked", () => {
     expect(createI18n("ko").t("language.label")).toBe("언어");
+  });
+
+  it.each([
+    ["de", "Sprache"],
+    ["es", "Idioma"],
+    ["fr", "Langue"],
+  ] as const)("speaks %s when asked", (locale, label) => {
+    expect(createI18n(locale).t("language.label")).toBe(label);
   });
 
   it("names a missing message by its key", () => {
@@ -163,6 +189,8 @@ describe("createI18n", () => {
     expect(createI18n("sv").languageLabel("en")).toBe("engelska — English (en)");
     expect(en.languageLabel("ko")).toBe("Korean — 한국어 (ko)");
     expect(createI18n("ko").languageLabel("ko")).toBe("한국어 (ko)");
+    expect(createI18n("de").languageLabel("sv")).toBe("Schwedisch — svenska (sv)");
+    expect(createI18n("fr").languageLabel("fr")).toBe("français (fr)");
   });
 
   it("names a language Intl has no words in by its name only, and one it cannot name as its code", () => {
@@ -190,6 +218,9 @@ describe("createI18n", () => {
     expect(createI18n("en").formatMonth("2025-03")).toBe("March 2025");
     expect(createI18n("sv").formatMonth("2025-03")).toBe("mars 2025");
     expect(createI18n("ko").formatDate("2026-09-22T00:00:00.000Z")).toBe("2026년 9월 22일");
+    expect(createI18n("de").formatDate("2026-09-22T00:00:00.000Z")).toBe("22. September 2026");
+    expect(createI18n("es").formatDate("2026-09-22T00:00:00.000Z")).toBe("22 de septiembre de 2026");
+    expect(createI18n("fr").formatDate("2026-09-22T00:00:00.000Z")).toBe("22 septembre 2026");
   });
 
   it("names every study direction", () => {

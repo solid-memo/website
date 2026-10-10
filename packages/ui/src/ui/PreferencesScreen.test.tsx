@@ -50,6 +50,8 @@ describe("PreferencesScreen", () => {
     expect(onChoose).toHaveBeenCalledWith("sv");
     fireEvent.click(screen.getByRole("radio", { name: "한국어" }));
     expect(onChoose).toHaveBeenCalledWith("ko");
+    fireEvent.click(screen.getByRole("radio", { name: "Deutsch" }));
+    expect(onChoose).toHaveBeenCalledWith("de");
     expect(onSave).not.toHaveBeenCalled();
   });
 

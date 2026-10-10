@@ -3,7 +3,14 @@ import { useI18n } from "./i18n";
 import { GlobeIcon } from "./icons";
 
 /** Each language named in itself, so it is found whichever is spoken now. */
-export const LANGUAGE_NAMES: Record<Locale, string> = { en: "English", sv: "Svenska", ko: "한국어" };
+export const LANGUAGE_NAMES: Record<Locale, string> = {
+  de: "Deutsch",
+  en: "English",
+  es: "Español",
+  fr: "Français",
+  sv: "Svenska",
+  ko: "한국어",
+};
 
 /**
  * The languages the app speaks, as a list of their names behind a globe,
