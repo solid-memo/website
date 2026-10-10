@@ -1,10 +1,11 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/preact";
 import { applyDraftChanges, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import type { DraftEditor } from "./draftEditor";
 import { StepEditorScreen } from "./StepEditorScreen";
 import { courseDraft, draftLinks } from "../test/fixtures";
+import { answer } from "../test/dialogs";
 
 function renderScreen(step: string, draft: ReleaseDraft = courseDraft(), onEdit = vi.fn<DraftEditor["edit"]>(() => null)) {
   const onDeleted = vi.fn();
@@ -13,7 +14,6 @@ function renderScreen(step: string, draft: ReleaseDraft = courseDraft(), onEdit 
 }
 
 beforeEach(() => localStorage.clear());
-afterEach(() => vi.unstubAllGlobals());
 
 describe("StepEditorScreen", () => {
   it("saves the theory as it is typed, previewed as the course player shows it", () => {
@@ -69,7 +69,6 @@ describe("StepEditorScreen", () => {
   });
 
   it("names a step retired, or of no chapter, by its id, and retires or deletes it", () => {
-    vi.stubGlobal("confirm", vi.fn(() => true));
     const draft = applyDraftChanges(courseDraft(), [{ kind: "retire", of: "step", id: "ch-pods-2" }]) as ReleaseDraft;
     const { onEdit, onDeleted } = renderScreen("ch-pods-2", draft);
     expect(screen.getByRole("heading", { level: 2, name: "ch-pods-2" })).toBeInTheDocument();
@@ -77,6 +76,7 @@ describe("StepEditorScreen", () => {
     fireEvent.click(screen.getByRole("button", { name: "Restore" }));
     expect(onEdit).toHaveBeenLastCalledWith([{ kind: "restore", of: "step", id: "ch-pods-2" }]);
     fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+    answer("Delete the step", "Delete");
     expect(onDeleted).toHaveBeenCalled();
   });
 

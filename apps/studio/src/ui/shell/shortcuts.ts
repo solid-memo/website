@@ -30,7 +30,8 @@ export type ShortcutId =
   | "open"
   | "extendDown"
   | "extendUp"
-  | "clear";
+  | "clear"
+  | "bulk";
 
 /**
  * A shortcut: its keys as `keyOf` names them, a chord's one after the
@@ -85,6 +86,7 @@ export const SHORTCUTS: readonly Shortcut[] = [
   { id: "extendDown", keys: "J", scope: "cards", help: "Shift+J" },
   { id: "extendUp", keys: "K", scope: "cards", help: "Shift+K" },
   { id: "clear", keys: "Escape", scope: "cards" },
+  { id: "bulk", keys: ".", scope: "cards" },
 ];
 
 /** A shortcut's keys, as the keymap names them (its first, for one with several). */

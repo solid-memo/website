@@ -3,6 +3,7 @@ import type { StudyDirection } from "@solid-memo/domain/deck";
 import type { ReviewState } from "@solid-memo/domain/review";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n, type ErrorText } from "@solid-memo/ui/i18n";
+import { useConfirm } from "./shell/ConfirmDialog";
 
 /** A card in one direction: its review state, if it has been studied so, and whether the deck studies it so now. */
 export interface CardDirectionSchedule {
@@ -83,6 +84,7 @@ function DirectionState({
 }) {
   const { t, locale, formatDate } = useI18n();
   const [due, setDue] = useState(state.due);
+  const { ask, dialog } = useConfirm();
   const instant = (iso: string) => new Date(iso).toLocaleString(locale, { dateStyle: "long", timeStyle: "short" });
   const id = `due-${state.direction}`;
   return (
@@ -119,13 +121,19 @@ function DirectionState({
           type="button"
           class="danger"
           disabled={busy}
-          onClick={() => {
-            if (window.confirm(t("studio.schedule.resetConfirm"))) onReset();
-          }}
+          onClick={() =>
+            ask({
+              heading: t("studio.confirm.forgetDirection"),
+              text: t("studio.schedule.resetConfirm"),
+              action: t("studio.schedule.reset"),
+              onConfirm: onReset,
+            })
+          }
         >
           {t("studio.schedule.reset")}
         </button>
       </p>
+      {dialog}
     </>
   );
 }

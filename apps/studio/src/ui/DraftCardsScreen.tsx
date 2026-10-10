@@ -17,6 +17,7 @@ import type { DraftLinks } from "./DraftOverviewScreen";
 import { DraftScope, DraftStatus } from "./DraftParts";
 import { NewQuestionForm } from "./NewQuestionForm";
 import type { DraftCardColumn } from "./router";
+import { BulkBar } from "./shell/BulkBar";
 import { DataTable, type Column } from "./shell/DataTable";
 import { nextSort, NO_SELECTION, sortedRows, type Selection, type TableSort } from "./shell/tableModel";
 
@@ -184,28 +185,8 @@ export function DraftCardsScreen({
             ))}
           </select>
         </label>
+        <p role="status">{t("studio.draftCards.count", { count: rows.length })}</p>
       </div>
-      <p role="status">{t("studio.draftCards.count", { count: rows.length })}</p>
-      {readOnly === null && (
-        <div class="studio-selection">
-          <p role="status">{t("studio.cards.selected", { count: selected.length })}</p>
-          {live.length > 0 && (
-            <button type="button" onClick={() => lifeOf("retire", live)}>
-              {t("studio.draftCards.retire", { count: live.length })}
-            </button>
-          )}
-          {retired.length > 0 && (
-            <button type="button" onClick={() => lifeOf("restore", retired)}>
-              {t("studio.draftCards.restore", { count: retired.length })}
-            </button>
-          )}
-          {chosen.size > 0 && (
-            <button type="button" onClick={() => setChosen(NO_SELECTION)}>
-              {t("studio.cards.clear")}
-            </button>
-          )}
-        </div>
-      )}
       {rows.length > 0 && (
         <DataTable
           caption={t("studio.draftCards.caption")}
@@ -245,6 +226,25 @@ export function DraftCardsScreen({
         />
       )}
       {page.pageCount > 1 && <Pager page={page.currentPage} pageCount={page.pageCount} onPageChange={(next) => onView(cleanView({ ...view, page: next }))} />}
+      {readOnly === null && (
+        <BulkBar
+          label={t("studio.cardBulk.label")}
+          count={chosen.size}
+          said={t("studio.cards.selected", { count: chosen.size })}
+          onClear={() => setChosen(NO_SELECTION)}
+        >
+          {live.length > 0 && (
+            <button type="button" onClick={() => lifeOf("retire", live)}>
+              {t("studio.draftCards.retire", { count: live.length })}
+            </button>
+          )}
+          {retired.length > 0 && (
+            <button type="button" onClick={() => lifeOf("restore", retired)}>
+              {t("studio.draftCards.restore", { count: retired.length })}
+            </button>
+          )}
+        </BulkBar>
+      )}
       <DraftScope readOnly={readOnly} draftsHref={links.draftsHref} healthHref={links.healthHref}>
         <NewQuestionForm
           id="draft-cards-new"

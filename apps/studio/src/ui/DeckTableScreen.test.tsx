@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { useState } from "preact/hooks";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import type { DeckTableRow, DeckTableView } from "@solid-memo/domain/deckTable";
@@ -7,6 +7,7 @@ import { I18nProvider } from "@solid-memo/ui/i18n";
 import { DeckTableScreen, type DeckBadge } from "./DeckTableScreen";
 import type { HomeView } from "./shell/views";
 import { choose } from "../test/choose";
+import { answer, dialog, pick } from "../test/dialogs";
 import { WithKeys } from "../test/keys";
 import { instanceA, makeDeck } from "../test/fixtures";
 
@@ -62,11 +63,13 @@ function Harness({ initial = { filter: "" }, ...overrides }: Partial<Props> & { 
   );
 }
 
+const EDIT = "Edit the selected decks";
+/** What Home says it did (the bar's count is a status line too, after it). */
+const said = () => screen.getAllByRole("status")[0]!;
+const bar = () => screen.getByRole("group", { name: "Selected decks" });
 const table = () => screen.getByRole("table", { name: "The decks of Deck set A" });
 const names = () => within(table()).getAllByRole("rowheader").map((cell) => within(cell).getByRole("link").textContent);
 const select = (name: string) => fireEvent.click(screen.getByRole("checkbox", { name: `Select ${name}` }));
-
-afterEach(() => vi.unstubAllGlobals());
 
 describe("DeckTableScreen", () => {
   it("has a row per deck, named by the deck, with its groups, settings and figures", () => {
@@ -236,9 +239,8 @@ describe("DeckTableScreen", () => {
     render(<Harness onMove={onMove} />);
     select("Kanji N5");
     select("Verbs");
-    const move = screen.getByRole("button", { name: "Move to group" });
-    fireEvent.click(move);
-    expect(move).toHaveAttribute("aria-expanded", "true");
+    pick(EDIT, "Move to group");
+    expect(dialog("Move to group")).toBeInTheDocument();
     const group = screen.getByRole("combobox", { name: "Group" });
     expect(within(group).getAllByRole("option").map((option) => option.textContent)).toEqual([
       "Top level (no group)",
@@ -248,14 +250,14 @@ describe("DeckTableScreen", () => {
     choose("Group", scripts.url);
     fireEvent.click(screen.getByRole("button", { name: "Apply" }));
     expect(onMove).toHaveBeenCalledWith([kanji, verbs], scripts);
-    expect(await screen.findByRole("status")).toHaveTextContent("Moved 2 decks to Scripts.");
+    await waitFor(() => expect(said()).toHaveTextContent("Moved 2 decks to Scripts."));
     expect(screen.queryByRole("combobox", { name: "Group" })).toBeNull();
     // Still selected, for what comes next.
-    fireEvent.click(move);
+    pick(EDIT, "Move to group");
     choose("Group", "");
     fireEvent.click(screen.getByRole("button", { name: "Apply" }));
     expect(onMove).toHaveBeenLastCalledWith([kanji, verbs], null);
-    await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("Moved 2 decks to Top level (no group)."));
+    await waitFor(() => expect(said()).toHaveTextContent("Moved 2 decks to Top level (no group)."));
   });
 
   it("moves the selected decks in the order the table shows them", () => {
@@ -266,7 +268,7 @@ describe("DeckTableScreen", () => {
     fireEvent.click(within(table()).getByRole("button", { name: "Deck" }));
     fireEvent.click(within(table()).getByRole("button", { name: "Deck" }));
     expect(names()).toEqual(["Verbs", "Kanji N5"]);
-    fireEvent.click(screen.getByRole("button", { name: "Move to group" }));
+    pick(EDIT, "Move to group");
     choose("Group", languages.url);
     fireEvent.click(screen.getByRole("button", { name: "Apply" }));
     expect(onMove).toHaveBeenCalledWith([verbs, kanji], languages);
@@ -279,19 +281,19 @@ describe("DeckTableScreen", () => {
     select("Verbs");
     const filter = screen.getByRole("searchbox", { name: "Filter by name or group" });
     fireEvent.input(filter, { target: { value: "verbs" } });
-    expect(screen.getByText("1 deck selected")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Set direction" }));
+    expect(bar()).toHaveTextContent("1 deck selected");
+    pick(EDIT, "Set direction");
     fireEvent.click(screen.getByRole("button", { name: "Apply" }));
     expect(onDirection).toHaveBeenCalledWith([verbs], expect.anything());
-    await screen.findByText(/1 deck/, { selector: "[role=status]" });
+    await waitFor(() => expect(said()).toHaveTextContent("Set the direction of 1 deck."));
     fireEvent.input(filter, { target: { value: "" } });
-    expect(screen.getByText("2 decks selected")).toBeInTheDocument();
+    expect(bar()).toHaveTextContent("2 decks selected");
   });
 
   it("does not offer a move when a newer version arranged the decks", () => {
     render(<Harness moveLocked="newerVersion" />);
     select("Verbs");
-    fireEvent.click(screen.getByRole("button", { name: "Move to group" }));
+    pick(EDIT, "Move to group");
     expect(screen.getByText(/A newer version of Solid Memo arranged these groups/)).toBeInTheDocument();
     expect(screen.queryByRole("combobox", { name: "Group" })).toBeNull();
   });
@@ -299,7 +301,7 @@ describe("DeckTableScreen", () => {
   it("does not offer a move while the arrangement is set aside", () => {
     render(<Harness moveLocked="setAside" />);
     select("Verbs");
-    fireEvent.click(screen.getByRole("button", { name: "Move to group" }));
+    pick(EDIT, "Move to group");
     expect(screen.getByText(/The arrangement of these decks has invalid data/)).toBeInTheDocument();
   });
 
@@ -311,7 +313,7 @@ describe("DeckTableScreen", () => {
     fireEvent.click(screen.getByRole("checkbox", { name: "Select every deck shown" }));
     expect(screen.getByRole("checkbox", { name: "Select every deck shown" })).toBeChecked();
     expect(screen.getByRole("checkbox", { name: "Select Kanji N5" })).not.toBeChecked();
-    expect(screen.getByText("1 deck selected")).toBeInTheDocument();
+    expect(bar()).toHaveTextContent("1 deck selected");
   });
 
   it("selects no deck while the data is checked", () => {
@@ -325,12 +327,12 @@ describe("DeckTableScreen", () => {
     const onPace = vi.fn(async () => true);
     render(<Harness onPace={onPace} />);
     select("Verbs");
-    fireEvent.click(screen.getByRole("button", { name: "Set pace" }));
+    pick(EDIT, "Set pace");
     fireEvent.input(screen.getByRole("spinbutton", { name: "New cards per day" }), { target: { value: "8" } });
     fireEvent.click(screen.getByRole("button", { name: "Apply" }));
     expect(onPace).toHaveBeenCalledWith([verbs], { newCardsPerDay: 8 });
-    expect(await screen.findByText("Set the pace of 1 deck.")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Set pace" }));
+    await waitFor(() => expect(said()).toHaveTextContent("Set the pace of 1 deck."));
+    pick(EDIT, "Set pace");
     fireEvent.input(screen.getByRole("spinbutton", { name: "New cards per day" }), { target: { value: " " } });
     fireEvent.input(screen.getByRole("spinbutton", { name: "Max reviews per day" }), { target: { value: "50" } });
     fireEvent.click(screen.getByRole("button", { name: "Apply" }));
@@ -342,36 +344,34 @@ describe("DeckTableScreen", () => {
     render(<Harness onDirection={onDirection} error="The pod said no" />);
     expect(screen.getByRole("alert")).toHaveTextContent("The pod said no");
     select("Kanji N5");
-    const direction = screen.getByRole("button", { name: "Set direction" });
-    fireEvent.click(direction);
+    pick(EDIT, "Set direction");
     choose("Direction", "back-to-front");
     fireEvent.click(screen.getByRole("button", { name: "Apply" }));
     expect(onDirection).toHaveBeenCalledWith([kanji], "back-to-front");
     await waitFor(() => expect(screen.getByRole("button", { name: "Apply" })).toBeEnabled());
     expect(screen.getByRole("combobox", { name: "Direction" })).toHaveValue("back-to-front");
-    expect(screen.getByRole("status")).toHaveTextContent("");
+    expect(said()).toHaveTextContent("");
     fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
     expect(screen.queryByRole("combobox", { name: "Direction" })).toBeNull();
-    // The same button opens and closes its form.
-    fireEvent.click(direction);
-    fireEvent.click(direction);
-    expect(direction).toHaveAttribute("aria-expanded", "false");
+    // Its dialog's Close leaves it too.
+    pick(EDIT, "Set direction");
+    fireEvent.click(within(dialog("Set direction")).getByRole("button", { name: "Close" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   });
 
   it("deletes the selected decks once the user confirms, naming each", async () => {
-    const confirm = vi.fn(() => false);
-    vi.stubGlobal("confirm", confirm);
     const onRemove = vi.fn(async () => true);
     render(<Harness onRemove={onRemove} />);
     select("Kanji N5");
     select("Verbs");
-    fireEvent.click(screen.getByRole("button", { name: "Delete" }));
-    expect(confirm).toHaveBeenCalledWith(
+    fireEvent.click(within(bar()).getByRole("button", { name: "Delete" }));
+    expect(dialog("Delete the selected decks")).toHaveTextContent(
       "Delete 2 decks and all their cards: “Kanji N5”, “Verbs”? This cannot be undone.",
     );
+    answer("Delete the selected decks", "Cancel");
     expect(onRemove).not.toHaveBeenCalled();
-    confirm.mockReturnValue(true);
-    fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+    fireEvent.click(within(bar()).getByRole("button", { name: "Delete" }));
+    answer("Delete the selected decks", "Delete");
     expect(onRemove).toHaveBeenCalledWith([kanji, verbs]);
     expect(await screen.findByText("Deleted 2 decks.")).toBeInTheDocument();
     expect(screen.queryByRole("group", { name: "Selected decks" })).toBeNull();

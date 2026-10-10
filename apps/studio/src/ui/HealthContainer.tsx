@@ -3,6 +3,7 @@ import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { CardSpot } from "@solid-memo/domain/deckHealth";
 import type { Instance } from "@solid-memo/domain/instance";
+import type { ComponentChildren } from "preact";
 import type { Unrepairable } from "@solid-memo/domain/repair";
 import type { ValidationReport } from "@solid-memo/domain/validation";
 import { useDataCheck } from "@solid-memo/ui/dataCheck";
@@ -12,6 +13,7 @@ import { Loading } from "@solid-memo/ui/Loading";
 import { useRepairMutation } from "@solid-memo/ui/RepairContainer";
 import { deckHealthQuery, HealthBadge } from "./HealthBadge";
 import { DeckHealthScreen, InstanceHealthScreen, type RepairActions } from "./HealthScreen";
+import { useConfirm } from "./shell/ConfirmDialog";
 
 /**
  * The health screen's data: with a deck, its health (UseCases.checkDeck)
@@ -57,26 +59,35 @@ export function HealthContainer({
 
 /**
  * The repairs of what a check found (`report`), the removal of a subject
- * once the user confirms it; after either, the checks under `checkKey`
- * are read afresh.
+ * once the user confirms it (in `dialog`, which the screen shows); after
+ * either, the checks under `checkKey` are read afresh.
  */
-function useRepairs(useCases: UseCases, instance: Instance, checkKey: readonly unknown[]): (report: ValidationReport) => RepairActions {
+function useRepairs(
+  useCases: UseCases,
+  instance: Instance,
+  checkKey: readonly unknown[],
+): { repairs: (report: ValidationReport) => RepairActions; dialog: ComponentChildren } {
   const { t, errorText } = useI18n();
   const repairMutation = useRepairMutation(useCases, instance.url, checkKey);
-  return (report) => {
+  const { ask, dialog } = useConfirm();
+  const repairs = (report: ValidationReport) => {
     const plan = useCases.planRepair(report);
     return {
       plan,
       busy: repairMutation.isPending,
       onRepair: () => repairMutation.mutate(plan.repairs),
-      onRemove: (problem: Unrepairable) => {
-        if (window.confirm(t("repair.removeConfirm", { url: problem.subjectUrl }))) {
-          repairMutation.mutate([{ kind: "remove-subject", documentUrl: problem.documentUrl, subjectUrl: problem.subjectUrl, version: 1 }]);
-        }
-      },
+      onRemove: (problem: Unrepairable) =>
+        ask({
+          heading: t("studio.confirm.removeData"),
+          text: t("repair.removeConfirm", { url: problem.subjectUrl }),
+          action: t("repair.removeButton"),
+          onConfirm: () =>
+            repairMutation.mutate([{ kind: "remove-subject", documentUrl: problem.documentUrl, subjectUrl: problem.subjectUrl, version: 1 }]),
+        }),
       error: errorText(repairMutation.error),
     };
   };
+  return { repairs, dialog };
 }
 
 function DeckHealthContainer({
@@ -95,7 +106,7 @@ function DeckHealthContainer({
   const { t, errorText } = useI18n();
   const queryClient = useQueryClient();
   const health = deckHealthQuery(useCases, queryClient, instance.url, deck);
-  const repairs = useRepairs(useCases, instance, health.queryKey);
+  const { repairs, dialog } = useRepairs(useCases, instance, health.queryKey);
   const reason = useDataCheck(useCases, instance.url).readOnly(deck);
   // Read afresh each time the screen opens, as a card edited since may have mended (or made) a problem.
   const healthQuery = useQuery({ ...health, refetchOnMount: "always" });
@@ -107,19 +118,22 @@ function DeckHealthContainer({
   if (error) return <ErrorMessage error={errorText(error)} />;
   if (healthQuery.data === undefined || cardsQuery.data === undefined) return <Loading label={t("studio.health.loading")} />;
   return (
-    <DeckHealthScreen
-      deck={deck}
-      health={healthQuery.data}
-      cards={cardsQuery.data}
-      checking={healthQuery.isFetching}
-      // The deck's check alone: what it finds is put in the one that holds it.
-      onCheck={() => void queryClient.invalidateQueries({ queryKey: health.queryKey })}
-      repairs={repairs(healthQuery.data.report)}
-      spotHref={(spot) => spotHref(deck, spot)}
-      aboutHref={aboutHref(deck)}
-      // Only once the check says so: while it is made, the links stay.
-      held={reason === "setAside" || reason === "blocked"}
-    />
+    <>
+      <DeckHealthScreen
+        deck={deck}
+        health={healthQuery.data}
+        cards={cardsQuery.data}
+        checking={healthQuery.isFetching}
+        // The deck's check alone: what it finds is put in the one that holds it.
+        onCheck={() => void queryClient.invalidateQueries({ queryKey: health.queryKey })}
+        repairs={repairs(healthQuery.data.report)}
+        spotHref={(spot) => spotHref(deck, spot)}
+        aboutHref={aboutHref(deck)}
+        // Only once the check says so: while it is made, the links stay.
+        held={reason === "setAside" || reason === "blocked"}
+      />
+      {dialog}
+    </>
   );
 }
 
@@ -133,7 +147,7 @@ function InstanceHealthContainer({
   deckHref: (deck: Deck) => string;
 }) {
   const { t, errorText } = useI18n();
-  const repairs = useRepairs(useCases, instance, ["validation", instance.url]);
+  const { repairs, dialog } = useRepairs(useCases, instance, ["validation", instance.url]);
   const reportQuery = useQuery({
     queryKey: ["validation", instance.url],
     queryFn: () => useCases.checkInstance(instance.url),
@@ -147,15 +161,18 @@ function InstanceHealthContainer({
   if (error) return <ErrorMessage error={errorText(error)} />;
   if (reportQuery.data === undefined || decksQuery.data === undefined) return <Loading label={t("studio.health.loading")} />;
   return (
-    <InstanceHealthScreen
-      instance={instance}
-      report={reportQuery.data}
-      decks={decksQuery.data}
-      checking={reportQuery.isFetching}
-      onCheck={() => void reportQuery.refetch()}
-      repairs={repairs(reportQuery.data)}
-      deckHref={deckHref}
-      badge={(each) => <HealthBadge useCases={useCases} instanceUrl={instance.url} deck={each} href={deckHref(each)} />}
-    />
+    <>
+      <InstanceHealthScreen
+        instance={instance}
+        report={reportQuery.data}
+        decks={decksQuery.data}
+        checking={reportQuery.isFetching}
+        onCheck={() => void reportQuery.refetch()}
+        repairs={repairs(reportQuery.data)}
+        deckHref={deckHref}
+        badge={(each) => <HealthBadge useCases={useCases} instanceUrl={instance.url} deck={each} href={deckHref(each)} />}
+      />
+      {dialog}
+    </>
   );
 }

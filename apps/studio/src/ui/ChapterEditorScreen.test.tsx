@@ -1,10 +1,11 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/preact";
 import { applyDraftChanges, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { ChapterEditorScreen, proseFormat } from "./ChapterEditorScreen";
 import type { DraftEditor } from "./draftEditor";
 import { courseDraft, draftLinks } from "../test/fixtures";
+import { answer, dialog } from "../test/dialogs";
 
 function renderScreen(chapter: string, draft: ReleaseDraft = courseDraft(), onEdit = vi.fn<DraftEditor["edit"]>(() => null)) {
   const onDeleted = vi.fn();
@@ -15,7 +16,6 @@ function renderScreen(chapter: string, draft: ReleaseDraft = courseDraft(), onEd
 }
 
 beforeEach(() => localStorage.clear());
-afterEach(() => vi.unstubAllGlobals());
 
 describe("proseFormat", () => {
   it("is Markdown when on; off, none, but a format this app does not know is kept", () => {
@@ -108,19 +108,18 @@ describe("ChapterEditorScreen", () => {
   });
 
   it("retires, restores and deletes the chapter, once the user confirms", () => {
-    vi.stubGlobal("confirm", vi.fn(() => true));
     const { onEdit, onDeleted } = renderScreen("ch-apps");
     expect(screen.getByText("No steps yet.")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Retire" }));
     expect(onEdit).toHaveBeenLastCalledWith([{ kind: "retire", of: "chapter", id: "ch-apps" }]);
     fireEvent.click(screen.getByRole("button", { name: "Delete" }));
-    expect(confirm).toHaveBeenCalledWith("Delete the chapter Apps, with its steps? Its questions stay, asked nowhere.");
+    expect(dialog("Delete the chapter")).toHaveTextContent("Delete the chapter Apps, with its steps? Its questions stay, asked nowhere.");
+    answer("Delete the chapter", "Delete");
     expect(onEdit).toHaveBeenLastCalledWith([{ kind: "delete", of: "chapter", id: "ch-apps" }]);
     expect(onDeleted).toHaveBeenCalled();
   });
 
   it("names a chapter retired, or of no title, and only retires one published", () => {
-    vi.stubGlobal("confirm", vi.fn(() => false));
     const draft = applyDraftChanges(courseDraft(), [{ kind: "addChapter", id: "ch-x" }, { kind: "retire", of: "chapter", id: "ch-x" }]) as ReleaseDraft;
     const { onEdit, onDeleted } = renderScreen("ch-x", { ...draft, published: { ids: { "ch-x": "chapter" }, activities: [] } });
     expect(screen.getByRole("heading", { level: 2, name: "Chapter ch-x" })).toBeInTheDocument();
@@ -133,12 +132,13 @@ describe("ChapterEditorScreen", () => {
   });
 
   it("stays when the user does not confirm, or the delete is refused", () => {
-    const confirm = vi.fn().mockReturnValueOnce(false).mockReturnValue(true);
-    vi.stubGlobal("confirm", confirm);
-    const { onDeleted } = renderScreen("ch-apps", courseDraft(), vi.fn<DraftEditor["edit"]>(() => ({ refused: "missing", id: "ch-apps" })));
+    const { onEdit, onDeleted } = renderScreen("ch-apps", courseDraft(), vi.fn<DraftEditor["edit"]>(() => ({ refused: "missing", id: "ch-apps" })));
     fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+    answer("Delete the chapter", "Cancel");
+    expect(onEdit).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "Delete" }));
-    expect(confirm).toHaveBeenCalledTimes(2);
+    answer("Delete the chapter", "Delete");
+    expect(onEdit).toHaveBeenCalled();
     expect(onDeleted).not.toHaveBeenCalled();
   });
 

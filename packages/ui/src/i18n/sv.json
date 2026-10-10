@@ -1490,7 +1490,8 @@
       "open": "Öppna raden",
       "extendDown": "Välj raden och nästa också",
       "extendUp": "Välj raden och den före också",
-      "clear": "Rensa valet"
+      "clear": "Rensa valet",
+      "bulk": "Öppna åtgärderna för de valda raderna"
     },
     "dock": {
       "label": "Panel",
@@ -1618,7 +1619,16 @@
         "other": "Tog bort {count} kortlekar."
       },
       "export": "Exportera",
-      "moveSetAside": "Ordningen av kortlekarna har ogiltiga data, så kortlekar kan inte flyttas in i grupper förrän den är reparerad."
+      "moveSetAside": "Ordningen av kortlekarna har ogiltiga data, så kortlekar kan inte flyttas in i grupper förrän den är reparerad.",
+      "groups": {
+        "edit": "Redigera",
+        "editCards": "Redigera de valda korten",
+        "editDecks": "Redigera de valda kortlekarna",
+        "schedule": "Schema",
+        "scheduleCards": "Schema för de valda korten",
+        "transfer": "Flytta eller kopiera",
+        "transferCards": "Flytta eller kopiera de valda korten"
+      }
     },
     "groups": {
       "heading": "Grupper"
@@ -1667,12 +1677,11 @@
         "one": "{shown} av {count} kort",
         "other": "{shown} av {count} kort"
       },
-      "keys": "Tangenter: {j} och {k} flyttar mellan korten, {x} väljer ett, {enter} öppnar det, {shiftJ} och {shiftK} väljer också nästa eller det före, och {escape} tömmer urvalet.",
+      "keys": "Tangenter: {j} och {k} flyttar mellan korten, {x} väljer ett, {enter} öppnar det, {shiftJ} och {shiftK} väljer också nästa eller det före, {escape} tömmer urvalet, och {dot} öppnar åtgärderna för de valda korten.",
       "selected": {
         "one": "{count} kort valt",
         "other": "{count} kort valda"
       },
-      "clear": "Rensa valet",
       "noMatch": "Inget kort matchar.",
       "caption": "Korten i {deck}",
       "select": "Välj",
@@ -1728,7 +1737,20 @@
         "save": "Spara",
         "discard": "Kasta",
         "stay": "Stanna"
-      }
+      },
+      "cancel": "Avbryt",
+      "deleteCards": "Ta bort de valda korten",
+      "forgetCards": "Glöm de valda kortens framsteg",
+      "deleteDecks": "Ta bort de valda kortlekarna",
+      "forgetDirection": "Glöm kortets framsteg",
+      "restartCourse": "Börja om kursen",
+      "deleteDraft": "Ta bort utkastet",
+      "deletePart": {
+        "chapter": "Ta bort kapitlet",
+        "step": "Ta bort steget",
+        "card": "Ta bort kortet"
+      },
+      "removeData": "Ta bort det ur din pod"
     },
     "schedule": {
       "loading": "Läser in schemat…",
@@ -1958,6 +1980,10 @@
         "present": {
           "one": "{count} kort fanns redan där.",
           "other": "{count} kort fanns redan där."
+        },
+        "heading": {
+          "move": "Flytta kort till en annan kortlek",
+          "copy": "Kopiera kort till en annan kortlek"
         }
       }
     },
@@ -2137,7 +2163,12 @@
       "badgeOf": "för {deck}",
       "newerUnknown": "Okänt: ingen offentlig katalog hos skaparen listar den",
       "peek": "Gå till en kopias rad ({j}, {k}) för att se vad en uppgradering skulle ändra.",
-      "plan": "Uppgradering"
+      "plan": "Uppgradering",
+      "bulk": "Valda kopior",
+      "selected": {
+        "one": "{count} kopia vald",
+        "other": "{count} kopior valda"
+      }
     },
     "transfer": {
       "crumb": "Importera och exportera",

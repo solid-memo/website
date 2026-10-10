@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
@@ -9,6 +9,7 @@ import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { DraftsContainer, draftsKey } from "./DraftsContainer";
 import { draftKey } from "./draftEditor";
 import { courseDraft, instanceA, invalidReport, makeDeck } from "../test/fixtures";
+import { answer } from "../test/dialogs";
 
 const kanji = makeDeck("deck-1", { en: "Kanji N5" });
 const solid: ReleaseDraftSummary = {
@@ -39,8 +40,6 @@ function renderContainer(useCases: UseCases, queryClient = new QueryClient({ def
   return { invalidate, onCreated };
 }
 
-afterEach(() => vi.unstubAllGlobals());
-
 describe("DraftsContainer", () => {
   it("lists the instance's drafts, makes a new one and reads them afresh, staying to offer the next version of the release it is a copy of", async () => {
     const useCases = makeUseCasesFake({
@@ -61,7 +60,6 @@ describe("DraftsContainer", () => {
   });
 
   it("deletes a draft once confirmed, and says why one could not be made or deleted", async () => {
-    vi.stubGlobal("confirm", () => true);
     const useCases = makeUseCasesFake({
       listReleaseDrafts: vi.fn(async () => [solid]),
       createReleaseDraft: vi.fn(async () => {
@@ -71,9 +69,11 @@ describe("DraftsContainer", () => {
     vi.mocked(useCases.deleteReleaseDraft).mockRejectedValueOnce(new AppError("draftGone"));
     renderContainer(useCases);
     fireEvent.click(await screen.findByRole("button", { name: "Delete the draft Solid, version 1" }));
+    answer("Delete the draft", "Delete");
     expect(await screen.findByText("That draft no longer exists. Perhaps it was deleted in another tab or app.")).toBeInTheDocument();
     await waitFor(() => expect(screen.getByRole("button", { name: "Delete the draft Solid, version 1" })).toBeEnabled());
     fireEvent.click(screen.getByRole("button", { name: "Delete the draft Solid, version 1" }));
+    answer("Delete the draft", "Delete");
     expect(await screen.findByText("Deleted the draft Solid, version 1.")).toBeInTheDocument();
     expect(useCases.deleteReleaseDraft).toHaveBeenCalledWith(solid);
     fireEvent.click(screen.getByRole("radio", { name: "The next version of a release" }));
@@ -83,7 +83,6 @@ describe("DraftsContainer", () => {
   });
 
   it("forgets what was read of a draft deleted, so a new draft at its URL is read afresh, and opens the new one", async () => {
-    vi.stubGlobal("confirm", () => true);
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     const useCases = makeUseCasesFake({
       listDecks: vi.fn(async () => [kanji]),
@@ -93,6 +92,7 @@ describe("DraftsContainer", () => {
     queryClient.setQueryData(draftKey(solid.url), courseDraft());
     const { onCreated } = renderContainer(useCases, queryClient);
     fireEvent.click(await screen.findByRole("button", { name: "Delete the draft Solid, version 1" }));
+    answer("Delete the draft", "Delete");
     expect(await screen.findByText("Deleted the draft Solid, version 1.")).toBeInTheDocument();
     expect(queryClient.getQueryData(draftKey(solid.url))).toBeUndefined();
     // Read in another tab meanwhile, say: a new draft at the URL is not that one.
@@ -105,12 +105,12 @@ describe("DraftsContainer", () => {
   });
 
   it("says which draft it is deleting while it does", async () => {
-    vi.stubGlobal("confirm", () => true);
     let finish: () => void = () => undefined;
     const useCases = makeUseCasesFake({ listReleaseDrafts: vi.fn(async () => [solid]) });
     vi.mocked(useCases.deleteReleaseDraft).mockImplementationOnce(() => new Promise((resolve) => (finish = () => resolve())));
     renderContainer(useCases);
     fireEvent.click(await screen.findByRole("button", { name: "Delete the draft Solid, version 1" }));
+    answer("Delete the draft", "Delete");
     expect(await screen.findByText("Deleting the draft Solid…")).toBeInTheDocument();
     finish();
     expect(await screen.findByText("Deleted the draft Solid, version 1.")).toBeInTheDocument();

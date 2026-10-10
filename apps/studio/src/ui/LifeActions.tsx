@@ -1,5 +1,6 @@
 import type { DraftChange, DraftKind, DraftRefusal } from "@solid-memo/domain/release/releaseDraft";
 import { useI18n } from "@solid-memo/ui/i18n";
+import { useConfirm } from "./shell/ConfirmDialog";
 
 /**
  * Retire or restore a chapter, step or card of a draft, or delete it,
@@ -27,6 +28,7 @@ export function LifeActions({
   onDeleted: () => void;
 }) {
   const { t } = useI18n();
+  const { ask, dialog } = useConfirm();
   return (
     <section aria-labelledby="draft-life-heading" class="draft-life">
       <h3 id="draft-life-heading">{t(`studio.draftEdit.life.${of}`)}</h3>
@@ -39,13 +41,21 @@ export function LifeActions({
           type="button"
           class="danger"
           disabled={published}
-          onClick={() => {
-            if (window.confirm(t(`studio.draftEdit.deleteConfirm.${of}`, { name })) && onEdit({ kind: "delete", of, id }) === null) onDeleted();
-          }}
+          onClick={() =>
+            ask({
+              heading: t(`studio.confirm.deletePart.${of}`),
+              text: t(`studio.draftEdit.deleteConfirm.${of}`, { name }),
+              action: t("studio.draftEdit.delete"),
+              onConfirm: () => {
+                if (onEdit({ kind: "delete", of, id }) === null) onDeleted();
+              },
+            })
+          }
         >
           {t("studio.draftEdit.delete")}
         </button>
       </p>
+      {dialog}
     </section>
   );
 }

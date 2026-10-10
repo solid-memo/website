@@ -14,6 +14,7 @@ import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { CardWorkbenchContainer } from "./CardWorkbenchContainer";
 import { instanceA, invalidReport, makeCard, makeDeck } from "../test/fixtures";
+import { answer, pick } from "../test/dialogs";
 
 const deck = makeDeck("deck-1", { en: "Kanji N5" });
 const water = { ...makeCard(deck, "water"), back: { en: "**Water**" }, textFormat: SM.markdown };
@@ -225,8 +226,8 @@ describe("CardWorkbenchContainer", () => {
     const bulk = () => within(screen.getByRole("group", { name: "Selected cards" }));
     fireEvent.click(bulk().getByRole("button", { name: "Retire" }));
     expect(await screen.findByRole("button", { name: "Undo" })).toBeInTheDocument();
-    await waitFor(() => expect(bulk().getByRole("button", { name: "Set due date" })).toBeEnabled());
-    fireEvent.click(bulk().getByRole("button", { name: "Set due date" }));
+    await waitFor(() => expect(bulk().getByRole("button", { name: "Retire" })).toBeEnabled());
+    pick("Schedule the selected cards", "Set due date");
     expect(screen.getByLabelText("Due on")).toHaveValue(today);
     fireEvent.input(screen.getByLabelText("Due on"), { target: { value: "2099-01-01" } });
     fireEvent.click(screen.getByRole("button", { name: "Apply" }));
@@ -236,15 +237,13 @@ describe("CardWorkbenchContainer", () => {
     expect(screen.queryByRole("button", { name: "Undo" })).not.toBeInTheDocument();
     await waitFor(() => expect(screen.getByRole("row", { name: /fire/ })).toHaveTextContent("January 1, 2099"));
 
-    vi.stubGlobal("confirm", () => true);
-    fireEvent.click(bulk().getByRole("button", { name: "Forget progress" }));
+    pick("Schedule the selected cards", "Forget progress");
+    answer("Forget the selected cards' progress", "Forget progress");
     expect(await screen.findByText("Forgot the progress of 1 card.")).toBeInTheDocument();
     expect(useCases.resetCards).toHaveBeenCalledWith(instanceA.url, deck, ["fire"]);
-    vi.unstubAllGlobals();
   });
 
   it("says why progress could not be forgotten", async () => {
-    vi.stubGlobal("confirm", () => true);
     const useCases = makeUseCasesFake({
       listCards: vi.fn(async () => [water, fire]),
       resetCards: vi.fn(async () => {
@@ -253,9 +252,9 @@ describe("CardWorkbenchContainer", () => {
     });
     renderContainer(useCases);
     fireEvent.click(await screen.findByRole("checkbox", { name: "Select fire" }));
-    fireEvent.click(within(screen.getByRole("group", { name: "Selected cards" })).getByRole("button", { name: "Forget progress" }));
+    pick("Schedule the selected cards", "Forget progress");
+    answer("Forget the selected cards' progress", "Forget progress");
     await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("Pod unreachable"));
-    vi.unstubAllGlobals();
   });
 
   it("moves the selected cards to another deck, says what it did, and reads both decks afresh", async () => {
@@ -274,8 +273,7 @@ describe("CardWorkbenchContainer", () => {
     });
     renderContainer(useCases);
     fireEvent.click(await screen.findByRole("checkbox", { name: "Select fire" }));
-    const bulk = () => within(screen.getByRole("group", { name: "Selected cards" }));
-    fireEvent.click(bulk().getByRole("button", { name: "Move to deck…" }));
+    pick("Move or copy the selected cards", "Move to deck…");
     // The deck itself is no choice.
     expect(within(screen.getByRole("combobox", { name: "To the deck" })).getAllByRole("option").map((o) => o.textContent)).toEqual(["Nouns"]);
     fireEvent.click(screen.getByRole("button", { name: "Move 1 card" }));
@@ -284,7 +282,7 @@ describe("CardWorkbenchContainer", () => {
     ).toBeInTheDocument();
     expect(useCases.transferCards).toHaveBeenCalledWith(instanceA.url, deck, nouns, ["fire"], { mode: "move", keepProgress: true });
     await waitFor(() => expect(fronts()).toEqual(["water"]));
-    expect(screen.getByText("0 cards selected")).toBeInTheDocument();
+    expect(screen.queryByRole("group", { name: "Selected cards" })).toBeNull();
   });
 
   it("offers no deck set aside to move cards to, and no edit of a deck set aside", async () => {
@@ -292,14 +290,14 @@ describe("CardWorkbenchContainer", () => {
     const useCases = makeUseCasesFake({ listCards: vi.fn(async () => [water, fire]), checkInstance: vi.fn(async () => invalidReport([nouns])) });
     const { unmount } = renderContainer(useCases, DEFAULT_CARD_QUERY, deck, [deck, nouns, verbs]);
     fireEvent.click(await screen.findByRole("checkbox", { name: "Select fire" }));
-    const bulk = await screen.findByRole("group", { name: "Selected cards" });
-    fireEvent.click(within(bulk).getByRole("button", { name: "Move to deck…" }));
+    await screen.findByRole("group", { name: "Selected cards" });
+    pick("Move or copy the selected cards", "Move to deck…");
     expect(within(screen.getByRole("combobox", { name: "To the deck" })).getAllByRole("option").map((o) => o.textContent)).toEqual(["Verbs"]);
     unmount();
     renderContainer(makeUseCasesFake({ listCards: vi.fn(async () => [water, fire]), checkInstance: vi.fn(async () => invalidReport([deck])) }));
     fireEvent.click(await screen.findByRole("checkbox", { name: "Select fire" }));
     expect(await screen.findByText(/This deck has invalid data/)).toBeInTheDocument();
-    expect(screen.queryByRole("group", { name: "Selected cards" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Retire" })).toBeNull();
   });
 
   it("says when a copy found cards there already, and why a transfer was not made", async () => {
@@ -313,15 +311,15 @@ describe("CardWorkbenchContainer", () => {
     renderContainer(useCases);
     fireEvent.click(await screen.findByRole("checkbox", { name: "Select fire" }));
     const bulk = () => within(screen.getByRole("group", { name: "Selected cards" }));
-    fireEvent.click(bulk().getByRole("button", { name: "Copy to deck…" }));
+    pick("Move or copy the selected cards", "Copy to deck…");
     fireEvent.click(screen.getByRole("button", { name: "Copy 1 card" }));
     expect(await screen.findByText("Copied 1 card to Nouns. 1 card was there already.")).toBeInTheDocument();
     // Still selected: a copy leaves the cards where they are.
-    expect(screen.getByText("1 card selected")).toBeInTheDocument();
+    expect(bulk().getByText("1 card selected")).toBeInTheDocument();
 
     vi.mocked(useCases.transferCards).mockRejectedValueOnce(new Error("Pod unreachable"));
-    await waitFor(() => expect(bulk().getByRole("button", { name: "Copy to deck…" })).toBeEnabled());
-    fireEvent.click(bulk().getByRole("button", { name: "Copy to deck…" }));
+    await waitFor(() => expect(bulk().getByRole("button", { name: "Retire" })).toBeEnabled());
+    pick("Move or copy the selected cards", "Copy to deck…");
     fireEvent.click(screen.getByRole("button", { name: "Copy 1 card" }));
     await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("Pod unreachable"));
   });

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
@@ -11,6 +11,7 @@ import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { DeckTableContainer } from "./DeckTableContainer";
 import { choose } from "../test/choose";
 import { instanceA, invalidReport, makeCard, makeDeck } from "../test/fixtures";
+import { answer, pick } from "../test/dialogs";
 
 const kanji = makeDeck("deck-1", { en: "Kanji N5" });
 const verbs = makeDeck("deck-2", { en: "Verbs" });
@@ -41,8 +42,6 @@ function renderContainer(useCases: UseCases) {
 }
 
 const cells = (row: HTMLElement) => within(row).getAllByRole("cell").map((cell) => cell.textContent);
-
-afterEach(() => vi.unstubAllGlobals());
 
 describe("DeckTableContainer", () => {
   it("reads the decks as arranged, then each one's cards in use and today's counts, with the instance's pace", async () => {
@@ -150,7 +149,7 @@ describe("DeckTableContainer", () => {
     expect(screen.getByRole("checkbox", { name: "Select Kanji N5" })).toBeDisabled();
     expect(screen.getByText(/Decks with invalid data are set aside/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("checkbox", { name: "Select Verbs" }));
-    fireEvent.click(screen.getByRole("button", { name: "Move to group" }));
+    pick("Edit the selected decks", "Move to group");
     expect(screen.getByText(/The arrangement of these decks has invalid data/)).toBeInTheDocument();
   });
 
@@ -160,7 +159,7 @@ describe("DeckTableContainer", () => {
     renderContainer(useCases);
     await waitFor(() => expect(screen.getByRole("checkbox", { name: "Select Verbs" })).toBeEnabled());
     fireEvent.click(screen.getByRole("checkbox", { name: "Select Verbs" }));
-    fireEvent.click(screen.getByRole("button", { name: "Move to group" }));
+    pick("Edit the selected decks", "Move to group");
     expect(screen.getByText(/A newer version of Solid Memo arranged these groups/)).toBeInTheDocument();
   });
 
@@ -174,10 +173,10 @@ describe("DeckTableContainer", () => {
     fireEvent.click(await screen.findByRole("checkbox", { name: "Select Kanji N5" }));
     fireEvent.click(screen.getByRole("checkbox", { name: "Select Verbs" }));
     const apply = async (action: string, fill: () => void, said: string) => {
-      fireEvent.click(screen.getByRole("button", { name: action }));
+      pick("Edit the selected decks", action);
       fill();
       fireEvent.click(screen.getByRole("button", { name: "Apply" }));
-      await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent(said));
+      await waitFor(() => expect(screen.getAllByRole("status")[0]).toHaveTextContent(said));
     };
     const reads = vi.mocked(useCases.listDeckTree).mock.calls.length;
     await apply(
@@ -209,9 +208,9 @@ describe("DeckTableContainer", () => {
       "Set the direction of 2 decks.",
     );
     expect(useCases.setDecksDirection).toHaveBeenCalledWith([kanji, verbs], "bidirectional");
-    vi.stubGlobal("confirm", () => true);
     fireEvent.click(screen.getByRole("button", { name: "Delete" }));
-    await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("Deleted 2 decks."));
+    answer("Delete the selected decks", "Delete");
+    await waitFor(() => expect(screen.getAllByRole("status")[0]).toHaveTextContent("Deleted 2 decks."));
     expect(useCases.removeDecks).toHaveBeenCalledWith([kanji, verbs]);
   });
 
@@ -224,7 +223,7 @@ describe("DeckTableContainer", () => {
     });
     renderContainer(useCases);
     fireEvent.click(await screen.findByRole("checkbox", { name: "Select Kanji N5" }));
-    fireEvent.click(screen.getByRole("button", { name: "Set direction" }));
+    pick("Edit the selected decks", "Set direction");
     fireEvent.click(screen.getByRole("button", { name: "Apply" }));
     await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("The pod said no"));
   });

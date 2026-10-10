@@ -202,6 +202,7 @@ and its keymap is data
 | `1` … `9` | a deck's or a draft's screens, but the trial | go to the tab of that number; in the trial they are the learner's, a grade or an option |
 | `j`, `k`, `x`, Enter | a table: the card workbench (a card beside it too), Home, the library copies, a draft's cards, the releases | the next row, the one before (beside a card, show it; on Home and the library copies, show it in the aside), select it, open it ([below](#card-workbench)) |
 | Shift+J, Shift+K, Escape | a table whose rows are selected | select the row and the next, or the one before; clear the selection |
+| `.` | a table whose rows are selected | open the first menu of the selection's bar, or go to its first button ([below](#bulk-edits)) |
 
 A pair such as `g d` is pressed one key after the other, the second
 within 1.5 seconds; a key held down counts once, so a held `g` is not
@@ -226,6 +227,29 @@ value is the pane's size in pixels, between its least and its most.
 Left and Right (Up and Down, for the dock's) move it 16 pixels, Home
 and End to either end; the pointer drags it. The sums are in
 [`shell/splitter.ts`](../apps/studio/src/ui/shell/splitter.ts).
+
+**Filters and the selection.** A table's filters (the workbench's,
+Home's, a draft's cards') are one row over it, wrapping only on a
+narrow screen, each label small and beside its field, and the counts at
+the row's end. Rows selected in a table (the workbench, Home, the
+library copies, a draft's cards) bring up a bar under it
+([`shell/BulkBar.tsx`](../apps/studio/src/ui/shell/BulkBar.tsx)), a
+group named for them ("Selected cards"), which stays in sight at the
+foot of the main content as the table scrolls: how many are selected,
+what can be done with them all at once (a few buttons, and menus of the
+rest), and **Clear selection**. It is there only while some are; a
+status line, there throughout, says how many. **`.`** opens its first
+menu.
+
+**Questions and forms in a dialog.** Whatever loses something asks
+first, in the Studio's own dialog, not the browser's
+([`shell/ConfirmDialog.tsx`](../apps/studio/src/ui/shell/ConfirmDialog.tsx),
+`useConfirm`): a heading, the question, the action (it has the focus)
+and Cancel; Escape or Close does nothing either. So does deleting
+cards, decks, a draft or a part of it, forgetting progress, restarting
+a course, and removing data from the pod on the health screen. A bulk
+edit that needs to be told more (a language, a day, a deck, a group)
+asks in a dialog too, not in the page above the table.
 
 ### The dock
 
@@ -502,9 +526,12 @@ the table has not. The URL names it (`deck`), each move of the cursor
 replacing the history entry; a deck the instance does not have shows
 none. Before the cursor has moved, the aside says how to show one.
 
-Decks are selected by their checkbox, or all those shown at once. The
-selected decks the table shows can be (a selected deck the filter hides
-stays selected, but is left alone until it is shown again):
+Decks are selected by their checkbox, or all those shown at once, and
+the selection's bar ([Layout](#layout)) offers what can be done with
+them: **Edit** (a menu of the first three, each asking how in a
+dialog), Export and Delete. The selected decks the table shows can be (a
+selected deck the filter hides stays selected, but is left alone until
+it is shown again):
 
 - **moved into a group**, or to the top level, at its end, in their
   order in the table (not when a newer version arranged the groups);
@@ -514,7 +541,7 @@ stays selected, but is left alone until it is shown again):
 - **exported**: Export opens [import and export](#import-and-export)
   with them ticked;
 - **deleted**, with their cards, once the user confirms a question that
-  names each deck.
+  names each deck (a ConfirmDialog).
 
 Each is one write of `catalog.ttl`, made in turn with the other writes
 of the catalog, and the table is read afresh after it
@@ -574,11 +601,12 @@ its header row and its first column (the checkboxes and the fronts)
 stay in sight as it scrolls. Cards are selected by their checkbox, or
 all those on the page at once; a click with Shift held selects, or
 not, every card from the one ticked last. The selection stays while
-the view changes, and a status line counts it. The keys say so on the
-screen: **j** and **k** move the cursor between the rows (the focus
+the view changes, and the selection's bar under the table counts it
+([Layout](#layout)). The keys say so, quietly, under the bar: **j** and **k** move the cursor between the rows (the focus
 goes to the row's front), **x** selects the row, **Shift+J** and
 **Shift+K** select on from where the selection was last made, **Escape**
-clears the selection, and **Enter** opens the card. The cursor's row is
+clears the selection, **Enter** opens the card, and **`.`** opens the
+bar's first menu. The cursor's row is
 marked, as is each row selected. **j** and **k** work wherever the
 focus is: from outside the table, they go on from the cursor's row, or
 to the first. **x**, **Enter** and the Shift keys act on the row the
@@ -601,8 +629,8 @@ The selected cards can be edited at once ([below](#bulk-edits)).
 
 The lapses column counts each card's wrong answers (below grade 3) in
 the [answer log](data-model.md#the-answer-log). The log goes back only
-so far, so a line above the table names the month of the deck's first
-answer in it: "since March 2025". The workbench reads the whole log once (`loadAnswerLog`). While
+so far, so the row of filters ends with the month of the deck's first
+answer in it: "since March 2025", after how many cards the query keeps. The workbench reads the whole log once (`loadAnswerLog`). While
 it is read, the cards show without their lapses, and a query that needs
 them (`state=leech`, `sort=lapses`) waits. When it cannot be read, the
 line says so, and such a query shows why. The deck's tabs go to its
@@ -619,9 +647,15 @@ A test keeps a query over 5,000 cards linear: timed at two sizes on the same mac
 ## Bulk edits
 
 The selected cards the query keeps can be edited at once, on any page
-([`CardBulkActions`](../apps/studio/src/ui/CardBulkActions.tsx)). A
-selected card the query hides stays selected, but is left alone. The
-edits are:
+([`CardBulkActions`](../apps/studio/src/ui/CardBulkActions.tsx)), from
+the selection's bar ([Layout](#layout)). A selected card the query hides
+stays selected, but is left alone. The bar groups the edits: **Edit**
+(Write in Markdown, Write as plain text, State language, Find and
+replace), **Schedule** (Set due date, Forget progress), **Move or
+copy** (Move to deck…, Copy to deck…), then Retire, Restore and
+Delete. An edit that needs to be told more asks in a dialog; one that
+loses something asks first ([Layout](#layout)). While the deck may not
+be changed, the bar has Clear selection alone. The edits are:
 
 - **Retire** and **Restore**. A retired card keeps its review state.
 - **Write in Markdown** and **Write as plain text**. Plain text is
@@ -708,7 +742,8 @@ Its four tabs are links, the one shown marked
 (`aria-current`):
 
 - **Content**: Solid Memo's card editor (`CardContainer` in `ui`): the
-  card as it is studied, its sides, pictures, notes, label and Markdown,
+  card as it is studied (small here, its faces side by side, so the
+  fields under it are in sight), its sides, pictures, notes, label and Markdown,
   Save, and Remove, which goes back to the deck's cards. Its wrong
   options are left to their own tab. Each save is told to the
   [dock](#the-dock)'s activity, as each change of the wrong options is.
@@ -1110,7 +1145,8 @@ back, none is shown until the cursor moves.
 
 The copies that can be upgraded are selected by their checkbox, or all
 at once; a copy set aside cannot be, nor any until the data check is
-done ([below](#data-set-aside)). **Update 2 decks** (as many as are selected) upgrades them one
+done ([below](#data-set-aside)). **Update 2 decks** (as many as are
+selected), in the selection's bar ([Layout](#layout)), upgrades them one
 after another, each with Solid Memo's own upgrade (`applyLibraryUpgrade`), on the plan the user saw: a
 deck changed since is refused, and left as it was. Nothing about an
 upgrade is new here. While it runs, the screen names the deck, "2 of 3",
@@ -1419,7 +1455,8 @@ A chapter's screen
 ([`ChapterEditorContainer`](../apps/studio/src/ui/ChapterEditorContainer.tsx))
 edits its title, always plain text, and its description, with "Format
 with Markdown" (`sm:textFormat` of the chapter) and a preview as the
-course's screen shows it. It orders the chapter's steps, up or down,
+course's screen shows it (beside the field on a screen 80rem wide or
+more, under it on a narrower one). It orders the chapter's steps, up or down,
 adds one, and restores one retired. It lists the questions asked only
 in the chapter's final review, and adds one.
 
@@ -1430,7 +1467,8 @@ A step's screen
 edits its theory, in each language it has, with "Format with Markdown"
 (`sm:textFormat` of the step). In Markdown, each text is hinted at where
 it would not show as meant, by the rules of prose (`PROSE`,
-[markdown.md](markdown.md)). Under it, a preview shows the theory as the
+[markdown.md](markdown.md)). Beside it on a screen 80rem wide or more,
+and under it on a narrower one, a preview shows the theory as the
 course player does (`ProseField` in `ui`, with the player's
 `DataProse`). The screen lists the questions that check the step, and
 adds one: its front and back, its id, and the question it is asked
@@ -1446,7 +1484,9 @@ content is Solid Memo's card editor (`CardContentFields`), saved by
 Save. Its wrong options are the inspector's own (`DistractorFields`),
 each change saved as it is made (`distractorChanges`). A preview asks
 the card as the course will (`CourseQuestion`, with `MultipleChoice`),
-as typed: it can be answered, and asked again.
+as typed: it can be answered, and asked again. On a screen 80rem wide
+or more it is beside the form, and stays in sight as the form scrolls;
+on a narrower one it is under it.
 
 ### A draft's cards
 
@@ -1460,8 +1500,9 @@ options in use, or retired; the language keeps those with text in it on
 their front or back. A column's name sorts by it, then the other way,
 then by id again, from the first page. A page holds 50. The table is a
 [`DataTable`](#card-workbench): cards are selected by their checkbox,
-or a page's at once, and **Retire 2 cards** or **Restore 1 card**
-retires or restores those selected the filter keeps, in one edit;
+or a page's at once, and **Retire 2 cards** or **Restore 1 card**, in
+the selection's bar ([Layout](#layout)), retires or restores those
+selected the filter keeps, in one edit;
 nothing is selected while the draft may not be changed. **Enter**
 opens a card's editor, as its link does. A new card is added under the
 table, asked nowhere yet.

@@ -21,6 +21,10 @@ beforeAll(() => {
 
 const root = document.documentElement;
 
+/** The test DOM's window this wide, as its own (happy-dom's) way has it: the cascade's @media reads it. */
+const viewport = (width: number) =>
+  (window as unknown as { happyDOM: { setViewport: (size: { width: number }) => void } }).happyDOM.setViewport({ width });
+
 afterEach(() => {
   document.body.innerHTML = "";
   root.removeAttribute("data-surface");
@@ -148,5 +152,58 @@ describe("the Studio's stylesheet", () => {
     // The row's name, though it stays in sight on a colour of its own, takes the row's.
     expect(styleOf(page, "tbody tr.cursor > th").backgroundColor).toBe(styleOf(page, "tbody tr.cursor > td:last-child").backgroundColor);
     expect(styleOf(page, "tbody tr.selected > th").backgroundColor).toBe(styleOf(page, "tbody tr.selected > td:last-child").backgroundColor);
+  });
+
+  it("packs a table's filters into one row, each label beside its field, and keeps the bar of the rows selected in sight", () => {
+    root.setAttribute("data-surface", "studio");
+    const page = `
+      <main class="workspace">
+        <div class="studio-filters">
+          <label class="studio-filter">Search <input type="search"></label>
+          <label>State <select><option>Any</option></select></label>
+          <p class="hint">3 of 4 cards</p>
+        </div>
+        <div class="studio-bulk-bar" role="group"><p>2 cards selected</p><div class="actions"><button>Retire</button></div></div>
+      </main>`;
+    expect(styleOf(page, ".studio-filters").display).toBe("flex");
+    expect(styleOf(page, ".studio-filters label:not(.studio-filter)").display).toBe("inline-flex");
+    expect(styleOf(page, ".studio-filters select").marginTop).toBe("0px");
+    expect(styleOf(page, ".studio-filters > p").marginLeft).toBe("auto");
+    expect(styleOf(page, ".studio-bulk-bar").position).toBe("sticky");
+    expect(styleOf(page, ".studio-bulk-bar").bottom).toBe("0px");
+    expect(styleOf(page, ".studio-bulk-bar .actions").display).toBe("flex");
+  });
+
+  it("makes the card inspector's card small, its faces side by side", () => {
+    const page = `
+      <main class="workspace">
+        <section class="card-inspector"><div class="practice-card"><div class="card-face card-front card-question"><p>水</p></div></div></section>
+      </main>`;
+    expect(styleOf(page, ".practice-card").flexDirection).toBe("column");
+    root.setAttribute("data-surface", "studio");
+    expect(styleOf(page, ".practice-card").flexDirection).toBe("row");
+    expect(styleOf(page, ".practice-card").minHeight).toBe("0");
+    expect(styleOf(page, ".card-question > p").fontSize).toBe("20px");
+  });
+
+  it("puts an editor's preview beside its form on a wide screen, under it on a narrower one", () => {
+    root.setAttribute("data-surface", "studio");
+    const page = `
+      <main class="workspace">
+        <div class="studio-editor"><p class="warning"></p><fieldset></fieldset><section class="course-player"></section></div>
+        <div class="prose-field"><div class="lang-text-field"></div><div class="markdown-toggle"></div><section class="prose-preview"></section></div>
+      </main>`;
+    viewport(1024);
+    expect(styleOf(page, ".studio-editor").display).toBe("block");
+    expect(styleOf(page, ".prose-field").display).toBe("block");
+    viewport(1440);
+    expect(styleOf(page, ".studio-editor").display).toBe("grid");
+    expect(styleOf(page, ".studio-editor > .course-player").position).toBe("sticky");
+    // A released draft's notice above the form leaves the preview on the right.
+    expect(styleOf(page, ".studio-editor > .warning").gridColumn).toContain("1");
+    expect(styleOf(page, ".studio-editor > .course-player").gridColumn).toContain("2");
+    expect(styleOf(page, ".prose-field").display).toBe("grid");
+    expect(styleOf(page, ".prose-preview").gridColumn).toContain("2");
+    viewport(1024);
   });
 });

@@ -468,6 +468,203 @@
   font-variant-numeric: tabular-nums;
 }
 
+/*
+ * A table's filters (the workbench's, Home's, a draft's cards'): one row,
+ * wrapping only when the screen is narrow, each label small and beside
+ * its field; the counts at the row's end.
+ */
+:root[data-surface="studio"] main .studio-filters {
+  gap: 0.25rem 0.75rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+:root[data-surface="studio"] main .studio-filters label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+:root[data-surface="studio"] main .studio-filters .studio-filter {
+  flex: 1 1 12rem;
+  max-width: 24rem;
+}
+
+:root[data-surface="studio"] main .studio-filters :is(select, input) {
+  display: inline-block;
+  margin-top: 0;
+  color: var(--text);
+}
+
+:root[data-surface="studio"] main .studio-filters .studio-filter input {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+}
+
+:root[data-surface="studio"] main .studio-filters > p {
+  margin: 0;
+  font-size: 0.8125rem;
+}
+
+:root[data-surface="studio"] main .studio-filters > p:first-of-type {
+  margin-left: auto;
+}
+
+/* The keys of a table, said once more under it, quietly. */
+:root[data-surface="studio"] main .studio-keys {
+  margin: 0.5rem 0 0;
+  font-size: 0.75rem;
+}
+
+/*
+ * The bar of a table's selected rows (shell/BulkBar.tsx): in sight at the
+ * foot of the main content while the table scrolls, over it.
+ */
+:root[data-surface="studio"] main .studio-bulk-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+  margin-top: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+}
+
+:root[data-surface="studio"] main .studio-bulk-bar > p {
+  margin: 0 0.25rem 0 0;
+  font-weight: 600;
+}
+
+:root[data-surface="studio"] main .studio-bulk-bar .actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0;
+}
+
+:root[data-surface="studio"] main .studio-bulk-bar .actions p {
+  margin: 0;
+}
+
+/* A dialog's form: a field a line, under its label. */
+:root[data-surface="studio"] .studio-dialog form label {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+:root[data-surface="studio"] .studio-dialog form :is(select, input:not([type="checkbox"])) {
+  display: block;
+  margin-top: 0.25rem;
+  max-width: 100%;
+}
+
+:root[data-surface="studio"] .studio-dialog form .studio-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-right: 1rem;
+}
+
+:root[data-surface="studio"] .studio-dialog fieldset {
+  margin: 0 0 0.5rem;
+  padding: 0;
+  border: 0;
+}
+
+/*
+ * A chapter's, a step's or a question's editor on a wide screen: the
+ * preview beside the form, not under it, in sight as the form scrolls.
+ */
+@media (min-width: 80rem) {
+  :root[data-surface="studio"] main .prose-field {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 1rem;
+    align-items: start;
+  }
+
+  :root[data-surface="studio"] main .prose-field > :not(.prose-preview) {
+    grid-column: 1;
+  }
+
+  :root[data-surface="studio"] main .prose-field > .prose-preview {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    margin: 0;
+  }
+
+  :root[data-surface="studio"] main .studio-editor {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(16rem, 2fr);
+    gap: 1rem;
+    align-items: start;
+  }
+
+  /* A read-only draft's notice, then the form, on the left. */
+  :root[data-surface="studio"] main .studio-editor > :not(.course-player) {
+    grid-column: 1;
+  }
+
+  :root[data-surface="studio"] main .studio-editor > .course-player {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    position: sticky;
+    top: 0;
+  }
+}
+
+/*
+ * The card inspector's card as it is studied: small, its two faces side
+ * by side, so the fields under it are in sight.
+ */
+:root[data-surface="studio"] .card-inspector .practice-card {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0.75rem;
+  min-height: 0;
+  max-height: 10rem;
+  padding: 0.5rem 0.75rem;
+  overflow: auto;
+  font-size: 0.875rem;
+  text-align: left;
+  animation: none;
+}
+
+:root[data-surface="studio"] .card-inspector .practice-card .card-face {
+  flex: 1 1 0;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+:root[data-surface="studio"] .card-inspector .practice-card .card-question > p {
+  font-size: 1.25rem;
+}
+
+:root[data-surface="studio"] .card-inspector .practice-card .card-answer {
+  padding: 0 0 0 0.75rem;
+  border-top: 0;
+  border-left: 1px dashed var(--border-strong);
+}
+
+:root[data-surface="studio"] .card-inspector .practice-card .card-answer > p {
+  font-size: 1rem;
+}
+
+:root[data-surface="studio"] .card-inspector .practice-card img {
+  max-height: 5rem;
+}
+
 /* A deck or a library copy beside its table: its figures as name and value, a row each. */
 :root[data-surface="studio"] .studio-peek h3 {
   margin: 0 0 0.5rem;

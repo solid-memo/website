@@ -16,6 +16,7 @@ import { problem } from "@solid-memo/domain/release/problems";
 import { courseDraft, DRAFT_URL, instanceA, instanceB, makeCard, makeDeck, session } from "../test/fixtures";
 import { courseDeck, courseInstance, makeCourse } from "@solid-memo/ui/test/course";
 import { narrowScreen, wideScreen } from "../test/media";
+import { answer } from "../test/dialogs";
 
 const kanji = makeDeck("deck-1", { en: "Kanji N5" });
 const verbs = makeDeck("deck-2", { en: "Verbs" });
@@ -941,22 +942,23 @@ describe("StudioWorkspace", () => {
     });
 
     it("leaves a chapter, step or question once it is deleted, and falls back from one the draft has not", async () => {
-      vi.stubGlobal("confirm", vi.fn(() => true));
       const useCases = draftUseCases();
       window.history.replaceState(null, "", studioRouteToHash({ screen: "chapter", draftUrl: DRAFT_URL, chapter: "ch-apps" }));
       renderWorkspace(useCases);
       fireEvent.click(await screen.findByRole("button", { name: "Delete" }));
+      answer("Delete the chapter", "Delete");
       await waitFor(() => expect(parseStudioHash(window.location.hash)).toEqual({ screen: "draft", draftUrl: DRAFT_URL }));
       expect(await screen.findByRole("heading", { name: "Outline" })).toBeInTheDocument();
       window.location.hash = studioRouteToHash({ screen: "step", draftUrl: DRAFT_URL, step: "ch-pods-2" });
       fireEvent.click(await screen.findByRole("button", { name: "Delete" }));
+      answer("Delete the step", "Delete");
       await waitFor(() => expect(parseStudioHash(window.location.hash)).toEqual({ screen: "draft", draftUrl: DRAFT_URL }));
       window.location.hash = studioRouteToHash({ screen: "question", draftUrl: DRAFT_URL, card: "q-pods-r01" });
       fireEvent.click(await screen.findByRole("button", { name: "Delete" }));
+      answer("Delete the card", "Delete");
       await waitFor(() => expect(parseStudioHash(window.location.hash)).toEqual({ screen: "draftCards", draftUrl: DRAFT_URL }));
       window.location.hash = studioRouteToHash({ screen: "chapter", draftUrl: DRAFT_URL, chapter: "ch-gone" });
       await waitFor(() => expect(parseStudioHash(window.location.hash)).toEqual({ screen: "draft", draftUrl: DRAFT_URL }));
-      vi.unstubAllGlobals();
     });
 
     it("names a step of no chapter, and a draft of no title, in its trail", async () => {
