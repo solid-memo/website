@@ -306,6 +306,7 @@ export type DraftChange =
   | { kind: "setMakingNotes"; notes: LangText }
   | { kind: "addCheckActivity"; id: string; activity: CheckActivity }
   | { kind: "editCheckActivity"; id: string; activity: CheckActivity }
+  /** An activity of this version deleted, with every mention of it, and what the draft states of a source it alone used. */
   | { kind: "deleteActivity"; id: string };
 
 /** Why a change was not made. */
@@ -919,10 +920,11 @@ function deleteActivity(draft: ReleaseDraft, id: string): ReleaseDraft | DraftRe
   const refusal = refuseActivity(draft, id);
   if (refusal !== null) return refusal;
   const iri = iriIn(draft, id);
-  return {
-    ...draft,
-    triples: draft.triples.filter((triple) => triple.subject !== iri && !(triple.object.kind === "iri" && triple.object.value === iri)),
-  };
+  const triples = draft.triples.filter((triple) => triple.subject !== iri && !(triple.object.kind === "iri" && triple.object.value === iri));
+  // A source only this activity used is no source any more: what the draft states of it goes too, so nothing is left that nothing names.
+  const sources = new Set(draft.triples.filter((triple) => triple.subject === iri && triple.predicate === `${PROV}used`).map((triple) => triple.object.value));
+  const named = (source: string) => draft.root.wasDerivedFrom.includes(source) || triples.some((triple) => triple.object.kind === "iri" && triple.object.value === source);
+  return { ...draft, triples: triples.filter((triple) => !sources.has(triple.subject) || named(triple.subject)) };
 }
 
 // --- The licence

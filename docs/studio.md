@@ -960,8 +960,9 @@ human review."). The release screen makes these changes
 A draft is written in six screens: its overview, a chapter, a step, a
 question, its cards, and its release metadata and provenance. They share the draft as one query, read once
 (`getReleaseDraft`), and change it by `DraftChange`s
-([below](#how-edits-are-saved)). Two more read it: its release check
-and its listing preview.
+([below](#how-edits-are-saved)). Four more read it: its release
+check, its listing preview, its trial, and its comparison with the
+release it follows.
 
 ### How edits are saved
 
@@ -1398,7 +1399,9 @@ library's releases are written
   only an earlier version's making used says so, and cannot be removed:
   that making still names it. Removing a source takes away this
   version's mentions of it; what it states stays while an earlier
-  version's making uses it. Only the source being edited has a
+  version's making uses it. An activity of this version deleted takes
+  with it what the draft states of a source it alone used, so nothing
+  stays that nothing names. Only the source being edited has a
   form, so a release of hundreds of sources stays light. A new source
   is a web address (`http:` or `https:`) the release does not name yet.
 - **Checks**: each check this version had, by a machine or by AI, with
