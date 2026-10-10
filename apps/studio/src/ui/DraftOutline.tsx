@@ -169,7 +169,7 @@ export function DraftOutline({
         {shown.length === 0 ? (
           <p>{t("studio.outline.empty")}</p>
         ) : (
-          <ul class="deck-list">
+          <ul class="deck-list" aria-label={t("studio.draft.outline")}>
             {shown.map((chapter, at) => {
               const name = readerText(chapter.title);
               const steps = chapter.children!;

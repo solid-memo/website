@@ -1,7 +1,8 @@
 import { expect, test, type Locator } from "@playwright/test";
 import { escapeRegExp } from "../harness/strings.ts";
-import { chooseLanguage } from "./languages.ts";
+import { chooseLanguageOf } from "./languages.ts";
 import { Screen } from "./Screen.ts";
+import { cellOf } from "./tables.ts";
 
 /**
  * Solid Memo Studio, in Solid Memo's page at #/studio (docs/studio.md):
@@ -83,8 +84,8 @@ export class Studio extends Screen {
 
   /**
    * Home lists the deck, in the instance's table: its name, the groups
-   * it is in, what is due today and its cards (the row's cells after its
-   * checkbox: group, direction, pace twice, due, new, last changed, cards).
+   * it is in, its new cards a day, what is due today and its cards, each
+   * under its column's header.
    */
   async expectDeck(
     instance: string,
@@ -93,11 +94,11 @@ export class Studio extends Screen {
   ): Promise<void> {
     await this.intent(`See ${deck} in the Studio`, async () => {
       await expect(this.page.getByRole("heading", { name: this.t("studio.decks.heading"), level: 2 })).toBeVisible();
-      const cells = this.row(instance, deck).getByRole("cell");
-      await expect(cells.nth(1)).toHaveText(figures.group ?? this.t("studio.decks.topLevel"));
-      if (figures.newCardsPerDay !== undefined) await expect(cells.nth(3)).toHaveText(figures.newCardsPerDay);
-      await expect(cells.nth(5)).toHaveText(String(figures.due));
-      await expect(cells.nth(8)).toContainText(String(figures.cards));
+      const cell = (column: string) => cellOf(this.decks(instance), this.row(instance, deck), this.t(`studio.decks.${column}`));
+      await expect(await cell("group")).toHaveText(figures.group ?? this.t("studio.decks.topLevel"));
+      if (figures.newCardsPerDay !== undefined) await expect(await cell("newCardsPerDay")).toHaveText(figures.newCardsPerDay);
+      await expect(await cell("due")).toHaveText(String(figures.due));
+      await expect(await cell("cards")).toContainText(String(figures.cards));
     });
   }
 
@@ -288,8 +289,9 @@ export class Studio extends Screen {
   async draftCourse(instance: string, name: string): Promise<void> {
     await this.intent(`Draft a course, ${name}`, async () => {
       await this.page.getByRole("radio", { name: this.t("studio.drafts.start.blankCourse") }).check();
-      await this.page.locator("#draft-name").fill(name);
-      await chooseLanguage(this.app, this.page.locator("#draft-name-language-0"), "en");
+      const field = this.page.getByRole("textbox", { name: this.t("studio.drafts.name"), exact: true });
+      await field.fill(name);
+      await chooseLanguageOf(this.app, field, "en");
       await this.page.getByRole("button", { name: this.t("studio.drafts.create"), exact: true }).click();
       await this.expectStatus(this.t("studio.drafts.created", { draft: name, version: 1 }));
       await this.expectDraft(instance, name, "course");
@@ -416,8 +418,8 @@ export class Studio extends Screen {
       await form.getByRole("textbox", { name: this.t("studio.cardBulk.replaceWith") }).fill(replace);
       const preview = form.getByRole("region", { name: this.t("studio.cardBulk.preview") });
       await expect(preview.getByText(this.t("studio.cardBulk.changes", { count: changes }))).toBeVisible();
-      await expect(preview.locator("del").first()).toHaveText(find);
-      await expect(preview.locator("ins").first()).toHaveText(replace);
+      await expect(preview.getByRole("deletion").first()).toHaveText(find);
+      await expect(preview.getByRole("insertion").first()).toHaveText(replace);
       await form.getByRole("button", { name: this.t("studio.cardBulk.confirmReplace", { count: changes }) }).click();
       await this.expectStatus(this.t("studio.cardBulk.done.replaceText", { count: changes }));
     });
@@ -427,7 +429,7 @@ export class Studio extends Screen {
   async expectBack(deck: string, front: string, back: string): Promise<void> {
     await this.intent(`See ${front}'s back as ${back}`, async () => {
       const row = this.cards(deck).getByRole("row").filter({ has: this.page.getByRole("rowheader", { name: front, exact: true }) });
-      await expect(row.getByRole("cell").nth(1)).toHaveText(back);
+      await expect(await cellOf(this.cards(deck), row, this.t("studio.cards.column.back"))).toHaveText(back);
     });
   }
 
@@ -540,7 +542,7 @@ export class Studio extends Screen {
       await this.app.chrome.expectBreadcrumbHere("studio.library.crumb");
       const table = this.page.getByRole("table", { name: this.t("studio.library.caption", { instance }) });
       const row = table.getByRole("row").filter({ has: this.page.getByRole("rowheader", { name: deck, exact: true }) });
-      await expect(row.getByRole("cell").nth(3)).toHaveText(this.t("studio.library.upToDate"));
+      await expect(await cellOf(table, row, this.t("studio.library.update"))).toHaveText(this.t("studio.library.upToDate"));
       await expect(row.getByRole("checkbox")).toHaveCount(0);
     });
   }
@@ -625,7 +627,7 @@ export class Studio extends Screen {
       await this.page.getByRole("link", { name: this.t("studio.cards.scheduleLink") }).click();
       await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.insight.heading", { deck }) })).toBeVisible();
       await expect(this.page).toHaveURL(/#\/studio\/schedule\?deck=/);
-      const tile = (label: string) => this.page.getByRole("group", { name: label, exact: true }).locator("strong");
+      const tile = (label: string) => this.page.getByRole("group", { name: label, exact: true }).getByRole("strong");
       await expect(tile(this.t("studio.insight.today"))).toHaveText(String(expected.today));
       await expect(tile(this.t("studio.insight.week", { count: 7 }))).toHaveText(String(expected.week));
       await expect(tile(this.t("studio.insight.scheduled"))).toHaveText(String(expected.studied));

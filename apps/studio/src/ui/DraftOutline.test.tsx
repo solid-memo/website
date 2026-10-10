@@ -30,7 +30,8 @@ describe("DraftOutline", () => {
   it("shows the chapters, their steps and the questions that check each, linked to their editors", () => {
     const draft = courseDraft();
     renderOutline({ ...draft, steps: draft.steps.map((node) => (node.id === "ch-pods-2" ? { ...node, data: { ...node.data, checkedBy: [`${draft.url}#gone`] } } : node)) });
-    expect(screen.getByRole("link", { name: "Pods" })).toHaveAttribute("href", "#/chapter/ch-pods");
+    const outline = screen.getByRole("list", { name: "Outline" });
+    expect(within(outline).getByRole("link", { name: "Pods" })).toHaveAttribute("href", "#/chapter/ch-pods");
     expect(screen.getByText("2 steps")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Step 1.1" })).toHaveAttribute("href", "#/step/ch-pods-1");
     expect(screen.getByText("A pod holds data.")).toBeInTheDocument();

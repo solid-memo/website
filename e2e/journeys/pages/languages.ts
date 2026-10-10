@@ -23,3 +23,13 @@ export async function chooseLanguage(app: App, picker: Locator, tag: string): Pr
   await panel.getByRole("button", { name: app.t("language.done"), exact: true }).click();
   await expect(picker).toHaveText(chosen);
 }
+
+/**
+ * Says which language a field's text is in (`field`, found by its role
+ * and label), with the picker that states it: the button whose text the
+ * field is described by, first among what describes it (LangTextField).
+ */
+export async function chooseLanguageOf(app: App, field: Locator, tag: string): Promise<void> {
+  const [said] = (await field.getAttribute("aria-describedby"))!.split(" ");
+  await chooseLanguage(app, app.page.getByRole("button").filter({ has: app.page.locator(`[id="${said}"]`) }), tag);
+}

@@ -95,7 +95,7 @@ export function ReleaseCheckScreen({
           {groupProblems(problems).map((group) => (
             <section key={group.severity} aria-labelledby={`check-${group.severity}`}>
               <h3 id={`check-${group.severity}`}>{t(group.severity === "error" ? "studio.check.errors" : "studio.check.warnings")}</h3>
-              <ul class="studio-health-list release-problems">
+              <ul class="studio-health-list release-problems" aria-labelledby={`check-${group.severity}`}>
                 {group.subjects.map(({ subject, problems: found }) => (
                   <li key={subject}>
                     <a href={subjectHref(found[0]!)}>{subjectName(draft, subject, i18n)}</a>

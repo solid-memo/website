@@ -64,13 +64,13 @@ describe("ReleaseCheckScreen", () => {
     });
     expect(screen.getByText(/held to its curation too/)).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("4 problems.");
-    const errors = screen.getByRole("region", { name: "Errors" });
+    const errors = screen.getByRole("list", { name: "Errors" });
     expect(within(errors).getByRole("link", { name: "Apps" })).toHaveAttribute("href", "#/chapter/ch-apps");
     expect(within(errors).getByRole("link", { name: "Has no step in use." })).toHaveAttribute("href", "#/chapter/ch-apps/steps");
     expect(within(errors).getByRole("link", { name: "Title: no text in English." })).toHaveAttribute("href", "#/chapter/ch-apps/title");
     expect(within(errors).getByRole("link", { name: "What holds data?" })).toHaveAttribute("href", "#/question/q-pods-1a");
     expect(within(errors).getByRole("link", { name: /^Has 1 wrong option/ })).toHaveAttribute("href", "#/question/q-pods-1a/distractors");
-    const warnings = screen.getByRole("region", { name: "Warnings" });
+    const warnings = screen.getByRole("list", { name: "Warnings" });
     expect(within(warnings).getByRole("link", { name: "This release" })).toHaveAttribute("href", "#/draft");
   });
 

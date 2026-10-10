@@ -37,6 +37,13 @@ const MARKDOWN_CHECK = { problems: expect.any(Function), chunks: expect.any(Func
 
 const home = (instanceUrl: string) => studioRouteToHash({ screen: "home", instanceUrl });
 
+/**
+ * Queries of the main content alone, the trail and the screen: links
+ * the shell around them may name too (a section, a deck, a draft, a tab)
+ * are the screen's here.
+ */
+const inMain = () => within(screen.getByRole("main"));
+
 describe("StudioWorkspace", () => {
   beforeEach(() => {
     window.history.replaceState(null, "", window.location.pathname);
@@ -65,7 +72,7 @@ describe("StudioWorkspace", () => {
     const back = await screen.findByRole("link", { name: "Back to Solid Memo" });
     await waitFor(() => expect(back).toHaveAttribute("href", `#/decks?instance=${encodeURIComponent(instanceA.url)}`));
     // No decks yet: Solid Memo makes them.
-    expect(await screen.findByRole("link", { name: "Solid Memo" })).toHaveAttribute("href", back.getAttribute("href"));
+    expect(await inMain().findByRole("link", { name: "Solid Memo" })).toHaveAttribute("href", back.getAttribute("href"));
   });
 
   it("has the user pick one of several instances, then shows its decks", async () => {
@@ -93,7 +100,7 @@ describe("StudioWorkspace", () => {
     );
     fireEvent.input(await screen.findByRole("searchbox", { name: "Filter by name or group" }), { target: { value: "verb" } });
     expect(parseStudioHash(window.location.hash)).toEqual({ screen: "home", instanceUrl: instanceA.url, view: { filter: "verb" } });
-    expect(screen.queryByRole("link", { name: "Kanji N5" })).toBeNull();
+    expect(inMain().queryByRole("link", { name: "Kanji N5" })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Cards" }));
     expect(parseStudioHash(window.location.hash)).toEqual({
       screen: "home",
@@ -103,15 +110,15 @@ describe("StudioWorkspace", () => {
     expect(window.history.length).toBe(length);
     const instance = encodeURIComponent(instanceA.url);
     const deck = encodeURIComponent(verbs.url);
-    expect(screen.getByRole("link", { name: "Verbs" })).toHaveAttribute("href", `#/studio/about?deck=${deck}`);
-    expect(await screen.findByRole("link", { name: /cards of Verbs/ })).toHaveAttribute("href", `#/studio/cards?deck=${deck}`);
-    expect(screen.getByRole("link", { name: "Name and catalogue" })).toHaveAttribute("href", `#/studio/instance?instance=${instance}`);
+    expect(inMain().getByRole("link", { name: "Verbs" })).toHaveAttribute("href", `#/studio/about?deck=${deck}`);
+    expect(await inMain().findByRole("link", { name: /cards of Verbs/ })).toHaveAttribute("href", `#/studio/cards?deck=${deck}`);
+    expect(inMain().getByRole("link", { name: "Name and catalogue" })).toHaveAttribute("href", `#/studio/instance?instance=${instance}`);
   });
 
   it("opens what a deck says of itself from Home: its trail and title, its page in Solid Memo", async () => {
     window.history.replaceState(null, "", home(instanceA.url));
     renderWorkspace(makeUseCasesFake({ listInstances: vi.fn(async () => [instanceA]), listDecks: vi.fn(async () => [kanji]) }));
-    fireEvent.click(await screen.findByRole("link", { name: "Kanji N5" }));
+    fireEvent.click(await inMain().findByRole("link", { name: "Kanji N5" }));
     expect(await screen.findByRole("heading", { name: "About: Kanji N5" })).toBeInTheDocument();
     expect(parseStudioHash(window.location.hash)).toEqual({ screen: "about", deckUrl: kanji.url });
     await waitFor(() => expect(document.title).toBe("About Kanji N5 – Solid Memo Studio"));
@@ -127,7 +134,7 @@ describe("StudioWorkspace", () => {
   it("opens the instance's name and catalogue from Home", async () => {
     window.history.replaceState(null, "", home(instanceA.url));
     renderWorkspace(makeUseCasesFake({ listInstances: vi.fn(async () => [instanceA]) }));
-    fireEvent.click(await screen.findByRole("link", { name: "Name and catalogue" }));
+    fireEvent.click(await inMain().findByRole("link", { name: "Name and catalogue" }));
     expect(await screen.findByRole("heading", { name: "Instance: Deck set A" })).toBeInTheDocument();
     expect(parseStudioHash(window.location.hash)).toEqual({ screen: "instance", instanceUrl: instanceA.url });
     await waitFor(() => expect(document.title).toBe("Name and catalogue – Solid Memo Studio"));
@@ -139,14 +146,14 @@ describe("StudioWorkspace", () => {
     window.history.replaceState(null, "", home(instanceA.url));
     const useCases = makeUseCasesFake({ listInstances: vi.fn(async () => [instanceA]), listDecks: vi.fn(async () => [kanji]) });
     renderWorkspace(useCases);
-    fireEvent.click(await screen.findByRole("link", { name: "Arrange groups" }));
+    fireEvent.click(await inMain().findByRole("link", { name: "Arrange groups" }));
     expect(await screen.findByRole("heading", { name: "Groups" })).toBeInTheDocument();
     expect(parseStudioHash(window.location.hash)).toEqual({ screen: "groups", instanceUrl: instanceA.url });
     await waitFor(() => expect(document.title).toBe("Groups – Solid Memo Studio"));
     const trail = screen.getByRole("navigation", { name: "Breadcrumb" });
     expect(within(trail).getByRole("link", { name: "Decks" })).toHaveAttribute("href", home(instanceA.url));
     expect(within(trail).getByRole("link", { name: "Groups" })).toHaveAttribute("aria-current", "page");
-    expect(screen.getByRole("link", { name: "Kanji N5" })).toHaveAttribute(
+    expect(inMain().getByRole("link", { name: "Kanji N5" })).toHaveAttribute(
       "href",
       `#/deck?instance=${encodeURIComponent(instanceA.url)}&deck=${encodeURIComponent(kanji.url)}`,
     );
@@ -161,8 +168,8 @@ describe("StudioWorkspace", () => {
       listCards: vi.fn(async () => [card]),
     });
     renderWorkspace(useCases);
-    fireEvent.click(await screen.findByRole("link", { name: /cards of Kanji N5/ }));
-    const link = await screen.findByRole("link", { name: "water" });
+    fireEvent.click(await inMain().findByRole("link", { name: /cards of Kanji N5/ }));
+    const link = await inMain().findByRole("link", { name: "water" });
     expect(parseStudioHash(window.location.hash)).toEqual({ screen: "cards", deckUrl: kanji.url });
     await waitFor(() => expect(document.title).toBe("Cards of Kanji N5 – Solid Memo Studio"));
     const trail = screen.getByRole("navigation", { name: "Breadcrumb" });
@@ -201,7 +208,7 @@ describe("StudioWorkspace", () => {
       leeches: [{ card, lapses: 4 }],
     }));
     renderWorkspace(useCases);
-    fireEvent.click(await screen.findByRole("link", { name: "Schedule, lapses and leeches" }));
+    fireEvent.click(await inMain().findByRole("link", { name: "Schedule, lapses and leeches" }));
     expect(await screen.findByRole("heading", { name: "Schedule: Kanji N5" })).toBeInTheDocument();
     expect(parseStudioHash(window.location.hash)).toEqual({ screen: "schedule", deckUrl: kanji.url });
     await waitFor(() => expect(document.title).toBe("Schedule – Solid Memo Studio"));
@@ -210,7 +217,7 @@ describe("StudioWorkspace", () => {
       "href",
       studioRouteToHash({ screen: "cards", deckUrl: kanji.url }),
     );
-    expect(screen.getByRole("link", { name: "water" })).toHaveAttribute(
+    expect(inMain().getByRole("link", { name: "water" })).toHaveAttribute(
       "href",
       studioRouteToHash({ screen: "card", deckUrl: kanji.url, cardUrl: card.url, tab: "history" }),
     );
@@ -232,7 +239,7 @@ describe("StudioWorkspace", () => {
         listCards: vi.fn(async () => [twin, { ...twin, id: "water-2", url: `${twin.url}-2` }, marked]),
       }),
     );
-    fireEvent.click(await screen.findByRole("link", { name: "Health" }));
+    fireEvent.click(await inMain().findByRole("link", { name: "Health" }));
     expect(await screen.findByRole("heading", { name: "Health of Deck set A" })).toBeInTheDocument();
     expect(parseStudioHash(window.location.hash)).toEqual({ screen: "health", instanceUrl: instanceA.url });
     await waitFor(() => expect(document.title).toBe("Health – Solid Memo Studio"));
@@ -264,7 +271,7 @@ describe("StudioWorkspace", () => {
         listLibraryUpdates: vi.fn(async () => [{ deck: copy, series: null, version: null, newer: false }]),
       }),
     );
-    fireEvent.click(await screen.findByRole("link", { name: "Library copies" }));
+    fireEvent.click(await inMain().findByRole("link", { name: "Library copies" }));
     expect(await screen.findByRole("heading", { name: "Library copies in Deck set A" })).toBeInTheDocument();
     expect(parseStudioHash(window.location.hash)).toEqual({ screen: "library", instanceUrl: instanceA.url });
     await waitFor(() => expect(document.title).toBe("Library copies – Solid Memo Studio"));
@@ -272,7 +279,7 @@ describe("StudioWorkspace", () => {
       "href",
       `#/library?instance=${encodeURIComponent(instanceA.url)}`,
     );
-    expect(screen.getByRole("link", { name: "Kanji N5" })).toHaveAttribute("href", studioRouteToHash({ screen: "about", deckUrl: kanji.url }));
+    expect(inMain().getByRole("link", { name: "Kanji N5" })).toHaveAttribute("href", studioRouteToHash({ screen: "about", deckUrl: kanji.url }));
   });
 
   it("lists the instance's drafts on Home, and opens them, from its panel or its header", async () => {
@@ -288,7 +295,7 @@ describe("StudioWorkspace", () => {
     const panel = await screen.findByRole("region", { name: "Drafts" });
     expect(await within(panel).findByText("Course, version 1")).toBeInTheDocument();
     const drafts = studioRouteToHash({ screen: "drafts", instanceUrl: instanceA.url });
-    expect(screen.getByRole("link", { name: "Drafts" })).toHaveAttribute("href", drafts);
+    expect(inMain().getByRole("link", { name: "Drafts" })).toHaveAttribute("href", drafts);
     fireEvent.click(within(panel).getByRole("link", { name: "Drafts of releases" }));
     expect(await screen.findByRole("heading", { name: "Drafts of releases in Deck set A" })).toBeInTheDocument();
     expect(parseStudioHash(window.location.hash)).toEqual({ screen: "drafts", instanceUrl: instanceA.url });
@@ -309,11 +316,11 @@ describe("StudioWorkspace", () => {
       }),
     );
     fireEvent.click(await screen.findByRole("checkbox", { name: "Select Verbs" }));
-    expect(screen.getByRole("link", { name: "Export" })).toHaveAttribute(
+    expect(inMain().getByRole("link", { name: "Export" })).toHaveAttribute(
       "href",
       studioRouteToHash({ screen: "transfer", instanceUrl: instanceA.url, deckUrls: [verbs.url] }),
     );
-    fireEvent.click(screen.getByRole("link", { name: "Import and export" }));
+    fireEvent.click(inMain().getByRole("link", { name: "Import and export" }));
     expect(await screen.findByRole("heading", { name: "Import and export decks of Deck set A" })).toBeInTheDocument();
     expect(parseStudioHash(window.location.hash)).toEqual({ screen: "transfer", instanceUrl: instanceA.url });
     await waitFor(() => expect(document.title).toBe("Import and export – Solid Memo Studio"));
@@ -324,7 +331,7 @@ describe("StudioWorkspace", () => {
     expect(parseStudioHash(window.location.hash)).toEqual({ screen: "transfer", instanceUrl: instanceA.url });
     fireEvent.click(screen.getByRole("button", { name: "Choose a file…" }));
     fireEvent.click(await screen.findByRole("button", { name: "Import into Deck set A" }));
-    expect(await screen.findByRole("link", { name: "Capitals" })).toHaveAttribute(
+    expect(await inMain().findByRole("link", { name: "Capitals" })).toHaveAttribute(
       "href",
       studioRouteToHash({ screen: "cards", deckUrl: imported.url }),
     );
@@ -354,7 +361,7 @@ describe("StudioWorkspace", () => {
   it("links a deck's cards to its export", async () => {
     window.history.replaceState(null, "", studioRouteToHash({ screen: "cards", deckUrl: kanji.url }));
     renderWorkspace(makeUseCasesFake({ listInstances: vi.fn(async () => [instanceA]), listDecks: vi.fn(async () => [kanji]) }));
-    expect(await screen.findByRole("link", { name: "Export" })).toHaveAttribute(
+    expect(await inMain().findByRole("link", { name: "Export" })).toHaveAttribute(
       "href",
       studioRouteToHash({ screen: "transfer", instanceUrl: instanceA.url, deckUrls: [kanji.url] }),
     );
@@ -363,7 +370,7 @@ describe("StudioWorkspace", () => {
   it("links a deck's cards to its health", async () => {
     window.history.replaceState(null, "", studioRouteToHash({ screen: "cards", deckUrl: kanji.url }));
     renderWorkspace(makeUseCasesFake({ listInstances: vi.fn(async () => [instanceA]), listDecks: vi.fn(async () => [kanji]) }));
-    expect(await screen.findByRole("link", { name: "Health" })).toHaveAttribute(
+    expect(await inMain().findByRole("link", { name: "Health" })).toHaveAttribute(
       "href",
       studioRouteToHash({ screen: "health", instanceUrl: instanceA.url, deckUrl: kanji.url }),
     );
@@ -508,21 +515,21 @@ describe("StudioWorkspace", () => {
       window.history.replaceState(null, "", studioRouteToHash({ screen: "drafts", instanceUrl: instanceA.url }));
       const useCases = draftUseCases();
       renderWorkspace(useCases);
-      fireEvent.click(await screen.findByRole("link", { name: "Solid" }));
+      fireEvent.click(await inMain().findByRole("link", { name: "Solid" }));
       expect(await screen.findByRole("heading", { level: 2, name: "Solid" })).toBeInTheDocument();
       expect(parseStudioHash(window.location.hash)).toEqual({ screen: "draft", draftUrl: DRAFT_URL });
       expect(trailOf()).toEqual(["Instances", "Decks", "Drafts", "Solid"]);
       await waitFor(() => expect(document.title).toBe("Solid – Solid Memo Studio"));
-      fireEvent.click(screen.getByRole("link", { name: "Pods" }));
+      fireEvent.click(inMain().getByRole("link", { name: "Pods" }));
       expect(await screen.findByRole("heading", { level: 2, name: "Pods" })).toBeInTheDocument();
       expect(trailOf()).toEqual(["Instances", "Decks", "Drafts", "Solid", "Pods"]);
-      fireEvent.click(screen.getByRole("link", { name: "Step 1" }));
+      fireEvent.click(inMain().getByRole("link", { name: "Step 1" }));
       expect(await screen.findByRole("heading", { level: 2, name: "Step 1" })).toBeInTheDocument();
       expect(trailOf()).toEqual(["Instances", "Decks", "Drafts", "Solid", "Pods", "Step 1"]);
-      fireEvent.click(screen.getByRole("link", { name: "What holds data?" }));
+      fireEvent.click(inMain().getByRole("link", { name: "What holds data?" }));
       expect(await screen.findByRole("heading", { level: 2, name: "What holds data?" })).toBeInTheDocument();
       expect(trailOf()).toEqual(["Instances", "Decks", "Drafts", "Solid", "Cards", "What holds data?"]);
-      fireEvent.click(screen.getByRole("link", { name: "All cards" }));
+      fireEvent.click(inMain().getByRole("link", { name: "All cards" }));
       expect(await screen.findByRole("heading", { level: 2, name: "Questions of Solid" })).toBeInTheDocument();
       expect(trailOf()).toEqual(["Instances", "Decks", "Drafts", "Solid", "Cards"]);
       // Read once: its screens share it.
@@ -591,7 +598,7 @@ describe("StudioWorkspace", () => {
       window.history.replaceState(null, "", studioRouteToHash({ screen: "draft", draftUrl: DRAFT_URL }));
       renderWorkspace(useCases);
       expect(await screen.findByText("The release check finds 1 problem.")).toBeInTheDocument();
-      expect(screen.getByRole("link", { name: "1 problem in Apps" })).toBeInTheDocument();
+      expect(inMain().getByRole("link", { name: "1 problem in Apps" })).toBeInTheDocument();
       fireEvent.click(screen.getByRole("link", { name: "See the release check" }));
       expect(await screen.findByRole("heading", { level: 2, name: "Release check" })).toBeInTheDocument();
       expect(trailOf()).toEqual(["Instances", "Decks", "Drafts", "Solid", "Release check"]);
@@ -714,7 +721,7 @@ describe("StudioWorkspace", () => {
         draft: { url: DRAFT_URL, instanceUrl: instanceA.url, name: "solid", version: 1, readable: true, title: { en: "Solid" }, course: true },
       });
       renderWorkspace(useCases);
-      fireEvent.click(await screen.findByRole("link", { name: "Published releases" }));
+      fireEvent.click(await inMain().findByRole("link", { name: "Published releases" }));
       expect(await screen.findByRole("heading", { level: 2, name: "Releases published from Deck set A" })).toBeInTheDocument();
       expect(parseStudioHash(window.location.hash)).toEqual({ screen: "releases", instanceUrl: instanceA.url });
       expect(trailOf()).toEqual(["Instances", "Decks", "Releases"]);
@@ -725,8 +732,8 @@ describe("StudioWorkspace", () => {
       expect(await screen.findByRole("heading", { level: 2, name: "Solid" })).toBeInTheDocument();
       expect(parseStudioHash(window.location.hash)).toEqual({ screen: "draft", draftUrl: DRAFT_URL });
       // The drafts screen links to the releases too.
-      fireEvent.click(screen.getAllByRole("link", { name: "Drafts" })[0]!);
-      expect(await screen.findByRole("link", { name: "Published releases" })).toHaveAttribute(
+      fireEvent.click(within(screen.getByRole("navigation", { name: "Breadcrumb" })).getByRole("link", { name: "Drafts" }));
+      expect(await inMain().findByRole("link", { name: "Published releases" })).toHaveAttribute(
         "href",
         studioRouteToHash({ screen: "releases", instanceUrl: instanceA.url }),
       );
@@ -759,7 +766,7 @@ describe("StudioWorkspace", () => {
       fireEvent.click(await screen.findByRole("link", { name: "Compare with the previous version" }));
       expect(await screen.findByRole("heading", { level: 2, name: "Changes since the previous version" })).toBeInTheDocument();
       expect(trailOf()).toEqual(["Instances", "Decks", "Drafts", "Solid", "Changes"]);
-      const changed = await screen.findByRole("link", { name: "What holds data?" });
+      const changed = await inMain().findByRole("link", { name: "What holds data?" });
       expect(useCases.diffReleaseDraft).toHaveBeenCalledWith(draft);
       fireEvent.click(changed);
       await waitFor(() => expect(parseStudioHash(window.location.hash)).toEqual({ screen: "question", draftUrl: DRAFT_URL, card: "q-pods-1a" }));
