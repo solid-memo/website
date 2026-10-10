@@ -1,0 +1,1315 @@
+@base <https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Rijksmuseum collection"@en ,
+                  "Rijksmuseums samlingar"@sv ,
+                  "암스테르담 국립미술관 소장품"@ko ,
+                  "Sammlung des Rijksmuseums"@de ,
+                  "Colección del Rijksmuseum"@es ,
+                  "Collection du Rijksmuseum"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "93 highlights of the Rijksmuseum in Amsterdam, the museum’s own “Top 100” as its linked open data lists it: the object on the front; its title, maker (or, for an anonymous work, where it was made) and date on the back, in English, Swedish, Korean, German, Spanish and French. Paintings, sculpture, silver, furniture, Delftware, a dolls’ house, a ship model and an aeroplane. Paintings already in the library’s Famous paintings deck and works still in copyright are left out, and the parts of one work, such as the ten weepers from the tomb of Isabella of Bourbon, are one card. Objects, makers, dates and pictures from the Rijksmuseum’s Linked Art data (metadata CC0, pictures in the public domain), names in the other languages from Wikidata and Wikipedia."@en ,
+                        "93 höjdpunkter ur Rijksmuseum i Amsterdam, museets egen ”Top 100” som dess länkade öppna data anger den: föremålet på framsidan; dess titel, upphovsperson (eller, för ett anonymt verk, var det tillverkades) och datering på baksidan, på engelska, svenska, koreanska, tyska, spanska och franska. Målningar, skulptur, silver, möbler, delftporslin, ett dockskåp, en fartygsmodell och ett flygplan. Målningar som redan finns i bibliotekets kortlek Berömda målningar och verk som fortfarande är upphovsrättsskyddade ingår inte, och delarna av ett verk, som de tio sörjande figurerna från Isabella av Bourbons gravmonument, är ett kort. Föremål, upphovspersoner, dateringar och bilder från Rijksmuseums Linked Art-data (metadata CC0, bilderna i public domain), namn på de andra språken från Wikidata och Wikipedia."@sv ,
+                        "암스테르담 국립미술관이 링크드 오픈 데이터에 직접 올려 둔 ‘Top 100’에서 고른 대표 소장품 93점입니다. 앞면에는 작품 사진, 뒷면에는 제목, 제작자(작자 미상인 작품은 제작지), 제작 시기가 영어, 스웨덴어, 한국어, 독일어, 스페인어, 프랑스어로 있습니다. 회화, 조각, 은 공예품, 가구, 델프트 도자기, 인형의 집, 선박 모형, 비행기까지 들어 있습니다. 라이브러리의 ‘유명한 그림’ 덱에 이미 있는 그림과 아직 저작권이 남아 있는 작품은 빠졌고, 부르봉의 이사벨라 묘의 애도자상 열 점처럼 한 작품을 이루는 부분들은 카드 한 장으로 묶었습니다. 작품, 제작자, 제작 시기, 사진은 암스테르담 국립미술관의 Linked Art 데이터(메타데이터 CC0, 사진은 퍼블릭 도메인)에서, 다른 언어의 이름은 위키데이터와 위키백과에서 가져왔습니다."@ko ,
+                        "93 Höhepunkte des Rijksmuseums in Amsterdam, die „Top 100“ des Museums selbst, wie seine Linked Open Data sie aufführen: das Objekt auf der Vorderseite; sein Titel, sein Urheber (oder, bei einem anonymen Werk, wo es entstand) und seine Datierung auf der Rückseite, auf Englisch, Schwedisch, Koreanisch, Deutsch, Spanisch und Französisch. Gemälde, Skulpturen, Silber, Möbel, Delfter Fayence, ein Puppenhaus, ein Schiffsmodell und ein Flugzeug. Gemälde, die schon im Stapel „Berühmte Gemälde“ der Bibliothek stehen, und noch urheberrechtlich geschützte Werke fehlen; die Teile eines Werks, etwa die zehn Klagenden vom Prunkgrab Isabellas von Bourbon, sind eine Karte. Objekte, Urheber, Datierungen und Bilder aus den Linked-Art-Daten des Rijksmuseums (Metadaten CC0, Bilder gemeinfrei), Namen in den anderen Sprachen aus Wikidata und Wikipedia."@de ,
+                        "93 obras destacadas del Rijksmuseum de Ámsterdam, el «Top 100» del propio museo tal como lo recogen sus datos abiertos enlazados: el objeto en el anverso; su título, su autor (o, en una obra anónima, dónde se hizo) y su fecha en el reverso, en inglés, sueco, coreano, alemán, español y francés. Pinturas, escultura, platería, muebles, loza de Delft, una casa de muñecas, una maqueta de barco y un avión. Se dejan fuera las pinturas que ya están en el mazo Pinturas famosas de la biblioteca y las obras aún protegidas por derechos de autor, y las partes de una misma obra, como los diez plorantes de la tumba de Isabel de Borbón, son una sola tarjeta. Objetos, autores, fechas e imágenes de los datos Linked Art del Rijksmuseum (metadatos CC0, imágenes de dominio público); los nombres en las demás lenguas, de Wikidata y Wikipedia."@es ,
+                        "93 chefs-d’œuvre du Rijksmuseum d’Amsterdam, le « Top 100 » du musée lui-même tel que ses données ouvertes liées le donnent : l’objet au recto ; son titre, son auteur (ou, pour une œuvre anonyme, son lieu de fabrication) et sa date au verso, en anglais, suédois, coréen, allemand, espagnol et français. Peintures, sculptures, orfèvrerie, mobilier, faïence de Delft, une maison de poupée, une maquette de navire et un avion. Les peintures déjà présentes dans le paquet Peintures célèbres de la bibliothèque et les œuvres encore protégées par le droit d’auteur sont écartées, et les parties d’une même œuvre, comme les dix pleurants du tombeau d’Isabelle de Bourbon, forment une seule carte. Objets, auteurs, dates et images des données Linked Art du Rijksmuseum (métadonnées CC0, images dans le domaine public) ; noms dans les autres langues tirés de Wikidata et de Wikipédia."@fr ;
+    prov:wasDerivedFrom <https://id.rijksmuseum.nl/260213> ,
+                        <https://iiif.micr.io/> ,
+                        <https://www.wikidata.org/> ,
+                        <https://commons.wikimedia.org/wiki/File:Zelfportret_Rijksmuseum_SK-A-3262.jpeg> ,
+                        <https://www.wikipedia.org/> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:art ,
+               topic:history ;
+    dcat:keyword "Rijksmuseum"@en ,
+                 "museums"@en ,
+                 "art"@en ,
+                 "art history"@en ,
+                 "Dutch art"@en ,
+                 "decorative arts"@en ,
+                 "Amsterdam"@en ,
+                 "Rijksmuseum"@sv ,
+                 "museer"@sv ,
+                 "konst"@sv ,
+                 "konsthistoria"@sv ,
+                 "nederländsk konst"@sv ,
+                 "konsthantverk"@sv ,
+                 "Amsterdam"@sv ,
+                 "암스테르담 국립미술관"@ko ,
+                 "박물관"@ko ,
+                 "미술"@ko ,
+                 "미술사"@ko ,
+                 "네덜란드 미술"@ko ,
+                 "공예"@ko ,
+                 "암스테르담"@ko ,
+                 "Rijksmuseum"@de ,
+                 "Museen"@de ,
+                 "Kunst"@de ,
+                 "Kunstgeschichte"@de ,
+                 "niederländische Kunst"@de ,
+                 "Kunsthandwerk"@de ,
+                 "Amsterdam"@de ,
+                 "Rijksmuseum"@es ,
+                 "museos"@es ,
+                 "arte"@es ,
+                 "historia del arte"@es ,
+                 "arte neerlandés"@es ,
+                 "artes decorativas"@es ,
+                 "Ámsterdam"@es ,
+                 "Rijksmuseum"@fr ,
+                 "musées"@fr ,
+                 "art"@fr ,
+                 "histoire de l’art"@fr ,
+                 "art néerlandais"@fr ,
+                 "arts décoratifs"@fr ,
+                 "Amsterdam"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#rijksmuseum-collection> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#rijksmuseum-collection> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/mark/1.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): selected and described from the Rijksmuseum's linked open data,
+# its backs in six languages written and checked against the sources, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://id.rijksmuseum.nl/260213> ,
+              <https://iiif.micr.io/> ,
+              <https://www.wikidata.org/> ,
+              <https://commons.wikimedia.org/wiki/File:Zelfportret_Rijksmuseum_SK-A-3262.jpeg> ,
+              <https://www.wikipedia.org/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "Selection: the Rijksmuseum’s own “Top 100” set (https://id.rijksmuseum.nl/260213), 133 object records, read through the museum’s Search API and Linked Art resolver on 2026-10-10. Left out: the five that are already in the library’s Famous paintings deck (The Night Watch SK-C-5, The Milkmaid SK-A-2344, The Jewish Bride SK-C-216, The Little Street SK-A-2860, Woman Reading a Letter SK-C-251, matched by their Wikidata items’ inventory numbers) and the four whose pictures are in copyright (Jan Schoonhoven’s Dish Relief SK-A-5007, Carel Visser’s Eight Stacked Beams BK-2008-4, Karel Appel’s Square Man SK-A-5002, Gerrit Rietveld’s armchair for Til Brugman BK-2010-1). Records that are parts of one work became one card, under the record of the whole or of its first part: the ten weepers of Isabella of Bourbon (BK-AM-33-A to J, under BK-AM-33), the two flower pyramids and the tiers of the second (BK-2004-4-B and its parts, under BK-2004-4-A), five Javanese court officials (NG-2010-37 to 41), the wine fountain and its cooler (BK-1963-64, -65), two toilet caskets (BK-2009-255-1, -2), two temple guardians (AK-RAK-2007-1-A, -B), the two halves of Piero di Cosimo’s portraits of the Sangallos (SK-C-1367, -1368) and Jamnitzer’s table ornament and its plaque (BK-17040-A, -A-1). That leaves 93 cards. Each card’s id is the object number of the record it uses, in lower case."@en ,
+                 "Front: the object’s picture, from the Rijksmuseum’s IIIF image service (one, Van Gogh’s Self-portrait, from Wikimedia Commons). There is no picture description: any description of these objects would either name them or say nothing a sighted learner does not see."@en ,
+                 "Back: “title — maker, date”, as in the Famous paintings deck. The English title is the museum’s brief English title, or the name it is known by where the brief title gives one (“… Known as ‘The Merry Drinker’”). The maker is the museum’s maker statement, with “signed by artist” and “mentioned on object” dropped and “attributed to” and “workshop of” kept; for an anonymous work the place where the record says it was made stands in its place. Dates follow the record, written in each language’s way (c., ca, um, vers, 년경). In Swedish, Korean, German, Spanish and French, the title is the object’s Wikidata label where it is a genuine title in that language, else the title that language’s Wikipedia gives it, else a translation of the museum’s English title checked against its Dutch one; makers and places are their Wikidata labels in that language, or the form that language’s Wikipedia uses where the label is an unusual variant; Korean names Wikidata does not give are transliterated by the Korean rules for Dutch (외래어 표기법). Three cards have a back note: the clock and gunpowder horn left on Novaya Zemlya, the ten weepers, and the series of five Javanese court officials."@en ,
+                 "Licensing: the deck’s content comes from the Rijksmuseum’s records (CC0 1.0 metadata, pictures marked public domain), Wikidata (CC0 1.0) and one public-domain picture on Wikimedia Commons, so the deck is CC0 1.0 like the rest of the library. Wikipedia (CC BY-SA 4.0) gave only the titles of works and forms of names, which are facts, and was otherwise used to verify. As the Rijksmuseum asks, though it does not require it, the deck credits it as the source of its data and pictures."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Sources, licences and pictures: every record’s rights, every picture URL, overlap with the library"@en ;
+    rdfs:comment "Scope: the 133 records of the Top 100 set, the 93 cards made from them, their pictures and the deck metadata."@en ,
+                 "Outcome: every one of the 124 records the cards use states CC0 1.0 for its data and the Public Domain Mark 1.0 for its picture (checked by a script over the records’ JSON-LD); the four In Copyright records and the five already in Famous paintings were left out; each of the 93 picture URLs was fetched and returned a JPEG (HTTP 200)."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Backs in six languages (AI): written, then checked by a second AI agent"@en ;
+    rdfs:comment "Scope: every card’s back, in English, Swedish, Korean, German, Spanish and French, in six batches: each batch written by an AI agent from the Rijksmuseum’s records, Wikidata and Wikipedia by the rules in the compilation’s comments, then checked by a second AI agent told to find what is wrong (a title that is not the established one in its language, a name in an unusual form, a date or qualifier that is wrong, a merged card that does not name the whole, unnatural Korean) and to correct it."@en ,
+                 "Outcome: 31 corrections, among them the common forms of makers’ names where a Wikidata label was an unusual variant (Jan Willem Pieneman, Jacob van Ruisdael), dates given exactly by the museum that had been written “circa”, Korean names transliterated by the Dutch rules (판피아넌, 혼더쿠터르, 피스허르, 흐레호르, 세자르), genuine German titles in place of coined ones (Die Goldene Bucht in der Herengracht; Klagende vom Prunkgrab der Isabella von Bourbon), and one card the first agent had left out (the silver cabinet, BK-R-4927). The compiler then made the German Rembrandt “Rembrandt van Rijn” on every card, as in Famous paintings."@en .
+
+<https://id.rijksmuseum.nl/260213>
+    dcterms:title "Rijksmuseum: Top 100 (a set of its collection’s linked open data)" ;
+    dcterms:creator "Rijksmuseum" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "Content source: the selection (the set’s 133 object records), each card’s object, title, maker or place of making and date, from the records’ Linked Art JSON-LD at https://id.rijksmuseum.nl/ (Search API https://data.rijksmuseum.nl/search/collection?memberOfSetId=https://id.rijksmuseum.nl/260213, read 2026-10-10). Every one of the 124 records the cards use states its own rights: its data record “subject_to” CC0 1.0, its picture (VisualItem) the Public Domain Mark 1.0. The Rijksmuseum’s data policy (https://data.rijksmuseum.nl/policy, read 2026-10-10): “For much of the information and data on the collection website, you will find a Public Domain or Creative Commons Zero (CC0) Public Domain Dedication under the copyright notice, meaning you can use the material freely”; “In some cases, copyright does apply. If so, a Creative Commons BY 4.0 (CC BY 4.0) licence is indicated”; “We kindly ask that when using our information and data, you credit the Rijksmuseum … even if this is not required.” The four records of the set whose pictures are “In Copyright” (rightsstatements.org InC 1.0) were left out."@en .
+
+<https://iiif.micr.io/>
+    dcterms:title "Rijksmuseum pictures (IIIF Image API, served by Micrio)" ;
+    dcterms:creator "Rijksmuseum" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> ;
+    rdfs:comment "Content source: the picture on each card but one, hotlinked from the IIIF image service that the Rijksmuseum’s records name as their pictures’ access point (DigitalObject access_point, e.g. https://iiif.micr.io/PJEZO/full/max/0/default.jpg), at most 1280 pixels on a side. Each picture’s VisualItem is classified with the Public Domain Mark 1.0 (“Public Domain”) in the record, read 2026-10-10."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "Content source: the names of makers and places in Swedish, Korean, German, Spanish and French (their labels, reached through the Wikidata links in the Rijksmuseum’s records), and objects’ titles in those languages where an object has a Wikidata item (found by its inventory number, P217 qualified by collection P195 Rijksmuseum, Q190804) with a genuine title as its label. Wikidata’s structured data is CC0 1.0 (https://www.wikidata.org/wiki/Wikidata:Licensing)."@en .
+
+<https://commons.wikimedia.org/wiki/File:Zelfportret_Rijksmuseum_SK-A-3262.jpeg>
+    dcterms:title "Zelfportret Rijksmuseum SK-A-3262.jpeg (Wikimedia Commons)" ;
+    dcterms:creator "Wikimedia Commons contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> ;
+    rdfs:comment "Content source: the picture of Vincent van Gogh’s Self-portrait (SK-A-3262), whose Rijksmuseum record states a public-domain picture but names no access point; File:Zelfportret Rijksmuseum SK-A-3262.jpeg, marked “Public domain” on Commons with the Rijksmuseum’s collection page as its credit, read 2026-10-10."@en .
+
+<https://www.wikipedia.org/>
+    dcterms:title "Wikipedia (English, Swedish, Korean, German, Spanish and French)" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Verification, and the established title of a work or form of a name in a language where Wikidata had none or a wrong one: an article’s title only (a name, not a creative expression), never text from an article. Wikipedia’s text is CC BY-SA 4.0 (https://en.wikipedia.org/wiki/Wikipedia:Copyrights)."@en .
+
+<#ak-mak-187>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/LAXcK/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Shiva Nataraja — Tamil Nadu, India, c. 1100–1200"@en ,
+                    "Shiva Nataraja — Tamil Nadu, Indien, ca 1100–1200"@sv ,
+                    "시바 나타라자 — 타밀나두주, 인도, 1100–1200년경"@ko ,
+                    "Shiva Nataraja — Tamil Nadu, Indien, um 1100–1200"@de ,
+                    "Shiva Nataraja — Tamil Nadu, India, c. 1100–1200"@es ,
+                    "Shiva Nataraja — Tamil Nadu, Inde, vers 1100–1200"@fr .
+
+<#ak-mak-84>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/blmqI/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Guanyin — Shanxi, China, c. 1100–1200"@en ,
+                    "Guanyin — Shanxi, Kina, ca 1100–1200"@sv ,
+                    "관음보살 — 산시성, 중국, 1100–1200년경"@ko ,
+                    "Guanyin — Shanxi, China, um 1100–1200"@de ,
+                    "Guanyin — Shanxi, China, c. 1100–1200"@es ,
+                    "Guanyin — Shanxi, Chine, vers 1100–1200"@fr .
+
+<#ak-mak-240>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/YEdtC/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "The Bodhisattva Manjushri — Candi Plaosan, Indonesia, c. 800–900"@en ,
+                    "Bodhisattvan Manjushri — Candi Plaosan, Indonesien, ca 800–900"@sv ,
+                    "문수보살 — 플라오산 사원, 인도네시아, 800–900년경"@ko ,
+                    "Der Bodhisattva Manjushri — Candi Plaosan, Indonesien, um 800–900"@de ,
+                    "El bodhisattva Manjushri — Candi Plaosan, Indonesia, c. 800–900"@es ,
+                    "Le bodhisattva Manjushri — Candi Plaosan, Indonésie, vers 800–900"@fr .
+
+<#sk-a-1115>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/GebpD/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "The Battle of Waterloo — Jan Willem Pieneman, 1824"@en ,
+                    "Slaget vid Waterloo — Jan Willem Pieneman, 1824"@sv ,
+                    "워털루 전투 — 얀 빌럼 피네만, 1824년"@ko ,
+                    "Die Schlacht bei Waterloo — Jan Willem Pieneman, 1824"@de ,
+                    "La batalla de Waterloo — Jan Willem Pieneman, 1824"@es ,
+                    "La bataille de Waterloo — Jan Willem Pieneman, 1824"@fr .
+
+<#sk-c-1367>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/DokhU/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Portraits of Giuliano and Francesco Giamberti da Sangallo — Piero di Cosimo, 1482–1485"@en ,
+                    "Porträtt av Giuliano och Francesco Giamberti da Sangallo — Piero di Cosimo, 1482–1485"@sv ,
+                    "줄리아노 다 상갈로와 프란체스코 잠베르티 다 상갈로의 초상 — 피에로 디 코시모, 1482–1485년"@ko ,
+                    "Bildnisse von Giuliano und Francesco Giamberti da Sangallo — Piero di Cosimo, 1482–1485"@de ,
+                    "Retratos de Giuliano y Francesco Giamberti da Sangallo — Piero di Cosimo, 1482–1485"@es ,
+                    "Portraits de Giuliano et Francesco Giamberti da Sangallo — Piero di Cosimo, 1482–1485"@fr .
+
+<#sk-a-742>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/zcGWb/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "View of Olinda, Brazil — Frans Post, 1662"@en ,
+                    "Vy över Olinda, Brasilien — Frans Post, 1662"@sv ,
+                    "브라질 올린다 풍경 — 프란스 포스트, 1662년"@ko ,
+                    "Blick auf Olinda — Frans Post, 1662"@de ,
+                    "Vista de Olinda, Brasil — Frans Post, 1662"@es ,
+                    "Vue d'Olinda, Brésil — Frans Post, 1662"@fr .
+
+<#sk-c-6>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/cWWQE/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "The Syndics — Rembrandt, 1662"@en ,
+                    "Klädesvävarskråets föreståndare i Amsterdam — Rembrandt, 1662"@sv ,
+                    "직물 길드 이사회 — 렘브란트, 1662년"@ko ,
+                    "Die Vorsteher der Tuchmacherzunft — Rembrandt van Rijn, 1662"@de ,
+                    "Los síndicos de los pañeros — Rembrandt, 1662"@es ,
+                    "Le Syndic de la guilde des drapiers — Rembrandt, 1662"@fr .
+
+<#sk-a-4691>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/YfhED/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Self-portrait — Rembrandt, c. 1628"@en ,
+                    "Självporträtt — Rembrandt, ca 1628"@sv ,
+                    "자화상 — 렘브란트, 1628년경"@ko ,
+                    "Selbstporträt mit zerzaustem Haar — Rembrandt van Rijn, um 1628"@de ,
+                    "Autorretrato — Rembrandt, c. 1628"@es ,
+                    "Autoportrait aux cheveux ébouriffés — Rembrandt, vers 1628"@fr .
+
+<#sk-c-597>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/FeurF/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Portrait of a Woman, Probably Maria Trip — Rembrandt, 1639"@en ,
+                    "Porträtt av en kvinna, troligen Maria Trip — Rembrandt, 1639"@sv ,
+                    "마리아 트립으로 추정되는 여인의 초상 — 렘브란트, 1639년"@ko ,
+                    "Porträt von Maria Trip — Rembrandt van Rijn, 1639"@de ,
+                    "Retrato de Maria Trip — Rembrandt, 1639"@es ,
+                    "Portrait de Maria Trip — Rembrandt, 1639"@fr .
+
+<#sk-a-4050>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/wqcDn/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Self-portrait as the Apostle Paul — Rembrandt, 1661"@en ,
+                    "Självporträtt som aposteln Paulus — Rembrandt, 1661"@sv ,
+                    "사도 바울로 분한 자화상 — 렘브란트, 1661년"@ko ,
+                    "Selbstporträt als Apostel Paulus — Rembrandt van Rijn, 1661"@de ,
+                    "Autorretrato como el apóstol Pablo — Rembrandt, 1661"@es ,
+                    "Autoportrait en apôtre Paul — Rembrandt, 1661"@fr .
+
+<#sk-c-211>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/XWEFp/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "The Windmill at Wijk bij Duurstede — Jacob van Ruisdael, c. 1668–1670"@en ,
+                    "Väderkvarnen vid Wijk bij Duurstede — Jacob van Ruisdael, ca 1668–1670"@sv ,
+                    "베이크 베이 뒤르스테더의 풍차 — 야코프 판 라위스달, 1668–1670년경"@ko ,
+                    "Die Mühle von Wijk — Jacob van Ruisdael, um 1668–1670"@de ,
+                    "El molino de Wijk bij Duurstede — Jacob van Ruisdael, c. 1668–1670"@es ,
+                    "Le Moulin près de Wijk bij Duurstede — Jacob van Ruisdael, vers 1668–1670"@fr .
+
+<#sk-c-217>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/fjTNG/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Interior of the Sint-Odulphuskerk in Assendelft — Pieter Jansz. Saenredam, 1649"@en ,
+                    "Interiör från Sint-Odulphuskerk i Assendelft — Pieter Saenredam, 1649"@sv ,
+                    "아센델프트 성 오둘푸스 교회 내부 — 피터르 산레담, 1649년"@ko ,
+                    "Das Innere der Sint Odulphuskerk zu Assendelft — Pieter Jansz. Saenredam, 1649"@de ,
+                    "Interior de la Sint-Odulphuskerk en Assendelft — Pieter Jansz Saenredam, 1649"@es ,
+                    "Intérieur de la Sint-Odulphuskerk à Assendelft — Pieter Jansz Saenredam, 1649"@fr .
+
+<#sk-a-372>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/VGOCe/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Mary Magdalene — Jan van Scorel, c. 1530"@en ,
+                    "Maria Magdalena — Jan van Scorel, ca 1530"@sv ,
+                    "막달라 마리아 — 얀 반 스코렐, 1530년경"@ko ,
+                    "Maria Magdalena — Jan van Scorel, um 1530"@de ,
+                    "María Magdalena — Jan van Scorel, c. 1530"@es ,
+                    "Marie-Madeleine — Jan van Scorel, vers 1530"@fr .
+
+<#sk-c-229>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/SbsFC/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "The Merry Family — Jan Steen, 1668"@en ,
+                    "Den glada familjen — Jan Steen, 1668"@sv ,
+                    "즐거운 가족 — 얀 스테인, 1668년"@ko ,
+                    "Die fröhliche Familie — Jan Steen, 1668"@de ,
+                    "La familia feliz — Jan Steen, 1668"@es ,
+                    "La Joyeuse Famille — Jan Steen, 1668"@fr .
+
+<#sk-a-2005>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/kYesm/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "The First Day of School — Jean Baptiste Vanmour, c. 1720–1737"@en ,
+                    "Första skoldagen — Jean-Baptiste Vanmour, ca 1720–1737"@sv ,
+                    "등교 첫날 — 장바티스트 반무르, 1720–1737년경"@ko ,
+                    "Der erste Schultag — Jean Baptiste Vanmour, um 1720–1737"@de ,
+                    "El primer día de escuela — Jean-Baptiste van Mour, c. 1720–1737"@es ,
+                    "Le Premier Jour d'école — Jean-Baptiste van Mour, vers 1720–1737"@fr .
+
+<#sk-a-3011>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/VkxAm/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Madonna of Humility — Fra Angelico, c. 1440"@en ,
+                    "Ödmjukhetens madonna — Fra Angelico, ca 1440"@sv ,
+                    "겸손의 성모 — 프라 안젤리코, 1440년경"@ko ,
+                    "Demutsmadonna — Fra Angelico, um 1440"@de ,
+                    "Virgen de la Humildad — Fra Angelico, c. 1440"@es ,
+                    "Vierge d'humilité — Fra Angelico, vers 1440"@fr .
+
+<#sk-a-4>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/hZepb/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "The Threatened Swan — Jan Asselijn, c. 1650"@en ,
+                    "Den hotade svanen — Jan Asselijn, ca 1650"@sv ,
+                    "위협받는 백조 — 얀 아설레인, 1650년경"@ko ,
+                    "Der bedrohte Schwan — Jan Asselijn, um 1650"@de ,
+                    "El cisne amenazado — Jan Asselijn, c. 1650"@es ,
+                    "Le Cygne menacé — Jan Asselyn, vers 1650"@fr .
+
+<#sk-a-1718>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/aXnzA/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Winter Landscape with Ice Skaters — Hendrick Avercamp, c. 1608"@en ,
+                    "Vinterlandskap med skridskoåkare — Hendrick Avercamp, ca 1608"@sv ,
+                    "스케이트 타는 사람들이 있는 겨울 풍경 — 헨드릭 아베르캄프, 1608년경"@ko ,
+                    "Winterlandschaft mit Schlittschuhläufern — Hendrick Avercamp, um 1608"@de ,
+                    "Paisaje invernal con patinadores sobre hielo — Hendrick Avercamp, c. 1608"@es ,
+                    "Paysage d'hiver avec patineurs — Hendrick Avercamp, vers 1608"@fr .
+
+<#sk-a-799>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/hoBLZ/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Floral Still Life — Hans Bollongier, 1639"@en ,
+                    "Blomsterstilleben — Hans Bollongier, 1639"@sv ,
+                    "꽃 정물 — 한스 볼롱히르, 1639년"@ko ,
+                    "Blumenstillleben — Hans Bollongier, 1639"@de ,
+                    "Bodegón de flores — Hans Bollongier, 1639"@es ,
+                    "Nature morte aux fleurs — Hans Bollongier, 1639"@fr .
+
+<#sk-a-404>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/RxOuM/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "The Paternal Admonition — Gerard ter Borch, c. 1654–1655"@en ,
+                    "Den faderliga förmaningen — Gerhard Terborch, ca 1654–1655"@sv ,
+                    "아버지의 훈계 — 헤라르트 테르보르흐, 1654–1655년경"@ko ,
+                    "Galante Konversation — Gerard ter Borch, um 1654–1655"@de ,
+                    "Conversación galante — Gerard ter Borch, c. 1654–1655"@es ,
+                    "La Remontrance paternelle — Gerard ter Borch, vers 1654–1655"@fr .
+
+<#sk-c-109>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/PpsTW/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Italian Landscape with a Draughtsman — Jan Both, c. 1650–1652"@en ,
+                    "Italienskt landskap med en tecknare — Jan Both, ca 1650–1652"@sv ,
+                    "그림 그리는 사람이 있는 이탈리아 풍경 — 얀 봇, 1650–1652년경"@ko ,
+                    "Italienische Landschaft mit Zeichner — Jan Both, um 1650–1652"@de ,
+                    "Paisaje italiano con un dibujante — Jan Both, c. 1650–1652"@es ,
+                    "Paysage italien avec un dessinateur — Jan Both, vers 1650–1652"@fr .
+
+<#sk-a-3584>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/cQMKz/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Girl in a White Kimono — George Hendrik Breitner, 1894"@en ,
+                    "Flicka i vit kimono — George Hendrik Breitner, 1894"@sv ,
+                    "흰 기모노를 입은 소녀 — 헤오르허 헨드릭 브라이트너, 1894년"@ko ,
+                    "Mädchen in weißem Kimono — George Hendrik Breitner, 1894"@de ,
+                    "Chica en kimono blanco — George Hendrik Breitner, 1894"@es ,
+                    "Fille en kimono blanc — George Hendrik Breitner, 1894"@fr .
+
+<#sk-a-3580>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/RXguV/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "The Singel Bridge at the Paleisstraat in Amsterdam — George Hendrik Breitner, 1896–1898"@en ,
+                    "Singelbron vid Paleisstraat i Amsterdam — George Hendrik Breitner, 1896–1898"@sv ,
+                    "암스테르담 팔레이스스트라트의 싱얼 다리 — 헤오르허 헨드릭 브라이트너, 1896–1898년"@ko ,
+                    "Die Singelbrücke bei der Paleisstraat in Amsterdam — George Hendrik Breitner, 1896–1898"@de ,
+                    "El puente del Singel junto a la Paleisstraat en Ámsterdam — George Hendrik Breitner, 1896–1898"@es ,
+                    "Le Pont du Singel près de la Paleisstraat à Amsterdam — George Hendrik Breitner, 1896–1898"@fr .
+
+<#sk-a-1365>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/cOyAv/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "The Battle of Terheide — Willem van de Velde the Elder, 1657"@en ,
+                    "Slaget vid Terheide — Willem van de Velde den äldre, 1657"@sv ,
+                    "테르헤이더 해전 — 대 빌럼 판더펠더, 1657년"@ko ,
+                    "Die Schlacht von Terheide — Willem van de Velde der Ältere, 1657"@de ,
+                    "La batalla de Terheide — Willem van de Velde el Viejo, 1657"@es ,
+                    "La Bataille de Terheide — Willem Van de Velde l'Ancien, 1657"@fr .
+
+<#sk-a-3064>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/GYQQk/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Portrait of a Girl Dressed in Blue — Johannes Cornelisz Verspronck, 1641"@en ,
+                    "Porträtt av en flicka klädd i blått — Johannes Cornelisz. Verspronck, 1641"@sv ,
+                    "파란 옷을 입은 소녀의 초상 — 요하너스 페르스프롱크, 1641년"@ko ,
+                    "Mädchen in blauem Kleid — Jan Cornelisz Verspronck, 1641"@de ,
+                    "Retrato de una niña vestida de azul — Johannes Corneliszoon Verspronck, 1641"@es ,
+                    "Portrait d'une petite fille en bleu — Jan Cornelisz. Verspronck, 1641"@fr .
+
+<#sk-a-4688>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/FDLZM/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Italian Landscape with Umbrella Pines — Hendrik Voogd, 1807"@en ,
+                    "Italienskt landskap med pinjer — Hendrik Voogd, 1807"@sv ,
+                    "우산소나무가 있는 이탈리아 풍경 — 헨드릭 포흐트, 1807년"@ko ,
+                    "Italienische Landschaft mit Mittelmeerkiefern — Hendrik Voogd, 1807"@de ,
+                    "Paisaje italiano con pinos piñoneros — Hendrik Voogd, 1807"@es ,
+                    "Paysage italien avec pins parasols — Hendrik Voogd, 1807"@fr .
+
+<#sk-a-447>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/uaBGu/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Fishing for Souls — Adriaen van de Venne, 1614"@en ,
+                    "Själafisket — Adriaen van de Venne, 1614"@sv ,
+                    "영혼 낚시 — 아드리안 판더펜너, 1614년"@ko ,
+                    "Seelenfischerei — Adriaen Pietersz. van de Venne, 1614"@de ,
+                    "La pesca de almas — Adriaen van de Venne, 1614"@es ,
+                    "La Pêche aux âmes — Adriaen Pietersz van de Venne, 1614"@fr .
+
+<#sk-a-500>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/QTcEa/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "The Holy Kinship — workshop of Geertgen tot Sint Jans, c. 1495"@en ,
+                    "Den heliga släkten — Geertgen tot Sint Jans verkstad, ca 1495"@sv ,
+                    "성 친족 — 헤르트헌 토트 신트 얀스 공방, 1495년경"@ko ,
+                    "Die Heilige Sippe — Werkstatt des Geertgen tot Sint Jans, um 1495"@de ,
+                    "La Sagrada Parentela — taller de Geertgen tot Sint Jans, c. 1495"@es ,
+                    "La Sainte Parenté — atelier de Gérard de Saint-Jean, vers 1495"@fr .
+
+<#sk-a-1065>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/VkWeX/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Piano Practice Interrupted — Willem Bartel van der Kooi, 1813"@en ,
+                    "Det avbrutna pianospelet — Willem Bartel van der Kooi, 1813"@sv ,
+                    "중단된 피아노 연습 — 빌럼 바르털 판데르코이, 1813년"@ko ,
+                    "Das unterbrochene Klavierspiel — Willem Bartel van der Kooi, 1813"@de ,
+                    "La práctica de piano interrumpida — Willem Bartel van der Kooi, 1813"@es ,
+                    "L'Exercice de piano interrompu — Willem Bartel van der Kooi, 1813"@fr .
+
+<#sk-a-1451>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/PvtVH/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "The Well-stocked Kitchen — Joachim Beuckelaer, 1566"@en ,
+                    "Det välförsedda köket — Joachim Beuckelaer, 1566"@sv ,
+                    "풍성한 부엌 — 요아힘 뵈컬라르, 1566년"@ko ,
+                    "Die gut bestückte Küche — Joachim Beuckelaer, 1566"@de ,
+                    "La cocina bien surtida — Joachim Beuckelaer, 1566"@es ,
+                    "La Cuisine bien garnie — Joachim Bueckelaer, 1566"@fr .
+
+<#sk-a-2099>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/OHDPD/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Still Life with Asparagus — Adriaen Coorte, 1697"@en ,
+                    "Stilleben med sparris — Adriaen Coorte, 1697"@sv ,
+                    "아스파라거스 정물 — 아드리안 코르터, 1697년"@ko ,
+                    "Stillleben mit Spargelbund — Adriaen Coorte, 1697"@de ,
+                    "Bodegón con espárragos — Adriaen Coorte, 1697"@es ,
+                    "Nature morte aux asperges — Adriaen Coorte, 1697"@fr .
+
+<#sk-a-128>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/CizGD/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "The Massacre of the Innocents — Cornelis van Haarlem, 1590"@en ,
+                    "Barnamordet i Betlehem — Cornelis van Haarlem, 1590"@sv ,
+                    "영아 학살 — 코르넬리스 판 하를럼, 1590년"@ko ,
+                    "Der bethlehemitische Kindermord — Cornelis van Haarlem, 1590"@de ,
+                    "Matanza de los Inocentes — Cornelis van Haarlem, 1590"@es ,
+                    "Le Massacre des Innocents — Cornelis Cornelisz van Haarlem, 1590"@fr .
+
+<#sk-a-1405>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/DLGpa/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Portrait of Jacob Cornelisz van Oostsanen — workshop of Jacob Cornelisz van Oostsanen, c. 1533"@en ,
+                    "Porträtt av Jacob Corneliszoon van Oostzanen — Jacob Corneliszoon van Oostzanens verkstad, ca 1533"@sv ,
+                    "야코프 코르넬리스 판 오스트사넌의 초상 — 야코프 코르넬리스 판 오스트사넌 공방, 1533년경"@ko ,
+                    "Porträt des Jacob Cornelisz van Oostsanen — Werkstatt des Jacob Cornelisz. van Oostsanen, um 1533"@de ,
+                    "Retrato de Jacob Cornelisz van Oostsanen — taller de Jacob Cornelisz. van Oostsanen, c. 1533"@es ,
+                    "Portrait de Jacob Cornelisz van Oostsanen — atelier de Jacob Cornelisz van Oostsanen, vers 1533"@fr .
+
+<#sk-a-4821>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/MbBYj/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Still Life with Cheese — Floris van Dyck, c. 1615"@en ,
+                    "Stilleben med ostar — Floris Claesz. van Dyck, ca 1615"@sv ,
+                    "치즈가 있는 정물 — 플로리스 판 데이크, 1615년경"@ko ,
+                    "Stillleben mit Käse — Floris van Dyck, um 1615"@de ,
+                    "Bodegón con quesos — Floris Claesz van Dijck, c. 1615"@es ,
+                    "Nature morte aux fromages — Floris Claesz van Dijck, vers 1615"@fr .
+
+<#sk-a-4118>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/uMHxo/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "River Landscape with Riders — Aelbert Cuyp, c. 1653–1657"@en ,
+                    "Flodlandskap med ryttare — Aelbert Cuyp, ca 1653–1657"@sv ,
+                    "기수들이 있는 강 풍경 — 알버르트 카위프, 1653–1657년경"@ko ,
+                    "Flusslandschaft mit Reitern — Aelbert Jacobsz. Cuyp, um 1653–1657"@de ,
+                    "Paisaje fluvial con jinetes — Albert Jacobsz. Cuyp, c. 1653–1657"@es ,
+                    "Paysage fluvial avec cavaliers — Albert Cuyp, vers 1653–1657"@fr .
+
+<#sk-a-1505>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/HNwWx/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "In the Month of July — Paul Joseph Constantin Gabriël, c. 1889"@en ,
+                    "I juli månad — Paul Joseph Constantin Gabriël, ca 1889"@sv ,
+                    "7월에 — 파울 요제프 콘스탄틴 하브리엘, 1889년경"@ko ,
+                    "Im Monat Juli — Paul Joseph Constantin Gabriël, um 1889"@de ,
+                    "En el mes de julio — Paul Joseph Constantin Gabriël, c. 1889"@es ,
+                    "Au mois de juillet — Paul Joseph Constantin Gabriël, vers 1889"@fr .
+
+<#sk-a-2963>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/GRbAZ/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Portrait of Don Ramón Satué — Francisco Goya, 1823"@en ,
+                    "Porträtt av don Ramón Satué — Francisco de Goya, 1823"@sv ,
+                    "돈 라몬 사투에의 초상 — 프란시스코 데 고야, 1823년"@ko ,
+                    "Don Ramón Satué — Francisco de Goya, 1823"@de ,
+                    "Retrato de Don Ramón Satué — Francisco de Goya, 1823"@es ,
+                    "Portrait de Don Ramón Satué — Francisco de Goya, 1823"@fr .
+
+<#sk-a-1796>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/GzjAh/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "The Fête champêtre — Dirck Hals, 1627"@en ,
+                    "Fest i det gröna — Dirck Hals, 1627"@sv ,
+                    "야외 연회 — 디르크 할스, 1627년"@ko ,
+                    "Fest im Freien — Dirck Hals, 1627"@de ,
+                    "La fiesta campestre — Dirck Hals, 1627"@es ,
+                    "La Fête champêtre — Dirck Hals, 1627"@fr .
+
+<#sk-a-133>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/kMSwz/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Portrait of a Married Couple, Likely Isaac Abrahamsz Massa and Beatrix van der Laen — Frans Hals, c. 1622"@en ,
+                    "Porträtt av ett äkta par, troligen Isaac Abrahamsz Massa och Beatrix van der Laen — Frans Hals, ca 1622"@sv ,
+                    "이사크 아브라함스 마사와 베아트릭스 판 데르 란으로 추정되는 부부의 초상 — 프란스 할스, 1622년경"@ko ,
+                    "Porträt eines Paares, wahrscheinlich Isaac Massa und Beatrix van der Laen — Frans Hals, um 1622"@de ,
+                    "Retrato de boda de Isaac Massa y Beatrix van der Laen — Frans Hals, c. 1622"@es ,
+                    "Portrait de mariage probablement d'Isaac Massa et Beatrix van der Laen — Frans Hals, vers 1622"@fr .
+
+<#sk-a-135>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/CgrHr/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "The Merry Drinker — Frans Hals, c. 1628–1630"@en ,
+                    "Den uppsluppne vindrickaren — Frans Hals, ca 1628–1630"@sv ,
+                    "유쾌한 술꾼 — 프란스 할스, 1628–1630년경"@ko ,
+                    "Der fröhliche Trinker — Frans Hals, um 1628–1630"@de ,
+                    "El alegre bebedor — Frans Hals, c. 1628–1630"@es ,
+                    "Le Joyeux Buveur — Frans Hals, vers 1628–1630"@fr .
+
+<#sk-a-4830>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/UjEro/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Still Life with a Gilt Cup — Willem Claesz. Heda, 1635"@en ,
+                    "Stilleben med förgylld pokal — Willem Claeszoon Heda, 1635"@sv ,
+                    "도금한 잔이 있는 정물 — 빌럼 클라스 헤다, 1635년"@ko ,
+                    "Stilleben mit vergoldetem Pokal — Willem Claesz Heda, 1635"@de ,
+                    "Bodegón con copa dorada — Willem Heda, 1635"@es ,
+                    "Nature morte au gobelet doré — Willem Claesz. Heda, 1635"@fr .
+
+<#sk-c-2>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/stWFo/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Banquet at the Crossbowmen’s Guild in Celebration of the Treaty of Münster — Bartholomeus van der Helst, 1648"@en ,
+                    "Bankett i armborstskyttarnas gille för att fira freden i Münster — Bartholomeus van der Helst, 1648"@sv ,
+                    "뮌스터 조약을 기념하는 석궁수 길드의 연회 — 바르톨로메우스 판 데르 헬스트, 1648년"@ko ,
+                    "Schützenmahlzeit zur Feier des Friedens von Münster — Bartholomeus van der Helst, 1648"@de ,
+                    "Banquete en el gremio de ballesteros para celebrar la Paz de Münster — Bartholomeus van der Helst, 1648"@es ,
+                    "Banquet de la guilde des arbalétriers pour célébrer la paix de Münster — Bartholomeus van der Helst, 1648"@fr .
+
+<#sk-a-147>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/Qhoba/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Portrait of Gerard Andriesz Bicker — Bartholomeus van der Helst, c. 1642"@en ,
+                    "Porträtt av Gerard Andriesz Bicker — Bartholomeus van der Helst, ca 1642"@sv ,
+                    "헤라르트 안드리스 비커르의 초상 — 바르톨로메우스 판 데르 헬스트, 1642년경"@ko ,
+                    "Bildnis des Gerard Andriesz. Bicker — Bartholomeus van der Helst, um 1642"@de ,
+                    "Retrato de Gerard Andriesz Bicker — Bartholomeus van der Helst, c. 1642"@es ,
+                    "Portrait de Gerard Andriesz Bicker — Bartholomeus van der Helst, vers 1642"@fr .
+
+<#sk-a-175>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/BaFQb/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "The Floating Feather — Melchior d'Hondecoeter, c. 1680"@en ,
+                    "Den flytande fjädern — Melchior d'Hondecoeter, ca 1680"@sv ,
+                    "물에 뜬 깃털 — 멜히오르 더 혼더쿠터르, 1680년경"@ko ,
+                    "Die schwimmende Feder — Melchior de Hondecoeter, um 1680"@de ,
+                    "La pluma flotante — Melchior d'Hondecoeter, c. 1680"@es ,
+                    "La Plume flottante — Melchior de Hondecoeter, vers 1680"@fr .
+
+<#sk-a-180>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/LAWVX/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "The Merry Fiddler — Gerard van Honthorst, 1623"@en ,
+                    "Den glade fiolspelaren — Gerard van Honthorst, 1623"@sv ,
+                    "유쾌한 바이올린 연주자 — 헤라르트 판 혼트호르스트, 1623년"@ko ,
+                    "Der lustige Musikant — Gerrit van Honthorst, 1623"@de ,
+                    "El alegre violinista — Gerard van Honthorst, 1623"@es ,
+                    "Le Joyeux Violoniste — Gerrit van Honthorst, 1623"@fr .
+
+<#sk-a-2382>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/nnjuR/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Children of the Sea — Jozef Israëls, 1872"@en ,
+                    "Havets barn — Jozef Israëls, 1872"@sv ,
+                    "바다의 아이들 — 요제프 이스라엘스, 1872년"@ko ,
+                    "Kinder der See — Jozef Israëls, 1872"@de ,
+                    "Hijos del mar — Jozef Israëls, 1872"@es ,
+                    "Enfants de la mer — Jozef Israëls, 1872"@fr .
+
+<#sk-a-3841>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/YMqmF/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Worship of the Golden Calf — Lucas van Leyden, c. 1530"@en ,
+                    "Tillbedjan av guldkalven — Lucas van Leyden, ca 1530"@sv ,
+                    "황금 송아지 숭배 — 루카스 판 레이던, 1530년경"@ko ,
+                    "Anbetung des Goldenen Kalbs — Lucas van Leyden, um 1530"@de ,
+                    "La adoración del becerro de oro — Lucas van Leyden, c. 1530"@es ,
+                    "L'Adoration du Veau d'or — Lucas van Leyden, vers 1530"@fr .
+
+<#sk-a-2815>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/ogTdF/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "The Seven Works of Mercy — Master of Alkmaar, 1504"@en ,
+                    "De sju barmhärtighetsgärningarna — Mästaren från Alkmaar, 1504"@sv ,
+                    "자비의 일곱 가지 행위 — 알크마르의 거장, 1504년"@ko ,
+                    "Die sieben Werke der Barmherzigkeit — Meister von Alkmaar, 1504"@de ,
+                    "Las siete obras de misericordia — Maestro de Alkmaar, 1504"@es ,
+                    "Les sept œuvres de miséricorde — Maître d'Alkmaar, 1504"@fr .
+
+<#sk-a-3059>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/zdALf/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "The Sick Child — Gabriël Metsu, c. 1664–1666"@en ,
+                    "Det sjuka barnet — Gabriël Metsu, ca 1664–1666"@sv ,
+                    "아픈 아이 — 가브리엘 메취, 1664–1666년경"@ko ,
+                    "Das kranke Kind — Gabriël Metsu, um 1664–1666"@de ,
+                    "La niña enferma — Gabriël Metsu, c. 1664–1666"@es ,
+                    "L'Enfant malade — Gabriël Metsu, vers 1664–1666"@fr .
+
+<#sk-a-3148>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/HTgKF/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Portrait of William I, Prince of Orange — Adriaen Thomasz. Key, c. 1579"@en ,
+                    "Porträtt av Vilhelm I av Oranien — Adriaen Thomasz Key, ca 1579"@sv ,
+                    "오라녀 공 빌럼 1세의 초상 — 아드리안 토마스 케이, 1579년경"@ko ,
+                    "Prinz Wilhelm I. von Oranien — Adriaen Thomasz Key, um 1579"@de ,
+                    "Retrato de Guillermo de Orange — Adriaen Thomasz Key, c. 1579"@es ,
+                    "Guillaume Ier d'Orange-Nassau — Adriaen Thomasz. Key, vers 1579"@fr .
+
+<#sk-a-3262>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f6/Zelfportret_Rijksmuseum_SK-A-3262.jpeg/1280px-Zelfportret_Rijksmuseum_SK-A-3262.jpeg> ;
+    solid-memo:back "Self-portrait — Vincent van Gogh, 1887"@en ,
+                    "Självporträtt — Vincent van Gogh, 1887"@sv ,
+                    "자화상 — 빈센트 반 고흐, 1887년"@ko ,
+                    "Selbstbildnis mit grauem Filzhut — Vincent van Gogh, 1887"@de ,
+                    "Autorretrato — Vincent van Gogh, 1887"@es ,
+                    "Autoportrait — Vincent van Gogh, 1887"@fr .
+
+<#sk-a-3948>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/IaBPB/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Portrait of a Member of the Van der Mersch Family — Cornelis Troost, 1736"@en ,
+                    "Porträtt av en medlem av familjen Van der Mersch — Cornelis Troost, 1736"@sv ,
+                    "판데르메르스 가문 일원의 초상 — 코르넬리스 트로스트, 1736년"@ko ,
+                    "Bildnis eines Mitglieds der Familie Van der Mersch — Cornelis Troost, 1736"@de ,
+                    "Retrato de un miembro de la familia Van der Mersch — Cornelis Troost, 1736"@es ,
+                    "Portrait d'un membre de la famille Van der Mersch — Cornelis Troost, 1736"@fr .
+
+<#sk-a-4100>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/CCSup/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "The Art Gallery of Jan Gildemeester Jansz — Adriaan de Lelie, 1794–1795"@en ,
+                    "Jan Gildemeester Jansz galleri — Adriaan de Lelie, 1794–1795"@sv ,
+                    "얀 힐더메이스터르 얀스의 화랑 — 아드리안 더 렐리, 1794–1795년"@ko ,
+                    "Die Gemäldegalerie von Jan Gildemeester Jansz — Adriaan de Lelie, 1794–1795"@de ,
+                    "La galería de arte de Jan Gildemeester Jansz — Adriaan de Lelie, 1794–1795"@es ,
+                    "La galerie de peinture de Jan Gildemeester Jansz — Adriaan de Lelie, 1794–1795"@fr .
+
+<#bk-1963-64>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/AxxMT/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Wine fountain and cooler — attributed to Alger Mensma, 1731–1732"@en ,
+                    "Vinfontän och vinkylare — tillskriven Alger Mensma, 1731–1732"@sv ,
+                    "와인 분수와 냉각기 — 알허르 멘스마 추정, 1731–1732년"@ko ,
+                    "Weinbrunnen und Kühlbecken — Alger Mensma zugeschrieben, 1731–1732"@de ,
+                    "Fuente de vino y enfriador — atribuido a Alger Mensma, 1731–1732"@es ,
+                    "Fontaine à vin et rafraîchissoir — attribué à Alger Mensma, 1731–1732"@fr .
+
+<#bk-1976-75>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/MMCGa/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Lidded ewer — Adam van Vianen, 1614"@en ,
+                    "Kanna med lock — Adam van Vianen, 1614"@sv ,
+                    "뚜껑 달린 주전자 — 아담 판피아넌, 1614년"@ko ,
+                    "Deckelkanne — Adam van Vianen, 1614"@de ,
+                    "Jarra con tapa — Adam van Vianen, 1614"@es ,
+                    "Aiguière — Adam van Vianen, 1614"@fr .
+
+<#bk-17040-a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/zIapp/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Table ornament — Wenzel Jamnitzer, 1549"@en ,
+                    "Bordsprydnad — Wenzel Jamnitzer, 1549"@sv ,
+                    "식탁 장식 — 벤첼 얌니처, 1549년"@ko ,
+                    "Merkelscher Tafelaufsatz — Wenzel Jamnitzer, 1549"@de ,
+                    "Centro de mesa — Wenzel Jamnitzer, 1549"@es ,
+                    "Surtout de table — Wenzel Jamnitzer, 1549"@fr .
+
+<#bk-nm-3888>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/OEGeX/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Virgin and Child — Adriaen van Wesel, c. 1470–1480"@en ,
+                    "Madonna med barnet — Adriaen van Wesel, ca 1470–1480"@sv ,
+                    "성모자 — 아드리안 판베설, 1470–1480년경"@ko ,
+                    "Maria mit dem Kind — Adriaen van Wesel, um 1470–1480"@de ,
+                    "Virgen con el Niño — Adriaen van Wesel, c. 1470–1480"@es ,
+                    "Vierge à l'Enfant — Adriaen van Wesel, vers 1470–1480"@fr .
+
+<#bk-nm-88>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/zNhuj/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "The Meeting of Joachim and Anna — Master of Joachim and Anne, c. 1470"@en ,
+                    "Mötet mellan Joakim och Anna — Mästaren av Joakim och Anna, ca 1470"@sv ,
+                    "요아킴과 안나의 만남 — 요아킴과 안나의 거장, 1470년경"@ko ,
+                    "Treffen der heiligen Joachim und Anna an der Goldenen Pforte — Meister von Joachim und Anna, um 1470"@de ,
+                    "El encuentro de Joaquín y Ana — Maestro de Joaquín y Ana, c. 1470"@es ,
+                    "La Rencontre de Joachim et Anne — Maître de Joachim et Anne, vers 1470"@fr .
+
+<#bk-18305>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/kfrUn/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Portrait of Andries de Graeff — Artus Quellinus the Elder, 1661"@en ,
+                    "Porträtt av Andries de Graeff — Artus Quellinus, 1661"@sv ,
+                    "안드리스 더 흐라프의 초상 — 아르투스 크벨리누스, 1661년"@ko ,
+                    "Porträtbüste von Andries de Graeff — Artus Quellinus I., 1661"@de ,
+                    "Retrato de Andries de Graeff — Artus Quellinus, 1661"@es ,
+                    "Portrait d'Andries de Graeff — Artus Quellinus, 1661"@fr .
+
+<#bk-nm-13150>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/GlNVH/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Portrait of Michiel de Ruyter — Rombout Verhulst, 1677–1681"@en ,
+                    "Porträtt av Michiel de Ruyter — Rombout Verhulst, 1677–1681"@sv ,
+                    "미힐 더 라위터르의 초상 — 롬바우트 페르휠스트, 1677–1681년"@ko ,
+                    "Bildnis des Michiel de Ruyter — Rombout Verhulst, 1677–1681"@de ,
+                    "Retrato de Michiel de Ruyter — Rombout Verhulst, 1677–1681"@es ,
+                    "Portrait de Michiel de Ruyter — Rombout Verhulst, 1677–1681"@fr .
+
+<#bk-1963-101>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/oRVzW/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Seated Cupid — Étienne Maurice Falconet, 1757"@en ,
+                    "Sittande Amor — Étienne Maurice Falconet, 1757"@sv ,
+                    "앉아 있는 큐피드 — 에티엔 모리스 팔코네, 1757년"@ko ,
+                    "Sitzender Amor — Étienne-Maurice Falconet, 1757"@de ,
+                    "Cupido sentado — Étienne-Maurice Falconet, 1757"@es ,
+                    "L'Amour menaçant — Étienne Maurice Falconet, 1757"@fr .
+
+<#bk-1976-49>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/hcKgh/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "A Dutch Merchant, Possibly Andreas Everardus van Braam Houckgeest — attributed to Chitqua, c. 1770"@en ,
+                    "Nederländsk köpman, möjligen Andreas Everardus van Braam Houckgeest — tillskriven Chitqua, ca 1770"@sv ,
+                    "안드레아스 에버라르뒤스 판브람 하우크헤이스트로 추정되는 네덜란드 상인 — 치트콰 추정, 1770년경"@ko ,
+                    "Niederländischer Kaufmann, möglicherweise Andreas Everardus van Braam Houckgeest — Chitqua zugeschrieben, um 1770"@de ,
+                    "Mercader neerlandés, posiblemente Andreas Everardus van Braam Houckgeest — atribuido a Chitqua, c. 1770"@es ,
+                    "Marchand néerlandais, peut-être Andreas Everardus van Braam Houckgeest — attribué à Chitqua, vers 1770"@fr .
+
+<#sk-a-5003>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/vYQLC/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "View of the Golden Bend in the Herengracht — Gerrit Berckheyde, 1671–1672"@en ,
+                    "Vy över Gyllene kröken i Herengracht — Gerrit Berckheyde, 1671–1672"@sv ,
+                    "헤렌흐라흐트의 황금 굽이 풍경 — 헤릿 베르크헤이더, 1671–1672년"@ko ,
+                    "Die Goldene Bucht in der Herengracht, Amsterdam, vom Osten gesehen — Gerrit Adriaenszoon Berckheyde, 1671–1672"@de ,
+                    "Vista de la Curva Dorada en el Herengracht — Gerrit Adriaensz. Berckheyde, 1671–1672"@es ,
+                    "Amsterdam, la courbure d'or dans le Herengracht — Gerrit Berckheyde, 1671–1672"@fr .
+
+<#bk-kog-656>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/TLaTa/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Cabinet of a Militia Company — Alkmaar, c. 1520–1530"@en ,
+                    "Skåp tillhörande ett skyttegille — Alkmaar, ca 1520–1530"@sv ,
+                    "민병대의 수납장 — 알크마르, 1520–1530년경"@ko ,
+                    "Schrank einer Schützengilde — Alkmaar, um 1520–1530"@de ,
+                    "Armario de una milicia cívica — Alkmaar, c. 1520–1530"@es ,
+                    "Armoire d'une compagnie de milice — Alkmaar, vers 1520–1530"@fr .
+
+<#bk-nm-1315>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/TqmcR/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Stadtholder’s chair — Gerrit Hutte, 1747"@en ,
+                    "Ståthållarens stol — Gerrit Hutte, 1747"@sv ,
+                    "스타트허우더의 의자 — 헤릿 휘터, 1747년"@ko ,
+                    "Stuhl des Statthalters — Gerrit Hutte, 1747"@de ,
+                    "Silla del estatúder — Gerrit Hutte, 1747"@es ,
+                    "Siège du stathouder — Gerrit Hutte, 1747"@fr .
+
+<#ng-kog-1208>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/kdHuD/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Book chest of Hugo de Groot — Northern Netherlands, c. 1600–1615"@en ,
+                    "Hugo Grotius bokkista — Norra Nederländerna, ca 1600–1615"@sv ,
+                    "휘호 그로티우스의 책 상자 — 북부 네덜란드, 1600–1615년경"@ko ,
+                    "Bücherkiste des Hugo Grotius — Nördliche Niederlande, um 1600–1615"@de ,
+                    "Arcón de libros de Hugo Grocio — Países Bajos septentrionales, c. 1600–1615"@es ,
+                    "Coffre à livres de Hugo Grotius — Pays-Bas septentrionaux, vers 1600–1615"@fr .
+
+<#sk-a-4981>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/QQWEh/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "The Burgomaster of Delft and his Daughter — Jan Steen, 1655"@en ,
+                    "Borgmästaren i Delft och hans dotter — Jan Steen, 1655"@sv ,
+                    "델프트의 시장과 그의 딸 — 얀 스테인, 1655년"@ko ,
+                    "Der Bürgermeister von Delft und seine Tochter — Jan Steen, 1655"@de ,
+                    "Retrato doble de Adolf y Catharina Croeser — Jan Steen, 1655"@es ,
+                    "Portrait d'Adolf et Catharina Croeser — Jan Steen, 1655"@fr .
+
+<#bk-nm-1010>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/vacBr/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Dolls’ house of Petronella Oortman — Amsterdam, c. 1686–1710"@en ,
+                    "Petronella Oortmans dockhus — Amsterdam, ca 1686–1710"@sv ,
+                    "페트로넬라 오르트만의 인형의 집 — 암스테르담, 1686–1710년경"@ko ,
+                    "Puppenhaus von Petronella Oortman — Amsterdam, um 1686–1710"@de ,
+                    "Casa de muñecas de Petronella Oortman — Ámsterdam, c. 1686–1710"@es ,
+                    "Maison de poupée de Petronella Oortman — Amsterdam, vers 1686–1710"@fr .
+
+<#sk-c-149>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/SgpJY/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "A Mother's Duty — Pieter de Hooch, c. 1660–1661"@en ,
+                    "En moders plikt — Pieter de Hooch, ca 1660–1661"@sv ,
+                    "어머니의 의무 — 피터르 더호흐, 1660–1661년경"@ko ,
+                    "Mutterpflichten — Pieter de Hooch, um 1660–1661"@de ,
+                    "El deber de una madre — Pieter de Hooch, c. 1660–1661"@es ,
+                    "Le Devoir d'une mère — Pieter de Hooch, vers 1660–1661"@fr .
+
+<#bk-2009-255-2>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/idsLZ/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Two toilet caskets — André-Charles Boulle, c. 1685–1690"@en ,
+                    "Två toalettskrin — André Charles Boulle, ca 1685–1690"@sv ,
+                    "화장품 상자 두 개 — 앙드레샤를 불, 1685–1690년경"@ko ,
+                    "Zwei Toilettenkästen — André-Charles Boulle, um 1685–1690"@de ,
+                    "Dos cofres de tocador — André-Charles Boulle, c. 1685–1690"@es ,
+                    "Deux coffrets de toilette — André-Charles Boulle, vers 1685–1690"@fr .
+
+<#ng-mc-651>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/BsWYL/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Model of the William Rex — Adriaen de Vriend and others, 1698"@en ,
+                    "Modell av William Rex — Adriaen de Vriend med flera, 1698"@sv ,
+                    "윌리엄 렉스호 모형 — 아드리안 더프린트 외, 1698년"@ko ,
+                    "Modell der William Rex — Adriaen de Vriend und andere, 1698"@de ,
+                    "Modelo del William Rex — Adriaen de Vriend y otros, 1698"@es ,
+                    "Maquette du William Rex — Adriaen de Vriend et autres, 1698"@fr .
+
+<#bk-16676>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/TBYBP/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Desk — Abraham Roentgen, c. 1758–1760"@en ,
+                    "Skrivbord — Abraham Roentgen, ca 1758–1760"@sv ,
+                    "책상 — 아브라함 뢴트겐, 1758–1760년경"@ko ,
+                    "Schreibtisch — Abraham Roentgen, um 1758–1760"@de ,
+                    "Escritorio — Abraham Roentgen, c. 1758–1760"@es ,
+                    "Bureau — Abraham Roentgen, vers 1758–1760"@fr .
+
+<#bk-15613>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/mGZIO/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Haarlem Reception Room — Abraham van der Hart, c. 1793–1795"@en ,
+                    "Mottagningsrum från Haarlem — Abraham van der Hart, ca 1793–1795"@sv ,
+                    "하를럼의 응접실 — 아브라함 판데르하르트, 1793–1795년경"@ko ,
+                    "Haarlemer Empfangszimmer — Abraham van der Hart, um 1793–1795"@de ,
+                    "Sala de recepción de Haarlem — Abraham van der Hart, c. 1793–1795"@es ,
+                    "Salon de réception de Haarlem — Abraham van der Hart, vers 1793–1795"@fr .
+
+<#ng-444>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/iQNAf/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Chest with nine porcelain bottles — Japan and Batavia, c. 1680–1700"@en ,
+                    "Kista med nio porslinsflaskor — Japan och Batavia, ca 1680–1700"@sv ,
+                    "도자기 병 아홉 개가 든 상자 — 일본·바타비아, 1680–1700년경"@ko ,
+                    "Kiste mit neun Porzellanflaschen — Japan und Batavia, um 1680–1700"@de ,
+                    "Caja con nueve botellas de porcelana — Japón y Batavia, c. 1680–1700"@es ,
+                    "Coffret à neuf flacons de porcelaine — Japon et Batavia, vers 1680–1700"@fr .
+
+<#bk-1994-34>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/rOKEq/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Toilet Mirror — Joseph Germain Dutalis and Louis Royer, 1828–1829"@en ,
+                    "Toalettspegel — Joseph Germain Dutalis och Louis Royer, 1828–1829"@sv ,
+                    "화장 거울 — 조제프 제르맹 뒤탈리스와 루이 루아예, 1828–1829년"@ko ,
+                    "Toilettenspiegel — Joseph Germain Dutalis und Louis Royer, 1828–1829"@de ,
+                    "Espejo de tocador — Joseph Germain Dutalis y Louis Royer, 1828–1829"@es ,
+                    "Miroir de toilette — Joseph Germain Dutalis et Louis Royer, 1828–1829"@fr .
+
+<#bk-1995-3>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/ksSSO/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Mantelpiece with relief of Paris and Oenone — Jan Baptist Xavery, 1739"@en ,
+                    "Spisel med relief av Paris och Oinone — Jan Baptist Xavery, 1739"@sv ,
+                    "파리스와 오이노네 부조가 있는 벽난로 — 얀 밥티스트 크사베리, 1739년"@ko ,
+                    "Kamin mit Relief von Paris und Oinone — Jan Baptist Xavery, 1739"@de ,
+                    "Chimenea con relieve de Paris y Enone — Jan Baptist Xavery, 1739"@es ,
+                    "Cheminée avec relief de Pâris et Œnone — Jean Baptiste Xavery, 1739"@fr .
+
+<#bk-17496>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/vSFQx/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Blue Parrot — Meissen Manufactory, 1731"@en ,
+                    "Blå papegoja — Porslinsmanufakturen i Meissen, 1731"@sv ,
+                    "파란 앵무새 — 마이센 자기 제작소, 1731년"@ko ,
+                    "Blauer Papagei — Porzellanmanufaktur Meissen, 1731"@de ,
+                    "Loro azul — Manufactura de Meissen, 1731"@es ,
+                    "Perroquet bleu — Manufacture de Meissen, 1731"@fr .
+
+<#bk-1983-15>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/Wdqmv/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Roemer with a poem to Constantijn Huygens — Anna Visscher, 1619"@en ,
+                    "Remmare med en dikt till Constantijn Huygens — Anna Roemers Visscher, 1619"@sv ,
+                    "콘스탄테인 하위헌스에게 바치는 시가 새겨진 뢰머 잔 — 안나 루머르스 피스허르, 1619년"@ko ,
+                    "Römer mit einem Gedicht an Constantijn Huygens — Anna Visscher, 1619"@de ,
+                    "Roemer con un poema a Constantijn Huygens — Anna Visscher, 1619"@es ,
+                    "Roemer avec un poème à Constantin Huygens — Anna Visscher, 1619"@fr .
+
+<#bk-r-4927>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/gdKOP/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Silver cabinet — Jan Adolf Hillebrand, 1844"@en ,
+                    "Silverskåp — Jan Adolf Hillebrand, 1844"@sv ,
+                    "은식기 장식장 — 얀 아돌프 힐레브란트, 1844년"@ko ,
+                    "Silberschrank — Jan Adolf Hillebrand, 1844"@de ,
+                    "Armario para la plata — Jan Adolf Hillebrand, 1844"@es ,
+                    "Armoire à argenterie — Jan Adolf Hillebrand, 1844"@fr .
+
+<#bk-2000-17>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/QoNdD/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Self-portrait — Johan Gregor van der Schardt, c. 1573–1580"@en ,
+                    "Självporträtt — Johann Gregor van der Schardt, ca 1573–1580"@sv ,
+                    "자화상 — 요한 흐레호르 판데르스하르트, 1573–1580년경"@ko ,
+                    "Selbstporträt — Johan Gregor van der Schardt, um 1573–1580"@de ,
+                    "Autorretrato — Johan Gregor van der Schardt, c. 1573–1580"@es ,
+                    "Autoportrait — Johann Gregor van der Schardt, vers 1573–1580"@fr .
+
+<#sk-c-1672>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/wEuxE/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Portrait of Alida Christina Assink — Jan Adam Kruseman, 1833"@en ,
+                    "Porträtt av Alida Christina Assink — Jan Adam Kruseman, 1833"@sv ,
+                    "알리다 크리스티나 아신크의 초상 — 얀 아담 크뤼서만, 1833년"@ko ,
+                    "Porträt der Alida Christina Assink — Jan Adam Kruseman, 1833"@de ,
+                    "Retrato de Alida Christina Assink — Jan Adam Kruseman, 1833"@es ,
+                    "Portrait d'Alida Christina Assink — Jan Adam Kruseman, 1833"@fr .
+
+<#ng-nm-7687>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/ffVgY/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Clock and gunpowder horn — c. 1590–1596"@en ,
+                    "Ur och kruthorn — ca 1590–1596"@sv ,
+                    "시계와 화약통 — 1590–1596년경"@ko ,
+                    "Uhr und Pulverhorn — um 1590–1596"@de ,
+                    "Reloj y cuerno de pólvora — c. 1590–1596"@es ,
+                    "Horloge et corne à poudre — vers 1590–1596"@fr ;
+    solid-memo:backNote "Left behind by Willem Barentsz's crew in their winter house on Novaya Zemlya in 1597."@en ,
+                        "Kvarlämnade av Willem Barentsz besättning i deras vinterhus på Novaja Zemlja 1597."@sv ,
+                        "1597년 빌럼 바렌츠 탐험대가 노바야제믈랴의 겨울 오두막에 남기고 떠난 것."@ko ,
+                        "1597 von der Mannschaft Willem Barentsz' in ihrem Winterhaus auf Nowaja Semlja zurückgelassen."@de ,
+                        "Abandonados en 1597 por la tripulación de Willem Barentsz en su refugio invernal de Nueva Zembla."@es ,
+                        "Laissés en 1597 par l'équipage de Willem Barentsz dans leur maison d'hivernage de Nouvelle-Zemble."@fr .
+
+<#bk-2004-4-a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/xpwiQ/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Flower pyramid — attributed to De Metaale Pot, c. 1692–1700"@en ,
+                    "Blompyramid — tillskriven De Metaale Pot, ca 1692–1700"@sv ,
+                    "꽃 피라미드 — 더 메탈러 폿 추정, 1692–1700년경"@ko ,
+                    "Blumenpyramide — De Metaale Pot zugeschrieben, um 1692–1700"@de ,
+                    "Pirámide de flores — atribuida a De Metaale Pot, c. 1692–1700"@es ,
+                    "Pyramide à fleurs — attribuée à De Metaale Pot, vers 1692–1700"@fr .
+
+<#ng-2005-24>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/uRTEh/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Diorama of a Du, a Dance Celebration on the Plantation — Gerrit Schouten, 1830"@en ,
+                    "Diorama av en du, en dansfest på plantagen — Gerrit Schouten, 1830"@sv ,
+                    "농장의 춤 축제 '두'를 담은 디오라마 — 헤릿 스하우턴, 1830년"@ko ,
+                    "Diorama eines Du, eines Tanzfestes auf der Plantage — Gerrit Schouten, 1830"@de ,
+                    "Diorama de un du, una fiesta de baile en la plantación — Gerrit Schouten, 1830"@es ,
+                    "Diorama d'un du, fête dansante sur la plantation — Gerrit Schouten, 1830"@fr .
+
+<#bk-am-33>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/WMEyE/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Weepers from the tomb of Isabella of Bourbon — attributed to the Borman workshop and Renier van Thienen, c. 1475–1476"@en ,
+                    "Sörjande från Isabella av Bourbons gravmonument — tillskrivna Bormanverkstaden och Renier van Thienen, ca 1475–1476"@sv ,
+                    "이자벨 드 부르봉 묘의 애도자상 — 보르만 공방·레니르 판 티넌 추정, 1475–1476년경"@ko ,
+                    "Klagende vom Prunkgrab der Isabella von Bourbon — der Borman-Werkstatt und Renier van Thienen zugeschrieben, um 1475–1476"@de ,
+                    "Plorantes de la tumba de Isabel de Borbón — atribuidos al taller Borman y a Renier van Thienen, c. 1475–1476"@es ,
+                    "Pleurants du tombeau d'Isabelle de Bourbon — attribués à l'atelier Borman et à Renier van Thienen, vers 1475–1476"@fr ;
+    solid-memo:backNote "Ten bronze mourning figures from her tomb in Antwerp."@en ,
+                        "Tio sörjande bronsfigurer från hennes grav i Antwerpen."@sv ,
+                        "안트베르펜에 있던 그녀의 묘를 장식한 청동 애도자상 10점."@ko ,
+                        "Zehn bronzene Trauerfiguren von ihrem Grabmal in Antwerpen."@de ,
+                        "Diez figuras dolientes de bronce de su tumba en Amberes."@es ,
+                        "Dix figures de deuil en bronze de son tombeau à Anvers."@fr .
+
+<#ak-rak-2007-1-a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/WAxob/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Pair of temple guardians — Japan, c. 1300–1400"@en ,
+                    "Par tempelväktare — Japan, ca 1300–1400"@sv ,
+                    "인왕상 한 쌍 — 일본, 1300–1400년경"@ko ,
+                    "Paar Tempelwächter — Japan, um 1300–1400"@de ,
+                    "Pareja de guardianes del templo — Japón, c. 1300–1400"@es ,
+                    "Paire de gardiens de temple — Japon, vers 1300–1400"@fr .
+
+<#sk-a-5005>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/txKxF/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Woman in a Large Hat — Caesar van Everdingen, c. 1650"@en ,
+                    "Kvinna med stor hatt — Caesar van Everdingen, ca 1650"@sv ,
+                    "큰 모자를 쓴 여인 — 세자르 판 에버르딩언, 1650년경"@ko ,
+                    "Mädchen mit großem Hut — Caesar van Everdingen, um 1650"@de ,
+                    "Mujer con sombrero grande — Caesar van Everdingen, c. 1650"@es ,
+                    "Femme au grand chapeau — Caesar van Everdingen, vers 1650"@fr .
+
+<#ng-2010-37>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/VrGYo/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Javanese Court Officials — Java, c. 1820–1870"@en ,
+                    "Javanesiska hovtjänstemän — Java, ca 1820–1870"@sv ,
+                    "자와 궁정 관리들 — 자와, 1820–1870년경"@ko ,
+                    "Javanische Hofbeamte — Java, um 1820–1870"@de ,
+                    "Funcionarios de la corte javanesa — Java, c. 1820–1870"@es ,
+                    "Fonctionnaires de la cour javanaise — Java, vers 1820–1870"@fr ;
+    solid-memo:backNote "A series of five portraits of Javanese court officials."@en ,
+                        "En serie med fem porträtt av javanesiska hovtjänstemän."@sv ,
+                        "자와 궁정 관리 다섯 명의 초상 연작."@ko ,
+                        "Eine Serie von fünf Bildnissen javanischer Hofbeamter."@de ,
+                        "Una serie de cinco retratos de funcionarios de la corte javanesa."@es ,
+                        "Une série de cinq portraits de fonctionnaires de la cour javanaise."@fr .
+
+<#ng-2011-1>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/AJtuL/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "FK 23 Bantam — Frederick Koolhoven, 1918"@en ,
+                    "FK 23 Bantam — Frederick Koolhoven, 1918"@sv ,
+                    "FK 23 밴텀 — 프레데릭 콜호번, 1918년"@ko ,
+                    "FK 23 Bantam — Frederick Koolhoven, 1918"@de ,
+                    "FK 23 Bantam — Frederick Koolhoven, 1918"@es ,
+                    "FK 23 Bantam — Frederick Koolhoven, 1918"@fr .
+
+<#bk-1985-10>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/lnTHp/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Layette Cupboard — Amsterdam, c. 1660–1670"@en ,
+                    "Skåp för babyutstyrsel — Amsterdam, ca 1660–1670"@sv ,
+                    "배내옷 장 — 암스테르담, 1660–1670년경"@ko ,
+                    "Babywäscheschrank — Amsterdam, um 1660–1670"@de ,
+                    "Armario para canastilla — Ámsterdam, c. 1660–1670"@es ,
+                    "Armoire à layette — Amsterdam, vers 1660–1670"@fr .
+
+<#sk-a-5033>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/ydvFQ/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Portrait of Marten Soolmans — Rembrandt, 1634"@en ,
+                    "Porträtt av Marten Soolmans — Rembrandt, 1634"@sv ,
+                    "마르턴 솔만스의 초상 — 렘브란트, 1634년"@ko ,
+                    "Porträt von Marten Soolmans — Rembrandt van Rijn, 1634"@de ,
+                    "Retrato de Marten Soolmans — Rembrandt, 1634"@es ,
+                    "Portrait de Marten Soolmans — Rembrandt, 1634"@fr .
+
+<#bk-1975-81>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/LQvPg/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Cupboard — Herman Doomer, c. 1635–1645"@en ,
+                    "Skåp — Herman Doomer, ca 1635–1645"@sv ,
+                    "수납장 — 헤르만 도머르, 1635–1645년경"@ko ,
+                    "Schrank — Herman Doomer, um 1635–1645"@de ,
+                    "Armario — Herman Doomer, c. 1635–1645"@es ,
+                    "Armoire — Herman Doomer, vers 1635–1645"@fr .
+
+<#sk-c-1768>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://iiif.micr.io/WjxgV/full/!1280,1280/0/default.jpg> ;
+    solid-memo:back "Portrait of Oopjen Coppit — Rembrandt, 1634"@en ,
+                    "Porträtt av Oopjen Coppit — Rembrandt, 1634"@sv ,
+                    "오프연 코핏의 초상 — 렘브란트, 1634년"@ko ,
+                    "Porträt von Oopjen Coppit — Rembrandt van Rijn, 1634"@de ,
+                    "Retrato de Oopjen Coppit — Rembrandt, 1634"@es ,
+                    "Portrait d'Oopjen Coppit — Rembrandt, 1634"@fr .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
