@@ -13,6 +13,7 @@ import {
   type DeckReviews,
 } from "./cardQuery";
 import type { ReviewState } from "./review";
+import { growth } from "./testing/growth";
 
 function card(id: string, extra: Partial<Card> = {}): Card {
   return {
@@ -290,7 +291,7 @@ describe("queryCards", () => {
     expect(sorted([iron, fresh])).toEqual(["c-iron", "c-fresh"]);
   });
 
-  it("stays fast over 5,000 cards", () => {
+  it("searches, filters and sorts 5,000 cards in time that grows with the cards", { timeout: 30_000 }, () => {
     const many = Array.from({ length: 5_000 }, (_, i) =>
       card(`c-${i}`, {
         front: { sv: `Ord nummer ${i}`, en: `Word number ${i}` },
@@ -300,15 +301,19 @@ describe("queryCards", () => {
         distractors: [{ id: `d-${i}`, text: { en: `Wrong ${i}` } }],
       }),
     );
-    const states: DeckReviews = {
+    const reviewsOf = (cards: Card[]): DeckReviews => ({
       direction: "bidirectional",
-      states: many.map((c, i) => state(c.id, { intervalDays: i % 40, due: `2026-10-${String((i % 28) + 1).padStart(2, "0")}` })),
-    };
+      states: cards.map((c, i) => state(c.id, { intervalDays: i % 40, due: `2026-10-${String((i % 28) + 1).padStart(2, "0")}` })),
+    });
     const query: CardQuery = { ...DEFAULT_CARD_QUERY, text: "méaning 4", state: "due", sort: { key: "back", descending: true } };
-    const started = performance.now();
-    const rows = queryCards(many, states, query, TODAY, plain, englishReader);
-    const took = performance.now() - started;
-    expect(rows.length).toBeGreaterThan(0);
-    expect(took).toBeLessThan(500);
+    expect(queryCards(many, reviewsOf(many), query, TODAY, plain, englishReader).length).toBeGreaterThan(0);
+    // Four times the cards take about four times as long (a little more,
+    // for the sort); work per card that grew with the cards would take sixteen.
+    const ratio = growth((count) => {
+      const some = many.slice(0, count);
+      const states = reviewsOf(some);
+      return () => queryCards(some, states, query, TODAY, plain, englishReader);
+    }, 1_250, 4);
+    expect(ratio).toBeLessThan(10);
   });
 });

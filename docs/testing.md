@@ -371,7 +371,7 @@ Dependency inversion gives every layer a seam that makes mocks trivial:
 
 | Layer | Seam | Technique |
 |---|---|---|
-| Domain | none needed | Pure functions; inputs (including `now: Date`) passed as parameters. Plain assertions. Time budgets keep what runs over a whole deck or log fast: `queryCards` over 5,000 cards, `lapseIndex` over five years of answers. |
+| Domain | none needed | Pure functions; inputs (including `now: Date`) passed as parameters. Plain assertions. What runs over a whole deck or log is timed at two sizes on the same machine, not against the clock (CI runs the tests, coverage on, many times slower than a laptop): four times the input must take less than ten times as long, which a linear pass meets (about four) and work growing with the input does not (about sixteen) — `queryCards` over 5,000 cards, `lapseIndex` over five years of answers (`growth` in `src/testing/growth.ts`). |
 | Application | ports | Inject fake port objects (`vi.fn` per method). No module mocking. |
 | UI | `UseCases` prop | Render with a fake `UseCases`; assert via testing-library queries. Query-dependent components get a fresh `QueryClient` (retries off). |
 | Infrastructure mappers | none needed | Pure `SolidDataset`/`Thing` → domain functions; feed in-memory datasets built with `mockSolidDatasetFrom`/`buildThing`. |

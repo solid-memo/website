@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Answer } from "./answer";
 import { cardAnswers, deckAnswers, distractorPicksOf, lapseIndex } from "./cardHistory";
+import { growth } from "./testing/growth";
 
 const DECK = "https://pod.example/a/catalog.ttl#deck-1";
 const CARDS = "https://pod.example/a/decks/deck-1.ttl";
@@ -76,21 +77,24 @@ describe("lapseIndex", () => {
     expect(lapseIndex([])).toEqual({ lapses: new Map(), since: null });
   });
 
-  it("stays fast over years of answers", () => {
+  it("reads the answers in one pass, however many years they cover", { timeout: 30_000 }, () => {
     // Five years of 200 answers a day, over 2,000 cards.
-    const days = 5 * 365;
-    const answers: Answer[] = [];
-    for (let day = 0; day < days; day++) {
-      const studyDay = new Date(Date.UTC(2021, 0, 1 + day)).toISOString().slice(0, 10);
-      for (let i = 0; i < 200; i++) {
-        answers.push(answer(1, { id: `answer-${day}-${i}`, cardUrl: `${CARDS}#c-${(day * 7 + i) % 2_000}`, grade: (i % 6) as Answer["grade"], studyDay }));
-      }
-    }
-    const started = performance.now();
-    const index = lapseIndex(answers);
-    const took = performance.now() - started;
+    const answers = (count: number) =>
+      Array.from({ length: count }, (_, n): Answer => {
+        const day = Math.floor(n / 200);
+        const studyDay = new Date(Date.UTC(2021, 0, 1 + day)).toISOString().slice(0, 10);
+        return answer(1, { id: `answer-${n}`, cardUrl: `${CARDS}#c-${(day * 7 + n) % 2_000}`, grade: (n % 6) as Answer["grade"], studyDay });
+      });
+    const years = answers(5 * 365 * 200);
+    const index = lapseIndex(years);
     expect(index.since).toBe("2021-01");
     expect(index.lapses.size).toBe(2_000);
-    expect(took).toBeLessThan(500);
+    // Four times the answers take about four times as long; work per answer
+    // that grew with the answers would take sixteen.
+    const ratio = growth((count) => {
+      const some = years.slice(0, count);
+      return () => lapseIndex(some);
+    }, years.length / 8, 4);
+    expect(ratio).toBeLessThan(10);
   });
 });
