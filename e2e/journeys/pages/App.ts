@@ -14,6 +14,7 @@ import { DeckCreator } from "./DeckCreator.ts";
 import { DeckDetail } from "./DeckDetail.ts";
 import { DeckGroups } from "./DeckGroups.ts";
 import { DeckList } from "./DeckList.ts";
+import { DraftEditor } from "./DraftEditor.ts";
 import { InstanceCreator } from "./InstanceCreator.ts";
 import { Library } from "./Library.ts";
 import { LibraryDeck } from "./LibraryDeck.ts";
@@ -54,6 +55,7 @@ export class App {
   readonly libraryDeck = new LibraryDeck(this);
   readonly libraryPreview = new LibraryPreview(this);
   readonly studio = new Studio(this);
+  readonly draftEditor = new DraftEditor(this);
   readonly course = new Course(this);
   readonly chapter = new Chapter(this);
   readonly chapterReview = new ChapterReview(this);

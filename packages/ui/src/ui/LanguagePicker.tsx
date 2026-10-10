@@ -18,7 +18,9 @@ export type LanguageRole =
   | "backNote"
   | "pictureDescription"
   | "distractor"
-  | "distractorNote";
+  | "distractorNote"
+  | "title"
+  | "theory";
 
 const LEGENDS: Record<LanguageRole, MessageKey> = {
   front: "language.legend.front",
@@ -32,11 +34,16 @@ const LEGENDS: Record<LanguageRole, MessageKey> = {
   pictureDescription: "language.legend.pictureDescription",
   distractor: "language.legend.distractor",
   distractorNote: "language.legend.distractorNote",
+  title: "language.legend.title",
+  theory: "language.legend.theory",
 };
+
+/** The roles of text of a deck or course itself, not of a card: a name, a description, keywords, a chapter's title, a step's theory. */
+const DECK_ROLES: ReadonlySet<LanguageRole> = new Set(["deckName", "description", "keywords", "title", "theory"]);
 
 /** Whose recent choices a role offers first: a deck's own text, or a card's. */
 function recentKinds(role: LanguageRole): RecentLanguageKind[] {
-  return role === "deckName" || role === "description" || role === "keywords" ? ["deck", "own"] : ["own", "deck"];
+  return DECK_ROLES.has(role) ? ["deck", "own"] : ["own", "deck"];
 }
 
 /**

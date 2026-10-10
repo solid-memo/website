@@ -28,6 +28,7 @@ function renderScreen(overrides: Partial<Props> = {}) {
     decks: [kanji, verbs],
     readOnly: null,
     healthHref: "#/health",
+    draftHref: (one) => `#/draft/${one.name}`,
     creating: false,
     created: null,
     createError: null,
@@ -55,6 +56,10 @@ describe("DraftsScreen", () => {
       ],
     });
     const table = screen.getByRole("table", { name: "Drafts in Deck set A" });
+    // A draft that can be read opens; one that cannot, not.
+    expect(within(table).getByRole("link", { name: "Solid" })).toHaveAttribute("href", "#/draft/solid");
+    expect(within(table).getByRole("link", { name: "Untitled (capitals)" })).toHaveAttribute("href", "#/draft/capitals");
+    expect(within(table).queryByRole("link", { name: "Untitled (broken)" })).toBeNull();
     const rows = within(table).getAllByRole("row").slice(1);
     expect(rows.map((row) => within(row).getAllByRole("cell").slice(0, 3).map((cell) => cell.textContent))).toEqual([
       ["Course", "2", "Being written"],

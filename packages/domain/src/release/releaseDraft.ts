@@ -868,7 +868,7 @@ export function publishedIdsOf(release: ReleaseDraft): PublishedIds {
 // Merging
 
 /** A value as a string to compare by, whatever order its records' fields are in. */
-function canonical(value: unknown): string {
+export function canonical(value: unknown): string {
   return JSON.stringify(value, (_field, one: unknown) =>
     one !== null && typeof one === "object" && !Array.isArray(one) ? Object.fromEntries(Object.entries(one).sort(([a], [b]) => (a < b ? -1 : 1))) : one,
   );

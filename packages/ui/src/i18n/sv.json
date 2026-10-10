@@ -15,7 +15,9 @@
       "backNote": "Språk för anteckningen under baksidan",
       "pictureDescription": "Språk för bildens beskrivning",
       "distractor": "Språk för det felaktiga alternativet",
-      "distractorNote": "Språk för anteckningen till det felaktiga alternativet"
+      "distractorNote": "Språk för anteckningen till det felaktiga alternativet",
+      "title": "Språk för titeln",
+      "theory": "Språk för teorin"
     },
     "none": "Inget språk (koder, siffror, symboler)",
     "otherOption": "Annat språk…",
@@ -39,7 +41,9 @@
       "frontImageDescription": "beskrivningen av framsidans bild",
       "backImageDescription": "beskrivningen av baksidans bild",
       "distractor": "det felaktiga alternativet",
-      "distractorNote": "anteckningen till det felaktiga alternativet"
+      "distractorNote": "anteckningen till det felaktiga alternativet",
+      "title": "titeln",
+      "theory": "teorin"
     }
   },
   "theme": {
@@ -2007,6 +2011,158 @@
       "deleteConfirm": "Ta bort utkastet {draft}, version {version}? Det går inte att ångra.",
       "deleting": "Tar bort utkastet {draft}…",
       "deleted": "Tog bort utkastet {draft}, version {version}."
+    },
+    "draft": {
+      "untitled": "Namnlöst utkast",
+      "about": "Om den här utgåvan",
+      "title": "Titel",
+      "description": "Beskrivning",
+      "outline": "Disposition",
+      "outlineHint": "Kapitlen, och stegen i vart och ett, i den ordning en elev går igenom dem. Dra ett till en annan plats, eller använd dess meny. Ett stegs frågor ställs i ordningen för deras id.",
+      "newChapter": "Nytt kapitel",
+      "chapterTitle": "Kapitlets titel",
+      "addChapter": "Lägg till kapitlet",
+      "retiredChapters": "Kapitel ur bruk",
+      "questions": "Frågor",
+      "cards": "Kort",
+      "cardCount": {
+        "one": "{count} kort sammanlagt.",
+        "other": "{count} kort sammanlagt."
+      },
+      "allCards": "Alla kort",
+      "newCard": "Nytt kort",
+      "problems": "Problem",
+      "problemsLater": "Utgåvekontrollen, som räknar det här utkastets problem, finns inte i Studio än."
+    },
+    "outline": {
+      "empty": "Inga kapitel än.",
+      "noSteps": "Inga steg än.",
+      "noTheory": "Ingen teori än.",
+      "stepNumber": "Steg {chapter}.{step}",
+      "stepCount": {
+        "one": "{count} steg",
+        "other": "{count} steg"
+      },
+      "actions": "Åtgärder för {name}",
+      "moveTo": "Flytta till kapitel",
+      "inChapter": "i {chapter}",
+      "afterChapter": "efter {chapter}",
+      "moved": "Flyttat.",
+      "dragCancelled": "Flytten avbröts.",
+      "retired": "{name} togs ur bruk.",
+      "deleted": "{name} togs bort."
+    },
+    "chapter": {
+      "untitled": "Kapitel {id}",
+      "number": "Kapitel {number} av {count}",
+      "retired": "Kapitel ur bruk",
+      "title": "Titel",
+      "description": "Beskrivning",
+      "steps": "Steg",
+      "step": "Steg {number}",
+      "stepUp": "Flytta {step} uppåt",
+      "stepDown": "Flytta {step} nedåt",
+      "newStep": "Nytt steg",
+      "addStep": "Lägg till steget",
+      "retiredSteps": "Steg ur bruk",
+      "review": "Slutrepetition",
+      "reviewHint": "Frågor som bara ställs i kapitlets slutrepetition, efter stegens egna frågor.",
+      "newReviewQuestion": "Ny repetitionsfråga"
+    },
+    "step": {
+      "inChapter": "I",
+      "retired": "Steg ur bruk",
+      "theory": "Teori",
+      "questions": "Frågor som kontrollerar den",
+      "questionsHint": "Ställs efter teorin, som inte visas medan de besvaras, i ordningen för deras id.",
+      "newQuestion": "Ny fråga"
+    },
+    "question": {
+      "retired": "Ur bruk",
+      "place": "Ställs",
+      "nowhere": "Ingenstans än",
+      "atStep": "{chapter}, steg {step}",
+      "atReview": "{chapter}, slutrepetition",
+      "preview": "Så som kursen ställer den",
+      "again": "Ställ igen"
+    },
+    "draftCards": {
+      "crumb": "Kort",
+      "heading": "Kort i {draft}",
+      "headingCourse": "Frågor i {draft}",
+      "overview": "Utkastets översikt",
+      "filter": "Visa",
+      "all": "Alla kort",
+      "filters": {
+        "unasked": "Ställs ingenstans",
+        "askedTwice": "Ställs från två ställen",
+        "fewDistractors": "För få felaktiga alternativ",
+        "retired": "Ur bruk"
+      },
+      "language": "Språk",
+      "anyLanguage": "Alla språk",
+      "unstated": "Inget språk angivet",
+      "count": {
+        "one": "{count} kort",
+        "other": "{count} kort"
+      },
+      "caption": "Utkastets kort",
+      "column": {
+        "front": "Framsida",
+        "back": "Baksida",
+        "place": "Ställs",
+        "distractors": "Felaktiga alternativ",
+        "id": "Id"
+      },
+      "retired": "(ur bruk)",
+      "askedTimes": "Ställs från {count} ställen",
+      "newQuestion": "Ny fråga, som inte ställs någonstans än"
+    },
+    "draftEdit": {
+      "saving": "Sparar…",
+      "saved": "Alla ändringar är sparade.",
+      "released": "Det här utkastet har getts ut och är därför fryst: inget i det kan ändras. Dess nästa version påbörjas från {drafts}.",
+      "releasedLink": "utkasten",
+      "chooseLanguage": "Välj språk för {field} för att spara det.",
+      "id": "Id",
+      "idHint": "En del av dess adress i utgåvan, och ändras aldrig när det väl har getts ut. Bokstäverna A till Z, siffror, ”.”, ”_” och ”-”.",
+      "idProblem": {
+        "invalid": "Ett id består av bokstäverna A till Z, siffror, ”.”, ”_” och ”-”, och börjar med en bokstav eller siffra.",
+        "taken": "Det här utkastet, eller en utgåva före det, har redan det här id:t."
+      },
+      "addQuestion": "Lägg till frågan",
+      "questionEmpty": "Skriv framsidan och baksidan.",
+      "retire": "Ta ur bruk",
+      "restore": "Återställ",
+      "delete": "Ta bort",
+      "published": "En tidigare utgåva gav ut det här, så en elevs framsteg kan nämna det: det kan tas ur bruk, aldrig tas bort.",
+      "life": {
+        "chapter": "Ta kapitlet ur bruk eller ta bort det",
+        "step": "Ta steget ur bruk eller ta bort det",
+        "card": "Ta kortet ur bruk eller ta bort det"
+      },
+      "deleteConfirm": {
+        "chapter": "Ta bort kapitlet {name}, med dess steg? Dess frågor finns kvar, utan att ställas någonstans.",
+        "step": "Ta bort {name}? Dess frågor finns kvar, utan att ställas någonstans.",
+        "card": "Ta bort kortet {name}, med dess felaktiga alternativ?"
+      },
+      "refused": {
+        "released": "Det här utkastet har getts ut: det ändras inte längre.",
+        "missing": "”{id}” finns inte längre i det här utkastet. Kanske ändrades det i en annan flik.",
+        "published": "En tidigare utgåva gav ut ”{id}”: det kan tas ur bruk, aldrig tas bort.",
+        "idTaken": "Id:t ”{id}” är upptaget, i det här utkastet eller en utgåva före det.",
+        "idInvalid": "”{id}” kan inte vara ett id: bokstäverna A till Z, siffror, ”.”, ”_” och ”-”, med en bokstav eller siffra först.",
+        "askedElsewhere": "Det här kortet ställs redan från ett annat ställe: flytta det dit i stället.",
+        "notACourse": "Bara en kurs har kapitel, steg och frågor.",
+        "notFrontToBack": "En kurs studeras från framsida till baksida.",
+        "carriedActivity": "Hur en tidigare utgåva togs fram skrivs inte om."
+      }
     }
+  },
+  "proseField": {
+    "markdown": "Formatera med Markdown",
+    "markdownHint": "Rubriker, listor, kod, tabeller och länkar, så som kursspelaren visar dem. Avstängt visas texten som den skrivs, och en tom rad börjar ett nytt stycke.",
+    "preview": "Förhandsvisning av {field}",
+    "empty": "Inget att visa än."
   }
 }

@@ -4406,3 +4406,42 @@ table.deck-statistics td {
   font-weight: 600;
   border-bottom: 3px solid var(--primary);
 }
+
+/* A course draft's outline (apps/studio, DraftOutline): the deck list's
+   rows, a step's name with the first words of its theory and its
+   questions under it, none with an icon to indent past. */
+.draft-outline .deck-open {
+  padding-left: 0.4rem;
+  text-indent: 0;
+}
+
+.draft-outline .outline-step-text {
+  grid-column: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.draft-outline .outline-step-text>.hint {
+  padding-left: 0.4rem;
+  overflow-wrap: anywhere;
+}
+
+.draft-outline .outline-questions {
+  margin: 0.25rem 0 0;
+  padding-left: 1.6rem;
+  font-size: 0.9rem;
+}
+
+/* Prose as the course player will show it, under its field (ui/ProseField.tsx). */
+.prose-preview {
+  margin: 0.5rem 0 1rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+}
+
+.draft-order li {
+  margin: 0.25rem 0;
+}

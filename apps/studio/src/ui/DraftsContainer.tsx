@@ -10,6 +10,7 @@ import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
+import { draftKey } from "./draftEditor";
 import { DraftsScreen } from "./DraftsScreen";
 
 /** The query of an instance's drafts: Home's panel and the drafts screen share it. */
@@ -24,9 +25,21 @@ export function draftsKey(instanceUrl: string): readonly unknown[] {
  * its turn with the other writes of the catalogue (catalogScope), and the
  * drafts are read afresh after it. Both are held until the instance's
  * data check is done, and while the catalogue is set aside
- * (useDataCheck).
+ * (useDataCheck). A deleted draft's URL is a new draft's when one of
+ * its name is made, so what was read at a draft's URL (draftKey) is
+ * forgotten when one is deleted, and when one is made.
  */
-export function DraftsContainer({ useCases, instance, healthHref }: { useCases: UseCases; instance: Instance; healthHref: string }) {
+export function DraftsContainer({
+  useCases,
+  instance,
+  healthHref,
+  draftHref,
+}: {
+  useCases: UseCases;
+  instance: Instance;
+  healthHref: string;
+  draftHref: (draft: ReleaseDraftSummary) => string;
+}) {
   const { t, errorText } = useI18n();
   const queryClient = useQueryClient();
   const check = useDataCheck(useCases, instance.url);
@@ -44,9 +57,11 @@ export function DraftsContainer({ useCases, instance, healthHref }: { useCases: 
       // The instance's check covers its drafts' documents too.
       queryClient.invalidateQueries({ queryKey: ["validation", instance.url] }),
     ]);
+  const forget = (draft: ReleaseDraftSummary) => queryClient.removeQueries({ queryKey: draftKey(draft.url) });
   const createMutation = useMutation({
     scope: { id: catalogScope(instance.url) },
     mutationFn: (from: NewDraft) => useCases.createReleaseDraft(instance.url, from),
+    onSuccess: (created) => created !== null && forget(created.draft),
     onSettled: reread,
   });
   const deleteMutation = useMutation({
@@ -55,6 +70,7 @@ export function DraftsContainer({ useCases, instance, healthHref }: { useCases: 
       await useCases.deleteReleaseDraft(draft);
       return draft;
     },
+    onSuccess: forget,
     onSettled: reread,
   });
 
@@ -69,6 +85,7 @@ export function DraftsContainer({ useCases, instance, healthHref }: { useCases: 
       decks={decksOf(treeQuery.data.children)}
       readOnly={check.readOnly() ?? (check.arrangementSetAside ? "setAside" : null)}
       healthHref={healthHref}
+      draftHref={draftHref}
       creating={createMutation.isPending}
       // No file picked: nothing was made, and nothing is said.
       created={createMutation.data ?? null}
@@ -83,11 +100,22 @@ export function DraftsContainer({ useCases, instance, healthHref }: { useCases: 
 }
 
 /**
- * Home's drafts: a line for each of the instance's drafts, its kind and
- * version, and a link to the drafts screen, where they are made and
+ * Home's drafts: a line for each of the instance's drafts, a link to it
+ * (one that can be read), its kind and version, and a link to the drafts
+ * screen, where they are made and
  * deleted. Quiet while they are read; an error says they could not be.
  */
-export function HomeDraftsContainer({ useCases, instance, draftsHref }: { useCases: UseCases; instance: Instance; draftsHref: string }) {
+export function HomeDraftsContainer({
+  useCases,
+  instance,
+  draftsHref,
+  draftHref,
+}: {
+  useCases: UseCases;
+  instance: Instance;
+  draftsHref: string;
+  draftHref: (draft: ReleaseDraftSummary) => string;
+}) {
   const { t, errorText } = useI18n();
   const draftsQuery = useQuery({
     queryKey: draftsKey(instance.url),
@@ -105,7 +133,11 @@ export function HomeDraftsContainer({ useCases, instance, draftsHref }: { useCas
           <ul>
             {drafts.map((draft) => (
               <li key={draft.url}>
-                {Object.keys(draft.title).length === 0 ? t("studio.drafts.untitled", { name: draft.name }) : <ReaderText text={draft.title} />}{" "}
+                {draft.readable ? (
+                  <a href={draftHref(draft)}>{Object.keys(draft.title).length === 0 ? t("studio.drafts.untitled", { name: draft.name }) : <ReaderText text={draft.title} />}</a>
+                ) : (
+                  t("studio.drafts.untitled", { name: draft.name })
+                )}{" "}
                 <span class="hint">
                   {t("studio.drafts.summary", {
                     kind: draft.readable ? t(`studio.drafts.kind.${draft.course ? "course" : "deck"}`) : t("studio.drafts.state.unreadable"),

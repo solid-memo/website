@@ -10,7 +10,7 @@ import {
   type DropTarget,
   type Point,
 } from "./dragMachine";
-import { scrollStep, type GapLabel, type MeasuredRow } from "./dropZones";
+import { scrollStep, type DropRules, type GapLabel, type MeasuredRow } from "./dropZones";
 import type { VisibleRow } from "./rows";
 
 /** How long after a drag a click is taken for the drag's own, and stopped. */
@@ -62,8 +62,10 @@ function rowElements(container: HTMLElement): Map<string, HTMLElement> {
 }
 
 /**
- * Drag and drop for the deck list's rows (data-row-key), in the list
- * `containerRef` holds: the DOM side of dragMachine.ts. It listens from
+ * Drag and drop for the rows (data-row-key) of an arranged list, the deck
+ * list or a course's outline, in the list `containerRef` holds: the DOM
+ * side of dragMachine.ts, a drop doing what the list's `rules` let it
+ * (dropZones.ts). It listens from
  * the press on (on the window, at once, so even a quick tap's end is
  * heard) to the drop, then lets go of everything.
  *
@@ -88,6 +90,7 @@ export function useDragReorder({
   onDrop,
   onCancel,
   describe,
+  rules,
   schedule = (step) => requestAnimationFrame(step),
 }: {
   containerRef: RefObject<HTMLElement | null>;
@@ -96,6 +99,7 @@ export function useDragReorder({
   onDrop: (source: string, target: DropTarget) => void;
   onCancel: () => void;
   describe: (label: GapLabel) => string;
+  rules: DropRules;
   schedule?: (step: () => void) => void;
 }) {
   const [feedback, setFeedback] = useState<DragFeedback>(IDLE_FEEDBACK);
@@ -105,8 +109,8 @@ export function useDragReorder({
   const ghostRef = useRef<HTMLDivElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
   // The listeners outlive a render, so they read these from here.
-  const latest = useRef({ rows, onDrop, onCancel, describe });
-  latest.current = { rows, onDrop, onCancel, describe };
+  const latest = useRef({ rows, onDrop, onCancel, describe, rules });
+  latest.current = { rows, onDrop, onCancel, describe, rules };
 
   function containerTop() {
     return containerRef.current!.getBoundingClientRect().top;
@@ -235,6 +239,7 @@ export function useDragReorder({
       layout: {
         rows: measured.filter((row) => !lifted(row)),
         hole: { top: hole[0]!.top, bottom: hole.at(-1)!.bottom },
+        rules: latest.current.rules,
       },
     });
   }

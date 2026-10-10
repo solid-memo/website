@@ -15,8 +15,8 @@ import { shownTag, type LangText } from "@solid-memo/domain/langText";
 import { ActionsMenu, MenuItem, MenuLink, MenuSeparator } from "./ActionsMenu";
 import { DeckRow, type RowDrag } from "./DeckRow";
 import type { DropTarget } from "./deckTree/dragMachine";
-import type { GapLabel } from "./deckTree/dropZones";
-import { flatten, slotKey } from "./deckTree/rows";
+import { DECK_LIST_RULES, type GapLabel } from "./deckTree/dropZones";
+import { flatten, outlineOf, slotKey } from "./deckTree/rows";
 import { useDragReorder } from "./deckTree/useDragReorder";
 import { useFlip } from "./deckTree/useFlip";
 import { ErrorMessage } from "./ErrorMessage";
@@ -400,6 +400,7 @@ export function DeckListScreen({
     enabled: !readOnly && naming === null,
     onDrop: dropped,
     onCancel: () => setAnnouncement(t("deckList.dragCancelled")),
+    rules: DECK_LIST_RULES,
     describe: (label: GapLabel) => {
       const name = readerText((locate(shown, label.group)!.node as GroupNode).group.title);
       return label.kind === "in" ? t("deckList.inGroup", { group: name }) : t("deckList.afterGroup", { group: name });
@@ -415,6 +416,7 @@ export function DeckListScreen({
   const shown = frozen.current ?? tree;
   const flip = useFlip(listRef, tree);
   const lifted = dragging ? locate(shown, drag.feedback.source!)!.node : null;
+  const outline = outlineOf(shown.children);
 
   function dragOf(key: string): RowDrag | undefined {
     const { phase, source, combine: other, into } = drag.feedback;
@@ -447,7 +449,7 @@ export function DeckListScreen({
         </MenuItem>
         <MenuSeparator />
         <MoveItems
-          tree={shown}
+          nodes={outline}
           nodeKey={key}
           readOnly={readOnly || busy}
           onMove={(to) => move(node, { kind: "move", node: key, to })}

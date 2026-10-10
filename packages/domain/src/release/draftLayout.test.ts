@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { card, courseDraft, DRAFT, link, of } from "../testing/releaseDraft.ts";
+import { applyDraftChanges, type ReleaseDraft } from "./releaseDraft.ts";
 import {
   cardsDocumentOf,
+  changedDocuments,
   chapterDocumentOf,
   draftContainerOf,
   draftDocuments,
@@ -92,6 +94,31 @@ describe("draftNameFor", () => {
     expect(draftNameFor("Solid: Fundamentals", [])).toBe("solid-fundamentals");
     expect(draftNameFor("Huvudstäder", ["huvudstader", "huvudstader-2"])).toBe("huvudstader-3");
     expect(draftNameFor("¿?", [])).toBe("draft");
+  });
+});
+
+describe("changedDocuments", () => {
+  const draft = courseDraft();
+  const after = (...changes: Parameters<typeof applyDraftChanges>[1]) => applyDraftChanges(draft, changes) as ReleaseDraft;
+
+  it("names the one document a chapter's text is in", () => {
+    expect(changedDocuments(draft, after({ kind: "editChapter", id: "ch-b", text: { title: { en: "Bee" } } }))).toEqual([chapterDocumentOf(DRAFT, "ch-b")]);
+    expect(changedDocuments(draft, after({ kind: "setMeta", meta: { title: { en: "Solid!" } } }))).toEqual([DRAFT]);
+    expect(changedDocuments(draft, after({ kind: "setAgent", id: "ada", agent: { name: "Ada" } }))).toEqual([DRAFT]);
+    expect(changedDocuments(draft, draft)).toEqual([]);
+    // The same text again, its fields in another order: no change.
+    expect(changedDocuments(draft, after({ kind: "editChapter", id: "ch-a", text: { title: { en: "A" } } }))).toEqual([]);
+  });
+
+  it("names every document a move writes, one it empties or makes among them", () => {
+    expect(changedDocuments(draft, after({ kind: "moveChapter", id: "ch-b", to: 0 })).sort()).toEqual(
+      [chapterDocumentOf(DRAFT, "ch-a"), chapterDocumentOf(DRAFT, "ch-b")].sort(),
+    );
+    // The loose card goes from the cards document to the chapter's.
+    expect(changedDocuments(draft, after({ kind: "addQuestion", card: "q-loose", place: { kind: "step", step: "ch-a-1" } })).sort()).toEqual(
+      [cardsDocumentOf(DRAFT), chapterDocumentOf(DRAFT, "ch-a")].sort(),
+    );
+    expect(changedDocuments(draft, after({ kind: "addChapter", id: "ch-c" }))).toEqual([chapterDocumentOf(DRAFT, "ch-c")]);
   });
 });
 

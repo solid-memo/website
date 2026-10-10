@@ -15,7 +15,9 @@
       "backNote": "Language of the note under the back",
       "pictureDescription": "Language of the picture's description",
       "distractor": "Language of the wrong option",
-      "distractorNote": "Language of the note on the wrong option"
+      "distractorNote": "Language of the note on the wrong option",
+      "title": "Language of the title",
+      "theory": "Language of the theory"
     },
     "none": "No language (codes, numbers, symbols)",
     "otherOption": "Other language…",
@@ -39,7 +41,9 @@
       "frontImageDescription": "the front picture's description",
       "backImageDescription": "the back picture's description",
       "distractor": "the wrong option",
-      "distractorNote": "the note on the wrong option"
+      "distractorNote": "the note on the wrong option",
+      "title": "the title",
+      "theory": "the theory"
     }
   },
   "theme": {
@@ -2010,6 +2014,158 @@
       "deleteConfirm": "Delete the draft {draft}, version {version}? This cannot be undone.",
       "deleting": "Deleting the draft {draft}…",
       "deleted": "Deleted the draft {draft}, version {version}."
+    },
+    "draft": {
+      "untitled": "Untitled draft",
+      "about": "About this release",
+      "title": "Title",
+      "description": "Description",
+      "outline": "Outline",
+      "outlineHint": "Chapters, and the steps in each, in the order a learner takes them. Drag one to another place, or use its menu. A step's questions are asked in the order of their ids.",
+      "newChapter": "New chapter",
+      "chapterTitle": "Title of the chapter",
+      "addChapter": "Add the chapter",
+      "retiredChapters": "Retired chapters",
+      "questions": "Questions",
+      "cards": "Cards",
+      "cardCount": {
+        "one": "{count} card in all.",
+        "other": "{count} cards in all."
+      },
+      "allCards": "All cards",
+      "newCard": "New card",
+      "problems": "Problems",
+      "problemsLater": "The release check, which counts this draft's problems, is not in the Studio yet."
+    },
+    "outline": {
+      "empty": "No chapters yet.",
+      "noSteps": "No steps yet.",
+      "noTheory": "No theory yet.",
+      "stepNumber": "Step {chapter}.{step}",
+      "stepCount": {
+        "one": "{count} step",
+        "other": "{count} steps"
+      },
+      "actions": "Actions for {name}",
+      "moveTo": "Move to chapter",
+      "inChapter": "in {chapter}",
+      "afterChapter": "after {chapter}",
+      "moved": "Moved.",
+      "dragCancelled": "Move cancelled.",
+      "retired": "Retired {name}.",
+      "deleted": "Deleted {name}."
+    },
+    "chapter": {
+      "untitled": "Chapter {id}",
+      "number": "Chapter {number} of {count}",
+      "retired": "Retired chapter",
+      "title": "Title",
+      "description": "Description",
+      "steps": "Steps",
+      "step": "Step {number}",
+      "stepUp": "Move {step} up",
+      "stepDown": "Move {step} down",
+      "newStep": "New step",
+      "addStep": "Add the step",
+      "retiredSteps": "Retired steps",
+      "review": "Final review",
+      "reviewHint": "Questions asked only in the chapter's final review, after its steps' own questions.",
+      "newReviewQuestion": "New review question"
+    },
+    "step": {
+      "inChapter": "In",
+      "retired": "Retired step",
+      "theory": "Theory",
+      "questions": "Questions that check it",
+      "questionsHint": "Asked after the theory, which is not shown while they are answered, in the order of their ids.",
+      "newQuestion": "New question"
+    },
+    "question": {
+      "retired": "Retired",
+      "place": "Asked",
+      "nowhere": "Nowhere yet",
+      "atStep": "{chapter}, step {step}",
+      "atReview": "{chapter}, final review",
+      "preview": "As the course asks it",
+      "again": "Ask again"
+    },
+    "draftCards": {
+      "crumb": "Cards",
+      "heading": "Cards of {draft}",
+      "headingCourse": "Questions of {draft}",
+      "overview": "The draft's overview",
+      "filter": "Show",
+      "all": "All cards",
+      "filters": {
+        "unasked": "Asked nowhere",
+        "askedTwice": "Asked from two places",
+        "fewDistractors": "Too few wrong options",
+        "retired": "Retired"
+      },
+      "language": "Language",
+      "anyLanguage": "Any language",
+      "unstated": "No language stated",
+      "count": {
+        "one": "{count} card",
+        "other": "{count} cards"
+      },
+      "caption": "The draft's cards",
+      "column": {
+        "front": "Front",
+        "back": "Back",
+        "place": "Asked",
+        "distractors": "Wrong options",
+        "id": "Id"
+      },
+      "retired": "(retired)",
+      "askedTimes": "Asked from {count} places",
+      "newQuestion": "New question, asked nowhere yet"
+    },
+    "draftEdit": {
+      "saving": "Saving…",
+      "saved": "All changes saved.",
+      "released": "This draft was released, so it is frozen: nothing in it can be changed. Its next version is started from {drafts}.",
+      "releasedLink": "the drafts",
+      "chooseLanguage": "Choose the language of {field} to save it.",
+      "id": "Id",
+      "idHint": "Part of its address in the release, and never changed once published. Letters A to Z, digits, “.”, “_” and “-”.",
+      "idProblem": {
+        "invalid": "An id is letters A to Z, digits, “.”, “_” and “-”, starting with a letter or digit.",
+        "taken": "This draft, or a release before it, already has this id."
+      },
+      "addQuestion": "Add the question",
+      "questionEmpty": "Write the front and the back.",
+      "retire": "Retire",
+      "restore": "Restore",
+      "delete": "Delete",
+      "published": "An earlier release published this, so a learner's progress may name it: it can be retired, never deleted.",
+      "life": {
+        "chapter": "Retire or delete the chapter",
+        "step": "Retire or delete the step",
+        "card": "Retire or delete the card"
+      },
+      "deleteConfirm": {
+        "chapter": "Delete the chapter {name}, with its steps? Its questions stay, asked nowhere.",
+        "step": "Delete {name}? Its questions stay, asked nowhere.",
+        "card": "Delete the card {name}, with its wrong options?"
+      },
+      "refused": {
+        "released": "This draft was released: it is no longer changed.",
+        "missing": "“{id}” is no longer in this draft. Perhaps it was changed in another tab.",
+        "published": "An earlier release published “{id}”: it can be retired, never deleted.",
+        "idTaken": "The id “{id}” is taken, in this draft or a release before it.",
+        "idInvalid": "“{id}” cannot be an id: letters A to Z, digits, “.”, “_” and “-”, starting with a letter or digit.",
+        "askedElsewhere": "This card is asked from another place already: move it there instead.",
+        "notACourse": "Only a course has chapters, steps and questions.",
+        "notFrontToBack": "A course is studied front to back.",
+        "carriedActivity": "How an earlier release was made is not rewritten."
+      }
     }
+  },
+  "proseField": {
+    "markdown": "Format with Markdown",
+    "markdownHint": "Headings, lists, code, tables and links, as the course player shows them. Off, the text is shown as typed, a blank line starting a new paragraph.",
+    "preview": "Preview of {field}",
+    "empty": "Nothing to show yet."
   }
 }

@@ -41,13 +41,30 @@ export interface MeasuredRow extends VisibleRow {
 }
 
 /**
+ * What a list lets a drop do beyond the deck list's rules, which hold
+ * when it says nothing: whether a row dropped on a leaf makes a new
+ * group of the two (`combine`), and the depths a row may land at
+ * (`depths`, inclusive; any when absent). A course's outline makes no
+ * groups, and keeps its chapters at the top and its steps in a chapter.
+ */
+export interface DropRules {
+  combine: boolean;
+  depths?: (source: VisibleRow) => { min: number; max: number };
+}
+
+/** The deck list's rules: a deck dropped on a deck makes a group, and anything goes at any depth. */
+export const DECK_LIST_RULES: DropRules = { combine: true };
+
+/**
  * The rows a drop can be aimed at, as measured when the drag began: all
  * but the dragged deck or group and what it holds, whose rows together
- * are the `hole` it left.
+ * are the `hole` it left; and the list's `rules` (the deck list's when
+ * absent).
  */
 export interface Layout {
   rows: readonly MeasuredRow[];
   hole: { top: number; bottom: number };
+  rules?: DropRules;
 }
 
 /** Which group a line between rows stands for, as its label says: "in {group}" or "after {group}". */
@@ -86,13 +103,14 @@ function band(row: MeasuredRow): number {
 
 /** What a drop of `source` would do with the pointer `y` pixels from the top of the list. */
 export function hitTest(layout: Layout, y: number, source: VisibleRow): Hit {
-  const { rows, hole } = layout;
+  const { rows, hole, rules = DECK_LIST_RULES } = layout;
   if (rows.length === 0 || (y >= hole.top && y < hole.bottom)) return NOOP;
+  const depths = rules.depths?.(source) ?? { min: 0, max: Number.POSITIVE_INFINITY };
 
   /** The place `depth` levels in, right under rows[at] (above the first row when `at` is -1). */
   function gap(at: number): GapHit | NoopHit {
     const a = rows[at];
-    if (a === undefined) return place({ parent: null, after: null }, 0, rows[0]!.top - HALF_GAP_PX, null);
+    if (a === undefined) return depths.min > 0 ? NOOP : place({ parent: null, after: null }, 0, rows[0]!.top - HALF_GAP_PX, null);
     const b = rows[at + 1];
     const deepest = a.kind === "group" && !a.collapsed ? a.depth + 1 : a.depth;
     const shallowest = b?.depth ?? 0;
@@ -104,6 +122,11 @@ export function hitTest(layout: Layout, y: number, source: VisibleRow): Hit {
       const levels = deepest - shallowest + 1;
       const slice = Math.floor(((y - top) / (b.top + band(b) - top)) * levels);
       depth = deepest - Math.min(levels - 1, Math.max(0, slice));
+    }
+    // A depth the row may not land at: the nearest it may, among the places here, else none.
+    if (depth < depths.min || depth > depths.max) {
+      depth = Math.min(Math.max(depth, depths.min), depths.max);
+      if (depth > deepest || depth < shallowest) return NOOP;
     }
     // The places under `a`: after it or a group it is in, or (a level deeper) first in it.
     const chain: (string | null)[] = [...a.ancestors, ...(a.kind === "slot" ? [] : [a.key]), null];
@@ -132,10 +155,10 @@ export function hitTest(layout: Layout, y: number, source: VisibleRow): Hit {
   if (row.kind === "slot") return gap(at - 1);
   const nearer = y < (row.top + row.bottom) / 2 ? gap(at - 1) : gap(at);
   if (row.kind === "group" && source.ancestors.includes(row.key)) return nearer;
-  if (row.kind === "group" && source.kind === "deck") {
+  if (row.kind === "group" && source.kind === "deck" && row.depth + 1 >= depths.min && row.depth + 1 <= depths.max) {
     return { kind: "into", group: row.key, to: { parent: row.key, after: row.last } };
   }
-  return { kind: "combine", target: row.key, fallback: nearer };
+  return rules.combine ? { kind: "combine", target: row.key, fallback: nearer } : nearer;
 }
 
 /** How near the viewport's top or bottom the list scrolls by itself while dragging. */
