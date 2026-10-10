@@ -13,6 +13,7 @@ import {
   reviewsContainerOf,
 } from "@solid-memo/domain/instanceLayout";
 import { draftPlaceOf, draftsContainerOf } from "@solid-memo/domain/release/draftLayout";
+import { releasesContainerOf } from "@solid-memo/domain/release/releasePlace";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { deleteContainerIfEmpty, listContainerTree } from "./containers";
 import { deleteIfPresent, getSolidDatasetOrNull } from "./datasets";
@@ -47,7 +48,9 @@ import { RDF, SM } from "./vocab";
  * A document's access control (its `.acl`) goes with it: the Solid
  * Protocol has the server delete a resource's auxiliary resources with
  * it. A resource already gone counts as deleted. What is left is kept,
- * and so is the container holding it, which the result names.
+ * and so is the container holding it, which the result names, with
+ * whether the releases published from the instance (`releases/`, never
+ * deleted) are among it.
  */
 export async function deleteInstanceData(
   instanceUrl: string,
@@ -80,7 +83,9 @@ export async function deleteInstanceData(
     await deleteContainerIfEmpty(subcontainer, fetch);
   }
   await deleteIfPresent(meta, fetch);
-  return { keptFolder: (await deleteContainerIfEmpty(container, fetch)) ? null : container };
+  if (await deleteContainerIfEmpty(container, fetch)) return { keptFolder: null, keptReleases: false };
+  // Releases others may read by their address are never deleted: the user is told they are why the folder is kept.
+  return { keptFolder: container, keptReleases: (await fetch(releasesContainerOf(container), { method: "HEAD" })).ok };
 }
 
 const UNREADABLE = Symbol("unreadable");

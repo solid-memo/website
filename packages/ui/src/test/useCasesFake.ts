@@ -64,7 +64,7 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
       url: "https://pod.example/solid-memo/main/",
       name: "Main",
     })),
-    deleteInstance: vi.fn(async () => ({ keptFolder: null })),
+    deleteInstance: vi.fn(async () => ({ keptFolder: null, keptReleases: false })),
     dataClassRegistrations: vi.fn(async () => ({
       registrations: (["instance", "catalog", "deck", "card", "reviewState", "answer", "draft"] as const).map((dataClass) => ({
         dataClass,
@@ -158,12 +158,20 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
     getReleaseDraft: vi.fn(async () => {
       throw new Error("getReleaseDraft fake not configured");
     }),
+    readReleaseDraft: vi.fn(async () => {
+      throw new Error("readReleaseDraft fake not configured");
+    }),
     editReleaseDraft: vi.fn(async () => {
       throw new Error("editReleaseDraft fake not configured");
     }),
     deleteReleaseDraft: vi.fn(async () => undefined),
     checkReleaseDraft: vi.fn(async (_draft, _check, _policy, options) => ({ rules: [], library: [], drops: [], markdown: [], shapes: options?.shapes === true ? [] : null })),
     diffReleaseDraft: vi.fn(async () => null),
+    publishRelease: vi.fn(async (_draft, url) => ({ url, public: true })),
+    makeReleasePublic: vi.fn(async () => undefined),
+    isReleasePublic: vi.fn(async () => true),
+    downloadRelease: vi.fn(async () => ({ name: "release-v1.ttl", url: "https://solid-memo.com/decks/release/v1.ttl" })),
+    listPublishedReleases: vi.fn(async () => []),
     exportDeckFile: vi.fn(async () => undefined),
     openDeckFile: vi.fn(async () => null),
     importDeckFile: vi.fn(async () => {

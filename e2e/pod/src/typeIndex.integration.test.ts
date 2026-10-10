@@ -59,12 +59,26 @@ async function profile(server: string, seeAlso: (base: string) => string[] = () 
   return { base, card, webId: `${card}#me` };
 }
 
-/** Lets anyone read the document and no one write it, as a WebID document on an identity broker; checked. */
+/**
+ * Lets anyone read the document and no one write it, as a WebID document
+ * on an identity broker; checked. Its own ACL says so on a server with
+ * Web Access Control; its ACR, denying writes, on one with Access
+ * Control Policies (whose rules for the folders above still allow them).
+ */
 async function readOnly(url: string): Promise<void> {
+  const control = await aclOf(url);
+  const acp = /<http:\/\/www\.w3\.org\/ns\/solid\/acp#AccessControlResource>;\s*rel="type"/.test((await fetch(control, { method: "HEAD" })).headers.get("link") ?? "");
+  const ACL = "http://www.w3.org/ns/auth/acl#";
+  const ACP = "http://www.w3.org/ns/solid/acp#";
   await put(
-    await aclOf(url),
-    `<#read> a <http://www.w3.org/ns/auth/acl#Authorization> ; <http://www.w3.org/ns/auth/acl#agentClass> <http://xmlns.com/foaf/0.1/Agent> ;
-    <http://www.w3.org/ns/auth/acl#accessTo> <${url}> ; <http://www.w3.org/ns/auth/acl#mode> <http://www.w3.org/ns/auth/acl#Read> .`,
+    control,
+    acp
+      ? `<> a <${ACP}AccessControlResource> ; <${ACP}resource> <${url}> ; <${ACP}accessControl> <#readOnly> .
+    <#readOnly> a <${ACP}AccessControl> ; <${ACP}apply> <#policy> .
+    <#policy> a <${ACP}Policy> ; <${ACP}allow> <${ACL}Read> ; <${ACP}deny> <${ACL}Write>, <${ACL}Append> ; <${ACP}anyOf> <#everyone> .
+    <#everyone> a <${ACP}Matcher> ; <${ACP}agent> <${ACP}PublicAgent> .`
+      : `<#read> a <${ACL}Authorization> ; <${ACL}agentClass> <http://xmlns.com/foaf/0.1/Agent> ;
+    <${ACL}accessTo> <${url}> ; <${ACL}mode> <${ACL}Read> .`,
   );
   const write = await fetch(url, { method: "PATCH", headers: { "content-type": "application/sparql-update" }, body: `INSERT DATA { <#x> <#y> "z" . };` });
   expect(write.ok, `${url} is still writable`).toBe(false);

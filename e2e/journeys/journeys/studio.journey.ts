@@ -50,10 +50,12 @@ import { BRIGHTEST_STARS } from "../pages/Library.ts";
  * They draft the next version of the library deck, by its address,
  * retire one of its cards, and compare the draft with the release: it
  * keeps the series' rules, lists the card retired, and a learner's copy
- * would retire it too, losing nothing. They go back to Solid Memo, still
- * logged in, which lists the deck they made that is left.
+ * would retire it too, losing nothing. They say how the course was made,
+ * then publish it to their pod, saying it will be public: someone with no
+ * login reads it, and the releases list it. They go back to Solid Memo,
+ * still logged in, which lists the deck they made that is left.
  */
-test("open the Studio from Solid Memo and manage an instance's decks @studio", async ({ app, account, runId }) => {
+test("open the Studio from Solid Memo and manage an instance's decks @studio", async ({ app, account, runId, playwright }) => {
   const instance = `Studio ${runId}`;
   const alpha = `Alpha ${runId}`;
   const beta = `Beta ${runId}`;
@@ -361,7 +363,21 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     await app.draftEditor.expectNoProblem(source, undescribed);
   });
 
-  await app.step("35 · Go back to Solid Memo, still logged in", async () => {
+  await app.step("35 · Publish the course to the pod, public: anyone can read it, and the releases list it", async () => {
+    await app.draftEditor.openRelease(authored);
+    await app.draftEditor.choosePublisher("Journey Author");
+    const url = await app.draftEditor.publish();
+    // Someone with no login reads it.
+    const anyone = await playwright.request.newContext();
+    const read = await anyone.get(url, { headers: { accept: "text/turtle" } });
+    expect(read.status()).toBe(200);
+    expect(await read.text()).toContain(`"${authored}"@en`);
+    await anyone.dispose();
+    await app.studio.openReleases(renamed);
+    await app.studio.expectRelease(renamed, url, `authored-${runId}`, 1);
+  });
+
+  await app.step("36 · Go back to Solid Memo, still logged in", async () => {
     await app.studio.backToApp();
     await app.chrome.expectLoggedInAs(account.webId);
     await app.decks.expectDeck(alpha);

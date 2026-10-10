@@ -25,7 +25,7 @@ function renderContainer(useCases: UseCases, queryClient = new QueryClient({ def
   const invalidate = vi.spyOn(queryClient, "invalidateQueries");
   render(
     <QueryClientProvider client={queryClient}>
-      <DraftsContainer useCases={useCases} instance={instanceA} healthHref="#/health" draftHref={(draft) => `#/draft/${draft.name}`} />
+      <DraftsContainer useCases={useCases} instance={instanceA} healthHref="#/health" releasesHref="#/releases" draftHref={(draft) => `#/draft/${draft.name}`} />
     </QueryClientProvider>,
   );
   return { invalidate };
@@ -135,7 +135,7 @@ describe("HomeDraftsContainer", () => {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(
       <QueryClientProvider client={queryClient}>
-        <HomeDraftsContainer useCases={useCases} instance={instanceA} draftsHref="#/drafts" draftHref={(draft) => `#/draft/${draft.name}`} />
+        <HomeDraftsContainer useCases={useCases} instance={instanceA} draftsHref="#/drafts" releasesHref="#/releases" draftHref={(draft) => `#/draft/${draft.name}`} />
       </QueryClientProvider>,
     );
   }

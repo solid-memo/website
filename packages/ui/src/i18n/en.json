@@ -562,7 +562,7 @@
     "heading": "Choose a Solid Memo instance",
     "intro": "An instance is one collection of your decks and study, kept in a folder in your Pod. Most people need only one.",
     "empty": "No instances are registered yet.",
-    "deleteConfirm": "Delete the instance \"{name}\" and all its decks and cards? This cannot be undone. Files another app put in its folder are kept.",
+    "deleteConfirm": "Delete the instance \"{name}\" and all its decks and cards? This cannot be undone. Files another app put in its folder are kept, and so are the releases published from it.",
     "deleteLabel": "Delete instance {name}",
     "delete": "Delete…",
     "newInstance": "New instance…",
@@ -573,6 +573,7 @@
   },
   "keptFolder": {
     "text": "Solid Memo deleted its own data and kept {link}: another app put files there.",
+    "releases": "Solid Memo deleted its own data and kept {link}: the releases published from it are there, which others may be reading. Anything another app put there is kept too.",
     "folder": "the folder in your Pod"
   },
   "instanceUpdate": {
@@ -1260,7 +1261,15 @@
     "draftGone": "That draft no longer exists. Perhaps it was deleted in another tab or app.",
     "releaseUnreadable": "Solid Memo cannot read a release at {url}. Check the address, and that the release is published there.",
     "notAReleaseFile": "That file does not hold one deck or course release. Choose a release saved as Turtle or JSON-LD.",
-    "releaseIdUnsupported": "This release names a part of it “#{id}”, which a draft cannot keep: an id of a draft is letters A to Z, digits, “.”, “_” and “-”, starting with a letter or digit. It cannot be made a draft."
+    "releaseIdUnsupported": "This release names a part of it “#{id}”, which a draft cannot keep: an id of a draft is letters A to Z, digits, “.”, “_” and “-”, starting with a letter or digit. It cannot be made a draft.",
+    "releaseTaken": "A release is already published at {url}, and a release is never written over. Publish the next version, or choose another folder.",
+    "releaseHasErrors": {
+      "one": "The release check finds {count} error. Fix it before you publish the release.",
+      "other": "The release check finds {count} errors. Fix them before you publish the release."
+    },
+    "draftReleased": "This draft was released already, at {url}, and is no longer changed. Start its next version instead.",
+    "guestCannotPublish": "A guest's study is kept in this browser alone, where no one else can read a release. Move your study into a Pod to publish it, or download the release as a file.",
+    "publicAccessRefused": "Your Pod did not let Solid Memo make the release at {url} public, so only you can read it. Try again, or make it readable by everyone with your Pod provider's tools."
   },
   "statistics": {
     "heading": "Statistics",
@@ -2486,6 +2495,68 @@
       "remove": "Remove",
       "editOf": "Edit {name}",
       "removeOf": "Remove {name}"
+    },
+    "publish": {
+      "heading": "Publish",
+      "intro": "Publishing writes the release in your Pod as one Turtle document, at an address that never changes, and makes it readable by everyone. A release is never changed afterwards: to change it, you draft its next version.",
+      "checking": "Checking the draft…",
+      "noErrors": "The release check finds no errors. Publishing checks the release again, against the shapes too.",
+      "errors": {
+        "one": "The release check finds {count} error. Fix it before you publish.",
+        "other": "The release check finds {count} errors. Fix them before you publish."
+      },
+      "folder": "Folder in your Pod",
+      "folderInvalid": "Give the folder's web address, starting with https:// or http:// and ending in /.",
+      "address": "The release will be published at {url}.",
+      "confirm": "I understand that this release will be public: anyone with its address can read it. Once published, it can never be changed or taken back here.",
+      "publish": "Publish to my Pod",
+      "publishing": "Checking and publishing the release…",
+      "waitSaving": "Waiting for your changes to be saved…",
+      "guest": "A guest's study is kept in this browser alone, where no one else could read a release. Move your study into a Pod to publish it there. You can download it as a file meanwhile.",
+      "releasedAt": "This draft was released at {url}.",
+      "askingPublic": "Asking whether anyone can read it…",
+      "public": "Anyone with its address can read it.",
+      "private": "Only you can read it: your Pod did not make it public. Try again, or make it readable by everyone with your Pod provider's tools.",
+      "makePublic": "Make it public",
+      "makingPublic": "Making the release public…",
+      "nextHint": "A release is never changed. To change it, start its next version: a new draft that keeps everything this release published.",
+      "downloadHeading": "Download",
+      "downloadIntro": "Save the release as a Turtle file, at the address it would have in the Solid Memo library, to propose it for the library. Nothing in your Pod changes.",
+      "download": "Download .ttl",
+      "downloaded": "Saved {file}, as the release at {url}.",
+      "stepsIntro": "To propose it for the library, in a copy of the Solid Memo repository:",
+      "stepCopy": "Put the file in decks/ as {file}.",
+      "stepLibrary": "Format it, and list it in the library's index:",
+      "stepCheck": "Check it against the library's rules:",
+      "stepAll": "Run every check:",
+      "stepPullRequest": "Open a pull request with the new file and the index.",
+      "libraryCheck": "Check the draft for the library first"
+    },
+    "releases": {
+      "crumb": "Releases",
+      "link": "Published releases",
+      "loading": "Reading the releases…",
+      "heading": "Releases published from {instance}",
+      "intro": "Each release is one document in your Pod, which learners add by its address. A release is never changed: to change one, start its next version.",
+      "none": "This instance has published no releases yet.",
+      "caption": "Releases published from {instance}",
+      "column": {
+        "release": "Release",
+        "readers": "Readable by",
+        "actions": "Actions"
+      },
+      "name": "{name}, version {version}",
+      "public": "Everyone",
+      "private": "Only you",
+      "makePublicOf": "Make {release} public",
+      "copy": "Copy the link",
+      "copyLink": "Copy the link {url}",
+      "copied": "Link copied.",
+      "copyFailed": "The link could not be copied. Select its address and copy it.",
+      "startNext": "Start the next version",
+      "startNextOf": "Start the next version of {release}",
+      "starting": "Starting the next version…",
+      "drafts": "Drafts of releases"
     }
   },
   "proseField": {

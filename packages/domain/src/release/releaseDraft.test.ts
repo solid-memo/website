@@ -65,6 +65,8 @@ describe("a blank draft", () => {
       isVersionOf: of("series"),
       distribution: [of("turtle")],
       studyDirection: SM.frontToBack,
+      // A course is about education, as a course release says.
+      theme: ["http://publications.europa.eu/resource/authority/data-theme/EDUC"],
     });
     expect(draft.distributions).toEqual([{ id: "turtle", data: turtleDistribution(DRAFT) }]);
     expect(draft.course).toBe(true);
@@ -74,6 +76,7 @@ describe("a blank draft", () => {
   it("leaves out a title with no text, and the ids other subjects will have", () => {
     const draft = blankDraft({ url: DRAFT, course: false, title: {}, now: NOW, taken: ["turtle", "series", "series-2"] });
     expect(draft.root.title).toBeUndefined();
+    expect(draft.root.theme).toEqual([]);
     expect(draft.root.inSeries).toBe(of("series-3"));
     expect(draft.distributions[0]!.id).toBe("turtle-2");
   });

@@ -11,7 +11,8 @@ import { Screen } from "./Screen.ts";
  * problems of the release it will be, each a link to what it is about;
  * its listing preview shows it as the library will. A next version is
  * compared with the release it follows. Its release screen says who
- * compiled it and how, under what licence, and from what sources.
+ * compiled it and how, under what licence, and from what sources, and
+ * publishes it in the pod, public.
  */
 export class DraftEditor extends Screen {
   /** The draft's outline, as the overview shows it. */
@@ -53,6 +54,39 @@ export class DraftEditor extends Screen {
       await this.page.getByRole("link", { name: this.t("studio.draft.releaseLink") }).click();
       await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.release.heading") })).toBeVisible();
       await this.app.chrome.expectBreadcrumbHere("studio.release.crumb");
+    });
+  }
+
+  /** Names the release's publisher, one of its authors, on the release screen. */
+  async choosePublisher(name: string): Promise<void> {
+    await this.intent(`Name ${name} the release's publisher`, async () => {
+      await this.page.getByRole("combobox", { name: this.t("studio.release.publisher"), exact: true }).selectOption({ label: name });
+      await this.expectSaved();
+    });
+  }
+
+  /**
+   * Publishes the draft from its release screen, in the instance's
+   * releases folder, once the user says it will be public: the screen
+   * then shows it released, at the address it said, readable by
+   * everyone. Its address.
+   */
+  async publish(): Promise<string> {
+    return this.intent("Publish the release to the pod, saying it will be public", async () => {
+      const part = this.page.getByRole("region", { name: this.t("studio.publish.heading"), exact: true });
+      await expect(part.getByText(this.t("studio.publish.noErrors"))).toBeVisible({ timeout: 30_000 });
+      const [before, after] = this.t("studio.publish.address", { url: "\u0000" }).split("\u0000") as [string, string];
+      const said = (await part.locator("#release-folder-hint").textContent())!;
+      const url = said.slice(before.length, said.length - after.length);
+      const publish = part.getByRole("button", { name: this.t("studio.publish.publish") });
+      await expect(publish).toBeDisabled();
+      await part.getByRole("checkbox", { name: this.t("studio.publish.confirm") }).check();
+      await publish.click();
+      await expect(part.getByRole("link", { name: url, exact: true })).toHaveAttribute("href", url, { timeout: 60_000 });
+      await expect(part.getByText(this.t("studio.publish.public"))).toBeVisible();
+      // Frozen: the metadata above it changes no more.
+      await expect(this.page.getByRole("combobox", { name: this.t("studio.license.label") })).toBeDisabled();
+      return url;
     });
   }
 

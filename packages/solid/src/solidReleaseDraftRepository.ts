@@ -1,6 +1,5 @@
 import {
   asUrl,
-  buildThing,
   createSolidDataset,
   getContainedResourceUrlAll,
   getSolidDataset,
@@ -27,12 +26,12 @@ import { DCAT_NS, DCTERMS_NS } from "@solid-memo/domain/release/releaseModel";
 import { RDF_TYPE, type DraftTriple, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { moved } from "@solid-memo/domain/release/releaseToDraft";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
+import { addCatalogLink, catalogLinks, removeCatalogLink } from "./catalogLinks";
 import { deleteContainerIfEmpty } from "./containers";
 import {
   deleteDataset,
   deleteIfPresent,
   getSolidDatasetOrNull,
-  PreconditionFailedError,
   readDataset,
   saveDataset,
   versionOf,
@@ -52,7 +51,7 @@ import {
   tripleKey,
   type DraftEntry,
 } from "./mappers/releaseDraftMapper";
-import { recordThing, removeUnlessNewer, storedVersionOf, unlessNewer } from "./records";
+import { recordThing, removeUnlessNewer, storedVersionOf } from "./records";
 import { DECK_FILE_PREFIXES, parseDeckFile } from "./solidDeckArchive";
 import { turtleOf } from "./turtleWriter";
 import { SM } from "./vocab";
@@ -69,9 +68,6 @@ export const RELEASE_PREFIXES: Readonly<Record<string, string>> = {
   adms: "http://www.w3.org/ns/adms#",
   spdx: "http://spdx.org/rdf/terms#",
 };
-
-/** How often the catalogue's link to a draft is written, in all, while the catalogue keeps changing elsewhere. */
-const LINK_ATTEMPTS = 3;
 
 /** Each of a draft's documents as read last, by URL, and the version they were at together. */
 interface Read {
@@ -105,10 +101,7 @@ export function createSolidReleaseDraftRepository({
 
   /** The drafts the instance's catalogue links, as their places say: a link anywhere but a draft's place in the instance is not followed. */
   async function linked(instanceUrl: string): Promise<{ url: string; place: { instanceUrl: string; name: string; version: number } }[]> {
-    const catalog = await getSolidDatasetOrNull(catalogUrlOf(instanceUrl), fetch);
-    const node = catalog === null ? null : getThing(catalog, catalogNodeUrlOf(instanceUrl));
-    if (node === null) return [];
-    return getUrlAll(node, SM.releaseDraft).flatMap((url) => {
+    return (await catalogLinks(instanceUrl, SM.releaseDraft, fetch)).flatMap((url) => {
       const place = draftPlaceOf(url);
       return place === null || place.instanceUrl !== ensureTrailingSlash(instanceUrl) ? [] : [{ url, place }];
     });
@@ -136,36 +129,9 @@ export function createSolidReleaseDraftRepository({
     );
     const draft = draftFromQuads(quads, draftUrl);
     if (draft === null) throw new AppError("draftGone");
-    // The version of each document, in order: a draft changed when any of them did, or one came or went.
-    const version = JSON.stringify(urls.map((url, at) => [url, versionOf(datasets[at]!)]));
+    const version = versionOfDocuments(urls, datasets);
     reads.set(draftUrl, { version, documents: new Map(urls.map((url, at) => [url, datasets[at]!])) });
     return { draft, version };
-  }
-
-  /**
-   * Change the catalogue's links to drafts as `change` says, If-Match,
-   * read and made again on a 412, a few times. Without a catalogue there
-   * is no link to remove, and none can be added (noCatalogToUpdate).
-   */
-  async function changeLinks(instanceUrl: string, change: (thing: ThingPersisted) => ThingPersisted | null, adding: boolean): Promise<void> {
-    const url = catalogUrlOf(instanceUrl);
-    for (let attempt = 1; ; attempt++) {
-      const catalog = await getSolidDatasetOrNull(url, fetch);
-      const node = catalog === null ? null : getThing(catalog, catalogNodeUrlOf(instanceUrl));
-      if (node === null) {
-        if (adding) throw new AppError("noCatalogToUpdate");
-        return;
-      }
-      const changed = change(unlessNewer(node));
-      if (changed === null) return;
-      try {
-        // sm:releaseDraft is no shape's: the catalogue is not checked for it, as for sm:completedChapter.
-        await saveDataset(url, setThing(catalog!, changed), fetch);
-        return;
-      } catch (error) {
-        if (!(error instanceof PreconditionFailedError) || attempt === LINK_ATTEMPTS) throw error;
-      }
-    }
   }
 
   /** Read a release document, as it states itself, its formats ones this app reads. */
@@ -223,10 +189,7 @@ export function createSolidReleaseDraftRepository({
           await saveDataset(url, dataset, fetch);
           written.push(url);
         }
-        await changeLinks(instanceUrl, (node) =>
-          getUrlAll(node, SM.releaseDraft).includes(draft.url) ? null : buildThing(node).addUrl(SM.releaseDraft, draft.url).build(),
-          true,
-        );
+        await addCatalogLink(instanceUrl, SM.releaseDraft, draft.url, fetch);
       } catch (error) {
         // What this draft wrote goes, the release document last: no draft is left that no catalogue links, nor deletes.
         if (written.length > 0) await deleteDocuments(draft.url, [...written.slice(1).reverse(), draft.url], fetch).catch(() => undefined);
@@ -296,12 +259,13 @@ export function createSolidReleaseDraftRepository({
       read.version = "";
     },
 
-    async assemble(draftUrl, targetUrl, issued) {
+    async assemble(draftUrl, targetUrl, issued, version) {
       const urls = await documentsOf(draftUrl);
       if (!urls.includes(draftUrl)) throw new AppError("draftGone");
       const iriOf = draftIriOf(draftContainerOf(draftUrl), draftUrl);
       const to = (iri: string) => moved(iriOf(iri), draftUrl, targetUrl);
       const datasets = await Promise.all(urls.map((url) => readDataset(url, fetch)));
+      if (version !== undefined && versionOfDocuments(urls, datasets) !== version) throw new AppError("changedElsewhere", { url: draftUrl });
       const atTarget = datasets.flatMap((dataset, at) =>
         quadsOf(dataset).map((quad) => {
           const object = termOf(quad.object);
@@ -346,12 +310,14 @@ export function createSolidReleaseDraftRepository({
     async delete(draft) {
       await deleteDraftResources(draft.url, fetch);
       reads.delete(draft.url);
-      await changeLinks(draft.instanceUrl, (node) =>
-        getUrlAll(node, SM.releaseDraft).includes(draft.url) ? buildThing(node).removeUrl(SM.releaseDraft, draft.url).build() : null,
-        false,
-      );
+      await removeCatalogLink(draft.instanceUrl, SM.releaseDraft, draft.url, fetch);
     },
   };
+}
+
+/** The version of each of a draft's documents, in order: a draft changed when any of them did, or one came or went. */
+function versionOfDocuments(urls: readonly string[], datasets: readonly SolidDataset[]): string {
+  return JSON.stringify(urls.map((url, at) => [url, versionOf(datasets[at]!)]));
 }
 
 /**

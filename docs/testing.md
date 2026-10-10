@@ -41,6 +41,7 @@ the run ends, on Ctrl-C); the test names say which server and version:
 | `css-6` | Community Solid Server 6.x, in memory | the same | blocking |
 | `nss-6` | node-solid-server 6.x | built here from its lockfile ([servers/nss/](../e2e/pod/servers/nss/Dockerfile)), in a root whose ACL lets anyone read and write | blocking |
 | `nss-5` | node-solid-server 5.x | the same | blocking |
+| `css-acp` | Community Solid Server 7.x with Access Control Policies in place of Web Access Control, in memory | built here on css-7's image ([servers/css-acp/](../e2e/pod/servers/css-acp/Dockerfile)) with a configuration of its own, its root's ACR open | blocking |
 | `css-8` | Community Solid Server 8, still in alpha, in memory | its own, pinned by digest | advisory |
 | `pivot` | Pivot, the server of solidcommunity.net (the Community Solid Server 7 with Pivot's components), in memory | built here from its lockfile ([servers/pivot/](../e2e/pod/servers/pivot/Dockerfile)) with a configuration of its own, its root open | advisory |
 | `nextcloud` | Solid-Nextcloud: Nextcloud 32 with the Solid app, on SQLite, the pod `apps/solid/~alice/storage/` | built here from a commit of the app ([servers/nextcloud/](../e2e/pod/servers/nextcloud/Dockerfile)), installed on every start, alice's pod opened by a hook | advisory |
@@ -185,6 +186,24 @@ inserts (`owl:deprecated true`) as false: its tests
 take the library's largest course, its text as it is, through a draft
 on every server, each step within a time budget.
 
+Publishing a release
+([releases.integration.test.ts](../e2e/pod/src/releases.integration.test.ts))
+is the app's only write of access control. The tests write anonymously,
+as every server lets anyone write, so "no login" is what the release's
+own ACL (Web Access Control) or ACR (Access Control Policies, `css-acp`,
+blocking so that the ACR's write gates CI as the ACL's does) says once
+published: the test reads that document, not only the
+release. A second release at the same address is refused, and leaves
+the first as it was. A publishing cut short after the release is
+written (its catalogue link refused once) is finished by publishing
+again; deleting the instance then keeps the release and its folder,
+and says so (`keptReleases`). node-solid-server refuses the PATCH
+`@inrupt/solid-client` writes an ACL with, and the Community Solid
+Server answers an ACR not written yet with 404; the publisher takes
+both in its stride (`accessFetch`). Solid-Nextcloud names a folder's
+ACL as each of its documents', so the release stays private there
+(its `expected-failures.json`).
+
 solid-server 6.0.0 is packaged with faults its image works around: it
 lacks the root ACL template it copies on first start (so the image has
 one in its config folder), and it lists its own commit-hook tool
@@ -210,7 +229,8 @@ deck list and working through its first chapter and final review, describing a d
 instance, logging out, and opening the Studio to manage an
 instance's decks and its drafts of releases, writing a course in one
 and test-playing it in the trial, the instance's decks and statistics
-unchanged after. Each journey runs against a fresh account, pod
+unchanged after, then publishing it, public, which someone with no
+login then reads. Each journey runs against a fresh account, pod
 and WebID on a Community Solid Server 7
 ([css/compose.yml](../e2e/journeys/css/compose.yml)) that the global
 setup starts in Docker and takes down after. The app logs in only with

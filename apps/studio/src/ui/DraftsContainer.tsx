@@ -33,11 +33,13 @@ export function DraftsContainer({
   useCases,
   instance,
   healthHref,
+  releasesHref,
   draftHref,
 }: {
   useCases: UseCases;
   instance: Instance;
   healthHref: string;
+  releasesHref: string;
   draftHref: (draft: ReleaseDraftSummary) => string;
 }) {
   const { t, errorText } = useI18n();
@@ -85,6 +87,7 @@ export function DraftsContainer({
       decks={decksOf(treeQuery.data.children)}
       readOnly={check.readOnly() ?? (check.arrangementSetAside ? "setAside" : null)}
       healthHref={healthHref}
+      releasesHref={releasesHref}
       draftHref={draftHref}
       creating={createMutation.isPending}
       // No file picked: nothing was made, and nothing is said.
@@ -103,17 +106,20 @@ export function DraftsContainer({
  * Home's drafts: a line for each of the instance's drafts, a link to it
  * (one that can be read), its kind and version, and a link to the drafts
  * screen, where they are made and
- * deleted. Quiet while they are read; an error says they could not be.
+ * deleted, and to the releases the instance published. Quiet while they
+ * are read; an error says they could not be.
  */
 export function HomeDraftsContainer({
   useCases,
   instance,
   draftsHref,
+  releasesHref,
   draftHref,
 }: {
   useCases: UseCases;
   instance: Instance;
   draftsHref: string;
+  releasesHref: string;
   draftHref: (draft: ReleaseDraftSummary) => string;
 }) {
   const { t, errorText } = useI18n();
@@ -150,6 +156,9 @@ export function HomeDraftsContainer({
         ))}
       <p>
         <a href={draftsHref}>{t("studio.drafts.manage")}</a>
+      </p>
+      <p>
+        <a href={releasesHref}>{t("studio.releases.link")}</a>
       </p>
     </section>
   );

@@ -63,6 +63,7 @@ export function InstancePickerContainer({
       onAttach={(url, target) => attachInstanceMutation.mutate({ url, target })}
       onDelete={(instance) => deleteInstanceMutation.mutate(instance)}
       keptFolder={deleteInstanceMutation.data?.keptFolder ?? null}
+      keptReleases={deleteInstanceMutation.data?.keptReleases ?? false}
     />
   );
 }

@@ -38,6 +38,7 @@ import { QuestionEditorContainer } from "./QuestionEditorContainer";
 import { ReleaseCheckContainer } from "./ReleaseCheckContainer";
 import { ReleaseDiffContainer } from "./ReleaseDiffContainer";
 import { ReleaseMetadataContainer } from "./ReleaseMetadataContainer";
+import { ReleasesContainer } from "./ReleasesContainer";
 import { StepEditorContainer } from "./StepEditorContainer";
 import { TrialContainer } from "./TrialContainer";
 import { instanceOfRoute, isDraftRoute, spotRoute, studioRouteToHash, targetRoute, useStudioRoute, type StudioRoute } from "./router";
@@ -138,6 +139,8 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
         return [instancesCrumb, decks, { label: t("studio.transfer.crumb"), route }];
       case "drafts":
         return [instancesCrumb, decks, { label: t("studio.drafts.crumb"), route }];
+      case "releases":
+        return [instancesCrumb, decks, { label: t("studio.releases.crumb"), route }];
       case "health": {
         const health: Crumb<StudioRoute> = { label: t("studio.health.crumb"), route: { screen: "health", instanceUrl: route.instanceUrl } };
         return route.deckUrl === undefined
@@ -288,7 +291,13 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             useCases={useCases}
             draftUrl={route.draftUrl}
             links={draftLinks(route.draftUrl)}
+            publishLinks={{
+              checkHref: studioRouteToHash({ screen: "check", draftUrl: route.draftUrl }),
+              libraryCheckHref: studioRouteToHash({ screen: "check", draftUrl: route.draftUrl, policy: "library" }),
+              healthHref: studioRouteToHash({ screen: "health", instanceUrl: instanceOfRoute(route)! }),
+            }}
             {...(route.field === undefined ? {} : { field: route.field })}
+            onStarted={(created) => navigate({ screen: "draft", draftUrl: created.draft.url })}
           />
         );
       case "trial":
@@ -396,6 +405,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
               useCases={useCases}
               instance={activeInstance!}
               draftsHref={studioRouteToHash({ screen: "drafts", instanceUrl: route.instanceUrl })}
+              releasesHref={studioRouteToHash({ screen: "releases", instanceUrl: route.instanceUrl })}
               draftHref={(draft) => studioRouteToHash({ screen: "draft", draftUrl: draft.url })}
             />
           </>
@@ -408,7 +418,19 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             useCases={useCases}
             instance={activeInstance!}
             healthHref={studioRouteToHash({ screen: "health", instanceUrl: route.instanceUrl })}
+            releasesHref={studioRouteToHash({ screen: "releases", instanceUrl: route.instanceUrl })}
             draftHref={(draft) => studioRouteToHash({ screen: "draft", draftUrl: draft.url })}
+          />
+        );
+      case "releases":
+        return (
+          <ReleasesContainer
+            key={route.instanceUrl}
+            useCases={useCases}
+            instance={activeInstance!}
+            healthHref={studioRouteToHash({ screen: "health", instanceUrl: route.instanceUrl })}
+            draftsHref={studioRouteToHash({ screen: "drafts", instanceUrl: route.instanceUrl })}
+            onStarted={(created) => navigate({ screen: "draft", draftUrl: created.draft.url })}
           />
         );
       case "groups":

@@ -648,6 +648,69 @@ describe("StudioWorkspace", () => {
       expect(await screen.findByRole("heading", { level: 3, name: "Sources" })).toHaveAttribute("data-arrival", "true");
     });
 
+    it("publishes a draft from its release screen once the user says it will be public, then shows it released, and starts its next version", async () => {
+      window.history.replaceState(null, "", studioRouteToHash({ screen: "release", draftUrl: DRAFT_URL }));
+      const draft = courseDraft();
+      const target = `${instanceA.url}releases/solid/v1.ttl`;
+      const nextUrl = `${instanceA.url}drafts/solid/v2/release.ttl`;
+      const useCases = draftUseCases(draft);
+      vi.mocked(useCases.publishRelease).mockImplementation(async (_draftUrl, url) => {
+        vi.mocked(useCases.getReleaseDraft).mockResolvedValue({ ...draft, root: { ...draft.root, releasedAs: url } });
+        return { url, public: false };
+      });
+      vi.mocked(useCases.createReleaseDraft).mockResolvedValue({
+        draft: { url: nextUrl, instanceUrl: instanceA.url, name: "solid", version: 2, readable: true, title: { en: "Solid" }, course: true },
+      });
+      renderWorkspace(useCases);
+      expect(await screen.findByText(`The release will be published at ${target}.`)).toBeInTheDocument();
+      expect(await screen.findByText(/The release check finds no errors/)).toBeInTheDocument();
+      fireEvent.click(screen.getByRole("checkbox", { name: /this release will be public/ }));
+      const publish = screen.getByRole("button", { name: "Publish to my Pod" });
+      // Nothing is published until the instance's data check is done.
+      await waitFor(() => expect(publish).toBeEnabled());
+      fireEvent.click(publish);
+      expect(await screen.findByRole("link", { name: target })).toHaveAttribute("href", target);
+      expect(useCases.publishRelease).toHaveBeenCalledWith(DRAFT_URL, target, MARKDOWN_CHECK);
+      // What the publishing said, not asked again: the pod would not make it public.
+      expect(screen.getByText(/Only you can read it/)).toBeInTheDocument();
+      expect(useCases.isReleasePublic).not.toHaveBeenCalled();
+      fireEvent.click(screen.getByRole("button", { name: "Make it public" }));
+      await waitFor(() => expect(useCases.makeReleasePublic).toHaveBeenCalledWith(target));
+      expect(await screen.findByText("Anyone with its address can read it.")).toBeInTheDocument();
+      fireEvent.click(screen.getByRole("button", { name: "Download .ttl" }));
+      await waitFor(() => expect(useCases.downloadRelease).toHaveBeenCalledWith(DRAFT_URL));
+      fireEvent.click(screen.getByRole("button", { name: "Start the next version" }));
+      await waitFor(() => expect(parseStudioHash(window.location.hash)).toEqual({ screen: "draft", draftUrl: nextUrl }));
+      expect(useCases.createReleaseDraft).toHaveBeenCalledWith(instanceA.url, { kind: "nextVersionOf", url: target });
+    });
+
+    it("lists the instance's releases from Home's panel, with their trail, and opens a next version started", async () => {
+      window.history.replaceState(null, "", home(instanceA.url));
+      const target = `${instanceA.url}releases/solid/v1.ttl`;
+      const useCases = draftUseCases();
+      vi.mocked(useCases.listPublishedReleases).mockResolvedValue([{ url: target, public: true }]);
+      vi.mocked(useCases.createReleaseDraft).mockResolvedValue({
+        draft: { url: DRAFT_URL, instanceUrl: instanceA.url, name: "solid", version: 1, readable: true, title: { en: "Solid" }, course: true },
+      });
+      renderWorkspace(useCases);
+      fireEvent.click(await screen.findByRole("link", { name: "Published releases" }));
+      expect(await screen.findByRole("heading", { level: 2, name: "Releases published from Deck set A" })).toBeInTheDocument();
+      expect(parseStudioHash(window.location.hash)).toEqual({ screen: "releases", instanceUrl: instanceA.url });
+      expect(trailOf()).toEqual(["Instances", "Decks", "Releases"]);
+      await waitFor(() => expect(document.title).toBe("Releases – Solid Memo Studio"));
+      const start = await screen.findByRole("button", { name: "Start the next version of solid, version 1" });
+      await waitFor(() => expect(start).toBeEnabled());
+      fireEvent.click(start);
+      expect(await screen.findByRole("heading", { level: 2, name: "Solid" })).toBeInTheDocument();
+      expect(parseStudioHash(window.location.hash)).toEqual({ screen: "draft", draftUrl: DRAFT_URL });
+      // The drafts screen links to the releases too.
+      fireEvent.click(screen.getAllByRole("link", { name: "Drafts" })[0]!);
+      expect(await screen.findByRole("link", { name: "Published releases" })).toHaveAttribute(
+        "href",
+        studioRouteToHash({ screen: "releases", instanceUrl: instanceA.url }),
+      );
+    });
+
     it("previews the draft's listing, with its trail", async () => {
       window.history.replaceState(null, "", studioRouteToHash({ screen: "check", draftUrl: DRAFT_URL }));
       renderWorkspace(draftUseCases());

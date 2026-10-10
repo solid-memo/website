@@ -84,6 +84,14 @@ describe("createAppUseCases", () => {
     await expect(useCases.createReleaseDraft(instance!.url, { kind: "nextVersionOf", url: `${instance!.url}releases/none/v1.ttl` })).rejects.toMatchObject({
       code: "releaseUnreadable",
     });
+    // A guest publishes nothing: their pod is this browser's.
+    await expect(useCases.listPublishedReleases(instance!.url)).resolves.toEqual([]);
+    await expect(useCases.publishRelease(made!.draft.url, `${instance!.url}releases/getting-started/v2.ttl`, {
+      problems: () => [],
+      chunks: () => ({ chunks: 1, empty: 0 }),
+    })).rejects.toMatchObject({
+      code: "guestCannotPublish",
+    });
   });
 
   it("keeps a guest's study in IndexedDB, where the browser has it", { timeout: 30_000 }, async () => {

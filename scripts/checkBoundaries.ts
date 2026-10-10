@@ -10,6 +10,9 @@
  *   undeclared import would still resolve — this is what catches it);
  * - code that runs in the browser imports nothing node-only (node:*, n3,
  *   the Turtle tooling, a package's tooling/ or node/ entry points).
+ * - some exports of a vendor package may be imported only from certain
+ *   files: `@inrupt/solid-client`'s access control, by the release
+ *   publisher alone (docs/boundaries.md, Access control).
  *
  * Test files and configs may also use the shared test tooling from the
  * root package.json.
@@ -55,6 +58,24 @@ const ONLY_FROM: Record<string, Record<string, RegExp>> = {
   // The app's messages (packages/ui/src/i18n), which the page objects find text by.
   "e2e-journeys": { ui: /^harness\/strings\.ts$/ },
 };
+
+/**
+ * Vendor exports that only certain files may import, tests aside, by
+ * package (`files`); a namespace import counts as importing them all.
+ * Who may read something is changed in one place only: the access
+ * control of @inrupt/solid-client (universal access, ACP, the ACL
+ * functions) is the release publisher's.
+ */
+const VENDOR_ONLY_FROM: { specifier: RegExp; names: RegExp; files: Record<string, RegExp> }[] = [
+  {
+    specifier: /^@inrupt\/solid-client(\/|$)/,
+    names: /^(universalAccess|access|acp_\w+|\w*Ac[lr]\w*|(get|set)(Agent|Group|Public)(Resource|Default)?Access(All)?|getEffectiveAccess)$/,
+    files: { solid: /^src\/solidReleasePublisher\.ts$/ },
+  },
+];
+
+/** A static import's specifier, and what it names: the names inside its braces, or "*" for a namespace import. */
+const NAMED_IMPORT = /^import\s+(?:type\s+)?(?:[\w$]+\s*,\s*)?(?:\{([^}]*)\}|(\*)\s+as\s+[\w$]+)\s*from\s*["']([^"'\s]+)["']/gm;
 
 /** Packages a package may import only with a dynamic import(), so they stay out of its first chunk. */
 const LAZY_ONLY: Record<string, string[]> = {
@@ -153,6 +174,16 @@ for (const group of ["apps", "packages", "e2e"]) {
         }
         if (BROWSER[short]?.test(file) && !test && NODE_ONLY.some((pattern) => pattern.test(specifier!))) {
           problems.push(`${where}: runs in the browser, so may not import "${specifier}".`);
+        }
+      }
+      for (const [, braces, namespace, specifier] of test ? [] : text.matchAll(NAMED_IMPORT)) {
+        for (const rule of VENDOR_ONLY_FROM) {
+          if (!rule.specifier.test(specifier!) || rule.files[short]?.test(file)) continue;
+          const names = namespace !== undefined ? ["*"] : braces!.split(",").map((one) => one.trim().replace(/^type\s+/, "").split(/\s+as\s+/)[0]!);
+          for (const name of names.filter((one) => one === "*" || rule.names.test(one))) {
+            const only = Object.entries(rule.files).map(([folder, pattern]) => `${folder} files matching ${pattern}`).join(", ");
+            problems.push(`${where}: may not import ${name === "*" ? "everything" : name} from ${specifier}: only ${only} may.`);
+          }
         }
       }
     }

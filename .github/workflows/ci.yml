@@ -68,7 +68,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        server: [css-7, css-6, nss-6, nss-5]
+        server: [css-7, css-6, nss-6, nss-5, css-acp]
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7

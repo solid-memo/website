@@ -593,7 +593,7 @@ describe("Workspace", () => {
       ),
       deleteInstance: vi.fn(async () => {
         deleted = true;
-        return { keptFolder: null };
+        return { keptFolder: null, keptReleases: false };
       }),
     });
     renderWorkspace(useCases);
@@ -620,7 +620,7 @@ describe("Workspace", () => {
       listInstances: vi.fn(async () => (deleted ? [instanceA] : [instanceA, instanceB])),
       deleteInstance: vi.fn(async () => {
         deleted = true;
-        return { keptFolder: instanceB.url };
+        return { keptFolder: instanceB.url, keptReleases: false };
       }),
     });
     renderWorkspace(useCases);
@@ -633,6 +633,20 @@ describe("Workspace", () => {
       "href",
       instanceB.url,
     );
+  });
+
+  it("says when deleting an instance kept its folder for the releases published from it", async () => {
+    vi.stubGlobal("confirm", vi.fn(() => true));
+    const useCases = makeUseCases({
+      listInstances: vi.fn(async () => [instanceA, instanceB]),
+      deleteInstance: vi.fn(async () => ({ keptFolder: instanceB.url, keptReleases: true })),
+    });
+    renderWorkspace(useCases);
+
+    fireEvent.click(await screen.findByRole("button", { name: "Delete instance Deck set B" }));
+
+    const notice = await screen.findByText(/Solid Memo deleted its own data and kept/);
+    expect(notice).toHaveTextContent("the releases published from it are there, which others may be reading.");
   });
 
   it("shows the error when deleting an instance fails", async () => {

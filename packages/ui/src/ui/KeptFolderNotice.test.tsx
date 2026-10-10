@@ -16,6 +16,13 @@ describe("KeptFolderNotice", () => {
     expect(within(notice).getByRole("link")).toHaveAttribute("href", FOLDER);
   });
 
+  it("says the folder was kept for the releases published from the instance", () => {
+    render(<KeptFolderNotice url={FOLDER} releases />);
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Solid Memo deleted its own data and kept the folder in your Pod (opens in a new tab): the releases published from it are there, which others may be reading. Anything another app put there is kept too.",
+    );
+  });
+
   it("is nothing when no folder was kept", () => {
     const { container } = render(<KeptFolderNotice url={null} />);
     expect(container).toBeEmptyDOMElement();
@@ -25,11 +32,12 @@ describe("KeptFolderNotice", () => {
     render(
       <I18nProvider locale="sv" onChoose={() => undefined}>
         <KeptFolderNotice url={FOLDER} />
+        <KeptFolderNotice url={FOLDER} releases />
       </I18nProvider>,
     );
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "Solid Memo tog bort sina egna data och behöll mappen i din Pod",
-    );
-    expect(screen.getByRole("status")).toHaveTextContent("en annan app har lagt filer där.");
+    const [other, releases] = screen.getAllByRole("status");
+    expect(other).toHaveTextContent("Solid Memo tog bort sina egna data och behöll mappen i din Pod");
+    expect(other).toHaveTextContent("en annan app har lagt filer där.");
+    expect(releases).toHaveTextContent("där finns de utgåvor som publicerats från den, som andra kan läsa.");
   });
 });

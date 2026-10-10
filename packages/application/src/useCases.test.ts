@@ -129,8 +129,8 @@ function makeDeps() {
     })),
     createInstance: vi.fn(async () => instance),
     attachInstance: vi.fn(async () => instance),
-    deleteInstance: vi.fn(async () => ({ keptFolder: null })),
-    deleteInstanceData: vi.fn(async () => ({ keptFolder: null })),
+    deleteInstance: vi.fn(async () => ({ keptFolder: null, keptReleases: false })),
+    deleteInstanceData: vi.fn(async () => ({ keptFolder: null, keptReleases: false })),
     readMeta: vi.fn(async () => null),
     saveMeta: vi.fn(async () => undefined),
     renameRegistrations: vi.fn(async () => undefined),
@@ -933,9 +933,9 @@ describe("createUseCases", () => {
 
   it("deleteInstance passes the WebID and the instance, and says what it kept", async () => {
     const deps = makeDeps();
-    vi.mocked(deps.instanceRepository.deleteInstance).mockResolvedValue({ keptFolder: instance.url });
+    vi.mocked(deps.instanceRepository.deleteInstance).mockResolvedValue({ keptFolder: instance.url, keptReleases: false });
     const useCases = createUseCases(deps);
-    await expect(useCases.deleteInstance(session, instance)).resolves.toEqual({ keptFolder: instance.url });
+    await expect(useCases.deleteInstance(session, instance)).resolves.toEqual({ keptFolder: instance.url, keptReleases: false });
     expect(deps.instanceRepository.deleteInstance).toHaveBeenCalledWith({
       webId: session.webId,
       instance,
@@ -2335,6 +2335,8 @@ describe("the instance digest", () => {
     const useCases = createUseCases(makeDeps());
     await expect(useCases.listReleaseDrafts(instance.url)).resolves.toEqual([]);
     await expect(useCases.getReleaseDraft(`${instance.url}drafts/a/v1/release.ttl`)).rejects.toThrow("This app keeps no drafts.");
+    await expect(useCases.listPublishedReleases(instance.url)).resolves.toEqual([]);
+    await expect(useCases.makeReleasePublic(`${instance.url}releases/a/v1.ttl`)).rejects.toThrow("This app keeps no drafts.");
   });
 
   it("keeps no receipt of a document that does not conform or has no version", async () => {
@@ -3250,7 +3252,7 @@ describe("library deck upgrade", () => {
       const { deps, guestPod } = guestDeps();
       vi.mocked(deps.instanceRepository.deleteInstance).mockImplementation(async () => {
         vi.mocked(deps.instanceRepository.listInstances).mockResolvedValue([]);
-        return { keptFolder: null };
+        return { keptFolder: null, keptReleases: false };
       });
       await createUseCases(deps).transferGuestStudy(session, guestInstance, { containerUrl: TARGET, registrationTarget: "public" });
       expect(guestPod.discard).toHaveBeenCalledOnce();
@@ -3593,7 +3595,7 @@ describe("library deck upgrade", () => {
         vi.mocked(deps.deckRepository.readDeckTree).mockResolvedValue({ readOnly: false, children: [] });
         vi.mocked(deps.instanceRepository.deleteInstance).mockImplementation(async () => {
           vi.mocked(deps.instanceRepository.listInstances).mockResolvedValue([]);
-          return { keptFolder: null };
+          return { keptFolder: null, keptReleases: false };
         });
         const outcome = await createUseCases(deps).mergeGuestStudy(session, guestInstance, target, { skip: [course.url] });
         expect(outcome).toMatchObject({ ok: true, added: [added("deck-n1", own)] });

@@ -433,9 +433,11 @@ export interface ReleaseDraftRepository {
    * The draft as one release document at `targetUrl`, in Turtle
    * (`@base` its URL, the usual prefixes): every subject moved there,
    * released `issued` (also its time of change), written at library
-   * deck format 6, with the series it starts described in it.
+   * deck format 6, with the series it starts described in it. With
+   * `version`, the draft as it was at that version (read), or
+   * changedElsewhere when its documents changed since.
    */
-  assemble(draftUrl: string, targetUrl: string, issued: string): Promise<string>;
+  assemble(draftUrl: string, targetUrl: string, issued: string, version?: string): Promise<string>;
   /**
    * A release document anywhere, as it states itself, at its own URL;
    * releaseUnreadable when there is none to read there, or its version
@@ -455,6 +457,35 @@ export interface ReleaseDraftRepository {
    * then empty, then its link from the catalogue.
    */
   delete(draft: ReleaseDraftSummary): Promise<void>;
+}
+
+/**
+ * Driven port: the releases a creator publishes from an instance
+ * (docs/studio.md, Publishing a release), each one Turtle document,
+ * frozen once written. The only port that changes who may read
+ * something: it makes a release it wrote readable by everyone, that
+ * document alone.
+ */
+export interface ReleasePublisher {
+  /**
+   * Write the release's text at `targetUrl`, only if nothing is there
+   * (If-None-Match: *; else releaseTaken, with nothing written: a
+   * release is never written over; but a release there that states what
+   * this one does, its time of issue aside, is this one, written by a
+   * publishing cut short, and is finished as if just written), then
+   * make it readable by everyone,
+   * then link it from the instance's catalogue (`sm:publishedRelease`,
+   * If-Match, read and made again on a 412). `public` is false when the
+   * pod would not make it readable by everyone: it is written and linked
+   * all the same, readable by its owner alone, until makePublic.
+   */
+  publish(instanceUrl: string, turtle: string, targetUrl: string): Promise<{ public: boolean }>;
+  /** Make the release readable by everyone, again; publicAccessRefused when the pod will not. */
+  makePublic(url: string): Promise<void>;
+  /** Whether someone with no login can read the release at `url`. */
+  isPublic(url: string): Promise<boolean>;
+  /** The releases the instance's catalogue says it published, in the order it names them. */
+  listPublished(instanceUrl: string): Promise<string[]>;
 }
 
 /**

@@ -21,7 +21,10 @@ its chapters, steps and questions, their wrong options, how it was made
 and from what), checked by
 every rule a release is held to, previewed as the library will list
 them, played in a sandbox as learners will play them, compared with
-the release they follow, and deleted.
+the release they follow, and deleted. A draft is released by
+publishing it in the pod, where anyone can read it, or by saving it as a
+file for the library; the releases an instance published are listed,
+each to share or to start the next version of.
 
 ## What it shares with Solid Memo
 
@@ -97,7 +100,8 @@ others.
 | `#/studio/preview?draft=…` | a draft as the library will list it ([below](#the-listing-preview)). |
 | `#/studio/trial?draft=…[&chapter=…&part=review]` | a draft played in a sandbox ([below](#the-trial)): a course's page, with `chapter` (an id) that chapter's steps, and with `part=review` its final review; a deck's study. |
 | `#/studio/diff?draft=…` | a draft against the release it follows ([below](#the-release-diff)): what it changes, and what learners' copies would get. |
-| `#/studio/release?draft=…[&field=…]` | what a draft's release says of itself beyond its listing, how it was made and from what ([below](#the-releases-metadata-and-provenance)). |
+| `#/studio/release?draft=…[&field=…]` | what a draft's release says of itself beyond its listing, how it was made and from what ([below](#the-releases-metadata-and-provenance)), then its publishing and its download ([below](#publishing-a-release)). |
+| `#/studio/releases?instance=…` | the releases the instance published ([below](#releases)). |
 
 `#/studio/` and its query count as `#/studio`. Anything else under
 `#/studio`, `#/studio` itself among them, is the default route: the only
@@ -129,8 +133,8 @@ The trail is Instances › Decks, then › Groups on the Groups screen,
 inspector, › Cards of *deck* › Schedule on a deck's schedule, › About *deck* on a deck's about screen, or › Name and
 catalogue on the instance's screen, › Health on the instance's health,
 › Health › *deck* on a deck's, › Library copies on the library
-copies, › Import and export on import and export, and › Drafts on the
-drafts. A draft's screens go on from › Drafts: › *draft* on its
+copies, › Import and export on import and export, › Drafts on the
+drafts, and › Releases on the releases. A draft's screens go on from › Drafts: › *draft* on its
 overview, › *draft* › *chapter* on a chapter, › *draft* › *chapter* ›
 Step 2 on a step, › *draft* › Cards on its cards, › *draft* › Cards
 › *card* on a question, › *draft* › Release check on its check,
@@ -845,7 +849,8 @@ A new draft starts from
 
 - **a blank deck or a blank course**, by its name in a language the
   user states: version 1 of a series of its own, with its Turtle
-  distribution, a course studied front to back;
+  distribution, a course studied front to back and about education
+  (the data theme EDUC, which the release check asks of a course);
 - **a deck of the instance** (`deckToDraft` in
   [deckToDraft.ts](../packages/domain/src/release/deckToDraft.ts)): what
   a release says and the deck does too, every card under its id, its
@@ -955,7 +960,8 @@ Every edit is made at once on the screen, then written in the pod
   has.
 
 A draft released is frozen: every screen shows it, and changes nothing
-in it. Its next version is started from the drafts. While the
+in it. Its next version is started from the drafts, its release screen
+or the releases ([below](#publishing-a-release)). While the
 instance's data check is under way, or blocks the instance, nothing is
 changed either ([below](#data-set-aside)).
 
@@ -1385,6 +1391,107 @@ its making an earlier version's is, so it does not run these rules: the
 Studio runs them on a draft, which knows
 (`quadsToReleaseModel` marks no making `carried`).
 
+## Publishing a release
+
+Below a draft's metadata, the release screen
+([`ReleasePublishContainer`](../apps/studio/src/ui/ReleasePublishContainer.tsx))
+releases it, two ways.
+
+**Publish to my Pod** (`publishRelease` in
+[releasePublishing.ts](../packages/application/src/releasePublishing.ts)):
+
+- **Where.** In a folder of the pod, the instance's `releases/` unless
+  the user types the address of another, at `<folder><name>/v<N>.ttl`
+  (`releaseUrlIn` in
+  [releasePlace.ts](../packages/domain/src/release/releasePlace.ts)): the
+  draft's name and version, as the library names its releases. The
+  screen shows the address before anything is written.
+- **The user's word.** The user ticks that the release will be public:
+  anyone with its address can read it, and once published it is never
+  changed or taken back here. Publishing waits for that, for the
+  changes typed above to be saved, and for the catalogue to be writable
+  ([below](#data-set-aside)).
+- **Checked.** The screen counts the errors the release check finds
+  (its rules, for a pod), with a link to it. Publishing checks the draft
+  again, as the release check does for a pod, the shapes too: an error
+  stops it (`releaseHasErrors`), and nothing is written. A warning does
+  not.
+- **Written once.** The draft is made one Turtle document at the
+  address (`assemble`, at library deck format 6, [data-model.md](data-model.md#drafts-and-releases)),
+  written only where nothing is (`If-None-Match: *`). An address taken,
+  by an earlier release or anything else, is refused (`releaseTaken`):
+  a release is never written over.
+- **Public.** Then that document alone is made readable by everyone,
+  as its server's access control says it: its own ACL on a server with
+  Web Access Control, its ACR on one with Access Control Policies
+  (`ReleasePublisher`, [boundaries.md](boundaries.md#access-control)).
+  This is the only place the app changes who may read something.
+- **Listed.** The catalogue links it (`sm:publishedRelease`).
+- **Frozen.** The draft names the release it was published as
+  (`sm:releasedAs`), and changes no more: every screen shows it, frozen.
+- **One version.** The draft is read once. What is checked is what is
+  written, and what is marked released: the draft at the version read
+  (If-Match). A draft changed elsewhere meanwhile, in another tab or
+  app, is `changedElsewhere`. Before the release is written, nothing is
+  written. After, the release stays, as it was checked, and the draft is
+  not marked.
+- **Finished again.** Publishing cut short after the release is written
+  (the catalogue, the draft or the network failed) is finished by
+  publishing again, at the same address. The document there states what
+  this release does, its time of issue aside, so it is this one: it is
+  made public, listed and its draft frozen, as if just written. A
+  document that states something else is `releaseTaken`, and so is a
+  release another of the instance's drafts names as its own, though this
+  draft would state the same.
+
+A pod that will not make the release public (it has no access control
+the app can write, it refuses the write, or it names the folder's
+access control as the release's, so the write would change the whole
+folder's) still has the release, written and listed, readable by its
+owner alone. The draft is released all the same: what is written there
+is frozen. The screen says so ("Only you can read it"), with **Make it
+public**, which tries the access again (`makeReleasePublic`;
+`publicAccessRefused` when it still fails). Whether a release is public
+is asked as someone with no login would ask (`isReleasePublic`, a
+request without credentials).
+
+A guest's draft is not published: a guest's pod is in this browser, and
+no one else could read it. The screen offers the download alone.
+
+A released draft shows where its release is, a link to copy, whether
+anyone can read it, and **Start the next version**: a new draft of
+version N + 1, which keeps everything the release published
+([above](#drafts)), and opens. A released draft can also be deleted
+from the drafts; the release stays.
+
+**Download .ttl** (`downloadRelease`) saves the draft as a release
+file, `<name>-v<N>.ttl`, at the address the library would publish it
+at (`libraryReleaseUrl`, by the library's index), to propose it for the
+library. Nothing in the pod changes, and nothing is checked: the
+library's own check does that. The screen lists the steps of a pull
+request, in a copy of the repository:
+
+1. Put the file in `decks/` as `decks/<name>/v<N>.ttl`.
+2. `npm run format:turtle && npm run library`.
+3. `npm run library:check -- --base main`.
+4. `npm run check && npm run crosscheck`.
+5. Open a pull request with the new file and the index.
+
+It links to the draft's release check for the library first
+([above](#the-release-check)).
+
+## Releases
+
+The releases screen
+([`ReleasesContainer`](../apps/studio/src/ui/ReleasesContainer.tsx),
+`listPublishedReleases`) lists the releases the instance published, as
+its catalogue links them. Each has its address, named by it ("capitals,
+version 2") when it is named as releases are, a link to copy, who can
+read it (everyone, or only its owner, with **Make it public**), and
+**Start the next version**, which makes a draft of it and opens it. It
+changes no release. Home's drafts panel and the drafts screen link to
+it ("Published releases").
+
 ## Data set aside
 
 Every Studio screen holds to the check Solid Memo makes when an
@@ -1407,8 +1514,8 @@ and again after a repair. A deck checked again on its own (its
   Groups does not rename or delete it.
 - **The arrangement set aside** (the catalogue or a deck group invalid):
   Groups cannot be rearranged, Home moves no deck into a group, and the
-  instance's name and catalogue, an import, and making or deleting a
-  draft are held.
+  instance's name and catalogue, an import, making or deleting a draft,
+  publishing a release and starting a next version are held.
 - **Under "block the instance"**, invalid data holds every deck and the
   instance, as a set-aside deck is held.
 - **What another app wrote** only warns: it sets nothing aside.

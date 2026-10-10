@@ -443,7 +443,7 @@ describe("deleteInstance", () => {
     const order: string[] = [];
     vi.mocked(deleteInstanceData).mockImplementation(async (url) => {
       order.push(`data ${url}`);
-      return { keptFolder: CONTAINER };
+      return { keptFolder: CONTAINER, keptReleases: false };
     });
     vi.mocked(removeInstanceRegistrations).mockImplementation(async (index) => {
       order.push(`unregister ${index}`);
@@ -453,20 +453,20 @@ describe("deleteInstance", () => {
       publicIndexUrl: PUBLIC_INDEX,
     });
 
-    await expect(makeRepository().deleteInstance({ webId: WEBID, instance })).resolves.toEqual({ keptFolder: CONTAINER });
+    await expect(makeRepository().deleteInstance({ webId: WEBID, instance })).resolves.toEqual({ keptFolder: CONTAINER, keptReleases: false });
 
     expect(order).toEqual([`data ${CONTAINER}`, `unregister ${PRIVATE_INDEX}`, `unregister ${PUBLIC_INDEX}`]);
     expect(removeInstanceRegistrations).toHaveBeenCalledWith(PRIVATE_INDEX, CONTAINER, expect.anything());
   });
 
   it("unregisters it from the one index there is", async () => {
-    vi.mocked(deleteInstanceData).mockResolvedValue({ keptFolder: null });
+    vi.mocked(deleteInstanceData).mockResolvedValue({ keptFolder: null, keptReleases: false });
     vi.mocked(locateTypeIndexes).mockResolvedValue({
       privateIndexUrl: null,
       publicIndexUrl: PUBLIC_INDEX,
     });
 
-    await expect(makeRepository().deleteInstance({ webId: WEBID, instance })).resolves.toEqual({ keptFolder: null });
+    await expect(makeRepository().deleteInstance({ webId: WEBID, instance })).resolves.toEqual({ keptFolder: null, keptReleases: false });
 
     expect(removeInstanceRegistrations).toHaveBeenCalledOnce();
     expect(removeInstanceRegistrations).toHaveBeenCalledWith(PUBLIC_INDEX, CONTAINER, expect.anything());
@@ -481,9 +481,9 @@ describe("deleteInstance", () => {
   });
 
   it("deletes an instance's data alone, its registrations left as they are", async () => {
-    vi.mocked(deleteInstanceData).mockResolvedValue({ keptFolder: null });
+    vi.mocked(deleteInstanceData).mockResolvedValue({ keptFolder: null, keptReleases: false });
 
-    await expect(makeRepository().deleteInstanceData(CONTAINER)).resolves.toEqual({ keptFolder: null });
+    await expect(makeRepository().deleteInstanceData(CONTAINER)).resolves.toEqual({ keptFolder: null, keptReleases: false });
 
     expect(deleteInstanceData).toHaveBeenCalledWith(CONTAINER, expect.anything());
     expect(locateTypeIndexes).not.toHaveBeenCalled();

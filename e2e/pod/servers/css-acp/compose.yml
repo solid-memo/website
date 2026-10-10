@@ -1,0 +1,18 @@
+# Community Solid Server 7 with Access Control Policies, built from
+# ./Dockerfile, in memory, its root open to anyone (acp-e2e.json): an
+# advisory server (docs/testing.md), where access control is ACP's. The
+# harness (../../servers.ts) sets E2E_PORT, the port on 127.0.0.1 it is
+# reached at.
+services:
+  server:
+    build: .
+    image: localhost/solid-memo-e2e-css-acp:local
+    pull_policy: never
+    command: ["-c", "config/acp-e2e.json", "-b", "http://127.0.0.1:${E2E_PORT:?}/", "-l", "warn"]
+    ports: ["127.0.0.1:${E2E_PORT:?}:3000"]
+    user: node
+    init: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 1g
+    pids_limit: 512

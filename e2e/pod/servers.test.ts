@@ -95,6 +95,7 @@ describe("the names in the tests", () => {
       "nss-6": expect.stringMatching(/^node-solid-server 6\.\d+\.\d+$/),
       "nss-5": expect.stringMatching(/^node-solid-server 5\.\d+\.\d+$/),
       "css-8": expect.stringMatching(/^Community Solid Server 8\.\d+\.\d+(-[\w.]+)?$/),
+      "css-acp": expect.stringMatching(/^Community Solid Server with ACP 7\.\d+\.\d+$/),
       pivot: expect.stringMatching(/^Pivot \d+\.\d+\.\d+ \(Community Solid Server 7\.\d+\.\d+\)$/),
       nextcloud: expect.stringMatching(/^Solid-Nextcloud [0-9a-f]{8} \(Nextcloud 32\.\d+\.\d+\)$/),
       jss: expect.stringMatching(/^JavaScript Solid Server \d+\.\d+\.\d+$/),

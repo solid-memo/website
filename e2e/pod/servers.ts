@@ -57,6 +57,16 @@ export const SERVERS = {
   "nss-6": { label: "node-solid-server", tier: "blocking", internalPort: 8443, podPath: "", readyPath: "", startTimeoutMs: 60_000, version: () => lockedVersion("nss/6", "solid-server") },
   "nss-5": { label: "node-solid-server", tier: "blocking", internalPort: 8443, podPath: "", readyPath: "", startTimeoutMs: 60_000, version: () => lockedVersion("nss/5", "solid-server") },
   "css-8": { label: "Community Solid Server", tier: "advisory", internalPort: 3000, podPath: "", readyPath: "", startTimeoutMs: 60_000, version: () => imageTag("css-8") },
+  "css-acp": {
+    label: "Community Solid Server with ACP",
+    // The one server with Access Control Policies that gates CI: a release's ACR is written here (docs/testing.md).
+    tier: "blocking",
+    internalPort: 3000,
+    podPath: "",
+    readyPath: "",
+    startTimeoutMs: 60_000,
+    version: () => baseImageTag("css-acp"),
+  },
   pivot: {
     label: "Pivot",
     tier: "advisory",

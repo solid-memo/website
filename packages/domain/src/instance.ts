@@ -46,11 +46,14 @@ export interface RegistrationOptions {
 /**
  * What deleting an instance's data left (docs/data-model.md "Deleting an
  * instance"): only what Solid Memo wrote is deleted, so a folder that
- * also holds what another app put there is kept.
+ * also holds what another app put there is kept, and so is one that
+ * holds the releases published from the instance.
  */
 export interface InstanceDeletion {
   /** The instance's folder, when it was kept for what else it holds; null when it is gone. */
   keptFolder: string | null;
+  /** Whether what the kept folder holds includes the releases published from the instance (`releases/`), which are kept. */
+  keptReleases: boolean;
 }
 
 /**

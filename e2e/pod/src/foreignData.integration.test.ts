@@ -125,7 +125,7 @@ describe.each(SERVERS)("what another app wrote, on $name", ({ url: server }) => 
     await put(cardsAcl, openTo(capitals.cardsDocumentUrl, false));
     expect(await status(cardsAcl)).toBe(200);
 
-    await expect(useCases.deleteInstance(session, instance)).resolves.toEqual({ keptFolder: instance.url });
+    await expect(useCases.deleteInstance(session, instance)).resolves.toEqual({ keptFolder: instance.url, keptReleases: false });
 
     // Another app's files, byte for byte, and the containers on their path.
     expect(new Uint8Array(await (await fetch(foreign[0]!)).arrayBuffer())).toEqual(PICTURE);
@@ -158,7 +158,7 @@ describe.each(SERVERS)("what another app wrote, on $name", ({ url: server }) => 
     const folderAcl = await aclOf(instance.url);
     await put(folderAcl, openTo(instance.url, true));
 
-    await expect(useCases.deleteInstance(session, instance)).resolves.toEqual({ keptFolder: null });
+    await expect(useCases.deleteInstance(session, instance)).resolves.toEqual({ keptFolder: null, keptReleases: false });
 
     expect(await status(instance.url)).toBe(404);
     expect(await status(folderAcl)).toBe(404);

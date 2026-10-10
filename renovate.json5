@@ -34,8 +34,9 @@
             matchDepNames: ['solidproject/community-server'],
             allowedVersions: '<7',
         },
+        // css-acp runs css-7's release with Access Control Policies.
         {
-            matchFileNames: ['e2e/pod/servers/css-7/compose.yml'],
+            matchFileNames: ['e2e/pod/servers/css-7/compose.yml', 'e2e/pod/servers/css-acp/Dockerfile'],
             matchDepNames: ['solidproject/community-server'],
             allowedVersions: '<8',
         },

@@ -28,6 +28,7 @@ function renderScreen(overrides: Partial<Props> = {}) {
     decks: [kanji, verbs],
     readOnly: null,
     healthHref: "#/health",
+    releasesHref: "#/releases",
     draftHref: (one) => `#/draft/${one.name}`,
     creating: false,
     created: null,

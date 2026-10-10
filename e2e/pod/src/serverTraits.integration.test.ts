@@ -23,6 +23,8 @@ const PINNED: Record<string, Traits> = {
   "css-6": { ...CSS, etagEveryEdit: false },
   "nss-6": NSS,
   "nss-5": NSS,
+  // css-7 with Access Control Policies.
+  "css-acp": CSS,
 };
 
 describe.each(SERVERS)("what $name does", ({ id, url: server }) => {
