@@ -23,6 +23,15 @@ describe("createLocalGuestPod", () => {
     expect(getStringNoLocale(me, "http://xmlns.com/foaf/0.1/name")).toBe("Guest");
   });
 
+  it("starts a pod at another origin, with its own profile", async () => {
+    const origin = "https://trial.solid-memo.invalid/";
+    const store = createMemoryResourceStore();
+    const fetch = createLocalPod({ root: origin, store, newEtag: () => `"${crypto.randomUUID()}"` });
+    await createLocalGuestPod({ fetch, store, origin }).start();
+    const me = getThing(await readDataset(`${origin}profile/card`, fetch), `${origin}profile/card#me`)!;
+    expect(getUrl(me, "http://www.w3.org/ns/pim/space#storage")).toBe(origin);
+  });
+
   it("keeps a pod already started", async () => {
     const { store, pod } = guestPod();
     await pod.start();

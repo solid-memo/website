@@ -133,6 +133,7 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
       const after = editCompletedChapters(completedChapters ?? [], edit);
       return after.length === 0 ? rest : { ...rest, completedChapters: after };
     }),
+    openTrial: vi.fn(async () => ({ ok: false as const, problems: [] })),
     addReleaseLanguages: vi.fn(async () => null),
     deckRelease: vi.fn(async () => null),
     applyLibraryUpgrade: vi.fn(async (deck, plan) => ({

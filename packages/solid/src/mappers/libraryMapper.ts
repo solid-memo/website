@@ -167,9 +167,7 @@ export function toLibraryDeckContent(
   if (read === null) {
     throw new AppError("notADeck", { url });
   }
-  const cards = things
-    .map((thing) => toLibraryCard(url, thing, dataset))
-    .filter((card): card is LibraryCard => card !== null);
+  const cards = toLibraryCards(url, dataset);
   const subject = asUrl(deck!);
   const names = agentNamesOf(dataset);
   if (read.record.version < 3) {
@@ -207,6 +205,13 @@ export function toCourseOutline(releaseUrl: string, dataset: SolidDataset): Cour
 }
 
 type LibraryDeckContentOf = ReturnType<typeof libraryDeckFromRecord>;
+
+/** The cards of the release at `url`, each with its distractors; a card that does not fit its shape is left out. */
+export function toLibraryCards(url: string, dataset: SolidDataset): LibraryCard[] {
+  return getThingAll(dataset)
+    .map((thing) => toLibraryCard(url, thing, dataset))
+    .filter((card): card is LibraryCard => card !== null);
+}
 
 function toLibraryCard(url: string, thing: Thing, dataset: SolidDataset): LibraryCard | null {
   if (!getUrlAll(thing, RDF.type).includes(SM.Card)) return null;

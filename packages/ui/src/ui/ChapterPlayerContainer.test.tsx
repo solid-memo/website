@@ -4,24 +4,27 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { Course, UseCases } from "@solid-memo/application/useCases";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { ChapterPlayerContainer } from "./ChapterPlayerContainer";
+import { Clock } from "./courseLinks";
 import { makeUseCasesFake } from "../test/useCasesFake";
 import { courseCards, courseInstance, makeCourse, noShuffle } from "../test/course";
 import { statusTexts } from "../test/liveRegions";
 
-function renderPlayer(useCases: UseCases, course: Course = makeCourse()) {
+function renderPlayer(useCases: UseCases, course: Course = makeCourse(), now = () => new Date()) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const invalidate = vi.spyOn(queryClient, "invalidateQueries");
   const onReview = vi.fn();
   const view = render(
     <QueryClientProvider client={queryClient}>
-      <ChapterPlayerContainer
-        useCases={useCases}
-        instance={courseInstance}
-        course={course}
-        chapter={course.outline.chapters[0]!}
-        onReview={onReview}
-        random={noShuffle}
-      />
+      <Clock.Provider value={now}>
+        <ChapterPlayerContainer
+          useCases={useCases}
+          instance={courseInstance}
+          course={course}
+          chapter={course.outline.chapters[0]!}
+          onReview={onReview}
+          random={noShuffle}
+        />
+      </Clock.Provider>
     </QueryClientProvider>,
   );
   return { ...view, onReview, invalidate };
@@ -105,6 +108,16 @@ describe("ChapterPlayerContainer", () => {
     expect(useCases.refreshStudyDigest).not.toHaveBeenCalled();
     unmount();
     expect(useCases.refreshStudyDigest).toHaveBeenCalledWith(courseInstance.url, course.deck);
+  });
+
+  it("answers at the screen's time", async () => {
+    const useCases = makeUseCasesFake();
+    vi.mocked(useCases.answerCourseQuestion).mockResolvedValue({ effect: "introduce", state: null });
+    const later = new Date("2026-12-24T10:00:00.000Z");
+    renderPlayer(useCases, makeCourse(), () => later);
+    toQuestions();
+    answer("An IRI");
+    await waitFor(() => expect(useCases.answerCourseQuestion).toHaveBeenCalledWith(courseInstance.url, expect.anything(), courseCards[0], { correct: true }, later));
   });
 
   it("opens at the step to resume at, on its theory", () => {

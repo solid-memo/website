@@ -6,6 +6,7 @@ import type { Instance } from "@solid-memo/domain/instance";
 import type { LibraryCard } from "@solid-memo/domain/library";
 import { ChapterPlayerScreen, type StepPhase } from "./ChapterPlayerScreen";
 import { courseKey } from "./CourseContainer";
+import { useClock } from "./courseLinks";
 import type { CheckedAnswer } from "./CourseQuestion";
 import { useI18n } from "./i18n";
 import { useKeepSchedule } from "./keepSchedule";
@@ -14,11 +15,13 @@ import { useKeepSchedule } from "./keepSchedule";
  * Answers a course question of `card`, then refreshes what the answer
  * changed: the course's progress, and, once a card is graded, the deck's
  * cards and counts. Shared by a chapter's steps and its final review.
+ * The answer is given at the screen's time (useClock).
  */
 export function useCourseAnswer(useCases: UseCases, instance: Instance, course: Course, onAnswered: (answer: CheckedAnswer) => void) {
   const queryClient = useQueryClient();
   const deck = course.deck;
   const noteGraded = useKeepSchedule(useCases, instance.url, deck);
+  const now = useClock();
   return useMutation({
     mutationFn: ({ card, choice }: { card: LibraryCard; choice: Choice }) =>
       useCases.answerCourseQuestion(
@@ -29,7 +32,7 @@ export function useCourseAnswer(useCases: UseCases, instance: Instance, course: 
           correct: choice.correct,
           ...(choice.distractorId === undefined ? {} : { distractorId: choice.distractorId }),
         },
-        new Date(),
+        now(),
       ),
     onSuccess: ({ effect }, { choice }) => {
       onAnswered({ choice, effect });

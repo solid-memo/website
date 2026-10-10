@@ -6,11 +6,12 @@ import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { problemMessage, subjectName } from "./problemText";
 
-/** Where the release check links: the check for another policy, a problem's place in the editors, the listing preview. */
+/** Where the release check links: the check for another policy, a problem's place in the editors, the listing preview, the trial. */
 export interface ReleaseCheckLinks {
   policyHref: (policy: CheckPolicy) => string;
   targetHref: (target: ProblemTarget) => string;
   previewHref: string;
+  trialHref: string;
 }
 
 /** The shapes' part of the check: asked or not, running, for an older version of the draft, and what they found. */
@@ -127,7 +128,7 @@ export function ReleaseCheckScreen({
         )}
       </section>
       <p>
-        <a href={links.previewHref}>{t("studio.check.previewLink")}</a>
+        <a href={links.previewHref}>{t("studio.check.previewLink")}</a> · <a href={links.trialHref}>{t("studio.check.trialLink")}</a>
       </p>
     </section>
   );

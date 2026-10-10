@@ -78,7 +78,13 @@ export type StudioRoute =
   /** The release check of a draft, for a pod or (`policy`) the repository's library; a pod's when absent. */
   | { screen: "check"; draftUrl: string; policy?: CheckPolicy }
   /** A draft as the library lists the release it will be. */
-  | { screen: "preview"; draftUrl: string };
+  | { screen: "preview"; draftUrl: string }
+  /**
+   * A draft played in a sandbox: a course's page, or with `chapter` (an
+   * id) that chapter's steps, or with `review` its final review; a deck's
+   * study.
+   */
+  | { screen: "trial"; draftUrl: string; chapter?: string; review?: true };
 
 /** The routes of a draft's screens. */
 export type DraftRoute = Extract<StudioRoute, { draftUrl: string }>;
@@ -122,6 +128,7 @@ export function instanceOfRoute(route: StudioRoute): string | null {
     case "draftCards":
     case "check":
     case "preview":
+    case "trial":
       // A draft's route is parsed only with a draft's URL.
       return draftPlaceOf(route.draftUrl)!.instanceUrl;
     default:
@@ -170,6 +177,12 @@ export function studioRouteToHash(route: StudioRoute): string {
       return `#${STUDIO_PATH}/check${hashParams({ draft: route.draftUrl, ...(route.policy === undefined || route.policy === "pod" ? {} : { policy: route.policy }) })}`;
     case "preview":
       return `#${STUDIO_PATH}/preview${hashParams({ draft: route.draftUrl })}`;
+    case "trial":
+      return `#${STUDIO_PATH}/trial${hashParams({
+        draft: route.draftUrl,
+        ...(route.chapter === undefined ? {} : { chapter: route.chapter }),
+        ...(route.review === true ? { part: "review" } : {}),
+      })}`;
     case "draftCards":
       return `#${STUDIO_PATH}/draft-cards${hashParams({
         draft: route.draftUrl,
@@ -225,6 +238,7 @@ export function parseStudioHash(hash: string): StudioRoute | null {
     case "/draft-cards":
     case "/check":
     case "/preview":
+    case "/trial":
       return draftRouteOf(path!.slice(STUDIO_PATH.length), query);
     case "/transfer": {
       if (instanceUrl === null) return null;
@@ -294,6 +308,11 @@ function draftRouteOf(path: string, query: URLSearchParams): DraftRoute | null {
       return query.get("policy") === "library" ? { screen: "check", draftUrl, policy: "library" } : { screen: "check", draftUrl };
     case "/preview":
       return { screen: "preview", draftUrl };
+    case "/trial":
+      // A review is of a chapter.
+      return chapter === null
+        ? { screen: "trial", draftUrl }
+        : { screen: "trial", draftUrl, chapter, ...(query.get("part") === "review" ? { review: true as const } : {}) };
     default: {
       const filter = DRAFT_CARD_FILTERS.find((known) => known === query.get("filter"));
       const language = query.get("lang");

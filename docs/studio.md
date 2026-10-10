@@ -19,7 +19,7 @@ from a deck, as the next version of a release or from a release saved
 as a file, written (what a release says of itself, a course's outline,
 its chapters, steps and questions, their wrong options), checked by
 every rule a release is held to, previewed as the library will list
-them, and deleted.
+them, played in a sandbox as learners will play them, and deleted.
 
 ## What it shares with Solid Memo
 
@@ -93,6 +93,7 @@ others.
 | `#/studio/draft-cards?draft=…[&filter=…&lang=…&page=…]` | a draft's cards as a table ([below](#a-drafts-cards)): `filter` is `unasked`, `askedTwice`, `fewDistractors` or `retired`, `lang` a language. |
 | `#/studio/check?draft=…[&policy=library]` | a draft's release check ([below](#the-release-check)): for a release in a pod, or with `policy=library` for the Solid Memo library. |
 | `#/studio/preview?draft=…` | a draft as the library will list it ([below](#the-listing-preview)). |
+| `#/studio/trial?draft=…[&chapter=…&part=review]` | a draft played in a sandbox ([below](#the-trial)): a course's page, with `chapter` (an id) that chapter's steps, and with `part=review` its final review; a deck's study. |
 
 `#/studio/` and its query count as `#/studio`. Anything else under
 `#/studio`, `#/studio` itself among them, is the default route: the only
@@ -126,8 +127,9 @@ copies, › Import and export on import and export, and › Drafts on the
 drafts. A draft's screens go on from › Drafts: › *draft* on its
 overview, › *draft* › *chapter* on a chapter, › *draft* › *chapter* ›
 Step 2 on a step, › *draft* › Cards on its cards, › *draft* › Cards
-› *card* on a question, › *draft* › Release check on its check, and
-› *draft* › Listing preview on its preview. The document title is the trail's
+› *card* on a question, › *draft* › Release check on its check,
+› *draft* › Listing preview on its preview, and › *draft* › Trial on its
+trial. The document title is the trail's
 last step and "Solid Memo Studio". After a move, the screen's heading
 takes the focus (`useScreenFocus`). The header has a link back to
 Solid Memo, at the open instance's decks when there is one, and the
@@ -1151,6 +1153,81 @@ library's list (`LibraryDeckRow`) and its own page
 deck built from the draft alone (`draftLibraryDeck` in
 [draftListing.ts](../packages/domain/src/release/draftListing.ts)).
 Both are inert: a picture, nothing in it to follow or press.
+
+## The trial
+
+The trial
+([`TrialContainer`](../apps/studio/src/ui/TrialContainer.tsx)) plays the
+draft as learners will play the release it will be: a course with Solid
+Memo's own course screens (its page, a chapter's steps, its final
+review), a deck with Solid Memo's study. The draft's overview and its
+release check link to it ("Try it out").
+
+It is played in a sandbox, so nothing done in it reaches the user's
+pod. The use case is `openTrial(draft, instanceUrl)`
+([useCases.ts](../packages/application/src/useCases.ts)), which sets the
+sandbox up with `startTrial`
+([trial.ts](../packages/application/src/trial.ts)):
+
+- **A pod of its own.** Each trial has a new pod, kept in memory, at
+  `https://trial.solid-memo.invalid/` (`TRIAL_ORIGIN` in
+  [release/trial.ts](../packages/domain/src/release/trial.ts)), which
+  never resolves. `createTrialUseCases`
+  ([trialUseCases.ts](../packages/composition/src/trialUseCases.ts))
+  wires the same Solid adapters and use cases over it as the page's own
+  (`routedFetch`). Any other request goes to the page's pods, through a
+  fence that refuses every method but GET and HEAD (`readOnlyFetch`): a
+  trial never writes to a real pod. It has no login, and none of the
+  device's language, theme or update journal.
+- **The draft as a library.** The trial's library is the draft alone,
+  as the editor keeps it, made afresh at each read
+  (`createDraftDeckLibrary` in
+  [draftDeckLibrary.ts](../packages/solid/src/draftDeckLibrary.ts)): the
+  site's library keeps what it reads, as the releases of `decks/` never
+  change. Its cards and a course's outline are read from the draft as a
+  release's are. What it says of itself is the listing preview's
+  (`draftLibraryDeck`).
+- **The same shapes.** Its writes are checked by the page's validator,
+  over the trial's pod (`over`): the same shapes, loaded once.
+- **Set up as a guest's.** The trial's pod is started as a
+  guest's is (a profile, then an instance with its meta document and
+  its catalogue), with new preferences but for the answer scale and the
+  hour the day rolls over, which are the user's. Then the draft is
+  started as a course (`startCourse`), or imported as a deck.
+
+A draft that cannot be played is refused, with what keeps it from it
+(`trialProblems`), each a link to its field, as in the release check:
+the course's rules, and what a release needs that the player needs too
+(its title, and each chapter's and step's fields). What a release says
+of itself besides its title (its publisher, version, series,
+distribution and theme) does not keep a draft from being played.
+
+The course's screens link to the trial's routes, not Solid Memo's:
+`CourseLinks` in `ui`
+([courseLinks.ts](../packages/ui/src/ui/courseLinks.ts)) holds where a
+course's page and its final review link to a chapter, Solid Memo's
+course routes unless a provider says otherwise. Each trial has its own
+query client too, so nothing it reads mixes with the user's.
+
+Its controls (`TrialControls`):
+
+- **Open a chapter**, as a learner who completed every chapter before
+  it: the course restarted, then each one before it completed. The
+  answers given stay.
+- **Answer all right, or all wrong**: every question of the chapter in
+  view, or of the one to take next (its steps', then its review's), a
+  wrong answer its first wrong option. A chapter answered right is
+  completed. For a deck, every card to study now.
+- **Days ahead**: the trial's clock moved ahead by a number of days
+  (`Clock` in `ui`, which the course and study screens answer by), to
+  play the days to come.
+- **Start over**: a new pod and a new query client, for the same draft.
+- **Reload the draft**: the draft read afresh from the pod, then a new
+  trial of it.
+
+After each control, what is shown is read again and starts afresh. A
+trial lasts while its screen is open: leaving it, or reloading the
+page, forgets it.
 
 ## Data set aside
 

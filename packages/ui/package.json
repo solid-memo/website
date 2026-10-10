@@ -24,6 +24,7 @@
     "./deckTree/useDragReorder": "./src/ui/deckTree/useDragReorder.ts",
     "./routerCore": "./src/ui/routerCore.ts",
     "./deckTreeEditor": "./src/ui/deckTreeEditor.ts",
+    "./courseLinks": "./src/ui/courseLinks.ts",
     "./test/setup": "./src/test/setup.ts",
     "./test/useCasesFake": "./src/test/useCasesFake.ts",
     "./test/course": "./src/test/course.ts",

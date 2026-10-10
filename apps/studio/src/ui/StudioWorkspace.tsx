@@ -37,6 +37,7 @@ import { ListingPreviewContainer } from "./ListingPreviewContainer";
 import { QuestionEditorContainer } from "./QuestionEditorContainer";
 import { ReleaseCheckContainer } from "./ReleaseCheckContainer";
 import { StepEditorContainer } from "./StepEditorContainer";
+import { TrialContainer } from "./TrialContainer";
 import { instanceOfRoute, isDraftRoute, spotRoute, studioRouteToHash, targetRoute, useStudioRoute, type StudioRoute } from "./router";
 
 /**
@@ -167,6 +168,8 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
         return [instancesCrumb, decks, ...draftCrumbs(route.draftUrl), { label: t("studio.check.crumb"), route }];
       case "preview":
         return [instancesCrumb, decks, ...draftCrumbs(route.draftUrl), { label: t("studio.preview.crumb"), route }];
+      case "trial":
+        return [instancesCrumb, decks, ...draftCrumbs(route.draftUrl), { label: t("studio.trial.crumb"), route }];
       case "chapter":
         return [instancesCrumb, decks, ...draftCrumbs(route.draftUrl), { label: chapterName(activeDraft!, route.chapter), route }];
       case "step": {
@@ -228,6 +231,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
     questionHref: (card) => studioRouteToHash({ screen: "question", draftUrl, card }),
     checkHref: studioRouteToHash({ screen: "check", draftUrl }),
     previewHref: studioRouteToHash({ screen: "preview", draftUrl }),
+    trialHref: studioRouteToHash({ screen: "trial", draftUrl }),
   });
 
   const screenFor = (route: StudioRoute) => {
@@ -254,11 +258,32 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
               policyHref: (policy) => studioRouteToHash({ screen: "check", draftUrl: route.draftUrl, policy }),
               targetHref: (target) => studioRouteToHash(targetRoute(route.draftUrl, target)),
               previewHref: studioRouteToHash({ screen: "preview", draftUrl: route.draftUrl }),
+              trialHref: studioRouteToHash({ screen: "trial", draftUrl: route.draftUrl }),
             }}
           />
         );
       case "preview":
         return <ListingPreviewContainer key={route.draftUrl} useCases={useCases} draftUrl={route.draftUrl} />;
+      case "trial":
+        return (
+          <TrialContainer
+            // Another draft: a trial of its own. Its chapters are the same trial's.
+            key={route.draftUrl}
+            useCases={useCases}
+            draftUrl={route.draftUrl}
+            chapter={route.chapter}
+            review={route.review === true}
+            links={{
+              courseHref: studioRouteToHash({ screen: "trial", draftUrl: route.draftUrl }),
+              chapterHref: (chapter) => studioRouteToHash({ screen: "trial", draftUrl: route.draftUrl, chapter }),
+              reviewHref: (chapter) => studioRouteToHash({ screen: "trial", draftUrl: route.draftUrl, chapter, review: true }),
+              targetHref: (target) => studioRouteToHash(targetRoute(route.draftUrl, target)),
+            }}
+            onReview={(chapter) => navigate({ screen: "trial", draftUrl: route.draftUrl, chapter, review: true })}
+            onCourse={() => navigate({ screen: "trial", draftUrl: route.draftUrl })}
+            onJump={(chapter) => navigate({ screen: "trial", draftUrl: route.draftUrl, chapter })}
+          />
+        );
       case "chapter":
         return (
           <ChapterEditorContainer

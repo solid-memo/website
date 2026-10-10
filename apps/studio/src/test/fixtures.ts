@@ -146,4 +146,5 @@ export const draftLinks = {
   questionHref: (card: string) => `#/question/${card}`,
   checkHref: "#/check",
   previewHref: "#/preview",
+  trialHref: "#/trial",
 };

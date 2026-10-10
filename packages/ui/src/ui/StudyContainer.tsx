@@ -13,6 +13,7 @@ import {
 import { ErrorMessage } from "./ErrorMessage";
 import { Loading } from "./Loading";
 import { StudyScreen } from "./StudyScreen";
+import { useClock } from "./courseLinks";
 import { deckHref } from "./router";
 import { useI18n } from "./i18n";
 
@@ -21,29 +22,34 @@ import { useI18n } from "./i18n";
  * starts and then walked in order; answering a card badly puts it back
  * into the remainder (never as the very next card unless it is the only
  * one left). The session covers today's due prompts and the new ones
- * within the daily budget, the new spread among the due. The deck's
- * cached queue is dropped when the session ends, however it is left.
+ * within the daily budget, the new spread among the due, today and each
+ * answer by the screen's time (useClock). The deck's cached queue is
+ * dropped when the session ends, however it is left. Its deck links to
+ * the deck's page, or to `deckLink` when given.
  */
 export function StudyContainer({
   useCases,
   instance,
   deck,
   onExit,
+  deckLink = deckHref(instance.url, deck.url),
   random = Math.random,
 }: {
   useCases: UseCases;
   instance: Instance;
   deck: Deck;
   onExit: () => void;
+  deckLink?: string;
   /** Uniform [0, 1) source deciding where a failed card comes back. */
   random?: () => number;
 }) {
   const { t, readerText, readerLang, errorText } = useI18n();
   const queryClient = useQueryClient();
+  const now = useClock();
 
   const queueQuery = useQuery({
     queryKey: ["studyQueue", deck.url],
-    queryFn: () => useCases.getStudyQueue(instance.url, deck, new Date()),
+    queryFn: () => useCases.getStudyQueue(instance.url, deck, now()),
     staleTime: Infinity,
     refetchOnWindowFocus: false,
     refetchOnMount: "always",
@@ -101,7 +107,7 @@ export function StudyContainer({
         deck,
         args.prompt,
         args.quality,
-        new Date(),
+        now(),
       ),
     onSuccess: (state, { prompt, quality }) => {
       answered.current++;
@@ -153,7 +159,7 @@ export function StudyContainer({
     <StudyScreen
       deckName={readerText(deck.title)}
       deckLang={readerLang(deck.title)}
-      deckHref={deckHref(instance.url, deck.url)}
+      deckHref={deckLink}
       prompt={prompt}
       position={position + 1}
       total={prompts.length}

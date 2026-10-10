@@ -115,6 +115,18 @@ describe("createShaclShapeValidator", () => {
     });
   });
 
+  it("is the same validator over another fetch's documents: its shapes and engines made once", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalog());
+    const { validator, loader, createEngine } = makeValidator();
+    const other = vi.fn() as unknown as typeof fetch;
+    const trial = validator.over(other);
+    await validator.validateDocument(DOC);
+    expect((await trial.validateDocument(DOC)).status).toBe("checked");
+    expect(vi.mocked(getSolidDatasetOrNull).mock.calls.at(-1)![1]).toBe(other);
+    expect(loader.load).toHaveBeenCalledOnce();
+    expect(createEngine).toHaveBeenCalledOnce();
+  });
+
   it("reports a missing document as missing, without loading anything", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
     const { validator, loader } = makeValidator();

@@ -208,7 +208,9 @@ preferences, making and studying decks, grouping them, importing from
 the library, starting the library's course for newcomers from an empty
 deck list and working through its first chapter and final review, describing a deck in two languages, validating the
 instance, logging out, and opening the Studio to manage an
-instance's decks and its drafts of releases, writing a course in one. Each journey runs against a fresh account, pod
+instance's decks and its drafts of releases, writing a course in one
+and test-playing it in the trial, the instance's decks and statistics
+unchanged after. Each journey runs against a fresh account, pod
 and WebID on a Community Solid Server 7
 ([css/compose.yml](../e2e/journeys/css/compose.yml)) that the global
 setup starts in Docker and takes down after. The app logs in only with

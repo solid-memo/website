@@ -13,6 +13,7 @@ import { choose } from "../test/choose";
 import { applyDraftChanges, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { problem } from "@solid-memo/domain/release/problems";
 import { courseDraft, DRAFT_URL, instanceA, instanceB, makeCard, makeDeck, session } from "../test/fixtures";
+import { courseDeck, courseInstance, makeCourse } from "@solid-memo/ui/test/course";
 
 const kanji = makeDeck("deck-1", { en: "Kanji N5" });
 const verbs = makeDeck("deck-2", { en: "Verbs" });
@@ -633,6 +634,68 @@ describe("StudioWorkspace", () => {
       fireEvent.click(await screen.findByRole("link", { name: "Preview the listing" }));
       expect(await screen.findByRole("heading", { level: 2, name: "Listing preview" })).toBeInTheDocument();
       expect(trailOf()).toEqual(["Instances", "Decks", "Drafts", "Solid", "Listing preview"]);
+    });
+
+    it("plays the draft in a trial from its overview, with its trail, its chapters, reviews and jumps in the URL", async () => {
+      const useCases = draftUseCases();
+      const trial = makeUseCasesFake({
+        getCourse: vi.fn(async () => makeCourse()),
+        answerCourseQuestion: vi.fn(async () => ({ effect: "introduce" as const, state: null })),
+      });
+      vi.mocked(useCases.openTrial).mockResolvedValue({ ok: true, trial: { useCases: trial, instance: courseInstance, deck: courseDeck } });
+      window.history.replaceState(null, "", studioRouteToHash({ screen: "draft", draftUrl: DRAFT_URL }));
+      renderWorkspace(useCases);
+      fireEvent.click(await screen.findByRole("link", { name: "Try it out" }));
+      expect(await screen.findByRole("heading", { level: 2, name: "Trial" })).toBeInTheDocument();
+      expect(trailOf()).toEqual(["Instances", "Decks", "Drafts", "Solid", "Trial"]);
+      fireEvent.click(await screen.findByRole("link", { name: "Start the course" }));
+      expect(await screen.findByRole("heading", { level: 2, name: "Linked data" })).toBeInTheDocument();
+      expect(parseStudioHash(window.location.hash)).toEqual({ screen: "trial", draftUrl: DRAFT_URL, chapter: "ch-1" });
+      fireEvent.change(screen.getByRole("combobox", { name: "Chapter" }), { target: { value: "ch-2" } });
+      fireEvent.click(screen.getByRole("button", { name: "Open the chapter" }));
+      await waitFor(() => expect(parseStudioHash(window.location.hash)).toEqual({ screen: "trial", draftUrl: DRAFT_URL, chapter: "ch-2" }));
+      // The chapter starts afresh once the jump is done.
+      await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("The trial is at today's date."));
+      fireEvent.click(await screen.findByRole("button", { name: "On to the question" }));
+      fireEvent.click(screen.getByRole("radio", { name: "A store" }));
+      fireEvent.click(screen.getByRole("button", { name: "Check" }));
+      fireEvent.click(await screen.findByRole("button", { name: "On to the final review" }));
+      expect(parseStudioHash(window.location.hash)).toEqual({ screen: "trial", draftUrl: DRAFT_URL, chapter: "ch-2", review: true });
+      expect(await screen.findByRole("heading", { level: 2, name: "Final review: Pods" })).toBeInTheDocument();
+      // A final review passed leads back to the course's page.
+      fireEvent.click(await screen.findByRole("button", { name: "Start the final review" }));
+      fireEvent.click(screen.getByRole("radio", { name: "A store" }));
+      fireEvent.click(screen.getByRole("button", { name: "Check" }));
+      fireEvent.click(await screen.findByRole("button", { name: "Next" }));
+      await waitFor(() => expect(parseStudioHash(window.location.hash)).toEqual({ screen: "trial", draftUrl: DRAFT_URL }));
+      // One trial throughout.
+      expect(useCases.openTrial).toHaveBeenCalledOnce();
+    });
+
+    it("links a trial's chapter to its final review once its steps are done, and a problem keeping a draft from play to its field", async () => {
+      const useCases = draftUseCases();
+      const trial = makeUseCasesFake({ getCourse: vi.fn(async () => makeCourse(["q-1", "q-2", "q-3"])) });
+      vi.mocked(useCases.openTrial).mockResolvedValue({ ok: true, trial: { useCases: trial, instance: courseInstance, deck: courseDeck } });
+      window.history.replaceState(null, "", studioRouteToHash({ screen: "trial", draftUrl: DRAFT_URL }));
+      const view = renderWorkspace(useCases);
+      expect(await screen.findByRole("link", { name: "Continue" })).toHaveAttribute(
+        "href",
+        studioRouteToHash({ screen: "trial", draftUrl: DRAFT_URL, chapter: "ch-1", review: true }),
+      );
+      view.unmount();
+      vi.mocked(useCases.openTrial).mockResolvedValue({ ok: false, problems: [problem(`${DRAFT_URL}#ch-apps`, { code: "chapterWithoutStep", params: {} })] });
+      renderWorkspace(useCases);
+      expect(await screen.findByRole("link", { name: "Has no step in use." })).toHaveAttribute(
+        "href",
+        studioRouteToHash({ screen: "chapter", draftUrl: DRAFT_URL, chapter: "ch-apps", field: "steps" }),
+      );
+    });
+
+    it("opens the trial from the release check", async () => {
+      window.history.replaceState(null, "", studioRouteToHash({ screen: "check", draftUrl: DRAFT_URL }));
+      renderWorkspace(draftUseCases());
+      fireEvent.click(await screen.findByRole("link", { name: "Try it out" }));
+      await waitFor(() => expect(parseStudioHash(window.location.hash)).toEqual({ screen: "trial", draftUrl: DRAFT_URL }));
     });
 
     it("opens a step, a question or the overview at a field", async () => {

@@ -2039,7 +2039,8 @@
         "other": "Utgåvekontrollen hittar {count} problem."
       },
       "problemsLink": "Se utgåvekontrollen",
-      "previewLink": "Förhandsvisa listningen"
+      "previewLink": "Förhandsvisa listningen",
+      "trialLink": "Prova"
     },
     "outline": {
       "empty": "Inga kapitel än.",
@@ -2210,7 +2211,8 @@
         "step": "ett steg",
         "distractor": "ett felaktigt alternativ"
       },
-      "profile": "{profile}: {message}"
+      "profile": "{profile}: {message}",
+      "trialLink": "Prova"
     },
     "field": {
       "title": "Titel",
@@ -2291,6 +2293,33 @@
       "intro": "Den här utgåvan i biblioteket, som eleverna kommer att se den. Inget här går att klicka på: det är en bild.",
       "row": "I bibliotekets lista",
       "page": "På sin egen sida"
+    },
+    "trial": {
+      "crumb": "Provkörning",
+      "heading": "Provkörning",
+      "intro": "Utkastet spelat som en elev kommer att spela det, i en sandlåda på den här sidan: inget som görs här når din pod, och börjar du om glöms allt bort.",
+      "opening": "Förbereder provkörningen…",
+      "notReady": "Det här utkastet går inte att spela än. Rätta först detta:",
+      "controls": "Provkörningens kontroller",
+      "coursePage": "Kursens sida",
+      "chapter": "Kapitel",
+      "jump": "Öppna kapitlet",
+      "jumpHint": "Som en elev som har klarat varje kapitel före det.",
+      "answers": "Svar",
+      "answersCourse": "Varje fråga i kapitlet som visas, eller i kapitlet som står på tur:",
+      "answersDeck": "Varje kort att studera nu:",
+      "allRight": "Svara rätt på allt",
+      "allWrong": "Svara fel på allt",
+      "days": "Dagar framåt",
+      "advance": "Gå framåt",
+      "ahead": {
+        "one": "Provkörningen är {count} dag framåt.",
+        "other": "Provkörningen är {count} dagar framåt."
+      },
+      "today": "Provkörningen är på dagens datum.",
+      "working": "Arbetar…",
+      "reset": "Börja om",
+      "reload": "Läs in utkastet igen"
     }
   },
   "proseField": {
