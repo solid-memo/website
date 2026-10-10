@@ -205,6 +205,9 @@
     "step": "Step {number} of {count}",
     "progress": "Steps done in this chapter",
     "theoryHidden": "The theory is not shown while you answer the questions.",
+    "part": "Part {number} of {count}",
+    "continue": "Continue",
+    "back": "Back",
     "toQuestions": {
       "one": "On to the question",
       "other": "On to the questions"

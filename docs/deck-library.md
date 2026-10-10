@@ -190,6 +190,11 @@ a release that says nothing reads exactly as before.
 - **Each language is its own document.** A code block in `@en` text
   stays `@en`; a back that is code alone may be untagged or `@zxx`, its
   distractors' text then the same.
+- **A step's theory may be in chunks**, read one at a time: a
+  thematic break (`---`) at the top level, with a blank line before
+  and after it, ends one and begins the next
+  ([courses.md](courses.md#writing-a-course)). Anywhere else a break
+  shows as a rule.
 - **Plain-text habits read otherwise in Markdown**: `<url>` is raw HTML,
   `&aring;` is "å", `*` and `_` may emphasise, `<ex:title>` is a link.
   Write such text as code (`` `git clone <url>` ``).
@@ -288,6 +293,10 @@ and chapter that states `sm:textFormat sm:markdown`, by the
 - no character reference (`&aring;`) outside code;
 - on a card with distractors, its `back` and each `distractorText` one
   paragraph, not a heading, as options are;
+- a step's theory with no empty [chunk](markdown.md#chunks) (a
+  top-level thematic break first, last or right after another), and in
+  as many chunks in each language, so a learner who switches language
+  keeps their place;
 - nothing past the limits the app reads Markdown within: 20,000
   characters, 8 levels of blocks and markup (each quote, list item,
   paragraph, emphasis and link is one; plain text that shows as written

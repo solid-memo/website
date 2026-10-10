@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { CACHE_SIZE, markdownBlocks, markdownPhrases } from "./markdownCache";
+import { MAX_CHARS } from "@solid-memo/markdown/parse";
+import { CACHE_SIZE, markdownBlocks, markdownChunks, markdownPhrases } from "./markdownCache";
 
 describe("markdownBlocks and markdownPhrases", () => {
   it("parse a text once, giving back what they gave before", () => {
@@ -19,5 +20,20 @@ describe("markdownBlocks and markdownPhrases", () => {
     markdownBlocks("one more");
     expect(markdownBlocks("first")).not.toBe(first);
     expect(markdownBlocks("first")).toEqual(first);
+  });
+});
+
+describe("markdownChunks", () => {
+  it("splits the text's blocks at its top-level rules, once, giving back what it gave before", () => {
+    const chunks = markdownChunks("a\n\n---\n\nb");
+    expect(chunks).toEqual([
+      [{ type: "paragraph", children: [{ type: "text", value: "a" }] }],
+      [{ type: "paragraph", children: [{ type: "text", value: "b" }] }],
+    ]);
+    expect(markdownChunks("a\n\n---\n\nb")).toBe(chunks);
+  });
+
+  it("is null for a text to be shown as plain text", () => {
+    expect(markdownChunks("a".repeat(MAX_CHARS + 1))).toBeNull();
   });
 });

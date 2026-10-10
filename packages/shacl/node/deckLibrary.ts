@@ -13,6 +13,7 @@ import {
   type MarkdownProblem,
 } from "@solid-memo/markdown/problems";
 import { MAX_CHARS, MAX_DEPTH, MAX_TABLE_CELLS, MAX_TABLE_COLUMNS } from "@solid-memo/markdown/parse";
+import { inspectChunks } from "@solid-memo/markdown/chunks";
 import { formatTurtle } from "@solid-memo/turtle/formatTurtle";
 import { objectsOf, parseTurtle, RDF_TYPE, subjectsOfType } from "@solid-memo/turtle/rdf";
 import { SITE, VOCAB_BASE } from "@solid-memo/vocab/tooling/sources";
@@ -574,7 +575,9 @@ function problemText(problem: MarkdownProblem): string {
  * read as Markdown, field by field, of each card, step and chapter that
  * states solid-memo:textFormat solid-memo:markdown; on a card, its
  * distractors' text too, its back and every distractor's text one
- * paragraph when it has distractors, as options are. Only those subjects
+ * paragraph when it has distractors, as options are; a step's theory
+ * with no empty chunk, and in as many chunks in each language (chunks
+ * are split at its top-level thematic breaks). Only those subjects
  * state a text format, and only a concept of solid-memo:TextFormats.
  * None of this keeps the app safe, which shows any text safely: it is
  * that the text shows as its author meant.
@@ -605,9 +608,10 @@ export function markdownProblems(release: DeckRelease): string[] {
   }
 
   const marked = (subject: string) => objectsOf(quads, subject, TEXT_FORMAT).some((o) => o.value === MARKDOWN);
+  const fieldOf = (name: string, text: Literal) => `${name}${text.language === "" ? "" : `@${text.language}`}`;
   const check = (subject: string, predicate: string, name: string, rule: FieldRule) => {
     for (const text of literalsOf(quads, subject, predicate) as Literal[]) {
-      const field = `${name}${text.language === "" ? "" : `@${text.language}`}`;
+      const field = fieldOf(name, text);
       for (const problem of textProblems(text.value, rule)) problems.push(`${label}: ${shown(subject)} ${field} ${problemText(problem)}`);
     }
   };
@@ -623,7 +627,25 @@ export function markdownProblems(release: DeckRelease): string[] {
       check(option, `${SM_NS}distractorNote`, "solid-memo:distractorNote", PROSE);
     }
   }
-  for (const step of steps.filter(marked)) check(step, `${SM_NS}theory`, "solid-memo:theory", PROSE);
+  for (const step of steps.filter(marked)) {
+    check(step, `${SM_NS}theory`, "solid-memo:theory", PROSE);
+    // A step's theory is shown a chunk at a time, split at its top-level thematic breaks.
+    const chunked = (literalsOf(quads, step, `${SM_NS}theory`) as Literal[]).map((text) => ({
+      field: fieldOf("solid-memo:theory", text),
+      ...inspectChunks(text.value),
+    }));
+    for (const { field } of chunked.filter(({ empty }) => empty > 0)) {
+      problems.push(
+        `${label}: ${shown(step)} ${field} has a thematic break first, last or right after another, which makes an empty chunk the app drops: a step's theory is shown a chunk at a time, split at its top-level thematic breaks, with text between each two.`,
+      );
+    }
+    if (new Set(chunked.map(({ chunks }) => chunks)).size > 1) {
+      const counts = chunked.map(({ field, chunks }) => `${chunks} ${chunks === 1 ? "chunk" : "chunks"} in ${field}`);
+      problems.push(
+        `${label}: ${shown(step)} has its theory in ${counts.join(", ")}: a step's theory is in as many chunks in each language, so a learner who switches language keeps their place.`,
+      );
+    }
+  }
   for (const chapter of chapters.filter(marked)) check(chapter, `${DCTERMS}description`, "dcterms:description", PROSE);
   return problems;
 }

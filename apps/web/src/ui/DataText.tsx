@@ -4,7 +4,7 @@ import { labelText } from "@solid-memo/markdown/plainText";
 import { breakable } from "./breakable";
 import { useI18n, type I18n } from "./i18n";
 import { MarkdownBlocks, MarkdownInlines } from "./Markdown";
-import { markdownBlocks, markdownPhrases } from "./markdownCache";
+import { markdownBlocks, markdownChunks, markdownPhrases } from "./markdownCache";
 
 /**
  * Text from data — a card's side, a note, a step's theory — in the
@@ -60,18 +60,30 @@ export function DataText({
  * Text from data that is prose of its own, such as a step's theory: a
  * `div` of the given class, in the reader's language as DataText is.
  * Plain text is split into paragraphs at its blank lines; Markdown is
- * its blocks, the div then a `div.md` too. Text past the parser's
- * limits is shown as plain text.
+ * shown a chunk at a time, `chunk` (0 first, below useProseChunks), the
+ * chunks split at its top-level thematic breaks, which show nothing
+ * themselves; the div is then a `div.md` too. Plain text, and text past
+ * the parser's limits, which is shown as plain text, is one chunk.
  */
-export function DataProse({ text, markdown, class: className }: { text: LangText; markdown: boolean; class: string }) {
+export function DataProse({
+  text,
+  markdown,
+  chunk = 0,
+  class: className,
+}: {
+  text: LangText;
+  markdown: boolean;
+  chunk?: number;
+  class: string;
+}) {
   const { readerText, readerLang } = useI18n();
   const shown = readerText(text);
   const lang = readerLang(text);
-  const blocks = markdown ? markdownBlocks(shown) : null;
-  if (blocks !== null) {
+  const chunks = markdown ? markdownChunks(shown) : null;
+  if (chunks !== null) {
     return (
       <div class={`${className} md`} lang={lang}>
-        <MarkdownBlocks blocks={blocks} />
+        <MarkdownBlocks blocks={chunks[chunk]!} />
       </div>
     );
   }
@@ -86,6 +98,12 @@ export function DataProse({ text, markdown, class: className }: { text: LangText
       ))}
     </div>
   );
+}
+
+/** How many chunks DataProse shows a text in, in the reader's language: one for plain text. */
+export function useProseChunks(text: LangText, markdown: boolean): number {
+  const { readerText } = useI18n();
+  return (markdown ? markdownChunks(readerText(text))?.length : undefined) ?? 1;
 }
 
 /**

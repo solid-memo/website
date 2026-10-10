@@ -63,6 +63,9 @@ folded to what the app shows:
 | `liveLink(url)` | `links` | whether a link is followed, and its host |
 | `inspectMarkdown(text)` | `parse` | whether the text is one paragraph as written (a heading is not), and notes of what the tree folds away or a check looks at: raw HTML, pictures, links (an autolink told apart), code outside a link, character references, what nests too deep and would not show as written, a table past its caps |
 | `markdownProblems(text, rule)` | `problems` | what would not show as its author meant, by the [rules for a release](#rules-for-a-release), in a field held to `SIDE`, `OPTION` or `PROSE` |
+| `chunksOf(blocks)` | `chunks` | the [chunks](#chunks) blocks are shown in, split at their top-level rules |
+| `splitAtRules(blocks)` | `chunks` | the pieces between top-level rules, empty ones included |
+| `inspectChunks(text)` | `chunks` | how many chunks a text is shown in, and how many empty pieces its rules make |
 
 ### Limits
 
@@ -102,6 +105,29 @@ Every entry point is bounded, for a pod or library may hold anything:
 The package's tests include the cmark and commonmark.js pathological
 inputs, each at the length cap, within a time budget.
 
+### Chunks
+
+A step's theory in Markdown is read a chunk at a time
+([courses.md](courses.md#the-learners-flow)), and its thematic breaks
+(`---`, `***` or `___` on a line of their own) are where one chunk
+ends and the next begins. Nowhere else does a break split anything: in
+a note or a chapter's description it shows as a rule.
+
+- **Only a break at the top level splits.** One inside a list item or a
+  block quote is part of that block, and shows there as a rule.
+- **The parsed tree is split, not the source** (`chunksOf`), so a
+  reference link in one chunk resolves by a definition in another, and
+  a `---` line in a code block splits nothing. A `---` right under a
+  line of text underlines it as a heading instead: leave a blank line
+  before it.
+- **The breaks are not shown.** A chunk is the blocks between two of
+  them. Empty chunks, from a break first, last or right after another,
+  are dropped; the library refuses them
+  ([deck-library.md](deck-library.md#markdown-rules)).
+- **One chunk** is what a text without a top-level break is, and a text
+  past the [limits](#limits), shown as plain text, and plain theory,
+  whatever it holds.
+
 ## Where it is shown: the profiles
 
 The renderer is `apps/web/src/ui/Markdown.tsx`, reached through
@@ -113,7 +139,7 @@ the deck or course it comes from.
 |---|---|---|
 | Text, emphasis, strong, code spans | as such | as such |
 | Paragraphs, hard breaks | `<p>`, `<br>` | joined by a space |
-| Lists, block quotes, thematic breaks | as such | items joined by "; ", the rest flattened |
+| Lists, block quotes, thematic breaks | as such, but for a step's theory, which is split at its top-level breaks ([chunks](#chunks)) | items joined by "; ", the rest flattened |
 | Code blocks | `<pre><code translate="no">` in a region that scrolls sideways, its language as a small label | one code span, white space collapsed |
 | Tables | in a region that scrolls sideways, alignment as `md-align-*` classes | cells joined by " · " |
 | Links | followed only by `liveLink` (below) | their text |
@@ -125,8 +151,8 @@ the deck or course it comes from.
   aligned, at a reading size on a card's face (a note's blocks as quiet
   as its paragraph) and at the size of the place it is in elsewhere. A
   step's theory (`DataProse`) is always a `div.course-theory`: plain
-  theory split into paragraphs at its blank lines, Markdown as its
-  blocks.
+  theory split into paragraphs at its blank lines, Markdown as the
+  blocks of the [chunk](#chunks) shown.
 - **Inline** is for a multiple-choice option (in a `<label>`) and a
   card's label.
 - **Plain** (`labelText`) is for places that take only text: a Browser
@@ -167,7 +193,7 @@ text is rendered, and none relies on a check of the data.
 | Link spoofing | A followed link opens in a new tab, says so, and when its text is not its own URL, or its host is an international one, the host it leads to follows it in sight: "the spec (solidproject.org)", punycode kept, so `<https://bаnk.example>` with a Cyrillic "а" shows "(xn--bnk-6cd.example)". The link and its host are each isolated (`dir="ltr"`), so a bidi override in the text before them cannot reorder them. |
 | Tracking pictures | Never loaded: alt text only. Pictures belong in `sm:frontImage`/`sm:backImage`, with a description. |
 | Trojan Source | Bidi controls, zero-width and other hidden characters in code and link text shown as markers; links isolated from the text around them. |
-| Denial of service | The limits above, at every entry point, and each text parsed once (`markdownCache.ts` keeps the last 500). |
+| Denial of service | The limits above, at every entry point, and each text parsed once (`markdownCache.ts` keeps the last 500, and a theory's chunks are split from its cached blocks). |
 
 Two checks of the built site hold this (`apps/web/src/build.test.ts`):
 
@@ -209,6 +235,11 @@ shows the same problems as hints, never as a block
 | A character reference outside code (`characterReference`), such as `&aring;` | CommonMark decodes it: it shows as "å". Write it as code, or escape its `&` (`\&aring;`). An unknown name, `&nosuchname;`, is text and passes. |
 | An option that is not one paragraph (`notOneParagraph`): a distractor's `distractorText`, and the `back` of a card with distractors (field `OPTION`) | Options show on one line, in the inline profile, and must look alike, or the odd one out gives the answer away. A heading is no paragraph: it would show bold on a revealed back. |
 | Past the [limits](#limits): longer than `MAX_CHARS` (`tooLong`), past the parser's others (`tooComplex`), nested past `MAX_DEPTH` (`tooDeep`, unless it is plain text that shows as written anyway), a table past its caps (`largeTable`) | The text, or that part of it, shows as plain text or as its source. |
+
+A step's theory is held to its [chunks](#chunks) too: none of them
+empty, and as many in each language, so a learner who switches language
+keeps their place
+([deck-library.md](deck-library.md#markdown-rules)).
 
 None of these is a safety rule: the [safety](#safety) rules hold when
 text is rendered, whether or not a check ran.

@@ -205,6 +205,9 @@
     "step": "Steg {number} av {count}",
     "progress": "Klara steg i kapitlet",
     "theoryHidden": "Teorin visas inte medan du svarar på frågorna.",
+    "part": "Del {number} av {count}",
+    "continue": "Fortsätt",
+    "back": "Tillbaka",
     "toQuestions": {
       "one": "Vidare till frågan",
       "other": "Vidare till frågorna"

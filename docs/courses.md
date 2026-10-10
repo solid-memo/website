@@ -32,7 +32,11 @@ in [useCases.ts](../packages/application/src/useCases.ts).
   first). They are never copied into a pod: the learner's deck reads them
   from the release its `prov:wasDerivedFrom` names.
 - **A step** has its theory (`sm:theory`) and the cards that check it
-  (`sm:checkedBy`, one or more).
+  (`sm:checkedBy`, one or more). Theory in Markdown may be in chunks,
+  read one at a time: each top-level thematic break (`---`) ends one
+  and begins the next ([markdown.md](markdown.md#chunks)). No term or
+  shape says so: it is how the app shows the Markdown, and an app that
+  does not chunk shows the breaks as rules.
 - **A chapter** has a title and description, and may name cards asked
   only in its final review (`sm:reviewQuestion`), questions that combine
   its steps.
@@ -145,7 +149,11 @@ new type-index entries ([data-model.md](data-model.md#courses)):
    any release of the course gets that copy back: a course is started
    once.
 2. **A step.** A step comes in two phases. First the learner reads the
-   theory, with no question shown. Below it, a button goes on to the
+   theory, with no question shown. Theory in chunks is read one chunk
+   at a time, starting at the first: "Part 2 of 3" says where the
+   learner is, Continue goes to the next chunk and Back, from the
+   second on, to the one before. Below the last chunk (all the theory,
+   when it is one), a button goes on to the
    step's question(s); it is described by a hint that the theory is not
    shown while answering. The step's questions are then asked one at a
    time, with the theory not rendered at all: the answer checks what
@@ -156,8 +164,13 @@ new type-index entries ([data-model.md](data-model.md#courses)):
    to the deck ("Added to your deck"). After the step's last question,
    Next goes to the next step's theory, or, after the chapter's last
    step, to the final review. There is no way back to the theory while
-   answering; every step starts on its theory, the one the chapter
-   resumes at included, so leaving and coming back shows it again.
+   answering; every step starts on its theory, at its first chunk, the
+   one the chapter resumes at included, so leaving and coming back
+   shows it again. Moving to another chunk puts the focus on "Part 2 of
+   3", so a screen reader reads the chunk from its start. When the
+   reader's language is switched to one with fewer chunks (which a
+   release checked by the library never has), a chunk past the last
+   shows the last.
 3. **The final review.** Once every step is done, the chapter's final
    review asks all its questions, shuffled and again without the theory.
    A question answered wrongly comes back until it is answered right.
@@ -278,9 +291,16 @@ these additions:
    step, chapter or card ([deck-library.md](deck-library.md#authoring-markdown)).
    A question's options are then one paragraph each, its back included,
    and hold no links.
-7. Keep the attribution and the review rounds as every authored deck
+7. To have the learner read a step's theory in chunks, write it in
+   Markdown and put a thematic break, `---` with a blank line before
+   and after it, between each two chunks. Every language of the theory
+   has as many chunks, none of them empty: no break first, last, or
+   right after another ([deck-library.md](deck-library.md#markdown-rules)).
+   Break at a change of topic, where a learner could pause, and keep a
+   chunk to about a screenful; a short theory needs no breaks.
+8. Keep the attribution and the review rounds as every authored deck
    does ([deck-library.md](deck-library.md#provenance)).
-8. `npm run format:turtle`, then `npm run library`, which runs the
+9. `npm run format:turtle`, then `npm run library`, which runs the
    course checks ([deck-library.md](deck-library.md#course-rules)) and
    the Markdown checks ([deck-library.md](deck-library.md#markdown-rules)).
 
