@@ -2230,6 +2230,7 @@
       "shapesHint": "셰이프와 DCAT-AP, SKOS 프로필은 릴리스를 게시된 데이터로 보고 검사해요. 초안이 크면 시간이 걸리기 때문에 요청할 때만 실행돼요.",
       "shapesRun": "셰이프로 검사",
       "shapesRunning": "셰이프로 검사하는 중…",
+      "again": "초안 다시 검사",
       "shapesAgain": "다시 검사",
       "shapesStale": "그 뒤로 초안이 바뀌었어요. 아래는 그때 있던 문제예요.",
       "shapesClear": "셰이프 검사에서 문제가 없어요.",

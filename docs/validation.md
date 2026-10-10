@@ -271,12 +271,13 @@ the shapes, as `pickShape` picks them for a read:
   release it will be, moved to its address, against the library shapes
   (`"library"`), DCAT-AP and SKOS, with a library's index beside it
   for the library's policy. Its publisher and series are often in
-  another document, a library's index. When nothing beside the release
-  describes them (in a pod, the index is not read), DCAT-AP's class
-  check on `dcterms:publisher`, `dcat:inSeries` and
-  `dcterms:isVersionOf` says nothing (`isLinkElsewhere`), as with a
-  member listed from elsewhere. With the index beside it, they are held
-  to their class.
+  another document, a library's index. For the library, the index is
+  beside the release, and DCAT-AP holds them to their class there. In a
+  pod, nothing else is read: a release there is whole on its own
+  ([deck-library.md](deck-library.md#a-release-outside-the-library)), so
+  a publisher or series it does not describe fails DCAT-AP's class
+  check. The next version of a library release describes them, as the
+  index does (`nextVersionDraft`).
   Every write of a draft is one
   ([solidReleaseDraftRepository.ts](../packages/solid/src/solidReleaseDraftRepository.ts)),
   and so is the check of a draft's documents.

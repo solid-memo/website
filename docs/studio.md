@@ -891,7 +891,13 @@ A new draft starts from
   release time or notes yet. Everything it published is carried: no
   card, chapter, step or distractor of it can be deleted, only retired,
   and none of their ids can be another's; how it was made (its
-  activities) is kept as it is;
+  activities) is kept as it is. A series and publisher the release
+  names in another document (a library's index) are read from it, as
+  no one, and described in the draft, so the release it makes is whole
+  on its own: the series by what an index says of one, a publisher by
+  its class and name only. A document that cannot be read gives
+  nothing: the draft is made without it, and the release check says
+  what the draft lacks;
 - **a release saved as a file**, Turtle or JSON-LD, as it is
   (`releaseToDraft` in
   [releaseToDraft.ts](../packages/domain/src/release/releaseToDraft.ts)).
@@ -1148,9 +1154,9 @@ will be. They are the rules `npm run library:check` runs on `decks/`
   SKOS with the reference data (`ShapeValidator.validateRelease`). For
   the library, its index is beside it, with the release's series in it
   (described from the release when the index lists it not yet). In a
-  pod, a publisher or series the release links to in another document
-  is not held to its class there: nothing beside the release describes
-  it ([validation.md](validation.md)). They
+  pod nothing else is read: a publisher or series the release does not
+  describe fails DCAT-AP's class check, as the release is not whole on
+  its own ([validation.md](validation.md)). They
   take a while on a large draft, so a button runs them, for the draft
   as it is then; once it changes, they say so and offer to check again.
   When they fail, the same button runs them again.
@@ -1159,8 +1165,9 @@ The library and drops parts read what is elsewhere: the library's
 index, and the release the draft follows. One that cannot be read is a
 problem of its own (`libraryUnread`, `previousUnread`), and the rest of
 the check stands. Such a check is not kept, so the next one reads again:
-the screen checks again when it is opened again, or when its window
-is focused.
+the screen checks again when it is opened again, when its window is
+focused, or when asked: such a check, or one that failed, has a button
+to check the draft again.
 
 The draft checked is the editor's, changes not yet written included, so
 a problem fixed clears at once. Each version of it is checked once:

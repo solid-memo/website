@@ -121,7 +121,12 @@ export function movedProblems(problems: readonly ReleaseProblem[], from: string,
  * that did not is not kept, so the next check reads again.
  */
 export function readWhole(check: Pick<ReleaseCheck, "drops" | "library">): boolean {
-  return ![...check.drops, ...check.library].some((one) => one.code === "previousUnread" || one.code === "libraryUnread");
+  return ![...check.drops, ...check.library].some(isUnread);
+}
+
+/** Whether a problem is a part of the check left unread (UnreadProblem), which a check made again may read. */
+export function isUnread(one: ReleaseProblem): boolean {
+  return one.code === "previousUnread" || one.code === "libraryUnread";
 }
 
 /** Every problem the check found, by the order of its rules, the shapes last. */

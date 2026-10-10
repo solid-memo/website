@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { draftUrlOf } from "@solid-memo/domain/release/draftLayout";
 import {
   applyDraftChanges,
@@ -11,8 +11,8 @@ import {
 import { rebaseDraft } from "@solid-memo/domain/release/releaseToDraft";
 import { nextVersionDraft } from "@solid-memo/domain/release/releaseVersion";
 import { courseDraft, NOW } from "@solid-memo/domain/testing/releaseDraft";
-import { DECKS, draftPod, INSTANCE, quadsOfTurtle, roundTrip } from "./testing/releaseDrafts";
-import { deleteDraftResources, draftDocumentsIn } from "./solidReleaseDraftRepository";
+import { DECKS, draftPod, INSTANCE, quadsOfTurtle, roundTrip, siteFetch } from "./testing/releaseDrafts";
+import { createSolidReleaseDraftRepository, deleteDraftResources, draftDocumentsIn } from "./solidReleaseDraftRepository";
 
 const DRAFT = draftUrlOf(INSTANCE, "solid", 1);
 const CONTAINER = `${INSTANCE}drafts/solid/v1/`;
@@ -476,6 +476,36 @@ describe("readRelease and parseRelease", () => {
     await pod.put(at, `<> a <${SM}Deck> ; <${SM}studyDirection> <${SM}frontToBack> ; <${SM}formatVersion> 6 . <#c> a <${SM}Card> ; <${SM}formatVersion> 6 .`);
     await expect(read(at)).rejects.toMatchObject({ code: "libraryCardTooNew" });
   });
+
+  it("read the document a release names its series and publisher in, once, as no one, and none for a release that describes them", async () => {
+    const pod = await draftPod();
+    const publicFetch = vi.fn(siteFetch);
+    const releaseFetch = vi.fn(siteFetch);
+    const repository = createSolidReleaseDraftRepository({ fetch: pod.fetch, releaseFetch, publicFetch });
+    const release = await repository.readRelease(`${DECKS}getting-started/v1.ttl`);
+    const linked = await repository.readLinked(release);
+    expect(linked).toContainEqual({ subject: `${DECKS}index.ttl#solid-memo`, predicate: "http://xmlns.com/foaf/0.1/name", object: expect.objectContaining({ value: "Solid Memo" }) });
+    expect(linked.filter((triple) => triple.subject === `${DECKS}index.ttl#solid-memo`)).toHaveLength(2);
+    expect(publicFetch.mock.calls.map(([input]) => String(input))).toEqual([`${DECKS}index.ttl`]);
+    expect(releaseFetch.mock.calls.map(([input]) => String(input))).not.toContain(`${DECKS}index.ttl`);
+    await expect(repository.readLinked(course())).resolves.toEqual([]);
+  });
+
+  it("make the next version of a release whose linked documents cannot be read, without them, the release check finding what it lacks", async () => {
+    const pod = await draftPod();
+    const gone = (async () => new Response("gone", { status: 404 })) as typeof globalThis.fetch;
+    const repository = createSolidReleaseDraftRepository({ fetch: pod.fetch, releaseFetch: siteFetch, publicFetch: gone });
+    const read = await repository.readRelease(`${DECKS}getting-started/v1.ttl`);
+    const release = { ...read, root: { ...read.root, publisher: "https://gone.example/profile/card#me" } };
+    const linked = await repository.readLinked(release);
+    expect(linked).toEqual([]);
+    const url = draftUrlOf(INSTANCE, "getting-started", 2);
+    await repository.create(INSTANCE, nextVersionDraft(release, url, linked));
+    const { draft } = await repository.read(url);
+    expect(draft.root).toMatchObject({ version: "2", publisher: "https://gone.example/profile/card#me", inSeries: `${DECKS}index.ttl#getting-started` });
+    const found = (await pod.validator.validateRelease(draft, url)).map((problem) => ("field" in problem ? problem.field : undefined));
+    expect(found).toEqual(expect.arrayContaining(["http://purl.org/dc/terms/publisher", "http://www.w3.org/ns/dcat#inSeries"]));
+  }, 60_000);
 
   it("parse a release from a Turtle or JSON-LD file, at the address its root names", async () => {
     const pod = await draftPod();

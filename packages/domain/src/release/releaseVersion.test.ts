@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { courseDraft, DRAFT, link } from "../testing/releaseDraft.ts";
 import { rebaseDraft } from "./releaseToDraft.ts";
-import { nextVersionDraft } from "./releaseVersion.ts";
+import { linkedDescription, nextVersionDraft } from "./releaseVersion.ts";
 
 const V1 = "https://pod.example/solid-memo/main/releases/solid/v1.ttl";
 const DCAT = "http://www.w3.org/ns/dcat#";
+const DCTERMS = "http://purl.org/dc/terms/";
+const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 
 /** The course fixture as release 1 at V1: released, with notes, its series `<v1.ttl#series>` described in it. */
 function v1() {
@@ -54,6 +56,39 @@ describe("nextVersionDraft", () => {
     expect(draft.root.version).toBe("2");
     expect(draft.root.inSeries).toBe("https://solid-memo.com/decks/index.ttl#solid");
     expect(draft.triples.some((triple) => triple.subject === V1)).toBe(false);
+  });
+
+  it("describes a series and publisher described elsewhere as their document does, so the release it makes is whole", () => {
+    const INDEX = "https://solid-memo.com/decks/index.ttl";
+    const release = { ...v1(), root: { ...v1().root, inSeries: `${INDEX}#solid`, isVersionOf: `${INDEX}#solid`, publisher: `${INDEX}#pub` } };
+    const library = { ...release, triples: v1().triples.slice(0, 4) };
+    const OLD = "https://solid-memo.com/decks/solid/v0.ttl";
+    const text = (subject: string, predicate: string, value: string) => ({ subject, predicate, object: { kind: "literal" as const, value, language: "en", datatype: "" } });
+    const series = [
+      link(`${INDEX}#solid`, RDF_TYPE, `${DCAT}DatasetSeries`),
+      link(`${INDEX}#solid`, `${DCTERMS}publisher`, `${INDEX}#lib`),
+      link(`${INDEX}#solid`, `${DCAT}hasVersion`, OLD),
+      link(`${INDEX}#solid`, `${DCAT}hasVersion`, V1),
+    ];
+    const agents = [link(`${INDEX}#pub`, RDF_TYPE, "http://xmlns.com/foaf/0.1/Agent"), text(`${INDEX}#lib`, "http://xmlns.com/foaf/0.1/name", "Library")];
+    const older = [link(OLD, RDF_TYPE, `${DCAT}Dataset`), text(OLD, `${DCTERMS}title`, "Solid")];
+    const elsewhere = [
+      link(`${INDEX}#other`, RDF_TYPE, `${DCAT}DatasetSeries`),
+      link(OLD, RDF_TYPE, "https://solid-memo.com/ns/vocab/v1.ttl#Deck"),
+      link(OLD, `${DCTERMS}creator`, `${INDEX}#someone`),
+      link(V1, `${DCTERMS}creator`, `${INDEX}#someone`),
+      // Of the series, what an index says of one; of a publisher, its class and name, nothing more a profile says of its person.
+      link(`${INDEX}#solid`, "http://www.w3.org/ns/prov#wasAttributedTo", `${INDEX}#someone`),
+      link(`${INDEX}#pub`, "http://xmlns.com/foaf/0.1/mbox", "mailto:pub@example.org"),
+      link(`${INDEX}#lib`, "http://xmlns.com/foaf/0.1/knows", `${INDEX}#someone`),
+    ];
+    const index = [...series, ...agents, ...older, ...elsewhere];
+    expect(linkedDescription(library, index)).toEqual([...series, ...agents, ...older]);
+    const draft = nextVersionDraft(library, DRAFT, index);
+    expect(draft.triples).toEqual(expect.arrayContaining([...series, ...agents, ...older, link(V1, RDF_TYPE, `${DCAT}Dataset`)]));
+    expect(draft.triples).not.toContainEqual(elsewhere[0]);
+    // What the release describes itself is not described again.
+    expect(linkedDescription(v1(), index)).toEqual([]);
   });
 
   it("carries what the release published: its every subject, retired ones too, and its activities", () => {

@@ -52,7 +52,7 @@ export type NewDraft =
   | { kind: "blankCourse"; title: LangText }
   /** A deck of the instance: what a release would say of it (deckToDraft). */
   | { kind: "fromDeck"; deck: Deck }
-  /** A release, by its URL: the next version of it (nextVersionDraft). */
+  /** A release, by its URL: the next version of it (nextVersionDraft), describing the series and publisher it names elsewhere. */
   | { kind: "nextVersionOf"; url: string }
   /** A release in a Turtle or JSON-LD file the user picks, as it is (releaseToDraft). */
   | { kind: "fromFile" };
@@ -344,11 +344,13 @@ export function createReleaseDraftUseCases({
         }
         case "nextVersionOf": {
           const release = draftable(await releaseDraftRepository.readRelease(from.url));
+          // Its series and publisher as their document describes them, when the release does not: the next version describes them itself.
+          const linked = await releaseDraftRepository.readLinked(release);
           const version = Number(release.root.version ?? "1") + 1;
           const name = nameInUrl(from.url) ?? undefined;
           return {
             draft: await create(instanceUrl, { title: release.root.title ?? {}, ...(name === undefined ? {} : { name }), version }, (url) =>
-              nextVersionDraft(release, url),
+              nextVersionDraft(release, url, linked),
             ),
           };
         }

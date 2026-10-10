@@ -628,6 +628,27 @@ describe("StudioWorkspace", () => {
       expect(vi.mocked(useCases.checkReleaseDraft).mock.calls.filter(([, , , options]) => options?.shapes === true)).toHaveLength(2);
     });
 
+    it("checks the draft again when asked after the library's index could not be read, and then reads it", async () => {
+      const draft = courseDraft();
+      const useCases = draftUseCases(draft);
+      let unread = true;
+      vi.mocked(useCases.checkReleaseDraft).mockImplementation(async () => ({
+        rules: [],
+        library: unread ? [problem(DRAFT_URL, { code: "libraryUnread", params: {} })] : [],
+        drops: [],
+        markdown: [],
+        shapes: null,
+      }));
+      window.history.replaceState(null, "", studioRouteToHash({ screen: "check", draftUrl: DRAFT_URL, policy: "library" }));
+      renderWorkspace(useCases);
+      const again = await screen.findByRole("button", { name: "Check the draft again" });
+      unread = false;
+      fireEvent.click(again);
+      expect(await screen.findByText("No problems found.")).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Check the draft again" })).toBeNull();
+      expect(vi.mocked(useCases.checkReleaseDraft).mock.calls.filter(([, , policy]) => policy === "library")).toHaveLength(2);
+    });
+
     it("edits the release's metadata and provenance from its overview, with its trail, writing each change", async () => {
       window.history.replaceState(null, "", studioRouteToHash({ screen: "draft", draftUrl: DRAFT_URL }));
       const useCases = draftUseCases();

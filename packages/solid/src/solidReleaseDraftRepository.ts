@@ -85,15 +85,19 @@ interface Read {
  * the draft shapes describe is checked before it is written
  * (`checkWrite`, "draft"); what they do not is written as it is.
  * Releases are read, never written, with `releaseFetch`: a library
- * release is read where the site serves it.
+ * release is read where the site serves it. The documents a release
+ * names its series and publisher in are read with `publicFetch`, as no
+ * one: what they say is copied into a draft to be published.
  */
 export function createSolidReleaseDraftRepository({
   fetch,
   releaseFetch = fetch,
+  publicFetch = releaseFetch,
   checkWrite = noWriteCheck,
 }: {
   fetch: typeof globalThis.fetch;
   releaseFetch?: typeof globalThis.fetch;
+  publicFetch?: typeof globalThis.fetch;
   checkWrite?: WriteCheck;
 }): ReleaseDraftRepository {
   /** Each draft's documents as last read, so an edit is written only if they are still so. */
@@ -290,6 +294,22 @@ export function createSolidReleaseDraftRepository({
         throw new AppError("releaseUnreadable", { url });
       }
       return readReleaseQuads(quadsOf(dataset), url);
+    },
+
+    async readLinked(release) {
+      const own = new Set(release.triples.map((triple) => triple.subject));
+      const named = [release.root.inSeries, release.root.isVersionOf, release.root.publisher].filter((iri): iri is string => iri !== undefined && !own.has(iri));
+      const documents = [...new Set(named.map((iri) => iri.split("#")[0]!))].filter((url) => url !== release.url);
+      // One that cannot be read says nothing: the draft is made without it, and the release check finds what it lacks.
+      const read = await Promise.all(
+        documents.map((url) =>
+          readDataset(url, publicFetch).then(
+            (dataset) => quadsOf(dataset).map(asTriple),
+            () => [],
+          ),
+        ),
+      );
+      return read.flat();
     },
 
     async parseRelease(text, format) {

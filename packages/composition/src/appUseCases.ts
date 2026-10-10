@@ -114,6 +114,8 @@ export function createAppUseCases({ clientName, servedSite, libraryIndexUrl, rul
       fetch: podFetch,
       // A library release is read where the site serves it, any other where it is published.
       releaseFetch: routedFetch({ origin: SITE, local: siteFetch, remote: podFetch }),
+      // What a release names elsewhere is copied into a draft to be published, so it is read as no one.
+      publicFetch: routedFetch({ origin: SITE, local: siteFetch, remote: anonymousFetch }),
       checkWrite,
     }),
     // A release is written as the user; whether it is public, asked as no one.
