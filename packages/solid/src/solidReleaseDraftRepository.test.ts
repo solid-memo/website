@@ -585,7 +585,8 @@ describe("delete", () => {
 });
 
 describe("a library release made a draft and published again", () => {
-  for (const path of ["getting-started/v1.ttl", "swedish-nouns/v1.ttl", "git-commands/v1.ttl"]) {
+  // A course, and two decks at formats 4 and 5 in English and Swedish; every release makes the trip in `npm run test:roundtrip`.
+  for (const path of ["getting-started/v1.ttl", "sweden-counties-and-provinces/v1.ttl", "git-commands/v1.ttl"]) {
     it(`gives ${path} back, apart from what publishing sets`, { timeout: 30_000 }, async () => {
       const { release, assembled } = await roundTrip(await draftPod(), path);
       expect(assembled).toEqual(release);

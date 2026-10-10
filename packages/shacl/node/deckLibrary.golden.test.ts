@@ -42,7 +42,9 @@ it("says what it said of published releases with faults put in", async () => {
   const section = (title: string, problems: readonly string[]) => out.push(`## ${title}`, ...problems);
   for (const deck of DECKS) {
     const release = await published(deck);
-    section(`${deck}: as published`, [...metadataProblems(release), ...courseProblems(release), ...markdownProblems(release)]);
+    // The course's own Markdown, some 2,000 texts, is checked by `npm run library:check`, as every release's is; here it would cost most of the test.
+    const marked = deck === "solid-fundamentals" ? [] : markdownProblems(release);
+    section(`${deck}: as published`, [...metadataProblems(release), ...courseProblems(release), ...marked]);
     section(`${deck}: at the next version's path`, metadataProblems({ ...release, version: 2 }));
     const retired = rewritten(release, release.turtle.replace(OUTLINE_SUBJECT, "$1\n    <http://www.w3.org/2002/07/owl#deprecated> true ;"));
     section(`${deck}: everything retired`, courseProblems(retired));
