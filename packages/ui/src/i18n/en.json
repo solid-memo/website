@@ -1434,7 +1434,9 @@
       "noDrafts": "No drafts.",
       "version": "v{version}",
       "switchInstance": "Switch instance: {instance}",
-      "allInstances": "All instances"
+      "allInstances": "All instances",
+      "resizeAside": "Width of the side pane",
+      "hide": "Hide"
     },
     "tabs": {
       "deck": "Deck",
@@ -1455,14 +1457,14 @@
       "palette": "Search, go to or run a command",
       "button": "? Keys",
       "heading": "Keyboard shortcuts",
-      "chords": "Keys shown side by side, such as g d, are pressed one after the other. While you type in a field, only Ctrl+K, F6 and Shift+F6 work.",
+      "chords": "Keys shown side by side, such as g d, are pressed one after the other. While you type in a field, only Ctrl+K, F6, Shift+F6, F8 and Shift+F8 work.",
       "scope": {
         "studio": "Anywhere in the Studio",
         "cards": "In the card workbench"
       },
       "help": "Show these shortcuts",
       "filter": "Go to the screen's search or filter",
-      "nextRegion": "Go to the next region: header, sidebar, main content, status bar",
+      "nextRegion": "Go to the next region: header, sidebar, main content, outline, panel, status bar",
       "previousRegion": "Go to the previous region",
       "go": {
         "decks": "Go to the decks",
@@ -1475,6 +1477,10 @@
         "instances": "Go to the instances"
       },
       "toggleSidebar": "Show or hide the sidebar",
+      "toggleAside": "Show or hide the outline",
+      "toggleDock": "Show or hide the panel: problems and activity",
+      "nextProblem": "Go to the next problem's field",
+      "previousProblem": "Go to the previous problem's field",
       "previousTab": "Go to the previous tab of the deck or draft",
       "nextTab": "Go to the next tab of the deck or draft",
       "tab": "Go to a tab of the deck or draft by its number",
@@ -1482,6 +1488,23 @@
       "up": "Previous card",
       "select": "Select the card",
       "open": "Open the card"
+    },
+    "dock": {
+      "label": "Panel",
+      "problems": "Problems",
+      "problemsCount": "Problems ({count})",
+      "activity": "Activity",
+      "resize": "Height of the panel",
+      "noActivity": "Nothing done yet since the Studio was opened.",
+      "noProblemsHere": "A deck's or a draft's problems are listed on its screens.",
+      "checking": "Looking for problems…",
+      "none": "No problems found.",
+      "deckData": {
+        "one": "{count} problem in the deck's data",
+        "other": "{count} problems in the deck's data"
+      },
+      "unstated": "{place}: its language is not stated",
+      "duplicate": "{place}: says the same as another card"
     },
     "palette": {
       "button": "Search or run…",

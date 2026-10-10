@@ -17,6 +17,10 @@ export type ShortcutId =
   | "previousRegion"
   | `go.${Section}`
   | "toggleSidebar"
+  | "toggleAside"
+  | "toggleDock"
+  | "nextProblem"
+  | "previousProblem"
   | "previousTab"
   | "nextTab"
   | `tab.${number}`
@@ -62,6 +66,10 @@ export const SHORTCUTS: readonly Shortcut[] = [
   { id: "previousRegion", keys: "Shift+F6", scope: "studio", whileTyping: true },
   ...Object.entries(GO_KEYS).map(([section, key]): Shortcut => ({ id: `go.${section as Section}`, keys: `g ${key}`, scope: "studio" })),
   { id: "toggleSidebar", keys: "Ctrl+b", scope: "studio" },
+  { id: "toggleAside", keys: "Ctrl+\\", scope: "studio" },
+  { id: "toggleDock", keys: "Ctrl+j", scope: "studio" },
+  { id: "nextProblem", keys: "F8", scope: "studio", whileTyping: true },
+  { id: "previousProblem", keys: "Shift+F8", scope: "studio", whileTyping: true },
   { id: "previousTab", keys: "[", scope: "studio" },
   { id: "nextTab", keys: "]", scope: "studio" },
   // The key help lists the nine as one.

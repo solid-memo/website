@@ -1,5 +1,5 @@
 import { expect, type Locator } from "@playwright/test";
-import type { Locale } from "../harness/strings.ts";
+import { escapeRegExp, type Locale } from "../harness/strings.ts";
 import { Screen } from "./Screen.ts";
 
 /**
@@ -36,9 +36,13 @@ export class Chrome extends Screen {
     await this.studioSidebar.getByRole("link", { name: this.t(`studio.shell.section.${section}`), exact: true }).click();
   }
 
-  /** Follows a tab of the deck or the draft the Studio shows, by its key ("schedule"), which is then the current one. */
+  /**
+   * Follows a tab of the deck or the draft the Studio shows, by its key
+   * ("schedule"), which is then the current one. A draft's Check counts
+   * its problems after its name ("Check 2 problems").
+   */
   async studioTab(of: "deck" | "draft", tab: string): Promise<void> {
-    const link = this.studioTabs(of).getByRole("link", { name: this.t(`studio.tabs.${tab}`), exact: true });
+    const link = this.studioTabs(of).getByRole("link", { name: new RegExp(`^${escapeRegExp(this.t(`studio.tabs.${tab}`))}( |$)`) });
     await link.click();
     await expect(link).toHaveAttribute("aria-current", "page");
   }

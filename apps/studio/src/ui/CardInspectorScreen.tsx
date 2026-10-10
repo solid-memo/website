@@ -65,7 +65,7 @@ export function CardInspectorScreen({
           key: each,
           href: tabHref(each),
           label: each === "distractors" ? t("studio.card.tab.distractors", { count }) : t(`studio.card.tab.${each}`),
-          current: each === tab,
+          current: each === tab && "page",
         }))}
         onFollow={onTab}
       />

@@ -1,20 +1,31 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
-import { useContext } from "preact/hooks";
+import { useContext, useState } from "preact/hooks";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ActionsMenu, MenuItem } from "@solid-memo/ui/ActionsMenu";
 import { DRAFT_URL, instanceA } from "../../test/fixtures";
 import { DraftWaiting, type EditorReport } from "../draftEditor";
 import { studioRouteToHash, type StudioRoute } from "../router";
 import type { ScreenCommand } from "./commandIndex";
-import { StudioShell } from "./StudioShell";
+import { ACTIVITY_LIMIT, useActivityLog } from "./activity";
+import type { WorkspaceProblems } from "./BottomDock";
+import { StudioShell, type AsidePane } from "./StudioShell";
 import { useScreenCommands } from "./useScreenCommands";
-import { NARROW, type ContextTab } from "./workspaceLayout";
+import { ASIDE_WIDTH, DOCK_HEIGHT } from "./splitter";
+import { MEDIUM, NARROW, type ContextTab } from "./workspaceLayout";
 
 /** Says what a draft editor would: how many of its changes wait. */
 let report: (editor: object, report: EditorReport) => void;
 function Editor() {
   report = useContext(DraftWaiting);
   return <p>An editor</p>;
+}
+
+/** Tells the Studio's activity what a screen did, as a screen's status line does. */
+let logActivity: (text: string) => void;
+function Activity() {
+  logActivity = useActivityLog();
+  return null;
 }
 
 /** A screen with commands of its own in the palette. */
@@ -35,6 +46,8 @@ function renderShell(
     filter?: true;
     tabs?: readonly ContextTab[];
     commands?: ScreenCommand[];
+    aside?: AsidePane;
+    problems?: WorkspaceProblems;
   } = {},
 ) {
   const queryClient = props.queryClient ?? new QueryClient();
@@ -58,9 +71,12 @@ function renderShell(
         }
         tabs={props.tabs ?? []}
         draftUrl={props.draftUrl ?? null}
+        aside={props.aside ?? null}
+        problems={props.problems ?? null}
         onGo={props.onGo ?? (() => undefined)}
       >
         <Editor />
+        <Activity />
         {props.commands && <Commands commands={props.commands} />}
         {props.filter && (
           <label>
@@ -82,25 +98,34 @@ const root = document.documentElement;
 const sidebar = () => document.getElementById(toggle().getAttribute("aria-controls")!)!;
 const toggle = () => screen.getByRole("button", { name: "Sidebar" });
 
-/** A screen as narrow as a phone's (NARROW), and a way to widen it, as the browser says it. */
-function narrowScreen() {
+/**
+ * A screen as narrow as a phone's (NARROW, and MEDIUM), or (`medium`)
+ * as a tablet's (MEDIUM only), and a way to widen it, as the browser
+ * says it.
+ */
+function narrowScreen(medium = false) {
   const listeners = new Set<() => void>();
-  const media = {
-    matches: true,
-    addEventListener: (_: string, listener: () => void) => listeners.add(listener),
-    removeEventListener: (_: string, listener: () => void) => listeners.delete(listener),
-  };
+  let wide = false;
   vi.spyOn(window, "matchMedia").mockImplementation((query) => {
-    expect(query).toBe(NARROW);
-    return media as unknown as MediaQueryList;
+    expect([NARROW, MEDIUM]).toContain(query);
+    return {
+      get matches() {
+        return !wide && (query === MEDIUM || !medium);
+      },
+      addEventListener: (_: string, listener: () => void) => listeners.add(listener),
+      removeEventListener: (_: string, listener: () => void) => listeners.delete(listener),
+    } as unknown as MediaQueryList;
   });
   return {
     widen() {
-      media.matches = false;
+      wide = true;
       act(() => listeners.forEach((listener) => listener()));
     },
   };
 }
+
+/** A screen wide enough for the aside beside the main content (the test DOM's is not). */
+const wideScreen = () => narrowScreen().widen();
 
 describe("StudioShell", () => {
   beforeEach(() => {
@@ -386,7 +411,7 @@ describe("StudioShell", () => {
   it("goes to the next tab or the one before with ] and [, and to one by its number, as a link does", () => {
     const onGo = vi.fn();
     const tabs: ContextTab[] = [
-      { key: "groups", route: groups, current: true },
+      { key: "groups", route: groups, current: "page" },
       { key: "drafts", route: drafts, current: false },
     ];
     window.history.replaceState(null, "", studioRouteToHash(groups));
@@ -452,5 +477,315 @@ describe("StudioShell", () => {
     fireEvent.click(screen.getByRole("button", { name: "Search or run…" }));
     expect(within(screen.getByRole("dialog")).queryByRole("option", { name: "Show or hide the sidebar" })).toBeNull();
     expect(within(screen.getByRole("dialog")).getByRole("option", { name: "Show the keyboard shortcuts" })).toBeInTheDocument();
+  });
+
+  describe("the aside", () => {
+    beforeEach(wideScreen);
+    const aside: AsidePane = {
+      label: "Outline",
+      content: (
+        <ul>
+          <li>
+            <a href={studioRouteToHash(drafts)}>Step 1.1</a>
+          </li>
+        </ul>
+      ),
+    };
+    const pane = () => document.getElementById(asideToggle().getAttribute("aria-controls")!)!;
+    const asideToggle = () => within(screen.getByText("The masthead").closest("header")!).getByRole("button", { name: "Outline" });
+
+    it("shows what the route has there beside the main content, a complementary region named for it, and hides it from its buttons or with Ctrl+\\, as the device remembers", () => {
+      const length = window.history.length;
+      const { unmount } = renderShell({ aside });
+      expect(pane()).toBe(screen.getByRole("complementary", { name: "Outline" }));
+      expect(within(pane()).getByRole("link", { name: "Step 1.1" })).toBeInTheDocument();
+      expect(asideToggle()).toHaveAttribute("aria-expanded", "true");
+      expect(asideToggle()).toHaveAttribute("aria-keyshortcuts", "Control+\\");
+      expect(root).toHaveAttribute("data-aside");
+      expect(pane()).toHaveStyle({ width: `${ASIDE_WIDTH.initial}px` });
+      fireEvent.click(within(pane()).getByRole("button", { name: "Hide" }));
+      expect(pane()).not.toBeVisible();
+      expect(asideToggle()).toHaveFocus();
+      expect(root).not.toHaveAttribute("data-aside");
+      document.body.focus();
+      expect(press("\\", { ctrlKey: true })).toBe(true);
+      expect(pane()).toBeVisible();
+      fireEvent.click(asideToggle());
+      expect(pane()).not.toBeVisible();
+      expect(window.history.length).toBe(length);
+      unmount();
+      expect(root).not.toHaveAttribute("data-aside");
+      renderShell({ aside });
+      expect(pane()).not.toBeVisible();
+    });
+
+    it("is as wide as its splitter makes it, which the device remembers", () => {
+      const { unmount } = renderShell({ aside });
+      const splitter = within(pane()).getByRole("separator", { name: "Width of the side pane" });
+      fireEvent.keyDown(splitter, { key: "End" });
+      expect(pane()).toHaveStyle({ width: `${ASIDE_WIDTH.max}px` });
+      unmount();
+      renderShell({ aside });
+      expect(within(pane()).getByRole("separator")).toHaveAttribute("aria-valuenow", String(ASIDE_WIDTH.max));
+    });
+
+    it("is passed over by F6 while it is hidden, and has no button or key without a pane to show", () => {
+      const { unmount } = renderShell({ aside });
+      screen.getByRole("main").focus();
+      press("F6");
+      expect(pane()).toHaveFocus();
+      fireEvent.click(asideToggle());
+      screen.getByRole("main").focus();
+      press("F6");
+      expect(screen.getByRole("complementary", { name: "Studio status" })).toHaveFocus();
+      unmount();
+      renderShell();
+      expect(screen.queryByRole("button", { name: "Outline" })).toBeNull();
+      document.body.focus();
+      expect(press("\\", { ctrlKey: true })).toBe(false);
+      expect(root).not.toHaveAttribute("data-aside");
+    });
+
+    it("is a drawer at the page's right on a screen not wide: closed at first, open with the focus in it, closed by a link, a press outside, Escape or Hide", () => {
+      vi.restoreAllMocks();
+      narrowScreen(true);
+      renderShell({ aside });
+      expect(pane()).not.toBeVisible();
+      expect(root).not.toHaveAttribute("data-aside");
+      document.body.focus();
+      press("\\", { ctrlKey: true });
+      expect(pane()).toBeVisible();
+      expect(pane()).toHaveFocus();
+      // A drawer has no width to set: it is the screen's.
+      expect(within(pane()).queryByRole("separator")).toBeNull();
+      expect(root).not.toHaveAttribute("data-aside");
+      fireEvent.click(within(pane()).getByRole("link", { name: "Step 1.1" }));
+      expect(pane()).not.toBeVisible();
+      fireEvent.click(asideToggle());
+      fireEvent.click(pane());
+      fireEvent.keyDown(pane(), { key: "Enter" });
+      expect(pane()).toBeVisible();
+      fireEvent.keyDown(pane(), { key: "Escape" });
+      expect(pane()).not.toBeVisible();
+      expect(asideToggle()).toHaveFocus();
+      fireEvent.click(asideToggle());
+      fireEvent.pointerDown(screen.getByRole("main"));
+      expect(pane()).not.toBeVisible();
+      fireEvent.click(asideToggle());
+      fireEvent.click(within(pane()).getByRole("button", { name: "Hide" }));
+      expect(pane()).not.toBeVisible();
+    });
+
+    it("stays open as a drawer while a menu of it, laid over the page, is used", () => {
+      vi.restoreAllMocks();
+      narrowScreen(true);
+      const onSelect = vi.fn();
+      function Menu() {
+        const [open, setOpen] = useState(false);
+        return (
+          <ActionsMenu label="Actions for Step 1.1" buttonClass="" open={open} onOpen={() => setOpen(true)} onClose={() => setOpen(false)}>
+            <MenuItem onSelect={onSelect}>Move down</MenuItem>
+          </ActionsMenu>
+        );
+      }
+      renderShell({ aside: { label: "Outline", content: <Menu /> } });
+      fireEvent.click(asideToggle());
+      fireEvent.click(within(pane()).getByRole("button", { name: "Actions for Step 1.1" }));
+      const item = screen.getByRole("menuitem", { name: "Move down" });
+      expect(pane()).not.toContainElement(item);
+      fireEvent.pointerDown(item);
+      fireEvent.click(item);
+      expect(onSelect).toHaveBeenCalled();
+      expect(pane()).toBeVisible();
+    });
+
+    it("leaves Escape and links in it alone beside the page", () => {
+      renderShell({ aside });
+      fireEvent.click(within(pane()).getByRole("link", { name: "Step 1.1" }));
+      fireEvent.keyDown(pane(), { key: "Escape" });
+      expect(pane()).toBeVisible();
+    });
+  });
+
+  describe("the dock", () => {
+    const dock = () => screen.getByRole("region", { name: "Panel" });
+    const dockButton = () => statusBar().getByRole("button", { name: "Panel" });
+    const problems: WorkspaceProblems = {
+      count: 3,
+      routes: [groups, drafts, drafts],
+      list: <p>The problems</p>,
+    };
+
+    it("is hidden at first, and shown from the status bar or with Ctrl+J, as the device remembers, without a history entry", () => {
+      const length = window.history.length;
+      const { unmount } = renderShell();
+      expect(screen.queryByRole("region", { name: "Panel" })).toBeNull();
+      expect(dockButton()).toHaveAttribute("aria-expanded", "false");
+      expect(dockButton()).toHaveAttribute("aria-keyshortcuts", "Control+J");
+      fireEvent.click(dockButton());
+      expect(dock()).toHaveAttribute("id", dockButton().getAttribute("aria-controls"));
+      expect(dockButton()).toHaveAttribute("aria-expanded", "true");
+      document.body.focus();
+      expect(press("j", { ctrlKey: true })).toBe(true);
+      expect(screen.queryByRole("region", { name: "Panel" })).toBeNull();
+      press("j", { ctrlKey: true });
+      expect(window.history.length).toBe(length);
+      unmount();
+      renderShell();
+      expect(dock()).toBeInTheDocument();
+      fireEvent.click(within(dock()).getByRole("button", { name: "Hide" }));
+      expect(screen.queryByRole("region", { name: "Panel" })).toBeNull();
+    });
+
+    it("has no button or key without an instance open", () => {
+      renderShell({ noInstance: true });
+      expect(statusBar().queryByRole("button", { name: "Panel" })).toBeNull();
+      document.body.focus();
+      expect(press("j", { ctrlKey: true })).toBe(false);
+    });
+
+    it("lists the problems of what is shown, its tab and the status bar counting them, the status bar's count opening it at them", () => {
+      renderShell({ problems });
+      const count = statusBar().getByRole("button", { name: "3 problems" });
+      fireEvent.click(count);
+      expect(count).toHaveAttribute("aria-controls", dock().id);
+      const tabs = within(dock()).getByRole("tablist", { name: "Panel" });
+      expect(within(tabs).getByRole("tab", { name: "Problems (3)" })).toHaveAttribute("aria-selected", "true");
+      expect(within(dock()).getByRole("tabpanel", { name: "Problems (3)" })).toHaveTextContent("The problems");
+      fireEvent.click(within(tabs).getByRole("tab", { name: "Activity" }));
+      expect(within(dock()).getByRole("tabpanel", { name: "Activity" })).toBeInTheDocument();
+      // Open already: at the problems again.
+      fireEvent.click(count);
+      expect(within(tabs).getByRole("tab", { name: "Problems (3)" })).toHaveAttribute("aria-selected", "true");
+    });
+
+    it("says so off a deck's or draft's screens, and while the problems are looked for, counts none", () => {
+      const { unmount } = renderShell();
+      fireEvent.click(dockButton());
+      expect(within(dock()).getByRole("tabpanel")).toHaveTextContent("A deck's or a draft's problems are listed on its screens.");
+      expect(within(dock()).getByRole("tab", { name: "Problems" })).toBeInTheDocument();
+      unmount();
+      renderShell({ problems: { ...problems, count: undefined } });
+      expect(statusBar().queryByRole("button", { name: /problems?$/ })).toBeNull();
+      expect(within(dock()).getByRole("tab", { name: "Problems" })).toBeInTheDocument();
+    });
+
+    it("counts none plainly, and some as a warning", () => {
+      const { unmount } = renderShell({ problems: { ...problems, count: 0, routes: [] } });
+      expect(statusBar().getByRole("button", { name: "0 problems" })).not.toHaveClass("studio-problem-count");
+      unmount();
+      renderShell({ problems });
+      expect(statusBar().getByRole("button", { name: "3 problems" })).toHaveClass("studio-problem-count");
+    });
+
+    it("goes from tab to tab with the arrow keys", () => {
+      renderShell();
+      fireEvent.click(dockButton());
+      const problemsTab = within(dock()).getByRole("tab", { name: "Problems" });
+      expect(problemsTab).toHaveAttribute("tabindex", "0");
+      expect(fireEvent.keyDown(problemsTab, { key: "ArrowRight" })).toBe(false);
+      const activityTab = within(dock()).getByRole("tab", { name: "Activity" });
+      expect(activityTab).toHaveAttribute("aria-selected", "true");
+      expect(activityTab).toHaveFocus();
+      expect(problemsTab).toHaveAttribute("tabindex", "-1");
+      fireEvent.keyDown(activityTab, { key: "ArrowLeft" });
+      expect(problemsTab).toHaveFocus();
+      expect(fireEvent.keyDown(problemsTab, { key: "Enter" })).toBe(true);
+    });
+
+    it("keeps what the screens did, the last first, and the draft's saves", () => {
+      renderShell({ draftUrl: DRAFT_URL });
+      fireEvent.click(dockButton());
+      fireEvent.click(within(dock()).getByRole("tab", { name: "Activity" }));
+      expect(within(dock()).getByRole("tabpanel")).toHaveTextContent("Nothing done yet since the Studio was opened.");
+      act(() => logActivity("Exported 2 decks."));
+      act(() => logActivity("Moved 3 cards."));
+      const editor = {};
+      act(() => report(editor, { waiting: 1, failed: false }));
+      act(() => report(editor, { waiting: 0, failed: false }));
+      act(() => report(editor, { waiting: 0, failed: true }));
+      // Each after its time.
+      const lines = within(dock()).getAllByRole("listitem").map((line) => line.textContent!.slice(line.querySelector("time")!.textContent!.length + 1));
+      expect(lines).toEqual(["Last change not saved", "Draft saved", "Moved 3 cards.", "Exported 2 decks."]);
+      expect(within(dock()).getAllByRole("listitem")[0]!.querySelector("time")).toHaveAttribute("datetime");
+    });
+
+    it("keeps the last lines only", () => {
+      renderShell();
+      fireEvent.click(dockButton());
+      fireEvent.click(within(dock()).getByRole("tab", { name: "Activity" }));
+      act(() => {
+        for (let n = 0; n <= ACTIVITY_LIMIT; n++) logActivity(`Line ${n}`);
+      });
+      const lines = within(dock()).getAllByRole("listitem");
+      expect(lines).toHaveLength(ACTIVITY_LIMIT);
+      expect(lines[0]).toHaveTextContent(`Line ${ACTIVITY_LIMIT}`);
+    });
+
+    it("is as tall as its splitter makes it", () => {
+      renderShell();
+      fireEvent.click(dockButton());
+      fireEvent.keyDown(within(dock()).getByRole("separator", { name: "Height of the panel" }), { key: "Home" });
+      expect(dock()).toHaveStyle({ height: `${DOCK_HEIGHT.min}px` });
+    });
+
+    it("goes to the next problem's field with F8 and the one before with Shift+F8, as a link does, from a field too", () => {
+      const onGo = vi.fn((route: StudioRoute) => window.history.replaceState(null, "", studioRouteToHash(route)));
+      const { unmount } = renderShell({ problems, onGo, filter: true });
+      document.body.focus();
+      expect(press("F8")).toBe(true);
+      expect(onGo).toHaveBeenLastCalledWith(groups);
+      press("F8");
+      expect(onGo).toHaveBeenLastCalledWith(drafts);
+      // Two problems in one place: the second is gone to, though the page stays.
+      onGo.mockClear();
+      press("F8");
+      expect(onGo).not.toHaveBeenCalled();
+      screen.getByRole("searchbox", { name: "Filter" }).focus();
+      expect(press("F8")).toBe(true);
+      expect(onGo).toHaveBeenLastCalledWith(groups);
+      press("F8", { shiftKey: true });
+      expect(onGo).toHaveBeenLastCalledWith(drafts);
+      unmount();
+      renderShell({ onGo });
+      document.body.focus();
+      expect(press("F8")).toBe(false);
+    });
+
+    it("is among the regions F6 goes to, after the main content", () => {
+      renderShell();
+      fireEvent.click(dockButton());
+      screen.getByRole("main").focus();
+      press("F6");
+      expect(dock()).toHaveFocus();
+      press("F6");
+      expect(screen.getByRole("complementary", { name: "Studio status" })).toHaveFocus();
+    });
+
+    it("is shown or hidden from the palette, as the aside is", () => {
+      wideScreen();
+      renderShell({ aside: { label: "Outline", content: <p>The outline</p> } });
+      const choose = (name: string) => {
+        fireEvent.click(screen.getByRole("button", { name: "Search or run…" }));
+        fireEvent.click(within(screen.getByRole("dialog", { name: "Quick open" })).getByRole("option", { name }));
+      };
+      choose("Show or hide the panel: problems and activity");
+      expect(dock()).toBeInTheDocument();
+      expect(screen.getByRole("complementary", { name: "Outline" })).toBeVisible();
+      choose("Show or hide the outline");
+      expect(screen.getByRole("button", { name: "Outline" })).toHaveAttribute("aria-expanded", "false");
+    });
+  });
+
+  it("gives the drawer a Close of its own, which the header's button under it cannot be", () => {
+    const screenSize = narrowScreen();
+    renderShell();
+    fireEvent.click(toggle());
+    fireEvent.click(within(sidebar()).getByRole("button", { name: "Close" }));
+    expect(sidebar()).not.toBeVisible();
+    expect(toggle()).toHaveFocus();
+    // Beside the page, the sidebar has none.
+    screenSize.widen();
+    expect(within(sidebar()).queryByRole("button", { name: "Close" })).toBeNull();
   });
 });

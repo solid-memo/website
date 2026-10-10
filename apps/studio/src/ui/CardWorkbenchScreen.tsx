@@ -17,7 +17,7 @@ import { CardRowBack, CardRowFront } from "@solid-memo/ui/CardFace";
 import type { ReadOnlyReason } from "@solid-memo/ui/dataCheck";
 import { cardName } from "@solid-memo/ui/DataText";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
-import { useI18n, type ErrorText } from "@solid-memo/ui/i18n";
+import { useI18n, type ErrorText, type I18n } from "@solid-memo/ui/i18n";
 import { paginate, Pager } from "@solid-memo/ui/Pager";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
 import { RetiredTag } from "@solid-memo/ui/RetiredCards";
@@ -26,6 +26,7 @@ import type { LapseIndex } from "@solid-memo/domain/cardHistory";
 import { CardBulkActions, type ReviewEdit } from "./CardBulkActions";
 import { ReadOnlyNotice } from "./ReadOnly";
 import type { CardTransfer } from "./TransferCardsDialog";
+import { useActivity } from "./shell/activity";
 import { shortcutOf } from "./shell/shortcuts";
 import { useScreenKeys } from "./shell/useShortcuts";
 
@@ -190,6 +191,24 @@ export function CardWorkbenchScreen({
   const allShown = shown.length > 0 && shown.every((row) => chosen.has(row.card.url));
   const toggle = (urls: readonly string[], on: boolean) =>
     setChosen((all) => new Set(on ? [...all, ...urls] : [...all].filter((url) => !urls.includes(url))));
+  const editSaid =
+    lastEdit === null
+      ? ""
+      : t(`studio.cardBulk.done.${doneKey(lastEdit.edit)}`, { count: lastEdit.plan.save.length + lastEdit.plan.remove.length }) +
+        (lastEdit.plan.skipped.length > 0 ? ` ${t("studio.cardBulk.skipped", { count: lastEdit.plan.skipped.length })}` : "");
+  const reviewSaid =
+    reviewDone === null
+      ? ""
+      : reviewDone.count === 0
+        ? t("studio.cardBulk.notStudied")
+        : reviewDone.edit.kind === "reset"
+          ? t("studio.cardBulk.done.reset", { count: reviewDone.count })
+          : t("studio.cardBulk.done.reschedule", { count: reviewDone.count, due: formatDate(reviewDone.edit.due) });
+  // The Studio's activity keeps what each status line said.
+  useActivity(lastEdit, () => editSaid);
+  useActivity(undone, () => t("studio.cardBulk.undone"));
+  useActivity(reviewDone, () => reviewSaid);
+  useActivity(transferDone, () => transferText(transferDone!, { t, readerText }));
   /** A filter changed: from the first page. */
   const filter = (change: Partial<CardQuery>) => onQuery({ ...query, ...change, page: 1 });
   const choice = <K extends "lang" | "state" | "has">(key: K, value: string) => {
@@ -266,28 +285,15 @@ export function CardWorkbenchScreen({
       <ReadOnlyNotice reason={readOnly} subject="deck" healthHref={healthHref} />
       {lastEdit !== null && (
         <div class="studio-selection">
-          <p role="status">
-            {t(`studio.cardBulk.done.${doneKey(lastEdit.edit)}`, {
-              count: lastEdit.plan.save.length + lastEdit.plan.remove.length,
-            })}
-            {lastEdit.plan.skipped.length > 0 && ` ${t("studio.cardBulk.skipped", { count: lastEdit.plan.skipped.length })}`}
-          </p>
+          <p role="status">{editSaid}</p>
           <button type="button" disabled={busy || readOnly !== null} onClick={onUndo}>
             {t("studio.cardBulk.undo")}
           </button>
         </div>
       )}
       {undone && <p role="status">{t("studio.cardBulk.undone")}</p>}
-      {reviewDone !== null && (
-        <p role="status">
-          {reviewDone.count === 0
-            ? t("studio.cardBulk.notStudied")
-            : reviewDone.edit.kind === "reset"
-              ? t("studio.cardBulk.done.reset", { count: reviewDone.count })
-              : t("studio.cardBulk.done.reschedule", { count: reviewDone.count, due: formatDate(reviewDone.edit.due) })}
-        </p>
-      )}
-      {transferDone !== null && <TransferStatus made={transferDone} />}
+      {reviewDone !== null && <p role="status">{reviewSaid}</p>}
+      {transferDone !== null && <p role="status">{transferText(transferDone, { t, readerText })}</p>}
       <ErrorMessage error={error} />
       {total === 0 ? (
         <p>{t("studio.cards.empty")}</p>
@@ -458,8 +464,7 @@ export function CardWorkbenchScreen({
 }
 
 /** What a move or copy did: how many cards went where, how many got a new id, how many were there already. */
-function TransferStatus({ made: { transfer, plan } }: { made: TransferMade }) {
-  const { t, readerText } = useI18n();
+function transferText({ transfer, plan }: TransferMade, { t, readerText }: Pick<I18n, "t" | "readerText">): string {
   const renamed = plan.cards.filter((card) => card.to !== card.from).length;
   const present = plan.cards.filter((card) => card.present).length;
   const parts = [
@@ -471,5 +476,5 @@ function TransferStatus({ made: { transfer, plan } }: { made: TransferMade }) {
     ...(present > 0 ? [t("studio.cardBulk.transfer.present", { count: present })] : []),
     ...(plan.missing.length > 0 ? [t("studio.cardBulk.skipped", { count: plan.missing.length })] : []),
   ];
-  return <p role="status">{parts.join(" ")}</p>;
+  return parts.join(" ");
 }

@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen, within } from "@testing-library/preact";
+import { problem, type ReleaseProblem } from "@solid-memo/domain/release/problems";
 import { applyDraftChanges, type DraftChange, type DraftRefusal, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { DraftOutline } from "./DraftOutline";
 import { courseDraft } from "../test/fixtures";
@@ -8,7 +9,19 @@ type Edit = (changes: DraftChange[]) => DraftRefusal | null;
 
 function renderOutline(
   draft: ReleaseDraft = courseDraft(),
-  { readOnly = false, onEdit = vi.fn<Edit>(() => null), problems = new Map<string, number>() } = {},
+  {
+    readOnly = false,
+    onEdit = vi.fn<Edit>(() => null),
+    problems = new Map<string, ReleaseProblem[]>(),
+    badgeHref,
+    currentKey,
+  }: {
+    readOnly?: boolean;
+    onEdit?: Edit;
+    problems?: ReadonlyMap<string, ReleaseProblem[]>;
+    badgeHref?: (problem: ReleaseProblem) => string;
+    currentKey?: string;
+  } = {},
 ) {
   const props = {
     readOnly,
@@ -17,11 +30,17 @@ function renderOutline(
     questionHref: (id: string) => `#/question/${id}`,
     checkHref: "#/check",
     problems,
+    ...(badgeHref === undefined ? {} : { badgeHref }),
+    ...(currentKey === undefined ? {} : { currentKey }),
     onEdit,
   };
   const view = render(<DraftOutline draft={draft} {...props} />);
   return { onEdit, rerender: (next: ReleaseDraft) => view.rerender(<DraftOutline draft={next} {...props} />) };
 }
+
+/** So many problems of a subject, by its id. */
+const problemsOf = (id: string, count: number) =>
+  Array.from({ length: count }, (_, at) => problem(`${courseDraft().url}#${id}`, { code: at === 0 ? "noBack" : "unshaped", params: {} }));
 
 const status = () => document.querySelector(".draft-outline [role=status]")!;
 const openMenu = (name: string) => fireEvent.click(screen.getByRole("button", { name: `Actions for ${name}` }));
@@ -44,11 +63,32 @@ describe("DraftOutline", () => {
   });
 
   it("counts the problems the release check finds in a chapter, step or question, linking to the check", () => {
-    renderOutline(courseDraft(), { problems: new Map([["ch-apps", 1], ["ch-pods-2", 2], ["q-pods-1a", 3]]) });
+    renderOutline(courseDraft(), {
+      problems: new Map([
+        ["ch-apps", problemsOf("ch-apps", 1)],
+        ["ch-pods-2", problemsOf("ch-pods-2", 2)],
+        ["q-pods-1a", problemsOf("q-pods-1a", 3)],
+      ]),
+    });
     expect(screen.getByRole("link", { name: "1 problem in Apps" })).toHaveAttribute("href", "#/check");
     expect(screen.getByRole("link", { name: "2 problems in Step 1.2" })).toHaveAttribute("href", "#/check");
     expect(screen.getByRole("link", { name: "3 problems in What holds data?" })).toHaveAttribute("href", "#/check");
     expect(screen.queryByRole("link", { name: /problems? in Pods/ })).toBeNull();
+  });
+
+  it("links a badge to where its first problem is fixed, when it can", () => {
+    renderOutline(courseDraft(), {
+      problems: new Map([["q-pods-1a", problemsOf("q-pods-1a", 2)]]),
+      badgeHref: (found) => `#/fix/${found.code}`,
+    });
+    expect(screen.getByRole("link", { name: "2 problems in What holds data?" })).toHaveAttribute("href", "#/fix/noBack");
+  });
+
+  it("marks the chapter, step or question the page shown edits", () => {
+    renderOutline(courseDraft(), { currentKey: "ch-pods-1" });
+    expect(screen.getByRole("link", { name: "Step 1.1" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "Pods" })).not.toHaveAttribute("aria-current");
+    expect(screen.getByRole("link", { name: "What holds data?" })).not.toHaveAttribute("aria-current");
   });
 
   it("names a chapter of no title by its id", () => {

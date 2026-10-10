@@ -1,4 +1,4 @@
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { ReleaseProblem } from "@solid-memo/domain/release/problems";
 import { readWhole, type CheckPolicy, type ReleaseCheck } from "@solid-memo/domain/release/releaseCheck";
@@ -34,15 +34,18 @@ export function revisionOf(draft: ReleaseDraft): number {
 
 /**
  * The domain's rules of the draft for the policy, the shapes left out; the
- * last version's while a newer one is checked. A check with a part unread
- * is stale at once, so it is made again when its screen opens again or
- * the window is focused.
+ * last version's while a newer one is checked (not another draft's, nor
+ * another policy's: the workspace's check goes from draft to draft). A
+ * check with a part unread is stale at once, so it is made again when its
+ * screen opens again or the window is focused. No draft (null), no check.
  */
-export function useReleaseCheck(useCases: UseCases, draft: ReleaseDraft, policy: CheckPolicy) {
+export function useReleaseCheck(useCases: UseCases, draft: ReleaseDraft | null, policy: CheckPolicy) {
   return useQuery<ReleaseCheck>({
-    queryKey: ["releaseCheck", draft.url, policy, revisionOf(draft)],
-    queryFn: () => useCases.checkReleaseDraft(draft, markdownCheck, policy),
-    placeholderData: keepPreviousData,
+    queryKey: ["releaseCheck", draft?.url, policy, draft === null ? 0 : revisionOf(draft)],
+    queryFn: () => useCases.checkReleaseDraft(draft!, markdownCheck, policy),
+    enabled: draft !== null,
+    placeholderData: (previous, previousQuery) =>
+      previousQuery?.queryKey[1] === draft?.url && previousQuery?.queryKey[2] === policy ? previous : undefined,
     staleTime: (query) => (query.state.data === undefined || readWhole(query.state.data) ? Infinity : 0),
   });
 }

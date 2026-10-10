@@ -245,7 +245,8 @@ export class DraftEditor extends Screen {
       await backField.fill(back);
       await chooseLanguageOf(this.app, backField, "en");
       await this.page.getByRole("button", { name: this.t("studio.draftEdit.addQuestion") }).click();
-      await expect(this.page.getByRole("link", { name: front, exact: true })).toBeVisible();
+      // The step's own link: the outline beside it lists the question too.
+      await expect(this.page.getByRole("main").getByRole("link", { name: front, exact: true })).toBeVisible();
       await this.expectSaved();
     });
   }
@@ -253,7 +254,7 @@ export class DraftEditor extends Screen {
   /** Opens a question from the step open: its editor, with its preview as the course asks it. */
   async openQuestion(front: string): Promise<void> {
     await this.intent(`Open the question ${front}`, async () => {
-      await this.page.getByRole("link", { name: front, exact: true }).click();
+      await this.page.getByRole("main").getByRole("link", { name: front, exact: true }).click();
       await expect(this.page.getByRole("heading", { level: 2, name: front })).toBeVisible();
       await expect(this.page.getByRole("heading", { name: this.t("studio.question.preview") })).toBeVisible();
     });

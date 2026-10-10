@@ -23,24 +23,32 @@ const solid: ReleaseDraftSummary = {
 
 function renderContainer(useCases: UseCases, queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })) {
   const invalidate = vi.spyOn(queryClient, "invalidateQueries");
+  const onCreated = vi.fn();
   render(
     <QueryClientProvider client={queryClient}>
-      <DraftsContainer useCases={useCases} instance={instanceA} healthHref="#/health" releasesHref="#/releases" draftHref={(draft) => `#/draft/${draft.name}`} />
+      <DraftsContainer
+        useCases={useCases}
+        instance={instanceA}
+        healthHref="#/health"
+        releasesHref="#/releases"
+        draftHref={(draft) => `#/draft/${draft.name}`}
+        onCreated={onCreated}
+      />
     </QueryClientProvider>,
   );
-  return { invalidate };
+  return { invalidate, onCreated };
 }
 
 afterEach(() => vi.unstubAllGlobals());
 
 describe("DraftsContainer", () => {
-  it("lists the instance's drafts, makes a new one and reads them afresh", async () => {
+  it("lists the instance's drafts, makes a new one and reads them afresh, staying to offer the next version of the release it is a copy of", async () => {
     const useCases = makeUseCasesFake({
       listDecks: vi.fn(async () => [kanji]),
       listReleaseDrafts: vi.fn(async () => [solid]),
       createReleaseDraft: vi.fn(async () => ({ draft: { ...solid, name: "kanji", title: { en: "Kanji N5" } }, basedOn: "https://x.example/v1.ttl" })),
     });
-    const { invalidate } = renderContainer(useCases);
+    const { invalidate, onCreated } = renderContainer(useCases);
     expect(screen.getByText("Reading the drafts…")).toBeInTheDocument();
     expect(await screen.findByRole("rowheader", { name: "Solid" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("radio", { name: "A deck of this instance" }));
@@ -49,6 +57,7 @@ describe("DraftsContainer", () => {
     expect(useCases.createReleaseDraft).toHaveBeenCalledWith(instanceA.url, { kind: "fromDeck", deck: kanji });
     expect(invalidate).toHaveBeenCalledWith({ queryKey: draftsKey(instanceA.url) });
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["validation", instanceA.url] });
+    expect(onCreated).not.toHaveBeenCalled();
   });
 
   it("deletes a draft once confirmed, and says why one could not be made or deleted", async () => {
@@ -73,7 +82,7 @@ describe("DraftsContainer", () => {
     expect(await screen.findByText(/Solid Memo cannot read a release at https:\/\/x.example\//)).toBeInTheDocument();
   });
 
-  it("forgets what was read of a draft deleted, so a new draft at its URL is read afresh", async () => {
+  it("forgets what was read of a draft deleted, so a new draft at its URL is read afresh, and opens the new one", async () => {
     vi.stubGlobal("confirm", () => true);
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     const useCases = makeUseCasesFake({
@@ -82,7 +91,7 @@ describe("DraftsContainer", () => {
       createReleaseDraft: vi.fn(async () => ({ draft: solid })),
     });
     queryClient.setQueryData(draftKey(solid.url), courseDraft());
-    renderContainer(useCases, queryClient);
+    const { onCreated } = renderContainer(useCases, queryClient);
     fireEvent.click(await screen.findByRole("button", { name: "Delete the draft Solid, version 1" }));
     expect(await screen.findByText("Deleted the draft Solid, version 1.")).toBeInTheDocument();
     expect(queryClient.getQueryData(draftKey(solid.url))).toBeUndefined();
@@ -92,6 +101,7 @@ describe("DraftsContainer", () => {
     fireEvent.click(screen.getByRole("button", { name: "Create the draft" }));
     expect(await screen.findByText("Created the draft Solid, version 1.")).toBeInTheDocument();
     expect(queryClient.getQueryData(draftKey(solid.url))).toBeUndefined();
+    await waitFor(() => expect(onCreated).toHaveBeenCalledWith({ draft: solid }));
   });
 
   it("says which draft it is deleting while it does", async () => {

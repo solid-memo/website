@@ -78,7 +78,7 @@ describe("the palette's entries", () => {
   });
 
   it("number only the first nine tabs, and have no section of an instance on the instances", () => {
-    const tabs = Array.from({ length: 10 }, (_, n) => ({ key: "cards", route: { screen: "draft", draftUrl: `${DRAFT_URL}${n}` } as StudioRoute, current: false }));
+    const tabs = Array.from({ length: 10 }, (_, n) => ({ key: "cards", route: { screen: "draft", draftUrl: `${DRAFT_URL}${n}` } as StudioRoute, current: false as const }));
     const commands = buildCommands({ ...sources, instanceUrl: null, tabs, decks: [], drafts: [], cards: null, commands: [] }, en);
     expect(commands.filter((command) => command.group === "tabs").map((command) => command.keys)).toEqual(["1", "2", "3", "4", "5", "6", "7", "8", "9", undefined]);
     expect(entries(commands.filter((command) => command.group === "sections"))).toEqual([["sections", "All instances", hash({ screen: "instances" }), "g i"]]);

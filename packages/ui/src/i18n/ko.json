@@ -1367,7 +1367,9 @@
       "noDrafts": "초안이 없어요.",
       "version": "v{version}",
       "switchInstance": "인스턴스 전환: {instance}",
-      "allInstances": "모든 인스턴스"
+      "allInstances": "모든 인스턴스",
+      "resizeAside": "옆 창 너비",
+      "hide": "숨기기"
     },
     "tabs": {
       "deck": "덱",
@@ -1388,14 +1390,14 @@
       "palette": "검색, 이동 또는 명령 실행",
       "button": "? 키",
       "heading": "단축키",
-      "chords": "g d처럼 나란히 표시된 키는 차례로 눌러요. 입력란에 입력하는 동안에는 Ctrl+K, F6, Shift+F6만 작동해요.",
+      "chords": "g d처럼 나란히 표시된 키는 차례로 눌러요. 입력란에 입력하는 동안에는 Ctrl+K, F6, Shift+F6, F8, Shift+F8만 작동해요.",
       "scope": {
         "studio": "스튜디오 어디서나",
         "cards": "카드 작업대에서"
       },
       "help": "이 단축키 보기",
       "filter": "화면의 검색 또는 필터로 이동",
-      "nextRegion": "다음 영역으로 이동: 머리글, 사이드바, 본문, 상태 표시줄",
+      "nextRegion": "다음 영역으로 이동: 머리글, 사이드바, 본문, 개요, 패널, 상태 표시줄",
       "previousRegion": "이전 영역으로 이동",
       "go": {
         "decks": "덱으로 이동",
@@ -1408,6 +1410,10 @@
         "instances": "인스턴스로 이동"
       },
       "toggleSidebar": "사이드바 보이기 또는 숨기기",
+      "toggleAside": "개요 보이기 또는 숨기기",
+      "toggleDock": "패널 보이기 또는 숨기기: 문제와 활동",
+      "nextProblem": "다음 문제의 입력란으로 이동",
+      "previousProblem": "이전 문제의 입력란으로 이동",
       "previousTab": "덱이나 초안의 이전 탭으로 이동",
       "nextTab": "덱이나 초안의 다음 탭으로 이동",
       "tab": "번호로 덱이나 초안의 탭으로 이동",
@@ -1415,6 +1421,23 @@
       "up": "이전 카드",
       "select": "카드 선택",
       "open": "카드 열기"
+    },
+    "dock": {
+      "label": "패널",
+      "problems": "문제",
+      "problemsCount": "문제 ({count})",
+      "activity": "활동",
+      "resize": "패널 높이",
+      "noActivity": "Studio를 연 뒤로 아직 한 일이 없어요.",
+      "noProblemsHere": "덱이나 초안의 문제는 그 화면에서 보여요.",
+      "checking": "문제를 찾는 중…",
+      "none": "찾은 문제가 없어요.",
+      "deckData": {
+        "one": "덱 데이터의 문제 {count}개",
+        "other": "덱 데이터의 문제 {count}개"
+      },
+      "unstated": "{place}: 언어가 지정되지 않았어요",
+      "duplicate": "{place}: 다른 카드와 내용이 같아요"
     },
     "palette": {
       "button": "검색 또는 실행…",

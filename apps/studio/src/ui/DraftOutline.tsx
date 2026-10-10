@@ -5,6 +5,7 @@ import { isMarkdown } from "@solid-memo/domain/deck";
 import type { LangText } from "@solid-memo/domain/langText";
 import { isPublished, questionsOfStep } from "@solid-memo/domain/release/courseIds";
 import { draftCardOf, draftOutline, outlineMove } from "@solid-memo/domain/release/draftOutline";
+import type { ReleaseProblem } from "@solid-memo/domain/release/problems";
 import type { DraftChange, DraftRefusal, ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { ActionsMenu, MenuItem, MenuSeparator } from "@solid-memo/ui/ActionsMenu";
 import { cardName, plainDataText } from "@solid-memo/ui/DataText";
@@ -39,7 +40,8 @@ export const OUTLINE_RULES: DropRules = {
  * confirms; a published one is retired, never deleted. Nothing moves
  * while the draft cannot be changed (`readOnly`). A chapter, step or
  * question the release check finds problems in has a badge counting
- * them, a link to the check.
+ * them, a link to the check, or (`badgeHref`) to where the first of them
+ * is fixed. The one the page shown edits (`currentKey`) is marked.
  */
 export function DraftOutline({
   draft,
@@ -49,6 +51,8 @@ export function DraftOutline({
   questionHref,
   checkHref,
   problems,
+  badgeHref,
+  currentKey = null,
   onEdit,
 }: {
   draft: ReleaseDraft;
@@ -57,12 +61,20 @@ export function DraftOutline({
   stepHref: (step: string) => string;
   questionHref: (card: string) => string;
   checkHref: string;
-  /** How many problems the release check finds in each subject, by its id. */
-  problems: ReadonlyMap<string, number>;
+  /** The problems the release check finds in each subject, by its id (outlineProblems). */
+  problems: ReadonlyMap<string, readonly ReleaseProblem[]>;
+  /** Where a badge links: where its first problem is fixed; the check, without. */
+  badgeHref?: (problem: ReleaseProblem) => string;
+  /** The chapter's, step's or question's id the page shown edits, if any. */
+  currentKey?: string | null;
   onEdit: (changes: DraftChange[]) => DraftRefusal | null;
 }) {
   const { t, readerText } = useI18n();
-  const badge = (id: string, name: string) => <ProblemBadge count={problems.get(id) ?? 0} name={name} href={checkHref} />;
+  const badge = (id: string, name: string) => {
+    const found = problems.get(id);
+    return found === undefined ? null : <ProblemBadge count={found.length} name={name} href={badgeHref?.(found[0]!) ?? checkHref} />;
+  };
+  const current = (key: string) => (key === currentKey ? "page" : undefined);
   const listRef = useRef<HTMLDivElement>(null);
   const [menu, setMenu] = useState<string | null>(null);
   const [announcement, setAnnouncement] = useState("");
@@ -180,7 +192,7 @@ export function DraftOutline({
                     data-row-key={chapter.key}
                     style="--depth: 0"
                   >
-                    <a class="deck-open" href={chapterHref(chapter.key)} draggable={false}>
+                    <a class="deck-open" href={chapterHref(chapter.key)} aria-current={current(chapter.key)} draggable={false}>
                       <ReaderText text={chapter.title} />
                     </a>
                     {badge(chapter.key, name)}
@@ -205,7 +217,7 @@ export function DraftOutline({
                             style="--depth: 1"
                           >
                             <div class="outline-step-text">
-                              <a class="deck-open" href={stepHref(step.key)} draggable={false}>
+                              <a class="deck-open" href={stepHref(step.key)} aria-current={current(step.key)} draggable={false}>
                                 {label}
                               </a>
                               {badge(step.key, label)}
@@ -216,7 +228,7 @@ export function DraftOutline({
                                   const question = found === null ? card : cardName({ ...found.content, id: card }, readerText);
                                   return (
                                     <li key={card}>
-                                      <a href={questionHref(card)} draggable={false}>
+                                      <a href={questionHref(card)} aria-current={current(card)} draggable={false}>
                                         {question}
                                       </a>
                                       {badge(card, question)}
@@ -252,10 +264,10 @@ export function DraftOutline({
   );
 }
 
-/** How many problems the release check finds in a subject, linking to the check; nothing for none. */
+/** How many problems the release check finds in a subject, linking to the check or to the first one's field. */
 function ProblemBadge({ count, name, href }: { count: number; name: string; href: string }) {
   const { t } = useI18n();
-  return count === 0 ? null : (
+  return (
     <a class="studio-badge studio-badge-warning" href={href} draggable={false}>
       {t("studio.check.badge", { count })}
       <span class="visually-hidden"> {t("studio.check.badgeOf", { name })}</span>

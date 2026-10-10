@@ -19,6 +19,7 @@ import { LoadingDots } from "@solid-memo/ui/Loading";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
 import { DeckBulkActions, type MoveLock } from "./DeckBulkActions";
 import { ReadOnlyNotice } from "./ReadOnly";
+import { useActivityLog } from "./shell/activity";
 
 /** One figure of a deck's row: a number, or why there is none yet. */
 export type Count = number | "loading" | "unreadable";
@@ -130,6 +131,7 @@ export function DeckTableScreen({
   const [chosen, setChosen] = useState<ReadonlySet<string>>(new Set());
   const [busy, setBusy] = useState(false);
   const [announcement, setAnnouncement] = useState("");
+  const log = useActivityLog();
 
   if (rows.length === 0) {
     return (
@@ -152,7 +154,7 @@ export function DeckTableScreen({
   const toggle = (urls: readonly string[], on: boolean) =>
     setChosen((all) => new Set(on ? [...all, ...urls] : [...all].filter((url) => !urls.includes(url))));
 
-  /** Makes a bulk action; once it is done, says so (and, after a deletion, nothing stays selected). */
+  /** Makes a bulk action; once it is done, says so, the Studio's activity too (and, after a deletion, nothing stays selected). */
   async function bulk(made: Promise<boolean>, said: string, clear = false): Promise<boolean> {
     setBusy(true);
     setAnnouncement("");
@@ -160,6 +162,7 @@ export function DeckTableScreen({
     setBusy(false);
     if (ok) {
       setAnnouncement(said);
+      log(said);
       if (clear) setChosen(new Set());
     }
     return ok;

@@ -32,20 +32,31 @@
 
 /*
  * The page is a grid the window's height: the header across it; the
- * sidebar, then the main content, each scrolling on its own; and at the
- * foot the status bar beside the site's footer. Nothing is capped to a
- * column. The sidebar hidden, the main content takes its room.
+ * sidebar, then the main content, then the aside (while it is beside it,
+ * data-aside), each scrolling on its own; the dock under the main content
+ * and the aside; and at the foot the status bar beside the site's footer.
+ * Nothing is capped to a column. The sidebar or the aside hidden, the
+ * main content takes its room; the dock hidden, its row is empty.
  */
 :root[data-surface="studio"] #app {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
   grid-template-areas:
-    "header header header"
-    "sidebar main main"
-    "status status footer";
+    "header header header header"
+    "sidebar main main main"
+    "sidebar dock dock dock"
+    "status status footer footer";
   height: 100dvh;
   min-height: 0;
+}
+
+:root[data-surface="studio"][data-aside] #app {
+  grid-template-areas:
+    "header header header header"
+    "sidebar main main aside"
+    "sidebar dock dock dock"
+    "status status footer footer";
 }
 
 :root[data-surface="studio"] header.site-header {
@@ -58,6 +69,14 @@
 
 :root[data-surface="studio"] main.workspace {
   grid-area: main;
+}
+
+:root[data-surface="studio"] .studio-aside {
+  grid-area: aside;
+}
+
+:root[data-surface="studio"] .studio-dock {
+  grid-area: dock;
 }
 
 :root[data-surface="studio"] .studio-status-bar {
@@ -74,14 +93,15 @@
   margin: 0;
 }
 
-/* Narrow: the site's footer under the status bar, and the sidebar a drawer over the page (NARROW in workspaceLayout.ts). */
+/* Narrow: the dock, the status bar and the site's footer under the main content, and the sidebar a drawer over the page (NARROW in workspaceLayout.ts). */
 @media (max-width: 48rem) {
   :root[data-surface="studio"] #app {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    grid-template-rows: auto minmax(0, 1fr) auto auto auto;
     grid-template-areas:
       "header"
       "main"
+      "dock"
       "status"
       "footer";
   }
@@ -165,6 +185,11 @@
   order: 2;
   margin: 0;
   font-size: 0.875rem;
+}
+
+/* The aside's button, at the header's end, as the sidebar's is at its start. */
+:root[data-surface="studio"] .studio-aside-toggle {
+  order: 3;
 }
 
 @media (max-width: 48rem) {
@@ -636,4 +661,189 @@
   border-radius: 4px;
   font-family: inherit;
   font-size: 0.85em;
+}
+
+/* The sidebar as a drawer: its own Close, over the header's button. */
+:root[data-surface="studio"] .studio-drawer-close {
+  display: block;
+  margin: 0 0 0.5rem auto;
+  min-height: var(--s-control-h);
+  padding: 0.15rem 0.6rem;
+  font-size: var(--s-font-size);
+}
+
+/*
+ * The aside, right of the main content: its splitter on its left edge,
+ * its name and Hide, then its content, which scrolls on its own.
+ */
+:root[data-surface="studio"] .studio-aside {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  font-size: var(--s-font-size);
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+}
+
+:root[data-surface="studio"] .studio-aside[hidden] {
+  display: none;
+}
+
+/* Not wide: a drawer over the page, at its right (MEDIUM in workspaceLayout.ts). */
+@media (max-width: 64rem) {
+  :root[data-surface="studio"] .studio-aside {
+    position: fixed;
+    inset: 0 0 0 auto;
+    z-index: 20;
+    width: min(20rem, 85vw);
+    box-shadow: var(--shadow);
+  }
+}
+
+:root[data-surface="studio"] :is(.studio-aside-bar, .studio-dock-bar) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.25rem 0.5rem 0.25rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+:root[data-surface="studio"] .studio-aside-bar p {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+:root[data-surface="studio"] :is(.studio-aside, .studio-dock) button {
+  min-height: var(--s-control-h);
+  padding: 0.15rem 0.6rem;
+  font-size: var(--s-font-size);
+  border-radius: var(--radius-sm);
+  box-shadow: none;
+}
+
+:root[data-surface="studio"] .studio-aside-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 0.5rem 0.75rem;
+  overflow: auto;
+}
+
+/* What the page shown edits, in the aside's outline. */
+:root[data-surface="studio"] .studio-aside a[aria-current="page"] {
+  font-weight: 600;
+  text-decoration: none;
+  background: var(--primary-soft);
+  border-radius: var(--radius-sm);
+}
+
+/* A splitter: a thin bar to drag, on the pane's edge, marked as the focus or the pointer is on it. */
+:root[data-surface="studio"] .studio-splitter {
+  position: absolute;
+  z-index: 2;
+  background: transparent;
+  touch-action: none;
+}
+
+:root[data-surface="studio"] .studio-splitter-vertical {
+  inset: 0 auto 0 -3px;
+  width: 6px;
+  cursor: col-resize;
+}
+
+:root[data-surface="studio"] .studio-splitter-horizontal {
+  inset: -3px 0 auto 0;
+  height: 6px;
+  cursor: row-resize;
+}
+
+:root[data-surface="studio"] .studio-splitter:is(:hover, :focus-visible) {
+  background: var(--primary);
+  outline: none;
+}
+
+/*
+ * The dock, under the main content: its splitter on its top edge, its
+ * tabs and Hide, then the tab shown, which scrolls on its own. A pane of
+ * the page, not a card on it, though it is a section.
+ */
+:root[data-surface="studio"] .studio-dock {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  font-size: var(--s-font-size);
+  background: var(--surface);
+  border: none;
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+:root[data-surface="studio"] .studio-dock [role="tablist"] {
+  display: flex;
+  gap: 0.25rem;
+}
+
+:root[data-surface="studio"] .studio-dock [role="tab"] {
+  color: var(--text-muted);
+  background: none;
+  border: 1px solid transparent;
+}
+
+:root[data-surface="studio"] .studio-dock [role="tab"][aria-selected="true"] {
+  color: var(--text);
+  background: var(--primary-soft);
+  border-color: var(--primary);
+}
+
+:root[data-surface="studio"] .studio-dock-panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 0.25rem 0.75rem 0.5rem;
+  overflow: auto;
+}
+
+:root[data-surface="studio"] .studio-dock-panel h3 {
+  margin: 0.5rem 0 0.25rem;
+  font-size: 0.875rem;
+}
+
+:root[data-surface="studio"] .studio-dock-panel section {
+  padding: 0;
+  margin: 0;
+  border: none;
+}
+
+/* The activity: each line after its time. */
+:root[data-surface="studio"] .studio-activity {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+:root[data-surface="studio"] .studio-activity time {
+  margin-right: 0.5rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The status bar's count of problems, a button that opens the dock at them: marked while there are any. */
+:root[data-surface="studio"] .studio-status-bar .studio-problem-count {
+  color: var(--warning-text);
+  background: var(--warning-soft);
+  border-color: var(--warning-border);
+}
+
+/* A tab's count, as the sidebar's. */
+:root[data-surface="studio"] main .studio-tabs .studio-count {
+  margin: 0 0 0 0.25rem;
 }

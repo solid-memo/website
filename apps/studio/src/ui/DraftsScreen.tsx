@@ -10,6 +10,7 @@ import { useI18n, type ErrorText } from "@solid-memo/ui/i18n";
 import { draftOf, LangTextField, rememberLanguages, textOfDraft, useMissingLanguage } from "@solid-memo/ui/LangTextField";
 import { recentLanguages } from "@solid-memo/ui/remembered";
 import { ReadOnlyScope } from "./ReadOnly";
+import { useActivity } from "./shell/activity";
 import { useScreenCommands } from "./shell/useScreenCommands";
 
 /** What a new draft starts from, as the form offers it. */
@@ -86,6 +87,8 @@ export function DraftsScreen({
 
   const nameOf = (draft: ReleaseDraftSummary) =>
     Object.keys(draft.title).length === 0 ? t("studio.drafts.untitled", { name: draft.name }) : readerText(draft.title);
+  useActivity(created, () => t("studio.drafts.created", { draft: nameOf(created!.draft), version: created!.draft.version }));
+  useActivity(deleted, () => t("studio.drafts.deleted", { draft: nameOf(deleted!), version: deleted!.version }));
 
   function handleSubmit(event: Event) {
     event.preventDefault();

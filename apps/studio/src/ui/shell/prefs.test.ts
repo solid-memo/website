@@ -1,29 +1,32 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { DEFAULT_PREFS, RECENT_LIMIT, recentCommands, rememberCommand, rememberPrefs, studioPrefs } from "./prefs";
+import { ASIDE_WIDTH, DOCK_HEIGHT } from "./splitter";
 
 const KEY = "solid-memo:studioLayout.v1";
 
 describe("the Studio's layout preferences", () => {
   beforeEach(() => localStorage.clear());
 
-  it("are compact at first, the sidebar shown", () => {
-    expect(studioPrefs()).toEqual({ density: "compact", sidebar: true });
-    expect(DEFAULT_PREFS).toEqual({ density: "compact", sidebar: true });
+  it("are compact at first, the sidebar and the aside shown, the dock hidden", () => {
+    const first = { density: "compact", sidebar: true, aside: true, asideWidth: ASIDE_WIDTH.initial, dock: false, dockHeight: DOCK_HEIGHT.initial };
+    expect(studioPrefs()).toEqual(first);
+    expect(DEFAULT_PREFS).toEqual(first);
   });
 
   it("are kept on this device", () => {
-    rememberPrefs({ density: "comfortable", sidebar: false });
-    expect(studioPrefs()).toEqual({ density: "comfortable", sidebar: false });
-    expect(JSON.parse(localStorage.getItem(KEY)!)).toEqual({ density: "comfortable", sidebar: false });
+    const prefs = { density: "comfortable", sidebar: false, aside: false, asideWidth: 400, dock: true, dockHeight: 300 } as const;
+    rememberPrefs(prefs);
+    expect(studioPrefs()).toEqual(prefs);
+    expect(JSON.parse(localStorage.getItem(KEY)!)).toEqual(prefs);
   });
 
   it("take the default for what the app does not store, each preference on its own", () => {
-    localStorage.setItem(KEY, JSON.stringify({ density: "roomy", sidebar: "no" }));
+    localStorage.setItem(KEY, JSON.stringify({ density: "roomy", sidebar: "no", aside: 1, asideWidth: "wide", dock: null, dockHeight: Infinity }));
     expect(studioPrefs()).toEqual(DEFAULT_PREFS);
     localStorage.setItem(KEY, JSON.stringify({ density: "comfortable" }));
-    expect(studioPrefs()).toEqual({ density: "comfortable", sidebar: true });
+    expect(studioPrefs()).toEqual({ ...DEFAULT_PREFS, density: "comfortable" });
     localStorage.setItem(KEY, JSON.stringify({ density: "roomy", sidebar: false }));
-    expect(studioPrefs()).toEqual({ density: "compact", sidebar: false });
+    expect(studioPrefs()).toEqual({ ...DEFAULT_PREFS, sidebar: false });
     localStorage.setItem(KEY, "{not json");
     expect(studioPrefs()).toEqual(DEFAULT_PREFS);
     localStorage.setItem(KEY, JSON.stringify(["comfortable"]));
@@ -32,12 +35,17 @@ describe("the Studio's layout preferences", () => {
     expect(studioPrefs()).toEqual(DEFAULT_PREFS);
   });
 
+  it("keep the panes' sizes within their bounds", () => {
+    localStorage.setItem(KEY, JSON.stringify({ asideWidth: 10, dockHeight: 10_000 }));
+    expect(studioPrefs()).toEqual({ ...DEFAULT_PREFS, asideWidth: ASIDE_WIDTH.min, dockHeight: DOCK_HEIGHT.max });
+  });
+
   it("are the defaults, and are not kept, when the browser's storage refuses", () => {
     const refusing = () => {
       throw new Error("SecurityError");
     };
     expect(studioPrefs(refusing)).toEqual(DEFAULT_PREFS);
-    expect(() => rememberPrefs({ density: "comfortable", sidebar: true }, refusing)).not.toThrow();
+    expect(() => rememberPrefs({ ...DEFAULT_PREFS, density: "comfortable" }, refusing)).not.toThrow();
   });
 });
 

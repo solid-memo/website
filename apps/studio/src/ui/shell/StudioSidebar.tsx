@@ -8,6 +8,7 @@ import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { draftsKey } from "../DraftsContainer";
 import { studioRouteToHash, type StudioRoute } from "../router";
+import { ProblemCount } from "./ProblemCount";
 import { deckOf, sectionHome, sectionOf, SIDEBAR_SECTIONS } from "./workspaceLayout";
 
 /**
@@ -53,12 +54,7 @@ export function StudioSidebar({ useCases, instance, route }: { useCases: UseCase
             <a href={href(sectionHome(each, instance.url))} aria-current={each === section ? "page" : undefined}>
               {t(`studio.shell.section.${each}`)}
             </a>
-            {each === "health" && problems > 0 && (
-              <span class="studio-count">
-                <span aria-hidden="true">{problems}</span>
-                <span class="visually-hidden">{t("studio.shell.problems", { count: problems })}</span>
-              </span>
-            )}
+            {each === "health" && problems > 0 && <ProblemCount count={problems} />}
           </li>
         ))}
       </ul>

@@ -9,16 +9,19 @@ import { useI18n } from "@solid-memo/ui/i18n";
  * showing it), the focus goes back where it was before it opened.
  * Opened, the focus goes to the field marked `autoFocus` in it, if one
  * is, as the browser does (and the test DOM does not). While
- * it is open, the Studio's shortcuts leave its keys to it.
+ * it is open, the Studio's shortcuts leave its keys to it: `onKeyDown`
+ * has those it wants, from anywhere in it.
  */
 export function Dialog({
   heading,
   onClose,
+  onKeyDown,
   children,
 }: {
   heading: string;
   /** The dialog closed: stop showing it. */
   onClose: () => void;
+  onKeyDown?: (event: KeyboardEvent & { currentTarget: HTMLDialogElement }) => void;
   children: ComponentChildren;
 }) {
   const { t } = useI18n();
@@ -33,7 +36,7 @@ export function Dialog({
   }, []);
 
   return (
-    <dialog ref={ref} class="studio-dialog" aria-labelledby={headingId} onClose={onClose}>
+    <dialog ref={ref} class="studio-dialog" aria-labelledby={headingId} onClose={onClose} onKeyDown={onKeyDown}>
       <header>
         <h2 id={headingId}>{heading}</h2>
         <button type="button" onClick={() => ref.current!.close()}>

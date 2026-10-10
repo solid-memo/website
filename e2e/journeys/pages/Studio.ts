@@ -279,18 +279,18 @@ export class Studio extends Screen {
     });
   }
 
-  /** Starts a draft of a deck of the instance: what was made is said, and it is listed, being written. */
+  /** Starts a draft of a deck of the instance: it opens, and back at the drafts it is listed, being written. */
   async draftDeck(instance: string, deck: string): Promise<void> {
     await this.intent(`Draft a release of ${deck}`, async () => {
       await this.page.getByRole("radio", { name: this.t("studio.drafts.start.fromDeck") }).check();
       await this.page.getByRole("combobox", { name: this.t("studio.drafts.deck") }).selectOption({ label: deck });
       await this.page.getByRole("button", { name: this.t("studio.drafts.create"), exact: true }).click();
-      await this.expectStatus(this.t("studio.drafts.created", { draft: deck, version: 1 }));
+      await this.expectOpened(deck);
       await this.expectDraft(instance, deck, "deck");
     });
   }
 
-  /** Starts a blank course, named in English: it is listed, being written. */
+  /** Starts a blank course, named in English: it opens, and back at the drafts it is listed, being written. */
   async draftCourse(instance: string, name: string): Promise<void> {
     await this.intent(`Draft a course, ${name}`, async () => {
       await this.page.getByRole("radio", { name: this.t("studio.drafts.start.blankCourse") }).check();
@@ -298,22 +298,30 @@ export class Studio extends Screen {
       await field.fill(name);
       await chooseLanguageOf(this.app, field, "en");
       await this.page.getByRole("button", { name: this.t("studio.drafts.create"), exact: true }).click();
-      await this.expectStatus(this.t("studio.drafts.created", { draft: name, version: 1 }));
+      await this.expectOpened(name);
       await this.expectDraft(instance, name, "course");
     });
   }
 
   /**
    * Starts the next version of a release, by its address: the draft is
-   * named after the release's title, and is the version after it.
+   * named after the release's title, and is the version after it. It
+   * opens; then back at the drafts.
    */
   async draftNextVersion(url: string, title: string, version: number): Promise<void> {
     await this.intent(`Draft version ${version} of ${title}`, async () => {
       await this.page.getByRole("radio", { name: this.t("studio.drafts.start.nextVersionOf") }).check();
       await this.page.getByRole("textbox", { name: this.t("studio.drafts.release") }).fill(url);
       await this.page.getByRole("button", { name: this.t("studio.drafts.create"), exact: true }).click();
-      await this.expectStatus(this.t("studio.drafts.created", { draft: title, version }));
+      await this.expectOpened(title);
     });
+  }
+
+  /** The draft just made is open, at its overview; then back at the drafts, from the sidebar. */
+  private async expectOpened(title: string): Promise<void> {
+    await expect(this.page.getByRole("heading", { level: 2, name: title, exact: true })).toBeVisible();
+    await this.app.chrome.studioSection("drafts");
+    await this.app.chrome.expectBreadcrumbHere("studio.drafts.crumb");
   }
 
   /** A draft's row, by its name: its kind, version 1, and being written. */

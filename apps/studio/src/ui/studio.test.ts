@@ -25,6 +25,7 @@ afterEach(() => {
   document.body.innerHTML = "";
   root.removeAttribute("data-surface");
   root.removeAttribute("data-density");
+  root.removeAttribute("data-aside");
 });
 
 /** Puts `html` in the page, and the computed style of the element `selector` names. */
@@ -100,5 +101,24 @@ describe("the Studio's stylesheet", () => {
     expect(styleOf(page(""), "a[aria-current]").fontWeight).toBe("600");
     expect(styleOf(page(""), "a:not([aria-current])").fontWeight).not.toBe("600");
     expect(styleOf(page(" hidden"), ".studio-sidebar").display).toBe("none");
+  });
+
+  it("gives the aside a column of its own while it is beside the main content, its content and the dock's scrolling on their own", () => {
+    root.setAttribute("data-surface", "studio");
+    const page = (hidden: string) => `
+      <div id="app">
+        <main class="workspace"></main>
+        <aside class="studio-aside"${hidden}><div class="studio-aside-content"></div></aside>
+        <section class="studio-dock"><div class="studio-dock-panel"></div></section>
+      </div>`;
+    expect(styleOf(page(""), "#app").gridTemplateAreas).not.toContain("aside");
+    root.setAttribute("data-aside", "");
+    expect(styleOf(page(""), "#app").gridTemplateAreas).toContain('"sidebar main main aside"');
+    root.removeAttribute("data-aside");
+    expect(styleOf(page(""), ".studio-aside-content").overflow).toBe("auto");
+    expect(styleOf(page(""), ".studio-dock-panel").overflow).toBe("auto");
+    // The dock is a pane of the page, not a card on it.
+    expect(styleOf(page(""), ".studio-dock").boxShadow).toBe("none");
+    expect(styleOf(page(" hidden"), ".studio-aside").display).toBe("none");
   });
 });

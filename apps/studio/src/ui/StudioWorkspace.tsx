@@ -39,12 +39,15 @@ import { ReleaseMetadataContainer } from "./ReleaseMetadataContainer";
 import { ReleasesContainer } from "./ReleasesContainer";
 import { StepEditorContainer } from "./StepEditorContainer";
 import { TrialContainer } from "./TrialContainer";
+import { OutlineAside } from "./OutlineAside";
 import { ContextTabs } from "./shell/ContextTabs";
 import { InstanceSwitcher } from "./shell/InstanceSwitcher";
+import { ProblemCount } from "./shell/ProblemCount";
 import { StudioShell } from "./shell/StudioShell";
 import { StudioSidebar } from "./shell/StudioSidebar";
 import { crumbsOf } from "./shell/titles";
-import { contextTabsOf } from "./shell/workspaceLayout";
+import { asideOf, contextTabsOf, currentOutlineKey } from "./shell/workspaceLayout";
+import { useWorkspaceProblems } from "./WorkspaceProblems";
 import { instanceOfRoute, isDraftRoute, spotRoute, studioRouteToHash, targetRoute, useStudioRoute, type StudioRoute } from "./router";
 
 /**
@@ -53,7 +56,9 @@ import { instanceOfRoute, isDraftRoute, spotRoute, studioRouteToHash, targetRout
  * main content, from the breadcrumbs and the deck's or draft's tabs to
  * the screen the route names, once the instances it needs are read
  * (and, for a deck's screen, the instance's decks; for a card's, the
- * deck's cards).
+ * deck's cards); a course draft's outline in the aside, and the
+ * problems of the deck or the draft shown (useWorkspaceProblems), the
+ * draft's counted in its Check tab.
  */
 export function StudioWorkspace({ useCases, session, banner, children }: WorkspaceProps) {
   const { t, errorText, readerText } = useI18n();
@@ -140,6 +145,9 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
   // The page the trail ends at: "Decks – Solid Memo Studio".
   useDocumentTitle(crumbs.slice(-1).map((crumb) => crumb.label));
   const tabs = waiting === null ? contextTabsOf(route!, activeDraft) : null;
+  const found = useWorkspaceProblems(useCases, waiting === null ? route : null, { deck: activeDeck, draft: activeDraft });
+  const checkCount = found.draft?.length ?? 0;
+  const aside = waiting === null ? asideOf(route!, activeDraft) : null;
 
   const draftLinks = (draftUrl: string): DraftLinks => ({
     draftsHref: studioRouteToHash({ screen: "drafts", instanceUrl: instanceOfRoute(route!)! }),
@@ -312,6 +320,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             healthHref={studioRouteToHash({ screen: "health", instanceUrl: route.instanceUrl })}
             releasesHref={studioRouteToHash({ screen: "releases", instanceUrl: route.instanceUrl })}
             draftHref={(draft) => studioRouteToHash({ screen: "draft", draftUrl: draft.url })}
+            onCreated={(created) => navigate({ screen: "draft", draftUrl: created.draft.url })}
           />
         );
       case "releases":
@@ -457,6 +466,23 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
       sidebar={activeInstance === null ? null : <StudioSidebar useCases={useCases} instance={activeInstance} route={route!} />}
       tabs={tabs?.tabs ?? []}
       draftUrl={draftUrl}
+      aside={
+        aside === null
+          ? null
+          : {
+              label: t("studio.draft.outline"),
+              content: (
+                <OutlineAside
+                  useCases={useCases}
+                  draftUrl={draftUrl!}
+                  links={draftLinks(draftUrl!)}
+                  currentKey={currentOutlineKey(route!)}
+                  problems={found.draft}
+                />
+              ),
+            }
+      }
+      problems={found.problems}
       onGo={navigate}
     >
       {children}
@@ -464,7 +490,19 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
       {tabs !== null && (
         <ContextTabs
           label={t(`studio.tabs.${tabs.of}`)}
-          tabs={tabs.tabs.map((tab) => ({ key: tab.key, href: studioRouteToHash(tab.route), label: t(`studio.tabs.${tab.key}`), current: tab.current }))}
+          tabs={tabs.tabs.map((tab) => ({
+            key: tab.key,
+            href: studioRouteToHash(tab.route),
+            label:
+              tab.key === "check" && checkCount > 0 ? (
+                <>
+                  {t("studio.tabs.check")} <ProblemCount count={checkCount} />
+                </>
+              ) : (
+                t(`studio.tabs.${tab.key}`)
+              ),
+            current: tab.current,
+          }))}
         />
       )}
       <div ref={screenRef} class="screen">

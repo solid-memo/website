@@ -35,8 +35,10 @@ tabs of a deck or a draft, and the palette's entries that go somewhere
 routes: following one pushes a history entry, as any link does, and
 none adds a route or a parameter of its own. The chrome around a
 screen (which section, deck or draft the sidebar marks, which tabs
-there are and which is current) is worked out from the route alone,
-and hiding the sidebar changes no URL ([studio.md](studio.md#layout)).
+there are and which is current, whether the aside shows a course's
+outline) is worked out from the route alone, and hiding the sidebar,
+the aside or the dock changes no URL ([studio.md](studio.md#layout)).
+F8 goes to a problem's field as a link does.
 
 ## Hash routing, not pathname routing
 

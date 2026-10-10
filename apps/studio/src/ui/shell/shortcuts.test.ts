@@ -54,6 +54,21 @@ describe("the Studio's keymap", () => {
     expect(STUDIO.filter((shortcut) => shortcut.id.startsWith("tab.")).map((shortcut) => shortcut.help)).toEqual(["1–9", ...Array(8).fill(null)]);
   });
 
+  it("toggles the aside with Ctrl+\\ and the dock with Ctrl+J, and goes from problem to problem with F8, a field's keys aside", () => {
+    expect(pressKey(null, press("\\", { ctrlKey: true }), 0, STUDIO).shortcut).toBe("toggleAside");
+    expect(pressKey(null, press("j", { ctrlKey: true }), 0, STUDIO).shortcut).toBe("toggleDock");
+    expect(pressKey(null, press("F8"), 0, STUDIO).shortcut).toBe("nextProblem");
+    expect(pressKey(null, press("F8", { shiftKey: true }), 0, STUDIO).shortcut).toBe("previousProblem");
+    expect(STUDIO.filter((shortcut) => shortcut.whileTyping).map((shortcut) => shortcut.id)).toEqual([
+      "palette",
+      "palette",
+      "nextRegion",
+      "previousRegion",
+      "nextProblem",
+      "previousProblem",
+    ]);
+  });
+
   it("does a single key's shortcut at once, and ignores a key that is none", () => {
     expect(pressKey(null, "?", 0, STUDIO)).toEqual({ chord: null, shortcut: "help" });
     expect(pressKey(null, "q", 0, STUDIO)).toEqual({ chord: null, shortcut: null });
