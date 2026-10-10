@@ -9,7 +9,7 @@ import ko from "@solid-memo/ui/i18n/ko.json" with { type: "json" };
  */
 export type Locale = "en" | "sv" | "ko";
 
-type Plural = { one: string; other: string };
+type Plural = Partial<Record<Intl.LDMLPluralRule, string>> & { other: string };
 interface Messages {
   [key: string]: string | Plural | Messages;
 }
@@ -28,8 +28,7 @@ const isPlural = (node: unknown): node is Plural =>
 export function text(locale: Locale, key: string, vars: Record<string, string | number> = {}): string {
   let node: unknown = CATALOGS[locale];
   for (const part of key.split(".")) node = (node as Messages | undefined)?.[part];
-  const form = isPlural(node) ? new Intl.PluralRules(locale).select(Number(vars.count)) : undefined;
-  const message = isPlural(node) ? (form === "one" ? node.one : node.other) : node;
+  const message = isPlural(node) ? node[new Intl.PluralRules(locale).select(Number(vars.count))] : node;
   if (typeof message !== "string") throw new Error(`packages/ui/src/i18n/${locale}.json has no message ${key}.`);
   return message.replace(/\{(\w+)\}/g, (whole, name: string) => (name in vars ? String(vars[name]) : whole));
 }

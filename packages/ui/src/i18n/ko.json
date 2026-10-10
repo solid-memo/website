@@ -55,11 +55,9 @@
   },
   "common": {
     "cardCount": {
-      "one": "카드 {count}장",
       "other": "카드 {count}장"
     },
     "toReview": {
-      "one": "복습할 카드 {count}장",
       "other": "복습할 카드 {count}장"
     },
     "direction": {
@@ -206,12 +204,10 @@
       "missing": "‘{option}’에는 뒷면의 언어인 {languages} 텍스트가 없어요.",
       "extra": "‘{option}’은(는) 뒷면의 언어가 아닌 {languages}(으)로 쓰여 있어요.",
       "few": {
-        "one": "사용 중인 오답 선택지가 {count}개예요. 코스는 질문마다 오답 선택지를 {least}개 이상 사용해요.",
         "other": "사용 중인 오답 선택지가 {count}개예요. 코스는 질문마다 오답 선택지를 {least}개 이상 사용해요."
       }
     },
     "picks": {
-      "one": "{count}번 선택됨",
       "other": "{count}번 선택됨"
     }
   },
@@ -232,7 +228,6 @@
   },
   "course": {
     "chaptersDone": {
-      "one": "챕터 {count}개 중 {done}개 완료",
       "other": "챕터 {count}개 중 {done}개 완료"
     },
     "start": "코스 시작하기",
@@ -247,7 +242,6 @@
     "open": "열림",
     "done": "완료",
     "stepsDone": {
-      "one": "단계 {count}개 중 {done}개 완료",
       "other": "단계 {count}개 중 {done}개 완료"
     }
   },
@@ -259,7 +253,6 @@
     "continue": "계속하기",
     "back": "뒤로",
     "toQuestions": {
-      "one": "질문으로 넘어가기",
       "other": "질문으로 넘어가기"
     },
     "check": "이해도 확인",
@@ -335,7 +328,6 @@
     "blockInstance": "복구될 때까지 Solid Memo는 이 인스턴스를 사용하지 않아요.",
     "restKeepsWorking": "나머지는 그대로 작동해요.",
     "setAside": {
-      "one": "{names} 덱은 복구될 때까지 제외돼요. 나머지는 그대로 작동해요.",
       "other": "{names} 덱은 복구될 때까지 제외돼요. 나머지는 그대로 작동해요."
     },
     "keepsWorking": "Solid Memo는 이 데이터를 계속 사용해요.",
@@ -371,12 +363,10 @@
     "noCards": "이 덱에는 아직 카드가 없어요. 카드 브라우저에서 추가해 주세요.",
     "allStudied": "모든 카드를 학습했어요. 오늘은 더 학습할 카드가 없어요.",
     "newOnly": {
-      "one": "오늘 복습할 카드는 없어요. 새로 익힐 카드 {count}장이 있어요.",
       "other": "오늘 복습할 카드는 없어요. 새로 익힐 카드 {count}장이 있어요."
     },
     "dueOnly": "오늘 복습할 {due}.",
     "dueAndNew": {
-      "one": "오늘 복습할 {due}, 새로 익힐 카드 {count}장.",
       "other": "오늘 복습할 {due}, 새로 익힐 카드 {count}장."
     },
     "studyButton": "학습",
@@ -390,7 +380,6 @@
     "region": "덱 텍스트의 언어",
     "heading": "이 덱의 텍스트 일부에 어떤 언어인지 지정되어 있지 않아요.",
     "unstated": {
-      "one": "카드 면 {count}개에 언어가 지정되어 있지 않아요.",
       "other": "카드 면 {count}개에 언어가 지정되어 있지 않아요."
     },
     "unchecked": "이 덱을 복사해 온 덱 라이브러리 릴리스를 읽을 수 없어서, 언어를 직접 지정해야 할 텍스트가 얼마나 되는지 알 수 없어요.",
@@ -405,7 +394,6 @@
     "setAside": "제외됨: 데이터 복구가 필요해요",
     "heading": "덱",
     "deckCount": {
-      "one": "덱 {count}개",
       "other": "덱 {count}개"
     },
     "empty": "아직 덱이 없어요. 아래에서 첫 덱을 만들거나 덱 라이브러리에서 가져와 주세요.",
@@ -424,7 +412,6 @@
     "deleteDeck": "덱 삭제",
     "deleteGroup": "그룹 삭제",
     "deleteGroupConfirm": {
-      "one": "‘{name}’ 그룹을 삭제할까요? 그룹 안의 덱 {count}개는 한 단계 위로 옮겨 유지돼요.",
       "other": "‘{name}’ 그룹을 삭제할까요? 그룹 안의 덱 {count}개는 한 단계 위로 옮겨 유지돼요."
     },
     "deleteGroupOfGroupsConfirm": "‘{name}’ 그룹을 삭제할까요? 그 안의 그룹들은 한 단계 위로 옮겨 유지돼요.",
@@ -461,18 +448,15 @@
       "many": "정말 대단해요!"
     },
     "streakCount": {
-      "one": "{count}일 연속 학습",
       "other": "{count}일 연속 학습"
     },
     "streakFirstDay": "첫날이에요! 내일 또 오면 이틀 연속이에요.",
     "streakRecord": "지금까지 최장 기록이에요!",
     "streakToBeat": "최고 기록: {count}일",
     "answers": {
-      "one": "카드 {count}장",
       "other": "카드 {count}장"
     },
     "introduced": {
-      "one": "새 카드 {count}장",
       "other": "새 카드 {count}장"
     },
     "remembered": "{percent} 기억함",
@@ -497,11 +481,9 @@
     "newCardsPerDay": "하루 새 카드 수",
     "maxReviewsPerDay": "하루 최대 복습 수",
     "newCardsUnit": {
-      "one": "장/일",
       "other": "장/일"
     },
     "maxReviewsUnit": {
-      "one": "회/일",
       "other": "회/일"
     },
     "emptyHint": "비워 두면 {link}의 값을 따라요.",
@@ -512,26 +494,21 @@
       "loading": "카드의 언어를 확인하는 중…",
       "unreadable": "카드의 언어를 확인하지 못했어요.",
       "unstated": {
-        "one": "카드 앞면 {count}개와 {backs}에 언어가 지정되어 있지 않아요.",
         "other": "카드 앞면 {count}개와 {backs}에 언어가 지정되어 있지 않아요."
       },
       "backs": {
-        "one": "뒷면 {count}개",
         "other": "뒷면 {count}개"
       },
       "fronts": "앞면",
       "backsLegend": "뒷면",
       "stateButton": "언어 지정",
       "confirmFronts": {
-        "one": "앞면 {count}개의 언어를 {language}(으)로 저장할까요?",
         "other": "앞면 {count}개의 언어를 {language}(으)로 저장할까요?"
       },
       "confirmBacks": {
-        "one": "뒷면 {count}개의 언어를 {language}(으)로 저장할까요?",
         "other": "뒷면 {count}개의 언어를 {language}(으)로 저장할까요?"
       },
       "stated": {
-        "one": "카드 {count}장의 언어를 저장했어요.",
         "other": "카드 {count}장의 언어를 저장했어요."
       },
       "releaseHint": "덱 라이브러리 릴리스 그대로인 카드는 제외돼요. 이후 릴리스에서 업데이트돼요.",
@@ -599,16 +576,13 @@
       "register": "다른 앱에서 데이터를 찾을 수 있게 하기"
     },
     "count": {
-      "one": "문서 {count}개 중 {done}개",
       "other": "문서 {count}개 중 {done}개"
     },
     "resultRegion": "업데이트 미완료",
     "notFinished": {
-      "one": "문서 {count}개를 지금 업데이트하지 못했어요:",
       "other": "문서 {count}개를 지금 업데이트하지 못했어요:"
     },
     "updatedAlso": {
-      "one": "다른 문서 {count}개는 업데이트했어요.",
       "other": "다른 문서 {count}개는 업데이트했어요."
     },
     "document": {
@@ -627,11 +601,9 @@
   "library": {
     "heading": "덱 라이브러리",
     "deckCount": {
-      "one": "덱 {count}개",
       "other": "덱 {count}개"
     },
     "shownCount": {
-      "one": "덱 {count}개 중 {shown}개",
       "other": "덱 {count}개 중 {shown}개"
     },
     "intro": "바로 쓸 수 있는 덱이에요. 덱을 열어 자세히 보거나, 여러 개를 선택해 이 인스턴스에 내 복사본으로 가져올 수 있어요.",
@@ -645,7 +617,6 @@
     "previewDeck": "{deck} 미리보기",
     "importSelected": "선택한 덱 가져오기",
     "importDecks": {
-      "one": "덱 {count}개 가져오기",
       "other": "덱 {count}개 가져오기"
     },
     "importing": "가져오는 중…",
@@ -659,7 +630,6 @@
     "empty": "이 덱에는 카드가 없어요.",
     "range": "카드 {total}장 중 {first}–{last}번째.",
     "count": {
-      "one": "카드 {count}장.",
       "other": "카드 {count}장."
     },
     "hint": "카드를 열면 전체 내용을 볼 수 있어요. 학습하거나 편집하려면 덱을 가져와 주세요.",
@@ -677,7 +647,6 @@
     "studied": "학습 방향",
     "bothWays": "{direction} — 모든 카드를 양방향으로 물어봐요. 가져온 뒤에 바꿀 수 있어요.",
     "topics": {
-      "one": "주제",
       "other": "주제"
     },
     "keywords": "키워드",
@@ -686,14 +655,12 @@
     "versionReleased": "버전 {version}, {date} 릴리스",
     "releaseNotes": "릴리스 노트",
     "authors": {
-      "one": "저자",
       "other": "저자"
     },
     "licence": "라이선스",
     "created": "만든 날짜",
     "updated": "업데이트 날짜",
     "sources": {
-      "one": "출처",
       "other": "출처"
     },
     "import": "이 덱 가져오기",
@@ -750,27 +717,21 @@
     "heading": "덱 라이브러리에 이 덱의 새 릴리스가 있어요.",
     "body": "{deck}은(는) 릴리스 {from}에서 가져왔고, 지금은 릴리스 {to}이(가) 나와 있어요. 업데이트 내용: {changes}.",
     "adds": {
-      "one": "카드 {count}장 추가",
       "other": "카드 {count}장 추가"
     },
     "changes": {
-      "one": "카드 {count}장 변경",
       "other": "카드 {count}장 변경"
     },
     "retires": {
-      "one": "카드 {count}장 사용 중지",
       "other": "카드 {count}장 사용 중지"
     },
     "bringsBack": {
-      "one": "카드 {count}장 복원",
       "other": "카드 {count}장 복원"
     },
     "removes": {
-      "one": "카드 {count}장 삭제",
       "other": "카드 {count}장 삭제"
     },
     "alreadyApplied": {
-      "one": "이미 릴리스와 같은 카드 {count}장 유지",
       "other": "이미 릴리스와 같은 카드 {count}장 유지"
     },
     "alreadyDescribed": "이미 릴리스와 같은 덱 이름, 설명, 키워드, 주제 또는 학습 방향 유지",
@@ -786,7 +747,6 @@
     "historyKeptRetired": "복습 기록은 유지돼요. 사용 중지된 카드는 남아 있지만 더 이상 학습하지 않아요.",
     "historyKeptButRemovedRetired": "삭제되는 카드를 제외하고 복습 기록은 유지돼요. 사용 중지된 카드는 남아 있지만 더 이상 학습하지 않아요.",
     "kept": {
-      "one": "직접 변경한 카드 {count}장은 그대로 남아요.",
       "other": "직접 변경한 카드 {count}장은 그대로 남아요."
     },
     "releaseNote": "릴리스 {version}: {notes}",
@@ -797,7 +757,6 @@
     "region": "형식 업데이트",
     "heading": "데이터 형식을 업데이트해야 해요.",
     "stored": {
-      "one": "다음 데이터가 이전 형식으로 저장되어 있어요: {outdated}.",
       "other": "다음 데이터가 이전 형식으로 저장되어 있어요: {outdated}."
     },
     "writes": "이제 Solid Memo는 다음 형식으로 데이터를 저장해요: {formats}.",
@@ -807,15 +766,12 @@
     "instanceCatalogue": "인스턴스의 카탈로그",
     "yourPreferences": "설정",
     "deckEntries": {
-      "one": "덱 항목 {count}개",
       "other": "덱 항목 {count}개"
     },
     "reviewStates": {
-      "one": "복습 상태 {count}개",
       "other": "복습 상태 {count}개"
     },
     "inDecks": {
-      "one": "덱 {count}개",
       "other": "덱 {count}개"
     },
     "countIn": "{decks}에 있는 {what}",
@@ -832,7 +788,6 @@
     "updating": "업데이트하는 중…",
     "updateButton": "{what} 업데이트",
     "buttonDecks": {
-      "one": "덱 {count}개",
       "other": "덱 {count}개"
     },
     "buttonPreferences": "설정",
@@ -860,7 +815,6 @@
     "region": "게스트 학습",
     "heading": "이 브라우저에서 게스트로 학습했어요.",
     "body": {
-      "one": "{name}에 덱 {count}개가 있어요. 계속 보관하려면 Pod로 옮기고, 필요 없으면 버려 주세요.",
       "other": "{name}에 덱 {count}개가 있어요. 계속 보관하려면 Pod로 옮기고, 필요 없으면 버려 주세요."
     },
     "move": "내 Pod로 옮기기",
@@ -907,7 +861,6 @@
     "sameRelease": "{name}에는 같은 덱 라이브러리 릴리스에서 가져온 이 덱이 이미 있어요. 이 덱은 기존 덱에 합쳐지지 않고, 진행 상황을 따로 갖는 별도의 덱으로 그 옆에 추가돼요. 빼려면 선택을 해제해 주세요.",
     "leftOut": "뺀 덱은 보관되지 않아요. 이 브라우저에 있는 나머지 학습과 함께 사라져요.",
     "draftsCopied": {
-      "one": "게스트로 스튜디오에서 초안 {count}개를 썼어요. 이 초안들도 {name}에 복사돼요. 각각 이름은 그대로 쓰지만, {name}에 이름과 버전이 같은 초안이 있으면 비어 있는 다음 이름(‘-2’, ‘-3’…)을 써요.",
       "other": "게스트로 스튜디오에서 초안 {count}개를 썼어요. 이 초안들도 {name}에 복사돼요. 각각 이름은 그대로 쓰지만, {name}에 이름과 버전이 같은 초안이 있으면 비어 있는 다음 이름(‘-2’, ‘-3’…)을 써요."
     },
     "chooseDeck": "추가할 덱을 하나 이상 고르거나, 대신 학습을 버려 주세요.",
@@ -926,11 +879,9 @@
     "mergeFailedRegion": "추가 실패",
     "mergeFailedWhile": "‘{step}’ 단계에서 학습 추가에 실패했어요:",
     "keptDecks": {
-      "one": "이제 {name}에 다음 덱이 빠짐없이 들어 있어요:",
       "other": "이제 {name}에 다음 덱이 빠짐없이 들어 있어요:"
     },
     "keptDrafts": {
-      "one": "이제 이 초안들은 {name}에 빠짐없이 들어 있어요.",
       "other": "이제 이 초안들은 {name}에 빠짐없이 들어 있어요."
     },
     "keptDraftName": "(‘{name}’, 버전 {version})",
@@ -1052,7 +1003,6 @@
     "canRepair": "Solid Memo가 다음 항목을 복구할 수 있어요:",
     "repairing": "복구하는 중…",
     "repairButton": {
-      "one": "문제 {count}건 복구",
       "other": "문제 {count}건 복구"
     },
     "needDecision": "다음 항목은 직접 결정해야 해요. 문서에서 고치거나 삭제해 주세요.",
@@ -1072,7 +1022,6 @@
   "retiredCards": {
     "showToggle": "사용 중지된 카드 보기",
     "toggleHint": {
-      "one": "카드 {count}장이 사용 중지됐어요. 복습 기록과 함께 보관되지만 더는 학습하지 않아요.",
       "other": "카드 {count}장이 사용 중지됐어요. 복습 기록과 함께 보관되지만 더는 학습하지 않아요."
     },
     "tag": "사용 중지됨",
@@ -1124,16 +1073,13 @@
     "validating": "검증하는 중…",
     "validateAgain": "다시 검증",
     "allConform": {
-      "one": "문서 {count}개가 모두 형식에 맞아요.",
       "other": "문서 {count}개가 모두 형식에 맞아요."
     },
     "violationsIn": "{documents}에서 {violations}.",
     "violationCount": {
-      "one": "위반 {count}건",
       "other": "위반 {count}건"
     },
     "documentCount": {
-      "one": "문서 {count}개",
       "other": "문서 {count}개"
     },
     "notCreated": "아직 만들어지지 않았어요.",
@@ -1241,12 +1187,10 @@
     "notAnInstanceNoMeta": "그 주소는 Solid Memo 인스턴스가 아니에요. /로 끝나는 인스턴스 폴더 주소를 붙여 넣었는지 확인해 주세요.",
     "notAnInstanceNoSubject": "그 폴더는 Solid Memo 인스턴스가 아니에요. 폴더의 설명을 읽을 수 없어요. 올바른 주소를 붙여 넣었는지 확인해 주세요.",
     "movedCopyInvalid": {
-      "one": "Pod에 있는 복사본이 Solid Memo가 기대하는 형식에 맞지 않아서(문제 {count}건) 학습 기록을 그대로 두었어요. 나중에 다시 시도해 주세요.",
       "other": "Pod에 있는 복사본이 Solid Memo가 기대하는 형식에 맞지 않아서(문제 {count}건) 학습 기록을 그대로 두었어요. 나중에 다시 시도해 주세요."
     },
     "guestUrlsLeft": "Pod에 있는 복사본이 아직 게스트 학습을 가리키고 있어서 학습 기록을 그대로 두었어요. 다시 시도해 주세요.",
     "guestStudyInvalid": {
-      "one": "이 브라우저에 있는 학습 기록 일부가 Solid Memo가 기대하는 형식에 맞지 않아서(문제 {count}건) 아무것도 Pod에 추가하지 않았어요. 학습 기록은 여기에 그대로 있어요.",
       "other": "이 브라우저에 있는 학습 기록 일부가 Solid Memo가 기대하는 형식에 맞지 않아서(문제 {count}건) 아무것도 Pod에 추가하지 않았어요. 학습 기록은 여기에 그대로 있어요."
     },
     "guestStudyTooNew": "이 브라우저에 있는 학습 기록 일부를 더 새로운 버전의 Solid Memo가 저장해서, 이 버전은 그 기록을 Pod에 추가하지 않아요. 최신 버전을 받으려면 페이지를 새로고침해 주세요.",
@@ -1283,7 +1227,6 @@
     "releaseIdUnsupported": "이 릴리스는 일부를 ‘#{id}’(이)라고 부르는데, 초안에서는 이 이름을 쓸 수 없어요. 초안의 id는 A부터 Z까지의 글자, 숫자, ‘.’, ‘_’, ‘-’로 이루어지고 글자나 숫자로 시작해야 해요. 그래서 초안으로 만들 수 없어요.",
     "releaseTaken": "{url}에 이미 릴리스가 게시되어 있고, 릴리스는 절대 덮어쓰지 않아요. 다음 버전을 게시하거나 다른 폴더를 선택해 주세요.",
     "releaseHasErrors": {
-      "one": "릴리스 검사에서 오류 {count}개가 발견됐어요. 릴리스를 게시하기 전에 고쳐 주세요.",
       "other": "릴리스 검사에서 오류 {count}개가 발견됐어요. 릴리스를 게시하기 전에 고쳐 주세요."
     },
     "draftReleased": "이 초안은 이미 {url}에 릴리스되어 더 이상 바뀌지 않아요. 대신 다음 버전을 시작해 주세요.",
@@ -1291,7 +1234,6 @@
     "publicAccessRefused": "Pod가 Solid Memo에게 {url}의 릴리스를 공개하도록 허용하지 않아서 나만 읽을 수 있어요. 다시 시도하거나, Pod 제공자의 도구로 모든 사람이 읽을 수 있게 설정해 주세요.",
     "releaseUrlInvalid": "릴리스 주소가 아니에요. https:// 또는 http://로 시작하는 전체 주소를 붙여 넣어 주세요.",
     "releaseNotConforming": {
-      "one": "{host}의 릴리스가 {count}곳에서 Solid Memo의 규칙을 어겨서 추가할 수 없어요. 만든 사람에게 확인을 요청해 주세요.",
       "other": "{host}의 릴리스가 {count}곳에서 Solid Memo의 규칙을 어겨서 추가할 수 없어요. 만든 사람에게 확인을 요청해 주세요."
     }
   },
@@ -1305,14 +1247,12 @@
     "currentStreak": "현재 연속 학습",
     "longestStreak": "최장 연속 학습",
     "dayCount": {
-      "one": "{count}일",
       "other": "{count}일"
     },
     "remembered": "복습에서 기억한 비율",
     "young": "익히는 중인 카드(복습 간격 21일 미만)",
     "mature": "익숙한 카드(21일 이상)",
     "ofReviews": {
-      "one": "복습 {count}회 중",
       "other": "복습 {count}회 중"
     },
     "noReviews": "아직 복습 없음",
@@ -1326,7 +1266,6 @@
     "dayDetail": "{date}: {answers}, 새 카드 {introduced}장, 잊은 카드 {forgotten}장.",
     "dayNothing": "{date}: 학습 기록 없음.",
     "answerCount": {
-      "one": "답변 {count}개",
       "other": "답변 {count}개"
     },
     "showTable": "표로 보기",
@@ -1344,7 +1283,6 @@
     "introducedNote": "최근 12개월 동안 처음 본 카드의 누적 수예요. 양방향으로 학습하는 카드는 방향마다 한 번씩 세고, 삭제된 덱과 사용 중지된 카드도 포함해요.",
     "introducedLabel": "처음 본 카드가 생길 때마다 날짜별로 올라가는 선.",
     "introducedDetail": {
-      "one": "{date}: 지금까지 {count}장.",
       "other": "{date}: 지금까지 {count}장."
     },
     "introducedTotal": "누적 카드",
@@ -1353,7 +1291,6 @@
     "recallNote": "달마다 복습에서 기억한 비율이에요. 익히는 중: 복습 간격 21일 미만, 익숙함: 21일 이상.",
     "recallDetail": "{month}: 익히는 중인 카드 {young}, 익숙한 카드 {mature}.",
     "recallShare": {
-      "one": "복습 {count}회 중 {percent}",
       "other": "복습 {count}회 중 {percent}"
     },
     "noReviewsThen": "복습 없음",
@@ -1367,15 +1304,12 @@
     "maturityHint": "새 카드: 아직 복습하지 않음. 익히는 중: 복습 간격 21일 미만. 익숙함: 21일 이상. 양방향으로 학습하는 카드는 방향마다 한 번씩 세요.",
     "maturityLabel": "{new}, {young}, {mature}.",
     "maturityNew": {
-      "one": "새 카드 {count}장",
       "other": "새 카드 {count}장"
     },
     "maturityYoung": {
-      "one": "익히는 중 {count}장",
       "other": "익히는 중 {count}장"
     },
     "maturityMature": {
-      "one": "익숙함 {count}장",
       "other": "익숙함 {count}장"
     },
     "maturityByDeck": "덱별 숙련도",
@@ -1386,7 +1320,6 @@
     "dueTodayDetail": "{date}, 오늘: {reviews} 예정, 밀린 복습 포함.",
     "nothingDue": "앞으로 {count}일 동안 복습할 카드가 없어요.",
     "reviewCount": {
-      "one": "복습 {count}회",
       "other": "복습 {count}회"
     },
     "due": "예정"
@@ -1411,7 +1344,6 @@
       "instanceLink": "이름과 카탈로그",
       "filter": "이름이나 그룹으로 필터",
       "shown": {
-        "one": "덱 {count}개 중 {shown}개",
         "other": "덱 {count}개 중 {shown}개"
       },
       "noMatch": "‘{filter}’와(과) 일치하는 덱이 없어요.",
@@ -1448,7 +1380,6 @@
     "bulk": {
       "label": "선택한 덱",
       "selected": {
-        "one": "덱 {count}개 선택됨",
         "other": "덱 {count}개 선택됨"
       },
       "move": "그룹으로 옮기기",
@@ -1465,23 +1396,18 @@
       "apply": "적용",
       "cancel": "취소",
       "removeConfirm": {
-        "one": "{names} 덱과 그 안의 모든 카드를 삭제할까요? 되돌릴 수 없어요.",
         "other": "덱 {count}개와 그 안의 모든 카드를 삭제할까요? 대상: {names}. 되돌릴 수 없어요."
       },
       "moved": {
-        "one": "덱 {count}개를 {group}(으)로 옮겼어요.",
         "other": "덱 {count}개를 {group}(으)로 옮겼어요."
       },
       "paced": {
-        "one": "덱 {count}개의 학습량을 설정했어요.",
         "other": "덱 {count}개의 학습량을 설정했어요."
       },
       "directed": {
-        "one": "덱 {count}개의 방향을 설정했어요.",
         "other": "덱 {count}개의 방향을 설정했어요."
       },
       "removed": {
-        "one": "덱 {count}개를 삭제했어요.",
         "other": "덱 {count}개를 삭제했어요."
       },
       "export": "내보내기",
@@ -1531,12 +1457,10 @@
       },
       "pageSize": "페이지당 카드 수",
       "shown": {
-        "one": "카드 {count}장 중 {shown}장",
         "other": "카드 {count}장 중 {shown}장"
       },
       "keys": "키: {j}와(과) {k}(으)로 카드 사이를 이동하고, {x}(으)로 카드를 선택하고, {enter}(으)로 카드를 열어요.",
       "selected": {
-        "one": "카드 {count}장 선택됨",
         "other": "카드 {count}장 선택됨"
       },
       "clear": "선택 해제",
@@ -1556,7 +1480,6 @@
         "id": "ID"
       },
       "days": {
-        "one": "{count}일",
         "other": "{count}일"
       },
       "notStudied": "아직 학습하지 않음",
@@ -1605,7 +1528,6 @@
       "loading": "카드의 답변을 불러오는 중…",
       "empty": "이 덱에서 이 카드에 대한 답변이 아직 없어요.",
       "summary": {
-        "one": "답변 {count}개, 잊음 {forgotten}번.",
         "other": "답변 {count}개, 잊음 {forgotten}번."
       },
       "caption": "카드의 답변(최신순)",
@@ -1660,7 +1582,6 @@
       "leechHint": "자주 잊는 카드는 {count}번 이상 잊은 카드예요. 계속 복습을 잡아먹으니, 다시 쓰거나 나누거나 사용 중지해 주세요.",
       "noLeeches": "자주 잊는 카드가 없어요.",
       "leechLapses": {
-        "one": "{count}번 잊음",
         "other": "{count}번 잊음"
       },
       "allLeeches": "덱의 카드 중 자주 잊는 카드 보기"
@@ -1677,11 +1598,9 @@
       "reset": "진행 상황 초기화",
       "remove": "삭제",
       "removeConfirm": {
-        "one": "카드 {count}장과 진행 상황을 삭제할까요? 다음에 편집하거나 이 페이지를 떠나기 전까지는 되돌릴 수 있어요.",
         "other": "카드 {count}장과 진행 상황을 삭제할까요? 다음에 편집하거나 이 페이지를 떠나기 전까지는 되돌릴 수 있어요."
       },
       "resetConfirm": {
-        "one": "카드 {count}장의 진행 상황을 초기화할까요? 다시 새 카드가 돼요. 답변은 기록에 남아요.",
         "other": "카드 {count}장의 진행 상황을 초기화할까요? 다시 새 카드가 돼요. 답변은 기록에 남아요."
       },
       "dueLabel": "다음 복습일",
@@ -1706,11 +1625,9 @@
       "previewEmpty": "찾을 텍스트를 입력해 주세요. 확인하기 전까지는 아무것도 바뀌지 않아요.",
       "noChange": "선택한 카드 중 이 텍스트가 있는 카드가 없어요.",
       "changes": {
-        "one": "바뀌는 카드 {count}장:",
         "other": "바뀌는 카드 {count}장:"
       },
       "skippedHeading": {
-        "one": "그대로 두는 카드 {count}장:",
         "other": "그대로 두는 카드 {count}장:"
       },
       "reasons": {
@@ -1731,49 +1648,38 @@
       },
       "removed": "(삭제됨)",
       "confirmReplace": {
-        "one": "카드 {count}장에서 바꾸기",
         "other": "카드 {count}장에서 바꾸기"
       },
       "done": {
         "retire": {
-          "one": "카드 {count}장을 사용 중지했어요.",
           "other": "카드 {count}장을 사용 중지했어요."
         },
         "restore": {
-          "one": "카드 {count}장을 복원했어요.",
           "other": "카드 {count}장을 복원했어요."
         },
         "remove": {
-          "one": "카드 {count}장을 삭제했어요.",
           "other": "카드 {count}장을 삭제했어요."
         },
         "replaceText": {
-          "one": "카드 {count}장의 텍스트를 바꿨어요.",
           "other": "카드 {count}장의 텍스트를 바꿨어요."
         },
         "markdownOn": {
-          "one": "카드 {count}장을 Markdown으로 썼어요.",
           "other": "카드 {count}장을 Markdown으로 썼어요."
         },
         "markdownOff": {
-          "one": "카드 {count}장을 일반 텍스트로 썼어요.",
           "other": "카드 {count}장을 일반 텍스트로 썼어요."
         },
         "stateLanguage": {
-          "one": "카드 {count}장의 언어를 지정했어요.",
           "other": "카드 {count}장의 언어를 지정했어요."
         },
         "reset": {
-          "one": "카드 {count}장의 진행 상황을 초기화했어요.",
           "other": "카드 {count}장의 진행 상황을 초기화했어요."
         },
         "reschedule": {
-          "one": "카드 {count}장의 다음 복습일을 {due}(으)로 지정했어요.",
           "other": "카드 {count}장의 다음 복습일을 {due}(으)로 지정했어요."
         }
       },
       "skipped": {
-        "one": "카드 {count}장은 그대로 두었어요.",
         "other": "카드 {count}장은 그대로 두었어요."
       },
       "undo": "실행 취소",
@@ -1787,27 +1693,21 @@
         "copyHint": "이 덱의 카드는 그대로 남아요. 복사본의 기록은 다른 덱에서 새로 시작돼요.",
         "noDeck": "이 인스턴스에는 카드를 넣을 다른 덱이 없어요.",
         "move": {
-          "one": "카드 {count}장 옮기기",
           "other": "카드 {count}장 옮기기"
         },
         "copy": {
-          "one": "카드 {count}장 복사",
           "other": "카드 {count}장 복사"
         },
         "moved": {
-          "one": "카드 {count}장을 {deck}(으)로 옮겼어요.",
           "other": "카드 {count}장을 {deck}(으)로 옮겼어요."
         },
         "copied": {
-          "one": "카드 {count}장을 {deck}(으)로 복사했어요.",
           "other": "카드 {count}장을 {deck}(으)로 복사했어요."
         },
         "renamed": {
-          "one": "카드 {count}장에 새 ID를 붙였어요. 덱에 같은 ID의 카드가 이미 있었어요.",
           "other": "카드 {count}장에 새 ID를 붙였어요. 덱에 같은 ID의 카드가 이미 있었어요."
         },
         "present": {
-          "one": "카드 {count}장은 이미 있었어요.",
           "other": "카드 {count}장은 이미 있었어요."
         }
       }
@@ -1873,7 +1773,6 @@
       "checkAgain": "다시 확인",
       "checking": "확인하는 중…",
       "summary": {
-        "one": "문제를 {count}건 찾았어요.",
         "other": "문제를 {count}건 찾았어요."
       },
       "allWell": "이 덱에는 아무 문제가 없어요.",
@@ -1891,7 +1790,6 @@
       "languagesHeading": "언어",
       "languagesFine": "모든 카드 면에 언어가 지정돼 있어요.",
       "unstated": {
-        "one": "카드 면 {count}개에 언어가 지정돼 있지 않아요.",
         "other": "카드 면 {count}개에 언어가 지정돼 있지 않아요."
       },
       "unstatedLink": "정보 화면에서 언어 지정하기",
@@ -1923,7 +1821,6 @@
       "language": "{place} ({language})",
       "badge": {
         "problems": {
-          "one": "문제 {count}건",
           "other": "문제 {count}건"
         },
         "healthy": "문제 없음",
@@ -1940,7 +1837,6 @@
       "browse": "덱 라이브러리 둘러보기",
       "intro": "덱 라이브러리에서 복사해 왔거나 링크로 추가한 각 덱과, 그 덱을 가져온 릴리스, 최신 릴리스를 보여 줘요. 덱을 업데이트하면 릴리스에 있던 그대로 둔 카드에 릴리스의 변경 사항이 반영돼요. 복습 기록은 유지돼요.",
       "upgrade": {
-        "one": "덱 {count}개 업데이트",
         "other": "덱 {count}개 업데이트"
       },
       "running": "{deck} 업데이트 중({total}개 중 {at}번째)",
@@ -1959,27 +1855,21 @@
       "details": "바뀌는 내용",
       "cards": {
         "add": {
-          "one": "추가: 카드 {count}장",
           "other": "추가: 카드 {count}장"
         },
         "change": {
-          "one": "변경: 카드 {count}장",
           "other": "변경: 카드 {count}장"
         },
         "retire": {
-          "one": "사용 중지: 카드 {count}장",
           "other": "사용 중지: 카드 {count}장"
         },
         "restore": {
-          "one": "복원: 카드 {count}장",
           "other": "복원: 카드 {count}장"
         },
         "remove": {
-          "one": "삭제: 카드 {count}장",
           "other": "삭제: 카드 {count}장"
         },
         "kept": {
-          "one": "지금 상태로 유지: 카드 {count}장",
           "other": "지금 상태로 유지: 카드 {count}장"
         }
       },
@@ -2003,12 +1893,10 @@
       },
       "withProgress": "내 진행 상황 포함: 각 카드의 복습 예정일과 완료한 코스 챕터",
       "exportButton": {
-        "one": "덱 {count}개 내보내기",
         "other": "덱 {count}개 내보내기"
       },
       "exporting": "{deck} 내보내는 중({total}개 중 {at}번째)…",
       "exported": {
-        "one": "덱 {count}개를 브라우저에 넘겼어요. 덱마다 따로 다운로드로 저장돼요. 브라우저가 여러 파일 다운로드를 허용할지 물어볼 수 있어요. 차단된 파일은 저장되지 않아요.",
         "other": "덱 {count}개를 브라우저에 넘겼어요. 덱마다 따로 다운로드로 저장돼요. 브라우저가 여러 파일 다운로드를 허용할지 물어볼 수 있어요. 차단된 파일은 저장되지 않아요."
       },
       "import": "가져오기",
@@ -2017,23 +1905,18 @@
       "reading": "파일을 읽는 중…",
       "file": "{name}: {deck}",
       "cards": {
-        "one": "카드 {count}장",
         "other": "카드 {count}장"
       },
       "states": {
-        "one": "진행 상황: 복습 상태 {count}개",
         "other": "진행 상황: 복습 상태 {count}개"
       },
       "chapters": {
-        "one": "완료한 챕터 {count}개",
         "other": "완료한 챕터 {count}개"
       },
       "upgraded": {
-        "one": "{count}개 부분이 이전 형식이라서 최신 형식으로 바뀌어요.",
         "other": "{count}개 부분이 이전 형식이라서 최신 형식으로 바뀌어요."
       },
       "dropped": {
-        "one": "{count}개 부분을 읽을 수 없어서 제외돼요.",
         "other": "{count}개 부분을 읽을 수 없어서 제외돼요."
       },
       "importProgress": "진행 상황도 가져오기",
@@ -2117,7 +2000,6 @@
       "questions": "질문",
       "cards": "카드",
       "cardCount": {
-        "one": "모두 카드 {count}장이에요.",
         "other": "모두 카드 {count}장이에요."
       },
       "allCards": "모든 카드",
@@ -2126,7 +2008,6 @@
       "problemsChecking": "초안을 검사하는 중…",
       "problemsNone": "릴리스 검사에서 문제점을 찾지 못했어요.",
       "problemsCount": {
-        "one": "릴리스 검사에서 문제점 {count}개를 찾았어요.",
         "other": "릴리스 검사에서 문제점 {count}개를 찾았어요."
       },
       "problemsLink": "릴리스 검사 보기",
@@ -2141,7 +2022,6 @@
       "noTheory": "아직 설명이 없어요.",
       "stepNumber": "단계 {chapter}.{step}",
       "stepCount": {
-        "one": "{count}단계",
         "other": "{count}단계"
       },
       "actions": "{name} 작업",
@@ -2204,7 +2084,6 @@
       "anyLanguage": "모든 언어",
       "unstated": "언어 지정 안 됨",
       "count": {
-        "one": "카드 {count}장",
         "other": "카드 {count}장"
       },
       "caption": "초안의 카드",
@@ -2278,7 +2157,6 @@
       "checking": "초안을 검사하는 중…",
       "clear": "문제가 없어요.",
       "summary": {
-        "one": "문제 {count}개.",
         "other": "문제 {count}개."
       },
       "errors": "오류",
@@ -2292,14 +2170,12 @@
       "shapesStale": "그 뒤로 초안이 바뀌었어요. 아래는 그때 있던 문제예요.",
       "shapesClear": "셰이프 검사에서 문제가 없어요.",
       "shapesCount": {
-        "one": "셰이프 검사에서 문제 {count}개가 나왔어요. 위의 문제에 포함돼 있어요.",
         "other": "셰이프 검사에서 문제 {count}개가 나왔어요. 위의 문제에 포함돼 있어요."
       },
       "previewLink": "목록 미리보기",
       "release": "이 릴리스",
       "distractor": "오답 선택지 {id}",
       "badge": {
-        "one": "문제 {count}개",
         "other": "문제 {count}개"
       },
       "badgeOf": "{name}에",
@@ -2372,7 +2248,6 @@
       "checkedAndReviewed": "{steps}에서 묻고, {chapters}의 복습에서도 물어요. 질문 하나는 한 곳에서만 물어요.",
       "noBack": "정답 선택지인 뒷면에 텍스트가 없어요.",
       "fewDistractors": {
-        "one": "사용 중인 오답 선택지가 {count}개예요. 코스에서 묻는 질문에는 {least}개 이상 있어야 해요.",
         "other": "사용 중인 오답 선택지가 {count}개예요. 코스에서 묻는 질문에는 {least}개 이상 있어야 해요."
       },
       "distractorLanguages": "{card}의 뒷면에는 있는 {missing} 텍스트가 없어요.",
@@ -2385,7 +2260,6 @@
       "theoryEmptyChunk": "{field}, {language}: 구분선이 맨 앞이나 맨 뒤에 있거나 다른 구분선 바로 뒤에 있으면 빈 부분이 생기고, 앱은 이 부분을 빼요. 단계의 설명은 구분선으로 나뉘어 한 부분씩 표시돼요. 두 구분선 사이마다 텍스트를 넣어 주세요.",
       "theoryChunks": "{field}: {counts}. 학습자가 언어를 바꿔도 진행 위치를 유지할 수 있도록, 단계의 설명은 언어마다 같은 수의 부분으로 나뉘어야 해요.",
       "theoryChunkCount": {
-        "one": "{language}에서 {count}부분",
         "other": "{language}에서 {count}부분"
       },
       "missingLanguage": "{field}: {language} 텍스트가 없어요.",
@@ -2439,7 +2313,6 @@
         "distractor": "오답 선택지"
       },
       "unchanged": {
-        "one": "{count}개는 그대로예요.",
         "other": "{count}개는 그대로예요."
       },
       "status": {
@@ -2459,11 +2332,9 @@
       "nothingLost": "진행 상황을 잃는 학습자는 없어요. 초안에서 더 이상 쓰지 않는 것은 사용 중지되고, 사용 중지된 카드는 기록을 유지해요.",
       "lost": "학습자가 잃게 될 진행 상황",
       "lostCards": {
-        "one": "초안에서 빠진 카드 {count}장의 복습 기록: {ids}.",
         "other": "초안에서 빠진 카드 {count}장의 복습 기록: {ids}."
       },
       "lostChapters": {
-        "one": "초안에서 빠진 챕터 {count}개의 완료 기록: {ids}.",
         "other": "초안에서 빠진 챕터 {count}개의 완료 기록: {ids}."
       }
     },
@@ -2486,7 +2357,6 @@
       "days": "앞당길 일수",
       "advance": "앞당기기",
       "ahead": {
-        "one": "체험이 {count}일 앞서 있어요.",
         "other": "체험이 {count}일 앞서 있어요."
       },
       "today": "체험이 오늘 날짜에 있어요.",
@@ -2537,7 +2407,6 @@
       "used": "이 버전을 만들 때 사용함",
       "usedEarlier": "이전 버전을 만들 때 사용했어요.",
       "sourceOthers": {
-        "one": "이 출처에 대한 다른 진술 {count}개는 그대로 유지돼요.",
         "other": "이 출처에 대한 다른 진술 {count}개는 그대로 유지돼요."
       },
       "saveSource": "출처 저장",
@@ -2590,7 +2459,6 @@
       "checking": "초안을 검사하는 중…",
       "noErrors": "릴리스 검사에서 오류가 없어요. 게시할 때 릴리스를 셰이프와도 대조해 다시 검사해요.",
       "errors": {
-        "one": "릴리스 검사에서 오류 {count}개를 찾았어요. 게시하기 전에 고쳐 주세요.",
         "other": "릴리스 검사에서 오류 {count}개를 찾았어요. 게시하기 전에 고쳐 주세요."
       },
       "folder": "Pod 안의 폴더",

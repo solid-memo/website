@@ -8,7 +8,7 @@ import en from "../i18n/en.json";
 import sv from "../i18n/sv.json";
 import ko from "../i18n/ko.json";
 
-/** Every message's key, and its placeholders, in a message file. */
+/** Every message's key, and its placeholders, in a message file; a plural message's marked as one. */
 function shape(messages: object, prefix = ""): Record<string, string[]> {
   const found: Record<string, string[]> = {};
   for (const [key, value] of Object.entries(messages)) {
@@ -17,15 +17,29 @@ function shape(messages: object, prefix = ""): Record<string, string[]> {
       found[path] = [...value.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort();
     } else if (typeof value.other === "string") {
       found[path] = [
-        ...new Set(
-          Object.values(value as Record<string, string>).flatMap((form) =>
-            [...form.matchAll(/\{(\w+)\}/g)].map((m) => m[1]),
+        "(plural)",
+        ...[
+          ...new Set(
+            Object.values(value as Record<string, string>).flatMap((form) =>
+              [...form.matchAll(/\{(\w+)\}/g)].map((m) => m[1]),
+            ),
           ),
-        ),
-      ].sort();
+        ].sort(),
+      ];
     } else {
       Object.assign(found, shape(value, `${path}.`));
     }
+  }
+  return found;
+}
+
+/** The forms each plural message in a message file gives, by key. */
+function pluralForms(messages: object, prefix = ""): Record<string, string[]> {
+  const found: Record<string, string[]> = {};
+  for (const [key, value] of Object.entries(messages)) {
+    if (typeof value === "string") continue;
+    if (typeof value.other === "string") found[`${prefix}${key}`] = Object.keys(value).sort();
+    else Object.assign(found, pluralForms(value, `${prefix}${key}.`));
   }
   return found;
 }
@@ -36,6 +50,17 @@ describe("the message files", () => {
     ["ko", ko],
   ])("say the same things in %s as in English, with the same placeholders", (_locale, messages) => {
     expect(shape(messages)).toEqual(shape(en));
+  });
+
+  it.each([
+    ["en", en],
+    ["sv", sv],
+    ["ko", ko],
+  ])("give each plural message in %s exactly the forms its plural rules name", (locale, messages) => {
+    const categories = [...new Intl.PluralRules(locale).resolvedOptions().pluralCategories].sort();
+    const forms = pluralForms(messages);
+    expect(Object.keys(forms)).not.toEqual([]);
+    expect(forms).toEqual(Object.fromEntries(Object.keys(forms).map((key) => [key, categories])));
   });
 });
 
