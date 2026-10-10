@@ -163,6 +163,7 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
     }),
     deleteReleaseDraft: vi.fn(async () => undefined),
     checkReleaseDraft: vi.fn(async (_draft, _check, _policy, options) => ({ rules: [], library: [], drops: [], markdown: [], shapes: options?.shapes === true ? [] : null })),
+    diffReleaseDraft: vi.fn(async () => null),
     exportDeckFile: vi.fn(async () => undefined),
     openDeckFile: vi.fn(async () => null),
     importDeckFile: vi.fn(async () => {

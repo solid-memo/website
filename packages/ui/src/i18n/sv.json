@@ -2040,7 +2040,8 @@
       },
       "problemsLink": "Se utgåvekontrollen",
       "previewLink": "Förhandsvisa listningen",
-      "trialLink": "Prova"
+      "trialLink": "Prova",
+      "diffLink": "Jämför med föregående version"
     },
     "outline": {
       "empty": "Inga kapitel än.",
@@ -2293,6 +2294,67 @@
       "intro": "Den här utgåvan i biblioteket, som eleverna kommer att se den. Inget här går att klicka på: det är en bild.",
       "row": "I bibliotekets lista",
       "page": "På sin egen sida"
+    },
+    "diff": {
+      "crumb": "Ändringar",
+      "heading": "Ändringar sedan föregående version",
+      "intro": "Det här utkastet jämfört med utgåvan det följer: vad det lägger till, ändrar, tar ur bruk och tar i bruk igen, och vad elever som har den utgåvan skulle få av det.",
+      "comparing": "Jämför utkastet…",
+      "first": "Det här utkastet är en första version: det följer ingen utgåva, så det finns inget att jämföra det med.",
+      "against": "Jämfört med version {version}, {url}.",
+      "rules": "Seriens regler",
+      "rulesKept": "Det tar inte bort något, ger inget id åt ett annat slags subjekt, och dess version är nästa.",
+      "about": "Vad det säger om sig självt",
+      "aboutSame": "Oförändrat.",
+      "aboutChanged": "Ändrat: {fields}.",
+      "detail": {
+        "course": "kurs eller kortlek",
+        "title": "titel",
+        "description": "beskrivning",
+        "keywords": "nyckelord",
+        "themes": "teman",
+        "direction": "studieriktning",
+        "license": "licens",
+        "authors": "upphovspersoner",
+        "languages": "språk",
+        "sources": "källor"
+      },
+      "subjects": "Dess innehåll",
+      "subjectsSame": "Varje kapitel, steg, kort och felaktigt alternativ är som det var.",
+      "kind": {
+        "chapter": "Kapitel",
+        "step": "Steg",
+        "card": "Kort",
+        "distractor": "Felaktiga alternativ"
+      },
+      "unchanged": {
+        "one": "{count} som det var.",
+        "other": "{count} som de var."
+      },
+      "status": {
+        "added": "tillagt",
+        "changed": "ändrat",
+        "retired": "taget ur bruk",
+        "restored": "taget i bruk igen",
+        "retiredChanged": "taget ur bruk, och ändrat",
+        "restoredChanged": "taget i bruk igen, och ändrat"
+      },
+      "learners": "Vad eleverna får",
+      "notNewer": "Eleverna erbjuds bara en nyare utgåva, och version {version} kommer inte efter version {previous}.",
+      "noUpgrade": "En elevs kopia av version {previous} skulle inte ändras.",
+      "upgrade": "En uppdatering av en elevs kopia av version {previous} {changes}.",
+      "retiredOnly": "uppdaterar bara kort som är tagna ur bruk",
+      "courseLearner": "Kopian här tillhör en elev som har nått varje fråga. En kurs elever får dess nya frågor när de når dem.",
+      "nothingLost": "Ingen elev förlorar framsteg: det utkastet inte längre använder tar det ur bruk, och ett kort ur bruk behåller sin historik.",
+      "lost": "Framsteg eleverna skulle förlora",
+      "lostCards": {
+        "one": "Repetitionshistoriken för {count} kort som utkastet tar bort: {ids}.",
+        "other": "Repetitionshistoriken för {count} kort som utkastet tar bort: {ids}."
+      },
+      "lostChapters": {
+        "one": "{count} slutfört kapitel som utkastet tar bort: {ids}.",
+        "other": "{count} slutförda kapitel som utkastet tar bort: {ids}."
+      }
     },
     "trial": {
       "crumb": "Provkörning",

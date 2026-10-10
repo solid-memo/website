@@ -147,4 +147,5 @@ export const draftLinks = {
   checkHref: "#/check",
   previewHref: "#/preview",
   trialHref: "#/trial",
+  diffHref: "#/diff",
 };

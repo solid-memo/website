@@ -2043,7 +2043,8 @@
       },
       "problemsLink": "See the release check",
       "previewLink": "Preview the listing",
-      "trialLink": "Try it out"
+      "trialLink": "Try it out",
+      "diffLink": "Compare with the previous version"
     },
     "outline": {
       "empty": "No chapters yet.",
@@ -2296,6 +2297,67 @@
       "intro": "This release in the library, as learners will see it. Nothing here can be clicked: it is a picture.",
       "row": "In the library's list",
       "page": "On its own page"
+    },
+    "diff": {
+      "crumb": "Changes",
+      "heading": "Changes since the previous version",
+      "intro": "This draft against the release it follows: what it adds, changes, retires and brings back, and what learners who have that release would get from it.",
+      "comparing": "Comparing the draft…",
+      "first": "This draft is a first version: it follows no release, so there is nothing to compare it with.",
+      "against": "Compared with version {version}, {url}.",
+      "rules": "Rules of the series",
+      "rulesKept": "It drops nothing, gives no id to another kind of subject, and its version is the next.",
+      "about": "What it says of itself",
+      "aboutSame": "Unchanged.",
+      "aboutChanged": "Changed: {fields}.",
+      "detail": {
+        "course": "course or deck",
+        "title": "title",
+        "description": "description",
+        "keywords": "keywords",
+        "themes": "themes",
+        "direction": "study direction",
+        "license": "licence",
+        "authors": "authors",
+        "languages": "languages",
+        "sources": "sources"
+      },
+      "subjects": "Its content",
+      "subjectsSame": "Every chapter, step, card and wrong option is as it was.",
+      "kind": {
+        "chapter": "Chapters",
+        "step": "Steps",
+        "card": "Cards",
+        "distractor": "Wrong options"
+      },
+      "unchanged": {
+        "one": "{count} as it was.",
+        "other": "{count} as they were."
+      },
+      "status": {
+        "added": "added",
+        "changed": "changed",
+        "retired": "retired",
+        "restored": "brought back",
+        "retiredChanged": "retired, and changed",
+        "restoredChanged": "brought back, and changed"
+      },
+      "learners": "What learners get",
+      "notNewer": "Learners are offered only a newer release, and version {version} does not come after version {previous}.",
+      "noUpgrade": "A learner's copy of version {previous} would not change.",
+      "upgrade": "Updating a learner's copy of version {previous} {changes}.",
+      "retiredOnly": "updates only retired cards",
+      "courseLearner": "The copy here is a learner's who has reached every question. A course's learners get its new questions as they reach them.",
+      "nothingLost": "No learner loses progress: what the draft no longer uses it retires, and a retired card keeps its history.",
+      "lost": "Progress learners would lose",
+      "lostCards": {
+        "one": "The review history of {count} card the draft drops: {ids}.",
+        "other": "The review history of {count} cards the draft drops: {ids}."
+      },
+      "lostChapters": {
+        "one": "The completion of {count} chapter the draft drops: {ids}.",
+        "other": "The completion of {count} chapters the draft drops: {ids}."
+      }
     },
     "trial": {
       "crumb": "Trial",

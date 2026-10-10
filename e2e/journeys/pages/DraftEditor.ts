@@ -9,7 +9,8 @@ import { Screen } from "./Screen.ts";
  * options and its preview). Every edit is saved as it is made, and the
  * status line says when all of them are. Its release check lists the
  * problems of the release it will be, each a link to what it is about;
- * its listing preview shows it as the library will.
+ * its listing preview shows it as the library will. A next version is
+ * compared with the release it follows.
  */
 export class DraftEditor extends Screen {
   /** The draft's outline, as the overview shows it. */
@@ -22,12 +23,54 @@ export class DraftEditor extends Screen {
     await expect(this.page.getByRole("status").filter({ hasText: this.t("studio.draftEdit.saved") })).toHaveCount(1);
   }
 
-  /** Opens a draft from the drafts screen's table, by its name: its overview. */
-  async openDraft(name: string): Promise<void> {
+  /** Opens a draft from the drafts screen's table, by its name: its overview, with a course's outline. */
+  async openDraft(name: string, { course = true } = {}): Promise<void> {
     await this.intent(`Open the draft ${name}`, async () => {
       await this.page.getByRole("table").getByRole("link", { name, exact: true }).click();
       await expect(this.page.getByRole("heading", { level: 2, name })).toBeVisible();
-      await expect(this.page.getByRole("heading", { name: this.t("studio.draft.outline") })).toBeVisible();
+      if (course) await expect(this.page.getByRole("heading", { name: this.t("studio.draft.outline") })).toBeVisible();
+      else await expect(this.page.getByRole("heading", { name: this.t("studio.draft.cards") })).toBeVisible();
+    });
+  }
+
+  /** Retires a card of the draft open, from its table of cards: it is saved, and the table says it is retired. */
+  async retireCard(front: string): Promise<void> {
+    await this.intent(`Retire the card ${front}`, async () => {
+      await this.page.getByRole("link", { name: this.t("studio.draft.allCards") }).click();
+      await this.page.getByRole("rowheader").getByRole("link", { name: front, exact: true }).click();
+      await expect(this.page.getByRole("heading", { level: 2, name: front })).toBeVisible();
+      await this.page.getByRole("button", { name: this.t("studio.draftEdit.retire"), exact: true }).click();
+      await this.expectSaved();
+      await expect(this.page.getByRole("button", { name: this.t("studio.draftEdit.restore"), exact: true })).toBeVisible();
+    });
+  }
+
+  /** Opens the comparison with the release the draft follows, from its overview, reached by the trail. */
+  async openDiff(draft: string): Promise<void> {
+    await this.intent("Compare the draft with the previous version", async () => {
+      await this.app.chrome.breadcrumbs.getByRole("link", { name: draft, exact: true }).click();
+      await this.page.getByRole("link", { name: this.t("studio.draft.diffLink") }).click();
+      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.diff.heading") })).toBeVisible();
+      await this.app.chrome.expectBreadcrumbHere("studio.diff.crumb");
+      await expect(this.page.getByText(this.t("studio.diff.comparing"))).toHaveCount(0);
+    });
+  }
+
+  /**
+   * The comparison keeps the series' rules, lists each subject changed
+   * with how (a link to its editor), and says what a learner's copy of
+   * the release would get (`upgrade`), losing nothing.
+   */
+  async expectDiff(changes: Record<string, string>, upgrade: string): Promise<void> {
+    await this.intent("See what the draft changes, and what learners get", async () => {
+      await expect(this.page.getByText(this.t("studio.diff.rulesKept"))).toBeVisible();
+      const content = this.page.getByRole("region", { name: this.t("studio.diff.subjects") });
+      for (const [name, status] of Object.entries(changes)) {
+        await expect(content.getByRole("listitem").filter({ has: this.page.getByRole("link", { name, exact: true }) })).toHaveText(`${name}: ${status}`);
+      }
+      const learners = this.page.getByRole("region", { name: this.t("studio.diff.learners") });
+      await expect(learners).toContainText(upgrade);
+      await expect(learners).toContainText(this.t("studio.diff.nothingLost"));
     });
   }
 

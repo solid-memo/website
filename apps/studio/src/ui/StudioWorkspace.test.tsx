@@ -636,6 +636,38 @@ describe("StudioWorkspace", () => {
       expect(trailOf()).toEqual(["Instances", "Decks", "Drafts", "Solid", "Listing preview"]);
     });
 
+    it("compares a next version with the release it follows from its overview, with its trail, each change a link to its editor", async () => {
+      const previous = courseDraft();
+      const draft: ReleaseDraft = {
+        ...previous,
+        root: { ...previous.root, version: "2", prev: "https://pod.example/releases/solid/v1.ttl" },
+        cards: previous.cards.map((node) => (node.id === "q-pods-1a" ? { ...node, data: { ...node.data, back: { en: "Your pod" } } } : node)),
+      };
+      const useCases = draftUseCases(draft);
+      vi.mocked(useCases.diffReleaseDraft).mockResolvedValue({
+        previous: { ...previous, url: "https://pod.example/releases/solid/v1.ttl" },
+        diff: { about: [], subjects: [{ kind: "card", id: "q-pods-1a", status: "changed" }], unchanged: { chapter: 2, step: 2, card: 1, distractor: 1 } },
+        problems: [],
+        upgrade: { newer: true, plan: null, lost: { cards: [], chapters: [] } },
+      });
+      window.history.replaceState(null, "", studioRouteToHash({ screen: "draft", draftUrl: DRAFT_URL }));
+      renderWorkspace(useCases);
+      fireEvent.click(await screen.findByRole("link", { name: "Compare with the previous version" }));
+      expect(await screen.findByRole("heading", { level: 2, name: "Changes since the previous version" })).toBeInTheDocument();
+      expect(trailOf()).toEqual(["Instances", "Decks", "Drafts", "Solid", "Changes"]);
+      const changed = await screen.findByRole("link", { name: "What holds data?" });
+      expect(useCases.diffReleaseDraft).toHaveBeenCalledWith(draft);
+      fireEvent.click(changed);
+      await waitFor(() => expect(parseStudioHash(window.location.hash)).toEqual({ screen: "question", draftUrl: DRAFT_URL, card: "q-pods-1a" }));
+    });
+
+    it("offers no comparison for a first version", async () => {
+      window.history.replaceState(null, "", studioRouteToHash({ screen: "draft", draftUrl: DRAFT_URL }));
+      renderWorkspace(draftUseCases());
+      expect(await screen.findByRole("link", { name: "Try it out" })).toBeInTheDocument();
+      expect(screen.queryByRole("link", { name: "Compare with the previous version" })).toBeNull();
+    });
+
     it("plays the draft in a trial from its overview, with its trail, its chapters, reviews and jumps in the URL", async () => {
       const useCases = draftUseCases();
       const trial = makeUseCasesFake({

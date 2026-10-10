@@ -1,6 +1,9 @@
+import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import { directionOfConcept } from "../concepts.ts";
+import { CARD_FORMAT_VERSION, type Distractor } from "../deck.ts";
+import { distractorFromRecord, libraryCardFromRecord } from "../deckRecord.ts";
 import { copyKeywords } from "../keywords.ts";
-import type { LibraryDeck, LibrarySource } from "../library.ts";
+import type { LibraryCard, LibraryDeck, LibraryDeckContent, LibrarySource } from "../library.ts";
 import { iriIn, type ReleaseDraft } from "./releaseDraft.ts";
 import { DCTERMS_NS } from "./releaseModel.ts";
 
@@ -53,4 +56,29 @@ export function draftLibraryDeck(draft: ReleaseDraft): LibraryDeck {
     }),
     ...(draft.course ? { isCourse: true as const } : {}),
   };
+}
+
+/**
+ * A draft as the release it will be, whole, as an import reads one
+ * (LibraryDeckContent): what it says of itself, as the listing preview
+ * shows it (draftLibraryDeck), and every card, retired ones too, each
+ * with its wrong options. A card or a wrong option without text is left
+ * out, as a reader leaves out one that does not fit its shape.
+ */
+export function draftLibraryContent(draft: ReleaseDraft): LibraryDeckContent {
+  const { url, releases: _releases, cardCount: _cardCount, sources: _sources, createdAt: _createdAt, isCourse, ...about } = draftLibraryDeck(draft);
+  const options = new Map(draft.distractors.map((node) => [iriIn(draft, node.id), node.data]));
+  const distractorsOf = (iris: readonly string[]): Distractor[] =>
+    iris
+      .flatMap((iri) => {
+        const data = options.get(iri);
+        const distractor = data === undefined ? null : distractorFromRecord(iri, data);
+        return distractor === null ? [] : [distractor];
+      })
+      .sort((a, b) => a.id.localeCompare(b.id));
+  const cards = draft.cards.flatMap((node): LibraryCard[] => {
+    const card = libraryCardFromRecord(iriIn(draft, node.id), CARD_FORMAT_VERSION, node.data, distractorsOf(node.data.distractor));
+    return card === null ? [] : [card];
+  });
+  return { ...about, url, formatVersion: LATEST_VERSION.libraryDeck, cards, ...(isCourse === undefined ? {} : { isCourse }) };
 }

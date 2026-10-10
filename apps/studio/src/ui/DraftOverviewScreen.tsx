@@ -30,6 +30,8 @@ export interface DraftLinks {
   previewHref: string;
   /** The draft played in a sandbox. */
   trialHref: string;
+  /** The draft against the release it follows. */
+  diffHref: string;
 }
 
 /** The release check of the draft as the overview counts it: its problems, undefined while it runs, or why it did not. */
@@ -164,6 +166,12 @@ export function DraftOverviewScreen({
           <p>
             <a href={links.checkHref}>{t("studio.draft.problemsLink")}</a> · <a href={links.previewHref}>{t("studio.draft.previewLink")}</a> ·{" "}
             <a href={links.trialHref}>{t("studio.draft.trialLink")}</a>
+            {draft.root.prev !== undefined && (
+              <>
+                {" · "}
+                <a href={links.diffHref}>{t("studio.draft.diffLink")}</a>
+              </>
+            )}
           </p>
         </section>
       </DraftScope>

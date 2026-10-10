@@ -62,6 +62,7 @@ describe("the Studio's routes", () => {
     { screen: "trial", draftUrl: DRAFT },
     { screen: "trial", draftUrl: DRAFT, chapter: "ch-pods" },
     { screen: "trial", draftUrl: DRAFT, chapter: "ch-pods", review: true },
+    { screen: "diff", draftUrl: DRAFT },
   ];
 
   it("round-trip through the hash", () => {
@@ -151,7 +152,7 @@ describe("the Studio's routes", () => {
   });
 
   it("name the instance a route is in, the deck's for the workbench", () => {
-    expect(routes.map(instanceOfRoute)).toEqual([null, ...Array(33).fill("https://pod.example/solid-memo/a/")]);
+    expect(routes.map(instanceOfRoute)).toEqual([null, ...Array(34).fill("https://pod.example/solid-memo/a/")]);
   });
 
   it("keep a draft and the subject of it shown in their query, and the cards' view, the first page and no filter left out", () => {

@@ -10,11 +10,13 @@ import { useI18n, type I18n, type ErrorText } from "./i18n";
  * itself, already as the release has them (an upgrade cut off half-way)
  * are said to be kept so; a course's chapters, steps and theory, and
  * the questions the learner has not reached, when they change, are said
- * to be updated.
+ * to be updated. A plan that touches only cards out of sight says
+ * `none`: by default, that it updates cards the user no longer studies.
  */
 export function describeChanges(
   plan: LibraryUpgradePlan,
   { t, directionLabel }: Pick<I18n, "t" | "directionLabel">,
+  none: string = t("libraryUpgradeNotice.noStudiedChanges"),
 ): string {
   const added = activeCards(plan.add).length;
   const changed = activeCards(plan.change).length;
@@ -35,7 +37,7 @@ export function describeChanges(
     ...(plan.outline === true ? [t("libraryUpgradeNotice.outline")] : []),
     ...(plan.unreached === true ? [t("libraryUpgradeNotice.unreached")] : []),
   ];
-  if (parts.length === 0) return t("libraryUpgradeNotice.noStudiedChanges");
+  if (parts.length === 0) return none;
   return parts.length === 1
     ? parts[0]
     : t("libraryUpgradeNotice.list", {

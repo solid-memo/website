@@ -4,8 +4,9 @@
  * server, at the size of the library's largest course (17 chapters, 193
  * steps, 466 cards, 1,398 distractors): its next version made a draft in
  * the instance, a document per chapter, within a time budget; opened,
- * knowing what the release published; edited, one write a document, and
- * edited again when a document changed elsewhere, keeping that change;
+ * knowing what the release published; edited, one write a document;
+ * compared with the release it follows, the card it retires retired in a
+ * learner's copy too, nothing lost; and edited again when a document changed elsewhere, keeping that change;
  * checked as the instance's check checks it; deleted, documents, folders
  * and link. An instance deleted with a draft in it leaves nothing. The
  * course is read with its text made ASCII: an edit of a draft is a
@@ -30,7 +31,7 @@ const SERVERS = inject("solidServers");
 const COURSE = `${SITE}decks/solid-fundamentals/v1.ttl`;
 
 /** How long each step may take at the course's size, on any server tested. */
-const BUDGET = { create: 30_000, open: 10_000, edit: 10_000, delete: 20_000 };
+const BUDGET = { create: 30_000, open: 10_000, edit: 10_000, diff: 10_000, delete: 20_000 };
 
 /** A page of the app as createAppUseCases wires it, every pod request through `fetch`, the library read from this repository. */
 function page(podFetch: typeof globalThis.fetch = fetch) {
@@ -105,6 +106,14 @@ describe.each(SERVERS)("drafts of releases on $name", ({ url: server }) => {
     expect(edited.took).toBeLessThan(BUDGET.edit);
     expect(edited.value.ok).toBe(true);
     expect((await useCases.getReleaseDraft(summary.url)).cards.find((node) => node.id === card!.id)!.data.deprecated).toBe(true);
+    // Against the release it follows: one card retired, which a learner's copy retires too, losing nothing.
+    const compared = await timed(async () => useCases.diffReleaseDraft(await useCases.getReleaseDraft(summary.url)));
+    expect(compared.took).toBeLessThan(BUDGET.diff);
+    const diff = compared.value!;
+    expect(diff.problems).toEqual([]);
+    expect(diff.diff.subjects).toEqual([{ kind: "card", id: card!.id, status: "retired" }]);
+    expect(diff.upgrade.plan!.retire.map((one) => one.id)).toEqual([card!.id]);
+    expect(diff.upgrade.lost).toEqual({ cards: [], chapters: [] });
     // What an earlier release published is retired, never deleted.
     await expect(useCases.editReleaseDraft(summary.url, [{ kind: "delete", of: "card", id: card!.id }])).resolves.toEqual({
       ok: false,

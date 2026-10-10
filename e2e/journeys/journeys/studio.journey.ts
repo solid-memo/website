@@ -47,8 +47,11 @@ import { BRIGHTEST_STARS } from "../pages/Library.ts";
  * test-play the course they wrote in the Studio's trial, to the end of
  * its one chapter's final review. The instance's decks, and Solid
  * Memo's statistics, are as they were: the trial is played in a sandbox.
- * They go back to Solid Memo, still logged in, which lists the deck they
- * made that is left.
+ * They draft the next version of the library deck, by its address,
+ * retire one of its cards, and compare the draft with the release: it
+ * keeps the series' rules, lists the card retired, and a learner's copy
+ * would retire it too, losing nothing. They go back to Solid Memo, still
+ * logged in, which lists the deck they made that is left.
  */
 test("open the Studio from Solid Memo and manage an instance's decks @studio", async ({ app, account, runId }) => {
   const instance = `Studio ${runId}`;
@@ -323,8 +326,23 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     for (const tile of tiles) expect(await app.statistics.value(tile), tile).toBe(counted[tile]);
   });
 
-  await app.step("33 · Go back to Solid Memo, still logged in", async () => {
-    await app.chrome.breadcrumb("breadcrumbs.decks");
+  await app.step("33 · Draft the library deck's next version, retire a card, and compare it with the release: learners lose nothing", async () => {
+    await app.studio.openFromApp();
+    await app.studio.openDrafts(renamed);
+    // A library release by its address, which the site serves (docs/deck-library.md).
+    const release = "https://solid-memo.com/decks/brightest-stars/v1.ttl";
+    await app.studio.draftNextVersion(release, BRIGHTEST_STARS.en, 2);
+    await app.draftEditor.openDraft(BRIGHTEST_STARS.en, { course: false });
+    await app.draftEditor.retireCard("Sirius");
+    await app.draftEditor.openDiff(BRIGHTEST_STARS.en);
+    await app.draftEditor.expectDiff(
+      { Sirius: app.t("studio.diff.status.retired") },
+      app.t("studio.diff.upgrade", { previous: "1", changes: app.t("libraryUpgradeNotice.retires", { count: 1 }) }),
+    );
+  });
+
+  await app.step("34 · Go back to Solid Memo, still logged in", async () => {
+    await app.studio.backToApp();
     await app.chrome.expectLoggedInAs(account.webId);
     await app.decks.expectDeck(alpha);
   });
