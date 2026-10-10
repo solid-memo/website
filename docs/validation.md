@@ -32,7 +32,7 @@ its text shows, not whether it conforms.
 ```mermaid
 flowchart LR
     ui["ValidationContainer<br/>#/validate"] --> uc["validateInstance"]
-    uc --> docs["instanceDocumentUrls<br/>meta, preferences, catalog,<br/>every deck's cards + reviews"]
+    uc --> docs["instanceDocumentUrls<br/>meta, preferences, catalog,<br/>every deck's cards + reviews,<br/>every draft's documents"]
     docs --> port["ShapeValidator.validateDocument"]
     port --> pod["pod document<br/>(authenticated fetch)"]
     port --> shapes["ns/shapes/&lt;class&gt;/v&lt;N&gt;.ttl<br/>(published with the site)"]
@@ -41,8 +41,12 @@ flowchart LR
 
 - `validateInstance` (application) lists the decks, names every document
   the instance may hold, the [answer log](data-model.md#the-answer-log)'s
-  month documents included, and asks the `ShapeValidator` port about
-  each; `summarize` (domain) counts the violations. It reads only.
+  month documents included, and the documents of the
+  [drafts](data-model.md#drafts-and-releases) its catalogue links, and
+  asks the `ShapeValidator` port about each, saying where it is: a
+  draft's document is checked as a draft's (`"draft"`, below), against
+  the draft shapes and without DCAT-AP; `summarize` (domain) counts the
+  violations. It reads only.
 - **Opening an instance** runs `checkInstance` instead: the same check,
   but a document still at a version the instance's
   [digest](data-model.md#the-digest) says conformed, by the same rules,
@@ -255,7 +259,7 @@ the shapes, as `pickShape` picks them for a read:
 
 - `"pod"`: an instance's documents, checked against the pod's shapes
   and, where they have DCAT subjects, DCAT-AP. Every write the app makes
-  today is one.
+  is one, but a draft's.
 - `"draft"`: a release's draft. Its deck, chapters and steps are checked
   against the draft shapes (`DraftDeckV1`, `DraftChapterV1`,
   `DraftStepV1`, [shapes.md](shapes.md#version-by-version)), which do
@@ -263,6 +267,9 @@ the shapes, as `pickShape` picks them for a read:
   against the shapes every context shares. DCAT-AP is not run: a draft
   may still lack what a published dataset needs, such as a description.
   The release check holds the draft to all of it before it is published.
+  Every write of a draft is one
+  ([solidReleaseDraftRepository.ts](../packages/solid/src/solidReleaseDraftRepository.ts)),
+  and so is the check of a draft's documents.
 
 A published release is never written, so no write is checked as one.
 

@@ -6,7 +6,7 @@
  * may be another pod's), linked from the WebID document, or, where that
  * cannot be written (as on Inrupt PodSpaces), from an extended profile it
  * names. Beside the instance, each class of its data is registered, its
- * review states and answers in the private index alone, read back from
+ * review states, answers and drafts in the private index alone, read back from
  * the index as written, and every registration goes when the instance is
  * deleted. Runs against each server globalSetup.ts starts. Every run here
  * shares the storage's one type index; a file's tests run one at a time.
@@ -91,7 +91,7 @@ async function registrationsIn(index: string, container: string) {
 }
 
 /** What each class of an instance's data is registered as, in the order registrationsIn sorts them. */
-function registered(container: string, classes: ("instance" | "catalog" | "deck" | "card" | "reviewState" | "answer")[]) {
+function registered(container: string, classes: ("instance" | "catalog" | "deck" | "card" | "reviewState" | "answer" | "draft")[]) {
   const all = {
     instance: { forClass: [`${SM}Instance`], predicate: "instanceContainer", target: container },
     catalog: { forClass: ["http://www.w3.org/ns/dcat#Catalog"], predicate: "instance", target: `${container}catalog.ttl#catalog` },
@@ -99,6 +99,7 @@ function registered(container: string, classes: ("instance" | "catalog" | "deck"
     card: { forClass: [`${SM}Card`], predicate: "instanceContainer", target: `${container}decks/` },
     reviewState: { forClass: [`${SM}ReviewState`], predicate: "instanceContainer", target: `${container}reviews/` },
     answer: { forClass: [`${SM}Answer`], predicate: "instanceContainer", target: `${container}history/` },
+    draft: { forClass: [`${SM}Deck`], predicate: "instanceContainer", target: `${container}drafts/` },
   };
   return classes
     .map((dataClass) => ({ ...all[dataClass], subject: expect.any(String), title: ["Main"] }))
@@ -124,7 +125,7 @@ describe.each(SERVERS)("registering an instance on $name", ({ url: server }) => 
     const instance = await repository.createInstance({ webId, containerUrl: `${base}solid-memo/`, name: "Main", registrationTarget: "private" });
 
     const index = `${await storageOf(base)}settings/privateTypeIndex.ttl`;
-    const all = ["instance", "catalog", "deck", "card", "reviewState", "answer"] as const;
+    const all = ["instance", "catalog", "deck", "card", "reviewState", "answer", "draft"] as const;
     expect(await registrationsIn(index, instance.url)).toEqual(registered(instance.url, [...all]));
     expect(await repository.listInstances(webId)).toContainEqual({ url: instance.url, name: "Main" });
     expect(await repository.readDataClassRegistrations({ webId, instanceUrl: instance.url })).toEqual({
@@ -145,7 +146,7 @@ describe.each(SERVERS)("registering an instance on $name", ({ url: server }) => 
     const index = `${await storageOf(base)}settings/privateTypeIndex.ttl`;
     // The removal is made in the same second as the index was read, which such a server's ETag does not tell apart.
     if (!(await etagMarksEveryEdit(server))) context.skip(ETAG_OUTLIVES_EDITS);
-    const all = ["instance", "catalog", "deck", "card", "reviewState", "answer"] as const;
+    const all = ["instance", "catalog", "deck", "card", "reviewState", "answer", "draft"] as const;
 
     const cards = (await registrationsIn(index, instance.url)).find((registration) => registration.target.endsWith("decks/"))!;
     const removal = await fetch(index, {
@@ -155,7 +156,7 @@ describe.each(SERVERS)("registering an instance on $name", ({ url: server }) => 
         <${SOLID_TERMS}instanceContainer> <${cards.target}> ; <http://purl.org/dc/terms/title> "Main" . }`,
     });
     expect(removal.ok, `PATCH ${index}: ${removal.status}`).toBe(true);
-    expect(await registrationsIn(index, instance.url)).toEqual(registered(instance.url, ["instance", "catalog", "deck", "reviewState", "answer"]));
+    expect(await registrationsIn(index, instance.url)).toEqual(registered(instance.url, ["instance", "catalog", "deck", "reviewState", "answer", "draft"]));
     expect((await repository.readDataClassRegistrations({ webId, instanceUrl: instance.url })).registrations).toContainEqual({
       dataClass: "card",
       index: "private",
@@ -165,7 +166,7 @@ describe.each(SERVERS)("registering an instance on $name", ({ url: server }) => 
     expect(await registrationsIn(index, instance.url)).toEqual(registered(instance.url, [...all]));
   });
 
-  it("registers an instance publicly, its review states and answers in the private index alone, and unregisters it from both", async () => {
+  it("registers an instance publicly, its review states, answers and drafts in the private index alone, and unregisters it from both", async () => {
     const { base, card, webId } = await profile(server, () => [], { privateIndex: true });
     const privateIndex = `${base}settings/privateTypeIndex.ttl`;
     const repository = instances();
@@ -175,7 +176,7 @@ describe.each(SERVERS)("registering an instance on $name", ({ url: server }) => 
     const publicIndex = `${await storageOf(base)}settings/publicTypeIndex.ttl`;
     expect(await triples(card)).toContain(`<${webId}> <${SOLID_TERMS}publicTypeIndex> <${publicIndex}> .`);
     expect(await registrationsIn(publicIndex, instance.url)).toEqual(registered(instance.url, ["instance", "catalog", "deck", "card"]));
-    expect(await registrationsIn(privateIndex, instance.url)).toEqual(registered(instance.url, ["reviewState", "answer"]));
+    expect(await registrationsIn(privateIndex, instance.url)).toEqual(registered(instance.url, ["reviewState", "answer", "draft"]));
     expect(await repository.listInstances(webId)).toContainEqual({ url: instance.url, name: "Main" });
 
     await repository.deleteInstance({ webId, instance });

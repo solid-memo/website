@@ -7,7 +7,7 @@ import {
   type SolidDataset,
 } from "@inrupt/solid-client";
 import type { DatasetCore, Quad } from "@rdfjs/types";
-import type { ShapeValidator } from "@solid-memo/application/ports";
+import type { DocumentContext, ShapeValidator } from "@solid-memo/application/ports";
 import type { DocumentReport, SubjectReport, Violation } from "@solid-memo/domain/validation";
 import { getSolidDatasetOrNull } from "./datasets";
 import { readSince } from "./readSince";
@@ -204,8 +204,12 @@ export function createShaclShapeValidator({
     return problems;
   }
 
-  /** The report on a document: each subject checked against its shape, the DCAT-AP profile where it applies. */
-  async function reportOf(url: string, dataset: SolidDataset | null): Promise<DocumentReport> {
+  /**
+   * The report on a document: each subject checked against its shape,
+   * picked for where the document is (an instance's, or a draft's), and
+   * the DCAT-AP profile where it applies, which a draft is not held to yet.
+   */
+  async function reportOf(url: string, dataset: SolidDataset | null, context: DocumentContext): Promise<DocumentReport> {
     if (dataset === null) return { url, status: "missing", subjects: [] };
     const data = toRdfJsDataset(dataset);
     const quads = [...(data as Iterable<Quad>)];
@@ -217,7 +221,7 @@ export function createShaclShapeValidator({
     for (const thing of getThingAll(dataset)) {
       const subject = asUrl(thing);
       const version = storedVersionOf(thing);
-      const pick = pickShape(getUrlAll(thing, RDF.type), version, "pod");
+      const pick = pickShape(getUrlAll(thing, RDF.type), version, context);
       if (pick.kind === "untyped") {
         subjects.push({ url: subject, status: "untyped" });
         continue;
@@ -243,9 +247,9 @@ export function createShaclShapeValidator({
         ...(foreign.has(subject) && { foreign: true }),
       });
     }
-    const profiled = getThingAll(dataset).some((thing) =>
-      getUrlAll(thing, RDF.type).some((type) => PROFILED_CLASSES.includes(type)),
-    );
+    const profiled =
+      context === "pod" &&
+      getThingAll(dataset).some((thing) => getUrlAll(thing, RDF.type).some((type) => PROFILED_CLASSES.includes(type)));
     if (profiled) {
       for (const [subject, found] of await profileViolations(data)) {
         const index = subjects.findIndex((s) => s.url === subject);
@@ -270,13 +274,13 @@ export function createShaclShapeValidator({
       }
     },
 
-    async validateDocument(url): Promise<DocumentReport> {
-      return reportOf(url, await getSolidDatasetOrNull(url, fetch));
+    async validateDocument(url, context = "pod"): Promise<DocumentReport> {
+      return reportOf(url, await getSolidDatasetOrNull(url, fetch), context);
     },
 
-    async validateDocumentSince(url, version) {
+    async validateDocumentSince(url, version, context = "pod") {
       const since = await readSince(url, version, fetch);
-      return since.unchanged ? since : { ...since, value: await reportOf(url, since.value) };
+      return since.unchanged ? since : { ...since, value: await reportOf(url, since.value, context) };
     },
   };
 }

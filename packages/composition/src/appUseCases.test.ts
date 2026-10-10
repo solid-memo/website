@@ -73,6 +73,19 @@ describe("createAppUseCases", () => {
     },
   );
 
+  it("drafts a release in the instance, a library release read from the site, another from the pod", { timeout: 60_000 }, async () => {
+    const useCases = createAppUseCases({ ...options, indexedDB: undefined });
+    await useCases.startGuest("My study");
+    const [instance] = await useCases.listInstances(GUEST_SESSION);
+    await useCases.createDeck(instance!.url, { en: "Capitals" });
+    const made = await useCases.createReleaseDraft(instance!.url, { kind: "nextVersionOf", url: `${SITE}decks/getting-started/v1.ttl` });
+    expect(made!.draft).toMatchObject({ name: "getting-started", version: 2, course: true });
+    expect((await useCases.checkInstance(instance!.url)).conforms).toBe(true);
+    await expect(useCases.createReleaseDraft(instance!.url, { kind: "nextVersionOf", url: `${instance!.url}releases/none/v1.ttl` })).rejects.toMatchObject({
+      code: "releaseUnreadable",
+    });
+  });
+
   it("keeps a guest's study in IndexedDB, where the browser has it", { timeout: 30_000 }, async () => {
     const indexedDB = new IDBFactory();
     await createAppUseCases({ ...options, indexedDB }).startGuest("My study");

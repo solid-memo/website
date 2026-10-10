@@ -1,13 +1,15 @@
-import { getSolidDataset, toRdfJsDataset } from "@inrupt/solid-client";
+import { toRdfJsDataset } from "@inrupt/solid-client";
 import type { Quad, Term } from "@rdfjs/types";
+import { getSolidDatasetLinear } from "./linearDataset";
 
 const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
 
 /**
  * A Turtle document as N-Triples lines, its relative IRIs resolved
  * against `url`: how the pods kept outside a server (localPod.ts, and
- * the one tests use) store documents. Rejects when the Turtle does not
- * parse.
+ * the one tests use) store documents, built in one pass (linearDataset.ts),
+ * so a large document is stored in time linear in its size. Rejects when
+ * the Turtle does not parse.
  */
 export async function triplesOf(url: string, turtle: string): Promise<Set<string>> {
   const fetch = (async () => {
@@ -15,7 +17,7 @@ export async function triplesOf(url: string, turtle: string): Promise<Set<string
     Object.defineProperty(response, "url", { value: url });
     return response;
   }) as unknown as typeof globalThis.fetch;
-  const quads = [...toRdfJsDataset(await getSolidDataset(url, { fetch }))] as Quad[];
+  const quads = [...toRdfJsDataset(await getSolidDatasetLinear(url, { fetch }))] as Quad[];
   return new Set(quads.map((q) => `${termOf(q.subject)} ${termOf(q.predicate)} ${termOf(q.object)} .`));
 }
 

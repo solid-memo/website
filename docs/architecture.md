@@ -18,7 +18,7 @@ where the layers meet.
 | `@solid-memo/application` | `packages/application/` | Use cases (what the app does) and ports (what the app needs). |
 | `@solid-memo/domain` | `packages/domain/` | Pure types and pure functions: the app's vocabulary, SRS, migrations. |
 | `@solid-memo/vocab` | `packages/vocab/` | The data contract: the TypeScript generated (`src/*.generated.ts`) from the RDF vocabulary and SHACL shapes in the repository's `ns/` ([vocab.md](vocab.md), [shapes.md](shapes.md)), with the generator (`tooling/`); vendored profiles (`vendor/`) and fixtures. |
-| `@solid-memo/solid` | `packages/solid/` | Adapters for Solid pods (Inrupt): repositories, the type index, the instance copier, the write fence, the pod-reading shape validator, the deck archive (decks as Turtle or JSON-LD files, [data-model.md](data-model.md#decks-as-files)), and the guest's pod kept in the browser ([guest-mode.md](guest-mode.md)). |
+| `@solid-memo/solid` | `packages/solid/` | Adapters for Solid pods (Inrupt): repositories, the type index, the instance copier, the write fence, the pod-reading shape validator, the deck archive (decks as Turtle or JSON-LD files, [data-model.md](data-model.md#decks-as-files)), the drafts of releases and the Turtle a release is written in ([data-model.md](data-model.md#drafts-and-releases)), and the guest's pod kept in the browser ([guest-mode.md](guest-mode.md)). |
 | `@solid-memo/shacl` | `packages/shacl/` | The SHACL engine (rdf-validate-shacl, loaded lazily), profiles and shape loading (`src/`); node-side validation of Turtle files and the deck library's index and checks, its Markdown rules among them (`node/`, `npm run library`). |
 | `@solid-memo/browser` | `packages/browser/` | Adapters for the browser: the update journal, the language, the guest's pod's store (IndexedDB), and files saved as downloads and opened from the user's disk (`FileExchange`). |
 | `@solid-memo/turtle` | `packages/turtle/` | Node-only Turtle tooling (n3): parsing and the house-style formatter. |
@@ -59,8 +59,9 @@ files (`i18n/<locale>.json`).
 
 ## Tasks
 
-`turbo.json` runs each package's `typecheck`, `test`, `generate:check`,
-`format:turtle:check`, `library:check` and `build` in dependency order,
+`turbo.json` runs each package's `typecheck`, `test`, `test:roundtrip`
+(`solid`'s, every library release through a draft, [testing.md](testing.md)),
+`generate:check`, `format:turtle:check`, `library:check` and `build` in dependency order,
 cached by input. A task's inputs are its package's files and those of the
 packages it depends on; the few that also read `ns/` or `decks/` add them
 in their package's own `turbo.json` (`vocab`, `shacl`, `solid`,
@@ -69,7 +70,7 @@ read the library. The Studio has no build of its own: Solid Memo's
 bundles it ([studio.md](studio.md)).
 
 ```sh
-npm run check     # every package: typecheck, tests (100% coverage), drift, formatting, the deck library; then boundaries
+npm run check     # every package: typecheck, tests (100% coverage), the round trip, drift, formatting, the deck library; then boundaries
 npm run build     # the site, the Studio included, into apps/web/dist/
 npm run dev       # the site, from source; the Studio at #/studio
 npm start         # the site as deployed: built, then served at http://localhost:4173

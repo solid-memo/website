@@ -11,6 +11,7 @@ import { createSolidDigestRepository } from "@solid-memo/solid/solidDigestReposi
 import { createSolidAnswerLog } from "@solid-memo/solid/solidAnswerLog";
 import { createSolidInstanceRepository } from "@solid-memo/solid/solidInstanceRepository";
 import { createSolidPreferencesRepository } from "@solid-memo/solid/solidPreferencesRepository";
+import { createSolidReleaseDraftRepository } from "@solid-memo/solid/solidReleaseDraftRepository";
 import { createBrowserFileExchange } from "@solid-memo/browser/fileExchange";
 import { createLocalStorageLanguagePreference } from "@solid-memo/browser/localStorageLanguagePreference";
 import { createLocalStorageThemePreference } from "@solid-memo/browser/localStorageThemePreference";
@@ -106,6 +107,12 @@ export function createAppUseCases({ clientName, servedSite, libraryIndexUrl, rul
     guestPod: createLocalGuestPod({ fetch: guestFetch, store: guestStore }),
     deckArchive: createSolidDeckArchive({ fetch: podFetch }),
     fileExchange: createBrowserFileExchange(),
+    releaseDraftRepository: createSolidReleaseDraftRepository({
+      fetch: podFetch,
+      // A library release is read where the site serves it, any other where it is published.
+      releaseFetch: routedFetch({ origin: SITE, local: siteFetch, remote: podFetch }),
+      checkWrite,
+    }),
   });
 }
 

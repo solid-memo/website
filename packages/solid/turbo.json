@@ -4,6 +4,9 @@
   "tasks": {
     "test": {
       "inputs": ["$TURBO_EXTENDS$", "$TURBO_ROOT$/ns/**", "$TURBO_ROOT$/decks/**"]
+    },
+    "test:roundtrip": {
+      "inputs": ["$TURBO_EXTENDS$", "$TURBO_ROOT$/ns/**", "$TURBO_ROOT$/decks/**"]
     }
   }
 }

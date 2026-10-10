@@ -75,6 +75,40 @@ describe("deleteInstanceData", () => {
     expect(await p.urls()).toEqual([ROOT, `${ROOT}profile/`, `${ROOT}profile/card`, `${ROOT}solid-memo/`]);
   });
 
+  it("deletes the drafts the catalogue links, before the catalogue, and never one elsewhere", async () => {
+    const p = pod();
+    const draft = `${INSTANCE}drafts/solid/v1/`;
+    const elsewhere = `${ROOT}solid-memo/other/drafts/solid/v1/release.ttl`;
+    await seedInstance(
+      p,
+      `<#catalog> <${SM}releaseDraft> <drafts/solid/v1/release.ttl> , <${elsewhere}> , <decks/deck-1.ttl> .`,
+    );
+    await p.put(`${draft}release.ttl`, `<> a <${SM}Deck> .`);
+    await p.put(`${draft}chapter-ch-a.ttl`, `<#ch-a> a <${SM}Chapter> .`);
+    await p.put(`${draft}cards.ttl`, `<#q> a <${SM}Card> .`);
+    await p.put(elsewhere, `<> a <${SM}Deck> .`);
+
+    await expect(deleteInstanceData(INSTANCE, p.fetch)).resolves.toEqual({ keptFolder: null });
+
+    const deleted = p.deleted;
+    expect(deleted.slice(deleted.indexOf(`${INSTANCE}history/2026-10.ttl`) + 1, deleted.indexOf(`${INSTANCE}preferences.ttl`))).toEqual([
+      `${draft}cards.ttl`,
+      `${draft}chapter-ch-a.ttl`,
+      `${draft}release.ttl`,
+      draft,
+      `${INSTANCE}drafts/solid/`,
+      `${INSTANCE}drafts/`,
+    ]);
+    expect(await p.exists(elsewhere)).toBe(true);
+  });
+
+  it("finds no draft in a catalogue document without the catalogue", async () => {
+    const p = pod();
+    await p.put(`${INSTANCE}catalog.ttl`, `<#deck-1> a <${SM}Deck> ; <${SM}cardsDocument> <decks/deck-1.ttl> .`);
+    await p.put(`${INSTANCE}decks/deck-1.ttl`, `<#c1> a <${SM}Card> .`);
+    await expect(deleteInstanceData(INSTANCE, p.fetch)).resolves.toEqual({ keptFolder: null });
+  });
+
   it("keeps what another app put in the folder, and the containers holding it, and says the folder was kept", async () => {
     const p = pod();
     await seedInstance(p);

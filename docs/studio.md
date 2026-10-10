@@ -13,7 +13,10 @@ deck or the instance. It lists the decks copied from the library, and
 upgrades them to newer releases. It exports decks as Turtle or JSON-LD
 files, and imports them. It also edits what
 a deck says of itself (its authors and licence among it), a course's
-progress, and the instance's name and catalogue.
+progress, and the instance's name and catalogue. It keeps the drafts
+of releases a creator writes in the instance: started from nothing,
+from a deck, as the next version of a release or from a release saved
+as a file, and deleted.
 
 ## What it shares with Solid Memo
 
@@ -79,6 +82,7 @@ others.
 | `#/studio/health?instance=…[&deck=…]` | everything wrong with the instance, or with one of its decks ([below](#health)). |
 | `#/studio/library?instance=…` | the instance's copies of library releases, the newer releases and what upgrading would change ([below](#library-copies)). |
 | `#/studio/transfer?instance=…[&deck=…&deck=…]` | import and export: the instance's decks to save as files, those of each `deck` ticked, and a file to make a deck of ([below](#import-and-export)). |
+| `#/studio/drafts?instance=…` | the instance's drafts of releases, and a new one to start ([below](#drafts)). |
 
 `#/studio/` and its query count as `#/studio`. Anything else under
 `#/studio`, `#/studio` itself among them, is the default route: the only
@@ -100,7 +104,8 @@ The trail is Instances › Decks, then › Groups on the Groups screen,
 inspector, › Cards of *deck* › Schedule on a deck's schedule, › About *deck* on a deck's about screen, or › Name and
 catalogue on the instance's screen, › Health on the instance's health,
 › Health › *deck* on a deck's, › Library copies on the library
-copies, and › Import and export on import and export. The document title is the trail's
+copies, › Import and export on import and export, and › Drafts on the
+drafts. The document title is the trail's
 last step and "Solid Memo Studio". After a move, the screen's heading
 takes the focus (`useScreenFocus`). The header has a link back to
 Solid Memo, at the open instance's decks when there is one, and the
@@ -151,9 +156,11 @@ date, or one whose library cannot be read, gets no badge.
 
 Above the table are links to the [Groups](#groups) screen, to the
 instance's [name and catalogue](#the-instance), to its
-[health](#health), to its [library copies](#library-copies) and to
-[import and export](#import-and-export); with no decks yet, the name
-and catalogue, and import and export, are still there.
+[health](#health), to its [library copies](#library-copies), to
+[import and export](#import-and-export) and to its [drafts](#drafts);
+with no decks yet, the name and catalogue, import and export, and the
+drafts are still there. Below the table, Home lists the instance's
+drafts, each with its kind and version, and links to them.
 
 The table starts in the order the user arranged the decks. A column's
 name sorts by it, then the other way, then back to that order; the
@@ -788,6 +795,90 @@ formats and back
 and the end-to-end tests do so against real servers
 ([deckFiles.integration.test.ts](../e2e/pod/src/deckFiles.integration.test.ts)).
 
+## Drafts
+
+A creator writes a deck or a course as a **draft** of a release, in the
+instance, before publishing it as a release others can add. The drafts
+screen ([`DraftsContainer`](../apps/studio/src/ui/DraftsContainer.tsx))
+lists the instance's drafts, each with its kind (deck or course), the
+version it drafts and whether it is being written, was released, or
+cannot be read; one is deleted, with its documents, once the user
+confirms. Where and how a draft is kept is in
+[data-model.md](data-model.md#drafts-and-releases); it is private, in
+the private type index alone.
+
+A new draft starts from
+
+- **a blank deck or a blank course**, by its name in a language the
+  user states: version 1 of a series of its own, with its Turtle
+  distribution, a course studied front to back;
+- **a deck of the instance** (`deckToDraft` in
+  [deckToDraft.ts](../packages/domain/src/release/deckToDraft.ts)): what
+  a release says and the deck does too, every card under its id, its
+  retired ones and wrong options with it, its authors the release's
+  agents, the first its publisher. What is the learner's own is left
+  behind: where its documents are, its study caps, its place among the
+  groups, a course's progress. A deck copied from a release names it
+  (`prov:wasDerivedFrom`), which is no source of the new release: the
+  screen says the deck is based on it, and offers to start the next
+  version of that release instead, which keeps what its learners
+  studied;
+- **the next version of a release**, by its address, in the library or
+  in a pod (`nextVersionDraft` in
+  [releaseVersion.ts](../packages/domain/src/release/releaseVersion.ts)):
+  the release whole, as version N + 1 after it, in its series, with no
+  release time or notes yet. Everything it published is carried: no
+  card, chapter, step or distractor of it can be deleted, only retired,
+  and none of their ids can be another's; how it was made (its
+  activities) is kept as it is;
+- **a release saved as a file**, Turtle or JSON-LD, as it is
+  (`releaseToDraft` in
+  [releaseToDraft.ts](../packages/domain/src/release/releaseToDraft.ts)).
+
+A release is made a draft only if its version is 1, 2, … and every id
+in it is one a draft can keep: letters A to Z, digits, `.`, `_` and
+`-`, starting with a letter or digit (`unsupportedIdOf`). A chapter is
+kept in a document named after its id, which another id would not
+survive; such a release is refused (`releaseIdUnsupported`) before
+anything is written.
+
+It is named after its title, or its release's name, unlike the
+instance's other drafts of that version. The use cases are
+`listReleaseDrafts`, `createReleaseDraft`, `getReleaseDraft`,
+`editReleaseDraft` and `deleteReleaseDraft`
+([releaseDrafts.ts](../packages/application/src/releaseDrafts.ts)), over
+the `ReleaseDraftRepository` port. When a document changed
+elsewhere meanwhile, the changes are made again on the draft as it is
+now; if they are then refused because part of them was written before
+(a chapter they add is there), what they changed is kept where nothing
+else changed it (`mergedDraft`). What a release before a draft
+published is read from that release (`dcat:prev`), once, since a
+release never changes; while it cannot be read, everything the draft
+has counts as published, so nothing is deleted that might have been. Making or deleting a draft
+changes the catalogue, so both are held until the data check is done,
+and while the catalogue is set aside ([below](#data-set-aside)).
+
+A draft changes by `DraftChange`s
+([releaseDraft.ts](../packages/domain/src/release/releaseDraft.ts),
+`UseCases.editReleaseDraft`): what the release says of itself, its
+agents, chapters and steps (added, edited, moved, retired, restored or
+deleted, the chapters and steps in use numbered 0, 1, … again), cards
+and their wrong options, where a question is asked, its sources, and
+the checks it had. A change is refused, writing nothing, when it would
+break what a release promises: deleting what an earlier release
+published (it is retired instead), giving an id that is another
+subject's or was an earlier release's, asking a card from a second
+place, a course not studied front to back, or rewriting how an earlier
+release was made. No change touches what an activity carried from an
+earlier release states: one that would (removing an agent it names) is
+refused. A check informs, and a source is used by, the activity of the
+draft's own that generated the release; a next version, generated only
+by activities carried over, is given one when it first needs it,
+`#revision-<N>`. A check is recorded only as a machine's or an AI's,
+in words that say it was no human review ("Scope: …; an AI check, not a
+human review."). A creator names the ids, the way
+[courses.md](courses.md#writing-a-course) says.
+
 ## Data set aside
 
 Every Studio screen holds to the check Solid Memo makes when an
@@ -810,7 +901,8 @@ and again after a repair. A deck checked again on its own (its
   Groups does not rename or delete it.
 - **The arrangement set aside** (the catalogue or a deck group invalid):
   Groups cannot be rearranged, Home moves no deck into a group, and the
-  instance's name and catalogue, and an import, are held.
+  instance's name and catalogue, an import, and making or deleting a
+  draft are held.
 - **Under "block the instance"**, invalid data holds every deck and the
   instance, as a set-aside deck is held.
 - **What another app wrote** only warns: it sets nothing aside.

@@ -56,18 +56,20 @@ export interface InstanceDeletion {
 /**
  * The kinds of an instance's data registered in the type indexes, one
  * class each (docs/data-model.md "Discovery chain"): the instance
- * itself, its catalogue, its decks, cards, review states and answers.
+ * itself, its catalogue, its decks, cards, review states and answers,
+ * and the drafts of releases its owner writes.
  */
-export const DATA_CLASSES = ["instance", "catalog", "deck", "card", "reviewState", "answer"] as const;
+export const DATA_CLASSES = ["instance", "catalog", "deck", "card", "reviewState", "answer", "draft"] as const;
 export type DataClass = (typeof DATA_CLASSES)[number];
 
 /**
- * Review states and answers say what the user studied, and how well:
- * they are registered in the private type index only, never in the
- * public one, even for an instance registered publicly.
+ * Review states and answers say what the user studied, and how well,
+ * and a draft is its author's until it is published: they are
+ * registered in the private type index only, never in the public one,
+ * even for an instance registered publicly.
  */
 export function isPrivateOnly(dataClass: DataClass): boolean {
-  return dataClass === "reviewState" || dataClass === "answer";
+  return dataClass === "reviewState" || dataClass === "answer" || dataClass === "draft";
 }
 
 /** One registration an instance's data has, or is missing, in one type index. */

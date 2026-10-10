@@ -20,6 +20,7 @@ import { CardWorkbenchContainer } from "./CardWorkbenchContainer";
 import { DeckAboutContainer } from "./DeckAboutContainer";
 import { DeckInsightContainer } from "./DeckInsightContainer";
 import { DeckTableContainer } from "./DeckTableContainer";
+import { DraftsContainer, HomeDraftsContainer } from "./DraftsContainer";
 import { GroupsContainer } from "./GroupsContainer";
 import { HealthContainer } from "./HealthContainer";
 import { InstanceAboutContainer } from "./InstanceAboutContainer";
@@ -100,6 +101,8 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
         return [instancesCrumb, decks, { label: t("studio.library.crumb"), route }];
       case "transfer":
         return [instancesCrumb, decks, { label: t("studio.transfer.crumb"), route }];
+      case "drafts":
+        return [instancesCrumb, decks, { label: t("studio.drafts.crumb"), route }];
       case "health": {
         const health: Crumb<StudioRoute> = { label: t("studio.health.crumb"), route: { screen: "health", instanceUrl: route.instanceUrl } };
         return route.deckUrl === undefined
@@ -158,22 +161,40 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
         );
       case "home":
         return (
-          <DeckTableContainer
+          <>
+            <DeckTableContainer
+              useCases={useCases}
+              instance={activeInstance!}
+              view={route.view ?? DEFAULT_DECK_TABLE_VIEW}
+              // How the table is looked at is no Back stop: the screen stays the same.
+              onView={(view) => replace({ ...route, view })}
+              appHref={decksHref(route.instanceUrl)}
+              groupsHref={studioRouteToHash({ screen: "groups", instanceUrl: route.instanceUrl })}
+              instanceHref={studioRouteToHash({ screen: "instance", instanceUrl: route.instanceUrl })}
+              healthHref={(deck) => studioRouteToHash({ screen: "health", instanceUrl: route.instanceUrl, ...(deck === undefined ? {} : { deckUrl: deck.url }) })}
+              libraryHref={studioRouteToHash({ screen: "library", instanceUrl: route.instanceUrl })}
+              transferHref={(decks) =>
+                studioRouteToHash({ screen: "transfer", instanceUrl: route.instanceUrl, deckUrls: decks.map((deck) => deck.url) })
+              }
+              deckHref={(deck) => studioRouteToHash({ screen: "about", deckUrl: deck.url })}
+              cardsHref={(deck) => studioRouteToHash({ screen: "cards", deckUrl: deck.url })}
+              draftsHref={studioRouteToHash({ screen: "drafts", instanceUrl: route.instanceUrl })}
+            />
+            <HomeDraftsContainer
+              useCases={useCases}
+              instance={activeInstance!}
+              draftsHref={studioRouteToHash({ screen: "drafts", instanceUrl: route.instanceUrl })}
+            />
+          </>
+        );
+      case "drafts":
+        return (
+          <DraftsContainer
+            // Another instance: no draft started for the last one stays.
+            key={route.instanceUrl}
             useCases={useCases}
             instance={activeInstance!}
-            view={route.view ?? DEFAULT_DECK_TABLE_VIEW}
-            // How the table is looked at is no Back stop: the screen stays the same.
-            onView={(view) => replace({ ...route, view })}
-            appHref={decksHref(route.instanceUrl)}
-            groupsHref={studioRouteToHash({ screen: "groups", instanceUrl: route.instanceUrl })}
-            instanceHref={studioRouteToHash({ screen: "instance", instanceUrl: route.instanceUrl })}
-            healthHref={(deck) => studioRouteToHash({ screen: "health", instanceUrl: route.instanceUrl, ...(deck === undefined ? {} : { deckUrl: deck.url }) })}
-            libraryHref={studioRouteToHash({ screen: "library", instanceUrl: route.instanceUrl })}
-            transferHref={(decks) =>
-              studioRouteToHash({ screen: "transfer", instanceUrl: route.instanceUrl, deckUrls: decks.map((deck) => deck.url) })
-            }
-            deckHref={(deck) => studioRouteToHash({ screen: "about", deckUrl: deck.url })}
-            cardsHref={(deck) => studioRouteToHash({ screen: "cards", deckUrl: deck.url })}
+            healthHref={studioRouteToHash({ screen: "health", instanceUrl: route.instanceUrl })}
           />
         );
       case "groups":

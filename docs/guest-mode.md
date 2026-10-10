@@ -87,7 +87,13 @@ instance's (the same `prov:wasDerivedFrom`) says so: it is added beside
 that deck, as a deck of its own with its own progress, never merged
 into it card by card, and the user may untick it. The form also says
 that the instance keeps its own preferences: the guest's are not
-carried over. Nor is the guest's digest, which is this browser's.
+carried over. Nor is the guest's digest, which is this browser's, nor
+are the drafts of releases a guest wrote in the [Studio](studio.md#drafts):
+they are deleted with the guest's instance. When the guest wrote any,
+the form says how many, and that they go: to keep them, the user goes
+back and leaves the study in the browser for now. Only moving the
+guest's study in, offered when the user has no instance yet (below), keeps its drafts,
+as it copies the instance whole.
 
 It runs these steps:
 
@@ -211,7 +217,7 @@ instance goes). It runs these steps:
 6. **register:** `attachInstance` in the type index the user chose.
    From here on the study is theirs.
 7. **tidy:** register each class of the instance's data (its
-   catalogue, decks, cards, review states and answers,
+   catalogue, decks, cards, review states, answers and drafts,
    [data-model.md](data-model.md#discovery-chain)), then delete the guest's instance
    as any instance is deleted ([data-model.md](data-model.md#discovery-chain)),
    and the whole guest pod once no instance is left. A registration

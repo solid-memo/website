@@ -15,6 +15,7 @@ npm run check     # the same, plus typecheck, drift, formatting, boundaries
 npm run test:unit -- packages/ui/src/ui/App.test.tsx   # some files, or all with none, without coverage (root vitest.config.ts)
 npm run test:watch # watch mode, every package's tests
 npm run test:unit -w @solid-memo/domain -- account.test.ts   # one package's (test:watch too)
+npm run test:roundtrip -w @solid-memo/solid   # every library release through a draft and back (below)
 npm run crosscheck # the pySHACL cross-check, as CI runs it (needs scripts/requirements-ci.txt)
 npm run test:pod  # the end-to-end tests, against the Solid servers they start in Docker
 npm run servers -w @solid-memo/e2e-pod   # pull or build those servers' images ahead (`-- css-6` for one)
@@ -177,7 +178,12 @@ cuts a document short after a PATCH to it when the document holds
 characters outside ASCII (`å`, `ä`, `ö`), even when the patch itself is
 ASCII: it stores as many bytes as there were characters. Its file store
 does not; keep test data that is patched ASCII, or measure on
-`-c @css:config/file.json -f <dir>`.
+`-c @css:config/file.json -f <dir>`. A release's draft is written whole
+(PUT) for this, and because node-solid-server stores a boolean a PATCH
+inserts (`owl:deprecated true`) as false: its tests
+([releaseDrafts.integration.test.ts](../e2e/pod/src/releaseDrafts.integration.test.ts))
+take the library's largest course, its text as it is, through a draft
+on every server, each step within a time budget.
 
 solid-server 6.0.0 is packaged with faults its image works around: it
 lacks the root ACL template it copies on first start (so the image has
@@ -202,7 +208,7 @@ preferences, making and studying decks, grouping them, importing from
 the library, starting the library's course for newcomers from an empty
 deck list and working through its first chapter and final review, describing a deck in two languages, validating the
 instance, logging out, and opening the Studio to manage an
-instance's decks. Each journey runs against a fresh account, pod
+instance's decks and its drafts of releases. Each journey runs against a fresh account, pod
 and WebID on a Community Solid Server 7
 ([css/compose.yml](../e2e/journeys/css/compose.yml)) that the global
 setup starts in Docker and takes down after. The app logs in only with
@@ -342,6 +348,7 @@ Dependency inversion gives every layer a seam that makes mocks trivial:
 | Infrastructure mappers | none needed | Pure `SolidDataset`/`Thing` → domain functions; feed in-memory datasets built with `mockSolidDatasetFrom`/`buildThing`. |
 | Infrastructure I/O shells | injected `fetch` + `vi.mock` | Mock `@inrupt/*` module functions; assert the shell orchestrates fetch → map → return. |
 | Shapes (`packages/shacl/`, `packages/solid/src/conformance.test.ts`) | the real engine | The real `rdf-validate-shacl` over the real shapes in `ns/shapes/`: fixture documents under `packages/vocab/fixtures/` pass or fail as a table says; a record written through every descriptor, and every migration step's output, conforms (`conformance.test.ts`). Every library deck passes too, by `npm run library:check` ([deck-library.md](deck-library.md#checks)). Shape documents are read through a `fetch` that serves the repository's files at their IRIs (`shapesFetch` in [sources.ts](../packages/vocab/tooling/sources.ts), a `Response` with its `url` set), exactly as the browser reads them. |
+| The round trip (`packages/solid/src/releaseDrafts.roundtrip.test.ts`) | the real draft adapter | Every release in `decks/` made a draft in a pod kept in memory, as an import makes one, then published again at its own address (`assemble`): its triples come back, apart from what publishing sets (the format versions it writes, its time of change), a blank node compared by what it says. A task of its own, `test:roundtrip`, which `npm run check` runs and Turbo runs again only when `decks/`, `ns/` or the package change; the unit tests take three releases (a course, one with blank nodes, a plain deck) the same way. |
 | The library (`packages/solid/src/libraryReleases.test.ts`) | the real library adapter | Every release in `decks/` and the index, read through `createSolidDeckLibrary` over a fetch that serves the repository's files at their IRIs, as the app reads them: the index lists every deck, each release reads with every card it has (its retired ones retired), and a course's outline has every chapter and step it has in use, each asking cards the app can ask (a back and at least two distractors). The library check validates the releases; this is what the app makes of them. The check's rules (`packages/domain/src/release/`) have tests of their own, and a golden test, `packages/shacl/node/deckLibrary.golden.test.ts`, keeps as text what they say of published releases with faults put in. |
 | Markdown (`packages/markdown/`) | none needed | Pure functions over strings: every node in both profiles, the folds, the chunks of a step's theory, each rule for a release (`markdownProblems`), the limits at every entry point, and the cmark and commonmark.js pathological inputs at the length cap within a time budget ([markdown.md](markdown.md)). |
 | The built site (`apps/web/src/build.test.ts`) | Vite's build API | Builds the site as `vite build` does, without writing it, and checks the bundle has no HTML sink but Preact's own, the [Studio](studio.md) is a chunk the page loads only lazily, and the page's Content Security Policy still lets its inline script run ([markdown.md](markdown.md#safety)). |

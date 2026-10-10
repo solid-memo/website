@@ -1,5 +1,6 @@
 import { expect, test, type Locator } from "@playwright/test";
 import { escapeRegExp } from "../harness/strings.ts";
+import { chooseLanguage } from "./languages.ts";
 import { Screen } from "./Screen.ts";
 
 /**
@@ -13,7 +14,9 @@ import { Screen } from "./Screen.ts";
  * its schedule and its history), a deck's schedule, a deck's and the
  * instance's health, its library copies, a deck's about screen (its
  * authors and licence), the instance's name and catalogue, a deck
- * exported to a file and imported from it, and its way back to Solid Memo.
+ * exported to a file and imported from it, the instance's drafts of
+ * releases (made, listed on Home and deleted), and its way back to
+ * Solid Memo.
  */
 export class Studio extends Screen {
   /** Home's table of the instance's decks ("The decks of {instance}"). */
@@ -223,6 +226,72 @@ export class Studio extends Screen {
       await expect(this.page.getByRole("checkbox", { name: this.t("studio.transfer.importProgress") })).toBeChecked();
       await this.page.getByRole("button", { name: this.t("studio.transfer.importButton", { instance }) }).click();
       await expect(this.page.getByRole("status").getByRole("link", { name: deck, exact: true })).toBeVisible();
+    });
+  }
+
+  /** The drafts screen's table of the instance's drafts ("Drafts in {instance}"). */
+  private drafts(instance: string): Locator {
+    return this.page.getByRole("table", { name: this.t("studio.drafts.caption", { instance }) });
+  }
+
+  /** Follows Home's link to the instance's drafts of releases. */
+  async openDrafts(instance: string): Promise<void> {
+    await this.intent("Open the instance's drafts", async () => {
+      await this.page.getByRole("link", { name: this.t("studio.decks.draftsLink"), exact: true }).click();
+      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.drafts.heading", { instance }) })).toBeVisible();
+      await this.app.chrome.expectBreadcrumbHere("studio.drafts.crumb");
+    });
+  }
+
+  /** Starts a draft of a deck of the instance: what was made is said, and it is listed, being written. */
+  async draftDeck(instance: string, deck: string): Promise<void> {
+    await this.intent(`Draft a release of ${deck}`, async () => {
+      await this.page.getByRole("radio", { name: this.t("studio.drafts.start.fromDeck") }).check();
+      await this.page.getByRole("combobox", { name: this.t("studio.drafts.deck") }).selectOption({ label: deck });
+      await this.page.getByRole("button", { name: this.t("studio.drafts.create"), exact: true }).click();
+      await this.expectStatus(this.t("studio.drafts.created", { draft: deck, version: 1 }));
+      await this.expectDraft(instance, deck, "deck");
+    });
+  }
+
+  /** Starts a blank course, named in English: it is listed, being written. */
+  async draftCourse(instance: string, name: string): Promise<void> {
+    await this.intent(`Draft a course, ${name}`, async () => {
+      await this.page.getByRole("radio", { name: this.t("studio.drafts.start.blankCourse") }).check();
+      await this.page.locator("#draft-name").fill(name);
+      await chooseLanguage(this.app, this.page.locator("#draft-name-language-0"), "en");
+      await this.page.getByRole("button", { name: this.t("studio.drafts.create"), exact: true }).click();
+      await this.expectStatus(this.t("studio.drafts.created", { draft: name, version: 1 }));
+      await this.expectDraft(instance, name, "course");
+    });
+  }
+
+  /** A draft's row, by its name: its kind, version 1, and being written. */
+  private async expectDraft(instance: string, name: string, kind: "deck" | "course"): Promise<void> {
+    const row = this.drafts(instance).getByRole("row").filter({ has: this.page.getByRole("rowheader", { name, exact: true }) });
+    await expect(row.getByRole("cell")).toHaveText([this.t(`studio.drafts.kind.${kind}`), "1", this.t("studio.drafts.state.writing"), this.t("studio.drafts.delete")]);
+  }
+
+  /** Deletes a draft, confirming the question that names it; its row goes. */
+  async deleteDraft(instance: string, name: string): Promise<void> {
+    await this.intent(`Delete the draft ${name}`, async () => {
+      this.app.expectDialog(this.tp("studio.drafts.deleteConfirm", { draft: name, version: 1 }));
+      await this.page.getByRole("button", { name: this.t("studio.drafts.deleteDraft", { draft: name, version: 1 }) }).click();
+      await this.expectStatus(this.t("studio.drafts.deleted", { draft: name, version: 1 }));
+      await expect(this.drafts(instance).getByRole("rowheader", { name, exact: true })).toHaveCount(0);
+    });
+  }
+
+  /** Home lists the drafts, each with its kind and version. */
+  async expectHomeDrafts(drafts: { name: string; kind: "deck" | "course" }[]): Promise<void> {
+    await this.intent("See the drafts on Home", async () => {
+      const panel = this.page.getByRole("region", { name: this.t("studio.drafts.list") });
+      for (const { name, kind } of drafts) {
+        await expect(panel.getByRole("listitem").filter({ hasText: name })).toContainText(
+          this.t("studio.drafts.summary", { kind: this.t(`studio.drafts.kind.${kind}`), version: 1 }),
+        );
+      }
+      await expect(panel.getByRole("listitem")).toHaveCount(drafts.length);
     });
   }
 

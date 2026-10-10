@@ -146,11 +146,11 @@ describe.each(SERVERS)("metadata on $name", ({ url: server }) => {
     const { session, instance, typeIndex } = await seed(server);
     const useCases = page();
     // One registration for each class of the instance's data, all in the private index.
-    expect(await titlesIn(typeIndex)).toEqual(Array(6).fill("Main"));
+    expect(await titlesIn(typeIndex)).toEqual(Array(7).fill("Main"));
 
     await expect(useCases.renameInstance(session, instance, " Languages ")).resolves.toEqual({ ...instance, name: "Languages" });
 
-    expect(await titlesIn(typeIndex)).toEqual(Array(6).fill("Languages"));
+    expect(await titlesIn(typeIndex)).toEqual(Array(7).fill("Languages"));
     await expect(useCases.listInstances(session)).resolves.toEqual([{ ...instance, name: "Languages" }]);
     expect(await titlesIn(`${instance.url}meta.ttl`)).toEqual(["Languages"]);
     await expect(useCases.readCatalog(instance.url)).resolves.toMatchObject({

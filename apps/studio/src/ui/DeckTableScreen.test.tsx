@@ -45,6 +45,7 @@ function Harness({ initial = { filter: "" }, ...overrides }: Partial<Props> & { 
       instanceHref="#/instance?instance=a"
       healthHref="#/health?instance=a"
       transferHref={(decks) => `#/transfer?${decks.map((deck) => `deck=${deck.id}`).join("&")}`}
+      draftsHref="#/drafts?instance=a"
       healthBadge={() => null}
       libraryHref="#/library?instance=a"
       updateBadge={() => null}

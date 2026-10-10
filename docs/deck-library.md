@@ -421,6 +421,18 @@ it ([`library-deck/v6/valid`](../packages/vocab/fixtures/library-deck/v6/valid/)
 is an example, which `npm run crosscheck` checks too). Nothing in the
 data says who may publish one, and the app reads its content as any release's (`toLibraryDeckContent`).
 
+Such a release is made from a draft in the creator's pod
+([studio.md](studio.md#drafts)): every subject of the draft moved to the
+release's address, `@base` that address, its release and change time
+set, at library deck format 6. A series the draft starts (its own
+`<#series>`) is described in it, the release its first, last and
+current version; a series an earlier release described goes on being
+described, the release added as its last and current version; a series
+an index describes, as this library's, is left to the index. Every
+release in `decks/` made a draft and published again comes back as it
+was, apart from what publishing sets (a test of its own,
+[testing.md](testing.md#strategy-per-layer)).
+
 ## In the app
 
 ```mermaid

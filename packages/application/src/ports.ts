@@ -25,6 +25,8 @@ import type { Storage } from "@solid-memo/domain/storage";
 import type { DocumentReport } from "@solid-memo/domain/validation";
 import type { InstanceDigest } from "@solid-memo/domain/studyDigest";
 import type { WebIdDocument } from "@solid-memo/domain/webIdDocument";
+import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
+import type { ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout";
 
 /**
  * Driven port: authentication against a Solid identity provider.
@@ -379,6 +381,79 @@ export interface DeckArchive {
 }
 
 /**
+ * Driven port: the drafts of releases an instance's owner writes in it
+ * (docs/studio.md, Drafts; domain/release/draftLayout.ts). A draft is a
+ * container of documents, linked from the instance's catalogue
+ * (`sm:releaseDraft`); its subjects are read into a ReleaseDraft, each
+ * named as a fragment of its release document, and written back where
+ * draftDocuments keeps them. What its shapes describe is written in this
+ * app's format and checked against the draft shapes; every other
+ * statement is kept as it is.
+ */
+export interface ReleaseDraftRepository {
+  /** The drafts the instance's catalogue links, each as its release document says; one that cannot be read is listed as such. */
+  list(instanceUrl: string): Promise<ReleaseDraftSummary[]>;
+  /** Every document of the instance's drafts, for the instance's check. */
+  documents(instanceUrl: string): Promise<string[]>;
+  /**
+   * Write a new draft where its URL says (draftLayout.ts): each document
+   * made only if nothing is there yet (If-None-Match: *), the release
+   * document first, then the link from the catalogue, If-Match, read and
+   * made again on a 412, a few times. A release document there already is
+   * createdElsewhere naming it, with nothing written. Any later failure
+   * deletes the documents written, and their containers left empty,
+   * before it is thrown: no draft is left that the catalogue does not
+   * link. Throws noCatalogToUpdate when the instance has no catalogue.
+   */
+  create(instanceUrl: string, draft: ReleaseDraft): Promise<ReleaseDraftSummary>;
+  /**
+   * The draft as its documents say now, with the version they are at
+   * together (opaque: it changes when any of them does, or one comes or
+   * goes). Nothing it published before is known here: `published` is
+   * empty. Throws draftGone when it has no release document.
+   */
+  read(draftUrl: string): Promise<{ draft: ReleaseDraft; version: string }>;
+  /** The draft unless none of its documents changed since `version` (undefined: read it). */
+  readSince(draftUrl: string, version: string | undefined): Promise<Since<ReleaseDraft>>;
+  /**
+   * Write what changed from `before` to `after`, `before` as `read` read
+   * it last, at `version`: one write per document that changed (a PUT of
+   * it whole), made only if it is still as it was read (If-Match; else
+   * changedElsewhere), a new chapter's only if none is there yet. A
+   * chapter's document nothing is left in is deleted, as it was read.
+   * changedElsewhere too when the draft was read since at another
+   * version, or not by this repository.
+   */
+  applyChanges(before: ReleaseDraft, after: ReleaseDraft, version: string): Promise<void>;
+  /**
+   * The draft as one release document at `targetUrl`, in Turtle
+   * (`@base` its URL, the usual prefixes): every subject moved there,
+   * released `issued` (also its time of change), written at library
+   * deck format 6, with the series it starts described in it.
+   */
+  assemble(draftUrl: string, targetUrl: string, issued: string): Promise<string>;
+  /**
+   * A release document anywhere, as it states itself, at its own URL;
+   * releaseUnreadable when there is none to read there, or its version
+   * is none of 1, 2, ….
+   */
+  readRelease(url: string): Promise<ReleaseDraft>;
+  /**
+   * A release from a file's text, at the address its root names (the
+   * file's own when it names none); notAReleaseFile when it holds no
+   * one release, or its version is none of 1, 2, …; deckFileUnreadable
+   * when it does not parse.
+   */
+  parseRelease(text: string, format: DeckFileFormat): Promise<ReleaseDraft>;
+  /**
+   * Delete a draft: its documents (those of a draft's, nothing else in
+   * its container), its container and the ones above it when they are
+   * then empty, then its link from the catalogue.
+   */
+  delete(draft: ReleaseDraftSummary): Promise<void>;
+}
+
+/**
  * Driven port: files on the user's device, which the user picks. Text
  * only.
  */
@@ -495,10 +570,17 @@ export interface AnswerLog {
   removeDay(instanceUrl: string, deckUrl: string, studyDay: string): Promise<void>;
 }
 
+/**
+ * Where a document checked is: an instance's own ("pod"), or a release's
+ * draft ("draft"), whose deck, chapters and steps the draft shapes check
+ * (docs/validation.md).
+ */
+export type DocumentContext = "pod" | "draft";
+
 export interface ShapeValidator {
-  validateDocument(url: string): Promise<DocumentReport>;
+  validateDocument(url: string, context?: DocumentContext): Promise<DocumentReport>;
   /** The document's report unless it is still at `version` (undefined: check it). */
-  validateDocumentSince(url: string, version: string | undefined): Promise<Since<DocumentReport>>;
+  validateDocumentSince(url: string, version: string | undefined, context?: DocumentContext): Promise<Since<DocumentReport>>;
 }
 
 /** Where a guest's study moves: every IRI under the container `from` becomes one under `to`. */

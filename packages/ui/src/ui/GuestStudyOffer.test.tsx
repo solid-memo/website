@@ -330,6 +330,7 @@ describe("GuestStudyOffer", () => {
             { deck: capitals, sameRelease: [] },
             { deck: course, sameRelease: target.url === main.url ? [addedAs(course, main)] : [] },
           ],
+          drafts: 0,
         })),
         ...overrides,
       });
@@ -358,6 +359,7 @@ describe("GuestStudyOffer", () => {
         "Main already has this deck from the same library release. It is added beside it as a deck of its own, with its own progress, not merged into it: untick it to leave it out.",
       );
       expect(screen.getByText(/A deck you leave out is not kept/)).toBeInTheDocument();
+      expect(screen.queryByText(/Drafts are not added/)).toBeNull();
       const announced = screen.getByRole("status");
       fireEvent.click(screen.getByRole("button", { name: "Add to Main" }));
       await waitFor(() => expect(mergeGuestStudy).toHaveBeenCalledWith(session, guestInstance, main, { skip: [] }, expect.any(Function)));
@@ -401,7 +403,7 @@ describe("GuestStudyOffer", () => {
     it("adds a study with no decks, saying so, and starts nothing before the decks are read", async () => {
       let read!: () => void;
       const useCases = renderMerge({
-        planGuestMerge: vi.fn(() => new Promise<{ decks: [] }>((resolve) => (read = () => resolve({ decks: [] })))),
+        planGuestMerge: vi.fn(() => new Promise<{ decks: []; drafts: number }>((resolve) => (read = () => resolve({ decks: [], drafts: 0 })))),
       });
       await openForm();
       expect(await screen.findByText("Reading your study…")).toBeInTheDocument();
@@ -412,6 +414,16 @@ describe("GuestStudyOffer", () => {
       expect(await screen.findByText("Your study has no decks to add.")).toBeInTheDocument();
       fireEvent.click(screen.getByRole("button", { name: "Add to Main" }));
       await waitFor(() => expect(useCases.mergeGuestStudy).toHaveBeenCalledWith(session, guestInstance, main, { skip: [] }, expect.any(Function)));
+    });
+
+    it("says the guest's drafts are not added, but deleted with the rest of the study", async () => {
+      renderMerge({ planGuestMerge: vi.fn(async () => ({ decks: [{ deck: capitals, sameRelease: [] }], drafts: 2 })) });
+      await openForm();
+      expect(
+        await screen.findByText(
+          "You wrote 2 drafts in the Studio as a guest. Drafts are not added: they are deleted with the rest of your study in this browser. To keep them, go back and leave your study here for now.",
+        ),
+      ).toBeInTheDocument();
     });
 
     it("says why the study could not be read", async () => {

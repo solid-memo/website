@@ -456,6 +456,23 @@ describe("createShaclShapeValidator", () => {
       );
     });
 
+    it("checks a draft's document against the draft shapes, without DCAT-AP, when told it is a draft's", async () => {
+      const draft = setThing(
+        mockSolidDatasetFrom(DOC),
+        buildThing(createThing({ url: DOC }))
+          .addIri(RDF.type, SM.Deck)
+          .addIri(RDF.type, "http://www.w3.org/ns/dcat#Dataset")
+          .addInteger(SM.formatVersion, 1)
+          .addIri(SM.studyDirection, SM.frontToBack)
+          .build(),
+      );
+      vi.mocked(getSolidDatasetOrNull).mockResolvedValue(draft);
+      const asDraft = await validator.validateDocument(DOC, "draft");
+      expect(asDraft.subjects).toEqual([expect.objectContaining({ shape: "draftDeck", violations: [] })]);
+      const asPod = await validator.validateDocument(DOC);
+      expect(asPod.subjects).toEqual([expect.objectContaining({ shape: "deck", violations: expect.arrayContaining([expect.anything()]) })]);
+    }, 30_000);
+
     it("checks only the subjects a write touches, leaving untyped and newer ones alone", async () => {
       const dataset = setThing(
         setThing(deck((t) => t), buildThing(createThing({ url: `${DOC}#note` })).addStringNoLocale(DCTERMS.title, "x").build()),

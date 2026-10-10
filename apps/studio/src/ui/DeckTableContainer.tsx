@@ -57,6 +57,7 @@ export function DeckTableContainer({
   transferHref,
   deckHref,
   cardsHref,
+  draftsHref,
 }: {
   useCases: UseCases;
   instance: Instance;
@@ -77,6 +78,8 @@ export function DeckTableContainer({
   deckHref: (deck: Deck) => string;
   /** A deck's cards, in the card workbench. */
   cardsHref: (deck: Deck) => string;
+  /** The instance's drafts of releases. */
+  draftsHref: string;
 }) {
   const { t, errorText } = useI18n();
   const queryClient = useQueryClient();
@@ -197,6 +200,7 @@ export function DeckTableContainer({
       healthBadge={(deck) => <HealthBadge useCases={useCases} instanceUrl={instance.url} deck={deck} href={healthHref(deck)} quiet />}
       libraryHref={libraryHref}
       transferHref={transferHref}
+      draftsHref={draftsHref}
       // A copy only, looked up as its row comes into view; nothing while it is up to date.
       updateBadge={(deck) =>
         deck.sourceUrl === undefined ? null : <UpdateBadge useCases={useCases} instanceUrl={instance.url} deck={deck} href={libraryHref} />

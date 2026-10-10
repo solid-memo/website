@@ -18,7 +18,7 @@
     "test": "turbo run test",
     "test:unit": "vitest run",
     "test:watch": "vitest",
-    "check": "turbo run typecheck test generate:check format:turtle:check library:check && npm run check:boundaries",
+    "check": "turbo run typecheck test test:roundtrip generate:check format:turtle:check library:check && npm run check:boundaries",
     "check:boundaries": "node scripts/checkBoundaries.ts",
     "crosscheck": "python3 scripts/shacl_crosscheck.py",
     "test:pod": "npm run test:pod -w @solid-memo/e2e-pod",

@@ -16,6 +16,7 @@ import type {
   RepairRepository,
   InstanceCopier,
   GuestPod,
+  ReleaseDraftRepository,
   Since,
 } from "./ports";
 import { GUEST_INSTANCE_URL, GUEST_ORIGIN, GUEST_SESSION, GUEST_WEBID, guestDeckStamp } from "@solid-memo/domain/guest";
@@ -2303,14 +2304,33 @@ describe("the instance digest", () => {
     const first = setup();
     await expect(first.useCases.checkInstance(instance.url)).resolves.toMatchObject({ conforms: true });
     await vi.waitFor(() => expect(Object.keys(first.stored()!.receipts)).toHaveLength(urls.length));
-    expect(first.deps.shapeValidator.validateDocumentSince).toHaveBeenCalledWith(urls[0], undefined);
+    expect(first.deps.shapeValidator.validateDocumentSince).toHaveBeenCalledWith(urls[0], undefined, "pod");
 
     const digest = first.stored()!;
     const again = setup({ ...digest, receipts: { ...digest.receipts, [urls[0]!]: { ...digest.receipts[urls[0]!]!, conformedTo: "older-rules" } } });
     const report = await again.useCases.checkInstance(instance.url);
     expect(report.documents.map((d) => d.subjects.length)).toEqual([0, 0, 0, 0, 0]);
-    expect(again.deps.shapeValidator.validateDocumentSince).toHaveBeenCalledWith(urls[0], undefined);
-    expect(again.deps.shapeValidator.validateDocumentSince).toHaveBeenCalledWith(urls[1], `v-${urls[1]}`);
+    expect(again.deps.shapeValidator.validateDocumentSince).toHaveBeenCalledWith(urls[0], undefined, "pod");
+    expect(again.deps.shapeValidator.validateDocumentSince).toHaveBeenCalledWith(urls[1], `v-${urls[1]}`, "pod");
+  });
+
+  it("checks the instance's drafts against the draft shapes, in the quick check and the full one", async () => {
+    const drafts = [`${instance.url}drafts/solid/v1/release.ttl`, `${instance.url}drafts/solid/v1/cards.ttl`];
+    const { deps } = setup();
+    const releaseDraftRepository = { documents: vi.fn(async () => drafts) } as unknown as ReleaseDraftRepository;
+    const useCases = createUseCases({ ...deps, releaseDraftRepository });
+    const report = await useCases.checkInstance(instance.url);
+    expect(report.documents.map((document) => document.url).slice(-2)).toEqual(drafts);
+    expect(deps.shapeValidator.validateDocumentSince).toHaveBeenCalledWith(drafts[0], undefined, "draft");
+    await useCases.validateInstance(instance.url);
+    expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(drafts[1], "draft");
+    expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(`${instance.url}catalog.ttl`, "pod");
+  });
+
+  it("keeps no drafts without a repository of them", async () => {
+    const useCases = createUseCases(makeDeps());
+    await expect(useCases.listReleaseDrafts(instance.url)).resolves.toEqual([]);
+    await expect(useCases.getReleaseDraft(`${instance.url}drafts/a/v1/release.ttl`)).rejects.toThrow("This app keeps no drafts.");
   });
 
   it("keeps no receipt of a document that does not conform or has no version", async () => {
@@ -2483,7 +2503,7 @@ describe("the answer log", () => {
     const { deps, byMonth, useCases } = setup();
     byMonth.set("2026-09", []);
     await useCases.validateInstance(instance.url);
-    expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(`${instance.url}history/2026-09.ttl`);
+    expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(`${instance.url}history/2026-09.ttl`, "pod");
     const plain = createUseCases(makeDeps());
     await expect(plain.getStatistics(instance.url, noon)).resolves.toMatchObject({ totals: { answers: 0, studyDays: 0, cards: 0 } });
   });
@@ -3106,7 +3126,7 @@ describe("library deck upgrade", () => {
         [`${TARGET}catalog.ttl`, GUEST_ORIGIN],
         [`${TARGET}history/2026-10.ttl`, GUEST_ORIGIN],
       ]);
-      expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(`${TARGET}meta.ttl`);
+      expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(`${TARGET}meta.ttl`, "pod");
       expect(deps.instanceRepository.attachInstance).toHaveBeenCalledWith({
         webId: session.webId,
         instanceUrl: TARGET,
@@ -3469,14 +3489,18 @@ describe("library deck upgrade", () => {
           { kind: "deck", url: second.url },
         ]);
 
-      it("planGuestMerge lists the guest's decks with the instance's from the same release", async () => {
+      it("planGuestMerge lists the guest's decks with the instance's from the same release, and counts the guest's drafts", async () => {
         const { deps } = mergeDeps();
         expect(await createUseCases(deps).planGuestMerge(guestInstance, target)).toEqual({
           decks: [
             { deck: course, sameRelease: [targetDeck] },
             { deck: own, sameRelease: [] },
           ],
+          drafts: 0,
         });
+        const list = vi.fn(async (url: string) => (url === guestInstance.url ? [{}, {}] : [{}]));
+        const releaseDraftRepository = { list } as unknown as ReleaseDraftRepository;
+        expect(await createUseCases({ ...deps, releaseDraftRepository }).planGuestMerge(guestInstance, target)).toMatchObject({ drafts: 2 });
       });
 
       it("mergeGuestStudy adds each deck whole — documents, entry, answers — groups them as the guest did, then deletes the guest's", async () => {
@@ -3495,7 +3519,7 @@ describe("library deck upgrade", () => {
         expect(outcome).toEqual({ ok: true, instance: { ...target, url: TARGET.slice(0, -1) }, added: [first, second], tidied: true });
         expect(hold).toHaveBeenCalledWith(GUEST_INSTANCE_URL);
         // The guest's study, checked whole before anything is written.
-        expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(`${GUEST_INSTANCE_URL}history/2026-10.ttl`);
+        expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(`${GUEST_INSTANCE_URL}history/2026-10.ttl`, "pod");
         const { url: _url, formatVersion: _version, ...content } = guestCard;
         expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledExactlyOnceWith(first, { save: [content], remove: [] }, { whole: true });
         expect(deps.reviewStateRepository.createReviewStates).toHaveBeenCalledExactlyOnceWith(first, [guestState]);

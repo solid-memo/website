@@ -114,20 +114,24 @@ export type GuestMergeOutcome =
 /**
  * What adding a guest's study to an instance would add: each of the
  * guest's decks, with the instance's decks copied from the same library
- * release, which it is added beside rather than merged into.
+ * release, which it is added beside rather than merged into. And how
+ * many drafts of releases the guest wrote: they are not added, and go
+ * with the rest of the guest's study.
  */
 export interface GuestMergePlan {
   decks: { deck: Deck; sameRelease: Deck[] }[];
+  drafts: number;
 }
 
-/** The guest's decks, each with the target's decks copied from the same library release. */
-export function guestMergePlan(guestDecks: readonly Deck[], targetDecks: readonly Deck[]): GuestMergePlan {
+/** The guest's decks, each with the target's decks copied from the same library release, and the guest's drafts, counted. */
+export function guestMergePlan(guestDecks: readonly Deck[], targetDecks: readonly Deck[], drafts: number): GuestMergePlan {
   return {
     decks: guestDecks.map((deck) => ({
       deck,
       sameRelease:
         deck.sourceUrl === undefined ? [] : targetDecks.filter((target) => target.sourceUrl === deck.sourceUrl),
     })),
+    drafts,
   };
 }
 
