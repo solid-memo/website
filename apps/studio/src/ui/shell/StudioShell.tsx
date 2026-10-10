@@ -12,9 +12,10 @@ import { CommandPalette } from "./CommandPalette";
 import { KeyHelp, Keys } from "./KeyHelp";
 import { DENSITIES, rememberPrefs, studioPrefs, type StudioPrefs } from "./prefs";
 import { keysOf, nextRegion, sectionRoute, type Section } from "./shortcuts";
-import { ASIDE_WIDTH } from "./splitter";
+import { ASIDE_WIDTH, DETAIL_WIDTH } from "./splitter";
 import { Splitter } from "./Splitter";
 import { ScreenCommands, useCommandRegistry } from "./useScreenCommands";
+import { useMedia } from "./useMedia";
 import { ScreenKeys, useShortcuts } from "./useShortcuts";
 import { MEDIUM, NARROW, stepProblem, stepTab, type ContextTab } from "./workspaceLayout";
 import "../studio.css";
@@ -27,6 +28,13 @@ const DOCK_ID = "studio-dock";
 export interface AsidePane {
   label: string;
   content: ComponentChildren;
+  /**
+   * The aside is the detail of the main content (a card beside its
+   * deck's cards): shown while the route has it, as wide as its own
+   * splitter makes it, and closed by going to the main content alone
+   * (`onClose`, as the palette's command `closeLabel` does).
+   */
+  detail?: { closeLabel: string; onClose: () => void };
 }
 
 /**
@@ -35,9 +43,10 @@ export interface AsidePane {
  * a button that opens the palette (CommandPalette) and a way back to
  * Solid Memo; the sidebar (`sidebar`, a `nav`), when an instance is
  * open; the main content, which scrolls on its own; the aside right of
- * it (`aside`: a course draft's outline), as wide as its splitter makes
- * it; the dock under them (BottomDock), with the problems of the deck or
- * draft shown (`problems`) and the activity the screens tell of
+ * it (`aside`: a course draft's outline, or a card beside its deck's
+ * cards), as wide as its splitter makes it; the dock under them
+ * (BottomDock), with the problems of the deck or draft shown
+ * (`problems`) and the activity the screens tell of
  * (ActivityLog); and a status bar, with the open instance, whether the
  * open draft is saved, its problems, the dock's button, how densely the
  * Studio is laid out, and its keys. Its stylesheet (studio.css)
@@ -58,8 +67,9 @@ export interface AsidePane {
  * `/` goes to the screen's filter (the field whose `aria-keyshortcuts`
  * is "/"), F6 and Shift+F6 go from region to region (each a
  * `data-region` shown), the `g` chords go to a section (`onGo`), Ctrl+B
- * shows or hides the sidebar, Ctrl+\ the aside and Ctrl+J the dock, F8
- * and Shift+F8 go to the next problem's field or the one before
+ * shows or hides the sidebar, Ctrl+\ the aside (or closes the detail)
+ * and Ctrl+J the dock, F8 and Shift+F8 go to the next problem's field
+ * or the one before
  * (stepProblem), and `[`, `]` and 1 to 9 go to another of the context
  * tabs (`tabs`). The screens' own keys come first (ScreenKeys).
  */
@@ -119,7 +129,10 @@ export function StudioShell({
   const toggleRef = useRef<HTMLButtonElement>(null);
   const sidebarRef = useRef<HTMLElement>(null);
   const [asideDrawer, setAsideDrawer] = useState(false);
-  const asideShown = aside !== null && (medium ? asideDrawer : prefs.aside);
+  const detail = aside?.detail;
+  // A detail is as wide as its own splitter makes it.
+  const width = detail === undefined ? ({ key: "asideWidth", size: ASIDE_WIDTH } as const) : ({ key: "detailWidth", size: DETAIL_WIDTH } as const);
+  const asideShown = aside !== null && (detail !== undefined || (medium ? asideDrawer : prefs.aside));
   const asideToggleRef = useRef<HTMLButtonElement>(null);
   const asideRef = useRef<HTMLElement>(null);
   // The dock is the open instance's, as the sidebar is.
@@ -140,7 +153,8 @@ export function StudioShell({
   }
 
   function toggleAside() {
-    if (medium) setAsideDrawer(!asideDrawer);
+    if (detail !== undefined) detail.onClose();
+    else if (medium) setAsideDrawer(!asideDrawer);
     else choose({ ...prefs, aside: !prefs.aside });
   }
 
@@ -174,7 +188,9 @@ export function StudioShell({
   const shellCommands = (): ScreenCommand[] => [
     { id: "help", label: t("studio.palette.help"), keys: keysOf("help"), run: () => setHelp(true) },
     ...(sidebar === null ? [] : [{ id: "toggleSidebar", label: t("studio.keys.toggleSidebar"), keys: keysOf("toggleSidebar"), run: toggleSidebar }]),
-    ...(aside === null ? [] : [{ id: "toggleAside", label: t("studio.keys.toggleAside"), keys: keysOf("toggleAside"), run: toggleAside }]),
+    ...(aside === null
+      ? []
+      : [{ id: "toggleAside", label: detail?.closeLabel ?? t("studio.keys.toggleAside"), keys: keysOf("toggleAside"), run: toggleAside }]),
     ...(docked ? [{ id: "toggleDock", label: t("studio.keys.toggleDock"), keys: keysOf("toggleDock"), run: toggleDock }] : []),
   ];
 
@@ -307,7 +323,7 @@ export function StudioShell({
           <p class="header-link">
             <a href={backHref}>{t("studio.backToApp")}</a>
           </p>
-          {aside !== null && (
+          {aside !== null && detail === undefined && (
             <button
               ref={asideToggleRef}
               type="button"
@@ -370,7 +386,7 @@ export function StudioShell({
             class="studio-aside"
             aria-label={aside.label}
             hidden={!asideShown}
-            style={medium ? undefined : { width: `${prefs.asideWidth}px` }}
+            style={medium ? undefined : { width: `${prefs[width.key]}px` }}
             data-region
             tabIndex={-1}
             // As the sidebar's drawer: a link followed, or Escape, closes it.
@@ -386,16 +402,22 @@ export function StudioShell({
                 label={t("studio.shell.resizeAside")}
                 controls={ASIDE_ID}
                 orientation="vertical"
-                value={prefs.asideWidth}
-                size={ASIDE_WIDTH}
-                onChange={(asideWidth) => choose({ ...prefs, asideWidth })}
+                value={prefs[width.key]}
+                size={width.size}
+                onChange={(value) => choose({ ...prefs, [width.key]: value })}
               />
             )}
             <div class="studio-aside-bar">
               <p aria-hidden="true">{aside.label}</p>
-              <button type="button" onClick={hideAside}>
-                {t("studio.shell.hide")}
-              </button>
+              {detail === undefined ? (
+                <button type="button" onClick={hideAside}>
+                  {t("studio.shell.hide")}
+                </button>
+              ) : (
+                <button type="button" aria-keyshortcuts={"Control+\\"} onClick={detail.onClose}>
+                  {t("studio.shell.close")}
+                </button>
+              )}
             </div>
             <div class="studio-aside-content">{aside.content}</div>
           </aside>
@@ -482,18 +504,6 @@ function SidebarIcon({ right = false }: { right?: boolean }) {
       <path d={right ? "M15 4v16" : "M9 4v16"} />
     </svg>
   );
-}
-
-/** Whether the screen is as narrow as `query` says (NARROW, MEDIUM), as it changes. */
-function useMedia(query: string): boolean {
-  const [matches, setMatches] = useState(() => window.matchMedia(query).matches);
-  useEffect(() => {
-    const media = window.matchMedia(query);
-    const change = () => setMatches(media.matches);
-    media.addEventListener("change", change);
-    return () => media.removeEventListener("change", change);
-  }, []);
-  return matches;
 }
 
 /**

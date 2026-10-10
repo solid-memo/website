@@ -12,6 +12,7 @@ import { describeChanges, historyKept } from "@solid-memo/ui/LibraryUpgradeNotic
 import { LoadingDots } from "@solid-memo/ui/Loading";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
 import { ReadOnlyNotice } from "./ReadOnly";
+import { allSelected, NO_SELECTION, toggled, type Selection } from "./shell/tableModel";
 
 /** What upgrading a copy would do: its plan, null when there is nothing to offer, or why it is not known yet. */
 export type PlanState = LibraryUpgradePlan | null | "loading" | "failed";
@@ -91,7 +92,7 @@ export function LibraryCopiesScreen({
 }) {
   const i18n = useI18n();
   const { t, tx, readerText } = i18n;
-  const [chosen, setChosen] = useState<ReadonlySet<string>>(new Set());
+  const [chosen, setChosen] = useState<Selection>(NO_SELECTION);
 
   const heading = <h2>{t("studio.library.heading", { instance: instance.name })}</h2>;
   if (rows.length === 0) {
@@ -111,7 +112,7 @@ export function LibraryCopiesScreen({
   const selected = upgradable.filter((each) => chosen.has(each.deck.url));
   const busy = running !== null;
   const toggle = (urls: readonly string[], on: boolean) =>
-    setChosen((all) => new Set(on ? [...all, ...urls] : [...all].filter((url) => !urls.includes(url))));
+    setChosen((all) => toggled(all, urls, on));
 
   return (
     <section>
@@ -126,7 +127,7 @@ export function LibraryCopiesScreen({
           <button
             class="primary"
             onClick={() => {
-              setChosen(new Set());
+              setChosen(NO_SELECTION);
               onUpgrade(selected);
             }}
           >
@@ -168,7 +169,7 @@ export function LibraryCopiesScreen({
                   <input
                     type="checkbox"
                     aria-label={t("studio.library.selectAll")}
-                    checked={upgradable.every((each) => chosen.has(each.deck.url))}
+                    checked={allSelected(chosen, upgradable.map((each) => each.deck.url))}
                     disabled={busy}
                     onChange={(event) => toggle(upgradable.map((each) => each.deck.url), event.currentTarget.checked)}
                   />

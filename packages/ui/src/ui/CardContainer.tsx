@@ -23,6 +23,7 @@ export function CardContainer({
   heading,
   withDistractors,
   arrival,
+  onUnsaved,
 }: {
   useCases: UseCases;
   deck: Deck;
@@ -34,6 +35,8 @@ export function CardContainer({
   withDistractors?: boolean;
   /** The text the page was opened at: where the user arrives. */
   arrival?: CardTextPart;
+  /** As CardScreen's: the editor holds changes not saved, and how to save them. */
+  onUnsaved?: (save: (() => Promise<boolean>) | null) => void;
 }) {
   const { errorText } = useI18n();
   const queryClient = useQueryClient();
@@ -85,8 +88,14 @@ export function CardContainer({
         errorText(updateCardMutation.error) ??
         errorText(removeCardMutation.error)
       }
-      onSave={(content) => updateCardMutation.mutate(content)}
+      onSave={(content) =>
+        updateCardMutation.mutateAsync(content).then(
+          () => true,
+          () => false,
+        )
+      }
       onRemove={() => removeCardMutation.mutate()}
+      onUnsaved={onUnsaved}
     />
   );
 }

@@ -11,6 +11,9 @@ export interface PaneSize {
 /** The aside's width, beside the main content. */
 export const ASIDE_WIDTH: PaneSize = { min: 192, max: 640, initial: 288 };
 
+/** The aside's width as a detail (a card beside its deck's cards): wider, for an editor. */
+export const DETAIL_WIDTH: PaneSize = { min: 320, max: 960, initial: 480 };
+
 /** The dock's height, under the main content. */
 export const DOCK_HEIGHT: PaneSize = { min: 96, max: 480, initial: 192 };
 

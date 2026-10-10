@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef, useState } from "preact/hooks";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "preact/hooks";
 import { isMarkdown, type Card, type CardContent, type CardTextPart, type Distractor } from "@solid-memo/domain/deck";
 import { cardName } from "./DataText";
 import type { DeckLanguages } from "@solid-memo/domain/deckLanguages";
@@ -8,6 +8,7 @@ import {
   CardContentFields,
   CardFieldsErrorMessage,
   checkDraft,
+  draftChanged,
   draftOf,
   rememberCardLanguages,
   type CardDraft,
@@ -45,6 +46,11 @@ const NO_DISTRACTORS: readonly Distractor[] = [];
  * (`withDistractors` false), as it gives the page its own heading
  * (`heading` false). Those the deck's
  * release published (`published`) are never deleted, only retired.
+ *
+ * While the editor holds changes not saved (since it opened, or since
+ * the last save), it says so (`onUnsaved`) with a way to save them as
+ * Save does, which resolves to whether they were saved; then, once
+ * there are none (saved, or the editor gone), null.
  */
 export function CardScreen({
   card,
@@ -59,6 +65,7 @@ export function CardScreen({
   error,
   onSave,
   onRemove,
+  onUnsaved,
 }: {
   card: Card;
   /** The deck's name: its languages are suggested for the card's text. */
@@ -77,13 +84,17 @@ export function CardScreen({
   /** The last save succeeded (and nothing was edited since). */
   saved: boolean;
   error: ErrorText | null;
-  onSave: (content: CardContent) => void;
+  /** Save the card; it may resolve to whether it was saved. */
+  onSave: (content: CardContent) => void | Promise<boolean>;
   onRemove: () => void;
+  onUnsaved?: (save: (() => Promise<boolean>) | null) => void;
 }) {
   const { t, locale, readerText } = useI18n();
   const hints = useMemo(() => cardLanguageHints(languages, deckTitle), [languages, deckTitle]);
   const startDraft = () => draftOf(card, [locale, ...navigator.languages], { defaults: hints.defaults });
   const [draft, setDraft] = useState(startDraft);
+  /** The draft as it started, or as last saved: what is not saved differs from it. */
+  const [pristine, setPristine] = useState(draft);
   const [invalid, setInvalid] = useState<CardFieldsError | null>(null);
   /** The wrong options as changed here, until saved; null while left as the card has them. */
   const [changed, setChanged] = useState<Distractor[] | null>(null);
@@ -99,7 +110,11 @@ export function CardScreen({
       draft.frontImageUrl === (card.frontImageUrl ?? "") &&
       draft.backImageUrl === (card.backImageUrl ?? "") &&
       draft.markdown === isMarkdown(card.textFormat);
-    if (started.current && untouched) setDraft(startDraft());
+    if (started.current && untouched) {
+      const fresh = startDraft();
+      setDraft(fresh);
+      setPristine(fresh);
+    }
     started.current = true;
   }, [hints]);
 
@@ -111,23 +126,39 @@ export function CardScreen({
     if (saved) setChanged(null);
     if (!saved || submitted.current === null) return;
     rememberCardLanguages(submitted.current.content, submitted.current.draft);
+    setPristine(submitted.current.draft);
     submitted.current = null;
   }, [saved]);
 
-  function handleSubmit(event: Event) {
-    event.preventDefault();
-    if (busy) return;
+  /** Saves the card as edited, once it is valid; whether it was saved. */
+  function save(): Promise<boolean> {
+    if (busy) return Promise.resolve(false);
     const check = checkDraft(draft, card);
     if (!check.ok) {
       setInvalid(check.invalid);
-      return;
+      return Promise.resolve(false);
     }
     setInvalid(null);
     // Wrong options left as they were are not stated: the card keeps its own.
     const content = changed === null ? check.content : { ...check.content, distractors: changed };
     submitted.current = { content, draft };
-    onSave(content);
+    return Promise.resolve(onSave(content)).then((done) => done !== false);
   }
+
+  function handleSubmit(event: Event) {
+    event.preventDefault();
+    void save();
+  }
+
+  // The latest save, with the latest edits.
+  const saveRef = useRef(save);
+  saveRef.current = save;
+  const unsaved = changed !== null || draftChanged(draft, pristine);
+  useEffect(() => {
+    if (!unsaved || onUnsaved === undefined) return;
+    onUnsaved(() => saveRef.current());
+    return () => onUnsaved(null);
+  }, [unsaved]);
 
   function handleRemove() {
     if (busy) return;

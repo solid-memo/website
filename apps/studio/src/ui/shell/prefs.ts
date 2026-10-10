@@ -1,4 +1,4 @@
-import { ASIDE_WIDTH, clampSize, DOCK_HEIGHT, type PaneSize } from "./splitter";
+import { ASIDE_WIDTH, clampSize, DETAIL_WIDTH, DOCK_HEIGHT, type PaneSize } from "./splitter";
 
 /** How tightly the Studio's rows and controls are packed: compact (about 28px), or comfortable (44px, for touch). */
 export type Density = "compact" | "comfortable";
@@ -8,13 +8,15 @@ export const DENSITIES: readonly Density[] = ["compact", "comfortable"];
 /**
  * How the Studio is laid out on this device: its density, whether the
  * sidebar and the aside are shown on a wide screen, and the aside's
- * width; whether the dock is shown, and its height (in CSS pixels).
+ * width, as itself and as a detail; whether the dock is shown, and its
+ * height (in CSS pixels).
  */
 export interface StudioPrefs {
   density: Density;
   sidebar: boolean;
   aside: boolean;
   asideWidth: number;
+  detailWidth: number;
   dock: boolean;
   dockHeight: number;
 }
@@ -24,6 +26,7 @@ export const DEFAULT_PREFS: StudioPrefs = {
   sidebar: true,
   aside: true,
   asideWidth: ASIDE_WIDTH.initial,
+  detailWidth: DETAIL_WIDTH.initial,
   dock: false,
   dockHeight: DOCK_HEIGHT.initial,
 };
@@ -44,7 +47,7 @@ export function studioPrefs(storage: () => Storage = () => globalThis.localStora
   } catch {
     return DEFAULT_PREFS;
   }
-  const { density, sidebar, aside, asideWidth, dock, dockHeight } =
+  const { density, sidebar, aside, asideWidth, detailWidth, dock, dockHeight } =
     typeof stored === "object" && stored !== null ? (stored as Record<string, unknown>) : {};
   const shown = (value: unknown, fallback: boolean) => (typeof value === "boolean" ? value : fallback);
   // A size out of its bounds is brought within them: the bounds may have changed since.
@@ -54,6 +57,7 @@ export function studioPrefs(storage: () => Storage = () => globalThis.localStora
     sidebar: shown(sidebar, DEFAULT_PREFS.sidebar),
     aside: shown(aside, DEFAULT_PREFS.aside),
     asideWidth: sized(asideWidth, ASIDE_WIDTH),
+    detailWidth: sized(detailWidth, DETAIL_WIDTH),
     dock: shown(dock, DEFAULT_PREFS.dock),
     dockHeight: sized(dockHeight, DOCK_HEIGHT),
   };

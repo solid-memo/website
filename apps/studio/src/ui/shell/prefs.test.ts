@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { DEFAULT_PREFS, RECENT_LIMIT, recentCommands, rememberCommand, rememberPrefs, studioPrefs } from "./prefs";
-import { ASIDE_WIDTH, DOCK_HEIGHT } from "./splitter";
+import { ASIDE_WIDTH, DETAIL_WIDTH, DOCK_HEIGHT } from "./splitter";
 
 const KEY = "solid-memo:studioLayout.v1";
 
@@ -8,20 +8,28 @@ describe("the Studio's layout preferences", () => {
   beforeEach(() => localStorage.clear());
 
   it("are compact at first, the sidebar and the aside shown, the dock hidden", () => {
-    const first = { density: "compact", sidebar: true, aside: true, asideWidth: ASIDE_WIDTH.initial, dock: false, dockHeight: DOCK_HEIGHT.initial };
+    const first = {
+      density: "compact",
+      sidebar: true,
+      aside: true,
+      asideWidth: ASIDE_WIDTH.initial,
+      detailWidth: DETAIL_WIDTH.initial,
+      dock: false,
+      dockHeight: DOCK_HEIGHT.initial,
+    };
     expect(studioPrefs()).toEqual(first);
     expect(DEFAULT_PREFS).toEqual(first);
   });
 
   it("are kept on this device", () => {
-    const prefs = { density: "comfortable", sidebar: false, aside: false, asideWidth: 400, dock: true, dockHeight: 300 } as const;
+    const prefs = { density: "comfortable", sidebar: false, aside: false, asideWidth: 400, detailWidth: 600, dock: true, dockHeight: 300 } as const;
     rememberPrefs(prefs);
     expect(studioPrefs()).toEqual(prefs);
     expect(JSON.parse(localStorage.getItem(KEY)!)).toEqual(prefs);
   });
 
   it("take the default for what the app does not store, each preference on its own", () => {
-    localStorage.setItem(KEY, JSON.stringify({ density: "roomy", sidebar: "no", aside: 1, asideWidth: "wide", dock: null, dockHeight: Infinity }));
+    localStorage.setItem(KEY, JSON.stringify({ density: "roomy", sidebar: "no", aside: 1, asideWidth: "wide", detailWidth: "wider", dock: null, dockHeight: Infinity }));
     expect(studioPrefs()).toEqual(DEFAULT_PREFS);
     localStorage.setItem(KEY, JSON.stringify({ density: "comfortable" }));
     expect(studioPrefs()).toEqual({ ...DEFAULT_PREFS, density: "comfortable" });
@@ -36,8 +44,8 @@ describe("the Studio's layout preferences", () => {
   });
 
   it("keep the panes' sizes within their bounds", () => {
-    localStorage.setItem(KEY, JSON.stringify({ asideWidth: 10, dockHeight: 10_000 }));
-    expect(studioPrefs()).toEqual({ ...DEFAULT_PREFS, asideWidth: ASIDE_WIDTH.min, dockHeight: DOCK_HEIGHT.max });
+    localStorage.setItem(KEY, JSON.stringify({ asideWidth: 10, detailWidth: 10_000, dockHeight: 10_000 }));
+    expect(studioPrefs()).toEqual({ ...DEFAULT_PREFS, asideWidth: ASIDE_WIDTH.min, detailWidth: DETAIL_WIDTH.max, dockHeight: DOCK_HEIGHT.max });
   });
 
   it("are the defaults, and are not kept, when the browser's storage refuses", () => {

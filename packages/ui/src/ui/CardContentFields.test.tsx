@@ -3,6 +3,7 @@ import type { CardContent } from "@solid-memo/domain/deck";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import {
   checkDraft,
+  draftChanged,
   draftOf,
   newDraft,
   nextDraft,
@@ -121,5 +122,24 @@ describe("checkDraft", () => {
       ok: true,
       content: { front: { en: "a" }, back: { en: "b" }, textFormat: SM.plainText },
     });
+  });
+});
+
+describe("draftChanged", () => {
+  const from = draftOf({ ...plain, frontNote: { en: "n" } }, ["en"]);
+
+  it("says a draft as it was is unchanged, though a text was touched and changed back", () => {
+    expect(draftChanged({ ...from, front: [{ ...from.front[0]!, value: "a" }], touched: ["front"] }, from)).toBe(false);
+  });
+
+  it.each<[string, Partial<CardDraft>]>([
+    ["a word", { back: [{ ...from.back[0]!, value: "c" }] }],
+    ["a language", { back: [{ ...from.back[0]!, tag: "sv" }] }],
+    ["a translation added", { frontNote: [...from.frontNote, { id: 9, value: "m", tag: "sv" }] }],
+    ["the front's picture", { frontImageUrl: "https://img.example/a.png" }],
+    ["the back's picture", { backImageUrl: "https://img.example/b.png" }],
+    ["Markdown", { markdown: true }],
+  ])("says a draft is changed by %s", (_, change) => {
+    expect(draftChanged({ ...from, ...change }, from)).toBe(true);
   });
 });

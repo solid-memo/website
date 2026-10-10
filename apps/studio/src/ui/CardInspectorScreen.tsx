@@ -20,7 +20,9 @@ export type CardReleaseLink = "none" | "same" | "changed";
  * newer release no longer updates it), the tabs (`tab`, in the URL:
  * the card's content, its wrong options, its schedule or its history, each a link,
  * which changes the view without a Back stop through `onTab`), and the
- * tab's panel.
+ * tab's panel. Beside the deck's cards, Previous and Next show the card
+ * before it in the workbench's list, or the one after (`steps`; none at
+ * either end), as k and j do.
  */
 export function CardInspectorScreen({
   card,
@@ -29,6 +31,7 @@ export function CardInspectorScreen({
   tabHref,
   onTab,
   appHref,
+  steps,
   children,
 }: {
   card: Card;
@@ -38,6 +41,8 @@ export function CardInspectorScreen({
   onTab: (tab: CardTab) => void;
   /** The card's page in Solid Memo. */
   appHref: string;
+  /** Show the card before this one in the list beside it, or the one after; null at either end. */
+  steps?: { previous: (() => void) | null; next: (() => void) | null };
   /** The tab's panel. */
   children: ComponentChildren;
 }) {
@@ -48,6 +53,16 @@ export function CardInspectorScreen({
       <header>
         <h2>{t("studio.card.heading", { card: cardName(card, readerText) })}</h2>
         {card.retired && <span class="studio-badge">{t("retiredCards.tag")}</span>}
+        {steps !== undefined && (
+          <div class="studio-card-steps" role="group" aria-label={t("studio.card.steps")}>
+            <button type="button" aria-keyshortcuts="k" disabled={steps.previous === null} onClick={steps.previous ?? undefined}>
+              {t("studio.card.previous")}
+            </button>
+            <button type="button" aria-keyshortcuts="j" disabled={steps.next === null} onClick={steps.next ?? undefined}>
+              {t("studio.card.next")}
+            </button>
+          </div>
+        )}
       </header>
       {release === "same" && (
         <p class="warning" role="note">

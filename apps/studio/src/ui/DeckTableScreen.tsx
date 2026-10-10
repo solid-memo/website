@@ -20,6 +20,7 @@ import { ReaderText } from "@solid-memo/ui/ReaderText";
 import { DeckBulkActions, type MoveLock } from "./DeckBulkActions";
 import { ReadOnlyNotice } from "./ReadOnly";
 import { useActivityLog } from "./shell/activity";
+import { allSelected, NO_SELECTION, toggled, type Selection } from "./shell/tableModel";
 
 /** One figure of a deck's row: a number, or why there is none yet. */
 export type Count = number | "loading" | "unreadable";
@@ -128,7 +129,7 @@ export function DeckTableScreen({
   error: ErrorText | null;
 }) {
   const { t, tx, locale, readerText, directionLabel, formatDate } = useI18n();
-  const [chosen, setChosen] = useState<ReadonlySet<string>>(new Set());
+  const [chosen, setChosen] = useState<Selection>(NO_SELECTION);
   const [busy, setBusy] = useState(false);
   const [announcement, setAnnouncement] = useState("");
   const log = useActivityLog();
@@ -149,10 +150,10 @@ export function DeckTableScreen({
   const selected = shown.map((row) => row.deck).filter((deck) => chosen.has(deck.url) && selectable(deck));
   const count = selected.length;
   const choosable = shown.map((row) => row.deck).filter(selectable);
-  const allShown = choosable.length > 0 && choosable.every((deck) => chosen.has(deck.url));
+  const allShown = allSelected(chosen, choosable.map((deck) => deck.url));
 
   const toggle = (urls: readonly string[], on: boolean) =>
-    setChosen((all) => new Set(on ? [...all, ...urls] : [...all].filter((url) => !urls.includes(url))));
+    setChosen((all) => toggled(all, urls, on));
 
   /** Makes a bulk action; once it is done, says so, the Studio's activity too (and, after a deletion, nothing stays selected). */
   async function bulk(made: Promise<boolean>, said: string, clear = false): Promise<boolean> {
@@ -163,7 +164,7 @@ export function DeckTableScreen({
     if (ok) {
       setAnnouncement(said);
       log(said);
-      if (clear) setChosen(new Set());
+      if (clear) setChosen(NO_SELECTION);
     }
     return ok;
   }
@@ -217,7 +218,7 @@ export function DeckTableScreen({
           onPace={(change) => bulk(onPace(selected, change), t("studio.bulk.paced", { count }))}
           onDirection={(direction) => bulk(onDirection(selected, direction), t("studio.bulk.directed", { count }))}
           onRemove={() => bulk(onRemove(selected), t("studio.bulk.removed", { count }), true)}
-          onClear={() => setChosen(new Set())}
+          onClear={() => setChosen(NO_SELECTION)}
         />
       )}
       <p class="visually-hidden" role="status">

@@ -132,17 +132,6 @@ export function isDefaultQuery(query: CardQuery): boolean {
   return Object.keys(queryToParams(query)).length === 0;
 }
 
-/**
- * The query sorted by `key` next: ascending first, then descending, then
- * in the deck's own order again; from the first page.
- */
-export function nextCardSort(query: CardQuery, key: CardSort): CardQuery {
-  const { sort: current, ...rest } = query;
-  const from = { ...rest, page: 1 };
-  if (current?.key !== key) return { ...from, sort: { key, descending: false } };
-  return current.descending ? from : { ...from, sort: { key, descending: true } };
-}
-
 /** One text of a card: its language tag ("" when unstated), its words, and whether they are written in Markdown. */
 interface CardText {
   tag: string;

@@ -5,7 +5,6 @@ import {
   cardLanguages,
   DEFAULT_CARD_QUERY,
   isDefaultQuery,
-  nextCardSort,
   queryCards,
   queryFromParams,
   queryToParams,
@@ -109,16 +108,6 @@ describe("the card query in the URL", () => {
     const params = new URLSearchParams("field=colour&state=sleepy&has=wings&sort=size&page=-2&size=7&lang=SV-fi");
     expect(queryFromParams(params)).toEqual({ ...DEFAULT_CARD_QUERY, lang: "sv-fi" });
     expect(queryFromParams(new URLSearchParams("lang=Swedish&page=2.5"))).toEqual(DEFAULT_CARD_QUERY);
-  });
-
-  it("sorts by a key ascending, then descending, then not, each time from the first page", () => {
-    const paged = { ...DEFAULT_CARD_QUERY, page: 4 };
-    const up = nextCardSort(paged, "ease");
-    expect(up).toEqual({ ...DEFAULT_CARD_QUERY, sort: { key: "ease", descending: false } });
-    const down = nextCardSort({ ...up, page: 2 }, "ease");
-    expect(down).toEqual({ ...DEFAULT_CARD_QUERY, sort: { key: "ease", descending: true } });
-    expect(nextCardSort(down, "ease")).toEqual(DEFAULT_CARD_QUERY);
-    expect(nextCardSort(down, "id")).toEqual({ ...DEFAULT_CARD_QUERY, sort: { key: "id", descending: false } });
   });
 });
 

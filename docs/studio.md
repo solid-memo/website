@@ -119,6 +119,14 @@ It takes the whole window, and the window does not scroll:
   both. On a screen 64rem wide or less it is a drawer over the page, at
   its right, closed until its button opens it, and closed again as the
   sidebar's drawer is.
+- **A card beside its deck's cards**: on a card's route, wider than
+  64rem, the main content is the deck's [workbench](#card-workbench)
+  and the aside, named Card, the [card inspector](#card-inspector). It
+  is shown while the route names the card: its **Close**, or Ctrl+\,
+  goes to the deck's cards alone, a Back stop as a link is. It has a
+  splitter of its own, wider than the outline's. On a screen 64rem wide
+  or less the card's route shows the inspector alone, as the main
+  content.
 - **The dock**, under the main content and the aside, a region named
   Panel: hidden until its button in the status bar, or Ctrl+J, shows
   it; the device remembers that, and its height, which its splitter on
@@ -166,8 +174,9 @@ is kept on the device, never in the pod
 ([`shell/prefs.ts`](../apps/studio/src/ui/shell/prefs.ts), key
 `solid-memo:studioLayout.v1`; storage that is missing or refuses gives
 compact), and changes no history entry. So are whether the sidebar,
-the aside and the dock are shown, and the aside's width and the dock's
-height (each kept within its bounds).
+the aside and the dock are shown, and the aside's width (the outline's,
+and a card's beside its deck's cards) and the dock's height (each kept
+within its bounds).
 
 **Keys.** The Studio has one listener of keys, in its shell
 ([`shell/useShortcuts.ts`](../apps/studio/src/ui/shell/useShortcuts.ts)),
@@ -183,12 +192,13 @@ and its keymap is data
 | `g d`, `g g`, `g r`, `g p`, `g h`, `g l`, `g t` | with an instance open | go to its decks (Home), groups, drafts, releases, health, library copies, or import and export |
 | `g i` | anywhere | go to the instances |
 | Ctrl+B | with an instance open | show or hide the sidebar; on a narrow screen, open or close the drawer |
-| Ctrl+\ | a course draft's screens but its overview | show or hide the aside, the outline; on a screen not wide, open or close its drawer |
+| Ctrl+\ | a course draft's screens but its overview; a card beside its deck's cards | show or hide the aside, the outline; on a screen not wide, open or close its drawer; close the card, going to the deck's cards |
 | Ctrl+J | with an instance open | show or hide the dock |
 | F8, Shift+F8 | a deck's or a draft's screens, a field too | go to the field of the next problem in the dock's list, or the one before, round from either end ([below](#the-dock)) |
 | `]`, `[` | a deck's or a draft's screens | go to the next tab, or the one before, round from either end |
 | `1` … `9` | a deck's or a draft's screens, but the trial | go to the tab of that number; in the trial they are the learner's, a grade or an option |
-| `j`, `k`, `x`, Enter | the card workbench | the next card, the one before, select it, open it ([below](#card-workbench)) |
+| `j`, `k`, `x`, Enter | the card workbench, a card beside it too | the next card, the one before (beside a card, show it), select it, open it ([below](#card-workbench)) |
+| Shift+J, Shift+K, Escape | the card workbench, a card beside it too | select the card and the next, or the one before; clear the selection |
 
 A pair such as `g d` is pressed one key after the other, the second
 within 1.5 seconds; a key held down counts once, so a held `g` is not
@@ -305,7 +315,8 @@ do at the moment (`useScreenCommands`, in
 [`shell/useScreenCommands.ts`](../apps/studio/src/ui/shell/useScreenCommands.ts)):
 
 The shell's own commands show the keys, and show or hide the sidebar,
-the aside (where there is one) and the dock. A screen's:
+the aside (where there is one; beside a card, Close the card) and the
+dock. A screen's:
 
 | Screen | Command | What it does |
 | --- | --- | --- |
@@ -328,7 +339,7 @@ others.
 | `#/studio?instance=…[&q=…&sort=…&order=desc]` | Home: every deck of the instance as a table ([below](#home)). `q` filters it, `sort` names the column it is sorted by, and `order=desc` sorts it the other way. |
 | `#/studio/groups?instance=…` | Groups: the instance's decks arranged into groups, as Solid Memo's deck list arranges them. |
 | `#/studio/cards?deck=…[&q&field&lang&state&has&sort&order&page&size]` | the card workbench: a deck's cards as a table ([below](#card-workbench)). The deck names the instance: its catalog's folder. |
-| `#/studio/card?deck=…&card=…[&tab=distractors\|schedule\|history&field=…]` | the card inspector: one card, its content, with `tab=distractors` its wrong options, with `tab=schedule` its review state, or with `tab=history` its answers ([below](#card-inspector)). The content is the default tab, and is left out of the URL. `field` opens it at one field: a text of the content (`front`, `backNote`…), or a wrong option by its id. |
+| `#/studio/card?deck=…&card=…[&tab=distractors\|schedule\|history&field=…][&q&in&lang&state&has&sort&order&page&size]` | the card inspector: one card, its content, with `tab=distractors` its wrong options, with `tab=schedule` its review state, or with `tab=history` its answers ([below](#card-inspector)). The content is the default tab, and is left out of the URL. `field` opens it at one field: a text of the content (`front`, `backNote`…), or a wrong option by its id. The rest is the query of the workbench beside the card, as the workbench's own, but `in` for its `field` (where to look); without it, the deck's cards as listed. |
 | `#/studio/schedule?deck=…` | a deck's schedule: the reviews to come, its intervals and eases, its lapses and leeches ([below](#a-decks-schedule)). |
 | `#/studio/about?deck=…` | a deck's about screen: what it says of itself, how it is studied and, for a course, the learner's progress ([below](#a-decks-about-screen)). |
 | `#/studio/instance?instance=…` | the instance's name and its catalogue ([below](#the-instance)). |
@@ -367,7 +378,9 @@ Like Solid Memo's fallbacks, these replace the history entry.
 Changing Home's filter or sort, the workbench's query, the
 inspector's tab, the decks ticked to export, or the view of a draft's
 cards, replaces the history entry: it is the same screen,
-looked at another way, so Back leaves it.
+looked at another way, so Back leaves it. So does going from card to
+card beside the deck's cards (`j` and `k`, Previous and Next);
+opening a card from the list is a Back stop.
 
 Solid Memo links to Home as `#/studio?instance=…` ("Open in Studio",
 in its instance bar, each deck's actions menu and the deck page;
@@ -517,14 +530,28 @@ The URL holds how the cards are looked at. The domain applies it
 
 A change of the search or a filter goes back to the first page.
 
-Cards are selected by their checkbox, or all those on the page at once.
-The selection stays while the view changes, and a status line counts
-it. The keys say so on the screen: **j** and **k** move between the
-rows, **x** selects one, and **Enter** opens it. They work wherever the
-focus is: from outside the table, **j** goes to the first row. The keys
-are left to the search and the filters while they have the focus, and
-to whatever took them first; they are the screen's own keys of the
-Studio's ([Keys](#layout)).
+The table is the Studio's `DataTable`
+([`shell/DataTable.tsx`](../apps/studio/src/ui/shell/DataTable.tsx)):
+its header row and its first column (the checkboxes and the fronts)
+stay in sight as it scrolls. Cards are selected by their checkbox, or
+all those on the page at once; a click with Shift held selects, or
+not, every card from the one ticked last. The selection stays while
+the view changes, and a status line counts it. The keys say so on the
+screen: **j** and **k** move the cursor between the rows (the focus
+goes to the row's front), **x** selects the row, **Shift+J** and
+**Shift+K** select on from where the selection was last made, **Escape**
+clears the selection, and **Enter** opens the card. The cursor's row is
+marked, as is each row selected. **j** and **k** work wherever the
+focus is: from outside the table, they go on from the cursor's row, or
+to the first. **x**, **Enter** and the Shift keys act on the row the
+focus is in, or, with the focus on the page's body, the cursor's. The
+keys are left to the search and the filters while they have the
+focus, and to whatever took them first; they are the screen's own keys
+of the Studio's ([Keys](#layout); `useRowKeys`). What is selected,
+how the table is sorted, where the cursor goes and which columns show
+is worked out apart from the page
+([`shell/tableModel.ts`](../apps/studio/src/ui/shell/tableModel.ts));
+Home and the library copies select with it too.
 
 The selected cards can be edited at once ([below](#bulk-edits)).
 
@@ -538,7 +565,9 @@ line says so, and such a query shows why. The deck's tabs go to its
 [schedule](#a-decks-schedule), its [health](#health) and its export
 ([import and export](#import-and-export), the deck ticked).
 
-A card opens in the [card inspector](#card-inspector). The
+A card opens in the [card inspector](#card-inspector): on a screen
+wider than 64rem beside the workbench, which stays as it is, its query,
+selection and Undo with it. The
 workbench reads the cards and the review states with the same queries
 as Solid Memo, and the instance's preferences for today's study day.
 A test keeps a query over 5,000 cards linear: timed at two sizes on the same machine, four times the cards take less than ten times as long.
@@ -617,7 +646,18 @@ read.
 
 The card inspector ([`CardInspectorContainer`](../apps/studio/src/ui/CardInspectorContainer.tsx))
 shows one card of a deck, named in its heading, with a link to its page
-in Solid Memo. Its four tabs are links, the one shown marked
+in Solid Memo. On a screen wider than 64rem it is in the aside, beside
+the deck's cards in the workbench, as the card's route has them
+([Layout](#layout)): the card's row there is marked (`aria-current`)
+and is the cursor's, and a card opened from the list takes the focus
+to its heading; closed, the cursor stays on its row, and the focus
+goes back there. **Previous** and **Next** at its heading's end, or
+**k** and **j**, show the card before it in the list, or the one after
+(each at its page of the list), on the same tab, with no Back stop; at
+either end of the list, or for a card the query does not keep, there
+is none. Below that width the inspector is the main content alone.
+
+Its four tabs are links, the one shown marked
 (`aria-current`):
 
 - **Content**: Solid Memo's card editor (`CardContainer` in `ui`): the
@@ -690,6 +730,18 @@ card keeps its own.
 
 While the deck is set aside, or the data check is under way, every tab
 is shown but nothing in it can be changed ([below](#data-set-aside)).
+
+**Edits not saved.** The content tab's card editor says while it holds
+changes not saved, since it opened or was last saved. Leaving them then
+(another card by `j`, `k`, Previous, Next or a row of the list, Close,
+another tab, or any other link or key that goes to another page)
+first asks, in a dialog ([`shell/ConfirmDialog.tsx`](../apps/studio/src/ui/shell/ConfirmDialog.tsx),
+on the Studio's `Dialog`): **Save** saves them as Save does, then goes
+on, unless the save failed or was refused, which the editor shows;
+**Discard** goes on without them; **Stay**, Escape or Close goes
+nowhere ([`shell/unsavedEdits.tsx`](../apps/studio/src/ui/shell/unsavedEdits.tsx)).
+A card's edits are never saved unasked. The browser's own Back and
+Forward are not asked about.
 
 Opened at a field (`field`, as the [health](#health) screen links to
 one), the inspector puts the focus there: on the text, or on the wrong
