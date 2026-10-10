@@ -17,7 +17,9 @@ import { courseHref } from "./router";
  * wrongly is put back at its end. After the last question is answered
  * right, the chapter is completed (UseCases.completeChapter), and the
  * course is read afresh before `onCompleted`, so the course's page the
- * learner is taken to shows it done and the next chapter open.
+ * learner is taken to shows it done and the next chapter open. A learner
+ * who leaves the review while that is saved stays where they went: the
+ * course is still read afresh, but `onCompleted` is not called.
  */
 export function ChapterReviewContainer({
   useCases,
@@ -62,20 +64,21 @@ export function ChapterReviewContainer({
       await useCases.completeChapter(deck, chapter.url);
       return finishesCourse;
     },
-    onSuccess: async (finishedCourse) => {
-      await Promise.all([
+    onSuccess: () =>
+      Promise.all([
         queryClient.invalidateQueries({ queryKey: courseKey(deck.url) }),
         queryClient.invalidateQueries({ queryKey: ["decks", instance.url] }),
-      ]);
-      onCompleted(finishedCourse);
-    },
+      ]),
   });
+  // Passed to mutate, not to useMutation, so that it is dropped once the
+  // review is unmounted.
+  const complete = () => completeMutation.mutate(undefined, { onSuccess: (finishedCourse) => onCompleted(finishedCourse) });
 
   function next() {
     answerMutation.reset();
     setAnswer(null);
     setPosition(position + 1);
-    if (position + 1 === queue.length) completeMutation.mutate();
+    if (position + 1 === queue.length) complete();
   }
 
   const completion: Completion | null =
@@ -101,7 +104,7 @@ export function ChapterReviewContainer({
       onStart={() => setStarted(true)}
       onCheck={(choice) => answerMutation.mutate({ card: card!, choice })}
       onNext={next}
-      onRetry={() => completeMutation.mutate()}
+      onRetry={complete}
     />
   );
 }

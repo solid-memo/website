@@ -2219,9 +2219,16 @@ describe("Workspace", () => {
     });
 
     it("takes a chapter from the course, named in the trail, and goes on to its final review", async () => {
+      const answered: string[] = [];
       window.history.replaceState(null, "", routeToHash(courseRoute));
       renderWorkspace(
-        courseUseCases({ answerCourseQuestion: vi.fn(async () => ({ effect: "introduce" as const, state: null })) }),
+        courseUseCases({
+          getCourse: vi.fn(async () => makeCourse([...answered])),
+          answerCourseQuestion: vi.fn(async (_instanceUrl: string, _deck: Deck, card: { id: string }) => {
+            answered.push(card.id);
+            return { effect: "introduce" as const, state: null };
+          }),
+        }),
       );
       fireEvent.click(await screen.findByRole("link", { name: "Start the course" }));
       expect(await screen.findByRole("heading", { name: "Step 1 of 2" })).toBeInTheDocument();
@@ -2322,6 +2329,15 @@ describe("Workspace", () => {
       renderWorkspace(courseUseCases());
       expect(await screen.findByRole("link", { name: "Start the course" })).toBeInTheDocument();
       expect(window.location.hash).toBe(routeToHash(courseRoute));
+    });
+
+    it("falls back to the chapter for a final review of a chapter with steps not done", async () => {
+      window.history.replaceState(null, "", routeToHash(reviewRoute));
+      renderWorkspace(courseUseCases({ getCourse: vi.fn(async () => makeCourse(["q-1"])) }));
+      // It resumes at the first step not done.
+      expect(await screen.findByRole("heading", { name: "Step 2 of 2" })).toBeInTheDocument();
+      expect(window.location.hash).toBe(routeToHash(chapterRoute));
+      expect(screen.queryByRole("button", { name: "Start the final review" })).toBeNull();
     });
 
     it("falls back to the deck's page for a deck that is no copy of a course", async () => {

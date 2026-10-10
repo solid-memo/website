@@ -211,7 +211,10 @@ export function Workspace({
   // A course's routes name the learner's deck of it; the course itself
   // (its release's outline and cards, and the learner's progress) is read
   // through the deck. A chapter that is not in it, or not open yet, falls
-  // back to the course; a deck that is no library copy, to its page.
+  // back to the course; a deck that is no library copy, to its page; a
+  // final review of a chapter with steps not done, to the chapter, once
+  // the course is read afresh (the last step's answer is still being
+  // read as the learner goes on from it).
   const isCourseRoute =
     route?.screen === "course" || route?.screen === "courseChapter" || route?.screen === "courseReview";
   const needsCourse = isCourseRoute && activeDeck !== null;
@@ -229,6 +232,11 @@ export function Workspace({
     chapterIndex >= 0 && activeCourse!.progress.chapters[chapterIndex]!.state !== "locked"
       ? activeCourse!.outline.chapters[chapterIndex]!
       : null;
+  const reviewTooSoon =
+    route?.screen === "courseReview" &&
+    activeChapter !== null &&
+    activeCourse!.progress.chapters[chapterIndex]!.resumeStepId !== undefined &&
+    !courseQuery.isFetching;
 
   // The chapter the learner has just completed, for the course's page to
   // celebrate as they come back to it. Kept in memory, not the URL, and
@@ -245,8 +253,10 @@ export function Workspace({
       replace({ screen: "deckDetail", instanceUrl: instanceUrl!, deckUrl: deckUrl! });
     } else if (chapterUrl !== null && activeCourse !== null && activeChapter === null) {
       replace({ screen: "course", instanceUrl: instanceUrl!, deckUrl: deckUrl! });
+    } else if (reviewTooSoon) {
+      replace({ screen: "courseChapter", instanceUrl: instanceUrl!, deckUrl: deckUrl!, chapterUrl: chapterUrl! });
     }
-  }, [needsCourse, activeDeck, activeCourse, activeChapter, chapterUrl, instanceUrl, deckUrl]);
+  }, [needsCourse, activeDeck, activeCourse, activeChapter, reviewTooSoon, chapterUrl, instanceUrl, deckUrl]);
 
   const preferencesQuery = useQuery({
     queryKey: ["preferences", instanceUrl],
@@ -443,7 +453,7 @@ export function Workspace({
       if (courseQuery.error) {
         return <ErrorMessage error={errorText(courseQuery.error)} />;
       }
-      if (activeCourse === null || (chapterUrl !== null && activeChapter === null)) {
+      if (activeCourse === null || (chapterUrl !== null && activeChapter === null) || reviewTooSoon) {
         return <Loading label={t("workspace.loadingCourse")} />;
       }
     }
