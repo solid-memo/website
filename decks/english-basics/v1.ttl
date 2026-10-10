@@ -1,0 +1,1758 @@
+@base <https://solid-memo.com/decks/english-basics/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Basic English"@en ,
+                  "Grundläggande engelska"@sv ,
+                  "기초 영어"@ko ,
+                  "Englisch für Anfänger"@de ,
+                  "Inglés básico"@es ,
+                  "Anglais de base"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "120 basic English words and phrases for beginners: the numbers 0–20, the tens and 100, the days of the week, the months, eight colours, family members, greetings and polite phrases, everyday nouns, six adjectives and 16 verbs. The front shows the English word in British spelling, nouns without an article and verbs with to (to go); the back gives its meaning in Swedish, Korean, German, Spanish and French, or the digits for a number, with notes on irregular forms, capital letters and usage. Words from Wikidata's English lexemes, checked against the Voice of America's Special English Word Book (public domain) and English Wiktionary; meanings from Wikidata's labels and lexemes where it has them and otherwise the authors' own, written with the help of AI and mostly following the library's other basics decks. Despite the title, this is not C. K. Ogden's Basic English word list."@en ,
+                        "120 grundläggande engelska ord och fraser för nybörjare: talen 0–20, tiotalen och 100, veckodagarna, månaderna, åtta färger, familjemedlemmar, hälsningar och artighetsfraser, vardagliga substantiv, sex adjektiv och 16 verb. Framsidan visar det engelska ordet i brittisk stavning, substantiv utan artikel och verb med to (to go); baksidan ger betydelsen på svenska, koreanska, tyska, spanska och franska, eller siffrorna för ett tal, med anteckningar om oregelbundna former, stor bokstav och användning. Ord från Wikidatas engelska lexem, kontrollerade mot Voice of Americas Special English Word Book (fri från upphovsrätt) och engelska Wiktionary; betydelser från Wikidatas etiketter och lexem där sådana finns och annars författarnas egna, skrivna med hjälp av AI och oftast i linje med bibliotekets andra nybörjarkortlekar. Trots titeln är detta inte C. K. Ogdens ordlista Basic English."@sv ,
+                        "초보자를 위한 기초 영어 단어와 표현 120개로, 0–20의 수, 십 단위 수와 100, 요일, 달, 색 여덟 가지, 가족 구성원, 인사와 예의 표현, 일상 명사, 형용사 여섯 개, 동사 16개가 있습니다. 앞면에는 영국식 철자로 쓴 영어 단어가 있고, 명사는 관사 없이, 동사는 to와 함께 나옵니다(to go). 뒷면에는 스웨덴어, 한국어, 독일어, 스페인어, 프랑스어 뜻, 수는 숫자가 있고, 불규칙 형태, 대문자, 쓰임에 관한 메모가 있습니다. 단어는 위키데이터의 영어 렉심에서 가져와 미국의 소리(Voice of America)의 Special English Word Book(퍼블릭 도메인)과 영어 위키낱말사전으로 확인했고, 뜻은 위키데이터의 레이블과 렉심에 있으면 위키데이터에서 가져왔으며 없으면 저자들이 AI의 도움을 받아 직접 썼고 대부분 라이브러리의 다른 기초 덱을 따랐습니다. 제목과 달리 C. K. 오그던의 Basic English 단어 목록은 아닙니다."@ko ,
+                        "120 grundlegende englische Wörter und Wendungen für Anfänger: die Zahlen 0–20, die Zehner und 100, die Wochentage, die Monate, acht Farben, Familienmitglieder, Grüße und Höflichkeitsformeln, Alltagssubstantive, sechs Adjektive und 16 Verben. Die Vorderseite zeigt das englische Wort in britischer Schreibung, Substantive ohne Artikel und Verben mit to (to go); die Rückseite gibt seine Bedeutung auf Schwedisch, Koreanisch, Deutsch, Spanisch und Französisch an, bei einer Zahl die Ziffern, mit Anmerkungen zu unregelmäßigen Formen, Großschreibung und Gebrauch. Wörter aus den englischen Lexemen von Wikidata, abgeglichen mit dem Special English Word Book der Voice of America (gemeinfrei) und dem englischen Wiktionary; Bedeutungen aus den Bezeichnungen und Lexemen von Wikidata, wo es sie gibt, sonst von den Autoren selbst, mit Hilfe von KI geschrieben und meist nach den anderen Anfängerstapeln der Bibliothek. Trotz des Titels ist dies nicht die Basic-English-Wortliste von C. K. Ogden."@de ,
+                        "120 palabras y frases básicas en inglés para principiantes: los números del 0 al 20, las decenas y el 100, los días de la semana, los meses, ocho colores, miembros de la familia, saludos y frases de cortesía, sustantivos cotidianos, seis adjetivos y 16 verbos. El anverso muestra la palabra inglesa con ortografía británica, los sustantivos sin artículo y los verbos con to (to go); el reverso da su significado en sueco, coreano, alemán, español y francés, o las cifras en el caso de un número, con notas sobre formas irregulares, mayúsculas y uso. Palabras de los lexemas ingleses de Wikidata, comprobadas con el Special English Word Book de la Voz de América (de dominio público) y el Wikcionario en inglés; significados de las etiquetas y los lexemas de Wikidata cuando los tiene y, si no, de los propios autores, escritos con ayuda de IA y en su mayoría según los otros mazos básicos de la biblioteca. Pese al título, no es la lista de palabras Basic English de C. K. Ogden."@es ,
+                        "120 mots et expressions de base en anglais pour débutants : les nombres de 0 à 20, les dizaines et 100, les jours de la semaine, les mois, huit couleurs, les membres de la famille, les salutations et les formules de politesse, des noms courants, six adjectifs et 16 verbes. Le recto montre le mot anglais en orthographe britannique, les noms sans article et les verbes avec to (to go) ; le verso donne son sens en suédois, en coréen, en allemand, en espagnol et en français, ou les chiffres pour un nombre, avec des notes sur les formes irrégulières, les majuscules et l'usage. Mots tirés des lexèmes anglais de Wikidata, vérifiés dans le Special English Word Book de Voice of America (domaine public) et le Wiktionnaire anglophone ; sens tirés des libellés et des lexèmes de Wikidata quand il les a et sinon rédigés par les auteurs avec l'aide de l'IA, le plus souvent d'après les autres paquets de base de la bibliothèque. Malgré son titre, ce n'est pas la liste de mots Basic English de C. K. Ogden."@fr ;
+    prov:wasDerivedFrom <https://www.wikidata.org/> ,
+                        <https://solid-memo.com/decks/french-basics/v3.ttl> ,
+                        <https://solid-memo.com/decks/german-basics/v3.ttl> ,
+                        <https://solid-memo.com/decks/spanish-basics/v3.ttl> ,
+                        <https://solid-memo.com/decks/finnish-basics/v3.ttl> ,
+                        <https://solid-memo.com/decks/italian-basics/v3.ttl> ,
+                        <https://solid-memo.com/decks/portuguese-basics/v3.ttl> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:languages ,
+               topic:english ;
+    dcat:keyword "English"@en ,
+                 "vocabulary"@en ,
+                 "beginners"@en ,
+                 "phrases"@en ,
+                 "engelska"@sv ,
+                 "ordförråd"@sv ,
+                 "nybörjare"@sv ,
+                 "fraser"@sv ,
+                 "영어"@ko ,
+                 "어휘"@ko ,
+                 "초보자"@ko ,
+                 "표현"@ko ,
+                 "Englisch"@de ,
+                 "Wortschatz"@de ,
+                 "Anfänger"@de ,
+                 "Redewendungen"@de ,
+                 "inglés"@es ,
+                 "vocabulario"@es ,
+                 "principiantes"@es ,
+                 "frases"@es ,
+                 "anglais"@fr ,
+                 "vocabulaire"@fr ,
+                 "débutants"@fr ,
+                 "expressions"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#english-basics> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#english-basics> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/mark/1.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T17:39:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/> ,
+              <https://solid-memo.com/decks/french-basics/v3.ttl> ,
+              <https://solid-memo.com/decks/german-basics/v3.ttl> ,
+              <https://solid-memo.com/decks/spanish-basics/v3.ttl> ,
+              <https://solid-memo.com/decks/finnish-basics/v3.ttl> ,
+              <https://solid-memo.com/decks/italian-basics/v3.ttl> ,
+              <https://solid-memo.com/decks/portuguese-basics/v3.ttl> ,
+              <https://archive.org/details/voa-special-english-word-book> ,
+              <https://en.wiktionary.org/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled. The dossier's per-card evidence and Wikidata checks, its numbered queries and API calls (its Queries section) and its log of discrepancies are not part of this release; where the text refers to them, to the dossier, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier's card table; the Wikidata checks are a second script, run against live Wikidata. The research, the writing of the cards, the checks and the review rounds were done by AI agents and by machines; no person has reviewed the cards."@en ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Word list. A candidate list of 120 words and phrases for a first English course was drawn up from the brief's categories (numbers 0–20, the tens and 100; days; months; colours; family; greetings and polite phrases; everyday nouns; adjectives; verbs), choosing the most basic word for each concept and following the library's French, German and Spanish basics decks where the languages allow. No frequency list or textbook word list was copied. The list was then checked against the Voice of America's Special English Word Book (2009 edition, a public-domain work of the United States Government, downloaded from the Internet Archive, calls 1c, 1d and 2a): 90 of the 120 words are entries of its word list or of its lists of numbers, days and months (grey as the American gray, please only as the verb); the 30 that are not are the numbers 11–19 and 30–90 but for 50, grandfather, grandmother, the greetings and polite phrases but for yes, no and please, and apple, table, chair and hand. Nothing was taken from its definitions."@en ,
+                 "Wikidata lexemes. SPARQL query Q1 fetched every English lexeme (language Q1860) whose lemma is one of the candidates (plus gray, thanks, thank, city, good afternoon, bye and excuse), with its category, senses, English glosses and sense items (P5137). Every one of the 120 candidates has a lexeme. For each card the lexeme of the card's part of speech was chosen (the numeral or determiner lexeme for numbers, the proper noun for days and months, the adjective for colours and adjectives, the noun for nouns, the verb for verbs, the interjection, particle or phrase lexeme for greetings and for yes and no), and its full JSON fetched with API calls A3 (city's, after review round 2, with call F2): lemma, forms and senses. The lexemes of other languages that the chosen senses translate to (P5972) were fetched with API calls A4; SPARQL query Q2 found the senses in Swedish, Korean, German, Spanish and French that translate to the chosen English senses, and query Q3 the lexemes in those languages whose senses name the same items. The forms quoted in the notes (the past and past participle of 13 verbs, am, are, is and has, and the plurals men and women) are the lexemes' forms."@en ,
+                 "Wikidata items. The items linked from the chosen senses (P5137), plus four found with the item search (API calls A6: brown Q47071, good evening Q19279366, goodbye Q2506912, thank you Q19279214), were fetched with API calls A5 and F2 (labels and aliases in en, sv, ko, de, es, fr and mul). They gave the Swedish, Korean, German, Spanish and French names of days, months, colours, family members, everyday things and some greetings, and the digit labels (mul) of the numbers. Where a sense has several items, the one for the card's meaning was used (window: sense S2, Q35473, not S1, a window on a screen; hand: S3, Q33767; man: S1, Q8441; day: S1 and S3, Q573 and Q52643). Where an item's label is not the everyday word, its alias was used (German Straße, Katze, Hund; Spanish hombre, gato; Korean 남자, 여자, 빨간색, 노란색, 검은색, 흰색, 날), and German colour names, which Wikidata labels as nouns (Rot, Blau), are written as the adjectives in lower case (rot, blau), four of them confirmed only by the label in another case."@en ,
+                 "Word lists not used. The brief suggested Ogden's Basic English word list (1930) for the selection. It was not used: C. K. Ogden died in March 1957 (Wikidata Q503276 gives 21 March; call A9), so his works stay in copyright in the United Kingdom until the end of 2027; the copy found on the Internet Archive (call 1b) is a 2021 print of the Basic-English Institute's web page, with no licence; and its 850 words leave out the numbers, the days, the months (may is in it only as a verb) and many basic verbs (speak, eat, want, read, write), so it could not have served the brief anyway. Despite its title, this deck is not Ogden's Basic English. Cambridge and Merriam-Webster dictionaries were not consulted. English Wiktionary verified the English; its licence (CC BY-SA 4.0) governs reuse of its text, which this deck does not do, and automated access to it is a matter of Wikimedia's Terms of Use and API rules, not of that licence, and its definitions were read through the Wikimedia REST API with an identifying User-Agent, as Wikimedia's User-Agent policy asks."@en ,
+                 "Writing the cards. The front is the English word as in the lexeme's lemma, in British spelling (grey, with gray in a note), lower case but for the days and months, which English writes with a capital letter. Nouns are given without an article and adjectives in their plain form; verbs are given with to (to go), as the library's other basics decks write the English meaning of a verb; numbers are spelled out (three), one hundred as the Voice of America's list writes it. The card id is the front in lower case, with dashes for spaces and the apostrophe (you-re-welcome). The back gives the meaning in Swedish, Korean, German, Spanish and French, one text per language, or the digits for a number (tagged zxx, as digits are in no language): nouns without an article, Swedish verbs with att, as the other basics decks write them. Korean colours are the colour names with 색 (빨간색), the forms Wikidata's labels and aliases and most of the library's decks give, while the six other adjectives are in the attributive form (큰, 좋은), which reads as an English adjective; both are usual dictionary forms. Where Wikidata has the word (an item's label or alias, a lexeme that translates the sense or names the same item, or a sense gloss or one part of it; for Swedish verbs, the lemma with att added), the back follows it: 341 of the 455 back texts come wholly from Wikidata. The other 114 have at least one word that does not: they are the authors' own renderings, written by an AI agent from its knowledge of the languages and following the library's other basics decks (the six decks recorded as sources), mostly the greetings and polite phrases, the verbs, the Korean adjectives and the Swedish grandparents, which Wikidata labels only by a description (förälders far); 105 of these 114 are the words those decks give for the same English meaning. Where an English word has two everyday equivalents both are given (sv farfar, morfar; de Freund, Freundin; es buenas tardes, buenas noches; fr marron, brun). Korean greetings that do not change with the time of day are marked (안녕하세요 (아침 인사)). Rule for text not given by a content source: the meanings and the facts behind the notes not taken from Wikidata or the library's decks are the authors' own knowledge of the languages, written with the help of AI; such single words and short facts of usage count as the authors' own content. How far they were checked is said under Cross-checking."@en ,
+                 "Notes. A short note was added where it helps a learner: the capital letter of days and months; forty spelled without u; a hundred; the American spelling gray; café for brown in much of Latin America; the everyday mum, mom, dad, grandpa and grandma; older and younger brother and sister; hi, bye and thanks as the informal forms; when good morning, good evening and good night are said; please in a request, with the Swedish and Korean way to ask (Vatten, tack; 물 주세요); you're welcome as the reply to thank you; excuse me against sorry; the plurals men and women; well as the adverb of good; old as the opposite of new and of young; a town being smaller than a city; the irregular forms of 13 verbs and the pronunciation of the past of read; do for a task and make for a thing. A front note \"month\" tells the months March and May from the verbs march and may. Every note is given in English, Swedish, Korean, German, Spanish and French: card format 4, which the library's basics decks use, asks for an English text in every note, and an English learner can read it too. Notes are the authors' own wording, written with the help of AI. Facts with a CC0 source: the forms they quote (the Wikidata lexemes); excuse me asking for attention (sense L750348-S1, \"requests an individual's attention\"); please in a polite request (L307873-S1, \"used to make a polite request\"); you're welcome as the reply to thank you (L1116901-S1, 'polite response to a \"Thank you\"'); a town smaller than a city (L3561-S1, \"settlement that is bigger than a village but smaller than a city\"); good evening as an evening greeting (Q19279366, \"greeting said in the evening\") and good night as a goodbye at night (Q126010969, \"goodbye at night\"); sorry as an apology (L334094-S1, \"expression of regret/sorrow\"). The other facts of usage are the authors' own knowledge, confirmed in English Wiktionary where it covers them but not taken from it: excuse me to get past and, in American English, as an apology; Sorry? asking someone to repeat; good night also before going to bed; grey as the British and gray as the American spelling; café in Latin America (the Spanish section of English Wiktionary's café, call W14.2); the informal and family forms; and the Swedish and Korean ways to ask and to part."@en ,
+                 "Cross-checking. Every English word was looked up in English Wiktionary's definitions (REST API, calls W13, and W14.1 for city): each has an English entry with the card's part of speech and meaning (the evidence quotes its first definitions, or for excuse me the senses that are the card's). The Voice of America's list confirms 90 words, as above. No verification source was consulted for the Swedish, Korean, German, Spanish and French meanings. Those from Wikidata were re-checked against live Wikidata (Machine checks). The authors' own were compared with the library's own basics decks (French, German, Spanish, Finnish, Italian and Portuguese, version 3), which give the same meanings in Swedish, Korean, German and Spanish and, on the French deck's fronts, in French: of the 452 backs that have a counterpart there, 442 agree (every word of the back is one those decks give for the same English word); the 10 that differ add a second equivalent or another form on purpose (good-morning ko 안녕하세요 (아침 인사); you-re-welcome sv ingen orsak, varsågod; you-re-welcome fr de rien, je vous en prie; sorry de Entschuldigung, es tut mir leid; friend de Freund, Freundin; friend es amigo, amiga; friend fr ami, amie; to-have ko 가지다, 있다; to-make sv att göra, att tillverka; to-make fr faire, fabriquer). SPARQL queries Q4 and Q5 looked up the 125 distinct words of the authors' own renderings (127 as written on the cards, counting att and the Korean time-of-day marks): 77 are the lemma of a Wikidata lexeme in their language, which confirms their spelling; the rest, phrases or words that Wikidata does not have as lemmas (snälla among them), were checked against no outside source, only against the library's decks and in the language review (review round 2, by an AI agent)."@en ,
+                 "Machine checks. The dossier's Wikidata checks were re-run against live Wikidata after the review rounds' fixes: for each card, that its English lexeme is in English and has the card's word as its lemma; for each number, the mul digit label of its item; for each back taken from an item, that the item still has that label or alias in that language; and for each note quoting a form, that the lexeme has that form with that grammatical feature. On 10 October 2026 they were 620 checks on 120 cards (120 lexemes, 107 items), and all passed. The built deck was validated with the library's checker (the app's SHACL shapes, DCAT-AP and the library rules)."@en ,
+                 "Excluded: the modal verb can (it has no infinitive, so it cannot be written as to can; pouvoir and können are be able to), town (a card of its own would share city's backs in most of the five languages, which Wikidata gives only for city, Q515: stad, 도시, Stadt, ciudad, ville; the note on city names town; the draft had town, and review round 2 found that its backs meant city), good afternoon (Korean, German and French have no greeting of their own for it), hi, bye and thanks as cards of their own (they are named as the informal forms in the notes on hello, goodbye and thank you), the American spellings as fronts (gray is in the note on grey), and Ogden's word list (see above)."@en ,
+                 "Selection: 120 cards: the cardinal numbers 0–20, the tens 30–90 and 100 (29); the seven days of the week; the twelve months; eight colours (red, blue, green, yellow, black, white, grey, brown); eight family members (mother, father, brother, sister, son, daughter, grandfather, grandmother); twelve greetings and polite phrases (hello, good morning, good evening, good night, goodbye, thank you, please, you're welcome, excuse me, sorry, yes, no); 22 everyday nouns (house, water, bread, milk, apple, book, table, chair, door, window, dog, cat, city, street, school, man, woman, friend, hand, day, night, week); six common adjectives (big, small, good, bad, new, old); and 16 common verbs (to be, to have, to go, to come, to do, to make, to speak, to eat, to drink, to love, to want, to see, to read, to write, to sleep, to work). English has two everyday verbs, do and make, for French faire and Spanish hacer, so both are cards and can is left out. The list was chosen by the deck's authors for a first course, following the library's other basics decks, not copied from any frequency list or textbook; every word has a Wikidata lexeme, and 90 are in the Voice of America's Special English word list. Spelling is British; American forms are in notes."@en ,
+                 "Licensing: The deck is CC0 1.0. Its content comes from sources whose terms allow any reuse: Wikidata's lexemes and items (CC0 1.0: English lemmas and forms, the Swedish, Korean, German, Spanish and French labels, aliases, lemmas and glosses that 341 of the backs take, and the glosses behind some notes), and the library's own basics decks (French, German, Spanish, Finnish, Italian and Portuguese, version 3, CC0 1.0, from the same publisher), which many of the authors' own meanings follow. The selection of words is the authors' own. The meanings not taken from Wikidata and the notes are the authors' own renderings, written with the help of AI; single words and fixed greetings such as \"ingen orsak\" or \"de nada\" are facts of usage, not protectable expression. The Voice of America's Special English Word Book, a work of the United States Government with no copyright protection under 17 U.S.C. § 105, was used to check the selection only. English Wiktionary (CC BY-SA 4.0) was used for verification only, of the English words and of facts of usage in the notes: no definition, example or list was taken from it, and the notes are worded independently. Ogden's word list, Cambridge and Merriam-Webster were not used. So no source requires attribution or share-alike for the deck, although all are credited in its provenance. The quotations in the dossier are not covered by the deck's CC0 dedication: quotations from English Wiktionary are © its contributors, CC BY-SA 4.0; quotations from the Voice of America's list are in the public domain; Wikidata data and the library's decks are CC0."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T16:11:36Z"^^xsd:dateTime ;
+    rdfs:label "Sources, licences and machine checks"@en ;
+    rdfs:comment "Scope: All 120 cards of the draft: every English front, every Swedish, Korean, German, Spanish and French back and every note against the content source (Wikidata) and the verification sources (English Wiktionary, the Voice of America's Special English Word Book), and against the library's other basics decks; the dossier's Wikidata checks, run against live Wikidata for every card; the library's checker. A machine check by the authoring AI agent and its scripts, not a human review."@en ,
+                 "Outcome: Every card cited Wikidata: its English lexeme, whose lemma is the card's word, and for 102 cards one or more items. English Wiktionary had every English word with the card's part of speech; the Voice of America's list had 90 of them. 336 of the 455 back texts came wholly from Wikidata; the other 119 were the authors' own renderings, written with the help of AI. The Wikidata checks, run against live Wikidata on 10 October 2026 for all 120 cards, were 615 checks (120 lexeme languages, 120 lemmas, 29 digit labels, 314 item labels or aliases in the five back languages, 32 lexeme forms quoted in notes); all passed. The library's checker found the draft valid. Discrepancies between sources and how they were resolved are listed in the dossier. (This round's counts were corrected in review round 3: it had said 97 cards with items and 99 items.)"@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T17:25:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 120 cards and the dossier's per-card evidence, by an AI agent (not a human review): each English lexeme's language, lemma and category; every sense and item cited; all 29 digit labels; every back marked as taken from Wikidata, against 336 entities re-fetched live on 10 October 2026; every form quoted in a note (32); the spelling of every front and back; every claim in the notes; the Voice of America and Ogden claims against the Internet Archive scans; the licence quotes; the counts in the record."@en ,
+                 "Outcome: No errors; three warnings and ten suggestions (the review's summary counts nine), each checked against the sources by the authoring agent. Warnings: please was Swedish vänligen, a formal written word (now snälla, with a note that Swedish asks with tack: Vatten, tack); the note on excuse me implied it is never an apology (rewritten: sorry usually, excuse me too in American English); and the dossier quoted for excuse me a Wiktionary sense that is not the card's (it now quotes the card's senses). Suggestions applied: the library comparison now matches each part of a library deck's English back (it had missed town, city; daughter, girl; small, little); gehen marked as one part of a German gloss; the Swedish verbs' att stated in the dossier's legend; the four items from the item search marked as such; no's lexical category named (adverbial particle) and the record's wording changed to particle; the count of own words reconciled (written and distinct words now both given); Ogden's death given as March 1957 with Wikidata's date; Ogden's list said to lack the months (may only as a verb); a note on brown that much of Latin America says café; and the Korean note on good night now says that 안녕히 주무세요 is for someone going to bed and 안녕히 가세요/계세요 for parting. None declined."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T17:25:00Z"^^xsd:dateTime ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 120 cards, by an AI agent (not a human review): every front, back and note in all six languages, by script (language tags, one back per language, Hangul only in Korean, card ids) and by reading (idiom, form, register, Korean particles); the backs compared with the library's six basics decks, version 3; Wikidata items for town, city and the greetings and English and Swedish Wiktionary's translation tables, looked up live; the title, description and keywords in all six languages."@en ,
+                 "Outcome: No errors; two warnings and seven suggestions, each checked by the authoring agent. Warnings: town's Korean and Spanish backs (도시, ciudad) meant city, while its note said a town is smaller than a city; resolved by making the card city, whose backs stad, 도시, Stadt, ciudad and ville are all Wikidata labels of Q515, with town in the note (town now under Excluded). please in Swedish was vänligen, formal; now snälla (as in the fact review). Suggestions applied: a more idiomatic Korean note on please (물 주세요); the Korean note on good night (as in the fact review); the Korean note on to have capitalised; the Korean front note on March and May says 달(월), since 달 alone can mean moon; the French description's articles evened and Wiktionary called le Wiktionnaire anglophone. Suggestions declined: the Korean colours keep the form with 색 (빨간색), the form Wikidata and most library decks give, while the other adjectives keep the attributive form, now explained in the record; and s'il vous plaît keeps the straight apostrophe of the French basics deck, consistent within this deck."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T17:25:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 120 cards and the record, by an AI agent (not a human review): the licence evidence of every source, fetched live (Wikidata:Licensing, English Wiktionary's footer, VOA's copyright statement, 17 U.S.C. § 105, the Internet Archive metadata, Wikidata on C. K. Ogden); every Wikidata claim of the evidence, re-fetched; the Voice of America and Ogden counts; the agreement with the library's basics decks; the call log; the metadata against the template and the brief; the library checker."@en ,
+                 "Outcome: The CC0 decision, the attribution wording and the absence of any claim of human review were confirmed. One error: the record gave 97 cards with items and 99 items; it is 102 and 107, now computed from the evidence. Four warnings, all applied: the library's basics decks were in effect a source of the authors' own meanings (they are now recorded as six sources with their CC0 licence, and the record says which meanings follow them); the record overstated how the own meanings were checked (it now says that no outside source covers them, and which were found as Wikidata lemmas); some notes rested on facts only Wiktionary supports (the notes on excuse me, please, you're welcome, city, good evening, good night and sorry now cite Wikidata glosses and descriptions, and the remaining facts are named in the record as the authors' own, confirmed in Wiktionary); and the Wiktionary source comment now says it also verified facts in the notes. Suggestions applied: the remark that Wiktionary's licence allows automated use corrected (access is governed by Wikimedia's terms, the licence governs reuse); VOA's credit request and its caveat on third-party material quoted; the activities' times set after the checks ran; and the description says the deck is not Ogden's Basic English. Suggestion declined: the Swedish verbs are not reclassified, since the rule (a Wikidata lemma with att added counts as Wikidata) was already applied to every card; att äta and att se count as own because Wikidata has no matching Swedish string, not because of att; the rule is now stated in the record and the dossier."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata (English lexemes and items)" ;
+    dcterms:creator "Wikidata contributors (Wikimedia Foundation)" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing (read with action=raw) — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\" Content taken: the English lemmas and forms, the Swedish, Korean, German, Spanish and French labels, aliases, lemmas and glosses the backs follow, and the glosses and descriptions behind some notes."@en .
+
+<https://solid-memo.com/decks/french-basics/v3.ttl>
+    rdfs:comment "A release of this library, described (title, creator, licence) in its own file and the library's index. The release file decks/french-basics/v3.ttl, read from the library's repository, states its licence: \"dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/>\"; its publisher is Solid Memo, as this deck's. Content taken: its Swedish, Korean, German and Spanish backs and its French fronts were compared with this deck's backs, and where the authors' own meanings were chosen they follow the library's basics decks (for example att gå, att åka; 남자 형제; farfar, morfar; 안녕하세요 (저녁 인사)). No notes or other text were taken."@en .
+
+<https://solid-memo.com/decks/german-basics/v3.ttl>
+    rdfs:comment "A release of this library, described (title, creator, licence) in its own file and the library's index. The release file decks/german-basics/v3.ttl, read from the library's repository, states its licence: \"dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/>\"; its publisher is Solid Memo, as this deck's. Content taken: its Swedish, Korean and Spanish backs were compared with this deck's backs, and where the authors' own meanings were chosen they follow the library's basics decks (for example att gå, att åka; 남자 형제; farfar, morfar; 안녕하세요 (저녁 인사)). No notes or other text were taken."@en .
+
+<https://solid-memo.com/decks/spanish-basics/v3.ttl>
+    rdfs:comment "A release of this library, described (title, creator, licence) in its own file and the library's index. The release file decks/spanish-basics/v3.ttl, read from the library's repository, states its licence: \"dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/>\"; its publisher is Solid Memo, as this deck's. Content taken: its Swedish, Korean and German backs were compared with this deck's backs, and where the authors' own meanings were chosen they follow the library's basics decks (for example att gå, att åka; 남자 형제; farfar, morfar; 안녕하세요 (저녁 인사)). No notes or other text were taken."@en .
+
+<https://solid-memo.com/decks/finnish-basics/v3.ttl>
+    rdfs:comment "A release of this library, described (title, creator, licence) in its own file and the library's index. The release file decks/finnish-basics/v3.ttl, read from the library's repository, states its licence: \"dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/>\"; its publisher is Solid Memo, as this deck's. Content taken: its Swedish, Korean, German and Spanish backs were compared with this deck's backs, and where the authors' own meanings were chosen they follow the library's basics decks (for example att gå, att åka; 남자 형제; farfar, morfar; 안녕하세요 (저녁 인사)). No notes or other text were taken."@en .
+
+<https://solid-memo.com/decks/italian-basics/v3.ttl>
+    rdfs:comment "A release of this library, described (title, creator, licence) in its own file and the library's index. The release file decks/italian-basics/v3.ttl, read from the library's repository, states its licence: \"dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/>\"; its publisher is Solid Memo, as this deck's. Content taken: its Swedish, Korean, German and Spanish backs were compared with this deck's backs, and where the authors' own meanings were chosen they follow the library's basics decks (for example att gå, att åka; 남자 형제; farfar, morfar; 안녕하세요 (저녁 인사)). No notes or other text were taken."@en .
+
+<https://solid-memo.com/decks/portuguese-basics/v3.ttl>
+    rdfs:comment "A release of this library, described (title, creator, licence) in its own file and the library's index. The release file decks/portuguese-basics/v3.ttl, read from the library's repository, states its licence: \"dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/>\"; its publisher is Solid Memo, as this deck's. Content taken: its Swedish, Korean, German and Spanish backs were compared with this deck's backs, and where the authors' own meanings were chosen they follow the library's basics decks (for example att gå, att åka; 남자 형제; farfar, morfar; 안녕하세요 (저녁 인사)). No notes or other text were taken."@en .
+
+<https://archive.org/details/voa-special-english-word-book>
+    dcterms:title "VOA Special English Word Book: A list of words used in Special English programs on radio, television and the Internet (Voice of America, 2009), as scanned on the Internet Archive" ;
+    dcterms:creator "VOA Special English, Voice of America, Washington, D.C." ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> ;
+    rdfs:comment "A work of the United States Government: the title page reads \"Voice of America Washington, D.C. 20237\", and the foreword, signed \"VOA Special English Washington, D.C. 2009\", says \"The Voice of America has been broadcasting programs in Special English since 1959\" and \"The first edition was published in 1962.\" VOA's copyright statement (https://www.voanews.com/p/5338.html): \"All text, audio and video material produced exclusively by the Voice of America is in the public domain. Credit for any use of VOA material should be given to voanews.com, Voice of America, or VOA.\" It adds that voanews.com content may also contain copyrighted material licensed for VOA programming only; the word book is VOA's own. 17 U.S.C. § 105 (https://www.law.cornell.edu/uscode/text/17/105): \"Copyright protection under this title is not available for any work of the United States Government\"; section 105 applies in the United States. The Internet Archive item (https://archive.org/metadata/voa-special-english-word-book), uploaded by a third party, states no licence. Recorded here with the Public Domain Mark: free of known copyright. Used to check the selection only; no content was taken from it. Credited to Voice of America in this provenance, as VOA asks."@en .
+
+<https://en.wiktionary.org/>
+    dcterms:title "English Wiktionary (English entries)" ;
+    dcterms:creator "Wiktionary contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://en.wiktionary.org/wiki/house — page footer: \"Definitions and other text are available under the Creative Commons Attribution-ShareAlike License; additional terms may apply.\", linking to https://creativecommons.org/licenses/by-sa/4.0/. Used to verify the English words and the facts of usage in the notes (definitions read through https://en.wiktionary.org/api/rest_v1/page/definition/); no content was taken from it."@en .
+
+<#zero>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "zero"@en ;
+    solid-memo:back "0"@zxx .
+
+<#one>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "one"@en ;
+    solid-memo:back "1"@zxx .
+
+<#two>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "two"@en ;
+    solid-memo:back "2"@zxx .
+
+<#three>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "three"@en ;
+    solid-memo:back "3"@zxx .
+
+<#four>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "four"@en ;
+    solid-memo:back "4"@zxx .
+
+<#five>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "five"@en ;
+    solid-memo:back "5"@zxx .
+
+<#six>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "six"@en ;
+    solid-memo:back "6"@zxx .
+
+<#seven>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "seven"@en ;
+    solid-memo:back "7"@zxx .
+
+<#eight>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "eight"@en ;
+    solid-memo:back "8"@zxx .
+
+<#nine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "nine"@en ;
+    solid-memo:back "9"@zxx .
+
+<#ten>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ten"@en ;
+    solid-memo:back "10"@zxx .
+
+<#eleven>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "eleven"@en ;
+    solid-memo:back "11"@zxx .
+
+<#twelve>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "twelve"@en ;
+    solid-memo:back "12"@zxx .
+
+<#thirteen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "thirteen"@en ;
+    solid-memo:back "13"@zxx .
+
+<#fourteen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "fourteen"@en ;
+    solid-memo:back "14"@zxx .
+
+<#fifteen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "fifteen"@en ;
+    solid-memo:back "15"@zxx .
+
+<#sixteen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "sixteen"@en ;
+    solid-memo:back "16"@zxx .
+
+<#seventeen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "seventeen"@en ;
+    solid-memo:back "17"@zxx .
+
+<#eighteen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "eighteen"@en ;
+    solid-memo:back "18"@zxx .
+
+<#nineteen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "nineteen"@en ;
+    solid-memo:back "19"@zxx .
+
+<#twenty>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "twenty"@en ;
+    solid-memo:back "20"@zxx .
+
+<#thirty>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "thirty"@en ;
+    solid-memo:back "30"@zxx .
+
+<#forty>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "forty"@en ;
+    solid-memo:back "40"@zxx ;
+    solid-memo:backNote "Spelled without the u of four: forty."@en ,
+                        "Stavas utan u, till skillnad från four: forty."@sv ,
+                        "four와 달리 u 없이 forty로 써요."@ko ,
+                        "Ohne das u von four geschrieben: forty."@de ,
+                        "Se escribe sin la u de four: forty."@es ,
+                        "S'écrit sans le u de four : forty."@fr .
+
+<#fifty>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "fifty"@en ;
+    solid-memo:back "50"@zxx .
+
+<#sixty>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "sixty"@en ;
+    solid-memo:back "60"@zxx .
+
+<#seventy>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "seventy"@en ;
+    solid-memo:back "70"@zxx .
+
+<#eighty>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "eighty"@en ;
+    solid-memo:back "80"@zxx .
+
+<#ninety>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ninety"@en ;
+    solid-memo:back "90"@zxx .
+
+<#one-hundred>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "one hundred"@en ;
+    solid-memo:back "100"@zxx ;
+    solid-memo:backNote "Also a hundred."@en ,
+                        "Även a hundred."@sv ,
+                        "a hundred라고도 해요."@ko ,
+                        "Auch a hundred."@de ,
+                        "También a hundred."@es ,
+                        "On dit aussi a hundred."@fr .
+
+<#monday>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Monday"@en ;
+    solid-memo:back "måndag"@sv ,
+                    "월요일"@ko ,
+                    "Montag"@de ,
+                    "lunes"@es ,
+                    "lundi"@fr ;
+    solid-memo:backNote "In English, the days of the week are written with a capital letter."@en ,
+                        "På engelska skrivs veckodagarna med stor bokstav."@sv ,
+                        "영어에서는 요일 이름을 대문자로 시작해요."@ko ,
+                        "Im Englischen schreibt man die Wochentage groß."@de ,
+                        "En inglés, los días de la semana se escriben con mayúscula."@es ,
+                        "En anglais, les jours de la semaine s'écrivent avec une majuscule."@fr .
+
+<#tuesday>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Tuesday"@en ;
+    solid-memo:back "tisdag"@sv ,
+                    "화요일"@ko ,
+                    "Dienstag"@de ,
+                    "martes"@es ,
+                    "mardi"@fr ;
+    solid-memo:backNote "In English, the days of the week are written with a capital letter."@en ,
+                        "På engelska skrivs veckodagarna med stor bokstav."@sv ,
+                        "영어에서는 요일 이름을 대문자로 시작해요."@ko ,
+                        "Im Englischen schreibt man die Wochentage groß."@de ,
+                        "En inglés, los días de la semana se escriben con mayúscula."@es ,
+                        "En anglais, les jours de la semaine s'écrivent avec une majuscule."@fr .
+
+<#wednesday>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Wednesday"@en ;
+    solid-memo:back "onsdag"@sv ,
+                    "수요일"@ko ,
+                    "Mittwoch"@de ,
+                    "miércoles"@es ,
+                    "mercredi"@fr ;
+    solid-memo:backNote "In English, the days of the week are written with a capital letter."@en ,
+                        "På engelska skrivs veckodagarna med stor bokstav."@sv ,
+                        "영어에서는 요일 이름을 대문자로 시작해요."@ko ,
+                        "Im Englischen schreibt man die Wochentage groß."@de ,
+                        "En inglés, los días de la semana se escriben con mayúscula."@es ,
+                        "En anglais, les jours de la semaine s'écrivent avec une majuscule."@fr .
+
+<#thursday>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Thursday"@en ;
+    solid-memo:back "torsdag"@sv ,
+                    "목요일"@ko ,
+                    "Donnerstag"@de ,
+                    "jueves"@es ,
+                    "jeudi"@fr ;
+    solid-memo:backNote "In English, the days of the week are written with a capital letter."@en ,
+                        "På engelska skrivs veckodagarna med stor bokstav."@sv ,
+                        "영어에서는 요일 이름을 대문자로 시작해요."@ko ,
+                        "Im Englischen schreibt man die Wochentage groß."@de ,
+                        "En inglés, los días de la semana se escriben con mayúscula."@es ,
+                        "En anglais, les jours de la semaine s'écrivent avec une majuscule."@fr .
+
+<#friday>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Friday"@en ;
+    solid-memo:back "fredag"@sv ,
+                    "금요일"@ko ,
+                    "Freitag"@de ,
+                    "viernes"@es ,
+                    "vendredi"@fr ;
+    solid-memo:backNote "In English, the days of the week are written with a capital letter."@en ,
+                        "På engelska skrivs veckodagarna med stor bokstav."@sv ,
+                        "영어에서는 요일 이름을 대문자로 시작해요."@ko ,
+                        "Im Englischen schreibt man die Wochentage groß."@de ,
+                        "En inglés, los días de la semana se escriben con mayúscula."@es ,
+                        "En anglais, les jours de la semaine s'écrivent avec une majuscule."@fr .
+
+<#saturday>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Saturday"@en ;
+    solid-memo:back "lördag"@sv ,
+                    "토요일"@ko ,
+                    "Samstag"@de ,
+                    "sábado"@es ,
+                    "samedi"@fr ;
+    solid-memo:backNote "In English, the days of the week are written with a capital letter."@en ,
+                        "På engelska skrivs veckodagarna med stor bokstav."@sv ,
+                        "영어에서는 요일 이름을 대문자로 시작해요."@ko ,
+                        "Im Englischen schreibt man die Wochentage groß."@de ,
+                        "En inglés, los días de la semana se escriben con mayúscula."@es ,
+                        "En anglais, les jours de la semaine s'écrivent avec une majuscule."@fr .
+
+<#sunday>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sunday"@en ;
+    solid-memo:back "söndag"@sv ,
+                    "일요일"@ko ,
+                    "Sonntag"@de ,
+                    "domingo"@es ,
+                    "dimanche"@fr ;
+    solid-memo:backNote "In English, the days of the week are written with a capital letter."@en ,
+                        "På engelska skrivs veckodagarna med stor bokstav."@sv ,
+                        "영어에서는 요일 이름을 대문자로 시작해요."@ko ,
+                        "Im Englischen schreibt man die Wochentage groß."@de ,
+                        "En inglés, los días de la semana se escriben con mayúscula."@es ,
+                        "En anglais, les jours de la semaine s'écrivent avec une majuscule."@fr .
+
+<#january>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "January"@en ;
+    solid-memo:back "januari"@sv ,
+                    "1월"@ko ,
+                    "Januar"@de ,
+                    "enero"@es ,
+                    "janvier"@fr ;
+    solid-memo:backNote "In English, the months are written with a capital letter."@en ,
+                        "På engelska skrivs månaderna med stor bokstav."@sv ,
+                        "영어에서는 달 이름을 대문자로 시작해요."@ko ,
+                        "Im Englischen schreibt man die Monate groß."@de ,
+                        "En inglés, los meses se escriben con mayúscula."@es ,
+                        "En anglais, les mois s'écrivent avec une majuscule."@fr .
+
+<#february>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "February"@en ;
+    solid-memo:back "februari"@sv ,
+                    "2월"@ko ,
+                    "Februar"@de ,
+                    "febrero"@es ,
+                    "février"@fr ;
+    solid-memo:backNote "In English, the months are written with a capital letter."@en ,
+                        "På engelska skrivs månaderna med stor bokstav."@sv ,
+                        "영어에서는 달 이름을 대문자로 시작해요."@ko ,
+                        "Im Englischen schreibt man die Monate groß."@de ,
+                        "En inglés, los meses se escriben con mayúscula."@es ,
+                        "En anglais, les mois s'écrivent avec une majuscule."@fr .
+
+<#march>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "March"@en ;
+    solid-memo:frontNote "month"@en ,
+                         "månad"@sv ,
+                         "달(월)"@ko ,
+                         "Monat"@de ,
+                         "mes"@es ,
+                         "mois"@fr ;
+    solid-memo:back "mars"@sv ,
+                    "3월"@ko ,
+                    "März"@de ,
+                    "marzo"@es ,
+                    "mars"@fr ;
+    solid-memo:backNote "In English, the months are written with a capital letter."@en ,
+                        "På engelska skrivs månaderna med stor bokstav."@sv ,
+                        "영어에서는 달 이름을 대문자로 시작해요."@ko ,
+                        "Im Englischen schreibt man die Monate groß."@de ,
+                        "En inglés, los meses se escriben con mayúscula."@es ,
+                        "En anglais, les mois s'écrivent avec une majuscule."@fr .
+
+<#april>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "April"@en ;
+    solid-memo:back "april"@sv ,
+                    "4월"@ko ,
+                    "April"@de ,
+                    "abril"@es ,
+                    "avril"@fr ;
+    solid-memo:backNote "In English, the months are written with a capital letter."@en ,
+                        "På engelska skrivs månaderna med stor bokstav."@sv ,
+                        "영어에서는 달 이름을 대문자로 시작해요."@ko ,
+                        "Im Englischen schreibt man die Monate groß."@de ,
+                        "En inglés, los meses se escriben con mayúscula."@es ,
+                        "En anglais, les mois s'écrivent avec une majuscule."@fr .
+
+<#may>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "May"@en ;
+    solid-memo:frontNote "month"@en ,
+                         "månad"@sv ,
+                         "달(월)"@ko ,
+                         "Monat"@de ,
+                         "mes"@es ,
+                         "mois"@fr ;
+    solid-memo:back "maj"@sv ,
+                    "5월"@ko ,
+                    "Mai"@de ,
+                    "mayo"@es ,
+                    "mai"@fr ;
+    solid-memo:backNote "In English, the months are written with a capital letter."@en ,
+                        "På engelska skrivs månaderna med stor bokstav."@sv ,
+                        "영어에서는 달 이름을 대문자로 시작해요."@ko ,
+                        "Im Englischen schreibt man die Monate groß."@de ,
+                        "En inglés, los meses se escriben con mayúscula."@es ,
+                        "En anglais, les mois s'écrivent avec une majuscule."@fr .
+
+<#june>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "June"@en ;
+    solid-memo:back "juni"@sv ,
+                    "6월"@ko ,
+                    "Juni"@de ,
+                    "junio"@es ,
+                    "juin"@fr ;
+    solid-memo:backNote "In English, the months are written with a capital letter."@en ,
+                        "På engelska skrivs månaderna med stor bokstav."@sv ,
+                        "영어에서는 달 이름을 대문자로 시작해요."@ko ,
+                        "Im Englischen schreibt man die Monate groß."@de ,
+                        "En inglés, los meses se escriben con mayúscula."@es ,
+                        "En anglais, les mois s'écrivent avec une majuscule."@fr .
+
+<#july>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "July"@en ;
+    solid-memo:back "juli"@sv ,
+                    "7월"@ko ,
+                    "Juli"@de ,
+                    "julio"@es ,
+                    "juillet"@fr ;
+    solid-memo:backNote "In English, the months are written with a capital letter."@en ,
+                        "På engelska skrivs månaderna med stor bokstav."@sv ,
+                        "영어에서는 달 이름을 대문자로 시작해요."@ko ,
+                        "Im Englischen schreibt man die Monate groß."@de ,
+                        "En inglés, los meses se escriben con mayúscula."@es ,
+                        "En anglais, les mois s'écrivent avec une majuscule."@fr .
+
+<#august>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "August"@en ;
+    solid-memo:back "augusti"@sv ,
+                    "8월"@ko ,
+                    "August"@de ,
+                    "agosto"@es ,
+                    "août"@fr ;
+    solid-memo:backNote "In English, the months are written with a capital letter."@en ,
+                        "På engelska skrivs månaderna med stor bokstav."@sv ,
+                        "영어에서는 달 이름을 대문자로 시작해요."@ko ,
+                        "Im Englischen schreibt man die Monate groß."@de ,
+                        "En inglés, los meses se escriben con mayúscula."@es ,
+                        "En anglais, les mois s'écrivent avec une majuscule."@fr .
+
+<#september>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "September"@en ;
+    solid-memo:back "september"@sv ,
+                    "9월"@ko ,
+                    "September"@de ,
+                    "septiembre"@es ,
+                    "septembre"@fr ;
+    solid-memo:backNote "In English, the months are written with a capital letter."@en ,
+                        "På engelska skrivs månaderna med stor bokstav."@sv ,
+                        "영어에서는 달 이름을 대문자로 시작해요."@ko ,
+                        "Im Englischen schreibt man die Monate groß."@de ,
+                        "En inglés, los meses se escriben con mayúscula."@es ,
+                        "En anglais, les mois s'écrivent avec une majuscule."@fr .
+
+<#october>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "October"@en ;
+    solid-memo:back "oktober"@sv ,
+                    "10월"@ko ,
+                    "Oktober"@de ,
+                    "octubre"@es ,
+                    "octobre"@fr ;
+    solid-memo:backNote "In English, the months are written with a capital letter."@en ,
+                        "På engelska skrivs månaderna med stor bokstav."@sv ,
+                        "영어에서는 달 이름을 대문자로 시작해요."@ko ,
+                        "Im Englischen schreibt man die Monate groß."@de ,
+                        "En inglés, los meses se escriben con mayúscula."@es ,
+                        "En anglais, les mois s'écrivent avec une majuscule."@fr .
+
+<#november>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "November"@en ;
+    solid-memo:back "november"@sv ,
+                    "11월"@ko ,
+                    "November"@de ,
+                    "noviembre"@es ,
+                    "novembre"@fr ;
+    solid-memo:backNote "In English, the months are written with a capital letter."@en ,
+                        "På engelska skrivs månaderna med stor bokstav."@sv ,
+                        "영어에서는 달 이름을 대문자로 시작해요."@ko ,
+                        "Im Englischen schreibt man die Monate groß."@de ,
+                        "En inglés, los meses se escriben con mayúscula."@es ,
+                        "En anglais, les mois s'écrivent avec une majuscule."@fr .
+
+<#december>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "December"@en ;
+    solid-memo:back "december"@sv ,
+                    "12월"@ko ,
+                    "Dezember"@de ,
+                    "diciembre"@es ,
+                    "décembre"@fr ;
+    solid-memo:backNote "In English, the months are written with a capital letter."@en ,
+                        "På engelska skrivs månaderna med stor bokstav."@sv ,
+                        "영어에서는 달 이름을 대문자로 시작해요."@ko ,
+                        "Im Englischen schreibt man die Monate groß."@de ,
+                        "En inglés, los meses se escriben con mayúscula."@es ,
+                        "En anglais, les mois s'écrivent avec une majuscule."@fr .
+
+<#red>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "red"@en ;
+    solid-memo:back "röd"@sv ,
+                    "빨간색"@ko ,
+                    "rot"@de ,
+                    "rojo"@es ,
+                    "rouge"@fr .
+
+<#blue>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "blue"@en ;
+    solid-memo:back "blå"@sv ,
+                    "파란색"@ko ,
+                    "blau"@de ,
+                    "azul"@es ,
+                    "bleu"@fr .
+
+<#green>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "green"@en ;
+    solid-memo:back "grön"@sv ,
+                    "초록색"@ko ,
+                    "grün"@de ,
+                    "verde"@es ,
+                    "vert"@fr .
+
+<#yellow>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "yellow"@en ;
+    solid-memo:back "gul"@sv ,
+                    "노란색"@ko ,
+                    "gelb"@de ,
+                    "amarillo"@es ,
+                    "jaune"@fr .
+
+<#black>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "black"@en ;
+    solid-memo:back "svart"@sv ,
+                    "검은색"@ko ,
+                    "schwarz"@de ,
+                    "negro"@es ,
+                    "noir"@fr .
+
+<#white>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "white"@en ;
+    solid-memo:back "vit"@sv ,
+                    "흰색"@ko ,
+                    "weiß"@de ,
+                    "blanco"@es ,
+                    "blanc"@fr .
+
+<#grey>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "grey"@en ;
+    solid-memo:back "grå"@sv ,
+                    "회색"@ko ,
+                    "grau"@de ,
+                    "gris"@es ,
+                    "gris"@fr ;
+    solid-memo:backNote "American English writes gray."@en ,
+                        "På amerikansk engelska stavas det gray."@sv ,
+                        "미국 영어에서는 gray라고 써요."@ko ,
+                        "Im amerikanischen Englisch schreibt man gray."@de ,
+                        "En inglés americano se escribe gray."@es ,
+                        "En anglais américain, on écrit gray."@fr .
+
+<#brown>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "brown"@en ;
+    solid-memo:back "brun"@sv ,
+                    "갈색"@ko ,
+                    "braun"@de ,
+                    "marrón"@es ,
+                    "marron, brun"@fr ;
+    solid-memo:backNote "In Spanish, much of Latin America says café rather than marrón."@en ,
+                        "På spanska säger man i stora delar av Latinamerika café i stället för marrón."@sv ,
+                        "스페인어로는 라틴 아메리카의 많은 곳에서 marrón 대신 café라고 해요."@ko ,
+                        "Im Spanischen sagt man in weiten Teilen Lateinamerikas café statt marrón."@de ,
+                        "En gran parte de América Latina se dice café en vez de marrón."@es ,
+                        "En espagnol, une grande partie de l'Amérique latine dit café plutôt que marrón."@fr .
+
+<#mother>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "mother"@en ;
+    solid-memo:back "mor"@sv ,
+                    "어머니"@ko ,
+                    "Mutter"@de ,
+                    "madre"@es ,
+                    "mère"@fr ;
+    solid-memo:backNote "Everyday: mum (British English), mom (American English)."@en ,
+                        "Vardagligt: mum (brittisk engelska), mom (amerikansk engelska)."@sv ,
+                        "일상적으로는 mum(영국 영어), mom(미국 영어)이라고 해요."@ko ,
+                        "Umgangssprachlich: mum (britisches Englisch), mom (amerikanisches Englisch)."@de ,
+                        "Coloquial: mum (inglés británico), mom (inglés americano)."@es ,
+                        "Familier : mum (anglais britannique), mom (anglais américain)."@fr .
+
+<#father>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "father"@en ;
+    solid-memo:back "far"@sv ,
+                    "아버지"@ko ,
+                    "Vater"@de ,
+                    "padre"@es ,
+                    "père"@fr ;
+    solid-memo:backNote "Everyday: dad."@en ,
+                        "Vardagligt: dad."@sv ,
+                        "일상적으로는 dad라고 해요."@ko ,
+                        "Umgangssprachlich: dad."@de ,
+                        "Coloquial: dad."@es ,
+                        "Familier : dad."@fr .
+
+<#brother>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "brother"@en ;
+    solid-memo:back "bror"@sv ,
+                    "남자 형제"@ko ,
+                    "Bruder"@de ,
+                    "hermano"@es ,
+                    "frère"@fr ;
+    solid-memo:backNote "Older or younger: older brother, younger brother."@en ,
+                        "Äldre eller yngre: older brother, younger brother."@sv ,
+                        "형이나 오빠는 older brother, 남동생은 younger brother예요."@ko ,
+                        "Älter oder jünger: older brother, younger brother."@de ,
+                        "Mayor o menor: older brother, younger brother."@es ,
+                        "Aîné ou cadet : older brother, younger brother."@fr .
+
+<#sister>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "sister"@en ;
+    solid-memo:back "syster"@sv ,
+                    "여자 형제"@ko ,
+                    "Schwester"@de ,
+                    "hermana"@es ,
+                    "sœur"@fr ;
+    solid-memo:backNote "Older or younger: older sister, younger sister."@en ,
+                        "Äldre eller yngre: older sister, younger sister."@sv ,
+                        "언니나 누나는 older sister, 여동생은 younger sister예요."@ko ,
+                        "Älter oder jünger: older sister, younger sister."@de ,
+                        "Mayor o menor: older sister, younger sister."@es ,
+                        "Aînée ou cadette : older sister, younger sister."@fr .
+
+<#son>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "son"@en ;
+    solid-memo:back "son"@sv ,
+                    "아들"@ko ,
+                    "Sohn"@de ,
+                    "hijo"@es ,
+                    "fils"@fr .
+
+<#daughter>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "daughter"@en ;
+    solid-memo:back "dotter"@sv ,
+                    "딸"@ko ,
+                    "Tochter"@de ,
+                    "hija"@es ,
+                    "fille"@fr .
+
+<#grandfather>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "grandfather"@en ;
+    solid-memo:back "farfar, morfar"@sv ,
+                    "할아버지"@ko ,
+                    "Großvater"@de ,
+                    "abuelo"@es ,
+                    "grand-père"@fr ;
+    solid-memo:backNote "Everyday: grandpa."@en ,
+                        "Vardagligt: grandpa."@sv ,
+                        "일상적으로는 grandpa라고 해요."@ko ,
+                        "Umgangssprachlich: grandpa."@de ,
+                        "Coloquial: grandpa."@es ,
+                        "Familier : grandpa."@fr .
+
+<#grandmother>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "grandmother"@en ;
+    solid-memo:back "farmor, mormor"@sv ,
+                    "할머니"@ko ,
+                    "Großmutter"@de ,
+                    "abuela"@es ,
+                    "grand-mère"@fr ;
+    solid-memo:backNote "Everyday: grandma."@en ,
+                        "Vardagligt: grandma."@sv ,
+                        "일상적으로는 grandma라고 해요."@ko ,
+                        "Umgangssprachlich: grandma."@de ,
+                        "Coloquial: grandma."@es ,
+                        "Familier : grandma."@fr .
+
+<#hello>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "hello"@en ;
+    solid-memo:back "hej"@sv ,
+                    "안녕하세요"@ko ,
+                    "hallo"@de ,
+                    "hola"@es ,
+                    "bonjour"@fr ;
+    solid-memo:backNote "Informal: hi."@en ,
+                        "Ledigare: hi."@sv ,
+                        "더 편하게는 hi라고 해요."@ko ,
+                        "Lockerer: hi."@de ,
+                        "Más informal: hi."@es ,
+                        "Plus familier : hi."@fr .
+
+<#good-morning>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "good morning"@en ;
+    solid-memo:back "god morgon"@sv ,
+                    "안녕하세요 (아침 인사)"@ko ,
+                    "guten Morgen"@de ,
+                    "buenos días"@es ,
+                    "bonjour"@fr ;
+    solid-memo:backNote "Said in the morning, until about noon."@en ,
+                        "Sägs på morgonen och förmiddagen, till ungefär klockan tolv."@sv ,
+                        "아침부터 정오 무렵까지 하는 인사예요."@ko ,
+                        "Sagt man morgens und vormittags, bis etwa zwölf Uhr."@de ,
+                        "Se dice por la mañana, más o menos hasta el mediodía."@es ,
+                        "Se dit le matin, jusque vers midi."@fr .
+
+<#good-evening>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "good evening"@en ;
+    solid-memo:back "god kväll"@sv ,
+                    "안녕하세요 (저녁 인사)"@ko ,
+                    "guten Abend"@de ,
+                    "buenas tardes, buenas noches"@es ,
+                    "bonsoir"@fr ;
+    solid-memo:backNote "A greeting in the evening; to say goodbye at night, use good night."@en ,
+                        "En hälsning på kvällen; när man säger adjö på kvällen säger man good night."@sv ,
+                        "저녁에 하는 인사예요. 밤에 작별할 때는 good night라고 해요."@ko ,
+                        "Ein Gruß am Abend; zum Abschied am Abend sagt man good night."@de ,
+                        "Un saludo por la tarde-noche; para despedirse por la noche se dice good night."@es ,
+                        "Une salutation du soir ; pour dire au revoir le soir, on dit good night."@fr .
+
+<#good-night>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "good night"@en ;
+    solid-memo:back "god natt"@sv ,
+                    "안녕히 주무세요"@ko ,
+                    "gute Nacht"@de ,
+                    "buenas noches"@es ,
+                    "bonne nuit"@fr ;
+    solid-memo:backNote "A goodbye at night, also before going to bed; to greet someone in the evening, use good evening."@en ,
+                        "Ett farväl på kvällen, också när man ska sova; för att hälsa på kvällen säger man good evening."@sv ,
+                        "밤에 하는 작별 인사이고 잠자리에 들 때도 써요. 저녁에 만났을 때는 good evening이라고 해요. 한국어로 안녕히 주무세요는 자러 가는 사람에게 하는 말이고, 그냥 헤어질 때는 안녕히 가세요/계세요라고 해요."@ko ,
+                        "Ein Abschiedsgruß am Abend, auch vor dem Schlafengehen; zur Begrüßung am Abend sagt man good evening."@de ,
+                        "Una despedida por la noche, también al irse a dormir; para saludar por la noche se dice good evening."@es ,
+                        "Un au revoir le soir, aussi avant d'aller dormir ; pour saluer le soir, on dit good evening."@fr .
+
+<#goodbye>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "goodbye"@en ;
+    solid-memo:back "hej då, adjö"@sv ,
+                    "안녕히 가세요, 안녕히 계세요"@ko ,
+                    "auf Wiedersehen"@de ,
+                    "adiós"@es ,
+                    "au revoir"@fr ;
+    solid-memo:backNote "Informal: bye."@en ,
+                        "Ledigare: bye."@sv ,
+                        "더 편하게는 bye라고 해요."@ko ,
+                        "Lockerer: bye."@de ,
+                        "Más informal: bye."@es ,
+                        "Plus familier : bye."@fr .
+
+<#thank-you>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "thank you"@en ;
+    solid-memo:back "tack"@sv ,
+                    "감사합니다"@ko ,
+                    "danke"@de ,
+                    "gracias"@es ,
+                    "merci"@fr ;
+    solid-memo:backNote "Informal: thanks."@en ,
+                        "Ledigare: thanks."@sv ,
+                        "더 편하게는 thanks라고 해요."@ko ,
+                        "Lockerer: thanks."@de ,
+                        "Más informal: thanks."@es ,
+                        "Plus familier : thanks."@fr .
+
+<#please>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "please"@en ;
+    solid-memo:back "snälla"@sv ,
+                    "부탁합니다"@ko ,
+                    "bitte"@de ,
+                    "por favor"@es ,
+                    "s'il vous plaît"@fr ;
+    solid-memo:backNote "Used to make a polite request: Water, please."@en ,
+                        "Gör en begäran artig: Water, please (på svenska oftast: Vatten, tack)."@sv ,
+                        "부탁할 때 공손하게 덧붙여요: Water, please (물 주세요)."@ko ,
+                        "Macht eine Bitte höflich: Water, please."@de ,
+                        "Hace cortés una petición: Water, please."@es ,
+                        "Rend une demande polie : Water, please."@fr .
+
+<#you-re-welcome>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "you're welcome"@en ;
+    solid-memo:back "ingen orsak, varsågod"@sv ,
+                    "천만에요"@ko ,
+                    "gern geschehen"@de ,
+                    "de nada"@es ,
+                    "de rien, je vous en prie"@fr ;
+    solid-memo:backNote "The usual reply to thank you."@en ,
+                        "Det vanliga svaret på thank you."@sv ,
+                        "thank you에 대한 일반적인 대답이에요."@ko ,
+                        "Die übliche Antwort auf thank you."@de ,
+                        "La respuesta habitual a thank you."@es ,
+                        "La réponse habituelle à thank you."@fr .
+
+<#excuse-me>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "excuse me"@en ;
+    solid-memo:back "ursäkta"@sv ,
+                    "실례합니다"@ko ,
+                    "entschuldigen Sie"@de ,
+                    "disculpe"@es ,
+                    "excusez-moi"@fr ;
+    solid-memo:backNote "Asks for someone's attention, or asks to get past. To apologize, people usually say sorry; American English also uses excuse me."@en ,
+                        "Ber om någons uppmärksamhet eller om att få komma förbi. För att be om ursäkt säger man oftast sorry; på amerikansk engelska också excuse me."@sv ,
+                        "다른 사람의 주의를 끌거나 지나가려고 할 때 써요. 사과할 때는 보통 sorry라고 하고, 미국 영어에서는 excuse me라고도 해요."@ko ,
+                        "Bittet um Aufmerksamkeit oder darum, vorbeigelassen zu werden. Um sich zu entschuldigen, sagt man meist sorry; im amerikanischen Englisch auch excuse me."@de ,
+                        "Sirve para llamar la atención de alguien o para pedir paso. Para pedir perdón se suele decir sorry; en inglés americano también excuse me."@es ,
+                        "Sert à attirer l'attention de quelqu'un ou à demander le passage. Pour s'excuser, on dit le plus souvent sorry ; en anglais américain, aussi excuse me."@fr .
+
+<#sorry>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "sorry"@en ;
+    solid-memo:back "förlåt"@sv ,
+                    "미안합니다"@ko ,
+                    "Entschuldigung, es tut mir leid"@de ,
+                    "perdón, lo siento"@es ,
+                    "pardon, désolé"@fr ;
+    solid-memo:backNote "To apologize; Sorry? also asks someone to repeat."@en ,
+                        "För att be om ursäkt; Sorry? ber också någon att upprepa."@sv ,
+                        "사과할 때 써요. Sorry?는 다시 말해 달라는 뜻도 돼요."@ko ,
+                        "Um sich zu entschuldigen; Sorry? bittet auch darum, etwas zu wiederholen."@de ,
+                        "Para pedir perdón; Sorry? también pide que alguien repita algo."@es ,
+                        "Pour s'excuser ; Sorry? demande aussi de répéter."@fr .
+
+<#yes>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "yes"@en ;
+    solid-memo:back "ja"@sv ,
+                    "네"@ko ,
+                    "ja"@de ,
+                    "sí"@es ,
+                    "oui"@fr .
+
+<#no>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "no"@en ;
+    solid-memo:back "nej"@sv ,
+                    "아니요"@ko ,
+                    "nein"@de ,
+                    "no"@es ,
+                    "non"@fr .
+
+<#house>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "house"@en ;
+    solid-memo:back "hus"@sv ,
+                    "집"@ko ,
+                    "Haus"@de ,
+                    "casa"@es ,
+                    "maison"@fr .
+
+<#water>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "water"@en ;
+    solid-memo:back "vatten"@sv ,
+                    "물"@ko ,
+                    "Wasser"@de ,
+                    "agua"@es ,
+                    "eau"@fr .
+
+<#bread>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "bread"@en ;
+    solid-memo:back "bröd"@sv ,
+                    "빵"@ko ,
+                    "Brot"@de ,
+                    "pan"@es ,
+                    "pain"@fr .
+
+<#milk>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "milk"@en ;
+    solid-memo:back "mjölk"@sv ,
+                    "우유"@ko ,
+                    "Milch"@de ,
+                    "leche"@es ,
+                    "lait"@fr .
+
+<#apple>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "apple"@en ;
+    solid-memo:back "äpple"@sv ,
+                    "사과"@ko ,
+                    "Apfel"@de ,
+                    "manzana"@es ,
+                    "pomme"@fr .
+
+<#book>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "book"@en ;
+    solid-memo:back "bok"@sv ,
+                    "책"@ko ,
+                    "Buch"@de ,
+                    "libro"@es ,
+                    "livre"@fr .
+
+<#table>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "table"@en ;
+    solid-memo:back "bord"@sv ,
+                    "탁자"@ko ,
+                    "Tisch"@de ,
+                    "mesa"@es ,
+                    "table"@fr .
+
+<#chair>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "chair"@en ;
+    solid-memo:back "stol"@sv ,
+                    "의자"@ko ,
+                    "Stuhl"@de ,
+                    "silla"@es ,
+                    "chaise"@fr .
+
+<#door>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "door"@en ;
+    solid-memo:back "dörr"@sv ,
+                    "문"@ko ,
+                    "Tür"@de ,
+                    "puerta"@es ,
+                    "porte"@fr .
+
+<#window>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "window"@en ;
+    solid-memo:back "fönster"@sv ,
+                    "창문"@ko ,
+                    "Fenster"@de ,
+                    "ventana"@es ,
+                    "fenêtre"@fr .
+
+<#dog>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "dog"@en ;
+    solid-memo:back "hund"@sv ,
+                    "개"@ko ,
+                    "Hund"@de ,
+                    "perro"@es ,
+                    "chien"@fr .
+
+<#cat>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "cat"@en ;
+    solid-memo:back "katt"@sv ,
+                    "고양이"@ko ,
+                    "Katze"@de ,
+                    "gato"@es ,
+                    "chat"@fr .
+
+<#city>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "city"@en ;
+    solid-memo:back "stad"@sv ,
+                    "도시"@ko ,
+                    "Stadt"@de ,
+                    "ciudad"@es ,
+                    "ville"@fr ;
+    solid-memo:backNote "A smaller place is a town."@en ,
+                        "En mindre ort är en town."@sv ,
+                        "더 작은 곳은 town이라고 해요."@ko ,
+                        "Ein kleinerer Ort ist eine town."@de ,
+                        "Un lugar más pequeño es una town."@es ,
+                        "Un endroit plus petit est une town."@fr .
+
+<#street>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "street"@en ;
+    solid-memo:back "gata"@sv ,
+                    "거리"@ko ,
+                    "Straße"@de ,
+                    "calle"@es ,
+                    "rue"@fr .
+
+<#school>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "school"@en ;
+    solid-memo:back "skola"@sv ,
+                    "학교"@ko ,
+                    "Schule"@de ,
+                    "escuela"@es ,
+                    "école"@fr .
+
+<#man>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "man"@en ;
+    solid-memo:back "man"@sv ,
+                    "남자"@ko ,
+                    "Mann"@de ,
+                    "hombre"@es ,
+                    "homme"@fr ;
+    solid-memo:backNote "Plural: men."@en ,
+                        "Plural: men."@sv ,
+                        "복수형: men."@ko ,
+                        "Plural: men."@de ,
+                        "Plural: men."@es ,
+                        "Pluriel : men."@fr .
+
+<#woman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "woman"@en ;
+    solid-memo:back "kvinna"@sv ,
+                    "여자"@ko ,
+                    "Frau"@de ,
+                    "mujer"@es ,
+                    "femme"@fr ;
+    solid-memo:backNote "Plural: women."@en ,
+                        "Plural: women."@sv ,
+                        "복수형: women."@ko ,
+                        "Plural: women."@de ,
+                        "Plural: women."@es ,
+                        "Pluriel : women."@fr .
+
+<#friend>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "friend"@en ;
+    solid-memo:back "vän"@sv ,
+                    "친구"@ko ,
+                    "Freund, Freundin"@de ,
+                    "amigo, amiga"@es ,
+                    "ami, amie"@fr .
+
+<#hand>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "hand"@en ;
+    solid-memo:back "hand"@sv ,
+                    "손"@ko ,
+                    "Hand"@de ,
+                    "mano"@es ,
+                    "main"@fr .
+
+<#day>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "day"@en ;
+    solid-memo:back "dag"@sv ,
+                    "날"@ko ,
+                    "Tag"@de ,
+                    "día"@es ,
+                    "jour"@fr .
+
+<#night>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "night"@en ;
+    solid-memo:back "natt"@sv ,
+                    "밤"@ko ,
+                    "Nacht"@de ,
+                    "noche"@es ,
+                    "nuit"@fr .
+
+<#week>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "week"@en ;
+    solid-memo:back "vecka"@sv ,
+                    "주, 일주일"@ko ,
+                    "Woche"@de ,
+                    "semana"@es ,
+                    "semaine"@fr .
+
+<#big>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "big"@en ;
+    solid-memo:back "stor"@sv ,
+                    "큰"@ko ,
+                    "groß"@de ,
+                    "grande"@es ,
+                    "grand"@fr .
+
+<#small>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "small"@en ;
+    solid-memo:back "liten"@sv ,
+                    "작은"@ko ,
+                    "klein"@de ,
+                    "pequeño"@es ,
+                    "petit"@fr .
+
+<#good>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "good"@en ;
+    solid-memo:back "bra, god"@sv ,
+                    "좋은"@ko ,
+                    "gut"@de ,
+                    "bueno"@es ,
+                    "bon"@fr ;
+    solid-memo:backNote "Adverb: well (She sings well)."@en ,
+                        "Adverb: well (She sings well)."@sv ,
+                        "부사형은 well이에요 (She sings well)."@ko ,
+                        "Adverb: well (She sings well)."@de ,
+                        "Adverbio: well (She sings well)."@es ,
+                        "Adverbe : well (She sings well)."@fr .
+
+<#bad>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "bad"@en ;
+    solid-memo:back "dålig"@sv ,
+                    "나쁜"@ko ,
+                    "schlecht"@de ,
+                    "malo"@es ,
+                    "mauvais"@fr .
+
+<#new>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "new"@en ;
+    solid-memo:back "ny"@sv ,
+                    "새로운"@ko ,
+                    "neu"@de ,
+                    "nuevo"@es ,
+                    "nouveau"@fr .
+
+<#old>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "old"@en ;
+    solid-memo:back "gammal"@sv ,
+                    "오래된, 늙은"@ko ,
+                    "alt"@de ,
+                    "viejo"@es ,
+                    "vieux"@fr ;
+    solid-memo:backNote "The opposite of new and of young."@en ,
+                        "Motsatsen till new och till young."@sv ,
+                        "new와 young의 반대말이에요."@ko ,
+                        "Das Gegenteil von new und von young."@de ,
+                        "Lo contrario de new y de young."@es ,
+                        "Le contraire de new et de young."@fr .
+
+<#to-be>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "to be"@en ;
+    solid-memo:back "att vara"@sv ,
+                    "이다, 있다"@ko ,
+                    "sein"@de ,
+                    "ser, estar"@es ,
+                    "être"@fr ;
+    solid-memo:backNote "I am, you are, he/she/it is; past: was, were; past participle: been."@en ,
+                        "I am, you are, he/she/it is; preteritum: was, were; perfekt particip: been."@sv ,
+                        "I am, you are, he/she/it is. 과거형: was, were. 과거분사: been."@ko ,
+                        "I am, you are, he/she/it is; Präteritum: was, were; Partizip Perfekt: been."@de ,
+                        "I am, you are, he/she/it is; pasado: was, were; participio: been."@es ,
+                        "I am, you are, he/she/it is ; passé : was, were ; participe passé : been."@fr .
+
+<#to-have>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "to have"@en ;
+    solid-memo:back "att ha"@sv ,
+                    "가지다, 있다"@ko ,
+                    "haben"@de ,
+                    "tener"@es ,
+                    "avoir"@fr ;
+    solid-memo:backNote "He/she/it has; past and past participle: had."@en ,
+                        "He/she/it has; preteritum och perfekt particip: had."@sv ,
+                        "He/she/it has. 과거형과 과거분사: had."@ko ,
+                        "He/she/it has; Präteritum und Partizip Perfekt: had."@de ,
+                        "He/she/it has; pasado y participio: had."@es ,
+                        "He/she/it has ; passé et participe passé : had."@fr .
+
+<#to-go>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "to go"@en ;
+    solid-memo:back "att gå, att åka"@sv ,
+                    "가다"@ko ,
+                    "gehen, fahren"@de ,
+                    "ir"@es ,
+                    "aller"@fr ;
+    solid-memo:backNote "Irregular: past went, past participle gone."@en ,
+                        "Oregelbundet: preteritum went, perfekt particip gone."@sv ,
+                        "불규칙 동사: 과거형 went, 과거분사 gone."@ko ,
+                        "Unregelmäßig: Präteritum went, Partizip Perfekt gone."@de ,
+                        "Irregular: pasado went, participio gone."@es ,
+                        "Irrégulier : passé went, participe passé gone."@fr .
+
+<#to-come>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "to come"@en ;
+    solid-memo:back "att komma"@sv ,
+                    "오다"@ko ,
+                    "kommen"@de ,
+                    "venir"@es ,
+                    "venir"@fr ;
+    solid-memo:backNote "Irregular: past came, past participle come."@en ,
+                        "Oregelbundet: preteritum came, perfekt particip come."@sv ,
+                        "불규칙 동사: 과거형 came, 과거분사 come."@ko ,
+                        "Unregelmäßig: Präteritum came, Partizip Perfekt come."@de ,
+                        "Irregular: pasado came, participio come."@es ,
+                        "Irrégulier : passé came, participe passé come."@fr .
+
+<#to-do>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "to do"@en ;
+    solid-memo:back "att göra"@sv ,
+                    "하다"@ko ,
+                    "tun, machen"@de ,
+                    "hacer"@es ,
+                    "faire"@fr ;
+    solid-memo:backNote "Irregular: past did, past participle done. Do is for a task, make for something you create: do homework, make a cake."@en ,
+                        "Oregelbundet: preteritum did, perfekt particip done. Do används om en uppgift, make om något man skapar: do homework, make a cake."@sv ,
+                        "불규칙 동사: 과거형 did, 과거분사 done. 일이나 과제에는 do를, 무언가를 만들 때는 make를 써요: do homework, make a cake."@ko ,
+                        "Unregelmäßig: Präteritum did, Partizip Perfekt done. Do für eine Aufgabe, make für etwas, das man herstellt: do homework, make a cake."@de ,
+                        "Irregular: pasado did, participio done. Do se usa para una tarea y make para algo que se crea: do homework, make a cake."@es ,
+                        "Irrégulier : passé did, participe passé done. Do s'emploie pour une tâche, make pour ce qu'on fabrique : do homework, make a cake."@fr .
+
+<#to-make>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "to make"@en ;
+    solid-memo:back "att göra, att tillverka"@sv ,
+                    "만들다"@ko ,
+                    "machen"@de ,
+                    "hacer"@es ,
+                    "faire, fabriquer"@fr ;
+    solid-memo:backNote "Irregular: past and past participle made. Do is for a task, make for something you create: do homework, make a cake."@en ,
+                        "Oregelbundet: preteritum och perfekt particip made. Do används om en uppgift, make om något man skapar: do homework, make a cake."@sv ,
+                        "불규칙 동사: 과거형과 과거분사 모두 made. 일이나 과제에는 do를, 무언가를 만들 때는 make를 써요: do homework, make a cake."@ko ,
+                        "Unregelmäßig: Präteritum und Partizip Perfekt made. Do für eine Aufgabe, make für etwas, das man herstellt: do homework, make a cake."@de ,
+                        "Irregular: pasado y participio made. Do se usa para una tarea y make para algo que se crea: do homework, make a cake."@es ,
+                        "Irrégulier : passé et participe passé made. Do s'emploie pour une tâche, make pour ce qu'on fabrique : do homework, make a cake."@fr .
+
+<#to-speak>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "to speak"@en ;
+    solid-memo:back "att tala, att prata"@sv ,
+                    "말하다"@ko ,
+                    "sprechen"@de ,
+                    "hablar"@es ,
+                    "parler"@fr ;
+    solid-memo:backNote "Irregular: past spoke, past participle spoken."@en ,
+                        "Oregelbundet: preteritum spoke, perfekt particip spoken."@sv ,
+                        "불규칙 동사: 과거형 spoke, 과거분사 spoken."@ko ,
+                        "Unregelmäßig: Präteritum spoke, Partizip Perfekt spoken."@de ,
+                        "Irregular: pasado spoke, participio spoken."@es ,
+                        "Irrégulier : passé spoke, participe passé spoken."@fr .
+
+<#to-eat>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "to eat"@en ;
+    solid-memo:back "att äta"@sv ,
+                    "먹다"@ko ,
+                    "essen"@de ,
+                    "comer"@es ,
+                    "manger"@fr ;
+    solid-memo:backNote "Irregular: past ate, past participle eaten."@en ,
+                        "Oregelbundet: preteritum ate, perfekt particip eaten."@sv ,
+                        "불규칙 동사: 과거형 ate, 과거분사 eaten."@ko ,
+                        "Unregelmäßig: Präteritum ate, Partizip Perfekt eaten."@de ,
+                        "Irregular: pasado ate, participio eaten."@es ,
+                        "Irrégulier : passé ate, participe passé eaten."@fr .
+
+<#to-drink>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "to drink"@en ;
+    solid-memo:back "att dricka"@sv ,
+                    "마시다"@ko ,
+                    "trinken"@de ,
+                    "beber"@es ,
+                    "boire"@fr ;
+    solid-memo:backNote "Irregular: past drank, past participle drunk."@en ,
+                        "Oregelbundet: preteritum drank, perfekt particip drunk."@sv ,
+                        "불규칙 동사: 과거형 drank, 과거분사 drunk."@ko ,
+                        "Unregelmäßig: Präteritum drank, Partizip Perfekt drunk."@de ,
+                        "Irregular: pasado drank, participio drunk."@es ,
+                        "Irrégulier : passé drank, participe passé drunk."@fr .
+
+<#to-love>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "to love"@en ;
+    solid-memo:back "att älska"@sv ,
+                    "사랑하다"@ko ,
+                    "lieben"@de ,
+                    "amar"@es ,
+                    "aimer"@fr .
+
+<#to-want>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "to want"@en ;
+    solid-memo:back "att vilja"@sv ,
+                    "원하다"@ko ,
+                    "wollen"@de ,
+                    "querer"@es ,
+                    "vouloir"@fr .
+
+<#to-see>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "to see"@en ;
+    solid-memo:back "att se"@sv ,
+                    "보다"@ko ,
+                    "sehen"@de ,
+                    "ver"@es ,
+                    "voir"@fr ;
+    solid-memo:backNote "Irregular: past saw, past participle seen."@en ,
+                        "Oregelbundet: preteritum saw, perfekt particip seen."@sv ,
+                        "불규칙 동사: 과거형 saw, 과거분사 seen."@ko ,
+                        "Unregelmäßig: Präteritum saw, Partizip Perfekt seen."@de ,
+                        "Irregular: pasado saw, participio seen."@es ,
+                        "Irrégulier : passé saw, participe passé seen."@fr .
+
+<#to-read>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "to read"@en ;
+    solid-memo:back "att läsa"@sv ,
+                    "읽다"@ko ,
+                    "lesen"@de ,
+                    "leer"@es ,
+                    "lire"@fr ;
+    solid-memo:backNote "Irregular in sound: past and past participle read, pronounced like red."@en ,
+                        "Oregelbundet i uttalet: preteritum och perfekt particip read, uttalas som red."@sv ,
+                        "발음이 불규칙해요: 과거형과 과거분사 read는 red처럼 발음해요."@ko ,
+                        "Unregelmäßig in der Aussprache: Präteritum und Partizip Perfekt read, ausgesprochen wie red."@de ,
+                        "Irregular en la pronunciación: pasado y participio read, que se pronuncia como red."@es ,
+                        "Irrégulier à l'oral : passé et participe passé read, prononcé comme red."@fr .
+
+<#to-write>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "to write"@en ;
+    solid-memo:back "att skriva"@sv ,
+                    "쓰다"@ko ,
+                    "schreiben"@de ,
+                    "escribir"@es ,
+                    "écrire"@fr ;
+    solid-memo:backNote "Irregular: past wrote, past participle written."@en ,
+                        "Oregelbundet: preteritum wrote, perfekt particip written."@sv ,
+                        "불규칙 동사: 과거형 wrote, 과거분사 written."@ko ,
+                        "Unregelmäßig: Präteritum wrote, Partizip Perfekt written."@de ,
+                        "Irregular: pasado wrote, participio written."@es ,
+                        "Irrégulier : passé wrote, participe passé written."@fr .
+
+<#to-sleep>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "to sleep"@en ;
+    solid-memo:back "att sova"@sv ,
+                    "자다"@ko ,
+                    "schlafen"@de ,
+                    "dormir"@es ,
+                    "dormir"@fr ;
+    solid-memo:backNote "Irregular: past and past participle slept."@en ,
+                        "Oregelbundet: preteritum och perfekt particip slept."@sv ,
+                        "불규칙 동사: 과거형과 과거분사 모두 slept."@ko ,
+                        "Unregelmäßig: Präteritum und Partizip Perfekt slept."@de ,
+                        "Irregular: pasado y participio slept."@es ,
+                        "Irrégulier : passé et participe passé slept."@fr .
+
+<#to-work>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "to work"@en ;
+    solid-memo:back "att arbeta"@sv ,
+                    "일하다"@ko ,
+                    "arbeiten"@de ,
+                    "trabajar"@es ,
+                    "travailler"@fr .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

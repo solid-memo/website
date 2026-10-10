@@ -7,4 +7,4 @@
     a dcat:Dataset ;
     dcterms:title "Capitals"@en ;
     dcterms:description "Capitals of the world."@en ;
-    dcterms:language <http://publications.europa.eu/resource/authority/language/JPN> .
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ZHO> .

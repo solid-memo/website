@@ -1,0 +1,1990 @@
+@base <https://solid-memo.com/decks/japanese-basics/v1.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Basic Japanese"@en ,
+                  "Grundläggande japanska"@sv ,
+                  "기초 일본어"@ko ,
+                  "Japanisch-Grundlagen"@de ,
+                  "Japonés básico"@es ,
+                  "Japonais de base"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "122 basic Japanese words and phrases for beginners: the numbers 0–20, the tens and 100, the days of the week, the months, eight colours, family members, greetings and polite phrases, and everyday nouns, adjectives and verbs. The front shows the Japanese word as it is usually written, in kanji or kana; where it has kanji, a note gives its reading in hiragana. The back gives its meaning in English, Swedish, Korean, German, Spanish and French, or the digits for a number, with notes on usage. Words and readings from Wikidata's lexemes and two public-domain US Government courses (the Foreign Service Institute's Japanese FAST course and the Defense Language Institute's Japanese Basic Course), checked against English Wiktionary; meanings from Wikidata (item labels, lexeme glosses and translations) where it has them, otherwise written by the authors with the help of AI."@en ,
+                        "122 grundläggande japanska ord och fraser för nybörjare: talen 0–20, tiotalen och 100, veckodagarna, månaderna, åtta färger, familjemedlemmar, hälsningar och artighetsfraser samt vardagliga substantiv, adjektiv och verb. Framsidan visar det japanska ordet så som det oftast skrivs, med kanji eller kana; har det kanji ger en anteckning läsningen med hiragana. Baksidan ger betydelsen på engelska, svenska, koreanska, tyska, spanska och franska, eller siffrorna för ett tal, med anteckningar om användningen. Ord och läsningar från Wikidatas lexem och två amerikanska statliga kurser fria från upphovsrätt (Foreign Service Institutes Japanese FAST och Defense Language Institutes Japanese Basic Course), kontrollerade mot engelska Wiktionary; betydelserna från Wikidata (objektens etiketter, lexemens glossor och översättningar) där sådana finns, annars skrivna av författarna med hjälp av AI."@sv ,
+                        "초보자를 위한 기초 일본어 단어와 표현 122개입니다. 0–20의 수, 십의 배수와 100, 요일, 달, 여덟 가지 색, 가족 구성원, 인사와 예의 표현, 일상적인 명사·형용사·동사를 다룹니다. 앞면은 보통 쓰는 대로 한자나 가나로 적은 일본어 단어이며, 한자가 있으면 메모에 히라가나로 읽는 법이 있습니다. 뒷면은 영어, 스웨덴어, 한국어, 독일어, 스페인어, 프랑스어 뜻이나 수의 경우 숫자이며, 쓰임에 관한 메모가 있습니다. 단어와 읽는 법은 Wikidata의 어휘소와 퍼블릭 도메인인 미국 정부의 교재 두 가지(Foreign Service Institute의 Japanese FAST와 Defense Language Institute의 Japanese Basic Course)에서 가져왔고 영어 위키낱말사전과 대조해 확인했습니다. 뜻은 Wikidata에 있으면(항목의 레이블, 어휘소의 뜻풀이와 번역) 그것을 따랐고, 없으면 저자들이 AI의 도움을 받아 썼습니다."@ko ,
+                        "122 grundlegende japanische Wörter und Redewendungen für Anfänger: die Zahlen 0–20, die Zehner und 100, die Wochentage, die Monate, acht Farben, Familienmitglieder, Begrüßungen und Höflichkeitsformeln sowie Substantive, Adjektive und Verben des Alltags. Die Vorderseite zeigt das japanische Wort so, wie es üblicherweise geschrieben wird, in Kanji oder Kana; enthält es Kanji, gibt eine Anmerkung die Lesung in Hiragana an. Die Rückseite gibt die Bedeutung auf Englisch, Schwedisch, Koreanisch, Deutsch, Spanisch und Französisch an, bei einer Zahl die Ziffern, mit Anmerkungen zum Gebrauch. Wörter und Lesungen aus den Lexemen von Wikidata und zwei gemeinfreien Kursen der US-Regierung (Japanese FAST des Foreign Service Institute und Japanese Basic Course des Defense Language Institute), geprüft anhand des englischen Wiktionary; die Bedeutungen aus Wikidata (Bezeichnungen der Datenobjekte, Glossen und Übersetzungen der Lexeme), wo es sie gibt, sonst von den Autoren mithilfe von KI verfasst."@de ,
+                        "122 palabras y frases básicas de japonés para principiantes: los números del 0 al 20, las decenas y el 100, los días de la semana, los meses, ocho colores, miembros de la familia, saludos y frases de cortesía, y sustantivos, adjetivos y verbos de uso cotidiano. El anverso muestra la palabra japonesa tal como se suele escribir, en kanji o kana; si lleva kanji, una nota da su lectura en hiragana. El reverso da su significado en inglés, sueco, coreano, alemán, español y francés, o las cifras en el caso de un número, con notas de uso. Palabras y lecturas tomadas de los lexemas de Wikidata y de dos cursos del Gobierno de Estados Unidos de dominio público (el Japanese FAST del Foreign Service Institute y el Japanese Basic Course del Defense Language Institute), contrastadas con el Wiktionary inglés; los significados, de Wikidata (etiquetas de los elementos, glosas y traducciones de los lexemas) cuando los tiene y, si no, redactados por los autores con ayuda de IA."@es ,
+                        "122 mots et expressions de base en japonais pour débutants : les nombres de 0 à 20, les dizaines et 100, les jours de la semaine, les mois, huit couleurs, les membres de la famille, les salutations et formules de politesse, ainsi que des noms, adjectifs et verbes du quotidien. Le recto montre le mot japonais tel qu’il s’écrit d’ordinaire, en kanji ou en kana ; s’il comporte des kanji, une note en donne la lecture en hiragana. Le verso donne son sens en anglais, en suédois, en coréen, en allemand, en espagnol et en français, ou les chiffres pour un nombre, avec des notes d’usage. Mots et lectures tirés des lexèmes de Wikidata et de deux cours du gouvernement des États-Unis, dans le domaine public (le Japanese FAST du Foreign Service Institute et le Japanese Basic Course du Defense Language Institute), vérifiés auprès du Wiktionary anglais ; les sens viennent de Wikidata (libellés des éléments, gloses et traductions des lexèmes) lorsqu’il les donne, sinon ils ont été rédigés par les auteurs avec l’aide de l’IA."@fr ;
+    prov:wasDerivedFrom <https://www.wikidata.org/> ,
+                        <https://archive.org/details/Fsi-JapaneseFast-StudentText> ,
+                        <https://archive.org/details/Japanese-Basic-Course> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:languages ,
+               topic:japanese ;
+    dcat:keyword "Japanese"@en ,
+                 "vocabulary"@en ,
+                 "beginners"@en ,
+                 "phrases"@en ,
+                 "kanji"@en ,
+                 "hiragana"@en ,
+                 "japanska"@sv ,
+                 "ordförråd"@sv ,
+                 "nybörjare"@sv ,
+                 "fraser"@sv ,
+                 "kanji"@sv ,
+                 "hiragana"@sv ,
+                 "일본어"@ko ,
+                 "어휘"@ko ,
+                 "초보자"@ko ,
+                 "표현"@ko ,
+                 "한자"@ko ,
+                 "히라가나"@ko ,
+                 "Japanisch"@de ,
+                 "Wortschatz"@de ,
+                 "Anfänger"@de ,
+                 "Redewendungen"@de ,
+                 "Kanji"@de ,
+                 "Hiragana"@de ,
+                 "japonés"@es ,
+                 "vocabulario"@es ,
+                 "principiantes"@es ,
+                 "frases"@es ,
+                 "kanji"@es ,
+                 "hiragana"@es ,
+                 "japonais"@fr ,
+                 "vocabulaire"@fr ,
+                 "débutants"@fr ,
+                 "expressions"@fr ,
+                 "kanji"@fr ,
+                 "hiragana"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/JPN> ,
+                     <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#japanese-basics> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#japanese-basics> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/mark/1.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/> ,
+              <https://archive.org/details/Fsi-JapaneseFast-StudentText> ,
+              <https://archive.org/details/Japanese-Basic-Course> ,
+              <https://en.wiktionary.org/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled. The dossier's per-card evidence and Wikidata checks, its numbered queries and API calls and its log of discrepancies are not part of this release; where the text refers to them, to the dossier or to findings listed below, it means that record. The builder is the script that wrote the deck from the dossier's card table and ran its Wikidata checks."@en ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators). The research, the writing of the cards, these checks and the four reviews below were done by AI agents; no human review is recorded."@en ,
+                 "Word list. A list of 122 words and phrases for a first Japanese course was drawn up by the AI agent from the library editor's brief, the same brief as the library's other basics decks (numbers 0–20, the tens and 100; days; months; colours; family; greetings and polite phrases; everyday nouns, adjectives and verbs), choosing the most basic, standard word for each concept. No frequency list, textbook word list or phrase-book list was copied: the two public-domain US Government courses below were read for the readings of numbers and months, the English meaning of the greetings already on the list and the facts in the notes."@en ,
+                 "Wikidata lexemes. SPARQL query 1 fetched every Japanese lexeme (language Q5287) whose lemma, in the tags ja, ja-hira, ja-kana or ja-hrkt, is a candidate front or one of its readings (468 rows). Words not found were looked up with the lexeme search (API calls 2): Wikidata has no Japanese lexeme for 六十, 八十 or ごめんなさい. The full JSON of the 205 lexemes found was fetched with API calls 3, and the lexeme chosen for each card (the numeral, noun, verb or adjective lexeme whose ja lemma is the front, or whose ja-hira lemma is the front for words written in kana; 120 cards) gave the hiragana reading of the front note, the sense, its glosses and its sense item (P5137). For the numbers 四, 七, 九 and 十七, whose second reading is a separate lexeme, both lexemes were kept (十四's second lexeme, じゅうし, L701027, was dropped with that reading in review 1). Eighteen more lexemes were fetched for the cards and notes (API calls 3b and 3c: お母さん, お父さん, お姉さん, 妹さん, お爺さん, お婆さん, 冷たい, 熱い, テーブル, ミルク, グレー, お早う, 有り難う, 良い, 〇, 初めまして, 始めまして and 居る (おる)), and in the review round the colour adjectives 赤い, 青い, 黒い, 白い, 黄色い and 茶色い (L33500–L33505), じゃ (L1158936, form じゃあ), 宜しく (L625296) and the honorific prefix お (L625391) (API calls 16–19). Query 7 looked for English, Swedish, Korean, German, Spanish and French senses linked to the chosen senses by translation statements (P5972), in either direction."@en ,
+                 "Wikidata items. The items linked from the senses were fetched with API calls 5 (labels and aliases in Japanese, English, Swedish, Korean, German, Spanish, French and mul); items for the greetings whose senses have none (good morning, good evening, good night, goodbye, please, thank you) and for 60 and 80 were found with the item search and two SPARQL queries (calls 6). 106 items in all give the English, Swedish, Korean, German, Spanish and French labels for numbers, days, months, colours, family members, everyday things and some greetings, the mul digit label of each number, and the Japanese label or alias checked against the front (六十 and 八十, which have no lexeme, come from the Japanese aliases of items Q79998 and Q712467)."@en ,
+                 "Courses. Two public-domain US Government courses on the Internet Archive were read in the Archive's OCR text (calls 9 and 10): the Foreign Service Institute's Japanese FAST course (1988), whose Lesson 1 number table gives the readings of 0–99 (zero, shi/yon, shichi/nana, ku/kyuu, yon-juu, nana-juu, kyuu-juu), whose Lesson 20 and table of months give the months (shi-gatsu, shichi-gatsu, ku-gatsu), and whose lessons give the greetings with their English meaning and usage (Ohayoo gozaimasu, Konnichiwa, Konbanwa, Sayoonara, Oyasuminasai, Hajimemashite, arigatoo gozaimasu, Doo itashimashite, Sumimasen, onegai shimasu, hai, iie): three English back texts are its wording (good afternoon, you're welcome, excuse me, sorry), and it confirms the meaning of the others; and the Defense Language Institute's Japanese Basic Course (21 volumes, 1965–1970), which gives the days, the months, the colours with its grammar note on them, the sibling words with its note on talking about one's own and others' brothers and sisters (L-53, l. 84245–84252), and \"0) ZERO or REI\". The OCR of the Japanese script in both courses is unreadable, so the courses were used only for their romanised Japanese and English text, never for a spelling: every front and reading is spelled as in Wikidata. Three short phrases in notes are the kana spelling of FSI's romanised text (じゃあ、また for \"Jaa, mata\", どうぞよろしく for \"Doozo yoroshiku\", これ、お願いします for \"kore onegai shimasu\"); their words are in Wikidata (じゃあ as a form of L1158936, どうぞ L984458, 宜しく L625296 with ja-hira よろしく, お願いします the card's lexeme). The text was searched with a script (call 11) and every passage cited in the evidence was read in the OCR text around it. The War Department's Japanese phrase books TM 30-611 (1944) and TM 30-341 (1943) were found and downloaded; TM 30-611 was consulted only to confirm 灰色 (\"Haiiro\"), and nothing was taken from either."@en ,
+                 "Writing the cards. The front is the Japanese word as it is usually written: in kanji where Japanese normally writes kanji, with standard okurigana (大きい, 新しい, 食べる), and in kana where Japanese normally writes kana (the greetings, いい, ある, いる, する, パン). For the greetings the ja-hira lemma of the lexeme was chosen over its kanji lemma (こんにちは, not 今日は; ありがとうございます, not 有難うございます), and お願いします keeps its usual kanji. Numbers are written in kanji numerals (零, 一 … 十, 十一 … 二十, 三十 … 九十, 百) and the months in kanji (一月 … 十二月); the days are 月曜日 … 日曜日. Every front with kanji has a front note, tagged ja, with its reading in hiragana from the lexeme's ja-hira lemma; where a number has two common readings both are given, with the reading the FSI course uses in the tens first (よん、し; なな、しち; きゅう、く; じゅうなな、じゅうしち); for 十四 and 十九 only じゅうよん and じゅうきゅう are given, since じゅうし and じゅうく, which the FSI table also lists, are not the usual readings when counting (review 1); and for 0 the reading れい, with ゼロ in the note. There is no romanisation anywhere on the cards. Card ids are lower-case Hepburn without macrons."@en ,
+                 "The back is the meaning in English, Swedish, Korean, German, Spanish and French, one text per language, or for a number its digits, tagged zxx (text in no language) and taken from the item's mul label. Each meaning follows the item's label or an alias in that language where the item has one and it is the everyday word, or a gloss or translation in Wikidata. Counted part by part (the comma-separated parts of a text): of the 558 meanings, 387 come wholly from Wikidata (en 77, sv 58, ko 57, de 68, es 62, fr 65 of 93 cards); 3 English ones are the FSI course's English, wholly or with a Wikidata label (you're welcome, excuse me, sorry; hello, good afternoon); 13 are mixed, one part from Wikidata and another the authors' own (for example こんにちは: hej from Wikidata, god dag own; 寝る: to sleep from Wikidata, to go to bed own); and 155 are wholly the authors' own renderings, written with the help of AI: mostly the verbs and adjectives, whose lexemes have English glosses but no items, the greetings, whose items lack most languages, and Korean adjectives in their attributive form (큰, 작은), as the library's other basics decks give them. Where Japanese makes a distinction the other language does not, both words are given (兄: 형 또는 오빠; 祖父: farfar eller morfar), and where a meaning needs narrowing it is given in brackets (古い: old (of things); ある and いる: of things, of people and animals). Verbs are in the infinitive (English \"to …\", Swedish \"att …\"), Korean verbs in the dictionary form. Every text is tagged with its language: the front ja, the front note ja, the back en, sv, ko, de, es and fr, digits zxx."@en ,
+                 "Notes. A short note, in the six back languages, was added where it helps a beginner and a content source gives its fact: the second reading of 四, 七 and 九 with an example each, ゼロ and 〇 for 0, the Arabic numerals of the months (1月) and the readings しがつ, しちがつ and くがつ, the -い adjective of five colours (赤い, 青い, 黄色い, 黒い, 白い: the DLI course and Wikidata), 緑の for green, which has none, and for brown both 茶色の and 茶色い (the DLI course gives only the noun; Wikidata L33505 has the adjective), グレー, the polite forms お母さん, お父さん, おじいさん and おばあさん (Wikidata: the honorific prefix お and the lexemes of the forms), and for 兄, 姉 and 妹 the words for someone else's (お兄さん, お姉さん: the DLI course's note on siblings; 妹さん: Wikidata's gloss \"of somebody else\"), the pronunciation of the final は of こんにちは and こんばんは, the casual おはよう and ありがとう, when おやすみなさい and さようなら are said, どうぞよろしく after はじめまして, すみません as a thank-you, how お願いします is used, はい as the answer to a roll call, and among the nouns, adjectives and verbs: 家 also family, ミルク, 本 as a counter, テーブル, the kana spellings いす, イヌ and ネコ, 町 as a unit of local government, read まち or ちょう, 男の人 and 女の人, 子ども and 友だち, 金, 夜 also evening, 良い, 冷たい and 熱い, ある and いる, the reading ゆく of 行く, and 寝る also meaning to lie down. Notes are our own wording, and each note's fact comes from Wikidata (lexemes, glosses, item labels and aliases) or from one of the two courses, as the dossier's per-card evidence cites; the one exception is a fact about Swedish, not Japanese (a Swedish request usually ends with tack), the authors' own. The notes were not checked against English Wiktionary."@en ,
+                 "Cross-checking. Every front was looked up in English Wiktionary (calls 12: its wikitext through the API, read with Python): all 122 pages have a Japanese section, and every reading in a front note appears in it. Only fronts and readings were checked there; no meaning or note was checked against Wiktionary. Wiktionary is CC BY-SA and was used to verify facts only: no definition, example or note was taken from it. JMdict was not consulted."@en ,
+                 "Machine checks. The dossier's Wikidata checks are re-run against live Wikidata by the builder: for every card that cites Wikidata (all 122), the front against the main lexeme's lemma (120 checks), each front-note reading against the hiragana lemmas of the card's lexemes (108), that the cited sense still exists (120), each back text against a label or alias of a linked item in its language (396), each number's digits against the item's mul label (29) and the front against the item's Japanese label or alias (76): 849 checks on 129 lexemes and 106 items, all passing in the final run after the review round. Where an item's label does not match the card, no check was added and the difference is listed in the dossier (98 such differences, all where the card's text is not taken from that item, such as the many items with no Japanese label in kanji or no label in a back language)."@en ,
+                 "Excluded: ごめんなさい, which has no Wikidata lexeme and is in neither course (replaced by はじめまして); the polite family words (お母さん …), the -い adjectives of the colours, テーブル and ゼロ, which appear only in notes; a note on 弟, 息子 and 娘 for someone else's family (弟さん, 息子さん, 娘さん), since no CC0 or public-domain source found gives those forms (Wikidata has no lexeme for them, calls 2); 日 and 年, whose readings depend on context; the pronouns 私 and あなた, whose use needs more than a flashcard; Arabic-numeral months (in notes only); and the War Department phrase books and the Bloch–Jorden Spoken Japanese (1945), the latter because its copyright status was not established."@en ,
+                 "Selection: 122 cards: the cardinal numbers 0–20, the tens 30–90 and 100 (29); the seven days of the week; the twelve months; eight colours (赤, 青, 緑, 黄色, 黒, 白, 灰色, 茶色); ten family members, since Japanese has no everyday word for a brother or sister of unspecified age (母, 父, 兄, 弟, 姉, 妹, 息子, 娘, 祖父, 祖母), in the plain form used of one's own family; twelve greetings and polite phrases (こんにちは, おはようございます, こんばんは, おやすみなさい, さようなら, はじめまして, ありがとうございます, どういたしまして, すみません, お願いします, はい, いいえ); 20 everyday nouns (家, 水, パン, 牛乳, 本, 机, 椅子, 窓, 犬, 猫, 町, 学校, 男, 女, 子供, 友達, お金, 仕事, 手, 夜); eight adjectives (大きい, 小さい, いい, 悪い, 新しい, 古い, 寒い, 暑い); and 16 verbs in the dictionary form (ある, いる, 行く, 来る, する, 話す, 食べる, 飲む, 住む, 読む, 書く, 寝る, 働く, 買う, 見る, 言う). The colours are the nouns, so that all eight are the same kind of word (the DLI course notes that only red, blue, yellow, black and white are -い adjectives); the five that the DLI course lists as -い adjectives give that adjective in a note, and 茶色, for which Wikidata also has 茶色い, gives both forms. The list was drawn up by the AI agent from the brief for a first course, not copied from any frequency list, textbook or phrase book. Every word has a Wikidata lexeme except 六十 and 八十 (Wikidata items and the FSI course). The deck is studied front to back only: some backs nearly repeat in a language (Spanish buenas noches for こんばんは and おやすみなさい; Korean 있다 for ある and いる; 안녕하세요 for three greetings), so the reverse direction would be ambiguous."@en ,
+                 "Licensing: The deck is CC0 1.0. Its content comes from three sources whose terms allow any reuse: Wikidata's lexemes and items (CC0 1.0: the Japanese lemmas and readings, glosses, translations and labels), the Foreign Service Institute's Japanese FAST course (1988) and the Defense Language Institute's Japanese Basic Course (1965–1970), both works of the United States Government with no copyright protection under 17 U.S.C. § 105 (the readings of numbers and months, three English back texts of greetings, the romanised phrases spelled in kana in three notes, and a few facts of usage in the notes). Section 105 applies in the United States; what the deck takes from these two works is readings, the English meaning of standard greetings and facts of usage, which are not protectable expression anywhere, so the deck's CC0 dedication does not depend on § 105 applying outside the US. The Defense Language Institute's notice that its pamphlets are \"NOT for general distribution\" and not to be \"released to other persons, quoted or extracted for publication\", and its preface's request that \"requests for authorization to reproduce\" go to its Director, are internal distribution instructions, not a copyright. The selection of words is the authors' own. The meanings not taken from Wikidata are the authors' own renderings, written with the help of AI; single words and fixed greetings such as \"good night\" or \"god natt\" are facts of usage, not protectable expression. English Wiktionary (CC BY-SA 4.0) was used to verify facts only: no definition, example, note or list was taken from it, and every fact in a note has a CC0 or public-domain content source. So no source requires attribution or share-alike for the deck, although all are credited in its provenance."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Sources, licences and machine checks"@en ;
+    rdfs:comment "Scope: All 122 cards: every Japanese front, reading, meaning and note against the content sources (Wikidata, the FSI course, the DLI course); every front and reading against English Wiktionary (its meanings and notes were not compared); the licences and licence evidence of the four sources; a live re-run of the builder's Wikidata checks; the library checker (Solid Memo's SHACL shapes, DCAT-AP and the library rules). Done by an AI agent and by machine; not a human review."@en ,
+                 "Outcome: Every card has evidence from a content source (Wikidata for 122 cards, the FSI or DLI course for the readings of numbers and months, the greetings and the facts in the notes), and English Wiktionary's Japanese entries contain every front and every reading. The re-run of the builder's Wikidata checks covered all 122 cards that cite Wikidata: 859 checks on 130 lexemes and 108 items (fronts, readings, senses, back labels and aliases, digits, Japanese labels); they all passed. The library checker found the first draft's cards, written in card format 4 like the other basics decks, invalid, since format 4 asks every note to have an English text and the reading notes are Japanese only; the cards were written in card format 5, which allows a note in any language, and the deck is valid. The four licences were confirmed against the evidence quoted in each source's record. Discrepancies between the sources and how they were resolved are listed in the dossier. (The figures are those of this round; after reviews 1–3 the checks are 849 on 129 lexemes and 106 items.)"@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 122 cards and their dossier entries: a live re-fetch of every lexeme and item the cards and notes cite, every front, reading, number, day and month, the cited senses and their glosses, the labels and aliases behind every back in the six languages, a re-run of the builder's Wikidata checks, the count of meanings taken from Wikidata, and every FSI and DLI line cited for a note, read in the OCR text; English Wiktionary for 十九 and 茶色い. Done by an AI agent and by machine; not a human review."@en ,
+                 "Outcome: Every front, reading, number, day and month was found right and every cited course line quoted accurately. Two errors: the Spanish notes of 父 and 兄 wrote \"de el\" for \"del\", and the Spanish note of 町 called the municipality a «ciudad», where Wikidata's Q1059478 has «pueblo». Two warnings: the record said brown has no -い adjective, while Wikidata has 茶色い (L33505); and 町 cited the administrative sense (S1) for its main meaning, and tagged Korean 동네 as Wikidata. Seven suggestions: ちょう as the reading of the administrative 町; tack rather than snälla for お願いします; varm, het for 暑い; じゅうし and じゅうく are not the usual readings when counting; テーブル is any table, not one for eating at; 男 and 子供 were linked to items that are not the source of their backs (Q6581097 male, Q29514218 offspring); and 弟 lacked the family note. All were checked against live Wikidata and the courses. The two errors and two warnings were fixed (del; «pueblo»; 茶色い in the note, citing L33505, and the record corrected; 町 now cites S2 with Q3957, and 동네 is counted as the authors' own). Six suggestions were applied (the reading まち or ちょう; vänligen with a note that a Swedish request ends with tack; varm, het; じゅうし and じゅうく dropped from the 十四 and 十九 notes; the テーブル note; Q6581097 and Q29514218 removed from the evidence). The note for 弟 was declined: no CC0 or public-domain source gives 弟さん, and the DLI passage on -san (l. 6276–6283) concerns names; the same reasoning now governs the other family notes (see review 3)."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: Every line of the deck: the 122 fronts and front notes, the 558 non-digit backs and 29 digit backs, all back notes in the six languages, the titles, descriptions and keywords, the study direction and the record; mechanically, every language tag, the hiragana-only front notes, the absence of Latin script on the fronts and of a reading note on kana-only fronts; by hand, every Korean particle after Japanese text; live Wikidata labels of the colour items and of Q1059478; conventions compared with the template decks' latest versions. Done by an AI agent and by machine; not a human review."@en ,
+                 "Outcome: Every language tag, front note and Korean particle was found right. Two errors, the same as review 1's: Spanish \"de el\" in the notes of 父 and 兄, and «ciudad» for the 町 municipality. Two warnings: the Korean colour backs mixed 빨강, 노랑, 검정, 하양 and 초록 with 파란색, 회색 and 갈색; and snälla, colloquial, for the polite お願いします. Ten suggestions: family notes for 弟, 息子 and 娘; 茶色い in the brown note; Swedish noun forms or German adjectives for the colours; classificateur rather than spécificatif in the French note on 本; a stronger note on さようなら; sehen, schauen for 見る; \"sich bemüht hat\" in the German note on すみません; \"für die eines anderen\" in the German family notes; why 男の人 and 女の人 are used; and the description's account of where meanings come from. Fixed: both errors; the Korean colours are now 빨간색, 파란색, 초록색, 녹색 (green), 노란색, 검은색, 흰색, 회색, 갈색, as in the template decks (빨간색, 녹색, 노란색, 검은색 and 흰색 are Wikidata aliases, 초록색 the authors' own); お願いします is vänligen, with a Swedish note that a request usually ends with tack; and the suggestions on 茶色い, classificateur, sehen, schauen, the German wording of the すみません and family notes, and the description (now naming item labels, lexeme glosses and translations, in all six languages) were applied. Declined: notes for 弟, 息子 and 娘, which no CC0 or public-domain source supports; the colour forms, since German nouns match the Japanese nouns and Wikidata's German labels, and Swedish names a colour by its common adjective form, Wikidata's Swedish label; the さようなら and 男の人 notes, since the FSI course says only that さようなら implies not meeting again that day and no source gives the reason for 男の人, so the notes keep to what the sources say; and writing 위키데이터 in the Korean description, since the template's Korean description also writes Wikidata."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: The whole deck and dossier against the template decks and the library's rules (docs/deck-library.md, the topics and external vocabularies): a byte-for-byte rebuild from the builder, a live re-run of the Wikidata checks, the library checker, the licence evidence of every source checked live (Wikidata:Licensing, the Wiktionary footer, the Internet Archive metadata), the courses' title pages, prefaces and notices in the OCR text, every cited course passage, the provenance tag of every back text checked against live Wikidata, every lexeme and item cited for a note, card ids, metadata, attribution and every statement about review. Done by an AI agent and by machine; not a human review."@en ,
+                 "Outcome: The CC0 decision, the attribution comments, the creator, publisher and release links, the metadata, the themes and languages and the card ids were found right, and no statement claims a human review. One error: the record claimed checks against English Wiktionary that were never run (the English meanings and the notes; only fronts and readings were checked). Five warnings: the own-versus-others rule in the notes of 母, 父, 祖父 and 祖母 had no CC0 or public-domain source and the evidence cited a section that did not exist; the FSI course was credited with the greetings' English though no back was tagged as FSI, while three are its wording; several backs counted as Wikidata were only partly from it; the record said brown has no -い adjective; and \"every spelling on the cards comes from Wikidata\" overlooked three kana phrases in notes taken from FSI's romanised text. Seven suggestions: TM 30-611's use for 灰色; the DLI notice quoted in full; the Wikidata source comment to name glosses and the translation; dossier §6 and §9 to agree on 町; the line numbers for すみません and support for \"usually ゼロ\"; \"drawn up by hand\"; and card format 5 instead of the template's 4. Fixed: the Wiktionary claims were cut from the compilation, review 0, the Wiktionary source record and the dossier; the notes of 母, 父, 祖父 and 祖母 now give only the polite form (お母さん …), which Wikidata supports through the honorific prefix お (L625391) and the forms' lexemes, while 兄 and 姉 cite the DLI note (l. 84245–84252) and 妹 its Wikidata gloss; each back text is now tagged part by part as Wikidata, FSI, mixed or the authors' own, and the counts in the record follow; the 茶色い and spelling statements were corrected and L33500–L33505, L1158936 and L625296 cited; TM 30-611, the DLI notice, the Wikidata comment, 町, the すみません lines (l. 2639–2643) and \"drawn up by the AI agent\" were fixed, and the 0 note now says only \"also ゼロ\". Card format 5 was kept, as recorded in the dossier, since format 4 requires an English text in every note and the reading notes are Japanese. The cards' dcterms:created and the compilation's end time were also set to 12:00, as the template decks write them."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata (Japanese lexemes and items)" ;
+    dcterms:creator "Wikidata contributors (Wikimedia Foundation)" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\" Content source: the Japanese lemmas and their hiragana readings, the lexemes behind the notes, the English, Swedish, Korean, German, Spanish and French labels and aliases of the items linked from the senses, the lexeme glosses behind some meanings (the English of most verbs and of 悪い and 暑い; the Korean and German of 食べる and 飲む) and one P5972 translation (the English of 寒い: L3296)."@en .
+
+<https://archive.org/details/Fsi-JapaneseFast-StudentText>
+    dcterms:title "Japanese: Familiarization & Short-term Training (FAST), Student Text (Foreign Service Institute, 1988), as scanned on the Internet Archive" ;
+    dcterms:creator "The Japanese Section, School of Language Studies, Foreign Service Institute, U.S. Department of State (Tomoko Tanaka Campen and the FSI Japanese instructors; final version edited by Cornelius C. Kubler)" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> ;
+    rdfs:comment "A work of the United States Government: the title page reads \"JAPANESE Familiarization & Short-term Training 1988 Japanese Section School of Language Studies FOREIGN SERVICE INSTITUTE U. S. DEPARTMENT OF STATE\", and the preface says the course \"is one of a series of similar foreign language courses produced at the Foreign Service Institute that are intended to train U.S. Government personnel assigned to overseas posts\" and that it was revised by \"Mrs. Tomoko Tanaka Campen, Senior Instructor in the FSI Japanese Section ... along with the team of instructors that she heads\". 17 U.S.C. § 105 (https://www.law.cornell.edu/uscode/text/17/105): \"Copyright protection under this title is not available for any work of the United States Government\". The Internet Archive item's metadata (https://archive.org/metadata/Fsi-JapaneseFast-StudentText) gives licenseurl \"http://creativecommons.org/licenses/publicdomain/\". Recorded here with the Public Domain Mark: free of known copyright. Content source: the readings of the numbers and months (confirming those of the lexemes), three English back texts (good afternoon for こんにちは, you're welcome, excuse me, sorry), the confirmation of the meaning of the other greetings, the romanised phrases whose kana spelling is in three notes (Jaa, mata; Doozo yoroshiku; kore onegai shimasu), and facts of usage in the notes."@en .
+
+<https://archive.org/details/Japanese-Basic-Course>
+    dcterms:title "Japanese: Basic Course, volumes 1–21 (Defense Language Institute, 1965–1970), as scanned on the Internet Archive" ;
+    dcterms:creator "Defense Language Institute, U.S. Department of Defense" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> ;
+    rdfs:comment "A work of the United States Government: volume 1 reads \"DEFENSE LANGUAGE INSTITUTE JAPANESE SOUNDS OF JAPANESE SPEECH BASIC COURSE VOLUME I ... DEPARTMENT OF DEFENSE ... April 1967\", and its preface says \"The Japanese Course, consisting of 160 lessons in 21 volumes, is one of the Defense Language Institute's Basic Course Series. The material was developed at the Defense Language Institute\". 17 U.S.C. § 105 (https://www.law.cornell.edu/uscode/text/17/105): \"Copyright protection under this title is not available for any work of the United States Government\". The notice in full (its two OCR columns reassembled): \"This pamphlet is for use by the faculty and staff of the Defense Language Institute solely for official purposes. It is NOT for general distribution. It may NOT be released to other persons, quoted or extracted for publication, or otherwise copied or distributed without specific permission in each instance from the Director, Defense Language Institute.\" The preface adds: \"All inquiries concerning these materials, including requests for authorization to reproduce, will be addressed to the Director, Defense Language Institute\". Both are internal distribution instructions of a government agency, not a claim of copyright, which 17 U.S.C. § 105 rules out for the agency's own work; the Internet Archive publishes the course openly (metadata https://archive.org/metadata/Japanese-Basic-Course, licenseurl \"https://creativecommons.org/publicdomain/mark/1.0/\"). Recorded here with the Public Domain Mark: free of known copyright. Content source: confirmation of the colours, family words, days and months with their English meaning, and facts of usage in the notes (the -い colour adjectives and 緑の/茶色の, the sibling words for one's own and others' family, 0 as ZERO or REI, はじめまして)."@en .
+
+<https://en.wiktionary.org/>
+    dcterms:title "English Wiktionary (Japanese entries)" ;
+    dcterms:creator "Wiktionary contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://en.wiktionary.org/wiki/犬 — page footer: \"Definitions and other text are available under the Creative Commons Attribution-ShareAlike License; additional terms may apply.\", linking to https://creativecommons.org/licenses/by-sa/4.0/. Used to verify facts only: every front was looked up for a Japanese entry containing its reading; the meanings and notes were not checked against it, and nothing was taken from it."@en .
+
+<#rei>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "零"@ja ;
+    solid-memo:frontNote "れい"@ja ;
+    solid-memo:back "0"@zxx ;
+    solid-memo:backNote "Also ゼロ; also written 〇."@en ,
+                        "Även ゼロ; skrivs också 〇."@sv ,
+                        "ゼロ라고도 해요. 〇으로도 써요."@ko ,
+                        "Auch ゼロ; auch 〇 geschrieben."@de ,
+                        "También ゼロ; también se escribe 〇."@es ,
+                        "Aussi ゼロ ; s’écrit aussi 〇."@fr .
+
+<#ichi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "一"@ja ;
+    solid-memo:frontNote "いち"@ja ;
+    solid-memo:back "1"@zxx .
+
+<#ni>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "二"@ja ;
+    solid-memo:frontNote "に"@ja ;
+    solid-memo:back "2"@zxx .
+
+<#san>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "三"@ja ;
+    solid-memo:frontNote "さん"@ja ;
+    solid-memo:back "3"@zxx .
+
+<#yon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "四"@ja ;
+    solid-memo:frontNote "よん、し"@ja ;
+    solid-memo:back "4"@zxx ;
+    solid-memo:backNote "Both readings are used: よん in 四十 (よんじゅう), し in 四月 (しがつ)."@en ,
+                        "Båda läsningarna används: よん i 四十 (よんじゅう), し i 四月 (しがつ)."@sv ,
+                        "두 가지로 읽어요. 四十(よんじゅう)에서는 よん, 四月(しがつ)에서는 し예요."@ko ,
+                        "Beide Lesungen kommen vor: よん in 四十 (よんじゅう), し in 四月 (しがつ)."@de ,
+                        "Se usan las dos lecturas: よん en 四十 (よんじゅう), し en 四月 (しがつ)."@es ,
+                        "Les deux lectures s’emploient : よん dans 四十 (よんじゅう), し dans 四月 (しがつ)."@fr .
+
+<#go>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "五"@ja ;
+    solid-memo:frontNote "ご"@ja ;
+    solid-memo:back "5"@zxx .
+
+<#roku>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "六"@ja ;
+    solid-memo:frontNote "ろく"@ja ;
+    solid-memo:back "6"@zxx .
+
+<#nana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "七"@ja ;
+    solid-memo:frontNote "なな、しち"@ja ;
+    solid-memo:back "7"@zxx ;
+    solid-memo:backNote "Both readings are used: なな in 七十 (ななじゅう), しち in 七月 (しちがつ)."@en ,
+                        "Båda läsningarna används: なな i 七十 (ななじゅう), しち i 七月 (しちがつ)."@sv ,
+                        "두 가지로 읽어요. 七十(ななじゅう)에서는 なな, 七月(しちがつ)에서는 しち예요."@ko ,
+                        "Beide Lesungen kommen vor: なな in 七十 (ななじゅう), しち in 七月 (しちがつ)."@de ,
+                        "Se usan las dos lecturas: なな en 七十 (ななじゅう), しち en 七月 (しちがつ)."@es ,
+                        "Les deux lectures s’emploient : なな dans 七十 (ななじゅう), しち dans 七月 (しちがつ)."@fr .
+
+<#hachi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "八"@ja ;
+    solid-memo:frontNote "はち"@ja ;
+    solid-memo:back "8"@zxx .
+
+<#kyu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "九"@ja ;
+    solid-memo:frontNote "きゅう、く"@ja ;
+    solid-memo:back "9"@zxx ;
+    solid-memo:backNote "Both readings are used: きゅう in 九十 (きゅうじゅう), く in 九月 (くがつ)."@en ,
+                        "Båda läsningarna används: きゅう i 九十 (きゅうじゅう), く i 九月 (くがつ)."@sv ,
+                        "두 가지로 읽어요. 九十(きゅうじゅう)에서는 きゅう, 九月(くがつ)에서는 く예요."@ko ,
+                        "Beide Lesungen kommen vor: きゅう in 九十 (きゅうじゅう), く in 九月 (くがつ)."@de ,
+                        "Se usan las dos lecturas: きゅう en 九十 (きゅうじゅう), く en 九月 (くがつ)."@es ,
+                        "Les deux lectures s’emploient : きゅう dans 九十 (きゅうじゅう), く dans 九月 (くがつ)."@fr .
+
+<#ju>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "十"@ja ;
+    solid-memo:frontNote "じゅう"@ja ;
+    solid-memo:back "10"@zxx .
+
+<#juichi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "十一"@ja ;
+    solid-memo:frontNote "じゅういち"@ja ;
+    solid-memo:back "11"@zxx .
+
+<#juni>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "十二"@ja ;
+    solid-memo:frontNote "じゅうに"@ja ;
+    solid-memo:back "12"@zxx .
+
+<#jusan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "十三"@ja ;
+    solid-memo:frontNote "じゅうさん"@ja ;
+    solid-memo:back "13"@zxx .
+
+<#juyon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "十四"@ja ;
+    solid-memo:frontNote "じゅうよん"@ja ;
+    solid-memo:back "14"@zxx .
+
+<#jugo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "十五"@ja ;
+    solid-memo:frontNote "じゅうご"@ja ;
+    solid-memo:back "15"@zxx .
+
+<#juroku>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "十六"@ja ;
+    solid-memo:frontNote "じゅうろく"@ja ;
+    solid-memo:back "16"@zxx .
+
+<#junana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "十七"@ja ;
+    solid-memo:frontNote "じゅうなな、じゅうしち"@ja ;
+    solid-memo:back "17"@zxx .
+
+<#juhachi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "十八"@ja ;
+    solid-memo:frontNote "じゅうはち"@ja ;
+    solid-memo:back "18"@zxx .
+
+<#jukyu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "十九"@ja ;
+    solid-memo:frontNote "じゅうきゅう"@ja ;
+    solid-memo:back "19"@zxx .
+
+<#niju>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "二十"@ja ;
+    solid-memo:frontNote "にじゅう"@ja ;
+    solid-memo:back "20"@zxx .
+
+<#sanju>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "三十"@ja ;
+    solid-memo:frontNote "さんじゅう"@ja ;
+    solid-memo:back "30"@zxx .
+
+<#yonju>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "四十"@ja ;
+    solid-memo:frontNote "よんじゅう"@ja ;
+    solid-memo:back "40"@zxx .
+
+<#goju>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "五十"@ja ;
+    solid-memo:frontNote "ごじゅう"@ja ;
+    solid-memo:back "50"@zxx .
+
+<#rokuju>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "六十"@ja ;
+    solid-memo:frontNote "ろくじゅう"@ja ;
+    solid-memo:back "60"@zxx .
+
+<#nanaju>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "七十"@ja ;
+    solid-memo:frontNote "ななじゅう"@ja ;
+    solid-memo:back "70"@zxx .
+
+<#hachiju>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "八十"@ja ;
+    solid-memo:frontNote "はちじゅう"@ja ;
+    solid-memo:back "80"@zxx .
+
+<#kyuju>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "九十"@ja ;
+    solid-memo:frontNote "きゅうじゅう"@ja ;
+    solid-memo:back "90"@zxx .
+
+<#hyaku>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "百"@ja ;
+    solid-memo:frontNote "ひゃく"@ja ;
+    solid-memo:back "100"@zxx .
+
+<#getsuyobi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "月曜日"@ja ;
+    solid-memo:frontNote "げつようび"@ja ;
+    solid-memo:back "Monday"@en ,
+                    "måndag"@sv ,
+                    "월요일"@ko ,
+                    "Montag"@de ,
+                    "lunes"@es ,
+                    "lundi"@fr .
+
+<#kayobi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "火曜日"@ja ;
+    solid-memo:frontNote "かようび"@ja ;
+    solid-memo:back "Tuesday"@en ,
+                    "tisdag"@sv ,
+                    "화요일"@ko ,
+                    "Dienstag"@de ,
+                    "martes"@es ,
+                    "mardi"@fr .
+
+<#suiyobi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "水曜日"@ja ;
+    solid-memo:frontNote "すいようび"@ja ;
+    solid-memo:back "Wednesday"@en ,
+                    "onsdag"@sv ,
+                    "수요일"@ko ,
+                    "Mittwoch"@de ,
+                    "miércoles"@es ,
+                    "mercredi"@fr .
+
+<#mokuyobi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "木曜日"@ja ;
+    solid-memo:frontNote "もくようび"@ja ;
+    solid-memo:back "Thursday"@en ,
+                    "torsdag"@sv ,
+                    "목요일"@ko ,
+                    "Donnerstag"@de ,
+                    "jueves"@es ,
+                    "jeudi"@fr .
+
+<#kinyobi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "金曜日"@ja ;
+    solid-memo:frontNote "きんようび"@ja ;
+    solid-memo:back "Friday"@en ,
+                    "fredag"@sv ,
+                    "금요일"@ko ,
+                    "Freitag"@de ,
+                    "viernes"@es ,
+                    "vendredi"@fr .
+
+<#doyobi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "土曜日"@ja ;
+    solid-memo:frontNote "どようび"@ja ;
+    solid-memo:back "Saturday"@en ,
+                    "lördag"@sv ,
+                    "토요일"@ko ,
+                    "Samstag"@de ,
+                    "sábado"@es ,
+                    "samedi"@fr .
+
+<#nichiyobi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "日曜日"@ja ;
+    solid-memo:frontNote "にちようび"@ja ;
+    solid-memo:back "Sunday"@en ,
+                    "söndag"@sv ,
+                    "일요일"@ko ,
+                    "Sonntag"@de ,
+                    "domingo"@es ,
+                    "dimanche"@fr .
+
+<#ichigatsu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "一月"@ja ;
+    solid-memo:frontNote "いちがつ"@ja ;
+    solid-memo:back "January"@en ,
+                    "januari"@sv ,
+                    "1월"@ko ,
+                    "Januar"@de ,
+                    "enero"@es ,
+                    "janvier"@fr ;
+    solid-memo:backNote "Often written with Arabic numerals: 1月."@en ,
+                        "Skrivs ofta med arabiska siffror: 1月."@sv ,
+                        "아라비아 숫자로 1月처럼 쓰는 경우가 많아요."@ko ,
+                        "Oft mit arabischen Ziffern geschrieben: 1月."@de ,
+                        "A menudo se escribe con cifras arábigas: 1月."@es ,
+                        "Souvent écrit en chiffres arabes : 1月."@fr .
+
+<#nigatsu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "二月"@ja ;
+    solid-memo:frontNote "にがつ"@ja ;
+    solid-memo:back "February"@en ,
+                    "februari"@sv ,
+                    "2월"@ko ,
+                    "Februar"@de ,
+                    "febrero"@es ,
+                    "février"@fr ;
+    solid-memo:backNote "Often written with Arabic numerals: 2月."@en ,
+                        "Skrivs ofta med arabiska siffror: 2月."@sv ,
+                        "아라비아 숫자로 2月처럼 쓰는 경우가 많아요."@ko ,
+                        "Oft mit arabischen Ziffern geschrieben: 2月."@de ,
+                        "A menudo se escribe con cifras arábigas: 2月."@es ,
+                        "Souvent écrit en chiffres arabes : 2月."@fr .
+
+<#sangatsu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "三月"@ja ;
+    solid-memo:frontNote "さんがつ"@ja ;
+    solid-memo:back "March"@en ,
+                    "mars"@sv ,
+                    "3월"@ko ,
+                    "März"@de ,
+                    "marzo"@es ,
+                    "mars"@fr ;
+    solid-memo:backNote "Often written with Arabic numerals: 3月."@en ,
+                        "Skrivs ofta med arabiska siffror: 3月."@sv ,
+                        "아라비아 숫자로 3月처럼 쓰는 경우가 많아요."@ko ,
+                        "Oft mit arabischen Ziffern geschrieben: 3月."@de ,
+                        "A menudo se escribe con cifras arábigas: 3月."@es ,
+                        "Souvent écrit en chiffres arabes : 3月."@fr .
+
+<#shigatsu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "四月"@ja ;
+    solid-memo:frontNote "しがつ"@ja ;
+    solid-memo:back "April"@en ,
+                    "april"@sv ,
+                    "4월"@ko ,
+                    "April"@de ,
+                    "abril"@es ,
+                    "avril"@fr ;
+    solid-memo:backNote "Read しがつ, not よんがつ. Often written with Arabic numerals: 4月."@en ,
+                        "Läses しがつ, inte よんがつ. Skrivs ofta med arabiska siffror: 4月."@sv ,
+                        "よんがつ가 아니라 しがつ로 읽어요. 아라비아 숫자로 4月처럼 쓰는 경우가 많아요."@ko ,
+                        "Gelesen しがつ, nicht よんがつ. Oft mit arabischen Ziffern geschrieben: 4月."@de ,
+                        "Se lee しがつ, no よんがつ. A menudo se escribe con cifras arábigas: 4月."@es ,
+                        "Se lit しがつ, et non よんがつ. Souvent écrit en chiffres arabes : 4月."@fr .
+
+<#gogatsu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "五月"@ja ;
+    solid-memo:frontNote "ごがつ"@ja ;
+    solid-memo:back "May"@en ,
+                    "maj"@sv ,
+                    "5월"@ko ,
+                    "Mai"@de ,
+                    "mayo"@es ,
+                    "mai"@fr ;
+    solid-memo:backNote "Often written with Arabic numerals: 5月."@en ,
+                        "Skrivs ofta med arabiska siffror: 5月."@sv ,
+                        "아라비아 숫자로 5月처럼 쓰는 경우가 많아요."@ko ,
+                        "Oft mit arabischen Ziffern geschrieben: 5月."@de ,
+                        "A menudo se escribe con cifras arábigas: 5月."@es ,
+                        "Souvent écrit en chiffres arabes : 5月."@fr .
+
+<#rokugatsu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "六月"@ja ;
+    solid-memo:frontNote "ろくがつ"@ja ;
+    solid-memo:back "June"@en ,
+                    "juni"@sv ,
+                    "6월"@ko ,
+                    "Juni"@de ,
+                    "junio"@es ,
+                    "juin"@fr ;
+    solid-memo:backNote "Often written with Arabic numerals: 6月."@en ,
+                        "Skrivs ofta med arabiska siffror: 6月."@sv ,
+                        "아라비아 숫자로 6月처럼 쓰는 경우가 많아요."@ko ,
+                        "Oft mit arabischen Ziffern geschrieben: 6月."@de ,
+                        "A menudo se escribe con cifras arábigas: 6月."@es ,
+                        "Souvent écrit en chiffres arabes : 6月."@fr .
+
+<#shichigatsu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "七月"@ja ;
+    solid-memo:frontNote "しちがつ"@ja ;
+    solid-memo:back "July"@en ,
+                    "juli"@sv ,
+                    "7월"@ko ,
+                    "Juli"@de ,
+                    "julio"@es ,
+                    "juillet"@fr ;
+    solid-memo:backNote "Read しちがつ. Often written with Arabic numerals: 7月."@en ,
+                        "Läses しちがつ. Skrivs ofta med arabiska siffror: 7月."@sv ,
+                        "しちがつ로 읽어요. 아라비아 숫자로 7月처럼 쓰는 경우가 많아요."@ko ,
+                        "Gelesen しちがつ. Oft mit arabischen Ziffern geschrieben: 7月."@de ,
+                        "Se lee しちがつ. A menudo se escribe con cifras arábigas: 7月."@es ,
+                        "Se lit しちがつ. Souvent écrit en chiffres arabes : 7月."@fr .
+
+<#hachigatsu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "八月"@ja ;
+    solid-memo:frontNote "はちがつ"@ja ;
+    solid-memo:back "August"@en ,
+                    "augusti"@sv ,
+                    "8월"@ko ,
+                    "August"@de ,
+                    "agosto"@es ,
+                    "août"@fr ;
+    solid-memo:backNote "Often written with Arabic numerals: 8月."@en ,
+                        "Skrivs ofta med arabiska siffror: 8月."@sv ,
+                        "아라비아 숫자로 8月처럼 쓰는 경우가 많아요."@ko ,
+                        "Oft mit arabischen Ziffern geschrieben: 8月."@de ,
+                        "A menudo se escribe con cifras arábigas: 8月."@es ,
+                        "Souvent écrit en chiffres arabes : 8月."@fr .
+
+<#kugatsu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "九月"@ja ;
+    solid-memo:frontNote "くがつ"@ja ;
+    solid-memo:back "September"@en ,
+                    "september"@sv ,
+                    "9월"@ko ,
+                    "September"@de ,
+                    "septiembre"@es ,
+                    "septembre"@fr ;
+    solid-memo:backNote "Read くがつ, not きゅうがつ. Often written with Arabic numerals: 9月."@en ,
+                        "Läses くがつ, inte きゅうがつ. Skrivs ofta med arabiska siffror: 9月."@sv ,
+                        "きゅうがつ가 아니라 くがつ로 읽어요. 아라비아 숫자로 9月처럼 쓰는 경우가 많아요."@ko ,
+                        "Gelesen くがつ, nicht きゅうがつ. Oft mit arabischen Ziffern geschrieben: 9月."@de ,
+                        "Se lee くがつ, no きゅうがつ. A menudo se escribe con cifras arábigas: 9月."@es ,
+                        "Se lit くがつ, et non きゅうがつ. Souvent écrit en chiffres arabes : 9月."@fr .
+
+<#jugatsu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "十月"@ja ;
+    solid-memo:frontNote "じゅうがつ"@ja ;
+    solid-memo:back "October"@en ,
+                    "oktober"@sv ,
+                    "10월"@ko ,
+                    "Oktober"@de ,
+                    "octubre"@es ,
+                    "octobre"@fr ;
+    solid-memo:backNote "Often written with Arabic numerals: 10月."@en ,
+                        "Skrivs ofta med arabiska siffror: 10月."@sv ,
+                        "아라비아 숫자로 10月처럼 쓰는 경우가 많아요."@ko ,
+                        "Oft mit arabischen Ziffern geschrieben: 10月."@de ,
+                        "A menudo se escribe con cifras arábigas: 10月."@es ,
+                        "Souvent écrit en chiffres arabes : 10月."@fr .
+
+<#juichigatsu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "十一月"@ja ;
+    solid-memo:frontNote "じゅういちがつ"@ja ;
+    solid-memo:back "November"@en ,
+                    "november"@sv ,
+                    "11월"@ko ,
+                    "November"@de ,
+                    "noviembre"@es ,
+                    "novembre"@fr ;
+    solid-memo:backNote "Often written with Arabic numerals: 11月."@en ,
+                        "Skrivs ofta med arabiska siffror: 11月."@sv ,
+                        "아라비아 숫자로 11月처럼 쓰는 경우가 많아요."@ko ,
+                        "Oft mit arabischen Ziffern geschrieben: 11月."@de ,
+                        "A menudo se escribe con cifras arábigas: 11月."@es ,
+                        "Souvent écrit en chiffres arabes : 11月."@fr .
+
+<#junigatsu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "十二月"@ja ;
+    solid-memo:frontNote "じゅうにがつ"@ja ;
+    solid-memo:back "December"@en ,
+                    "december"@sv ,
+                    "12월"@ko ,
+                    "Dezember"@de ,
+                    "diciembre"@es ,
+                    "décembre"@fr ;
+    solid-memo:backNote "Often written with Arabic numerals: 12月."@en ,
+                        "Skrivs ofta med arabiska siffror: 12月."@sv ,
+                        "아라비아 숫자로 12月처럼 쓰는 경우가 많아요."@ko ,
+                        "Oft mit arabischen Ziffern geschrieben: 12月."@de ,
+                        "A menudo se escribe con cifras arábigas: 12月."@es ,
+                        "Souvent écrit en chiffres arabes : 12月."@fr .
+
+<#aka>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "赤"@ja ;
+    solid-memo:frontNote "あか"@ja ;
+    solid-memo:back "red"@en ,
+                    "röd"@sv ,
+                    "빨간색"@ko ,
+                    "Rot"@de ,
+                    "rojo"@es ,
+                    "rouge"@fr ;
+    solid-memo:backNote "As an adjective: 赤い (あかい)."@en ,
+                        "Som adjektiv: 赤い (あかい)."@sv ,
+                        "형용사로는 赤い(あかい)예요."@ko ,
+                        "Als Adjektiv: 赤い (あかい)."@de ,
+                        "Como adjetivo: 赤い (あかい)."@es ,
+                        "Comme adjectif : 赤い (あかい)."@fr .
+
+<#ao>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "青"@ja ;
+    solid-memo:frontNote "あお"@ja ;
+    solid-memo:back "blue"@en ,
+                    "blå"@sv ,
+                    "파란색"@ko ,
+                    "Blau"@de ,
+                    "azul"@es ,
+                    "bleu"@fr ;
+    solid-memo:backNote "As an adjective: 青い (あおい)."@en ,
+                        "Som adjektiv: 青い (あおい)."@sv ,
+                        "형용사로는 青い(あおい)예요."@ko ,
+                        "Als Adjektiv: 青い (あおい)."@de ,
+                        "Como adjetivo: 青い (あおい)."@es ,
+                        "Comme adjectif : 青い (あおい)."@fr .
+
+<#midori>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "緑"@ja ;
+    solid-memo:frontNote "みどり"@ja ;
+    solid-memo:back "green"@en ,
+                    "grön"@sv ,
+                    "초록색, 녹색"@ko ,
+                    "Grün"@de ,
+                    "verde"@es ,
+                    "vert"@fr ;
+    solid-memo:backNote "Before a noun: 緑の (みどりの); there is no adjective in -い."@en ,
+                        "Före ett substantiv: 緑の (みどりの); det finns inget adjektiv på -い."@sv ,
+                        "명사 앞에서는 緑の(みどりの)를 써요. -い 형용사는 없어요."@ko ,
+                        "Vor einem Substantiv: 緑の (みどりの); ein Adjektiv auf -い gibt es nicht."@de ,
+                        "Delante de un sustantivo: 緑の (みどりの); no hay adjetivo en -い."@es ,
+                        "Devant un nom : 緑の (みどりの) ; il n’y a pas d’adjectif en -い."@fr .
+
+<#kiiro>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "黄色"@ja ;
+    solid-memo:frontNote "きいろ"@ja ;
+    solid-memo:back "yellow"@en ,
+                    "gul"@sv ,
+                    "노란색"@ko ,
+                    "Gelb"@de ,
+                    "amarillo"@es ,
+                    "jaune"@fr ;
+    solid-memo:backNote "As an adjective: 黄色い (きいろい)."@en ,
+                        "Som adjektiv: 黄色い (きいろい)."@sv ,
+                        "형용사로는 黄色い(きいろい)예요."@ko ,
+                        "Als Adjektiv: 黄色い (きいろい)."@de ,
+                        "Como adjetivo: 黄色い (きいろい)."@es ,
+                        "Comme adjectif : 黄色い (きいろい)."@fr .
+
+<#kuro>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "黒"@ja ;
+    solid-memo:frontNote "くろ"@ja ;
+    solid-memo:back "black"@en ,
+                    "svart"@sv ,
+                    "검은색"@ko ,
+                    "Schwarz"@de ,
+                    "negro"@es ,
+                    "noir"@fr ;
+    solid-memo:backNote "As an adjective: 黒い (くろい)."@en ,
+                        "Som adjektiv: 黒い (くろい)."@sv ,
+                        "형용사로는 黒い(くろい)예요."@ko ,
+                        "Als Adjektiv: 黒い (くろい)."@de ,
+                        "Como adjetivo: 黒い (くろい)."@es ,
+                        "Comme adjectif : 黒い (くろい)."@fr .
+
+<#shiro>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "白"@ja ;
+    solid-memo:frontNote "しろ"@ja ;
+    solid-memo:back "white"@en ,
+                    "vit"@sv ,
+                    "흰색"@ko ,
+                    "Weiß"@de ,
+                    "blanco"@es ,
+                    "blanc"@fr ;
+    solid-memo:backNote "As an adjective: 白い (しろい)."@en ,
+                        "Som adjektiv: 白い (しろい)."@sv ,
+                        "형용사로는 白い(しろい)예요."@ko ,
+                        "Als Adjektiv: 白い (しろい)."@de ,
+                        "Como adjetivo: 白い (しろい)."@es ,
+                        "Comme adjectif : 白い (しろい)."@fr .
+
+<#haiiro>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "灰色"@ja ;
+    solid-memo:frontNote "はいいろ"@ja ;
+    solid-memo:back "grey"@en ,
+                    "grå"@sv ,
+                    "회색"@ko ,
+                    "Grau"@de ,
+                    "gris"@es ,
+                    "gris"@fr ;
+    solid-memo:backNote "Also グレー."@en ,
+                        "Även グレー."@sv ,
+                        "グレー라고도 해요."@ko ,
+                        "Auch グレー."@de ,
+                        "También グレー."@es ,
+                        "Aussi グレー."@fr .
+
+<#chairo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "茶色"@ja ;
+    solid-memo:frontNote "ちゃいろ"@ja ;
+    solid-memo:back "brown"@en ,
+                    "brun"@sv ,
+                    "갈색"@ko ,
+                    "Braun"@de ,
+                    "marrón"@es ,
+                    "marron, brun"@fr ;
+    solid-memo:backNote "Before a noun: 茶色の (ちゃいろの); there is also the adjective 茶色い (ちゃいろい)."@en ,
+                        "Före ett substantiv: 茶色の (ちゃいろの); det finns också adjektivet 茶色い (ちゃいろい)."@sv ,
+                        "명사 앞에서는 茶色の(ちゃいろの)를 써요. 형용사 茶色い(ちゃいろい)도 있어요."@ko ,
+                        "Vor einem Substantiv: 茶色の (ちゃいろの); es gibt auch das Adjektiv 茶色い (ちゃいろい)."@de ,
+                        "Delante de un sustantivo: 茶色の (ちゃいろの); también existe el adjetivo 茶色い (ちゃいろい)."@es ,
+                        "Devant un nom : 茶色の (ちゃいろの) ; il existe aussi l’adjectif 茶色い (ちゃいろい)."@fr .
+
+<#haha>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "母"@ja ;
+    solid-memo:frontNote "はは"@ja ;
+    solid-memo:back "mother"@en ,
+                    "mor"@sv ,
+                    "어머니"@ko ,
+                    "Mutter"@de ,
+                    "madre"@es ,
+                    "mère"@fr ;
+    solid-memo:backNote "Polite form: お母さん (おかあさん)."@en ,
+                        "Artig form: お母さん (おかあさん)."@sv ,
+                        "공손한 말은 お母さん(おかあさん)이에요."@ko ,
+                        "Höfliche Form: お母さん (おかあさん)."@de ,
+                        "Forma cortés: お母さん (おかあさん)."@es ,
+                        "Forme polie : お母さん (おかあさん)."@fr .
+
+<#chichi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "父"@ja ;
+    solid-memo:frontNote "ちち"@ja ;
+    solid-memo:back "father"@en ,
+                    "far"@sv ,
+                    "아버지"@ko ,
+                    "Vater"@de ,
+                    "padre"@es ,
+                    "père"@fr ;
+    solid-memo:backNote "Polite form: お父さん (おとうさん)."@en ,
+                        "Artig form: お父さん (おとうさん)."@sv ,
+                        "공손한 말은 お父さん(おとうさん)이에요."@ko ,
+                        "Höfliche Form: お父さん (おとうさん)."@de ,
+                        "Forma cortés: お父さん (おとうさん)."@es ,
+                        "Forme polie : お父さん (おとうさん)."@fr .
+
+<#ani>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "兄"@ja ;
+    solid-memo:frontNote "あに"@ja ;
+    solid-memo:back "older brother"@en ,
+                    "äldre bror, storebror"@sv ,
+                    "형 또는 오빠"@ko ,
+                    "älterer Bruder"@de ,
+                    "hermano mayor"@es ,
+                    "frère aîné"@fr ;
+    solid-memo:backNote "Said of your own older brother when speaking to others; someone else’s is お兄さん (おにいさん)."@en ,
+                        "Sägs om ens egen storebror när man talar med andra; någon annans är お兄さん (おにいさん)."@sv ,
+                        "남에게 자기 형이나 오빠를 말할 때 써요. 다른 사람의 경우에는 お兄さん(おにいさん)이라고 해요."@ko ,
+                        "Für den eigenen älteren Bruder im Gespräch mit anderen; für den eines anderen: お兄さん (おにいさん)."@de ,
+                        "Para hablar a otros del propio hermano mayor; si es de otra persona, お兄さん (おにいさん)."@es ,
+                        "Pour parler à d’autres de son propre frère aîné ; en parlant de la famille d’autrui : お兄さん (おにいさん)."@fr .
+
+<#ototo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "弟"@ja ;
+    solid-memo:frontNote "おとうと"@ja ;
+    solid-memo:back "younger brother"@en ,
+                    "yngre bror, lillebror"@sv ,
+                    "남동생"@ko ,
+                    "jüngerer Bruder"@de ,
+                    "hermano menor"@es ,
+                    "frère cadet"@fr .
+
+<#ane>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "姉"@ja ;
+    solid-memo:frontNote "あね"@ja ;
+    solid-memo:back "older sister"@en ,
+                    "äldre syster, storasyster"@sv ,
+                    "누나 또는 언니"@ko ,
+                    "ältere Schwester"@de ,
+                    "hermana mayor"@es ,
+                    "sœur aînée"@fr ;
+    solid-memo:backNote "Said of your own older sister when speaking to others; someone else’s is お姉さん (おねえさん)."@en ,
+                        "Sägs om ens egen storasyster när man talar med andra; någon annans är お姉さん (おねえさん)."@sv ,
+                        "남에게 자기 누나나 언니를 말할 때 써요. 다른 사람의 경우에는 お姉さん(おねえさん)이라고 해요."@ko ,
+                        "Für die eigene ältere Schwester im Gespräch mit anderen; für die eines anderen: お姉さん (おねえさん)."@de ,
+                        "Para hablar a otros de la propia hermana mayor; si es de otra persona, お姉さん (おねえさん)."@es ,
+                        "Pour parler à d’autres de sa propre sœur aînée ; en parlant de la famille d’autrui : お姉さん (おねえさん)."@fr .
+
+<#imoto>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "妹"@ja ;
+    solid-memo:frontNote "いもうと"@ja ;
+    solid-memo:back "younger sister"@en ,
+                    "yngre syster, lillasyster"@sv ,
+                    "여동생"@ko ,
+                    "jüngere Schwester"@de ,
+                    "hermana menor"@es ,
+                    "sœur cadette"@fr ;
+    solid-memo:backNote "Said of your own younger sister when speaking to others; someone else’s is 妹さん (いもうとさん)."@en ,
+                        "Sägs om ens egen lillasyster när man talar med andra; någon annans är 妹さん (いもうとさん)."@sv ,
+                        "남에게 자기 여동생을 말할 때 써요. 다른 사람의 경우에는 妹さん(いもうとさん)이라고 해요."@ko ,
+                        "Für die eigene jüngere Schwester im Gespräch mit anderen; für die eines anderen: 妹さん (いもうとさん)."@de ,
+                        "Para hablar a otros de la propia hermana menor; si es de otra persona, 妹さん (いもうとさん)."@es ,
+                        "Pour parler à d’autres de sa propre sœur cadette ; en parlant de la famille d’autrui : 妹さん (いもうとさん)."@fr .
+
+<#musuko>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "息子"@ja ;
+    solid-memo:frontNote "むすこ"@ja ;
+    solid-memo:back "son"@en ,
+                    "son"@sv ,
+                    "아들"@ko ,
+                    "Sohn"@de ,
+                    "hijo"@es ,
+                    "fils"@fr .
+
+<#musume>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "娘"@ja ;
+    solid-memo:frontNote "むすめ"@ja ;
+    solid-memo:back "daughter"@en ,
+                    "dotter"@sv ,
+                    "딸"@ko ,
+                    "Tochter"@de ,
+                    "hija"@es ,
+                    "fille"@fr .
+
+<#sofu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "祖父"@ja ;
+    solid-memo:frontNote "そふ"@ja ;
+    solid-memo:back "grandfather"@en ,
+                    "farfar eller morfar"@sv ,
+                    "할아버지"@ko ,
+                    "Großvater"@de ,
+                    "abuelo"@es ,
+                    "grand-père"@fr ;
+    solid-memo:backNote "Polite form: おじいさん, which also means an old man."@en ,
+                        "Artig form: おじいさん, som också betyder gammal man."@sv ,
+                        "공손한 말은 おじいさん이고, 이 말은 노인 남성을 뜻하기도 해요."@ko ,
+                        "Höfliche Form: おじいさん, das auch „alter Mann“ bedeutet."@de ,
+                        "Forma cortés: おじいさん, que también significa «anciano»."@es ,
+                        "Forme polie : おじいさん, qui signifie aussi « vieil homme »."@fr .
+
+<#sobo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "祖母"@ja ;
+    solid-memo:frontNote "そぼ"@ja ;
+    solid-memo:back "grandmother"@en ,
+                    "farmor eller mormor"@sv ,
+                    "할머니"@ko ,
+                    "Großmutter"@de ,
+                    "abuela"@es ,
+                    "grand-mère"@fr ;
+    solid-memo:backNote "Polite form: おばあさん, which also means an old woman."@en ,
+                        "Artig form: おばあさん, som också betyder gammal kvinna."@sv ,
+                        "공손한 말은 おばあさん이고, 이 말은 노인 여성을 뜻하기도 해요."@ko ,
+                        "Höfliche Form: おばあさん, das auch „alte Frau“ bedeutet."@de ,
+                        "Forma cortés: おばあさん, que también significa «anciana»."@es ,
+                        "Forme polie : おばあさん, qui signifie aussi « vieille femme »."@fr .
+
+<#konnichiwa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "こんにちは"@ja ;
+    solid-memo:back "hello, good afternoon"@en ,
+                    "hej, god dag"@sv ,
+                    "안녕하세요"@ko ,
+                    "hallo, guten Tag"@de ,
+                    "hola, buenas tardes"@es ,
+                    "bonjour"@fr ;
+    solid-memo:backNote "A greeting used during the day. The final は is read わ."@en ,
+                        "En hälsning som används under dagen. Det sista は uttalas わ."@sv ,
+                        "낮에 하는 인사예요. 마지막 は는 わ로 읽어요."@ko ,
+                        "Ein Gruß für tagsüber. Das letzte は wird わ gesprochen."@de ,
+                        "Saludo que se usa durante el día. La は final se pronuncia わ."@es ,
+                        "Salutation employée pendant la journée. Le は final se prononce わ."@fr .
+
+<#ohayo-gozaimasu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "おはようございます"@ja ;
+    solid-memo:back "good morning"@en ,
+                    "god morgon"@sv ,
+                    "안녕하세요(아침 인사)"@ko ,
+                    "guten Morgen"@de ,
+                    "buenos días"@es ,
+                    "bonjour (le matin)"@fr ;
+    solid-memo:backNote "Polite; among friends just おはよう."@en ,
+                        "Artigt; bland vänner bara おはよう."@sv ,
+                        "공손한 말이에요. 친구끼리는 おはよう라고만 해요."@ko ,
+                        "Höflich; unter Freunden nur おはよう."@de ,
+                        "Cortés; entre amigos, solo おはよう."@es ,
+                        "Poli ; entre amis, simplement おはよう."@fr .
+
+<#konbanwa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "こんばんは"@ja ;
+    solid-memo:back "good evening"@en ,
+                    "god kväll"@sv ,
+                    "안녕하세요(저녁 인사)"@ko ,
+                    "guten Abend"@de ,
+                    "buenas noches"@es ,
+                    "bonsoir"@fr ;
+    solid-memo:backNote "The final は is read わ."@en ,
+                        "Det sista は uttalas わ."@sv ,
+                        "마지막 は는 わ로 읽어요."@ko ,
+                        "Das letzte は wird わ gesprochen."@de ,
+                        "La は final se pronuncia わ."@es ,
+                        "Le は final se prononce わ."@fr .
+
+<#oyasuminasai>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "おやすみなさい"@ja ;
+    solid-memo:back "good night"@en ,
+                    "god natt"@sv ,
+                    "안녕히 주무세요"@ko ,
+                    "gute Nacht"@de ,
+                    "buenas noches, que descanses"@es ,
+                    "bonne nuit"@fr ;
+    solid-memo:backNote "Said when going to bed, or when parting late in the evening."@en ,
+                        "Sägs när man går och lägger sig, eller när man skiljs sent på kvällen."@sv ,
+                        "잠자리에 들 때나 늦은 저녁에 헤어질 때 해요."@ko ,
+                        "Beim Schlafengehen oder beim Abschied spät am Abend."@de ,
+                        "Se dice al irse a dormir o al despedirse tarde por la noche."@es ,
+                        "Se dit au moment d’aller se coucher, ou en se quittant tard le soir."@fr .
+
+<#sayonara>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "さようなら"@ja ;
+    solid-memo:back "goodbye"@en ,
+                    "adjö, hej då"@sv ,
+                    "안녕히 가세요, 안녕히 계세요"@ko ,
+                    "auf Wiedersehen"@de ,
+                    "adiós"@es ,
+                    "au revoir"@fr ;
+    solid-memo:backNote "Implies you will not meet again that day; for “see you”, じゃあ、また is common."@en ,
+                        "Antyder att man inte ses igen samma dag; för ”vi ses” säger man ofta じゃあ、また."@sv ,
+                        "그날 다시 만나지 않는다는 느낌이 있어요. ‘또 봐요’는 흔히 じゃあ、また라고 해요."@ko ,
+                        "Deutet an, dass man sich an dem Tag nicht mehr sieht; für „bis dann“ sagt man oft じゃあ、また."@de ,
+                        "Da a entender que no se volverán a ver ese día; para «hasta luego» se suele decir じゃあ、また."@es ,
+                        "Sous-entend qu’on ne se reverra pas le même jour ; pour « à plus tard », on dit souvent じゃあ、また."@fr .
+
+<#hajimemashite>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "はじめまして"@ja ;
+    solid-memo:back "nice to meet you"@en ,
+                    "trevligt att träffas"@sv ,
+                    "처음 뵙겠습니다"@ko ,
+                    "freut mich"@de ,
+                    "encantado, mucho gusto"@es ,
+                    "enchanté"@fr ;
+    solid-memo:backNote "Said on meeting someone for the first time, often followed by どうぞよろしく."@en ,
+                        "Sägs när man träffar någon för första gången, ofta följt av どうぞよろしく."@sv ,
+                        "처음 만난 사람에게 하는 말로, 흔히 뒤에 どうぞよろしく를 붙여요."@ko ,
+                        "Sagt man, wenn man jemanden zum ersten Mal trifft, oft gefolgt von どうぞよろしく."@de ,
+                        "Se dice al conocer a alguien por primera vez, a menudo seguido de どうぞよろしく."@es ,
+                        "Se dit en rencontrant quelqu’un pour la première fois, souvent suivi de どうぞよろしく."@fr .
+
+<#arigato-gozaimasu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ありがとうございます"@ja ;
+    solid-memo:back "thank you"@en ,
+                    "tack"@sv ,
+                    "감사합니다"@ko ,
+                    "danke"@de ,
+                    "gracias"@es ,
+                    "merci"@fr ;
+    solid-memo:backNote "Polite; among friends just ありがとう."@en ,
+                        "Artigt; bland vänner bara ありがとう."@sv ,
+                        "공손한 말이에요. 친구끼리는 ありがとう라고만 해요."@ko ,
+                        "Höflich; unter Freunden nur ありがとう."@de ,
+                        "Cortés; entre amigos, solo ありがとう."@es ,
+                        "Poli ; entre amis, simplement ありがとう."@fr .
+
+<#doitashimashite>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "どういたしまして"@ja ;
+    solid-memo:back "you’re welcome"@en ,
+                    "ingen orsak, varsågod"@sv ,
+                    "천만에요"@ko ,
+                    "gern geschehen"@de ,
+                    "de nada"@es ,
+                    "de rien"@fr .
+
+<#sumimasen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "すみません"@ja ;
+    solid-memo:back "excuse me, sorry"@en ,
+                    "ursäkta, förlåt"@sv ,
+                    "실례합니다, 죄송합니다"@ko ,
+                    "Entschuldigung"@de ,
+                    "perdón, disculpe"@es ,
+                    "excusez-moi, pardon"@fr ;
+    solid-memo:backNote "Also a way of saying “thank you” to someone who has gone to trouble for you."@en ,
+                        "Används också för att tacka någon som har gjort sig besvär för ens skull."@sv ,
+                        "나를 위해 수고해 준 사람에게 고마움을 나타낼 때도 써요."@ko ,
+                        "Auch ein Dank an jemanden, der sich für einen bemüht hat."@de ,
+                        "También sirve para dar las gracias a alguien que se ha tomado una molestia por uno."@es ,
+                        "Sert aussi à remercier quelqu’un qui s’est donné de la peine pour vous."@fr .
+
+<#onegaishimasu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "お願いします"@ja ;
+    solid-memo:frontNote "おねがいします"@ja ;
+    solid-memo:back "please"@en ,
+                    "vänligen"@sv ,
+                    "부탁합니다"@ko ,
+                    "bitte"@de ,
+                    "por favor"@es ,
+                    "s’il vous plaît"@fr ;
+    solid-memo:backNote "Literally “I make a request”; said after what you ask for: これ、お願いします, “this one, please”."@en ,
+                        "Ordagrant ”jag ber om något”; sägs efter det man ber om: これ、お願いします, ”den här, tack”. En svensk begäran slutar oftast med tack."@sv ,
+                        "글자 그대로는 ‘부탁합니다’라는 뜻으로, 원하는 것 뒤에 붙여요. これ、お願いします는 ‘이것 주세요’예요."@ko ,
+                        "Wörtlich „ich bitte darum“; steht nach dem, worum man bittet: これ、お願いします, „das hier, bitte“."@de ,
+                        "Literalmente «hago una petición»; va después de lo que se pide: これ、お願いします, «esto, por favor»."@es ,
+                        "Littéralement « je fais une demande » ; se dit après ce que l’on demande : これ、お願いします, « celui-ci, s’il vous plaît »."@fr .
+
+<#hai>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "はい"@ja ;
+    solid-memo:back "yes"@en ,
+                    "ja"@sv ,
+                    "네"@ko ,
+                    "ja"@de ,
+                    "sí"@es ,
+                    "oui"@fr ;
+    solid-memo:backNote "Also the answer when your name is called."@en ,
+                        "Också svaret när ens namn ropas upp."@sv ,
+                        "이름을 부를 때 대답하는 말이기도 해요."@ko ,
+                        "Auch die Antwort, wenn der eigene Name aufgerufen wird."@de ,
+                        "También es la respuesta cuando dicen tu nombre."@es ,
+                        "C’est aussi la réponse quand on appelle votre nom."@fr .
+
+<#iie>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "いいえ"@ja ;
+    solid-memo:back "no"@en ,
+                    "nej"@sv ,
+                    "아니요"@ko ,
+                    "nein"@de ,
+                    "no"@es ,
+                    "non"@fr .
+
+<#ie>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "家"@ja ;
+    solid-memo:frontNote "いえ"@ja ;
+    solid-memo:back "house"@en ,
+                    "hus"@sv ,
+                    "집"@ko ,
+                    "Haus"@de ,
+                    "casa"@es ,
+                    "maison"@fr ;
+    solid-memo:backNote "Also a family or household."@en ,
+                        "Även familj eller hushåll."@sv ,
+                        "가족이나 집안이라는 뜻도 있어요."@ko ,
+                        "Auch Familie oder Haushalt."@de ,
+                        "También familia u hogar."@es ,
+                        "Aussi la famille, le foyer."@fr .
+
+<#mizu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "水"@ja ;
+    solid-memo:frontNote "みず"@ja ;
+    solid-memo:back "water"@en ,
+                    "vatten"@sv ,
+                    "물"@ko ,
+                    "Wasser"@de ,
+                    "agua"@es ,
+                    "eau"@fr .
+
+<#pan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "パン"@ja ;
+    solid-memo:back "bread"@en ,
+                    "bröd"@sv ,
+                    "빵"@ko ,
+                    "Brot"@de ,
+                    "pan"@es ,
+                    "pain"@fr .
+
+<#gyunyu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "牛乳"@ja ;
+    solid-memo:frontNote "ぎゅうにゅう"@ja ;
+    solid-memo:back "milk"@en ,
+                    "mjölk"@sv ,
+                    "우유"@ko ,
+                    "Milch"@de ,
+                    "leche"@es ,
+                    "lait"@fr ;
+    solid-memo:backNote "Also ミルク."@en ,
+                        "Även ミルク."@sv ,
+                        "ミルク라고도 해요."@ko ,
+                        "Auch ミルク."@de ,
+                        "También ミルク."@es ,
+                        "Aussi ミルク."@fr .
+
+<#hon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "本"@ja ;
+    solid-memo:frontNote "ほん"@ja ;
+    solid-memo:back "book"@en ,
+                    "bok"@sv ,
+                    "책"@ko ,
+                    "Buch"@de ,
+                    "libro"@es ,
+                    "livre"@fr ;
+    solid-memo:backNote "Also the counter for long, thin objects."@en ,
+                        "Även räkneord för långa, smala föremål."@sv ,
+                        "길고 가는 물건을 세는 단위이기도 해요."@ko ,
+                        "Auch das Zählwort für lange, dünne Dinge."@de ,
+                        "También el contador de objetos largos y delgados."@es ,
+                        "Aussi le classificateur des objets longs et fins."@fr .
+
+<#tsukue>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "机"@ja ;
+    solid-memo:frontNote "つくえ"@ja ;
+    solid-memo:back "desk"@en ,
+                    "skrivbord"@sv ,
+                    "책상"@ko ,
+                    "Schreibtisch"@de ,
+                    "escritorio"@es ,
+                    "bureau"@fr ;
+    solid-memo:backNote "A table is テーブル."@en ,
+                        "Ett bord är テーブル."@sv ,
+                        "탁자는 テーブル라고 해요."@ko ,
+                        "Ein Tisch ist テーブル."@de ,
+                        "Una mesa es テーブル."@es ,
+                        "Une table se dit テーブル."@fr .
+
+<#isu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "椅子"@ja ;
+    solid-memo:frontNote "いす"@ja ;
+    solid-memo:back "chair"@en ,
+                    "stol"@sv ,
+                    "의자"@ko ,
+                    "Stuhl"@de ,
+                    "silla"@es ,
+                    "chaise"@fr ;
+    solid-memo:backNote "Often written in kana: いす."@en ,
+                        "Skrivs ofta med kana: いす."@sv ,
+                        "가나로 いす라고 쓰는 경우가 많아요."@ko ,
+                        "Oft in Kana geschrieben: いす."@de ,
+                        "A menudo se escribe en kana: いす."@es ,
+                        "Souvent écrit en kana : いす."@fr .
+
+<#mado>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "窓"@ja ;
+    solid-memo:frontNote "まど"@ja ;
+    solid-memo:back "window"@en ,
+                    "fönster"@sv ,
+                    "창문"@ko ,
+                    "Fenster"@de ,
+                    "ventana"@es ,
+                    "fenêtre"@fr .
+
+<#inu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "犬"@ja ;
+    solid-memo:frontNote "いぬ"@ja ;
+    solid-memo:back "dog"@en ,
+                    "hund"@sv ,
+                    "개"@ko ,
+                    "Hund"@de ,
+                    "perro"@es ,
+                    "chien"@fr ;
+    solid-memo:backNote "Also written in katakana: イヌ."@en ,
+                        "Skrivs också med katakana: イヌ."@sv ,
+                        "가타카나로 イヌ라고도 써요."@ko ,
+                        "Auch in Katakana geschrieben: イヌ."@de ,
+                        "También se escribe en katakana: イヌ."@es ,
+                        "S’écrit aussi en katakana : イヌ."@fr .
+
+<#neko>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "猫"@ja ;
+    solid-memo:frontNote "ねこ"@ja ;
+    solid-memo:back "cat"@en ,
+                    "katt"@sv ,
+                    "고양이"@ko ,
+                    "Katze"@de ,
+                    "gato"@es ,
+                    "chat"@fr ;
+    solid-memo:backNote "Also written in katakana: ネコ."@en ,
+                        "Skrivs också med katakana: ネコ."@sv ,
+                        "가타카나로 ネコ라고도 써요."@ko ,
+                        "Auch in Katakana geschrieben: ネコ."@de ,
+                        "También se escribe en katakana: ネコ."@es ,
+                        "S’écrit aussi en katakana : ネコ."@fr .
+
+<#machi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "町"@ja ;
+    solid-memo:frontNote "まち"@ja ;
+    solid-memo:back "town"@en ,
+                    "stad"@sv ,
+                    "마을, 동네"@ko ,
+                    "Stadt"@de ,
+                    "pueblo, ciudad pequeña"@es ,
+                    "ville"@fr ;
+    solid-memo:backNote "Also a town as a unit of local government, read まち or ちょう."@en ,
+                        "Även en köping som kommunal enhet, då läst まち eller ちょう."@sv ,
+                        "지방 행정 단위인 ‘정’이기도 하며, 이때는 まち 또는 ちょう로 읽어요."@ko ,
+                        "Auch eine Stadt als Gemeindeform, dann まち oder ちょう gelesen."@de ,
+                        "También un municipio de categoría «pueblo»; entonces se lee まち o ちょう."@es ,
+                        "Aussi le bourg, comme commune ; se lit alors まち ou ちょう."@fr .
+
+<#gakko>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "学校"@ja ;
+    solid-memo:frontNote "がっこう"@ja ;
+    solid-memo:back "school"@en ,
+                    "skola"@sv ,
+                    "학교"@ko ,
+                    "Schule"@de ,
+                    "escuela"@es ,
+                    "école"@fr .
+
+<#otoko>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "男"@ja ;
+    solid-memo:frontNote "おとこ"@ja ;
+    solid-memo:back "man"@en ,
+                    "man"@sv ,
+                    "남자"@ko ,
+                    "Mann"@de ,
+                    "hombre"@es ,
+                    "homme"@fr ;
+    solid-memo:backNote "A man is also 男の人 (おとこのひと)."@en ,
+                        "En man kallas också 男の人 (おとこのひと)."@sv ,
+                        "남자는 男の人(おとこのひと)라고도 해요."@ko ,
+                        "Ein Mann heißt auch 男の人 (おとこのひと)."@de ,
+                        "Un hombre también es 男の人 (おとこのひと)."@es ,
+                        "Un homme se dit aussi 男の人 (おとこのひと)."@fr .
+
+<#onna>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "女"@ja ;
+    solid-memo:frontNote "おんな"@ja ;
+    solid-memo:back "woman"@en ,
+                    "kvinna"@sv ,
+                    "여자"@ko ,
+                    "Frau"@de ,
+                    "mujer"@es ,
+                    "femme"@fr ;
+    solid-memo:backNote "A woman is also 女の人 (おんなのひと)."@en ,
+                        "En kvinna kallas också 女の人 (おんなのひと)."@sv ,
+                        "여자는 女の人(おんなのひと)라고도 해요."@ko ,
+                        "Eine Frau heißt auch 女の人 (おんなのひと)."@de ,
+                        "Una mujer también es 女の人 (おんなのひと)."@es ,
+                        "Une femme se dit aussi 女の人 (おんなのひと)."@fr .
+
+<#kodomo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "子供"@ja ;
+    solid-memo:frontNote "こども"@ja ;
+    solid-memo:back "child"@en ,
+                    "barn"@sv ,
+                    "아이"@ko ,
+                    "Kind"@de ,
+                    "niño, niña"@es ,
+                    "enfant"@fr ;
+    solid-memo:backNote "Also written 子ども."@en ,
+                        "Skrivs också 子ども."@sv ,
+                        "子ども라고도 써요."@ko ,
+                        "Auch 子ども geschrieben."@de ,
+                        "También se escribe 子ども."@es ,
+                        "S’écrit aussi 子ども."@fr .
+
+<#tomodachi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "友達"@ja ;
+    solid-memo:frontNote "ともだち"@ja ;
+    solid-memo:back "friend"@en ,
+                    "vän"@sv ,
+                    "친구"@ko ,
+                    "Freund, Freundin"@de ,
+                    "amigo, amiga"@es ,
+                    "ami, amie"@fr ;
+    solid-memo:backNote "Also written 友だち."@en ,
+                        "Skrivs också 友だち."@sv ,
+                        "友だち라고도 써요."@ko ,
+                        "Auch 友だち geschrieben."@de ,
+                        "También se escribe 友だち."@es ,
+                        "S’écrit aussi 友だち."@fr .
+
+<#okane>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "お金"@ja ;
+    solid-memo:frontNote "おかね"@ja ;
+    solid-memo:back "money"@en ,
+                    "pengar"@sv ,
+                    "돈"@ko ,
+                    "Geld"@de ,
+                    "dinero"@es ,
+                    "argent"@fr ;
+    solid-memo:backNote "Also 金 (かね), without the prefix お."@en ,
+                        "Även 金 (かね), utan prefixet お."@sv ,
+                        "접두사 お 없이 金(かね)라고도 해요."@ko ,
+                        "Auch 金 (かね), ohne die Vorsilbe お."@de ,
+                        "También 金 (かね), sin el prefijo お."@es ,
+                        "Aussi 金 (かね), sans le préfixe お."@fr .
+
+<#shigoto>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "仕事"@ja ;
+    solid-memo:frontNote "しごと"@ja ;
+    solid-memo:back "work, job"@en ,
+                    "arbete, jobb"@sv ,
+                    "일"@ko ,
+                    "Arbeit"@de ,
+                    "trabajo"@es ,
+                    "travail"@fr .
+
+<#te>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "手"@ja ;
+    solid-memo:frontNote "て"@ja ;
+    solid-memo:back "hand"@en ,
+                    "hand"@sv ,
+                    "손"@ko ,
+                    "Hand"@de ,
+                    "mano"@es ,
+                    "main"@fr .
+
+<#yoru>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "夜"@ja ;
+    solid-memo:frontNote "よる"@ja ;
+    solid-memo:back "night"@en ,
+                    "natt"@sv ,
+                    "밤"@ko ,
+                    "Nacht"@de ,
+                    "noche"@es ,
+                    "nuit"@fr ;
+    solid-memo:backNote "Also the evening."@en ,
+                        "Även kväll."@sv ,
+                        "저녁이라는 뜻도 있어요."@ko ,
+                        "Auch der Abend."@de ,
+                        "También la tarde-noche."@es ,
+                        "Aussi le soir."@fr .
+
+<#okii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "大きい"@ja ;
+    solid-memo:frontNote "おおきい"@ja ;
+    solid-memo:back "big, large"@en ,
+                    "stor"@sv ,
+                    "큰"@ko ,
+                    "groß"@de ,
+                    "grande"@es ,
+                    "grand"@fr .
+
+<#chiisai>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "小さい"@ja ;
+    solid-memo:frontNote "ちいさい"@ja ;
+    solid-memo:back "small, little"@en ,
+                    "liten"@sv ,
+                    "작은"@ko ,
+                    "klein"@de ,
+                    "pequeño"@es ,
+                    "petit"@fr .
+
+<#ii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "いい"@ja ;
+    solid-memo:back "good"@en ,
+                    "bra"@sv ,
+                    "좋은"@ko ,
+                    "gut"@de ,
+                    "bueno"@es ,
+                    "bon"@fr ;
+    solid-memo:backNote "Also 良い (よい)."@en ,
+                        "Även 良い (よい)."@sv ,
+                        "良い(よい)라고도 해요."@ko ,
+                        "Auch 良い (よい)."@de ,
+                        "También 良い (よい)."@es ,
+                        "Aussi 良い (よい)."@fr .
+
+<#warui>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "悪い"@ja ;
+    solid-memo:frontNote "わるい"@ja ;
+    solid-memo:back "bad"@en ,
+                    "dålig"@sv ,
+                    "나쁜"@ko ,
+                    "schlecht"@de ,
+                    "malo"@es ,
+                    "mauvais"@fr .
+
+<#atarashii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "新しい"@ja ;
+    solid-memo:frontNote "あたらしい"@ja ;
+    solid-memo:back "new"@en ,
+                    "ny"@sv ,
+                    "새로운"@ko ,
+                    "neu"@de ,
+                    "nuevo"@es ,
+                    "nouveau"@fr .
+
+<#furui>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "古い"@ja ;
+    solid-memo:frontNote "ふるい"@ja ;
+    solid-memo:back "old (of things)"@en ,
+                    "gammal (om saker)"@sv ,
+                    "오래된, 낡은"@ko ,
+                    "alt (von Dingen)"@de ,
+                    "viejo (de cosas)"@es ,
+                    "vieux (pour des choses)"@fr .
+
+<#samui>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "寒い"@ja ;
+    solid-memo:frontNote "さむい"@ja ;
+    solid-memo:back "cold"@en ,
+                    "kall"@sv ,
+                    "추운"@ko ,
+                    "kalt"@de ,
+                    "frío"@es ,
+                    "froid"@fr ;
+    solid-memo:backNote "Of the weather; cold to the touch is 冷たい (つめたい)."@en ,
+                        "Om vädret; kall att ta på är 冷たい (つめたい)."@sv ,
+                        "날씨에 써요. 만져서 차가운 것은 冷たい(つめたい)예요."@ko ,
+                        "Vom Wetter; kalt beim Anfassen ist 冷たい (つめたい)."@de ,
+                        "Del tiempo; frío al tacto es 冷たい (つめたい)."@es ,
+                        "Pour le temps qu’il fait ; froid au toucher se dit 冷たい (つめたい)."@fr .
+
+<#atsui>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "暑い"@ja ;
+    solid-memo:frontNote "あつい"@ja ;
+    solid-memo:back "hot"@en ,
+                    "varm, het"@sv ,
+                    "더운"@ko ,
+                    "heiß"@de ,
+                    "caluroso"@es ,
+                    "chaud"@fr ;
+    solid-memo:backNote "Of the weather; hot to the touch is 熱い, also read あつい."@en ,
+                        "Om vädret; het att ta på är 熱い, som också läses あつい."@sv ,
+                        "날씨에 써요. 만져서 뜨거운 것은 熱い라고 쓰고, 역시 あつい로 읽어요."@ko ,
+                        "Vom Wetter; heiß beim Anfassen ist 熱い, ebenfalls あつい gelesen."@de ,
+                        "Del tiempo; caliente al tacto es 熱い, que también se lee あつい."@es ,
+                        "Pour le temps qu’il fait ; chaud au toucher se dit 熱い, lu aussi あつい."@fr .
+
+<#aru>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ある"@ja ;
+    solid-memo:back "to be, to exist (of things)"@en ,
+                    "att finnas (om saker)"@sv ,
+                    "있다(사물)"@ko ,
+                    "da sein, vorhanden sein (Dinge)"@de ,
+                    "haber, estar (cosas)"@es ,
+                    "y avoir, être (choses)"@fr ;
+    solid-memo:backNote "Of things; for people and animals, いる."@en ,
+                        "Om saker; om människor och djur いる."@sv ,
+                        "사물에 써요. 사람과 동물에는 いる를 써요."@ko ,
+                        "Für Dinge; für Menschen und Tiere いる."@de ,
+                        "Para cosas; para personas y animales, いる."@es ,
+                        "Pour les choses ; pour les personnes et les animaux, いる."@fr .
+
+<#iru>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "いる"@ja ;
+    solid-memo:back "to be, to exist (of people and animals)"@en ,
+                    "att finnas, att vara (om människor och djur)"@sv ,
+                    "있다(사람·동물)"@ko ,
+                    "da sein (Menschen, Tiere)"@de ,
+                    "estar, haber (personas y animales)"@es ,
+                    "être, y avoir (personnes et animaux)"@fr ;
+    solid-memo:backNote "Of people and animals; for things, ある."@en ,
+                        "Om människor och djur; om saker ある."@sv ,
+                        "사람과 동물에 써요. 사물에는 ある를 써요."@ko ,
+                        "Für Menschen und Tiere; für Dinge ある."@de ,
+                        "Para personas y animales; para cosas, ある."@es ,
+                        "Pour les personnes et les animaux ; pour les choses, ある."@fr .
+
+<#iku>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "行く"@ja ;
+    solid-memo:frontNote "いく"@ja ;
+    solid-memo:back "to go"@en ,
+                    "att gå, att åka"@sv ,
+                    "가다"@ko ,
+                    "gehen, fahren"@de ,
+                    "ir"@es ,
+                    "aller"@fr ;
+    solid-memo:backNote "Also read ゆく."@en ,
+                        "Läses också ゆく."@sv ,
+                        "ゆく로도 읽어요."@ko ,
+                        "Auch ゆく gelesen."@de ,
+                        "También se lee ゆく."@es ,
+                        "Se lit aussi ゆく."@fr .
+
+<#kuru>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "来る"@ja ;
+    solid-memo:frontNote "くる"@ja ;
+    solid-memo:back "to come"@en ,
+                    "att komma"@sv ,
+                    "오다"@ko ,
+                    "kommen"@de ,
+                    "venir"@es ,
+                    "venir"@fr .
+
+<#suru>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "する"@ja ;
+    solid-memo:back "to do"@en ,
+                    "att göra"@sv ,
+                    "하다"@ko ,
+                    "tun, machen"@de ,
+                    "hacer"@es ,
+                    "faire"@fr .
+
+<#hanasu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "話す"@ja ;
+    solid-memo:frontNote "はなす"@ja ;
+    solid-memo:back "to speak, to talk"@en ,
+                    "att tala, att prata"@sv ,
+                    "이야기하다"@ko ,
+                    "sprechen"@de ,
+                    "hablar"@es ,
+                    "parler"@fr .
+
+<#taberu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "食べる"@ja ;
+    solid-memo:frontNote "たべる"@ja ;
+    solid-memo:back "to eat"@en ,
+                    "att äta"@sv ,
+                    "먹다"@ko ,
+                    "essen"@de ,
+                    "comer"@es ,
+                    "manger"@fr .
+
+<#nomu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "飲む"@ja ;
+    solid-memo:frontNote "のむ"@ja ;
+    solid-memo:back "to drink"@en ,
+                    "att dricka"@sv ,
+                    "마시다"@ko ,
+                    "trinken"@de ,
+                    "beber"@es ,
+                    "boire"@fr .
+
+<#sumu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "住む"@ja ;
+    solid-memo:frontNote "すむ"@ja ;
+    solid-memo:back "to live (reside)"@en ,
+                    "att bo"@sv ,
+                    "살다(거주하다)"@ko ,
+                    "wohnen"@de ,
+                    "vivir (residir)"@es ,
+                    "habiter"@fr .
+
+<#yomu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "読む"@ja ;
+    solid-memo:frontNote "よむ"@ja ;
+    solid-memo:back "to read"@en ,
+                    "att läsa"@sv ,
+                    "읽다"@ko ,
+                    "lesen"@de ,
+                    "leer"@es ,
+                    "lire"@fr .
+
+<#kaku>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "書く"@ja ;
+    solid-memo:frontNote "かく"@ja ;
+    solid-memo:back "to write"@en ,
+                    "att skriva"@sv ,
+                    "쓰다"@ko ,
+                    "schreiben"@de ,
+                    "escribir"@es ,
+                    "écrire"@fr .
+
+<#neru>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "寝る"@ja ;
+    solid-memo:frontNote "ねる"@ja ;
+    solid-memo:back "to sleep, to go to bed"@en ,
+                    "att sova, att gå och lägga sig"@sv ,
+                    "자다"@ko ,
+                    "schlafen"@de ,
+                    "dormir, acostarse"@es ,
+                    "dormir, se coucher"@fr ;
+    solid-memo:backNote "Also to lie down."@en ,
+                        "Även att lägga sig ner."@sv ,
+                        "눕다라는 뜻도 있어요."@ko ,
+                        "Auch sich hinlegen."@de ,
+                        "También tumbarse."@es ,
+                        "Aussi s’allonger."@fr .
+
+<#hataraku>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "働く"@ja ;
+    solid-memo:frontNote "はたらく"@ja ;
+    solid-memo:back "to work"@en ,
+                    "att arbeta"@sv ,
+                    "일하다"@ko ,
+                    "arbeiten"@de ,
+                    "trabajar"@es ,
+                    "travailler"@fr .
+
+<#kau>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "買う"@ja ;
+    solid-memo:frontNote "かう"@ja ;
+    solid-memo:back "to buy"@en ,
+                    "att köpa"@sv ,
+                    "사다"@ko ,
+                    "kaufen"@de ,
+                    "comprar"@es ,
+                    "acheter"@fr .
+
+<#miru>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "見る"@ja ;
+    solid-memo:frontNote "みる"@ja ;
+    solid-memo:back "to see, to look, to watch"@en ,
+                    "att se, att titta"@sv ,
+                    "보다"@ko ,
+                    "sehen, schauen"@de ,
+                    "ver, mirar"@es ,
+                    "voir, regarder"@fr .
+
+<#iu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "言う"@ja ;
+    solid-memo:frontNote "いう"@ja ;
+    solid-memo:back "to say"@en ,
+                    "att säga"@sv ,
+                    "말하다"@ko ,
+                    "sagen"@de ,
+                    "decir"@es ,
+                    "dire"@fr .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
