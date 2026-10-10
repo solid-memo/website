@@ -3838,9 +3838,10 @@ p[role="status"]:not(.loading) {
   vertical-align: top;
 }
 
-/* Study statistics: tiles of headline numbers, an activity calendar and
-   day bars in one hue, the app's green mixed into the surface by step,
-   so dark mode follows the tokens. */
+/* Study statistics: tiles of headline numbers, an activity calendar, bar
+   and line charts and a maturity bar in one hue, the app's green mixed
+   into the surface by step, so dark mode follows the tokens. Nothing
+   moves, so there is no motion to reduce. */
 .stat-tiles {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
@@ -4199,10 +4200,16 @@ p[role="status"]:not(.loading) {
   height: 4rem;
 }
 
-.bar-chart .baseline {
+.bar-chart .baseline,
+.line-chart .baseline,
+.line-chart .gridline {
   stroke: var(--border-strong);
   stroke-width: 1;
   vector-effect: non-scaling-stroke;
+}
+
+.line-chart .gridline {
+  stroke: var(--border);
 }
 
 .bar-chart .bar {
@@ -4213,8 +4220,213 @@ p[role="status"]:not(.loading) {
   fill: var(--primary-hover);
 }
 
-.bar-chart .bar-hit {
+.bar-chart .bar-hit,
+.line-chart .bar-hit {
   fill: transparent;
+}
+
+.chart-note {
+  margin: -0.25rem 0 0.5rem;
+  font-size: 0.85rem;
+}
+
+/* A line chart: the scale's top and 0 to the left, the first and last
+   points under it; the strokes keep their width however the plot is
+   stretched, and a point with no neighbour is a dot of its own. */
+.line-plot {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 0.4rem;
+  max-width: 32rem;
+}
+
+.line-plot svg {
+  display: block;
+  width: 100%;
+  height: 9rem;
+  overflow: visible;
+}
+
+.line-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: right;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.line-keys {
+  grid-column: 2;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.line-chart .line,
+.line-key .line {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.line-chart .line.lone,
+.line-chart .line-point,
+.line-chart .line-point.line-young {
+  fill: none;
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-dasharray: none;
+  vector-effect: non-scaling-stroke;
+}
+
+.line-chart .line-point {
+  stroke: var(--primary);
+}
+
+.line-chart .line-young,
+.line-key .line-young {
+  stroke: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken));
+  stroke-dasharray: 5 4;
+}
+
+.line-chart .crosshair {
+  stroke: var(--text-muted);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.line-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin: 0 0 0.5rem;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85rem;
+}
+
+.line-legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.line-key {
+  width: 1.5rem;
+  height: 0.5rem;
+}
+
+/* How mature the cards are: one bar of three steps of the green, new
+   the sunken surface with a border, a surface gap between the steps. */
+.maturity-bar {
+  display: flex;
+  gap: 2px;
+  max-width: 32rem;
+  height: 1rem;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.maturity-segment {
+  flex-basis: 0;
+  min-width: 2px;
+}
+
+.maturity-new {
+  background: var(--surface-sunken);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+}
+
+.maturity-young {
+  background: color-mix(in srgb, var(--primary) 50%, var(--surface-sunken));
+}
+
+.maturity-mature {
+  background: var(--primary);
+}
+
+.maturity-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin: 0.4rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85rem;
+}
+
+.maturity-legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.maturity-swatch {
+  display: inline-block;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 2px;
+}
+
+.maturity-decks {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.maturity-decks figure {
+  margin: 0.5rem 0 1rem;
+}
+
+.maturity-decks figcaption {
+  font-weight: 400;
+  overflow-wrap: anywhere;
+}
+
+/* Forced colours drop backgrounds and recolour strokes: the steps keep
+   apart as empty, hatched and filled, and the marks take the text colour. */
+@media (forced-colors: active) {
+  .maturity-bar,
+  .maturity-swatch {
+    forced-color-adjust: none;
+  }
+
+  .maturity-bar {
+    background: Canvas;
+    box-shadow: inset 0 0 0 1px CanvasText;
+  }
+
+  .maturity-new {
+    background: Canvas;
+    box-shadow: inset 0 0 0 1px CanvasText;
+  }
+
+  .maturity-young {
+    background: repeating-linear-gradient(45deg, CanvasText 0 2px, Canvas 2px 5px);
+  }
+
+  .maturity-mature {
+    background: CanvasText;
+  }
+
+  .bar-chart .bar,
+  .bar-chart .bar.pointed {
+    fill: CanvasText;
+  }
+
+  .line-chart .line,
+  .line-key .line,
+  .line-chart .line-point,
+  .line-chart .line-young,
+  .line-key .line-young {
+    stroke: CanvasText;
+  }
 }
 
 .chart-inspector {

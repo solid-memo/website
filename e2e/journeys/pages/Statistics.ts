@@ -4,7 +4,14 @@ import { Screen } from "./Screen.ts";
 /** A tile's key under statistics.* in the i18n files: what it counts. */
 export type StatisticsTile = "answers" | "studyDays" | "cards" | "currentStreak" | "longestStreak" | "young" | "mature";
 
-/** What the statistics should say; left out, a tile or the table is not checked. */
+/** How many prompts are new, young and mature: a bidirectional deck counts each card twice. */
+export interface Maturity {
+  new: number;
+  young: number;
+  mature: number;
+}
+
+/** What the statistics should say; left out, a tile, a chart or the table is not checked. */
 export interface ExpectedStatistics {
   answers?: number;
   studyDays?: number;
@@ -17,9 +24,16 @@ export interface ExpectedStatistics {
   mature?: { recalled: number; reviews: number } | null;
   /** Every row of "By deck", in any order; `lastStudied` "today" is today's study day. */
   decks?: { name: string; answers: number; lastStudied?: "today" }[];
+  /** The instance's prompts taken together, under "Where your cards stand", with the forecast beside them. */
+  maturity?: Maturity;
+  /** Every deck under "Maturity by deck", in any order. */
+  maturityByDeck?: ({ name: string } & Maturity)[];
 }
 
-/** "Statistics": the instance's answers in tiles, a calendar, and a table by deck. */
+/**
+ * "Statistics": the instance's answers in tiles, a calendar, charts of
+ * progress and a table by deck; then where the cards stand, read apart.
+ */
 export class Statistics extends Screen {
   private get main(): Locator {
     return this.page.getByRole("main");
@@ -62,6 +76,7 @@ export class Statistics extends Screen {
       for (const [key, count] of Object.entries(counts)) {
         if (count !== undefined) await this.expectValue(key as StatisticsTile, String(count));
       }
+      if (expected.answers !== undefined) await this.expectIntroduced();
       const streaks = { currentStreak: expected.currentStreak, longestStreak: expected.longestStreak } as const;
       for (const [key, days] of Object.entries(streaks)) {
         if (days !== undefined) await this.expectValue(key as StatisticsTile, this.t("statistics.dayCount", { count: days }));
@@ -71,7 +86,47 @@ export class Statistics extends Screen {
         if (recall !== undefined) await this.expectRecall(key, recall);
       }
       if (expected.decks !== undefined) await this.expectByDeck(expected.decks);
+      if (expected.maturity !== undefined) await this.expectMaturity(expected.maturity);
+      if (expected.maturityByDeck !== undefined) await this.expectMaturityByDeck(expected.maturityByDeck);
     });
+  }
+
+  /** A chart, named by its caption. */
+  private figure(caption: string): Locator {
+    return this.main.getByRole("figure", { name: caption, exact: true });
+  }
+
+  /** What a maturity bar's picture says of its counts: "0 new, 4 young and 0 mature." */
+  private maturityLabel(maturity: Maturity): string {
+    return this.t("statistics.maturityLabel", {
+      new: this.t("statistics.maturityNew", { count: maturity.new }),
+      young: this.t("statistics.maturityYoung", { count: maturity.young }),
+      mature: this.t("statistics.maturityMature", { count: maturity.mature }),
+    });
+  }
+
+  /** The chart of cards introduced over time, which comes with answers. */
+  private async expectIntroduced(): Promise<void> {
+    await expect(this.main.getByRole("img", { name: this.t("statistics.introducedLabel"), exact: true })).toBeVisible();
+  }
+
+  /**
+   * The overall maturity bar and the forecast of the next 30 days, which
+   * show before any answer too.
+   */
+  private async expectMaturity(maturity: Maturity): Promise<void> {
+    const bar = this.figure(this.t("statistics.maturity")).getByRole("img");
+    await expect(bar, this.t("statistics.maturity")).toHaveAccessibleName(this.maturityLabel(maturity));
+    await expect(this.main.getByRole("img", { name: this.t("statistics.forecastLabel", { count: 30 }), exact: true })).toBeVisible();
+  }
+
+  private async expectMaturityByDeck(decks: ({ name: string } & Maturity)[]): Promise<void> {
+    const list = this.main.getByRole("list").filter({ has: this.page.getByRole("figure") });
+    await expect(list.getByRole("listitem"), this.t("statistics.maturityByDeck")).toHaveCount(decks.length);
+    for (const deck of decks) {
+      const bar = list.getByRole("figure", { name: deck.name, exact: true }).getByRole("img");
+      await expect(bar, `${this.t("statistics.maturityByDeck")}: ${deck.name}`).toHaveAccessibleName(this.maturityLabel(deck));
+    }
   }
 
   private async expectValue(key: StatisticsTile, value: string): Promise<void> {

@@ -1336,7 +1336,60 @@
     "byDeck": "덱별",
     "deck": "덱",
     "lastStudied": "마지막 학습",
-    "removedDeck": "삭제된 덱"
+    "removedDeck": "삭제된 덱",
+    "pointAtMonth": "달을 가리키면 그달에 얼마나 기억했는지 볼 수 있어요. 아래 표를 열어도 돼요.",
+    "pointAtDayAhead": "날짜를 가리키면 그날 복습할 카드를 볼 수 있어요. 아래 표를 열어도 돼요.",
+    "progress": "진행 상황",
+    "introducedOverTime": "처음 학습한 카드 추이",
+    "introducedNote": "최근 12개월 동안 처음 본 카드의 누적 수예요. 양방향으로 학습하는 카드는 방향마다 한 번씩 세고, 삭제된 덱과 사용 중지된 카드도 포함해요.",
+    "introducedLabel": "처음 본 카드가 생길 때마다 날짜별로 올라가는 선.",
+    "introducedDetail": {
+      "one": "{date}: 지금까지 {count}장.",
+      "other": "{date}: 지금까지 {count}장."
+    },
+    "introducedTotal": "누적 카드",
+    "recallByMonth": "월별 기억률",
+    "recallLabel": "달마다 복습에서 기억한 비율(0~100%): 익히는 중인 카드는 점선, 익숙한 카드는 실선이에요.",
+    "recallNote": "달마다 복습에서 기억한 비율이에요. 익히는 중: 복습 간격 21일 미만, 익숙함: 21일 이상.",
+    "recallDetail": "{month}: 익히는 중인 카드 {young}, 익숙한 카드 {mature}.",
+    "recallShare": {
+      "one": "복습 {count}회 중 {percent}",
+      "other": "복습 {count}회 중 {percent}"
+    },
+    "noReviewsThen": "복습 없음",
+    "month": "월",
+    "youngShort": "익히는 중",
+    "matureShort": "익숙함",
+    "progressHeading": "카드 현황",
+    "progressLoading": "카드 현황을 불러오는 중…",
+    "progressUnavailable": "지금은 카드 현황을 읽을 수 없어요.",
+    "maturity": "카드 숙련도",
+    "maturityHint": "새 카드: 아직 복습하지 않음. 익히는 중: 복습 간격 21일 미만. 익숙함: 21일 이상. 양방향으로 학습하는 카드는 방향마다 한 번씩 세요.",
+    "maturityLabel": "{new}, {young}, {mature}.",
+    "maturityNew": {
+      "one": "새 카드 {count}장",
+      "other": "새 카드 {count}장"
+    },
+    "maturityYoung": {
+      "one": "익히는 중 {count}장",
+      "other": "익히는 중 {count}장"
+    },
+    "maturityMature": {
+      "one": "익숙함 {count}장",
+      "other": "익숙함 {count}장"
+    },
+    "maturityByDeck": "덱별 숙련도",
+    "forecast": "앞으로 {count}일 동안 복습할 카드",
+    "forecastLabel": "앞으로 {count}일 동안 날짜별로 복습할 카드 수. 오늘에는 밀린 복습이 모두 포함돼요.",
+    "forecastNote": "하루 복습 한도 없이 센 수예요. 한도 때문에 일부는 다음 날로 넘어갈 수 있어요.",
+    "dueDetail": "{date}: {reviews} 예정.",
+    "dueTodayDetail": "{date}, 오늘: {reviews} 예정, 밀린 복습 포함.",
+    "nothingDue": "앞으로 {count}일 동안 복습할 카드가 없어요.",
+    "reviewCount": {
+      "one": "복습 {count}회",
+      "other": "복습 {count}회"
+    },
+    "due": "예정"
   },
   "zoomableImage": {
     "enlarge": "그림 확대",

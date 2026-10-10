@@ -162,6 +162,7 @@ import {
   type Bin,
   type ForecastDay,
 } from "@solid-memo/domain/scheduleInsight";
+import { cardProgressOf, type CardProgress } from "@solid-memo/domain/cardProgress";
 import type { EstablishedSession, Session } from "@solid-memo/domain/session";
 import { applySm2, INITIAL_SM2_STATE } from "@solid-memo/domain/sm2";
 import type { Storage } from "@solid-memo/domain/storage";
@@ -770,6 +771,14 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
   /** The answers of one card of the deck (by its id), newest first, from the answer log. */
   cardAnswers(instanceUrl: string, deck: Deck, cardId: string): Promise<Answer[]>;
   /**
+   * How far along each deck's prompts are now (cardProgressOf), and the
+   * reviews of its next FORECAST_DAYS study days (forecastOf, capped by
+   * the deck's pace, else the preferences'): of every deck of the
+   * instance, or of the one given. Reads each deck's cards and review
+   * states, and keeps its schedule in the digest while at it.
+   */
+  getCardProgress(instanceUrl: string, now: Date, options?: { deck?: Deck }): Promise<CardProgressReport>;
+  /**
    * Start a course (a library deck whose release is a course, see
    * docs/courses.md): the instance's deck of it, a copy of the current
    * release with its title, description, authors and the rest, but no
@@ -857,6 +866,14 @@ export interface Course {
   /** The cards the learner has answered: those with review state in the deck. */
   answeredCardIds: string[];
   progress: CourseProgress;
+}
+
+/** How far along decks' prompts are (UseCases.getCardProgress). */
+export interface CardProgressReport {
+  /** The study day it is: the forecasts' first. */
+  today: string;
+  /** Each deck's prompts by stage, and the reviews of its next FORECAST_DAYS study days (forecastOf). */
+  decks: { deck: Deck; progress: CardProgress; forecast: ForecastDay[] }[];
 }
 
 /** The option a learner chose: right or wrong, and which wrong one (a distractor's id). */
@@ -1667,6 +1684,27 @@ export function createUseCases({
       }
       return next;
     });
+  }
+
+  /**
+   * A deck's cards and review states as they are now, with its schedule:
+   * the digest's while it is of these documents, else computed afresh and
+   * kept.
+   */
+  async function scheduleNow(instanceUrl: string, deck: Deck, at: Date, dayBoundaryHour: number) {
+    const [digest, cards, reviews] = await Promise.all([
+      digestOf(instanceUrl),
+      readNow(deckRepository.readCardsSince(deck, undefined)),
+      readNow(reviewStateRepository.readReviewStatesSince(deck, undefined)),
+    ]);
+    const versions = { cards: cards.version, reviews: reviews.version };
+    const today = studyDayOf(at, dayBoundaryHour);
+    let schedule = freshSchedule(digest.schedules[deck.url], versions, { direction: deck.direction, dayBoundaryHour, today });
+    if (schedule === null) {
+      schedule = scheduleOf({ cards: cards.value, direction: deck.direction, reviews: reviews.value, dayBoundaryHour, now: at });
+      recordSchedule(instanceUrl, deck, cards, reviews, schedule);
+    }
+    return { cards, reviews, schedule };
   }
 
   async function checkInstance(instanceUrl: string): Promise<ValidationReport> {
@@ -2764,25 +2802,10 @@ export function createUseCases({
     loadAnswerLog,
     async deckInsight(instanceUrl, deck, at, prefs) {
       const today = studyDayOf(at, prefs.dayBoundaryHour);
-      const [digest, cards, reviews, answers] = await Promise.all([
-        digestOf(instanceUrl),
-        readNow(deckRepository.readCardsSince(deck, undefined)),
-        readNow(reviewStateRepository.readReviewStatesSince(deck, undefined)),
+      const [{ cards, reviews, schedule }, answers] = await Promise.all([
+        scheduleNow(instanceUrl, deck, at, prefs.dayBoundaryHour),
         loadAnswerLog(instanceUrl),
       ]);
-      const versions = { cards: cards.version, reviews: reviews.version };
-      const studied = { direction: deck.direction, dayBoundaryHour: prefs.dayBoundaryHour, today };
-      let schedule = freshSchedule(digest.schedules[deck.url], versions, studied);
-      if (schedule === null) {
-        schedule = scheduleOf({
-          cards: cards.value,
-          direction: deck.direction,
-          reviews: reviews.value,
-          dayBoundaryHour: prefs.dayBoundaryHour,
-          now: at,
-        });
-        recordSchedule(instanceUrl, deck, cards, reviews, schedule);
-      }
       const { maxReviewsPerDay } = deckPreferences(prefs, deck);
       const states = scheduledStates(cards.value, deck.direction, reviews.value);
       const lapses = lapseIndex(deckAnswers(answers, deck));
@@ -2800,6 +2823,25 @@ export function createUseCases({
           return card === undefined ? [] : [{ card, lapses }];
         }),
       };
+    },
+    async getCardProgress(instanceUrl, at, { deck } = {}) {
+      const [prefs, decks] = await Promise.all([
+        getPreferences(instanceUrl),
+        deck === undefined ? deckRepository.listDecks(instanceUrl) : [deck],
+      ]);
+      const today = studyDayOf(at, prefs.dayBoundaryHour);
+      const progress = await Promise.all(
+        decks.map(async (one) => {
+          const { cards, reviews, schedule } = await scheduleNow(instanceUrl, one, at, prefs.dayBoundaryHour);
+          const { maxReviewsPerDay } = deckPreferences(prefs, one);
+          return {
+            deck: one,
+            progress: cardProgressOf({ cards: cards.value, direction: one.direction, reviews: reviews.value }),
+            forecast: forecastOf(schedule, { today, days: FORECAST_DAYS, maxReviewsPerDay }),
+          };
+        }),
+      );
+      return { today, decks: progress };
     },
     async cardAnswers(instanceUrl, deck, cardId) {
       return cardAnswers(deckAnswers(await loadAnswerLog(instanceUrl), deck), `${deck.cardsDocumentUrl}#${cardId}`);

@@ -123,6 +123,7 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
       lapses: { lapses: new Map(), since: null },
       leeches: [],
     })),
+    getCardProgress: vi.fn(async () => ({ today: "2026-09-21", decks: [] })),
     startCourse: vi.fn(async () => {
       throw new Error("startCourse fake not configured");
     }),

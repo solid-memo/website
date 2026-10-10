@@ -1,6 +1,15 @@
 import { describe, expect, it } from "vitest";
 import type { Answer } from "./answer";
-import { dailyActivity, retentionOf, shiftStudyDay, statisticsOf, streaksOf, todayOf } from "./statistics";
+import {
+  dailyActivity,
+  introducedOverTime,
+  monthlyRetention,
+  retentionOf,
+  shiftStudyDay,
+  statisticsOf,
+  streaksOf,
+  todayOf,
+} from "./statistics";
 
 const DECK = "https://pod.example/i/catalog.ttl#deck-";
 let n = 0;
@@ -55,6 +64,27 @@ describe("retentionOf", () => {
   });
 });
 
+describe("introducedOverTime", () => {
+  it("adds up the prompts introduced, day by day", () => {
+    const days = dailyActivity([answer("2026-10-01", 4), answer("2026-10-01", 4), answer("2026-10-02", 4, 1), answer("2026-10-05", 3)]);
+    expect(introducedOverTime(days)).toEqual([
+      { studyDay: "2026-10-01", introduced: 2 },
+      { studyDay: "2026-10-02", introduced: 2 },
+      { studyDay: "2026-10-05", introduced: 3 },
+    ]);
+    expect(introducedOverTime([])).toEqual([]);
+  });
+});
+
+describe("monthlyRetention", () => {
+  it("counts each month's reviews apart, oldest first, a month of first answers only with none", () => {
+    expect(monthlyRetention([answer("2026-10-02", 1, 3), answer("2026-08-30", 4), answer("2026-10-01", 5, 30), answer("2026-10-03", 4, 2)])).toEqual([
+      { month: "2026-08", retention: { young: { reviews: 0, recalled: 0 }, mature: { reviews: 0, recalled: 0 } } },
+      { month: "2026-10", retention: { young: { reviews: 2, recalled: 1 }, mature: { reviews: 1, recalled: 1 } } },
+    ]);
+  });
+});
+
 describe("statisticsOf", () => {
   it("counts a card once, though an upgrade of its deck moved it into a new document", () => {
     const before = answer("2026-10-01", 4, undefined, "1", "se");
@@ -75,6 +105,7 @@ describe("statisticsOf", () => {
     expect(statistics.streaks).toEqual({ current: 2, longest: 2 });
     expect(statistics.days.map((day) => day.studyDay)).toEqual(["2026-10-01", "2026-10-02"]);
     expect(statistics.retention.young).toEqual({ reviews: 1, recalled: 1 });
+    expect(statistics.months).toEqual([{ month: "2026-10", retention: statistics.retention }]);
     expect(statistics.decks.map((deck) => [deck.deckUrl, deck.answers, deck.lastStudyDay])).toEqual([
       [`${DECK}1`, 2, "2026-10-02"],
       [`${DECK}2`, 1, "2026-10-02"],

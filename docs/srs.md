@@ -212,6 +212,45 @@ Rows load independently and share the `["studyQueue", deckUrl]` cache entry
 with the deck page. Concurrent reads of the instance's preferences are
 shared (one request for all rows) but never cached beyond the request.
 
+## Where cards stand
+
+The statistics page, and each deck's page for that deck, show how far
+along the cards are now and what falls due next
+([cardProgress.ts](../packages/domain/src/cardProgress.ts)). Both come
+from the decks' cards and review states, read afresh each time they are
+shown (`getCardProgress`, two GETs a deck), not from the answer log.
+
+- **New, young and mature.** A prompt with no review state is *new*;
+  one whose `intervalDays` is under 21 (`MATURE_INTERVAL_DAYS`) is
+  *young*, and one at 21 days or more is *mature*. The recall tiles and
+  the recall-by-month chart draw the same line, but on the interval
+  *before* each review (the answer's prior interval), so the review
+  that makes a prompt mature still counts as a young one.
+- **Prompts, not cards.** The counts are of prompts in the deck's
+  direction, as the queue's are (`cardProgressOf` counts
+  `promptsOf(activeCards(cards), direction)` and the states
+  `scheduledStates` keeps of them), so a bidirectional deck counts each
+  card twice, and the page says so. Retired cards, and states of a
+  direction the deck is not studied in, count for nothing.
+- **The forecast** is the Studio's (`forecastOf`,
+  [scheduleInsight.ts](../packages/domain/src/scheduleInsight.ts)),
+  worked out for each deck from its schedule (the digest's while it is
+  of the documents just read, else `scheduleOf` afresh, then kept in the
+  digest), then added up
+  day by day across the decks (`mergeForecasts`): the reviews due on
+  each of the next 30 study days, today first. Today's bar also holds
+  every prompt already overdue. The bars show what falls due, not what
+  the deck's `maxReviewsPerDay` lets through, so a day over the limit
+  is shown in full, though study would move the rest to a later day, as
+  a note with the chart says.
+- **Introduced is not learned.** "Cards introduced over time" is a
+  running total of first answers in the
+  [answer log](data-model.md#the-answer-log), over the months it reads
+  (the last 12). It counts prompts of removed decks and retired cards
+  too, and none introduced before those months, so it need not match
+  the new, young and mature counts, which say only where today's
+  prompts stand.
+
 ## Resetting the day
 
 The deck page offers **Reset today's study** once something has been

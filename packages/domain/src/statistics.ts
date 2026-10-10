@@ -1,4 +1,4 @@
-import { isRecalled, type Answer } from "./answer";
+import { isRecalled, monthOfStudyDay, type Answer } from "./answer";
 import { fragmentIdOf } from "./subjectUrl";
 
 /**
@@ -34,6 +34,20 @@ export interface Retention {
   mature: Recall;
 }
 
+/** How well the reviews of one study month were remembered; a month of first answers only has none. */
+export interface MonthRetention {
+  /** "YYYY-MM". */
+  month: string;
+  retention: Retention;
+}
+
+/** The prompts introduced up to and including one study day. */
+export interface IntroducedTotal {
+  /** "YYYY-MM-DD". */
+  studyDay: string;
+  introduced: number;
+}
+
 export interface Streaks {
   /** Study days in a row up to today, or up to yesterday while today is not studied yet. */
   current: number;
@@ -55,6 +69,8 @@ export interface Statistics {
   days: DayActivity[];
   streaks: Streaks;
   retention: Retention;
+  /** Every study month with answers, oldest first, with how well its reviews were remembered. */
+  months: MonthRetention[];
   /** Every deck answered in, most answers first. */
   decks: DeckStatistics[];
 }
@@ -109,6 +125,31 @@ export function retentionOf(answers: readonly Answer[]): Retention {
   return retention;
 }
 
+/**
+ * The running total of prompts introduced, by study day, of the days
+ * given (oldest first): first answers within the months read, those of
+ * removed decks and retired cards included.
+ */
+export function introducedOverTime(days: readonly DayActivity[]): IntroducedTotal[] {
+  let introduced = 0;
+  return days.map((day) => {
+    introduced += day.introduced;
+    return { studyDay: day.studyDay, introduced };
+  });
+}
+
+/** How well reviews were remembered, month by month, oldest first; every month with answers has an entry. */
+export function monthlyRetention(answers: readonly Answer[]): MonthRetention[] {
+  const byMonth = new Map<string, Answer[]>();
+  for (const answer of answers) {
+    const month = monthOfStudyDay(answer.studyDay);
+    byMonth.set(month, [...(byMonth.get(month) ?? []), answer]);
+  }
+  return [...byMonth]
+    .map(([month, monthAnswers]) => ({ month, retention: retentionOf(monthAnswers) }))
+    .sort((a, b) => a.month.localeCompare(b.month));
+}
+
 /** Everything the statistics screens show, of the answers given (in any order) up to `today`. */
 export function statisticsOf(answers: readonly Answer[], today: string): Statistics {
   const days = dailyActivity(answers);
@@ -128,6 +169,7 @@ export function statisticsOf(answers: readonly Answer[], today: string): Statist
       today,
     ),
     retention: retentionOf(answers),
+    months: monthlyRetention(answers),
     decks: [...byDeck]
       .map(([deckUrl, deckAnswers]) => ({
         deckUrl,
