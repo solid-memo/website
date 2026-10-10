@@ -36,6 +36,38 @@ describe("parseMarkdown", () => {
     ]);
   });
 
+  it("reads emphasis that closes on punctuation next to Hangul, Japanese or Chinese", () => {
+    expect(parseMarkdown("**스크립트(script)**라고 한다 *‘사과’*를 먹다")).toEqual([
+      paragraph(
+        { type: "strong", children: [text("스크립트(script)")] },
+        text("라고 한다 "),
+        { type: "emphasis", children: [text("‘사과’")] },
+        text("를 먹다"),
+      ),
+    ]);
+    expect(parseMarkdown("**強調。**この文")).toEqual([
+      paragraph({ type: "strong", children: [text("強調。")] }, text("この文")),
+    ]);
+    // Underscores inside a word stay as they are, as in English.
+    expect(parseMarkdown("__사람__들")).toEqual([paragraph(text("__사람__들"))]);
+  });
+
+  it("reads emphasis between Latin letters and punctuation as CommonMark does", () => {
+    expect(parseMarkdown('foo*bar*baz a**"b"**c *(a)*b __foo__bar')).toEqual([
+      paragraph(
+        text("foo"),
+        { type: "emphasis", children: [text("bar")] },
+        text('baz a**"b"**c *(a)*b __foo__bar'),
+      ),
+    ]);
+  });
+
+  it("counts an emoji next to a delimiter as punctuation, as CommonMark does", () => {
+    expect(parseMarkdown("*😀*a")).toEqual([paragraph(text("*😀*a"))]);
+    expect(parseMarkdown("a**😀**b")).toEqual([paragraph(text("a**😀**b"))]);
+    expect(parseMarkdown("*😀*")).toEqual([paragraph({ type: "emphasis", children: [text("😀")] })]);
+  });
+
   it("reads nothing from empty text", () => {
     expect(parseMarkdown("")).toEqual([]);
   });
@@ -394,6 +426,8 @@ describe("pathological input", () => {
     ["emphasis openers", fill("*a ")],
     ["mixed delimiters", fill("*_")],
     ["strong closers", fill("a**")],
+    ["emphasis delimiters among Hangul at the cap", fill("가", "**(가)**나".repeat(MAX_DELIMITERS / 4))],
+    ["strong closers after punctuation before Hangul", fill("가)**나")],
     ["underscores in words", fill("snake_case ")],
     ["backtick runs", fill("`a``")],
     ["entities", fill("&aaaaaaaa; ")],

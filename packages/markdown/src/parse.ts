@@ -1,11 +1,13 @@
 import type { Nodes, Parents, PhrasingContent, Root, RootContent, Table, TableCell } from "mdast";
 import { fromMarkdown } from "mdast-util-from-markdown";
 import { gfmTableFromMarkdown } from "mdast-util-gfm-table";
+import { cjkFriendlyExtension } from "micromark-extension-cjk-friendly";
 import { gfmTable } from "micromark-extension-gfm-table";
 
 /**
  * Markdown as Solid Memo reads it (docs/markdown.md): CommonMark 0.31.2
- * with GitHub Flavored Markdown pipe tables, `sm:markdown`. This is the
+ * with GitHub Flavored Markdown pipe tables and CJK-friendly emphasis
+ * (`**스크립트(script)**라고` is strong), `sm:markdown`. This is the
  * one module that touches the parser; everything else sees the tree
  * below, already folded to what the app shows: headings as bold
  * paragraphs, raw HTML as its source text, pictures as their alt text,
@@ -127,7 +129,10 @@ export function parseMarkdown(text: string): MdBlock[] | null {
 /** The parser's tree of a text, or null past the limits parseMarkdown names. */
 function read(text: string): Root | null {
   if (text.length > MAX_CHARS || tooCostly(text)) return null;
-  return fromMarkdown(text, { extensions: [gfmTable()], mdastExtensions: [gfmTableFromMarkdown()] });
+  return fromMarkdown(text, {
+    extensions: [gfmTable(), cjkFriendlyExtension()],
+    mdastExtensions: [gfmTableFromMarkdown()],
+  });
 }
 
 /**
