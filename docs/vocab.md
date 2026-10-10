@@ -69,7 +69,10 @@ string, so other applications can look up what it means:
   `packages/vocab/src/concepts.generated.ts` (`STUDY_DIRECTIONS`,
   `INVALID_DATA_POLICIES`, `ANSWER_MODES`, `TEXT_FORMATS`, `SCHEDULERS`, `TOPICS`), which the app lists and labels
   from, in the language the user reads; [concepts.ts](../packages/domain/src/concepts.ts) looks concepts up by
-  IRI or notation.
+  IRI or notation. It renders the EU languages `external.ttl` describes
+  too (`EU_LANGUAGES`: each entry's IRI, code and English label), which
+  the Studio offers as a release's languages
+  ([studio.md](studio.md#the-releases-metadata-and-provenance)).
 - Concepts are only ever added. One that should go is deprecated
   (`owl:deprecated`), never removed: decks point at it.
 - The topics scheme is versioned the way `v1` is, but without a version

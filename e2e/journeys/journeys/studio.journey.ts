@@ -341,7 +341,27 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     );
   });
 
-  await app.step("34 · Go back to Solid Memo, still logged in", async () => {
+  await app.step("34 · Say how the course was made: its author, an attribution, its licence, a source and an AI check; follow the source's warning and fix it", async () => {
+    const source = "https://example.org/pods-explained";
+    const undescribed = app.t("studio.problem.sourceUndescribed", { missing: app.t("studio.release.detail.creator") });
+    await app.chrome.breadcrumb("breadcrumbs.decks");
+    await app.studio.openDrafts(renamed);
+    await app.draftEditor.openDraft(authored);
+    await app.draftEditor.openRelease(authored);
+    await app.draftEditor.addAuthor("Journey Author");
+    await app.draftEditor.attributeWithAi("Journey Author");
+    await app.draftEditor.chooseReleaseLicence("CC0 1.0");
+    await app.draftEditor.addSource(source, "Pods explained", "The page's footer: CC0.");
+    await app.draftEditor.recordAiCheck("Facts", "every question", "none wrong");
+    await app.draftEditor.openCheck(authored);
+    await app.draftEditor.expectProblem(source, undescribed);
+    await app.draftEditor.followProblem(source, undescribed);
+    await app.draftEditor.describeSource(source, "Pods explained", "Example authors");
+    await app.draftEditor.openCheck(authored);
+    await app.draftEditor.expectNoProblem(source, undescribed);
+  });
+
+  await app.step("35 · Go back to Solid Memo, still logged in", async () => {
     await app.studio.backToApp();
     await app.chrome.expectLoggedInAs(account.webId);
     await app.decks.expectDeck(alpha);

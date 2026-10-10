@@ -1,6 +1,12 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { checkEveryConceptInAScheme, parseConceptSchemes, renderConcepts } from "./concepts.ts";
+import {
+  checkEveryConceptInAScheme,
+  parseConceptSchemes,
+  parseReferenceConcepts,
+  renderConcepts,
+  type ReferenceScheme,
+} from "./concepts.ts";
 import { readTurtleTree, type TurtleFile } from "@solid-memo/turtle/rdf";
 import { VOCAB_BASE } from "../src/ns.ts";
 import { NS_ROOT } from "./root.ts";
@@ -27,6 +33,17 @@ const CONCEPT_SOURCES = [
   { path: "vocab/v1.ttl", baseIri: VOCAB_IRI },
   { path: "vocab/topics.ttl", baseIri: `${VOCAB_BASE}topics.ttl` },
 ] as const;
+
+/** The reference data the app offers to choose from (ns/vocab/external.ttl), with the constant each is rendered as. */
+const REFERENCE_SOURCE = { path: "vocab/external.ttl", baseIri: `${VOCAB_BASE}external.ttl` } as const;
+const REFERENCE_SCHEMES: readonly ReferenceScheme[] = [
+  {
+    name: "EU_LANGUAGES",
+    iri: "http://publications.europa.eu/resource/authority/language",
+    definition:
+      "The EU's languages (its authority table) a release may state it is in (dcterms:language): those the reference data describes, so a release's profile check finds them.",
+  },
+];
 
 export interface GenerateIo {
   /** A file under the package, such as a committed output. */
@@ -63,13 +80,19 @@ export async function render(io: GenerateIo): Promise<Record<string, string>> {
     parseConceptSchemes(turtle, baseIri),
   );
   checkEveryConceptInAScheme(conceptDocuments, schemes);
+  const external = await io.readNs(REFERENCE_SOURCE.path);
+  const references = REFERENCE_SCHEMES.map((scheme) => ({
+    scheme,
+    concepts: parseReferenceConcepts(external, REFERENCE_SOURCE.baseIri, scheme.iri),
+  }));
   return {
     [OUTPUTS.vocab]: renderVocabConstants(vocab),
     [OUTPUTS.types]: renderDomainTypes(shapes),
     [OUTPUTS.descriptors]: renderDescriptors(shapes),
     [OUTPUTS.concepts]: renderConcepts(
-      CONCEPT_SOURCES.map((source) => `ns/${source.path}`),
+      [...CONCEPT_SOURCES, REFERENCE_SOURCE].map((source) => `ns/${source.path}`),
       schemes,
+      references,
     ),
   };
 }

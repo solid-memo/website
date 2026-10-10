@@ -47,6 +47,11 @@ const FIELDS: Readonly<Record<string, string>> = {
   [SM.distractorText]: "distractorText",
   [SM.distractorNote]: "distractorNote",
   [SM.textFormat]: "textFormat",
+  ["http://www.w3.org/ns/adms#versionNotes"]: "versionNotes",
+  [`${DCTERMS}language`]: "language",
+  [`${DCTERMS}creator`]: "creator",
+  ["http://www.w3.org/2000/01/rdf-schema#comment"]: "comment",
+  ["http://www.w3.org/ns/prov#wasDerivedFrom"]: "wasDerivedFrom",
 };
 
 /** A field by its name in the reader's language; one without a name by its IRI. */
@@ -171,6 +176,12 @@ export function problemMessage(problem: ReleaseProblem, draft: ReleaseDraft, i18
       return t(key, { theme: problem.params.theme.slice(problem.params.theme.lastIndexOf("/") + 1) });
     case "required":
       return t(key, { field });
+    case "sourceUndescribed":
+      return t(key, { missing: problem.params.missing.map((detail) => t(`studio.release.detail.${detail}`)).join(", ") });
+    case "usedNotDerived":
+      return t(key);
+    case "countDisagrees":
+      return t(key, { stated: problem.params.stated, counted: problem.params.counted, what: t(`studio.release.counted.${problem.params.what}`) });
     case "previousUnread":
       return t(key, { previous: `<${problem.params.previous}>` });
     case "libraryUnread":

@@ -15,6 +15,7 @@ const TURTLE = `@base <${URL}> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix dcat: <http://www.w3.org/ns/dcat#> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix schema: <https://schema.org/> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 
@@ -26,7 +27,11 @@ const TURTLE = `@base <${URL}> .
     prov:wasGeneratedBy <#compilation> ;
     prov:wasDerivedFrom <https://solidproject.org/> .
 
-<#compilation> a prov:Activity .
+<#compilation> a prov:Activity ;
+    prov:used <https://solidproject.org/> ;
+    rdfs:comment "Compiled by Ann."@en .
+
+<https://solidproject.org/> dcterms:title "Solid" .
 <#review> a prov:Activity .
 
 <#q-1> a solid-memo:Card ;
@@ -73,6 +78,8 @@ describe("quadsToReleaseModel", () => {
       { iri: `${URL}#compilation`, generating: true },
       { iri: `${URL}#review`, generating: false },
     ]);
+    expect(model.making).toEqual([{ iri: `${URL}#compilation`, used: ["https://solidproject.org/"], comments: [en("Compiled by Ann.")], carried: false }]);
+    expect(model.sourceDetails).toEqual([{ iri: "https://solidproject.org/", title: [plain("Solid")], creator: [], licence: [], comments: [] }]);
   });
 
   it("reads its cards, chapters, steps and distractors, retired when they state owl:deprecated true", () => {

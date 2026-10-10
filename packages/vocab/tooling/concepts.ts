@@ -109,8 +109,43 @@ export function checkEveryConceptInAScheme(
   }
 }
 
-/** The domain module: one constant per scheme. */
-export function renderConcepts(sources: readonly string[], schemes: readonly SchemeModel[]): string {
+/**
+ * An entry of an EU authority table that Solid Memo data may point at,
+ * as ns/vocab/external.ttl extracts it: its IRI, its code (the last
+ * segment of its IRI, "ENG") and its English label. The table is the
+ * authority for its labels, so the extract has no other language.
+ */
+export interface ReferenceModel {
+  iri: string;
+  code: string;
+  label: string;
+}
+
+/** The reference schemes rendered, each as a constant: its name and the scheme's IRI. */
+export interface ReferenceScheme {
+  name: string;
+  iri: string;
+  definition: string;
+}
+
+/** The concepts of a reference scheme (`scheme`, its IRI) in one Turtle document, in document order. */
+export function parseReferenceConcepts(turtle: string, baseIri: string, scheme: string): ReferenceModel[] {
+  const quads = parseTurtle(turtle, baseIri);
+  return subjectsOfType(quads, `${SKOS}Concept`)
+    .filter((concept) => objectsOf(quads, concept, `${SKOS}inScheme`).some((s) => s.value === scheme))
+    .map((iri) => {
+      const label = objectsOf(quads, iri, `${SKOS}prefLabel`).find((o) => o.termType === "Literal" && o.language === "en");
+      if (label === undefined) throw new Error(`${baseIri}: <${iri}> has no English prefLabel.`);
+      return { iri, code: iri.slice(iri.lastIndexOf("/") + 1), label: label.value };
+    });
+}
+
+/** The domain module: one constant per scheme, then one per reference scheme. */
+export function renderConcepts(
+  sources: readonly string[],
+  schemes: readonly SchemeModel[],
+  references: readonly { scheme: ReferenceScheme; concepts: readonly ReferenceModel[] }[] = [],
+): string {
   const lines = [
     GENERATED_HEADER(sources.join(", ")),
     "/** Text by language tag (lower case), one of them English. */",
@@ -155,6 +190,25 @@ export function renderConcepts(sources: readonly string[], schemes: readonly Sch
       lines.push("    },");
     }
     lines.push("  ],", "} as const satisfies ConceptScheme;", "");
+  }
+  if (references.length > 0) {
+    lines.push(
+      "/** An entry of an EU authority table Solid Memo data may point at (ns/vocab/external.ttl): its IRI, its code and its English label. */",
+      "export interface ReferenceConcept {",
+      "  readonly iri: string;",
+      "  readonly code: string;",
+      "  readonly label: string;",
+      "}",
+      "",
+    );
+  }
+  for (const { scheme, concepts } of references) {
+    lines.push(`/** ${scheme.definition} */`);
+    lines.push(`export const ${scheme.name}: readonly ReferenceConcept[] = [`);
+    for (const concept of concepts) {
+      lines.push(`  { iri: ${JSON.stringify(concept.iri)}, code: ${JSON.stringify(concept.code)}, label: ${JSON.stringify(concept.label)} },`);
+    }
+    lines.push("];", "");
   }
   return lines.join("\n");
 }

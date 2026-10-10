@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   checkEveryConceptInAScheme,
   parseConceptSchemes,
+  parseReferenceConcepts,
   renderConcepts,
 } from "./concepts.ts";
 
@@ -101,5 +102,47 @@ export const COLOURS = {
 } as const satisfies ConceptScheme;
 `,
     );
+  });
+});
+
+const TABLE = "http://publications.europa.eu/resource/authority/language";
+const EXTERNAL = `${HEAD}
+<${TABLE}> a skos:ConceptScheme ; dcterms:title "Language"@en .
+<${TABLE}/ENG> a skos:Concept ; skos:prefLabel "English"@en ; skos:inScheme <${TABLE}> .
+<${TABLE}/SWE> a skos:Concept ; skos:prefLabel "Svenska"@sv, "Swedish"@en ; skos:inScheme <${TABLE}> .
+<http://example.com/theme/EDUC> a skos:Concept ; skos:prefLabel "Education"@en ; skos:inScheme <http://example.com/theme> .
+`;
+
+describe("parseReferenceConcepts", () => {
+  it("reads a scheme's entries in document order, each with its code and English label", () => {
+    expect(parseReferenceConcepts(EXTERNAL, BASE, TABLE)).toEqual([
+      { iri: `${TABLE}/ENG`, code: "ENG", label: "English" },
+      { iri: `${TABLE}/SWE`, code: "SWE", label: "Swedish" },
+    ]);
+  });
+
+  it("requires an English label", () => {
+    expect(() => parseReferenceConcepts(`${HEAD}<${TABLE}/DEU> a skos:Concept ; skos:prefLabel "Deutsch"@de ; skos:inScheme <${TABLE}> .`, BASE, TABLE)).toThrow(
+      `<${TABLE}/DEU> has no English prefLabel.`,
+    );
+  });
+});
+
+describe("renderConcepts with reference schemes", () => {
+  it("renders each as a list of its entries", () => {
+    const rendered = renderConcepts([], [], [
+      { scheme: { name: "EU_LANGUAGES", iri: TABLE, definition: "Languages." }, concepts: parseReferenceConcepts(EXTERNAL, BASE, TABLE) },
+    ]);
+    expect(rendered).toContain("export interface ReferenceConcept {");
+    expect(rendered).toContain(`/** Languages. */
+export const EU_LANGUAGES: readonly ReferenceConcept[] = [
+  { iri: "${TABLE}/ENG", code: "ENG", label: "English" },
+  { iri: "${TABLE}/SWE", code: "SWE", label: "Swedish" },
+];
+`);
+  });
+
+  it("renders no reference type without reference schemes", () => {
+    expect(renderConcepts([], [])).not.toContain("ReferenceConcept");
   });
 });

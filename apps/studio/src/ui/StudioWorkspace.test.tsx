@@ -628,6 +628,26 @@ describe("StudioWorkspace", () => {
       expect(vi.mocked(useCases.checkReleaseDraft).mock.calls.filter(([, , , options]) => options?.shapes === true)).toHaveLength(2);
     });
 
+    it("edits the release's metadata and provenance from its overview, with its trail, writing each change", async () => {
+      window.history.replaceState(null, "", studioRouteToHash({ screen: "draft", draftUrl: DRAFT_URL }));
+      const useCases = draftUseCases();
+      renderWorkspace(useCases);
+      fireEvent.click(await screen.findByRole("link", { name: "Release metadata and provenance" }));
+      expect(await screen.findByRole("heading", { level: 2, name: "Release metadata and provenance" })).toBeInTheDocument();
+      expect(parseStudioHash(window.location.hash)).toEqual({ screen: "release", draftUrl: DRAFT_URL });
+      expect(trailOf()).toEqual(["Instances", "Decks", "Drafts", "Solid", "Release"]);
+      // Nothing is changed until the instance's data check is done.
+      await waitFor(() => expect(screen.getByRole("combobox", { name: "Licence" })).toBeEnabled());
+      choose("Licence", "https://creativecommons.org/publicdomain/zero/1.0/");
+      await waitFor(() => expect(useCases.editReleaseDraft).toHaveBeenCalledWith(DRAFT_URL, [{ kind: "setLicense", license: "https://creativecommons.org/publicdomain/zero/1.0/" }]));
+    });
+
+    it("opens the release screen at the part a problem is in", async () => {
+      window.history.replaceState(null, "", studioRouteToHash({ screen: "release", draftUrl: DRAFT_URL, field: "sources" }));
+      renderWorkspace(draftUseCases());
+      expect(await screen.findByRole("heading", { level: 3, name: "Sources" })).toHaveAttribute("data-arrival", "true");
+    });
+
     it("previews the draft's listing, with its trail", async () => {
       window.history.replaceState(null, "", studioRouteToHash({ screen: "check", draftUrl: DRAFT_URL }));
       renderWorkspace(draftUseCases());

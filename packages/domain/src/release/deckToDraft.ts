@@ -3,7 +3,7 @@ import { SM } from "@solid-memo/vocab/vocab.generated";
 import { agentToRecord, agentUrlOf } from "../agentRecord.ts";
 import { cardToRecord, distractorToRecord } from "../deckRecord.ts";
 import type { Card, Deck, DeckDirection } from "../deck.ts";
-import { blankDraft, type DraftNode, type ReleaseDraft } from "./releaseDraft.ts";
+import { blankDraft, licenseType, type DraftNode, type ReleaseDraft } from "./releaseDraft.ts";
 
 const DIRECTIONS: Record<DeckDirection, DraftDeckV1["studyDirection"]> = {
   "front-to-back": SM.frontToBack as DraftDeckV1["studyDirection"],
@@ -16,7 +16,8 @@ const DIRECTIONS: Record<DeckDirection, DraftDeckV1["studyDirection"]> = {
  * (docs/studio.md, Drafts): what a release says and the deck does too,
  * nothing that is the learner's own.
  *
- * - **Kept:** its title, description, licence, direction, themes and
+ * - **Kept:** its title, description, licence (typed a
+ *   dcterms:LicenseDocument, as a release's is), direction, themes and
  *   keywords, each in the languages it states (a release's text is
  *   language-tagged; untagged text from an old format is left out), and
  *   every card, retired ones too, with
@@ -57,6 +58,8 @@ export function deckToDraft(deck: Deck, cards: readonly Card[], url: string, now
     distractors: cards.flatMap((card) =>
       (card.distractors ?? []).map((distractor): DraftNode<DistractorV1> => ({ id: distractor.id, data: distractorToRecord(distractor) })),
     ),
+    // Its licence, typed as a release's is (setLicense).
+    triples: deck.license === undefined ? [] : [licenseType(deck.license)],
   };
   return deck.sourceUrl === undefined ? { draft } : { draft, basedOn: deck.sourceUrl };
 }

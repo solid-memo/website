@@ -2041,7 +2041,8 @@
       "problemsLink": "Se utgåvekontrollen",
       "previewLink": "Förhandsvisa listningen",
       "trialLink": "Prova",
-      "diffLink": "Jämför med föregående version"
+      "diffLink": "Jämför med föregående version",
+      "releaseLink": "Utgåvans metadata och proveniens"
     },
     "outline": {
       "empty": "Inga kapitel än.",
@@ -2164,7 +2165,9 @@
         "askedElsewhere": "Det här kortet ställs redan från ett annat ställe: flytta det dit i stället.",
         "notACourse": "Bara en kurs har kapitel, steg och frågor.",
         "notFrontToBack": "En kurs studeras från framsida till baksida.",
-        "carriedActivity": "Hur en tidigare utgåva togs fram skrivs inte om."
+        "carriedActivity": "Hur en tidigare utgåva togs fram skrivs inte om.",
+        "noAuthors": "Ange en upphovsperson först: tillskrivningen nämner utgåvans upphovspersoner.",
+        "unusedSource": "En källa är en som utgåvan bygger på eller som dess framtagning använde: kryssa i minst en."
       }
     },
     "check": {
@@ -2242,7 +2245,12 @@
       "distractor": "Felaktiga alternativ",
       "distractorText": "Felaktigt alternativ",
       "distractorNote": "Varför det är fel",
-      "textFormat": "Textformat"
+      "textFormat": "Textformat",
+      "versionNotes": "Versionsanteckningar",
+      "language": "Språk",
+      "creator": "Upphovspersoner",
+      "comment": "Kommentar",
+      "wasDerivedFrom": "Källor"
     },
     "problem": {
       "notARelease": "{path} är ingen plats för en utgåva i biblioteket: namnet får bara innehålla gemener, siffror och bindestreck.",
@@ -2286,7 +2294,10 @@
       "previousUnread": "Utgåvan den följer, {previous}, kunde inte läsas, så inget kontrolleras mot den. Kontrollera igen senare.",
       "libraryUnread": "Bibliotekets index kunde inte läsas, så utkastets plats i biblioteket kontrolleras inte. Kontrollera igen senare.",
       "shape": "{field}: {message}",
-      "unshaped": "Är av en klass i Solid Memo som ingen form i den här appen beskriver."
+      "unshaped": "Är av en klass i Solid Memo som ingen form i den här appen beskriver.",
+      "sourceUndescribed": "Anger inte {missing}: en källa säger vad den är, vems den är och på vilka villkor den användes.",
+      "usedNotDerived": "Användes för att ta fram utgåvan, som inte säger att den bygger på den.",
+      "countDisagrees": "Säger {stated} {what}, men utgåvan har {counted}."
     },
     "preview": {
       "crumb": "Förhandsvisning av listningen",
@@ -2382,6 +2393,96 @@
       "working": "Arbetar…",
       "reset": "Börja om",
       "reload": "Läs in utkastet igen"
+    },
+    "release": {
+      "crumb": "Utgåva",
+      "heading": "Utgåvans metadata och proveniens",
+      "intro": "Vad utgåvan säger om sig själv utöver sin listning: vem som sammanställde den och hur, och vad den togs fram ur. Varje ändring sparas när den görs.",
+      "about": "Om den här versionen",
+      "versionNotes": "Versionsanteckningar",
+      "versionNotesHint": "Vad den här versionen är, eller ändrar, med några ord till eleverna.",
+      "languages": "Språk",
+      "languagesHint": "Språken dess innehåll är på, ur EU:s tabell över språk.",
+      "languageOther": "{iri} (finns inte i tabellen)",
+      "licenseHint": "Anges som ett licensdokument, som DCAT-AP kräver.",
+      "publisher": "Utgivare",
+      "publisherNone": "Ingen angiven",
+      "publisherHint": "Vem som ger ut utgåvan: en av dess upphovspersoner, eller den utgivare den redan nämner.",
+      "authors": "Upphovspersoner",
+      "authorsHint": "De som sammanställde utgåvan, sparade i själva utgåvan.",
+      "noAuthors": "Inga upphovspersoner än.",
+      "otherAuthors": "Nämns också, i ett annat dokument, och behålls som de är: {authors}",
+      "authorName": "Namn",
+      "authorEmail": "E-post (valfritt)",
+      "saveAuthor": "Spara",
+      "newAuthor": "Ny upphovsperson",
+      "addAuthor": "Lägg till upphovspersonen",
+      "authorEmpty": "Skriv upphovspersonens namn.",
+      "making": "Hur den togs fram",
+      "attribution": "Tillskrivning",
+      "attributionHint": "Säger vem som sammanställde utgåvan, på engelska och svenska. Inget här säger att någon har granskat den.",
+      "attributionNone": "Ingen tillskrivning",
+      "attributionNeedsAuthors": "Ange en upphovsperson först: tillskrivningen nämner utgåvans upphovspersoner.",
+      "makingNotes": "Anteckningar om hur den togs fram",
+      "makingNotesHint": "Varje stycke sparas som en anteckning om hur utgåvan togs fram: dess källor, struktur, urval eller licenser, till exempel. Ett antal som en anteckning anger (kapitel, steg, källor eller kort sammanlagt) kontrolleras mot utgåvan.",
+      "sources": "Källor",
+      "sourcesHint": "Vad utgåvan togs fram ur. Varje källa säger vad den är, vems den är och på vilka villkor den användes: dess licens, eller belägget för en. Studion visar dess adress och öppnar den aldrig.",
+      "noSources": "Inga källor än.",
+      "sourceIri": "Adress",
+      "sourceTitle": "Titel",
+      "sourceCreator": "Upphov",
+      "sourceLicense": "Licens (dess adress)",
+      "sourceEvidence": "Belägg för dess licens",
+      "derivedFrom": "Utgåvan bygger på den",
+      "used": "Den här versionens framtagning använde den",
+      "usedEarlier": "En tidigare versions framtagning använde den.",
+      "sourceOthers": {
+        "one": "{count} uppgift till om den behålls som den är.",
+        "other": "{count} uppgifter till om den behålls som de är."
+      },
+      "saveSource": "Spara källan",
+      "newSource": "Ny källa",
+      "addSource": "Lägg till källan",
+      "sourceInvalid": "Ange källans webbadress, som börjar med https:// eller http://.",
+      "sourceExists": "Utgåvan nämner redan den här källan.",
+      "sourceUnused": "Kryssa i minst en: utgåvan bygger på den, eller den här versionens framtagning använde den.",
+      "licenseInvalid": "Ange licensens webbadress, som börjar med https:// eller http://, eller lämna fältet tomt.",
+      "checks": "Kontroller",
+      "checksHint": "Kontroller som utgåvan har gått igenom, maskinellt (validerarna, utgåvekontrollen) eller av AI. Var och en sparas uttryckligen som en kontroll som inte är en mänsklig granskning; Studion kan inte spara någon mänsklig granskning.",
+      "noChecks": "Inga kontroller sparade än.",
+      "checkKind": "Kontrollerad av",
+      "checkMachine": "En maskin",
+      "checkAi": "AI",
+      "checkLabel": "Vad den gällde",
+      "checkScope": "Omfattning",
+      "checkOutcome": "Utfall",
+      "checkEnded": "Avslutad",
+      "checkLanguage": "Skriven på",
+      "checkLanguageEn": "Engelska",
+      "checkLanguageSv": "Svenska",
+      "checkEmpty": "Skriv vad den gällde, dess omfattning och dess utfall.",
+      "newCheck": "Ny kontroll",
+      "addCheck": "Spara kontrollen",
+      "saveCheck": "Spara kontrollen",
+      "checkOtherwise": "Skriven på ett annat sätt än Studion skriver en kontroll: den kan tas bort, inte ändras.",
+      "carried": "Från tidigare versioner",
+      "carriedHint": "Hur tidigare versioner togs fram. Behålls som de är: en utgåva skrivs aldrig om.",
+      "detail": {
+        "title": "sin titel",
+        "creator": "sitt upphov",
+        "licence": "sin licens eller belägget för en"
+      },
+      "counted": {
+        "chapters": "kapitel",
+        "steps": "steg",
+        "sources": "källor",
+        "cards": "kort sammanlagt"
+      },
+      "edit": "Ändra",
+      "cancel": "Avbryt",
+      "remove": "Ta bort",
+      "editOf": "Ändra {name}",
+      "removeOf": "Ta bort {name}"
     }
   },
   "proseField": {

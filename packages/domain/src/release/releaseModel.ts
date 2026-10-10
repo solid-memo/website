@@ -82,6 +82,26 @@ export interface ReleaseActivity {
   generating: boolean;
 }
 
+/** An activity that generated the release (prov:wasGeneratedBy), as its curation reads it (provenanceRules). */
+export interface ReleaseMaking {
+  iri: string;
+  /** What it used (prov:used), by IRI. */
+  used: string[];
+  /** What it says of itself (rdfs:comment): how the release was compiled, by whom, from how many sources. */
+  comments: ReleaseText[];
+  /** How an earlier release was made, carried over: a draft knows which; a release read alone does not. */
+  carried: boolean;
+}
+
+/** What a release states of a source it names: its title, its creator, its licence and its comments (which may quote the evidence for it). */
+export interface ReleaseSource {
+  iri: string;
+  title: ReleaseTerm[];
+  creator: ReleaseTerm[];
+  licence: ReleaseTerm[];
+  comments: ReleaseTerm[];
+}
+
 /** One statement of a subject's predicate, for what may be stated on any subject. */
 export interface ReleaseStatement {
   subject: string;
@@ -116,6 +136,10 @@ export interface ReleaseModel {
   /** What it was compiled from (prov:wasDerivedFrom). */
   sources: ReleaseTerm[];
   activities: ReleaseActivity[];
+  /** The activities that generated it, in the order it names them. */
+  making: ReleaseMaking[];
+  /** What it states of its sources: those it is derived from, then those only its making used, each once. */
+  sourceDetails: ReleaseSource[];
   cards: ReleaseCard[];
   chapters: ReleaseChapter[];
   steps: ReleaseStep[];
@@ -185,6 +209,8 @@ export function emptyReleaseModel(url: string): ReleaseModel {
     licence: [],
     sources: [],
     activities: [],
+    making: [],
+    sourceDetails: [],
     cards: [],
     chapters: [],
     steps: [],

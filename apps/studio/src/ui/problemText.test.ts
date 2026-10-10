@@ -88,6 +88,18 @@ describe("problemMessage", () => {
     expect(say({ code: "libraryUnread", params: {} })).toContain("The library's index could not be read");
   });
 
+  it("says what a source or the release's making lacks, in English and Swedish", () => {
+    expect(say({ code: "sourceUndescribed", params: { missing: ["title", "creator", "licence"] } })).toBe(
+      "Does not state its title, its creator, its licence or the evidence for one: a source says what it is, whose it is, and on what terms it was used.",
+    );
+    expect(say({ code: "sourceUndescribed", params: { missing: ["licence"] } }, undefined, sv)).toBe(
+      "Anger inte sin licens eller belägget för en: en källa säger vad den är, vems den är och på vilka villkor den användes.",
+    );
+    expect(say({ code: "usedNotDerived", params: {} })).toBe("Was used to make the release, which does not say it is derived from it.");
+    expect(say({ code: "countDisagrees", params: { what: "cards", stated: 466, counted: 465 } })).toBe("Says 466 cards in all, but the release has 465.");
+    expect(say({ code: "countDisagrees", params: { what: "chapters", stated: 17, counted: 16 } }, undefined, sv)).toBe("Säger 17 kapitel, men utgåvan har 16.");
+  });
+
   it("says a shape's result in its own words, the validator's by its constraint, a profile's named", () => {
     const shaped = { message: { en: "A title is text.", sv: "En titel är text." }, constraint: "Datatype" };
     expect(say({ code: "shape", params: shaped }, `${DCTERMS}title`)).toBe("Title: A title is text.");
@@ -101,6 +113,8 @@ describe("problemMessage", () => {
 describe("fieldName", () => {
   it("names a field it knows, and any other by its IRI", () => {
     expect(fieldName(`${DCTERMS}title`, sv.t)).toBe("Titel");
+    expect(fieldName("http://www.w3.org/2000/01/rdf-schema#comment", en.t)).toBe("Comment");
+    expect(fieldName("http://www.w3.org/ns/adms#versionNotes", sv.t)).toBe("Versionsanteckningar");
     expect(fieldName("https://other.example/p", en.t)).toBe("https://other.example/p");
     expect(fieldName(undefined, en.t)).toBe("");
   });

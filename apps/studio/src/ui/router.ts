@@ -16,6 +16,7 @@ import {
   type DraftField,
   type ProblemTarget,
   type QuestionField,
+  type ReleaseField,
   type StepField,
 } from "@solid-memo/domain/release/releaseCheck";
 import { STUDIO_PATH } from "@solid-memo/ui/router";
@@ -81,6 +82,8 @@ export type StudioRoute =
   | { screen: "preview"; draftUrl: string }
   /** A draft against the release it follows: what it changes, and what a learner's copy would get. */
   | { screen: "diff"; draftUrl: string }
+  /** What a draft's release says of itself beyond its listing (its notes, languages, licence, authors), how it was made, and from what. */
+  | { screen: "release"; draftUrl: string; field?: ReleaseField }
   /**
    * A draft played in a sandbox: a course's page, or with `chapter` (an
    * id) that chapter's steps, or with `review` its final review; a deck's
@@ -131,6 +134,7 @@ export function instanceOfRoute(route: StudioRoute): string | null {
     case "check":
     case "preview":
     case "diff":
+    case "release":
     case "trial":
       // A draft's route is parsed only with a draft's URL.
       return draftPlaceOf(route.draftUrl)!.instanceUrl;
@@ -182,6 +186,8 @@ export function studioRouteToHash(route: StudioRoute): string {
       return `#${STUDIO_PATH}/preview${hashParams({ draft: route.draftUrl })}`;
     case "diff":
       return `#${STUDIO_PATH}/diff${hashParams({ draft: route.draftUrl })}`;
+    case "release":
+      return `#${STUDIO_PATH}/release${hashParams({ draft: route.draftUrl, ...fieldParam(route.field) })}`;
     case "trial":
       return `#${STUDIO_PATH}/trial${hashParams({
         draft: route.draftUrl,
@@ -244,6 +250,7 @@ export function parseStudioHash(hash: string): StudioRoute | null {
     case "/check":
     case "/preview":
     case "/diff":
+    case "/release":
     case "/trial":
       return draftRouteOf(path!.slice(STUDIO_PATH.length), query);
     case "/transfer": {
@@ -316,6 +323,8 @@ function draftRouteOf(path: string, query: URLSearchParams): DraftRoute | null {
       return { screen: "preview", draftUrl };
     case "/diff":
       return { screen: "diff", draftUrl };
+    case "/release":
+      return { screen: "release", draftUrl, ...(field("release") as { field?: ReleaseField }) };
     case "/trial":
       // A review is of a chapter.
       return chapter === null

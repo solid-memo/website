@@ -5,6 +5,9 @@ import {
   activitiesOf,
   applyDraftChange,
   applyDraftChanges,
+  attributionOf,
+  attributionText,
+  authorNames,
   blankDraft,
   checkActivityTriples,
   generatingActivities,
@@ -15,9 +18,12 @@ import {
   liveChapters,
   mergedDraft,
   liveSteps,
+  makingNotesOf,
+  ownMakingOf,
   placeOf,
   publishedIdsOf,
   RDF_TYPE,
+  readCheckActivity,
   turtleDistribution,
   unsupportedIdOf,
   type CheckActivity,
@@ -407,9 +413,28 @@ describe("applyDraftChange", () => {
       expect(draft.root.wasDerivedFrom).toEqual(["https://source.example/", "https://wiki.example/"]);
       expect(draft.triples).toContainEqual(link(of("compilation"), `${PROV}used`, "https://wiki.example/"));
       expect(draft.triples).toContainEqual({ subject: "https://wiki.example/", ...source.statements[0] });
-      const only = made(courseDraft(), { kind: "setSource", iri: "https://source.example/", source: { statements: [], derivedFrom: false, used: false } });
-      expect(only.root.wasDerivedFrom).toEqual([]);
+      const only = made(courseDraft(), { kind: "setSource", iri: "https://source.example/", source: { statements: [], derivedFrom: true, used: false } });
+      expect(only.root.wasDerivedFrom).toEqual(["https://source.example/"]);
       expect(only.triples.some((triple) => triple.subject === "https://source.example/" || triple.predicate === `${PROV}used`)).toBe(false);
+    });
+
+    it("refuses a source the release would be neither derived from nor have used", () => {
+      for (const draft of [courseDraft(), blankDraft({ url: DRAFT, course: false, title: {}, now: NOW })]) {
+        expect(applyDraftChange(draft, { kind: "setSource", iri: "https://source.example/", source: { ...source, derivedFrom: false, used: false } })).toEqual({
+          refused: "unusedSource",
+          id: "https://source.example/",
+        });
+      }
+    });
+
+    it("gives a release that names no making one, `#compilation`, for the source it used", () => {
+      const blank = blankDraft({ url: DRAFT, course: false, title: {}, now: NOW });
+      expect(generatingActivities(blank)).toEqual([]);
+      const draft = made(blank, { kind: "setSource", iri: "https://wiki.example/", source: { ...source, derivedFrom: false } });
+      expect(generatingActivities(draft)).toEqual([of("compilation")]);
+      expect(draft.triples).toContainEqual(link(of("compilation"), RDF_TYPE, `${PROV}Activity`));
+      expect(draft.triples).toContainEqual(link(of("compilation"), `${PROV}used`, "https://wiki.example/"));
+      expect(draft.root.wasDerivedFrom).toEqual([]);
     });
 
     it("removes a source with every mention of it, refusing one the draft does not have", () => {
@@ -480,6 +505,139 @@ describe("applyDraftChange", () => {
       expect(generatingActivities(draft)).toEqual([]);
       expect(draft.triples).toEqual(checkActivityTriples(of("review-1"), check));
     });
+  });
+});
+
+describe("the licence", () => {
+  const CC0 = "https://creativecommons.org/publicdomain/zero/1.0/";
+  const BY = "https://creativecommons.org/licenses/by/4.0/";
+  const typed = (iri: string) => link(iri, RDF_TYPE, "http://purl.org/dc/terms/LicenseDocument");
+
+  it("is set typed a licence document, once, and the one it replaces loses its type", () => {
+    const cc0 = made(courseDraft(), { kind: "setLicense", license: CC0 });
+    expect(cc0.root.license).toBe(CC0);
+    expect(cc0.triples.filter((triple) => triple.subject === CC0)).toEqual([typed(CC0)]);
+    expect(made(cc0, { kind: "setLicense", license: CC0 }).triples).toEqual(cc0.triples);
+    const by = made(cc0, { kind: "setLicense", license: BY });
+    expect(by.triples).toContainEqual(typed(BY));
+    expect(by.triples).not.toContainEqual(typed(CC0));
+    const none = made(by, { kind: "setLicense", license: null });
+    expect(none.root.license).toBeUndefined();
+    expect(none.triples).toEqual(courseDraft().triples);
+  });
+
+  it("keeps the type of a licence a source still names", () => {
+    const cc0 = made(courseDraft(), { kind: "setLicense", license: CC0 });
+    const named = { ...cc0, triples: [...cc0.triples, link("https://source.example/", "http://purl.org/dc/terms/license", CC0)] };
+    expect(made(named, { kind: "setLicense", license: BY }).triples).toContainEqual(typed(CC0));
+  });
+});
+
+describe("the attribution", () => {
+  const authored = (draft: ReleaseDraft, ...names: string[]) =>
+    made(
+      draft,
+      ...names.map((name, n): DraftChange => ({ kind: "setAgent", id: `a${n}`, agent: { name } })),
+      { kind: "setMeta", meta: { creator: names.map((_name, n) => of(`a${n}`)) } },
+    );
+  const comments = (draft: ReleaseDraft, activity: string) =>
+    draft.triples.filter((triple) => triple.subject === activity && triple.predicate === "http://www.w3.org/2000/01/rdf-schema#comment").map((triple) => triple.object);
+
+  it("is worded in English and Swedish, the names joined by the language's and", () => {
+    expect(attributionText(["Ann"], false, "en")).toBe("Compiled by Ann.");
+    expect(attributionText(["Ann", "Bo"], true, "en")).toBe("Compiled by Ann and Bo with the help of AI.");
+    expect(attributionText(["Ann", "Bo", "Cy"], true, "sv")).toBe("Sammanställd av Ann, Bo och Cy med hjälp av AI.");
+    expect(attributionText(["Ann"], false, "de")).toBe("Compiled by Ann.");
+  });
+
+  it("names the authors, as the making of the release states it, with or without AI", () => {
+    const draft = authored(courseDraft(), "Ann", "Bo");
+    expect(authorNames({ ...draft, root: { ...draft.root, creator: [...draft.root.creator, "https://elsewhere.example/#c", of("nobody")] } })).toEqual(["Ann", "Bo"]);
+    const attributed = made(draft, { kind: "setAttribution", attribution: { ai: true } });
+    expect(comments(attributed, of("compilation")).map((term) => [term.value, (term as { language: string }).language])).toEqual([
+      ["Compiled by Ann and Bo with the help of AI.", "en"],
+      ["Sammanställd av Ann och Bo med hjälp av AI.", "sv"],
+    ]);
+    expect(attributionOf(attributed)).toEqual({ ai: true, text: "Compiled by Ann and Bo with the help of AI." });
+    const plain = made(attributed, { kind: "setAttribution", attribution: { ai: false } });
+    expect(comments(plain, of("compilation"))).toHaveLength(2);
+    expect(attributionOf(plain)).toEqual({ ai: false, text: "Compiled by Ann and Bo." });
+    expect(attributionOf(made(plain, { kind: "setAttribution", attribution: null }))).toBeNull();
+    expect(attributionOf(courseDraft())).toBeNull();
+  });
+
+  it("reads a Swedish attribution alone", () => {
+    const draft = authored(courseDraft(), "Ann");
+    const swedish = { ...draft, triples: [...draft.triples, { subject: of("compilation"), predicate: "http://www.w3.org/2000/01/rdf-schema#comment", object: { kind: "literal" as const, value: "Sammanställd av Ann.", language: "sv", datatype: "" } }] };
+    expect(attributionOf(swedish)).toEqual({ ai: false, text: "Sammanställd av Ann." });
+  });
+
+  it("is refused without authors, and gives a release that names no making one", () => {
+    expect(applyDraftChange(courseDraft(), { kind: "setAttribution", attribution: { ai: true } })).toEqual({ refused: "noAuthors" });
+    const deck = made(authored(deckDraft(), "Ann"), { kind: "setAttribution", attribution: { ai: false } });
+    expect(generatingActivities(deck)).toEqual([of("compilation")]);
+    expect(ownMakingOf(deck)).toBe(of("compilation"));
+    expect(made(deckDraft(), { kind: "setAttribution", attribution: null })).toEqual(deckDraft());
+    const taken = { ...deckDraft(), agents: [{ id: "compilation", data: { name: "C" } }] };
+    expect(generatingActivities(made(authored(taken, "Ann"), { kind: "setAttribution", attribution: { ai: false } }))).toEqual([of("compilation-2")]);
+  });
+});
+
+describe("the notes of the making", () => {
+  it("are each language's comments beside the attribution, a paragraph each", () => {
+    const draft = made(
+      courseDraft(),
+      { kind: "setAgent", id: "ann", agent: { name: "Ann" } },
+      { kind: "setMeta", meta: { creator: [of("ann")] } },
+      { kind: "setAttribution", attribution: { ai: true } },
+      { kind: "setMakingNotes", notes: { en: "Sources: 2 documents.\n\n  Structure: 2 chapters.  \n \n", sv: "Källor: 2.", "": "Plain." } },
+    );
+    expect(makingNotesOf(draft)).toEqual({ en: "Sources: 2 documents.\n\nStructure: 2 chapters.", sv: "Källor: 2.", "": "Plain." });
+    expect(attributionOf(draft)!.ai).toBe(true);
+    const cleared = made(draft, { kind: "setMakingNotes", notes: {} });
+    expect(makingNotesOf(cleared)).toEqual({});
+    expect(attributionOf(cleared)).not.toBeNull();
+    expect(makingNotesOf(deckDraft())).toEqual({});
+    expect(made(deckDraft(), { kind: "setMakingNotes", notes: { en: " " } })).toEqual(deckDraft());
+  });
+
+  it("keep a note that only starts as an attribution, which the attribution leaves as it is", () => {
+    const draft = made(
+      courseDraft(),
+      { kind: "setAgent", id: "ann", agent: { name: "Ann" } },
+      { kind: "setMeta", meta: { creator: [of("ann")] } },
+      { kind: "setMakingNotes", notes: { en: "Compiled by hand from two books.", sv: "Sammanställd av Bo." } },
+    );
+    expect(makingNotesOf(draft)).toEqual({ en: "Compiled by hand from two books.", sv: "Sammanställd av Bo." });
+    expect(attributionOf(draft)).toBeNull();
+    const attributed = made(draft, { kind: "setAttribution", attribution: { ai: false } });
+    expect(attributionOf(attributed)).toEqual({ ai: false, text: "Compiled by Ann." });
+    expect(makingNotesOf(made(attributed, { kind: "setAttribution", attribution: null }))).toEqual(makingNotesOf(draft));
+  });
+});
+
+describe("readCheckActivity", () => {
+  it("reads back a check as it was recorded, by machine or AI, in English or Swedish", () => {
+    for (const activity of [check, { ...check, check: "machine" as const }, { ...check, language: "sv" }, { ...check, check: "machine" as const, language: "sv", label: "Maskin" }]) {
+      const draft = made(courseDraft(), { kind: "addCheckActivity", id: "review-1", activity });
+      expect(readCheckActivity(draft, "review-1")).toEqual(activity);
+    }
+  });
+
+  it("is null for an activity written otherwise", () => {
+    const draft = made(courseDraft(), { kind: "addCheckActivity", id: "review-1", activity: check });
+    expect(readCheckActivity(draft, "compilation")).toBeNull();
+    const more = { ...draft, triples: [...draft.triples, link(of("review-1"), `${PROV}used`, "https://source.example/")] };
+    expect(readCheckActivity(more, "review-1")).toBeNull();
+    const reworded = {
+      ...draft,
+      triples: draft.triples.map((triple) =>
+        triple.subject === of("review-1") && triple.object.value.startsWith("Outcome") ? { ...triple, object: { ...triple.object, value: "Result: fine" } } : triple,
+      ),
+    };
+    expect(readCheckActivity(reworded, "review-1")).toBeNull();
+    const short = { ...draft, triples: draft.triples.filter((triple) => !(triple.subject === of("review-1") && triple.object.value.startsWith("Scope"))) };
+    expect(readCheckActivity(short, "review-1")).toBeNull();
   });
 });
 
@@ -605,6 +763,10 @@ describe("how an earlier release was made", () => {
     const draft = next();
     const removed = made(draft, { kind: "setSource", iri: "https://source.example/", source: null });
     expect(compilation(removed)).toEqual(compilation(draft));
+    // A source that making used may be neither derived from nor used by this version's.
+    const kept = made(draft, { kind: "setSource", iri: "https://source.example/", source: { statements: [], derivedFrom: false, used: false } });
+    expect(compilation(kept)).toEqual(compilation(draft));
+    expect(kept.root.wasDerivedFrom).toEqual([]);
     expect(applyDraftChange(draft, { kind: "setAgent", id: "alice", agent: null })).toEqual({ refused: "carriedActivity", id: "compilation" });
     expect(made(draft, { kind: "setAgent", id: "alice", agent: { name: "Alice B." } }).agents[0]!.data.name).toBe("Alice B.");
   });
