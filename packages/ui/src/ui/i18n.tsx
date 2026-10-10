@@ -11,11 +11,11 @@ import sv from "../i18n/sv.json";
 import ko from "../i18n/ko.json";
 
 /**
- * A message with a form per plural category: English and Swedish have
- * two. Korean has only "other", which it is always said in; its messages
- * still give both forms, the one form the same as the other.
+ * A message with a form per plural category its language's plural rules
+ * name: "one" and "other" in English and Swedish, only "other" in Korean.
+ * Every language has "other", the form a message without a count takes.
  */
-type Plural = { one: string; other: string };
+type Plural = Partial<Record<Intl.LDMLPluralRule, string>> & { other: string };
 type Message = string | Plural;
 interface Messages {
   [key: string]: Message | Messages;
@@ -164,7 +164,8 @@ export function createI18n(locale: Locale): I18n {
   function template(key: string, count: unknown): string {
     const message = lookup(CATALOGS[locale], key) ?? key;
     if (typeof message === "string") return message;
-    return typeof count === "number" && plurals.select(count) === "one" ? message.one : message.other;
+    // The message files' tests give each plural message every form its language names.
+    return typeof count === "number" ? message[plurals.select(count)]! : message.other;
   }
 
   const t: I18n["t"] = (key, vars = {}) =>

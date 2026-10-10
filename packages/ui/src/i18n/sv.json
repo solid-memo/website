@@ -500,7 +500,10 @@
       "one": "nytt kort per dag",
       "other": "nya kort per dag"
     },
-    "maxReviewsUnit": "högst antal repetitioner per dag",
+    "maxReviewsUnit": {
+      "one": "högst antal repetitioner per dag",
+      "other": "högst antal repetitioner per dag"
+    },
     "emptyHint": "Ett tomt fält följer dina {link}.",
     "studyPreferencesLink": "studieinställningar",
     "saveButton": "Spara inställningar",
