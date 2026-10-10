@@ -1,0 +1,586 @@
+@base <https://solid-memo.com/decks/physics-equations/v2.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Physics equations"@en ,
+                  "Fysikformler"@sv ,
+                  "물리 공식"@ko ,
+                  "Physikformeln"@de ,
+                  "Ecuaciones de física"@es ,
+                  "Équations de physique"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "42 fundamental equations of school and first-year university physics: motion and forces, energy, work and power, gravitation, oscillations, fluids, heat and gases, waves and optics, electricity and magnetism, and photons and relativity. Front: the law or quantity, naming every symbol, e.g. \"Ohm's law: voltage U across a resistance R carrying a current I\"; back: the equation, e.g. \"U = RI\". Voltage is U throughout, as in Swedish schools. Each equation is checked for dimensional consistency with SymPy and against OpenStax University Physics, and where they state it, against Wikidata and Swedish Wikipedia."@en ,
+                        "42 grundläggande formler ur gymnasiets fysik och första årets högskolefysik: rörelse och krafter, energi, arbete och effekt, gravitation, svängningar, vätskor, värme och gaser, vågor och optik, elektricitet och magnetism samt fotoner och relativitet. Framsida: lagen eller storheten med alla beteckningar namngivna, t.ex. ”Ohms lag: spänningen U över resistansen R när strömmen är I”; baksida: formeln, t.ex. ”U = RI”. Spänning betecknas genomgående U, som i svensk skola. Varje formel är kontrollerad för dimensionell konsistens med SymPy och mot OpenStax University Physics, och där de anger den även mot Wikidata och svenska Wikipedia."@sv ,
+                        "고등학교와 대학교 1학년 물리의 기본 공식 42개입니다. 운동과 힘, 에너지·일·일률, 중력, 진동, 유체, 열과 기체, 파동과 광학, 전기와 자기, 광자와 상대성을 다룹니다. 앞면: 모든 기호를 밝힌 법칙이나 물리량, 예: “옴의 법칙: 전류 I가 흐르는 저항 R에 걸린 전압 U”. 뒷면: 공식, 예: “U = RI”. 스웨덴 학교에서처럼 전압은 모두 U로 씁니다. 모든 공식은 SymPy로 차원 일관성을 확인하고 OpenStax University Physics와 대조했으며, 공식이 실려 있는 경우 Wikidata와 스웨덴어 위키백과와도 대조했습니다."@ko ,
+                        "42 grundlegende Formeln der Schulphysik und der Physik im ersten Studienjahr: Bewegung und Kräfte, Energie, Arbeit und Leistung, Gravitation, Schwingungen, Fluide, Wärme und Gase, Wellen und Optik, Elektrizität und Magnetismus sowie Photonen und Relativität. Vorderseite: das Gesetz oder die Größe, mit jedem Formelzeichen benannt, z. B. „Ohmsches Gesetz: Spannung U an einem Widerstand R, durch den ein Strom I fließt“; Rückseite: die Gleichung, z. B. „U = RI“. Die Spannung heißt durchgehend U, wie an schwedischen Schulen. Jede Gleichung ist mit SymPy auf Dimensionskonsistenz und anhand von OpenStax University Physics geprüft und, wo sie dort steht, auch anhand von Wikidata und der schwedischsprachigen Wikipedia."@de ,
+                        "42 ecuaciones fundamentales de la física escolar y del primer curso universitario: movimiento y fuerzas, energía, trabajo y potencia, gravitación, oscilaciones, fluidos, calor y gases, ondas y óptica, electricidad y magnetismo, y fotones y relatividad. Anverso: la ley o magnitud, nombrando cada símbolo, p. ej., «Ley de Ohm: tensión U en una resistencia R por la que circula una corriente I»; reverso: la ecuación, p. ej., «U = RI». La tensión se escribe U en todo el mazo, como en las escuelas suecas. Cada ecuación se ha comprobado con SymPy en cuanto a coherencia dimensional y con OpenStax University Physics y, donde la recogen, con Wikidata y la Wikipedia en sueco."@es ,
+                        "42 équations fondamentales de la physique du lycée et de première année d’université : mouvement et forces, énergie, travail et puissance, gravitation, oscillations, fluides, chaleur et gaz, ondes et optique, électricité et magnétisme, ainsi que photons et relativité. Recto : la loi ou la grandeur, avec chaque symbole nommé, par exemple « Loi d’Ohm : tension U aux bornes d’une résistance R parcourue par un courant I » ; verso : l’équation, par exemple « U = RI ». La tension est notée U partout, comme dans les écoles suédoises. Chaque équation est vérifiée avec SymPy (cohérence dimensionnelle) et sur OpenStax University Physics et, quand ils la donnent, sur Wikidata et la Wikipédia suédophone."@fr ;
+    prov:wasDerivedFrom <#own-work> ,
+                        <https://www.wikidata.org/> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:physics ;
+    dcat:keyword "physics"@en ,
+                 "equations"@en ,
+                 "formulas"@en ,
+                 "mechanics"@en ,
+                 "electricity"@en ,
+                 "SI units"@en ,
+                 "fysik"@sv ,
+                 "formler"@sv ,
+                 "ekvationer"@sv ,
+                 "mekanik"@sv ,
+                 "elektricitet"@sv ,
+                 "SI-enheter"@sv ,
+                 "물리학"@ko ,
+                 "방정식"@ko ,
+                 "공식"@ko ,
+                 "역학"@ko ,
+                 "전기"@ko ,
+                 "SI 단위"@ko ,
+                 "Physik"@de ,
+                 "Gleichungen"@de ,
+                 "Formeln"@de ,
+                 "Mechanik"@de ,
+                 "Elektrizität"@de ,
+                 "SI-Einheiten"@de ,
+                 "física"@es ,
+                 "ecuaciones"@es ,
+                 "fórmulas"@es ,
+                 "mecánica"@es ,
+                 "electricidad"@es ,
+                 "unidades SI"@es ,
+                 "physique"@fr ,
+                 "équations"@fr ,
+                 "formules"@fr ,
+                 "mécanique"@fr ,
+                 "électricité"@fr ,
+                 "unités SI"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/physics-equations/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/physics-equations/v1.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#physics-equations> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#physics-equations> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <#own-work> ,
+              <https://www.wikidata.org/> ,
+              <https://openstax.org/details/books/university-physics-volume-1> ,
+              <https://sv.wikipedia.org/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ,
+                       <#review-6> ,
+                       <#review-7> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
+                 "The cards were checked by machine (SymPy, live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Selection: the equations a Swedish upper-secondary course (Fysik 1 and 2) and a first university course in physics ask students to know were listed from general knowledge of the subject, following the brief of the library editor (Newton's second law, weight, momentum, kinetic and potential energy, work, power, Ohm's law, electric power, Coulomb's law, the law of gravitation, pressure, density, wave speed, Snell's law, E = mc², the ideal gas law and others of the same rank); no list was copied from any source. Each was kept only if it has one standard form and the front can name every symbol so that exactly one equation answers it (see the selection for what was left out and why)."@en ,
+                 "Symbols: one symbol set is used throughout and every front names each symbol it uses, in English and in Swedish. The brief noted that Swedish schools write U for voltage while English texts often write V; the deck uses U (Ohm's law U = RI, electric power P = UI, capacitance C = Q/U), which is also the quantity symbol that Wikidata gives first for voltage (Q25428, P416 \"U\" and \"V\"), and the Ohm's law card's note gives the English form V = IR. Other choices: s for distance and displacement, v₀ for the initial velocity, Eₖ and Eₚ for kinetic and potential energy (as Swedish texts write them; OpenStax writes K and U), F for every force including weight and buoyancy, Q for both charge and heat, T for both period and absolute temperature, ρ for both density and resistivity, h for both height and the Planck constant, k for both the spring constant and the Coulomb constant (the front of each card says which is meant), and capital L for every length, because a lower-case l is easily read as the capital I of the current in \"F = BIl\". Magnitudes are used throughout (no vector arrows); where a direction or an angle matters, the front says so (\"perpendicular\", \"in the direction of the force\") and a note gives the general form."@en ,
+                 "Notation of the backs: the whole equation, subject first (\"F = ma\", \"v² = v₀² + 2as\"), as one text in no language (tagged zxx) shared by both languages. Plain Unicode: superscripts ² and ⁴, subscripts ₀ ₁ ₂ ₖ ₚ, Greek letters, √ with parentheses, a slash for division (mv²/2 rather than ½mv², so that every back uses one style; the ½ form is named in a note where it is common) and − (U+2212) for minus in the notes."@en ,
+                 "Machine verification (query 9): verify_physics.py, run with `uv run --with sympy python3 verify_physics.py <dossier>` (SymPy 1.14.0), reads the back of every card from the dossier and parses its own text into a SymPy equation (so the check runs on what the card says, not on a retyped copy). (a) Dimensional consistency: every symbol is replaced by the SI unit of the quantity the front names (the gravitational, Coulomb, molar gas, Stefan–Boltzmann and Planck constants and the speed of light by SymPy's own definitions of those constants, sympy.physics.units), and every additive term of the equation must reduce to the same SI base dimensions; all 42 cards pass. (b) Derivation: for 18 cards a short derivation from first principles is substituted and the difference of the two sides must simplify to 0: the three equations of constant acceleration (by integrating a and v), kinetic energy (work–energy integral), potential energy (work against mg), centripetal force (differentiating uniform circular motion), the periods of the pendulum (small-angle equation) and the spring (both solved with dsolve), hydrostatic pressure (weight of a column over its base), Archimedes' principle (pressure difference on a submerged box), resistors in series and in parallel (Kirchhoff), Snell's law (Fermat's least time), electric power (P = W/t with W = QU and Q = It), the force on a conductor (summing QvB over the charge carriers), wave speed, weight (F = ma with a = g) and the de Broglie relation (consistency for a photon); all 18 pass. (c) Negative controls: 11 deliberately wrong equations (Eₖ = mv, T = 2π√(g/L), F = Gm₁m₂/r, E = mc, P = σAT³, F = kQ₁Q₂/r, T = 2π√(k/m), and for the derivations Eₖ = mv², s = v₀t + at², R = R₁ + R₂ for parallel resistors and n₁ sin θ₂ = n₂ sin θ₁) must fail, and all 11 do. A dimensional check cannot see a wrong numerical factor (Eₖ = mv² passes it, as the script records); the remaining 24 cards, which are definitions or laws without a derivation in the script, rest on the dimensional check and the source comparisons in steps 6–8. The result of every card is quoted in its evidence (the \"derivation\" source)."@en ,
+                 "OpenStax: the tables of contents of University Physics volumes 1–3 were read from the OpenStax archive (os_toc.py, query 5) and the Key Equations pages of 21 chapters and 14 sections were downloaded (os_fetch.py, query 6, recorded verbatim). os_fetch.py turns the MathML of each page into linear text (fractions as (a)/(b), powers as x^2, subscripts as x_0, vectors as a letter followed by a combining arrow); each card's evidence quotes that text, and make_dossier.py confirmed that each quote occurs verbatim in the saved page text. Every card's equation agrees with OpenStax, up to the symbol convention (OpenStax writes V for voltage, q for charge, K and U for kinetic and potential energy, w for weight, d for distance) and up to rearrangement where OpenStax states the same relation solved for another quantity (F = QE for E = F/Q) or in a more general form (p = p₀ + ρgh, F = IlB sin θ, F = qvB sin θ, W = Fd cos θ, Coulomb's law with 1/(4πε₀)); these differences are listed in round 0 of quality control. OpenStax is used for verification only (licence CC BY-NC-SA 4.0)."@en ,
+                 "Wikidata: the items of the quantities and laws were found with wbsearchentities (wd_search.py, query 2) and their English and Swedish labels and aliases, quantity symbols (P416) and defining formulas (P2534, TeX) were fetched with wbgetentities (wd_get.py, query 3). Every card's evidence quotes the items concerned, generated from the saved response by make_dossier.py. 27 cards have a P2534 formula on one of their items that states the card's relation, an equivalent of it or its instantaneous or vector form; none disagrees (the forms differ in letters, vector notation or arrangement, e.g. Snell's law as the ratio sin θ₁/sin θ₂ = n₂/n₁, the Stefan–Boltzmann law per unit area as M_b = σT⁴, kinetic energy as T = ½mv²). For the other 15 cards Wikidata states no formula of the relation, so only the names and symbols on their fronts are checked against it. The builder cannot check P2534 itself, because the SPARQL endpoint returns that datatype rendered as MathML, so its checks (102 in all) are label and alias checks of the English and Swedish names on the fronts and P416 checks of the quantity symbols F, m, ρ, V, f, n, U, R, I, Q and B."@en ,
+                 "Swedish text: the Swedish fronts and notes were written directly in Swedish, using the Wikidata Swedish labels and aliases of the quantities and laws (step 7) and the usage of Swedish Wikipedia: fetch_wiki.py (query 7) downloaded the current wikitext and revision id of 38 Swedish articles, wiki_lines.py and sv_terms.py (query 8) listed the lines stating each formula and the occurrences of the Swedish terms that are not Wikidata labels (medelfart, medelacceleration, starthastighet, resulterande kraft, medeleffekt, fjäderkonstant, matematisk pendel, periodtid, lyftkraft, svartkropp, brytningslagen, infallsvinkel, brytningsvinkel, punktladdning, Coulombs konstant, seriekopplade, parallellkopplade, tvärsnittsarea, kondensator, viloenergi). 39 cards quote the Swedish article that states their equation, with a link to the revision (for the Stefan–Boltzmann law its general form with emissivity and surroundings, for average acceleration its form a = (v − v₀)/t, for the spring's period the angular frequency ω = √(k/m), from which T = 2π/ω); the three others (heat and temperature change, the force on a conductor, photon energy; see quality control) rest on OpenStax, Wikidata and the derivation. Swedish conventions: decimal comma in the Coulomb constant's note, \"de Broglie-våglängden\" with a lower-case particle as Wikidata's label \"de Broglie-våg\", and \"Allmänna gaslagen\" (the Swedish school name, a Wikidata alias) rather than the label \"Ideala gaslagen\"."@en ,
+                 "Finally make_dossier.py wrote the dossier from the card list, the saved source data and the script's results; the builder ran the Wikidata checks against live Wikidata and wrote the deck and the provenance report, and the deck was validated with the app's SHACL and DCAT-AP validators (node scripts/validate_sources.ts physics-equations). The helper scripts other than verify_physics.py and os_fetch.py are not published with the deck; what they do is described above."@en ,
+                 "Selection: Included: 42 equations of school and first-year university physics, one card each: kinematics (average speed and acceleration, the three equations of constant acceleration), dynamics (Newton's second law, weight, momentum, Hooke's law, the law of gravitation, centripetal force), energy (kinetic and gravitational potential energy, work, power), oscillations and waves (periods of the simple pendulum and of a mass on a spring, frequency, wave speed), fluids (pressure, density, hydrostatic pressure, Archimedes' principle), heat (the ideal gas law, heat and temperature change, the Stefan–Boltzmann law), optics (Snell's law, refractive index), electricity and magnetism (Ohm's law, electric power, current, Coulomb's law, electric field strength, resistors in series and in parallel, resistivity, capacitance, the magnetic force on a conductor and on a moving charge) and modern physics (photon energy, mass–energy equivalence, the de Broglie wavelength). Every front names each symbol so that one equation answers it; the deck is studied front to back only, because a back such as F = ma cannot ask for one law. Left out: the impulse (J in English texts, I in Swedish ones, which clashes with the current), torque (τ in English, M in Swedish), the thin-lens and mirror equations (the sign conventions differ between textbooks: 1/f = 1/a + 1/b with real-is-positive distances, 1/f = 1/v − 1/u in the Cartesian convention), the first law of thermodynamics (the sign of the work differs between physics and chemistry texts), Kepler's laws, induction (Faraday's law with its sign) and other equations beyond most first courses; general forms with vectors, angles or integrals are given in the notes where they help (W = Fs cos θ, F = BIL sin θ, F = −kx, p₀ + ρgh)."@en ,
+                 "Licensing: The deck is CC0 1.0. Its content comes from two sources whose licences allow anything: the compiler's own selection, wording, choice of symbols, notation and SymPy checks (dedicated to the public domain with the deck; the equations are laws of physics and definitions, which are not copyrightable in any case) and Wikidata (structured data under CC0), from which the English and Swedish names of the quantities and laws and the quantity symbols were taken and against whose defining formulas cards were compared. OpenStax University Physics (CC BY-NC-SA 4.0, recorded as all rights reserved because the builder has no identifier for a non-commercial licence) and the Swedish Wikipedia (CC BY-SA 4.0) were used only to verify the equations and the Swedish terms: no text, notation, table layout or list was copied from them; single established terms (periodtid, lyftkraft, svartkropp, brytningslagen, tvärsnittsarea) carry no protectable expression. The selection follows the standard syllabus, which the subject dictates, and was made independently of any list. Quotations in the provenance report's evidence remain under their sources' licences and are not part of the CC0 deck."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Machine verification (SymPy dimensions and derivations), source cross-checks (OpenStax, Wikidata, Swedish Wikipedia), licences, symbols and Swedish terms"@en ;
+    rdfs:comment "Scope: All 42 cards, the sources and the deck metadata."@en ,
+                 "Outcome: verify_physics.py (SymPy 1.14.0) parsed every back from the dossier and found all 42 dimensionally consistent in SI units; 18 cards also passed a derivation from first principles, and all 11 deliberately wrong equations used as negative controls failed as they must. Every card's equation agrees with OpenStax University Physics (up to symbols and rearrangement), 27 with a Wikidata defining formula and 39 with a Swedish Wikipedia article; every quote was checked by script to occur verbatim in the saved source. The builder's 102 Wikidata checks (labels, aliases and quantity symbols) pass; one planned label check was left out for a typographic difference (Stefan–Boltzmann). Discrepancies and decisions are logged below."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 42 cards, the description and round 0."@en ,
+                 "Outcome: The review re-checked every equation from standard physics and HyperPhysics and re-queried the doubtful Wikidata labels and aliases live; all equations are correct and unambiguous and round 0's fixes are in place. One warning (the description claimed more cross-checks than the dossier records) and one wording suggestion were raised; both were verified against the dossier and fixed."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 42 cards, the title, description and keywords."@en ,
+                 "Outcome: The review found the language tags, Unicode and Swedish terms correct (fronts en+sv, every back zxx, no untagged text). One warning (the Swedish description said first term where the English says first year) and seven idiom and consistency suggestions were raised; all were checked against the texts and applied."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: The sources and their licences, every OpenStax and Swedish Wikipedia quote, the method, queries and recorded scripts."@en ,
+                 "Outcome: The review fetched each source's licence and re-fetched every cited OpenStax page and Swedish Wikipedia revision: the licences are as recorded, all quotes occur verbatim, nothing was copied, and the deck can stay CC0. Two warnings (the description's overclaim, also raised in round 1, and Swedish Wikipedia quotes that did not state the card's equation) and four suggestions were raised. Five were fixed; the licence label of OpenStax needs a builder change and was left as it is."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: 22 cards (the 10 changed in round 3's fixes and every third card), the metadata, description, keywords, licence decision, documentation and quality-control log."@en ,
+                 "Outcome: The review confirmed that the fixes of rounds 1–3 are in place, that all 102 Wikidata checks pass, that the sampled Swedish Wikipedia and OpenStax quotes occur verbatim, that the licences support CC0 and that the generated files match the dossier. One warning (a locator that attributed the Δ notation to Swedish Wikipedia) and three suggestions were raised. The warning and two suggestions were fixed; the suggestion about the derivation source's creator concerns a library-wide convention and was not changed in this deck alone."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: 15 cards (the 3 changed in round 4's fixes and every third card), the metadata, description, keywords, licence decision, documentation and quality-control log."@en ,
+                 "Outcome: The review confirmed that round 4's fixes are in place, that all 102 Wikidata checks pass, that the sampled Swedish Wikipedia and OpenStax quotes occur verbatim, that the licences support CC0 and that the generated files match the dossier. One warning (the derivation source's creator field) and one suggestion (electric-current) were raised; both were fixed."@en .
+
+<#review-6>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: All 42 cards, the metadata, description, keywords, study direction, the statement of how the deck was made and round 5's fixes."@en ,
+                 "Outcome: The review checked all 42 cards and found no errors and no warnings, spot-checked Wikidata labels, confirmed the 102 checks, the description and keywords, and confirmed that round 5's two fixes are in place. One suggestion (a line break in the electric-current Swedish Wikipedia quote) was raised and fixed."@en .
+
+<#review-7>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 1, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card changed."@en .
+
+<#own-work>
+    dcterms:title "Derivations and SymPy checks for the Solid Memo physics equations deck" ;
+    dcterms:creator "Anton Wiklund, with the help of AI" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "Own work of the deck's compiler, dedicated to the public domain together with the deck: the deck's dcterms:license is https://creativecommons.org/publicdomain/zero/1.0/ (CC0 1.0 Universal). The equations themselves are laws of physics and definitions of quantities, which are not copyrightable; the wording of the fronts and notes, the choice of symbols and the selection are the compilation's own. The verification script is recorded verbatim in the dossier's Queries."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata: items of the physical quantities and laws, with their English and Swedish labels, quantity symbols (P416) and defining formulas (P2534)" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing (raw text fetched 2026-10-04, query 4): \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://openstax.org/details/books/university-physics-volume-1>
+    dcterms:title "University Physics, Volumes 1–3 (OpenStax)" ;
+    dcterms:creator "Samuel J. Ling, Jeff Sanny, William Moebs and contributing authors; OpenStax, Rice University" ;
+    rdfs:comment "Footer of every page fetched, e.g. https://openstax.org/books/university-physics-volume-1/pages/5-3-newtons-second-law (fetched 2026-10-04): \"© Jun 11, 2026 OpenStax. Textbook content produced by OpenStax is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike License.\" and \"Except where otherwise noted, textbooks on this site are licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 (CC BY NC-SA) license\"; the book records of all three volumes in the OpenStax archive (query 5) give the licence http://creativecommons.org/licenses/by-nc-sa/4.0/. A non-commercial licence does not allow reuse in a CC0 deck and the builder has no identifier for CC BY-NC-SA, so the source is recorded as all-rights-reserved: verification only."@en .
+
+<https://sv.wikipedia.org/>
+    dcterms:title "Swedish Wikipedia: articles on the quantities and laws" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of every Swedish Wikipedia article (e.g. https://sv.wikipedia.org/wiki/Ohms_lag, fetched 2026-10-04): \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported.\""@en .
+
+<#average-speed>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Average speed v when a distance s is covered in time t"@en ,
+                     "Medelfarten v när sträckan s tillryggaläggs på tiden t"@sv ;
+    solid-memo:back "v = s/t"@zxx .
+
+<#average-acceleration>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Average acceleration a when the velocity changes by Δv in time Δt"@en ,
+                     "Medelaccelerationen a när hastigheten ändras med Δv på tiden Δt"@sv ;
+    solid-memo:back "a = Δv/Δt"@zxx .
+
+<#velocity-constant-acceleration>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Velocity v after time t, starting at velocity v₀ with constant acceleration a"@en ,
+                     "Hastigheten v efter tiden t med starthastigheten v₀ och den konstanta accelerationen a"@sv ;
+    solid-memo:back "v = v₀ + at"@zxx .
+
+<#displacement-constant-acceleration>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Displacement s after time t, starting at velocity v₀ with constant acceleration a"@en ,
+                     "Förflyttningen s efter tiden t med starthastigheten v₀ och den konstanta accelerationen a"@sv ;
+    solid-memo:back "s = v₀t + at²/2"@zxx ;
+    solid-memo:backNote "Also written s = v₀t + ½at²."@en ,
+                        "Skrivs även s = v₀t + ½at²."@sv .
+
+<#velocity-displacement>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Velocity v after a displacement s, starting at velocity v₀ with constant acceleration a (time not involved)"@en ,
+                     "Hastigheten v efter förflyttningen s med starthastigheten v₀ och den konstanta accelerationen a (tiden ingår inte)"@sv ;
+    solid-memo:back "v² = v₀² + 2as"@zxx ;
+    solid-memo:backNote "Also written v² − v₀² = 2as."@en ,
+                        "Skrivs även v² − v₀² = 2as."@sv .
+
+<#newtons-second-law>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Newton's second law: net force F on a body of mass m with acceleration a"@en ,
+                     "Newtons andra lag: den resulterande kraften F på en kropp med massan m och accelerationen a"@sv ;
+    solid-memo:back "F = ma"@zxx .
+
+<#weight>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Weight F of a body of mass m where the gravitational acceleration is g"@en ,
+                     "Tyngdkraften F på en kropp med massan m där tyngdaccelerationen är g"@sv ;
+    solid-memo:back "F = mg"@zxx .
+
+<#momentum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Momentum p of a body of mass m moving at velocity v"@en ,
+                     "Rörelsemängden p hos en kropp med massan m och hastigheten v"@sv ;
+    solid-memo:back "p = mv"@zxx .
+
+<#kinetic-energy>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Kinetic energy Eₖ of a body of mass m moving at speed v"@en ,
+                     "Rörelseenergin Eₖ hos en kropp med massan m och farten v"@sv ;
+    solid-memo:back "Eₖ = mv²/2"@zxx ;
+    solid-memo:backNote "Also written ½mv². Holds at speeds far below the speed of light."@en ,
+                        "Skrivs även ½mv². Gäller vid farter långt under ljusets hastighet."@sv .
+
+<#potential-energy>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Gravitational potential energy Eₚ of a mass m at height h, where the gravitational acceleration is g"@en ,
+                     "Lägesenergin Eₚ hos en massa m på höjden h där tyngdaccelerationen är g"@sv ;
+    solid-memo:back "Eₚ = mgh"@zxx ;
+    solid-memo:backNote "Holds near the Earth's surface, where g is constant; h is measured from a chosen zero level."@en ,
+                        "Gäller nära jordytan, där g är konstant; h räknas från en vald nollnivå."@sv .
+
+<#work>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Work W done by a constant force F over a distance s in the direction of the force"@en ,
+                     "Arbetet W som en konstant kraft F uträttar längs sträckan s i kraftens riktning"@sv ;
+    solid-memo:back "W = Fs"@zxx ;
+    solid-memo:backNote "At an angle θ between force and displacement: W = Fs cos θ."@en ,
+                        "Med vinkeln θ mellan kraft och förflyttning: W = Fs cos θ."@sv .
+
+<#power>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Average power P when work W is done in time t"@en ,
+                     "Medeleffekten P när arbetet W uträttas på tiden t"@sv ;
+    solid-memo:back "P = W/t"@zxx .
+
+<#hookes-law>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hooke's law: force F from a spring with spring constant k stretched or compressed by x"@en ,
+                     "Hookes lag: kraften F från en fjäder med fjäderkonstanten k som sträckts ut eller tryckts ihop med sträckan x"@sv ;
+    solid-memo:back "F = kx"@zxx ;
+    solid-memo:backNote "The size of the force. It acts against the deformation, so as a vector F = −kx."@en ,
+                        "Kraftens storlek. Den verkar mot deformationen, så som vektor är F = −kx."@sv .
+
+<#gravitation>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Newton's law of gravitation: force F between masses m₁ and m₂ at distance r (gravitational constant G)"@en ,
+                     "Newtons gravitationslag: kraften F mellan massorna m₁ och m₂ på avståndet r (gravitationskonstanten G)"@sv ;
+    solid-memo:back "F = Gm₁m₂/r²"@zxx .
+
+<#centripetal-force>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Centripetal force F on a body of mass m moving at speed v in a circle of radius r"@en ,
+                     "Centripetalkraften F på en kropp med massan m som rör sig med farten v i en cirkel med radien r"@sv ;
+    solid-memo:back "F = mv²/r"@zxx .
+
+<#pendulum-period>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Period T of a simple pendulum of length L swinging through small angles (gravitational acceleration g)"@en ,
+                     "Periodtiden T för en matematisk pendel med längden L vid små utslag (tyngdaccelerationen g)"@sv ;
+    solid-memo:back "T = 2π√(L/g)"@zxx .
+
+<#spring-period>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Period T of a mass m oscillating on a spring with spring constant k"@en ,
+                     "Periodtiden T för en massa m som svänger i en fjäder med fjäderkonstanten k"@sv ;
+    solid-memo:back "T = 2π√(m/k)"@zxx .
+
+<#pressure>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pressure p when a force F acts perpendicular to an area A"@en ,
+                     "Trycket p när kraften F verkar vinkelrätt mot arean A"@sv ;
+    solid-memo:back "p = F/A"@zxx .
+
+<#density>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Density ρ of a body of mass m and volume V"@en ,
+                     "Densiteten ρ hos en kropp med massan m och volymen V"@sv ;
+    solid-memo:back "ρ = m/V"@zxx .
+
+<#hydrostatic-pressure>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pressure p at depth h in a liquid of density ρ, not counting the air pressure above (gravitational acceleration g)"@en ,
+                     "Trycket p på djupet h i en vätska med densiteten ρ, utan lufttrycket ovanför (tyngdaccelerationen g)"@sv ;
+    solid-memo:back "p = ρgh"@zxx ;
+    solid-memo:backNote "With the air pressure p₀ at the surface, the total pressure is p₀ + ρgh."@en ,
+                        "Med lufttrycket p₀ vid ytan är det totala trycket p₀ + ρgh."@sv .
+
+<#archimedes-principle>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Archimedes' principle: buoyant force F on a body that displaces a volume V of a fluid of density ρ (gravitational acceleration g)"@en ,
+                     "Arkimedes princip: lyftkraften F på en kropp som tränger undan volymen V av en vätska eller gas med densiteten ρ (tyngdaccelerationen g)"@sv ;
+    solid-memo:back "F = ρVg"@zxx ;
+    solid-memo:backNote "The buoyant force equals the weight of the displaced fluid."@en ,
+                        "Lyftkraften är lika stor som tyngden av den undanträngda vätskan eller gasen."@sv .
+
+<#ideal-gas-law>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ideal gas law: pressure p, volume V, amount of substance n and absolute temperature T (molar gas constant R)"@en ,
+                     "Allmänna gaslagen: trycket p, volymen V, substansmängden n och den absoluta temperaturen T (allmänna gaskonstanten R)"@sv ;
+    solid-memo:back "pV = nRT"@zxx ;
+    solid-memo:backNote "T in kelvin."@en ,
+                        "T i kelvin."@sv .
+
+<#heat-and-temperature>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Heat Q needed to change the temperature of a mass m of a substance with specific heat capacity c by ΔT"@en ,
+                     "Värmemängden Q som behövs för att ändra temperaturen med ΔT hos massan m av ett ämne med den specifika värmekapaciteten c"@sv ;
+    solid-memo:back "Q = mcΔT"@zxx ;
+    solid-memo:backNote "Without a change of phase."@en ,
+                        "Utan fasövergång."@sv .
+
+<#stefan-boltzmann-law>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Stefan–Boltzmann law: power P radiated by a black body of surface area A at absolute temperature T (Stefan–Boltzmann constant σ)"@en ,
+                     "Stefan–Boltzmanns lag: effekten P som en svartkropp med arean A strålar ut vid den absoluta temperaturen T (Stefan–Boltzmanns konstant σ)"@sv ;
+    solid-memo:back "P = σAT⁴"@zxx .
+
+<#frequency-and-period>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Frequency f of an oscillation with period T"@en ,
+                     "Frekvensen f hos en svängning med periodtiden T"@sv ;
+    solid-memo:back "f = 1/T"@zxx .
+
+<#wave-speed>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Speed v of a wave with frequency f and wavelength λ"@en ,
+                     "Hastigheten v hos en våg med frekvensen f och våglängden λ"@sv ;
+    solid-memo:back "v = fλ"@zxx ;
+    solid-memo:backNote "Also written v = λf."@en ,
+                        "Skrivs även v = λf."@sv .
+
+<#snells-law>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Snell's law: angle of incidence θ₁ in a medium of refractive index n₁, angle of refraction θ₂ in a medium of refractive index n₂"@en ,
+                     "Snells lag (brytningslagen): infallsvinkeln θ₁ i ett medium med brytningsindex n₁, brytningsvinkeln θ₂ i ett medium med brytningsindex n₂"@sv ;
+    solid-memo:back "n₁ sin θ₁ = n₂ sin θ₂"@zxx ;
+    solid-memo:backNote "Both angles are measured from the normal."@en ,
+                        "Båda vinklarna mäts mot normalen."@sv .
+
+<#refractive-index>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Refractive index n of a medium in which light travels at speed v (speed of light in vacuum c)"@en ,
+                     "Brytningsindex n för ett medium där ljuset har hastigheten v (ljusets hastighet i vakuum c)"@sv ;
+    solid-memo:back "n = c/v"@zxx .
+
+<#ohms-law>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ohm's law: voltage U across a resistance R carrying a current I"@en ,
+                     "Ohms lag: spänningen U över resistansen R när strömmen är I"@sv ;
+    solid-memo:back "U = RI"@zxx ;
+    solid-memo:backNote "Many English texts write voltage as V: V = IR."@en ,
+                        "Engelska texter skriver ofta spänningen som V: V = IR."@sv .
+
+<#electric-power>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Electric power P in a component with voltage U across it and current I through it"@en ,
+                     "Den elektriska effekten P i en komponent med spänningen U över sig och strömmen I genom sig"@sv ;
+    solid-memo:back "P = UI"@zxx .
+
+<#electric-current>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Electric current I when a charge Q passes through a cross-section of a conductor in time t"@en ,
+                     "Den elektriska strömmen I när laddningen Q passerar genom ett tvärsnitt av en ledare på tiden t"@sv ;
+    solid-memo:back "I = Q/t"@zxx ;
+    solid-memo:backNote "The average current; for a steady current it is the current itself."@en ,
+                        "Medelströmmen; för en konstant ström är det själva strömmen."@sv .
+
+<#coulombs-law>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Coulomb's law: force F between point charges Q₁ and Q₂ at distance r (Coulomb constant k)"@en ,
+                     "Coulombs lag: kraften F mellan punktladdningarna Q₁ och Q₂ på avståndet r (Coulombs konstant k)"@sv ;
+    solid-memo:back "F = kQ₁Q₂/r²"@zxx ;
+    solid-memo:backNote "k = 1/(4πε₀) ≈ 8.99 · 10⁹ N·m²/C²."@en ,
+                        "k = 1/(4πε₀) ≈ 8,99 · 10⁹ N·m²/C²."@sv .
+
+<#electric-field-strength>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Electric field strength E at a point where a charge Q experiences a force F"@en ,
+                     "Den elektriska fältstyrkan E i en punkt där laddningen Q påverkas av kraften F"@sv ;
+    solid-memo:back "E = F/Q"@zxx .
+
+<#resistors-in-series>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Total resistance R of two resistors with resistances R₁ and R₂ connected in series"@en ,
+                     "Den totala resistansen R för två seriekopplade resistorer med resistanserna R₁ och R₂"@sv ;
+    solid-memo:back "R = R₁ + R₂"@zxx .
+
+<#resistors-in-parallel>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Total resistance R of two resistors with resistances R₁ and R₂ connected in parallel"@en ,
+                     "Den totala resistansen R för två parallellkopplade resistorer med resistanserna R₁ och R₂"@sv ;
+    solid-memo:back "1/R = 1/R₁ + 1/R₂"@zxx ;
+    solid-memo:backNote "Also written R = R₁R₂/(R₁ + R₂)."@en ,
+                        "Skrivs även R = R₁R₂/(R₁ + R₂)."@sv .
+
+<#resistance-and-resistivity>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Resistance R of a conductor of length L and cross-sectional area A made of a material of resistivity ρ"@en ,
+                     "Resistansen R hos en ledare med längden L och tvärsnittsarean A av ett material med resistiviteten ρ"@sv ;
+    solid-memo:back "R = ρL/A"@zxx .
+
+<#capacitance>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Capacitance C of a capacitor that holds a charge Q at a voltage U"@en ,
+                     "Kapacitansen C hos en kondensator som har laddningen Q vid spänningen U"@sv ;
+    solid-memo:back "C = Q/U"@zxx .
+
+<#force-on-current-carrying-conductor>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Magnetic force F on a straight conductor of length L carrying a current I perpendicular to a magnetic field of flux density B"@en ,
+                     "Den magnetiska kraften F på en rak ledare med längden L där strömmen I går vinkelrätt mot ett magnetfält med flödestätheten B"@sv ;
+    solid-memo:back "F = BIL"@zxx ;
+    solid-memo:backNote "At an angle θ between conductor and field: F = BIL sin θ."@en ,
+                        "Med vinkeln θ mellan ledare och fält: F = BIL sin θ."@sv .
+
+<#force-on-moving-charge>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Magnetic force F on a charge Q moving at speed v perpendicular to a magnetic field of flux density B"@en ,
+                     "Den magnetiska kraften F på laddningen Q som rör sig med farten v vinkelrätt mot ett magnetfält med flödestätheten B"@sv ;
+    solid-memo:back "F = QvB"@zxx ;
+    solid-memo:backNote "At an angle θ between velocity and field: F = QvB sin θ."@en ,
+                        "Med vinkeln θ mellan hastighet och fält: F = QvB sin θ."@sv .
+
+<#photon-energy>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Energy E of a photon of frequency f (Planck constant h)"@en ,
+                     "Energin E hos en foton med frekvensen f (Plancks konstant h)"@sv ;
+    solid-memo:back "E = hf"@zxx .
+
+<#mass-energy-equivalence>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mass–energy equivalence: rest energy E of a mass m (speed of light in vacuum c)"@en ,
+                     "Massans och energins ekvivalens: viloenergin E hos massan m (ljusets hastighet i vakuum c)"@sv ;
+    solid-memo:back "E = mc²"@zxx .
+
+<#de-broglie-wavelength>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "de Broglie wavelength λ of a particle with momentum p (Planck constant h)"@en ,
+                     "de Broglie-våglängden λ för en partikel med rörelsemängden p (Plancks konstant h)"@sv ;
+    solid-memo:back "λ = h/p"@zxx .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

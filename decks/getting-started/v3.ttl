@@ -1,0 +1,1728 @@
+@base <https://solid-memo.com/decks/getting-started/v3.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+@prefix schema:     <https://schema.org/> .
+
+# A course as well as a deck: its chapters and steps are subjects of this
+# document beside the cards, and every card is a multiple-choice question
+# whose back is the correct option and whose distractors are the wrong ones.
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ,
+      schema:Course ;
+    dcterms:title "Getting started with Solid Memo"@en ,
+                  "Kom igång med Solid Memo"@sv ,
+                  "Solid Memo 시작하기"@ko ,
+                  "Erste Schritte mit Solid Memo"@de ,
+                  "Primeros pasos con Solid Memo"@es ,
+                  "Premiers pas avec Solid Memo"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "A short course for people new to Solid Memo, guests trying it out included: how studying works and how to grade yourself honestly, where your decks and study are kept (in your own Solid Pod, or only in this browser as a guest) and how to keep what you studied as a guest, ready-made decks and courses from the deck library, making your own decks and cards, and setting a daily pace and following your progress. 5 chapters of short steps, each a piece of theory followed by multiple-choice questions; each chapter ends with a review, and every question you answer becomes a card in your deck. Take about one chapter a day, since every answer comes back as a card on the next study day. The facts come from the Solid Memo app and its documentation, as of October 2026."@en ,
+                        "En kort kurs för dig som är ny i Solid Memo, även om du bara provar som gäst: hur studierna går till och hur du betygsätter dig själv ärligt, var dina kortlekar och studier sparas (i din egen Solid Pod, eller bara i den här webbläsaren som gäst) och hur du behåller det du studerat som gäst, färdiga kortlekar och kurser från kortleksbiblioteket, att göra egna kortlekar och kort, och att sätta en takt för varje dag och följa dina framsteg. 5 kapitel med korta steg av teori följda av flervalsfrågor; varje kapitel avslutas med en repetition, och varje fråga du besvarar blir ett kort i din kortlek. Ta ungefär ett kapitel om dagen, eftersom varje svar kommer tillbaka som ett kort nästa studiedag. Fakta kommer från appen Solid Memo och dess dokumentation, så som de var i oktober 2026."@sv ,
+                        "Solid Memo를 처음 쓰는 사람을 위한 짧은 코스로, 게스트로 체험하는 사람도 포함됩니다. 학습이 어떻게 이루어지고 자신을 어떻게 정직하게 평가하는지, 덱과 학습 기록이 어디에 저장되는지(내 Solid Pod, 또는 게스트라면 이 브라우저에만)와 게스트로 학습한 내용을 보관하는 방법, 덱 라이브러리의 바로 쓸 수 있는 덱과 코스, 나만의 덱과 카드 만들기, 하루 학습 속도를 정하고 진행 상황을 확인하는 방법을 다룹니다. 짧은 단계로 이루어진 챕터 5개로 구성되며, 각 단계는 이론 한 토막과 그 뒤에 이어지는 객관식 문제입니다. 각 챕터는 복습으로 끝나고, 답한 문제는 모두 덱의 카드가 됩니다. 모든 답이 다음 학습일에 카드로 다시 나오므로 하루에 챕터 하나 정도씩 진행하는 것이 좋습니다. 내용은 2026년 10월 기준 Solid Memo 앱과 그 문서에서 가져왔습니다."@ko ,
+                        "Ein kurzer Kurs für alle, die neu bei Solid Memo sind, auch für Gäste, die es ausprobieren: wie das Lernen funktioniert und wie du dich ehrlich bewertest, wo deine Stapel und dein Lernstand gespeichert werden (in deinem eigenen Solid Pod oder als Gast nur in diesem Browser) und wie du behältst, was du als Gast gelernt hast, fertige Stapel und Kurse aus der Stapelbibliothek, eigene Stapel und Karten erstellen sowie ein tägliches Lerntempo festlegen und deinen Fortschritt verfolgen. 5 Kapitel mit kurzen Schritten, jeder ein Stück Theorie, gefolgt von Multiple-Choice-Fragen; jedes Kapitel endet mit einer Wiederholung, und jede Frage, die du beantwortest, wird zu einer Karte in deinem Stapel. Nimm dir etwa ein Kapitel pro Tag vor, denn jede Antwort kommt am nächsten Lerntag als Karte wieder. Die Fakten stammen aus der App Solid Memo und ihrer Dokumentation, Stand Oktober 2026."@de ,
+                        "Un curso breve para quienes empiezan con Solid Memo, incluidos quienes lo prueban en modo invitado: cómo funciona el estudio y cómo valorarte con sinceridad, dónde se guardan tus mazos y tus datos de estudio (en tu propio Solid Pod, o solo en este navegador en modo invitado) y cómo conservar lo que has estudiado en modo invitado, los mazos y cursos ya preparados de la biblioteca de mazos, cómo crear tus propios mazos y tarjetas, y cómo fijar un ritmo diario y seguir tu progreso. 5 capítulos de pasos cortos, cada uno un poco de teoría seguido de preguntas de opción múltiple; cada capítulo termina con un repaso, y cada pregunta que respondes se convierte en una tarjeta de tu mazo. Haz más o menos un capítulo al día, ya que cada respuesta vuelve como tarjeta el siguiente día de estudio. La información procede de la app Solid Memo y su documentación, a fecha de octubre de 2026."@es ,
+                        "Un cours court pour celles et ceux qui découvrent Solid Memo, y compris en mode invité : comment fonctionne l’étude et comment vous noter honnêtement, où sont conservés vos paquets et votre travail (dans votre propre Solid Pod, ou seulement dans ce navigateur en mode invité) et comment garder ce que vous avez étudié en mode invité, les paquets et cours prêts à l’emploi de la bibliothèque de paquets, la création de vos propres paquets et cartes, ainsi que le choix d’un rythme quotidien et le suivi de votre progression. 5 chapitres de courtes étapes, chacune un peu de théorie suivie de questions à choix multiple ; chaque chapitre se termine par une révision, et chaque question à laquelle vous répondez devient une carte de votre paquet. Comptez environ un chapitre par jour, car chaque réponse revient sous forme de carte le jour d’étude suivant. Les informations proviennent de l’application Solid Memo et de sa documentation, telles qu’en octobre 2026."@fr ;
+    prov:wasDerivedFrom <https://github.com/solid-memo/website> ,
+                        <https://solid-memo.com/> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ;
+    dcat:keyword "Solid Memo"@en ,
+                 "getting started"@en ,
+                 "beginner"@en ,
+                 "spaced repetition"@en ,
+                 "flashcards"@en ,
+                 "Solid"@en ,
+                 "pod"@en ,
+                 "Solid Memo"@sv ,
+                 "kom igång"@sv ,
+                 "nybörjare"@sv ,
+                 "repetition med mellanrum"@sv ,
+                 "kortlekar"@sv ,
+                 "Solid"@sv ,
+                 "pod"@sv ,
+                 "Solid Memo"@ko ,
+                 "시작하기"@ko ,
+                 "초보자"@ko ,
+                 "간격 반복"@ko ,
+                 "플래시카드"@ko ,
+                 "Solid"@ko ,
+                 "Pod"@ko ,
+                 "Solid Memo"@de ,
+                 "Erste Schritte"@de ,
+                 "Anfänger"@de ,
+                 "verteilte Wiederholung"@de ,
+                 "Karteikarten"@de ,
+                 "Solid"@de ,
+                 "Pod"@de ,
+                 "Solid Memo"@es ,
+                 "primeros pasos"@es ,
+                 "principiante"@es ,
+                 "repetición espaciada"@es ,
+                 "tarjetas de memoria"@es ,
+                 "Solid"@es ,
+                 "pod"@es ,
+                 "Solid Memo"@fr ,
+                 "premiers pas"@fr ,
+                 "débutant"@fr ,
+                 "répétition espacée"@fr ,
+                 "cartes mémoire"@fr ,
+                 "Solid"@fr ,
+                 "pod"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/getting-started/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/getting-started/v2.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#getting-started> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#getting-started> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this course was made (W3C PROV-O): written from the app's code and
+# documentation, then checked in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://github.com/solid-memo/website> ,
+              <https://solid-memo.com/> ,
+              <http://augmentingcognition.com/ltm.html> ,
+              <https://docs.ankiweb.net/studying.html> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ,
+                       <#review-6> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the course was planned by AI agents from an inventory of the app's user-facing features, read from its code and its English and Swedish texts, and from research on how to introduce an app and spaced repetition to newcomers; three outlines were drafted from different angles and merged into one, and its chapters were then written in English and Swedish. The working notes and the outline are kept with the course's sources, not in the library."@en ,
+                 "The course was checked by machine (the app's SHACL and DCAT-AP validators, its course and Markdown checks) and by AI agents against the app's code; it has had no human review."@en ,
+                 "Selection: what a newcomer needs first, in the order they meet it: studying and honest grading, where their study is kept (a Solid Pod, or the browser as a guest) and how to keep guest study, the deck library and courses, making their own decks and cards, and pace and progress. Left out on purpose: screens a beginner rarely meets (data checks and repair, format updates, setting up storage), the scheduling formula's details and exact intervals, and the names of buttons and pages beyond a few, since questions test what a feature does and how it behaves, not where it sits on the screen."@en ,
+                 "Structure: 5 chapters of 12 steps in all. Each step is a short theory text and one or two multiple-choice questions on it; each chapter has one review question that combines its steps and is asked only in its final review. Every question has one correct option (the card's back) and three wrong options (its distractors) of similar length and form, each with a note on why it is wrong. Every text is in English and Swedish."@en ,
+                 "Licensing: the course is CC0 1.0, like most of the library. Its theory, questions, options and notes describe Solid Memo, whose code and documentation are the compiler's own (MIT License, copyright Anton Wiklund), in the course's own words. The two essays on spaced repetition below were used for facts only: nothing was copied from them."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
+    rdfs:label "Machine checks"@en ;
+    rdfs:comment "Scope: the whole release, with the library checker (npm run library:check), which validates it against Solid Memo's shapes (library deck format 5, card format 5, chapter, step and distractor format 1), DCAT-AP and SKOS, with the reference data, checks the course's outline by its rules and its Markdown by the rules for a release."@en ,
+                 "Outcome: The release conforms to every shape, profile and rule the checker applies to it."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-09T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Outline: facts and completeness (AI)"@en ;
+    rdfs:comment "Scope: the merged outline, each chapter's theory points, answers and wrong options checked by an AI agent against the app's code, which tried to refute each one, and the outline as a whole by another for what a newcomer would miss or be lost by; not a human review."@en ,
+                 "Outcome: 29 problems were found, among them wrong options that were true in some cases, answers that held only after a lapse, and claims about a backup the app does not offer; the outline was revised and cut to 26 questions before the chapters were written."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-09T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Chapter text: facts, Swedish and questions (AI)"@en ;
+    rdfs:comment "Scope: each chapter as written, reviewed by three AI agents: one checking every fact, answer and wrong option against the app's code, one the Swedish text against the app's own Swedish terms, and one the questions' design and the release's format rules; not a human review."@en ,
+                 "Outcome: the findings (such as a wrong option that held in one case, notes that overstated a rule, options whose form gave the answer away, and calques in the Swedish) were fixed in the text, or kept with a reason."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-09T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Course as a whole (AI)"@en ;
+    rdfs:comment "Scope: the five chapters read together by an AI agent, in both languages, for terms used differently, contradictions, facts explained twice, and theory that relies on a later chapter; not a human review."@en ,
+                 "Outcome: a few terms were aligned with the app's labels, a step that repeated an earlier one was shortened, and two notes were corrected to say a reset is per deck."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-09T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Recheck against the app's later changes (AI)"@en ;
+    rdfs:comment "Scope: every chapter, in both languages, checked again by AI agents against the app's code after it changed how guest study is kept (added to an instance one has, rather than always moved into a new one), how instances are updated and deleted, and how the deck list offers the library's course for newcomers, then the edits checked once more by another; not a human review."@en ,
+                 "Outcome: the step on keeping guest study, the questions on it and on deleting an instance, and a few sentences on courses and daily limits were rewritten to match; the other chapters held as they were."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: theory in chunks (AI)"@en ;
+    rdfs:comment "Scope: every step's theory, in both languages, split by an AI agent into chunks read one at a time, with a Markdown thematic break where its topic turns and at the same place in English and Swedish; the release compared by a script with version 1, which found the breaks and the release's own metadata the only changes, and checked by the library checker (no empty chunk, as many chunks in each language); not a human review."@en ,
+                 "Outcome: each of the 12 steps is read in two chunks; no text was reworded, and every chapter, step, card and distractor keeps its id."@en .
+
+<#review-6>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 3: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 2, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card, chapter, step or distractor changed."@en .
+
+<https://github.com/solid-memo/website>
+    dcterms:title "Solid Memo repository: README, docs and source" ;
+    dcterms:creator "Solid Memo" ;
+    rdfs:comment "The repository's licence file, LICENSE, is the MIT License: \"Copyright (c) 2026 Anton Wiklund\". Used for facts only: nothing copied; the course describes the app's behaviour in its own words, and its few button and page names are the app's own English and Swedish labels. Reliability: authoritative (first-hand, this project). Read in October 2026, at the commit that added this course to the library. Used for: every fact about the app: scheduling and grading, study sessions and days, guest mode and moving guest study, instances, the deck library and its updates, courses, the card editor and its Browser, preferences, the streak and statistics."@en .
+
+<https://solid-memo.com/>
+    dcterms:title "Solid Memo" ;
+    dcterms:creator "Solid Memo" ;
+    rdfs:comment "The app itself, the build of the repository above; its code is the MIT-licensed code of the repository, copyright Anton Wiklund. Used for facts only: nothing copied. Reliability: authoritative (first-hand, this project). Used for: what a newcomer sees."@en .
+
+<http://augmentingcognition.com/ltm.html>
+    dcterms:title "Augmenting Long-term Memory" ;
+    dcterms:creator "Michael A. Nielsen, 2018" ;
+    rdfs:comment "The page's footer: \"This work is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License\". Used for facts only: nothing copied. Reliability: secondary (expert essay). Used for: the spacing effect as a principle, each successful recall letting the gap before the next review grow."@en .
+
+<https://docs.ankiweb.net/studying.html>
+    dcterms:title "Anki Manual: Studying" ;
+    dcterms:creator "Ankitects" ;
+    rdfs:comment "The manual's repository README: \"This manual is licensed under the CC BY-SA 4 license\". Used for facts only: nothing copied. Reliability: secondary (another spaced-repetition app's manual). Used for: grading yourself strictly, a half-remembered answer counted as a fail."@en .
+
+# Chapter 1: How studying works.
+<#ch-studying>
+    a solid-memo:Chapter ,
+      schema:Syllabus ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <> ;
+    schema:position 0 ;
+    dcterms:title "How studying works"@en ,
+                  "Så studerar du"@sv ;
+    dcterms:description "How this course turns your answers into cards, how a study session runs, and how to grade yourself so the schedule works for you. Ends with a review of the chapter."@en ,
+                        "Hur kursen gör dina svar till kort, hur ett studiepass går till och hur du betygsätter dig själv så att schemat fungerar för dig. Avslutas med en repetition av kapitlet."@sv ;
+    solid-memo:reviewQuestion <#q-studying-r01> .
+
+<#ch-studying-1>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <#ch-studying> ;
+    schema:position 0 ;
+    solid-memo:textFormat solid-memo:markdown ;
+    solid-memo:theory """## Your answers become cards
+
+While you answer a step's questions, its text is hidden, so that you recall instead of reread.
+
+Every question you answer, right or wrong, becomes a card in this course's deck. Recalling something just before you would forget it makes it last. So each time you remember a card, the gap before it comes back grows: first a day, then about a week, then longer. A card you forget starts over. A day here means a study day, which by default starts at 04:00.
+
+Every answer comes back as a card on the next study day, so take about one chapter a day.
+
+---
+
+Each chapter ends with a final review of all its questions. A question you answer wrongly comes back until you get it right, and finishing the review opens the next chapter. Do it in one go: leaving part-way starts it over. To come back later, continue the course from its deck in your deck list, or from its page in the Deck library."""@en ,
+                      """## Dina svar blir kort
+
+Medan du svarar på ett stegs frågor är dess text dold, så att du plockar fram svaret ur minnet i stället för att läsa det igen.
+
+Varje fråga du svarar på, rätt eller fel, blir ett kort i kursens kortlek. Det du plockar fram ur minnet strax innan du skulle ha glömt det fastnar bättre. Därför blir tiden tills kortet kommer tillbaka längre varje gång du minns det: först en dag, sedan ungefär en vecka, sedan ännu längre. Ett kort du glömmer börjar om. Med dag menas här en studiedag, som börjar klockan 04:00 som standard.
+
+Varje svar kommer tillbaka som ett kort nästa studiedag, så ta ungefär ett kapitel om dagen.
+
+---
+
+Varje kapitel avslutas med en slutrepetition av alla dess frågor. En fråga du svarar fel på kommer tillbaka tills du svarar rätt, och när repetitionen är klar öppnas nästa kapitel. Gör den i ett svep: lämnar du den halvvägs börjar den om. Vill du komma tillbaka senare fortsätter du kursen från dess kortlek i din lista med kortlekar, eller från dess sida i Kortleksbiblioteket."""@sv ;
+    solid-memo:checkedBy <#q-studying-1a> ,
+                         <#q-studying-1b> .
+
+<#q-studying-1a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "You answer a question in a Solid Memo course wrongly. What happens to that question afterwards?"@en ,
+                     "Du svarar fel på en fråga i en kurs i Solid Memo. Vad händer sedan med frågan?"@sv ;
+    solid-memo:back "It becomes a card in your deck all the same"@en ,
+                    "Den blir ändå ett kort i din kortlek"@sv ;
+    solid-memo:backNote "Every question you answer in a step joins the course's deck, right or wrong, and comes back to study on the next study day."@en ,
+                        "Varje fråga du svarar på i ett steg hamnar i kursens kortlek, rätt eller fel, och kommer tillbaka för repetition nästa studiedag."@sv ;
+    solid-memo:distractor <#q-studying-1a-d1> ,
+                          <#q-studying-1a-d2> ,
+                          <#q-studying-1a-d3> .
+
+<#q-studying-1a-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "It is dropped, so only right answers become cards"@en ,
+                              "Den slängs, så bara rätta svar blir kort"@sv ;
+    solid-memo:distractorNote "Wrong answers are not dropped: every answered question becomes a card, so you practise exactly what you missed."@en ,
+                              "Fel svar slängs inte: varje fråga du har svarat på blir ett kort, så du övar på just det du missade."@sv .
+
+<#q-studying-1a-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "It becomes a card only once the chapter is done"@en ,
+                              "Den blir ett kort först när kapitlet är klart"@sv ;
+    solid-memo:distractorNote "A question joins your deck the moment you first answer it, not when the chapter ends."@en ,
+                              "En fråga hamnar i din kortlek så fort du svarar på den första gången, inte när kapitlet är slut."@sv .
+
+<#q-studying-1a-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "It is marked failed, and its step must be retaken"@en ,
+                              "Den markeras som underkänd, och steget måste göras om"@sv ;
+    solid-memo:distractorNote "A step is done once all its questions are answered, whatever the answers, so nothing has to be retaken."@en ,
+                              "Ett steg är klart när alla dess frågor är besvarade, oavsett svaren, så inget behöver göras om."@sv .
+
+<#q-studying-1b>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "You have remembered a card three times in a row. Why does Solid Memo show it to you less and less often?"@en ,
+                     "Du har kommit ihåg ett kort tre gånger i rad. Varför visar Solid Memo det allt mer sällan?"@sv ;
+    solid-memo:back "Each successful recall lets the next gap grow"@en ,
+                    "Varje gång du minns det blir nästa intervall längre"@sv ;
+    solid-memo:backNote "Recalling something just before you would forget it makes it last, so each pass lengthens the wait: first a day, then about a week, then longer."@en ,
+                        "Det du plockar fram ur minnet strax innan du skulle ha glömt det fastnar bättre, så varje godkänt svar förlänger väntan: först en dag, sedan ungefär en vecka, sedan ännu längre."@sv ;
+    solid-memo:distractor <#q-studying-1b-d1> ,
+                          <#q-studying-1b-d2> ,
+                          <#q-studying-1b-d3> .
+
+<#q-studying-1b-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Each card is shown only a fixed number of times"@en ,
+                              "Varje kort visas bara ett bestämt antal gånger"@sv ;
+    solid-memo:distractorNote "There is no such limit: a card keeps coming back, only with longer and longer gaps."@en ,
+                              "Någon sådan gräns finns inte: ett kort fortsätter att komma tillbaka, bara med allt längre intervall."@sv .
+
+<#q-studying-1b-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Cards fade out once they are a week old"@en ,
+                              "Kort fasas ut när de är en vecka gamla"@sv ;
+    solid-memo:distractorNote "A card's age does not matter; your grades decide when it comes back."@en ,
+                              "Kortets ålder spelar ingen roll; det är dina betyg som avgör när det kommer tillbaka."@sv .
+
+<#q-studying-1b-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Older cards make way for newer ones"@en ,
+                              "Äldre kort får ge plats åt nyare"@sv ;
+    solid-memo:distractorNote "New cards do not push old ones out; a card you remember is spaced further apart, not replaced."@en ,
+                              "Nya kort tränger inte undan gamla; ett kort du minns kommer tillbaka allt glesare i stället för att ersättas."@sv .
+
+<#ch-studying-2>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <#ch-studying> ;
+    schema:position 1 ;
+    solid-memo:textFormat solid-memo:markdown ;
+    solid-memo:theory """## Due cards and a few new ones
+
+A deck offers Study only while something is waiting for you today. There is one kind of study session: the cards due today, meaning those whose gap has run out, with a few new ones spread evenly among them when the deck has cards you have not studied yet. The new ones are picked at random. A course's cards join its deck already answered, so a course's deck usually has no new ones.
+
+---
+
+For each card you see one side and try to recall the other. Then you reveal the answer and grade yourself. The app does not check a typed answer; only courses like this one use multiple choice.
+
+Each grade is saved the moment you give it. So you can end a session at any time and lose nothing: the cards you did not reach simply wait. When nothing is left for today, the deck is marked as done for today.
+
+After this chapter, try it: when one of your decks has cards waiting, study it."""@en ,
+                      """## Dagens kort och några nya
+
+En kortlek visar knappen Studera bara när något väntar på dig idag. Det finns bara en sorts studiepass: korten du ska repetera idag, med några nya jämnt utspridda bland dem när kortleken har kort du inte har studerat än. De nya väljs slumpvis. Korten från en kurs hamnar i kortleken redan besvarade, så kursens kortlek har oftast inga nya.
+
+---
+
+För varje kort ser du ena sidan och försöker minnas den andra. Sedan visar du svaret och betygsätter dig själv. Appen rättar inga inskrivna svar; det är bara kurser som den här som har flervalsfrågor.
+
+Varje betyg sparas i samma stund som du ger det. Du kan alltså avsluta ett studiepass när du vill utan att förlora något: korten du inte hann med väntar bara kvar. När inget återstår markeras kortleken som klar för idag.
+
+Prova efter det här kapitlet: när en av dina kortlekar har kort som väntar, studera den."""@sv ;
+    solid-memo:checkedBy <#q-studying-2a> ,
+                         <#q-studying-2b> .
+
+<#q-studying-2a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "What does an ordinary Solid Memo study session hold?"@en ,
+                     "Vad innehåller ett vanligt studiepass i Solid Memo?"@sv ;
+    solid-memo:back "Today's due cards, with any new ones mixed in"@en ,
+                    "Dagens kort att repetera, med eventuella nya insprängda"@sv ;
+    solid-memo:backNote "There is one kind of session: the cards due today, with a few new cards, picked at random, spread evenly among them when the deck has any."@en ,
+                        "Det finns bara en sorts studiepass: korten du ska repetera idag, med några slumpvis valda nya kort jämnt utspridda bland dem när kortleken har några."@sv ;
+    solid-memo:distractor <#q-studying-2a-d1> ,
+                          <#q-studying-2a-d2> ,
+                          <#q-studying-2a-d3> .
+
+<#q-studying-2a-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Only the cards you failed in earlier sessions"@en ,
+                              "Bara korten du svarade fel på i tidigare pass"@sv ;
+    solid-memo:distractorNote "Every card due today is in it, whether you passed or failed it last time, plus any new ones."@en ,
+                              "Alla kort du ska repetera idag är med, oavsett om du svarade rätt eller fel förra gången, plus eventuella nya."@sv .
+
+<#q-studying-2a-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Every card in the deck, in the deck's order"@en ,
+                              "Alla kort i kortleken, i kortlekens ordning"@sv ;
+    solid-memo:distractorNote "Only the cards due today come up, with any new ones; the rest wait for their day."@en ,
+                              "Bara korten du ska repetera idag kommer upp, med eventuella nya; resten väntar på sin dag."@sv .
+
+<#q-studying-2a-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "All the new cards first, then the reviews"@en ,
+                              "Alla nya kort först, sedan repetitionerna"@sv ;
+    solid-memo:distractorNote "Only a few new cards come each day, and they are spread evenly among the reviews rather than put first."@en ,
+                              "Bara några nya kort kommer varje dag, och de sprids jämnt bland repetitionerna i stället för att komma först."@sv .
+
+<#q-studying-2b>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "You end a Solid Memo study session halfway through. What happens to the answers you already gave?"@en ,
+                     "Du avslutar ett studiepass i Solid Memo halvvägs. Vad händer med svaren du redan har gett?"@sv ;
+    solid-memo:back "They are kept, as each was saved when given"@en ,
+                    "De finns kvar, eftersom vart och ett sparades direkt"@sv ;
+    solid-memo:backNote "Each grade is saved the moment you give it, so stopping early loses nothing; the cards you did not reach simply wait."@en ,
+                        "Varje betyg sparas i samma stund som du ger det, så du förlorar inget på att sluta tidigt; korten du inte hann med väntar bara kvar."@sv ;
+    solid-memo:distractor <#q-studying-2b-d1> ,
+                          <#q-studying-2b-d2> ,
+                          <#q-studying-2b-d3> .
+
+<#q-studying-2b-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "They are lost unless the session is finished"@en ,
+                              "De går förlorade om inte passet slutförs"@sv ;
+    solid-memo:distractorNote "Nothing waits for the end of a session: each answer is already saved when you give it."@en ,
+                              "Inget väntar på att passet ska ta slut: varje svar sparas redan när du ger det."@sv .
+
+<#q-studying-2b-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "They are undone the next time you open the deck"@en ,
+                              "De görs ogjorda nästa gång du öppnar kortleken"@sv ;
+    solid-memo:distractorNote "Opening a deck changes nothing: each answer was saved when you gave it, and only resetting today's study of the deck undoes it."@en ,
+                              "Att öppna en kortlek ändrar ingenting: varje svar sparades när du gav det, och bara en återställning av dagens studier i kortleken gör det ogjort."@sv .
+
+<#q-studying-2b-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "They are graded again when you restart"@en ,
+                              "De betygsätts på nytt när du börjar om"@sv ;
+    solid-memo:distractorNote "Every grade sets the card's next day to a later study day, so a new session holds only what is still waiting."@en ,
+                              "Varje betyg flyttar kortet till en senare studiedag, så ett nytt pass innehåller bara det som fortfarande väntar."@sv .
+
+<#ch-studying-3>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <#ch-studying> ;
+    schema:position 2 ;
+    solid-memo:textFormat solid-memo:markdown ;
+    solid-memo:theory """## A grade is an instruction, not a score
+
+After you reveal the answer, a row of buttons asks how well you remembered it. By default they run from 0, no memory at all, to 5, easy. Your grade decides when the card comes back, so be strict: if you could not produce the answer on your own, grade it as a fail, even if you recognise it once it is shown.
+
+- 0, 1 and 2 are fails.
+- 3, 4 and 5 are passes, from hard to easy.
+
+---
+
+If you prefer, Preferences, in the bar at the top, offer four buttons instead: Again, Hard, Good and Easy. They count as 1, 3, 4 and 5, so only Again fails, and Hard is still a pass.
+
+A card graded 0 or 1, or Again, also comes back later in the same session, until you grade it higher. A card graded 2 waits for the next study day. Grading too generously sends cards back too late, so you forget more."""@en ,
+                      """## Betyget är en instruktion, inte en poäng
+
+När du har visat svaret frågar en rad knappar hur väl du mindes det. Som standard går de från 0, inget minne alls, till 5, lätt. Betyget avgör när kortet kommer tillbaka, så var sträng: kunde du inte få fram svaret på egen hand ger du underkänt, även om du känner igen svaret när det visas.
+
+- 0, 1 och 2 är underkänt.
+- 3, 4 och 5 är godkänt, från svårt till lätt.
+
+---
+
+Om du vill kan du under Inställningar, i raden högst upp, välja fyra knappar i stället: Igen, Svårt, Bra och Lätt. De räknas som 1, 3, 4 och 5, så bara Igen är underkänt, och Svårt är fortfarande godkänt.
+
+Ett kort med betyget 0 eller 1, eller Igen, kommer dessutom tillbaka senare i samma studiepass, tills du ger det ett högre betyg. Ett kort med betyget 2 väntar till nästa studiedag. Är du för generös med betygen kommer korten tillbaka för sent, och då hinner du glömma mer."""@sv ;
+    solid-memo:checkedBy <#q-studying-3a> ,
+                         <#q-studying-3b> .
+
+<#q-studying-3a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Studying in Solid Memo, you recall an answer only after a friend whispers its first letter. Which grade keeps your schedule honest?"@en ,
+                     "När du studerar i Solid Memo kommer du på svaret först efter att en vän viskat första bokstaven. Vilket betyg ska du ge för att schemat ska stämma?"@sv ;
+    solid-memo:back "A fail, as you could not recall it alone"@en ,
+                    "Underkänt, eftersom du inte mindes det själv"@sv ;
+    solid-memo:backNote "Grade by whether you produced the answer on your own; with a hint you did not, so a fail brings the card back soon enough to learn it."@en ,
+                        "Betygsätt efter om du fick fram svaret på egen hand; med en ledtråd gjorde du inte det, så med underkänt kommer kortet tillbaka tillräckligt snart för att du ska lära dig det."@sv ;
+    solid-memo:distractor <#q-studying-3a-d1> ,
+                          <#q-studying-3a-d2> ,
+                          <#q-studying-3a-d3> .
+
+<#q-studying-3a-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "The lowest pass, so the card comes back sooner"@en ,
+                              "Det lägsta godkända, så att kortet kommer tillbaka tidigare"@sv ;
+    solid-memo:distractorNote "The lowest pass is still a pass, so the card is not started over, although you never recalled the answer on your own."@en ,
+                              "Även det lägsta godkända är godkänt, så kortet börjar inte om, fast du aldrig fick fram svaret på egen hand."@sv .
+
+<#q-studying-3a-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "A middle pass, as you got there in the end"@en ,
+                              "Godkänt mitt på skalan, eftersom du kom på det till slut"@sv ;
+    solid-memo:distractorNote "Getting there with a hint is not recall; a pass would schedule the card as if you knew it."@en ,
+                              "Att komma på svaret med hjälp av en ledtråd är inte att minnas; med ett godkänt betyg schemaläggs kortet som om du kunde det."@sv .
+
+<#q-studying-3a-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "The top pass, so the card bothers you less"@en ,
+                              "Högsta betyget, så att kortet stör dig mindre"@sv ;
+    solid-memo:distractorNote "The top pass also makes later gaps grow faster, the opposite of what a card you could not recall needs."@en ,
+                              "Högsta betyget får dessutom senare intervall att växa snabbare, raka motsatsen till vad ett kort du inte kunde minnas behöver."@sv .
+
+<#q-studying-3b>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "In a Solid Memo study session you grade a card Again, or 0 or 1 on the 0 to 5 scale. When will you see it next?"@en ,
+                     "I ett studiepass i Solid Memo ger du ett kort betyget Igen, eller 0 eller 1 på skalan 0 till 5. När ser du det nästa gång?"@sv ;
+    solid-memo:back "Later in this same session"@en ,
+                    "Senare i samma studiepass"@sv ;
+    solid-memo:backNote "A grade of 0 or 1, or Again, puts the card back among the rest of the session; after that it is due again on the next study day."@en ,
+                        "Betyget 0 eller 1, eller Igen, lägger tillbaka kortet bland resten av studiepasset; efter det ska det repeteras nästa studiedag."@sv ;
+    solid-memo:distractor <#q-studying-3b-d1> ,
+                          <#q-studying-3b-d2> ,
+                          <#q-studying-3b-d3> .
+
+<#q-studying-3b-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Not until the next study day"@en ,
+                              "Inte förrän nästa studiedag"@sv ;
+    solid-memo:distractorNote "That is what a 2 does; a grade of 0 or 1, or Again, also brings the card back later in the same session."@en ,
+                              "Så gör betyget 2; med betyget 0 eller 1, eller Igen, kommer kortet dessutom tillbaka senare i samma studiepass."@sv .
+
+<#q-studying-3b-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Only once you reset today's study"@en ,
+                              "Först när du återställer dagens studier"@sv ;
+    solid-memo:distractorNote "Resetting undoes a deck's whole day of study; a failed card comes back within the session without it."@en ,
+                              "En återställning gör en kortleks studier för hela dagen ogjorda; ett underkänt kort kommer tillbaka i studiepasset ändå."@sv .
+
+<#q-studying-3b-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "After its usual gap, as if it had passed"@en ,
+                              "Efter sitt vanliga intervall, som om det klarats"@sv ;
+    solid-memo:distractorNote "A fail does not keep the card's gap; it starts the card over with a gap of one day."@en ,
+                              "Ett underkänt betyg behåller inte kortets intervall; kortet börjar om med ett intervall på en dag."@sv .
+
+<#q-studying-r01>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Priya studies in Solid Memo with the four answer buttons. She has remembered a card every time it came up over several weeks. Today she recalls it only with real effort and grades it Hard. What does that do to the card's schedule?"@en ,
+                     "Priya studerar i Solid Memo med de fyra svarsknapparna. Hon har kommit ihåg ett kort varje gång det kommit upp under flera veckor. Idag minns hon det bara med stor möda och ger det betyget Svårt. Hur påverkar det kortets schema?"@sv ;
+    solid-memo:back "It counts as a pass, so the next gap is still longer"@en ,
+                    "Det räknas som godkänt, så nästa intervall blir ändå längre"@sv ;
+    solid-memo:backNote "Hard is the lowest passing grade, so after a run of passes it still lengthens the gap, just not as much as a higher grade can."@en ,
+                        "Svårt är det lägsta godkända betyget, så efter en rad godkända svar blir intervallet ändå längre, bara inte lika mycket som ett högre betyg kan ge."@sv ;
+    solid-memo:distractor <#q-studying-r01-d1> ,
+                          <#q-studying-r01-d2> ,
+                          <#q-studying-r01-d3> .
+
+<#q-studying-r01-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "It counts as a fail, and the card starts over"@en ,
+                              "Det räknas som underkänt, och kortet börjar om"@sv ;
+    solid-memo:distractorNote "On the four buttons only Again fails; Hard is a pass, counted as a 3."@en ,
+                              "Med de fyra knapparna är bara Igen underkänt; Svårt är godkänt och räknas som en 3:a."@sv .
+
+<#q-studying-r01-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "It brings the card back later this session"@en ,
+                              "Kortet kommer tillbaka senare i samma pass"@sv ;
+    solid-memo:distractorNote "Only Again, or a 0 or 1, brings a card back within the session; Hard does not."@en ,
+                              "Bara Igen, eller 0 eller 1, gör att ett kort kommer tillbaka i samma studiepass; det gör inte Svårt."@sv .
+
+<#q-studying-r01-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "It keeps the card's gap exactly as it was"@en ,
+                              "Det behåller kortets intervall precis som det var"@sv ;
+    solid-memo:distractorNote "After a run of passes, Hard still lengthens the gap; it does not hold it still."@en ,
+                              "Efter en rad godkända svar gör Svårt ändå intervallet längre; det förblir inte detsamma."@sv .
+
+# Chapter 2: Where your study is kept.
+<#ch-your-data>
+    a solid-memo:Chapter ,
+      schema:Syllabus ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <> ;
+    schema:position 1 ;
+    dcterms:title "Where your study is kept"@en ,
+                  "Var dina studier sparas"@sv ;
+    dcterms:description "Your own Solid Pod, studying as a guest in this browser and how to keep that study, and what logging out and deleting mean for your data. Ends with a review of the chapter."@en ,
+                        "Din egen Solid Pod, att studera som gäst i den här webbläsaren och hur du behåller det du studerat, och vad utloggning och radering betyder för dina data. Avslutas med en repetition av kapitlet."@sv ;
+    solid-memo:reviewQuestion <#q-your-data-r01> .
+
+<#ch-your-data-1>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <#ch-your-data> ;
+    schema:position 0 ;
+    solid-memo:textFormat solid-memo:markdown ;
+    solid-memo:theory """## Your Pod, your data
+
+Solid Memo keeps nothing of yours on servers of its own. When you log in, your decks, cards, progress and settings are kept in your Solid Pod: your own storage space on the web, a bit like a personal drive, run by a Pod provider you choose. Because your data is not locked inside one app, other Solid apps you allow can use it too.
+
+If you have no Pod yet, a Pod provider makes one for you on its own site, and some do it for free. Then you come back and log in.
+
+---
+
+You log in on your provider's own page, either by entering your WebID (the web address that identifies you) or by picking your provider. Solid Memo never sees your password.
+
+Since everything is read from your Pod, every device you log in on shows the same decks and progress. Only a few small choices stay with each device, such as the language of the app's menus."""@en ,
+                      """## Din Pod, dina data
+
+Solid Memo sparar inget av det som är ditt på egna servrar. När du är inloggad sparas dina kortlekar, kort, framsteg och inställningar i din Solid Pod: ditt eget lagringsutrymme på webben, ungefär som en personlig molndisk, som drivs av en Pod-leverantör du själv väljer. Eftersom dina data inte är inlåsta i en enda app kan även andra Solid-appar använda dem, om du tillåter det.
+
+Har du ingen Pod än skapar en Pod-leverantör en åt dig på sin egen webbplats, och en del gör det gratis. Sedan kommer du tillbaka hit och loggar in.
+
+---
+
+Du loggar in på leverantörens egen sida, antingen genom att skriva in ditt WebID (webbadressen som identifierar dig) eller genom att välja din leverantör. Solid Memo ser aldrig ditt lösenord.
+
+Eftersom allt läses från din Pod visar varje enhet du loggar in på samma kortlekar och framsteg. Bara några små val sparas på varje enhet för sig, till exempel språket i appens menyer."""@sv ;
+    solid-memo:checkedBy <#q-your-data-1a> ,
+                         <#q-your-data-1b> .
+
+<#q-your-data-1a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "When you are logged in to Solid Memo, where are your decks and study stored?"@en ,
+                     "Var sparas dina kortlekar och studier när du är inloggad i Solid Memo?"@sv ;
+    solid-memo:back "In your Pod, at the provider you chose"@en ,
+                    "I din Pod, hos leverantören du valt"@sv ;
+    solid-memo:backNote "Solid Memo is an app that works on your own storage: it reads and writes your decks and progress in your Pod and has no database of its own."@en ,
+                        "Solid Memo är en app som arbetar mot ditt eget lagringsutrymme: den läser och skriver dina kortlekar och framsteg i din Pod och har ingen egen databas."@sv ;
+    solid-memo:distractor <#q-your-data-1a-d1> ,
+                          <#q-your-data-1a-d2> ,
+                          <#q-your-data-1a-d3> .
+
+<#q-your-data-1a-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "On Solid Memo's own servers"@en ,
+                              "På Solid Memos egna servrar"@sv ;
+    solid-memo:distractorNote "Solid Memo has no servers that keep your study; everything you make and learn is kept in your Pod."@en ,
+                              "Solid Memo har inga servrar som sparar dina studier; allt du skapar och lär dig sparas i din Pod."@sv .
+
+<#q-your-data-1a-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "In this browser, on this device only"@en ,
+                              "I den här webbläsaren, bara på den här enheten"@sv ;
+    solid-memo:distractorNote "Only a guest's study is kept in the browser; when you are logged in, Solid Memo reads and writes your decks in your Pod."@en ,
+                              "Bara en gästs studier sparas i webbläsaren; när du är inloggad läser och skriver Solid Memo dina kortlekar i din Pod."@sv .
+
+<#q-your-data-1a-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "In this browser, synced to your Pod"@en ,
+                              "I den här webbläsaren, synkade med din Pod"@sv ;
+    solid-memo:distractorNote "Nothing is synced: when you are logged in, your data is only in your Pod, and every device reads it from there."@en ,
+                              "Ingenting synkas: när du är inloggad finns dina data bara i din Pod, och varje enhet läser dem därifrån."@sv .
+
+<#q-your-data-1b>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "You log in to Solid Memo with your Solid Pod. Who checks your password or other login details?"@en ,
+                     "Du loggar in i Solid Memo med din Solid Pod. Vem kontrollerar ditt lösenord eller dina andra inloggningsuppgifter?"@sv ;
+    solid-memo:back "Your provider, on its own login page"@en ,
+                    "Din leverantör, på sin egen inloggningssida"@sv ;
+    solid-memo:backNote "Solid Memo sends you to your Pod provider's own page to log in and only learns who you are afterwards; it never sees your password."@en ,
+                        "Solid Memo skickar dig till din Pod-leverantörs egen sida för att logga in och får först efteråt veta vem du är; ditt lösenord ser den aldrig."@sv ;
+    solid-memo:distractor <#q-your-data-1b-d1> ,
+                          <#q-your-data-1b-d2> ,
+                          <#q-your-data-1b-d3> .
+
+<#q-your-data-1b-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Solid Memo, in a login form of its own"@en ,
+                              "Solid Memo, i ett eget inloggningsformulär"@sv ;
+    solid-memo:distractorNote "Solid Memo has no password field at all; you type your password only on your provider's page."@en ,
+                              "Solid Memo har inget lösenordsfält alls; ditt lösenord skriver du bara på leverantörens sida."@sv .
+
+<#q-your-data-1b-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Solid Memo's servers, against an account there"@en ,
+                              "Solid Memos servrar, mot ett konto där"@sv ;
+    solid-memo:distractorNote "There is no Solid Memo account: you are identified by your WebID, and your provider checks your login."@en ,
+                              "Det finns inget konto hos Solid Memo: du identifieras av ditt WebID, och din leverantör kontrollerar inloggningen."@sv .
+
+<#q-your-data-1b-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Nobody, as a WebID needs no password"@en ,
+                              "Ingen, eftersom ett WebID inte kräver lösenord"@sv ;
+    solid-memo:distractorNote "A WebID only says who you claim to be; you still prove it by logging in with your provider."@en ,
+                              "Ett WebID anger bara vem du påstår dig vara; det måste du ändå bevisa genom att logga in hos din leverantör."@sv .
+
+<#ch-your-data-2>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <#ch-your-data> ;
+    schema:position 1 ;
+    solid-memo:textFormat solid-memo:markdown ;
+    solid-memo:theory """## Studying as a guest, and keeping it
+
+You can use Solid Memo without an account. A guest gets the same features, but the study is kept only in this web browser on this device. Another browser or device does not see it, and clearing the site's data erases it.
+
+To keep your study, choose to log in from the guest bar at the top. Logging in alone moves nothing: once you are in, Solid Memo offers to move it into your Pod. It writes the study into your Pod, checking it along the way, and removes it from the browser only when everything is in and every check passes. If anything fails, your study stays in the browser.
+
+---
+
+If you already have an instance (a collection of decks in your Pod), each deck you studied, this course's included, is added to it as a new deck with its progress, beside your own and never merged into one. With several instances, you pick one. Only if you have none does the study become a new instance in its own folder. Putting the offer off brings it back on your next visit; discarding deletes the guest study for good."""@en ,
+                      """## Studera som gäst och behåll dina studier
+
+Du kan använda Solid Memo utan konto. Som gäst får du samma funktioner, men det du studerar sparas bara i den här webbläsaren på den här enheten. En annan webbläsare eller enhet ser det inte, och om du rensar webbplatsens data försvinner det.
+
+Vill du behålla dina studier loggar du in via gästraden högst upp. Att bara logga in flyttar ingenting: när du är inne erbjuder Solid Memo att flytta dem till din Pod. Appen skriver in studierna i din Pod och kontrollerar dem på vägen, och tar bort dem ur webbläsaren först när allt är på plats och alla kontroller har gått igenom. Går något fel stannar dina studier i webbläsaren.
+
+---
+
+Har du redan en instans (en samling kortlekar i din Pod) läggs varje kortlek du studerat, den här kursens medräknad, till i den som en ny kortlek med sina framsteg, bredvid dina egna och aldrig ihopslagen med någon av dem. Har du flera instanser väljer du en. Bara om du inte har någon blir studierna en ny instans i en egen mapp. Skjuter du upp erbjudandet kommer det tillbaka nästa gång; slänger du studierna raderas de för gott."""@sv ;
+    solid-memo:checkedBy <#q-your-data-2a> ,
+                         <#q-your-data-2b> .
+
+<#q-your-data-2a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sam studies as a guest on his laptop, then opens Solid Memo on his phone. What does he find there?"@en ,
+                     "Sam studerar som gäst på sin laptop och öppnar sedan Solid Memo på mobilen. Vad hittar han där?"@sv ;
+    solid-memo:back "None of his guest study, which stays on the laptop"@en ,
+                    "Inget av det han studerat; allt finns kvar på laptopen"@sv ;
+    solid-memo:backNote "A guest's study is kept only in the browser it was made in; to reach it elsewhere, Sam must log in on the laptop and move it into his Pod."@en ,
+                        "En gästs studier sparas bara i webbläsaren där de gjordes; för att nå dem någon annanstans måste Sam logga in på laptopen och flytta dem till sin Pod."@sv ;
+    solid-memo:distractor <#q-your-data-2a-d1> ,
+                          <#q-your-data-2a-d2> ,
+                          <#q-your-data-2a-d3> .
+
+<#q-your-data-2a-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "His guest study, synced through Solid Memo's servers"@en ,
+                              "Det han studerat, synkat via Solid Memos servrar"@sv ;
+    solid-memo:distractorNote "Solid Memo has no servers that keep or sync study; a guest's study stays in its browser until it is moved into a Pod."@en ,
+                              "Solid Memo har inga servrar som sparar eller synkar studier; en gästs studier stannar i sin webbläsare tills de flyttas till en Pod."@sv .
+
+<#q-your-data-2a-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "His decks, but without any of his review progress"@en ,
+                              "Hans kortlekar, men utan något av hans framsteg"@sv ;
+    solid-memo:distractorNote "Nothing Sam studied as a guest reaches the phone, neither the decks nor the progress."@en ,
+                              "Ingenting av det Sam studerat som gäst når mobilen, varken kortlekarna eller framstegen."@sv .
+
+<#q-your-data-2a-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "A prompt to copy his study over from the laptop"@en ,
+                              "En fråga om att kopiera studierna från laptopen"@sv ;
+    solid-memo:distractorNote "Solid Memo does not copy between devices; guest study reaches other devices only by moving it into a Pod from the browser that holds it."@en ,
+                              "Solid Memo kopierar inte mellan enheter; studier som gäst når andra enheter bara genom att flyttas till en Pod från webbläsaren där de finns."@sv .
+
+<#q-your-data-2b>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eva tries to keep her guest study in her Pod, but a check fails along the way. What happens to the study in her browser?"@en ,
+                     "Eva försöker behålla sina studier som gäst i sin Pod, men en kontroll misslyckas på vägen. Vad händer med studierna i hennes webbläsare?"@sv ;
+    solid-memo:back "It stays in the browser, as it was"@en ,
+                    "De finns kvar i webbläsaren, som de var"@sv ;
+    solid-memo:backNote "Solid Memo removes the study from the browser only after everything is in her Pod and every check has passed, so a failed move leaves it as it was."@en ,
+                        "Solid Memo tar bort studierna ur webbläsaren först när allt finns i hennes Pod och alla kontroller har gått igenom, så en misslyckad flytt lämnar dem som de var."@sv ;
+    solid-memo:distractor <#q-your-data-2b-d1> ,
+                          <#q-your-data-2b-d2> ,
+                          <#q-your-data-2b-d3> .
+
+<#q-your-data-2b-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "It is removed from the browser anyway"@en ,
+                              "De tas bort ur webbläsaren ändå"@sv ;
+    solid-memo:distractorNote "Removing the study from the browser is the very last step, taken only after every check has passed."@en ,
+                              "Att ta bort studierna ur webbläsaren är allra sista steget, och det tas först när alla kontroller har gått igenom."@sv .
+
+<#q-your-data-2b-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "It is kept only in her Pod from now on"@en ,
+                              "De finns hädanefter bara i hennes Pod"@sv ;
+    solid-memo:distractorNote "Nothing leaves the browser until every check has passed; after a failure the study is still there, and Eva can try again."@en ,
+                              "Ingenting lämnar webbläsaren förrän alla kontroller har gått igenom; efter ett fel finns studierna kvar där, och Eva kan försöka igen."@sv .
+
+<#q-your-data-2b-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "The move retries by itself on her next visit"@en ,
+                              "Flytten görs om automatiskt vid nästa besök"@sv ;
+    solid-memo:distractorNote "Nothing retries by itself; Solid Memo offers the move again, and Eva chooses whether to try."@en ,
+                              "Ingenting görs om automatiskt; Solid Memo erbjuder flytten igen, och Eva väljer själv om hon vill försöka."@sv .
+
+<#ch-your-data-3>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <#ch-your-data> ;
+    schema:position 2 ;
+    solid-memo:textFormat solid-memo:markdown ;
+    solid-memo:theory """## Instances, logging out and deleting
+
+Your decks, study and settings live together in an instance: one folder in your Pod or, for a guest, in this browser. Most people need only one, and a single instance opens by itself. With two, for example after making one more with "New instance…", you pick one when you open Solid Memo and can switch at any time.
+
+The bar at the top names the open instance and leads to its Statistics and Preferences. With a Pod it also links to the instance's folder there; for a guest, it says the instance is kept in this browser.
+
+---
+
+Logging out signs you out of Solid Memo in this browser and deletes nothing in your Pod. Deleting an instance removes all its decks, cards and study from your Pod and cannot be undone; only files another app put in its folder are kept. Solid Memo has no copy on servers of its own. Your data is ordinary files in your Pod, so backups are for you and your Pod provider to look after."""@en ,
+                      """## Instanser, utloggning och radering
+
+Dina kortlekar, studier och inställningar hör ihop i en instans: en mapp i din Pod eller, om du är gäst, i den här webbläsaren. De flesta behöver bara en, och har du en enda öppnas den av sig själv. Har du två, till exempel efter att ha skapat en till med ”Ny instans…”, väljer du en när du öppnar Solid Memo och kan byta när du vill.
+
+Raden högst upp visar namnet på den öppna instansen och leder till dess Statistik och Inställningar. Med en Pod länkar den också till instansens mapp; för en gäst står det i stället att instansen sparas i webbläsaren.
+
+---
+
+När du loggar ut från Solid Memo i den här webbläsaren raderas ingenting i din Pod. Att ta bort en instans raderar alla dess kortlekar, kort och studier från din Pod och går inte att ångra; bara filer som en annan app har lagt i dess mapp behålls. Solid Memo har heller ingen kopia på egna servrar. Dina data är vanliga filer i din Pod, så säkerhetskopior är något du och din Pod-leverantör tar hand om."""@sv ;
+    solid-memo:checkedBy <#q-your-data-3a> ,
+                         <#q-your-data-3b> .
+
+<#q-your-data-3a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "What happens to the decks in your Pod when you log out of Solid Memo?"@en ,
+                     "Vad händer med kortlekarna i din Pod när du loggar ut från Solid Memo?"@sv ;
+    solid-memo:back "They stay in your Pod, ready for next time"@en ,
+                    "De finns kvar i din Pod till nästa gång"@sv ;
+    solid-memo:backNote "Logging out only signs you out in this browser; your Pod and everything in it are left as they are."@en ,
+                        "Att logga ut loggar bara ut dig i den här webbläsaren; din Pod och allt i den lämnas som det är."@sv ;
+    solid-memo:distractor <#q-your-data-3a-d1> ,
+                          <#q-your-data-3a-d2> ,
+                          <#q-your-data-3a-d3> .
+
+<#q-your-data-3a-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "They are deleted as you log out"@en ,
+                              "De raderas när du loggar ut"@sv ;
+    solid-memo:distractorNote "Logging out deletes nothing; decks leave your Pod only when you delete them or their instance."@en ,
+                              "Utloggning raderar ingenting; kortlekar försvinner ur din Pod bara när du tar bort dem eller deras instans."@sv .
+
+<#q-your-data-3a-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "They move into the browser until you return"@en ,
+                              "De flyttas till webbläsaren tills du kommer tillbaka"@sv ;
+    solid-memo:distractorNote "Nothing moves into the browser; the decks never leave your Pod."@en ,
+                              "Ingenting flyttas till webbläsaren; kortlekarna lämnar aldrig din Pod."@sv .
+
+<#q-your-data-3a-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "They are archived until you log in again"@en ,
+                              "De arkiveras tills du loggar in igen"@sv ;
+    solid-memo:distractorNote "Nothing is archived or changed; the decks stay in your Pod exactly as they were."@en ,
+                              "Ingenting arkiveras eller ändras; kortlekarna ligger kvar i din Pod precis som de var."@sv .
+
+<#q-your-data-3b>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ines deletes one of her Solid Memo instances. What happens to its decks and study in her Pod?"@en ,
+                     "Ines tar bort en av sina instanser i Solid Memo. Vad händer med dess kortlekar och studier i hennes Pod?"@sv ;
+    solid-memo:back "They are deleted, and cannot be brought back"@en ,
+                    "De raderas och går inte att få tillbaka"@sv ;
+    solid-memo:backNote "Deleting an instance deletes everything Solid Memo wrote in it, after a warning that it cannot be undone; only files another app put in its folder are kept, and Solid Memo has no servers holding a copy."@en ,
+                        "Att ta bort en instans raderar allt Solid Memo har skrivit i den, efter en varning om att det inte går att ångra; bara filer som en annan app har lagt i dess mapp behålls, och Solid Memo har inga servrar med någon kopia."@sv ;
+    solid-memo:distractor <#q-your-data-3b-d1> ,
+                          <#q-your-data-3b-d2> ,
+                          <#q-your-data-3b-d3> .
+
+<#q-your-data-3b-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "They stay, only unlinked from the app"@en ,
+                              "De finns kvar, bara bortkopplade från appen"@sv ;
+    solid-memo:distractorNote "Deleting removes the instance's decks and study from her Pod, not just its link to the app."@en ,
+                              "Att ta bort raderar instansens kortlekar och studier från hennes Pod, inte bara kopplingen till appen."@sv .
+
+<#q-your-data-3b-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "A copy is kept on Solid Memo's servers"@en ,
+                              "En kopia sparas på Solid Memos servrar"@sv ;
+    solid-memo:distractorNote "Solid Memo has no servers holding copies of your decks; your data lives only in your Pod."@en ,
+                              "Solid Memo har inga servrar med kopior av dina kortlekar; dina data finns bara i din Pod."@sv .
+
+<#q-your-data-3b-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "They go to a trash folder first"@en ,
+                              "De hamnar först i en papperskorg"@sv ;
+    solid-memo:distractorNote "Solid Memo has no trash folder; before you delete an instance, it warns that this cannot be undone."@en ,
+                              "Solid Memo har ingen papperskorg; innan du tar bort en instans varnar den för att det inte går att ångra."@sv .
+
+<#q-your-data-r01>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mia already has decks in her Pod and then moves her guest study there too. How does the guest study arrive?"@en ,
+                     "Mia har redan kortlekar i sin Pod och flyttar sedan dit det hon studerat som gäst. Hur hamnar hennes studier som gäst där?"@sv ;
+    solid-memo:back "As new decks in her instance, beside her own"@en ,
+                    "Som nya kortlekar i hennes instans, bredvid hennes egna"@sv ;
+    solid-memo:backNote "Solid Memo adds each guest deck to the instance she has (she picks one if she has several) as a new deck with its cards, progress and answers; a new instance is made only when she has none."@en ,
+                        "Solid Memo lägger till varje kortlek hon studerat som gäst i instansen hon har (har hon flera väljer hon en) som en ny kortlek med sina kort, framsteg och svar; en ny instans skapas bara när hon inte har någon."@sv ;
+    solid-memo:distractor <#q-your-data-r01-d1> ,
+                          <#q-your-data-r01-d2> ,
+                          <#q-your-data-r01-d3> .
+
+<#q-your-data-r01-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "As a separate instance, beside her own"@en ,
+                              "Som en egen instans, bredvid hennes egen"@sv ;
+    solid-memo:distractorNote "A new instance is made only when she has none; since she has one, the guest decks are added to it."@en ,
+                              "En ny instans skapas bara när hon inte har någon; eftersom hon har en läggs kortlekarna hon studerat som gäst till i den."@sv .
+
+<#q-your-data-r01-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "In place of the decks she already has"@en ,
+                              "I stället för kortlekarna hon redan har"@sv ;
+    solid-memo:distractorNote "Nothing she already has is replaced; each guest deck is added beside her decks, and the instance keeps its own preferences."@en ,
+                              "Ingenting hon redan har ersätts; varje kortlek hon studerat som gäst läggs till bredvid hennes andra, och instansen behåller sina egna inställningar."@sv .
+
+<#q-your-data-r01-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Joined to her decks that have matching names"@en ,
+                              "Ihopkopplade med hennes kortlekar som har samma namn"@sv ;
+    solid-memo:distractorNote "No decks are matched by name, or even by library release: each guest deck is added as a deck of its own."@en ,
+                              "Inga kortlekar matchas på namn, inte ens på utgåva i biblioteket: varje kortlek hon studerat som gäst läggs till som en egen kortlek."@sv .
+
+# Chapter 3: The deck library and courses.
+<#ch-library>
+    a solid-memo:Chapter ,
+      schema:Syllabus ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <> ;
+    schema:position 2 ;
+    dcterms:title "The deck library and courses"@en ,
+                  "Kortleksbiblioteket och kurser"@sv ;
+    dcterms:description "Ready-made decks you copy into your own collection, how your copies catch up with newer releases, and how courses like this one build a deck as you answer. Ends with a review of the chapter."@en ,
+                        "Färdiga kortlekar som du kopierar till din egen samling, hur dina kopior hänger med när nyare utgåvor kommer, och hur kurser som den här bygger en kortlek medan du svarar. Avslutas med en repetition av kapitlet."@sv ;
+    solid-memo:reviewQuestion <#q-library-r01> .
+
+<#ch-library-1>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <#ch-library> ;
+    schema:position 0 ;
+    solid-memo:textFormat solid-memo:markdown ;
+    solid-memo:theory """## Your own copy
+
+The Deck library, which you reach from your deck list, holds ready-made decks on languages, geography, science, computing and much more. Guests can use it too.
+
+Open a deck in the library to read about it. Preview shows you random cards from it, and nothing you do in a preview is recorded or scheduled.
+
+Importing a deck makes a copy that belongs to you. You can study it, edit its cards and rename it, and your changes stay in your copy: the library and its other users never see them.
+
+---
+
+Now and then the library publishes a newer release of a deck. When you open your copy from your deck list, its page then offers an update, and nothing changes until you choose it. The offer tells you what will happen. Cards you have edited keep your text, and your review history is kept, except for any cards the update removes.
+
+After this chapter, try it: open the Deck library and preview a deck."""@en ,
+                      """## Din egen kopia
+
+Kortleksbiblioteket, som du når från din lista med kortlekar, har färdiga kortlekar om språk, geografi, naturvetenskap, datorer och mycket mer. Du kan använda det även som gäst.
+
+Öppna en kortlek i biblioteket för att läsa om den. Med Förhandsvisa ser du slumpade kort ur den, och inget du gör i en förhandsvisning sparas eller schemaläggs.
+
+När du importerar en kortlek får du en kopia som är din. Du kan studera den, redigera korten och byta namn på den, och dina ändringar stannar i din kopia: varken biblioteket eller andra som använder det ser dem.
+
+---
+
+Då och då ger biblioteket ut en nyare utgåva av en kortlek. När du sedan öppnar din kopia från listan med kortlekar erbjuds du en uppdatering på kopians sida, och ingenting ändras förrän du väljer att uppdatera. I erbjudandet står det vad som kommer att hända. Kort som du har redigerat behåller din text, och din repetitionshistorik behålls, utom för kort som uppdateringen tar bort.
+
+Prova efter det här kapitlet: öppna Kortleksbiblioteket och förhandsvisa en kortlek."""@sv ;
+    solid-memo:checkedBy <#q-library-1a> .
+
+<#q-library-1a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "You import a deck from Solid Memo's deck library and edit two of its cards. Later the library publishes a newer release of the deck that also adds some cards. What happens to your copy?"@en ,
+                     "Du importerar en kortlek från Solid Memos kortleksbibliotek och redigerar två av korten. Senare ger biblioteket ut en nyare utgåva av kortleken som också lägger till några kort. Vad händer med din kopia?"@sv ;
+    solid-memo:back "An update is offered, and your edited cards are kept"@en ,
+                    "Du erbjuds en uppdatering, och dina redigerade kort behålls"@sv ;
+    solid-memo:backNote "Your copy's page offers the newer release, and nothing changes until you choose it. Updating adds the new cards but leaves the cards you edited as you have them."@en ,
+                        "På din kopias sida erbjuds du den nyare utgåvan, och ingenting ändras förrän du väljer att uppdatera. Uppdateringen lägger till de nya korten men låter korten du har redigerat vara som du har gjort dem."@sv ;
+    solid-memo:distractor <#q-library-1a-d1> ,
+                          <#q-library-1a-d2> ,
+                          <#q-library-1a-d3> .
+
+<#q-library-1a-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "The deck changes at once, replacing your edits"@en ,
+                              "Kortleken ändras direkt, och dina ändringar skrivs över"@sv ;
+    solid-memo:distractorNote "Nothing changes until you choose the update, and even then your edited cards keep your text."@en ,
+                              "Ingenting ändras förrän du väljer att uppdatera, och även då behåller dina redigerade kort din text."@sv .
+
+<#q-library-1a-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Nothing, as an imported copy never learns of new releases"@en ,
+                              "Ingenting, eftersom en importerad kopia aldrig får veta om nya utgåvor"@sv ;
+    solid-memo:distractorNote "Your copy remembers the release it came from, so its page offers the newer one."@en ,
+                              "Din kopia minns vilken utgåva den kom från, så på kopians sida erbjuds du den nyare."@sv .
+
+<#q-library-1a-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Your edits are sent to the library for its next release"@en ,
+                              "Dina ändringar skickas till biblioteket inför nästa utgåva"@sv ;
+    solid-memo:distractorNote "Solid Memo never sends your edits to the library: they stay in your own copy, which the library never sees."@en ,
+                              "Solid Memo skickar aldrig dina ändringar till biblioteket: de stannar i din egen kopia, som biblioteket aldrig ser."@sv .
+
+<#ch-library-2>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <#ch-library> ;
+    schema:position 1 ;
+    solid-memo:textFormat solid-memo:markdown ;
+    solid-memo:theory """## A deck that grows as you learn
+
+Some entries in the library are courses, like this one: short pieces of theory, each checked by multiple-choice questions. You start a course instead of importing it: from its library page, or, for the course offered to newcomers, from an empty deck list.
+
+Starting a course creates an empty deck in your deck list, and, as you have seen in this course, each question joins it as a card the first time you answer it. Once you have started a course, its library page offers to continue it instead of starting it again.
+
+---
+
+That first answer is also the card's first grade. A right answer counts as a 3, Hard, the lowest pass, and a wrong one as a fail. Either way, the new card is first due on the next study day.
+
+From then on, the course's cards are studied like any other card: you recall the answer, reveal it and grade yourself, with no options to pick from."""@en ,
+                      """## En kortlek som växer medan du lär dig
+
+En del av det som finns i biblioteket är kurser, som den här: korta teoriavsnitt, vart och ett följt av flervalsfrågor. En kurs importeras inte, utan du börjar den: från kursens sida i biblioteket, eller, för kursen för nybörjare, från en tom lista med kortlekar.
+
+När du börjar en kurs skapas en tom kortlek i din lista med kortlekar, och som du har sett i den här kursen läggs varje fråga till i kortleken som ett kort första gången du svarar på den. När du har börjat en kurs erbjuder kursens sida i biblioteket att du fortsätter den i stället för att börja om.
+
+---
+
+Det första svaret är också kortets första betyg. Ett rätt svar räknas som en 3:a, Svårt, det lägsta godkända betyget, och ett fel svar som underkänt. I båda fallen ska det nya kortet repeteras först nästa studiedag.
+
+Därefter studeras kursens kort som alla andra kort: du försöker minnas svaret, visar det och betygsätter dig själv, utan några alternativ att välja bland."""@sv ;
+    solid-memo:checkedBy <#q-library-2a> .
+
+<#q-library-2a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "In Solid Memo, once a course's questions have become cards in your deck, how are those cards studied in the days after?"@en ,
+                     "När frågorna i en kurs i Solid Memo har blivit kort i din kortlek, hur studeras de korten under dagarna därefter?"@sv ;
+    solid-memo:back "As cards you recall and grade yourself"@en ,
+                    "Som kort du minns och själv betygsätter"@sv ;
+    solid-memo:backNote "The options belong to the course itself. Afterwards a course's cards are ordinary cards in your deck, studied by recalling the answer, revealing it and grading yourself."@en ,
+                        "Alternativen hör till själva kursen. Efteråt är kursens kort vanliga kort i din kortlek, som du studerar genom att minnas svaret, visa det och betygsätta dig själv."@sv ;
+    solid-memo:distractor <#q-library-2a-d1> ,
+                          <#q-library-2a-d2> ,
+                          <#q-library-2a-d3> .
+
+<#q-library-2a-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "As multiple choice, with the same options"@en ,
+                              "Som flerval, med samma alternativ"@sv ;
+    solid-memo:distractorNote "Options appear only in the course; later study shows none, so you have to recall the answer on your own."@en ,
+                              "Alternativ visas bara i kursen; när du studerar senare finns inga, så du måste minnas svaret på egen hand."@sv .
+
+<#q-library-2a-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Only by retaking the course's chapters"@en ,
+                              "Bara genom att gå om kursens kapitel"@sv ;
+    solid-memo:distractorNote "They are ordinary cards in your deck and are studied there like any other; you never need to go back into the course."@en ,
+                              "De är vanliga kort i din kortlek och studeras där som alla andra; du behöver aldrig gå tillbaka in i kursen."@sv .
+
+<#q-library-2a-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "As typed answers that the app checks"@en ,
+                              "Som inskrivna svar som appen rättar"@sv ;
+    solid-memo:distractorNote "Solid Memo has no place to type an answer: you reveal the back and grade yourself."@en ,
+                              "I Solid Memo skriver du aldrig in något svar: du visar baksidan och betygsätter dig själv."@sv .
+
+<#q-library-r01>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ole is new to Solid Memo. On the same day he imports a plain deck from the Deck library and starts a course. Which of his decks has cards he can study straight away?"@en ,
+                     "Ole har precis börjat använda Solid Memo. Samma dag importerar han en vanlig kortlek från Kortleksbiblioteket och börjar en kurs. Vilken av hans kortlekar har kort som han kan studera direkt?"@sv ;
+    solid-memo:back "Only the deck he imported"@en ,
+                    "Bara kortleken han importerade"@sv ;
+    solid-memo:backNote "An imported deck arrives with all its cards, ready to be studied as new cards. A course's deck starts empty, and each card he answers in the course waits until the next study day."@en ,
+                        "En importerad kortlek kommer med alla sina kort, redo att studeras som nya kort. Kortleken för en kurs börjar tom, och varje kort han besvarar i kursen väntar till nästa studiedag."@sv ;
+    solid-memo:distractor <#q-library-r01-d1> ,
+                          <#q-library-r01-d2> ,
+                          <#q-library-r01-d3> .
+
+<#q-library-r01-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Only the course's deck"@en ,
+                              "Bara kursens kortlek"@sv ;
+    solid-memo:distractorNote "A course's deck starts empty, and the cards he answers in the course are not studied until the next study day."@en ,
+                              "Kortleken för en kurs börjar tom, och korten han besvarar i kursen studeras inte förrän nästa studiedag."@sv .
+
+<#q-library-r01-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Both of the decks"@en ,
+                              "Båda kortlekarna"@sv ;
+    solid-memo:distractorNote "Only the imported deck has cards ready today; the course's cards wait until the next study day."@en ,
+                              "Bara den importerade kortleken har kort redo idag; kursens kort väntar till nästa studiedag."@sv .
+
+<#q-library-r01-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Neither, until he previews them"@en ,
+                              "Ingen, förrän han förhandsvisat dem"@sv ;
+    solid-memo:distractorNote "A preview is optional and records nothing; an imported deck can be studied at once."@en ,
+                              "En förhandsvisning är frivillig och sparar ingenting; en importerad kortlek kan studeras direkt."@sv .
+
+# Chapter 4: Making your own cards.
+<#ch-own-cards>
+    a solid-memo:Chapter ,
+      schema:Syllabus ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <> ;
+    schema:position 3 ;
+    dcterms:title "Making your own cards"@en ,
+                  "Så gör du egna kort"@sv ;
+    dcterms:description "Creating a deck, where its cards are listed, added and edited, which way round it is studied, and what a card can hold. Ends with a review of the chapter."@en ,
+                        "Hur du skapar en kortlek, var dess kort listas, läggs till och redigeras, åt vilket håll den studeras och vad ett kort kan innehålla. Avslutas med en repetition av kapitlet."@sv ;
+    solid-memo:reviewQuestion <#q-own-cards-r01> .
+
+<#ch-own-cards-1>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <#ch-own-cards> ;
+    schema:position 0 ;
+    solid-memo:textFormat solid-memo:markdown ;
+    solid-memo:theory """## A deck and its Browser
+
+You create a deck from your deck list, with just a name and the language the name is in. A new deck is empty, and its page points you to its Browser: a page in Solid Memo, not your web browser, that lists every card of the deck.
+
+There you add, edit and remove cards. Editing a card keeps what you have learnt of it. Removing a card deletes it and what you learnt of it for good, though your past answers still count in your statistics.
+
+---
+
+The Browser is also where you choose the study direction:
+
+- Front → back, the default
+- Back → front
+- Both ways, each direction with its own schedule
+
+What you have learnt each way is kept when you change it.
+
+On your deck list you can gather decks into groups. Deleting a group keeps its decks; deleting a deck removes all its cards.
+
+After this chapter, try it: create a deck and add two cards."""@en ,
+                      """## En kortlek och Bläddra
+
+Du skapar en kortlek från din lista med kortlekar, med bara ett namn och det språk namnet är på. En ny kortlek är tom, och dess sida hänvisar dig till Bläddra: en sida i Solid Memo som listar alla kort i kortleken.
+
+Där lägger du till, redigerar och tar bort kort. Redigerar du ett kort behåller du dina framsteg med det. Tar du bort ett kort försvinner det för gott, tillsammans med dina framsteg, men dina tidigare svar räknas fortfarande med i statistiken.
+
+---
+
+Under Bläddra väljer du också studieriktning:
+
+- Framsida → baksida, som är standard
+- Baksida → framsida
+- Åt båda hållen, med ett eget schema för varje riktning
+
+Det du har lärt dig åt varje håll sparas när du byter.
+
+I listan med kortlekar kan du samla kortlekar i grupper. Tar du bort en grupp behålls dess kortlekar; tar du bort en kortlek försvinner alla dess kort.
+
+Prova efter det här kapitlet: skapa en kortlek och lägg till två kort."""@sv ;
+    solid-memo:checkedBy <#q-own-cards-1a> ,
+                         <#q-own-cards-1b> .
+
+<#q-own-cards-1a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "In Solid Memo, where can you see every card of a deck, and open one to edit it?"@en ,
+                     "Var i Solid Memo kan du se alla kort i en kortlek och öppna ett av dem för att redigera det?"@sv ;
+    solid-memo:back "On the deck's Browser page"@en ,
+                    "På kortlekens sida Bläddra"@sv ;
+    solid-memo:backNote "The Browser is a page in Solid Memo, not your web browser. It lists every card of the deck, and opening a card there lets you edit it."@en ,
+                        "Bläddra är en sida i Solid Memo som listar alla kort i kortleken, och där öppnar du ett kort för att redigera det."@sv ;
+    solid-memo:distractor <#q-own-cards-1a-d1> ,
+                          <#q-own-cards-1a-d2> ,
+                          <#q-own-cards-1a-d3> .
+
+<#q-own-cards-1a-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "On the deck's Preferences page"@en ,
+                              "På kortlekens sida Inställningar"@sv ;
+    solid-memo:distractorNote "A deck's Preferences hold settings such as its daily limits; they do not list its cards."@en ,
+                              "En kortleks Inställningar rymmer sådant som dess dagliga gränser; där listas inte korten."@sv .
+
+<#q-own-cards-1a-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "At the end of a study session"@en ,
+                              "I slutet av ett studiepass"@sv ;
+    solid-memo:distractorNote "A study session ends with a short message that it is finished, not with a list of the deck's cards."@en ,
+                              "Ett studiepass slutar med ett meddelande om att det är klart, inte med en lista över kortlekens kort."@sv .
+
+<#q-own-cards-1a-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "On the Statistics page"@en ,
+                              "På sidan Statistik"@sv ;
+    solid-memo:distractorNote "Statistics shows your answers, per deck among other things, but not the cards themselves, and nothing there can be edited."@en ,
+                              "Statistik visar dina svar, bland annat per kortlek, men inte själva korten, och där går ingenting att redigera."@sv .
+
+<#q-own-cards-1b>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "You have studied a deck front to back, and now switch its study direction to both ways. What happens to what you have already learnt?"@en ,
+                     "Du har studerat en kortlek från framsida till baksida och väljer nu studieriktningen Åt båda hållen. Vad händer med det du redan har lärt dig?"@sv ;
+    solid-memo:back "It is kept, and the other way gets its own schedule"@en ,
+                    "Det sparas, och det andra hållet får ett eget schema"@sv ;
+    solid-memo:backNote "Each direction is scheduled on its own. Your front-to-back progress stays as it was, and the back-to-front questions start as new cards."@en ,
+                        "Varje riktning schemaläggs för sig. Det du har lärt dig från framsida till baksida ligger kvar, och frågorna från baksida till framsida börjar som nya kort."@sv ;
+    solid-memo:distractor <#q-own-cards-1b-d1> ,
+                          <#q-own-cards-1b-d2> ,
+                          <#q-own-cards-1b-d3> .
+
+<#q-own-cards-1b-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "It is reset so both ways start together"@en ,
+                              "Det nollställs så att båda hållen börjar samtidigt"@sv ;
+    solid-memo:distractorNote "Changing the direction resets nothing: what you have learnt each way is kept."@en ,
+                              "Att byta riktning nollställer ingenting: det du har lärt dig åt varje håll sparas."@sv .
+
+<#q-own-cards-1b-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "It is copied over to the back-to-front way"@en ,
+                              "Det kopieras över till riktningen baksida → framsida"@sv ;
+    solid-memo:distractorNote "Nothing is copied: the back-to-front way starts as new cards, with a schedule of its own."@en ,
+                              "Ingenting kopieras: riktningen baksida → framsida börjar som nya kort, med ett eget schema."@sv .
+
+<#q-own-cards-1b-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "It is kept, but both ways now share one schedule"@en ,
+                              "Det sparas, men båda hållen delar nu ett schema"@sv ;
+    solid-memo:distractorNote "The two ways never share a schedule; each one is scheduled on its own."@en ,
+                              "De två hållen delar aldrig schema; vart och ett schemaläggs för sig."@sv .
+
+<#ch-own-cards-2>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <#ch-own-cards> ;
+    schema:position 1 ;
+    solid-memo:textFormat solid-memo:markdown ;
+    solid-memo:theory """## What a card can hold
+
+A card has a front, the question, and a back, the answer. Each side needs text, a picture, or both. A picture is added by the web address of an image already online. Its description is read out to anyone who cannot see it, so it must not give the answer away.
+
+Each side can also have a note in smaller text, shown only once the answer is revealed, so a front note is not a hint. A short label above the back can say what kind of answer it is.
+
+---
+
+For every text you write, you state its language; the app never guesses it. On a new deck's first card you choose it for the front and back, and the card cannot be saved without one. After that, new text starts in the language the deck's cards already use. Stating a language never translates the text.
+
+Markdown, a way to write code, lists and tables in plain text, can be switched on per card. It is off on new cards."""@en ,
+                      """## Vad ett kort kan innehålla
+
+Ett kort har en framsida, frågan, och en baksida, svaret. Varje sida behöver text, en bild eller båda. En bild anges med webbadressen till en bild som redan finns på nätet. Dess beskrivning läses upp för den som inte kan se bilden, så den får inte avslöja svaret.
+
+Varje sida kan dessutom ha en anteckning med mindre stil, som syns först när svaret har visats, så en anteckning på framsidan är ingen ledtråd. Ovanför baksidan kan det stå en etikett, till exempel vilken sorts svar det är.
+
+---
+
+För varje text du skriver anger du dess språk; appen gissar det aldrig. På det första kortet i en ny kortlek väljer du språk för framsidan och baksidan, och utan språk går kortet inte att spara. Sedan börjar ny text på det språk som kortlekens kort redan har. Att ange ett språk översätter aldrig texten.
+
+Markdown, ett sätt att skriva kod, listor och tabeller som vanlig text, kan slås på för varje kort. Det är avstängt på nya kort."""@sv ;
+    solid-memo:checkedBy <#q-own-cards-2a> ,
+                         <#q-own-cards-2b> .
+
+<#q-own-cards-2a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "You write a hint in a card's front note. When does someone studying the card see it?"@en ,
+                     "Du skriver en ledtråd i anteckningen på ett korts framsida. När ser den som studerar kortet ledtråden?"@sv ;
+    solid-memo:back "Only after the answer is revealed"@en ,
+                    "Först när svaret har visats"@sv ;
+    solid-memo:backNote "A note, on either side, appears only once the answer is revealed, so a front note cannot work as a hint."@en ,
+                        "En anteckning, på vilken sida som helst, syns först när svaret har visats, så en anteckning på framsidan fungerar inte som ledtråd."@sv ;
+    solid-memo:distractor <#q-own-cards-2a-d1> ,
+                          <#q-own-cards-2a-d2> ,
+                          <#q-own-cards-2a-d3> .
+
+<#q-own-cards-2a-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Together with the question, before revealing"@en ,
+                              "Tillsammans med frågan, innan svaret visas"@sv ;
+    solid-memo:distractorNote "It is easy to assume a front note shows with the question, but it stays hidden until the answer is revealed."@en ,
+                              "Det är lätt att tro att anteckningen på framsidan visas med frågan, men den är dold tills svaret har visats."@sv .
+
+<#q-own-cards-2a-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Only when the card is opened for editing"@en ,
+                              "Bara när kortet öppnas för redigering"@sv ;
+    solid-memo:distractorNote "Notes are not only for the editor: they show in study too, once the answer is revealed."@en ,
+                              "Anteckningar är inte bara till för redigeringen: de syns också när du studerar, så fort svaret har visats."@sv .
+
+<#q-own-cards-2a-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Only after a failing grade is given"@en ,
+                              "Bara efter att kortet har fått ett underkänt betyg"@sv ;
+    solid-memo:distractorNote "The note appears as soon as the answer is revealed, before any grade is given."@en ,
+                              "Anteckningen syns så fort svaret har visats, innan något betyg har getts."@sv .
+
+<#q-own-cards-2b>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "You set the language of a card's front to French. What does that do?"@en ,
+                     "Du anger att ett korts framsida är skriven på franska. Vad har det för effekt?"@sv ;
+    solid-memo:back "It marks the front's text as written in French"@en ,
+                    "Det märker framsidans text som skriven på franska"@sv ;
+    solid-memo:backNote "Stating a language only says what the text is written in, so that, for example, a screen reader pronounces it right. The words stay exactly as you typed them."@en ,
+                        "Att ange ett språk säger bara vilket språk texten är skriven på, så att till exempel en skärmläsare uttalar den rätt. Orden står kvar precis som du skrev dem."@sv ;
+    solid-memo:distractor <#q-own-cards-2b-d1> ,
+                          <#q-own-cards-2b-d2> ,
+                          <#q-own-cards-2b-d3> .
+
+<#q-own-cards-2b-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "It translates the front's text into French"@en ,
+                              "Det översätter framsidans text till franska"@sv ;
+    solid-memo:distractorNote "Solid Memo never translates a card: the language you state only labels the text you wrote."@en ,
+                              "Solid Memo översätter aldrig ett kort: språket du anger märker bara den text du skrev."@sv .
+
+<#q-own-cards-2b-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "It switches the app's own menus to French"@en ,
+                              "Det byter appens egna menyer till franska"@sv ;
+    solid-memo:distractorNote "The app's own language is a separate setting, and a card's language never changes it."@en ,
+                              "Appens eget språk är en separat inställning, och ett korts språk ändrar det aldrig."@sv .
+
+<#q-own-cards-2b-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "It shows the card only to French speakers"@en ,
+                              "Det visar kortet bara för den som talar franska"@sv ;
+    solid-memo:distractorNote "Whoever studies the deck sees the card; its language keeps nobody out."@en ,
+                              "Den som studerar kortleken ser kortet; dess språk stänger inte ute någon."@sv .
+
+<#q-own-cards-r01>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Kim removes a card she had studied for a month, then adds it again with the same text. How does the re-added card start?"@en ,
+                     "Kim tar bort ett kort som hon har studerat i en månad och lägger sedan till det igen med samma text. Hur börjar kortet när hon har lagt till det igen?"@sv ;
+    solid-memo:back "As a new card, with no progress at all"@en ,
+                    "Som ett nytt kort, utan några framsteg"@sv ;
+    solid-memo:backNote "Removing a card deletes your progress with it for good, and a card added again is a new card, so it starts from scratch."@en ,
+                        "När du tar bort ett kort försvinner dina framsteg med det för gott, och ett kort som läggs till igen är ett nytt kort, så det börjar från början."@sv ;
+    solid-memo:distractor <#q-own-cards-r01-d1> ,
+                          <#q-own-cards-r01-d2> ,
+                          <#q-own-cards-r01-d3> .
+
+<#q-own-cards-r01-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "With the old card's progress, since the text is the same"@en ,
+                              "Med det gamla kortets framsteg, eftersom texten är densamma"@sv ;
+    solid-memo:distractorNote "Cards are never recognised by their text: every card added is a new card, so the old progress does not carry over."@en ,
+                              "Kort känns aldrig igen på sin text: varje kort som läggs till är ett nytt kort, så de gamla framstegen följer inte med."@sv .
+
+<#q-own-cards-r01-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "With the old progress, restored from a trash folder"@en ,
+                              "Med de gamla framstegen, hämtade från en papperskorg"@sv ;
+    solid-memo:distractorNote "Solid Memo has no trash folder: a removed card and its progress are gone for good."@en ,
+                              "Solid Memo har ingen papperskorg: ett borttaget kort och dess framsteg är borta för gott."@sv .
+
+<#q-own-cards-r01-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "As a new card, but on the old card's schedule"@en ,
+                              "Som ett nytt kort, men med det gamla kortets schema"@sv ;
+    solid-memo:distractorNote "A card added again is a separate card that starts as new, so nothing of the old card's schedule carries over."@en ,
+                              "Ett kort som läggs till igen är ett eget kort som börjar som nytt, så inget av det gamla kortets schema följer med."@sv .
+
+# Chapter 5: Pace and progress.
+<#ch-pace>
+    a solid-memo:Chapter ,
+      schema:Syllabus ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <> ;
+    schema:position 4 ;
+    dcterms:title "Pace and progress"@en ,
+                  "Takt och framsteg"@sv ;
+    dcterms:description "How many new cards to take on, when a study day begins, and how your streak and statistics follow your study. Ends with a review of the chapter."@en ,
+                        "Hur många nya kort du tar dig an, när en studiedag börjar och hur din svit och din statistik speglar dina studier. Avslutas med en repetition av kapitlet."@sv ;
+    solid-memo:reviewQuestion <#q-pace-r01> .
+
+<#ch-pace-1>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <#ch-pace> ;
+    schema:position 0 ;
+    solid-memo:textFormat solid-memo:markdown ;
+    solid-memo:theory """## A few new cards a day
+
+Solid Memo sets two limits for each study day: how many new cards a deck may bring to your study, and how many reviews it may ask. By default they are 5 new cards and 200 reviews. You change them in Preferences, in the bar at the top.
+
+Why so few new cards? Every new card comes back for reviews in the days that follow. Take on many today and the reviews pile up later. Start small and stay steady; you can always raise the number when it feels easy.
+
+---
+
+The limits count per study day, not per session. Study twice on the same day and the second session gets only what is left. A course's questions are not held to them: each card you answer joins its deck right away.
+
+A deck can also have limits of its own, higher or lower than yours, in that deck's preferences. A field left empty there follows your study preferences. In a deck studied both ways, each direction counts on its own toward the new-card limit, so one new card can use up two of the day's places."""@en ,
+                      """## Några nya kort om dagen
+
+Solid Memo har två gränser för varje studiedag: hur många nya kort en kortlek får introducera i dina studier och hur många repetitioner den får ge dig. Som standard är det 5 nya kort och 200 repetitioner. Du ändrar dem under Inställningar, i raden högst upp.
+
+Varför så få nya kort? Varje nytt kort kommer tillbaka för repetition under de följande dagarna. Tar du dig an många idag, hopar sig repetitionerna längre fram. Börja smått och håll en jämn takt; du kan alltid höja antalet när det känns lätt.
+
+---
+
+Gränserna gäller per studiedag, inte per studiepass. Studerar du två gånger samma dag, får det andra passet bara det som är kvar. Frågorna i en kurs omfattas inte av dem: varje fråga du besvarar läggs till i kortleken som ett kort direkt.
+
+En kortlek kan också ha egna gränser, högre eller lägre än dina, i kortlekens inställningar. Ett fält som lämnas tomt där följer dina studieinställningar. I en kortlek som studeras åt båda hållen räknas varje riktning för sig mot gränsen för nya kort, så ett nytt kort kan ta upp två av dagens platser."""@sv ;
+    solid-memo:checkedBy <#q-pace-1a> .
+
+<#q-pace-1a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Why does Solid Memo advise taking on only a few new cards a day?"@en ,
+                     "Varför råder Solid Memo dig att bara ta dig an några få nya kort om dagen?"@sv ;
+    solid-memo:back "Every new card brings reviews in the days after"@en ,
+                    "Varje nytt kort ger repetitioner de följande dagarna"@sv ;
+    solid-memo:backNote "A new card is not done once you have seen it: it comes back for reviews over the following days, so many new cards today mean a pile of reviews later."@en ,
+                        "Ett nytt kort är inte klart när du har sett det: det kommer tillbaka för repetition de följande dagarna, så många nya kort idag blir en hög med repetitioner senare."@sv ;
+    solid-memo:distractor <#q-pace-1a-d1> ,
+                          <#q-pace-1a-d2> ,
+                          <#q-pace-1a-d3> .
+
+<#q-pace-1a-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "New cards are slower to load from your Pod"@en ,
+                              "Nya kort tar längre tid att läsa in från din Pod"@sv ;
+    solid-memo:distractorNote "The advice is about the reviews a new card brings later, not about loading; a new card loads like any other."@en ,
+                              "Rådet gäller repetitionerna ett nytt kort ger senare, inte inläsningen; ett nytt kort läses in som vilket annat kort som helst."@sv .
+
+<#q-pace-1a-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Only a few cards fit into one study session"@en ,
+                              "Bara några få kort ryms i ett studiepass"@sv ;
+    solid-memo:distractorNote "A session holds every card the day's limits allow; the new-card limit exists to keep later reviews manageable."@en ,
+                              "Ett pass rymmer alla kort som dagens gränser tillåter; gränsen för nya kort finns för att repetitionerna längre fram ska bli hanterliga."@sv .
+
+<#q-pace-1a-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "The limit cannot be lowered once it is raised"@en ,
+                              "Gränsen kan inte sänkas när den väl har höjts"@sv ;
+    solid-memo:distractorNote "You can change the number up or down in Preferences at any time."@en ,
+                              "Du kan ändra antalet uppåt eller nedåt under Inställningar när du vill."@sv .
+
+<#ch-pace-2>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <#ch-pace> ;
+    schema:position 1 ;
+    solid-memo:textFormat solid-memo:markdown ;
+    solid-memo:theory """## Study days and your progress
+
+Solid Memo counts study days, not calendar days. By default a new study day starts at 04:00, so a session late at night still counts for the day before. You can change the hour in Preferences.
+
+Graded a deck carelessly today? Its page lets you reset today's study of that deck: your cards stay, only today's answers are undone.
+
+---
+
+After your first answer of the day, a strip above your decks shows today's cards, the share you remembered and your streak: study days in a row, today included. Missing a day starts the streak over. Statistics, in the bar at the top, adds a year of activity and how well you remember in reviews.
+
+Your figures come from a log of your answers kept with your decks, so with a Pod they are the same on every device you log in on. The app's language is set per device. The app never translates your cards, but a card written in several languages is shown in the language you chose, when it has it."""@en ,
+                      """## Studiedagar och dina framsteg
+
+Solid Memo räknar studiedagar, inte kalenderdagar. Som standard börjar en ny studiedag klockan 04:00, så ett studiepass sent på natten räknas fortfarande till dagen innan. Du kan ändra timmen under Inställningar.
+
+Betygsatte du en kortlek slarvigt idag? På kortlekens sida kan du återställa dagens studier av just den: korten finns kvar, bara dagens svar görs ogjorda.
+
+---
+
+Efter dagens första svar visar en remsa ovanför dina kortlekar dagens kort, hur stor del du kom ihåg och din svit: hur många dagar i rad du har studerat, inklusive idag. Missar du en dag, börjar sviten om. Statistik, i raden högst upp, visar dessutom ett års aktivitet och hur väl du minns vid repetition.
+
+Siffrorna bygger på en logg över dina svar som sparas tillsammans med dina kortlekar, så med en Pod är de desamma på alla enheter du loggar in på. Appens språk väljs per enhet. Appen översätter aldrig dina kort, men ett kort som är skrivet på flera språk visas på det språk du har valt, om kortet finns på det."""@sv ;
+    solid-memo:checkedBy <#q-pace-2a> ,
+                         <#q-pace-2b> .
+
+<#q-pace-2a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Your Solid Memo study day starts at 04:00, the default. You study at half past one at night. Which study day does that session count for?"@en ,
+                     "Din studiedag i Solid Memo börjar som standard klockan 04:00. Du studerar halv två på natten. Vilken studiedag räknas passet till?"@sv ;
+    solid-memo:back "The day before, as the new day starts at 04:00"@en ,
+                    "Dagen innan, eftersom nya dagen börjar klockan 04:00"@sv ;
+    solid-memo:backNote "A study day runs from the start hour to the same hour the next morning, so anything before 04:00 still belongs to the previous day."@en ,
+                        "En studiedag varar från starttimmen till samma timme nästa morgon, så allt före 04:00 hör fortfarande till föregående dag."@sv ;
+    solid-memo:distractor <#q-pace-2a-d1> ,
+                          <#q-pace-2a-d2> ,
+                          <#q-pace-2a-d3> .
+
+<#q-pace-2a-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "The new day, as it is past midnight"@en ,
+                              "Den nya dagen, eftersom midnatt har passerat"@sv ;
+    solid-memo:distractorNote "Solid Memo counts study days, not calendar days: the new study day begins at 04:00, not at midnight."@en ,
+                              "Solid Memo räknar studiedagar, inte kalenderdagar: den nya studiedagen börjar klockan 04:00, inte vid midnatt."@sv .
+
+<#q-pace-2a-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Both days, split at midnight"@en ,
+                              "Båda dagarna, uppdelat vid midnatt"@sv ;
+    solid-memo:distractorNote "Every answer belongs to exactly one study day, and midnight is not where one ends."@en ,
+                              "Varje svar hör till exakt en studiedag, och en studiedag tar inte slut vid midnatt."@sv .
+
+<#q-pace-2a-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Neither, as night study is not counted"@en ,
+                              "Ingen, eftersom nattstudier inte räknas"@sv ;
+    solid-memo:distractorNote "Every answer counts, whatever the hour; it is simply placed in the study day it falls in."@en ,
+                              "Varje svar räknas, oavsett klockslag; det hamnar bara i den studiedag det infaller i."@sv .
+
+<#q-pace-2b>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ana studies in Solid Memo every day from Monday to Friday, skips Saturday, and studies again on Sunday. Once she has studied on Sunday, what streak does Solid Memo show her?"@en ,
+                     "Ana studerar i Solid Memo varje dag från måndag till fredag, hoppar över lördagen och studerar igen på söndagen. Hur många dagar i rad visar Solid Memo för henne när hon har studerat på söndagen?"@sv ;
+    solid-memo:back "One day, as the missed day broke the streak"@en ,
+                    "En dag, eftersom den missade dagen bröt sviten"@sv ;
+    solid-memo:backNote "A streak counts study days in a row, today included, so after a missed day it starts again from Sunday alone."@en ,
+                        "Sviten räknar studiedagar utan avbrott, inklusive idag, så efter en missad dag börjar den om med bara söndagen."@sv ;
+    solid-memo:distractor <#q-pace-2b-d1> ,
+                          <#q-pace-2b-d2> ,
+                          <#q-pace-2b-d3> .
+
+<#q-pace-2b-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Six days, as one missed day is forgiven"@en ,
+                              "Sex dagar, eftersom en missad dag tillåts"@sv ;
+    solid-memo:distractorNote "Solid Memo forgives no missed days: any day without study ends the run."@en ,
+                              "Solid Memo gör inga undantag för missade dagar: varje dag utan studier bryter sviten."@sv .
+
+<#q-pace-2b-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Seven days, as Saturday is counted in"@en ,
+                              "Sju dagar, eftersom lördagen räknas med"@sv ;
+    solid-memo:distractorNote "A streak counts only days you studied: Saturday without study breaks it, so Sunday starts a new one."@en ,
+                              "Sviten räknar bara dagar du har studerat: lördagen utan studier bryter den, så söndagen börjar en ny."@sv .
+
+<#q-pace-2b-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "None, until she studies two days in a row"@en ,
+                              "Inga, förrän hon studerat två dagar i rad"@sv ;
+    solid-memo:distractorNote "A single study day already counts as a streak of one, today included."@en ,
+                              "En enda studiedag ger redan en svit på en dag, inklusive idag."@sv .
+
+<#q-pace-r01>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Leo's study preferences in Solid Memo allow 5 new cards a day. In his Chemistry deck's own preferences he sets the new-card limit to 2, and in his Spanish deck he leaves that field empty. How many new cards a day can each deck bring?"@en ,
+                     "Leos studieinställningar i Solid Memo tillåter 5 nya kort per dag. I inställningarna för kortleken Kemi sätter han gränsen för nya kort till 2, och för kortleken Spanska lämnar han det fältet tomt. Hur många nya kort per dag kan varje kortlek ge?"@sv ;
+    solid-memo:back "Chemistry up to 2, Spanish up to 5"@en ,
+                    "Kemi upp till 2, Spanska upp till 5"@sv ;
+    solid-memo:backNote "A deck's own limit takes the place of the study preferences for that deck only, and an empty field follows the study preferences."@en ,
+                        "En kortleks egen gräns ersätter studieinställningarna för just den kortleken, och ett tomt fält följer studieinställningarna."@sv ;
+    solid-memo:distractor <#q-pace-r01-d1> ,
+                          <#q-pace-r01-d2> ,
+                          <#q-pace-r01-d3> .
+
+<#q-pace-r01-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Both up to 2, the lower of the limits"@en ,
+                              "Båda upp till 2, den lägre gränsen"@sv ;
+    solid-memo:distractorNote "A deck's own limit applies to that deck alone; it does not lower the limit of his other decks."@en ,
+                              "En kortleks egen gräns gäller bara den kortleken; den sänker inte gränsen för hans andra kortlekar."@sv .
+
+<#q-pace-r01-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Both up to 5, from his study preferences"@en ,
+                              "Båda upp till 5, från studieinställningarna"@sv ;
+    solid-memo:distractorNote "A limit set in a deck's own preferences replaces the study preferences for that deck, so Chemistry brings at most 2."@en ,
+                              "En gräns i kortlekens egna inställningar ersätter studieinställningarna för den kortleken, så Kemi ger högst 2."@sv .
+
+<#q-pace-r01-d3>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "Chemistry up to 2, Spanish none at all"@en ,
+                              "Kemi upp till 2, Spanska inga alls"@sv ;
+    solid-memo:distractorNote "An empty field does not mean zero: it follows the study preferences, so Spanish brings up to 5."@en ,
+                              "Ett tomt fält betyder inte noll: det följer studieinställningarna, så Spanska ger upp till 5."@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

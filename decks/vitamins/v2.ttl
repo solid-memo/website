@@ -1,0 +1,566 @@
+@base <https://solid-memo.com/decks/vitamins/v2.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Vitamins"@en ,
+                  "Vitaminer"@sv ,
+                  "비타민"@ko ,
+                  "Vitamine"@de ,
+                  "Vitaminas"@es ,
+                  "Vitamines"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "The 13 vitamins in 35 cards of three kinds: a vitamin and the chemical name of the vitamin or its main form (e.g. “Vitamin B1: chemical name” → “thiamine”), with separate cards for vitamins D2, D3, K1 and K2; a classic deficiency disease or sign and the vitamin involved (e.g. scurvy → vitamin C); and whether each vitamin is fat-soluble or water-soluble. Text in English and Swedish; no dosage or health advice. Taken from the US National Institutes of Health's Office of Dietary Supplements fact sheets and Wikidata, checked against Livsmedelsverket (the Swedish Food Agency) and the Swedish Wikipedia."@en ,
+                        "De 13 vitaminerna i 35 kort av tre slag: ett vitamin och det kemiska namnet på vitaminet eller dess huvudform (t.ex. ”Vitamin B1: kemiskt namn” → ”tiamin”), med egna kort för vitamin D2, D3, K1 och K2; en klassisk bristsjukdom eller ett bristtecken och vilket vitamin det gäller (t.ex. skörbjugg → C-vitamin); samt om varje vitamin är fettlösligt eller vattenlösligt. Text på engelska och svenska; inga doser eller hälsoråd. Uppgifterna kommer från faktabladen från Office of Dietary Supplements vid USA:s National Institutes of Health och från Wikidata och är kontrollerade mot Livsmedelsverket och svenskspråkiga Wikipedia."@sv ,
+                        "13가지 비타민을 세 종류의 35장 카드로 다룬다: 비타민과 그 비타민 또는 주된 형태의 화학명(예: ‘Vitamin B1: chemical name’ → ‘thiamine’), 비타민 D2, D3, K1, K2는 카드가 따로 있다; 대표적인 결핍증이나 결핍 증상과 관련된 비타민(예: 괴혈병 → 비타민 C); 그리고 각 비타민이 지용성인지 수용성인지. 텍스트는 영어와 스웨덴어; 복용량이나 건강 조언은 없다. 미국 국립보건원(National Institutes of Health) Office of Dietary Supplements의 팩트 시트와 Wikidata에서 가져와 Livsmedelsverket(스웨덴 식품청)와 스웨덴어판 위키백과로 확인했다."@ko ,
+                        "Die 13 Vitamine in 35 Karten von dreierlei Art: ein Vitamin und der chemische Name des Vitamins oder seiner Hauptform (z. B. „Vitamin B1: chemical name“ → „thiamine“), mit eigenen Karten für die Vitamine D2, D3, K1 und K2; eine klassische Mangelkrankheit oder Mangelerscheinung und das betroffene Vitamin (z. B. Skorbut → Vitamin C); und ob jedes Vitamin fettlöslich oder wasserlöslich ist. Text auf Englisch und Schwedisch; keine Dosierungsangaben oder Gesundheitsratschläge. Aus den Faktenblättern des Office of Dietary Supplements der National Institutes of Health der USA und aus Wikidata übernommen, abgeglichen mit Livsmedelsverket (der schwedischen Lebensmittelbehörde) und der schwedischen Wikipedia."@de ,
+                        "Las 13 vitaminas en 35 tarjetas de tres tipos: una vitamina y el nombre químico de la vitamina o de su forma principal (p. ej., «Vitamin B1: chemical name» → «thiamine»), con tarjetas aparte para las vitaminas D2, D3, K1 y K2; una enfermedad o un signo clásico de carencia y la vitamina implicada (p. ej., escorbuto → vitamina C); y si cada vitamina es liposoluble o hidrosoluble. Texto en inglés y en sueco; sin dosis ni consejos de salud. Tomado de las hojas informativas de la Office of Dietary Supplements de los National Institutes of Health de EE. UU. y de Wikidata, y comprobado con Livsmedelsverket (la Agencia Sueca de Alimentos) y con la Wikipedia en sueco."@es ,
+                        "Les 13 vitamines en 35 cartes de trois sortes : une vitamine et le nom chimique de la vitamine ou de sa forme principale (p. ex. « Vitamin B1: chemical name » → « thiamine »), avec des cartes à part pour les vitamines D2, D3, K1 et K2 ; une maladie ou un signe classique de carence et la vitamine en cause (p. ex. scorbut → vitamine C) ; et si chaque vitamine est liposoluble ou hydrosoluble. Texte en anglais et en suédois ; ni posologie ni conseils de santé. Données issues des fiches d’information de l’Office of Dietary Supplements des National Institutes of Health des États-Unis et de Wikidata, vérifiées sur Livsmedelsverket (l’Agence suédoise de l’alimentation) et sur la Wikipédia suédophone."@fr ;
+    prov:wasDerivedFrom <https://ods.od.nih.gov/factsheets/list-VitaminsMinerals/> ,
+                        <https://www.wikidata.org/wiki/Q34956> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:biology ,
+               topic:chemistry ;
+    dcat:keyword "vitamins"@en ,
+                 "deficiency diseases"@en ,
+                 "fat-soluble vitamins"@en ,
+                 "water-soluble vitamins"@en ,
+                 "nutrition"@en ,
+                 "vitaminer"@sv ,
+                 "bristsjukdomar"@sv ,
+                 "fettlösliga vitaminer"@sv ,
+                 "vattenlösliga vitaminer"@sv ,
+                 "näringslära"@sv ,
+                 "비타민"@ko ,
+                 "결핍증"@ko ,
+                 "지용성 비타민"@ko ,
+                 "수용성 비타민"@ko ,
+                 "영양학"@ko ,
+                 "Vitamine"@de ,
+                 "Mangelkrankheiten"@de ,
+                 "fettlösliche Vitamine"@de ,
+                 "wasserlösliche Vitamine"@de ,
+                 "Ernährung"@de ,
+                 "vitaminas"@es ,
+                 "enfermedades carenciales"@es ,
+                 "vitaminas liposolubles"@es ,
+                 "vitaminas hidrosolubles"@es ,
+                 "nutrición"@es ,
+                 "vitamines"@fr ,
+                 "maladies de carence"@fr ,
+                 "vitamines liposolubles"@fr ,
+                 "vitamines hydrosolubles"@fr ,
+                 "nutrition"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/vitamins/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/vitamins/v1.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#vitamins> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#vitamins> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://ods.od.nih.gov/factsheets/list-VitaminsMinerals/> ,
+              <https://www.wikidata.org/wiki/Q34956> ,
+              <https://www.livsmedelsverket.se/livsmedel-och-innehall/naringsamne/vitaminer-och-antioxidanter/> ,
+              <https://sv.wikipedia.org/wiki/Vitamin> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ,
+                       <#review-6> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Scope: the 13 vitamins of human nutrition, the complete set, for each of which the NIH Office of Dietary Supplements (ODS) publishes one health-professional fact sheet (A, D, E and K fat-soluble; thiamin, riboflavin, niacin, pantothenic acid, vitamin B6, biotin, folate, vitamin B12 and C water-soluble). The Swedish Food Agency's index page confirms the same 13 (\"Det finns 13 livsnödvändiga vitaminer\"). The set of 13 is the complete set, not a selection taken from a list."@en ,
+                 "ODS fact sheets: ods.od.nih.gov answered every request from the research environment (curl and WebFetch) with a Cloudflare challenge page or HTTP 403 (query 6), and its API did the same (query 7). The 13 health-professional fact sheets were therefore downloaded unmodified from the Internet Archive's most recent 2026 capture of each (query 8: a request for https://web.archive.org/web/2026id_/<page> redirects to the latest 2026 capture; captures 2026-09-16 to 2026-10-04, all of the current versions, which were last updated between 2021 and 2026), decompressed and turned into plain text (totext.py), and the relevant sentences were extracted with grep_ods.py (queries 9–13). Every ODS quotation in the evidence is verbatim from these captures; each locator names the sheet, its \"Updated\" date and the capture."@en ,
+                 "Wikidata: query 1 asked for items that are instances or subclasses of vitamin (Q34956); it returned only classes (fat-soluble vitamin Q4389811, water-soluble vitamin Q11548920, vitamin B Q183206 …), not the 13 vitamins. Query 2 found the items labelled or aliased \"vitamin A\" … \"vitamin K2\" in English; query 3 (wbsearchentities, search.py) found the items for the diseases and the vitamers. Query 4 (entities.py, wbgetentities) fetched the English and Swedish labels and aliases, the Wikipedia sitelinks and the statements P31, P279, P828, P2176, P361 and P527 of 41 candidate items; query 5 resolved the deficiency items the diseases point to; query 14 found which Swedish terms are labels or aliases of which items; query 15 listed the members of the fat- and water-soluble classes; query 16 fetched the folates item Q111271197. All raw responses were saved."@en ,
+                 "Card kind 1, vitamin → chemical name: for each vitamin the ODS sheet gives either one compound (thiamin(e), riboflavin, pantothenic acid, biotin, L-ascorbic acid) or a generic name for several vitamers (niacin for nicotinic acid and nicotinamide; folate, including folic acid; cobalamins). For vitamins A, B6 and E, which are groups with no single chemical name, the front names the form asked for in a front note: the main form of vitamin A, an alcohol (retinol, ODS: \"primarily retinol and retinyl esters\"); the alcohol among the B6 vitamers (pyridoxine, ODS: \"pyridoxine, an alcohol; pyridoxal, an aldehyde; and pyridoxamine\"); and the form of vitamin E that meets human requirements (alpha-tocopherol, ODS). Vitamins D and K have no generic card: vitamin K has no chemical name of its own (ODS: \"the generic name for a family of compounds\"), and \"calciferol\", which ODS gives as another name for vitamin D, is also a name of ergocalciferol alone (it is an English alias of Q139200, ergocalciferol), so it would not have one right answer; instead their two main forms each have a card (D2 ergocalciferol, D3 cholecalciferol; K1 phylloquinone, K2 menaquinones), all named in the ODS sheets."@en ,
+                 "Card kind 2, deficiency disease or sign → vitamin: only diseases and signs that an ODS sheet itself ties to one vitamin. Five are diseases caused by the lack of the vitamin: scurvy (vitamin C), rickets and osteomalacia (vitamin D), beriberi (thiamin) and pellagra (niacin). Night blindness is not a disease but an early sign of vitamin A deficiency (\"The first sign\" of xerophthalmia, \"the most common clinical sign of vitamin A deficiency\"), and its card asks for it as such. Pernicious anemia goes the other way: it is an autoimmune disease that causes vitamin B12 deficiency (ODS: \"the most common cause of clinically evident vitamin B12 deficiency\"; it leads to \"malabsorption of dietary vitamin B12\"), not a disease caused by it, and its card asks which vitamin it leaves the body short of. Each was confirmed by Livsmedelsverket's page on the vitamin and by the Swedish Wikipedia article on the disease, and, where Wikidata has the link, by the disease item (scurvy P828 ascorbic acid deficiency; beriberi P279 thiamine deficiency; pellagra P828 niacin deficiency; pernicious anemia P828 vitamin B12 deficiency)."@en ,
+                 "Card kind 3, fat- or water-soluble: the introduction of each ODS sheet states it (\"fat-soluble\" for A, D, E and K; \"water-soluble\" for the other nine; for pantothenic acid and biotin in the sentence after the introduction's first, \"this water-soluble B vitamin\", \"This water-soluble vitamin\"). Livsmedelsverket's index page gives the same split. Wikidata states it for A, D, E and K (P279 fat-soluble vitamin Q4389811) and for biotin, folate (vitamin B9) and vitamin B12 through their class vitamin B (P279 Q183206, itself P279 water-soluble vitamin Q11548920); those statements are machine-checked."@en ,
+                 "Swedish text: the Swedish names of the compounds and diseases are Wikidata Swedish labels or aliases where Wikidata has them (tiamin, pantotensyra, pyridoxin, niacin, askorbinsyra, kolekalciferol, folat, skörbjugg, rakit, beriberi, pellagra, perniciös anemi, nattblindhet; Riboflavin, Biotin, Kobalamin, Retinol, Fyllokinon, Menakinon and Osteomalaci are capitalised in Wikidata and written in lower case on the cards, as Swedish common nouns are). Every Swedish name on a card side was then confirmed in Livsmedelsverket's page on the vitamin (queries 17–19) and in the introduction of the Swedish Wikipedia article (query 20, with revision ids); the term \"xeroftalmi\", which appears only in the night-blindness note, is the Wikidata Swedish label of Q1054713 and is confirmed by the Swedish Wikipedia article Xeroftalmi (Livsmedelsverket does not use it). The Swedish forms of the vitamin names are Wikidata Swedish labels or aliases (C-vitamin on Q199678, D-vitamin on Q175621, K-vitamin on Q182338, A-vitamin on retinol Q424976, E-vitamin and Alfa-tokoferol on tocopherol Q910277; Vitamin B1 … Vitamin B12 as aliases of the B-vitamin items), and Livsmedelsverket confirms them as the forms Swedish authorities use: A-, C-, D-, E- and K-vitamin, but vitamin B1 … vitamin B12 and vitamin D2, D3, K1, K2. Swedish \"vitamin\" is neuter, so the solubility answers are \"fettlösligt\" and \"vattenlösligt\". Svenska Akademiens ordböcker (svenska.se) could not be used as a check: the lookup pages now render in the browser and returned no entries to a script (svenska_se.py, which fetched https://svenska.se/tri/f_so.php?sok=<word> and https://svenska.se/tri/f_saol.php?sok=<word> for tiamin, riboflavin, niacin, pantotensyra, pyridoxin, biotin, folat, kobalamin, askorbinsyra, kalciferol, tokoferol, retinol, skörbjugg, rakit, beriberi, pellagra, osteomalaci, nattblindhet, perniciös, fettlöslig and vattenlöslig; svenska.se is not a source of the deck). Two web searches for a Swedish source for the generic name \"kalciferol\" (WebSearch: \"kalciferol\" D-vitamin; WebSearch: kalciferol vitamin D ne.se OR 1177.se OR fass.se OR internetmedicin.se) found none, only German pharmacy pages and FASS product texts about cholecalciferol, another reason the generic vitamin D card was left out."@en ,
+                 "Notes: a back note, in the compiler's own words, gives the other vitamers or a short piece of context where it helps (e.g. folic acid as the synthetic form of folate, the cobalt in cobalamin, osteomalacia as the adult counterpart of rickets). Every fact in a note is stated in an ODS sheet or Wikidata and was checked against Livsmedelsverket or the Swedish Wikipedia; no dosages, intake recommendations or health advice are given."@en ,
+                 "Licences: the ODS site-policy page (query 21, archived capture), Livsmedelsverket's reuse page (query 22), Wikidata:Licensing (query 23) and a Swedish Wikipedia footer (query 24) were fetched and quoted in the sources."@en ,
+                 "Helper scripts (Python 3, standard library; kept in the authoring session's scratch directory, so their logic is given here): fetch_ods_wayback.py requests https://web.archive.org/web/2026id_/<page> for each ODS page (the id_ form returns the archived bytes unmodified), follows the redirect to the latest 2026 capture, records the capture timestamp and saves the HTML; totext.py gunzips an archived page when needed, drops <script> and <style>, turns </p>, </li>, </h1>–</h6>, </tr>, </div> and <br> into line breaks, removes the remaining tags, unescapes HTML entities and collapses white space; grep_ods.py splits each sheet's plain text into sentences (at \".\", \"!\" or \"?\" followed by white space and a capital letter) and prints the sentences matching a case-insensitive regular expression, for all 13 sheets or the ones named; entities.py calls wbgetentities (query 4) in batches and prints the labels, aliases, sitelinks and the listed statements of each item; search.py calls wbsearchentities (query 3) for each term; svwiki.py calls the Swedish Wikipedia API of query 20 and prints each article's title, revision id and introduction; fetch_lv.sh is the curl loop of query 17; lv_main.py keeps the text of each Livsmedelsverket page from its <h1> to </main>, with the same tag stripping as totext.py."@en ,
+                 "Build: the dossier was written by hand, built with the deck builder (which runs every card's Wikidata checks against live Wikidata) and validated with node scripts/validate_sources.ts vitamins."@en ,
+                 "Selection: All 13 vitamins of human nutrition (the complete set, one ODS fact sheet each; Livsmedelsverket confirms the same 13), in three kinds of card. Chemical names: one card for each vitamin whose ODS sheet gives a single compound or a generic name (B1, B2, B3, B5, B7, B9, B12, C), one for each of A, B6 and E naming one form identified by a front note, and one each for vitamins D2, D3, K1 and K2 instead of a generic card for D and K (15 cards). Left out: a generic card for vitamin D (\"calciferol\" also names ergocalciferol alone, so the card would have two readings) and for vitamin K (no chemical name of its own); provitamin A carotenoids and the metabolites calcidiol and calcitriol; vitamin K3 (menadione, synthetic). Deficiency diseases and signs: the seven whose link to one vitamin the ODS sheets state and the other sources confirm: the deficiency diseases scurvy, rickets, osteomalacia, beriberi and pellagra; night blindness, an early sign of vitamin A deficiency rather than a disease; and pernicious anemia, an autoimmune disease that causes vitamin B12 deficiency rather than one caused by it (7 cards). Left out: megaloblastic anemia (caused by lack of either folate or vitamin B12, so it has two answers), xerophthalmia (kept in the night-blindness note: night blindness is the better-known first sign), Wernicke–Korsakoff syndrome (also thiamine deficiency, mentioned in the beriberi note), vitamin K deficiency bleeding and ariboflavinosis (their names give the answer away), neural tube defects (a risk associated with low folate, not a deficiency disease) and conditions without a classic single-vitamin cause. Solubility: one card per vitamin (13 cards). No card gives a dose, an intake recommendation, a food source or health advice."@en ,
+                 "Licensing: The content sources are the NIH Office of Dietary Supplements fact sheets, which ODS states are in the public domain (and which, as works of the US federal government, are not subject to copyright in the United States), and Wikidata, whose structured data is CC0. The facts on the cards, their selection (the complete set of 13 vitamins, the three card kinds and the seven diseases and signs the ODS sheets tie to one vitamin) and the English and Swedish names all come from these two sources (the Swedish forms A-, C-, D-, E- and K-vitamin included: they are Swedish labels or aliases in Wikidata, which Livsmedelsverket only confirms), so the deck can be CC0 1.0 like the rest of the library. No ODS sentence is reproduced in a card: the cards and notes state facts in the compiler's own words, which also respects ODS's request that reproduced content not be altered. Livsmedelsverket (whose material may be reused only on conditions — unedited quotation, attribution and an updating duty — which is not an open licence) and the Swedish Wikipedia (CC BY-SA 4.0) were used for verification only: they confirmed the facts and the Swedish terms that ODS and Wikidata gave; no wording, table or selection was copied from them, and single-word Swedish technical terms such as \"tiamin\" or \"skörbjugg\" are not copyrightable. Quotations in the provenance report's evidence are not part of the CC0 deck: they remain under their sources' terms (ODS public domain; Livsmedelsverket's text the agency's, quoted verbatim (omissions marked …) and attributed; Wikipedia text CC BY-SA 4.0, by Wikipedia contributors, each linked to the quoted revision) and are short quotations given only to make the verification checkable."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Sources, licences and machine checks: every card against the ODS fact sheet for the vitamin, Wikidata where it has the statement or label, Livsmedelsverket's page on the vitamin and the Swedish Wikipedia article; the Swedish names; card ambiguity."@en ;
+    rdfs:comment "Scope: All 35 cards, the sources and the deck metadata."@en ,
+                 "Outcome: ODS, Livsmedelsverket and the Swedish Wikipedia agree on every card. Wikidata agrees wherever it has the fact, but its vitamin items are unevenly modelled: several labels are capitalised or name a related item, one Swedish label is wrong (ergocalciferol), and solubility is stated only for A, D, E, K and the B-group class. No card follows a Wikidata value that a better source contradicts; where Wikidata's form differs from the card (case, singular/plural, a related item), the check verifies the Wikidata form and the evidence says so, and no check was skipped to hide a disagreement. The builder's checks cover the names on 15 chemical-name cards, the disease names and four disease-to-deficiency links, and solubility for seven vitamins. The brief's generic vitamin D card (calciferol) was not made, because the name is ambiguous."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 35 cards against standard nutrition facts, spot checks of the ODS captures, a live run of the builder's Wikidata checks (97 checks) and the disease items on Wikidata."@en ,
+                 "Outcome: No factual error on any card. One warning: the deck's description, selection and method called all seven kind-2 cards diseases caused by a lack of the vitamin, which fits neither night blindness (a sign) nor pernicious anemia (a disease that causes B12 deficiency). Three suggestions on check strength and one note's wording. All four were verified and applied."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 35 cards, the title, description and keywords in English and Swedish, and the language tags."@en ,
+                 "Outcome: No errors or warnings: every card text is tagged en or sv and the Swedish terms are the established forms. Six suggestions on consistency and idiom; five applied, one (untagged keywords) is a builder limitation outside the dossier."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 35 cards' evidence (every non-Wikidata locator refetched and compared), the four sources' licence pages, the licensing, method and queries."@en ,
+                 "Outcome: No licence breach; every recorded licence is right and a CC0 deck is compliant. Four warnings (two unsourced qualifiers in notes, a self-contradiction on where the Swedish vitamin-name forms come from, and Swedish notes worded close to Livsmedelsverket) and five suggestions; all verified and applied."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: 22 cards: the 13 cards changed in rounds 1–3 and every third card in dossier order; all claimed fixes of rounds 1–3; the builder check, validate_sources.ts and every ODS, Livsmedelsverket and Swedish Wikipedia quote refetched."@en ,
+                 "Outcome: No errors or warnings; every fix claimed in rounds 1–3 is present. Two documentation suggestions, both verified (Swedish Wikipedia parse of Niacin rev 55091741 and Xeroftalmi rev 54264507 fetched today) and applied; no card text changed."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: All 35 cards (15 chemical-name, 7 deficiency and 13 solubility cards), the description, the fixes of rounds 1–4 and a live builder check of all 99 Wikidata checks."@en ,
+                 "Outcome: Every fact confirmed and every round 1–4 fix present; one optional Swedish wording suggestion on vitamin-b12-name, verified and applied. No card was removed and no answer changed."@en .
+
+<#review-6>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 1, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card changed."@en .
+
+<https://ods.od.nih.gov/factsheets/list-VitaminsMinerals/>
+    dcterms:title "Office of Dietary Supplements: Vitamin and Mineral Supplement Fact Sheets (health-professional fact sheets on vitamin A, thiamin, riboflavin, niacin, pantothenic acid, vitamin B6, biotin, folate, vitamin B12, vitamin C, vitamin D, vitamin E and vitamin K)" ;
+    dcterms:creator "Office of Dietary Supplements, National Institutes of Health (US Department of Health and Human Services)" ;
+    rdfs:comment "ODS Site Policies, https://ods.od.nih.gov/About/Site_Policies.aspx (read in the Internet Archive capture of 2026-08-13, https://web.archive.org/web/20260813073844/https://ods.od.nih.gov/About/Site_Policies.aspx, because the live site answers non-browser requests with a challenge page): \"Most of the information available from this site is within the public domain and unless stated otherwise, may be freely downloaded and reproduced, provided the content has not been changed or modified.\" The fact sheets carry no notice stating otherwise; as works of the US federal government they are not subject to copyright in the United States. No text is reproduced in the deck: the cards state facts from the fact sheets in the compiler's own words."@en .
+
+<https://www.wikidata.org/wiki/Q34956>
+    dcterms:title "Wikidata: the items on the vitamins and their vitamers (e.g. Q83187 thiamine, Q424976 retinol, Q139347 cholecalciferol, Q186093 phylloquinone), the classes fat-soluble vitamin (Q4389811) and vitamin B (Q183206), and the deficiency diseases (e.g. Q163865 scurvy, Q184084 beriberi), with their English and Swedish labels and aliases" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data from the main, Property, Lexeme, and EntitySchema namespaces is available under the Creative Commons CC0 License\""@en .
+
+<https://www.livsmedelsverket.se/livsmedel-och-innehall/naringsamne/vitaminer-och-antioxidanter/>
+    dcterms:title "Livsmedelsverket: Vitaminer och antioxidanter, with the pages on each vitamin (A-vitamin, tiamin, riboflavin, niacin, pantotensyra, vitamin B6, biotin, folat, vitamin B12, C-vitamin, D-vitamin, E-vitamin, K-vitamin)" ;
+    dcterms:creator "Livsmedelsverket (Swedish Food Agency)" ;
+    rdfs:comment "https://www.livsmedelsverket.se/om-oss/om-webbplatsen/far-man-anvanda-text-bild/ — \"Livsmedelsverkets webbplats innehåller material som vi gärna vill sprida. Detta gäller under förutsättning att du följer följande regler.\" The rules include \"När textavsnitt kopieras i sin helhet, citeras, ska det återges i oredigerat skick.\" and \"Den som använder material på webbplatsen påtar sig själv ansvaret för att uppdatera informationen\". This is a conditional permission, not an open licence (no editing, an updating duty), so the agency keeps its rights and the source is used for verification only."@en .
+
+<https://sv.wikipedia.org/wiki/Vitamin>
+    dcterms:title "Svenskspråkiga Wikipedia: artiklarna Vitamin, Tiamin, Riboflavin, Niacin, Pantotensyra, Pyridoxin, Biotin, Folsyra, Kobalamin, Askorbinsyra, D-vitamin, Vitamin E, Alfatokoferol, K-vitamin, Fyllokinon, Retinol, Skörbjugg, Rakit, Beriberi, Pellagra, Benvävsuppmjukning, Perniciös anemi, Nattblindhet och Xeroftalmi (inledningarna)" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of every Swedish Wikipedia article (e.g. https://sv.wikipedia.org/wiki/Sk%C3%B6rbjugg): \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported\""@en .
+
+<#vitamin-a-name>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vitamin A: chemical name"@en ,
+                     "A-vitamin: kemiskt namn"@sv ;
+    solid-memo:frontNote "its main form, an alcohol"@en ,
+                         "dess huvudform, en alkohol"@sv ;
+    solid-memo:back "retinol"@en ,
+                    "retinol"@sv ;
+    solid-memo:backNote "Vitamin A is a group of retinoids, mainly retinol and retinyl esters; beta-carotene and other provitamin A carotenoids are converted to it."@en ,
+                        "A-vitamin är en grupp retinoider, främst retinol och retinylestrar; betakaroten och andra provitamin A-karotenoider omvandlas till det."@sv .
+
+<#vitamin-b1-name>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vitamin B1: chemical name"@en ,
+                     "Vitamin B1: kemiskt namn"@sv ;
+    solid-memo:back "thiamine"@en ,
+                    "tiamin"@sv ;
+    solid-memo:backNote "Also spelled thiamin; also called aneurin."@en ,
+                        "Kallas även aneurin."@sv .
+
+<#vitamin-b2-name>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vitamin B2: chemical name"@en ,
+                     "Vitamin B2: kemiskt namn"@sv ;
+    solid-memo:back "riboflavin"@en ,
+                    "riboflavin"@sv .
+
+<#vitamin-b3-name>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vitamin B3: chemical name"@en ,
+                     "Vitamin B3: kemiskt namn"@sv ;
+    solid-memo:frontNote "generic name"@en ,
+                         "samlingsnamn"@sv ;
+    solid-memo:back "niacin"@en ,
+                    "niacin"@sv ;
+    solid-memo:backNote "The generic name for nicotinic acid and nicotinamide."@en ,
+                        "Samlingsnamn för nikotinsyra och nikotinamid."@sv .
+
+<#vitamin-b5-name>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vitamin B5: chemical name"@en ,
+                     "Vitamin B5: kemiskt namn"@sv ;
+    solid-memo:back "pantothenic acid"@en ,
+                    "pantotensyra"@sv .
+
+<#vitamin-b6-name>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vitamin B6: chemical name"@en ,
+                     "Vitamin B6: kemiskt namn"@sv ;
+    solid-memo:frontNote "the alcohol among its forms"@en ,
+                         "alkoholen bland dess former"@sv ;
+    solid-memo:back "pyridoxine"@en ,
+                    "pyridoxin"@sv ;
+    solid-memo:backNote "Vitamin B6 comprises six compounds: pyridoxine, pyridoxal, pyridoxamine and their phosphate esters."@en ,
+                        "Vitamin B6 omfattar sex föreningar: pyridoxin, pyridoxal, pyridoxamin och deras fosfatestrar."@sv .
+
+<#vitamin-b7-name>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vitamin B7: chemical name"@en ,
+                     "Vitamin B7: kemiskt namn"@sv ;
+    solid-memo:back "biotin"@en ,
+                    "biotin"@sv ;
+    solid-memo:backNote "Also called vitamin H."@en ,
+                        "Kallas även vitamin H."@sv .
+
+<#vitamin-b9-name>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vitamin B9: chemical name"@en ,
+                     "Vitamin B9: kemiskt namn"@sv ;
+    solid-memo:frontNote "generic name"@en ,
+                         "samlingsnamn"@sv ;
+    solid-memo:back "folate"@en ,
+                    "folat"@sv ;
+    solid-memo:backNote "Folic acid is the synthetic form used in fortified foods and most supplements."@en ,
+                        "Folsyra är den syntetiska formen; den finns i berikade livsmedel och i de flesta kosttillskott."@sv .
+
+<#vitamin-b12-name>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vitamin B12: chemical name"@en ,
+                     "Vitamin B12: kemiskt namn"@sv ;
+    solid-memo:frontNote "generic name"@en ,
+                         "samlingsnamn"@sv ;
+    solid-memo:back "cobalamin"@en ,
+                    "kobalamin"@sv ;
+    solid-memo:backNote "Named after the cobalt it contains."@en ,
+                        "Namnet kommer av att vitaminet innehåller kobolt."@sv .
+
+<#vitamin-c-name>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vitamin C: chemical name"@en ,
+                     "C-vitamin: kemiskt namn"@sv ;
+    solid-memo:back "ascorbic acid"@en ,
+                    "askorbinsyra"@sv ;
+    solid-memo:backNote "The vitamin is L-ascorbic acid; as a food additive it is E300."@en ,
+                        "Vitaminet är L-askorbinsyra; som livsmedelstillsats E300."@sv .
+
+<#vitamin-d2-name>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vitamin D2: chemical name"@en ,
+                     "Vitamin D2: kemiskt namn"@sv ;
+    solid-memo:back "ergocalciferol"@en ,
+                    "ergokalciferol"@sv ;
+    solid-memo:backNote "One of the two main forms of vitamin D (with D3); found in mushrooms."@en ,
+                        "En av D-vitaminets två huvudformer (med D3); finns i svampar."@sv .
+
+<#vitamin-d3-name>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vitamin D3: chemical name"@en ,
+                     "Vitamin D3: kemiskt namn"@sv ;
+    solid-memo:back "cholecalciferol"@en ,
+                    "kolekalciferol"@sv ;
+    solid-memo:backNote "The form made in the skin by UVB light; also in animal-based foods."@en ,
+                        "Bildas i huden när den utsätts för UVB-ljus; finns också i livsmedel från djur."@sv .
+
+<#vitamin-e-name>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vitamin E: chemical name"@en ,
+                     "E-vitamin: kemiskt namn"@sv ;
+    solid-memo:frontNote "the form that meets human requirements"@en ,
+                         "den form som täcker människans behov"@sv ;
+    solid-memo:back "alpha-tocopherol"@en ,
+                    "alfa-tokoferol"@sv ;
+    solid-memo:backNote "Vitamin E comprises eight compounds: four tocopherols and four tocotrienols (alpha, beta, gamma, delta)."@en ,
+                        "E-vitamin omfattar åtta föreningar: fyra tokoferoler och fyra tokotrienoler (alfa, beta, gamma, delta)."@sv .
+
+<#vitamin-k1-name>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vitamin K1: chemical name"@en ,
+                     "Vitamin K1: kemiskt namn"@sv ;
+    solid-memo:back "phylloquinone"@en ,
+                    "fyllokinon"@sv ;
+    solid-memo:backNote "Found mainly in green leafy vegetables; the main dietary form of vitamin K."@en ,
+                        "Finns främst i gröna bladgrönsaker; den viktigaste formen av K-vitamin i kosten."@sv .
+
+<#vitamin-k2-name>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vitamin K2: chemical name"@en ,
+                     "Vitamin K2: kemiskt namn"@sv ;
+    solid-memo:back "menaquinones"@en ,
+                    "menakinoner"@sv ;
+    solid-memo:backNote "Mostly made by bacteria; named MK-n (e.g. MK-4, MK-7) after the length of their side chain."@en ,
+                        "Bildas främst av bakterier; betecknas MK-n (t.ex. MK-4, MK-7) efter sidokedjans längd."@sv .
+
+<#scurvy>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Scurvy: deficiency of which vitamin?"@en ,
+                     "Skörbjugg: brist på vilket vitamin?"@sv ;
+    solid-memo:back "vitamin C"@en ,
+                    "C-vitamin"@sv .
+
+<#rickets>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Rickets: deficiency of which vitamin?"@en ,
+                     "Rakit: brist på vilket vitamin?"@sv ;
+    solid-memo:back "vitamin D"@en ,
+                    "D-vitamin"@sv ;
+    solid-memo:backNote "In children; in adults the same deficiency causes osteomalacia."@en ,
+                        "Hos barn; hos vuxna ger samma brist osteomalaci."@sv .
+
+<#osteomalacia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Osteomalacia: deficiency of which vitamin?"@en ,
+                     "Osteomalaci: brist på vilket vitamin?"@sv ;
+    solid-memo:back "vitamin D"@en ,
+                    "D-vitamin"@sv ;
+    solid-memo:backNote "Softening of the bones in adults; in children the same deficiency causes rickets."@en ,
+                        "Benuppmjukning hos vuxna; hos barn ger samma brist rakit."@sv .
+
+<#beriberi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Beriberi: deficiency of which vitamin?"@en ,
+                     "Beriberi: brist på vilket vitamin?"@sv ;
+    solid-memo:back "vitamin B1 (thiamine)"@en ,
+                    "vitamin B1 (tiamin)"@sv ;
+    solid-memo:backNote "Thiamine deficiency can also cause Wernicke–Korsakoff syndrome."@en ,
+                        "Tiaminbrist kan också ge Wernicke–Korsakoffs syndrom."@sv .
+
+<#pellagra>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pellagra: deficiency of which vitamin?"@en ,
+                     "Pellagra: brist på vilket vitamin?"@sv ;
+    solid-memo:back "vitamin B3 (niacin)"@en ,
+                    "vitamin B3 (niacin)"@sv .
+
+<#night-blindness>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Night blindness: an early sign of a deficiency of which vitamin?"@en ,
+                     "Nattblindhet: ett tidigt tecken på brist på vilket vitamin?"@sv ;
+    solid-memo:back "vitamin A"@en ,
+                    "A-vitamin"@sv ;
+    solid-memo:backNote "It is the first sign of xerophthalmia, the most common sign of vitamin A deficiency."@en ,
+                        "Det är det första tecknet på xeroftalmi, det vanligaste tecknet på A-vitaminbrist."@sv .
+
+<#pernicious-anemia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pernicious anemia leads to a deficiency of which vitamin?"@en ,
+                     "Perniciös anemi ger brist på vilket vitamin?"@sv ;
+    solid-memo:back "vitamin B12"@en ,
+                    "vitamin B12"@sv ;
+    solid-memo:backNote "An autoimmune disease of the stomach lining that stops vitamin B12 from being absorbed."@en ,
+                        "En autoimmun sjukdom i magslemhinnan som gör att vitamin B12 inte kan tas upp."@sv .
+
+<#vitamin-a-solubility>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vitamin A: fat- or water-soluble?"@en ,
+                     "A-vitamin: fett- eller vattenlösligt?"@sv ;
+    solid-memo:back "fat-soluble"@en ,
+                    "fettlösligt"@sv .
+
+<#vitamin-b1-solubility>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vitamin B1: fat- or water-soluble?"@en ,
+                     "Vitamin B1: fett- eller vattenlösligt?"@sv ;
+    solid-memo:back "water-soluble"@en ,
+                    "vattenlösligt"@sv .
+
+<#vitamin-b2-solubility>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vitamin B2: fat- or water-soluble?"@en ,
+                     "Vitamin B2: fett- eller vattenlösligt?"@sv ;
+    solid-memo:back "water-soluble"@en ,
+                    "vattenlösligt"@sv .
+
+<#vitamin-b3-solubility>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vitamin B3: fat- or water-soluble?"@en ,
+                     "Vitamin B3: fett- eller vattenlösligt?"@sv ;
+    solid-memo:back "water-soluble"@en ,
+                    "vattenlösligt"@sv .
+
+<#vitamin-b5-solubility>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vitamin B5: fat- or water-soluble?"@en ,
+                     "Vitamin B5: fett- eller vattenlösligt?"@sv ;
+    solid-memo:back "water-soluble"@en ,
+                    "vattenlösligt"@sv .
+
+<#vitamin-b6-solubility>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vitamin B6: fat- or water-soluble?"@en ,
+                     "Vitamin B6: fett- eller vattenlösligt?"@sv ;
+    solid-memo:back "water-soluble"@en ,
+                    "vattenlösligt"@sv .
+
+<#vitamin-b7-solubility>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vitamin B7: fat- or water-soluble?"@en ,
+                     "Vitamin B7: fett- eller vattenlösligt?"@sv ;
+    solid-memo:back "water-soluble"@en ,
+                    "vattenlösligt"@sv .
+
+<#vitamin-b9-solubility>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vitamin B9: fat- or water-soluble?"@en ,
+                     "Vitamin B9: fett- eller vattenlösligt?"@sv ;
+    solid-memo:back "water-soluble"@en ,
+                    "vattenlösligt"@sv .
+
+<#vitamin-b12-solubility>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vitamin B12: fat- or water-soluble?"@en ,
+                     "Vitamin B12: fett- eller vattenlösligt?"@sv ;
+    solid-memo:back "water-soluble"@en ,
+                    "vattenlösligt"@sv .
+
+<#vitamin-c-solubility>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vitamin C: fat- or water-soluble?"@en ,
+                     "C-vitamin: fett- eller vattenlösligt?"@sv ;
+    solid-memo:back "water-soluble"@en ,
+                    "vattenlösligt"@sv .
+
+<#vitamin-d-solubility>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vitamin D: fat- or water-soluble?"@en ,
+                     "D-vitamin: fett- eller vattenlösligt?"@sv ;
+    solid-memo:back "fat-soluble"@en ,
+                    "fettlösligt"@sv .
+
+<#vitamin-e-solubility>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vitamin E: fat- or water-soluble?"@en ,
+                     "E-vitamin: fett- eller vattenlösligt?"@sv ;
+    solid-memo:back "fat-soluble"@en ,
+                    "fettlösligt"@sv .
+
+<#vitamin-k-solubility>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vitamin K: fat- or water-soluble?"@en ,
+                     "K-vitamin: fett- eller vattenlösligt?"@sv ;
+    solid-memo:back "fat-soluble"@en ,
+                    "fettlösligt"@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

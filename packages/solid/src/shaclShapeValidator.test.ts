@@ -592,7 +592,7 @@ describe("validateRelease", () => {
   }, 60_000);
 
   // A deck and a course, each the latest of its series; small ones, for each is checked whole, five times over.
-  it.each(["greek-alphabet/v1.ttl", "getting-started/v2.ttl"])(
+  it.each(["greek-alphabet/v2.ttl", "getting-started/v3.ttl"])(
     "finds nothing wrong with the next version of decks/%s, in a pod, where it is published and as published, alone, or for the library: it describes its publisher and series as the index does",
     async (path) => {
       const pod = await draftPod();

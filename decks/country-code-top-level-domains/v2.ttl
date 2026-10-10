@@ -1,0 +1,1742 @@
+@base <https://solid-memo.com/decks/country-code-top-level-domains/v2.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Country-code top-level domains"@en ,
+                  "Nationella toppdomäner"@sv ,
+                  "국가 코드 최상위 도메인"@ko ,
+                  "Länderspezifische Top-Level-Domains"@de ,
+                  "Dominios de nivel superior geográfico"@es ,
+                  "Domaines de premier niveau nationaux"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "The country-code top-level domain (ccTLD) of each of the 193 UN member states: 193 cards with the country on the front, in English and Swedish, and its two-letter Internet domain on the back, such as Sweden → .se, studied in both directions. Each card gives the domain IANA has delegated to the country's registry, formed from its ISO 3166-1 code except for the United Kingdom (.uk, not .gb); internationalised domains in other scripts and the domains of territories that are not UN members are left out. Compiled from Wikidata and checked against IANA's Root Zone Database and the DNS root zone file."@en ,
+                        "Den nationella toppdomänen (ccTLD) för vart och ett av FN:s 193 medlemsländer: 193 kort med landet på framsidan, på engelska och svenska, och dess tvåbokstaviga internetdomän på baksidan, till exempel Sverige → .se, att öva i båda riktningarna. Varje kort ger den domän som IANA har delegerat till landets domänregister, bildad av landets ISO 3166-1-kod utom för Storbritannien (.uk, inte .gb); internationaliserade domäner i andra skriftsystem och domäner för territorier som inte är medlemmar i FN ingår inte. Sammanställd från Wikidata och kontrollerad mot IANA:s rotzonsdatabas (Root Zone Database) och DNS-rotzonfilen."@sv ,
+                        "유엔 회원국 193개국 각각의 국가 코드 최상위 도메인(ccTLD). 카드 193장의 앞면에는 영어와 스웨덴어로 된 나라 이름이, 뒷면에는 그 나라의 두 글자 인터넷 도메인이 있으며(예: 스웨덴 → .se), 양방향으로 학습한다. 각 카드는 IANA가 그 나라의 도메인 등록 기관에 위임한 도메인을 알려 주며, 이 도메인은 영국(.gb가 아닌 .uk)을 제외하면 ISO 3166-1 코드에서 따왔다. 다른 문자로 된 국제화 도메인과 유엔 회원국이 아닌 지역의 도메인은 제외했다. Wikidata를 바탕으로 정리하고 IANA의 Root Zone Database와 DNS 루트 존 파일로 검증했다."@ko ,
+                        "Die länderspezifische Top-Level-Domain (ccTLD) jedes der 193 UN-Mitgliedstaaten: 193 Karten mit dem Land auf der Vorderseite, auf Englisch und Schwedisch, und seiner zweibuchstabigen Internetdomain auf der Rückseite, etwa Schweden → .se, zum Lernen in beide Richtungen. Jede Karte nennt die Domain, die die IANA an die Registrierungsstelle des Landes delegiert hat, gebildet aus seinem ISO-3166-1-Code, außer beim Vereinigten Königreich (.uk, nicht .gb); internationalisierte Domains in anderen Schriften und die Domains von Gebieten, die keine UN-Mitglieder sind, fehlen. Zusammengestellt aus Wikidata und abgeglichen mit der Root Zone Database der IANA und der Datei der DNS-Root-Zone."@de ,
+                        "El dominio de nivel superior geográfico (ccTLD) de cada uno de los 193 Estados miembros de la ONU: 193 tarjetas con el país en el anverso, en inglés y en sueco, y su dominio de internet de dos letras en el reverso, como Suecia → .se, para estudiar en ambos sentidos. Cada tarjeta da el dominio que la IANA ha delegado en el registro del país, formado a partir de su código ISO 3166-1 salvo en el caso del Reino Unido (.uk, no .gb); se excluyen los dominios internacionalizados en otros sistemas de escritura y los dominios de territorios que no son miembros de la ONU. Recopilado de Wikidata y comprobado con la Root Zone Database de la IANA y el archivo de la zona raíz del DNS."@es ,
+                        "Le domaine de premier niveau national (ccTLD) de chacun des 193 États membres de l’ONU : 193 cartes avec le pays au recto, en anglais et en suédois, et son domaine Internet à deux lettres au verso, par exemple Suède → .se, à étudier dans les deux sens. Chaque carte donne le domaine que l’IANA a délégué au registre du pays, formé à partir de son code ISO 3166-1, sauf pour le Royaume-Uni (.uk, et non .gb) ; les domaines internationalisés dans d’autres systèmes d’écriture et les domaines des territoires qui ne sont pas membres de l’ONU sont exclus. Compilé à partir de Wikidata et vérifié avec la Root Zone Database de l’IANA et le fichier de la zone racine du DNS."@fr ;
+    prov:wasDerivedFrom <https://www.wikidata.org/> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:computing ,
+               topic:geography ;
+    dcat:keyword "top-level domains"@en ,
+                 "ccTLD"@en ,
+                 "Internet domains"@en ,
+                 "DNS"@en ,
+                 "countries"@en ,
+                 "toppdomäner"@sv ,
+                 "nationella toppdomäner"@sv ,
+                 "domännamn"@sv ,
+                 "internet"@sv ,
+                 "länder"@sv ,
+                 "ccTLD"@sv ,
+                 "DNS"@sv ,
+                 "최상위 도메인"@ko ,
+                 "국가 코드 최상위 도메인"@ko ,
+                 "ccTLD"@ko ,
+                 "인터넷 도메인"@ko ,
+                 "DNS"@ko ,
+                 "국가"@ko ,
+                 "Top-Level-Domains"@de ,
+                 "ccTLD"@de ,
+                 "Internetdomains"@de ,
+                 "Länderdomains"@de ,
+                 "DNS"@de ,
+                 "Länder"@de ,
+                 "dominios de nivel superior"@es ,
+                 "ccTLD"@es ,
+                 "dominios de internet"@es ,
+                 "DNS"@es ,
+                 "países"@es ,
+                 "domaines de premier niveau"@fr ,
+                 "ccTLD"@fr ,
+                 "domaines Internet"@fr ,
+                 "DNS"@fr ,
+                 "pays"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:bidirectional ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/country-code-top-level-domains/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/country-code-top-level-domains/v1.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#country-code-top-level-domains> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#country-code-top-level-domains> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/> ,
+              <https://www.iana.org/domains/root/db> ,
+              <https://www.internic.net/domain/root.zone> ,
+              <https://www.un.org/en/about-us/member-states> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
+                 "The cards were checked by machine (IANA's Root Zone Database and the DNS root zone file, live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Selection: the Wikidata SPARQL endpoint was asked for every item that is a member (P463) of the United Nations (Q1065) with no end time on that statement, with its ISO 3166-1 alpha-2 code (P297) and every top-level Internet domain (P78) statement (query 1, run 2026-10-04). It returned 203 items, 11 of them without an ISO 3166-1 alpha-2 code. As in the library's world-currencies deck, ten of these are historical predecessor states still tagged as members (Islamic State of Afghanistan, Republic of Afghanistan, Kingdom of Laos, Kingdom of Nepal, Mongolian People's Republic, People's Republic of Mozambique, Republic of the Congo (Léopoldville), Somali Democratic Republic, Third Hellenic Republic, realm of the United Kingdom); they were dropped. The eleventh is the Kingdom of Denmark (Q756617), a member without P297; it and the Kingdom of the Netherlands (Q29999, which has P297 \"NL\") are the recorded members; the cards use Denmark (Q35) and the Netherlands (Q55), whose domains .dk and .nl are also the Kingdoms' P78 values. The resulting 193 items are exactly those of the world-currencies deck, and they were matched one to one with the 193 names on the UN's Member States page downloaded the same day (by normalised English name, the rest through a hand-written table of 28 UN name forms, listed in full under queries, such as \"Viet Nam\", \"Türkiye\", \"Naoero\")."@en ,
+                 "Domains: query 2 asked, for the 193 items and the two Kingdoms, for P297 and every P78 statement with its rank, start and end time, the domain item's English, Swedish and multilingual labels and its classes (P31). For 166 states P78 has exactly one value; for 27 it has more: internationalised (non-Latin) ccTLDs such as .рф, .中国 or .бг (classed Q843214), generic or geographic TLDs such as .quebec, .paris, .swiss, .gov and .mil, the legacy .su for Russia and .gb for the United Kingdom, overseas .wf, .re, .yt and .pm for France, and .eu (deprecated rank) for Belgium and Lithuania. The card's domain is the P78 value of best rank whose label is a dot followed by the state's ISO 3166-1 alpha-2 code in lower case; it is a country code top-level domain (P31 Q42032) for every state. The one exception to the ISO rule is the United Kingdom: its code is GB, but its P78 value of preferred rank is .uk (Q37913), and .gb (Q433862, normal rank) is described as \"reserved\"; the card gives .uk and a back note explains .gb. The Netherlands item Q55 has no P297 of normal or preferred rank (its \"NL\" statement is deprecated, so the truthy wdt:P297 of query 2 does not return it); the Kingdom's code NL (Q29999) was used."@en ,
+                 "Cross-check against IANA: the Root Zone Database table (https://www.iana.org/domains/root/db) was downloaded and parsed into its 1595 rows (316 of type country-code), and the delegation record of each card's domain was fetched (fetch_iana_pages.py, one request per second). Every card's domain is listed with type country-code and a named manager (none is \"Not assigned\" or \"Reserved Domain - IANA\"); each card's evidence quotes the row (manager), the record's heading, registration date and last update. Then the root zone file itself (https://www.internic.net/domain/root.zone, SOA serial 2026100301) was downloaded and its NS records counted: every card's domain has NS records, i.e. is delegated in the DNS today."@en ,
+                 "English and Swedish names of the states: the fronts are those of the library's world-currencies deck, which were reviewed for language there: the Wikidata English and Swedish labels, except China (English label is the long form \"People's Republic of China\"; the front is the short name \"China\") and Eswatini (the Swedish label is still \"Swaziland\"; the Swedish alias \"Eswatini\" is used). The English fronts are Wikidata's common English short names, so some differ from UN usage (Czech Republic for Czechia, Ivory Coast for Côte d'Ivoire, Cape Verde for Cabo Verde, Turkey for Türkiye); the Swedish fronts are the established Swedish names (Sverige, Storbritannien, USA, Kongo-Kinshasa, Elfenbenskusten, Östtimor …). Every front text is checked against live Wikidata as a label or alias by the builder, except the English \"China\"."@en ,
+                 "Backs: the domain written as it is conventionally cited, a dot followed by the two lower-case letters (\".se\"), which is also the English label of the Wikidata domain item. A domain name is text in no language, so the back is tagged zxx. All 193 backs are different, so the deck is studied in both directions."@en ,
+                 "Back notes, in the compiler's own words, only where a learner would otherwise be misled: the United Kingdom (ISO code GB, domain .uk, .gb reserved: IANA's .gb record names \"Reserved Domain - IANA\" as manager, Wikidata describes Q433862 as \"reserved Internet country-code top level domain for the United Kingdom\"); Russia (the Cyrillic .рф and the Soviet Union's .su, both listed by IANA as country-code domains, .рф managed by the Coordination Center for TLD RU and .su by ROSNIIROS, whose address in the .su record is in Moscow, both delegated in the root zone; Wikidata gives .su the country Soviet Union and .рф the country Russia); Timor-Leste (.tl delegated on 23 March 2005; the former .tp of Portuguese Timor, delegated 1997, was later removed: IANA's .tp record says \"This domain is not present in the root zone at this time\", and its report of 26 January 2015 gives the history; Wikidata gives .tp replaced by .tl). The Swedish notes were written by the compiler."@en ,
+                 "Machine checks: every card carried Wikidata checks that the builder ran against live Wikidata: the state's English and Swedish label or alias (the front), its P297 code, that its P78 includes the card's domain item, that this item's English label is the card's back and that it is an instance of country code top-level domain (Q42032); and for the notes the labels and countries of .gb, .su and .рф and .tp's replacement by .tl. Every card's evidence quotes Wikidata, IANA's Root Zone Database, the root zone file and the UN page for that state, generated from the downloaded files by gen.py."@en ,
+                 "Helper scripts (Python 3, standard library, run in a scratch directory; their logic in full): make_q2.py wrote query 2's VALUES list from the country items of the world-currencies dossier's P38 checks plus Q29999 and Q756617. parse_iana.py read the IANA table page and kept every <tr> with exactly three <td> cells as (domain, type, manager, link), text with tags stripped and HTML entities decoded: 1595 rows, 316 with type \"country-code\". fetch_iana_pages.py fetched https://www.iana.org/domains/root/db/<xx>.html for each card's domain and .gb, .su, .tp (one per second), and took from the <main> text the \"Delegation Record for …\" heading, the \"ccTLD Manager\" block, \"Registration date\" and \"Record last updated\". rootzone.py split each line of root.zone on whitespace and counted, per owner name (lower case, final dot removed), the lines whose 4th field is NS; the SOA serial is the 7th field of the line owned by \".\" with type SOA. match_un.py took the text of every <h2> on the UN page after the first (the search heading), 193 names, and matched each to a card by the hand-written table or else by the English front with accents removed and everything but a–z dropped, lower case. gen.py wrote each card from these files: the front from the world-currencies dossier, the back from the best-rank P78 value whose English label is \".\" plus the ISO code, the Wikidata checks, and the evidence entries (Wikidata statements, the IANA row and record fields, the NS count with the first NS line, and the UN name); it stops if any card's domain is not of type country-code, has a manager \"Not assigned\" or \"Reserved…\", or has no NS records, and asserts that the 193 backs are distinct. The notes were written by hand."@en ,
+                 "Excluded: territories and states that are not UN members, even where IANA lists a country-code domain for them (e.g. .tw, .va, .ps, .gl, .fo, .aw, .aq, .io; Kosovo has no domain in IANA's database); the European Union's .eu, a country-code entry in IANA's database but not a state's; internationalised ccTLDs in other scripts (e.g. .рф, .中国), named only in the Russia note; generic and sponsored TLDs (.gov, .mil, .quebec, .рус …); and retired or legacy domains (.tp, and the Soviet Union's .su), named only in the Timor-Leste and Russia notes."@en ,
+                 "Selection: All 193 member states of the United Nations, one card each, as recorded in Wikidata (member of Q1065 with no end time, less ten historical predecessor items, none of which has an ISO 3166-1 alpha-2 code) and confirmed against the UN's Member States page on 2026-10-04; the Kingdoms of Denmark (Q756617, no ISO code in Wikidata) and the Netherlands (Q29999) are represented by Denmark (Q35) and the Netherlands (Q55). Each card gives the country-code top-level domain for the state's ISO 3166-1 alpha-2 code that IANA has delegated to the country's registry, as recorded in Wikidata (P78) and confirmed by IANA's Root Zone Database and the root zone file of 2026-10-04; the United Kingdom, whose ISO code is GB, gets .uk, its delegated domain, with a note on the reserved .gb. Left out: territories and non-member states (Taiwan, the Holy See, Palestine, Kosovo, dependencies such as Greenland or Aruba), internationalised ccTLDs in non-Latin scripts, the European Union's .eu, generic and sponsored TLDs such as .gov or .quebec, and retired or legacy domains; Russia's .рф and .su and Timor-Leste's former .tp are mentioned in back notes only."@en ,
+                 "Licensing: The deck is CC0 1.0. Its only content source is Wikidata, whose structured data is CC0: the selection of states, each state's domain and the English and Swedish names come from it (China's English short name and the notes are the compiler's own wording of facts). IANA's Root Zone Database and the root zone file (ICANN terms of service: no licence to reproduce; IANA's CC0 statement covers only its protocol registries, not the root zone database) and the UN Member States page (personal non-commercial use only) were used only to verify facts that Wikidata gave: no list, selection or running text was copied from them, and the selection of states follows Wikidata, not their lists. The evidence in the provenance report quotes each of them briefly, one entry at a time, as citations for verification; read as a whole, the evidence column thus cites the UN's name for every state and IANA's manager and dates for every domain. These are factual names and dates given as citations, and the cards themselves contain none of them except the domain name itself. Which domain is delegated for a country is a fact and not protected by copyright, so verifying it against these sources puts no conditions on the deck."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Machine and source checks: every card's domain compared across Wikidata (P78 and P297), IANA's Root Zone Database (table and delegation record) and the root zone file; the selection compared with the UN Member States page; Wikidata checks run by the builder."@en ;
+    rdfs:comment "Scope: All 193 cards."@en ,
+                 "Outcome: For all 193 states Wikidata's best-rank P78 includes the ASCII ccTLD formed from the state's ISO 3166-1 alpha-2 code (for the United Kingdom .uk, see below), IANA lists that domain as a country-code TLD with a manager, and the root zone of 2026-10-04 delegates it (NS records). No card's domain disagrees between the sources. The UN page lists the same 193 states. The builder's 1166 Wikidata checks (581 on labels: every front label, and each domain item's label; the others on P297, P78, the domain item's class and the note facts) pass against live Wikidata. The findings below record where Wikidata holds further or unexpected values and how the cards deal with them."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 193 cards: codes against iso-codes (pycountry), delegation against the live root zone, membership against the UN page, the three back notes against IANA records; builder checks re-run."@en ,
+                 "Outcome: No factual errors found. One suggestion on the United Kingdom note and the description's wording, verified and applied."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 193 cards, the notes, title, description, keywords and the built TTL's language tags."@en ,
+                 "Outcome: No errors in language, translation or tags. The Russia note was reworded as suggested; the untagged keywords come from the builder and are outside the dossier."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 193 cards' evidence, every source's licence page, the method, selection, licensing and queries."@en ,
+                 "Outcome: Licensing confirmed (CC0, Wikidata the only content source). Two documentation warnings and two suggestions, all verified and fixed in the documentation; no card text changed for them."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: 68 cards: the three changed in round 3's fixes (united-kingdom, russia, netherlands) and every third card from Afghanistan to Zimbabwe, against the root zone file, IANA delegation records, the UN Member States page and live Wikidata; plus the metadata, licensing and documentation."@en ,
+                 "Outcome: No errors or warnings; every earlier fix confirmed in place. One optional wording suggestion, applied."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 1, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card changed."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing (fetched 2026-10-04) — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://www.iana.org/domains/root/db>
+    dcterms:title "Root Zone Database (the list of top-level domains with their type and manager, the delegation record of each, and the report on the removal of .tp)" ;
+    dcterms:creator "Internet Assigned Numbers Authority (IANA), operated by Public Technical Identifiers, an affiliate of ICANN" ;
+    rdfs:comment "Every IANA page links to ICANN's terms of service (https://www.icann.org/privacy/tos, which redirects to https://www.icann.org/en/data-protection/terms-of-service): \"This Agreement does not transfer from us to you any of our or third party intellectual property, and all right, title and interest in and to such property will remain (as between the parties) solely with us. … Your use of the Platform grants you no right or license to reproduce or otherwise use any intellectual property belonging to our organization or other third parties.\" IANA's CC0 statement (https://www.iana.org/help/licensing-terms) covers only \"the technical protocol registry data directly linked at either https://www.iana.org/protocols or https://www.ietf.org/assignments/\", which does not include the Root Zone Database under /domains. Used for verification only."@en .
+
+<https://www.internic.net/domain/root.zone>
+    dcterms:title "The DNS root zone file (root.zone, SOA serial 2026100301)" ;
+    dcterms:creator "Internet Assigned Numbers Authority (IANA), published on InterNIC, a site operated by ICANN" ;
+    rdfs:comment "No licence is stated in the file. The InterNIC site that publishes it says \"InterNIC is a registered service mark of the U.S. Department of Commerce. It is licensed to the Internet Corporation for Assigned Names and Numbers, which operates this web site.\" (https://www.internic.net/), so ICANN's terms of service apply: \"Your use of the Platform grants you no right or license to reproduce or otherwise use any intellectual property belonging to our organization or other third parties.\" (https://www.icann.org/en/data-protection/terms-of-service). Used for verification only."@en .
+
+<https://www.un.org/en/about-us/member-states>
+    dcterms:title "Member States" ;
+    dcterms:creator "United Nations" ;
+    rdfs:comment "https://www.un.org/en/about-us/terms-of-use — \"The United Nations grants permission to Users to visit the Site and to download and copy the information, documents and materials (collectively, “Materials”) from the Site for the User’s personal, non-commercial use, without any right to resell or redistribute them or to compile or create derivative works therefrom\". Used for verification only."@en .
+
+<#afghanistan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Afghanistan"@en ,
+                     "Afghanistan"@sv ;
+    solid-memo:back ".af"@zxx .
+
+<#albania>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Albania"@en ,
+                     "Albanien"@sv ;
+    solid-memo:back ".al"@zxx .
+
+<#algeria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Algeria"@en ,
+                     "Algeriet"@sv ;
+    solid-memo:back ".dz"@zxx .
+
+<#andorra>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Andorra"@en ,
+                     "Andorra"@sv ;
+    solid-memo:back ".ad"@zxx .
+
+<#angola>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Angola"@en ,
+                     "Angola"@sv ;
+    solid-memo:back ".ao"@zxx .
+
+<#antigua-and-barbuda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Antigua and Barbuda"@en ,
+                     "Antigua och Barbuda"@sv ;
+    solid-memo:back ".ag"@zxx .
+
+<#argentina>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Argentina"@en ,
+                     "Argentina"@sv ;
+    solid-memo:back ".ar"@zxx .
+
+<#armenia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Armenia"@en ,
+                     "Armenien"@sv ;
+    solid-memo:back ".am"@zxx .
+
+<#australia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Australia"@en ,
+                     "Australien"@sv ;
+    solid-memo:back ".au"@zxx .
+
+<#austria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Austria"@en ,
+                     "Österrike"@sv ;
+    solid-memo:back ".at"@zxx .
+
+<#azerbaijan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Azerbaijan"@en ,
+                     "Azerbajdzjan"@sv ;
+    solid-memo:back ".az"@zxx .
+
+<#bahrain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bahrain"@en ,
+                     "Bahrain"@sv ;
+    solid-memo:back ".bh"@zxx .
+
+<#bangladesh>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bangladesh"@en ,
+                     "Bangladesh"@sv ;
+    solid-memo:back ".bd"@zxx .
+
+<#barbados>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Barbados"@en ,
+                     "Barbados"@sv ;
+    solid-memo:back ".bb"@zxx .
+
+<#belarus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Belarus"@en ,
+                     "Belarus"@sv ;
+    solid-memo:back ".by"@zxx .
+
+<#belgium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Belgium"@en ,
+                     "Belgien"@sv ;
+    solid-memo:back ".be"@zxx .
+
+<#belize>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Belize"@en ,
+                     "Belize"@sv ;
+    solid-memo:back ".bz"@zxx .
+
+<#benin>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Benin"@en ,
+                     "Benin"@sv ;
+    solid-memo:back ".bj"@zxx .
+
+<#bhutan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bhutan"@en ,
+                     "Bhutan"@sv ;
+    solid-memo:back ".bt"@zxx .
+
+<#bolivia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bolivia"@en ,
+                     "Bolivia"@sv ;
+    solid-memo:back ".bo"@zxx .
+
+<#bosnia-and-herzegovina>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bosnia and Herzegovina"@en ,
+                     "Bosnien och Hercegovina"@sv ;
+    solid-memo:back ".ba"@zxx .
+
+<#botswana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Botswana"@en ,
+                     "Botswana"@sv ;
+    solid-memo:back ".bw"@zxx .
+
+<#brazil>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Brazil"@en ,
+                     "Brasilien"@sv ;
+    solid-memo:back ".br"@zxx .
+
+<#brunei>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Brunei"@en ,
+                     "Brunei"@sv ;
+    solid-memo:back ".bn"@zxx .
+
+<#bulgaria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bulgaria"@en ,
+                     "Bulgarien"@sv ;
+    solid-memo:back ".bg"@zxx .
+
+<#burkina-faso>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Burkina Faso"@en ,
+                     "Burkina Faso"@sv ;
+    solid-memo:back ".bf"@zxx .
+
+<#burundi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Burundi"@en ,
+                     "Burundi"@sv ;
+    solid-memo:back ".bi"@zxx .
+
+<#cambodia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cambodia"@en ,
+                     "Kambodja"@sv ;
+    solid-memo:back ".kh"@zxx .
+
+<#cameroon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cameroon"@en ,
+                     "Kamerun"@sv ;
+    solid-memo:back ".cm"@zxx .
+
+<#canada>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Canada"@en ,
+                     "Kanada"@sv ;
+    solid-memo:back ".ca"@zxx .
+
+<#cape-verde>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cape Verde"@en ,
+                     "Kap Verde"@sv ;
+    solid-memo:back ".cv"@zxx .
+
+<#central-african-republic>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Central African Republic"@en ,
+                     "Centralafrikanska republiken"@sv ;
+    solid-memo:back ".cf"@zxx .
+
+<#chad>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Chad"@en ,
+                     "Tchad"@sv ;
+    solid-memo:back ".td"@zxx .
+
+<#chile>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Chile"@en ,
+                     "Chile"@sv ;
+    solid-memo:back ".cl"@zxx .
+
+<#china>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "China"@en ,
+                     "Kina"@sv ;
+    solid-memo:back ".cn"@zxx .
+
+<#colombia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Colombia"@en ,
+                     "Colombia"@sv ;
+    solid-memo:back ".co"@zxx .
+
+<#comoros>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Comoros"@en ,
+                     "Komorerna"@sv ;
+    solid-memo:back ".km"@zxx .
+
+<#costa-rica>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Costa Rica"@en ,
+                     "Costa Rica"@sv ;
+    solid-memo:back ".cr"@zxx .
+
+<#croatia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Croatia"@en ,
+                     "Kroatien"@sv ;
+    solid-memo:back ".hr"@zxx .
+
+<#cuba>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cuba"@en ,
+                     "Kuba"@sv ;
+    solid-memo:back ".cu"@zxx .
+
+<#cyprus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cyprus"@en ,
+                     "Cypern"@sv ;
+    solid-memo:back ".cy"@zxx .
+
+<#czech-republic>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Czech Republic"@en ,
+                     "Tjeckien"@sv ;
+    solid-memo:back ".cz"@zxx .
+
+<#democratic-republic-of-the-congo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Democratic Republic of the Congo"@en ,
+                     "Kongo-Kinshasa"@sv ;
+    solid-memo:back ".cd"@zxx .
+
+<#denmark>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Denmark"@en ,
+                     "Danmark"@sv ;
+    solid-memo:back ".dk"@zxx .
+
+<#djibouti>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Djibouti"@en ,
+                     "Djibouti"@sv ;
+    solid-memo:back ".dj"@zxx .
+
+<#dominica>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Dominica"@en ,
+                     "Dominica"@sv ;
+    solid-memo:back ".dm"@zxx .
+
+<#dominican-republic>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Dominican Republic"@en ,
+                     "Dominikanska republiken"@sv ;
+    solid-memo:back ".do"@zxx .
+
+<#ecuador>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ecuador"@en ,
+                     "Ecuador"@sv ;
+    solid-memo:back ".ec"@zxx .
+
+<#egypt>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Egypt"@en ,
+                     "Egypten"@sv ;
+    solid-memo:back ".eg"@zxx .
+
+<#el-salvador>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "El Salvador"@en ,
+                     "El Salvador"@sv ;
+    solid-memo:back ".sv"@zxx .
+
+<#equatorial-guinea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Equatorial Guinea"@en ,
+                     "Ekvatorialguinea"@sv ;
+    solid-memo:back ".gq"@zxx .
+
+<#eritrea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eritrea"@en ,
+                     "Eritrea"@sv ;
+    solid-memo:back ".er"@zxx .
+
+<#estonia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Estonia"@en ,
+                     "Estland"@sv ;
+    solid-memo:back ".ee"@zxx .
+
+<#eswatini>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eswatini"@en ,
+                     "Eswatini"@sv ;
+    solid-memo:back ".sz"@zxx .
+
+<#ethiopia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ethiopia"@en ,
+                     "Etiopien"@sv ;
+    solid-memo:back ".et"@zxx .
+
+<#federated-states-of-micronesia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Federated States of Micronesia"@en ,
+                     "Mikronesiska federationen"@sv ;
+    solid-memo:back ".fm"@zxx .
+
+<#fiji>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Fiji"@en ,
+                     "Fiji"@sv ;
+    solid-memo:back ".fj"@zxx .
+
+<#finland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Finland"@en ,
+                     "Finland"@sv ;
+    solid-memo:back ".fi"@zxx .
+
+<#france>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "France"@en ,
+                     "Frankrike"@sv ;
+    solid-memo:back ".fr"@zxx .
+
+<#gabon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Gabon"@en ,
+                     "Gabon"@sv ;
+    solid-memo:back ".ga"@zxx .
+
+<#georgia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Georgia"@en ,
+                     "Georgien"@sv ;
+    solid-memo:back ".ge"@zxx .
+
+<#germany>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Germany"@en ,
+                     "Tyskland"@sv ;
+    solid-memo:back ".de"@zxx .
+
+<#ghana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ghana"@en ,
+                     "Ghana"@sv ;
+    solid-memo:back ".gh"@zxx .
+
+<#greece>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Greece"@en ,
+                     "Grekland"@sv ;
+    solid-memo:back ".gr"@zxx .
+
+<#grenada>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Grenada"@en ,
+                     "Grenada"@sv ;
+    solid-memo:back ".gd"@zxx .
+
+<#guatemala>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Guatemala"@en ,
+                     "Guatemala"@sv ;
+    solid-memo:back ".gt"@zxx .
+
+<#guinea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Guinea"@en ,
+                     "Guinea"@sv ;
+    solid-memo:back ".gn"@zxx .
+
+<#guinea-bissau>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Guinea-Bissau"@en ,
+                     "Guinea-Bissau"@sv ;
+    solid-memo:back ".gw"@zxx .
+
+<#guyana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Guyana"@en ,
+                     "Guyana"@sv ;
+    solid-memo:back ".gy"@zxx .
+
+<#haiti>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Haiti"@en ,
+                     "Haiti"@sv ;
+    solid-memo:back ".ht"@zxx .
+
+<#honduras>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Honduras"@en ,
+                     "Honduras"@sv ;
+    solid-memo:back ".hn"@zxx .
+
+<#hungary>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hungary"@en ,
+                     "Ungern"@sv ;
+    solid-memo:back ".hu"@zxx .
+
+<#iceland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Iceland"@en ,
+                     "Island"@sv ;
+    solid-memo:back ".is"@zxx .
+
+<#india>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "India"@en ,
+                     "Indien"@sv ;
+    solid-memo:back ".in"@zxx .
+
+<#indonesia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Indonesia"@en ,
+                     "Indonesien"@sv ;
+    solid-memo:back ".id"@zxx .
+
+<#iran>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Iran"@en ,
+                     "Iran"@sv ;
+    solid-memo:back ".ir"@zxx .
+
+<#iraq>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Iraq"@en ,
+                     "Irak"@sv ;
+    solid-memo:back ".iq"@zxx .
+
+<#ireland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ireland"@en ,
+                     "Irland"@sv ;
+    solid-memo:back ".ie"@zxx .
+
+<#israel>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Israel"@en ,
+                     "Israel"@sv ;
+    solid-memo:back ".il"@zxx .
+
+<#italy>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Italy"@en ,
+                     "Italien"@sv ;
+    solid-memo:back ".it"@zxx .
+
+<#ivory-coast>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ivory Coast"@en ,
+                     "Elfenbenskusten"@sv ;
+    solid-memo:back ".ci"@zxx .
+
+<#jamaica>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Jamaica"@en ,
+                     "Jamaica"@sv ;
+    solid-memo:back ".jm"@zxx .
+
+<#japan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Japan"@en ,
+                     "Japan"@sv ;
+    solid-memo:back ".jp"@zxx .
+
+<#jordan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Jordan"@en ,
+                     "Jordanien"@sv ;
+    solid-memo:back ".jo"@zxx .
+
+<#kazakhstan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Kazakhstan"@en ,
+                     "Kazakstan"@sv ;
+    solid-memo:back ".kz"@zxx .
+
+<#kenya>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Kenya"@en ,
+                     "Kenya"@sv ;
+    solid-memo:back ".ke"@zxx .
+
+<#kiribati>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Kiribati"@en ,
+                     "Kiribati"@sv ;
+    solid-memo:back ".ki"@zxx .
+
+<#kuwait>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Kuwait"@en ,
+                     "Kuwait"@sv ;
+    solid-memo:back ".kw"@zxx .
+
+<#kyrgyzstan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Kyrgyzstan"@en ,
+                     "Kirgizistan"@sv ;
+    solid-memo:back ".kg"@zxx .
+
+<#laos>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Laos"@en ,
+                     "Laos"@sv ;
+    solid-memo:back ".la"@zxx .
+
+<#latvia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Latvia"@en ,
+                     "Lettland"@sv ;
+    solid-memo:back ".lv"@zxx .
+
+<#lebanon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Lebanon"@en ,
+                     "Libanon"@sv ;
+    solid-memo:back ".lb"@zxx .
+
+<#lesotho>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Lesotho"@en ,
+                     "Lesotho"@sv ;
+    solid-memo:back ".ls"@zxx .
+
+<#liberia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Liberia"@en ,
+                     "Liberia"@sv ;
+    solid-memo:back ".lr"@zxx .
+
+<#libya>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Libya"@en ,
+                     "Libyen"@sv ;
+    solid-memo:back ".ly"@zxx .
+
+<#liechtenstein>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Liechtenstein"@en ,
+                     "Liechtenstein"@sv ;
+    solid-memo:back ".li"@zxx .
+
+<#lithuania>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Lithuania"@en ,
+                     "Litauen"@sv ;
+    solid-memo:back ".lt"@zxx .
+
+<#luxembourg>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Luxembourg"@en ,
+                     "Luxemburg"@sv ;
+    solid-memo:back ".lu"@zxx .
+
+<#madagascar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Madagascar"@en ,
+                     "Madagaskar"@sv ;
+    solid-memo:back ".mg"@zxx .
+
+<#malawi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Malawi"@en ,
+                     "Malawi"@sv ;
+    solid-memo:back ".mw"@zxx .
+
+<#malaysia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Malaysia"@en ,
+                     "Malaysia"@sv ;
+    solid-memo:back ".my"@zxx .
+
+<#maldives>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Maldives"@en ,
+                     "Maldiverna"@sv ;
+    solid-memo:back ".mv"@zxx .
+
+<#mali>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mali"@en ,
+                     "Mali"@sv ;
+    solid-memo:back ".ml"@zxx .
+
+<#malta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Malta"@en ,
+                     "Malta"@sv ;
+    solid-memo:back ".mt"@zxx .
+
+<#marshall-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Marshall Islands"@en ,
+                     "Marshallöarna"@sv ;
+    solid-memo:back ".mh"@zxx .
+
+<#mauritania>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mauritania"@en ,
+                     "Mauretanien"@sv ;
+    solid-memo:back ".mr"@zxx .
+
+<#mauritius>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mauritius"@en ,
+                     "Mauritius"@sv ;
+    solid-memo:back ".mu"@zxx .
+
+<#mexico>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mexico"@en ,
+                     "Mexiko"@sv ;
+    solid-memo:back ".mx"@zxx .
+
+<#moldova>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Moldova"@en ,
+                     "Moldavien"@sv ;
+    solid-memo:back ".md"@zxx .
+
+<#monaco>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Monaco"@en ,
+                     "Monaco"@sv ;
+    solid-memo:back ".mc"@zxx .
+
+<#mongolia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mongolia"@en ,
+                     "Mongoliet"@sv ;
+    solid-memo:back ".mn"@zxx .
+
+<#montenegro>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Montenegro"@en ,
+                     "Montenegro"@sv ;
+    solid-memo:back ".me"@zxx .
+
+<#morocco>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Morocco"@en ,
+                     "Marocko"@sv ;
+    solid-memo:back ".ma"@zxx .
+
+<#mozambique>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mozambique"@en ,
+                     "Moçambique"@sv ;
+    solid-memo:back ".mz"@zxx .
+
+<#myanmar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Myanmar"@en ,
+                     "Myanmar"@sv ;
+    solid-memo:back ".mm"@zxx .
+
+<#namibia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Namibia"@en ,
+                     "Namibia"@sv ;
+    solid-memo:back ".na"@zxx .
+
+<#nauru>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Nauru"@en ,
+                     "Nauru"@sv ;
+    solid-memo:back ".nr"@zxx .
+
+<#nepal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Nepal"@en ,
+                     "Nepal"@sv ;
+    solid-memo:back ".np"@zxx .
+
+<#netherlands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Netherlands"@en ,
+                     "Nederländerna"@sv ;
+    solid-memo:back ".nl"@zxx .
+
+<#new-zealand>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "New Zealand"@en ,
+                     "Nya Zeeland"@sv ;
+    solid-memo:back ".nz"@zxx .
+
+<#nicaragua>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Nicaragua"@en ,
+                     "Nicaragua"@sv ;
+    solid-memo:back ".ni"@zxx .
+
+<#niger>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Niger"@en ,
+                     "Niger"@sv ;
+    solid-memo:back ".ne"@zxx .
+
+<#nigeria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Nigeria"@en ,
+                     "Nigeria"@sv ;
+    solid-memo:back ".ng"@zxx .
+
+<#north-korea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "North Korea"@en ,
+                     "Nordkorea"@sv ;
+    solid-memo:back ".kp"@zxx .
+
+<#north-macedonia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "North Macedonia"@en ,
+                     "Nordmakedonien"@sv ;
+    solid-memo:back ".mk"@zxx .
+
+<#norway>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Norway"@en ,
+                     "Norge"@sv ;
+    solid-memo:back ".no"@zxx .
+
+<#oman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Oman"@en ,
+                     "Oman"@sv ;
+    solid-memo:back ".om"@zxx .
+
+<#pakistan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pakistan"@en ,
+                     "Pakistan"@sv ;
+    solid-memo:back ".pk"@zxx .
+
+<#palau>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Palau"@en ,
+                     "Palau"@sv ;
+    solid-memo:back ".pw"@zxx .
+
+<#panama>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Panama"@en ,
+                     "Panama"@sv ;
+    solid-memo:back ".pa"@zxx .
+
+<#papua-new-guinea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Papua New Guinea"@en ,
+                     "Papua Nya Guinea"@sv ;
+    solid-memo:back ".pg"@zxx .
+
+<#paraguay>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Paraguay"@en ,
+                     "Paraguay"@sv ;
+    solid-memo:back ".py"@zxx .
+
+<#peru>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Peru"@en ,
+                     "Peru"@sv ;
+    solid-memo:back ".pe"@zxx .
+
+<#philippines>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Philippines"@en ,
+                     "Filippinerna"@sv ;
+    solid-memo:back ".ph"@zxx .
+
+<#poland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Poland"@en ,
+                     "Polen"@sv ;
+    solid-memo:back ".pl"@zxx .
+
+<#portugal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Portugal"@en ,
+                     "Portugal"@sv ;
+    solid-memo:back ".pt"@zxx .
+
+<#qatar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Qatar"@en ,
+                     "Qatar"@sv ;
+    solid-memo:back ".qa"@zxx .
+
+<#republic-of-the-congo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Republic of the Congo"@en ,
+                     "Kongo-Brazzaville"@sv ;
+    solid-memo:back ".cg"@zxx .
+
+<#romania>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Romania"@en ,
+                     "Rumänien"@sv ;
+    solid-memo:back ".ro"@zxx .
+
+<#russia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Russia"@en ,
+                     "Ryssland"@sv ;
+    solid-memo:back ".ru"@zxx ;
+    solid-memo:backNote "Russia also has the Cyrillic-script domain .рф, and the Soviet Union's .su is still delegated, managed from Moscow."@en ,
+                        "Ryssland har också den kyrilliska toppdomänen .рф, och Sovjetunionens .su är fortfarande delegerad och förvaltas från Moskva."@sv .
+
+<#rwanda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Rwanda"@en ,
+                     "Rwanda"@sv ;
+    solid-memo:back ".rw"@zxx .
+
+<#saint-kitts-and-nevis>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Saint Kitts and Nevis"@en ,
+                     "Saint Kitts och Nevis"@sv ;
+    solid-memo:back ".kn"@zxx .
+
+<#saint-lucia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Saint Lucia"@en ,
+                     "Saint Lucia"@sv ;
+    solid-memo:back ".lc"@zxx .
+
+<#saint-vincent-and-the-grenadines>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Saint Vincent and the Grenadines"@en ,
+                     "Saint Vincent och Grenadinerna"@sv ;
+    solid-memo:back ".vc"@zxx .
+
+<#samoa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Samoa"@en ,
+                     "Samoa"@sv ;
+    solid-memo:back ".ws"@zxx .
+
+<#san-marino>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "San Marino"@en ,
+                     "San Marino"@sv ;
+    solid-memo:back ".sm"@zxx .
+
+<#saudi-arabia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Saudi Arabia"@en ,
+                     "Saudiarabien"@sv ;
+    solid-memo:back ".sa"@zxx .
+
+<#senegal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Senegal"@en ,
+                     "Senegal"@sv ;
+    solid-memo:back ".sn"@zxx .
+
+<#serbia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Serbia"@en ,
+                     "Serbien"@sv ;
+    solid-memo:back ".rs"@zxx .
+
+<#seychelles>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Seychelles"@en ,
+                     "Seychellerna"@sv ;
+    solid-memo:back ".sc"@zxx .
+
+<#sierra-leone>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sierra Leone"@en ,
+                     "Sierra Leone"@sv ;
+    solid-memo:back ".sl"@zxx .
+
+<#singapore>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Singapore"@en ,
+                     "Singapore"@sv ;
+    solid-memo:back ".sg"@zxx .
+
+<#slovakia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Slovakia"@en ,
+                     "Slovakien"@sv ;
+    solid-memo:back ".sk"@zxx .
+
+<#slovenia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Slovenia"@en ,
+                     "Slovenien"@sv ;
+    solid-memo:back ".si"@zxx .
+
+<#solomon-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Solomon Islands"@en ,
+                     "Salomonöarna"@sv ;
+    solid-memo:back ".sb"@zxx .
+
+<#somalia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Somalia"@en ,
+                     "Somalia"@sv ;
+    solid-memo:back ".so"@zxx .
+
+<#south-africa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "South Africa"@en ,
+                     "Sydafrika"@sv ;
+    solid-memo:back ".za"@zxx .
+
+<#south-korea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "South Korea"@en ,
+                     "Sydkorea"@sv ;
+    solid-memo:back ".kr"@zxx .
+
+<#south-sudan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "South Sudan"@en ,
+                     "Sydsudan"@sv ;
+    solid-memo:back ".ss"@zxx .
+
+<#spain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Spain"@en ,
+                     "Spanien"@sv ;
+    solid-memo:back ".es"@zxx .
+
+<#sri-lanka>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sri Lanka"@en ,
+                     "Sri Lanka"@sv ;
+    solid-memo:back ".lk"@zxx .
+
+<#sudan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sudan"@en ,
+                     "Sudan"@sv ;
+    solid-memo:back ".sd"@zxx .
+
+<#suriname>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Suriname"@en ,
+                     "Surinam"@sv ;
+    solid-memo:back ".sr"@zxx .
+
+<#sweden>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sweden"@en ,
+                     "Sverige"@sv ;
+    solid-memo:back ".se"@zxx .
+
+<#switzerland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Switzerland"@en ,
+                     "Schweiz"@sv ;
+    solid-memo:back ".ch"@zxx .
+
+<#syria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Syria"@en ,
+                     "Syrien"@sv ;
+    solid-memo:back ".sy"@zxx .
+
+<#sao-tome-and-principe>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "São Tomé and Príncipe"@en ,
+                     "São Tomé och Príncipe"@sv ;
+    solid-memo:back ".st"@zxx .
+
+<#tajikistan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Tajikistan"@en ,
+                     "Tadzjikistan"@sv ;
+    solid-memo:back ".tj"@zxx .
+
+<#tanzania>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Tanzania"@en ,
+                     "Tanzania"@sv ;
+    solid-memo:back ".tz"@zxx .
+
+<#thailand>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Thailand"@en ,
+                     "Thailand"@sv ;
+    solid-memo:back ".th"@zxx .
+
+<#the-bahamas>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Bahamas"@en ,
+                     "Bahamas"@sv ;
+    solid-memo:back ".bs"@zxx .
+
+<#the-gambia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Gambia"@en ,
+                     "Gambia"@sv ;
+    solid-memo:back ".gm"@zxx .
+
+<#timor-leste>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Timor-Leste"@en ,
+                     "Östtimor"@sv ;
+    solid-memo:back ".tl"@zxx ;
+    solid-memo:backNote "Delegated in 2005; it replaced the former .tp (Portuguese Timor), which has since been removed from the root zone."@en ,
+                        "Delegerad 2005; den ersatte den tidigare .tp (Portugisiska Timor), som sedan har tagits bort ur rotzonen."@sv .
+
+<#togo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Togo"@en ,
+                     "Togo"@sv ;
+    solid-memo:back ".tg"@zxx .
+
+<#tonga>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Tonga"@en ,
+                     "Tonga"@sv ;
+    solid-memo:back ".to"@zxx .
+
+<#trinidad-and-tobago>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Trinidad and Tobago"@en ,
+                     "Trinidad och Tobago"@sv ;
+    solid-memo:back ".tt"@zxx .
+
+<#tunisia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Tunisia"@en ,
+                     "Tunisien"@sv ;
+    solid-memo:back ".tn"@zxx .
+
+<#turkey>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Turkey"@en ,
+                     "Turkiet"@sv ;
+    solid-memo:back ".tr"@zxx .
+
+<#turkmenistan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Turkmenistan"@en ,
+                     "Turkmenistan"@sv ;
+    solid-memo:back ".tm"@zxx .
+
+<#tuvalu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Tuvalu"@en ,
+                     "Tuvalu"@sv ;
+    solid-memo:back ".tv"@zxx .
+
+<#uganda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Uganda"@en ,
+                     "Uganda"@sv ;
+    solid-memo:back ".ug"@zxx .
+
+<#ukraine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ukraine"@en ,
+                     "Ukraina"@sv ;
+    solid-memo:back ".ua"@zxx .
+
+<#united-arab-emirates>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "United Arab Emirates"@en ,
+                     "Förenade arabemiraten"@sv ;
+    solid-memo:back ".ae"@zxx .
+
+<#united-kingdom>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "United Kingdom"@en ,
+                     "Storbritannien"@sv ;
+    solid-memo:back ".uk"@zxx ;
+    solid-memo:backNote "The UK's ISO 3166-1 code is GB, but its domain is .uk; IANA lists .gb as reserved."@en ,
+                        "Storbritanniens ISO 3166-1-kod är GB, men landets domän är .uk; IANA anger .gb som reserverad."@sv .
+
+<#united-states>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "United States"@en ,
+                     "USA"@sv ;
+    solid-memo:back ".us"@zxx .
+
+<#uruguay>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Uruguay"@en ,
+                     "Uruguay"@sv ;
+    solid-memo:back ".uy"@zxx .
+
+<#uzbekistan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Uzbekistan"@en ,
+                     "Uzbekistan"@sv ;
+    solid-memo:back ".uz"@zxx .
+
+<#vanuatu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vanuatu"@en ,
+                     "Vanuatu"@sv ;
+    solid-memo:back ".vu"@zxx .
+
+<#venezuela>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Venezuela"@en ,
+                     "Venezuela"@sv ;
+    solid-memo:back ".ve"@zxx .
+
+<#vietnam>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vietnam"@en ,
+                     "Vietnam"@sv ;
+    solid-memo:back ".vn"@zxx .
+
+<#yemen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Yemen"@en ,
+                     "Jemen"@sv ;
+    solid-memo:back ".ye"@zxx .
+
+<#zambia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Zambia"@en ,
+                     "Zambia"@sv ;
+    solid-memo:back ".zm"@zxx .
+
+<#zimbabwe>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Zimbabwe"@en ,
+                     "Zimbabwe"@sv ;
+    solid-memo:back ".zw"@zxx .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

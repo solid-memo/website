@@ -1,0 +1,918 @@
+@base <https://solid-memo.com/decks/nordic-birds/v2.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Nordic birds"@en ,
+                  "Nordiska fåglar"@sv ,
+                  "북유럽의 새"@ko ,
+                  "Nordische Vögel"@de ,
+                  "Aves nórdicas"@es ,
+                  "Oiseaux nordiques"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "86 familiar breeding birds of Sweden and the Nordic countries. Front: the English name and the official Swedish name; back: the scientific name. Scientific and English names follow the global checklist AviList (v2025b; BirdLife Sverige's lists follow AviList v2025, whose names v2025b leaves unchanged). Names from Wikidata and Dyntaxa, checked against AviList and BirdLife Sverige's official Swedish list."@en ,
+                        "86 välkända häckfåglar i Sverige och Norden. Framsida: det engelska namnet och det officiella svenska namnet; baksida: det vetenskapliga namnet. Vetenskapliga och engelska namn följer den globala checklistan AviList (v2025b; BirdLife Sveriges listor följer AviList v2025, vars namn är oförändrade i v2025b). Namnen kommer från Wikidata och Dyntaxa och är kontrollerade mot AviList och BirdLife Sveriges officiella Sverigelista."@sv ,
+                        "스웨덴과 북유럽 국가에서 번식하는 친숙한 새 86종입니다. 앞면: 영어 이름과 공식 스웨덴어 이름; 뒷면: 학명. 학명과 영어 이름은 세계 조류 목록 AviList(v2025b)를 따릅니다(BirdLife Sverige의 목록은 AviList v2025를 따르는데, v2025b에서도 이름이 바뀌지 않았습니다). 이름은 위키데이터와 Dyntaxa에서 가져와 AviList와 BirdLife Sverige의 공식 스웨덴 목록으로 확인했습니다."@ko ,
+                        "86 bekannte Brutvögel Schwedens und der nordischen Länder. Vorderseite: der englische Name und der offizielle schwedische Name; Rückseite: der wissenschaftliche Name. Wissenschaftliche und englische Namen folgen der weltweiten Checkliste AviList (v2025b; die Listen von BirdLife Sverige folgen AviList v2025, deren Namen v2025b unverändert lässt). Namen aus Wikidata und Dyntaxa, abgeglichen mit AviList und der offiziellen schwedischen Liste von BirdLife Sverige."@de ,
+                        "86 aves reproductoras conocidas de Suecia y los países nórdicos. Anverso: el nombre en inglés y el nombre oficial en sueco; reverso: el nombre científico. Los nombres científicos y en inglés siguen la lista mundial AviList (v2025b; las listas de BirdLife Sverige siguen AviList v2025, cuyos nombres v2025b deja sin cambios). Nombres de Wikidata y Dyntaxa, comprobados con AviList y la lista sueca oficial de BirdLife Sverige."@es ,
+                        "86 oiseaux nicheurs familiers de Suède et des pays nordiques. Recto : le nom anglais et le nom suédois officiel ; verso : le nom scientifique. Les noms scientifiques et anglais suivent la liste mondiale AviList (v2025b ; les listes de BirdLife Sverige suivent AviList v2025, dont v2025b ne change pas les noms). Noms tirés de Wikidata et de Dyntaxa, vérifiés avec AviList et la liste suédoise officielle de BirdLife Sverige."@fr ;
+    prov:wasDerivedFrom <https://www.wikidata.org/> ,
+                        <https://doi.org/10.15468/j43wfc> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:biology ;
+    dcat:keyword "birds"@en ,
+                 "ornithology"@en ,
+                 "scientific names"@en ,
+                 "bird names"@en ,
+                 "Nordic countries"@en ,
+                 "fåglar"@sv ,
+                 "ornitologi"@sv ,
+                 "vetenskapliga namn"@sv ,
+                 "fågelnamn"@sv ,
+                 "Norden"@sv ,
+                 "새"@ko ,
+                 "조류학"@ko ,
+                 "학명"@ko ,
+                 "새 이름"@ko ,
+                 "북유럽"@ko ,
+                 "Vögel"@de ,
+                 "Ornithologie"@de ,
+                 "wissenschaftliche Namen"@de ,
+                 "Vogelnamen"@de ,
+                 "nordische Länder"@de ,
+                 "aves"@es ,
+                 "ornitología"@es ,
+                 "nombres científicos"@es ,
+                 "nombres de aves"@es ,
+                 "países nórdicos"@es ,
+                 "oiseaux"@fr ,
+                 "ornithologie"@fr ,
+                 "noms scientifiques"@fr ,
+                 "noms d’oiseaux"@fr ,
+                 "pays nordiques"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/LAT> ;
+    solid-memo:studyDirection solid-memo:bidirectional ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/nordic-birds/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/nordic-birds/v1.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#nordic-birds> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#nordic-birds> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/> ,
+              <https://doi.org/10.15468/j43wfc> ,
+              <https://doi.org/10.2173/avilist.v2025b> ,
+              <https://birdlife.se/tk/stc/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ,
+                       <#review-6> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
+                 "Scope and authority. The library editor asked for about 80 common Nordic birds, English and Swedish name on the front and the scientific name on the back, verified against the IOC World Bird List and BirdLife Sverige. Research showed that the IOC list made its last update with version 15.2 (13 April 2026) and its editors now work on AviList, the unified global checklist first released on 11 June 2025 (current version v2025b, 11 June 2026), and that BirdLife Sverige's Taxonomic Committee decided to 'fully adopt and endorse' AviList for its Swedish lists. AviList v2025b was therefore chosen as the single taxonomic authority for scientific and English names, and BirdLife Sverige's lists (which follow AviList) for the Swedish names."@en ,
+                 "Candidate list. The authoring agent wrote down 123 candidate scientific names of familiar Nordic birds from general knowledge, including the newer combinations it expected (for example Cyanistes caeruleus, Poecile montanus, Linaria cannabina, Astur gentilis) and the older Accipiter gentilis to see how the sources treat it."@en ,
+                 "Wikidata (content source). One SPARQL query (the first query below) fetched, for every candidate name, the items with that taxon name (P225), their taxon rank (P105), English and Swedish labels and aliases, and Dyntaxa id (P1939). All 123 names matched an item of rank species (Q7432). The raw response was saved."@en ,
+                 "AviList (authority, verification). The AviList v2025b short and extended spreadsheets were downloaded and each candidate's species row was looked up by exact scientific name, recording Sequence, Authority, English_name_AviList and the decision summary, and from the extended file the protonym. Corvus cornix and Accipiter gentilis have no species row: AviList treats the Hooded Crow as part of Corvus corone and the goshawk as Astur gentilis."@en ,
+                 "BirdLife Sverige (verification). The official Swedish list 2025 (Förteckning över Sveriges fågeltaxa, version 2025, which states that it follows AviList) was downloaded; for each candidate its species row gave the Swedish and English names, and the category (A–E) and status (H = breeding) were read from the species row when it has them (monotypic species) or else from the subspecies rows that follow it (the species row of a polytypic species has no category or status); the evidence quotes the rows separately. As a second check the official Swedish names of all the world's birds (version 2025, file NL2025b.xlsx, following AviList v2025) was downloaded: for all 86 species in the deck its Swedish and English names equal the Swedish list's. BirdLife's lists follow AviList v2025; AviList states that v2025b changed no English or scientific names."@en ,
+                 "Dyntaxa (content source). Each of the 86 selected species was looked up in Dyntaxa, the Swedish taxonomic database of SLU Artdatabanken, through its CC0 dataset on GBIF (species search restricted to the dataset, exact canonical name, then the record's vernacular names, which come in Swedish (swe) and English (eng)). All 86 are ACCEPTED under exactly the deck's scientific name and each has the deck's Swedish name among its Swedish vernacular names; 83 have the deck's English name, in the same letter case, among their English vernacular names (the other three: 'European Crested Tit', 'Long-tailed Bushtit', 'Chaffinch'). For the 13 species whose genus changed, the record's synonyms were fetched as well."@en ,
+                 "Selection. The candidates were filtered by the criteria in the selection section and cut to 86 by editorial judgement; the exclusions and their reasons are listed there."@en ,
+                 "Card text. Front, English: taken from the content sources, choosing among the English names they carry the one that is AviList v2025b's English name: Dyntaxa's English vernacular name (CC0) for 83 species, and for crested tit, long-tailed tit and chaffinch, whose Dyntaxa English names differ, the Wikidata label or alias ('Crested Tit', alias of Q207831; 'Long-tailed Tit', label of Q170831; 'Eurasian Chaffinch', label of Q25383). Every English front is therefore exactly AviList's name, in AviList's capitalisation, and also present verbatim in a CC0 source. Front, Swedish: Dyntaxa's Swedish vernacular name that is the official BirdLife Sverige name, in lower case (it is also the item's Swedish Wikidata label, letter case aside in three cases). Back: the scientific name, tagged as Latin: the AviList name, which is also the Wikidata taxon name (P225) and the accepted Dyntaxa name. No Swedish text was translated by the agent: every Swedish name is the official BirdLife Sverige name."@en ,
+                 "Former names. For the 13 species whose genus changed (tits formerly in Parus, finches formerly in Carduelis, and Coloeus, Curruca, Astur, Lyrurus and Chroicocephalus), a back note gives the former combination. Each note is backed by the Dyntaxa synonym list and by a Wikidata taxon synonym or alias or the AviList protonym; the Wikidata queries are below (two first attempts timed out and were simplified)."@en ,
+                 "Cross-checks. During authoring, scripts compared every card's Wikidata taxon name and labels with the AviList species row, the Swedish list row, the NL2025b row and the Dyntaxa record, and the names with the final IOC World Bird List, v15.2 (https://www.worldbirdnames.org/IOC_Names_File_Plus-15.2.xlsx, downloaded 2026-10-04, licensed CC BY 3.0 Unported): every card's scientific, English and Swedish names agree across AviList, the Swedish list, NL2025b and Dyntaxa, and with Wikidata except for the letter-case differences recorded under quality control; all 86 scientific and English names are identical to IOC 15.2's. Those authoring scripts were not recorded verbatim, so in quality-control round 3 one cross-check script (crosscheck.py, run with the last command in the queries) was written and run over the final dossier. For every card it compares, as exact case-sensitive strings: the English front with AviList's English_name_AviList (short xlsx, sheet 'AviList v2025b short', rows with Taxon_rank 'species', keyed by Scientific_name), with IOC 15.2's English name (first sheet, rows whose rank column is 'Species', keyed by the scientific-name column), with the English column of the Swedish list's species row and of NL2025b's row of rank 'art', and with the record's Dyntaxa English vernacular names (live GBIF, language 'eng'); the Swedish front with the Swedish list, NL2025b and Dyntaxa's Swedish vernacular names (language 'swe'); and that the species row or one of its subspecies rows (an unindented binomial followed by indented trinomials of the same binomial) has category A or C with status H. All comparisons pass for all 86 cards except that Dyntaxa lacks the English front of the three cards named in step 8, which Wikidata supplies (and the builder checked). The IOC list is used only for this comparison; nothing in the deck comes from it, and as the builder has no CC BY 3.0 Unported licence entry, its download is recorded under the AviList source, whose editors succeeded it."@en ,
+                 "Machine checks. Each card carried a Wikidata check of its taxon name (P225), and checks of its English and Swedish names as a label or alias wherever Wikidata has the text in exactly the card's letter case. The builder ran them against live Wikidata on every build."@en ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Selection: The deck has 86 bird species that are widespread, familiar breeding birds of Sweden, most of them also common in Norway, Finland and Denmark: garden and woodland songbirds, crows, woodpeckers, owls, raptors, waterfowl, waders, gulls and terns, and grouse. Inclusion criteria: (1) a species in AviList v2025b, the global checklist the Swedish lists follow since June 2025; (2) in BirdLife Sverige's official Swedish list 2025 in category A or C with breeding status H (two species, Canada Goose and Common Pheasant, are category C, introduced and established); (3) an accepted species in Dyntaxa with the same Swedish name; (4) a Wikidata item whose taxon name (P225) is the AviList name, whose Swedish label is the official Swedish name and whose English label or an alias is the AviList English name (in both cases letter case aside); together with Dyntaxa's English and Swedish vernacular names, every name on the cards is then present in a CC0 source in exactly the card's spelling and letter case (English: Dyntaxa for 83 species, a Wikidata label or alias for the other three; Swedish: Dyntaxa for all 86). The 123 candidates were drafted by the authoring agent from general knowledge of the Nordic avifauna (no published list of common birds was copied), and the list was then cut to 86 by the agent's editorial judgement of how familiar a species is to a Nordic beginner. Left out because of taxonomy or naming: Corvus cornix (Hooded Crow; in the Swedish list the subspecies Corvus corone cornix, gråkråka, of the species Corvus corone, kråka): AviList treats it as part of Corvus corone (Carrion Crow), so neither the name Corvus cornix nor the English name Hooded Crow is a species name under the deck's authority, and the Swedish list no longer has it as a species; Acanthis flammea (Redpoll, gråsiska): AviList treats Common, Lesser and Arctic Redpoll as one species named 'Redpoll'; a recent and contested lump; Anas crecca (kricka): AviList includes the American Green-winged Teal and names the species 'Green-winged Teal', while Wikidata calls it Eurasian Teal: the English side would be ambiguous; Delichon urbicum (hussvala): AviList's English name 'Western House Martin' is neither a label nor an alias on Wikidata (which has 'Common House Martin'); Emberiza schoeniclus (sävsparv): AviList's 'Common Reed Bunting' is not on Wikidata, which has 'Reed Bunting'; Glaucidium passerinum (sparvuggla): AviList's 'Eurasian Pygmy Owl' is not on Wikidata, which has 'Eurasian Pygmy Owlet'; Fratercula arctica (lunnefågel): a regular visitor but not a breeding bird in Sweden (status T in the Swedish list); Accipiter gentilis: not a separate card: AviList, the Swedish list and Dyntaxa place the goshawk in Astur, and the deck has it as Astur gentilis. Left out only to keep the deck near the requested size of about 80 (they met criteria 1, 2 and 4; Dyntaxa was only consulted for the species kept): Turdus viscivorus, Loxia curvirostra, Coccothraustes coccothraustes, Corvus frugilegus, Nucifraga caryocatactes, Anthus pratensis, Anthus trivialis, Riparia riparia, Phylloscopus sibilatrix, Sylvia borin, Curruca curruca, Muscicapa striata, Saxicola rubetra, Streptopelia decaocto, Strix uralensis, Milvus milvus, Branta leucopsis, Gallinula chloropus, Actitis hypoleucos, Gallinago gallinago, Larus marinus, Tetrastes bonasia, Alca torda, Oriolus oriolus, Alcedo atthis, Lagopus lagopus, Lagopus muta, Cinclus cinclus, Motacilla flava. Subspecies are not included. Former scientific names are given as a back note (not as an answer) on the 13 cards whose genus changed."@en ,
+                 "Licensing: The deck is released under CC0 1.0. Its content comes from two CC0 sources: Wikidata (structured data released under CC0) for the item behind every card, its taxon name and its English and Swedish labels, and Dyntaxa (published by SLU Artdatabanken on GBIF under CC0 1.0) for the accepted scientific names, the Swedish and English vernacular names and the former names. Every string on the cards is present verbatim, in the same letter case, in Dyntaxa or Wikidata (English names: Dyntaxa for 83 cards, Wikidata for 3). AviList (CC BY 4.0) and BirdLife Sverige's lists (no licence stated, so treated as all rights reserved) were used for verification only: they confirmed which of the names carried by the content sources is current and official, and no text, list or selection was copied from them. Species names are facts, and the deck's selection of species is the authoring agent's own. AviList is still credited in the deck's provenance and in the provenance report; the IOC World Bird List (CC BY 3.0 Unported), consulted as an extra check, contributed nothing."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Sources and machine checks: every card's scientific, English and Swedish names compared across Wikidata, AviList v2025b, BirdLife Sverige's Swedish list 2025 and NL2025b, Dyntaxa and (extra) IOC 15.2."@en ;
+    rdfs:comment "Scope: All 86 cards and the 37 candidates left out."@en ,
+                 "Outcome: All 86 scientific names are the AviList species name, the accepted Dyntaxa name and the Wikidata taxon name (P225, checked by the builder). All English names equal AviList, IOC 15.2 and the Swedish list's English column; all Swedish names equal the Swedish list, NL2025b and a Dyntaxa vernacular name. Wikidata differs only in letter case for 11 English and 3 Swedish names: those label checks are left out and recorded below. Species whose name is new, lumped or missing from Wikidata were left out."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 86 cards, compared by script with IOC 15.2, Sverigelista 2025 and AviList v2025b; GBIF Backbone for the 13 former names; live Wikidata P225 lookups; the exclusion reasons."@en ,
+                 "Outcome: No factual errors: every card's English, Swedish and scientific names match IOC 15.2, the Swedish list and AviList exactly; every species is category A or C with status H; the 13 former names are confirmed; all builder checks pass. Three wording suggestions, all applied."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language and translation"@en ;
+    rdfs:comment "Scope: All 86 cards in English, Swedish and Latin, the notes, title, description, keywords and selection text; compared by script with AviList v2025b, Sverigelista 2025 and NL2025b."@en ,
+                 "Outcome: No errors: every English front equals AviList, every Swedish front the official name, every back the AviList scientific name; language tags, letter case and Unicode are clean and the bidirectional setting is valid. Four suggestions, all applied."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 86 cards' evidence against Dyntaxa (GBIF), Wikidata, AviList, Sverigelista 2025 and NL2025b; every source's licence page; the queries, method, selection and licensing text."@en ,
+                 "Outcome: Licences are correctly recorded and the evidence is real. The main finding was a documentation contradiction: the method said the English text came from AviList (verification only), while Dyntaxa's CC0 records, already cited, carry the same English names. The method, licensing, source records and evidence now record the English names' CC0 provenance; the missing queries were added; the Swedish-list evidence now quotes species and subspecies rows separately; DOIs and AviList version wording were corrected."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Final re-check (loop 1): the 86 cards changed in the last fix (which is every card), every third card for facts and language, metadata, licence decision, documentation and QC-log accuracy"@en ;
+    rdfs:comment "Scope: All 86 cards against live Wikidata, Dyntaxa via GBIF, AviList v2025b and Sverigelista 2025; metadata, licence decision, method, queries and the quality-control log."@en ,
+                 "Outcome: The review found every card, evidence quote, licence quote and the CC0 decision correct, and the builder and validator passing. The one finding, two wrong method-step numbers in the round-3 log, was verified and corrected; no card changed."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Live Wikidata checks at a rebuild"@en ;
+    rdfs:comment "Scope: All 86 cards' Wikidata checks, re-run when the dossier's keywords were split by language."@en ,
+                 "Outcome: One check failed: Wikidata's English label of Q25332 had been changed from 'Osprey' to 'osprey' that morning. The card is unchanged; its check and evidence now follow the label."@en .
+
+<#review-6>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 1, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card changed."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://doi.org/10.15468/j43wfc>
+    dcterms:title "Dyntaxa. Svensk taxonomisk databas (via GBIF)" ;
+    dcterms:creator "SLU Artdatabanken (Backlund M)" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://api.gbif.org/v1/dataset/de8934f4-a136-481c-a87a-b0b202b80a31 — the dataset's metadata: \"license\":\"http://creativecommons.org/publicdomain/zero/1.0/legalcode\" (publisher SLU Artdatabanken, publication date 2026-09-29); DOI 10.15468/j43wfc, citation \"Backlund M (2026). Dyntaxa. Svensk taxonomisk databas. SLU Artdatabanken. Checklist dataset https://doi.org/10.15468/j43wfc accessed via GBIF.org\"."@en .
+
+<https://doi.org/10.2173/avilist.v2025b>
+    dcterms:title "AviList: The Global Avian Checklist, v2025b" ;
+    dcterms:creator "AviList Core Team" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    rdfs:comment "https://www.avilist.org/checklist/ — \"AviList: The Global Avian Checklist © 2026 by AviList Core Team is licensed under CC BY 4.0\"; recommended citation (sheet 'Recommended citation' of the xlsx and the checklist page): \"AviList Core Team. 2026. AviList: The Global Avian Checklist, v2025b. https://doi.org/10.2173/avilist.v2025b\"."@en .
+
+<https://birdlife.se/tk/stc/>
+    dcterms:title "Förteckning över Sveriges fågeltaxa, version 2025: fynd t.o.m. 2023, and Officiella svenska namn på alla världens fågelarter, version 2025 (NL2025b.xlsx)" ;
+    dcterms:creator "BirdLife Sverige: Taxonomikommittén and Raritetskommittén" ;
+    rdfs:comment "https://birdlife.se/tk/stc/ — neither the page nor the downloadable lists state a licence (checked 2026-10-04), so they are treated as all rights reserved and used for verification only. The page says the lists follow AviList: \"Together with the board of BirdLife Sweden, we have decided though to fully adopt and endorse the unified global avian taxonomy of AviList (version 1, June 2025) from its release.\" and \"The taxonomy follows AviList v2025\"; NL2025b.xlsx is titled 'Officiella svenska namn på alla världens fågelarter, version 2025' (sheet 'NL v2025 (AviList v2025)')."@en .
+
+<#great-tit>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Great Tit"@en ,
+                     "talgoxe"@sv ;
+    solid-memo:back "Parus major"@la .
+
+<#eurasian-blue-tit>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurasian Blue Tit"@en ,
+                     "blåmes"@sv ;
+    solid-memo:back "Cyanistes caeruleus"@la ;
+    solid-memo:backNote "Formerly Parus caeruleus."@en ,
+                        "Tidigare namn: Parus caeruleus."@sv .
+
+<#coal-tit>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Coal Tit"@en ,
+                     "svartmes"@sv ;
+    solid-memo:back "Periparus ater"@la ;
+    solid-memo:backNote "Formerly Parus ater."@en ,
+                        "Tidigare namn: Parus ater."@sv .
+
+<#crested-tit>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Crested Tit"@en ,
+                     "tofsmes"@sv ;
+    solid-memo:back "Lophophanes cristatus"@la ;
+    solid-memo:backNote "Formerly Parus cristatus."@en ,
+                        "Tidigare namn: Parus cristatus."@sv .
+
+<#marsh-tit>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Marsh Tit"@en ,
+                     "entita"@sv ;
+    solid-memo:back "Poecile palustris"@la ;
+    solid-memo:backNote "Formerly Parus palustris."@en ,
+                        "Tidigare namn: Parus palustris."@sv .
+
+<#willow-tit>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Willow Tit"@en ,
+                     "talltita"@sv ;
+    solid-memo:back "Poecile montanus"@la ;
+    solid-memo:backNote "Formerly Parus montanus."@en ,
+                        "Tidigare namn: Parus montanus."@sv .
+
+<#long-tailed-tit>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Long-tailed Tit"@en ,
+                     "stjärtmes"@sv ;
+    solid-memo:back "Aegithalos caudatus"@la .
+
+<#eurasian-nuthatch>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurasian Nuthatch"@en ,
+                     "nötväcka"@sv ;
+    solid-memo:back "Sitta europaea"@la .
+
+<#eurasian-treecreeper>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurasian Treecreeper"@en ,
+                     "trädkrypare"@sv ;
+    solid-memo:back "Certhia familiaris"@la .
+
+<#eurasian-wren>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurasian Wren"@en ,
+                     "gärdsmyg"@sv ;
+    solid-memo:back "Troglodytes troglodytes"@la .
+
+<#european-robin>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "European Robin"@en ,
+                     "rödhake"@sv ;
+    solid-memo:back "Erithacus rubecula"@la .
+
+<#common-blackbird>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Common Blackbird"@en ,
+                     "koltrast"@sv ;
+    solid-memo:back "Turdus merula"@la .
+
+<#fieldfare>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Fieldfare"@en ,
+                     "björktrast"@sv ;
+    solid-memo:back "Turdus pilaris"@la .
+
+<#song-thrush>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Song Thrush"@en ,
+                     "taltrast"@sv ;
+    solid-memo:back "Turdus philomelos"@la .
+
+<#redwing>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Redwing"@en ,
+                     "rödvingetrast"@sv ;
+    solid-memo:back "Turdus iliacus"@la .
+
+<#eurasian-chaffinch>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurasian Chaffinch"@en ,
+                     "bofink"@sv ;
+    solid-memo:back "Fringilla coelebs"@la .
+
+<#brambling>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Brambling"@en ,
+                     "bergfink"@sv ;
+    solid-memo:back "Fringilla montifringilla"@la .
+
+<#european-greenfinch>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "European Greenfinch"@en ,
+                     "grönfink"@sv ;
+    solid-memo:back "Chloris chloris"@la ;
+    solid-memo:backNote "Formerly Carduelis chloris."@en ,
+                        "Tidigare namn: Carduelis chloris."@sv .
+
+<#european-goldfinch>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "European Goldfinch"@en ,
+                     "steglits"@sv ;
+    solid-memo:back "Carduelis carduelis"@la .
+
+<#eurasian-siskin>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurasian Siskin"@en ,
+                     "grönsiska"@sv ;
+    solid-memo:back "Spinus spinus"@la ;
+    solid-memo:backNote "Formerly Carduelis spinus."@en ,
+                        "Tidigare namn: Carduelis spinus."@sv .
+
+<#common-linnet>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Common Linnet"@en ,
+                     "hämpling"@sv ;
+    solid-memo:back "Linaria cannabina"@la ;
+    solid-memo:backNote "Formerly Carduelis cannabina."@en ,
+                        "Tidigare namn: Carduelis cannabina."@sv .
+
+<#eurasian-bullfinch>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurasian Bullfinch"@en ,
+                     "domherre"@sv ;
+    solid-memo:back "Pyrrhula pyrrhula"@la .
+
+<#house-sparrow>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "House Sparrow"@en ,
+                     "gråsparv"@sv ;
+    solid-memo:back "Passer domesticus"@la .
+
+<#eurasian-tree-sparrow>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurasian Tree Sparrow"@en ,
+                     "pilfink"@sv ;
+    solid-memo:back "Passer montanus"@la .
+
+<#yellowhammer>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Yellowhammer"@en ,
+                     "gulsparv"@sv ;
+    solid-memo:back "Emberiza citrinella"@la .
+
+<#common-starling>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Common Starling"@en ,
+                     "stare"@sv ;
+    solid-memo:back "Sturnus vulgaris"@la .
+
+<#eurasian-magpie>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurasian Magpie"@en ,
+                     "skata"@sv ;
+    solid-memo:back "Pica pica"@la .
+
+<#eurasian-jay>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurasian Jay"@en ,
+                     "nötskrika"@sv ;
+    solid-memo:back "Garrulus glandarius"@la .
+
+<#western-jackdaw>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Western Jackdaw"@en ,
+                     "kaja"@sv ;
+    solid-memo:back "Coloeus monedula"@la ;
+    solid-memo:backNote "Formerly Corvus monedula."@en ,
+                        "Tidigare namn: Corvus monedula."@sv .
+
+<#northern-raven>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Northern Raven"@en ,
+                     "korp"@sv ;
+    solid-memo:back "Corvus corax"@la .
+
+<#bohemian-waxwing>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Bohemian Waxwing"@en ,
+                     "sidensvans"@sv ;
+    solid-memo:back "Bombycilla garrulus"@la .
+
+<#white-wagtail>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "White Wagtail"@en ,
+                     "sädesärla"@sv ;
+    solid-memo:back "Motacilla alba"@la .
+
+<#eurasian-skylark>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurasian Skylark"@en ,
+                     "sånglärka"@sv ;
+    solid-memo:back "Alauda arvensis"@la .
+
+<#barn-swallow>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Barn Swallow"@en ,
+                     "ladusvala"@sv ;
+    solid-memo:back "Hirundo rustica"@la .
+
+<#common-swift>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Common Swift"@en ,
+                     "tornseglare"@sv ;
+    solid-memo:back "Apus apus"@la .
+
+<#willow-warbler>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Willow Warbler"@en ,
+                     "lövsångare"@sv ;
+    solid-memo:back "Phylloscopus trochilus"@la .
+
+<#common-chiffchaff>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Common Chiffchaff"@en ,
+                     "gransångare"@sv ;
+    solid-memo:back "Phylloscopus collybita"@la .
+
+<#eurasian-blackcap>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurasian Blackcap"@en ,
+                     "svarthätta"@sv ;
+    solid-memo:back "Sylvia atricapilla"@la .
+
+<#common-whitethroat>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Common Whitethroat"@en ,
+                     "törnsångare"@sv ;
+    solid-memo:back "Curruca communis"@la ;
+    solid-memo:backNote "Formerly Sylvia communis."@en ,
+                        "Tidigare namn: Sylvia communis."@sv .
+
+<#goldcrest>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Goldcrest"@en ,
+                     "kungsfågel"@sv ;
+    solid-memo:back "Regulus regulus"@la .
+
+<#european-pied-flycatcher>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "European Pied Flycatcher"@en ,
+                     "svartvit flugsnappare"@sv ;
+    solid-memo:back "Ficedula hypoleuca"@la .
+
+<#common-redstart>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Common Redstart"@en ,
+                     "rödstjärt"@sv ;
+    solid-memo:back "Phoenicurus phoenicurus"@la .
+
+<#northern-wheatear>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Northern Wheatear"@en ,
+                     "stenskvätta"@sv ;
+    solid-memo:back "Oenanthe oenanthe"@la .
+
+<#dunnock>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Dunnock"@en ,
+                     "järnsparv"@sv ;
+    solid-memo:back "Prunella modularis"@la .
+
+<#great-spotted-woodpecker>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Great Spotted Woodpecker"@en ,
+                     "större hackspett"@sv ;
+    solid-memo:back "Dendrocopos major"@la .
+
+<#black-woodpecker>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Black Woodpecker"@en ,
+                     "spillkråka"@sv ;
+    solid-memo:back "Dryocopus martius"@la .
+
+<#european-green-woodpecker>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "European Green Woodpecker"@en ,
+                     "gröngöling"@sv ;
+    solid-memo:back "Picus viridis"@la .
+
+<#common-wood-pigeon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Common Wood Pigeon"@en ,
+                     "ringduva"@sv ;
+    solid-memo:back "Columba palumbus"@la .
+
+<#common-cuckoo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Common Cuckoo"@en ,
+                     "gök"@sv ;
+    solid-memo:back "Cuculus canorus"@la .
+
+<#tawny-owl>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Tawny Owl"@en ,
+                     "kattuggla"@sv ;
+    solid-memo:back "Strix aluco"@la .
+
+<#eurasian-eagle-owl>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurasian Eagle-Owl"@en ,
+                     "berguv"@sv ;
+    solid-memo:back "Bubo bubo"@la .
+
+<#common-buzzard>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Common Buzzard"@en ,
+                     "ormvråk"@sv ;
+    solid-memo:back "Buteo buteo"@la .
+
+<#eurasian-sparrowhawk>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurasian Sparrowhawk"@en ,
+                     "sparvhök"@sv ;
+    solid-memo:back "Accipiter nisus"@la .
+
+<#eurasian-goshawk>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurasian Goshawk"@en ,
+                     "duvhök"@sv ;
+    solid-memo:back "Astur gentilis"@la ;
+    solid-memo:backNote "Formerly Accipiter gentilis."@en ,
+                        "Tidigare namn: Accipiter gentilis."@sv .
+
+<#common-kestrel>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Common Kestrel"@en ,
+                     "tornfalk"@sv ;
+    solid-memo:back "Falco tinnunculus"@la .
+
+<#white-tailed-eagle>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "White-tailed Eagle"@en ,
+                     "havsörn"@sv ;
+    solid-memo:back "Haliaeetus albicilla"@la .
+
+<#golden-eagle>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Golden Eagle"@en ,
+                     "kungsörn"@sv ;
+    solid-memo:back "Aquila chrysaetos"@la .
+
+<#osprey>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Osprey"@en ,
+                     "fiskgjuse"@sv ;
+    solid-memo:back "Pandion haliaetus"@la .
+
+<#common-crane>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Common Crane"@en ,
+                     "trana"@sv ;
+    solid-memo:back "Grus grus"@la .
+
+<#grey-heron>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Grey Heron"@en ,
+                     "gråhäger"@sv ;
+    solid-memo:back "Ardea cinerea"@la .
+
+<#mute-swan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mute Swan"@en ,
+                     "knölsvan"@sv ;
+    solid-memo:back "Cygnus olor"@la .
+
+<#whooper-swan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Whooper Swan"@en ,
+                     "sångsvan"@sv ;
+    solid-memo:back "Cygnus cygnus"@la .
+
+<#greylag-goose>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Greylag Goose"@en ,
+                     "grågås"@sv ;
+    solid-memo:back "Anser anser"@la .
+
+<#canada-goose>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Canada Goose"@en ,
+                     "kanadagås"@sv ;
+    solid-memo:back "Branta canadensis"@la .
+
+<#mallard>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mallard"@en ,
+                     "gräsand"@sv ;
+    solid-memo:back "Anas platyrhynchos"@la .
+
+<#tufted-duck>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Tufted Duck"@en ,
+                     "vigg"@sv ;
+    solid-memo:back "Aythya fuligula"@la .
+
+<#common-goldeneye>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Common Goldeneye"@en ,
+                     "knipa"@sv ;
+    solid-memo:back "Bucephala clangula"@la .
+
+<#common-eider>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Common Eider"@en ,
+                     "ejder"@sv ;
+    solid-memo:back "Somateria mollissima"@la .
+
+<#common-merganser>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Common Merganser"@en ,
+                     "storskrake"@sv ;
+    solid-memo:back "Mergus merganser"@la .
+
+<#great-crested-grebe>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Great Crested Grebe"@en ,
+                     "skäggdopping"@sv ;
+    solid-memo:back "Podiceps cristatus"@la .
+
+<#black-throated-loon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Black-throated Loon"@en ,
+                     "storlom"@sv ;
+    solid-memo:back "Gavia arctica"@la .
+
+<#great-cormorant>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Great Cormorant"@en ,
+                     "storskarv"@sv ;
+    solid-memo:back "Phalacrocorax carbo"@la .
+
+<#eurasian-coot>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurasian Coot"@en ,
+                     "sothöna"@sv ;
+    solid-memo:back "Fulica atra"@la .
+
+<#northern-lapwing>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Northern Lapwing"@en ,
+                     "tofsvipa"@sv ;
+    solid-memo:back "Vanellus vanellus"@la .
+
+<#eurasian-oystercatcher>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurasian Oystercatcher"@en ,
+                     "strandskata"@sv ;
+    solid-memo:back "Haematopus ostralegus"@la .
+
+<#eurasian-curlew>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurasian Curlew"@en ,
+                     "storspov"@sv ;
+    solid-memo:back "Numenius arquata"@la .
+
+<#eurasian-woodcock>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eurasian Woodcock"@en ,
+                     "morkulla"@sv ;
+    solid-memo:back "Scolopax rusticola"@la .
+
+<#black-headed-gull>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Black-headed Gull"@en ,
+                     "skrattmås"@sv ;
+    solid-memo:back "Chroicocephalus ridibundus"@la ;
+    solid-memo:backNote "Formerly Larus ridibundus."@en ,
+                        "Tidigare namn: Larus ridibundus."@sv .
+
+<#common-gull>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Common Gull"@en ,
+                     "fiskmås"@sv ;
+    solid-memo:back "Larus canus"@la .
+
+<#european-herring-gull>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "European Herring Gull"@en ,
+                     "gråtrut"@sv ;
+    solid-memo:back "Larus argentatus"@la .
+
+<#common-tern>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Common Tern"@en ,
+                     "fisktärna"@sv ;
+    solid-memo:back "Sterna hirundo"@la .
+
+<#arctic-tern>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Arctic Tern"@en ,
+                     "silvertärna"@sv ;
+    solid-memo:back "Sterna paradisaea"@la .
+
+<#black-grouse>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Black Grouse"@en ,
+                     "orre"@sv ;
+    solid-memo:back "Lyrurus tetrix"@la ;
+    solid-memo:backNote "Formerly Tetrao tetrix."@en ,
+                        "Tidigare namn: Tetrao tetrix."@sv .
+
+<#western-capercaillie>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Western Capercaillie"@en ,
+                     "tjäder"@sv ;
+    solid-memo:back "Tetrao urogallus"@la .
+
+<#common-pheasant>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Common Pheasant"@en ,
+                     "fasan"@sv ;
+    solid-memo:back "Phasianus colchicus"@la .
+
+<#red-backed-shrike>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Red-backed Shrike"@en ,
+                     "törnskata"@sv ;
+    solid-memo:back "Lanius collurio"@la .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

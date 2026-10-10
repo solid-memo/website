@@ -1,0 +1,662 @@
+@base <https://solid-memo.com/decks/mathematical-symbols/v2.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Mathematical symbols"@en ,
+                  "Matematiska symboler"@sv ,
+                  "수학 기호"@ko ,
+                  "Mathematische Symbole"@de ,
+                  "Símbolos matemáticos"@es ,
+                  "Symboles mathématiques"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "45 common mathematical symbols and what they mean: logic (∀, ∃, ¬, ∧, ∨, ⇒, ⇔), sets and number sets (∈, ⊆, ⊂, ∪, ∩, ℕ, ℝ …), relations (≠, ≈, ∝, ≤, ≡ …), operators (∑, ∏, √, ∫, ∂, ∇, n! …) and the constants π, e and i, plus ∞. Front: the symbol, in a short expression where it needs one (⌊x⌋, g ∘ f); back: its meaning in English and Swedish. ⊂ is read as proper subset and ℕ includes 0. Checked against Wikidata, the Unicode Character Database and the English and Swedish Wikipedia."@en ,
+                        "45 vanliga matematiska symboler och vad de betyder: logik (∀, ∃, ¬, ∧, ∨, ⇒, ⇔), mängder och talmängder (∈, ⊆, ⊂, ∪, ∩, ℕ, ℝ …), relationer (≠, ≈, ∝, ≤, ≡ …), operatorer (∑, ∏, √, ∫, ∂, ∇, n! …) och konstanterna π, e och i, samt ∞. Framsida: symbolen, vid behov i ett kort uttryck (⌊x⌋, g ∘ f); baksida: dess betydelse på engelska och svenska. ⊂ läses som äkta delmängd och ℕ innehåller 0. Kontrollerade mot Wikidata, Unicodes teckendatabas och engelskspråkiga och svenskspråkiga Wikipedia."@sv ,
+                        "자주 쓰는 수학 기호 45개와 그 뜻입니다. 논리(∀, ∃, ¬, ∧, ∨, ⇒, ⇔), 집합과 수 집합(∈, ⊆, ⊂, ∪, ∩, ℕ, ℝ …), 관계(≠, ≈, ∝, ≤, ≡ …), 연산자(∑, ∏, √, ∫, ∂, ∇, n! …), 상수 π, e, i, 그리고 ∞를 다룹니다. 앞면: 기호(필요하면 ⌊x⌋, g ∘ f처럼 짧은 식 안에). 뒷면: 영어와 스웨덴어로 된 뜻. ⊂는 진부분집합으로 읽고 ℕ은 0을 포함합니다. Wikidata, Unicode Character Database, 영어·스웨덴어 위키백과로 확인했습니다."@ko ,
+                        "45 gängige mathematische Symbole und ihre Bedeutung: Logik (∀, ∃, ¬, ∧, ∨, ⇒, ⇔), Mengen und Zahlenmengen (∈, ⊆, ⊂, ∪, ∩, ℕ, ℝ …), Relationen (≠, ≈, ∝, ≤, ≡ …), Operatoren (∑, ∏, √, ∫, ∂, ∇, n! …) und die Konstanten π, e und i sowie ∞. Vorderseite: das Symbol, wo nötig in einem kurzen Ausdruck (⌊x⌋, g ∘ f); Rückseite: seine Bedeutung auf Englisch und Schwedisch. ⊂ wird als echte Teilmenge gelesen, und ℕ enthält die 0. Geprüft anhand von Wikidata, der Unicode Character Database und der englisch- und schwedischsprachigen Wikipedia."@de ,
+                        "45 símbolos matemáticos habituales y su significado: lógica (∀, ∃, ¬, ∧, ∨, ⇒, ⇔), conjuntos y conjuntos numéricos (∈, ⊆, ⊂, ∪, ∩, ℕ, ℝ …), relaciones (≠, ≈, ∝, ≤, ≡ …), operadores (∑, ∏, √, ∫, ∂, ∇, n! …) y las constantes π, e e i, además de ∞. Anverso: el símbolo, dentro de una expresión breve cuando la necesita (⌊x⌋, g ∘ f); reverso: su significado en inglés y en sueco. ⊂ se lee como subconjunto propio y ℕ incluye el 0. Comprobados en Wikidata, la Unicode Character Database y las Wikipedias en inglés y en sueco."@es ,
+                        "45 symboles mathématiques courants et leur signification : logique (∀, ∃, ¬, ∧, ∨, ⇒, ⇔), ensembles et ensembles de nombres (∈, ⊆, ⊂, ∪, ∩, ℕ, ℝ …), relations (≠, ≈, ∝, ≤, ≡ …), opérateurs (∑, ∏, √, ∫, ∂, ∇, n! …) et les constantes π, e et i, ainsi que ∞. Recto : le symbole, dans une courte expression quand il en a besoin (⌊x⌋, g ∘ f) ; verso : sa signification en anglais et en suédois. ⊂ se lit comme inclusion stricte et ℕ contient 0. Vérifiés sur Wikidata, la Unicode Character Database et les Wikipédias anglophone et suédophone."@fr ;
+    prov:wasDerivedFrom <https://www.wikidata.org/> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:mathematics ;
+    dcat:keyword "mathematical symbols"@en ,
+                 "mathematical notation"@en ,
+                 "logic"@en ,
+                 "set theory"@en ,
+                 "mathematical analysis"@en ,
+                 "matematiska symboler"@sv ,
+                 "matematisk notation"@sv ,
+                 "logik"@sv ,
+                 "mängdlära"@sv ,
+                 "matematisk analys"@sv ,
+                 "수학 기호"@ko ,
+                 "수학 표기법"@ko ,
+                 "논리학"@ko ,
+                 "집합론"@ko ,
+                 "해석학"@ko ,
+                 "mathematische Symbole"@de ,
+                 "mathematische Notation"@de ,
+                 "Logik"@de ,
+                 "Mengenlehre"@de ,
+                 "Analysis"@de ,
+                 "símbolos matemáticos"@es ,
+                 "notación matemática"@es ,
+                 "lógica"@es ,
+                 "teoría de conjuntos"@es ,
+                 "análisis matemático"@es ,
+                 "symboles mathématiques"@fr ,
+                 "notation mathématique"@fr ,
+                 "logique"@fr ,
+                 "théorie des ensembles"@fr ,
+                 "analyse mathématique"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/mathematical-symbols/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/mathematical-symbols/v1.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#mathematical-symbols> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#mathematical-symbols> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/> ,
+              <https://www.unicode.org/Public/18.0.0/ucd/UnicodeData.txt> ,
+              <https://www.iso.org/standard/64973.html> ,
+              <https://en.wikipedia.org/w/index.php?title=Glossary_of_mathematical_symbols&oldid=1377851125> ,
+              <https://en.wikipedia.org/w/index.php?title=Natural_number&oldid=1375965996> ,
+              <https://sv.wikipedia.org/w/index.php?title=Lista_%C3%B6ver_matematiska_symboler&oldid=57825007> ,
+              <https://sv.wikipedia.org/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ,
+                       <#review-6> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
+                 "The cards were checked by machine (the Unicode Character Database, live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Candidate symbols: the library editor's brief named about 45 symbols in five groups (logic, sets, relations, operators, constants). For each, Wikidata was searched for the items that carry the symbol as Unicode character (P487) (query 1) and the statements of those items (query 2), which link character items to concepts through notation (P913), depicts (P180), has use (P366) or symbolizes (P4878)."@en ,
+                 "ISO 80000-2 as recorded in Wikidata: query 3 listed every Wikidata item described by ISO 80000-2:2019 (Q109490582) with the item number (P958 section, e.g. \"2-6.8\") and the standard's verbal equivalent (P1810 subject named as, e.g. \"B is properly included in A\"). Every card's concept was matched to one of these records where one exists (all but ∝, and ∫ via the indefinite integral item); this is what the evidence calls the ISO item number. The standard's own tables could not be read: the ISO Online Browsing Platform answered 403 (https://www.iso.org/obp/ui/en/#iso:std:iso:80000:-2:ed-2:v1:en), and the publisher's free preview (query 10) ends after clause 4. From the preview only clause 4's sentence on mathematical constants (e, π, i) is used."@en ,
+                 "Concepts and labels: query 4 fetched, for the chosen concept items, the English and Swedish labels, Swedish aliases, P487, the notation items with their characters and the ISO records; query 5 the Swedish Wikipedia article title and the character items linked to each concept; query 6 the P487, P913 and P1343 statements that the build checks. While doing so the Query Service was found to return \"ℜ\" (U+211C) as P487 of the set of real numbers (Q1174982) where the Wikidata API returns \"ℝ\" (U+211D) (queries 7 and 8); see round 0."@en ,
+                 "Characters: UnicodeData.txt of the Unicode Character Database 18.0.0 was downloaded (query 11) and the script ucd.py (query 12) printed the line of every character used on a front, which fixed the exact code point (for example U+2223 DIVIDES rather than U+007C VERTICAL LINE for \"a ∣ b\", U+2216 SET MINUS rather than the backslash for \"A ∖ B\") and gave the official character name as a check of the meaning."@en ,
+                 "Independent check in English: the wikitext of the English Wikipedia \"Glossary of mathematical symbols\" (query 11) was searched with grep_en.py (query 13) and grep (query 14) for the entry of each symbol; each card's meaning agrees with it (∠, π, e and i are not in the glossary). The English Wikipedia article \"Natural number\" (query 15) was read for the ISO convention on 0."@en ,
+                 "Swedish: the Swedish Wikipedia \"Lista över matematiska symboler\" (query 11, wikitext extracted by query 20) and Swedish Wikipedia articles on the concepts (svwiki.py, query 16: 46 titles tried, 41 found, two of them redirects to the same article; plain-text extracts with revision ids; grep_sv.py, query 17; in round 3 also \"Skilt från-tecknet\", query 24) were read to confirm the Swedish terms. The Swedish backs are standard Swedish terminology chosen by the compiler: single words or set phrases, not protected expression. Where Wikidata has the term as an sv label or alias, the back follows it (konjunktion, disjunktion, negation, implikation, delmängd, union, snitt, tomma mängden, mindre/större än eller lika med, summa, produkt, kvadratrot, absolutbelopp, golvfunktion, takfunktion, fakultet, sammansatt funktion, nablaoperatorn, imaginära enheten, oändlighet, vinkel, Eulers tal, \"inte lika med-tecknet\" for ≠); the other readings (för alla, det finns, implicerar, om och endast om, är ett element i, äkta delmängd, mängddifferens, kongruent modulo n, delar, proportionell mot, ungefär lika med, plus eller minus) are the usual ones, which the Swedish list and articles only confirmed; no sentences, notes or selection were taken from them. Swedish lower-case style is used throughout (Wikidata's \"Partiell derivata\" is written \"partiell derivata\"), named sets and constants with an adjective take the Swedish double definite form (\"de naturliga talen\", \"den tomma mängden\", \"den imaginära enheten\"), and Swedish decimal commas are used in the Swedish notes."@en ,
+                 "Writing the cards: the backs are the compiler's own short wording of the meaning, in the form in which the symbol is read (\"is an element of\", \"för alla\"), with the concept name in brackets where the reading alone is a bare word (\"and (conjunction)\"). Fronts are text in no language (zxx). A symbol is shown in a short expression where it has another common meaning or could be mistaken for another character: \"A ∖ B\", \"a ≡ b (mod n)\", \"a ∣ b\", \"|x|\", \"⌊x⌋\", \"⌈x⌉\", \"n!\", \"g ∘ f\". The constants π, e and i have the front note \"a mathematical constant\" so that e and i are not read as variables (or e as the elementary charge). Notes give a formula, an example or the convention used, in the compiler's own words and with examples of the compiler's own choosing; examples are introduced with \"for example\" / \"till exempel\", and notes that are sentences end with a full stop. Expression fronts get expression readings (\"absolute value of x\", \"floor of x\", \"g composed with f\")."@en ,
+                 "Checks: every card has Wikidata checks run by the builder against live Wikidata: the symbol (P487 on the concept or on its character item), the link between character and concept (P913, P180 or P366), a stable label in English or Swedish, and the concept's ISO 80000-2 record (P1343 Q109490582). Checks were left out where Wikidata disagrees with the card or the Query Service returns a different character (⊂ on subset, ℝ, e); see round 0."@en ,
+                 "Left out: ⊥ (U+22A5 UP TACK is also the logical constant false, and Unicode has a separate U+27C2 PERPENDICULAR, so the front would be ambiguous between characters and meanings); ≪ and ≫ (no Swedish source for the reading was found beyond the plain translation; the Swedish Wikipedia search for \"mycket mindre än\", query 22, gave 186 hits, the first ten all outside mathematics); ∄, ∃!, ∴, ∵ and ∮ (not in the brief and outside ISO 80000-2's tables as recorded in Wikidata); ≡ alone (identity, congruence or logical equivalence) and the bare vertical bar (absolute value, divides, such that), which appear only in expressions that fix one meaning."@en ,
+                 "Selection: 45 symbols in five groups, chosen from the library editor's brief and grouped broadly as ISO 80000-2:2019's clauses (as recorded in Wikidata): logic ∀ ∃ ¬ ∧ ∨ ⇒ ⇔ (7); sets ∈ ∉ ∅ ⊆ ⊂ ∪ ∩ ∖ and the number sets ℕ ℤ ℚ ℝ ℂ (13); relations and geometry ≠ ≈ ∝ ≤ ≥, congruence modulo n, divides, parallel and angle (9); operators ∑ ∏ √ ± |x| ⌊x⌋ ⌈x⌉ n! ∘ ∫ ∂ ∇ (12); the constants π, e and i and the symbol ∞ (4). Each is a symbol a student meets in upper-secondary or first-year university mathematics and has one standard meaning given the front. Where usage differs the card states the convention in its note: ⊂ is a proper subset (with ⊆ for subset), as in the Swedish Wikipedia list and the reading that pairs ⊂ with ⊆, and ℕ includes 0, as in ISO 80000-2 and Skolverket's terminology. Left out: ⊥ (two characters, and also \"false\"), ≪ and ≫, ∄, ∃!, ∴, ∵, ∮, and symbols whose meaning depends on context without a disambiguating expression (≡ alone, |, ~, ×, Δ, →)."@en ,
+                 "Licensing: The only content source is Wikidata, whose structured data is CC0: the link from each symbol to its concept, the concept names in English and Swedish and the ISO 80000-2 item records come from it, and the card texts are the compiler's own wording of the meanings, so the deck is CC0 1.0. The Unicode Character Database (Unicode License v3, permissive but not a licence the builder knows), ISO 80000-2 (all rights reserved), the English Wikipedia glossary and article and the Swedish Wikipedia list and articles (CC BY-SA 4.0) were used for verification only: they confirmed the meanings and that the Swedish readings the compiler chose are the usual ones. The Swedish readings that Wikidata does not hold (\"för alla\", \"är ett element i\", \"mängddifferens\" …) are standard terminology, single words or set phrases that are not protected expression; no sentence, note, example, table layout or selection was copied from any of these sources, and notes whose first drafts followed a Wikipedia sentence closely were rewritten in round 3. The selection follows the editor's brief, grouped broadly as ISO 80000-2's clauses as recorded in Wikidata; it is not the selection of the Swedish or English Wikipedia list. Meanings of symbols and the names of mathematical concepts are facts, not copyrightable expression."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Sources, licences and machine checks: every symbol's character against the Unicode Character Database, its meaning against Wikidata and the English Wikipedia glossary, the Swedish terms against Wikidata sv labels and the Swedish Wikipedia; ambiguity of each front."@en ;
+    rdfs:comment "Scope: All 45 cards, the sources and the deck metadata."@en ,
+                 "Outcome: All 45 meanings agree between Wikidata and at least one independent source (the English glossary for 41; the ISO preview and the Swedish Wikipedia for π, e and i; the Unicode character name for ∠), and every front character was confirmed in UnicodeData.txt. ISO 80000-2's tables could not be read, so ISO is cited only through Wikidata's records and the preview's clause 4. Three Wikidata checks were left out because Wikidata (or its Query Service) disagrees with the card; eight fronts were given a short expression to remove ambiguity; ⊥, ≪ and ≫ were left out."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 45 cards: every front's code point and character name (Python unicodedata), the Wikidata items used in the checks (fetched live), the meanings and notes against the English and Swedish Wikipedia, and the deck description."@en ,
+                 "Outcome: No factual errors in the 45 cards; three optional suggestions. Every code point and character name matched, the Wikidata items behind the checks are the intended concepts, and the notes and both stated conventions (⊂ as proper subset, 0 ∈ ℕ) are correct. All three suggestions were verified and applied."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 45 cards plus the title, description and keywords: language tags, Swedish terms against Wikidata sv labels and Swedish Wikipedia, idiom and consistency of the English and Swedish text."@en ,
+                 "Outcome: All language tags are right (every front zxx, all other text en/sv, nothing untagged) and the Swedish terms match Wikidata and Swedish Wikipedia. One warning, the composition back naming the functions in the reverse order, was confirmed and fixed; the consistency and idiom suggestions were applied, the article style of the bare-symbol backs was kept on purpose."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: Every source's licence page fetched again, spot checks of the evidence quotes (17 glossary entries, 12 Swedish list rows, 7 Swedish articles, 12 UnicodeData lines, 10 Wikidata items), the required method text, and the reproducibility of the method and queries."@en ,
+                 "Outcome: The recorded licences are right and Wikidata (CC0) is the only content source, so the CC0 deck licence is consistent. Three warnings were confirmed and fixed: the documentation credited Swedish readings to a verification-only CC BY-SA source, the Swedish floor note followed Swedish Wikipedia's sentence and example, and several recorded steps read files no recorded command created. The smaller attribution points were applied within what the dossier can change."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: 29 cards: the 17 cards changed in round 3 and every third card (for-all, and, if-and-only-if, empty-set, union, natural-numbers, real-numbers, not-equal, greater-or-equal, divides, parallel-to, product, plus-minus, floor, composition, partial-derivative, e); all 148 Wikidata checks against live Wikidata, the build's sync check, the SHACL and DCAT-AP validators, the language tags, the description, keywords, licensing and the required method text."@en ,
+                 "Outcome: No errors or warnings; every fix claimed in rounds 1–3 is present. Two suggestions, both confirmed and applied: the ceiling card's Swedish Wikipedia evidence now quotes the sentence that defines takfunktionen, and the first method paragraph names the Unicode Character Database check."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: All 45 cards (front characters against Python unicodedata, meanings, notes, examples, Swedish terms, language tags), the description and its counts, keywords, study direction, the required method text, the pinned UnicodeData.txt URL and the fixes logged in round 4."@en ,
+                 "Outcome: No errors or warnings; both round 4 fixes confirmed in place. Two suggestions, both confirmed and applied: the proportional-to note now matches its Swedish Wikipedia source, and the selection calls the third group \"relations and geometry\"."@en .
+
+<#review-6>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 1, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card changed."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata: mathematical concepts, their symbols, labels and ISO 80000-2 records" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing (fetched 2026-10-04): \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://www.unicode.org/Public/18.0.0/ucd/UnicodeData.txt>
+    dcterms:title "Unicode Character Database 18.0.0: UnicodeData.txt (Unicode License v3)" ;
+    dcterms:creator "Unicode, Inc." ;
+    rdfs:comment "Licence: Unicode License v3 (SPDX Unicode-3.0), recorded as \"unknown\" only because the builder has no licence id for it. https://www.unicode.org/license.txt (fetched 2026-10-04): \"UNICODE LICENSE V3 … Permission is hereby granted, free of charge, to any person obtaining a copy of data files and any associated documentation (the \"Data Files\") or software … to deal in the Data Files or Software without restriction …\" with a notice requirement. Used for verification only, so the deck takes nothing from it."@en .
+
+<https://www.iso.org/standard/64973.html>
+    dcterms:title "ISO 80000-2:2019 Quantities and units — Part 2: Mathematics (corrected version 2021-11), publisher's preview (front matter and clauses 1–4)" ;
+    dcterms:creator "ISO/TC 12 with IEC/TC 25" ;
+    rdfs:comment "Page ii of the standard (preview PDF fetched 2026-10-04 from https://assets.vde-verlag.de/iec-normen/preview-pdf/info_iso80000-2%7Bed2.0%7Den.pdf): \"COPYRIGHT PROTECTED DOCUMENT © ISO 2019 All rights reserved. Unless otherwise specified, or required in the context of its implementation, no part of this publication may be reproduced or utilized otherwise in any form or by any means …\". Verification only."@en .
+
+<https://en.wikipedia.org/w/index.php?title=Glossary_of_mathematical_symbols&oldid=1377851125>
+    dcterms:title "Glossary of mathematical symbols (English Wikipedia, revision 1377851125)" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://en.wikipedia.org/wiki/Wikipedia:Copyrights (fetched 2026-10-04): \"If you wish to reuse content from Wikipedia, read § Reusers' rights and obligations first. Then review the licenses: the Creative Commons Attribution-ShareAlike 4.0 International License and the GNU Free Documentation License.\" Used for verification only."@en .
+
+<https://en.wikipedia.org/w/index.php?title=Natural_number&oldid=1375965996>
+    dcterms:title "Natural number (English Wikipedia, revision 1375965996)" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://en.wikipedia.org/wiki/Wikipedia:Copyrights (fetched 2026-10-04): \"… review the licenses: the Creative Commons Attribution-ShareAlike 4.0 International License and the GNU Free Documentation License.\" Used for verification only."@en .
+
+<https://sv.wikipedia.org/w/index.php?title=Lista_%C3%B6ver_matematiska_symboler&oldid=57825007>
+    dcterms:title "Lista över matematiska symboler (Swedish Wikipedia, revision 57825007)" ;
+    dcterms:creator "Wikipedias bidragsgivare" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use, section 7 (fetched 2026-10-04): \"When you submit text to which you hold the copyright, you agree to license it under: Creative Commons Attribution-ShareAlike 4.0 International License (\"CC BY-SA 4.0\"), and GNU Free Documentation License (\"GFDL\")\". Used for verification only."@en .
+
+<https://sv.wikipedia.org/>
+    dcterms:title "Swedish Wikipedia articles on the concepts (29 articles; titles and revision ids under \"used for\" and in each card's evidence)" ;
+    dcterms:creator "Wikipedias bidragsgivare" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use, section 7 (fetched 2026-10-04): \"When you submit text to which you hold the copyright, you agree to license it under: Creative Commons Attribution-ShareAlike 4.0 International License (\"CC BY-SA 4.0\"), and GNU Free Documentation License (\"GFDL\")\". Used for verification only."@en .
+
+<#for-all>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∀"@zxx ;
+    solid-memo:back "for all"@en ,
+                    "för alla"@sv ;
+    solid-memo:backNote "The universal quantifier: ∀x P(x) says that P(x) holds for every x."@en ,
+                        "Allkvantifikatorn: ∀x P(x) betyder att P(x) gäller för varje x."@sv .
+
+<#there-exists>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∃"@zxx ;
+    solid-memo:back "there exists"@en ,
+                    "det finns"@sv ;
+    solid-memo:backNote "The existential quantifier: ∃x P(x) says that P(x) holds for at least one x."@en ,
+                        "Existenskvantifikatorn: ∃x P(x) betyder att P(x) gäller för minst ett x."@sv .
+
+<#not>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "¬"@zxx ;
+    solid-memo:back "not (negation)"@en ,
+                    "icke (negation)"@sv ;
+    solid-memo:backNote "¬p is true exactly when p is false."@en ,
+                        "¬p är sann precis när p är falsk."@sv .
+
+<#and>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∧"@zxx ;
+    solid-memo:back "and (conjunction)"@en ,
+                    "och (konjunktion)"@sv ;
+    solid-memo:backNote "p ∧ q is true when both p and q are true."@en ,
+                        "p ∧ q är sann när både p och q är sanna."@sv .
+
+<#or>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∨"@zxx ;
+    solid-memo:back "or (disjunction)"@en ,
+                    "eller (disjunktion)"@sv ;
+    solid-memo:backNote "Inclusive or: p ∨ q is true when at least one of p and q is true."@en ,
+                        "Inklusivt eller: p ∨ q är sann när minst en av p och q är sann."@sv .
+
+<#implies>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "⇒"@zxx ;
+    solid-memo:back "implies (implication)"@en ,
+                    "implicerar (implikation)"@sv ;
+    solid-memo:backNote "p ⇒ q: if p, then q."@en ,
+                        "p ⇒ q: om p, så q."@sv .
+
+<#if-and-only-if>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "⇔"@zxx ;
+    solid-memo:back "if and only if (equivalence)"@en ,
+                    "om och endast om (ekvivalens)"@sv ;
+    solid-memo:backNote "p ⇔ q: p and q are both true or both false."@en ,
+                        "p ⇔ q: p och q är antingen båda sanna eller båda falska."@sv .
+
+<#element-of>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∈"@zxx ;
+    solid-memo:back "is an element of"@en ,
+                    "är ett element i"@sv ;
+    solid-memo:backNote "x ∈ A: x belongs to the set A."@en ,
+                        "x ∈ A: x tillhör mängden A."@sv .
+
+<#not-element-of>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∉"@zxx ;
+    solid-memo:back "is not an element of"@en ,
+                    "är inte ett element i"@sv .
+
+<#empty-set>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∅"@zxx ;
+    solid-memo:back "the empty set"@en ,
+                    "den tomma mängden"@sv ;
+    solid-memo:backNote "The set with no elements, also written {}."@en ,
+                        "Mängden utan element, skrivs även {}."@sv .
+
+<#subset-or-equal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "⊆"@zxx ;
+    solid-memo:back "is a subset of"@en ,
+                    "är en delmängd av"@sv ;
+    solid-memo:backNote "A ⊆ B: every element of A is also in B; A may equal B."@en ,
+                        "A ⊆ B: varje element i A finns också i B; A kan vara lika med B."@sv .
+
+<#proper-subset>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "⊂"@zxx ;
+    solid-memo:back "is a proper subset of"@en ,
+                    "är en äkta delmängd av"@sv ;
+    solid-memo:backNote "A ⊂ B: A ⊆ B and A ≠ B. Some authors use ⊂ for any subset (A = B allowed); ⊊ always means a proper subset."@en ,
+                        "A ⊂ B: A ⊆ B och A ≠ B. Vissa författare använder ⊂ för delmängd i allmänhet (även när A = B); ⊊ betyder alltid äkta delmängd."@sv .
+
+<#union>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∪"@zxx ;
+    solid-memo:back "union"@en ,
+                    "union"@sv ;
+    solid-memo:backNote "A ∪ B: the elements that are in A or in B (or both)."@en ,
+                        "A ∪ B: elementen som finns i A eller i B (eller i båda)."@sv .
+
+<#intersection>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∩"@zxx ;
+    solid-memo:back "intersection"@en ,
+                    "snitt"@sv ;
+    solid-memo:backNote "A ∩ B: the elements that are in both A and B."@en ,
+                        "A ∩ B: elementen som finns i både A och B."@sv .
+
+<#set-difference>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A ∖ B"@zxx ;
+    solid-memo:back "set difference (A minus B)"@en ,
+                    "mängddifferens (A minus B)"@sv ;
+    solid-memo:backNote "The elements of A that are not in B."@en ,
+                        "Elementen i A som inte finns i B."@sv .
+
+<#natural-numbers>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ℕ"@zxx ;
+    solid-memo:back "the natural numbers"@en ,
+                    "de naturliga talen"@sv ;
+    solid-memo:backNote "Here including 0: {0, 1, 2, …}, as in ISO 80000-2 and Swedish schools; some authors start at 1."@en ,
+                        "Här med 0: {0, 1, 2, …}, som i ISO 80000-2 och i svensk skola; vissa författare börjar på 1."@sv .
+
+<#integers>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ℤ"@zxx ;
+    solid-memo:back "the integers"@en ,
+                    "heltalen"@sv ;
+    solid-memo:backNote "{…, −2, −1, 0, 1, 2, …}"@en ,
+                        "{…, −2, −1, 0, 1, 2, …}"@sv .
+
+<#rational-numbers>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ℚ"@zxx ;
+    solid-memo:back "the rational numbers"@en ,
+                    "de rationella talen"@sv ;
+    solid-memo:backNote "Numbers p/q with integers p and q, q ≠ 0."@en ,
+                        "Tal p/q där p och q är heltal och q ≠ 0."@sv .
+
+<#real-numbers>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ℝ"@zxx ;
+    solid-memo:back "the real numbers"@en ,
+                    "de reella talen"@sv .
+
+<#complex-numbers>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ℂ"@zxx ;
+    solid-memo:back "the complex numbers"@en ,
+                    "de komplexa talen"@sv .
+
+<#not-equal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "≠"@zxx ;
+    solid-memo:back "is not equal to"@en ,
+                    "är inte lika med"@sv .
+
+<#approximately-equal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "≈"@zxx ;
+    solid-memo:back "is approximately equal to"@en ,
+                    "är ungefär lika med"@sv ;
+    solid-memo:backNote "For example, π ≈ 3.14."@en ,
+                        "Till exempel π ≈ 3,14."@sv .
+
+<#proportional-to>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∝"@zxx ;
+    solid-memo:back "is proportional to"@en ,
+                    "är proportionell mot"@sv ;
+    solid-memo:backNote "y ∝ x: y = kx for a constant k ≠ 0. Swedish texts more commonly write y ∼ x."@en ,
+                        "y ∝ x: y = kx för en konstant k ≠ 0. I svenska texter skrivs oftare y ∼ x."@sv .
+
+<#less-or-equal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "≤"@zxx ;
+    solid-memo:back "is less than or equal to"@en ,
+                    "är mindre än eller lika med"@sv .
+
+<#greater-or-equal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "≥"@zxx ;
+    solid-memo:back "is greater than or equal to"@en ,
+                    "är större än eller lika med"@sv .
+
+<#congruent-modulo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "a ≡ b (mod n)"@zxx ;
+    solid-memo:back "a is congruent to b modulo n"@en ,
+                    "a är kongruent med b modulo n"@sv ;
+    solid-memo:backNote "n divides a − b: a and b leave the same remainder on division by n."@en ,
+                        "n delar a − b: a och b ger samma rest vid division med n."@sv .
+
+<#divides>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "a ∣ b"@zxx ;
+    solid-memo:back "a divides b"@en ,
+                    "a delar b"@sv ;
+    solid-memo:backNote "b is an integer multiple of a: b = ka for an integer k."@en ,
+                        "b är en heltalsmultipel av a: b = ka för ett heltal k."@sv .
+
+<#parallel-to>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∥"@zxx ;
+    solid-memo:back "is parallel to"@en ,
+                    "är parallell med"@sv ;
+    solid-memo:backNote "For lines, as in AB ∥ CD."@en ,
+                        "För linjer, som i AB ∥ CD."@sv .
+
+<#angle>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∠"@zxx ;
+    solid-memo:back "angle"@en ,
+                    "vinkel"@sv ;
+    solid-memo:backNote "∠ABC: the angle at B between BA and BC."@en ,
+                        "∠ABC: vinkeln vid B mellan BA och BC."@sv .
+
+<#summation>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∑"@zxx ;
+    solid-memo:back "sum"@en ,
+                    "summa"@sv ;
+    solid-memo:backNote "∑ₖ₌₁ⁿ aₖ = a₁ + a₂ + … + aₙ"@en ,
+                        "∑ₖ₌₁ⁿ aₖ = a₁ + a₂ + … + aₙ"@sv .
+
+<#product>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∏"@zxx ;
+    solid-memo:back "product"@en ,
+                    "produkt"@sv ;
+    solid-memo:backNote "∏ₖ₌₁ⁿ aₖ = a₁ · a₂ · … · aₙ"@en ,
+                        "∏ₖ₌₁ⁿ aₖ = a₁ · a₂ · … · aₙ"@sv .
+
+<#square-root>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "√"@zxx ;
+    solid-memo:back "square root"@en ,
+                    "kvadratrot"@sv ;
+    solid-memo:backNote "For a ≥ 0, √a is the non-negative number whose square is a."@en ,
+                        "För a ≥ 0 är √a det icke-negativa tal vars kvadrat är a."@sv .
+
+<#plus-minus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "±"@zxx ;
+    solid-memo:back "plus or minus"@en ,
+                    "plus eller minus"@sv ;
+    solid-memo:backNote "For example, x = ±2 means x = 2 or x = −2."@en ,
+                        "Till exempel betyder x = ±2 att x = 2 eller x = −2."@sv .
+
+<#absolute-value>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "|x|"@zxx ;
+    solid-memo:back "absolute value of x"@en ,
+                    "absolutbeloppet av x"@sv ;
+    solid-memo:backNote "The distance from x to 0; for example, |−3| = 3."@en ,
+                        "Avståndet från x till 0; till exempel |−3| = 3."@sv .
+
+<#floor>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "⌊x⌋"@zxx ;
+    solid-memo:back "floor of x"@en ,
+                    "golvfunktionen av x"@sv ;
+    solid-memo:backNote "x rounded down to the nearest integer; for example, ⌊3.7⌋ = 3 and ⌊−1.2⌋ = −2."@en ,
+                        "x avrundat nedåt till närmaste heltal; till exempel ⌊3,7⌋ = 3 och ⌊−1,2⌋ = −2."@sv .
+
+<#ceiling>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "⌈x⌉"@zxx ;
+    solid-memo:back "ceiling of x"@en ,
+                    "takfunktionen av x"@sv ;
+    solid-memo:backNote "x rounded up to the nearest integer; for example, ⌈3.2⌉ = 4 and ⌈−1.8⌉ = −1."@en ,
+                        "x avrundat uppåt till närmaste heltal; till exempel ⌈3,2⌉ = 4 och ⌈−1,8⌉ = −1."@sv .
+
+<#factorial>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "n!"@zxx ;
+    solid-memo:back "n factorial"@en ,
+                    "n-fakultet"@sv ;
+    solid-memo:backNote "n! = 1 · 2 · … · n; for example, 4! = 24. Also 0! = 1."@en ,
+                        "n! = 1 · 2 · … · n; till exempel 4! = 24. Dessutom 0! = 1."@sv .
+
+<#composition>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "g ∘ f"@zxx ;
+    solid-memo:back "g composed with f"@en ,
+                    "sammansättningen av g och f"@sv ;
+    solid-memo:backNote "(g ∘ f)(x) = g(f(x)): first f, then g."@en ,
+                        "(g ∘ f)(x) = g(f(x)): först f, sedan g."@sv .
+
+<#integral>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∫"@zxx ;
+    solid-memo:back "integral"@en ,
+                    "integral"@sv ;
+    solid-memo:backNote "∫ f(x) dx: an antiderivative; with limits a and b, the definite integral."@en ,
+                        "∫ f(x) dx: en primitiv funktion; med gränserna a och b, den bestämda integralen."@sv .
+
+<#partial-derivative>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∂"@zxx ;
+    solid-memo:back "partial derivative"@en ,
+                    "partiell derivata"@sv ;
+    solid-memo:backNote "∂f/∂x: the rate at which f changes when only x varies."@en ,
+                        "∂f/∂x: hur snabbt f ändras när bara x varierar."@sv .
+
+<#nabla>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∇"@zxx ;
+    solid-memo:back "nabla operator (del)"@en ,
+                    "nablaoperatorn"@sv ;
+    solid-memo:backNote "∇f is the gradient of f."@en ,
+                        "∇f är gradienten av f."@sv .
+
+<#pi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "π"@zxx ;
+    solid-memo:frontNote "a mathematical constant"@en ,
+                         "en matematisk konstant"@sv ;
+    solid-memo:back "pi: the ratio of a circle's circumference to its diameter"@en ,
+                    "pi: kvoten mellan en cirkels omkrets och diameter"@sv ;
+    solid-memo:backNote "π ≈ 3.14159"@en ,
+                        "π ≈ 3,14159"@sv .
+
+<#e>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "e"@zxx ;
+    solid-memo:frontNote "a mathematical constant"@en ,
+                         "en matematisk konstant"@sv ;
+    solid-memo:back "Euler's number, the base of the natural logarithm"@en ,
+                    "Eulers tal, basen för den naturliga logaritmen"@sv ;
+    solid-memo:backNote "e ≈ 2.71828"@en ,
+                        "e ≈ 2,71828"@sv .
+
+<#imaginary-unit>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "i"@zxx ;
+    solid-memo:frontNote "a mathematical constant"@en ,
+                         "en matematisk konstant"@sv ;
+    solid-memo:back "the imaginary unit"@en ,
+                    "den imaginära enheten"@sv ;
+    solid-memo:backNote "i² = −1; in electrical engineering often written j."@en ,
+                        "i² = −1; inom elektroteknik skrivs den ofta j."@sv .
+
+<#infinity>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "∞"@zxx ;
+    solid-memo:back "infinity"@en ,
+                    "oändlighet"@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

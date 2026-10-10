@@ -1,0 +1,515 @@
+@base <https://solid-memo.com/decks/roman-numerals/v2.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Roman numerals"@en ,
+                  "Romerska siffror"@sv ,
+                  "로마 숫자"@ko ,
+                  "Römische Zahlen"@de ,
+                  "Números romanos"@es ,
+                  "Chiffres romains"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "40 Roman numerals in the standard modern notation: the seven symbols I, V, X, L, C, D and M, the six subtractive pairs IV, IX, XL, XC, CD and CM, and 27 further numbers from 2 to 3999, among them years such as MCMXCIX (1999) and MMXXVI (2026). Front: the Roman numeral; back: its value in Arabic numerals; studied in both directions. Notes name older forms such as IIII on clock faces. Every card was computed and checked by two independent converters and against English Wikipedia's table of the standard form, and against Wikidata, Wiktionary and Swedish Wikipedia where they cover the numeral."@en ,
+                        "40 romerska tal i den moderna standardformen: de sju tecknen I, V, X, L, C, D och M, de sex subtraktiva paren IV, IX, XL, XC, CD och CM samt 27 andra tal från 2 till 3999, bland dem årtal som MCMXCIX (1999) och MMXXVI (2026). Framsida: det romerska talet; baksida: dess värde med arabiska siffror; kortleken övas åt båda hållen. Anteckningar nämner äldre skrivsätt som IIII på urtavlor. Varje kort är beräknat och kontrollerat med två oberoende omvandlare och mot engelskspråkiga Wikipedias tabell över standardformen, samt mot Wikidata, Wiktionary och svenskspråkiga Wikipedia där de tar upp talet."@sv ,
+                        "현대 표준 표기법으로 쓴 로마 숫자 40개입니다. 일곱 기호 I, V, X, L, C, D, M, 여섯 개의 감산 쌍 IV, IX, XL, XC, CD, CM, 그리고 2부터 3999까지의 다른 수 27개가 있으며, 그중에는 MCMXCIX(1999), MMXXVI(2026) 같은 연도도 있습니다. 앞면: 로마 숫자, 뒷면: 아라비아 숫자로 된 값, 양방향으로 학습합니다. 메모에는 시계 문자판의 IIII 같은 옛 표기가 나옵니다. 모든 카드는 독립된 변환기 두 개로 계산하고 확인했으며, 영어 위키백과의 표준 표기 표와, 해당 숫자를 다루는 경우 위키데이터, 위키낱말사전, 스웨덴어 위키백과로도 확인했습니다."@ko ,
+                        "40 römische Zahlen in der heutigen Standardschreibweise: die sieben Zeichen I, V, X, L, C, D und M, die sechs subtraktiven Paare IV, IX, XL, XC, CD und CM und 27 weitere Zahlen von 2 bis 3999, darunter Jahreszahlen wie MCMXCIX (1999) und MMXXVI (2026). Vorderseite: die römische Zahl; Rückseite: ihr Wert in arabischen Ziffern; gelernt in beide Richtungen. Anmerkungen nennen ältere Formen wie IIII auf Zifferblättern. Jede Karte wurde mit zwei unabhängigen Umrechnern berechnet und geprüft und mit der Tabelle der Standardform in der englischsprachigen Wikipedia abgeglichen, außerdem mit Wikidata, Wiktionary und der schwedischsprachigen Wikipedia, wo sie die Zahl behandeln."@de ,
+                        "40 números romanos en la notación estándar moderna: los siete símbolos I, V, X, L, C, D y M, los seis pares sustractivos IV, IX, XL, XC, CD y CM, y otros 27 números del 2 al 3999, entre ellos años como MCMXCIX (1999) y MMXXVI (2026). Anverso: el número romano; reverso: su valor en números arábigos; se estudia en ambas direcciones. Las notas mencionan formas antiguas como IIII en las esferas de los relojes. Cada tarjeta se calculó y comprobó con dos conversores independientes y con la tabla de la forma estándar de la Wikipedia en inglés, y con Wikidata, Wiktionary y la Wikipedia en sueco cuando tratan el número."@es ,
+                        "40 nombres en chiffres romains dans la notation standard moderne : les sept symboles I, V, X, L, C, D et M, les six paires soustractives IV, IX, XL, XC, CD et CM, et 27 autres nombres de 2 à 3999, dont des années comme MCMXCIX (1999) et MMXXVI (2026). Recto : le nombre en chiffres romains ; verso : sa valeur en chiffres arabes ; le paquet s’étudie dans les deux sens. Des notes signalent des formes plus anciennes comme IIII sur les cadrans d’horloge. Chaque carte a été calculée et vérifiée avec deux convertisseurs indépendants et avec le tableau de la forme standard de Wikipédia en anglais, ainsi qu’avec Wikidata, le Wiktionnaire et Wikipédia en suédois lorsqu’ils traitent le nombre."@fr ;
+    prov:wasDerivedFrom <#own-work> ,
+                        <https://www.wikidata.org/wiki/Q38918> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:mathematics ,
+               topic:history ;
+    dcat:keyword "Roman numerals"@en ,
+                 "numeral system"@en ,
+                 "numbers"@en ,
+                 "years"@en ,
+                 "ancient Rome"@en ,
+                 "romerska siffror"@sv ,
+                 "talsystem"@sv ,
+                 "tal"@sv ,
+                 "årtal"@sv ,
+                 "antikens Rom"@sv ,
+                 "로마 숫자"@ko ,
+                 "기수법"@ko ,
+                 "숫자"@ko ,
+                 "연도"@ko ,
+                 "고대 로마"@ko ,
+                 "römische Zahlen"@de ,
+                 "Zahlensystem"@de ,
+                 "Zahlen"@de ,
+                 "Jahreszahlen"@de ,
+                 "antikes Rom"@de ,
+                 "números romanos"@es ,
+                 "sistema de numeración"@es ,
+                 "números"@es ,
+                 "años"@es ,
+                 "antigua Roma"@es ,
+                 "chiffres romains"@fr ,
+                 "système de numération"@fr ,
+                 "nombres"@fr ,
+                 "années"@fr ,
+                 "Rome antique"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:bidirectional ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/roman-numerals/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/roman-numerals/v1.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#roman-numerals> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#roman-numerals> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <#own-work> ,
+              <https://www.wikidata.org/wiki/Q38918> ,
+              <https://en.wikipedia.org/w/index.php?title=Roman_numerals&oldid=1377908551> ,
+              <https://sv.wikipedia.org/w/index.php?title=Romerska_siffror&oldid=59692021> ,
+              <https://en.wiktionary.org/wiki/Category:Roman_numerals> ,
+              <https://pypi.org/project/roman/5.2/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ,
+                       <#review-6> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
+                 "The cards were checked by machine (a Python conversion script with an independent implementation, live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "1. Convention: the deck uses the standard modern notation, the one in which every number from 1 to 3999 has exactly one numeral: a number is written digit by digit, from the thousands down, each digit by its fixed form (units I, II, III, IV, V, VI, VII, VIII, IX; tens X to XC and hundreds C to CM likewise; thousands M, MM, MMM), and a zero digit is left out. Subtraction therefore occurs only in the six pairs IV, IX, XL, XC, CD and CM. This is what makes the cards unambiguous and lets them be studied in both directions; older and non-standard forms (IIII, VIIII, XXXX, CCCC, IL, IC, MIM) are named in notes, never on a front or back."@en ,
+                 "2. Selection: the 40 numbers were chosen by the compiler following the library editor's brief, not taken from a list: the seven symbols (I, V, X, L, C, D, M); the six subtractive pairs (IV, IX, XL, XC, CD, CM); and 27 further numbers chosen to practise each kind of construction: small numbers (2, 3, 6, 8, 12, 14, 19, 24), numbers that combine a subtractive pair with other symbols (39, 42, 49, 99, 444, 999), repeated and additive forms (80, 300, 800, 2000), MDCLXVI (1666, each symbol once), years often met in Roman numerals (1492, 1776, 1945, 1984, 1999 and the current year 2026), the longest numeral below 4000 (3888) and the largest (3999)."@en ,
+                 "3. Fronts and backs: each front is the numeral in capital Latin letters (I, V, X, L, C, D, M; not the Unicode Roman numeral characters (U+2160–U+2188); the Swedish Wikipedia article, citing the Unicode Standard 5.0 for U+2160–U+2182, says these are meant mainly for text in Chinese characters and recommends ordinary letters instead) and each back the value in Arabic numerals without separators, both tagged zxx (text in no language). The backs are all different, so the deck is studied in both directions. The dossier nevertheless declares the back side as [\"en\", \"sv\"]: these are the languages of the back notes, and the builder takes the deck's languages (dcterms:language) only from the declared sides and the fronts and backs, so with both sides declared zxx it wrote an empty language list and the Turtle did not parse (QC round 0). Every front and back is still tagged zxx in the built deck."@en ,
+                 "4. Machine verification (query 13): verify_roman.py, run with `uv run --with roman==5.2 python3 <scratch>/verify_roman.py <dossier>`, reads the dossier and (a) converts every front with the compiler's own strict parser, which accepts only numerals in standard notation, and with roman.fromRoman, and every back with the compiler's converter and with roman.toRoman (roman 5.2, the PyPI package of Mark Pilgrim and the Zope Foundation, an independent implementation); all four results must agree with the card; (b) checks that the front is the concatenation of the place-table forms of the back's digits (printed per card, e.g. 3888 = MMM + DCCC + LXXX + VIII); (c) runs both implementations over every number from 1 to 3999 (all agree) and checks that 4000 has no standard numeral; (d) checks that 16 non-standard strings (IIII, VIIII, XXXX, CCCC, IL, IC, IM, XM, VX, LC, DM, MIM, VV, MMMM, IXI and the empty string) are rejected; (e) computes the facts used in notes: 3999 = MMMCMXCIX is the largest number, 3888 the only number with the longest numeral (15 symbols), and MDCLXVI uses each of the seven symbols once. All 40 cards passed; the results are in each card's evidence."@en ,
+                 "5. Wikidata (queries 1–4): a search for Wikidata items with a Unicode Roman numeral character (P487 in U+2160–U+2188, query 1) and for a Wikidata property holding Roman numerals (query 2: none exists) led to the class Roman numerals (Q38918); its instances (query 3) include one item per numeral for 1–12, 50, 100, 500 and 1000 (described \"Roman numeral N\", with the numeral in Latin letters as English alias and its value as P1181 numeric value). Their full data was fetched with wbgetentities (query 4, which also fetched the items for VII and XI, not in the deck, and two Unicode-character items, to understand a label anomaly). The 14 cards among these numerals have three builder checks each (P1181 value, P31 Q38918, English alias), run against live Wikidata on every build. No Wikidata item exists for the other 26 numerals."@en ,
+                 "6. Second and third sources for every card: the English Wikipedia article Roman numerals (revision 1377908551 of 2026-10-01, the current revision on 2026-10-04; wikitext through the API, query 8, and the rendered page, query 9) states the standard form in a table of the numeral for each digit of each decimal place; every card's numeral was compared with the cells for its digits, and the article's own examples (39, 1776, 3999 and the current year, rendered by MediaWiki as MMXXVI) were compared where they exist. The English Wiktionary's Translingual entries (query 6 listed which exist, query 7 fetched them) give the value of 25 of the numerals. The Swedish Wikipedia article Romerska siffror (revision 59692021, query 10) states 19 of the numerals or the rules in their notes. All agree with the cards; no discrepancy was found."@en ,
+                 "7. Swedish text: the notes were written in Swedish by the compiler, with the terms of the Swedish Wikipedia article (romerska siffror, tecken, subtraheras, urtavla) and Wikidata's Swedish alias \"Romerska siffror\" of Q38918 for the deck's title. Numbers and numerals are the same in both languages and are tagged zxx."@en ,
+                 "8. Excluded: numbers of 4000 and more (no standard notation: overlines, the apostrophus forms CIↃ and the Unicode characters ↁ ↂ ↇ ↈ vary by period and source); zero and fractions (no Roman numeral in the standard system); lower-case numerals (i, ii, …), which are the same numerals in another case; non-standard forms as fronts or backs, because a card must have one answer."@en ,
+                 "Selection: 40 numerals in the standard modern notation, all between 1 and 3999: the seven symbols I (1), V (5), X (10), L (50), C (100), D (500) and M (1000); the six subtractive pairs IV (4), IX (9), XL (40), XC (90), CD (400) and CM (900); and 27 further numbers chosen by the compiler to practise each construction: 2, 3, 6, 8, 12, 14, 19, 24, 39, 42, 49, 80, 99, 300, 444, 800, 999, 1492, 1666, 1776, 1945, 1984, 1999, 2000, 2026 (the year of the deck), 3888 (the longest numeral below 4000) and 3999 (the largest). Standard notation means each number is written digit by digit from the thousands down, so every number has exactly one numeral and the deck can be studied both ways. Left out: numbers of 4000 and more (written with overlines or special forms that vary by period), zero and fractions, lower-case numerals, and the Unicode Roman numeral characters. Older additive forms (IIII, VIIII, XXXX, CCCC) and the non-standard IL, IC and MIM appear only in the notes of the cards they concern."@en ,
+                 "Licensing: The deck's content is the compiler's own: the selection of the 40 numbers, the convention and the wording of the notes are his, and the value of a Roman numeral is a mathematical fact, computed here by his own script. The only other content source is Wikidata (CC0), whose numeric values agree for 14 numerals. So the deck is CC0 1.0 like the rest of the library. The English and Swedish Wikipedia articles and Wiktionary (CC BY-SA 4.0) and the roman Python package (Zope Public License 2.1, recorded as unknown) were used for verification only: they confirmed facts the cards already had, and no wording, table or selection was copied from them. The deck's selection is not the Wikipedia table (which lists digit forms, not numbers) nor any list of examples. Three of the numbers, 39, 1776 and 3999, coincide with the English article's worked examples; within the editor's brief, 39 was chosen as a subtractive pair combined with other symbols, 1776 as a year often met in Roman numerals and 3999 as the largest standard numeral. Three isolated numbers are facts, not a copied selection."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Machine checks and sources: every card computed and verified by verify_roman.py with two independent implementations; every card against the English Wikipedia standard-form table; the 14 numerals with Wikidata items against their numeric values; Wiktionary and the Swedish Wikipedia where they state a numeral; the facts in the notes."@en ;
+    rdfs:comment "Scope: All 40 cards, the sources and the deck metadata."@en ,
+                 "Outcome: All 40 cards pass the script (own converter and roman 5.2 agree on every card and on all of 1–3999; all 16 negative controls rejected) and agree with the Wikipedia table, Wikidata (14 cards), Wiktionary (25) and the Swedish Wikipedia (19). No Wikidata check was skipped. Findings concern Wikidata data quality and the reach of the sources, none a card."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 40 cards, re-checked with the review's own greedy converter, live Wikidata, the English Wikipedia (rev. 1377908551) and the Swedish Wikipedia (rev. 59692021); the description."@en ,
+                 "Outcome: All 40 cards are correct; every front converts to its back and back, the backs are unique, and 3888 is the only number with the longest numeral. The 14 Wikidata items pass. Three findings, all applied: the description overstated the Wikidata and Wiktionary checks, and the notes of XLIX and XCIX stated the subtraction rule without saying it is the standard form's."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 40 cards in both languages, the title, description, keywords and language tags."@en ,
+                 "Outcome: No language errors; every front and back is zxx, the notes are en and sv, the Swedish terms follow the Swedish Wikipedia. One warning about the declared back-side languages, documented in the method because the builder cannot take zxx on both sides; two wording suggestions applied."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: Every source's licence and terms page, the licensing paragraph, the method and queries, and the evidence of 25 cards spot-checked against the cited revisions."@en ,
+                 "Outcome: All recorded licences are right and the CC0 deck uses only its own derivation and CC0 Wikidata as content. One error (the Wiktionary footer was misquoted) and three warnings (the Unicode range attributed to the Swedish article, the description's checks, unrecorded scripts) were confirmed and fixed; the five suggestions were applied."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The 7 cards changed in round 3's fixes (iv, ix, xl, cd, xlix, xcix, mmmcmxcix) and every third card (19 cards in all), checked against the cited English and Swedish Wikipedia and Wiktionary revisions and live Wikidata; the description, keywords, topics, method, licensing and the fixes claimed in rounds 1 to 3."@en ,
+                 "Outcome: No errors: every sampled card, quote and Wikidata statement was confirmed and every earlier fix was found in place. Two suggestions: the paraphrase in the iv/xl/cd English Wikipedia evidence was replaced by the article's own words; the AI mention in the derivation source's creator was declined as a library-wide choice."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: All 40 cards (fronts, backs, notes and evidence), with each numeral decomposed by decimal place and the 14 Wikidata-checked items confirmed by a live SPARQL query; the title, description (word count and counts), keywords, topics, method, licensing and the fixes claimed in rounds 1 to 4."@en ,
+                 "Outcome: No errors or warnings: every card, note and Wikidata statement was confirmed, the Swedish was found idiomatic and every earlier fix was found in place. One suggestion: the licensing sentence on the overlap with the English article's worked examples explained why 1776 and 3999 were chosen but not 39; it was reworded."@en .
+
+<#review-6>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 1, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card changed."@en .
+
+<#own-work>
+    dcterms:title "Conversion and machine checks for the Solid Memo Roman numerals deck" ;
+    dcterms:creator "Anton Wiklund, with the help of AI" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "Own work of the deck's compiler, dedicated to the public domain together with the deck: the deck's dcterms:license is https://creativecommons.org/publicdomain/zero/1.0/ (CC0 1.0 Universal). The value of a Roman numeral is a mathematical fact, which is not copyrightable; the selection of numbers and the wording of the notes are the compilation's own. The verification script is recorded verbatim in the dossier's Queries (query 13)."@en .
+
+<https://www.wikidata.org/wiki/Q38918>
+    dcterms:title "Wikidata: the items for the Roman numerals 1–12, 50, 100, 500 and 1000 (instances of Roman numerals, Q38918), with their English labels and aliases and numeric values (P1181)" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing (raw text fetched 2026-10-04, query 5): \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://en.wikipedia.org/w/index.php?title=Roman_numerals&oldid=1377908551>
+    dcterms:title "Roman numerals (English Wikipedia), revision 1377908551" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of the article page (https://en.wikipedia.org/wiki/Roman_numerals, fetched 2026-10-04, query 9): \"Text is available under the Creative Commons Attribution-ShareAlike 4.0 License; additional terms may apply.\" Used for verification only: nothing is copied from it."@en .
+
+<https://sv.wikipedia.org/w/index.php?title=Romerska_siffror&oldid=59692021>
+    dcterms:title "Romerska siffror (Swedish Wikipedia), revision 59692021" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of the article page (https://sv.wikipedia.org/wiki/Romerska_siffror, fetched 2026-10-04, query 10): \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported.\" Used for verification only: nothing is copied from it."@en .
+
+<https://en.wiktionary.org/wiki/Category:Roman_numerals>
+    dcterms:title "English Wiktionary: Translingual entries for Roman numerals" ;
+    dcterms:creator "Wiktionary contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of every Wiktionary page (e.g. https://en.wiktionary.org/wiki/MCM, fetched 2026-10-04, query 7, read by query 12): \"Definitions and other text are available under the Creative Commons Attribution-ShareAlike License; additional terms may apply.\", linking to https://creativecommons.org/licenses/by-sa/4.0/. Used for verification only: nothing is copied from it."@en .
+
+<https://pypi.org/project/roman/5.2/>
+    dcterms:title "roman 5.2 (Python package: integer to Roman numerals converter)" ;
+    dcterms:creator "Mark Pilgrim (author); Zope Foundation and Contributors (maintainers)" ;
+    rdfs:comment "PyPI metadata of the package (https://pypi.org/pypi/roman/json, fetched 2026-10-04, query 11): \"license\": \"ZPL-2.1\", classifier \"License :: OSI Approved :: Zope Public License\". The Zope Public License 2.1 is a permissive software licence that the builder has no identifier for, so it is recorded as \"unknown\". The package was only run as an independent implementation to check the compiler's converter: nothing from it is in the deck."@en .
+
+<#i>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "I"@zxx ;
+    solid-memo:back "1"@zxx .
+
+<#v>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "V"@zxx ;
+    solid-memo:back "5"@zxx .
+
+<#x>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "X"@zxx ;
+    solid-memo:back "10"@zxx .
+
+<#l>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "L"@zxx ;
+    solid-memo:back "50"@zxx .
+
+<#c>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "C"@zxx ;
+    solid-memo:back "100"@zxx .
+
+<#d>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "D"@zxx ;
+    solid-memo:back "500"@zxx .
+
+<#m>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "M"@zxx ;
+    solid-memo:back "1000"@zxx .
+
+<#iv>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "IV"@zxx ;
+    solid-memo:back "4"@zxx ;
+    solid-memo:backNote "Standard form; older inscriptions and many clock faces write IIII."@en ,
+                        "Standardformen; i äldre inskrifter och på många urtavlor skrivs 4 som IIII."@sv .
+
+<#ix>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "IX"@zxx ;
+    solid-memo:back "9"@zxx ;
+    solid-memo:backNote "Standard form; older texts also write VIIII."@en ,
+                        "Standardformen; i äldre texter skrivs 9 även som VIIII."@sv .
+
+<#xl>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "XL"@zxx ;
+    solid-memo:back "40"@zxx ;
+    solid-memo:backNote "Standard form; older texts also write XXXX."@en ,
+                        "Standardformen; i äldre texter skrivs 40 även som XXXX."@sv .
+
+<#xc>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "XC"@zxx ;
+    solid-memo:back "90"@zxx .
+
+<#cd>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "CD"@zxx ;
+    solid-memo:back "400"@zxx ;
+    solid-memo:backNote "Standard form; older texts also write CCCC."@en ,
+                        "Standardformen; i äldre texter skrivs 400 även som CCCC."@sv .
+
+<#cm>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "CM"@zxx ;
+    solid-memo:back "900"@zxx .
+
+<#ii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "II"@zxx ;
+    solid-memo:back "2"@zxx .
+
+<#iii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "III"@zxx ;
+    solid-memo:back "3"@zxx .
+
+<#vi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "VI"@zxx ;
+    solid-memo:back "6"@zxx .
+
+<#viii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "VIII"@zxx ;
+    solid-memo:back "8"@zxx .
+
+<#xii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "XII"@zxx ;
+    solid-memo:back "12"@zxx .
+
+<#xiv>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "XIV"@zxx ;
+    solid-memo:back "14"@zxx .
+
+<#xix>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "XIX"@zxx ;
+    solid-memo:back "19"@zxx .
+
+<#xxiv>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "XXIV"@zxx ;
+    solid-memo:back "24"@zxx .
+
+<#xxxix>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "XXXIX"@zxx ;
+    solid-memo:back "39"@zxx .
+
+<#xlii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "XLII"@zxx ;
+    solid-memo:back "42"@zxx .
+
+<#xlix>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "XLIX"@zxx ;
+    solid-memo:back "49"@zxx ;
+    solid-memo:backNote "Not IL: in the standard form, I is subtracted only from V and X."@en ,
+                        "Inte IL: i standardformen subtraheras I bara från V och X."@sv .
+
+<#lxxx>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "LXXX"@zxx ;
+    solid-memo:back "80"@zxx .
+
+<#xcix>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "XCIX"@zxx ;
+    solid-memo:back "99"@zxx ;
+    solid-memo:backNote "Not IC: in the standard form, I is subtracted only from V and X (IC occurs in some older texts)."@en ,
+                        "Inte IC: i standardformen subtraheras I bara från V och X (IC förekommer i vissa äldre texter)."@sv .
+
+<#ccc>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "CCC"@zxx ;
+    solid-memo:back "300"@zxx .
+
+<#cdxliv>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "CDXLIV"@zxx ;
+    solid-memo:back "444"@zxx .
+
+<#dccc>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "DCCC"@zxx ;
+    solid-memo:back "800"@zxx .
+
+<#cmxcix>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "CMXCIX"@zxx ;
+    solid-memo:back "999"@zxx .
+
+<#mcdxcii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "MCDXCII"@zxx ;
+    solid-memo:back "1492"@zxx .
+
+<#mdclxvi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "MDCLXVI"@zxx ;
+    solid-memo:back "1666"@zxx ;
+    solid-memo:backNote "Each of the seven symbols once, in descending order."@en ,
+                        "Vart och ett av de sju tecknen en gång, i fallande ordning."@sv .
+
+<#mdcclxxvi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "MDCCLXXVI"@zxx ;
+    solid-memo:back "1776"@zxx .
+
+<#mcmxlv>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "MCMXLV"@zxx ;
+    solid-memo:back "1945"@zxx .
+
+<#mcmlxxxiv>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "MCMLXXXIV"@zxx ;
+    solid-memo:back "1984"@zxx .
+
+<#mcmxcix>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "MCMXCIX"@zxx ;
+    solid-memo:back "1999"@zxx ;
+    solid-memo:backNote "Not MIM: the number is written digit by digit (M + CM + XC + IX)."@en ,
+                        "Inte MIM: talet skrivs siffra för siffra (M + CM + XC + IX)."@sv .
+
+<#mm>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "MM"@zxx ;
+    solid-memo:back "2000"@zxx .
+
+<#mmxxvi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "MMXXVI"@zxx ;
+    solid-memo:back "2026"@zxx .
+
+<#mmmdccclxxxviii>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "MMMDCCCLXXXVIII"@zxx ;
+    solid-memo:back "3888"@zxx ;
+    solid-memo:backNote "The longest numeral below 4000: 15 symbols."@en ,
+                        "Det längsta romerska talet under 4000: 15 tecken."@sv .
+
+<#mmmcmxcix>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "MMMCMXCIX"@zxx ;
+    solid-memo:back "3999"@zxx ;
+    solid-memo:backNote "The largest number standard notation can write."@en ,
+                        "Det största tal som kan skrivas i standardformen."@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

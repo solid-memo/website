@@ -1,0 +1,2121 @@
+@base <https://solid-memo.com/decks/world-flags/v2.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "World flags"@en ,
+                  "Världens flaggor"@sv ,
+                  "세계의 국기"@ko ,
+                  "Flaggen der Welt"@de ,
+                  "Banderas del mundo"@es ,
+                  "Drapeaux du monde"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "The flag of every country and territory on the front, its name in English and Swedish on the back. The list follows Flagpedia's index; the flag images are public-domain SVGs served by Flagpedia's CDN, each in its official aspect ratio. The Swedish names come from Wikidata, as in the capitals deck."@en ,
+                        "Flaggan för varje land och territorium på framsidan, dess namn på engelska och svenska på baksidan. Listan följer Flagpedias index; flaggbilderna är SVG-filer i allmän egendom från Flagpedias CDN, var och en i sina officiella proportioner. De svenska namnen är hämtade från Wikidata, som i kortleken om huvudstäder."@sv ,
+                        "앞면에 모든 나라와 지역의 깃발, 뒷면에 영어와 스웨덴어로 된 그 이름이 있습니다. 목록은 Flagpedia의 색인을 따르며, 깃발 이미지는 Flagpedia의 CDN에서 제공하는 퍼블릭 도메인 SVG로, 각각 공식 가로세로 비율입니다. 스웨덴어 이름은 수도 덱과 마찬가지로 위키데이터에서 가져왔습니다."@ko ,
+                        "Die Flagge jedes Landes und Gebiets auf der Vorderseite, sein Name auf Englisch und Schwedisch auf der Rückseite. Die Liste folgt dem Index von Flagpedia; die Flaggenbilder sind gemeinfreie SVG-Dateien vom CDN von Flagpedia, jede in ihrem offiziellen Seitenverhältnis. Die schwedischen Namen stammen aus Wikidata, wie im Stapel zu den Hauptstädten."@de ,
+                        "La bandera de cada país y territorio en el anverso, su nombre en inglés y en sueco en el reverso. La lista sigue el índice de Flagpedia; las imágenes de las banderas son SVG de dominio público servidos por la CDN de Flagpedia, cada una en su proporción oficial. Los nombres en sueco proceden de Wikidata, como en el mazo de capitales."@es ,
+                        "Le drapeau de chaque pays et territoire au recto, son nom en anglais et en suédois au verso. La liste suit l’index de Flagpedia ; les images des drapeaux sont des SVG du domaine public servis par le CDN de Flagpedia, chacune dans ses proportions officielles. Les noms suédois proviennent de Wikidata, comme dans le paquet sur les capitales."@fr ;
+    prov:wasDerivedFrom <https://flagpedia.net/index> ,
+                        <https://flagcdn.com> ;
+    dcterms:created "2026-09-22T21:00:10.236Z"^^xsd:dateTime ;
+    dcterms:modified "2026-10-04T04:34:28.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:geography ;
+    dcat:keyword "countries"@en ,
+                 "flags"@en ,
+                 "geography"@en ,
+                 "länder"@sv ,
+                 "flaggor"@sv ,
+                 "geografi"@sv ,
+                 "나라"@ko ,
+                 "국기"@ko ,
+                 "지리"@ko ,
+                 "Länder"@de ,
+                 "Flaggen"@de ,
+                 "Geografie"@de ,
+                 "países"@es ,
+                 "banderas"@es ,
+                 "geografía"@es ,
+                 "pays"@fr ,
+                 "drapeaux"@fr ,
+                 "géographie"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:bidirectional ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/world-flags/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/world-flags/v1.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#world-flags> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#world-flags> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+<https://flagpedia.net/index>
+    dcterms:title "Flagpedia: flags of all countries" ;
+    dcterms:creator "Flagpedia.net" .
+
+<https://flagcdn.com>
+    dcterms:title "Flag CDN" ;
+    dcterms:creator "Flagpedia.net" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> .
+
+<#afghanistan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/af.svg> ;
+    solid-memo:back "Afghanistan"@en ,
+                    "Afghanistan"@sv .
+
+<#aland-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ax.svg> ;
+    solid-memo:back "Åland Islands"@en ,
+                    "Åland"@sv .
+
+<#albania>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/al.svg> ;
+    solid-memo:back "Albania"@en ,
+                    "Albanien"@sv .
+
+<#algeria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/dz.svg> ;
+    solid-memo:back "Algeria"@en ,
+                    "Algeriet"@sv .
+
+<#american-samoa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/as.svg> ;
+    solid-memo:back "American Samoa"@en ,
+                    "Amerikanska Samoa"@sv .
+
+<#andorra>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ad.svg> ;
+    solid-memo:back "Andorra"@en ,
+                    "Andorra"@sv .
+
+<#angola>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ao.svg> ;
+    solid-memo:back "Angola"@en ,
+                    "Angola"@sv .
+
+<#anguilla>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ai.svg> ;
+    solid-memo:back "Anguilla"@en ,
+                    "Anguilla"@sv .
+
+<#antarctica>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/aq.svg> ;
+    solid-memo:back "Antarctica"@en ,
+                    "Antarktis"@sv .
+
+<#antigua-and-barbuda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ag.svg> ;
+    solid-memo:back "Antigua and Barbuda"@en ,
+                    "Antigua och Barbuda"@sv .
+
+<#argentina>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ar.svg> ;
+    solid-memo:back "Argentina"@en ,
+                    "Argentina"@sv .
+
+<#armenia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/am.svg> ;
+    solid-memo:back "Armenia"@en ,
+                    "Armenien"@sv .
+
+<#aruba>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/aw.svg> ;
+    solid-memo:back "Aruba"@en ,
+                    "Aruba"@sv .
+
+<#australia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/au.svg> ;
+    solid-memo:back "Australia"@en ,
+                    "Australien"@sv .
+
+<#austria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/at.svg> ;
+    solid-memo:back "Austria"@en ,
+                    "Österrike"@sv .
+
+<#azerbaijan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/az.svg> ;
+    solid-memo:back "Azerbaijan"@en ,
+                    "Azerbajdzjan"@sv .
+
+<#the-bahamas>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bs.svg> ;
+    solid-memo:back "Bahamas"@en ,
+                    "Bahamas"@sv .
+
+<#bahrain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bh.svg> ;
+    solid-memo:back "Bahrain"@en ,
+                    "Bahrain"@sv .
+
+<#bangladesh>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bd.svg> ;
+    solid-memo:back "Bangladesh"@en ,
+                    "Bangladesh"@sv .
+
+<#barbados>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bb.svg> ;
+    solid-memo:back "Barbados"@en ,
+                    "Barbados"@sv .
+
+<#belarus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/by.svg> ;
+    solid-memo:back "Belarus"@en ,
+                    "Belarus"@sv .
+
+<#belgium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/be.svg> ;
+    solid-memo:back "Belgium"@en ,
+                    "Belgien"@sv .
+
+<#belize>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bz.svg> ;
+    solid-memo:back "Belize"@en ,
+                    "Belize"@sv .
+
+<#benin>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bj.svg> ;
+    solid-memo:back "Benin"@en ,
+                    "Benin"@sv .
+
+<#bermuda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bm.svg> ;
+    solid-memo:back "Bermuda"@en ,
+                    "Bermuda"@sv .
+
+<#bhutan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bt.svg> ;
+    solid-memo:back "Bhutan"@en ,
+                    "Bhutan"@sv .
+
+<#bolivia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bo.svg> ;
+    solid-memo:back "Bolivia"@en ,
+                    "Bolivia"@sv .
+
+<#bosnia-and-herzegovina>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ba.svg> ;
+    solid-memo:back "Bosnia and Herzegovina"@en ,
+                    "Bosnien och Hercegovina"@sv .
+
+<#botswana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bw.svg> ;
+    solid-memo:back "Botswana"@en ,
+                    "Botswana"@sv .
+
+<#bouvet-island>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bv.svg> ;
+    solid-memo:back "Bouvet Island"@en ,
+                    "Bouvetön"@sv .
+
+<#brazil>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/br.svg> ;
+    solid-memo:back "Brazil"@en ,
+                    "Brasilien"@sv .
+
+<#british-indian-ocean-territory>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/io.svg> ;
+    solid-memo:back "British Indian Ocean Territory"@en ,
+                    "Brittiska territoriet i Indiska oceanen"@sv .
+
+<#brunei>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bn.svg> ;
+    solid-memo:back "Brunei"@en ,
+                    "Brunei"@sv .
+
+<#bulgaria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bg.svg> ;
+    solid-memo:back "Bulgaria"@en ,
+                    "Bulgarien"@sv .
+
+<#burkina-faso>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bf.svg> ;
+    solid-memo:back "Burkina Faso"@en ,
+                    "Burkina Faso"@sv .
+
+<#burundi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bi.svg> ;
+    solid-memo:back "Burundi"@en ,
+                    "Burundi"@sv .
+
+<#cambodia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/kh.svg> ;
+    solid-memo:back "Cambodia"@en ,
+                    "Kambodja"@sv .
+
+<#cameroon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/cm.svg> ;
+    solid-memo:back "Cameroon"@en ,
+                    "Kamerun"@sv .
+
+<#canada>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ca.svg> ;
+    solid-memo:back "Canada"@en ,
+                    "Kanada"@sv .
+
+<#cape-verde>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/cv.svg> ;
+    solid-memo:back "Cape Verde"@en ,
+                    "Kap Verde"@sv .
+
+<#caribbean-netherlands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bq.svg> ;
+    solid-memo:back "Caribbean Netherlands"@en ,
+                    "Karibiska Nederländerna"@sv .
+
+<#cayman-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ky.svg> ;
+    solid-memo:back "Cayman Islands"@en ,
+                    "Caymanöarna"@sv .
+
+<#the-central-african-republic>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/cf.svg> ;
+    solid-memo:back "Central African Republic"@en ,
+                    "Centralafrikanska republiken"@sv .
+
+<#chad>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/td.svg> ;
+    solid-memo:back "Chad"@en ,
+                    "Tchad"@sv .
+
+<#chile>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/cl.svg> ;
+    solid-memo:back "Chile"@en ,
+                    "Chile"@sv .
+
+<#the-people-s-republic-of-china>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/cn.svg> ;
+    solid-memo:back "China"@en ,
+                    "Kina"@sv .
+
+<#christmas-island>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/cx.svg> ;
+    solid-memo:back "Christmas Island"@en ,
+                    "Julön"@sv .
+
+<#cocos-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/cc.svg> ;
+    solid-memo:back "Cocos Islands"@en ,
+                    "Kokosöarna"@sv .
+
+<#colombia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/co.svg> ;
+    solid-memo:back "Colombia"@en ,
+                    "Colombia"@sv .
+
+<#the-comoros>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/km.svg> ;
+    solid-memo:back "Comoros"@en ,
+                    "Komorerna"@sv .
+
+<#the-republic-of-the-congo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/cg.svg> ;
+    solid-memo:back "Republic of the Congo"@en ,
+                    "Kongo-Brazzaville"@sv .
+
+<#the-democratic-republic-of-the-congo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/cd.svg> ;
+    solid-memo:back "DR Congo"@en ,
+                    "Kongo-Kinshasa"@sv .
+
+<#cook-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ck.svg> ;
+    solid-memo:back "Cook Islands"@en ,
+                    "Cooköarna"@sv .
+
+<#costa-rica>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/cr.svg> ;
+    solid-memo:back "Costa Rica"@en ,
+                    "Costa Rica"@sv .
+
+<#cote-d-ivoire>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ci.svg> ;
+    solid-memo:back "Côte d'Ivoire"@en ,
+                    "Elfenbenskusten"@sv .
+
+<#croatia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/hr.svg> ;
+    solid-memo:back "Croatia"@en ,
+                    "Kroatien"@sv .
+
+<#cuba>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/cu.svg> ;
+    solid-memo:back "Cuba"@en ,
+                    "Kuba"@sv .
+
+<#curacao>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/cw.svg> ;
+    solid-memo:back "Curaçao"@en ,
+                    "Curaçao"@sv .
+
+<#cyprus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/cy.svg> ;
+    solid-memo:back "Cyprus"@en ,
+                    "Cypern"@sv .
+
+<#the-czech-republic>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/cz.svg> ;
+    solid-memo:back "Czechia"@en ,
+                    "Tjeckien"@sv .
+
+<#denmark>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/dk.svg> ;
+    solid-memo:back "Denmark"@en ,
+                    "Danmark"@sv .
+
+<#djibouti>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/dj.svg> ;
+    solid-memo:back "Djibouti"@en ,
+                    "Djibouti"@sv .
+
+<#dominica>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/dm.svg> ;
+    solid-memo:back "Dominica"@en ,
+                    "Dominica"@sv .
+
+<#the-dominican-republic>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/do.svg> ;
+    solid-memo:back "Dominican Republic"@en ,
+                    "Dominikanska republiken"@sv .
+
+<#ecuador>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ec.svg> ;
+    solid-memo:back "Ecuador"@en ,
+                    "Ecuador"@sv .
+
+<#egypt>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/eg.svg> ;
+    solid-memo:back "Egypt"@en ,
+                    "Egypten"@sv .
+
+<#el-salvador>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/sv.svg> ;
+    solid-memo:back "El Salvador"@en ,
+                    "El Salvador"@sv .
+
+<#england>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gb-eng.svg> ;
+    solid-memo:back "England"@en ,
+                    "England"@sv .
+
+<#equatorial-guinea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gq.svg> ;
+    solid-memo:back "Equatorial Guinea"@en ,
+                    "Ekvatorialguinea"@sv .
+
+<#eritrea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/er.svg> ;
+    solid-memo:back "Eritrea"@en ,
+                    "Eritrea"@sv .
+
+<#estonia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ee.svg> ;
+    solid-memo:back "Estonia"@en ,
+                    "Estland"@sv .
+
+<#swaziland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/sz.svg> ;
+    solid-memo:back "Eswatini"@en ,
+                    "Eswatini"@sv .
+
+<#ethiopia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/et.svg> ;
+    solid-memo:back "Ethiopia"@en ,
+                    "Etiopien"@sv .
+
+<#falkland-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/fk.svg> ;
+    solid-memo:back "Falkland Islands"@en ,
+                    "Falklandsöarna"@sv .
+
+<#faroe-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/fo.svg> ;
+    solid-memo:back "Faroe Islands"@en ,
+                    "Färöarna"@sv .
+
+<#fiji>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/fj.svg> ;
+    solid-memo:back "Fiji"@en ,
+                    "Fiji"@sv .
+
+<#finland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/fi.svg> ;
+    solid-memo:back "Finland"@en ,
+                    "Finland"@sv .
+
+<#france>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/fr.svg> ;
+    solid-memo:back "France"@en ,
+                    "Frankrike"@sv .
+
+<#french-guiana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gf.svg> ;
+    solid-memo:back "French Guiana"@en ,
+                    "Franska Guyana"@sv .
+
+<#french-polynesia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/pf.svg> ;
+    solid-memo:back "French Polynesia"@en ,
+                    "Franska Polynesien"@sv .
+
+<#french-southern-and-antarctic-lands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/tf.svg> ;
+    solid-memo:back "French Southern and Antarctic Lands"@en ,
+                    "Franska sydterritorierna"@sv .
+
+<#gabon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ga.svg> ;
+    solid-memo:back "Gabon"@en ,
+                    "Gabon"@sv .
+
+<#the-gambia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gm.svg> ;
+    solid-memo:back "Gambia"@en ,
+                    "Gambia"@sv .
+
+<#georgia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ge.svg> ;
+    solid-memo:back "Georgia"@en ,
+                    "Georgien"@sv .
+
+<#germany>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/de.svg> ;
+    solid-memo:back "Germany"@en ,
+                    "Tyskland"@sv .
+
+<#ghana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gh.svg> ;
+    solid-memo:back "Ghana"@en ,
+                    "Ghana"@sv .
+
+<#gibraltar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gi.svg> ;
+    solid-memo:back "Gibraltar"@en ,
+                    "Gibraltar"@sv .
+
+<#greece>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gr.svg> ;
+    solid-memo:back "Greece"@en ,
+                    "Grekland"@sv .
+
+<#greenland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gl.svg> ;
+    solid-memo:back "Greenland"@en ,
+                    "Grönland"@sv .
+
+<#grenada>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gd.svg> ;
+    solid-memo:back "Grenada"@en ,
+                    "Grenada"@sv .
+
+<#guadeloupe>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gp.svg> ;
+    solid-memo:back "Guadeloupe"@en ,
+                    "Guadeloupe"@sv .
+
+<#guam>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gu.svg> ;
+    solid-memo:back "Guam"@en ,
+                    "Guam"@sv .
+
+<#guatemala>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gt.svg> ;
+    solid-memo:back "Guatemala"@en ,
+                    "Guatemala"@sv .
+
+<#guernsey>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gg.svg> ;
+    solid-memo:back "Guernsey"@en ,
+                    "Guernsey"@sv .
+
+<#guinea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gn.svg> ;
+    solid-memo:back "Guinea"@en ,
+                    "Guinea"@sv .
+
+<#guinea-bissau>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gw.svg> ;
+    solid-memo:back "Guinea-Bissau"@en ,
+                    "Guinea-Bissau"@sv .
+
+<#guyana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gy.svg> ;
+    solid-memo:back "Guyana"@en ,
+                    "Guyana"@sv .
+
+<#haiti>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ht.svg> ;
+    solid-memo:back "Haiti"@en ,
+                    "Haiti"@sv .
+
+<#heard-island-and-mcdonald-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/hm.svg> ;
+    solid-memo:back "Heard Island and McDonald Islands"@en ,
+                    "Heard- och McDonaldöarna"@sv .
+
+<#honduras>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/hn.svg> ;
+    solid-memo:back "Honduras"@en ,
+                    "Honduras"@sv .
+
+<#hong-kong>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/hk.svg> ;
+    solid-memo:back "Hong Kong"@en ,
+                    "Hongkong"@sv .
+
+<#hungary>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/hu.svg> ;
+    solid-memo:back "Hungary"@en ,
+                    "Ungern"@sv .
+
+<#iceland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/is.svg> ;
+    solid-memo:back "Iceland"@en ,
+                    "Island"@sv .
+
+<#india>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/in.svg> ;
+    solid-memo:back "India"@en ,
+                    "Indien"@sv .
+
+<#indonesia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/id.svg> ;
+    solid-memo:back "Indonesia"@en ,
+                    "Indonesien"@sv .
+
+<#iran>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ir.svg> ;
+    solid-memo:back "Iran"@en ,
+                    "Iran"@sv .
+
+<#iraq>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/iq.svg> ;
+    solid-memo:back "Iraq"@en ,
+                    "Irak"@sv .
+
+<#ireland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ie.svg> ;
+    solid-memo:back "Ireland"@en ,
+                    "Irland"@sv .
+
+<#isle-of-man>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/im.svg> ;
+    solid-memo:back "Isle of Man"@en ,
+                    "Isle of Man"@sv .
+
+<#israel>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/il.svg> ;
+    solid-memo:back "Israel"@en ,
+                    "Israel"@sv .
+
+<#italy>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/it.svg> ;
+    solid-memo:back "Italy"@en ,
+                    "Italien"@sv .
+
+<#jamaica>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/jm.svg> ;
+    solid-memo:back "Jamaica"@en ,
+                    "Jamaica"@sv .
+
+<#japan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/jp.svg> ;
+    solid-memo:back "Japan"@en ,
+                    "Japan"@sv .
+
+<#jersey>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/je.svg> ;
+    solid-memo:back "Jersey"@en ,
+                    "Jersey"@sv .
+
+<#jordan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/jo.svg> ;
+    solid-memo:back "Jordan"@en ,
+                    "Jordanien"@sv .
+
+<#kazakhstan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/kz.svg> ;
+    solid-memo:back "Kazakhstan"@en ,
+                    "Kazakstan"@sv .
+
+<#kenya>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ke.svg> ;
+    solid-memo:back "Kenya"@en ,
+                    "Kenya"@sv .
+
+<#kiribati>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ki.svg> ;
+    solid-memo:back "Kiribati"@en ,
+                    "Kiribati"@sv .
+
+<#north-korea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/kp.svg> ;
+    solid-memo:back "North Korea"@en ,
+                    "Nordkorea"@sv .
+
+<#south-korea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/kr.svg> ;
+    solid-memo:back "South Korea"@en ,
+                    "Sydkorea"@sv .
+
+<#kosovo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/xk.svg> ;
+    solid-memo:back "Kosovo"@en ,
+                    "Kosovo"@sv .
+
+<#kuwait>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/kw.svg> ;
+    solid-memo:back "Kuwait"@en ,
+                    "Kuwait"@sv .
+
+<#kyrgyzstan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/kg.svg> ;
+    solid-memo:back "Kyrgyzstan"@en ,
+                    "Kirgizistan"@sv .
+
+<#laos>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/la.svg> ;
+    solid-memo:back "Laos"@en ,
+                    "Laos"@sv .
+
+<#latvia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/lv.svg> ;
+    solid-memo:back "Latvia"@en ,
+                    "Lettland"@sv .
+
+<#lebanon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/lb.svg> ;
+    solid-memo:back "Lebanon"@en ,
+                    "Libanon"@sv .
+
+<#lesotho>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ls.svg> ;
+    solid-memo:back "Lesotho"@en ,
+                    "Lesotho"@sv .
+
+<#liberia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/lr.svg> ;
+    solid-memo:back "Liberia"@en ,
+                    "Liberia"@sv .
+
+<#libya>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ly.svg> ;
+    solid-memo:back "Libya"@en ,
+                    "Libyen"@sv .
+
+<#liechtenstein>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/li.svg> ;
+    solid-memo:back "Liechtenstein"@en ,
+                    "Liechtenstein"@sv .
+
+<#lithuania>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/lt.svg> ;
+    solid-memo:back "Lithuania"@en ,
+                    "Litauen"@sv .
+
+<#luxembourg>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/lu.svg> ;
+    solid-memo:back "Luxembourg"@en ,
+                    "Luxemburg"@sv .
+
+<#macau>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mo.svg> ;
+    solid-memo:back "Macau"@en ,
+                    "Macao"@sv .
+
+<#madagascar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mg.svg> ;
+    solid-memo:back "Madagascar"@en ,
+                    "Madagaskar"@sv .
+
+<#malawi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mw.svg> ;
+    solid-memo:back "Malawi"@en ,
+                    "Malawi"@sv .
+
+<#malaysia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/my.svg> ;
+    solid-memo:back "Malaysia"@en ,
+                    "Malaysia"@sv .
+
+<#maldives>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mv.svg> ;
+    solid-memo:back "Maldives"@en ,
+                    "Maldiverna"@sv .
+
+<#mali>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ml.svg> ;
+    solid-memo:back "Mali"@en ,
+                    "Mali"@sv .
+
+<#malta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mt.svg> ;
+    solid-memo:back "Malta"@en ,
+                    "Malta"@sv .
+
+<#the-marshall-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mh.svg> ;
+    solid-memo:back "Marshall Islands"@en ,
+                    "Marshallöarna"@sv .
+
+<#martinique>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mq.svg> ;
+    solid-memo:back "Martinique"@en ,
+                    "Martinique"@sv .
+
+<#mauritania>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mr.svg> ;
+    solid-memo:back "Mauritania"@en ,
+                    "Mauretanien"@sv .
+
+<#mauritius>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mu.svg> ;
+    solid-memo:back "Mauritius"@en ,
+                    "Mauritius"@sv .
+
+<#mayotte>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/yt.svg> ;
+    solid-memo:back "Mayotte"@en ,
+                    "Mayotte"@sv .
+
+<#mexico>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mx.svg> ;
+    solid-memo:back "Mexico"@en ,
+                    "Mexiko"@sv .
+
+<#micronesia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/fm.svg> ;
+    solid-memo:back "Micronesia"@en ,
+                    "Mikronesien"@sv .
+
+<#moldova>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/md.svg> ;
+    solid-memo:back "Moldova"@en ,
+                    "Moldavien"@sv .
+
+<#monaco>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mc.svg> ;
+    solid-memo:back "Monaco"@en ,
+                    "Monaco"@sv .
+
+<#mongolia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mn.svg> ;
+    solid-memo:back "Mongolia"@en ,
+                    "Mongoliet"@sv .
+
+<#montenegro>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/me.svg> ;
+    solid-memo:back "Montenegro"@en ,
+                    "Montenegro"@sv .
+
+<#montserrat>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ms.svg> ;
+    solid-memo:back "Montserrat"@en ,
+                    "Montserrat"@sv .
+
+<#morocco>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ma.svg> ;
+    solid-memo:back "Morocco"@en ,
+                    "Marocko"@sv .
+
+<#mozambique>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mz.svg> ;
+    solid-memo:back "Mozambique"@en ,
+                    "Moçambique"@sv .
+
+<#myanmar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mm.svg> ;
+    solid-memo:back "Myanmar"@en ,
+                    "Myanmar"@sv .
+
+<#namibia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/na.svg> ;
+    solid-memo:back "Namibia"@en ,
+                    "Namibia"@sv .
+
+<#nauru>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/nr.svg> ;
+    solid-memo:back "Nauru"@en ,
+                    "Nauru"@sv .
+
+<#nepal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/np.svg> ;
+    solid-memo:back "Nepal"@en ,
+                    "Nepal"@sv .
+
+<#the-netherlands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/nl.svg> ;
+    solid-memo:back "Netherlands"@en ,
+                    "Nederländerna"@sv .
+
+<#new-caledonia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/nc.svg> ;
+    solid-memo:back "New Caledonia"@en ,
+                    "Nya Kaledonien"@sv .
+
+<#new-zealand>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/nz.svg> ;
+    solid-memo:back "New Zealand"@en ,
+                    "Nya Zeeland"@sv .
+
+<#nicaragua>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ni.svg> ;
+    solid-memo:back "Nicaragua"@en ,
+                    "Nicaragua"@sv .
+
+<#niger>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ne.svg> ;
+    solid-memo:back "Niger"@en ,
+                    "Niger"@sv .
+
+<#nigeria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ng.svg> ;
+    solid-memo:back "Nigeria"@en ,
+                    "Nigeria"@sv .
+
+<#niue>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/nu.svg> ;
+    solid-memo:back "Niue"@en ,
+                    "Niue"@sv .
+
+<#norfolk-island>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/nf.svg> ;
+    solid-memo:back "Norfolk Island"@en ,
+                    "Norfolkön"@sv .
+
+<#macedonia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mk.svg> ;
+    solid-memo:back "North Macedonia"@en ,
+                    "Nordmakedonien"@sv .
+
+<#northern-ireland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gb-nir.svg> ;
+    solid-memo:back "Northern Ireland"@en ,
+                    "Nordirland"@sv .
+
+<#northern-mariana-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mp.svg> ;
+    solid-memo:back "Northern Mariana Islands"@en ,
+                    "Nordmarianerna"@sv .
+
+<#norway>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/no.svg> ;
+    solid-memo:back "Norway"@en ,
+                    "Norge"@sv .
+
+<#oman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/om.svg> ;
+    solid-memo:back "Oman"@en ,
+                    "Oman"@sv .
+
+<#pakistan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/pk.svg> ;
+    solid-memo:back "Pakistan"@en ,
+                    "Pakistan"@sv .
+
+<#palau>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/pw.svg> ;
+    solid-memo:back "Palau"@en ,
+                    "Palau"@sv .
+
+<#palestine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ps.svg> ;
+    solid-memo:back "Palestine"@en ,
+                    "Palestina"@sv .
+
+<#panama>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/pa.svg> ;
+    solid-memo:back "Panama"@en ,
+                    "Panama"@sv .
+
+<#papua-new-guinea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/pg.svg> ;
+    solid-memo:back "Papua New Guinea"@en ,
+                    "Papua Nya Guinea"@sv .
+
+<#paraguay>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/py.svg> ;
+    solid-memo:back "Paraguay"@en ,
+                    "Paraguay"@sv .
+
+<#peru>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/pe.svg> ;
+    solid-memo:back "Peru"@en ,
+                    "Peru"@sv .
+
+<#the-philippines>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ph.svg> ;
+    solid-memo:back "Philippines"@en ,
+                    "Filippinerna"@sv .
+
+<#pitcairn-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/pn.svg> ;
+    solid-memo:back "Pitcairn Islands"@en ,
+                    "Pitcairnöarna"@sv .
+
+<#poland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/pl.svg> ;
+    solid-memo:back "Poland"@en ,
+                    "Polen"@sv .
+
+<#portugal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/pt.svg> ;
+    solid-memo:back "Portugal"@en ,
+                    "Portugal"@sv .
+
+<#puerto-rico>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/pr.svg> ;
+    solid-memo:back "Puerto Rico"@en ,
+                    "Puerto Rico"@sv .
+
+<#qatar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/qa.svg> ;
+    solid-memo:back "Qatar"@en ,
+                    "Qatar"@sv .
+
+<#reunion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/re.svg> ;
+    solid-memo:back "Réunion"@en ,
+                    "Réunion"@sv .
+
+<#romania>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ro.svg> ;
+    solid-memo:back "Romania"@en ,
+                    "Rumänien"@sv .
+
+<#russia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ru.svg> ;
+    solid-memo:back "Russia"@en ,
+                    "Ryssland"@sv .
+
+<#rwanda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/rw.svg> ;
+    solid-memo:back "Rwanda"@en ,
+                    "Rwanda"@sv .
+
+<#saint-barthelemy>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/bl.svg> ;
+    solid-memo:back "Saint Barthélemy"@en ,
+                    "Saint-Barthélemy"@sv .
+
+<#saint-helena-ascension-and-tristan-da-cunha>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/sh.svg> ;
+    solid-memo:back "Saint Helena, Ascension and Tristan da Cunha"@en ,
+                    "Sankta Helena, Ascension och Tristan da Cunha"@sv .
+
+<#saint-kitts-and-nevis>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/kn.svg> ;
+    solid-memo:back "Saint Kitts and Nevis"@en ,
+                    "Saint Kitts och Nevis"@sv .
+
+<#saint-lucia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/lc.svg> ;
+    solid-memo:back "Saint Lucia"@en ,
+                    "Saint Lucia"@sv .
+
+<#saint-martin>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/mf.svg> ;
+    solid-memo:back "Saint Martin"@en ,
+                    "Saint-Martin"@sv .
+
+<#saint-pierre-and-miquelon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/pm.svg> ;
+    solid-memo:back "Saint Pierre and Miquelon"@en ,
+                    "Saint-Pierre och Miquelon"@sv .
+
+<#saint-vincent-and-the-grenadines>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/vc.svg> ;
+    solid-memo:back "Saint Vincent and the Grenadines"@en ,
+                    "Saint Vincent och Grenadinerna"@sv .
+
+<#samoa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ws.svg> ;
+    solid-memo:back "Samoa"@en ,
+                    "Samoa"@sv .
+
+<#san-marino>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/sm.svg> ;
+    solid-memo:back "San Marino"@en ,
+                    "San Marino"@sv .
+
+<#sao-tome-and-principe>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/st.svg> ;
+    solid-memo:back "São Tomé and Príncipe"@en ,
+                    "São Tomé och Príncipe"@sv .
+
+<#saudi-arabia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/sa.svg> ;
+    solid-memo:back "Saudi Arabia"@en ,
+                    "Saudiarabien"@sv .
+
+<#scotland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gb-sct.svg> ;
+    solid-memo:back "Scotland"@en ,
+                    "Skottland"@sv .
+
+<#senegal>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/sn.svg> ;
+    solid-memo:back "Senegal"@en ,
+                    "Senegal"@sv .
+
+<#serbia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/rs.svg> ;
+    solid-memo:back "Serbia"@en ,
+                    "Serbien"@sv .
+
+<#the-seychelles>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/sc.svg> ;
+    solid-memo:back "Seychelles"@en ,
+                    "Seychellerna"@sv .
+
+<#sierra-leone>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/sl.svg> ;
+    solid-memo:back "Sierra Leone"@en ,
+                    "Sierra Leone"@sv .
+
+<#singapore>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/sg.svg> ;
+    solid-memo:back "Singapore"@en ,
+                    "Singapore"@sv .
+
+<#sint-maarten>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/sx.svg> ;
+    solid-memo:back "Sint Maarten"@en ,
+                    "Sint Maarten"@sv .
+
+<#slovakia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/sk.svg> ;
+    solid-memo:back "Slovakia"@en ,
+                    "Slovakien"@sv .
+
+<#slovenia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/si.svg> ;
+    solid-memo:back "Slovenia"@en ,
+                    "Slovenien"@sv .
+
+<#the-solomon-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/sb.svg> ;
+    solid-memo:back "Solomon Islands"@en ,
+                    "Salomonöarna"@sv .
+
+<#somalia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/so.svg> ;
+    solid-memo:back "Somalia"@en ,
+                    "Somalia"@sv .
+
+<#south-africa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/za.svg> ;
+    solid-memo:back "South Africa"@en ,
+                    "Sydafrika"@sv .
+
+<#south-georgia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gs.svg> ;
+    solid-memo:back "South Georgia"@en ,
+                    "Sydgeorgien"@sv .
+
+<#south-sudan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ss.svg> ;
+    solid-memo:back "South Sudan"@en ,
+                    "Sydsudan"@sv .
+
+<#spain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/es.svg> ;
+    solid-memo:back "Spain"@en ,
+                    "Spanien"@sv .
+
+<#sri-lanka>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/lk.svg> ;
+    solid-memo:back "Sri Lanka"@en ,
+                    "Sri Lanka"@sv .
+
+<#sudan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/sd.svg> ;
+    solid-memo:back "Sudan"@en ,
+                    "Sudan"@sv .
+
+<#suriname>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/sr.svg> ;
+    solid-memo:back "Suriname"@en ,
+                    "Surinam"@sv .
+
+<#svalbard-and-jan-mayen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/sj.svg> ;
+    solid-memo:back "Svalbard and Jan Mayen"@en ,
+                    "Svalbard och Jan Mayen"@sv .
+
+<#sweden>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/se.svg> ;
+    solid-memo:back "Sweden"@en ,
+                    "Sverige"@sv .
+
+<#switzerland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ch.svg> ;
+    solid-memo:back "Switzerland"@en ,
+                    "Schweiz"@sv .
+
+<#syria>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/sy.svg> ;
+    solid-memo:back "Syria"@en ,
+                    "Syrien"@sv .
+
+<#the-republic-of-china>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/tw.svg> ;
+    solid-memo:back "Taiwan"@en ,
+                    "Taiwan"@sv .
+
+<#tajikistan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/tj.svg> ;
+    solid-memo:back "Tajikistan"@en ,
+                    "Tadzjikistan"@sv .
+
+<#tanzania>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/tz.svg> ;
+    solid-memo:back "Tanzania"@en ,
+                    "Tanzania"@sv .
+
+<#thailand>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/th.svg> ;
+    solid-memo:back "Thailand"@en ,
+                    "Thailand"@sv .
+
+<#east-timor>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/tl.svg> ;
+    solid-memo:back "Timor-Leste"@en ,
+                    "Östtimor"@sv .
+
+<#togo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/tg.svg> ;
+    solid-memo:back "Togo"@en ,
+                    "Togo"@sv .
+
+<#tokelau>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/tk.svg> ;
+    solid-memo:back "Tokelau"@en ,
+                    "Tokelau"@sv .
+
+<#tonga>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/to.svg> ;
+    solid-memo:back "Tonga"@en ,
+                    "Tonga"@sv .
+
+<#trinidad-and-tobago>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/tt.svg> ;
+    solid-memo:back "Trinidad and Tobago"@en ,
+                    "Trinidad och Tobago"@sv .
+
+<#tunisia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/tn.svg> ;
+    solid-memo:back "Tunisia"@en ,
+                    "Tunisien"@sv .
+
+<#turkey>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/tr.svg> ;
+    solid-memo:back "Turkey"@en ,
+                    "Turkiet"@sv .
+
+<#turkmenistan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/tm.svg> ;
+    solid-memo:back "Turkmenistan"@en ,
+                    "Turkmenistan"@sv .
+
+<#turks-and-caicos-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/tc.svg> ;
+    solid-memo:back "Turks and Caicos Islands"@en ,
+                    "Turks- och Caicosöarna"@sv .
+
+<#tuvalu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/tv.svg> ;
+    solid-memo:back "Tuvalu"@en ,
+                    "Tuvalu"@sv .
+
+<#uganda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ug.svg> ;
+    solid-memo:back "Uganda"@en ,
+                    "Uganda"@sv .
+
+<#ukraine>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ua.svg> ;
+    solid-memo:back "Ukraine"@en ,
+                    "Ukraina"@sv .
+
+<#the-united-arab-emirates>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ae.svg> ;
+    solid-memo:back "United Arab Emirates"@en ,
+                    "Förenade arabemiraten"@sv .
+
+<#the-united-kingdom>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gb.svg> ;
+    solid-memo:back "United Kingdom"@en ,
+                    "Storbritannien"@sv .
+
+<#the-united-states>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/us.svg> ;
+    solid-memo:back "United States"@en ,
+                    "USA"@sv .
+
+<#united-states-minor-outlying-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/um.svg> ;
+    solid-memo:back "United States Minor Outlying Islands"@en ,
+                    "Förenta staternas mindre öar i Oceanien och Västindien"@sv .
+
+<#uruguay>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/uy.svg> ;
+    solid-memo:back "Uruguay"@en ,
+                    "Uruguay"@sv .
+
+<#uzbekistan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/uz.svg> ;
+    solid-memo:back "Uzbekistan"@en ,
+                    "Uzbekistan"@sv .
+
+<#vanuatu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/vu.svg> ;
+    solid-memo:back "Vanuatu"@en ,
+                    "Vanuatu"@sv .
+
+<#the-vatican-city>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/va.svg> ;
+    solid-memo:back "Vatican City"@en ,
+                    "Vatikanstaten"@sv .
+
+<#venezuela>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ve.svg> ;
+    solid-memo:back "Venezuela"@en ,
+                    "Venezuela"@sv .
+
+<#vietnam>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/vn.svg> ;
+    solid-memo:back "Vietnam"@en ,
+                    "Vietnam"@sv .
+
+<#british-virgin-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/vg.svg> ;
+    solid-memo:back "British Virgin Islands"@en ,
+                    "Brittiska Jungfruöarna"@sv .
+
+<#united-states-virgin-islands>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/vi.svg> ;
+    solid-memo:back "United States Virgin Islands"@en ,
+                    "Amerikanska Jungfruöarna"@sv .
+
+<#wales>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/gb-wls.svg> ;
+    solid-memo:back "Wales"@en ,
+                    "Wales"@sv .
+
+<#wallis-and-futuna>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/wf.svg> ;
+    solid-memo:back "Wallis and Futuna"@en ,
+                    "Wallis- och Futunaöarna"@sv .
+
+<#western-sahara>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/eh.svg> ;
+    solid-memo:back "Western Sahara"@en ,
+                    "Västsahara"@sv .
+
+<#yemen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/ye.svg> ;
+    solid-memo:back "Yemen"@en ,
+                    "Jemen"@sv .
+
+<#zambia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/zm.svg> ;
+    solid-memo:back "Zambia"@en ,
+                    "Zambia"@sv .
+
+<#zimbabwe>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-09-22T15:49:38.000Z"^^xsd:dateTime ;
+    solid-memo:frontImage <https://flagcdn.com/zw.svg> ;
+    solid-memo:back "Zimbabwe"@en ,
+                    "Zimbabwe"@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

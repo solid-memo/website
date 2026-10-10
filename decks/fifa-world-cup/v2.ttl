@@ -1,0 +1,807 @@
+@base <https://solid-memo.com/decks/fifa-world-cup/v2.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "FIFA Men's and Women's World Cups: winners and hosts"@en ,
+                  "Fotbolls-VM: segrare och värdländer"@sv ,
+                  "FIFA 월드컵과 FIFA 여자 월드컵: 우승국과 개최국"@ko ,
+                  "Fußball-Weltmeisterschaften der Männer und Frauen: Sieger und Gastgeber"@de ,
+                  "Copa Mundial de Fútbol y Copa Mundial Femenina: campeones y anfitriones"@es ,
+                  "Coupes du monde de football masculine et féminine : vainqueurs et pays hôtes"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "The winner and the host country (or countries) of every FIFA World Cup, the men's tournament from 1930 to 2026 (23 tournaments) and the women's from 1991 to 2023 (9 tournaments): 64 cards. Front: the tournament and the question, e.g. \"FIFA World Cup 1958: winner\" or \"FIFA Women's World Cup 2023: host\"; back: the country in English and Swedish. Countries are named as they were at the time: \"West Germany\" for the titles of 1954, 1974 and 1990 and for the 1974 host. Results up to and including the 2026 men's World Cup, won by Spain on 19 July 2026. Taken from Wikidata and checked against FIFA's own data and the RSSSF."@en ,
+                        "Segraren och värdlandet (eller värdländerna) i varje VM i fotboll, för herrar 1930–2026 (23 turneringar) och för damer 1991–2023 (9 turneringar): 64 kort. Framsida: turneringen och frågan, t.ex. ”VM i fotboll 1958: segrare” eller ”VM i fotboll för damer 2023: värdland”; baksida: landet på engelska och svenska. Länderna anges med de namn de hade då: ”Västtyskland” för segrarna 1954, 1974 och 1990 och för värdlandet 1974. Resultat till och med herrarnas VM 2026, som Spanien vann den 19 juli 2026. Uppgifterna är hämtade från Wikidata och kontrollerade mot Fifas egna data och RSSSF."@sv ,
+                        "1930년부터 2026년까지의 남자 대회(23회)와 1991년부터 2023년까지의 여자 대회(9회), 모든 FIFA 월드컵의 우승국과 개최국(또는 공동 개최국)을 담은 카드 64장입니다. 앞면: 대회와 질문, 예: “FIFA World Cup 1958: winner” 또는 “FIFA Women's World Cup 2023: host”. 뒷면: 영어와 스웨덴어로 된 나라 이름. 나라 이름은 당시의 이름을 씁니다. 1954년, 1974년, 1990년 우승국과 1974년 개최국은 “서독”입니다. 결과는 2026년 7월 19일 스페인이 우승한 2026년 남자 월드컵까지 포함합니다. 위키데이터에서 가져와 FIFA 자체 자료와 RSSSF로 확인했습니다."@ko ,
+                        "Der Sieger und das Gastgeberland (oder die Gastgeberländer) jeder FIFA-Weltmeisterschaft, beim Turnier der Männer von 1930 bis 2026 (23 Turniere) und bei dem der Frauen von 1991 bis 2023 (9 Turniere): 64 Karten. Vorderseite: das Turnier und die Frage, z. B. „FIFA World Cup 1958: winner“ oder „FIFA Women's World Cup 2023: host“; Rückseite: das Land auf Englisch und Schwedisch. Die Länder tragen die Namen, die sie damals hatten: „Westdeutschland“ für die Titel von 1954, 1974 und 1990 und für den Gastgeber von 1974. Ergebnisse bis einschließlich der Weltmeisterschaft der Männer 2026, die Spanien am 19. Juli 2026 gewann. Aus Wikidata übernommen und mit den eigenen Daten der FIFA und der RSSSF abgeglichen."@de ,
+                        "El campeón y el país anfitrión (o los países anfitriones) de cada Copa Mundial de la FIFA, el torneo masculino de 1930 a 2026 (23 torneos) y el femenino de 1991 a 2023 (9 torneos): 64 tarjetas. Anverso: el torneo y la pregunta, p. ej., «FIFA World Cup 1958: winner» o «FIFA Women's World Cup 2023: host»; reverso: el país en inglés y sueco. Los países se nombran como se llamaban entonces: «Alemania Occidental» para los títulos de 1954, 1974 y 1990 y para el anfitrión de 1974. Resultados hasta el Mundial masculino de 2026 incluido, que ganó España el 19 de julio de 2026. Tomado de Wikidata y comprobado con los datos de la propia FIFA y la RSSSF."@es ,
+                        "Le vainqueur et le pays hôte (ou les pays hôtes) de chaque Coupe du monde de la FIFA, le tournoi masculin de 1930 à 2026 (23 tournois) et le tournoi féminin de 1991 à 2023 (9 tournois) : 64 cartes. Recto : le tournoi et la question, par ex. « FIFA World Cup 1958: winner » ou « FIFA Women's World Cup 2023: host » ; verso : le pays en anglais et en suédois. Les pays portent le nom qu’ils avaient à l’époque : « Allemagne de l’Ouest » pour les titres de 1954, 1974 et 1990 et pour le pays hôte de 1974. Résultats jusqu’à la Coupe du monde masculine 2026 incluse, remportée par l’Espagne le 19 juillet 2026. Tiré de Wikidata et vérifié avec les données de la FIFA elle-même et la RSSSF."@fr ;
+    prov:wasDerivedFrom <https://www.wikidata.org/wiki/Q19317> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:sports ;
+    dcat:keyword "FIFA World Cup"@en ,
+                 "FIFA Women's World Cup"@en ,
+                 "football"@en ,
+                 "soccer"@en ,
+                 "world champions"@en ,
+                 "sports history"@en ,
+                 "VM i fotboll"@sv ,
+                 "fotbolls-VM"@sv ,
+                 "damfotboll"@sv ,
+                 "världsmästare"@sv ,
+                 "värdland"@sv ,
+                 "idrottshistoria"@sv ,
+                 "FIFA 월드컵"@ko ,
+                 "FIFA 여자 월드컵"@ko ,
+                 "축구"@ko ,
+                 "월드컵"@ko ,
+                 "세계 챔피언"@ko ,
+                 "스포츠 역사"@ko ,
+                 "Fußball-Weltmeisterschaft"@de ,
+                 "Fußball-Weltmeisterschaft der Frauen"@de ,
+                 "Fußball"@de ,
+                 "WM"@de ,
+                 "Weltmeister"@de ,
+                 "Sportgeschichte"@de ,
+                 "Copa Mundial de Fútbol"@es ,
+                 "Copa Mundial Femenina de Fútbol"@es ,
+                 "Mundial"@es ,
+                 "fútbol"@es ,
+                 "campeones del mundo"@es ,
+                 "historia del deporte"@es ,
+                 "Coupe du monde de football"@fr ,
+                 "Coupe du monde féminine de football"@fr ,
+                 "football"@fr ,
+                 "Mondial"@fr ,
+                 "champions du monde"@fr ,
+                 "histoire du sport"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/fifa-world-cup/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/fifa-world-cup/v1.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#fifa-world-cup> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#fifa-world-cup> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/wiki/Q19317> ,
+              <https://api.fifa.com/api/v3/seasons?idCompetition=17&count=100&language=en> ,
+              <https://www.rsssf.org/tablesw/worldcup.html> ,
+              <https://sv.wikipedia.org/wiki/V%C3%A4rldsm%C3%A4sterskapet_i_fotboll> ,
+              <https://www.rsssf.org/intland-women.html> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ,
+                       <#review-6> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Finding the tournaments: the Wikidata items of the two competitions were found with the Wikidata search API (query 1): FIFA World Cup (Q19317) and FIFA Women's World Cup (Q19323). Query 2 selected every item whose P3450 (sports season of league or competition) is one of them, with start and end time (P580/P582), the truthy winner (P1346), country (P17) and the English and Swedish labels; the CSV was saved. Besides the tournaments it returned qualification groups, the unplayed 1942 and 1946 editions, future editions (2027 onward for women, 2030 onward for men) and the unofficial women's tournaments of 1970 and 1971."@en ,
+                 "Statements of all ranks: query 3 listed every P17, P276 and P1346 statement, with its rank, of the held editions 1930–2026. All are normal rank; every held edition has exactly one winner. Query 4 fetched the P17 and P1532 (country for sport) of the winning teams and of two locations, query 5 every English, Swedish and multilingual label and alias of the tournaments, teams and countries used, and query 6 the aliases of all the tournaments (the English \"FIFA World Cup 1958\" and Swedish \"VM i fotboll 1958\" forms on which the fronts are modelled)."@en ,
+                 "The 2026 men's World Cup: the Wikidata item (Q5020214, fetched in full with query 7) gives the winner Spain (Q42267) without a reference, and its English description still read \"being held\". Because the tournament ended after the compiler's training data, the result was established from sources fetched on 2026-10-04: a web search for the final's result (news reports of Spain's 1–0 win over Argentina after extra time on 19 July 2026; discovery only, not cited; the exact search string of that first search was not recorded, and query 22 is the re-run made in QC round 3), then FIFA's own match data (query 8: the final of season 285023, Spain 1–0 Argentina, winner Spain), RSSSF's overview (query 10: \"2026 Spain\", \"Spain 1-0 Argentina AET\") and the Swedish Wikipedia introduction (query 12). Only the latter three are cited, as verification; the facts of the back note come from Wikidata's item of the final (Q55640701, query 17), which records the date, the teams, the 1–0 score, the winner and the goal in the second half of extra time."@en ,
+                 "Cross-check against FIFA: the script fifa_api.py (query 8, its source given in full) downloaded FIFA's public API list of seasons of competitions 17 (men) and 103 (women), each season's match list and the names of the host and winning teams, and printed each tournament's official name, host teams and final. For 1950, which had no final, the matches of the stage \"Final Round\" were listed (query 9). Every card was compared with this data: all 64 agree, under FIFA's own team names (\"Germany FR\", \"Korea Republic\", \"USA\", \"China PR\")."@en ,
+                 "Cross-check against the RSSSF: the men's overview (query 10) gives the palmares, each final and the country of each final tournament; the women's overview and the RSSSF page of each Women's World Cup (query 11, rsssf_women.py, its source given in full; each page has its own author, credited in the source \"rsssf-women-pages\") give the palmares, the finals and in each page title the host. All 64 cards agree."@en ,
+                 "Team names as at the time: the cards name the winner and the host as the country the team or tournament represented at the time, the convention of FIFA's own records. For 1954, 1974 and 1990 the winner is West Germany (FIFA: \"Germany FR\", a team record of its own; RSSSF: \"West Germany\"), and the 1974 host is West Germany (FIFA's host team \"Germany FR\", although FIFA's tournament name is \"1974 FIFA World Cup Germany\"; RSSSF \"[Final tournament in West Germany]\"). Wikidata records these with the present-day items (the team Q43310, \"Germany men's national association football team\", and the country Germany, Q183); the West German names come from Wikidata's West Germany item (Q713750, en \"West Germany\", sv \"Västtyskland\") and the team's aliases \"West Germany national football team\" and \"Västtysklands herrlandslag i fotboll\". For 1966 the host is England, as FIFA (\"1966 FIFA World Cup England™\") and RSSSF name it; Wikidata's P17 is the United Kingdom (Q145), and the winner England comes from the team's P1532 (England, Q21). The West German name and dates of the notes come from Q713750 (its alias \"Federal Republic of Germany (1949–1990)\", P571, P576 and P1366); these checks confirm wording only. That the 1974 host was West Germany rests on FIFA's host team \"Germany FR\", RSSSF and the Swedish Wikipedia, not on a Wikidata statement. That West Germany won in 1954, 1974 and 1990 rests on the winner team of FIFA's final, \"Germany FR\", and on RSSSF (\"West Germany\"), not on a Wikidata statement (Wikidata has only the team's alias); the Swedish Wikipedia confirms the Swedish name (for 1974 its introduction gives the host only, and its infobox \"Mästare\" the winner)."@en ,
+                 "English and Swedish text: the fronts are the compiler's own pattern \"FIFA World Cup 1958: winner\" / \"VM i fotboll 1958: segrare\" (host: \"värdland\"), and \"FIFA Women's World Cup 2023: …\" / \"VM i fotboll för damer 2023: …\", built from Wikidata's aliases of the tournaments (for those without such an alias the builder checked the label instead; see the checks). The backs are the English and Swedish Wikidata labels of the countries, except \"China\" (Wikidata's English label is \"People's Republic of China\"; the Swedish label is \"Kina\") and \"West Germany\" (see above). The United States is \"USA\" in Swedish (Wikidata's Swedish label). Several hosts are joined with \"and\"/\"och\" in FIFA's order (South Korea and Japan; Australia and New Zealand), the 2026 hosts in alphabetical order (Canada, Mexico and the United States / Kanada, Mexiko och USA, as on the Swedish Wikipedia)."@en ,
+                 "Swedish check: the script svwiki.py (query 12, its source given in full) fetched, through the MediaWiki API, the introductions and current revision ids of the Swedish Wikipedia articles on the tournaments with a convention or a note; the quoted sentences, linked to their revisions, are in the cards' evidence (\"Turneringen vanns av Västtyskland\", \"spelades i England\", \"arrangerades i Västtyskland\", \"spelades i Kina\" …)."@en ,
+                 "Notes: a back note in the compiler's own words was added only where it helps to answer or to avoid a wrong answer, and only with facts that Wikidata (the content source) gives, the verification sources confirming them: 1950 (no final; Uruguay won the four-team final round, Q989777, whose last match Uruguay v Brazil, Q754483, ended 2–1 on 16 July 1950; query 16), West Germany (1954, 1974 and 1990 winners, 1974 host: the Federal Republic of Germany of 1949–1990, Q713750), England as a country of the United Kingdom (1966, Q21 P31 Q3336843), the first World Cup with two hosts (2002) and the first with three hosts and 48 teams (2026), both from the count of P17 values and the P1132 of every edition (query 15), and the 2026 final (Q55640701). The first version also had notes with FIFA's names (\"Germany FR\", \"1974 FIFA World Cup Germany\", \"2002 FIFA World Cup Korea/Japan\") and the move of the 2003 Women's World Cup from China because of SARS; these rested on verification sources only and were removed in QC round 3. Each note's facts are in the evidence of its card."@en ,
+                 "Assembly: the throwaway helper script make_dossier.py (kept only in the compiler's scratch directory, not part of the record) built the cards from the saved responses, asserting for each card that the Wikidata winner and host, FIFA's final and host teams and RSSSF's palmares and host agree with the card, so a disagreement stops the build. The dossier's text (sources, method, selection, licensing) was written with a second throwaway helper, meta.py. Their Wikidata assertions are re-run by the builder's checks on every build; their FIFA and RSSSF comparisons are recorded card by card in the evidence and were repeated independently in QC rounds 1 and 3. Machine checks: for every card the builder checked against live Wikidata the English and Swedish front wording (an alias or the label of the tournament), the winner (P1346) or host (P17; for 2007 women the P276 location and its P17), the team's P1532 country for sport, and the English and Swedish labels of the country on the back. The deck was then validated with the app's SHACL and DCAT-AP validators (scripts/validate_sources.ts)."@en ,
+                 "Review: three review rounds checked the deck for factual accuracy, for language and language tags, and for licensing and documentation (QC rounds 1–3). The changes the rounds led to (the title and description wording, the notes rebuilt on Wikidata facts, the RSSSF authors, the full FIFA terms, the scripts given in full, the shorter quotations) were made by the authoring agent and re-checked with the builder's Wikidata checks and the validators."@en ,
+                 "Selection: Every FIFA World Cup actually held from the first (Uruguay 1930) to the most recent (Canada, Mexico and the United States 2026), 23 tournaments, and every FIFA Women's World Cup from the first (China 1991) to the most recent (Australia and New Zealand 2023), 9 tournaments; two cards for each, the winner and the host country or countries: 64 cards. Left out: the World Cups of 1942 and 1946, which were not held; the unofficial women's tournaments of 1970 (Italy) and 1971 (Mexico), which were not organised by FIFA and are in Wikidata only as editions of Q19323 (RSSSF lists them among the unofficial tournaments before FIFA's first in 1991); the 2027 Women's World Cup (Brazil, June–July 2027) and all later tournaments, not yet played; qualification tournaments; runners-up, scores, venues and individual awards. The host card names countries, not cities or stadiums. Results are as of 2026-10-04."@en ,
+                 "Licensing: The only content source is Wikidata, whose structured data is CC0: the selection of tournaments, the winner and host of each, the English and Swedish names of the tournaments and countries, and the facts in the back notes (the 1950 final round, the 2026 final, the number of hosts and teams, West Germany's dates, England in the United Kingdom) come from it, so the deck can be CC0 1.0 like the rest of the library. FIFA's data API and the RSSSF pages (all rights reserved; RSSSF's permission to copy with acknowledgement is not a recognised open licence and is not relied on) and the Swedish Wikipedia (CC BY-SA 4.0) were used for verification only: they confirmed facts the Wikidata data gave and the names used at the time; no wording, table, data set or selection was copied from them. FIFA's terms limit use of its content and API to private, non-commercial use on FIFA's platforms (§5.3) and forbid using FIFA content, names, logos or marks without written agreement (§6.2): the API was consulted privately, and the deck reproduces nothing of FIFA's: no FIFA data, text, logo or mark, and no official tournament name (the fronts use Wikidata's aliases, e.g. \"FIFA World Cup 1958\"; the competition's name appears only to identify it). The provenance report cites FIFA's responses (tournament names as FIFA gives them, team ids, dates and scores) as short factual references so the checks can be repeated. The selection is every held edition of two competitions, the complete set, not a choice taken from any list. Quotations in the provenance report's evidence are not part of the CC0 deck: they remain under their sources' licences (Wikipedia text CC BY-SA 4.0 by Wikipedia contributors, each linked to the quoted revision; FIFA's data all rights reserved; each RSSSF page © its named author and RSSSF, credited in the sources) and are short quotations of at most one sentence each, given only to make the verification checkable."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Sources, licences and machine checks: every card's winner and host against Wikidata, FIFA's own data and the RSSSF; the Swedish names against Wikidata labels and the Swedish Wikipedia; the 2026 result against sources fetched on the day."@en ;
+    rdfs:comment "Scope: All 64 cards, the sources and the deck metadata."@en ,
+                 "Outcome: Wikidata, FIFA and RSSSF agree on the winner and the host of all 32 tournaments (make_dossier.py asserts it for every card). The discrepancies are in naming: Wikidata records West Germany's titles and the 1974 host with present-day items and the 1966 host as the United Kingdom, while FIFA and RSSSF name West Germany and England; the cards follow FIFA's records and check the Wikidata items and aliases that carry these names. No Wikidata check was skipped because Wikidata disagreed; one English label check was left out where Wikidata has no matching text (China)."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 64 cards, their notes and the Wikidata checks, against RSSSF, English Wikipedia, news reports of the 2026 final and live Wikidata."@en ,
+                 "Outcome: No factual errors in any of the 64 cards; the builder's Wikidata checks passed. Two documentation suggestions, both applied."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 64 cards, the title, description and keywords, and the built TTL, against live Wikidata labels and aliases."@en ,
+                 "Outcome: All back texts and language tags are correct. One library-wide finding (untagged keywords) lies in the builder and cannot be fixed in the dossier; four wording suggestions were applied and one was overtaken by the rebuilt notes."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 64 cards, every source and its licence page, the evidence quotations, the method and the queries."@en ,
+                 "Outcome: No licensing error affecting the CC0 deck, but the notes, the RSSSF credit, the FIFA terms and the reproducibility of the method did not match the policy and the brief. All four warnings and two of the three suggestions were applied in full; the third was applied in part. Notes now rest on Wikidata, with checks added; the SARS note was removed."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: All 64 cards, the metadata and the documentation; the builder's 402 Wikidata checks and validate_sources.ts."@en ,
+                 "Outcome: All facts and Swedish wording confirmed. One warning (quotation length did not match the licensing paragraph and the round-3 resolution) and two suggestions (stale round-0 resolutions, Wikidata's 33 teams for 2002) were verified and fixed; no card text changed."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The six cards changed in round 4 and every third card (27 cards), the metadata and the documentation; the builder's 402 Wikidata checks, validate_sources.ts, FIFA's API for 26 seasons, RSSSF and the Swedish Wikipedia revisions."@en ,
+                 "Outcome: All round-4 fixes confirmed and all sampled facts and Swedish wording correct. One suggestion (the Swedish Wikipedia evidence on men-1974-winner and method step 7 overstated what that source confirms for the winner) was verified and fixed; no card text changed."@en .
+
+<#review-6>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 1, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card changed."@en .
+
+<https://www.wikidata.org/wiki/Q19317>
+    dcterms:title "Wikidata: the editions of the FIFA World Cup (Q19317) and the FIFA Women's World Cup (Q19323), their winners (P1346), countries (P17), locations (P276) and numbers of participants (P1132), the national teams' country for sport (P1532), the 1950 final round (Q989777) and its match Uruguay v Brazil (Q754483), the 2026 final (Q55640701), West Germany (Q713750), and the labels of the tournaments and countries" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://api.fifa.com/api/v3/seasons?idCompetition=17&count=100&language=en>
+    dcterms:title "FIFA's public data API (api.fifa.com v3): the seasons of the FIFA World Cup (competition 17) and the FIFA Women's World Cup (competition 103), their host teams and their matches" ;
+    dcterms:creator "Fédération Internationale de Football Association (FIFA)" ;
+    rdfs:comment "FIFA Terms of Service, https://inside.fifa.com/legal/terms-of-service: §5.1 \"FIFA and its licensors own the copyright and all intellectual property rights in and to the FIFA Digital Platforms, and to all information, data, text, software, … the application programming interface (“FIFA API”), and any other material on the FIFA Digital Platforms (together the “Content”)\"; §5.3 \"Content may not be used, reproduced, distributed, transmitted, broadcast, displayed, sold, licensed or otherwise exploited for any other purposes than for accessing and using it on the FIFA Digital Platforms save as permitted pursuant to Section 6.2 below. For that sole and exclusive purpose, FIFA grants You a limited, revocable, non-exclusive licence to access the FIFA Digital Platforms and use the Content strictly for the purpose of using the FIFA Digital Platforms privately for non-commercial purposes, in accordance with these Terms. FIFA and/or its licensors reserve all rights on the FIFA Digital Platforms and the Content.\"; §6.2 \"You are not permitted to use any FIFA and/or Third-Party Content, names, logos, pictures or trademarks, unless separately and previously agreed to in writing by the relevant rights holder.\" All rights reserved: verification only."@en .
+
+<https://www.rsssf.org/tablesw/worldcup.html>
+    dcterms:title "RSSSF (Rec.Sport.Soccer Statistics Foundation): World Cup 1930-2026 overview and Women's World Cup overview" ;
+    dcterms:creator "Karel Stokkermans (RSSSF)" ;
+    rdfs:comment "Footers of the two overview pages: https://www.rsssf.org/tablesw/worldcup.html \"(C) Copyright Karel Stokkermans and RSSSF 1995/2026 You are free to copy this document in whole or part provided that proper acknowledgement is given to the author. All rights reserved.\" and https://www.rsssf.org/tablesw/women-worldcup.html \"(C) Copyright Karel Stokkermans and RSSSF 1995/2023\" (same permission). The permission does not state its terms as a recognised open licence, so it is treated as all rights reserved: verification only."@en .
+
+<https://sv.wikipedia.org/wiki/V%C3%A4rldsm%C3%A4sterskapet_i_fotboll>
+    dcterms:title "Swedish Wikipedia: introductions of the articles on the 1954, 1966, 1974, 1990, 2002 and 2026 FIFA World Cups and the 1991, 2003, 2007 and 2023 FIFA Women's World Cups" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of every Swedish Wikipedia article (e.g. https://sv.wikipedia.org/wiki/V%C3%A4rldsm%C3%A4sterskapet_i_fotboll_1974): \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported\""@en .
+
+<https://www.rsssf.org/intland-women.html>
+    dcterms:title "RSSSF (Rec.Sport.Soccer Statistics Foundation): the pages of the FIFA Women's World Cups 1991–2023 (tablesw/wwc91f, wwc95f, wwc99f, wwc03f, wwc07f, wwc2011f, wwc2015f, wwc2019f, wwc2023f)" ;
+    dcterms:creator "David Shannon (1991, 1995, 1999), Lars Aarhus and Sturmius Burkert (2003), Roberto Di Maggio (2007, 2011, 2019, 2023) and Karel Stokkermans (2015), for RSSSF" ;
+    rdfs:comment "Footer of each page, naming its own author, e.g. https://www.rsssf.org/tablesw/wwc91f.html \"(C) Copyright David Shannon and RSSSF 2001/15 You are free to copy this document in whole or part provided that proper acknowledgement is given to the author. All rights reserved.\"; wwc03f.html \"(C) Copyright Lars Aarhus, Sturmius Burkert and RSSSF 2001/15\"; wwc07f.html \"(C) Copyright Roberto Di Maggio and RSSSF 2004/15\"; wwc2015f.html \"(C) Copyright Karel Stokkermans and RSSSF 2015/19\"; wwc2023f.html \"(C) Copyright Roberto Di Maggio and RSSSF 2023\" (wwc95f and wwc99f: David Shannon 2001/15; wwc2011f: Roberto Di Maggio 2011/23; wwc2019f: Roberto Di Maggio 2019/23). Treated as all rights reserved: verification only."@en .
+
+<#men-1930-winner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 1930: winner"@en ,
+                     "VM i fotboll 1930: segrare"@sv ;
+    solid-memo:back "Uruguay"@en ,
+                    "Uruguay"@sv .
+
+<#men-1930-host>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 1930: host"@en ,
+                     "VM i fotboll 1930: värdland"@sv ;
+    solid-memo:back "Uruguay"@en ,
+                    "Uruguay"@sv .
+
+<#men-1934-winner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 1934: winner"@en ,
+                     "VM i fotboll 1934: segrare"@sv ;
+    solid-memo:back "Italy"@en ,
+                    "Italien"@sv .
+
+<#men-1934-host>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 1934: host"@en ,
+                     "VM i fotboll 1934: värdland"@sv ;
+    solid-memo:back "Italy"@en ,
+                    "Italien"@sv .
+
+<#men-1938-winner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 1938: winner"@en ,
+                     "VM i fotboll 1938: segrare"@sv ;
+    solid-memo:back "Italy"@en ,
+                    "Italien"@sv .
+
+<#men-1938-host>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 1938: host"@en ,
+                     "VM i fotboll 1938: värdland"@sv ;
+    solid-memo:back "France"@en ,
+                    "Frankrike"@sv .
+
+<#men-1950-winner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 1950: winner"@en ,
+                     "VM i fotboll 1950: segrare"@sv ;
+    solid-memo:back "Uruguay"@en ,
+                    "Uruguay"@sv ;
+    solid-memo:backNote "There was no final: Uruguay won the four-team final round, decided by their 2–1 win over Brazil on 16 July 1950."@en ,
+                        "Det fanns ingen final: Uruguay vann finalgruppen med fyra lag, som avgjordes när Uruguay slog Brasilien med 2–1 den 16 juli 1950."@sv .
+
+<#men-1950-host>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 1950: host"@en ,
+                     "VM i fotboll 1950: värdland"@sv ;
+    solid-memo:back "Brazil"@en ,
+                    "Brasilien"@sv .
+
+<#men-1954-winner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 1954: winner"@en ,
+                     "VM i fotboll 1954: segrare"@sv ;
+    solid-memo:back "West Germany"@en ,
+                    "Västtyskland"@sv ;
+    solid-memo:backNote "West Germany: the Federal Republic of Germany of 1949–1990, before German reunification."@en ,
+                        "Västtyskland: Förbundsrepubliken Tyskland 1949–1990, före Tysklands återförening."@sv .
+
+<#men-1954-host>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 1954: host"@en ,
+                     "VM i fotboll 1954: värdland"@sv ;
+    solid-memo:back "Switzerland"@en ,
+                    "Schweiz"@sv .
+
+<#men-1958-winner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 1958: winner"@en ,
+                     "VM i fotboll 1958: segrare"@sv ;
+    solid-memo:back "Brazil"@en ,
+                    "Brasilien"@sv .
+
+<#men-1958-host>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 1958: host"@en ,
+                     "VM i fotboll 1958: värdland"@sv ;
+    solid-memo:back "Sweden"@en ,
+                    "Sverige"@sv .
+
+<#men-1962-winner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 1962: winner"@en ,
+                     "VM i fotboll 1962: segrare"@sv ;
+    solid-memo:back "Brazil"@en ,
+                    "Brasilien"@sv .
+
+<#men-1962-host>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 1962: host"@en ,
+                     "VM i fotboll 1962: värdland"@sv ;
+    solid-memo:back "Chile"@en ,
+                    "Chile"@sv .
+
+<#men-1966-winner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 1966: winner"@en ,
+                     "VM i fotboll 1966: segrare"@sv ;
+    solid-memo:back "England"@en ,
+                    "England"@sv .
+
+<#men-1966-host>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 1966: host"@en ,
+                     "VM i fotboll 1966: värdland"@sv ;
+    solid-memo:back "England"@en ,
+                    "England"@sv ;
+    solid-memo:backNote "England, one of the countries of the United Kingdom."@en ,
+                        "England, ett av länderna i Storbritannien."@sv .
+
+<#men-1970-winner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 1970: winner"@en ,
+                     "VM i fotboll 1970: segrare"@sv ;
+    solid-memo:back "Brazil"@en ,
+                    "Brasilien"@sv .
+
+<#men-1970-host>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 1970: host"@en ,
+                     "VM i fotboll 1970: värdland"@sv ;
+    solid-memo:back "Mexico"@en ,
+                    "Mexiko"@sv .
+
+<#men-1974-winner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 1974: winner"@en ,
+                     "VM i fotboll 1974: segrare"@sv ;
+    solid-memo:back "West Germany"@en ,
+                    "Västtyskland"@sv ;
+    solid-memo:backNote "West Germany: the Federal Republic of Germany of 1949–1990, before German reunification. It was also the host."@en ,
+                        "Västtyskland: Förbundsrepubliken Tyskland 1949–1990, före Tysklands återförening. Landet var också värd."@sv .
+
+<#men-1974-host>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 1974: host"@en ,
+                     "VM i fotboll 1974: värdland"@sv ;
+    solid-memo:back "West Germany"@en ,
+                    "Västtyskland"@sv ;
+    solid-memo:backNote "The Federal Republic of Germany of 1949–1990, before German reunification."@en ,
+                        "Förbundsrepubliken Tyskland 1949–1990, före Tysklands återförening."@sv .
+
+<#men-1978-winner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 1978: winner"@en ,
+                     "VM i fotboll 1978: segrare"@sv ;
+    solid-memo:back "Argentina"@en ,
+                    "Argentina"@sv .
+
+<#men-1978-host>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 1978: host"@en ,
+                     "VM i fotboll 1978: värdland"@sv ;
+    solid-memo:back "Argentina"@en ,
+                    "Argentina"@sv .
+
+<#men-1982-winner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 1982: winner"@en ,
+                     "VM i fotboll 1982: segrare"@sv ;
+    solid-memo:back "Italy"@en ,
+                    "Italien"@sv .
+
+<#men-1982-host>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 1982: host"@en ,
+                     "VM i fotboll 1982: värdland"@sv ;
+    solid-memo:back "Spain"@en ,
+                    "Spanien"@sv .
+
+<#men-1986-winner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 1986: winner"@en ,
+                     "VM i fotboll 1986: segrare"@sv ;
+    solid-memo:back "Argentina"@en ,
+                    "Argentina"@sv .
+
+<#men-1986-host>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 1986: host"@en ,
+                     "VM i fotboll 1986: värdland"@sv ;
+    solid-memo:back "Mexico"@en ,
+                    "Mexiko"@sv .
+
+<#men-1990-winner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 1990: winner"@en ,
+                     "VM i fotboll 1990: segrare"@sv ;
+    solid-memo:back "West Germany"@en ,
+                    "Västtyskland"@sv ;
+    solid-memo:backNote "West Germany: the Federal Republic of Germany of 1949–1990, before German reunification."@en ,
+                        "Västtyskland: Förbundsrepubliken Tyskland 1949–1990, före Tysklands återförening."@sv .
+
+<#men-1990-host>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 1990: host"@en ,
+                     "VM i fotboll 1990: värdland"@sv ;
+    solid-memo:back "Italy"@en ,
+                    "Italien"@sv .
+
+<#men-1994-winner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 1994: winner"@en ,
+                     "VM i fotboll 1994: segrare"@sv ;
+    solid-memo:back "Brazil"@en ,
+                    "Brasilien"@sv .
+
+<#men-1994-host>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 1994: host"@en ,
+                     "VM i fotboll 1994: värdland"@sv ;
+    solid-memo:back "United States"@en ,
+                    "USA"@sv .
+
+<#men-1998-winner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 1998: winner"@en ,
+                     "VM i fotboll 1998: segrare"@sv ;
+    solid-memo:back "France"@en ,
+                    "Frankrike"@sv .
+
+<#men-1998-host>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 1998: host"@en ,
+                     "VM i fotboll 1998: värdland"@sv ;
+    solid-memo:back "France"@en ,
+                    "Frankrike"@sv .
+
+<#men-2002-winner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 2002: winner"@en ,
+                     "VM i fotboll 2002: segrare"@sv ;
+    solid-memo:back "Brazil"@en ,
+                    "Brasilien"@sv .
+
+<#men-2002-host>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 2002: host"@en ,
+                     "VM i fotboll 2002: värdland"@sv ;
+    solid-memo:back "South Korea and Japan"@en ,
+                    "Sydkorea och Japan"@sv ;
+    solid-memo:backNote "The first World Cup with two hosts."@en ,
+                        "Det första VM:et med två värdländer."@sv .
+
+<#men-2006-winner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 2006: winner"@en ,
+                     "VM i fotboll 2006: segrare"@sv ;
+    solid-memo:back "Italy"@en ,
+                    "Italien"@sv .
+
+<#men-2006-host>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 2006: host"@en ,
+                     "VM i fotboll 2006: värdland"@sv ;
+    solid-memo:back "Germany"@en ,
+                    "Tyskland"@sv .
+
+<#men-2010-winner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 2010: winner"@en ,
+                     "VM i fotboll 2010: segrare"@sv ;
+    solid-memo:back "Spain"@en ,
+                    "Spanien"@sv .
+
+<#men-2010-host>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 2010: host"@en ,
+                     "VM i fotboll 2010: värdland"@sv ;
+    solid-memo:back "South Africa"@en ,
+                    "Sydafrika"@sv .
+
+<#men-2014-winner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 2014: winner"@en ,
+                     "VM i fotboll 2014: segrare"@sv ;
+    solid-memo:back "Germany"@en ,
+                    "Tyskland"@sv .
+
+<#men-2014-host>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 2014: host"@en ,
+                     "VM i fotboll 2014: värdland"@sv ;
+    solid-memo:back "Brazil"@en ,
+                    "Brasilien"@sv .
+
+<#men-2018-winner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 2018: winner"@en ,
+                     "VM i fotboll 2018: segrare"@sv ;
+    solid-memo:back "France"@en ,
+                    "Frankrike"@sv .
+
+<#men-2018-host>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 2018: host"@en ,
+                     "VM i fotboll 2018: värdland"@sv ;
+    solid-memo:back "Russia"@en ,
+                    "Ryssland"@sv .
+
+<#men-2022-winner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 2022: winner"@en ,
+                     "VM i fotboll 2022: segrare"@sv ;
+    solid-memo:back "Argentina"@en ,
+                    "Argentina"@sv .
+
+<#men-2022-host>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 2022: host"@en ,
+                     "VM i fotboll 2022: värdland"@sv ;
+    solid-memo:back "Qatar"@en ,
+                    "Qatar"@sv .
+
+<#men-2026-winner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 2026: winner"@en ,
+                     "VM i fotboll 2026: segrare"@sv ;
+    solid-memo:back "Spain"@en ,
+                    "Spanien"@sv ;
+    solid-memo:backNote "Spain beat Argentina 1–0 after extra time in the final on 19 July 2026."@en ,
+                        "Spanien slog Argentina med 1–0 efter förlängning i finalen den 19 juli 2026."@sv .
+
+<#men-2026-host>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA World Cup 2026: host"@en ,
+                     "VM i fotboll 2026: värdland"@sv ;
+    solid-memo:back "Canada, Mexico and the United States"@en ,
+                    "Kanada, Mexiko och USA"@sv ;
+    solid-memo:backNote "The first World Cup with three hosts and 48 teams."@en ,
+                        "Det första VM:et med tre värdländer och 48 lag."@sv .
+
+<#women-1991-winner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA Women's World Cup 1991: winner"@en ,
+                     "VM i fotboll för damer 1991: segrare"@sv ;
+    solid-memo:back "United States"@en ,
+                    "USA"@sv .
+
+<#women-1991-host>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA Women's World Cup 1991: host"@en ,
+                     "VM i fotboll för damer 1991: värdland"@sv ;
+    solid-memo:back "China"@en ,
+                    "Kina"@sv .
+
+<#women-1995-winner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA Women's World Cup 1995: winner"@en ,
+                     "VM i fotboll för damer 1995: segrare"@sv ;
+    solid-memo:back "Norway"@en ,
+                    "Norge"@sv .
+
+<#women-1995-host>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA Women's World Cup 1995: host"@en ,
+                     "VM i fotboll för damer 1995: värdland"@sv ;
+    solid-memo:back "Sweden"@en ,
+                    "Sverige"@sv .
+
+<#women-1999-winner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA Women's World Cup 1999: winner"@en ,
+                     "VM i fotboll för damer 1999: segrare"@sv ;
+    solid-memo:back "United States"@en ,
+                    "USA"@sv .
+
+<#women-1999-host>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA Women's World Cup 1999: host"@en ,
+                     "VM i fotboll för damer 1999: värdland"@sv ;
+    solid-memo:back "United States"@en ,
+                    "USA"@sv .
+
+<#women-2003-winner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA Women's World Cup 2003: winner"@en ,
+                     "VM i fotboll för damer 2003: segrare"@sv ;
+    solid-memo:back "Germany"@en ,
+                    "Tyskland"@sv .
+
+<#women-2003-host>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA Women's World Cup 2003: host"@en ,
+                     "VM i fotboll för damer 2003: värdland"@sv ;
+    solid-memo:back "United States"@en ,
+                    "USA"@sv .
+
+<#women-2007-winner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA Women's World Cup 2007: winner"@en ,
+                     "VM i fotboll för damer 2007: segrare"@sv ;
+    solid-memo:back "Germany"@en ,
+                    "Tyskland"@sv .
+
+<#women-2007-host>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA Women's World Cup 2007: host"@en ,
+                     "VM i fotboll för damer 2007: värdland"@sv ;
+    solid-memo:back "China"@en ,
+                    "Kina"@sv .
+
+<#women-2011-winner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA Women's World Cup 2011: winner"@en ,
+                     "VM i fotboll för damer 2011: segrare"@sv ;
+    solid-memo:back "Japan"@en ,
+                    "Japan"@sv .
+
+<#women-2011-host>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA Women's World Cup 2011: host"@en ,
+                     "VM i fotboll för damer 2011: värdland"@sv ;
+    solid-memo:back "Germany"@en ,
+                    "Tyskland"@sv .
+
+<#women-2015-winner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA Women's World Cup 2015: winner"@en ,
+                     "VM i fotboll för damer 2015: segrare"@sv ;
+    solid-memo:back "United States"@en ,
+                    "USA"@sv .
+
+<#women-2015-host>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA Women's World Cup 2015: host"@en ,
+                     "VM i fotboll för damer 2015: värdland"@sv ;
+    solid-memo:back "Canada"@en ,
+                    "Kanada"@sv .
+
+<#women-2019-winner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA Women's World Cup 2019: winner"@en ,
+                     "VM i fotboll för damer 2019: segrare"@sv ;
+    solid-memo:back "United States"@en ,
+                    "USA"@sv .
+
+<#women-2019-host>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA Women's World Cup 2019: host"@en ,
+                     "VM i fotboll för damer 2019: värdland"@sv ;
+    solid-memo:back "France"@en ,
+                    "Frankrike"@sv .
+
+<#women-2023-winner>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA Women's World Cup 2023: winner"@en ,
+                     "VM i fotboll för damer 2023: segrare"@sv ;
+    solid-memo:back "Spain"@en ,
+                    "Spanien"@sv .
+
+<#women-2023-host>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "FIFA Women's World Cup 2023: host"@en ,
+                     "VM i fotboll för damer 2023: värdland"@sv ;
+    solid-memo:back "Australia and New Zealand"@en ,
+                    "Australien och Nya Zeeland"@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

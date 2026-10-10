@@ -1,0 +1,686 @@
+@base <https://solid-memo.com/decks/html-elements/v2.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "HTML elements"@en ,
+                  "HTML-element"@sv ,
+                  "HTML 요소"@ko ,
+                  "HTML-Elemente"@de ,
+                  "Elementos HTML"@es ,
+                  "Éléments HTML"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    dcterms:description "55 everyday elements of HTML, the markup language of the web: the front says in plain words what an element is for, in English and Swedish, and the back gives its tag, such as <a> or <main>. Covers the document and its metadata, sections, text, lists, images and media, tables and forms; obsolete elements are left out. Based on the WHATWG HTML Living Standard (CC BY 4.0), with every card checked against MDN Web Docs and Wikidata."@en ,
+                        "55 vanliga element i HTML, webbens märkspråk: på framsidan står med vanliga ord vad ett element används till, på engelska och svenska, och på baksidan dess tagg, till exempel <a> eller <main>. Täcker dokumentet och dess metadata, avsnitt, text, listor, bilder och media, tabeller och formulär; föråldrade element är utelämnade. Bygger på WHATWG:s HTML Living Standard (CC BY 4.0), och varje kort är kontrollerat mot MDN Web Docs och Wikidata."@sv ,
+                        "웹의 마크업 언어인 HTML에서 자주 쓰는 요소 55개입니다. 앞면에는 요소가 무엇에 쓰이는지 쉬운 말로 영어와 스웨덴어로 적혀 있고, 뒷면에는 <a>나 <main> 같은 태그가 있습니다. 문서와 메타데이터, 섹션, 텍스트, 목록, 이미지와 미디어, 표, 폼을 다루며, 더 이상 쓰지 않는 요소는 뺐습니다. WHATWG HTML Living Standard(CC BY 4.0)를 바탕으로 하고, 모든 카드를 MDN Web Docs와 Wikidata로 확인했습니다."@ko ,
+                        "55 alltägliche Elemente von HTML, der Auszeichnungssprache des Webs: Auf der Vorderseite steht in einfachen Worten, wofür ein Element da ist, auf Englisch und Schwedisch, und auf der Rückseite sein Tag, etwa <a> oder <main>. Behandelt das Dokument und seine Metadaten, Abschnitte, Text, Listen, Bilder und Medien, Tabellen und Formulare; veraltete Elemente sind weggelassen. Beruht auf dem WHATWG HTML Living Standard (CC BY 4.0), und jede Karte ist anhand von MDN Web Docs und Wikidata geprüft."@de ,
+                        "55 elementos habituales de HTML, el lenguaje de marcado de la web: el anverso explica con palabras sencillas para qué sirve un elemento, en inglés y en sueco, y el reverso da su etiqueta, como <a> o <main>. Abarca el documento y sus metadatos, secciones, texto, listas, imágenes y multimedia, tablas y formularios; se omiten los elementos obsoletos. Basado en el HTML Living Standard del WHATWG (CC BY 4.0), con cada tarjeta comprobada en MDN Web Docs y Wikidata."@es ,
+                        "55 éléments courants de HTML, le langage de balisage du Web : le recto indique en termes simples à quoi sert un élément, en anglais et en suédois, et le verso donne sa balise, par exemple <a> ou <main>. Couvre le document et ses métadonnées, les sections, le texte, les listes, les images et médias, les tableaux et les formulaires ; les éléments obsolètes sont exclus. Fondé sur le HTML Living Standard du WHATWG (CC BY 4.0), chaque carte étant vérifiée sur MDN Web Docs et Wikidata."@fr ;
+    prov:wasDerivedFrom <https://html.spec.whatwg.org/multipage/> ,
+                        <https://www.wikidata.org/> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:computing ;
+    dcat:keyword "HTML"@en ,
+                 "web development"@en ,
+                 "markup"@en ,
+                 "elements"@en ,
+                 "tags"@en ,
+                 "WHATWG"@en ,
+                 "HTML"@sv ,
+                 "webbutveckling"@sv ,
+                 "märkspråk"@sv ,
+                 "element"@sv ,
+                 "taggar"@sv ,
+                 "WHATWG"@sv ,
+                 "HTML"@ko ,
+                 "웹 개발"@ko ,
+                 "마크업"@ko ,
+                 "요소"@ko ,
+                 "태그"@ko ,
+                 "WHATWG"@ko ,
+                 "HTML"@de ,
+                 "Webentwicklung"@de ,
+                 "Auszeichnungssprache"@de ,
+                 "Elemente"@de ,
+                 "Tags"@de ,
+                 "WHATWG"@de ,
+                 "HTML"@es ,
+                 "desarrollo web"@es ,
+                 "lenguaje de marcado"@es ,
+                 "elementos"@es ,
+                 "etiquetas"@es ,
+                 "WHATWG"@es ,
+                 "HTML"@fr ,
+                 "développement web"@fr ,
+                 "langage de balisage"@fr ,
+                 "éléments"@fr ,
+                 "balises"@fr ,
+                 "WHATWG"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/html-elements/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/html-elements/v1.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#html-elements> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#html-elements> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/2.5/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/licenses/by/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://html.spec.whatwg.org/multipage/> ,
+              <https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements> ,
+              <https://www.wikidata.org/> ,
+              <https://svenska.se/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ,
+                       <#review-6> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "The standard. 18 pages of the multipage edition of the WHATWG HTML Living Standard (the front page, the indices, the chapters that define the chosen elements and the chapter on obsolete features) were downloaded on 2026-10-04 (fetch_whatwg.sh; the front page says 'Living Standard — Last Updated 4 October 2026'), with the Acknowledgements page (licence notice), the rendering chapter (default CSS) and the link types chapter. The index of elements (indices.html#elements-3, 111 rows: h1–h6 share one row, and MathML math, SVG svg and autonomous custom elements are also listed) was extracted with elements_index.py. Obsolete and non-conforming elements are not in that index; they are listed in the chapter 'Obsolete features' (obsolete.html, section 16.2 'Non-conforming features'), which was converted to text and read to confirm that none of the chosen elements is listed there; its advice 'acronym: Use abbr instead' is the source of the abbr note."@en ,
+                 "Selection. From the index 55 elements were chosen that a web author meets every day, in seven groups: the document and its metadata (html, head, title, link, meta, style, body, script), sections (main, header, footer, nav, article, section, aside, h1), grouping content (p, hr, pre, blockquote, ol, ul, li, figure, figcaption, div), text (a, em, strong, q, abbr, code, sub, sup, mark, time, br, span), embedded content (img, iframe, video, audio, canvas), tables (table, tr, td, th) and forms and interactive elements (form, input, button, label, select, textarea, details, dialog). Each candidate had to be describable in plain words so that only one element of the standard answers the description; elements that failed that test, or that only make sense next to another, were left out (see Selection)."@en ,
+                 "Definitions. For each element its section in the standard (the id the-<element>-element) was read and the defining sentence extracted with spec_represents.py; where the section does not open with '<element> represents' (link, style, script, the headings, sub/sup, video, canvas) the defining sentence was found with grep_rest.sh. Facts used on the fronts or in the notes beyond the definition (for example that div is 'an element of last resort', that the header may hold a search form or logos, that a document has at most one main without the hidden attribute, the examples given for sub and sup, the default rendering of em, strong, pre, ol, ul, hr and q) were looked up with grep_claims.sh, grep_notes.sh, grep_more.sh and in the rendering chapter converted to text (to_text.py). Every card's first evidence entry quotes the sentences used inside quotation marks; where it adds a rule from the rendering chapter, an example, a content model or the index's one-line description, that part is labelled with where it comes from and quoted separately (see Quality control, round 3)."@en ,
+                 "Fronts. Each front says what the element is for in plain words, written in plain words from the standard's definition; several keep the standard's own key words (for example 'stress emphasis', 'strong importance, seriousness or urgency', 'a data cell in a table', 'thematic break', 'disclosure widget'), which is why the deck is CC BY 4.0 (see Licensing). Where an element alone would be a hard guess, the front adds an example taken from the standard (a blog or forum post for article, a scene change for hr, x₁₀ and E = mc² for sub and sup, a postal address for br). The back is the start tag in angle brackets, with no attributes, tagged as text in no language (zxx)."@en ,
+                 "Ambiguity checks. Every front was compared with the index's descriptions of all the other elements, chosen or not, to make sure it fits exactly one. Close pairs were separated on purpose: head (metadata) versus header (introductory content) and body (all contents) versus main (the main content); section versus div versus article; blockquote (a block) versus q (in the running text); em versus strong versus mark; div versus span; td versus th; label (caption of a form control) versus the omitted legend (caption of a fieldset); button (labelled by its content) versus input buttons (labelled by their value attribute); img versus picture, which the index describes with the same word 'Image' (picture is a container that offers sources to an img, so 'An image' is img, and the note says so); ul versus menu (a toolbar of commands, named in the note); iframe versus object (the index calls iframe a 'Child navigable' and object an 'Image, child navigable, or plugin'; the front says 'frame', and the note gives the name 'inline frame'). Only h1 of the six heading elements is in the deck, because fronts for h2–h6 would differ only by a level number."@en ,
+                 "Cross-check against MDN (verification). For every element the source of its MDN Web Docs page (mdn/content on GitHub, files/en-us/web/html/reference/elements/<element>/index.md) was downloaded (fetch_mdn.sh) and its first paragraph and status flags printed (mdn_summary.py). Every card's MDN summary agreed with the standard's definition and the front, and no page carries a deprecated or non-standard flag. The second evidence entry of each card quotes MDN's first sentence. No wording or selection was taken from MDN: fronts that came close to MDN's wording in the first draft (title, textarea, span) were reworded from the standard instead (see Quality control)."@en ,
+                 "Cross-check against Wikidata. A SPARQL query (q1.rq) found the Wikidata item of every element of the deck as an instance of a subclass of 'HTML element' (Q179551); wd_items.py then read each item's short name (P1813) and 'described at URL' (P973). Every one of the 55 items has P1813 equal to the tag name and a P973 link to the very section of the standard used for the card, so each card has two Wikidata checks that the builder ran against live Wikidata: P1813 = the tag and P973 = the section's URL. Two items (meta, dialog) carry a second, unrelated P973 URL besides the standard's; the checks test only the standard's URL."@en ,
+                 "Swedish. The Swedish fronts and notes are translations of the English fronts and notes. Swedish terms that carry the meaning were checked against Swedish dictionaries and Wikidata: in Svensk ordbok or SAOL via the svenska.se search API (svenska.py): hyperlänk, stycke, rubrik, sidfot, radbrytning, förkortning, akronym, dialogruta, rullgardinsmeny, upphöjd, formulär, bildtext, maskinläsbar, fristående, betoning, sökträff, scenbyte, tabell, webbsida, programkod; and as Swedish labels or aliases of Wikidata items (wd_search.py), each then made a label check on its card: hyperlänk (Q102014), stycke (Q194431), rubrik (Q3529597), sidfot (Q526434), förkortning (Q102786), akronym (Q101244), dialogruta and dialogfönster (Q86915), rullgardinsmeny (Q783066), metadata (Q180160), teckenkodning (Q184759), citat (Q206287), tabell (Q496946), webbsida (Q36774), programkod (Q128751), knapp (Q1335171) and Kryssruta (Q23544, written kryssruta in running text). Words not found in either dictionary and not in Wikidata (stilmall, sidospalt, bitmapp, löptext) were avoided; the remaining compounds (rotelement, datacell, rubrikcell, formulärfält, formulärkontroll, navigeringslänkar, videospelare, ljudström, rityta, spelgrafik, textfält) are ordinary Swedish compounds of dictionary words. The other words looked up gave these results: skript (SO: 'instruktioner eller kommandon till datorprogram'; used on canvas), etikett (SO: 'lapp (som sätts fast på vara) som anger en varas namn, innehåll m.m.'; used on label and button in the transferred sense of the text that names a form control), bokmärke (SO entry; used on title in the sense of a saved link), navigering (SAOL entry; used in navigeringslänkar on nav), nedsänkt (no entry of its own: SAOL returns the verb nedsänka, whose past participle it is; kept on sub as the counterpart of upphöjd), initialord (SO and SAOL entries; not used), modal and flik (entries, but in senses unrelated to user interfaces; not used). Element and attribute names (title, base, link, style, script, type, value, <summary>) stay in their English form because they are typed literally."@en ,
+                 "Everything was written into the dossier with gen.py from the card data, built with the builder (which ran all Wikidata checks against live Wikidata) and validated with the app's SHACL and DCAT-AP validators (scripts/validate_sources.ts html-elements). The fixes from the review rounds 1–3 were applied directly to the dossier with fix_qc1.py (recorded under queries) and the deck was built and validated again."@en ,
+                 "Selection: 55 elements of the HTML Living Standard (WHATWG), last updated 4 October 2026: <html>, <head>, <title>, <link>, <meta>, <style>, <body>, <script>, <main>, <header>, <footer>, <nav>, <article>, <section>, <aside>, <h1>, <p>, <hr>, <pre>, <blockquote>, <ol>, <ul>, <li>, <figure>, <figcaption>, <div>, <a>, <em>, <strong>, <q>, <abbr>, <code>, <sub>, <sup>, <mark>, <time>, <br>, <span>, <img>, <iframe>, <video>, <audio>, <canvas>, <table>, <tr>, <td>, <th>, <form>, <input>, <button>, <label>, <select>, <textarea>, <details>, <dialog>. Included: elements from the standard's index of elements that web authors use every day and that can be described in plain words so that exactly one element fits. Left out: everything obsolete or non-conforming (the standard lists those, such as applet, acronym, center, font, marquee, big, frame, strike and tt, only in section 16.2 of its chapter 'Obsolete features', not in the index); h2–h6, whose fronts would differ from h1 only by a number; elements whose purpose cannot be told apart from a chosen element without technical detail, or that only make sense as the child of another element: b, i, u, s, small, cite, dfn, var, samp, kbd, data, bdi, bdo, wbr, ins, del, ruby, rt, rp (text-level elements whose distinctions are subtle), tbody, thead, tfoot, col, colgroup, caption (table parts), optgroup, option, datalist, selectedcontent, legend, fieldset, output, progress, meter (further form parts), source, track, picture, map, area, embed, object (further embedded content), summary, menu, search, hgroup, address, dl, dt, dd, base, noscript, template and slot; and the foreign elements MathML math and SVG svg and autonomous custom elements. Several omitted elements (<menu>, <picture>, <summary>) are named in back notes where they help to tell a pair apart, as are elements of other cards (<a>, <link>, <input type=\"submit\">). The selection is this deck's own, not copied from a list."@en ,
+                 "Licensing: The deck is CC BY 4.0. Its main content source is the WHATWG HTML Living Standard, licensed under CC BY 4.0 (the code portions under BSD 3-Clause, not used here). The fronts are original plain-language wording, but they are based on the standard's definitions and several keep its key words ('stress emphasis', 'strong importance, seriousness or urgency', 'a row of cells in a table', 'a data cell in a table', 'a header cell in a table', 'thematic break', 'disclosure widget', 'a section quoted from another source'), and the examples on some fronts come from the standard; rather than argue that every such phrase is too short to be protected, the deck takes the standard's licence: it is CC BY 4.0, with the WHATWG credited as a source in the deck (prov:wasDerivedFrom) and in the provenance report, which satisfies CC BY 4.0's attribution condition. The selection of 55 elements is this deck's own. Wikidata (CC0) supplied the element items used for the machine checks, the Swedish terms checked against its labels and the expansion 'inline frame' in the iframe note; CC0 sets no conditions. MDN Web Docs prose is CC BY-SA 2.5 or later and was used for verification only: each card was checked against its MDN page, and fronts that had drifted close to MDN's wording (title, textarea, span, and in review hr and q) were reworded from the standard so that no MDN text is in the deck; the provenance report quotes MDN's first sentences verbatim only as the record of the check; those quotations remain CC BY-SA 2.5 (or later) text by Mozilla Contributors, attributed as such in the MDN source entry, and are not part of the deck's cards. Svensk ordbok and SAOL (svenska.se, © Svenska Akademien) were used for verification only, to confirm Swedish words; no definition or example was copied. Facts about what an element is for are not themselves protected, and tag names are the language's interface, needed to state the fact at all."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Every front checked against the element's definition in the WHATWG HTML Living Standard and against all other entries of its index of elements for a single answer; every card cross-checked against MDN Web Docs and its Wikidata item (P1813, P973); Swedish terms against Svensk ordbok, SAOL and Wikidata labels; builder and validator checks."@en ;
+    rdfs:comment "Scope: All 55 cards."@en ,
+                 "Outcome: All 55 elements are current (in the standard's index of elements, none flagged deprecated or non-standard on MDN), every front matches the standard's definition and MDN's description, and every element's Wikidata item names the tag (P1813) and links the section of the standard used (P973). The findings record the licence decision, the close pairs that were separated, wording moved away from MDN and the Swedish words that were replaced."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 55 cards against the review's own download of the one-page HTML Living Standard (last updated 4 October 2026), its index of elements (111 rows) and live Wikidata (all 129 checks)."@en ,
+                 "Outcome: No factual errors. Every front, note and evidence quote matched the standard, each front had exactly one answer, all 55 elements are current and all Wikidata checks passed. Four optional suggestions: three were applied, one (the Kryssruta label check) was declined."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 55 cards, title, description, keywords and notes in English and Swedish; language tags in the dossier and the built TTL."@en ,
+                 "Outcome: Language tags correct throughout (backs zxx, fronts and notes en+sv, nothing untagged); title, description and keywords fine; Swedish terms match Wikidata labels. One warning (the word 'omslag' on section) and five suggestions; all six were applied."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: Every source's licence and its evidence, every card's WHATWG evidence quote against the spec chapters, 20 MDN quotes, 10 element items and 8 Swedish-label items on live Wikidata, the method, selection, licensing and queries."@en ,
+                 "Outcome: The deck licence (CC BY 4.0) complies with every source. Four warnings: an editorial paraphrase inside the script quote that was also wrong, MDN wording that had reached the hr and q fronts, and extra authorship remarks in the method, selection and licensing; all fixed. Four suggestions on attribution and record-keeping; all applied."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: 33 cards: the 24 changed in round 3 plus every third card in dossier order; all 129 Wikidata checks against live Wikidata; WHATWG and MDN quotes in the reviewed cards; metadata, description, keywords, licence decision, documentation, the quality-control log and the built files."@en ,
+                 "Outcome: No errors found; every fix claimed in rounds 1–3 is in the dossier, all Wikidata checks pass and the built deck validates. One suggestion: the span front tied the element to paragraphs; applied."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: All 55 cards in full against their evidence, language tags, Swedish, title, keywords, study direction, licence, description and the round 4 fix; the WHATWG links chapter fetched to check the <a>/<link> question."@en ,
+                 "Outcome: No errors found. One warning: the front 'A hyperlink' could also be answered with <link>, which the standard says can create links too; fixed. Two suggestions (selection wording, English footer front); both applied."@en .
+
+<#review-6>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 1, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card changed."@en .
+
+<https://html.spec.whatwg.org/multipage/>
+    dcterms:title "HTML Living Standard (multipage version, last updated 4 October 2026)" ;
+    dcterms:creator "WHATWG (Apple, Google, Mozilla, Microsoft)" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    rdfs:comment "End of https://html.spec.whatwg.org/multipage/acknowledgements.html (fetched 2026-10-04): \"Copyright © WHATWG (Apple, Google, Mozilla, Microsoft). This work is licensed under a Creative Commons Attribution 4.0 International License. To the extent portions of it are incorporated into source code, such portions in the source code are licensed under the BSD 3-Clause License instead.\""@en .
+
+<https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements>
+    dcterms:title "MDN Web Docs: HTML elements reference (source in the mdn/content repository)" ;
+    dcterms:creator "Mozilla Contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/2.5/> ;
+    rdfs:comment "https://developer.mozilla.org/en-US/docs/MDN/Writing_guidelines/Attrib_copyright_license (fetched 2026-10-04): \"Unless otherwise indicated, the content is available under the terms of the Creative Commons Attribution-ShareAlike license (CC-BY-SA), v2.5 or any later version.\" \"Code samples added on or after August 20, 2010 are in the public domain CC0.\" \"When reusing the content on MDN Web Docs, you need to ensure that attribution is given to the material as well as to 'Mozilla Contributors'.\" (the page puts Mozilla Contributors in double quotation marks)"@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing (fetched 2026-10-04): \"All data in Wikidata has a CC0 license.\" Page footer: \"All structured data from the main, Property, Lexeme, and EntitySchema namespaces is available under the Creative Commons CC0 License\"."@en .
+
+<https://svenska.se/>
+    dcterms:title "Svensk ordbok (SO) and Svenska Akademiens ordlista (SAOL), via svenska.se" ;
+    dcterms:creator "Svenska Akademien" ;
+    rdfs:comment "https://svenska.se/ (fetched 2026-10-04), page footer: \"© Svenska Akademien\"; no open licence is stated. Used for verification only: no wording was taken from it."@en .
+
+<#html>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The root element of an HTML document"@en ,
+                     "Rotelementet i ett HTML-dokument"@sv ;
+    solid-memo:back "<html>"@zxx .
+
+<#head>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The container for the document's metadata"@en ,
+                     "Behållaren för dokumentets metadata"@sv ;
+    solid-memo:back "<head>"@zxx .
+
+<#title>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The document's title or name, used for example in bookmarks and the browser history"@en ,
+                     "Dokumentets titel eller namn, som används till exempel i bokmärken och webbläsarhistoriken"@sv ;
+    solid-memo:back "<title>"@zxx .
+
+<#link>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Metadata that links the document to another resource, such as a style sheet or an icon"@en ,
+                     "Metadata som kopplar dokumentet till en annan resurs, till exempel en CSS-fil eller en ikon"@sv ;
+    solid-memo:back "<link>"@zxx ;
+    solid-memo:backNote "Clickable links in the content are made with <a>."@en ,
+                        "Klickbara länkar i innehållet görs med <a>."@sv .
+
+<#meta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Metadata that the <title>, <base>, <link>, <style> and <script> elements cannot express, such as the character encoding"@en ,
+                     "Metadata som elementen <title>, <base>, <link>, <style> och <script> inte kan uttrycka, till exempel teckenkodningen"@sv ;
+    solid-memo:back "<meta>"@zxx .
+
+<#style>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Embedded CSS style information"@en ,
+                     "Inbäddad stilinformation i CSS"@sv ;
+    solid-memo:back "<style>"@zxx .
+
+<#body>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The contents of the document, as opposed to its metadata"@en ,
+                     "Dokumentets innehåll, till skillnad från dess metadata"@sv ;
+    solid-memo:back "<body>"@zxx .
+
+<#script>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Embedded or external program code, usually JavaScript"@en ,
+                     "Inbäddad eller extern programkod, oftast JavaScript"@sv ;
+    solid-memo:back "<script>"@zxx ;
+    solid-memo:backNote "It can also hold a data block, such as JSON, that the browser does not run."@en ,
+                        "Det kan också innehålla ett datablock, till exempel JSON, som webbläsaren inte kör."@sv .
+
+<#main>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The main content of the document"@en ,
+                     "Dokumentets huvudinnehåll"@sv ;
+    solid-memo:back "<main>"@zxx ;
+    solid-memo:backNote "A document may have only one <main> without the hidden attribute."@en ,
+                        "Ett dokument får bara ha ett <main> utan attributet hidden."@sv .
+
+<#header>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Introductory content for a page or section, such as its heading, a logo or a search form"@en ,
+                     "Inledande innehåll för en sida eller ett avsnitt, till exempel dess rubrik, en logotyp eller ett sökformulär"@sv ;
+    solid-memo:back "<header>"@zxx .
+
+<#footer>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A footer for a page or section, with information such as who wrote it and copyright details"@en ,
+                     "En sidfot för en sida eller ett avsnitt, till exempel med upphovsperson och uppgifter om upphovsrätt"@sv ;
+    solid-memo:back "<footer>"@zxx .
+
+<#nav>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A section of navigation links"@en ,
+                     "Ett avsnitt med navigeringslänkar"@sv ;
+    solid-memo:back "<nav>"@zxx .
+
+<#article>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A self-contained composition that could be distributed on its own, such as a blog post or a forum post"@en ,
+                     "En fristående innehållsdel som skulle kunna spridas på egen hand, till exempel ett blogginlägg eller ett foruminlägg"@sv ;
+    solid-memo:back "<article>"@zxx .
+
+<#section>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A generic thematic grouping of content, typically with its own heading"@en ,
+                     "En allmän tematisk gruppering av innehåll, normalt med en egen rubrik"@sv ;
+    solid-memo:back "<section>"@zxx ;
+    solid-memo:backNote "Not a mere styling wrapper: for that, use <div>."@en ,
+                        "Inte bara en behållare för formatering: till det används <div>."@sv .
+
+<#aside>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Content only tangentially related to the content around it, often shown as a sidebar"@en ,
+                     "Innehåll som bara har ett löst samband med innehållet runt omkring, ofta visat i en spalt vid sidan av"@sv ;
+    solid-memo:back "<aside>"@zxx .
+
+<#h1>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A heading for a top-level section"@en ,
+                     "En rubrik för ett avsnitt på översta nivån"@sv ;
+    solid-memo:back "<h1>"@zxx ;
+    solid-memo:backNote "<h2> to <h6> head ever deeper subsections."@en ,
+                        "<h2> till <h6> är rubriker för allt djupare underavsnitt."@sv .
+
+<#p>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A paragraph"@en ,
+                     "Ett stycke"@sv ;
+    solid-memo:back "<p>"@zxx .
+
+<#hr>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A paragraph-level thematic break, such as a scene change in a story"@en ,
+                     "Ett tematiskt avbrott på styckenivå, till exempel ett scenbyte i en berättelse"@sv ;
+    solid-memo:back "<hr>"@zxx ;
+    solid-memo:backNote "Browsers draw it as a horizontal line by default."@en ,
+                        "Webbläsare visar det som en vågrät linje som standard."@sv .
+
+<#pre>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A block of preformatted text, shown with its spaces and line breaks as written"@en ,
+                     "Ett block med förformaterad text som visas med mellanslag och radbrytningar som de är skrivna"@sv ;
+    solid-memo:back "<pre>"@zxx .
+
+<#blockquote>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A section quoted from another source, set off as a block of its own"@en ,
+                     "Ett avsnitt som citeras från en annan källa, avskilt som ett eget block"@sv ;
+    solid-memo:back "<blockquote>"@zxx .
+
+<#ol>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A list whose order matters, numbered by default"@en ,
+                     "En lista där ordningen spelar roll, numrerad som standard"@sv ;
+    solid-memo:back "<ol>"@zxx .
+
+<#ul>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A list whose order does not matter, with bullets by default"@en ,
+                     "En lista där ordningen inte spelar roll, med punkter som standard"@sv ;
+    solid-memo:back "<ul>"@zxx ;
+    solid-memo:backNote "<menu> is a similar list, meant as a toolbar of commands."@en ,
+                        "<menu> är en liknande lista, tänkt som ett verktygsfält med kommandon."@sv .
+
+<#li>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "An item in a list"@en ,
+                     "Ett objekt i en lista"@sv ;
+    solid-memo:back "<li>"@zxx .
+
+<#figure>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Self-contained content, such as an image or a diagram, with an optional caption"@en ,
+                     "Fristående innehåll, till exempel en bild eller ett diagram, med en valfri bildtext"@sv ;
+    solid-memo:back "<figure>"@zxx .
+
+<#figcaption>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The caption of a figure"@en ,
+                     "Bildtexten till en figur"@sv ;
+    solid-memo:back "<figcaption>"@zxx ;
+    solid-memo:backNote "It goes first or last inside <figure>."@en ,
+                        "Det placeras först eller sist i <figure>."@sv .
+
+<#div>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A generic container for blocks of content, with no meaning of its own"@en ,
+                     "En allmän behållare för innehållsblock, utan egen betydelse"@sv ;
+    solid-memo:back "<div>"@zxx ;
+    solid-memo:backNote "The HTML standard calls it an element of last resort, for when no other element fits."@en ,
+                        "HTML-standarden kallar det en sista utväg, när inget annat element passar."@sv .
+
+<#a>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A hyperlink in the content, labelled by its own content"@en ,
+                     "En hyperlänk i innehållet som får sin etikett från sitt eget innehåll"@sv ;
+    solid-memo:back "<a>"@zxx ;
+    solid-memo:backNote "<link> links the whole document to resources such as style sheets."@en ,
+                        "<link> kopplar hela dokumentet till resurser som CSS-filer."@sv .
+
+<#em>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Stress emphasis, which changes the meaning of the sentence"@en ,
+                     "Betoning som ändrar meningens innebörd"@sv ;
+    solid-memo:back "<em>"@zxx ;
+    solid-memo:backNote "Shown in italics by default."@en ,
+                        "Visas som standard i kursiv stil."@sv .
+
+<#strong>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Strong importance, seriousness or urgency"@en ,
+                     "Stor vikt, allvar eller brådska"@sv ;
+    solid-memo:back "<strong>"@zxx ;
+    solid-memo:backNote "Shown in a bolder weight (normally bold) by default."@en ,
+                        "Visas som standard i fetare stil (normalt fetstil)."@sv .
+
+<#q>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A quotation within the running text"@en ,
+                     "Ett citat i den löpande texten"@sv ;
+    solid-memo:back "<q>"@zxx ;
+    solid-memo:backNote "Browsers add the quotation marks."@en ,
+                        "Webbläsare lägger till citattecknen."@sv .
+
+<#abbr>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "An abbreviation or acronym"@en ,
+                     "En förkortning eller akronym"@sv ;
+    solid-memo:back "<abbr>"@zxx ;
+    solid-memo:backNote "Its title attribute can give the expansion. The old <acronym> element is obsolete: use <abbr>."@en ,
+                        "Attributet title kan ange vad förkortningen står för. Det gamla elementet <acronym> är föråldrat: använd <abbr>."@sv .
+
+<#code>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A fragment of computer code"@en ,
+                     "En bit datorkod"@sv ;
+    solid-memo:back "<code>"@zxx .
+
+<#sub>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A subscript, such as the 10 in x₁₀"@en ,
+                     "Nedsänkt text, till exempel tian i x₁₀"@sv ;
+    solid-memo:back "<sub>"@zxx .
+
+<#sup>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A superscript, such as the 2 in E = mc²"@en ,
+                     "Upphöjd text, till exempel tvåan i E = mc²"@sv ;
+    solid-memo:back "<sup>"@zxx .
+
+<#mark>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Text highlighted for reference because of its relevance elsewhere, such as a search match"@en ,
+                     "Text som markerats för att den är relevant i ett annat sammanhang, till exempel en sökträff"@sv ;
+    solid-memo:back "<mark>"@zxx .
+
+<#time>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A date or time, together with a machine-readable form of it"@en ,
+                     "Ett datum eller en tidpunkt, tillsammans med en maskinläsbar form av det"@sv ;
+    solid-memo:back "<time>"@zxx .
+
+<#br>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A line break, as in a poem or a postal address"@en ,
+                     "En radbrytning, som i en dikt eller en postadress"@sv ;
+    solid-memo:back "<br>"@zxx .
+
+<#span>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A generic container for a run of text, with no meaning of its own"@en ,
+                     "En allmän behållare för en bit text, utan egen betydelse"@sv ;
+    solid-memo:back "<span>"@zxx .
+
+<#img>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "An image"@en ,
+                     "En bild"@sv ;
+    solid-memo:back "<img>"@zxx ;
+    solid-memo:backNote "A <picture> element can wrap it to offer alternative image sources."@en ,
+                        "Ett <picture>-element kan omsluta det för att erbjuda alternativa bildkällor."@sv .
+
+<#iframe>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A frame that shows another web page inside this one"@en ,
+                     "En ram som visar en annan webbsida inuti den här"@sv ;
+    solid-memo:back "<iframe>"@zxx ;
+    solid-memo:backNote "The i stands for inline: an inline frame."@en ,
+                        "Bokstaven i står för engelskans inline, alltså en ”inline frame”."@sv .
+
+<#video>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A video player"@en ,
+                     "En videospelare"@sv ;
+    solid-memo:back "<video>"@zxx .
+
+<#audio>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A player for sound or an audio stream"@en ,
+                     "En spelare för ljud eller en ljudström"@sv ;
+    solid-memo:back "<audio>"@zxx .
+
+<#canvas>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A drawing surface on which scripts draw graphics, such as charts or game graphics"@en ,
+                     "En rityta som skript ritar grafik på, till exempel diagram eller spelgrafik"@sv ;
+    solid-memo:back "<canvas>"@zxx .
+
+<#table>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A table of data in rows and columns"@en ,
+                     "En tabell med data i rader och kolumner"@sv ;
+    solid-memo:back "<table>"@zxx .
+
+<#tr>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A row of cells in a table"@en ,
+                     "En rad med celler i en tabell"@sv ;
+    solid-memo:back "<tr>"@zxx .
+
+<#td>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A data cell in a table"@en ,
+                     "En datacell i en tabell"@sv ;
+    solid-memo:back "<td>"@zxx .
+
+<#th>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A header cell in a table"@en ,
+                     "En rubrikcell i en tabell"@sv ;
+    solid-memo:back "<th>"@zxx .
+
+<#form>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A form that the user can fill in and submit"@en ,
+                     "Ett formulär som användaren kan fylla i och skicka in"@sv ;
+    solid-memo:back "<form>"@zxx .
+
+<#input>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A form field whose kind, such as text, checkbox or date, is set by its type attribute"@en ,
+                     "Ett formulärfält vars sort, till exempel text, kryssruta eller datum, anges med attributet type"@sv ;
+    solid-memo:back "<input>"@zxx .
+
+<#button>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A button labelled by its own content"@en ,
+                     "En knapp som får sin etikett från sitt eget innehåll"@sv ;
+    solid-memo:back "<button>"@zxx ;
+    solid-memo:backNote "<input type=\"submit\"> also makes a button, but takes its label from the value attribute."@en ,
+                        "<input type=\"submit\"> ger också en knapp, men den får sin etikett från attributet value."@sv .
+
+<#label>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A caption for a form control"@en ,
+                     "En etikett för en formulärkontroll"@sv ;
+    solid-memo:back "<label>"@zxx .
+
+<#select>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A control for choosing among a set of options, such as a drop-down list"@en ,
+                     "En kontroll för att välja bland ett antal alternativ, till exempel en rullgardinsmeny"@sv ;
+    solid-memo:back "<select>"@zxx .
+
+<#textarea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A text field for several lines of plain text"@en ,
+                     "Ett textfält för flera rader oformaterad text"@sv ;
+    solid-memo:back "<textarea>"@zxx .
+
+<#details>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A disclosure widget that the user can open to see more information"@en ,
+                     "En utfällbar ruta som användaren kan öppna för att se mer information"@sv ;
+    solid-memo:back "<details>"@zxx ;
+    solid-memo:backNote "Its always-visible label is the <summary> element."@en ,
+                        "Dess alltid synliga rubrik är elementet <summary>."@sv .
+
+<#dialog>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "A dialog box or window"@en ,
+                     "En dialogruta eller ett dialogfönster"@sv ;
+    solid-memo:back "<dialog>"@zxx .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

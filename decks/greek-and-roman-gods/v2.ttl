@@ -1,0 +1,602 @@
+@base <https://solid-memo.com/decks/greek-and-roman-gods/v2.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Greek and Roman gods"@en ,
+                  "Grekiska och romerska gudar"@sv ,
+                  "그리스·로마 신"@ko ,
+                  "Griechische und römische Götter"@de ,
+                  "Dioses griegos y romanos"@es ,
+                  "Dieux grecs et romains"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "43 cards on 22 Greek gods: the twelve Olympians (counting both Hestia and Dionysus, as lists differ), Hades, Persephone, Eros, Cronus and five personified gods such as Helios and Nike. One kind of card asks for the god's Roman counterpart (Zeus → Jupiter), the other for what the god is god of (Zeus → the sky and thunder), in English and Swedish. Correspondences, names and domains from Wikidata and the 1911 Encyclopædia Britannica, in our own words, checked against the Theoi Project and Swedish Wikipedia."@en ,
+                        "43 kort om 22 grekiska gudar: de tolv olympierna (både Hestia och Dionysos medräknade, eftersom listorna skiljer sig åt), Hades, Persefone, Eros, Kronos och fem personifierade gudar som Helios och Nike. Den ena sortens kort frågar efter gudens romerska motsvarighet (Zeus → Jupiter), den andra efter vad guden är gud för (Zeus → himlen och åskan), på engelska och svenska. Motsvarigheter, namn och gudarnas områden från Wikidata och Encyclopædia Britannica från 1911, med egna ord, kontrollerade mot Theoi Project och svenska Wikipedia."@sv ,
+                        "그리스 신 22명에 관한 카드 43장. 올림포스 12신(목록마다 다르므로 헤스티아와 디오니소스를 모두 포함), 하데스, 페르세포네, 에로스, 크로노스, 그리고 헬리오스와 니케 같은 의인화된 신 다섯을 다룬다. 한 종류의 카드는 그 신에 해당하는 로마 신을 묻고(제우스 → 유피테르), 다른 종류는 그 신이 무엇의 신인지 묻는다(제우스 → 하늘과 천둥). 영어와 스웨덴어로 되어 있다. 대응 관계, 이름, 관장 영역은 Wikidata와 1911년판 브리태니커 백과사전에서 가져와 직접 다시 썼으며, Theoi Project와 스웨덴어 위키백과로 검증했다."@ko ,
+                        "43 Karten zu 22 griechischen Göttern: die zwölf Olympier (Hestia und Dionysos beide mitgezählt, da die Listen voneinander abweichen), Hades, Persephone, Eros, Kronos und fünf personifizierte Götter wie Helios und Nike. Die eine Art von Karte fragt nach dem römischen Gegenstück des Gottes (Zeus → Jupiter), die andere danach, wofür der Gott zuständig ist (Zeus → der Himmel und der Donner), auf Englisch und Schwedisch. Entsprechungen, Namen und Zuständigkeiten aus Wikidata und der Encyclopædia Britannica von 1911, in eigenen Worten, abgeglichen mit dem Theoi Project und der schwedischsprachigen Wikipedia."@de ,
+                        "43 tarjetas sobre 22 dioses griegos: los doce olímpicos (contando tanto a Hestia como a Dioniso, ya que las listas difieren), Hades, Perséfone, Eros, Crono y cinco dioses personificados como Helios y Nike. Un tipo de tarjeta pregunta por el equivalente romano del dios (Zeus → Júpiter); el otro, por aquello de lo que es dios (Zeus → el cielo y el trueno), en inglés y en sueco. Equivalencias, nombres y dominios tomados de Wikidata y de la Encyclopædia Britannica de 1911, con nuestras propias palabras, y comprobados con el Theoi Project y la Wikipedia en sueco."@es ,
+                        "43 cartes sur 22 dieux grecs : les douze Olympiens (en comptant à la fois Hestia et Dionysos, car les listes diffèrent), Hadès, Perséphone, Éros, Cronos et cinq dieux personnifiés comme Hélios et Niké. Un type de carte demande l’équivalent romain du dieu (Zeus → Jupiter), l’autre ce dont il est le dieu (Zeus → le ciel et le tonnerre), en anglais et en suédois. Correspondances, noms et domaines tirés de Wikidata et de l’Encyclopædia Britannica de 1911, avec nos propres mots, et vérifiés avec le Theoi Project et la Wikipédia en suédois."@fr ;
+    prov:wasDerivedFrom <https://www.wikidata.org/> ,
+                        <https://en.wikisource.org/wiki/1911_Encyclop%C3%A6dia_Britannica> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:mythology ,
+               topic:history ;
+    dcat:keyword "Greek mythology"@en ,
+                 "Roman mythology"@en ,
+                 "Olympians"@en ,
+                 "gods"@en ,
+                 "grekisk mytologi"@sv ,
+                 "romersk mytologi"@sv ,
+                 "olympier"@sv ,
+                 "gudar"@sv ,
+                 "그리스 신화"@ko ,
+                 "로마 신화"@ko ,
+                 "올림포스 12신"@ko ,
+                 "신들"@ko ,
+                 "griechische Mythologie"@de ,
+                 "römische Mythologie"@de ,
+                 "Olympier"@de ,
+                 "Götter"@de ,
+                 "mitología griega"@es ,
+                 "mitología romana"@es ,
+                 "olímpicos"@es ,
+                 "dioses"@es ,
+                 "mythologie grecque"@fr ,
+                 "mythologie romaine"@fr ,
+                 "Olympiens"@fr ,
+                 "dieux"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/greek-and-roman-gods/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/greek-and-roman-gods/v1.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#greek-and-roman-gods> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#greek-and-roman-gods> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/> ,
+              <https://en.wikisource.org/wiki/1911_Encyclop%C3%A6dia_Britannica> ,
+              <https://www.theoi.com/> ,
+              <https://sv.wikipedia.org/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Finding the right Wikidata property. The brief suggested P2959, which is \"permanent duplicated item\" and does not link gods. The statements of Zeus (Q34201) were listed (query 1); the Greek–Roman correspondences are recorded with P460 \"said to be the same as\" (Zeus → Jupiter Q4649) and the god's domains with P2925 \"domain of saint or deity\"."@en ,
+                 "Candidates. The twelve Olympians (Zeus, Hera, Poseidon, Demeter, Athena, Apollo, Artemis, Ares, Aphrodite, Hephaestus, Hermes, and both Hestia and Dionysus, since lists of the twelve differ on these two), plus Hades, Persephone, Eros and Cronus, and the personified gods Helios, Selene, Eos, Nike and Tyche, whose Roman counterparts are one-to-one. Their P460 values with English and Swedish labels were fetched with query 2; Eros, Helios, Nike and Dionysus were looked up by their English Wikipedia sitelinks (API call 4), and the labels, aliases and Swedish sitelinks of all Greek and Roman items with API call 5."@en ,
+                 "Choosing the counterpart. P460 often lists several equivalents (Zeus: Jupiter, Thor, Amun, Indra and others). For each god the Roman deity among the P460 values was taken; where two Roman gods were listed (Hades: Pluto and Dis Pater; Dionysus: Bacchus and Liber; Persephone: Proserpina and Libera; Selene: Luna and Diana; Eros: Cupid via Q5011), the choice was made from the content sources and the other is mentioned in a note where it is common: Pluto, whose Wikidata description is \"god in Roman religion, Plouton in Greek\" and of whom the 1911 Britannica (\"Pluto\") says that among the Romans Hades \"was usually called Dis pater ... and Orcus, although the name Pluto is often used\" (so the card states this convention in its note); Bacchus, \"ancient Roman deity of wine\" in Wikidata, which the 1911 Britannica (\"Liber and Libera\") gives as another name of Liber; Proserpina, \"the Latin form of Persephone\" (1911 Britannica, \"Proserpine\"), Libera being only \"sometimes identified\" with her; Luna, \"Roman goddess of the Moon\" in Wikidata, Diana being Artemis's counterpart; Cupid, \"Roman deity, counterpart of Eros\" in Wikidata and \"the Latin name for the god of love, Eros\" in the 1911 Britannica (\"Cupid\"). The Theoi title lines agree with every choice but did not decide any (as first drafted, this step used them as the tie-break; changed in review round 3)."@en ,
+                 "Names on the cards. English names are the Wikidata English labels (Cronus, Hephaestus, Mercury, Vulcan, Neptune, Saturn, Cupid). Swedish names are the Wikidata Swedish labels (Afrodite, Hefaistos, Persefone, Kronos, Apollon, Mercurius, Vulcanus, Neptunus, Saturnus, Amor), except where Wikidata had none: Dionysus (Q41680) has no Swedish label (only the misspelt alias \"Dinosys\"), so \"Dionysos\" was taken from the item's Swedish Wikipedia sitelink title recorded in Wikidata (API call 5, CC0) and confirmed in the article itself; Sol (Q1199937) has the Swedish label \"Sol Indiges\" and the alias \"Sol\", and \"Sol\" was used. Each Swedish name was confirmed against the Swedish Wikipedia article (API calls 9–11)."@en ,
+                 "Domains. The domains of each god were taken from Wikidata (P2925 values with their English and Swedish labels, queries 3a and 3b, and the items' English descriptions) and written as a short phrase in our own words in English and Swedish, keeping only the god's main, uncontested domains. Apollo has no P2925 statement and is typed only as a \"solar deity\", a late identification; his domains (music, prophecy and healing) were taken from the 1911 Encyclopædia Britannica article (fetched from Wikisource, API call 7). Persephone has no P2925 statement and Wikidata describes her only as goddess of the seasons and queen of the underworld; her answer (the underworld and spring vegetation) follows the 1911 Britannica article \"Proserpine\" (query 14). The Dionysus answer is \"wine\" (Wikidata P2925), with his vegetation aspect and ecstatic worship from the 1911 Britannica article in a note; the Tyche answer is \"fortune\", Wikidata's description (both shortened in review rounds 1 and 3, see there). Swedish answers name the domains in the definite form (\"kriget\", \"kärleken och skönheten\"), as Swedish names a god's domain with a definite genitive (\"krigets gud\"). No domain card was written for Cronus (see selection)."@en ,
+                 "Cross-checking. Every card was compared with the god's Theoi Project page (fetched with query 6: the title line \"… (Roman X)\" and the first paragraph \"X was the god of …\"), with the 1911 Encyclopædia Britannica articles (query 7 for the Olympians, query 14 for Pluto, Proserpine, Cupid, Liber and Libera and Fortuna) and with the first paragraph of the Swedish Wikipedia article (API calls 9–11). All sources agree on every correspondence and domain on the cards, except that the 1911 Britannica's article Dionysus names no Roman counterpart (its article \"Liber and Libera\" does) and that it says the Romans usually called Hades Dis pater or Orcus (see the note on hades-roman); differences in emphasis are recorded in the quality-control log."@en ,
+                 "The dossier's Wikidata checks (English and Swedish labels of every Greek and Roman god on the cards, the P460 link for every correspondence and P2925 values for the domains) were run by the builder against live Wikidata on every build."@en ,
+                 "Selection: The deck covers the twelve Olympians (counting both Hestia and Dionysus, since ancient lists differ on which of the two belongs to the twelve), Hades, Persephone, Eros and Cronus, and five personified gods with a single standard Roman counterpart: Helios (Sol), Selene (Luna), Eos (Aurora), Nike (Victoria) and Tyche (Fortuna). Each god has a card asking for the Roman counterpart; each except Cronus has a card asking for the god's domains. Left out: gods with no single standard Roman counterpart (Gaia: Terra or Tellus; Hecate; Pan: Faunus is only partly equivalent; Uranus; Rhea: Ops or Cybele) and minor gods; the domain card for Cronus, because the common description of him as god of time comes from an ancient confusion of Kronos with Chronos, and he is better described as king of the Titans than as a god of something. Domains are limited to each god's main, generally agreed ones; later or contested identifications (Apollo as sun god, Artemis as moon goddess) are left out of the answers and mentioned in a note where helpful."@en ,
+                 "Licensing: The deck is CC0 1.0. Its content comes from two sources whose licences allow anything: Wikidata, whose structured data is CC0, gave the correspondences, the English and Swedish names and most domains, and the 1911 Encyclopædia Britannica, in the public domain (published 1910–1911, before 1931, in the US; elsewhere its articles used are anonymous or by contributors who died more than 70 years ago, see the source), gave the domains of Apollo and Persephone, the note on Dionysus and confirmation of the Roman names; facts and names are not copyrightable in any case, and the domain phrases are our own wording. The Theoi Project (all rights reserved) and Swedish Wikipedia (CC BY-SA 4.0) were used only to verify facts: every answer and note rests on Wikidata or the 1911 Britannica, no prose was copied from them (the Athena answer \"wisdom, war and crafts\" coincides with a Theoi title line, but is a plain list of three domains all given by Wikidata), and the selection of gods is our own (the Olympians and the gods named in the editor's brief, plus five personified gods with a one-to-one Roman counterpart), not taken from any list on those sites. The modern Encyclopædia Britannica was not consulted (britannica.com refused the request) and nothing was taken from it."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Machine checks against Wikidata and cross-checks of every card against the 1911 Encyclopædia Britannica, the Theoi Project and Swedish Wikipedia"@en ;
+    rdfs:comment "Scope: All 43 cards, the property used for the correspondences, the Swedish names and the deck's licensing."@en ,
+                 "Outcome: The builder's Wikidata checks cover the English and Swedish labels or aliases of every Greek and Roman god named on the cards (except the Swedish name Dionysos, which Wikidata lacks), the P460 link from each Greek god to the Roman counterpart on the card, and P2925 values for the domains where Wikidata has them. Every correspondence agrees across Wikidata, Theoi and Swedish Wikipedia (and the 1911 Britannica for the Olympians). The discrepancies found and how they were resolved are listed below."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 43 cards, re-checked against Wikidata (P2925 of every god, the 136 builder checks), the 1911 Encyclopædia Britannica (Dionysus, Proserpine, Pluto, Demeter, Artemis), six Theoi Project pages and Swedish Wikipedia."@en ,
+                 "Outcome: No card was found wrong; all 22 correspondences and the Swedish names are the standard ones. Three warnings (the Pluto convention, and \"spring growth\" and \"festivity\" resting only on verification sources) and two suggestions (the god count in the description, a Hestia check). All five were verified against the sources and fixed."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language and translation"@en ;
+    rdfs:comment "Scope: All 43 cards in English and Swedish, plus the title, description and keywords."@en ,
+                 "Outcome: No Swedish name was found wrong and the language tags are right. One warning (definite and indefinite forms mixed in the Swedish domain answers) and five suggestions. Five were applied; the \"Dis pater\" spelling was declined."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 43 cards' evidence (every quoted \"says\" string searched in re-fetched sources), the four sources' licences, the attribution in the deck and the report, and the method, queries and licensing text."@en ,
+                 "Outcome: The licences and attribution were found correct and every quote was found in its source. The problems were places where verification-only sources (Theoi, Swedish Wikipedia) had supplied wording or choices. All nine findings were verified and fixed (the athena-domain part of one needed only a documentation change). After this round every answer and note rests on Wikidata or the 1911 Britannica."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Final re-check (loop 1): changed cards, every third card (facts and language), metadata, licence and documentation"@en ;
+    rdfs:comment "Scope: 29 of the 43 cards (the 18 changed in round 3 and every third card), the metadata, the licence and the documentation; builder check and validate_sources.ts re-run."@en ,
+                 "Outcome: No errors or warnings; one suggestion, on eros-domain, which was verified and applied by shortening the answer to what the content sources state."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 1, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card changed."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors (Wikimedia Foundation)" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://en.wikisource.org/wiki/1911_Encyclop%C3%A6dia_Britannica>
+    dcterms:title "Encyclopædia Britannica, 11th edition (1911), as transcribed on Wikisource" ;
+    dcterms:creator "Hugh Chisholm (editor) and the Encyclopædia Britannica's contributors; transcription by Wikisource contributors" ;
+    rdfs:comment "https://en.wikisource.org/wiki/1911_Encyclop%C3%A6dia_Britannica — licence notice on the page: \"This work is in the public domain in the United States because it was published before January 1, 1931. This work may be in the public domain in countries and areas with longer native copyright terms that apply the rule of the shorter term to foreign works.\" Published 1910–1911. Outside the US: the articles used are either unsigned (Poseidon, Ares, Hestia, Dionysus, Pluto, Cupid, Eros (god), Liber and Libera, and the anonymous part of Proserpine), so anonymous works published over 70 years ago, or by contributors who died more than 70 years ago (Zeus: Lewis Richard Farnell, d. 1934; Hera, Hephaestus, Hermes: Edward Ernest Sikes, d. 1940; Demeter, Athena, Apollo, Artemis, Aphrodite: John Henry Freese, d. 1930; Proserpine: James George Frazer, d. 1941; Fortuna: William Warde Fowler, d. 1921; signatures from the Wikisource headers and the articles' initials, death dates from Wikidata, query 15), and only facts, no text, were taken from them."@en .
+
+<https://www.theoi.com/>
+    dcterms:title "Theoi Project: Greek Mythology" ;
+    dcterms:creator "Aaron J. Atsma" ;
+    rdfs:comment "https://www.theoi.com/Olympios/Zeus.html — page footer: \"Theoi Project © Copyright 2000 - 2017 Aaron J. Atsma, Netherlands & New Zealand\". No open licence is offered, so the site is used for verification only."@en .
+
+<https://sv.wikipedia.org/>
+    dcterms:title "Svenska Wikipedia (articles on the Greek and Roman gods)" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://sv.wikipedia.org/wiki/Zeus — page footer: \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported.\""@en .
+
+<#zeus-roman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Roman counterpart of Zeus"@en ,
+                     "Romersk motsvarighet till Zeus"@sv ;
+    solid-memo:back "Jupiter"@en ,
+                    "Jupiter"@sv .
+
+<#hera-roman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Roman counterpart of Hera"@en ,
+                     "Romersk motsvarighet till Hera"@sv ;
+    solid-memo:back "Juno"@en ,
+                    "Juno"@sv .
+
+<#poseidon-roman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Roman counterpart of Poseidon"@en ,
+                     "Romersk motsvarighet till Poseidon"@sv ;
+    solid-memo:back "Neptune"@en ,
+                    "Neptunus"@sv .
+
+<#demeter-roman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Roman counterpart of Demeter"@en ,
+                     "Romersk motsvarighet till Demeter"@sv ;
+    solid-memo:back "Ceres"@en ,
+                    "Ceres"@sv .
+
+<#athena-roman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Roman counterpart of Athena"@en ,
+                     "Romersk motsvarighet till Athena"@sv ;
+    solid-memo:back "Minerva"@en ,
+                    "Minerva"@sv .
+
+<#apollo-roman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Roman counterpart of Apollo"@en ,
+                     "Romersk motsvarighet till Apollon"@sv ;
+    solid-memo:back "Apollo"@en ,
+                    "Apollo"@sv ;
+    solid-memo:backNote "The Romans adopted the Greek god under his own name."@en ,
+                        "Romarna övertog den grekiska guden under samma namn."@sv .
+
+<#artemis-roman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Roman counterpart of Artemis"@en ,
+                     "Romersk motsvarighet till Artemis"@sv ;
+    solid-memo:back "Diana"@en ,
+                    "Diana"@sv .
+
+<#ares-roman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Roman counterpart of Ares"@en ,
+                     "Romersk motsvarighet till Ares"@sv ;
+    solid-memo:back "Mars"@en ,
+                    "Mars"@sv .
+
+<#aphrodite-roman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Roman counterpart of Aphrodite"@en ,
+                     "Romersk motsvarighet till Afrodite"@sv ;
+    solid-memo:back "Venus"@en ,
+                    "Venus"@sv .
+
+<#hephaestus-roman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Roman counterpart of Hephaestus"@en ,
+                     "Romersk motsvarighet till Hefaistos"@sv ;
+    solid-memo:back "Vulcan"@en ,
+                    "Vulcanus"@sv .
+
+<#hermes-roman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Roman counterpart of Hermes"@en ,
+                     "Romersk motsvarighet till Hermes"@sv ;
+    solid-memo:back "Mercury"@en ,
+                    "Mercurius"@sv .
+
+<#hestia-roman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Roman counterpart of Hestia"@en ,
+                     "Romersk motsvarighet till Hestia"@sv ;
+    solid-memo:back "Vesta"@en ,
+                    "Vesta"@sv .
+
+<#dionysus-roman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Roman counterpart of Dionysus"@en ,
+                     "Romersk motsvarighet till Dionysos"@sv ;
+    solid-memo:back "Bacchus"@en ,
+                    "Bacchus"@sv ;
+    solid-memo:backNote "Also identified with the Italian god Liber."@en ,
+                        "Identifierades även med den italiska guden Liber."@sv .
+
+<#hades-roman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Roman counterpart of Hades"@en ,
+                     "Romersk motsvarighet till Hades"@sv ;
+    solid-memo:back "Pluto"@en ,
+                    "Pluto"@sv ;
+    solid-memo:backNote "Pluto comes from Plouton, a Greek name of Hades; the Romans also called him Dis Pater or Orcus."@en ,
+                        "Pluto kommer av Pluton, ett grekiskt namn på Hades; romarna kallade honom även Dis Pater eller Orcus."@sv .
+
+<#persephone-roman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Roman counterpart of Persephone"@en ,
+                     "Romersk motsvarighet till Persefone"@sv ;
+    solid-memo:back "Proserpina"@en ,
+                    "Proserpina"@sv .
+
+<#eros-roman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Roman counterpart of Eros"@en ,
+                     "Romersk motsvarighet till Eros"@sv ;
+    solid-memo:back "Cupid"@en ,
+                    "Amor"@sv ;
+    solid-memo:backNote "Also called Amor."@en ,
+                        "Även kallad Cupido."@sv .
+
+<#cronus-roman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Roman counterpart of Cronus"@en ,
+                     "Romersk motsvarighet till Kronos"@sv ;
+    solid-memo:back "Saturn"@en ,
+                    "Saturnus"@sv ;
+    solid-memo:backNote "Cronus was the king of the Titans and the father of Zeus."@en ,
+                        "Kronos var titanernas kung och Zeus far."@sv .
+
+<#helios-roman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Roman counterpart of Helios"@en ,
+                     "Romersk motsvarighet till Helios"@sv ;
+    solid-memo:back "Sol"@en ,
+                    "Sol"@sv .
+
+<#selene-roman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Roman counterpart of Selene"@en ,
+                     "Romersk motsvarighet till Selene"@sv ;
+    solid-memo:back "Luna"@en ,
+                    "Luna"@sv .
+
+<#eos-roman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Roman counterpart of Eos"@en ,
+                     "Romersk motsvarighet till Eos"@sv ;
+    solid-memo:back "Aurora"@en ,
+                    "Aurora"@sv .
+
+<#nike-roman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Roman counterpart of Nike"@en ,
+                     "Romersk motsvarighet till Nike"@sv ;
+    solid-memo:back "Victoria"@en ,
+                    "Victoria"@sv .
+
+<#tyche-roman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Roman counterpart of Tyche"@en ,
+                     "Romersk motsvarighet till Tyche"@sv ;
+    solid-memo:back "Fortuna"@en ,
+                    "Fortuna"@sv .
+
+<#zeus-domain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "What is Zeus the god of?"@en ,
+                     "Vad är Zeus gud för?"@sv ;
+    solid-memo:back "the sky and thunder"@en ,
+                    "himlen och åskan"@sv ;
+    solid-memo:backNote "He is also the king of the gods."@en ,
+                        "Han är också gudarnas kung."@sv .
+
+<#hera-domain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "What is Hera the goddess of?"@en ,
+                     "Vad är Hera gudinna för?"@sv ;
+    solid-memo:back "marriage and women"@en ,
+                    "äktenskapet och kvinnorna"@sv ;
+    solid-memo:backNote "She is also the queen of the gods, wife of Zeus."@en ,
+                        "Hon är också gudarnas drottning, Zeus hustru."@sv .
+
+<#poseidon-domain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "What is Poseidon the god of?"@en ,
+                     "Vad är Poseidon gud för?"@sv ;
+    solid-memo:back "the sea, earthquakes and horses"@en ,
+                    "havet, jordbävningarna och hästarna"@sv .
+
+<#demeter-domain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "What is Demeter the goddess of?"@en ,
+                     "Vad är Demeter gudinna för?"@sv ;
+    solid-memo:back "agriculture and the harvest"@en ,
+                    "jordbruket och skörden"@sv .
+
+<#athena-domain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "What is Athena the goddess of?"@en ,
+                     "Vad är Athena gudinna för?"@sv ;
+    solid-memo:back "wisdom, war and crafts"@en ,
+                    "visheten, kriget och hantverket"@sv ;
+    solid-memo:backNote "In war she stands for strategy and the defence of cities, unlike Ares."@en ,
+                        "I kriget står hon för strategi och städernas försvar, till skillnad från Ares."@sv .
+
+<#apollo-domain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "What is Apollo the god of?"@en ,
+                     "Vad är Apollon gud för?"@sv ;
+    solid-memo:back "music, prophecy and healing"@en ,
+                    "musiken, spådomskonsten och läkekonsten"@sv ;
+    solid-memo:backNote "His identification with the sun god Helios came later."@en ,
+                        "Först senare likställdes han med solguden Helios."@sv .
+
+<#artemis-domain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "What is Artemis the goddess of?"@en ,
+                     "Vad är Artemis gudinna för?"@sv ;
+    solid-memo:back "the hunt and wild animals"@en ,
+                    "jakten och de vilda djuren"@sv ;
+    solid-memo:backNote "Apollo's twin sister."@en ,
+                        "Apollons tvillingsyster."@sv .
+
+<#ares-domain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "What is Ares the god of?"@en ,
+                     "Vad är Ares gud för?"@sv ;
+    solid-memo:back "war"@en ,
+                    "kriget"@sv ;
+    solid-memo:backNote "Above all the violence of battle, unlike Athena."@en ,
+                        "Framför allt stridens våld, till skillnad från Athena."@sv .
+
+<#aphrodite-domain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "What is Aphrodite the goddess of?"@en ,
+                     "Vad är Afrodite gudinna för?"@sv ;
+    solid-memo:back "love and beauty"@en ,
+                    "kärleken och skönheten"@sv .
+
+<#hephaestus-domain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "What is Hephaestus the god of?"@en ,
+                     "Vad är Hefaistos gud för?"@sv ;
+    solid-memo:back "fire and the forge"@en ,
+                    "elden och smideskonsten"@sv .
+
+<#hermes-domain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "What is Hermes the god of?"@en ,
+                     "Vad är Hermes gud för?"@sv ;
+    solid-memo:back "travellers, trade and thieves"@en ,
+                    "resenärerna, handeln och tjuvarna"@sv ;
+    solid-memo:backNote "He is also the messenger of the gods and guides the dead to the underworld."@en ,
+                        "Han är också gudarnas budbärare och leder de döda till underjorden."@sv .
+
+<#hestia-domain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "What is Hestia the goddess of?"@en ,
+                     "Vad är Hestia gudinna för?"@sv ;
+    solid-memo:back "the hearth and the home"@en ,
+                    "härden och hemmet"@sv .
+
+<#dionysus-domain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "What is Dionysus the god of?"@en ,
+                     "Vad är Dionysos gud för?"@sv ;
+    solid-memo:back "wine"@en ,
+                    "vinet"@sv ;
+    solid-memo:backNote "Originally a god of vegetation, worshipped with ecstatic rites."@en ,
+                        "Ursprungligen en växtlighetens gud, dyrkad med extatiska riter."@sv .
+
+<#hades-domain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "What is Hades the god of?"@en ,
+                     "Vad är Hades gud för?"@sv ;
+    solid-memo:back "the underworld and the dead"@en ,
+                    "underjorden och de döda"@sv .
+
+<#persephone-domain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "What is Persephone the goddess of?"@en ,
+                     "Vad är Persefone gudinna för?"@sv ;
+    solid-memo:back "the underworld and spring vegetation"@en ,
+                    "underjorden och vårens växtlighet"@sv ;
+    solid-memo:backNote "Queen of the underworld as the wife of Hades."@en ,
+                        "Underjordens drottning som Hades hustru."@sv .
+
+<#eros-domain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "What is Eros the god of?"@en ,
+                     "Vad är Eros gud för?"@sv ;
+    solid-memo:back "love"@en ,
+                    "kärleken"@sv ;
+    solid-memo:backNote "In later myth the son of Aphrodite."@en ,
+                        "I senare myter Afrodites son."@sv .
+
+<#helios-domain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "What is Helios the god of?"@en ,
+                     "Vad är Helios gud för?"@sv ;
+    solid-memo:back "the sun"@en ,
+                    "solen"@sv .
+
+<#selene-domain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "What is Selene the goddess of?"@en ,
+                     "Vad är Selene gudinna för?"@sv ;
+    solid-memo:back "the moon"@en ,
+                    "månen"@sv .
+
+<#eos-domain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "What is Eos the goddess of?"@en ,
+                     "Vad är Eos gudinna för?"@sv ;
+    solid-memo:back "the dawn"@en ,
+                    "gryningen"@sv .
+
+<#nike-domain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "What is Nike the goddess of?"@en ,
+                     "Vad är Nike gudinna för?"@sv ;
+    solid-memo:back "victory"@en ,
+                    "segern"@sv .
+
+<#tyche-domain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "What is Tyche the goddess of?"@en ,
+                     "Vad är Tyche gudinna för?"@sv ;
+    solid-memo:back "fortune"@en ,
+                    "lyckan"@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

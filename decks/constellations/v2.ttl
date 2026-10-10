@@ -1,0 +1,1102 @@
+@base <https://solid-memo.com/decks/constellations/v2.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Constellations"@en ,
+                  "Stjärnbilder"@sv ,
+                  "별자리"@ko ,
+                  "Sternbilder"@de ,
+                  "Constelaciones"@es ,
+                  "Constellations"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    dcterms:description "All 88 constellations recognised by the International Astronomical Union, in 88 cards studied both ways. Front: the constellation's official Latin name; back: its English and Swedish names, with the IAU abbreviation in a note. Names from the IAU's constellation table and Wikidata, checked against NASA, Wikipedia and Nationalencyklopedin."@en ,
+                        "Alla 88 stjärnbilder som Internationella astronomiska unionen (IAU) erkänner, på 88 kort som övas åt båda hållen. Framsida: stjärnbildens officiella latinska namn; baksida: dess engelska och svenska namn, med IAU:s förkortning i en anteckning. Namnen kommer från IAU:s tabell över stjärnbilderna och från Wikidata och är kontrollerade mot NASA, Wikipedia och Nationalencyklopedin."@sv ,
+                        "국제천문연맹(IAU)이 공인한 88개 별자리 전체를 양방향으로 학습하는 카드 88장에 담았습니다. 앞면은 별자리의 공식 라틴어 이름, 뒷면은 영어와 스웨덴어 이름이며, IAU 약어는 메모에 있습니다. 이름은 IAU의 별자리 표와 Wikidata에서 가져왔고 NASA, 위키백과, Nationalencyklopedin과 대조해 확인했습니다."@ko ,
+                        "Alle 88 von der Internationalen Astronomischen Union (IAU) anerkannten Sternbilder, auf 88 Karten, die in beide Richtungen gelernt werden. Vorderseite: der offizielle lateinische Name des Sternbilds; Rückseite: sein englischer und schwedischer Name, mit der IAU-Abkürzung in einer Anmerkung. Namen aus der Sternbildtabelle der IAU und aus Wikidata, geprüft anhand von NASA, Wikipedia und Nationalencyklopedin."@de ,
+                        "Las 88 constelaciones reconocidas por la Unión Astronómica Internacional (UAI), en 88 tarjetas que se estudian en ambos sentidos. Anverso: el nombre oficial en latín de la constelación; reverso: sus nombres en inglés y en sueco, con la abreviatura de la UAI en una nota. Nombres tomados de la tabla de constelaciones de la UAI y de Wikidata, contrastados con la NASA, Wikipedia y la Nationalencyklopedin."@es ,
+                        "Les 88 constellations reconnues par l’Union astronomique internationale (UAI), sur 88 cartes étudiées dans les deux sens. Recto : le nom latin officiel de la constellation ; verso : ses noms en anglais et en suédois, avec l’abréviation de l’UAI dans une note. Noms tirés de la table des constellations de l’UAI et de Wikidata, vérifiés auprès de la NASA, de Wikipédia et de la Nationalencyklopedin."@fr ;
+    prov:wasDerivedFrom <https://iauarchive.eso.org/public/themes/constellations/> ,
+                        <https://www.wikidata.org/wiki/Wikidata:Main_Page> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:astronomy ;
+    dcat:keyword "constellations"@en ,
+                 "astronomy"@en ,
+                 "IAU"@en ,
+                 "night sky"@en ,
+                 "stars"@en ,
+                 "stjärnbilder"@sv ,
+                 "astronomi"@sv ,
+                 "stjärnhimlen"@sv ,
+                 "stjärnor"@sv ,
+                 "IAU"@sv ,
+                 "별자리"@ko ,
+                 "천문학"@ko ,
+                 "IAU"@ko ,
+                 "밤하늘"@ko ,
+                 "별"@ko ,
+                 "Sternbilder"@de ,
+                 "Astronomie"@de ,
+                 "IAU"@de ,
+                 "Nachthimmel"@de ,
+                 "Sterne"@de ,
+                 "constelaciones"@es ,
+                 "astronomía"@es ,
+                 "UAI"@es ,
+                 "IAU"@es ,
+                 "cielo nocturno"@es ,
+                 "estrellas"@es ,
+                 "constellations"@fr ,
+                 "astronomie"@fr ,
+                 "UAI"@fr ,
+                 "IAU"@fr ,
+                 "ciel nocturne"@fr ,
+                 "étoiles"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/LAT> ;
+    solid-memo:studyDirection solid-memo:bidirectional ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/constellations/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/constellations/v1.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#constellations> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#constellations> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/licenses/by/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://iauarchive.eso.org/public/themes/constellations/> ,
+              <https://www.wikidata.org/wiki/Wikidata:Main_Page> ,
+              <https://asd.gsfc.nasa.gov/archive/ircatalog/constel_names.html> ,
+              <https://sv.wikipedia.org/wiki/Stj%C3%A4rnbild> ,
+              <https://en.wikipedia.org/wiki/IAU_designated_constellations> ,
+              <https://en.wikipedia.org/wiki/Category:Constellations> ,
+              <https://www.ne.se/uppslagsverk/encyklopedi/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "The list of constellations, their Latin names, abbreviations and English names come from the IAU's page “The Constellations”. Its old address (https://www.iau.org/public/themes/constellations/) returns 404 since the IAU's site was redesigned, and the new iau.org has no constellation page linked from its home page. The page was found in the IAU's own web archive at https://iauarchive.eso.org/public/themes/constellations/ (the reference used by the English Wikipedia article) and downloaded with curl on 2026-10-04; an Internet Archive copy of the old iau.org page from 2023-12-30 was also downloaded and has the identical table. The table under “Charts and tables” was parsed with a short Python script (parse_iau.py, reproduced verbatim in the dossier's Queries; HTML tags stripped, the download links dropped, the remaining cells read in groups of six: name, pronunciation, abbreviation, English name, genitive, genitive pronunciation). It gives exactly 88 rows."@en ,
+                 "Each card's front is the IAU name exactly as the table spells it (e.g. “Boötes” with its diaeresis), tagged as Latin. All 88 are tagged Latin by convention, Dorado included: the IAU names serve as the constellations’ scientific Latin names and are declined as Latin (the IAU table gives the genitive “Doradus”), although “dorado” itself is a Spanish word, as the Dorado card’s note says. The back's English text is the table's “English Name” (described on the page as “the popular name in English”) without its leading “the” (“the Great Bear” → “Great Bear”), with three kinds of exception: (a) Coma Berenices: the table reads “the Bernice's Hair”; the deck spells it “Berenice’s Hair”, as the Latin name itself (Berenices) and Wikipedia's Meaning column (“Berenice's hair”) do. (b) Pyxis: the table reads “the Mariner Compass”; the deck uses the usual English form “Mariner’s Compass” (Wikipedia's Meaning column: “mariner's compass”). (c) Eight constellations named after a figure — Andromeda, Cassiopeia, Cepheus, Eridanus, Hercules, Orion, Pegasus and Perseus — have the figure's own name as their English name, which is what English uses for them; the IAU table gives descriptions for seven of them (“the Chained Maiden”, “the Seated Queen”, “the King”, “the River”, “the Hunter”, “the Winged Horse”, “the Hero”; for Hercules it reads “the Hercules”), and those descriptions are quoted in the card's note instead. Using them as answers would have made the reversed cards ambiguous (“Hero” fits Hercules as well as Perseus) and would not translate the Swedish name on the same card (Cassiopeja, Orion, …)."@en ,
+                 "The Swedish names are the Swedish labels (rdfs:label @sv) of the Wikidata items. The items were found with one SPARQL query on https://query.wikidata.org/sparql (listed in the dossier's Queries) that matches each IAU name against English labels of items that are instances of constellation (Q8928) or a subclass of it and have a short name (P1813); it returned exactly one item for each of the 88 names, and for every item the short name equals the IAU abbreviation. The English and Swedish aliases of the 88 items were fetched with a second query, so that a Wikidata check could also be added where an alias is exactly the card's English text. A first exploratory query (instances of Q8928 only) returned 97 items: it missed Aries and Cancer, which Wikidata types only as zodiac constellation (Q4193029), and included historical or non-IAU constellations (e.g. Sciurus Volans, Marmor Sculptile, Pomum Imperiale); it was used only to see how the data is modelled."@en ,
+                 "Swedish cross-check: every Swedish label was compared with the table “Tabell över stjärnbilderna” in the Swedish Wikipedia article “Stjärnbild” (wikitext fetched with https://sv.wikipedia.org/w/api.php?action=parse&page=Stj%C3%A4rnbild&prop=wikitext|revid&format=json&formatversion=2, revision 59706601), parsed with a Python script. That script was not kept; the parsing rules are reproduced by parse_svwiki.py (in the dossier's Queries), written during review round 2, which gives exactly the same 87 rows from the same saved wikitext (the rowspan rows of Giraffen/Camelopardalis are skipped and that row added by hand, as in the original). All 88 Swedish names and all 88 abbreviations agree. The names follow Swedish convention: definite form of a common noun with a lower-case second word (“Stora björnen”, “Södra korset”), and the Swedish forms of personal names (“Cassiopeja”, “Herkules”)."@en ,
+                 "English cross-check: every English name and abbreviation was compared with the “List” table of the English Wikipedia article “IAU designated constellations” (parsed with parse_enwiki.py, in the dossier's Queries; wikitext fetched with https://en.wikipedia.org/w/api.php?action=parse&page=IAU_designated_constellations&prop=wikitext|revid&format=json&formatversion=2, revision 1375575250). The Meaning column agrees with the IAU's English name for most constellations; where it differs (listed in quality control, round 0) the deck keeps the IAU's name, since the IAU is the authority for the list and the Wikipedia column gives a literal meaning rather than a popular name."@en ,
+                 "Abbreviation and list cross-check: the NASA/GSFC page “Three-Letter Constellation Abbreviations” was downloaded with curl and its table parsed; it lists the same 88 constellations with the same abbreviations (in capitals). NASA and Wikidata spell Boötes without the diaeresis in some places (NASA “Bootes”, Wikidata's Latin label “Bootes”); the deck follows the IAU spelling, which is also Wikidata's English label."@en ,
+                 "The generator script make_dossier.py (reproduced verbatim in the dossier's Queries, together with wd_fetch.py and wd_aliases.py, which ran the two Wikidata queries; the raw downloads were kept in a temporary working directory of the authoring agent that is not published) asserts for every card that the IAU abbreviation equals the Wikidata short name, the Swedish Wikipedia abbreviation and the NASA abbreviation, and that the Wikidata Swedish label equals the Swedish Wikipedia name; it then writes each card with its evidence from all five sources. Each card’s note gives the IAU abbreviation and, in the authoring agent’s own words, an explanation where the English and Swedish names clearly differ in meaning (Boötes, Capricornus, Cetus, Corvus, Hydra, Hydrus, Horologium, Pictor, Reticulum, Taurus, Telescopium), where the IAU’s popular name is not used as the answer, or where the name itself needs a word (Dorado); notes on Swedish variants (Cassiopeia, Eridanus, Vela) were added in review round 1. Smaller nuances (e.g. Vela “Sails” / Seglet, singular) get no note."@en ,
+                 "Review rounds 1–3 were applied to the dossier by apply_rounds.py and round 4 by apply_round4.py (both reproduced verbatim in the dossier's Queries). apply_rounds.py reads the saved downloads and review fetches (NE openings, English Wikipedia leads) and edits the dossier that make_dossier.py wrote; replay.py (also in the dossier's Queries) re-ran it on a saved copy of that pre-review dossier and found the result identical to the published dossier before round 4."@en ,
+                 "Swedish names, independent check (added in review rounds 1–2): for every card, Nationalencyklopedin’s article was fetched by the script ne_fetch.py (in the dossier's Queries) from https://www.ne.se/uppslagsverk/encyklopedi/lång/<Swedish name, lower case, spaces as hyphens>, falling back to <…>-(stjärnbild), and the opening sentence (the free part of the article) kept as evidence. NE gives the card’s Swedish name as the headword for 85 of the 88 cards. The three others: Cassiopeja (NE’s headword is “Cassiopeia”, with “Cassiopeja” as a variant), Eridanus (NE’s main article is “Floden Eridanus”; “Eridanus” is a cross-reference to it) and Seglet (NE calls it “Seglen”, plural). These cards keep the Wikidata and Swedish Wikipedia name, which the builder checked, and give NE’s form in the note."@en ,
+                 "English names, second check (added in review round 3): where English Wikipedia’s list renders the IAU’s English name differently, and for the meanings given in the notes, the lead sections of the English Wikipedia articles on those constellations were fetched with the MediaWiki API (in the dossier's Queries) and the sentence that confirms the name or meaning is quoted in the card’s evidence. The Swedish names of species used in the notes (korp, stenbock, guldmakrill) were looked up as Wikidata labels and are checked at every build."@en ,
+                 "Every card has machine checks against Wikidata, run by the builder: the English label equals the IAU Latin name, the Swedish label equals the card's Swedish name, and the short name (P1813) equals the IAU abbreviation; where Wikidata has the card's English text as an English alias, that alias is checked too."@en ,
+                 "Study direction is bidirectional: the builder confirms that every English and every Swedish back text is unique in the deck, so the reversed cards (English or Swedish name → Latin name) each have one answer. For 11 constellations the English name is the Latin name (Andromeda, Cassiopeia, Cepheus, Eridanus, Hercules, Lynx, Orion, Pegasus, Perseus, Phoenix, Sculptor), and for six of them the Swedish name is too (Andromeda, Cepheus, Eridanus, Orion, Pegasus, Perseus), so the reversed card gives its answer away; that is inherent to the subject and was accepted."@en ,
+                 "Selection: The deck has exactly the 88 constellations in the IAU's table, which are the constellations the IAU recognises (the list agreed in 1922, with boundaries adopted in 1928 and published in 1930); nothing was added and nothing left out. Historical constellations that the IAU does not recognise (Wikidata types some of them as constellations, e.g. Sciurus Volans and Marmor Sculptile) are excluded. Asterisms such as the Big Dipper/Karlavagnen are not constellations and are excluded. Genitive forms, pronunciations, boundaries and star names are left out to keep each card to one fact: the constellation's names."@en ,
+                 "Licensing: The deck is licensed CC BY 4.0 because its list of constellations, their Latin names and abbreviations and, above all, their English names (the IAU table's “English Name” column, popular names that are not mere literal translations) are taken from the IAU's page “The Constellations”, whose web texts the IAU releases under CC BY 4.0; the IAU is credited as a source in the deck (prov:wasDerivedFrom, with title, creator and licence) and in the provenance report, and the changes made to its English names (leading “the” dropped, two spellings corrected, eight figure names used instead of descriptions) are listed in the method. Using the IAU page as a content source was a deliberate choice: the CC0 alternatives cover the list and abbreviations (Wikidata; NASA's public-domain table) but not a consistent set of English names (Wikidata's English aliases are incomplete and inconsistent), and CC BY 4.0 lets anyone reuse the deck, commercially too, with attribution. The IAU’s credit conditions are met: the IAU is named, unaltered, in the deck description, in the deck metadata and in the notes that quote its popular names, and nothing in the deck states or implies IAU endorsement. The Swedish names come from Wikidata (CC0), which places no conditions. The NASA page (a US government work), the Swedish Wikipedia article and the English Wikipedia articles (CC BY-SA 4.0), and Nationalencyklopedin (all rights reserved; free quotation only for non-commercial use) were used only to verify facts: no wording, list or selection was taken from them, so their licences put no conditions on the deck. The notes are the authoring agent's own wording."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Sources and machine checks: every card against the IAU table, Wikidata, NASA and both Wikipedias; the builder's Wikidata checks."@en ;
+    rdfs:comment "Scope: All 88 cards."@en ,
+                 "Outcome: The IAU table, Wikidata (short name P1813), the Swedish Wikipedia table and the NASA table agree on all 88 constellations and all 88 abbreviations; Wikidata's Swedish labels agree with the Swedish Wikipedia table for all 88. Every card has 3 or 4 Wikidata checks (English label = IAU name, Swedish label, P1813 abbreviation, and the English alias where one exactly matches); all pass at build time. The English names were compared with English Wikipedia's Meaning column; the differences are listed below and resolved in favour of the IAU, except two misspellings in the IAU table. Wikidata's Latin labels use classical spellings for three items; they are not used. Limitation: Wikidata's Swedish labels and the Swedish Wikipedia table are maintained by overlapping communities, so they are not fully independent; no third Swedish list (e.g. Nationalencyklopedin, behind a paywall) was consulted."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 88 cards: Latin names, abbreviations and English names against a fresh parse of the IAU table, Wikidata labels and P1813 live, Swedish names against Nationalencyklopedin."@en ,
+                 "Outcome: The review found no wrong card: the IAU table matches every Latin name, abbreviation and English name apart from the documented changes, all Wikidata checks pass, and NE confirms the Swedish name of 86 cards (Seglet unconfirmed). One warning (Eridanus: NE’s main Swedish name is “Floden Eridanus”) and five suggestions. The authoring agent re-fetched NE for every card and confirmed the review's quotes; it also found what the review could not: NE calls Vela “Seglen”, not “Seglet”. All findings were applied except a description change for the trivial reversed cards, which is documented in the method instead."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language and translation"@en ;
+    rdfs:comment "Scope: All 88 cards in every language (Latin fronts, English and Swedish backs and notes), plus title, description, keywords and study direction."@en ,
+                 "Outcome: The review found no errors and agreed with all 88 Swedish names. Two warnings: five cards whose English and Swedish names differ in meaning lacked the note the method promises, and the Swedish names rested only on Wikidata and Swedish Wikipedia. Three suggestions: idiomatic Swedish on Hydrus, consistent apostrophes, a better Swedish description sentence. All were applied. For the second warning, Nationalencyklopedin was added as a verification source on every card (85 headwords identical, three variants given in notes); in-the-sky.org’s translation table (https://in-the-sky.org/data/constellations_translations.php, downloaded 2026-10-04) was also looked at but not used, because its Swedish column has evident errors (Circinus “Ormen”, Scutum “Sobieskis sköld”)."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 88 cards’ evidence against re-fetched sources; every source’s licence; the method, queries and reproducibility."@en ,
+                 "Outcome: The review re-fetched every source and found the licence quotes accurate, the CC BY 4.0 choice right, all evidence matching the sources and no wording copied from closed sources. Two warnings: about ten English answers rested on the IAU table alone, and the scripts that did the work were not published. Four suggestions on the enwiki role text, the IAU’s credit conditions, the NASA licence evidence and grouped round-0 findings. All but the last were applied; the last needs no change."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Final re-check (loop 1): every card changed in the last fix plus every third card, metadata, description, licence and documentation"@en ;
+    rdfs:comment "Scope: 88 cards (every card changed in rounds 1–3 and every third card against the IAU table, live Wikidata, NE and English Wikipedia leads), plus metadata, description, licence and documentation."@en ,
+                 "Outcome: The review found no errors or warnings: the IAU table, live Wikidata (labels and P1813), NE openings and English Wikipedia leads agree with the cards, the builder check and the validator pass. Six suggestions; five were applied and one (Dorado’s Latin tag) was answered in the method without changing the card."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 1, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card changed."@en .
+
+<https://iauarchive.eso.org/public/themes/constellations/>
+    dcterms:title "The Constellations" ;
+    dcterms:creator "International Astronomical Union (IAU)" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    rdfs:comment "https://iauarchive.eso.org/copyright/ — “The images, videos and web texts on iau.org are released under the Creative Commons Attribution 4.0 International license and may on a non-exclusive basis be reproduced without fee, on the conditions outlined below.” The page is the IAU's former iau.org theme page (https://www.iau.org/public/themes/constellations/, now 404 after the site's redesign), kept in the IAU's web archive hosted at iauarchive.eso.org; the same table and the same copyright text were also seen in the Internet Archive's copies of the iau.org pages (December 2023). The same page sets conditions: “The full image, footage or web text credit must be presented in a clear and readable manner to all users, with the wording unaltered (for example: \"IAU\". The credit should not be hidden or disassociated from the image footage. Links should be active if the credit is online.” and “IAU materials may not be used to state or imply the endorsement by IAU or any IAU employee of a commercial product or service”."@en .
+
+<https://www.wikidata.org/wiki/Wikidata:Main_Page>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — “All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.”"@en .
+
+<https://asd.gsfc.nasa.gov/archive/ircatalog/constel_names.html>
+    dcterms:title "Three-Letter Constellation Abbreviations" ;
+    dcterms:creator "NASA Goddard Space Flight Center, Astrophysics Science Division" ;
+    rdfs:comment "https://www.nasa.gov/nasa-brand-center/images-and-media/ — “NASA content – images, audio, video, and media files used in the rendition of 3-dimensional models, such as texture maps and polygon data in any format – generally are not subject to copyright in the United States.” and “NASA content used in a factual manner that does not imply endorsement may be used without needing explicit permission. NASA should be acknowledged as the source of the material.” The page is a work of the US government (NASA/GSFC); it is used here only to verify facts. That guideline speaks of media files; for this text table it is applied by analogy: the table is a work of the US government (17 U.S.C. §105). The page’s own footer link “Privacy Policy & Important Notices” (http://www.nasa.gov/about/highlights/HP_Privacy.html, which now redirects to https://www.nasa.gov/privacy/) was fetched on 2026-10-04 and contains no copyright statement."@en .
+
+<https://sv.wikipedia.org/wiki/Stj%C3%A4rnbild>
+    dcterms:title "Stjärnbild" ;
+    dcterms:creator "Wikipedia contributors (Swedish Wikipedia)" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Page footer: “Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported.”"@en .
+
+<https://en.wikipedia.org/wiki/IAU_designated_constellations>
+    dcterms:title "IAU designated constellations" ;
+    dcterms:creator "Wikipedia contributors (English Wikipedia)" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Page footer: “Text is available under the Creative Commons Attribution-ShareAlike 4.0 License”."@en .
+
+<https://en.wikipedia.org/wiki/Category:Constellations>
+    dcterms:title "English Wikipedia articles on individual constellations" ;
+    dcterms:creator "Wikipedia contributors (English Wikipedia)" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of every English Wikipedia article page, seen on “IAU designated constellations” (fetched 2026-10-04): “Text is available under the Creative Commons Attribution-ShareAlike 4.0 License”."@en .
+
+<https://www.ne.se/uppslagsverk/encyklopedi/>
+    dcterms:title "Nationalencyklopedin (uppslagsverk, långa artiklar)" ;
+    dcterms:creator "Nationalencyklopedin (NE)" ;
+    rdfs:comment "https://www.ne.se/info/upphovsratt/ — “Nästan allt material på NE.se omfattas av upphovsrättslagen.” and “För texter från uppslagsverket har NE valt att inte strikt följa upphovsrättslagen. Det innebär att det är fritt att citera dem i delar eller i sin helhet, på webbsidor eller i tryckt form, i icke-kommersiellt syfte.” The deck allows commercial use, so NE is used for verification only."@en .
+
+<#andromeda>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Andromeda"@la ;
+    solid-memo:back "Andromeda"@en ,
+                    "Andromeda"@sv ;
+    solid-memo:backNote "IAU abbreviation: And. The IAU’s popular English name: “the Chained Maiden”."@en ,
+                        "IAU-förkortning: And. IAU:s populärnamn på engelska: ”the Chained Maiden”."@sv .
+
+<#antlia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Antlia"@la ;
+    solid-memo:back "Air Pump"@en ,
+                    "Luftpumpen"@sv ;
+    solid-memo:backNote "IAU abbreviation: Ant."@en ,
+                        "IAU-förkortning: Ant."@sv .
+
+<#apus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Apus"@la ;
+    solid-memo:back "Bird of Paradise"@en ,
+                    "Paradisfågeln"@sv ;
+    solid-memo:backNote "IAU abbreviation: Aps."@en ,
+                        "IAU-förkortning: Aps."@sv .
+
+<#aquarius>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Aquarius"@la ;
+    solid-memo:back "Water Bearer"@en ,
+                    "Vattumannen"@sv ;
+    solid-memo:backNote "IAU abbreviation: Aqr."@en ,
+                        "IAU-förkortning: Aqr."@sv .
+
+<#aquila>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Aquila"@la ;
+    solid-memo:back "Eagle"@en ,
+                    "Örnen"@sv ;
+    solid-memo:backNote "IAU abbreviation: Aql."@en ,
+                        "IAU-förkortning: Aql."@sv .
+
+<#ara>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ara"@la ;
+    solid-memo:back "Altar"@en ,
+                    "Altaret"@sv ;
+    solid-memo:backNote "IAU abbreviation: Ara."@en ,
+                        "IAU-förkortning: Ara."@sv .
+
+<#aries>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Aries"@la ;
+    solid-memo:back "Ram"@en ,
+                    "Väduren"@sv ;
+    solid-memo:backNote "IAU abbreviation: Ari."@en ,
+                        "IAU-förkortning: Ari."@sv .
+
+<#auriga>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Auriga"@la ;
+    solid-memo:back "Charioteer"@en ,
+                    "Kusken"@sv ;
+    solid-memo:backNote "IAU abbreviation: Aur."@en ,
+                        "IAU-förkortning: Aur."@sv .
+
+<#bootes>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Boötes"@la ;
+    solid-memo:back "Herdsman"@en ,
+                    "Björnvaktaren"@sv ;
+    solid-memo:backNote "IAU abbreviation: Boo. The Swedish name means “the bear keeper”."@en ,
+                        "IAU-förkortning: Boo. Det engelska namnet betyder ”herden”."@sv .
+
+<#caelum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Caelum"@la ;
+    solid-memo:back "Engraving Tool"@en ,
+                    "Gravstickeln"@sv ;
+    solid-memo:backNote "IAU abbreviation: Cae."@en ,
+                        "IAU-förkortning: Cae."@sv .
+
+<#camelopardalis>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Camelopardalis"@la ;
+    solid-memo:back "Giraffe"@en ,
+                    "Giraffen"@sv ;
+    solid-memo:backNote "IAU abbreviation: Cam."@en ,
+                        "IAU-förkortning: Cam."@sv .
+
+<#cancer>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cancer"@la ;
+    solid-memo:back "Crab"@en ,
+                    "Kräftan"@sv ;
+    solid-memo:backNote "IAU abbreviation: Cnc."@en ,
+                        "IAU-förkortning: Cnc."@sv .
+
+<#canes-venatici>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Canes Venatici"@la ;
+    solid-memo:back "Hunting Dogs"@en ,
+                    "Jakthundarna"@sv ;
+    solid-memo:backNote "IAU abbreviation: CVn."@en ,
+                        "IAU-förkortning: CVn."@sv .
+
+<#canis-major>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Canis Major"@la ;
+    solid-memo:back "Great Dog"@en ,
+                    "Stora hunden"@sv ;
+    solid-memo:backNote "IAU abbreviation: CMa."@en ,
+                        "IAU-förkortning: CMa."@sv .
+
+<#canis-minor>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Canis Minor"@la ;
+    solid-memo:back "Lesser Dog"@en ,
+                    "Lilla hunden"@sv ;
+    solid-memo:backNote "IAU abbreviation: CMi."@en ,
+                        "IAU-förkortning: CMi."@sv .
+
+<#capricornus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Capricornus"@la ;
+    solid-memo:back "Sea Goat"@en ,
+                    "Stenbocken"@sv ;
+    solid-memo:backNote "IAU abbreviation: Cap. The Swedish name means “the ibex”."@en ,
+                        "IAU-förkortning: Cap. Det engelska namnet betyder ”havsgeten”."@sv .
+
+<#carina>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Carina"@la ;
+    solid-memo:back "Keel"@en ,
+                    "Kölen"@sv ;
+    solid-memo:backNote "IAU abbreviation: Car."@en ,
+                        "IAU-förkortning: Car."@sv .
+
+<#cassiopeia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cassiopeia"@la ;
+    solid-memo:back "Cassiopeia"@en ,
+                    "Cassiopeja"@sv ;
+    solid-memo:backNote "IAU abbreviation: Cas. The IAU’s popular English name: “the Seated Queen”. Also spelt Cassiopeia in Swedish (Nationalencyklopedin’s headword)."@en ,
+                        "IAU-förkortning: Cas. IAU:s populärnamn på engelska: ”the Seated Queen”. Skrivs även Cassiopeia (Nationalencyklopedins uppslagsord)."@sv .
+
+<#centaurus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Centaurus"@la ;
+    solid-memo:back "Centaur"@en ,
+                    "Kentauren"@sv ;
+    solid-memo:backNote "IAU abbreviation: Cen."@en ,
+                        "IAU-förkortning: Cen."@sv .
+
+<#cepheus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cepheus"@la ;
+    solid-memo:back "Cepheus"@en ,
+                    "Cepheus"@sv ;
+    solid-memo:backNote "IAU abbreviation: Cep. The IAU’s popular English name: “the King”."@en ,
+                        "IAU-förkortning: Cep. IAU:s populärnamn på engelska: ”the King”."@sv .
+
+<#cetus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cetus"@la ;
+    solid-memo:back "Sea Monster"@en ,
+                    "Valfisken"@sv ;
+    solid-memo:backNote "IAU abbreviation: Cet. The Swedish name means “the whale”."@en ,
+                        "IAU-förkortning: Cet. Det engelska namnet betyder ”havsodjuret”."@sv .
+
+<#chamaeleon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Chamaeleon"@la ;
+    solid-memo:back "Chameleon"@en ,
+                    "Kameleonten"@sv ;
+    solid-memo:backNote "IAU abbreviation: Cha."@en ,
+                        "IAU-förkortning: Cha."@sv .
+
+<#circinus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Circinus"@la ;
+    solid-memo:back "Drawing Compass"@en ,
+                    "Cirkelpassaren"@sv ;
+    solid-memo:backNote "IAU abbreviation: Cir."@en ,
+                        "IAU-förkortning: Cir."@sv .
+
+<#columba>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Columba"@la ;
+    solid-memo:back "Dove"@en ,
+                    "Duvan"@sv ;
+    solid-memo:backNote "IAU abbreviation: Col."@en ,
+                        "IAU-förkortning: Col."@sv .
+
+<#coma-berenices>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Coma Berenices"@la ;
+    solid-memo:back "Berenice’s Hair"@en ,
+                    "Berenikes hår"@sv ;
+    solid-memo:backNote "IAU abbreviation: Com."@en ,
+                        "IAU-förkortning: Com."@sv .
+
+<#corona-australis>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Corona Australis"@la ;
+    solid-memo:back "Southern Crown"@en ,
+                    "Södra kronan"@sv ;
+    solid-memo:backNote "IAU abbreviation: CrA."@en ,
+                        "IAU-förkortning: CrA."@sv .
+
+<#corona-borealis>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Corona Borealis"@la ;
+    solid-memo:back "Northern Crown"@en ,
+                    "Norra kronan"@sv ;
+    solid-memo:backNote "IAU abbreviation: CrB."@en ,
+                        "IAU-förkortning: CrB."@sv .
+
+<#corvus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Corvus"@la ;
+    solid-memo:back "Crow"@en ,
+                    "Korpen"@sv ;
+    solid-memo:backNote "IAU abbreviation: Crv. The Swedish name means “the raven”."@en ,
+                        "IAU-förkortning: Crv. Det engelska namnet betyder ”kråkan”."@sv .
+
+<#crater>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Crater"@la ;
+    solid-memo:back "Cup"@en ,
+                    "Bägaren"@sv ;
+    solid-memo:backNote "IAU abbreviation: Crt."@en ,
+                        "IAU-förkortning: Crt."@sv .
+
+<#crux>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Crux"@la ;
+    solid-memo:back "Southern Cross"@en ,
+                    "Södra korset"@sv ;
+    solid-memo:backNote "IAU abbreviation: Cru."@en ,
+                        "IAU-förkortning: Cru."@sv .
+
+<#cygnus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cygnus"@la ;
+    solid-memo:back "Swan"@en ,
+                    "Svanen"@sv ;
+    solid-memo:backNote "IAU abbreviation: Cyg."@en ,
+                        "IAU-förkortning: Cyg."@sv .
+
+<#delphinus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Delphinus"@la ;
+    solid-memo:back "Dolphin"@en ,
+                    "Delfinen"@sv ;
+    solid-memo:backNote "IAU abbreviation: Del."@en ,
+                        "IAU-förkortning: Del."@sv .
+
+<#dorado>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Dorado"@la ;
+    solid-memo:back "Swordfish"@en ,
+                    "Svärdfisken"@sv ;
+    solid-memo:backNote "IAU abbreviation: Dor. Dorado is Spanish for the mahi-mahi (dolphinfish); the constellation has also been drawn as a swordfish."@en ,
+                        "IAU-förkortning: Dor. Dorado är spanska för guldmakrill; stjärnbilden har också avbildats som en svärdfisk."@sv .
+
+<#draco>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Draco"@la ;
+    solid-memo:back "Dragon"@en ,
+                    "Draken"@sv ;
+    solid-memo:backNote "IAU abbreviation: Dra."@en ,
+                        "IAU-förkortning: Dra."@sv .
+
+<#equuleus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Equuleus"@la ;
+    solid-memo:back "Little Horse"@en ,
+                    "Lilla hästen"@sv ;
+    solid-memo:backNote "IAU abbreviation: Equ."@en ,
+                        "IAU-förkortning: Equ."@sv .
+
+<#eridanus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eridanus"@la ;
+    solid-memo:back "Eridanus"@en ,
+                    "Eridanus"@sv ;
+    solid-memo:backNote "IAU abbreviation: Eri. The IAU’s popular English name: “the River”. Also called Floden Eridanus in Swedish (Nationalencyklopedin)."@en ,
+                        "IAU-förkortning: Eri. IAU:s populärnamn på engelska: ”the River”. Kallas även Floden Eridanus (Nationalencyklopedin)."@sv .
+
+<#fornax>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Fornax"@la ;
+    solid-memo:back "Furnace"@en ,
+                    "Ugnen"@sv ;
+    solid-memo:backNote "IAU abbreviation: For."@en ,
+                        "IAU-förkortning: For."@sv .
+
+<#gemini>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Gemini"@la ;
+    solid-memo:back "Twins"@en ,
+                    "Tvillingarna"@sv ;
+    solid-memo:backNote "IAU abbreviation: Gem."@en ,
+                        "IAU-förkortning: Gem."@sv .
+
+<#grus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Grus"@la ;
+    solid-memo:back "Crane"@en ,
+                    "Tranan"@sv ;
+    solid-memo:backNote "IAU abbreviation: Gru."@en ,
+                        "IAU-förkortning: Gru."@sv .
+
+<#hercules>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hercules"@la ;
+    solid-memo:back "Hercules"@en ,
+                    "Herkules"@sv ;
+    solid-memo:backNote "IAU abbreviation: Her."@en ,
+                        "IAU-förkortning: Her."@sv .
+
+<#horologium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Horologium"@la ;
+    solid-memo:back "Clock"@en ,
+                    "Pendeluret"@sv ;
+    solid-memo:backNote "IAU abbreviation: Hor. The Swedish name means “the pendulum clock”."@en ,
+                        "IAU-förkortning: Hor. Det engelska namnet betyder ”klockan”."@sv .
+
+<#hydra>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hydra"@la ;
+    solid-memo:back "Female Water Snake"@en ,
+                    "Vattenormen"@sv ;
+    solid-memo:backNote "IAU abbreviation: Hya. The Swedish name means “the water snake”."@en ,
+                        "IAU-förkortning: Hya. Det engelska namnet betyder ”vattenormshonan”."@sv .
+
+<#hydrus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hydrus"@la ;
+    solid-memo:back "Male Water Snake"@en ,
+                    "Lilla vattenormen"@sv ;
+    solid-memo:backNote "IAU abbreviation: Hyi. The Swedish name means “the lesser water snake”."@en ,
+                        "IAU-förkortning: Hyi. Det engelska namnet betyder ”vattenormshanen”."@sv .
+
+<#indus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Indus"@la ;
+    solid-memo:back "Indian"@en ,
+                    "Indianen"@sv ;
+    solid-memo:backNote "IAU abbreviation: Ind."@en ,
+                        "IAU-förkortning: Ind."@sv .
+
+<#lacerta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Lacerta"@la ;
+    solid-memo:back "Lizard"@en ,
+                    "Ödlan"@sv ;
+    solid-memo:backNote "IAU abbreviation: Lac."@en ,
+                        "IAU-förkortning: Lac."@sv .
+
+<#leo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Leo"@la ;
+    solid-memo:back "Lion"@en ,
+                    "Lejonet"@sv ;
+    solid-memo:backNote "IAU abbreviation: Leo."@en ,
+                        "IAU-förkortning: Leo."@sv .
+
+<#leo-minor>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Leo Minor"@la ;
+    solid-memo:back "Lesser Lion"@en ,
+                    "Lilla lejonet"@sv ;
+    solid-memo:backNote "IAU abbreviation: LMi."@en ,
+                        "IAU-förkortning: LMi."@sv .
+
+<#lepus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Lepus"@la ;
+    solid-memo:back "Hare"@en ,
+                    "Haren"@sv ;
+    solid-memo:backNote "IAU abbreviation: Lep."@en ,
+                        "IAU-förkortning: Lep."@sv .
+
+<#libra>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Libra"@la ;
+    solid-memo:back "Scales"@en ,
+                    "Vågen"@sv ;
+    solid-memo:backNote "IAU abbreviation: Lib."@en ,
+                        "IAU-förkortning: Lib."@sv .
+
+<#lupus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Lupus"@la ;
+    solid-memo:back "Wolf"@en ,
+                    "Vargen"@sv ;
+    solid-memo:backNote "IAU abbreviation: Lup."@en ,
+                        "IAU-förkortning: Lup."@sv .
+
+<#lynx>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Lynx"@la ;
+    solid-memo:back "Lynx"@en ,
+                    "Lodjuret"@sv ;
+    solid-memo:backNote "IAU abbreviation: Lyn."@en ,
+                        "IAU-förkortning: Lyn."@sv .
+
+<#lyra>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Lyra"@la ;
+    solid-memo:back "Lyre"@en ,
+                    "Lyran"@sv ;
+    solid-memo:backNote "IAU abbreviation: Lyr."@en ,
+                        "IAU-förkortning: Lyr."@sv .
+
+<#mensa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mensa"@la ;
+    solid-memo:back "Table Mountain"@en ,
+                    "Taffelberget"@sv ;
+    solid-memo:backNote "IAU abbreviation: Men."@en ,
+                        "IAU-förkortning: Men."@sv .
+
+<#microscopium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Microscopium"@la ;
+    solid-memo:back "Microscope"@en ,
+                    "Mikroskopet"@sv ;
+    solid-memo:backNote "IAU abbreviation: Mic."@en ,
+                        "IAU-förkortning: Mic."@sv .
+
+<#monoceros>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Monoceros"@la ;
+    solid-memo:back "Unicorn"@en ,
+                    "Enhörningen"@sv ;
+    solid-memo:backNote "IAU abbreviation: Mon."@en ,
+                        "IAU-förkortning: Mon."@sv .
+
+<#musca>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Musca"@la ;
+    solid-memo:back "Fly"@en ,
+                    "Flugan"@sv ;
+    solid-memo:backNote "IAU abbreviation: Mus."@en ,
+                        "IAU-förkortning: Mus."@sv .
+
+<#norma>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Norma"@la ;
+    solid-memo:back "Carpenter’s Square"@en ,
+                    "Vinkelhaken"@sv ;
+    solid-memo:backNote "IAU abbreviation: Nor."@en ,
+                        "IAU-förkortning: Nor."@sv .
+
+<#octans>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Octans"@la ;
+    solid-memo:back "Octant"@en ,
+                    "Oktanten"@sv ;
+    solid-memo:backNote "IAU abbreviation: Oct."@en ,
+                        "IAU-förkortning: Oct."@sv .
+
+<#ophiuchus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ophiuchus"@la ;
+    solid-memo:back "Serpent Bearer"@en ,
+                    "Ormbäraren"@sv ;
+    solid-memo:backNote "IAU abbreviation: Oph."@en ,
+                        "IAU-förkortning: Oph."@sv .
+
+<#orion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Orion"@la ;
+    solid-memo:back "Orion"@en ,
+                    "Orion"@sv ;
+    solid-memo:backNote "IAU abbreviation: Ori. The IAU’s popular English name: “the Hunter”."@en ,
+                        "IAU-förkortning: Ori. IAU:s populärnamn på engelska: ”the Hunter”."@sv .
+
+<#pavo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pavo"@la ;
+    solid-memo:back "Peacock"@en ,
+                    "Påfågeln"@sv ;
+    solid-memo:backNote "IAU abbreviation: Pav."@en ,
+                        "IAU-förkortning: Pav."@sv .
+
+<#pegasus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pegasus"@la ;
+    solid-memo:back "Pegasus"@en ,
+                    "Pegasus"@sv ;
+    solid-memo:backNote "IAU abbreviation: Peg. The IAU’s popular English name: “the Winged Horse”."@en ,
+                        "IAU-förkortning: Peg. IAU:s populärnamn på engelska: ”the Winged Horse”."@sv .
+
+<#perseus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Perseus"@la ;
+    solid-memo:back "Perseus"@en ,
+                    "Perseus"@sv ;
+    solid-memo:backNote "IAU abbreviation: Per. The IAU’s popular English name: “the Hero”."@en ,
+                        "IAU-förkortning: Per. IAU:s populärnamn på engelska: ”the Hero”."@sv .
+
+<#phoenix>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Phoenix"@la ;
+    solid-memo:back "Phoenix"@en ,
+                    "Fenix"@sv ;
+    solid-memo:backNote "IAU abbreviation: Phe."@en ,
+                        "IAU-förkortning: Phe."@sv .
+
+<#pictor>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pictor"@la ;
+    solid-memo:back "Painter’s Easel"@en ,
+                    "Målaren"@sv ;
+    solid-memo:backNote "IAU abbreviation: Pic. The Swedish name means “the painter”."@en ,
+                        "IAU-förkortning: Pic. Det engelska namnet betyder ”målarens staffli”."@sv .
+
+<#pisces>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pisces"@la ;
+    solid-memo:back "Fishes"@en ,
+                    "Fiskarna"@sv ;
+    solid-memo:backNote "IAU abbreviation: Psc."@en ,
+                        "IAU-förkortning: Psc."@sv .
+
+<#piscis-austrinus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Piscis Austrinus"@la ;
+    solid-memo:back "Southern Fish"@en ,
+                    "Södra fisken"@sv ;
+    solid-memo:backNote "IAU abbreviation: PsA."@en ,
+                        "IAU-förkortning: PsA."@sv .
+
+<#puppis>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Puppis"@la ;
+    solid-memo:back "Stern"@en ,
+                    "Akterskeppet"@sv ;
+    solid-memo:backNote "IAU abbreviation: Pup."@en ,
+                        "IAU-förkortning: Pup."@sv .
+
+<#pyxis>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pyxis"@la ;
+    solid-memo:back "Mariner’s Compass"@en ,
+                    "Kompassen"@sv ;
+    solid-memo:backNote "IAU abbreviation: Pyx."@en ,
+                        "IAU-förkortning: Pyx."@sv .
+
+<#reticulum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Reticulum"@la ;
+    solid-memo:back "Reticle"@en ,
+                    "Rombiska nätet"@sv ;
+    solid-memo:backNote "IAU abbreviation: Ret. The Swedish name means “the rhombic net”."@en ,
+                        "IAU-förkortning: Ret. Det engelska namnet betyder ”trådkorset” (i ett teleskops okular)."@sv .
+
+<#sagitta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sagitta"@la ;
+    solid-memo:back "Arrow"@en ,
+                    "Pilen"@sv ;
+    solid-memo:backNote "IAU abbreviation: Sge."@en ,
+                        "IAU-förkortning: Sge."@sv .
+
+<#sagittarius>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sagittarius"@la ;
+    solid-memo:back "Archer"@en ,
+                    "Skytten"@sv ;
+    solid-memo:backNote "IAU abbreviation: Sgr."@en ,
+                        "IAU-förkortning: Sgr."@sv .
+
+<#scorpius>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Scorpius"@la ;
+    solid-memo:back "Scorpion"@en ,
+                    "Skorpionen"@sv ;
+    solid-memo:backNote "IAU abbreviation: Sco."@en ,
+                        "IAU-förkortning: Sco."@sv .
+
+<#sculptor>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sculptor"@la ;
+    solid-memo:back "Sculptor"@en ,
+                    "Bildhuggaren"@sv ;
+    solid-memo:backNote "IAU abbreviation: Scl."@en ,
+                        "IAU-förkortning: Scl."@sv .
+
+<#scutum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Scutum"@la ;
+    solid-memo:back "Shield"@en ,
+                    "Skölden"@sv ;
+    solid-memo:backNote "IAU abbreviation: Sct."@en ,
+                        "IAU-förkortning: Sct."@sv .
+
+<#serpens>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Serpens"@la ;
+    solid-memo:back "Serpent"@en ,
+                    "Ormen"@sv ;
+    solid-memo:backNote "IAU abbreviation: Ser."@en ,
+                        "IAU-förkortning: Ser."@sv .
+
+<#sextans>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sextans"@la ;
+    solid-memo:back "Sextant"@en ,
+                    "Sextanten"@sv ;
+    solid-memo:backNote "IAU abbreviation: Sex."@en ,
+                        "IAU-förkortning: Sex."@sv .
+
+<#taurus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Taurus"@la ;
+    solid-memo:back "Bull"@en ,
+                    "Oxen"@sv ;
+    solid-memo:backNote "IAU abbreviation: Tau. The Swedish name means “the ox”."@en ,
+                        "IAU-förkortning: Tau. Det engelska namnet betyder ”tjuren”."@sv .
+
+<#telescopium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Telescopium"@la ;
+    solid-memo:back "Telescope"@en ,
+                    "Kikaren"@sv ;
+    solid-memo:backNote "IAU abbreviation: Tel. The Swedish name means “the spyglass”."@en ,
+                        "IAU-förkortning: Tel. Det engelska namnet betyder ”teleskopet”."@sv .
+
+<#triangulum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Triangulum"@la ;
+    solid-memo:back "Triangle"@en ,
+                    "Triangeln"@sv ;
+    solid-memo:backNote "IAU abbreviation: Tri."@en ,
+                        "IAU-förkortning: Tri."@sv .
+
+<#triangulum-australe>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Triangulum Australe"@la ;
+    solid-memo:back "Southern Triangle"@en ,
+                    "Södra triangeln"@sv ;
+    solid-memo:backNote "IAU abbreviation: TrA."@en ,
+                        "IAU-förkortning: TrA."@sv .
+
+<#tucana>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Tucana"@la ;
+    solid-memo:back "Toucan"@en ,
+                    "Tukanen"@sv ;
+    solid-memo:backNote "IAU abbreviation: Tuc."@en ,
+                        "IAU-förkortning: Tuc."@sv .
+
+<#ursa-major>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ursa Major"@la ;
+    solid-memo:back "Great Bear"@en ,
+                    "Stora björnen"@sv ;
+    solid-memo:backNote "IAU abbreviation: UMa."@en ,
+                        "IAU-förkortning: UMa."@sv .
+
+<#ursa-minor>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ursa Minor"@la ;
+    solid-memo:back "Little Bear"@en ,
+                    "Lilla björnen"@sv ;
+    solid-memo:backNote "IAU abbreviation: UMi."@en ,
+                        "IAU-förkortning: UMi."@sv .
+
+<#vela>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vela"@la ;
+    solid-memo:back "Sails"@en ,
+                    "Seglet"@sv ;
+    solid-memo:backNote "IAU abbreviation: Vel. Also called Seglen in Swedish (Nationalencyklopedin)."@en ,
+                        "IAU-förkortning: Vel. Kallas även Seglen (Nationalencyklopedin)."@sv .
+
+<#virgo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Virgo"@la ;
+    solid-memo:back "Maiden"@en ,
+                    "Jungfrun"@sv ;
+    solid-memo:backNote "IAU abbreviation: Vir."@en ,
+                        "IAU-förkortning: Vir."@sv .
+
+<#volans>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Volans"@la ;
+    solid-memo:back "Flying Fish"@en ,
+                    "Flygfisken"@sv ;
+    solid-memo:backNote "IAU abbreviation: Vol."@en ,
+                        "IAU-förkortning: Vol."@sv .
+
+<#vulpecula>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vulpecula"@la ;
+    solid-memo:back "Fox"@en ,
+                    "Räven"@sv ;
+    solid-memo:backNote "IAU abbreviation: Vul."@en ,
+                        "IAU-förkortning: Vul."@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

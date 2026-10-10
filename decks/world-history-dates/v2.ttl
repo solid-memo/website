@@ -1,0 +1,950 @@
+@base <https://solid-memo.com/decks/world-history-dates/v2.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "World history dates"@en ,
+                  "Årtal i världshistorien"@sv ,
+                  "세계사 연도"@ko ,
+                  "Jahreszahlen der Weltgeschichte"@de ,
+                  "Fechas de la historia universal"@es ,
+                  "Dates de l’histoire mondiale"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "87 landmark events of world history, from the Battle of Marathon to the September 11 attacks, spread across eras and continents. The front names the event in English and Swedish; the back gives the year it happened. A plain number is a year AD; years before Christ are written “490 BC” (“490 f.Kr.”). Years from Wikidata, each checked against Store norske leksikon."@en ,
+                        "87 avgörande händelser i världshistorien, från slaget vid Marathon till 11 september-attackerna, spridda över epoker och världsdelar. Framsidan namnger händelsen på engelska och svenska; baksidan ger året då den inträffade. Ett tal utan tillägg är ett år efter Kristus; år före Kristus skrivs ”490 f.Kr.” (”490 BC”). Årtalen kommer från Wikidata och är kontrollerade mot Store norske leksikon."@sv ,
+                        "마라톤 전투부터 9·11 테러까지, 여러 시대와 대륙에 걸친 세계사의 주요 사건 87개입니다. 앞면은 사건 이름을 영어와 스웨덴어로, 뒷면은 그 사건이 일어난 연도를 보여 줍니다. 숫자만 있으면 서기 연도이고, 기원전 연도는 ‘490 BC’(‘490 f.Kr.’)처럼 씁니다. 연도는 Wikidata에서 가져왔고, 각각 Store norske leksikon과 대조해 확인했습니다."@ko ,
+                        "87 wegweisende Ereignisse der Weltgeschichte, von der Schlacht bei Marathon bis zu den Terroranschlägen am 11. September 2001, verteilt über Epochen und Kontinente. Die Vorderseite nennt das Ereignis auf Englisch und Schwedisch; die Rückseite gibt das Jahr an, in dem es geschah. Eine bloße Zahl ist ein Jahr n. Chr.; Jahre vor Christus werden „490 BC“ („490 f.Kr.“) geschrieben. Jahreszahlen aus Wikidata, jede anhand von Store norske leksikon geprüft."@de ,
+                        "87 acontecimientos clave de la historia universal, desde la batalla de Maratón hasta los atentados del 11 de septiembre de 2001, repartidos entre épocas y continentes. El anverso nombra el acontecimiento en inglés y en sueco; el reverso da el año en que ocurrió. Un número solo es un año d. C.; los años antes de Cristo se escriben «490 BC» («490 f.Kr.»). Años tomados de Wikidata, cada uno contrastado con el Store norske leksikon."@es ,
+                        "87 événements marquants de l’histoire mondiale, de la bataille de Marathon aux attentats du 11 septembre 2001, répartis sur les époques et les continents. Le recto nomme l’événement en anglais et en suédois ; le verso donne l’année où il a eu lieu. Un nombre seul est une année apr. J.-C. ; les années avant Jésus-Christ s’écrivent « 490 BC » (« 490 f.Kr. »). Années tirées de Wikidata, chacune vérifiée auprès du Store norske leksikon."@fr ;
+    prov:wasDerivedFrom <https://www.wikidata.org/> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:history ;
+    dcat:keyword "history"@en ,
+                 "world history"@en ,
+                 "dates"@en ,
+                 "historical events"@en ,
+                 "historia"@sv ,
+                 "världshistoria"@sv ,
+                 "årtal"@sv ,
+                 "historiska händelser"@sv ,
+                 "역사"@ko ,
+                 "세계사"@ko ,
+                 "연도"@ko ,
+                 "역사적 사건"@ko ,
+                 "Geschichte"@de ,
+                 "Weltgeschichte"@de ,
+                 "Jahreszahlen"@de ,
+                 "historische Ereignisse"@de ,
+                 "historia"@es ,
+                 "historia universal"@es ,
+                 "fechas"@es ,
+                 "acontecimientos históricos"@es ,
+                 "histoire"@fr ,
+                 "histoire mondiale"@fr ,
+                 "dates"@fr ,
+                 "événements historiques"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/world-history-dates/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/world-history-dates/v1.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#world-history-dates> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#world-history-dates> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/3.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/> ,
+              <https://snl.no/> ,
+              <https://sv.wikipedia.org/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
+                 "The cards were checked by machine (the Store norske leksikon API, live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Candidates: from its own general knowledge, the authoring agent drew up, in five batches, about 250 search strings for widely taught events of world history (some events were searched more than once), deliberately including Africa, the Americas, Asia and Oceania as well as Europe and covering antiquity to the 21st century. No published list or timeline was copied. Each candidate was looked up with the Wikidata wbsearchentities API (English search, four hits; the exact requests are in the dossier's Queries) and the right item picked by hand from the hits and their descriptions. Four titles that the search did not find were resolved to item ids through the English Wikipedia pageprops API (only the wikibase_item ids were used)."@en ,
+                 "Dates and labels: two SPARQL queries against https://query.wikidata.org/sparql (in the dossier's Queries) returned, for every candidate item, its English and Swedish labels, Swedish aliases (first query), English and Swedish Wikipedia sitelinks, and the values of P585 point in time, P580 start time, P582 end time, P571 inception, P577 publication date, P619 launch date, P1619 date of official opening and P576 dissolution date. The raw JSON responses were saved and read item by item. One further query fetched the inception (P571) of Australia (Q408)."@en ,
+                 "Choosing the year: for each card the property that dates exactly the event on the front was chosen (for instance P582 end time of the siege of Constantinople for its fall, P580 start time of the Korean War for its outbreak, P1619 official opening of the Suez Canal, P619 launch of Vostok 1 for the first human in space). The card's evidence names the property and its value. Where an item had several conflicting dates, the one matching the card was used and the discrepancy recorded in quality control."@en ,
+                 "Years before Christ: the Wikidata Query Service writes dates in the XSD 1.1 form, in which 1 BCE is year 0 (https://www.mediawiki.org/wiki/Wikibase/Indexing/RDF_Dump_Format: “The xsd:dateTime dates follow XSD 1.1 standard, which uses the proleptic Gregorian calendar, and represents the year 1 BCE as +0000.”). A Query Service year of -489 is therefore 490 BC. The cards give the traditional year (490 BC); their machine checks use the Query Service form (-489). The same page explains why some dates appear shifted by a few days (Julian dates converted to the proleptic Gregorian calendar, e.g. 25 December 800 shown as 800-12-29); for no card does this change the year."@en ,
+                 "Wording: every front is the deck's own short wording of the event, in English and in Swedish. Where a front uses an item's Wikidata label verbatim (English or Swedish), a label check is attached so the build confirms it. Swedish text not taken from an event's label was written by the authoring agent in Swedish conventions (sentence case; lower-case names of peoples and adjectives). In the first draft the Swedish names of people and places inside such text were written from the agent's knowledge; the Swedish labels or aliases of related items were checked only where a name seemed uncertain (Q408 alias “Australiska statsförbundet”, Q33296 “Mogulriket”). In quality-control round 2 every such name was checked against Wikidata's sv labels and aliases and, where needed, Swedish Wikipedia (queries in the dossier's Queries): Odovakar (sv label of Q103333; the draft's “Odoaker” was corrected), Qin Shi Huangdi (sv label of Q7192; corrected from “Qin Shi Huang”), Alarik (Q102371 sv label “Alarik I”), Johan utan land (sv alias of Q129308), Karl den store (Q3044), Konstantinopel (Q16869), Mecka (title of the Swedish Wikipedia article on Q5806, whose sv label is the variant “Mekka”), Jurij Gagarin (Q7327), Dagen D (redirect on Swedish Wikipedia to “Landstigningen i Normandie”, whose lead names 6 June 1944 “Dagen D”). Short frontNotes disambiguate battles that share a name with other battles; backNotes explain conventions (the Julian date of the October Revolution, AD years below 100, the Hijra as year 1 of the Islamic calendar)."@en ,
+                 "Back convention: years AD are untagged numbers (“1789”); years before Christ are tagged text, “490 BC” in English and “490 f.Kr.” in Swedish. AD 9 and AD 79 carry a backNote saying AD so they are not mistaken for an unmarked BC year."@en ,
+                 "Independent check: every card's year was checked against Store norske leksikon, the Norwegian national encyclopedia, whose articles are written and signed by subject experts. For each card the SNL search API (https://snl.no/api/v1/search) was queried, the article JSON of the top hits fetched (https://snl.no/<article>.json) and its sentences containing the year read; where the first search found nothing, further searches were run (all listed in the dossier's Queries). The verbatim sentence, with an English gloss, is in each card's evidence. Before SNL, a few Encyclopaedia Britannica, encyclopedia.com and infoplease article URLs were requested as a possible independent check; the exact URLs were not recorded. Britannica refused the automated requests (HTTP 403) and the other two returned not-found, so none of them returned content and none was used. The Battle of Talas (751) was dropped because no SNL article stating its year was found."@en ,
+                 "Build and validation: the dossier was built with the deck builder, which re-ran every Wikidata check (the date of every card, plus the labels used) against live Wikidata, and the deck was validated with node packages/deck-library/scripts/validate_sources.ts world-history-dates (the app's SHACL shapes and DCAT-AP)."@en ,
+                 "Notes and quality control: after the reviews, every frontNote and backNote was compared with the card's evidence, and where a note stated a fact its evidence did not contain, either a supporting SNL sentence or Wikidata statement was added to the evidence or the note was cut back to what the evidence says (logged in quality-control round 3). The SNL articles were re-fetched as https://snl.no/<article>.json and searched for sentences supporting each note; the Wikidata statements were fetched with the queries listed in the dossier's Queries."@en ,
+                 "Selection: Included: landmark events that are widely taught in world history, that happened in a single year that the sources agree on, and that can be named unambiguously in a short phrase. Processes and wars are only included through a single dated moment (a war breaking out, a city falling, a treaty being signed, a revolution beginning), and the front says which moment is meant. The set is spread across eras (antiquity to 2001) and continents (Africa, the Americas, Asia, Europe, Oceania), with a few events of special interest to Swedish learners (the Kalmar Union, the Stockholm Bloodbath, Poltava). Left out because the year is disputed or not a single year: the Battle of Tours (732 or 733), the Battle of Kadesh (the Egyptian chronologies differ), the founding of Rome (legendary), the East–West Schism (a process conventionally dated 1054), the Glorious Revolution (1688–1689), the Black Death (1346–1353), Gutenberg's first printing (uncertain), the Iranian Revolution (1978–1979). Left out because Wikidata's date conflicts with the commonly given one and the deck takes its dates from Wikidata: the Convention of Kanagawa (Wikidata 1864, commonly 1854) and the Suez Crisis (point in time 1957 alongside a 1956 start). Left out for lack of an independent check: the Battle of Talas (751). Further candidates were left out only to keep the deck near 80 cards and balanced between regions (among them Salamis, Zama, Trafalgar, Austerlitz, Lützen, the Wall Street Crash, the Salt March and the Bandung Conference)."@en ,
+                 "Licensing: The deck is CC0 1.0. Its only content source is Wikidata, whose structured data is CC0: the events' dates and the labels used on the cards come from it. The choice of events is the authoring agent's own and was not copied from any list. The card wording is the deck's own, apart from Wikidata labels. Store norske leksikon was used only to verify the years. Nothing from it is in the cards: no wording, no selection. Many of its articles are marked begrenset gjenbruk (restricted reuse), so it is recorded as all rights reserved. The provenance report quotes one or two short sentences per card as evidence, which SNL's terms allow even for restricted articles (“Du har fremdeles lov til å lenke til og sitere utdrag fra artikler merket med begrenset gjenbruk”). Facts such as the year of an event are not copyrightable. English Wikipedia's API was used only to look up four Wikidata item ids, and no Wikipedia text was used. A few Encyclopaedia Britannica, encyclopedia.com and infoplease URLs were requested (not recorded), but none returned content and nothing from them was used. The SNL sentences in the provenance report are short quotations made under SNL's quotation allowance; each is attributed by the article's URL, where the article's named authors and its licence (fri gjenbruk CC BY-SA 3.0 or begrenset gjenbruk) are shown. Treating every article under the stricter begrenset terms is also safe for the articles marked fri."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Machine checks against live Wikidata and a card-by-card cross-check of every year against Store norske leksikon"@en ;
+    rdfs:comment "Scope: All cards."@en ,
+                 "Outcome: The builder's Wikidata checks cover every card: the property value that dates the card's event (P585, P580, P582, P571, P577, P619 or P1619), plus the English and Swedish Wikidata labels wherever a front uses one verbatim, and two Swedish aliases of related items. Every year was confirmed by a sentence in Store norske leksikon. The findings below record where the two sources' dates differ in day or framing (in no case in the year), how the card was framed to stay unambiguous, and the candidates that were dropped."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 87 cards: every year compared with the English Wikipedia lead of the card's Wikidata item, the builder's Wikidata checks re-run, notes and description read."@en ,
+                 "Outcome: No wrong years. One warning (the Abbasid Caliphate did not strictly end in 1258) was fixed by rewording the front and adding a sourced backNote; the Hong Kong Island precision was fixed; two frontNote suggestions were already met by the cards; the year-only Wikidata checks are now listed in round 0."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language and translation"@en ;
+    rdfs:comment "Scope: All 87 cards in English and Swedish, title, description, keywords, notes and language tags in the built TTL."@en ,
+                 "Outcome: Both warnings fixed (Odovakar, the East India Company note), the Qin Shi Huangdi name, the Hijra and Bastille notes and the Nanjing subject were fixed; the Rwanda parity suggestion was declined. All other Swedish names of people and places were then checked against Wikidata and Swedish Wikipedia and are recorded in the method."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: All 87 cards' evidence (every SNL quote and Wikidata value re-fetched), sources, licence evidence, method, queries and licensing."@en ,
+                 "Outcome: The licensing was sound. The documentation gaps were fixed: the unrecorded Britannica, encyclopedia.com and infoplease requests are now described honestly; the Xinhai backNote has evidence; every frontNote and backNote in the deck (not only the review's examples) was compared with its evidence, so supporting sentences were added or the notes were cut back; the Teutoburg discrepancy and the stray ids are documented; and SNL attribution is stated."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Final re-check (loop 1): changed cards, every third card, metadata, licensing and documentation"@en ;
+    rdfs:comment "Scope: 42 cards (the 20 changed in round 3 plus every third card in dossier order), metadata, licensing and documentation."@en ,
+                 "Outcome: No errors or warnings; five suggestions on documentation completeness and one Swedish wording. Each was verified against live Wikidata, Swedish Wikipedia and the dossier, and all five were applied."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 1, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card changed."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing (fetched 2026-10-04): “All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.”"@en .
+
+<https://snl.no/>
+    dcterms:title "Store norske leksikon" ;
+    dcterms:creator "Store norske leksikon and the named authors of each article" ;
+    rdfs:comment "Each article carries its own licence. https://snl.no/.licenses/free (fetched 2026-10-04): “Fri gjenbruk betyr at artikkelen er lisensiert med Creative Commons -lisenen CC-BY-SA-3.0.” https://snl.no/.licenses/restricted (fetched 2026-10-04): “Hvis en artikkel i Store norske leksikon er merket med begrenset gjenbruk, kan du ikke gjenbruke, republisere eller bygge videre på artikkelen uten at du først har fått opphavspersonens tillatelse.” and “NB: Du har fremdeles lov til å lenke til og sitere utdrag fra artikler merket med begrenset gjenbruk uten å spørre opphavspersonen.” Most of the articles consulted are marked begrenset gjenbruk, so the source is recorded under the stricter terms and used for verification only."@en .
+
+<https://sv.wikipedia.org/>
+    dcterms:title "Swedish Wikipedia" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/3.0/> ;
+    rdfs:comment "https://sv.wikipedia.org/wiki/Wikipedia:Upphovsr%C3%A4tt (fetched 2026-10-04): “De textbidrag du lämnar till Wikipedia publiceras under CC BY-SA 3.0 och GNU FDL.” Used for verification only, so nothing from it is in the cards."@en .
+
+<#battle-of-marathon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Battle of Marathon"@en ,
+                     "Slaget vid Marathon"@sv ;
+    solid-memo:frontNote "The Athenians under Miltiades defeat the Persians"@en ,
+                         "Atenarna under Miltiades besegrar perserna"@sv ;
+    solid-memo:back "490 BC"@en ,
+                    "490 f.Kr."@sv .
+
+<#battle-of-thermopylae>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Battle of Thermopylae"@en ,
+                     "Slaget vid Thermopyle"@sv ;
+    solid-memo:frontNote "Leonidas and the Spartans against the Persians of Xerxes"@en ,
+                         "Leonidas och spartanerna mot Xerxes perser"@sv ;
+    solid-memo:back "480 BC"@en ,
+                    "480 f.Kr."@sv .
+
+<#battle-of-gaugamela>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Battle of Gaugamela"@en ,
+                     "Slaget vid Gaugamela"@sv ;
+    solid-memo:frontNote "Alexander the Great defeats Darius III of Persia"@en ,
+                         "Alexander den store besegrar perserkungen Dareios III"@sv ;
+    solid-memo:back "331 BC"@en ,
+                    "331 f.Kr."@sv .
+
+<#death-of-alexander-the-great>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Death of Alexander the Great in Babylon"@en ,
+                     "Alexander den store dör i Babylon"@sv ;
+    solid-memo:back "323 BC"@en ,
+                    "323 f.Kr."@sv .
+
+<#qin-unifies-china>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Qin unifies China and Qin Shi Huang becomes its first emperor"@en ,
+                     "Qin enar Kina och Qin Shi Huangdi blir landets förste kejsare"@sv ;
+    solid-memo:back "221 BC"@en ,
+                    "221 f.Kr."@sv .
+
+<#battle-of-cannae>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Battle of Cannae"@en ,
+                     "Slaget vid Cannae"@sv ;
+    solid-memo:frontNote "Hannibal's great victory over Rome"@en ,
+                         "Hannibals stora seger över Rom"@sv ;
+    solid-memo:back "216 BC"@en ,
+                    "216 f.Kr."@sv .
+
+<#destruction-of-carthage>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Rome destroys Carthage"@en ,
+                     "Rom förstör Karthago"@sv ;
+    solid-memo:frontNote "End of the Third Punic War"@en ,
+                         "Slutet på det tredje puniska kriget"@sv ;
+    solid-memo:back "146 BC"@en ,
+                    "146 f.Kr."@sv .
+
+<#assassination-of-julius-caesar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Assassination of Julius Caesar"@en ,
+                     "Mordet på Julius Caesar"@sv ;
+    solid-memo:back "44 BC"@en ,
+                    "44 f.Kr."@sv .
+
+<#battle-of-actium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Battle of Actium"@en ,
+                     "Slaget vid Actium"@sv ;
+    solid-memo:frontNote "Octavian defeats Antony and Cleopatra"@en ,
+                         "Octavianus besegrar Antonius och Kleopatra"@sv ;
+    solid-memo:back "31 BC"@en ,
+                    "31 f.Kr."@sv .
+
+<#battle-of-the-teutoburg-forest>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Battle of the Teutoburg Forest"@en ,
+                     "Slaget vid Teutoburgerskogen"@sv ;
+    solid-memo:frontNote "Germanic tribes under Arminius ambush the Roman army of Varus"@en ,
+                         "Germanska stammar under Arminius överfaller Varus romerska armé"@sv ;
+    solid-memo:back "9" ;
+    solid-memo:backNote "AD 9"@en ,
+                        "År 9 e.Kr."@sv .
+
+<#eruption-of-vesuvius>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Eruption of Vesuvius that buries Pompeii"@en ,
+                     "Vesuvius utbrott som begraver Pompeji"@sv ;
+    solid-memo:back "79" ;
+    solid-memo:backNote "AD 79"@en ,
+                        "År 79 e.Kr."@sv .
+
+<#first-council-of-nicaea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First Council of Nicaea"@en ,
+                     "Första konciliet i Nicaea"@sv ;
+    solid-memo:frontNote "The council that adopted the Nicene Creed"@en ,
+                         "Kyrkomötet som antog den nicenska trosbekännelsen"@sv ;
+    solid-memo:back "325" .
+
+<#sack-of-rome-410>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Visigoths under Alaric sack Rome"@en ,
+                     "Västgoterna under Alarik plundrar Rom"@sv ;
+    solid-memo:back "410" .
+
+<#deposition-of-romulus-augustulus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Odoacer deposes Romulus Augustulus, the last Western Roman emperor"@en ,
+                     "Odovakar avsätter Romulus Augustulus, den siste västromerske kejsaren"@sv ;
+    solid-memo:back "476" ;
+    solid-memo:backNote "The conventional end of the Western Roman Empire"@en ,
+                        "Räknas traditionellt som slutet på Västromerska riket"@sv .
+
+<#founding-of-the-tang-dynasty>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Founding of the Tang dynasty in China"@en ,
+                     "Tangdynastin grundas i Kina"@sv ;
+    solid-memo:back "618" .
+
+<#hijra>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Hijra: Muhammad's emigration from Mecca to Medina"@en ,
+                     "Hijra: Muhammeds utvandring från Mecka till Medina"@sv ;
+    solid-memo:back "622" ;
+    solid-memo:backNote "The Islamic calendar counts its years from it"@en ,
+                        "Den islamiska tideräkningen räknas från den"@sv .
+
+<#coronation-of-charlemagne>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Charlemagne is crowned emperor in Rome"@en ,
+                     "Karl den store kröns till kejsare i Rom"@sv ;
+    solid-memo:back "800" .
+
+<#battle-of-hastings>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Battle of Hastings"@en ,
+                     "Slaget vid Hastings"@sv ;
+    solid-memo:frontNote "William of Normandy defeats Harold II of England"@en ,
+                         "Vilhelm av Normandie besegrar Harald II av England"@sv ;
+    solid-memo:back "1066" .
+
+<#crusaders-capture-jerusalem>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Crusaders capture Jerusalem in the First Crusade"@en ,
+                     "Korsfararna intar Jerusalem under första korståget"@sv ;
+    solid-memo:back "1099" .
+
+<#magna-carta>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "King John of England agrees to Magna Carta"@en ,
+                     "Johan utan land godkänner Magna Charta"@sv ;
+    solid-memo:back "1215" .
+
+<#mongols-sack-baghdad>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Mongols sack Baghdad and kill the Abbasid caliph"@en ,
+                     "Mongolerna intar och plundrar Bagdad och dödar den abbasidiske kalifen"@sv ;
+    solid-memo:back "1258" ;
+    solid-memo:backNote "Conventionally the end of the Abbasid Caliphate; powerless Abbasid caliphs lived on in Cairo until 1517"@en ,
+                        "Räknas traditionellt som slutet på abbasidkalifatet; maktlösa abbasidiska kalifer levde kvar i Kairo till 1517"@sv .
+
+<#battle-of-ain-jalut>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Battle of Ain Jalut"@en ,
+                     "Slaget vid Ain Jalut"@sv ;
+    solid-memo:frontNote "The Mamluks of Egypt defeat the Mongols"@en ,
+                         "Egyptens mamluker besegrar mongolerna"@sv ;
+    solid-memo:back "1260" .
+
+<#founding-of-the-ming-dynasty>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Founding of the Ming dynasty in China"@en ,
+                     "Mingdynastin grundas i Kina"@sv ;
+    solid-memo:back "1368" .
+
+<#kalmar-union>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Kalmar Union of Denmark, Norway and Sweden is formed"@en ,
+                     "Kalmarunionen mellan Danmark, Norge och Sverige bildas"@sv ;
+    solid-memo:back "1397" .
+
+<#fall-of-constantinople>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Ottomans capture Constantinople"@en ,
+                     "Osmanerna erövrar Konstantinopel"@sv ;
+    solid-memo:back "1453" .
+
+<#columbus-reaches-the-americas>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Columbus's first voyage reaches the Americas"@en ,
+                     "Columbus första resa når Amerika"@sv ;
+    solid-memo:back "1492" .
+
+<#da-gama-reaches-india>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Vasco da Gama reaches India by sea"@en ,
+                     "Vasco da Gama når Indien sjövägen"@sv ;
+    solid-memo:back "1498" .
+
+<#ninety-five-theses>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Martin Luther's Ninety-five Theses"@en ,
+                     "Martin Luthers 95 teser"@sv ;
+    solid-memo:back "1517" ;
+    solid-memo:backNote "Traditionally taken as the start of the Reformation"@en ,
+                        "Brukar räknas som reformationens början"@sv .
+
+<#stockholm-bloodbath>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Stockholm Bloodbath"@en ,
+                     "Stockholms blodbad"@sv ;
+    solid-memo:back "1520" .
+
+<#fall-of-tenochtitlan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Fall of Tenochtitlan"@en ,
+                     "Tenochtitláns fall"@sv ;
+    solid-memo:frontNote "The Spanish under Hernán Cortés take the Aztec capital"@en ,
+                         "Spanjorerna under Hernán Cortés erövrar aztekernas huvudstad"@sv ;
+    solid-memo:back "1521" .
+
+<#first-circumnavigation-completed>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The first circumnavigation of the world is completed (Magellan–Elcano expedition)"@en ,
+                     "Den första världsomseglingen fullbordas (Magellan och Elcano)"@sv ;
+    solid-memo:back "1522" .
+
+<#first-battle-of-panipat>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "First Battle of Panipat"@en ,
+                     "Första slaget vid Panipat"@sv ;
+    solid-memo:frontNote "Babur's victory that founds the Mughal Empire"@en ,
+                         "Baburs seger som grundlägger Mogulriket"@sv ;
+    solid-memo:back "1526" .
+
+<#pizarro-captures-atahualpa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pizarro captures the Inca ruler Atahualpa at Cajamarca"@en ,
+                     "Pizarro tillfångatar inkahärskaren Atahualpa i Cajamarca"@sv ;
+    solid-memo:back "1532" .
+
+<#battle-of-lepanto>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Battle of Lepanto"@en ,
+                     "Slaget vid Lepanto"@sv ;
+    solid-memo:frontNote "The Holy League defeats the Ottoman fleet"@en ,
+                         "Heliga ligan besegrar den osmanska flottan"@sv ;
+    solid-memo:back "1571" .
+
+<#battle-of-sekigahara>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Battle of Sekigahara"@en ,
+                     "Slaget vid Sekigahara"@sv ;
+    solid-memo:frontNote "Tokugawa Ieyasu wins control of Japan"@en ,
+                         "Tokugawa Ieyasu vinner makten över Japan"@sv ;
+    solid-memo:back "1600" .
+
+<#peace-of-westphalia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Peace of Westphalia"@en ,
+                     "Westfaliska freden"@sv ;
+    solid-memo:frontNote "Ends the Thirty Years' War"@en ,
+                         "Avslutar trettioåriga kriget"@sv ;
+    solid-memo:back "1648" .
+
+<#battle-of-poltava>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Battle of Poltava"@en ,
+                     "Slaget vid Poltava"@sv ;
+    solid-memo:frontNote "Peter the Great defeats Charles XII of Sweden"@en ,
+                         "Peter den store besegrar Karl XII"@sv ;
+    solid-memo:back "1709" .
+
+<#battle-of-plassey>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Battle of Plassey"@en ,
+                     "Slaget vid Plassey"@sv ;
+    solid-memo:frontNote "Robert Clive's victory that lays the foundation of British rule in India"@en ,
+                         "Robert Clives seger som lägger grunden till det brittiska styret i Indien"@sv ;
+    solid-memo:back "1757" .
+
+<#us-declaration-of-independence>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "United States Declaration of Independence"@en ,
+                     "USA:s självständighetsförklaring"@sv ;
+    solid-memo:back "1776" .
+
+<#storming-of-the-bastille>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Storming of the Bastille"@en ,
+                     "Stormningen av Bastiljen"@sv ;
+    solid-memo:back "1789" ;
+    solid-memo:backNote "Often regarded as the start of the French Revolution"@en ,
+                        "Räknas ofta som början på franska revolutionen"@sv .
+
+<#haitian-independence>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Haiti declares independence from France"@en ,
+                     "Haiti förklarar sig självständigt från Frankrike"@sv ;
+    solid-memo:back "1804" .
+
+<#grito-de-dolores>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Grito de Dolores: the Mexican War of Independence begins"@en ,
+                     "Grito de Dolores: Mexikos frihetskrig inleds"@sv ;
+    solid-memo:back "1810" .
+
+<#battle-of-waterloo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Battle of Waterloo"@en ,
+                     "Slaget vid Waterloo"@sv ;
+    solid-memo:frontNote "Napoleon's final defeat"@en ,
+                         "Napoleons slutliga nederlag"@sv ;
+    solid-memo:back "1815" .
+
+<#battle-of-ayacucho>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Battle of Ayacucho"@en ,
+                     "Slaget vid Ayacucho"@sv ;
+    solid-memo:frontNote "The decisive defeat of Spain in South America"@en ,
+                         "Spaniens avgörande nederlag i Sydamerika"@sv ;
+    solid-memo:back "1824" .
+
+<#treaty-of-waitangi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Treaty of Waitangi"@en ,
+                     "Waitangifördraget"@sv ;
+    solid-memo:frontNote "Between the British Crown and Māori chiefs in New Zealand"@en ,
+                         "Mellan brittiska kronan och maorihövdingar på Nya Zeeland"@sv ;
+    solid-memo:back "1840" .
+
+<#treaty-of-nanjing>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Treaty of Nanjing"@en ,
+                     "Freden i Nanking"@sv ;
+    solid-memo:frontNote "Ends the First Opium War; China cedes Hong Kong Island to Britain"@en ,
+                         "Avslutar första opiumkriget; Kina avträder ön Hongkong till Storbritannien"@sv ;
+    solid-memo:back "1842" .
+
+<#sepoy-rebellion>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Sepoy Rebellion breaks out in India"@en ,
+                     "Sepoyupproret bryter ut i Indien"@sv ;
+    solid-memo:back "1857" .
+
+<#american-civil-war-begins>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The attack on Fort Sumter starts the American Civil War"@en ,
+                     "Angreppet på Fort Sumter inleder amerikanska inbördeskriget"@sv ;
+    solid-memo:back "1861" .
+
+<#meiji-restoration>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Meiji Restoration begins in Japan"@en ,
+                     "Meijirestaurationen inleds i Japan"@sv ;
+    solid-memo:back "1868" .
+
+<#suez-canal-opens>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Suez Canal opens"@en ,
+                     "Suezkanalen öppnas"@sv ;
+    solid-memo:back "1869" .
+
+<#proclamation-of-the-german-empire>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The German Empire is proclaimed at Versailles"@en ,
+                     "Tyska kejsarriket utropas i Versailles"@sv ;
+    solid-memo:back "1871" .
+
+<#lei-aurea>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Brazil abolishes slavery (Lei Áurea)"@en ,
+                     "Brasilien avskaffar slaveriet (Lei Áurea)"@sv ;
+    solid-memo:back "1888" .
+
+<#battle-of-adwa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Battle of Adwa"@en ,
+                     "Slaget vid Adua"@sv ;
+    solid-memo:frontNote "Ethiopia defeats Italy"@en ,
+                         "Etiopien besegrar Italien"@sv ;
+    solid-memo:back "1896" .
+
+<#federation-of-australia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The six Australian colonies federate as the Commonwealth of Australia"@en ,
+                     "De sex australiska kolonierna går samman i Australiska statsförbundet"@sv ;
+    solid-memo:back "1901" .
+
+<#wright-brothers-first-flight>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Wright brothers' first powered aeroplane flight"@en ,
+                     "Bröderna Wrights första motorflygning"@sv ;
+    solid-memo:back "1903" .
+
+<#xinhai-revolution>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Xinhai Revolution breaks out in China"@en ,
+                     "Xinhairevolutionen bryter ut i Kina"@sv ;
+    solid-memo:back "1911" ;
+    solid-memo:backNote "It ended imperial rule; the Republic of China was proclaimed on 1 January 1912"@en ,
+                        "Den gjorde slut på kejsardömet; Republiken Kina utropades 1 januari 1912"@sv .
+
+<#sinking-of-the-titanic>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sinking of the Titanic"@en ,
+                     "Titanics förlisning"@sv ;
+    solid-memo:back "1912" .
+
+<#assassination-of-franz-ferdinand>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Assassination of Archduke Franz Ferdinand in Sarajevo"@en ,
+                     "Skotten i Sarajevo: ärkehertig Franz Ferdinand mördas"@sv ;
+    solid-memo:back "1914" .
+
+<#october-revolution>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "October Revolution in Russia"@en ,
+                     "Oktoberrevolutionen i Ryssland"@sv ;
+    solid-memo:back "1917" ;
+    solid-memo:backNote "25 October in the Julian calendar then used in Russia, 7 November in the Gregorian"@en ,
+                        "25 oktober enligt den julianska kalender som då gällde i Ryssland, 7 november enligt den gregorianska"@sv .
+
+<#armistice-of-compiegne>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The armistice at Compiègne ends the fighting of the First World War"@en ,
+                     "Vapenstilleståndet i Compiègne avslutar striderna i första världskriget"@sv ;
+    solid-memo:back "1918" .
+
+<#treaty-of-versailles>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Treaty of Versailles is signed"@en ,
+                     "Versaillesfreden undertecknas"@sv ;
+    solid-memo:back "1919" .
+
+<#invasion-of-poland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Germany invades Poland, starting the Second World War in Europe"@en ,
+                     "Tyskland invaderar Polen och andra världskriget i Europa börjar"@sv ;
+    solid-memo:back "1939" .
+
+<#attack-on-pearl-harbor>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Attack on Pearl Harbor"@en ,
+                     "Attacken mot Pearl Harbor"@sv ;
+    solid-memo:back "1941" .
+
+<#normandy-landings>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "D-Day: the Allied landings in Normandy"@en ,
+                     "Dagen D: de allierades landstigning i Normandie"@sv ;
+    solid-memo:back "1944" .
+
+<#atomic-bombing-of-hiroshima>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Atomic bombing of Hiroshima"@en ,
+                     "Atombombningen av Hiroshima"@sv ;
+    solid-memo:back "1945" .
+
+<#un-charter-signed>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Charter of the United Nations is signed in San Francisco"@en ,
+                     "FN-stadgan undertecknas i San Francisco"@sv ;
+    solid-memo:back "1945" .
+
+<#independence-of-india-and-pakistan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "India and Pakistan become independent as British India is partitioned"@en ,
+                     "Indien och Pakistan blir självständiga när Brittiska Indien delas"@sv ;
+    solid-memo:back "1947" .
+
+<#universal-declaration-of-human-rights>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The UN adopts the Universal Declaration of Human Rights"@en ,
+                     "FN antar den allmänna förklaringen om de mänskliga rättigheterna"@sv ;
+    solid-memo:back "1948" .
+
+<#founding-of-the-peoples-republic-of-china>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mao Zedong proclaims the People's Republic of China"@en ,
+                     "Mao Zedong utropar Folkrepubliken Kina"@sv ;
+    solid-memo:back "1949" .
+
+<#korean-war-begins>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Korean War breaks out"@en ,
+                     "Koreakriget bryter ut"@sv ;
+    solid-memo:back "1950" .
+
+<#ghana-independence>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Ghana becomes independent from Britain"@en ,
+                     "Ghana blir självständigt från Storbritannien"@sv ;
+    solid-memo:back "1957" .
+
+<#sputnik-1>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Launch of Sputnik 1, the first artificial satellite"@en ,
+                     "Uppskjutningen av Sputnik 1, den första konstgjorda satelliten"@sv ;
+    solid-memo:back "1957" .
+
+<#cuban-revolution>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cuban Revolution: Batista flees and Castro's rebels take power"@en ,
+                     "Kubanska revolutionen: Batista flyr och Castros rebeller tar makten"@sv ;
+    solid-memo:back "1959" .
+
+<#first-human-in-space>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Yuri Gagarin becomes the first human in space (Vostok 1)"@en ,
+                     "Jurij Gagarin blir den första människan i rymden (Vostok 1)"@sv ;
+    solid-memo:back "1961" .
+
+<#berlin-wall-built>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Construction of the Berlin Wall begins"@en ,
+                     "Byggandet av Berlinmuren inleds"@sv ;
+    solid-memo:back "1961" .
+
+<#cuban-missile-crisis>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Cuban Missile Crisis"@en ,
+                     "Kubakrisen"@sv ;
+    solid-memo:back "1962" .
+
+<#algerian-independence>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Algeria wins independence from France"@en ,
+                     "Algeriet blir självständigt från Frankrike"@sv ;
+    solid-memo:back "1962" .
+
+<#assassination-of-john-f-kennedy>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Assassination of John F. Kennedy"@en ,
+                     "Mordet på John F. Kennedy"@sv ;
+    solid-memo:back "1963" .
+
+<#apollo-11-moon-landing>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Apollo 11: the first humans land on the Moon"@en ,
+                     "Apollo 11: de första människorna landar på månen"@sv ;
+    solid-memo:back "1969" .
+
+<#fall-of-saigon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Fall of Saigon"@en ,
+                     "Saigons fall"@sv ;
+    solid-memo:frontNote "The end of the Vietnam War"@en ,
+                         "Slutet på Vietnamkriget"@sv ;
+    solid-memo:back "1975" .
+
+<#chernobyl-disaster>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Chernobyl disaster"@en ,
+                     "Tjernobylolyckan"@sv ;
+    solid-memo:back "1986" .
+
+<#fall-of-the-berlin-wall>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Fall of the Berlin Wall"@en ,
+                     "Berlinmurens fall"@sv ;
+    solid-memo:back "1989" .
+
+<#german-reunification>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "German reunification"@en ,
+                     "Tysklands återförening"@sv ;
+    solid-memo:back "1990" .
+
+<#dissolution-of-the-soviet-union>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Dissolution of the Soviet Union"@en ,
+                     "Sovjetunionens upplösning"@sv ;
+    solid-memo:back "1991" .
+
+<#rwandan-genocide>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Genocide against the Tutsi in Rwanda"@en ,
+                     "Folkmordet i Rwanda"@sv ;
+    solid-memo:back "1994" .
+
+<#south-africa-first-democratic-election>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "South Africa's first election with universal suffrage"@en ,
+                     "Sydafrikas första val med allmän rösträtt"@sv ;
+    solid-memo:frontNote "Nelson Mandela becomes president"@en ,
+                         "Nelson Mandela blir president"@sv ;
+    solid-memo:back "1994" .
+
+<#september-11-attacks>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "September 11 attacks on the United States"@en ,
+                     "11 september-attackerna mot USA"@sv ;
+    solid-memo:back "2001" .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

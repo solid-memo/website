@@ -1,0 +1,1400 @@
+@base <https://solid-memo.com/decks/nobel-prize-in-physics/v2.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Nobel Prize in Physics"@en ,
+                  "Nobelpriset i fysik"@sv ,
+                  "노벨 물리학상"@ko ,
+                  "Nobelpreis für Physik"@de ,
+                  "Premio Nobel de Física"@es ,
+                  "Prix Nobel de physique"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "Every Nobel Prize in Physics from 1901 to 2025, one card per prize year: 119 cards with the year on the front and the laureate or laureates on the back, and a short note, based on the Nobel Foundation's citation, on what the prize was for. Years with no award are left out; the deck ends with the 2025 prize, as the 2026 prize is announced on 6 October 2026, after the deck was made. From the Nobel Prize API and Wikidata, checked against NobelPrize.org. Not affiliated with or endorsed by the Nobel Foundation or the Royal Swedish Academy of Sciences."@en ,
+                        "Varje Nobelpris i fysik från 1901 till 2025, ett kort per prisår: 119 kort med året på framsidan och pristagaren eller pristagarna på baksidan, och en kort anteckning, byggd på Nobelstiftelsens motivering, om vad priset gavs för. År då priset inte delades ut är utelämnade; kortleken slutar med 2025 års pris, eftersom 2026 års pris tillkännages den 6 oktober 2026, efter att kortleken gjordes. Från Nobelprisets API och Wikidata, kontrollerat mot NobelPrize.org. Inte knuten till eller godkänd av Nobelstiftelsen eller Kungl. Vetenskapsakademien."@sv ,
+                        "1901년부터 2025년까지의 모든 노벨 물리학상을 수상 연도마다 한 장씩 담은 카드 119장입니다. 앞면에는 연도가, 뒷면에는 수상자(한 명 또는 여러 명)와 함께 노벨 재단의 선정 이유를 바탕으로 무엇으로 상을 받았는지 알려 주는 짧은 메모가 있습니다. 시상이 없었던 해는 빠져 있습니다. 2026년 상은 덱을 만든 뒤인 2026년 10월 6일에 발표되므로 덱은 2025년 상으로 끝납니다. 노벨상 API와 위키데이터에서 가져와 NobelPrize.org로 확인했습니다. 노벨 재단이나 스웨덴 왕립과학원과 관련이 없으며 이들의 승인을 받지 않았습니다."@ko ,
+                        "Jeder Nobelpreis für Physik von 1901 bis 2025, eine Karte pro Preisjahr: 119 Karten mit dem Jahr auf der Vorderseite und dem Preisträger oder den Preisträgern auf der Rückseite, dazu eine kurze Anmerkung, gestützt auf die Begründung der Nobelstiftung, wofür der Preis vergeben wurde. Jahre ohne Vergabe fehlen; der Stapel endet mit dem Preis von 2025, da der Preis von 2026 am 6. Oktober 2026 bekanntgegeben wird, nachdem der Stapel erstellt wurde. Aus der Nobel Prize API und Wikidata, abgeglichen mit NobelPrize.org. Weder mit der Nobelstiftung noch mit der Königlich Schwedischen Akademie der Wissenschaften verbunden oder von ihnen unterstützt."@de ,
+                        "Todos los premios Nobel de Física de 1901 a 2025, una tarjeta por año de premio: 119 tarjetas con el año en el anverso y el galardonado o los galardonados en el reverso, y una breve nota, basada en la motivación de la Fundación Nobel, sobre el motivo del premio. Se omiten los años en que no se concedió; el mazo termina con el premio de 2025, ya que el de 2026 se anuncia el 6 de octubre de 2026, después de que se creara el mazo. A partir de la API del Premio Nobel y Wikidata, comprobado con NobelPrize.org. Sin vinculación con la Fundación Nobel ni con la Real Academia de las Ciencias de Suecia, ni respaldado por ellas."@es ,
+                        "Tous les prix Nobel de physique de 1901 à 2025, une carte par année de prix : 119 cartes avec l’année au recto et le ou les lauréats au verso, ainsi qu’une courte note, fondée sur la motivation de la Fondation Nobel, indiquant ce qui a valu le prix. Les années sans attribution sont omises ; le paquet s’arrête au prix 2025, car le prix 2026 est annoncé le 6 octobre 2026, après la création du paquet. D’après l’API du prix Nobel et Wikidata, vérifié avec NobelPrize.org. Sans lien avec la Fondation Nobel ni avec l’Académie royale des sciences de Suède, et sans leur approbation."@fr ;
+    prov:wasDerivedFrom <https://api.nobelprize.org/2.1/> ,
+                        <https://www.wikidata.org/wiki/Q38104> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:physics ,
+               topic:history ;
+    dcat:keyword "Nobel Prize in Physics"@en ,
+                 "Nobel laureates"@en ,
+                 "physics"@en ,
+                 "physicists"@en ,
+                 "history of science"@en ,
+                 "Nobelpriset i fysik"@sv ,
+                 "nobelpristagare"@sv ,
+                 "fysik"@sv ,
+                 "fysiker"@sv ,
+                 "vetenskapshistoria"@sv ,
+                 "노벨 물리학상"@ko ,
+                 "노벨상 수상자"@ko ,
+                 "물리학"@ko ,
+                 "물리학자"@ko ,
+                 "과학사"@ko ,
+                 "Nobelpreis für Physik"@de ,
+                 "Nobelpreisträger"@de ,
+                 "Physik"@de ,
+                 "Physiker"@de ,
+                 "Wissenschaftsgeschichte"@de ,
+                 "Premio Nobel de Física"@es ,
+                 "ganadores del Premio Nobel"@es ,
+                 "física"@es ,
+                 "físicos"@es ,
+                 "historia de la ciencia"@es ,
+                 "prix Nobel de physique"@fr ,
+                 "lauréats du prix Nobel"@fr ,
+                 "physique"@fr ,
+                 "physiciens"@fr ,
+                 "histoire des sciences"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/nobel-prize-in-physics/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/nobel-prize-in-physics/v1.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#nobel-prize-in-physics> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#nobel-prize-in-physics> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://api.nobelprize.org/2.1/> ,
+              <https://www.wikidata.org/wiki/Q38104> ,
+              <https://www.nobelprize.org/prizes/lists/all-nobel-prizes-in-physics/> ,
+              <https://en.wikipedia.org/wiki/Lawrence_Bragg> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ,
+                       <#review-6> ,
+                       <#review-7> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Prizes and selection. On 2026-10-04 the Nobel Prize API was queried for all Nobel Prizes in Physics (nobelPrizeCategory=phy, sorted by year) and for all physics laureates (see Queries). It returned 125 prize years, 1901–2025, and 229 laureates. Six years have no laureates: 1916, 1931, 1934, 1940, 1941 and 1942; the API's topMotivation and NobelPrize.org's summary page for each say \"No Nobel Prize was awarded this year\". They are left out. Each of the other 119 years became one card, with the year (the API's awardYear, the year the prize is for) on the front, tagged zxx as a number in no language. The 2026 prize is announced on 6 October 2026 (NobelPrize.org press release \"The 2026 Nobel Prize announcements\", fetched 2026-10-04), two days after the deck was made, so the deck ends with 2025."@en ,
+                 "Back: English. The laureates of each year in the order the API lists them, joined with \", \" and \" and \". The English names are the API's knownName.en, the names under which the Nobel Foundation lists the laureates, with initials and their spacing kept as given (J.J. Thomson, but \"E. M. Purcell\", as the API and Wikidata write it). Six names were changed, each documented under Quality control: (a) the API writes \"Il´ja M. Frank\", with an acute accent (´) standing for the Russian soft sign, and \"Nicolay G. Basov\"; the cards write \"Ilya M. Frank\" and \"Nikolay G. Basov\", combining the usual English spelling of the first name (Wikidata's English labels \"Ilya Frank\" and \"Nikolay Basov\") with the API's initial, as for the other laureates of 1958 and 1964; (b) the knighthood \"Sir\", which the API gives only for Chandrasekhara Venkata Raman and Nevill F. Mott, is left out (the cards write the API's name without the title; for Raman this is also his English Wikidata label, while for Mott the English form \"Nevill F. Mott\" is the API's name without \"Sir\", Wikidata's English label being \"Nevill Francis Mott\"), as the API leaves it out for the other knighted laureates such as J.J. Thomson, William Bragg and James Chadwick; \"Lord Rayleigh\", the name under which he is known as a scientist (a Wikidata alias in English and Swedish; the Swedish Wikipedia: \"Som vetenskapsman är han känd som Lord Rayleigh\"), is kept in both languages as a fixed name, not a title before a name; (c) \"Alexei Abrikosov\" is written \"Alexei A. Abrikosov\", with the initial of the patronymic in the API's fullName (\"Alexei Alexeyevich Abrikosov\"; also a Wikidata alias and NobelPrize.org's form), so that all three 2003 laureates have an initial; (d) the typographic apostrophe in \"Anne L’Huillier\" is written as the straight apostrophe of Wikidata's label \"Anne L'Huillier\" and of the deck's other names and notes (\"Gerardus 't Hooft\")."@en ,
+                 "Back: Swedish. The same laureates joined with \", \" and \" och \". Each Swedish name is the API's Swedish name (knownName.se), which equals the English name except for Russian names, where the API gives the Swedish transliteration (Pavel A. Tjerenkov, Ilja M. Frank, Aleksandr M. Prochorov, Pjotr Kapitsa, Vitalij Ginzburg). Eight Swedish names were changed, each to a form that is a Wikidata Swedish label or alias (query 2) or the Swedish Wikipedia article title (query 3), or that adds an initial from the API's Swedish fullName: \"Igor Jevgenjevitj Tamm\" (full patronymic) to \"Igor J. Tamm\" (sv alias), so that all three 1958 laureates have an initial; \"Nicolaj G. Basov\" to \"Nikolaj G. Basov\" (sv alias and Swedish Wikipedia title; Swedish transliteration writes k); \"Zhores Alferov\" (the English transliteration) to \"Zjores Alfjorov\" (sv label and Swedish Wikipedia title); \"Alexei Abrikosov\" to \"Alexej A. Abrikosov\" (sv label and Swedish Wikipedia title); \"Vitalij Ginzburg\" to \"Vitalij L. Ginzburg\" (the initial of \"Vitalij Lazarevitj Ginzburg\", the API's Swedish fullName; sv alias \"Vitalij L Ginzburg\"), so that all three 2003 laureates have an initial; \"Sir Chandrasekhara Venkata Raman\" and \"Sir Nevill F. Mott\" to \"Chandrasekhara Venkata Raman\" and \"Nevill F. Mott\" (sv labels and Swedish Wikipedia titles; see step 3, and Swedish writes titles before names in lower case); and \"Anne L’Huillier\" to \"Anne L'Huillier\" (sv label; see step 3). Other names that Swedish writes the same as English were kept as the API gives them, including where the Swedish Wikipedia title is a fuller or shorter variant (e.g. Wilhelm Röntgen, Paul Dirac)."@en ,
+                 "Second source for every laureate. Wikidata was queried (query 1) for every item with P166 award received = Q38104 (Nobel Prize in Physics), with the year of its P585 point in time qualifier and the statement's rank. All 230 laureate-years in the API (229 laureates; John Bardeen twice) were matched by the Wikidata id the API itself gives (laureate.wikidata.id), and every one has Q38104 with the API's year, after one correction: the API links Pierre Agostini (2023) to Q122921025, which is now a redirect to Q57020342 (merged duplicate); the deck's checks use Q57020342. Wikidata also gives the prize, with no year, to Q629583, Sheldon Cooper, a fictional character in a television series; it is not a laureate and is ignored."@en ,
+                 "Third source. NobelPrize.org's summary page for each year 1901–2025 was fetched (one request per second, script fetch_summary.py) and compared with the cards: the laureates, the six years without an award and the late awards agree with the API. Its award sentence is quoted in each card's evidence with the motivations elided. NobelPrize.org is copyrighted and used for verification only."@en ,
+                 "Notes. Each card's backNote says in a few words what the prize was for. The notes shorten the motivation in the API (the Nobel Foundation's citation, which the API makes available under CC0 in English and Swedish; for 2021 alone the API has no Swedish motivation, so that year's Swedish note is translated from the English one); many follow its wording closely, with the leading \"for\" dropped and a word or two changed or left out, and the Swedish notes likewise follow the Swedish motivation where it reads naturally; where a year's laureates were cited for different work, the note names each part (e.g. 1978: \"Kapitsa: low-temperature physics; Penzias and Wilson: discovering the cosmic microwave background.\"). Swedish technical terms were compared with the Swedish labels of the corresponding Wikidata items (query 4) and the eponymous terms written as those labels write them (Zeemaneffekten, Starkeffekten, Comptonspridning, Ramanspridning, Tjerenkovstrålning, Josephsoneffekt); the one exception is \"Mössbauereffekten\", whose Wikidata sv label (and Swedish Wikipedia title) is hyphenated, \"Mössbauer-effekten\", but which is written closed like the deck's other eponymous terms, as Q918552's sv alias \"Mössbauereffekten\" (a redirect on Swedish Wikipedia) writes it, as listed under the Wikidata source, in the definite form where the sentence needs it. The notes also give, from the API and confirmed by NobelPrize.org: the nine prizes awarded a year late (1914, 1917, 1918, 1921, 1924, 1925, 1928, 1932, 1943; the API's dateAwarded falls in the next year; for each but 1914 the summary page says the laureate \"received his Nobel Prize one year later\" or, for 1925, \"their\"; for 1914, whose NobelPrize.org pages do not mention it, the Swedish Wikipedia article on Max von Laue confirms it: \"Nobelpriset tillkännagavs först hösten 1915\"); Marie Curie's Nobel Prize in Chemistry 1911; and John Bardeen's two physics prizes (1956, 1972). Four notes give a father-and-son link from Wikidata P40 child, confirmed by Wikipedia: William and Lawrence Bragg (1915, who shared the prize), J.J. Thomson (1906) and G.P. Thomson (1937), Niels Bohr (1922) and Aage Bohr (1975), Manne Siegbahn (1924) and Kai Siegbahn (1981). In Swedish the late award is \"Priset tilldelades honom ett år senare\" (the award decision, as in the API's dateAwarded; \"dem\" for 1925)."@en ,
+                 "Machine checks. Every card carried Wikidata checks run by the builder against live Wikidata: for every laureate, P166 includes Q38104; the English and Swedish name on the card is a Wikidata label or alias in that language (or the \"mul\" label) where Wikidata has that form; and the facts behind the notes' family links (P40) and Marie Curie's chemistry prize (P166 Q44585). The checks read only truthy property values and cannot see the P585 year qualifier, so the link between year and laureate is verified by query 1 and NobelPrize.org, not on every build. Name checks are left out where Wikidata does not have the Nobel Foundation's form (often an initialled form such as \"Albert A. Michelson\"); those names were confirmed against the API and NobelPrize.org's summary pages and are listed in Quality control. The deck was then validated with the app's SHACL and DCAT-AP validators (node scripts/validate_sources.ts nobel-prize-in-physics)."@en ,
+                 "Study direction. Front to back only: John Bardeen is on two cards (1956 and 1972), several backs are long lists of names, and a note on what the prize was for belongs with the year."@en ,
+                 "Reproduction. The cards were generated from the saved API and Wikidata responses by a script (gen_cards.py) that applies the name decisions in steps 3 and 4 and no other transformation, joins the names, takes the notes from a table written by hand (notes.py), writes each card's evidence from the saved responses and NobelPrize.org pages, and adds the Wikidata checks. The scripts and raw responses are kept in the authoring agent's scratch directory, not in the repository; the queries and URLs below are enough to fetch the same data again and the rules above to rebuild the cards. The changes made after review (Quality control rounds 1–3: names in steps 3 and 4, and five notes) were made to the dossier directly, with the Wikidata labels and Swedish Wikipedia texts behind them fetched on 2026-10-04 (queries 15 and 16)."@en ,
+                 "Selection: All 119 years from 1901 to 2025 in which the Nobel Prize in Physics was awarded, one card per year, with every laureate of that year: the complete set, nothing chosen. Left out: the six years with no award (1916, 1931, 1934, 1940, 1941, 1942), since a card for them would have no laureate to learn; and the 2026 prize, which is announced on 6 October 2026, after this deck was made on 4 October 2026. The year is the prize year, not the year of the award decision: the 1921 prize, awarded to Albert Einstein in 1922, is on the card 1921. Items that Wikidata also credits with the prize but that are not laureates (a fictional character) are not on the cards. The notes say what each prize was for in a few words; the laureates' nationalities and affiliations are not given, as many laureates had several."@en ,
+                 "Licensing: The deck is CC0 1.0. Its content comes from two sources whose terms allow that: the Nobel Prize API, whose terms say the service is \"free to use according to the Creative Commons Zero (CC0) license\", and Wikidata, whose structured data is CC0. The selection (every prize year with an award), the laureates and their order, the English and most Swedish names, the late awards and the multiple laureates come from the API, cross-checked with Wikidata; the changed Swedish names, the English spellings \"Ilya\" and \"Nikolay\", Raman's English name without \"Sir\" and the family links come from Wikidata, while Mott's English \"Nevill F. Mott\" is the API's name with \"Sir\" left out, and the added initials in \"Alexei A. Abrikosov\" and \"Vitalij L. Ginzburg\" from the API's own full names (\"Ilya M. Frank\" and \"Nikolay G. Basov\" combine Wikidata's spelling of the first name with the API's initial). The notes shorten the Nobel Foundation's motivations as the API gives them in English and Swedish, often closely following their wording; the API provides the motivations under CC0 too. Two sources were used for verification only and contributed nothing but confirmation of facts: NobelPrize.org's pages (copyright Nobel Prize Outreach: \"You may not reproduce, distribute ... or otherwise use the Content without prior written permission\"), read to confirm what the open sources give — the evidence quotes each year's one-sentence award statement from that year's summary page with the motivations elided (a short quotation to show what was checked; the same facts are CC0 from the same maker through the API, and the quotes are in the provenance report, not on the cards), but no text, selection or data field was taken, which also keeps clear of the EU sui generis database right in the site as a whole; and Wikipedia (CC BY-SA 4.0), which confirms four family relations and the late award of the 1914 prize, facts, with nothing copied. The API terms add conditions for applications: not to alter the data or mislead users — the deck changes six English and eight Swedish names (transliterations, the title \"Sir\", initials and an apostrophe), each documented in the method and under Quality control — and to credit the API as the data source, which the deck does. They also say applications may not use Nobel Prize Outreach's name or trademarks \"in their titles or logos, or in any way that implies endorsement\", and NobelPrize.org's terms list \"Nobel Prize®\" among the Nobel Foundation's trademarks. The deck's title, \"Nobel Prize in Physics\" / \"Nobelpriset i fysik\", uses the prize's name only to say what the deck is about (descriptive use), with no logo, medal or other Nobel graphics, and its description says it is not affiliated with or endorsed by the Nobel Foundation or the Royal Swedish Academy of Sciences. As for the literature and peace decks, whether that satisfies the API terms' \"titles\" clause is an open question, raised in Quality control rounds 3 and 6 and not yet settled; the decision will be recorded here; the fallback is a title without the prize's name, such as \"Physics laureates 1901–2025\" / \"Fysikpristagare 1901–2025\"."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Completeness and correctness against the sources; agreement between the Nobel Prize API, Wikidata and NobelPrize.org; Wikidata machine checks; Swedish names and terms"@en ;
+    rdfs:comment "Scope: All 119 cards."@en ,
+                 "Outcome: The API's 125 prize years (119 with an award, 6 without) and 230 laureate-years (229 laureates, John Bardeen twice) were matched one by one against Wikidata's P166 Q38104 statements with their P585 years and against NobelPrize.org's summary page for every year. The laureates and years agree in all three. The six years without an award and the eight late awards agree between the API and NobelPrize.org. All 626 Wikidata checks passed in the build (2026-10-04). The P166 checks confirm that each laureate received the prize but cannot see the year; each card's year rests on the API, NobelPrize.org and query 1."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 119 cards, against the Nobel Prize API, Wikidata (P166 Q38104 with P585) and the 2026 announcement date."@en ,
+                 "Outcome: No errors found: every year's laureates match Wikidata's P166/P585 statements and the API, all notes are accurate, and ending at 2025 is right (the 2026 physics prize is announced on 6 October 2026). Three suggestions: the late award of the 1914 prize, a more precise 1919 note, and the name styles on the 2003 card. All three were applied."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 119 cards, the title, description and keywords; Swedish names and terms against Wikidata sv labels, sv.wikipedia and the API's Swedish motivations."@en ,
+                 "Outcome: Language tags are clean (fronts zxx, backs and notes en+sv, no untagged text). Two warnings: the Swedish backs kept the capitalised English title \"Sir\" for Raman and Mott. Suggestions on name consistency (\"Sir\" in English, 2003 initials, \"E. M. Purcell\", apostrophes, \"Nicolay\") and on four Swedish notes. Both warnings and most suggestions were applied; \"Lord Rayleigh\" and \"E. M. Purcell\" were kept and documented."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: Every source's licence page, the deck licence, the evidence (16 cards spot-checked), the method, queries and licensing text."@en ,
+                 "Outcome: The recorded licences are right and the deck can be CC0. One error: the description, method and licensing said the notes were in our own words and did not copy the motivations, whereas many closely follow them. Also the open trademark-in-title question, an inaccurate claim about \"Ilya M. Frank\", bare output paths in the recorded commands, and two forms of the same Swedish terms. The claims, the licensing text, the paths and the term forms were corrected; the title question stays open."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The 10 cards changed in round 3 and every third card in dossier order (48 cards): laureate order, names, dates and motivations against the Nobel Prize API; every Wikidata check re-run against all 229 laureate items; NobelPrize.org summary pages for 10 years; the method, sources, licensing text and build outputs."@en ,
+                 "Outcome: No card errors; all checks pass, the API still returns 125 prize years matching the fronts, and the round 1–3 fixes are in place. One documentation warning (the method and licensing said Mott's English name without \"Sir\" came from Wikidata) and two suggestions (say that 2021 has no Swedish motivation; \"förtunnade gaser\" in the 2001 note). All three were verified against live sources and applied. The trademark-in-title question stays open, as logged in round 3."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The card changed in round 4 (2001) and every third card in dossier order (40 cards, 1902–2025) against the live Nobel Prize API (laureates, order, English and Swedish names, dateAwarded, motivations); every Wikidata check on those cards re-run; NobelPrize.org's 2001 summary and the 2026 announcement dates; language tags, description, keywords, licence decision and method."@en ,
+                 "Outcome: No errors; round 4's three fixes are in place, all sampled checks pass and the API still returns 125 prize years with 119 matching fronts (physics 2026 is announced on 6 October at the earliest, after the deck's cut-off). Two documentation suggestions, both verified against live sources and applied: the Wikidata source named the sv alias \"Bose–Einstein-kondensation\" instead of the label \"Bose–Einstein-kondensat\" the 2001 note uses, and the 2001 card's evidence did not show the Swedish motivation behind its Swedish note. The trademark-in-title question stays open, as logged in round 3."@en .
+
+<#review-6>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: All 119 cards against the live Nobel Prize API and NobelPrize.org (laureates, prize years, late awards, family links, the 2025 prize and the 2026 announcement dates); round 5's fixes; language tags, Swedish names and terms; title, description, keywords, study direction and the open licensing question."@en ,
+                 "Outcome: No factual or language-tag errors in the 119 cards; the cut-off at 2025 is right (physics 2026 is announced on 6 October) and round 5's fixes are in place. One release blocker and two Swedish style suggestions. The trademark-in-title question was verified as still open (the API terms, fetched 2026-10-04, still bar Nobel Prize Outreach's trademarks \"in their titles or logos\"); it is re-raised here and left open. Both style suggestions were verified and applied: \"Mössbauereffekten\" is now written closed like the deck's other eponymous terms, and the 2020 Swedish note's Penrose part is a noun phrase following the Swedish motivation."@en .
+
+<#review-7>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 1, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card changed."@en .
+
+<https://api.nobelprize.org/2.1/>
+    dcterms:title "Nobel Prize API 2.1 (api.nobelprize.org): Nobel Prizes and laureates in physics (nobelPrizes and laureates endpoints)" ;
+    dcterms:creator "Nobel Prize Outreach" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "Every API response's meta block links the terms (\"terms\": \"https://www.nobelprize.org/about/terms-of-use-for-api-nobelprize-org-and-data-nobelprize-org/\", \"license\": \"…#licence\"), which say: \"The Services are free to use according to the Creative Commons Zero (CC0) license. In case of conflicting terms or other inconsistencies, these Terms shall prevail.\" They add: \"Applications that use the Services should not deliberately alter or censor the data, or deliberately mislead the end users\" and \"Applications and other products and services may not use Nobel Prize Outreach’s name, logos, or other trademarks in their titles or logos, or in any way that implies endorsement, sponsorship, or false association with Nobel Prize Outreach or any other association within the Nobel Foundation’s sphere. However, you are encouraged to cite the Services as the data source\"."@en .
+
+<https://www.wikidata.org/wiki/Q38104>
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing: \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://www.nobelprize.org/prizes/lists/all-nobel-prizes-in-physics/>
+    dcterms:title "NobelPrize.org: the summary page of every Nobel Prize in Physics year and seven laureate pages" ;
+    dcterms:creator "Nobel Prize Outreach" ;
+    rdfs:comment "https://www.nobelprize.org/about/terms-of-use/: \"Everything, including but not limited to the articles, texts, photographs, images, data, files, audio and video clips, illustrations, designs, educational games and documentation in whole or in part (the “Content”) which appears on the Site is either proprietary to Nobel Prize Outreach or used in accordance with applicable law or third party consents. You may not reproduce, distribute, display, transmit, modify, perform, adapt, generate derivative works or otherwise use the Content without prior written permission […]\"; and \"you may not use the Nobel Foundation trademarks without prior written permission from the Nobel Foundation\", which lists \"Nobel Prize®\" among them."@en .
+
+<https://en.wikipedia.org/wiki/Lawrence_Bragg>
+    dcterms:title "Wikipedia (English and Swedish): the articles Lawrence Bragg, George Paget Thomson, Aage Bohr and Kai Siegbahn, and the Swedish articles Max von Laue and John Strutt, 3:e baron Rayleigh" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "The page footer of the English Wikipedia: \"Text is available under the Creative Commons Attribution-ShareAlike 4.0 License\"; the Swedish Wikipedia's footer: \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported\"."@en .
+
+<#1901-rontgen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1901"@zxx ;
+    solid-memo:back "Wilhelm Conrad Röntgen"@en ,
+                    "Wilhelm Conrad Röntgen"@sv ;
+    solid-memo:backNote "Discovery of X-rays."@en ,
+                        "Upptäckten av röntgenstrålningen."@sv .
+
+<#1902-lorentz-zeeman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1902"@zxx ;
+    solid-memo:back "Hendrik A. Lorentz and Pieter Zeeman"@en ,
+                    "Hendrik A. Lorentz och Pieter Zeeman"@sv ;
+    solid-memo:backNote "How magnetism affects radiation (the Zeeman effect)."@en ,
+                        "Magnetismens inverkan på strålning (Zeemaneffekten)."@sv .
+
+<#1903-becquerel-curie>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1903"@zxx ;
+    solid-memo:back "Henri Becquerel, Pierre Curie and Marie Curie"@en ,
+                    "Henri Becquerel, Pierre Curie och Marie Curie"@sv ;
+    solid-memo:backNote "Becquerel: discovering radioactivity; the Curies: their joint research on it. Marie Curie also won the 1911 Nobel Prize in Chemistry."@en ,
+                        "Becquerel: upptäckten av radioaktiviteten; makarna Curie: deras gemensamma forskning om den. Marie Curie fick även Nobelpriset i kemi 1911."@sv .
+
+<#1904-rayleigh>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1904"@zxx ;
+    solid-memo:back "Lord Rayleigh"@en ,
+                    "Lord Rayleigh"@sv ;
+    solid-memo:backNote "Measuring the densities of gases, which led to the discovery of argon."@en ,
+                        "Mätningar av gasers densitet, som ledde till upptäckten av argon."@sv .
+
+<#1905-lenard>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1905"@zxx ;
+    solid-memo:back "Philipp Lenard"@en ,
+                    "Philipp Lenard"@sv ;
+    solid-memo:backNote "Research on cathode rays."@en ,
+                        "Forskning om katodstrålar."@sv .
+
+<#1906-thomson>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1906"@zxx ;
+    solid-memo:back "J.J. Thomson"@en ,
+                    "J.J. Thomson"@sv ;
+    solid-memo:backNote "Research on how gases conduct electricity."@en ,
+                        "Forskning om hur gaser leder elektricitet."@sv .
+
+<#1907-michelson>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1907"@zxx ;
+    solid-memo:back "Albert A. Michelson"@en ,
+                    "Albert A. Michelson"@sv ;
+    solid-memo:backNote "Optical precision instruments and the measurements made with them."@en ,
+                        "Optiska precisionsinstrument och mätningarna som gjordes med dem."@sv .
+
+<#1908-lippmann>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1908"@zxx ;
+    solid-memo:back "Gabriel Lippmann"@en ,
+                    "Gabriel Lippmann"@sv ;
+    solid-memo:backNote "Colour photography based on the interference of light."@en ,
+                        "Färgfotografi som bygger på ljusets interferens."@sv .
+
+<#1909-marconi-braun>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1909"@zxx ;
+    solid-memo:back "Guglielmo Marconi and Ferdinand Braun"@en ,
+                    "Guglielmo Marconi och Ferdinand Braun"@sv ;
+    solid-memo:backNote "Developing wireless telegraphy."@en ,
+                        "Utvecklingen av trådlös telegrafi."@sv .
+
+<#1910-waals>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1910"@zxx ;
+    solid-memo:back "Johannes Diderik van der Waals"@en ,
+                    "Johannes Diderik van der Waals"@sv ;
+    solid-memo:backNote "The equation of state for gases and liquids."@en ,
+                        "Tillståndsekvationen för gaser och vätskor."@sv .
+
+<#1911-wien>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1911"@zxx ;
+    solid-memo:back "Wilhelm Wien"@en ,
+                    "Wilhelm Wien"@sv ;
+    solid-memo:backNote "The laws of heat radiation."@en ,
+                        "Lagarna för värmestrålning."@sv .
+
+<#1912-dalen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1912"@zxx ;
+    solid-memo:back "Gustaf Dalén"@en ,
+                    "Gustaf Dalén"@sv ;
+    solid-memo:backNote "Automatic regulators for gas-lit lighthouses and buoys."@en ,
+                        "Automatiska regulatorer för gasbelysta fyrar och bojar."@sv .
+
+<#1913-onnes>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1913"@zxx ;
+    solid-memo:back "Heike Kamerlingh Onnes"@en ,
+                    "Heike Kamerlingh Onnes"@sv ;
+    solid-memo:backNote "Matter at low temperatures, which led to the production of liquid helium."@en ,
+                        "Materiens egenskaper vid låga temperaturer, som ledde till framställningen av flytande helium."@sv .
+
+<#1914-laue>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1914"@zxx ;
+    solid-memo:back "Max von Laue"@en ,
+                    "Max von Laue"@sv ;
+    solid-memo:backNote "Discovering that crystals diffract X-rays. Awarded a year later, in 1915."@en ,
+                        "Upptäckten av röntgenstrålningens diffraktion i kristaller. Priset tilldelades honom ett år senare, 1915."@sv .
+
+<#1915-bragg>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1915"@zxx ;
+    solid-memo:back "William Bragg and Lawrence Bragg"@en ,
+                    "William Bragg och Lawrence Bragg"@sv ;
+    solid-memo:backNote "Analysing the structure of crystals with X-rays. Father and son."@en ,
+                        "Analys av kristallers struktur med röntgenstrålning. Far och son."@sv .
+
+<#1917-barkla>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1917"@zxx ;
+    solid-memo:back "Charles Glover Barkla"@en ,
+                    "Charles Glover Barkla"@sv ;
+    solid-memo:backNote "Discovering the characteristic X-rays of the elements. Awarded a year later, in 1918."@en ,
+                        "Upptäckten av grundämnenas karakteristiska röntgenstrålning. Priset tilldelades honom ett år senare, 1918."@sv .
+
+<#1918-planck>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1918"@zxx ;
+    solid-memo:back "Max Planck"@en ,
+                    "Max Planck"@sv ;
+    solid-memo:backNote "Discovering energy quanta. Awarded a year later, in 1919."@en ,
+                        "Upptäckten av energikvanta. Priset tilldelades honom ett år senare, 1919."@sv .
+
+<#1919-stark>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1919"@zxx ;
+    solid-memo:back "Johannes Stark"@en ,
+                    "Johannes Stark"@sv ;
+    solid-memo:backNote "Discovering the Doppler effect in canal rays and the splitting of spectral lines in electric fields (the Stark effect)."@en ,
+                        "Upptäckten av dopplereffekten i kanalstrålar och av hur spektrallinjer delas upp i elektriska fält (Starkeffekten)."@sv .
+
+<#1920-guillaume>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1920"@zxx ;
+    solid-memo:back "Charles Edouard Guillaume"@en ,
+                    "Charles Edouard Guillaume"@sv ;
+    solid-memo:backNote "Anomalies he found in nickel steel alloys, useful for precision measurement."@en ,
+                        "Avvikande egenskaper som han fann hos nickelstållegeringar, till nytta för precisionsmätningar."@sv .
+
+<#1921-einstein>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1921"@zxx ;
+    solid-memo:back "Albert Einstein"@en ,
+                    "Albert Einstein"@sv ;
+    solid-memo:backNote "Services to theoretical physics, above all the law of the photoelectric effect. Awarded a year later, in 1922."@en ,
+                        "Insatser inom teoretisk fysik, framför allt lagen för den fotoelektriska effekten. Priset tilldelades honom ett år senare, 1922."@sv .
+
+<#1922-bohr>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1922"@zxx ;
+    solid-memo:back "Niels Bohr"@en ,
+                    "Niels Bohr"@sv ;
+    solid-memo:backNote "The structure of atoms and the radiation they emit."@en ,
+                        "Atomernas struktur och den strålning de sänder ut."@sv .
+
+<#1923-millikan>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1923"@zxx ;
+    solid-memo:back "Robert A. Millikan"@en ,
+                    "Robert A. Millikan"@sv ;
+    solid-memo:backNote "Work on the elementary charge and on the photoelectric effect."@en ,
+                        "Arbeten om elementarladdningen och den fotoelektriska effekten."@sv .
+
+<#1924-siegbahn>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1924"@zxx ;
+    solid-memo:back "Manne Siegbahn"@en ,
+                    "Manne Siegbahn"@sv ;
+    solid-memo:backNote "X-ray spectroscopy. Awarded a year later, in 1925."@en ,
+                        "Röntgenspektroskopi. Priset tilldelades honom ett år senare, 1925."@sv .
+
+<#1925-franck-hertz>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1925"@zxx ;
+    solid-memo:back "James Franck and Gustav Hertz"@en ,
+                    "James Franck och Gustav Hertz"@sv ;
+    solid-memo:backNote "The laws of electron collisions with atoms. Awarded a year later, in 1926."@en ,
+                        "Lagarna för elektroners kollisioner med atomer. Priset tilldelades dem ett år senare, 1926."@sv .
+
+<#1926-perrin>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1926"@zxx ;
+    solid-memo:back "Jean Baptiste Perrin"@en ,
+                    "Jean Baptiste Perrin"@sv ;
+    solid-memo:backNote "The discontinuous structure of matter, especially sedimentation equilibrium."@en ,
+                        "Materiens diskontinuerliga struktur, särskilt sedimentationsjämvikten."@sv .
+
+<#1927-compton-wilson>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1927"@zxx ;
+    solid-memo:back "Arthur H. Compton and C.T.R. Wilson"@en ,
+                    "Arthur H. Compton och C.T.R. Wilson"@sv ;
+    solid-memo:backNote "Compton: Compton scattering; Wilson: the cloud chamber, which makes the tracks of charged particles visible."@en ,
+                        "Compton: Comptonspridningen; Wilson: dimkammaren, som gör laddade partiklars spår synliga."@sv .
+
+<#1928-richardson>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1928"@zxx ;
+    solid-memo:back "Owen Willans Richardson"@en ,
+                    "Owen Willans Richardson"@sv ;
+    solid-memo:backNote "Thermionic emission and the law describing it. Awarded a year later, in 1929."@en ,
+                        "Termisk emission och lagen som beskriver den. Priset tilldelades honom ett år senare, 1929."@sv .
+
+<#1929-broglie>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1929"@zxx ;
+    solid-memo:back "Louis de Broglie"@en ,
+                    "Louis de Broglie"@sv ;
+    solid-memo:backNote "Discovering the wave nature of electrons."@en ,
+                        "Upptäckten av elektronernas vågnatur."@sv .
+
+<#1930-raman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1930"@zxx ;
+    solid-memo:back "Chandrasekhara Venkata Raman"@en ,
+                    "Chandrasekhara Venkata Raman"@sv ;
+    solid-memo:backNote "Light scattering, notably Raman scattering."@en ,
+                        "Ljusspridning, särskilt Ramanspridning."@sv .
+
+<#1932-heisenberg>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1932"@zxx ;
+    solid-memo:back "Werner Heisenberg"@en ,
+                    "Werner Heisenberg"@sv ;
+    solid-memo:backNote "Creating quantum mechanics. Awarded a year later, in 1933."@en ,
+                        "Skapandet av kvantmekaniken. Priset tilldelades honom ett år senare, 1933."@sv .
+
+<#1933-schrodinger-dirac>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1933"@zxx ;
+    solid-memo:back "Erwin Schrödinger and Paul A.M. Dirac"@en ,
+                    "Erwin Schrödinger och Paul A.M. Dirac"@sv ;
+    solid-memo:backNote "New, fruitful forms of atomic theory."@en ,
+                        "Nya, fruktbara former av atomteorin."@sv .
+
+<#1935-chadwick>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1935"@zxx ;
+    solid-memo:back "James Chadwick"@en ,
+                    "James Chadwick"@sv ;
+    solid-memo:backNote "Discovering the neutron."@en ,
+                        "Upptäckten av neutronen."@sv .
+
+<#1936-hess-anderson>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1936"@zxx ;
+    solid-memo:back "Victor F. Hess and Carl D. Anderson"@en ,
+                    "Victor F. Hess och Carl D. Anderson"@sv ;
+    solid-memo:backNote "Hess: discovering cosmic radiation; Anderson: discovering the positron."@en ,
+                        "Hess: upptäckten av den kosmiska strålningen; Anderson: upptäckten av positronen."@sv .
+
+<#1937-davisson-thomson>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1937"@zxx ;
+    solid-memo:back "Clinton Davisson and George Paget Thomson"@en ,
+                    "Clinton Davisson och George Paget Thomson"@sv ;
+    solid-memo:backNote "Showing by experiment that crystals diffract electrons. Thomson was the son of J.J. Thomson (1906)."@en ,
+                        "Experiment som visade elektroners diffraktion i kristaller. Thomson var son till J.J. Thomson (1906)."@sv .
+
+<#1938-fermi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1938"@zxx ;
+    solid-memo:back "Enrico Fermi"@en ,
+                    "Enrico Fermi"@sv ;
+    solid-memo:backNote "New radioactive elements made by neutron irradiation, and nuclear reactions caused by slow neutrons."@en ,
+                        "Nya radioaktiva grundämnen framställda genom neutronbestrålning, och kärnreaktioner orsakade av långsamma neutroner."@sv .
+
+<#1939-lawrence>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1939"@zxx ;
+    solid-memo:back "Ernest Lawrence"@en ,
+                    "Ernest Lawrence"@sv ;
+    solid-memo:backNote "Inventing the cyclotron, and the results obtained with it."@en ,
+                        "Uppfinningen av cyklotronen och resultaten som nåddes med den."@sv .
+
+<#1943-stern>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1943"@zxx ;
+    solid-memo:back "Otto Stern"@en ,
+                    "Otto Stern"@sv ;
+    solid-memo:backNote "The molecular-beam method and the magnetic moment of the proton. Awarded a year later, in 1944."@en ,
+                        "Molekylstrålemetoden och protonens magnetiska moment. Priset tilldelades honom ett år senare, 1944."@sv .
+
+<#1944-rabi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1944"@zxx ;
+    solid-memo:back "Isidor Isaac Rabi"@en ,
+                    "Isidor Isaac Rabi"@sv ;
+    solid-memo:backNote "A resonance method for measuring the magnetic properties of atomic nuclei."@en ,
+                        "En resonansmetod för att mäta atomkärnors magnetiska egenskaper."@sv .
+
+<#1945-pauli>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1945"@zxx ;
+    solid-memo:back "Wolfgang Pauli"@en ,
+                    "Wolfgang Pauli"@sv ;
+    solid-memo:backNote "Discovering the exclusion principle."@en ,
+                        "Upptäckten av Paulis uteslutningsprincip."@sv .
+
+<#1946-bridgman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1946"@zxx ;
+    solid-memo:back "Percy W. Bridgman"@en ,
+                    "Percy W. Bridgman"@sv ;
+    solid-memo:backNote "An apparatus for extremely high pressures, and discoveries in high-pressure physics made with it."@en ,
+                        "En apparat för extremt höga tryck, och upptäckter inom högtrycksfysiken som gjordes med den."@sv .
+
+<#1947-appleton>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1947"@zxx ;
+    solid-memo:back "Edward V. Appleton"@en ,
+                    "Edward V. Appleton"@sv ;
+    solid-memo:backNote "Physics of the upper atmosphere, notably discovering the layer of the ionosphere named after him."@en ,
+                        "Den övre atmosfärens fysik, särskilt upptäckten av det skikt i jonosfären som fått hans namn."@sv .
+
+<#1948-blackett>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1948"@zxx ;
+    solid-memo:back "Patrick M.S. Blackett"@en ,
+                    "Patrick M.S. Blackett"@sv ;
+    solid-memo:backNote "Developing the cloud chamber method, and discoveries made with it in nuclear physics and cosmic radiation."@en ,
+                        "Vidareutvecklingen av dimkammarmetoden, och upptäckter som gjordes med den inom kärnfysik och kosmisk strålning."@sv .
+
+<#1949-yukawa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1949"@zxx ;
+    solid-memo:back "Hideki Yukawa"@en ,
+                    "Hideki Yukawa"@sv ;
+    solid-memo:backNote "Predicting mesons from a theory of nuclear forces."@en ,
+                        "Förutsägelsen av mesoner utifrån en teori om kärnkrafterna."@sv .
+
+<#1950-powell>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1950"@zxx ;
+    solid-memo:back "Cecil Powell"@en ,
+                    "Cecil Powell"@sv ;
+    solid-memo:backNote "A photographic method for studying nuclear processes, and discoveries about mesons made with it."@en ,
+                        "En fotografisk metod för att studera kärnprocesser, och upptäckter om mesoner som gjordes med den."@sv .
+
+<#1951-cockcroft-walton>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1951"@zxx ;
+    solid-memo:back "John Cockcroft and Ernest T.S. Walton"@en ,
+                    "John Cockcroft och Ernest T.S. Walton"@sv ;
+    solid-memo:backNote "Transmuting atomic nuclei with artificially accelerated particles."@en ,
+                        "Omvandling av atomkärnor med artificiellt accelererade partiklar."@sv .
+
+<#1952-bloch-purcell>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1952"@zxx ;
+    solid-memo:back "Felix Bloch and E. M. Purcell"@en ,
+                    "Felix Bloch och E. M. Purcell"@sv ;
+    solid-memo:backNote "New methods for precise nuclear magnetic measurements (nuclear magnetic resonance)."@en ,
+                        "Nya metoder för precisa kärnmagnetiska mätningar (kärnmagnetisk resonans)."@sv .
+
+<#1953-zernike>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1953"@zxx ;
+    solid-memo:back "Frits Zernike"@en ,
+                    "Frits Zernike"@sv ;
+    solid-memo:backNote "The phase-contrast method and the phase-contrast microscope."@en ,
+                        "Faskontrastmetoden och faskontrastmikroskopet."@sv .
+
+<#1954-born-bothe>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1954"@zxx ;
+    solid-memo:back "Max Born and Walther Bothe"@en ,
+                    "Max Born och Walther Bothe"@sv ;
+    solid-memo:backNote "Born: the statistical interpretation of the wave function; Bothe: the coincidence method."@en ,
+                        "Born: den statistiska tolkningen av vågfunktionen; Bothe: koincidensmetoden."@sv .
+
+<#1955-lamb-kusch>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1955"@zxx ;
+    solid-memo:back "Willis E. Lamb and Polykarp Kusch"@en ,
+                    "Willis E. Lamb och Polykarp Kusch"@sv ;
+    solid-memo:backNote "Lamb: the fine structure of the hydrogen spectrum; Kusch: a precise measurement of the electron's magnetic moment."@en ,
+                        "Lamb: vätespektrumets finstruktur; Kusch: en precisionsmätning av elektronens magnetiska moment."@sv .
+
+<#1956-shockley-bardeen-brattain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1956"@zxx ;
+    solid-memo:back "William B. Shockley, John Bardeen and Walter H. Brattain"@en ,
+                    "William B. Shockley, John Bardeen och Walter H. Brattain"@sv ;
+    solid-memo:backNote "Research on semiconductors and discovering the transistor effect. Bardeen won the prize again in 1972."@en ,
+                        "Forskning om halvledare och upptäckten av transistoreffekten. Bardeen fick priset igen 1972."@sv .
+
+<#1957-yang-lee>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1957"@zxx ;
+    solid-memo:back "Chen Ning Yang and Tsung-Dao Lee"@en ,
+                    "Chen Ning Yang och Tsung-Dao Lee"@sv ;
+    solid-memo:backNote "Their study of the parity laws, which led to discoveries about elementary particles."@en ,
+                        "Deras undersökning av paritetslagarna, som ledde till upptäckter om elementarpartiklar."@sv .
+
+<#1958-cherenkov-frank-tamm>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1958"@zxx ;
+    solid-memo:back "Pavel A. Cherenkov, Ilya M. Frank and Igor Y. Tamm"@en ,
+                    "Pavel A. Tjerenkov, Ilja M. Frank och Igor J. Tamm"@sv ;
+    solid-memo:backNote "Discovering and explaining Cherenkov radiation."@en ,
+                        "Upptäckten och förklaringen av Tjerenkovstrålningen."@sv .
+
+<#1959-segre-chamberlain>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1959"@zxx ;
+    solid-memo:back "Emilio Segrè and Owen Chamberlain"@en ,
+                    "Emilio Segrè och Owen Chamberlain"@sv ;
+    solid-memo:backNote "Discovering the antiproton."@en ,
+                        "Upptäckten av antiprotonen."@sv .
+
+<#1960-glaser>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1960"@zxx ;
+    solid-memo:back "Donald A. Glaser"@en ,
+                    "Donald A. Glaser"@sv ;
+    solid-memo:backNote "Inventing the bubble chamber."@en ,
+                        "Uppfinningen av bubbelkammaren."@sv .
+
+<#1961-hofstadter-mossbauer>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1961"@zxx ;
+    solid-memo:back "Robert Hofstadter and Rudolf Mössbauer"@en ,
+                    "Robert Hofstadter och Rudolf Mössbauer"@sv ;
+    solid-memo:backNote "Hofstadter: electron scattering that revealed the structure of nucleons; Mössbauer: resonance absorption of gamma rays (the Mössbauer effect)."@en ,
+                        "Hofstadter: elektronspridning som visade nukleonernas struktur; Mössbauer: resonansabsorption av gammastrålning (Mössbauereffekten)."@sv .
+
+<#1962-landau>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1962"@zxx ;
+    solid-memo:back "Lev Landau"@en ,
+                    "Lev Landau"@sv ;
+    solid-memo:backNote "Theories of condensed matter, especially liquid helium."@en ,
+                        "Teorier om kondenserad materia, särskilt flytande helium."@sv .
+
+<#1963-wigner-mayer-jensen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1963"@zxx ;
+    solid-memo:back "Eugene Wigner, Maria Goeppert Mayer and J. Hans D. Jensen"@en ,
+                    "Eugene Wigner, Maria Goeppert Mayer och J. Hans D. Jensen"@sv ;
+    solid-memo:backNote "Wigner: symmetry principles in the theory of nuclei and elementary particles; Goeppert Mayer and Jensen: the shell structure of the nucleus."@en ,
+                        "Wigner: symmetriprinciper i teorin för atomkärnor och elementarpartiklar; Goeppert Mayer och Jensen: atomkärnans skalstruktur."@sv .
+
+<#1964-townes-basov-prokhorov>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1964"@zxx ;
+    solid-memo:back "Charles H. Townes, Nikolay G. Basov and Aleksandr M. Prokhorov"@en ,
+                    "Charles H. Townes, Nikolaj G. Basov och Aleksandr M. Prochorov"@sv ;
+    solid-memo:backNote "Quantum electronics, which led to the maser and the laser."@en ,
+                        "Kvantelektronik, som ledde till masern och lasern."@sv .
+
+<#1965-tomonaga-schwinger-feynman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1965"@zxx ;
+    solid-memo:back "Sin-Itiro Tomonaga, Julian Schwinger and Richard P. Feynman"@en ,
+                    "Sin-Itiro Tomonaga, Julian Schwinger och Richard P. Feynman"@sv ;
+    solid-memo:backNote "Fundamental work in quantum electrodynamics."@en ,
+                        "Grundläggande arbeten inom kvantelektrodynamiken."@sv .
+
+<#1966-kastler>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1966"@zxx ;
+    solid-memo:back "Alfred Kastler"@en ,
+                    "Alfred Kastler"@sv ;
+    solid-memo:backNote "Optical methods for studying resonances in atoms."@en ,
+                        "Optiska metoder för att studera resonanser i atomer."@sv .
+
+<#1967-bethe>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1967"@zxx ;
+    solid-memo:back "Hans Bethe"@en ,
+                    "Hans Bethe"@sv ;
+    solid-memo:backNote "The theory of nuclear reactions, especially how stars produce energy."@en ,
+                        "Teorin för kärnreaktioner, särskilt hur stjärnor producerar energi."@sv .
+
+<#1968-alvarez>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1968"@zxx ;
+    solid-memo:back "Luis Alvarez"@en ,
+                    "Luis Alvarez"@sv ;
+    solid-memo:backNote "Elementary particle physics, notably discovering many resonance states with the hydrogen bubble chamber."@en ,
+                        "Elementarpartikelfysik, särskilt upptäckten av många resonanstillstånd med vätebubbelkammaren."@sv .
+
+<#1969-gell-mann>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1969"@zxx ;
+    solid-memo:back "Murray Gell-Mann"@en ,
+                    "Murray Gell-Mann"@sv ;
+    solid-memo:backNote "Classifying elementary particles and their interactions."@en ,
+                        "Klassificeringen av elementarpartiklarna och deras växelverkan."@sv .
+
+<#1970-alfven-neel>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1970"@zxx ;
+    solid-memo:back "Hannes Alfvén and Louis Néel"@en ,
+                    "Hannes Alfvén och Louis Néel"@sv ;
+    solid-memo:backNote "Alfvén: magnetohydrodynamics and plasma physics; Néel: antiferromagnetism and ferrimagnetism."@en ,
+                        "Alfvén: magnetohydrodynamik och plasmafysik; Néel: antiferromagnetism och ferrimagnetism."@sv .
+
+<#1971-gabor>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1971"@zxx ;
+    solid-memo:back "Dennis Gabor"@en ,
+                    "Dennis Gabor"@sv ;
+    solid-memo:backNote "Inventing holography."@en ,
+                        "Uppfinningen av holografin."@sv .
+
+<#1972-bardeen-cooper-schrieffer>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1972"@zxx ;
+    solid-memo:back "John Bardeen, Leon N. Cooper and Robert Schrieffer"@en ,
+                    "John Bardeen, Leon N. Cooper och Robert Schrieffer"@sv ;
+    solid-memo:backNote "The BCS theory of superconductivity. Bardeen's second prize; his first was in 1956."@en ,
+                        "BCS-teorin för supraledning. Bardeens andra pris; det första fick han 1956."@sv .
+
+<#1973-esaki-giaever-josephson>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1973"@zxx ;
+    solid-memo:back "Leo Esaki, Ivar Giaever and Brian D. Josephson"@en ,
+                    "Leo Esaki, Ivar Giaever och Brian D. Josephson"@sv ;
+    solid-memo:backNote "Esaki and Giaever: tunnelling in semiconductors and superconductors; Josephson: predicting supercurrents through a tunnel barrier (the Josephson effect)."@en ,
+                        "Esaki och Giaever: tunnling i halvledare och supraledare; Josephson: förutsägelser om supraströmmar genom en tunnelbarriär (Josephsoneffekten)."@sv .
+
+<#1974-ryle-hewish>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1974"@zxx ;
+    solid-memo:back "Martin Ryle and Antony Hewish"@en ,
+                    "Martin Ryle och Antony Hewish"@sv ;
+    solid-memo:backNote "Radio astrophysics: Ryle for aperture synthesis, Hewish for discovering pulsars."@en ,
+                        "Radioastrofysik: Ryle för apertursyntes, Hewish för upptäckten av pulsarer."@sv .
+
+<#1975-bohr-mottelson-rainwater>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1975"@zxx ;
+    solid-memo:back "Aage N. Bohr, Ben R. Mottelson and James Rainwater"@en ,
+                    "Aage N. Bohr, Ben R. Mottelson och James Rainwater"@sv ;
+    solid-memo:backNote "The link between collective motion and particle motion in atomic nuclei, and the theory of nuclear structure built on it. Aage Bohr was the son of Niels Bohr (1922)."@en ,
+                        "Sambandet mellan kollektiv rörelse och partikelrörelse i atomkärnor, och teorin för kärnans struktur som bygger på det. Aage Bohr var son till Niels Bohr (1922)."@sv .
+
+<#1976-richter-ting>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1976"@zxx ;
+    solid-memo:back "Burton Richter and Samuel C.C. Ting"@en ,
+                    "Burton Richter och Samuel C.C. Ting"@sv ;
+    solid-memo:backNote "Discovering a new kind of heavy elementary particle."@en ,
+                        "Upptäckten av en ny sorts tung elementarpartikel."@sv .
+
+<#1977-anderson-mott-vleck>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1977"@zxx ;
+    solid-memo:back "Philip W. Anderson, Nevill F. Mott and John H. Van Vleck"@en ,
+                    "Philip W. Anderson, Nevill F. Mott och John H. Van Vleck"@sv ;
+    solid-memo:backNote "The theory of the electronic structure of magnetic and disordered systems."@en ,
+                        "Teorin för elektronstrukturen i magnetiska och oordnade system."@sv .
+
+<#1978-kapitsa-penzias-wilson>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1978"@zxx ;
+    solid-memo:back "Pyotr Kapitsa, Arno Penzias and Robert Woodrow Wilson"@en ,
+                    "Pjotr Kapitsa, Arno Penzias och Robert Woodrow Wilson"@sv ;
+    solid-memo:backNote "Kapitsa: low-temperature physics; Penzias and Wilson: discovering the cosmic microwave background."@en ,
+                        "Kapitsa: lågtemperaturfysik; Penzias och Wilson: upptäckten av den kosmiska bakgrundsstrålningen."@sv .
+
+<#1979-glashow-salam-weinberg>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1979"@zxx ;
+    solid-memo:back "Sheldon Glashow, Abdus Salam and Steven Weinberg"@en ,
+                    "Sheldon Glashow, Abdus Salam och Steven Weinberg"@sv ;
+    solid-memo:backNote "The theory unifying the weak and electromagnetic interactions."@en ,
+                        "Teorin som förenar den svaga och den elektromagnetiska växelverkan."@sv .
+
+<#1980-cronin-fitch>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1980"@zxx ;
+    solid-memo:back "James Cronin and Val Fitch"@en ,
+                    "James Cronin och Val Fitch"@sv ;
+    solid-memo:backNote "Discovering the violation of a fundamental symmetry in the decay of neutral K mesons."@en ,
+                        "Upptäckten av brott mot en grundläggande symmetri i neutrala K-mesoners sönderfall."@sv .
+
+<#1981-bloembergen-schawlow-siegbahn>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1981"@zxx ;
+    solid-memo:back "Nicolaas Bloembergen, Arthur L. Schawlow and Kai M. Siegbahn"@en ,
+                    "Nicolaas Bloembergen, Arthur L. Schawlow och Kai M. Siegbahn"@sv ;
+    solid-memo:backNote "Bloembergen and Schawlow: laser spectroscopy; Siegbahn: high-resolution electron spectroscopy. Kai Siegbahn was the son of Manne Siegbahn (1924)."@en ,
+                        "Bloembergen och Schawlow: laserspektroskopi; Siegbahn: högupplöst elektronspektroskopi. Kai Siegbahn var son till Manne Siegbahn (1924)."@sv .
+
+<#1982-wilson>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1982"@zxx ;
+    solid-memo:back "Kenneth G. Wilson"@en ,
+                    "Kenneth G. Wilson"@sv ;
+    solid-memo:backNote "The theory of critical phenomena in phase transitions."@en ,
+                        "Teorin för kritiska fenomen vid fasövergångar."@sv .
+
+<#1983-chandrasekhar-fowler>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1983"@zxx ;
+    solid-memo:back "Subrahmanyan Chandrasekhar and William A. Fowler"@en ,
+                    "Subrahmanyan Chandrasekhar och William A. Fowler"@sv ;
+    solid-memo:backNote "Chandrasekhar: the physics of the structure and evolution of stars; Fowler: the nuclear reactions that form the chemical elements."@en ,
+                        "Chandrasekhar: fysiken bakom stjärnornas struktur och utveckling; Fowler: kärnreaktionerna som bildar grundämnena."@sv .
+
+<#1984-rubbia-meer>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1984"@zxx ;
+    solid-memo:back "Carlo Rubbia and Simon van der Meer"@en ,
+                    "Carlo Rubbia och Simon van der Meer"@sv ;
+    solid-memo:backNote "Key roles in the project that discovered the W and Z particles."@en ,
+                        "Avgörande insatser i projektet som upptäckte W- och Z-partiklarna."@sv .
+
+<#1985-klitzing>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1985"@zxx ;
+    solid-memo:back "Klaus von Klitzing"@en ,
+                    "Klaus von Klitzing"@sv ;
+    solid-memo:backNote "Discovering that the Hall effect is quantised."@en ,
+                        "Upptäckten att Halleffekten är kvantiserad."@sv .
+
+<#1986-ruska-binnig-rohrer>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1986"@zxx ;
+    solid-memo:back "Ernst Ruska, Gerd Binnig and Heinrich Rohrer"@en ,
+                    "Ernst Ruska, Gerd Binnig och Heinrich Rohrer"@sv ;
+    solid-memo:backNote "Ruska: electron optics and the first electron microscope; Binnig and Rohrer: the scanning tunnelling microscope."@en ,
+                        "Ruska: elektronoptik och det första elektronmikroskopet; Binnig och Rohrer: sveptunnelmikroskopet."@sv .
+
+<#1987-bednorz-muller>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1987"@zxx ;
+    solid-memo:back "J. Georg Bednorz and K. Alex Müller"@en ,
+                    "J. Georg Bednorz och K. Alex Müller"@sv ;
+    solid-memo:backNote "Discovering superconductivity in ceramic materials."@en ,
+                        "Upptäckten av supraledning i keramiska material."@sv .
+
+<#1988-lederman-schwartz-steinberger>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1988"@zxx ;
+    solid-memo:back "Leon M. Lederman, Melvin Schwartz and Jack Steinberger"@en ,
+                    "Leon M. Lederman, Melvin Schwartz och Jack Steinberger"@sv ;
+    solid-memo:backNote "The neutrino beam method and discovering the muon neutrino."@en ,
+                        "Neutrinostrålemetoden och upptäckten av myonneutrinon."@sv .
+
+<#1989-ramsey-dehmelt-paul>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1989"@zxx ;
+    solid-memo:back "Norman F. Ramsey, Hans G. Dehmelt and Wolfgang Paul"@en ,
+                    "Norman F. Ramsey, Hans G. Dehmelt och Wolfgang Paul"@sv ;
+    solid-memo:backNote "Ramsey: the separated oscillatory fields method, used in atomic clocks; Dehmelt and Paul: the ion trap technique."@en ,
+                        "Ramsey: metoden med separerade oscillerande fält, som används i atomur; Dehmelt och Paul: jonfälletekniken."@sv .
+
+<#1990-friedman-kendall-taylor>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1990"@zxx ;
+    solid-memo:back "Jerome I. Friedman, Henry W. Kendall and Richard E. Taylor"@en ,
+                    "Jerome I. Friedman, Henry W. Kendall och Richard E. Taylor"@sv ;
+    solid-memo:backNote "Deep inelastic scattering of electrons on protons and neutrons, key to the quark model."@en ,
+                        "Djupt inelastisk spridning av elektroner mot protoner och neutroner, avgörande för kvarkmodellen."@sv .
+
+<#1991-gennes>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1991"@zxx ;
+    solid-memo:back "Pierre-Gilles de Gennes"@en ,
+                    "Pierre-Gilles de Gennes"@sv ;
+    solid-memo:backNote "Applying methods for order phenomena to complex matter such as liquid crystals and polymers."@en ,
+                        "Metoder för ordningsfenomen tillämpade på komplex materia som flytande kristaller och polymerer."@sv .
+
+<#1992-charpak>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1992"@zxx ;
+    solid-memo:back "Georges Charpak"@en ,
+                    "Georges Charpak"@sv ;
+    solid-memo:backNote "Inventing particle detectors, notably a new kind of wire chamber."@en ,
+                        "Uppfinningen av partikeldetektorer, särskilt en ny sorts trådkammare."@sv .
+
+<#1993-hulse-taylor>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1993"@zxx ;
+    solid-memo:back "Russell A. Hulse and Joseph H. Taylor Jr."@en ,
+                    "Russell A. Hulse och Joseph H. Taylor Jr."@sv ;
+    solid-memo:backNote "Discovering a new type of pulsar, which opened new ways to study gravitation."@en ,
+                        "Upptäckten av en ny typ av pulsar, som gav nya möjligheter att studera gravitationen."@sv .
+
+<#1994-brockhouse-shull>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1994"@zxx ;
+    solid-memo:back "Bertram N. Brockhouse and Clifford G. Shull"@en ,
+                    "Bertram N. Brockhouse och Clifford G. Shull"@sv ;
+    solid-memo:backNote "Brockhouse: neutron spectroscopy; Shull: neutron diffraction."@en ,
+                        "Brockhouse: neutronspektroskopi; Shull: neutrondiffraktion."@sv .
+
+<#1995-perl-reines>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1995"@zxx ;
+    solid-memo:back "Martin L. Perl and Frederick Reines"@en ,
+                    "Martin L. Perl och Frederick Reines"@sv ;
+    solid-memo:backNote "Perl: discovering the tau lepton; Reines: detecting the neutrino."@en ,
+                        "Perl: upptäckten av tau-leptonen; Reines: påvisandet av neutrinon."@sv .
+
+<#1996-lee-osheroff-richardson>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1996"@zxx ;
+    solid-memo:back "David M. Lee, Douglas D. Osheroff and Robert C. Richardson"@en ,
+                    "David M. Lee, Douglas D. Osheroff och Robert C. Richardson"@sv ;
+    solid-memo:backNote "Discovering superfluidity in helium-3."@en ,
+                        "Upptäckten av suprafluiditet i helium-3."@sv .
+
+<#1997-chu-cohen-tannoudji-phillips>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1997"@zxx ;
+    solid-memo:back "Steven Chu, Claude Cohen-Tannoudji and William D. Phillips"@en ,
+                    "Steven Chu, Claude Cohen-Tannoudji och William D. Phillips"@sv ;
+    solid-memo:backNote "Methods to cool and trap atoms with laser light."@en ,
+                        "Metoder för att kyla och fånga atomer med laserljus."@sv .
+
+<#1998-laughlin-stormer-tsui>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1998"@zxx ;
+    solid-memo:back "Robert B. Laughlin, Horst L. Störmer and Daniel C. Tsui"@en ,
+                    "Robert B. Laughlin, Horst L. Störmer och Daniel C. Tsui"@sv ;
+    solid-memo:backNote "Discovering a quantum fluid with fractionally charged excitations."@en ,
+                        "Upptäckten av en kvantvätska med fraktionellt laddade excitationer."@sv .
+
+<#1999-hooft-veltman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "1999"@zxx ;
+    solid-memo:back "Gerardus 't Hooft and Martinus J.G. Veltman"@en ,
+                    "Gerardus 't Hooft och Martinus J.G. Veltman"@sv ;
+    solid-memo:backNote "The quantum structure of the electroweak interaction."@en ,
+                        "Den elektrosvaga växelverkans kvantstruktur."@sv .
+
+<#2000-alferov-kroemer-kilby>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2000"@zxx ;
+    solid-memo:back "Zhores Alferov, Herbert Kroemer and Jack Kilby"@en ,
+                    "Zjores Alfjorov, Herbert Kroemer och Jack Kilby"@sv ;
+    solid-memo:backNote "Alferov and Kroemer: semiconductor heterostructures; Kilby: his part in inventing the integrated circuit."@en ,
+                        "Alfjorov och Kroemer: heterostrukturer av halvledare; Kilby: hans del i uppfinningen av den integrerade kretsen."@sv .
+
+<#2001-cornell-ketterle-wieman>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2001"@zxx ;
+    solid-memo:back "Eric Cornell, Wolfgang Ketterle and Carl Wieman"@en ,
+                    "Eric Cornell, Wolfgang Ketterle och Carl Wieman"@sv ;
+    solid-memo:backNote "Achieving Bose–Einstein condensation in dilute gases of alkali atoms."@en ,
+                        "Framställningen av Bose–Einstein-kondensat i förtunnade gaser av alkaliatomer."@sv .
+
+<#2002-davis-koshiba-giacconi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2002"@zxx ;
+    solid-memo:back "Raymond Davis Jr., Masatoshi Koshiba and Riccardo Giacconi"@en ,
+                    "Raymond Davis Jr., Masatoshi Koshiba och Riccardo Giacconi"@sv ;
+    solid-memo:backNote "Davis and Koshiba: detecting cosmic neutrinos; Giacconi: discovering cosmic X-ray sources."@en ,
+                        "Davis och Koshiba: påvisandet av kosmiska neutriner; Giacconi: upptäckten av kosmiska röntgenkällor."@sv .
+
+<#2003-abrikosov-ginzburg-leggett>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2003"@zxx ;
+    solid-memo:back "Alexei A. Abrikosov, Vitaly L. Ginzburg and Anthony J. Leggett"@en ,
+                    "Alexej A. Abrikosov, Vitalij L. Ginzburg och Anthony J. Leggett"@sv ;
+    solid-memo:backNote "The theory of superconductivity and superfluidity."@en ,
+                        "Teorin för supraledning och suprafluiditet."@sv .
+
+<#2004-gross-politzer-wilczek>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2004"@zxx ;
+    solid-memo:back "David J. Gross, H. David Politzer and Frank Wilczek"@en ,
+                    "David J. Gross, H. David Politzer och Frank Wilczek"@sv ;
+    solid-memo:backNote "Discovering asymptotic freedom in the theory of the strong interaction."@en ,
+                        "Upptäckten av asymptotisk frihet i teorin för den starka växelverkan."@sv .
+
+<#2005-glauber-hall-hansch>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2005"@zxx ;
+    solid-memo:back "Roy J. Glauber, John L. Hall and Theodor W. Hänsch"@en ,
+                    "Roy J. Glauber, John L. Hall och Theodor W. Hänsch"@sv ;
+    solid-memo:backNote "Glauber: the quantum theory of optical coherence; Hall and Hänsch: laser-based precision spectroscopy and the optical frequency comb."@en ,
+                        "Glauber: kvantteorin för optisk koherens; Hall och Hänsch: laserbaserad precisionsspektroskopi och den optiska frekvenskammen."@sv .
+
+<#2006-mather-smoot>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2006"@zxx ;
+    solid-memo:back "John C. Mather and George F. Smoot"@en ,
+                    "John C. Mather och George F. Smoot"@sv ;
+    solid-memo:backNote "Showing the blackbody spectrum and the anisotropy of the cosmic microwave background."@en ,
+                        "Påvisandet av den kosmiska bakgrundsstrålningens svartkroppsspektrum och anisotropi."@sv .
+
+<#2007-fert-grunberg>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2007"@zxx ;
+    solid-memo:back "Albert Fert and Peter Grünberg"@en ,
+                    "Albert Fert och Peter Grünberg"@sv ;
+    solid-memo:backNote "Discovering giant magnetoresistance."@en ,
+                        "Upptäckten av jättemagnetoresistans."@sv .
+
+<#2008-nambu-kobayashi-maskawa>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2008"@zxx ;
+    solid-memo:back "Yoichiro Nambu, Makoto Kobayashi and Toshihide Maskawa"@en ,
+                    "Yoichiro Nambu, Makoto Kobayashi och Toshihide Maskawa"@sv ;
+    solid-memo:backNote "Nambu: spontaneous symmetry breaking in subatomic physics; Kobayashi and Maskawa: the origin of the broken symmetry that predicts at least three families of quarks."@en ,
+                        "Nambu: spontant symmetribrott i subatomär fysik; Kobayashi och Maskawa: ursprunget till det symmetribrott som förutsäger minst tre familjer av kvarkar."@sv .
+
+<#2009-kao-boyle-smith>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2009"@zxx ;
+    solid-memo:back "Charles K. Kao, Willard S. Boyle and George E. Smith"@en ,
+                    "Charles K. Kao, Willard S. Boyle och George E. Smith"@sv ;
+    solid-memo:backNote "Kao: transmitting light in optical fibres; Boyle and Smith: the CCD image sensor."@en ,
+                        "Kao: ljusöverföring i optiska fibrer; Boyle och Smith: CCD-bildsensorn."@sv .
+
+<#2010-geim-novoselov>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2010"@zxx ;
+    solid-memo:back "Andre Geim and Konstantin Novoselov"@en ,
+                    "Andre Geim och Konstantin Novoselov"@sv ;
+    solid-memo:backNote "Groundbreaking experiments with graphene, a two-dimensional material."@en ,
+                        "Banbrytande experiment med grafen, ett tvådimensionellt material."@sv .
+
+<#2011-perlmutter-schmidt-riess>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2011"@zxx ;
+    solid-memo:back "Saul Perlmutter, Brian P. Schmidt and Adam G. Riess"@en ,
+                    "Saul Perlmutter, Brian P. Schmidt och Adam G. Riess"@sv ;
+    solid-memo:backNote "Discovering from distant supernovae that the expansion of the universe is accelerating."@en ,
+                        "Upptäckten, genom avlägsna supernovor, att universums expansion accelererar."@sv .
+
+<#2012-haroche-wineland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2012"@zxx ;
+    solid-memo:back "Serge Haroche and David J. Wineland"@en ,
+                    "Serge Haroche och David J. Wineland"@sv ;
+    solid-memo:backNote "Methods for measuring and manipulating individual quantum systems."@en ,
+                        "Metoder för att mäta och styra enskilda kvantsystem."@sv .
+
+<#2013-englert-higgs>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2013"@zxx ;
+    solid-memo:back "François Englert and Peter Higgs"@en ,
+                    "François Englert och Peter Higgs"@sv ;
+    solid-memo:backNote "The theory of how subatomic particles get mass, confirmed when the Higgs boson was found at CERN."@en ,
+                        "Teorin för hur subatomära partiklar får massa, bekräftad när Higgsbosonen hittades vid CERN."@sv .
+
+<#2014-akasaki-amano-nakamura>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2014"@zxx ;
+    solid-memo:back "Isamu Akasaki, Hiroshi Amano and Shuji Nakamura"@en ,
+                    "Isamu Akasaki, Hiroshi Amano och Shuji Nakamura"@sv ;
+    solid-memo:backNote "Inventing efficient blue LEDs, which made bright, energy-saving white light sources possible."@en ,
+                        "Uppfinningen av effektiva blå lysdioder, som gjort ljusstarka och energisnåla vita ljuskällor möjliga."@sv .
+
+<#2015-kajita-mcdonald>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2015"@zxx ;
+    solid-memo:back "Takaaki Kajita and Arthur B. McDonald"@en ,
+                    "Takaaki Kajita och Arthur B. McDonald"@sv ;
+    solid-memo:backNote "Discovering neutrino oscillations, which show that neutrinos have mass."@en ,
+                        "Upptäckten av neutrinooscillationer, som visar att neutriner har massa."@sv .
+
+<#2016-thouless-haldane-kosterlitz>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2016"@zxx ;
+    solid-memo:back "David J. Thouless, F. Duncan M. Haldane and J. Michael Kosterlitz"@en ,
+                    "David J. Thouless, F. Duncan M. Haldane och J. Michael Kosterlitz"@sv ;
+    solid-memo:backNote "Theories of topological phase transitions and topological phases of matter."@en ,
+                        "Teorier om topologiska fasövergångar och topologiska faser av materia."@sv .
+
+<#2017-weiss-barish-thorne>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2017"@zxx ;
+    solid-memo:back "Rainer Weiss, Barry C. Barish and Kip S. Thorne"@en ,
+                    "Rainer Weiss, Barry C. Barish och Kip S. Thorne"@sv ;
+    solid-memo:backNote "Decisive work on the LIGO detector and the observation of gravitational waves."@en ,
+                        "Avgörande insatser för LIGO-detektorn och observationen av gravitationsvågor."@sv .
+
+<#2018-ashkin-mourou-strickland>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2018"@zxx ;
+    solid-memo:back "Arthur Ashkin, Gérard Mourou and Donna Strickland"@en ,
+                    "Arthur Ashkin, Gérard Mourou och Donna Strickland"@sv ;
+    solid-memo:backNote "Ashkin: optical tweezers; Mourou and Strickland: a method for intense, ultrashort laser pulses."@en ,
+                        "Ashkin: den optiska pincetten; Mourou och Strickland: en metod för intensiva, ultrakorta laserpulser."@sv .
+
+<#2019-peebles-mayor-queloz>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2019"@zxx ;
+    solid-memo:back "James Peebles, Michel Mayor and Didier Queloz"@en ,
+                    "James Peebles, Michel Mayor och Didier Queloz"@sv ;
+    solid-memo:backNote "Peebles: theoretical discoveries in physical cosmology; Mayor and Queloz: discovering an exoplanet orbiting a Sun-like star."@en ,
+                        "Peebles: teoretiska upptäckter inom fysikalisk kosmologi; Mayor och Queloz: upptäckten av en exoplanet kring en solliknande stjärna."@sv .
+
+<#2020-penrose-genzel-ghez>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2020"@zxx ;
+    solid-memo:back "Roger Penrose, Reinhard Genzel and Andrea Ghez"@en ,
+                    "Roger Penrose, Reinhard Genzel och Andrea Ghez"@sv ;
+    solid-memo:backNote "Penrose: showing that general relativity predicts black holes; Genzel and Ghez: discovering a supermassive compact object at the centre of our galaxy."@en ,
+                        "Penrose: upptäckten att den allmänna relativitetsteorin förutsäger svarta hål; Genzel och Ghez: upptäckten av ett supermassivt kompakt objekt i Vintergatans centrum."@sv .
+
+<#2021-manabe-hasselmann-parisi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2021"@zxx ;
+    solid-memo:back "Syukuro Manabe, Klaus Hasselmann and Giorgio Parisi"@en ,
+                    "Syukuro Manabe, Klaus Hasselmann och Giorgio Parisi"@sv ;
+    solid-memo:backNote "Manabe and Hasselmann: physical modelling of Earth's climate and global warming; Parisi: the interplay of disorder and fluctuations in physical systems."@en ,
+                        "Manabe och Hasselmann: fysikalisk modellering av jordens klimat och den globala uppvärmningen; Parisi: samspelet mellan oordning och fluktuationer i fysikaliska system."@sv .
+
+<#2022-aspect-clauser-zeilinger>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2022"@zxx ;
+    solid-memo:back "Alain Aspect, John Clauser and Anton Zeilinger"@en ,
+                    "Alain Aspect, John Clauser och Anton Zeilinger"@sv ;
+    solid-memo:backNote "Experiments with entangled photons, showing the violation of Bell inequalities and pioneering quantum information science."@en ,
+                        "Experiment med sammanflätade fotoner, som visade brott mot Bells olikheter och banade väg för kvantinformationsvetenskapen."@sv .
+
+<#2023-agostini-krausz-lhuillier>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2023"@zxx ;
+    solid-memo:back "Pierre Agostini, Ferenc Krausz and Anne L'Huillier"@en ,
+                    "Pierre Agostini, Ferenc Krausz och Anne L'Huillier"@sv ;
+    solid-memo:backNote "Methods that generate attosecond pulses of light for studying electrons in matter."@en ,
+                        "Metoder för att skapa attosekundpulser av ljus för att studera elektroner i materia."@sv .
+
+<#2024-hopfield-hinton>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2024"@zxx ;
+    solid-memo:back "John J. Hopfield and Geoffrey Hinton"@en ,
+                    "John J. Hopfield och Geoffrey Hinton"@sv ;
+    solid-memo:backNote "Foundational discoveries that enable machine learning with artificial neural networks."@en ,
+                        "Grundläggande upptäckter som möjliggör maskininlärning med artificiella neuronnät."@sv .
+
+<#2025-clarke-devoret-martinis>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "2025"@zxx ;
+    solid-memo:back "John Clarke, Michel H. Devoret and John M. Martinis"@en ,
+                    "John Clarke, Michel H. Devoret och John M. Martinis"@sv ;
+    solid-memo:backNote "Discovering macroscopic quantum tunnelling and energy quantisation in an electric circuit."@en ,
+                        "Upptäckten av makroskopisk kvanttunnling och energikvantisering i en elektrisk krets."@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .

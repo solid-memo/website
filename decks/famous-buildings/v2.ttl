@@ -1,0 +1,784 @@
+@base <https://solid-memo.com/decks/famous-buildings/v2.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Famous buildings"@en ,
+                  "Kända byggnader"@sv ,
+                  "유명한 건축물"@ko ,
+                  "Berühmte Bauwerke"@de ,
+                  "Edificios famosos"@es ,
+                  "Bâtiments célèbres"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "50 famous buildings and their architects: 39 of the world's best-known, ranked by their number of Wikipedia and other Wikimedia sitelinks in Wikidata, from Hagia Sophia and the White House to Fallingwater, and 11 Nordic buildings ranked the same way, from Drottningholm Palace to Stockholm City Hall (buildings of unknown, collective or disputed authorship left out). Front: the building, in English or Swedish, with its city where that helps; back: its architect or pair of architects, with a note on those who completed it. Taken from Wikidata and checked against the English and Swedish Wikipedia and official sites."@en ,
+                        "50 kända byggnader och deras arkitekter: 39 av världens mest kända, rangordnade efter hur många länkar till Wikipedia och andra Wikimediaprojekt de har i Wikidata, från Hagia Sofia och Vita huset till Fallingwater, och 11 nordiska byggnader rangordnade på samma sätt, från Drottningholms slott till Stockholms stadshus (byggnader med okänd, kollektiv eller omstridd upphovsman ingår inte). Framsida: byggnaden, på engelska eller svenska, med staden där det hjälper; baksida: arkitekten eller arkitektparet, med en anteckning om dem som fullbordade bygget. Uppgifterna är hämtade från Wikidata och kontrollerade mot engelska och svenska Wikipedia och officiella webbplatser."@sv ,
+                        "유명한 건축물 50개와 그 건축가입니다. 위키데이터에서 위키백과 및 기타 위키미디어 사이트 링크 수로 순위를 매긴 세계에서 가장 잘 알려진 건축물 39개(아야 소피아와 백악관부터 낙수장까지)와, 같은 방식으로 순위를 매긴 북유럽 건축물 11개(드로트닝홀름 궁전부터 스톡홀름 시청사까지)이며, 설계자가 알려지지 않았거나 공동 작업이거나 논란이 있는 건축물은 뺐습니다. 앞면: 영어 또는 스웨덴어로 된 건축물 이름과, 도움이 되는 경우 그 도시; 뒷면: 건축가 또는 건축가 두 사람과, 건물을 완성한 사람들에 관한 메모. 위키데이터에서 가져와 영어·스웨덴어 위키백과와 공식 사이트로 확인했습니다."@ko ,
+                        "50 berühmte Bauwerke und ihre Architekten: 39 der bekanntesten der Welt, geordnet nach der Zahl ihrer Sitelinks zu Wikipedia und anderen Wikimedia-Projekten in Wikidata, von der Hagia Sophia und dem Weißen Haus bis Fallingwater, und 11 nordische Bauwerke, auf dieselbe Weise geordnet, von Schloss Drottningholm bis zum Stockholms stadshus (Bauwerke mit unbekannter, kollektiver oder umstrittener Urheberschaft ausgenommen). Vorderseite: das Bauwerk, auf Englisch oder Schwedisch, mit seiner Stadt, wo das hilft; Rückseite: sein Architekt oder Architektenpaar, mit einer Anmerkung zu denen, die es vollendet haben. Aus Wikidata übernommen und mit der englischen und schwedischen Wikipedia sowie offiziellen Websites abgeglichen."@de ,
+                        "50 edificios famosos y sus arquitectos: 39 de los más conocidos del mundo, ordenados por su número de enlaces a Wikipedia y a otros sitios de Wikimedia en Wikidata, desde Santa Sofía y la Casa Blanca hasta la Casa de la cascada, y 11 edificios nórdicos ordenados de la misma manera, desde el Palacio de Drottningholm hasta el Ayuntamiento de Estocolmo (se excluyen los edificios de autoría desconocida, colectiva o discutida). Anverso: el edificio, en inglés o en sueco, con su ciudad cuando ayuda; reverso: su arquitecto o pareja de arquitectos, con una nota sobre quienes lo terminaron. Datos tomados de Wikidata y comprobados con la Wikipedia en inglés y en sueco y con sitios oficiales."@es ,
+                        "50 bâtiments célèbres et leurs architectes : 39 des plus connus au monde, classés selon leur nombre de liens vers Wikipédia et d’autres sites Wikimedia dans Wikidata, de Sainte-Sophie et de la Maison-Blanche à la Maison sur la cascade, et 11 bâtiments nordiques classés de la même façon, du château de Drottningholm à l’hôtel de ville de Stockholm (les bâtiments d’auteur inconnu, collectif ou contesté sont exclus). Recto : le bâtiment, en anglais ou en suédois, avec sa ville quand cela aide ; verso : son architecte ou son duo d’architectes, avec une note sur ceux qui l’ont achevé. Données tirées de Wikidata et vérifiées dans les Wikipédias anglaise et suédoise et sur des sites officiels."@fr ;
+    prov:wasDerivedFrom <https://www.wikidata.org/wiki/Q41176> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:art ,
+               topic:history ;
+    dcat:keyword "architecture"@en ,
+                 "architects"@en ,
+                 "buildings"@en ,
+                 "art history"@en ,
+                 "landmarks"@en ,
+                 "arkitektur"@sv ,
+                 "arkitekter"@sv ,
+                 "byggnader"@sv ,
+                 "konsthistoria"@sv ,
+                 "sevärdheter"@sv ,
+                 "건축"@ko ,
+                 "건축가"@ko ,
+                 "건축물"@ko ,
+                 "미술사"@ko ,
+                 "랜드마크"@ko ,
+                 "Architektur"@de ,
+                 "Architekten"@de ,
+                 "Bauwerke"@de ,
+                 "Kunstgeschichte"@de ,
+                 "Sehenswürdigkeiten"@de ,
+                 "arquitectura"@es ,
+                 "arquitectos"@es ,
+                 "edificios"@es ,
+                 "historia del arte"@es ,
+                 "monumentos"@es ,
+                 "architecture"@fr ,
+                 "architectes"@fr ,
+                 "bâtiments"@fr ,
+                 "histoire de l’art"@fr ,
+                 "monuments"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/famous-buildings/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/famous-buildings/v1.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in Korean, German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#famous-buildings> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#famous-buildings> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/wiki/Q41176> ,
+              <https://en.wikipedia.org/wiki/Architecture> ,
+              <https://sv.wikipedia.org/wiki/Arkitektur> ,
+              <https://www.nps.gov/places/white-house.htm> ,
+              <https://www.kungligaslotten.se/english/royal-palaces-and-sites/drottningholm-palace/history.html> ,
+              <https://www.teatroallascala.org/en/the-theater/history.html> ,
+              <https://www.guggenheim-bilbao.eus/en/the-building> ,
+              <https://fallingwater.org/history/the-kaufmanns-fallingwater/designing-fallingwater/> ,
+              <https://pt.wikipedia.org/wiki/Mirante_do_Vale> ,
+              <https://www.vatican.va/content/vatican/it/ra/cappella-sistina.html> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ,
+                       <#review-6> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "World ranking (query 1): as in the library's famous-sculptures deck, fame is measured by the number of Wikipedia (and other Wikimedia) sitelinks of a Wikidata item. Query 1 takes the items that are instances of building (Q41176) or of any subclass of it and have at least one architect (P84), the top 400 by sitelinks, with each item's architects and English and Swedish labels. It answered on query.wikidata.org on 2026-10-04 (680 rows, 400 items); the CSV was saved in the research scratch directory, which is not published."@en ,
+                 "Nordic ranking (query 2): the brief asks for Nordic buildings, and only Drottningholm Palace (59) and Helsinki Cathedral (51) appear in query 1's top 400 at all; neither reaches the world walk's 60-sitelink cut-off. A second ranking therefore takes the same items restricted to those whose country (P17) is Sweden, Norway, Denmark, Finland or Iceland, top 60 by sitelinks. It timed out on query.wikidata.org twice (HTTP 504, then a client time-out with the query optimiser switched off), so it was run on QLever's mirror of Wikidata (https://qlever.dev/api/wikidata), which the famous-sculptures deck also used. For the two buildings in both rankings the sitelink counts agree (Drottningholm Palace 59, Helsinki Cathedral 51)."@en ,
+                 "Selection (see the selection): walking down query 1, a building became a card when the English Wikipedia (and, where it says so, the Swedish Wikipedia) names one architect, or a pair of architects jointly, as the designer of the building as it stands, and that attribution agrees with Wikidata's P84. The world walk stopped at 60 sitelinks (39 cards, from Hagia Sophia, 152, to Fallingwater, 60). The Nordic walk down query 2 applied the same rules and stopped at 38 sitelinks, which brings in Stockholm City Hall (38) as the brief asks: 11 cards, Drottningholm Palace (59) first. The excluded candidates and the reasons are listed in the selection. Quality-control round 1 removed two of the world cards first selected, the Sistine Chapel (attribution varies between the sources) and the Israel Museum (several architects, its main wings rebuilt in 2010), and named in the selection the candidates at or above 60 sitelinks that it had left out without naming them."@en ,
+                 "Data (query 3): fetch_all.py fetched the Wikidata entities of the 52 buildings first selected (two since removed, see round 1) and 26 excluded candidates and of all their architects (labels, aliases and claims in English, Swedish and mul; English and Swedish sitelinks), then the full plain text and revision id of each English and Swedish Wikipedia article linked from them. A second script (query 4) fetched the English articles on 32 further excluded candidates to document the exclusions. Summaries printed the sentences of each article that name an architect; every attribution was read in its context. In quality-control round 1 a further script (query 8) fetched the English articles on the further candidates then named in the selection, and the Portuguese and Italian articles on Mirante do Vale and the Sistine Chapel."@en ,
+                 "Back (the architect): Wikidata's P84 of each building. Where Wikidata lists more than one architect, the card names the architect or pair that the English Wikipedia names as the designer and a back note names those who completed or altered the building (Peter Hall at the Sydney Opera House, Tessin the Younger and Carl Hårleman at Drottningholm, Carl Hårleman at Stockholm Palace, Rondelet at the Panthéon, Parigi and Buontalenti at the Uffizi, Ludwig Hoffmann at the Pergamon Museum, Ernst Lohrmann at Helsinki Cathedral, Lauritz de Thurah at Amalienborg, Abadie's five successors at Sacré-Cœur). Wikidata's later or lesser architects are not named on the card: Trdat (repairs of 989) and Mimar Sinan at Hagia Sophia (Wikidata ranks Anthemius and Isidore as preferred), Heinrich Strack (later alterations) at the Brandenburg Gate, Sanquirico, Secchi and Mario Botta at La Scala (Piermarini is ranked preferred), Skidmore, Owings and Merrill and Fazlur Khan at the Willis Tower (Khan named in the note), Adamson Associates at the Petronas Towers, Maximilien Brébion at the Panthéon (Wikidata's third architect there, beside Soufflot and Rondelet; the English Wikipedia's account of the building does not name him). For the Palace of Westminster Wikidata's P84 names Charles Barry, Jr. (Q5075445), not his father Sir Charles Barry (Q552584), whom both Wikipedias name as the architect; the card follows the Wikipedias (see round 0)."@en ,
+                 "Names: the English and Swedish names of the buildings are Wikidata's labels or aliases, which the builder checked against live Wikidata; Belvedere's Swedish front is its Swedish label \"Schloss Belvedere\" and the Gazprom Arena's Swedish front its Swedish alias \"Gazprom Arena\" (its Swedish label \"Krestovskij stadion\" is in the front note). The architects' names are their Wikidata English and Swedish labels or aliases, with five exceptions, four recorded in round 0 and one in round 5: the English \"Bartolomeo Rastrelli\" (the English Wikipedia's form; Wikidata's English label is \"Francesco Bartolomeo Rastrelli\"); the Swedish \"Satyrus och Pythius\" for the Mausoleum's architects (the Swedish Wikipedia's form; Wikidata has no Swedish label for Satyros and \"Pytheos\" for Pythius, and no Swedish text found uses \"Pytheos\", query 7); Mirante do Vale's two engineers, who have no Swedish labels and whose names Swedish writes unchanged; Leppänen of Petäjävesi, whose Wikidata labels are swapped (the English label is the Swedish form \"Jacob Clementsson Leppänen\", the Swedish label the Finnish form), so the card gives the English Wikipedia's \"Jaakko Klemetinpoika Leppänen\" in English and the Swedish Wikipedia's \"Jacob Clementsson Leppänen\" in Swedish; and the English \"Sedefkar Mehmed Agha\" for the Sultan Ahmed Mosque's architect (the English Wikipedia's spelling, which is also Wikidata's Swedish label; Wikidata's English label is the Turkish spelling \"Sedefkar Mehmed Ağa\")."@en ,
+                 "Disambiguation: a front note gives the city (or, for the Gazprom Arena, its other name) where a name alone could mean another building or is little known: Barcelona, Chicago (with the former name Sears Tower), Istanbul, Dubai, Saint Petersburg, Milan, London, Florence, São Paulo, Amsterdam, Edirne, Paris, Cleveland, Berlin, Vienna, New York, Pennsylvania, Copenhagen, Malmö, Reykjavík and Stockholm. The British Museum's note says \"the main building\", since later parts are by others (the Round Reading Room by his brother Sydney Smirke), and the Rock and Roll Hall of Fame's that the card means the museum building. No note names or hints at the architect."@en ,
+                 "Cross-checks: every card's attribution was checked against the English Wikipedia (the sentence naming the architect is quoted verbatim from the full text of the revision read) and, for the 41 cards whose Swedish article names the architect, against the Swedish Wikipedia. Official pages were a further check where they could be read (query 5): the National Park Service (White House), Kungliga slotten (Drottningholm Palace, Stockholm Palace), Teatro alla Scala, the Guggenheim Museum Bilbao and Fallingwater (its \"Designing Fallingwater\" page). Mirante do Vale's designers were also checked in the Portuguese Wikipedia. Other official sites tried answered HTTP 404, timed out or carried no attribution in their text (the Rijksmuseum, Hallgrímskirkja, HSB (Turning Torso), the Sagrada Família, Nationalmuseum, the Centre Pompidou, the Pentagon tours site, the Sydney Opera House, the Guggenheim New York, The Shard and the Opéra de Paris); those cards rest on Wikidata and the two Wikipedias. Web searches (query 6) were used only to find official pages."@en ,
+                 "Notes: the notes are the compiler's own wording of facts; each fact has a quoted source in the card's evidence (the English or Swedish Wikipedia, or the official page). The Swedish notes and front notes were written directly in Swedish, with place names in their Swedish form (Florens, Wien, Köpenhamn, Sankt Petersburg, Milano)."@en ,
+                 "Machine checks: for every card the builder checked against live Wikidata that the building's P84 includes the architect(s) on the card (for the Palace of Westminster, Augustus Pugin, named in the note, since P84 lacks Sir Charles Barry), the English and Swedish labels or aliases of the building that the front uses, and the English and Swedish labels or aliases of each architect the back names, except where round 0 records that the card's form is not in Wikidata. The builder accepts a multilingual (mul) label for any language. The deck was then validated with the app's SHACL and DCAT-AP validators (scripts/validate_sources.ts)."@en ,
+                 "The dossier was assembled by a script (make_dossier.py, in the research scratch directory, which like the other helper scripts and the saved files is not published) from a hand-written card list: it checks that every quotation occurs verbatim in the saved article or page text (and stops if one does not), records the revision ids, writes the Wikidata evidence from the saved entities and generates the Wikidata label checks only where the card's text equals a Wikidata label or alias."@en ,
+                 "Selection: About 50 famous buildings, chosen objectively in two passes. World: the Wikidata items that are buildings (instances of Q41176 or a subclass) with an architect (P84), ranked by their number of sitelinks (query 1, 2026-10-04), taken in rank order down to 60 sitelinks: 39 cards. Nordic: the same items in Sweden, Norway, Denmark, Finland or Iceland (query 2), down to 38 sitelinks: 11 cards. An item was left out when it is not a building or is an institution rather than a building (the Statue of Liberty, the Royal Swedish Academy of Sciences, the Tretyakov Gallery, whose façade only is by Viktor Vasnetsov); when its maker is unknown, legendary or a hypothesis (the Great Pyramid of Giza and Hemiunu, Borobudur and Gunadharma, the Pantheon in Rome and Apollodorus, the Leaning Tower of Pisa, St Basil's Cathedral, whose architect the English Wikipedia calls unknown, the Taj Mahal, built by a board of architects, the Lighthouse of Alexandria, where Strabo records only Sostratus's dedication, Rosenborg Castle, with which two architects are only \"associated\", and the Charles Bridge, whose attribution to Peter Parler the English Wikipedia does not make); when the sources credit three or more architects, a firm or a team (the Louvre, St Peter's Basilica, Versailles, the Kremlin, the Forbidden City, the Capitol, Buckingham Palace, Windsor Castle, Neuschwanstein, the Metropolitan Museum and MoMA; the Israel Museum, where Alfred Mansfeld's buildings of 1965 stand beside Armand Bartos and Frederick Kiesler's Shrine of the Book and James Carpenter's pavilions, and whose main wings were completely rebuilt in 2010; the Van Gogh Museum, Gerrit Rietveld's building with Kisho Kurokawa's exhibition wing; the Musée d'Orsay, which the English and Swedish Wikipedia give to three architects, Lucien Magne, Émile Bénard and Victor Laloux, though Wikidata names Laloux alone; the Eiffel Tower, designed by Gustave Eiffel's company with the engineers Maurice Koechlin and Émile Nouguier and the architect Stephen Sauvestre; the Empire State Building (Shreve, Lamb & Harmon), Burj Khalifa (Skidmore, Owings and Merrill, where Wikidata lists five designers), One World Trade Center (Daniel Libeskind's plan replaced by David Childs's design), the CN Tower, the Stade de France, the Stadio Olimpico, Tokyo Skytree, the Mode Gakuen Cocoon Tower, the National Diet Library, Abeno Harukas, the Allianz Arena, Wembley, the Emirates Stadium, the Avicii Arena, the Oslo Opera House, the Ostankino Tower, the London Stadium and the FNB Stadium (Populous), the Lukoil Arena (AECOM), the Beijing National Stadium (Herzog & de Meuron), the Shanghai World Financial Center (Kohn Pedersen Fox), the Westfalenstadion, expanded several times, and other stadiums and towers credited to firms); when the medieval cathedral or palace was built over generations (Notre-Dame de Paris, Cologne, Milan, Chartres, Reims, Canterbury, Florence, St Vitus, St Mark's, Santiago de Compostela, Aachen, Saint-Denis, the Doge's Palace, Nidaros, Roskilde; likewise the Archbasilica of St. John Lateran, rebuilt over the centuries with Francesco Borromini's interior and Alessandro Galilei's façade, Mexico City Metropolitan Cathedral, built in sections from 1573 to 1813, the Mosque–Cathedral of Córdoba, a mosque of 785 expanded over two centuries with a Renaissance cathedral built into it, the Apostolic Palace, built mainly between 1471 and 1605, and 10 Downing Street, houses that William Kent joined and that were rebuilt many times since) or the person Wikidata names was its patron (Mehmed II at the Topkapı Palace, Abbot Suger, Absalon); when the attribution varies between the sources (the Sistine Chapel: the English and Swedish Wikipedia give it to Baccio Pontelli, but the Holy See's own page names Giovannino de' Dolci and Baccio Pontelli together; the Élysée Palace: the Swedish Wikipedia names Armand-Claude Mollet and Jean Cailleteau, the English Mollet; the Bolshoi Theatre: Joseph Bové from Andrei Mikhailov's design; Schönbrunn Palace, which the English Wikipedia gives to no architect; Big Ben, a bell whose tower Augustus Pugin designed within Charles Barry's palace, the Palace of Westminster having its own card; Balmoral Castle, William Smith's designs amended by Prince Albert; the Temple of Artemis, where Wikidata pairs Chersiphron with a later architect); when the building standing today is chiefly someone else's (the Reichstag, fundamentally redesigned by Norman Foster; the Cathedral of Christ the Saviour, demolished in 1931 and rebuilt 1995–2000; the Quba Mosque, rebuilt in 1986; Tate Modern, Giles Gilbert Scott's power station converted by Herzog & de Meuron; the Hoover Dam, whose exterior only Gordon Kaufmann redesigned; Archibald Leitch's football grounds Old Trafford, Anfield, Stamford Bridge, Villa Park and Goodison Park, whose stands have been rebuilt, Everton having moved out of Goodison in 2025; Christiansborg Palace, now the third palace on the site, Häusser's being the first); and when it is being rebuilt as of 2026-10-04 (Camp Nou, under renovation since 2023). Facts are as of 2026-10-04; a building's architect does not change, though a building's name may (the Willis Tower and the Gazprom Arena carry their former or other name in the front note)."@en ,
+                 "Licensing: The only content source is Wikidata, whose structured data is CC0: the selection (the two sitelink rankings), the link from each building to its architect (P84) and nearly all English and Swedish names of buildings and architects come from it, so the deck can be CC0 1.0 like the rest of the library. QLever's mirror serves the same CC0 Wikidata data. The English, Swedish and Portuguese Wikipedia (CC BY-SA 4.0), the National Park Service page (a US federal work, public domain), and the pages of Kungliga slotten and the Holy See (no licence found), Teatro alla Scala, the Guggenheim Museum Bilbao and Fallingwater (all rights reserved) were used for verification only. A few name forms that are not Wikidata labels were confirmed in the English or Swedish Wikipedia (Bartolomeo Rastrelli; Sedefkar Mehmed Agha; Satyrus och Pythius; Jaakko Klemetinpoika Leppänen and Jacob Clementsson Leppänen): the name of a person is a fact, not a creative expression, and no wording, list or selection was taken from Wikipedia. The notes are the compiler's own wording of facts. Quotations in the provenance report's evidence are not part of the CC0 deck: they remain under their sources' licences (Wikipedia text CC BY-SA 4.0 by Wikipedia contributors, each linked to the quoted revision; the official sites' text all rights reserved or of unknown licence) and are short quotations given only to make the verification checkable."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Sources, licences and machine checks: every card's architect against Wikidata's P84, the English Wikipedia and, where available, the Swedish Wikipedia and the building's official site; the English and Swedish names against Wikidata labels and the Wikipedias."@en ;
+    rdfs:comment "Scope: All 52 cards, the selection, the sources and the deck metadata."@en ,
+                 "Outcome: For 51 cards Wikidata's P84 includes the architect(s) on the card and agrees with the English Wikipedia (and, where read, the Swedish Wikipedia and the official site). The one disagreement is the Palace of Westminster, where Wikidata names the wrong Charles Barry; the card follows the Wikipedias and that P84 check is not made. Where the sources disagree about who designed a building, the building was left out (the Musée d'Orsay, the Élysée Palace, the Bolshoi Theatre and others, see the selection). Four architects' names on the cards are not Wikidata labels in the card's language; the builder checked every other front and back text against live Wikidata labels."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 52 cards, re-running both ranking queries (on QLever) and checking live sitelink counts, the Italian, German and Portuguese Wikipedia and the Holy See's page on the Sistine Chapel."@en ,
+                 "Outcome: Two errors, three warnings and three suggestions; all verified and acted on. The Sistine Chapel and the Israel Museum were removed (50 cards, 39 in the world ranking), the candidates at or above 60 sitelinks left out without being named are now named with their reasons, and five notes and the method were corrected or extended."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 52 cards in both languages, the title, descriptions and keywords, and the language tags in the built deck."@en ,
+                 "Outcome: No tagging problems. Two warnings (an ungrammatical Swedish note and the Uffizi note) and three idiom or parity suggestions; all five applied."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: The sources and their licence evidence, every card's evidence (quotations checked against the cited revisions and pages), the method, queries, selection and licensing."@en ,
+                 "Outcome: No licensing errors and the required method paragraph is correct. Eight findings about the evidence and the record (four warnings, four suggestions); all applied."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The ten changed cards still in the deck (mirante-do-vale, uffizi, drottningholm-palace, gazprom-arena, palace-of-westminster, mausoleum-at-halicarnassus, sagrada-familia, sydney-opera-house, fallingwater, guggenheim-museum-bilbao), every third card (17 sampled), the metadata and the documentation, against live Wikidata, the cited Wikipedia revisions and the official and terms pages re-fetched on 2026-10-04."@en ,
+                 "Outcome: The fixes from rounds 1–3 are in the deck and every checked fact, quotation and Wikidata check holds. One warning (a stale city in the method's disambiguation list) and one suggestion (query entries attributing round-3 fixes to round 1); both verified and fixed."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: All 50 cards (39 world, 11 Nordic), the title, description, keywords and study direction, the method, and the fixes logged in rounds 1–4."@en ,
+                 "Outcome: No errors; the deck and the earlier rounds' fixes were confirmed. One warning (a method sentence that contradicted the 60-sitelink cut-off) and two suggestions (Palais Garnier's front note, the spelling of the Blue Mosque's architect); all three verified and fixed."@en .
+
+<#review-6>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 1, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card changed."@en .
+
+<https://www.wikidata.org/wiki/Q41176>
+    dcterms:title "Wikidata: buildings (Q41176 and its subclasses) with an architect (P84), their sitelinks, architects and English and Swedish labels" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing (read 2026-10-04) — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://en.wikipedia.org/wiki/Architecture>
+    dcterms:title "English Wikipedia: the articles on the 50 buildings (and on the excluded candidates named in the selection), the passages quoted" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://en.wikipedia.org/wiki/Wikipedia:Copyrights — \"Permission is granted to copy, distribute and/or modify Wikipedia's text under the terms of the Creative Commons Attribution-ShareAlike 4.0 International License\""@en .
+
+<https://sv.wikipedia.org/wiki/Arkitektur>
+    dcterms:title "Svenskspråkiga Wikipedia: artiklarna om byggnaderna, de citerade avsnitten" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of every Swedish Wikipedia article (e.g. https://sv.wikipedia.org/wiki/Stockholms_stadshus, read 2026-10-04): \"Wikipedias text är tillgänglig under licensen Creative Commons Erkännande-dela-lika 4.0 Unported.\""@en .
+
+<https://www.nps.gov/places/white-house.htm>
+    dcterms:title "National Park Service: \"White House\"" ;
+    dcterms:creator "U.S. National Park Service" ;
+    rdfs:comment "https://www.nps.gov/aboutus/disclaimer.htm — \"Thus, material created by the National Park Service and presented on this website, unless otherwise indicated, is generally considered in the public domain.\""@en .
+
+<https://www.kungligaslotten.se/english/royal-palaces-and-sites/drottningholm-palace/history.html>
+    dcterms:title "Kungliga slotten (the Royal Palaces): \"Drottningholms' History\" and \"The Royal Palace: History\"" ;
+    dcterms:creator "Kungliga Hovstaterna (the Royal Court of Sweden)" ;
+    rdfs:comment "The two history pages read on 2026-10-04 state no licence and no copyright notice, and neither does the site's \"About the website\" page (https://www.kungligaslotten.se/english/about-the-site.html, read 2026-10-04), which says only that \"www.kungligaslotten.se is the official website for the ten royal palaces and their attractions\" and covers cookies and privacy. No licence to reuse the text was found, so the site is treated as unknown: verification only."@en .
+
+<https://www.teatroallascala.org/en/the-theater/history.html>
+    dcterms:title "Teatro alla Scala: \"History\"" ;
+    dcterms:creator "Fondazione Teatro alla Scala" ;
+    rdfs:comment "Footer of the page (read 2026-10-04): \"© 2026 Teatro alla Scala\"; no licence is offered (a legal-notes page was tried at https://www.teatroallascala.org/en/legal-notes.html and answered HTTP 404). Treated as all rights reserved: verification only."@en .
+
+<https://www.guggenheim-bilbao.eus/en/the-building>
+    dcterms:title "Guggenheim Museum Bilbao: \"The Building\"" ;
+    dcterms:creator "Fundación del Museo Guggenheim Bilbao" ;
+    rdfs:comment "https://www.guggenheim-bilbao.eus/en/legal-information (\"Legal information\", linked from the footer of the page used; read 2026-10-04): \"... are the property of GMBF or its legitimate owners. All rights reserved.\" and \"The User is therefore expressly prohibited to reproduce, transform, distribute, publicly communicate, make available, extract, reuse, resend or use in any way and by any means or procedure, any part of the website, except when lawful to do so or when authorization has been provided by the ho[lder]\". Verification only."@en .
+
+<https://fallingwater.org/history/the-kaufmanns-fallingwater/designing-fallingwater/>
+    dcterms:title "Fallingwater: \"History\" and \"Designing Fallingwater\"" ;
+    dcterms:creator "Western Pennsylvania Conservancy (Fallingwater)" ;
+    rdfs:comment "Footer of the pages (read 2026-10-04): \"©2026, Fallingwater. All Rights Reserved.\" Verification only."@en .
+
+<https://pt.wikipedia.org/wiki/Mirante_do_Vale>
+    dcterms:title "Portuguese Wikipedia: \"Mirante do Vale\", the passage quoted" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "Footer of the article (https://pt.wikipedia.org/wiki/Mirante_do_Vale, read 2026-10-04): \"Este texto é disponibilizado nos termos da licença Atribuição-CompartilhaIgual 4.0 Internacional (CC BY-SA 4.0) da Creative Commons\""@en .
+
+<https://www.vatican.va/content/vatican/it/ra/cappella-sistina.html>
+    dcterms:title "La Santa Sede: \"Cappella Sistina\"" ;
+    dcterms:creator "Holy See (vatican.va)" ;
+    rdfs:comment "The page (read 2026-10-04) states no licence and carries no copyright notice; no licence to reuse its text was found, so it is treated as unknown: verification only. It was used only to document why the Sistine Chapel was left out (quality-control round 1); no card rests on it."@en .
+
+<#hagia-sophia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hagia Sophia"@en ,
+                     "Hagia Sofia"@sv ;
+    solid-memo:back "Anthemius of Tralles and Isidore of Miletus"@en ,
+                    "Anthemios från Tralles och Isidoros från Miletos"@sv .
+
+<#white-house>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "White House"@en ,
+                     "Vita huset"@sv ;
+    solid-memo:back "James Hoban"@en ,
+                    "James Hoban"@sv .
+
+<#parthenon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Parthenon"@en ,
+                     "Parthenon"@sv ;
+    solid-memo:back "Ictinus and Callicrates"@en ,
+                    "Iktinos och Kallikrates"@sv ;
+    solid-memo:backNote "Phidias oversaw the work and its sculpture."@en ,
+                        "Fidias ledde arbetet och svarade för skulpturerna."@sv .
+
+<#british-museum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "British Museum"@en ,
+                     "British Museum"@sv ;
+    solid-memo:frontNote "the main building"@en ,
+                         "huvudbyggnaden"@sv ;
+    solid-memo:back "Robert Smirke"@en ,
+                    "Robert Smirke"@sv .
+
+<#sagrada-familia>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sagrada Família"@en ,
+                     "Sagrada Família"@sv ;
+    solid-memo:frontNote "Barcelona"@en ,
+                         "Barcelona"@sv ;
+    solid-memo:back "Antoni Gaudí"@en ,
+                    "Antoni Gaudí"@sv ;
+    solid-memo:backNote "He took over in 1883 from Francisco de Paula del Villar, under whom construction had begun in 1882."@en ,
+                        "Han tog över 1883 efter Francisco de Paula del Villar, under vars ledning bygget hade påbörjats 1882."@sv .
+
+<#the-pentagon>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Pentagon"@en ,
+                     "Pentagon"@sv ;
+    solid-memo:back "George Bergstrom"@en ,
+                    "George Bergstrom"@sv .
+
+<#sydney-opera-house>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sydney Opera House"@en ,
+                     "Operahuset i Sydney"@sv ;
+    solid-memo:back "Jørn Utzon"@en ,
+                    "Jørn Utzon"@sv ;
+    solid-memo:backNote "After Utzon resigned in 1966, a team led by Peter Hall completed it."@en ,
+                        "Sedan Utzon lämnat projektet 1966 fullbordades det av en arbetsgrupp under ledning av Peter Hall."@sv .
+
+<#willis-tower>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Willis Tower"@en ,
+                     "Willis Tower"@sv ;
+    solid-memo:frontNote "formerly the Sears Tower, Chicago"@en ,
+                         "tidigare Sears Tower, Chicago"@sv ;
+    solid-memo:back "Bruce Graham"@en ,
+                    "Bruce Graham"@sv ;
+    solid-memo:backNote "With the structural engineer Fazlur Khan, both of Skidmore, Owings & Merrill."@en ,
+                        "Tillsammans med konstruktören Fazlur Khan, båda vid Skidmore, Owings & Merrill."@sv .
+
+<#mausoleum-at-halicarnassus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mausoleum at Halicarnassus"@en ,
+                     "Mausoleet i Halikarnassos"@sv ;
+    solid-memo:back "Satyros of Paros and Pythius of Priene"@en ,
+                    "Satyrus från Paros och Pythius från Priene"@sv .
+
+<#sultan-ahmed-mosque>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sultan Ahmed Mosque"@en ,
+                     "Blå moskén"@sv ;
+    solid-memo:frontNote "the Blue Mosque, Istanbul"@en ,
+                         "Istanbul"@sv ;
+    solid-memo:back "Sedefkar Mehmed Agha"@en ,
+                    "Sedefkar Mehmed Agha"@sv .
+
+<#petronas-towers>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Petronas Towers"@en ,
+                     "Petronas Twin Towers"@sv ;
+    solid-memo:back "César Pelli"@en ,
+                    "César Pelli"@sv .
+
+<#brandenburg-gate>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Brandenburg Gate"@en ,
+                     "Brandenburger Tor"@sv ;
+    solid-memo:back "Carl Gotthard Langhans"@en ,
+                    "Carl Gotthard Langhans"@sv .
+
+<#taipei-101>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Taipei 101"@en ,
+                     "Taipei 101"@sv ;
+    solid-memo:back "C. Y. Lee"@en ,
+                    "C. Y. Lee"@sv .
+
+<#palace-of-westminster>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Palace of Westminster"@en ,
+                     "Westminsterpalatset"@sv ;
+    solid-memo:back "Charles Barry"@en ,
+                    "Charles Barry"@sv ;
+    solid-memo:backNote "Augustus Pugin designed much of its Gothic detail."@en ,
+                        "Augustus Pugin ritade många av de gotiska detaljerna."@sv .
+
+<#museo-del-prado>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Museo del Prado"@en ,
+                     "Pradomuseet"@sv ;
+    solid-memo:back "Juan de Villanueva"@en ,
+                    "Juan de Villanueva"@sv .
+
+<#burj-al-arab>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Burj al-Arab"@en ,
+                     "Burj Al Arab"@sv ;
+    solid-memo:frontNote "Dubai"@en ,
+                         "Dubai"@sv ;
+    solid-memo:back "Tom Wright"@en ,
+                    "Tom Wright"@sv ;
+    solid-memo:backNote "Of the consultancy Atkins."@en ,
+                        "Vid konsultföretaget Atkins."@sv .
+
+<#winter-palace>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Winter Palace"@en ,
+                     "Vinterpalatset"@sv ;
+    solid-memo:frontNote "Saint Petersburg"@en ,
+                         "Sankt Petersburg"@sv ;
+    solid-memo:back "Bartolomeo Rastrelli"@en ,
+                    "Bartolomeo Rastrelli"@sv .
+
+<#chrysler-building>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Chrysler Building"@en ,
+                     "Chrysler Building"@sv ;
+    solid-memo:back "William Van Alen"@en ,
+                    "William Van Alen"@sv .
+
+<#la-scala>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "La Scala"@en ,
+                     "Teatro alla Scala"@sv ;
+    solid-memo:frontNote "Milan"@en ,
+                         "Milano"@sv ;
+    solid-memo:back "Giuseppe Piermarini"@en ,
+                    "Giuseppe Piermarini"@sv .
+
+<#st-pauls-cathedral>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "St Paul's Cathedral"@en ,
+                     "Sankt Pauls-katedralen"@sv ;
+    solid-memo:frontNote "London"@en ,
+                         "London"@sv ;
+    solid-memo:back "Christopher Wren"@en ,
+                    "Christopher Wren"@sv .
+
+<#uffizi>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Uffizi"@en ,
+                     "Uffizierna"@sv ;
+    solid-memo:frontNote "Florence"@en ,
+                         "Florens"@sv ;
+    solid-memo:back "Giorgio Vasari"@en ,
+                    "Giorgio Vasari"@sv ;
+    solid-memo:backNote "Begun in 1560; Alfonso Parigi and Bernardo Buontalenti continued the work, which was completed in 1581."@en ,
+                        "Bygget påbörjades 1560 och fortsattes av Alfonso Parigi och Bernardo Buontalenti; det fullbordades 1581."@sv .
+
+<#mirante-do-vale>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Mirante do Vale"@en ,
+                     "Mirante do Vale"@sv ;
+    solid-memo:frontNote "skyscraper in São Paulo"@en ,
+                         "skyskrapa i São Paulo"@sv ;
+    solid-memo:back "Waldomiro Zarzur and Aron Kogan"@en ,
+                    "Waldomiro Zarzur och Aron Kogan"@sv ;
+    solid-memo:backNote "Both were engineers."@en ,
+                        "Båda var ingenjörer."@sv .
+
+<#rijksmuseum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Rijksmuseum"@en ,
+                     "Rijksmuseum"@sv ;
+    solid-memo:frontNote "Amsterdam"@en ,
+                         "Amsterdam"@sv ;
+    solid-memo:back "Pierre Cuypers"@en ,
+                    "Pierre Cuypers"@sv .
+
+<#tokyo-tower>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Tokyo Tower"@en ,
+                     "Tokyo Tower"@sv ;
+    solid-memo:back "Tachū Naitō"@en ,
+                    "Tachū Naitō"@sv .
+
+<#suleymaniye-mosque>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Süleymaniye Mosque"@en ,
+                     "Süleymaniyemoskén"@sv ;
+    solid-memo:frontNote "Istanbul"@en ,
+                         "Istanbul"@sv ;
+    solid-memo:back "Mimar Sinan"@en ,
+                    "Mimar Sinan"@sv .
+
+<#guggenheim-museum-bilbao>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Guggenheim Museum Bilbao"@en ,
+                     "Guggenheimmuseet i Bilbao"@sv ;
+    solid-memo:back "Frank Gehry"@en ,
+                    "Frank Gehry"@sv .
+
+<#selimiye-mosque>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Selimiye Mosque"@en ,
+                     "Selimiyemoskén"@sv ;
+    solid-memo:frontNote "Edirne"@en ,
+                         "Edirne"@sv ;
+    solid-memo:back "Mimar Sinan"@en ,
+                    "Mimar Sinan"@sv .
+
+<#centre-pompidou>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Centre Pompidou"@en ,
+                     "Centre Pompidou"@sv ;
+    solid-memo:frontNote "Paris"@en ,
+                         "Paris"@sv ;
+    solid-memo:back "Renzo Piano and Richard Rogers"@en ,
+                    "Renzo Piano och Richard Rogers"@sv ;
+    solid-memo:backNote "With Gianfranco Franchini."@en ,
+                        "Tillsammans med Gianfranco Franchini."@sv .
+
+<#palais-garnier>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Palais Garnier"@en ,
+                     "Palais Garnier"@sv ;
+    solid-memo:frontNote "opera house in Paris"@en ,
+                         "operahus i Paris"@sv ;
+    solid-memo:back "Charles Garnier"@en ,
+                    "Charles Garnier"@sv .
+
+<#rock-and-roll-hall-of-fame>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Rock and Roll Hall of Fame"@en ,
+                     "Rock and Roll Hall of Fame"@sv ;
+    solid-memo:frontNote "the museum building, Cleveland"@en ,
+                         "museibyggnaden i Cleveland"@sv ;
+    solid-memo:back "I. M. Pei"@en ,
+                    "I. M. Pei"@sv .
+
+<#lenins-mausoleum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Lenin's Mausoleum"@en ,
+                     "Leninmausoleet"@sv ;
+    solid-memo:back "Alexey Shchusev"@en ,
+                    "Aleksej Sjtjusev"@sv .
+
+<#gazprom-arena>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Gazprom Arena"@en ,
+                     "Gazprom Arena"@sv ;
+    solid-memo:frontNote "Krestovsky Stadium, Saint Petersburg"@en ,
+                         "Krestovskij stadion, Sankt Petersburg"@sv ;
+    solid-memo:back "Kisho Kurokawa"@en ,
+                    "Kisho Kurokawa"@sv ;
+    solid-memo:backNote "Kurokawa died in 2007; the stadium opened in 2017."@en ,
+                        "Kurokawa dog 2007; arenan invigdes 2017."@sv .
+
+<#pergamon-museum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Pergamon Museum"@en ,
+                     "Pergamonmuseet"@sv ;
+    solid-memo:frontNote "Berlin"@en ,
+                         "Berlin"@sv ;
+    solid-memo:back "Alfred Messel"@en ,
+                    "Alfred Messel"@sv ;
+    solid-memo:backNote "Built in 1910–1930, after Messel's death, under Ludwig Hoffmann."@en ,
+                        "Uppfört 1910–1930, efter Messels död, under ledning av Ludwig Hoffmann."@sv .
+
+<#belvedere-vienna>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Belvedere"@en ,
+                     "Schloss Belvedere"@sv ;
+    solid-memo:frontNote "palace in Vienna"@en ,
+                         "slott i Wien"@sv ;
+    solid-memo:back "Johann Lukas von Hildebrandt"@en ,
+                    "Johann Lukas von Hildebrandt"@sv .
+
+<#pantheon-paris>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Panthéon"@en ,
+                     "Panthéon"@sv ;
+    solid-memo:frontNote "Paris"@en ,
+                         "Paris"@sv ;
+    solid-memo:back "Jacques-Germain Soufflot"@en ,
+                    "Jacques-Germain Soufflot"@sv ;
+    solid-memo:backNote "Completed after his death in 1780 by his student Jean-Baptiste Rondelet."@en ,
+                        "Fullbordat efter hans död 1780 av hans elev Jean-Baptiste Rondelet."@sv .
+
+<#sacre-coeur>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Sacré-Cœur"@en ,
+                     "Sacré-Cœur"@sv ;
+    solid-memo:frontNote "Paris"@en ,
+                         "Paris"@sv ;
+    solid-memo:back "Paul Abadie"@en ,
+                    "Paul Abadie"@sv ;
+    solid-memo:backNote "Abadie died in 1884; five later architects completed it."@en ,
+                        "Abadie dog 1884 och fem senare arkitekter fullbordade den."@sv .
+
+<#the-shard>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "The Shard"@en ,
+                     "The Shard"@sv ;
+    solid-memo:frontNote "London"@en ,
+                         "London"@sv ;
+    solid-memo:back "Renzo Piano"@en ,
+                    "Renzo Piano"@sv .
+
+<#guggenheim-museum-new-york>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Solomon R. Guggenheim Museum"@en ,
+                     "Solomon R. Guggenheim Museum"@sv ;
+    solid-memo:frontNote "New York"@en ,
+                         "New York"@sv ;
+    solid-memo:back "Frank Lloyd Wright"@en ,
+                    "Frank Lloyd Wright"@sv .
+
+<#fallingwater>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Fallingwater"@en ,
+                     "Fallingwater"@sv ;
+    solid-memo:frontNote "house over a waterfall, Pennsylvania"@en ,
+                         "hus över ett vattenfall, Pennsylvania"@sv ;
+    solid-memo:back "Frank Lloyd Wright"@en ,
+                    "Frank Lloyd Wright"@sv .
+
+<#drottningholm-palace>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Drottningholm Palace"@en ,
+                     "Drottningholms slott"@sv ;
+    solid-memo:back "Nicodemus Tessin the Elder"@en ,
+                    "Nicodemus Tessin den äldre"@sv ;
+    solid-memo:backNote "Completed by his son, Nicodemus Tessin the Younger; Carl Hårleman later added a storey to its wings."@en ,
+                        "Fullbordat av hans son Nicodemus Tessin den yngre; Carl Hårleman byggde senare på slottslängorna med en våning."@sv .
+
+<#helsinki-cathedral>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Helsinki Cathedral"@en ,
+                     "Helsingfors domkyrka"@sv ;
+    solid-memo:back "Carl Ludvig Engel"@en ,
+                    "Carl Ludvig Engel"@sv ;
+    solid-memo:backNote "Completed after Engel's death in 1840 by Ernst Lohrmann, who altered its appearance."@en ,
+                        "Fullbordad efter Engels död 1840 av Ernst Lohrmann, som ändrade dess utseende."@sv .
+
+<#stockholm-palace>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Stockholm Palace"@en ,
+                     "Stockholms slott"@sv ;
+    solid-memo:back "Nicodemus Tessin the Younger"@en ,
+                    "Nicodemus Tessin den yngre"@sv ;
+    solid-memo:backNote "Completed after his death in 1728 by Carl Hårleman."@en ,
+                        "Fullbordat efter hans död 1728 av Carl Hårleman."@sv .
+
+<#amalienborg>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Amalienborg"@en ,
+                     "Amalienborg"@sv ;
+    solid-memo:frontNote "Copenhagen"@en ,
+                         "Köpenhamn"@sv ;
+    solid-memo:back "Nicolai Eigtved"@en ,
+                    "Nicolai Eigtved"@sv ;
+    solid-memo:backNote "Completed after his death in 1754 by Lauritz de Thurah, to Eigtved's plans."@en ,
+                        "Fullbordat efter hans död 1754 av Lauritz de Thurah, efter Eigtveds ritningar."@sv .
+
+<#turning-torso>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Turning Torso"@en ,
+                     "Turning Torso"@sv ;
+    solid-memo:frontNote "Malmö"@en ,
+                         "Malmö"@sv ;
+    solid-memo:back "Santiago Calatrava"@en ,
+                    "Santiago Calatrava"@sv .
+
+<#helsinki-olympic-stadium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Helsinki Olympic Stadium"@en ,
+                     "Helsingfors olympiastadion"@sv ;
+    solid-memo:back "Yrjö Lindegren and Toivo Jäntti"@en ,
+                    "Yrjö Lindegren och Toivo Jäntti"@sv .
+
+<#hallgrimskirkja>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Hallgrímskirkja"@en ,
+                     "Hallgrímskirkja"@sv ;
+    solid-memo:frontNote "Reykjavík"@en ,
+                         "Reykjavik"@sv ;
+    solid-memo:back "Guðjón Samúelsson"@en ,
+                    "Guðjón Samúelsson"@sv .
+
+<#petajavesi-old-church>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Petäjävesi Old Church"@en ,
+                     "Petäjävesi gamla kyrka"@sv ;
+    solid-memo:back "Jaakko Klemetinpoika Leppänen"@en ,
+                    "Jacob Clementsson Leppänen"@sv ;
+    solid-memo:backNote "A church builder; his grandson Erkki Leppänen added the bell tower."@en ,
+                        "En kyrkbyggare; hans sonson Erkki Leppänen byggde klockstapeln."@sv .
+
+<#stockholm-olympic-stadium>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Stockholm Olympic Stadium"@en ,
+                     "Stockholms stadion"@sv ;
+    solid-memo:back "Torben Grut"@en ,
+                    "Torben Grut"@sv .
+
+<#nationalmuseum>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Nationalmuseum"@en ,
+                     "Nationalmuseum"@sv ;
+    solid-memo:frontNote "Stockholm"@en ,
+                         "Stockholm"@sv ;
+    solid-memo:back "Friedrich August Stüler"@en ,
+                    "Friedrich August Stüler"@sv ;
+    solid-memo:backNote "Fredrik Wilhelm Scholander designed the interiors."@en ,
+                        "Fredrik Wilhelm Scholander utformade interiörerna."@sv .
+
+<#stockholm-city-hall>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Stockholm City Hall"@en ,
+                     "Stockholms stadshus"@sv ;
+    solid-memo:back "Ragnar Östberg"@en ,
+                    "Ragnar Östberg"@sv .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
