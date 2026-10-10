@@ -3,7 +3,7 @@ import type { SolidDataset } from "@inrupt/solid-client";
 import type { CourseOutline } from "@solid-memo/domain/course";
 import type { LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
 import { getSolidDatasetLinear } from "./linearDataset";
-import { toCourseOutline, toLibraryDeckContent, toLibraryDecks } from "./mappers/libraryMapper";
+import { toCourseOutline, toLibraryDeckContent, toLibraryDecks, toLibraryIndexView } from "./mappers/libraryMapper";
 
 export interface SolidDeckLibraryDeps {
   /**
@@ -43,6 +43,10 @@ export function createSolidDeckLibrary({
   return {
     async listLibraryDecks(): Promise<LibraryDeck[]> {
       return toLibraryDecks(await getSolidDatasetLinear(indexUrl, { fetch }));
+    },
+
+    async readLibraryIndex() {
+      return toLibraryIndexView(indexUrl, await getSolidDatasetLinear(indexUrl, { fetch }));
     },
 
     fetchLibraryDeck(url) {

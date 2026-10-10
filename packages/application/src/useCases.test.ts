@@ -173,6 +173,7 @@ function makeDeps() {
     listLibraryDecks: vi.fn(async () => [libraryDeck]),
     fetchLibraryDeck: vi.fn(async () => libraryContent),
     fetchCourseOutline: vi.fn(async (releaseUrl) => ({ releaseUrl, chapters: [] })),
+    readLibraryIndex: vi.fn(async () => ({ url: "https://site.example/decks/index.ttl", publisher: null, releases: [] })),
   };
   const preferencesRepository: PreferencesRepository = {
     getPreferences: vi.fn(async () => null),
@@ -203,6 +204,7 @@ function makeDeps() {
       value: await shapeValidator.validateDocument(url),
       version: null,
     })),
+    validateRelease: vi.fn(async () => []),
   };
   const repairRepository: RepairRepository = {
     applyRepairs: vi.fn(async () => undefined),

@@ -2,7 +2,10 @@ import { useState } from "preact/hooks";
 import type { LangText } from "@solid-memo/domain/langText";
 import { chapterIdFor } from "@solid-memo/domain/release/courseIds";
 import { retiredChapters } from "@solid-memo/domain/release/draftOutline";
+import type { ReleaseProblem } from "@solid-memo/domain/release/problems";
+import { problemCounts, type DraftField } from "@solid-memo/domain/release/releaseCheck";
 import type { DraftChange, ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
+import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { draftOf, LangTextField, rememberLanguages, textOfDraft, type DraftEntry } from "@solid-memo/ui/LangTextField";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
@@ -21,6 +24,16 @@ export interface DraftLinks {
   chapterHref: (chapter: string) => string;
   stepHref: (step: string) => string;
   questionHref: (card: string) => string;
+  /** The draft's release check, for a pod. */
+  checkHref: string;
+  /** The draft as the library will list it. */
+  previewHref: string;
+}
+
+/** The release check of the draft as the overview counts it: its problems, undefined while it runs, or why it did not. */
+export interface OverviewCheck {
+  problems: ReleaseProblem[] | undefined;
+  error: unknown;
 }
 
 /** A text to set, or (empty) to clear. */
@@ -34,23 +47,30 @@ export function textOrNull(text: LangText): LangText | null {
  * typed), and for a course its outline (DraftOutline), a new chapter (its
  * title, and its id as the id assistant suggests it), and its chapters
  * retired, to restore. Its cards are counted, with a link to their table;
- * a deck's are added here. The release check, which counts its problems,
- * is not here yet. A draft released is shown, frozen.
+ * a deck's are added here. The release check (for a pod) counts its
+ * problems, each chapter's and step's beside it in the outline, and
+ * links to the check and the listing preview. A draft released is
+ * shown, frozen. Opened at a field (`field`, from the release check),
+ * that field is where the user arrives.
  */
 export function DraftOverviewScreen({
   draft,
   readOnly,
   status,
   links,
+  check,
+  field,
   onEdit,
 }: {
   draft: ReleaseDraft;
   readOnly: DraftReadOnly | null;
   status: Pick<DraftEditor, "saving" | "failure">;
   links: DraftLinks;
+  check: OverviewCheck;
+  field?: DraftField;
   onEdit: DraftEditor["edit"];
 }) {
-  const { t, readerText } = useI18n();
+  const { t, readerText, errorText } = useI18n();
   const held = readOnly !== null;
   const title = draft.root.title ?? {};
   const retired = retiredChapters(draft);
@@ -74,6 +94,7 @@ export function DraftOverviewScreen({
             field={t("language.field.title")}
             text={draft.root.title}
             disabled={held}
+            arrival={field === "title"}
             onSave={(text) => onEdit([{ kind: "setMeta", meta: { title: textOrNull(text) } }], { debounce: true })}
           />
           <DraftTextField
@@ -84,12 +105,15 @@ export function DraftOverviewScreen({
             text={draft.root.description}
             multiline
             disabled={held}
+            arrival={field === "description"}
             onSave={(text) => onEdit([{ kind: "setMeta", meta: { description: textOrNull(text) } }], { debounce: true })}
           />
         </section>
         {draft.course && (
           <section aria-labelledby="draft-outline-heading">
-            <h3 id="draft-outline-heading">{t("studio.draft.outline")}</h3>
+            <h3 id="draft-outline-heading" tabIndex={-1} data-arrival={field === "outline" || undefined}>
+              {t("studio.draft.outline")}
+            </h3>
             <p class="hint">{t("studio.draft.outlineHint")}</p>
             <DraftOutline
               draft={draft}
@@ -97,6 +121,8 @@ export function DraftOverviewScreen({
               chapterHref={links.chapterHref}
               stepHref={links.stepHref}
               questionHref={links.questionHref}
+              checkHref={links.checkHref}
+              problems={problemCounts(draft, check.problems ?? [])}
               onEdit={(changes) => onEdit(changes)}
             />
             <NewChapterForm draft={draft} onAdd={(changes) => onEdit(changes) === null} />
@@ -128,7 +154,14 @@ export function DraftOverviewScreen({
         </section>
         <section aria-labelledby="draft-problems-heading">
           <h3 id="draft-problems-heading">{t("studio.draft.problems")}</h3>
-          <p class="hint">{t("studio.draft.problemsLater")}</p>
+          {check.problems === undefined ? (
+            check.error ? <ErrorMessage error={errorText(check.error)} /> : <p class="hint">{t("studio.draft.problemsChecking")}</p>
+          ) : (
+            <p>{check.problems.length === 0 ? t("studio.draft.problemsNone") : t("studio.draft.problemsCount", { count: check.problems.length })}</p>
+          )}
+          <p>
+            <a href={links.checkHref}>{t("studio.draft.problemsLink")}</a> · <a href={links.previewHref}>{t("studio.draft.previewLink")}</a>
+          </p>
         </section>
       </DraftScope>
     </section>

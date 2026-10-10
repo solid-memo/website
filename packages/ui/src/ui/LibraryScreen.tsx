@@ -64,7 +64,7 @@ export function LibraryScreen({
   error: ErrorText | null;
   onImport: (decks: LibraryDeck[]) => void;
 }) {
-  const { t, readerText } = useI18n();
+  const { t } = useI18n();
   const [selectedUrls, setSelectedUrls] = useRemembered<string[]>(`${memoryKey}:selected`, []);
   const [topics, setTopics] = useRemembered<string[]>(`${memoryKey}:topics`, []);
   const [query, setQuery] = useRemembered(`${memoryKey}:query`, "");
@@ -161,39 +161,15 @@ export function LibraryScreen({
             <ul class="library-list">
               {shown.map((deck) => (
                 <li key={deck.url}>
-                  {/* A 44px target above the row's link, so a near miss
-                      ticks the deck instead of leaving the screen. A course
-                      has none, only its place: it is started from its page. */}
-                  {deck.isCourse === true ? (
-                    <span class="library-pick" aria-hidden="true" />
-                  ) : (
-                    <label class="library-pick">
-                      <input
-                        type="checkbox"
-                        aria-label={readerText(deck.title)}
-                        checked={selectedUrls.includes(deck.url)}
-                        disabled={busy}
-                        onChange={(e) => toggle(deck, e.currentTarget.checked)}
-                      />
-                    </label>
-                  )}
-                  <a class="library-deck-name" href={deckHref(deck)}>
-                    <ReaderText text={deck.title} />
-                  </a>
-                  <span class="library-deck-meta">
-                    <span class="hint">{t("common.cardCount", { count: deck.cardCount })}</span>
-                    {deck.isCourse === true && <span class="hint library-course">{t("library.course")}</span>}
-                    {isImported(deck) && (
-                      <span class="hint library-imported">{t("library.alreadyImported")}</span>
-                    )}
-                  </span>
-                  <a
-                    class="button library-preview"
-                    href={previewHref(deck)}
-                    aria-label={t("library.previewDeck", { deck: readerText(deck.title) })}
-                  >
-                    {t("library.preview")}
-                  </a>
+                  <LibraryDeckRow
+                    deck={deck}
+                    selected={selectedUrls.includes(deck.url)}
+                    imported={isImported(deck)}
+                    busy={busy}
+                    deckHref={deckHref(deck)}
+                    previewHref={previewHref(deck)}
+                    onToggle={(checked) => toggle(deck, checked)}
+                  />
                 </li>
               ))}
             </ul>
@@ -209,5 +185,69 @@ export function LibraryScreen({
       )}
       <ErrorMessage error={error} />
     </section>
+  );
+}
+
+/**
+ * One deck of the library's list (LibraryScreen): a box to tick it (a
+ * course has none, being started from its page), its name, linking to
+ * its page, its size, that it is a course or already imported, and its
+ * Preview button. The Studio shows a draft's row as learners will see
+ * it (docs/studio.md, The listing preview).
+ */
+export function LibraryDeckRow({
+  deck,
+  selected,
+  imported,
+  busy,
+  deckHref,
+  previewHref,
+  onToggle,
+}: {
+  deck: LibraryDeck;
+  selected: boolean;
+  imported: boolean;
+  busy: boolean;
+  deckHref: string;
+  previewHref: string;
+  onToggle: (checked: boolean) => void;
+}) {
+  const { t, readerText } = useI18n();
+  return (
+    <>
+      {/* A 44px target above the row's link, so a near miss
+          ticks the deck instead of leaving the screen. A course
+          has none, only its place: it is started from its page. */}
+      {deck.isCourse === true ? (
+        <span class="library-pick" aria-hidden="true" />
+      ) : (
+        <label class="library-pick">
+          <input
+            type="checkbox"
+            aria-label={readerText(deck.title)}
+            checked={selected}
+            disabled={busy}
+            onChange={(e) => onToggle(e.currentTarget.checked)}
+          />
+        </label>
+      )}
+      <a class="library-deck-name" href={deckHref}>
+        <ReaderText text={deck.title} />
+      </a>
+      <span class="library-deck-meta">
+        <span class="hint">{t("common.cardCount", { count: deck.cardCount })}</span>
+        {deck.isCourse === true && <span class="hint library-course">{t("library.course")}</span>}
+        {imported && (
+          <span class="hint library-imported">{t("library.alreadyImported")}</span>
+        )}
+      </span>
+      <a
+        class="button library-preview"
+        href={previewHref}
+        aria-label={t("library.previewDeck", { deck: readerText(deck.title) })}
+      >
+        {t("library.preview")}
+      </a>
+    </>
   );
 }

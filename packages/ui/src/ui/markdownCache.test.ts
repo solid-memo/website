@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { MAX_CHARS } from "@solid-memo/markdown/parse";
 import { plainText } from "@solid-memo/markdown/plainText";
-import { CACHE_SIZE, deckTextCheck, markdownBlocks, markdownChunks, markdownPhrases, plainTexts } from "./markdownCache";
+import { CACHE_SIZE, deckTextCheck, markdownBlocks, markdownChunks, markdownPhrases, plainTexts, releaseMarkdownCheck } from "./markdownCache";
 
 vi.mock("@solid-memo/markdown/plainText", async (importOriginal) => {
   const original = await importOriginal<typeof import("@solid-memo/markdown/plainText")>();
@@ -64,5 +64,30 @@ describe("deckTextCheck", () => {
     expect(text.check("[a](https://example.org)", "side")).toEqual([{ code: "link", source: "[a](https://example.org)", autolink: false }]);
     expect(text.check("[example.org](https://example.org)", "prose")).toEqual([]);
     expect(text.check("a\n\nb", "option")).toEqual([{ code: "notOneParagraph" }]);
+  });
+});
+
+describe("releaseMarkdownCheck", () => {
+  it("checks each field by the markdown package's rule, each text once by each rule", () => {
+    const check = releaseMarkdownCheck();
+    const found = check.problems("[a](https://example.org)", "side");
+    expect(found).toEqual([{ code: "link", source: "[a](https://example.org)", autolink: false }]);
+    expect(check.problems("[a](https://example.org)", "side")).toBe(found);
+    expect(check.problems("[a](https://example.org)", "prose")).toEqual([]);
+    expect(check.problems("a\n\nb", "option")).toEqual([{ code: "notOneParagraph" }]);
+  });
+
+  it("remembers every text of each rule, however many, so a long list checked again in order is read once", () => {
+    const check = releaseMarkdownCheck();
+    const texts = Array.from({ length: CACHE_SIZE * 2 }, (_, index) => `*text* ${index}`);
+    const first = texts.map((text) => check.problems(text, "option"));
+    texts.forEach((text, index) => expect(check.problems(text, "option")).toBe(first[index]));
+  });
+
+  it("chunks a step's theory, each text once", () => {
+    const check = releaseMarkdownCheck();
+    const chunks = check.chunks("---\n\na\n\n---\n\nb");
+    expect(chunks).toEqual({ chunks: 2, empty: 1 });
+    expect(check.chunks("---\n\na\n\n---\n\nb")).toBe(chunks);
   });
 });

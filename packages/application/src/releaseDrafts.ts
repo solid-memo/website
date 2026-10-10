@@ -3,7 +3,7 @@ import type { Deck } from "@solid-memo/domain/deck";
 import { DECK_FILE_ACCEPT, deckFileFormatOf } from "@solid-memo/domain/deckFile";
 import { shown, tidiedStated, type LangText } from "@solid-memo/domain/langText";
 import { deckToDraft } from "@solid-memo/domain/release/deckToDraft";
-import { draftNameFor, draftUrlOf, type ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout";
+import { draftNameFor, draftPlaceOf, draftUrlOf, type ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout";
 import {
   applyDraftChanges,
   blankDraft,
@@ -16,9 +16,23 @@ import {
   type ReleaseDraft,
   unsupportedIdOf,
 } from "@solid-memo/domain/release/releaseDraft";
+import { continuityProblems } from "@solid-memo/domain/release/continuityRules";
+import { draftReleaseModel } from "@solid-memo/domain/release/draftModel";
+import { markdownProblems, type MarkdownCheck } from "@solid-memo/domain/release/markdownFields";
+import { problem, type ReleaseProblem } from "@solid-memo/domain/release/problems";
+import {
+  libraryProblems,
+  libraryReleaseUrl,
+  movedProblems,
+  readWhole,
+  ruleProblems,
+  type CheckPolicy,
+  type ReleaseCheck,
+} from "@solid-memo/domain/release/releaseCheck";
+import type { ReleaseModel } from "@solid-memo/domain/release/releaseModel";
 import { releaseToDraft } from "@solid-memo/domain/release/releaseToDraft";
 import { nextVersionDraft } from "@solid-memo/domain/release/releaseVersion";
-import type { DeckRepository, FileExchange, ReleaseDraftRepository } from "./ports";
+import type { DeckLibrary, DeckRepository, FileExchange, ReleaseDraftRepository, ShapeValidator } from "./ports";
 
 /**
  * The drafts of releases (docs/studio.md, Drafts): a creator writes a
@@ -77,6 +91,19 @@ export interface ReleaseDraftUseCases {
    */
   editReleaseDraft(draftUrl: string, changes: readonly DraftChange[]): Promise<DraftEdit>;
   deleteReleaseDraft(draft: ReleaseDraftSummary): Promise<void>;
+  /**
+   * The release check of the draft as it is (docs/studio.md, The release
+   * check), for a pod or for the repository's library (`policy`): the
+   * domain's rules (its course, what a release needs, the policy's
+   * curation, its text in Markdown by `markdownCheck`, which the caller
+   * passes in, and against the release it follows), for the library its
+   * place there, by the library's index; with `shapes`, the shapes and
+   * profiles too (validateRelease), which take a while, so they are run
+   * only when asked. Each part is made once for a draft (a draft is
+   * changed into a new one, so each version is checked once), the
+   * releases a draft follows read once.
+   */
+  checkReleaseDraft(draft: ReleaseDraft, markdownCheck: MarkdownCheck, policy: CheckPolicy, options?: { shapes?: boolean }): Promise<ReleaseCheck>;
 }
 
 /** How often a change of a draft is made, in all, while its documents keep changing elsewhere. */
@@ -107,14 +134,41 @@ function nameInUrl(url: string): string | null {
   return /\/([a-z0-9][a-z0-9-]*)\/v[1-9][0-9]*\.ttl$/.exec(url)?.[1] ?? null;
 }
 
+/** What a check made of a draft, by policy: made once for each draft (a version of it). */
+type Made<T> = WeakMap<ReleaseDraft, Map<CheckPolicy, Promise<T>>>;
+
+/**
+ * What `make` makes of the draft for the policy, made once and kept; a
+ * failure, or what `whole` says is not whole, is forgotten, so the next
+ * call tries again.
+ */
+function madeOnce<T>(made: Made<T>, draft: ReleaseDraft, policy: CheckPolicy, make: () => Promise<T>, whole: (value: T) => boolean = () => true): Promise<T> {
+  const byPolicy = made.get(draft) ?? new Map<CheckPolicy, Promise<T>>();
+  made.set(draft, byPolicy);
+  let result = byPolicy.get(policy);
+  if (result === undefined) {
+    result = make();
+    byPolicy.set(policy, result);
+    result.then(
+      (value) => whole(value) || byPolicy.delete(policy),
+      () => byPolicy.delete(policy),
+    );
+  }
+  return result;
+}
+
 export function createReleaseDraftUseCases({
   releaseDraftRepository,
   deckRepository,
+  deckLibrary,
+  shapeValidator,
   fileExchange,
   now,
 }: {
   releaseDraftRepository: ReleaseDraftRepository;
   deckRepository: DeckRepository;
+  deckLibrary: DeckLibrary;
+  shapeValidator: ShapeValidator;
   fileExchange: FileExchange;
   now: () => Date;
 }): ReleaseDraftUseCases {
@@ -131,6 +185,62 @@ export function createReleaseDraftUseCases({
       publishedOf.set(url, ids);
     }
     return ids;
+  }
+
+  /** Each release a draft follows, as the release rules read it, by URL: read once. */
+  const releaseModels = new Map<string, Promise<ReleaseModel>>();
+
+  function releaseModel(url: string): Promise<ReleaseModel> {
+    let model = releaseModels.get(url);
+    if (model === undefined) {
+      model = releaseDraftRepository.readRelease(url).then((release) => draftReleaseModel(release));
+      model.catch(() => releaseModels.delete(url));
+      releaseModels.set(url, model);
+    }
+    return model;
+  }
+
+  const ruleChecks: Made<Omit<ReleaseCheck, "shapes">> = new WeakMap();
+  const shapeChecks: Made<ReleaseProblem[]> = new WeakMap();
+
+  /** Where the library would publish the draft: its name and version there, by its place in the instance; and the index. */
+  async function libraryPlace(draft: ReleaseDraft) {
+    // A draft is read only at a draft's place.
+    const { name, version } = draftPlaceOf(draft.url)!;
+    const index = await deckLibrary.readLibraryIndex();
+    return { name, version, index, url: libraryReleaseUrl(index.url, name, version) };
+  }
+
+  /**
+   * The rules of the draft, its Markdown, and the parts that read what
+   * is elsewhere: against the release it follows, and its place in the
+   * library. A part that cannot read what it needs is a problem of its
+   * own (previousUnread, libraryUnread); the rest stands.
+   */
+  async function ruleCheck(draft: ReleaseDraft, markdownCheck: MarkdownCheck, policy: CheckPolicy): Promise<Omit<ReleaseCheck, "shapes">> {
+    const model = draftReleaseModel(draft);
+    const { prev } = draft.root;
+    const [drops, library] = await Promise.all([
+      prev === undefined
+        ? []
+        : releaseModel(prev).then(
+            (before) => continuityProblems(before, model),
+            () => [problem(draft.url, { code: "previousUnread", params: { previous: prev } }, { related: [prev] })],
+          ),
+      policy === "pod"
+        ? []
+        : libraryPlace(draft).then(
+            (place) => movedProblems(libraryProblems(draftReleaseModel(draft, place.url), place.index, place.name, place.version), place.url, draft.url),
+            () => [problem(draft.url, { code: "libraryUnread", params: {} })],
+          ),
+    ]);
+    return { rules: ruleProblems(model, policy), library, drops, markdown: markdownProblems(model, markdownCheck) };
+  }
+
+  async function shapeCheck(draft: ReleaseDraft, policy: CheckPolicy): Promise<ReleaseProblem[]> {
+    if (policy === "pod") return shapeValidator.validateRelease(draft, draft.url);
+    const place = await libraryPlace(draft);
+    return shapeValidator.validateRelease(draft, place.url, place.index.url);
   }
 
   async function withPublished(draft: ReleaseDraft): Promise<ReleaseDraft> {
@@ -242,6 +352,12 @@ export function createReleaseDraftUseCases({
 
     deleteReleaseDraft(draft) {
       return releaseDraftRepository.delete(draft);
+    },
+
+    async checkReleaseDraft(draft, markdownCheck, policy, { shapes = false } = {}) {
+      const rules = madeOnce(ruleChecks, draft, policy, () => ruleCheck(draft, markdownCheck, policy), readWhole);
+      const shaped = shapes ? madeOnce(shapeChecks, draft, policy, () => shapeCheck(draft, policy)) : null;
+      return { ...(await rules), shapes: shaped === null ? null : await shaped };
     },
   };
 }

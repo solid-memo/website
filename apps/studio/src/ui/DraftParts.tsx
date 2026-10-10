@@ -113,6 +113,7 @@ export function DraftTextField({
   text,
   multiline = false,
   disabled,
+  arrival = false,
   onSave,
 }: {
   id: string;
@@ -123,6 +124,8 @@ export function DraftTextField({
   text: LangText | undefined;
   multiline?: boolean;
   disabled: boolean;
+  /** The screen was opened at this field (a link from the release check). */
+  arrival?: boolean;
   onSave: (text: LangText) => void;
 }) {
   const { draft, missing, change } = useSavedText(text, onSave);
@@ -138,6 +141,7 @@ export function DraftTextField({
         disabled={disabled}
         missing={missing}
         errorId={`${id}-language`}
+        arrival={arrival}
         onChange={change}
       />
       <MissingLanguage id={`${id}-language`} missing={missing} field={field} />
@@ -159,6 +163,7 @@ export function DraftProseField({
   markdown,
   disabled,
   preview,
+  arrival = false,
   onSave,
 }: {
   id: string;
@@ -169,6 +174,8 @@ export function DraftProseField({
   markdown: boolean;
   disabled: boolean;
   preview: (text: LangText, markdown: boolean) => ComponentChildren;
+  /** The screen was opened at this field (a link from the release check). */
+  arrival?: boolean;
   onSave: (text: LangText, markdown: boolean) => void;
 }) {
   const [inMarkdown, setInMarkdown] = useState(markdown);
@@ -186,6 +193,7 @@ export function DraftProseField({
         preview={preview}
         missing={missing}
         errorId={`${id}-language`}
+        arrival={arrival}
         onChange={change}
         onMarkdown={(on) => {
           setInMarkdown(on);

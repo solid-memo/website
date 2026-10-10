@@ -6,12 +6,17 @@ import { courseDraft } from "../test/fixtures";
 
 type Edit = (changes: DraftChange[]) => DraftRefusal | null;
 
-function renderOutline(draft: ReleaseDraft = courseDraft(), { readOnly = false, onEdit = vi.fn<Edit>(() => null) } = {}) {
+function renderOutline(
+  draft: ReleaseDraft = courseDraft(),
+  { readOnly = false, onEdit = vi.fn<Edit>(() => null), problems = new Map<string, number>() } = {},
+) {
   const props = {
     readOnly,
     chapterHref: (id: string) => `#/chapter/${id}`,
     stepHref: (id: string) => `#/step/${id}`,
     questionHref: (id: string) => `#/question/${id}`,
+    checkHref: "#/check",
+    problems,
     onEdit,
   };
   const view = render(<DraftOutline draft={draft} {...props} />);
@@ -37,6 +42,14 @@ describe("DraftOutline", () => {
     expect(screen.getByText("No steps yet.")).toBeInTheDocument();
   });
 
+  it("counts the problems the release check finds in a chapter, step or question, linking to the check", () => {
+    renderOutline(courseDraft(), { problems: new Map([["ch-apps", 1], ["ch-pods-2", 2], ["q-pods-1a", 3]]) });
+    expect(screen.getByRole("link", { name: "1 problem in Apps" })).toHaveAttribute("href", "#/check");
+    expect(screen.getByRole("link", { name: "2 problems in Step 1.2" })).toHaveAttribute("href", "#/check");
+    expect(screen.getByRole("link", { name: "3 problems in What holds data?" })).toHaveAttribute("href", "#/check");
+    expect(screen.queryByRole("link", { name: /problems? in Pods/ })).toBeNull();
+  });
+
   it("names a chapter of no title by its id", () => {
     const draft = courseDraft();
     renderOutline({ ...draft, chapters: draft.chapters.map((node) => (node.id === "ch-apps" ? { ...node, data: { ...node.data, title: undefined } } : node)) });
@@ -48,7 +61,9 @@ describe("DraftOutline", () => {
     renderOutline({ ...draft, chapters: [], steps: [] });
     expect(screen.getByText("No chapters yet.")).toBeInTheDocument();
     const theoryless = applyDraftChanges(draft, [{ kind: "editStep", id: "ch-pods-1", text: {} }]) as ReleaseDraft;
-    render(<DraftOutline draft={theoryless} readOnly={false} chapterHref={String} stepHref={String} questionHref={String} onEdit={vi.fn()} />);
+    render(
+      <DraftOutline draft={theoryless} readOnly={false} chapterHref={String} stepHref={String} questionHref={String} checkHref="#" problems={new Map()} onEdit={vi.fn()} />,
+    );
     expect(screen.getByText("No theory yet.")).toBeInTheDocument();
   });
 

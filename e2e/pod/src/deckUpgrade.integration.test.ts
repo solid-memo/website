@@ -94,6 +94,8 @@ function libraryOf(...published: LibraryDeckContent[]): DeckLibrary {
       return release;
     },
     fetchCourseOutline: async (releaseUrl) => ({ releaseUrl, chapters: [] }),
+    // The release check is the Studio's: no index is read here.
+    readLibraryIndex: async () => ({ url: "https://site.example/decks/index.ttl", publisher: null, releases: [] }),
   };
 }
 

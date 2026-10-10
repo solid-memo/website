@@ -302,7 +302,7 @@ export function createSolidReleaseDraftRepository({
       const iriOf = draftIriOf(draftContainerOf(draftUrl), draftUrl);
       const to = (iri: string) => moved(iriOf(iri), draftUrl, targetUrl);
       const datasets = await Promise.all(urls.map((url) => readDataset(url, fetch)));
-      let quads = datasets.flatMap((dataset, at) =>
+      const atTarget = datasets.flatMap((dataset, at) =>
         quadsOf(dataset).map((quad) => {
           const object = termOf(quad.object);
           const label = (value: string) => `d${at}-${value}`;
@@ -313,15 +313,7 @@ export function createSolidReleaseDraftRepository({
           );
         }),
       );
-      const time = { kind: "literal" as const, value: issued, language: "", datatype: XSD_DATE_TIME };
-      const dropped = new Set([SM.formatVersion, SM.releasedAs, DCTERMS("issued"), DCTERMS("modified")]);
-      quads = [
-        ...quads.filter((quad) => !(quad.subject.value === targetUrl && dropped.has(quad.predicate.value))),
-        quadOf(targetUrl, SM.formatVersion, { kind: "literal", value: String(LATEST_VERSION.libraryDeck), language: "", datatype: "http://www.w3.org/2001/XMLSchema#integer" }),
-        quadOf(targetUrl, DCTERMS("issued"), time),
-        quadOf(targetUrl, DCTERMS("modified"), time),
-      ];
-      quads = withSeries(quads, targetUrl);
+      const quads = releaseQuadsOf(atTarget, targetUrl, issued);
       const subjects = [...new Set(quads.map((quad) => keyOf(quad.subject)))];
       return turtleOf(quads, { base: targetUrl, prefixes: RELEASE_PREFIXES, order: [targetUrl, ...subjects.filter((subject) => !subject.startsWith(`${targetUrl}#`)), ...subjects] });
     },
@@ -360,6 +352,27 @@ export function createSolidReleaseDraftRepository({
       );
     },
   };
+}
+
+/**
+ * A draft's statements, every subject moved to `targetUrl`, as the
+ * release they make, released `issued` (also its time of change):
+ * written at library deck format 6, with the series it starts described
+ * in it (withSeries). What `assemble` writes, and what the shapes check
+ * of a draft (ShapeValidator.validateRelease).
+ */
+export function releaseQuadsOf(quads: readonly Quad[], targetUrl: string, issued: string): Quad[] {
+  const time = { kind: "literal" as const, value: issued, language: "", datatype: XSD_DATE_TIME };
+  const dropped = new Set([SM.formatVersion, SM.releasedAs, DCTERMS("issued"), DCTERMS("modified")]);
+  return withSeries(
+    [
+      ...quads.filter((quad) => !(quad.subject.value === targetUrl && dropped.has(quad.predicate.value))),
+      quadOf(targetUrl, SM.formatVersion, { kind: "literal", value: String(LATEST_VERSION.libraryDeck), language: "", datatype: "http://www.w3.org/2001/XMLSchema#integer" }),
+      quadOf(targetUrl, DCTERMS("issued"), time),
+      quadOf(targetUrl, DCTERMS("modified"), time),
+    ],
+    targetUrl,
+  );
 }
 
 /** The documents of a draft's container, those a draft has (draftLayout.ts), by URL; none when it is gone (404). */

@@ -1,4 +1,5 @@
 import type { UseCases } from "@solid-memo/application/useCases";
+import type { ChapterField } from "@solid-memo/domain/release/releaseCheck";
 import { useDraftEditor } from "./draftEditor";
 import type { DraftLinks } from "./DraftOverviewScreen";
 import { ChapterEditorScreen } from "./ChapterEditorScreen";
@@ -9,12 +10,14 @@ export function ChapterEditorContainer({
   draftUrl,
   chapter,
   links,
+  field,
   onDeleted,
 }: {
   useCases: UseCases;
   draftUrl: string;
   chapter: string;
   links: DraftLinks;
+  field?: ChapterField;
   onDeleted: () => void;
 }) {
   const editor = useDraftEditor(useCases, draftUrl);
@@ -25,6 +28,7 @@ export function ChapterEditorContainer({
       readOnly={editor.readOnly}
       status={editor}
       links={links}
+      {...(field === undefined ? {} : { field })}
       onEdit={editor.edit}
       onDeleted={onDeleted}
     />

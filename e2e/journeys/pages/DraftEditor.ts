@@ -7,7 +7,9 @@ import { Screen } from "./Screen.ts";
  * draft): its overview and outline, a chapter's editor, a step's editor
  * (its theory and its questions) and a question's editor (its wrong
  * options and its preview). Every edit is saved as it is made, and the
- * status line says when all of them are.
+ * status line says when all of them are. Its release check lists the
+ * problems of the release it will be, each a link to what it is about;
+ * its listing preview shows it as the library will.
  */
 export class DraftEditor extends Screen {
   /** The draft's outline, as the overview shows it. */
@@ -132,8 +134,87 @@ export class DraftEditor extends Screen {
       await this.app.chrome.breadcrumbs.getByRole("link", { name: draft, exact: true }).click();
       await expect(this.outline.getByRole("link", { name: chapter, exact: true })).toBeVisible();
       const row = this.outline.locator(".outline-step").filter({ has: this.page.getByRole("link", { name: step, exact: true }) });
-      await expect(row.locator(".outline-questions").getByRole("link")).toHaveText(questions);
+      // Each question's own link, not the badge counting its problems.
+      await expect(row.locator(".outline-questions > li > a:first-child")).toHaveText(questions);
       await expect(this.page.getByText(this.t("studio.draft.cardCount", { count: questions.length }))).toBeVisible();
+    });
+  }
+
+  /** The release check's list item of what a problem is in, by its name. */
+  private problemsOf(subject: string): Locator {
+    return this.page
+      .locator(".release-problems > li")
+      .filter({ has: this.page.getByRole("link", { name: subject, exact: true }) });
+  }
+
+  /** The overview's outline counts the problems of what it lists, a badge beside it. */
+  async expectBadge(name: string, count: number): Promise<void> {
+    await this.intent(`See ${count} problems counted in ${name}`, async () => {
+      const badge = `${this.t("studio.check.badge", { count })} ${this.t("studio.check.badgeOf", { name })}`;
+      await expect(this.outline.getByRole("link", { name: badge, exact: true })).toBeVisible();
+    });
+  }
+
+  /** Opens the draft's release check from its overview, reached by the trail. */
+  async openCheck(draft: string): Promise<void> {
+    await this.intent("Open the release check", async () => {
+      await this.app.chrome.breadcrumbs.getByRole("link", { name: draft, exact: true }).click();
+      await this.page.getByRole("link", { name: this.t("studio.draft.problemsLink") }).click();
+      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.check.heading") })).toBeVisible();
+      await expect(this.page.getByRole("status").filter({ hasText: this.t("studio.check.checking") })).toHaveCount(0);
+    });
+  }
+
+  /** The release check lists the problem in what it names. */
+  async expectProblem(subject: string, problem: string): Promise<void> {
+    await this.intent(`See the problem of ${subject}: ${problem}`, async () => {
+      await expect(this.problemsOf(subject).getByRole("link", { name: problem, exact: true })).toBeVisible();
+    });
+  }
+
+  /** The release check no longer lists the problem in what it names. */
+  async expectNoProblem(subject: string, problem: string): Promise<void> {
+    await this.intent(`See the problem of ${subject} gone: ${problem}`, async () => {
+      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.check.heading") })).toBeVisible();
+      await expect(this.problemsOf(subject).getByRole("link", { name: problem, exact: true })).toHaveCount(0);
+    });
+  }
+
+  /** Follows a problem to where it is fixed: its editor, at its field, where the focus is. */
+  async followProblem(subject: string, problem: string): Promise<void> {
+    await this.intent(`Follow the problem of ${subject} to its field`, async () => {
+      await this.problemsOf(subject).getByRole("link", { name: problem, exact: true }).click();
+      await expect(this.page.locator("[data-arrival]")).toBeFocused();
+    });
+  }
+
+  /** Writes the release's description, in English, where the overview was opened at it. */
+  async writeDescription(description: string): Promise<void> {
+    await this.intent("Write the release's description", async () => {
+      await this.page.locator("#draft-description").fill(description);
+      await chooseLanguage(this.app, this.page.locator("#draft-description-language-0"), "en");
+      await this.expectSaved();
+    });
+  }
+
+  /** Checks the draft against the shapes too: they find what a release still lacks. */
+  async checkShapes(): Promise<void> {
+    await this.intent("Check against the shapes", async () => {
+      const shapes = this.page.getByRole("region", { name: this.t("studio.check.shapesHeading") });
+      await shapes.getByRole("button", { name: this.t("studio.check.shapesRun") }).click();
+      const found = this.t("studio.check.shapesCount", { count: 7 }).replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace("7", "\\d+");
+      await expect(shapes.getByText(new RegExp(found))).toBeVisible({ timeout: 60_000 });
+    });
+  }
+
+  /** Opens the listing preview from the release check: the draft's row and page in the library, a picture of them. */
+  async openPreview(draft: string): Promise<void> {
+    await this.intent("Preview the listing", async () => {
+      await this.page.getByRole("link", { name: this.t("studio.check.previewLink") }).click();
+      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.preview.heading") })).toBeVisible();
+      const previews = this.page.locator(".listing-preview");
+      await expect(previews.first().locator(".library-deck-name")).toHaveText(draft);
+      await expect(previews.last().locator("h2")).toHaveText(draft);
     });
   }
 }

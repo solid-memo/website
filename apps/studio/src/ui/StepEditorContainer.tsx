@@ -1,4 +1,5 @@
 import type { UseCases } from "@solid-memo/application/useCases";
+import type { StepField } from "@solid-memo/domain/release/releaseCheck";
 import { useDraftEditor } from "./draftEditor";
 import type { DraftLinks } from "./DraftOverviewScreen";
 import { StepEditorScreen } from "./StepEditorScreen";
@@ -9,12 +10,14 @@ export function StepEditorContainer({
   draftUrl,
   step,
   links,
+  field,
   onDeleted,
 }: {
   useCases: UseCases;
   draftUrl: string;
   step: string;
   links: DraftLinks;
+  field?: StepField;
   onDeleted: () => void;
 }) {
   const editor = useDraftEditor(useCases, draftUrl);
@@ -25,6 +28,7 @@ export function StepEditorContainer({
       readOnly={editor.readOnly}
       status={editor}
       links={links}
+      {...(field === undefined ? {} : { field })}
       onEdit={editor.edit}
       onDeleted={onDeleted}
     />

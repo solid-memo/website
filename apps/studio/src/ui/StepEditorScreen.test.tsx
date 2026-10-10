@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/preact";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/preact";
 import { applyDraftChanges, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import type { DraftEditor } from "./draftEditor";
@@ -91,5 +91,26 @@ describe("StepEditorScreen", () => {
     const draft = courseDraft();
     renderScreen("ch-pods-1", { ...draft, chapters: draft.chapters.map((node) => (node.id === "ch-pods" ? { ...node, data: { ...node.data, title: undefined } } : node)) });
     expect(screen.getByRole("link", { name: "ch-pods" })).toHaveAttribute("href", "#/chapter/ch-pods");
+  });
+
+  it("marks the field it was opened at where the user arrives", () => {
+    const at = (field: "theory" | "questions") =>
+      render(
+        <StepEditorScreen
+          draft={courseDraft()}
+          step="ch-pods-1"
+          readOnly={null}
+          status={{ saving: false, failure: null }}
+          links={draftLinks}
+          field={field}
+          onEdit={vi.fn()}
+          onDeleted={vi.fn()}
+        />,
+      );
+    at("theory");
+    expect(screen.getByRole("textbox", { name: "Theory" })).toHaveAttribute("data-arrival");
+    cleanup();
+    at("questions");
+    expect(screen.getByRole("heading", { name: "Questions that check it" })).toHaveAttribute("data-arrival");
   });
 });

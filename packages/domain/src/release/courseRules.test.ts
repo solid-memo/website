@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { asked, at, card, chapter, course, distractor, iri, model, RELEASE, step, text } from "../testing/releaseModel";
-import { courseProblems } from "./courseRules";
+import { EDUCATION_THEME } from "../dcat";
+import { courseProblems, readinessProblems } from "./courseRules";
 import type { ReleaseProblem } from "./problems";
 
 /** Two chapters: the first with a step and a review question, the second with a step. */
@@ -177,5 +178,64 @@ describe("courseProblems", () => {
       }),
     );
     expect(brief(problems)).toEqual([{ code: "chapterWithoutStep", subject: at("ch-1"), params: {} }]);
+  });
+});
+
+describe("readinessProblems", () => {
+  const DCAT = "http://www.w3.org/ns/dcat#";
+  const DCTERMS = "http://purl.org/dc/terms/";
+  const SCHEMA = "https://schema.org/";
+  /** A course with everything a release states. */
+  function ready() {
+    const o = outline();
+    return course({
+      ...o,
+      chapters: o.chapters.map((c) => ({ ...c, title: [text("Chapter")] })),
+      steps: o.steps.map((s) => ({ ...s, theory: [text("Theory", "en-gb")] })),
+    });
+  }
+  const stated = {
+    title: [text("Title"), text("Titel", "sv")],
+    description: [text("About")],
+    publisher: [iri(at("me"))],
+    version: [text("1", "")],
+    inSeries: [iri(at("series"))],
+    isVersionOf: [iri(at("series"))],
+    distribution: [iri(at("turtle"))],
+    themes: [iri(EDUCATION_THEME)],
+  };
+  const brief = (problems: readonly ReleaseProblem[]) => problems.map(({ code, subject, field, params }) => ({ code, subject, field, params }));
+
+  it("accepts a release with what a release states", () => {
+    expect(readinessProblems({ ...ready(), ...stated })).toEqual([]);
+  });
+
+  it("names what the release lacks: a field, an English text, the theme EDUC", () => {
+    const required = (subject: string, field: string) => ({ code: "required", subject, field, params: {} });
+    expect(brief(readinessProblems({ ...ready(), ...stated, title: [], description: [text("Om", "sv")], publisher: [], version: [], inSeries: [], isVersionOf: [], distribution: [], themes: [] }))).toEqual([
+      required(RELEASE, `${DCTERMS}title`),
+      { code: "missingLanguage", subject: RELEASE, field: `${DCTERMS}description`, params: { language: "en" } },
+      required(RELEASE, `${DCTERMS}publisher`),
+      required(RELEASE, `${DCAT}version`),
+      required(RELEASE, `${DCAT}inSeries`),
+      required(RELEASE, `${DCAT}isVersionOf`),
+      required(RELEASE, `${DCAT}distribution`),
+      { code: "missingTheme", subject: RELEASE, field: `${DCAT}theme`, params: { theme: EDUCATION_THEME } },
+    ]);
+  });
+
+  it("names what a chapter or a step lacks, retired or not", () => {
+    const release = { ...ready(), ...stated };
+    release.chapters[1] = { ...release.chapters[1], retired: true, title: [text("Kapitel", "sv")], isPartOf: [], positions: [] };
+    release.steps[1] = { ...release.steps[1], theory: [], checkedBy: [], isPartOf: [], positions: [] };
+    expect(brief(readinessProblems(release))).toEqual([
+      { code: "missingLanguage", subject: at("ch-2"), field: `${DCTERMS}title`, params: { language: "en" } },
+      { code: "required", subject: at("ch-2"), field: `${SCHEMA}isPartOf`, params: {} },
+      { code: "required", subject: at("ch-2"), field: `${SCHEMA}position`, params: {} },
+      { code: "required", subject: at("s-2"), field: SM.theory, params: {} },
+      { code: "required", subject: at("s-2"), field: SM.checkedBy, params: {} },
+      { code: "required", subject: at("s-2"), field: `${SCHEMA}isPartOf`, params: {} },
+      { code: "required", subject: at("s-2"), field: `${SCHEMA}position`, params: {} },
+    ]);
   });
 });

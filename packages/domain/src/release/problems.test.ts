@@ -18,3 +18,7 @@ it("makes an error in a subject, with its field and related subjects when there 
     params: { part: "p" },
   });
 });
+
+it("makes a warning when asked", () => {
+  expect(problem("s", { code: "unshaped", params: {} }, { severity: "warning" })).toEqual({ severity: "warning", subject: "s", code: "unshaped", params: {} });
+});

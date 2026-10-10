@@ -79,6 +79,8 @@ const library: DeckLibrary = {
   listLibraryDecks: async () => [course],
   fetchLibraryDeck: async () => content,
   fetchCourseOutline: async () => ({ releaseUrl: RELEASE, chapters: [chapter("ch-1", 0), chapter("ch-2", 1)] }),
+  // The release check is the Studio's: no index is read here.
+  readLibraryIndex: async () => ({ url: "https://site.example/decks/index.ttl", publisher: null, releases: [] }),
 };
 
 /** The app as createAppUseCases wires it; `beforeWrite` runs before each write it makes. */

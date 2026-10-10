@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { courseDraft, DRAFT, of } from "@solid-memo/domain/testing/releaseDraft";
+import { courseDraft, deckDraft, DRAFT, of } from "@solid-memo/domain/testing/releaseDraft";
 import { quadsOfTurtle } from "../testing/releaseDrafts";
 import {
   draftEntries,
   draftFromQuads,
   draftIriOf,
+  draftQuads,
   entryQuads,
   keyOf,
   quadOf,
@@ -153,5 +154,16 @@ describe("draftEntries", () => {
     expect(sameEntry(before.get(of("q-loose"))!, after.get(of("q-loose"))!)).toBe(false);
     expect(sameEntry(before.get(of("compilation"))!, { ...before.get(of("compilation"))!, raw: [] })).toBe(false);
     expect(sameEntry(before.get(of("q-loose"))!, { ...before.get(of("q-loose"))!, document: DRAFT })).toBe(false);
+  });
+});
+
+describe("draftQuads", () => {
+  it("states the draft at its own IRIs, which read back as the draft", () => {
+    const course = courseDraft();
+    const quads = draftQuads(course);
+    expect(quads.every((quad) => quad.subject.value === DRAFT || quad.subject.value.startsWith(`${DRAFT}#`) || quad.subject.value === "https://source.example/")).toBe(true);
+    expect(draftFromQuads(quads, DRAFT)).toEqual(course);
+    const deck = deckDraft();
+    expect(draftFromQuads(draftQuads(deck), DRAFT)).toEqual(deck);
   });
 });

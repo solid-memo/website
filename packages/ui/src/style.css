@@ -4407,6 +4407,22 @@ table.deck-statistics td {
   border-bottom: 3px solid var(--primary);
 }
 
+/* A draft's listing preview (apps/studio, ListingPreviewScreen): the
+   library's row and page as learners will see them, framed as a picture,
+   nothing in them to press. */
+.listing-preview {
+  margin: 0.5rem 0 1rem;
+  padding: 0.75rem;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  pointer-events: none;
+}
+
+/* The release check's problems: each subject, then its problems under it. */
+.release-problems > li > ul {
+  margin: 0.15rem 0 0.5rem;
+}
+
 /* A course draft's outline (apps/studio, DraftOutline): the deck list's
    rows, a step's name with the first words of its theory and its
    questions under it, none with an icon to indent past. */

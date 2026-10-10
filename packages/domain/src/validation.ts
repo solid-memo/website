@@ -30,7 +30,7 @@ export interface Violation {
   /** The SHACL constraint component, e.g. "MinCount", "NodeKind", "Xone". */
   constraint: string;
   /** The published profile the result comes from, when not Solid Memo's own shapes. */
-  profile?: "dcat-ap";
+  profile?: "dcat-ap" | "skos";
 }
 
 export type SubjectReport =

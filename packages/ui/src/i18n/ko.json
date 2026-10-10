@@ -2035,7 +2035,14 @@
       "allCards": "모든 카드",
       "newCard": "새 카드",
       "problems": "문제점",
-      "problemsLater": "이 초안의 문제를 세는 릴리스 검사는 아직 스튜디오에 없어요."
+      "problemsChecking": "초안을 검사하는 중…",
+      "problemsNone": "릴리스 검사에서 문제점을 찾지 못했어요.",
+      "problemsCount": {
+        "one": "릴리스 검사에서 문제점 {count}개를 찾았어요.",
+        "other": "릴리스 검사에서 문제점 {count}개를 찾았어요."
+      },
+      "problemsLink": "릴리스 검사 보기",
+      "previewLink": "목록 미리보기"
     },
     "outline": {
       "empty": "아직 챕터가 없어요.",
@@ -2160,6 +2167,136 @@
         "notFrontToBack": "코스는 앞면 → 뒷면 방향으로 학습해요.",
         "carriedActivity": "이전 릴리스를 만든 방식은 다시 쓰지 않아요."
       }
+    },
+    "check": {
+      "crumb": "릴리스 검사",
+      "heading": "릴리스 검사",
+      "intro": "릴리스가 지켜야 하는 모든 규칙을, 이 초안이 될 릴리스로 보고 검사해요. 각 문제에는 해당하는 초안 부분으로 가는 링크가 있어요.",
+      "policy": "검사 대상",
+      "policyPod": "내 Pod의 릴리스",
+      "policyLibrary": "Solid Memo 덱 라이브러리",
+      "policyHintPod": "Pod의 릴리스는 데이터 규칙을 따라야 해요. 코스, 릴리스가 밝히는 내용, Markdown, 이어받는 이전 릴리스가 대상이에요.",
+      "policyHintLibrary": "Solid Memo 덱 라이브러리에 보내는 덱은 큐레이션 규칙(영어와 스웨덴어 키워드, 주제 ‘Education’)도 따라야 하고, 라이브러리 색인에 따라 다른 덱들 사이에 자리가 정해져요.",
+      "checking": "초안을 검사하는 중…",
+      "clear": "문제가 없어요.",
+      "summary": {
+        "one": "문제 {count}개.",
+        "other": "문제 {count}개."
+      },
+      "errors": "오류",
+      "warnings": "경고",
+      "shapesHeading": "셰이프",
+      "shapesHint": "셰이프와 DCAT-AP, SKOS 프로필은 릴리스를 게시된 데이터로 보고 검사해요. 초안이 크면 시간이 걸리기 때문에 요청할 때만 실행돼요.",
+      "shapesRun": "셰이프로 검사",
+      "shapesRunning": "셰이프로 검사하는 중…",
+      "shapesAgain": "다시 검사",
+      "shapesStale": "그 뒤로 초안이 바뀌었어요. 아래는 그때 있던 문제예요.",
+      "shapesClear": "셰이프 검사에서 문제가 없어요.",
+      "shapesCount": {
+        "one": "셰이프 검사에서 문제 {count}개가 나왔어요. 위의 문제에 포함돼 있어요.",
+        "other": "셰이프 검사에서 문제 {count}개가 나왔어요. 위의 문제에 포함돼 있어요."
+      },
+      "previewLink": "목록 미리보기",
+      "release": "이 릴리스",
+      "distractor": "오답 선택지 {id}",
+      "badge": {
+        "one": "문제 {count}개",
+        "other": "문제 {count}개"
+      },
+      "badgeOf": "{name}에",
+      "untagged": "언어 태그가 없는 텍스트",
+      "nothing": "없음",
+      "firstVersion": "없음(첫 버전)",
+      "kind": {
+        "card": "카드",
+        "chapter": "챕터",
+        "step": "단계",
+        "distractor": "오답 선택지"
+      },
+      "profile": "{profile}: {message}"
+    },
+    "field": {
+      "title": "제목",
+      "description": "설명",
+      "publisher": "게시자",
+      "license": "라이선스",
+      "version": "버전",
+      "inSeries": "시리즈",
+      "isVersionOf": "이 버전이 속한 시리즈",
+      "distribution": "배포",
+      "theme": "주제",
+      "keyword": "키워드",
+      "prev": "이전 버전",
+      "previousVersion": "이전 버전",
+      "studyDirection": "학습 방향",
+      "theory": "설명",
+      "checkedBy": "질문",
+      "isPartOf": "속한 곳",
+      "position": "순서",
+      "reviewQuestion": "복습 질문",
+      "front": "앞면",
+      "back": "뒷면",
+      "backLabel": "뒷면 레이블",
+      "frontNote": "앞면 아래 메모",
+      "backNote": "뒷면 아래 메모",
+      "distractor": "오답 선택지",
+      "distractorText": "오답 선택지",
+      "distractorNote": "틀린 이유",
+      "textFormat": "텍스트 형식"
+    },
+    "problem": {
+      "notARelease": "{path}은(는) 덱 라이브러리에 릴리스를 둘 수 있는 곳이 아니에요. 이름에는 영문 소문자, 숫자, 대시만 쓸 수 있어요.",
+      "versionGap": "덱 라이브러리에 있는 {deck}의 버전이 1, 2, …처럼 빠짐없이 이어지지 않게 돼요: {versions}.",
+      "notOneDeck": "릴리스가 정확히 하나의 덱, 즉 자기 자신을 설명하지 않아요. 설명하는 덱: {decks}.",
+      "versionMismatch": "버전 {stated}(이)라고 밝히지만, 위치로는 {expected}이에요.",
+      "linkMismatch": "{field}: {stated}(이)라고 밝히지만, 위치로는 {expected}이에요.",
+      "cardsDropped": "{previous}에 있는 {ids}이(가) 빠졌어요. 카드는 절대 삭제하지 않아요. 학습자가 카드와 그 기록을 유지할 수 있도록 대신 사용 중지해 주세요.",
+      "outlineDropped": "{previous}에 있는 {ids}이(가) 빠졌어요. 챕터, 단계, 오답 선택지는 절대 삭제하지 않아요. 학습자가 진행 위치를 유지할 수 있도록 대신 사용 중지해 주세요.",
+      "idReused": "{id}은(는) 여기서는 {now}인데 {previous}에서는 {was}(이)었어요. id 하나는 언제까지나 한 대상만 가리켜요.",
+      "versionNotNext": "버전 {version}은(는) 버전 {previousVersion}인 {previous}의 다음 버전이 아니에요.",
+      "outlineWithoutCourse": "챕터나 단계가 있지만 코스가 아니에요.",
+      "courseWithoutChapter": "코스에는 챕터가 하나 이상 있어야 해요.",
+      "courseDirection": "코스는 앞면 → 뒷면 방향으로 학습하는데, 여기서는 {stated}(이)라고 밝혀요.",
+      "chapterPartOf": "{parts}에 속해 있어요. 챕터는 자신이 들어 있는 릴리스에 속해야 해요.",
+      "stepPartOf": "{part}에 속해 있는데, 이 릴리스의 챕터가 아니에요.",
+      "askedNotACard": "{card}을(를) 묻는데, 이 릴리스의 카드가 아니에요.",
+      "askedRetired": "{card}을(를) 묻는데, 사용 중지된 카드예요. 사용 중인 카드를 묻거나, 이것도 사용 중지해 주세요.",
+      "notADistractor": "{distractor}을(를) 오답 선택지로 지정했는데, 이 릴리스의 오답 선택지가 아니에요.",
+      "distractorShared": "{cards}의 오답 선택지예요. 카드마다 자신만의 오답 선택지가 있어야 해요.",
+      "checkedTwice": "단계 {steps}에서 묻고 있어요. 질문 하나는 최대 한 단계에서만 물어요.",
+      "checkedAndReviewed": "{steps}에서 묻고, {chapters}의 복습에서도 물어요. 질문 하나는 한 곳에서만 물어요.",
+      "noBack": "정답 선택지인 뒷면에 텍스트가 없어요.",
+      "fewDistractors": {
+        "one": "사용 중인 오답 선택지가 {count}개예요. 코스에서 묻는 질문에는 {least}개 이상 있어야 해요.",
+        "other": "사용 중인 오답 선택지가 {count}개예요. 코스에서 묻는 질문에는 {least}개 이상 있어야 해요."
+      },
+      "distractorLanguages": "{card}의 뒷면에는 있는 {missing} 텍스트가 없어요.",
+      "chapterPositions": "챕터 {chapters}의 순서가 {position}(으)로 같아요.",
+      "stepPositions": "단계 {steps}의 순서가 {position}(으)로 같아요.",
+      "chapterWithoutStep": "사용 중인 단계가 없어요.",
+      "textFormatMisplaced": "텍스트 형식을 밝히고 있는데, 텍스트 형식은 카드, 단계, 챕터만 밝힐 수 있어요.",
+      "textFormatUnknown": "이 앱이 모르는 텍스트 형식 {format}을(를) 밝히고 있어요. 텍스트는 일반 텍스트로 표시돼요.",
+      "markdown": "{field}, {language}: {finding}",
+      "theoryEmptyChunk": "{field}, {language}: 구분선이 맨 앞이나 맨 뒤에 있거나 다른 구분선 바로 뒤에 있으면 빈 부분이 생기고, 앱은 이 부분을 빼요. 단계의 설명은 구분선으로 나뉘어 한 부분씩 표시돼요. 두 구분선 사이마다 텍스트를 넣어 주세요.",
+      "theoryChunks": "{field}: {counts}. 학습자가 언어를 바꿔도 진행 위치를 유지할 수 있도록, 단계의 설명은 언어마다 같은 수의 부분으로 나뉘어야 해요.",
+      "theoryChunkCount": {
+        "one": "{language}에서 {count}부분",
+        "other": "{language}에서 {count}부분"
+      },
+      "missingLanguage": "{field}: {language} 텍스트가 없어요.",
+      "missingTheme": "주제: {theme}이(가) 없어요.",
+      "required": "{field}: 아직 지정되지 않았어요.",
+      "previousUnread": "이어받는 이전 릴리스 {previous}을(를) 읽을 수 없어서, 그에 대해서는 아무것도 검사하지 않았어요. 나중에 다시 검사해 주세요.",
+      "libraryUnread": "덱 라이브러리 색인을 읽을 수 없어서, 덱 라이브러리에서 초안의 위치는 검사하지 않았어요. 나중에 다시 검사해 주세요.",
+      "shape": "{field}: {message}",
+      "unshaped": "이 앱의 어떤 셰이프도 설명하지 않는 Solid Memo 클래스예요."
+    },
+    "preview": {
+      "crumb": "목록 미리보기",
+      "heading": "목록 미리보기",
+      "intro": "학습자에게 보일 덱 라이브러리 속 이 릴리스의 모습이에요. 그림일 뿐이라 아무것도 클릭할 수 없어요.",
+      "row": "덱 라이브러리 목록에서",
+      "page": "자체 페이지에서"
     }
   },
   "proseField": {

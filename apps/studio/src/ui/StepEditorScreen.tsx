@@ -1,6 +1,7 @@
 import { isMarkdown } from "@solid-memo/domain/deck";
 import { isPublished, questionsOfStep } from "@solid-memo/domain/release/courseIds";
 import { chapterOfStep, draftCardOf } from "@solid-memo/domain/release/draftOutline";
+import type { StepField } from "@solid-memo/domain/release/releaseCheck";
 import { liveSteps, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { cardName, DataProse } from "@solid-memo/ui/DataText";
 import { useI18n } from "@solid-memo/ui/i18n";
@@ -19,7 +20,8 @@ import { NewQuestionForm } from "./NewQuestionForm";
  * questions that check it, in the order the learner meets them (their
  * ids), and a new one, its id after the last; and the step retired,
  * restored or deleted (one an earlier release published is only
- * retired).
+ * retired). Opened at a field (`field`, from the release check), that
+ * field is where the user arrives.
  */
 export function StepEditorScreen({
   draft,
@@ -27,6 +29,7 @@ export function StepEditorScreen({
   readOnly,
   status,
   links,
+  field,
   onEdit,
   onDeleted,
 }: {
@@ -35,6 +38,7 @@ export function StepEditorScreen({
   readOnly: DraftReadOnly | null;
   status: Pick<DraftEditor, "saving" | "failure">;
   links: DraftLinks;
+  field?: StepField;
   onEdit: DraftEditor["edit"];
   onDeleted: () => void;
 }) {
@@ -70,6 +74,7 @@ export function StepEditorScreen({
           text={data.theory}
           markdown={isMarkdown(data.textFormat)}
           disabled={readOnly !== null}
+          arrival={field === "theory"}
           preview={(shown, markdown) => <DataProse class="course-theory" text={shown} markdown={markdown} />}
           onSave={(theory, markdown) =>
             onEdit(
@@ -80,7 +85,9 @@ export function StepEditorScreen({
         />
 
         <section aria-labelledby="step-questions-heading">
-          <h3 id="step-questions-heading">{t("studio.step.questions")}</h3>
+          <h3 id="step-questions-heading" tabIndex={-1} data-arrival={field === "questions" || undefined}>
+            {t("studio.step.questions")}
+          </h3>
           <p class="hint">{t("studio.step.questionsHint")}</p>
           <ol>
             {questionsOfStep(draft, step).map((card) => {

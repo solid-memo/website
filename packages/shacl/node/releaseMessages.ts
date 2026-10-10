@@ -1,6 +1,6 @@
 import type { MarkdownProblem } from "@solid-memo/markdown/problems";
 import { MAX_CHARS, MAX_DEPTH, MAX_TABLE_CELLS, MAX_TABLE_COLUMNS } from "@solid-memo/markdown/parse";
-import type { CurationProblem, ReleaseProblem } from "@solid-memo/domain/release/problems";
+import type { CurationProblem, ReadinessProblem, ReleaseProblem, ShapeProblem, UnreadProblem } from "@solid-memo/domain/release/problems";
 import type { ReleaseTerm } from "@solid-memo/domain/release/releaseModel";
 import { SM_NS } from "@solid-memo/vocab/tooling/vocab";
 
@@ -64,8 +64,16 @@ function markdownText(problem: MarkdownProblem): string {
   }
 }
 
-/** The problems worded here: all but curation and `versionNotNext`. */
-export type WordedProblem = Exclude<ReleaseProblem, CurationProblem | { code: "versionNotNext" }>;
+/**
+ * The problems worded here: all but curation, readiness and the shapes'
+ * results (the Studio's: the library's command words what the shapes
+ * find as the shapes do), `versionNotNext`, and the Studio's own parts
+ * not read (the command reads every release, or fails).
+ */
+export type WordedProblem = Exclude<
+  ReleaseProblem,
+  CurationProblem | ReadinessProblem | ShapeProblem | UnreadProblem | { code: "versionNotNext" }
+>;
 
 /**
  * A problem in English. `label` is where it is (`decks/<name>/v<N>.ttl`)

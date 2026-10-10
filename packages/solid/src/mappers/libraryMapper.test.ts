@@ -10,7 +10,7 @@ import {
   type ThingBuilder,
   type ThingPersisted,
 } from "@inrupt/solid-client";
-import { toCourseOutline, toLibraryDeckContent, toLibraryDecks } from "./libraryMapper";
+import { toCourseOutline, toLibraryDeckContent, toLibraryDecks, toLibraryIndexView } from "./libraryMapper";
 import { getSolidDataset } from "@inrupt/solid-client";
 import { turtleFetch } from "@solid-memo/shacl/testing/turtle";
 import { DCTERMS, RDF, SM } from "../vocab";
@@ -229,6 +229,21 @@ describe("toLibraryDecks", () => {
 });
 
 /** The index as the app reads it, from where it is published. */
+describe("toLibraryIndexView", () => {
+  it("is the index's address, its catalogue's publisher and every release of its decks", async () => {
+    expect(toLibraryIndexView(INDEX, await datasetFromIndex(INDEX_TURTLE))).toEqual({
+      url: INDEX,
+      publisher: `${INDEX}#solid-memo`,
+      releases: ["https://solid-memo.com/decks/capitals/v1.ttl", "https://solid-memo.com/decks/capitals/v2.ttl", "https://solid-memo.com/decks/capitals/v3.ttl"],
+    });
+  });
+
+  it("names no publisher without a catalogue, or one without a publisher", async () => {
+    expect(toLibraryIndexView(INDEX, await datasetFromIndex(`<#x> a <${SM.Card}> .`))).toEqual({ url: INDEX, publisher: null, releases: [] });
+    expect(toLibraryIndexView(INDEX, await datasetFromIndex(`<> a <http://www.w3.org/ns/dcat#Catalog> .`)).publisher).toBeNull();
+  });
+});
+
 function datasetFromIndex(turtle: string) {
   return datasetOf(turtle, INDEX);
 }

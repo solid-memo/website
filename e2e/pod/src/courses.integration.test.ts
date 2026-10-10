@@ -100,6 +100,8 @@ const library: DeckLibrary = {
   listLibraryDecks: async () => [course],
   fetchLibraryDeck: async () => content,
   fetchCourseOutline: async () => outline,
+  // The release check is the Studio's: no index is read here.
+  readLibraryIndex: async () => ({ url: "https://site.example/decks/index.ttl", publisher: null, releases: [] }),
 };
 
 /** The app as createAppUseCases wires it, every write checked against the shapes read from this repository. */
