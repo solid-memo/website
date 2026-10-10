@@ -17,6 +17,7 @@ import {
   unsupportedIdOf,
 } from "@solid-memo/domain/release/releaseDraft";
 import { continuityProblems } from "@solid-memo/domain/release/continuityRules";
+import { releaseDiff, simulateLearnerUpgrade, type LearnerUpgrade, type ReleaseDiff } from "@solid-memo/domain/release/releaseDiff";
 import { draftReleaseModel } from "@solid-memo/domain/release/draftModel";
 import { markdownProblems, type MarkdownCheck } from "@solid-memo/domain/release/markdownFields";
 import { problem, type ReleaseProblem } from "@solid-memo/domain/release/problems";
@@ -58,6 +59,20 @@ export type NewDraft =
 export interface CreatedDraft {
   draft: ReleaseDraftSummary;
   basedOn?: string;
+}
+
+/**
+ * A draft against the release it follows (`previous`, as it was
+ * published): what it changes (releaseDiff), the rules of the series it
+ * breaks (continuityProblems: a subject dropped, an id given to another
+ * kind, a version not the next), and what a learner's copy of the
+ * release would get from it (simulateLearnerUpgrade).
+ */
+export interface DraftDiff {
+  previous: ReleaseDraft;
+  diff: ReleaseDiff;
+  problems: ReleaseProblem[];
+  upgrade: LearnerUpgrade;
 }
 
 /** A change made, the draft as it is then; or why it was not. */
@@ -104,6 +119,13 @@ export interface ReleaseDraftUseCases {
    * releases a draft follows read once.
    */
   checkReleaseDraft(draft: ReleaseDraft, markdownCheck: MarkdownCheck, policy: CheckPolicy, options?: { shapes?: boolean }): Promise<ReleaseCheck>;
+  /**
+   * The draft as it is against the release it follows (docs/studio.md,
+   * The release diff); null for a draft of a first release, which
+   * follows none. The release is read once; one that cannot be read
+   * fails it.
+   */
+  diffReleaseDraft(draft: ReleaseDraft): Promise<DraftDiff | null>;
 }
 
 /** How often a change of a draft is made, in all, while its documents keep changing elsewhere. */
@@ -172,28 +194,32 @@ export function createReleaseDraftUseCases({
   fileExchange: FileExchange;
   now: () => Date;
 }): ReleaseDraftUseCases {
-  /** What each release published, by URL: releases are frozen, so it is read once. */
-  const publishedOf = new Map<string, Promise<PublishedIds>>();
+  /** Each release a draft follows, by URL: releases are frozen, so each is read once. */
+  const releases = new Map<string, Promise<ReleaseDraft>>();
+
+  function release(url: string): Promise<ReleaseDraft> {
+    let read = releases.get(url);
+    if (read === undefined) {
+      read = releaseDraftRepository.readRelease(url);
+      // A failed read is tried again next time.
+      read.catch(() => releases.delete(url));
+      releases.set(url, read);
+    }
+    return read;
+  }
 
   /** What the release `url` and those before it published. */
   function published(url: string): Promise<PublishedIds> {
-    let ids = publishedOf.get(url);
-    if (ids === undefined) {
-      ids = releaseDraftRepository.readRelease(url).then(publishedIdsOf);
-      // A failed read is tried again next time.
-      ids.catch(() => publishedOf.delete(url));
-      publishedOf.set(url, ids);
-    }
-    return ids;
+    return release(url).then(publishedIdsOf);
   }
 
-  /** Each release a draft follows, as the release rules read it, by URL: read once. */
+  /** Each release a draft follows, as the release rules read it, by URL. */
   const releaseModels = new Map<string, Promise<ReleaseModel>>();
 
   function releaseModel(url: string): Promise<ReleaseModel> {
     let model = releaseModels.get(url);
     if (model === undefined) {
-      model = releaseDraftRepository.readRelease(url).then((release) => draftReleaseModel(release));
+      model = release(url).then((read) => draftReleaseModel(read));
       model.catch(() => releaseModels.delete(url));
       releaseModels.set(url, model);
     }
@@ -358,6 +384,18 @@ export function createReleaseDraftUseCases({
       const rules = madeOnce(ruleChecks, draft, policy, () => ruleCheck(draft, markdownCheck, policy), readWhole);
       const shaped = shapes ? madeOnce(shapeChecks, draft, policy, () => shapeCheck(draft, policy)) : null;
       return { ...(await rules), shapes: shaped === null ? null : await shaped };
+    },
+
+    async diffReleaseDraft(draft) {
+      const { prev } = draft.root;
+      if (prev === undefined) return null;
+      const [previous, before] = await Promise.all([release(prev), releaseModel(prev)]);
+      return {
+        previous,
+        diff: releaseDiff(previous, draft),
+        problems: continuityProblems(before, draftReleaseModel(draft)),
+        upgrade: simulateLearnerUpgrade(previous, draft),
+      };
     },
   };
 }

@@ -79,6 +79,8 @@ export type StudioRoute =
   | { screen: "check"; draftUrl: string; policy?: CheckPolicy }
   /** A draft as the library lists the release it will be. */
   | { screen: "preview"; draftUrl: string }
+  /** A draft against the release it follows: what it changes, and what a learner's copy would get. */
+  | { screen: "diff"; draftUrl: string }
   /**
    * A draft played in a sandbox: a course's page, or with `chapter` (an
    * id) that chapter's steps, or with `review` its final review; a deck's
@@ -128,6 +130,7 @@ export function instanceOfRoute(route: StudioRoute): string | null {
     case "draftCards":
     case "check":
     case "preview":
+    case "diff":
     case "trial":
       // A draft's route is parsed only with a draft's URL.
       return draftPlaceOf(route.draftUrl)!.instanceUrl;
@@ -177,6 +180,8 @@ export function studioRouteToHash(route: StudioRoute): string {
       return `#${STUDIO_PATH}/check${hashParams({ draft: route.draftUrl, ...(route.policy === undefined || route.policy === "pod" ? {} : { policy: route.policy }) })}`;
     case "preview":
       return `#${STUDIO_PATH}/preview${hashParams({ draft: route.draftUrl })}`;
+    case "diff":
+      return `#${STUDIO_PATH}/diff${hashParams({ draft: route.draftUrl })}`;
     case "trial":
       return `#${STUDIO_PATH}/trial${hashParams({
         draft: route.draftUrl,
@@ -238,6 +243,7 @@ export function parseStudioHash(hash: string): StudioRoute | null {
     case "/draft-cards":
     case "/check":
     case "/preview":
+    case "/diff":
     case "/trial":
       return draftRouteOf(path!.slice(STUDIO_PATH.length), query);
     case "/transfer": {
@@ -308,6 +314,8 @@ function draftRouteOf(path: string, query: URLSearchParams): DraftRoute | null {
       return query.get("policy") === "library" ? { screen: "check", draftUrl, policy: "library" } : { screen: "check", draftUrl };
     case "/preview":
       return { screen: "preview", draftUrl };
+    case "/diff":
+      return { screen: "diff", draftUrl };
     case "/trial":
       // A review is of a chapter.
       return chapter === null

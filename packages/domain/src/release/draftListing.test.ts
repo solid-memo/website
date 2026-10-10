@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
-import { courseDraft, deckDraft, DRAFT, NOW, of } from "../testing/releaseDraft";
-import { draftLibraryDeck } from "./draftListing";
+import { card, courseDraft, deckDraft, DRAFT, NOW, of } from "../testing/releaseDraft";
+import { draftLibraryContent, draftLibraryDeck } from "./draftListing";
 
 const DCTERMS = "http://purl.org/dc/terms/";
 
@@ -77,5 +77,39 @@ describe("draftLibraryDeck", () => {
     const listed = draftLibraryDeck({ ...deck, root: { ...deck.root, title: undefined, created: undefined } });
     expect(listed.title).toEqual({});
     expect(listed.createdAt).toBeUndefined();
+  });
+});
+
+describe("draftLibraryContent", () => {
+  it("is the release whole, as an import reads it: every card, retired ones too, with its wrong options by id", () => {
+    const draft = courseDraft();
+    const content = draftLibraryContent({
+      ...draft,
+      cards: [
+        { ...draft.cards[0]!, data: { ...draft.cards[0]!.data, deprecated: true, distractor: [of("q-a-1a-d2"), of("q-a-1a-d1"), of("q-empty"), "https://elsewhere.example/#d"] } },
+        { id: "q-blank", data: card("x", { front: {} }) },
+      ],
+      distractors: [...draft.distractors, { id: "q-empty", data: { text: {} } }],
+    });
+    expect(content).toMatchObject({ url: DRAFT, title: { en: "Solid" }, version: "1", formatVersion: 6, isCourse: true });
+    expect(content.cards).toEqual([
+      {
+        id: "q-a-1a",
+        front: { en: "1a" },
+        back: { en: "1a!" },
+        distractors: [
+          { id: "q-a-1a-d1", text: { en: "No 1" } },
+          { id: "q-a-1a-d2", text: { en: "No 2" }, note: { en: "Why" } },
+        ],
+        formatVersion: 5,
+        retired: true,
+      },
+    ]);
+  });
+
+  it("is no course for a deck", () => {
+    const content = draftLibraryContent(deckDraft());
+    expect(content).not.toHaveProperty("isCourse");
+    expect(content.cards.map((one) => one.id)).toEqual(["w1"]);
   });
 });

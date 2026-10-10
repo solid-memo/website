@@ -19,7 +19,8 @@ from a deck, as the next version of a release or from a release saved
 as a file, written (what a release says of itself, a course's outline,
 its chapters, steps and questions, their wrong options), checked by
 every rule a release is held to, previewed as the library will list
-them, played in a sandbox as learners will play them, and deleted.
+them, played in a sandbox as learners will play them, compared with
+the release they follow, and deleted.
 
 ## What it shares with Solid Memo
 
@@ -94,6 +95,7 @@ others.
 | `#/studio/check?draft=…[&policy=library]` | a draft's release check ([below](#the-release-check)): for a release in a pod, or with `policy=library` for the Solid Memo library. |
 | `#/studio/preview?draft=…` | a draft as the library will list it ([below](#the-listing-preview)). |
 | `#/studio/trial?draft=…[&chapter=…&part=review]` | a draft played in a sandbox ([below](#the-trial)): a course's page, with `chapter` (an id) that chapter's steps, and with `part=review` its final review; a deck's study. |
+| `#/studio/diff?draft=…` | a draft against the release it follows ([below](#the-release-diff)): what it changes, and what learners' copies would get. |
 
 `#/studio/` and its query count as `#/studio`. Anything else under
 `#/studio`, `#/studio` itself among them, is the default route: the only
@@ -1228,6 +1230,54 @@ Its controls (`TrialControls`):
 After each control, what is shown is read again and starts afresh. A
 trial lasts while its screen is open: leaving it, or reloading the
 page, forgets it.
+
+## The release diff
+
+The release diff
+([`ReleaseDiffContainer`](../apps/studio/src/ui/ReleaseDiffContainer.tsx))
+compares a draft with the release it follows (its `dcat:prev`). The
+draft's overview links to it ("Compare with the previous version") when
+there is one. A draft of a first version follows none, and the screen
+says so. The use case is `diffReleaseDraft(draft)`
+([releaseDrafts.ts](../packages/application/src/releaseDrafts.ts)).
+It reads the release once, as the release check does, and fails when
+it cannot be read. It shows:
+
+- **Rules of the series**: the problems of the check's drops part
+  (`continuityProblems`): a subject dropped, an id given to another
+  kind of subject, a version that is not the next.
+- **What it says of itself**: which of its title, description,
+  keywords, themes, study direction, licence, authors, languages and
+  sources changed, and whether it became a course or a deck
+  (`releaseDiff` in
+  [releaseDiff.ts](../packages/domain/src/release/releaseDiff.ts)).
+- **Its content**: each chapter, step, card and wrong option the draft
+  adds, changes, retires or brings back, a link each to its editor,
+  and how many of each kind are as they were. Subjects are matched by
+  their ids. A card compares as an upgrade compares it (`sameContent`
+  in [libraryUpgrade.ts](../packages/domain/src/libraryUpgrade.ts)),
+  its wrong options aside, which are listed on their own. Retiring a
+  subject is its own change; one retired and changed says both.
+- **What learners get** (`simulateLearnerUpgrade`): Solid Memo's own
+  upgrade plan (`planLibraryUpgrade`) for a learner's copy of the
+  release, as an import makes it, the learner having changed nothing.
+  A course's learner has reached every question and completed every
+  chapter, so new questions come as they are reached. The sentence is
+  the one Solid Memo's update offer says, but for a plan that changes
+  only retired cards: no author studies them, so it says "updates only
+  retired cards". Then what progress learners would lose: the history
+  of the cards the draft drops, and, of a course, the completion of
+  the chapters it drops. Both are found by id, whatever the draft's
+  version. A draft that retires what it no longer uses loses nothing.
+  Learners are offered only a newer version, so a draft whose version
+  does not come after the release's offers them nothing.
+
+The learner's copy is built in memory from the release and the draft
+as libraries are (`draftLibraryContent` in
+[draftListing.ts](../packages/domain/src/release/draftListing.ts)):
+nothing is read or written for it. Each version of the draft is
+compared once, as the editor keeps it, changes not yet written
+included.
 
 ## Data set aside
 

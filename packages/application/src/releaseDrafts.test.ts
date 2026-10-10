@@ -4,6 +4,7 @@ import type { Card, Deck } from "@solid-memo/domain/deck";
 import { draftSummaryOf, draftUrlOf, type ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout";
 import { applyDraftChanges, blankDraft, type DraftChange, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { rebaseDraft } from "@solid-memo/domain/release/releaseToDraft";
+import { nextVersionDraft } from "@solid-memo/domain/release/releaseVersion";
 import { courseDraft, NOW } from "@solid-memo/domain/testing/releaseDraft";
 import { problem } from "@solid-memo/domain/release/problems";
 import { SM } from "@solid-memo/vocab/vocab.generated";
@@ -354,5 +355,35 @@ describe("checkReleaseDraft", () => {
     const check = await useCases.checkReleaseDraft(draft, markdownCheck, "library");
     expect(check.library.map((p) => p.code)).toContain("versionMismatch");
     expect(deckLibrary.readLibraryIndex).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("diffReleaseDraft", () => {
+  it("is null for a draft of a first release", async () => {
+    const { useCases, repository } = setUp();
+    await expect(useCases.diffReleaseDraft(courseDraft())).resolves.toBeNull();
+    expect(repository.readRelease).not.toHaveBeenCalled();
+  });
+
+  it("compares the draft with the release it follows, read once: its changes, the series' rules it breaks, a learner's upgrade", async () => {
+    const next = nextVersionDraft(v1, courseDraft().url);
+    const draft = { ...next, cards: next.cards.filter((node) => node.id !== "q-loose") };
+    const { useCases, repository } = setUp();
+    const diff = (await useCases.diffReleaseDraft(draft))!;
+    expect(diff.previous).toBe(v1);
+    expect(diff.diff.unchanged.card).toBe(3);
+    expect(diff.problems.map((one) => one.code)).toEqual(["cardsDropped"]);
+    expect(diff.upgrade.lost.cards).toEqual(["q-loose"]);
+    await useCases.diffReleaseDraft(next);
+    expect(repository.readRelease).toHaveBeenCalledTimes(1);
+  });
+
+  it("fails while the release it follows cannot be read, and reads it again next time", async () => {
+    const draft = nextVersionDraft(v1, courseDraft().url);
+    const { useCases, repository } = setUp();
+    repository.readRelease.mockRejectedValueOnce(new AppError("releaseUnreadable", { url: V1 }));
+    await expect(useCases.diffReleaseDraft(draft)).rejects.toThrow(AppError);
+    await expect(useCases.diffReleaseDraft(draft)).resolves.not.toBeNull();
+    expect(repository.readRelease).toHaveBeenCalledTimes(2);
   });
 });

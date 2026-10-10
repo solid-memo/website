@@ -36,6 +36,7 @@ import type { DraftLinks } from "./DraftOverviewScreen";
 import { ListingPreviewContainer } from "./ListingPreviewContainer";
 import { QuestionEditorContainer } from "./QuestionEditorContainer";
 import { ReleaseCheckContainer } from "./ReleaseCheckContainer";
+import { ReleaseDiffContainer } from "./ReleaseDiffContainer";
 import { StepEditorContainer } from "./StepEditorContainer";
 import { TrialContainer } from "./TrialContainer";
 import { instanceOfRoute, isDraftRoute, spotRoute, studioRouteToHash, targetRoute, useStudioRoute, type StudioRoute } from "./router";
@@ -170,6 +171,8 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
         return [instancesCrumb, decks, ...draftCrumbs(route.draftUrl), { label: t("studio.preview.crumb"), route }];
       case "trial":
         return [instancesCrumb, decks, ...draftCrumbs(route.draftUrl), { label: t("studio.trial.crumb"), route }];
+      case "diff":
+        return [instancesCrumb, decks, ...draftCrumbs(route.draftUrl), { label: t("studio.diff.crumb"), route }];
       case "chapter":
         return [instancesCrumb, decks, ...draftCrumbs(route.draftUrl), { label: chapterName(activeDraft!, route.chapter), route }];
       case "step": {
@@ -232,6 +235,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
     checkHref: studioRouteToHash({ screen: "check", draftUrl }),
     previewHref: studioRouteToHash({ screen: "preview", draftUrl }),
     trialHref: studioRouteToHash({ screen: "trial", draftUrl }),
+    diffHref: studioRouteToHash({ screen: "diff", draftUrl }),
   });
 
   const screenFor = (route: StudioRoute) => {
@@ -264,6 +268,15 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
         );
       case "preview":
         return <ListingPreviewContainer key={route.draftUrl} useCases={useCases} draftUrl={route.draftUrl} />;
+      case "diff":
+        return (
+          <ReleaseDiffContainer
+            key={route.draftUrl}
+            useCases={useCases}
+            draftUrl={route.draftUrl}
+            links={{ targetHref: (target) => studioRouteToHash(targetRoute(route.draftUrl, target)) }}
+          />
+        );
       case "trial":
         return (
           <TrialContainer

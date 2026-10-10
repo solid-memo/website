@@ -15,7 +15,8 @@ import { Screen } from "./Screen.ts";
  * instance's health, its library copies, a deck's about screen (its
  * authors and licence), the instance's name and catalogue, a deck
  * exported to a file and imported from it, the instance's drafts of
- * releases (made, listed on Home and deleted), and its way back to
+ * releases (made, the next version of a release among them, listed on
+ * Home and deleted), and its way back to
  * Solid Memo.
  */
 export class Studio extends Screen {
@@ -272,6 +273,19 @@ export class Studio extends Screen {
       await this.page.getByRole("button", { name: this.t("studio.drafts.create"), exact: true }).click();
       await this.expectStatus(this.t("studio.drafts.created", { draft: name, version: 1 }));
       await this.expectDraft(instance, name, "course");
+    });
+  }
+
+  /**
+   * Starts the next version of a release, by its address: the draft is
+   * named after the release's title, and is the version after it.
+   */
+  async draftNextVersion(url: string, title: string, version: number): Promise<void> {
+    await this.intent(`Draft version ${version} of ${title}`, async () => {
+      await this.page.getByRole("radio", { name: this.t("studio.drafts.start.nextVersionOf") }).check();
+      await this.page.getByRole("textbox", { name: this.t("studio.drafts.release") }).fill(url);
+      await this.page.getByRole("button", { name: this.t("studio.drafts.create"), exact: true }).click();
+      await this.expectStatus(this.t("studio.drafts.created", { draft: title, version }));
     });
   }
 
