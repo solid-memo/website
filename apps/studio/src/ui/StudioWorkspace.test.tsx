@@ -536,6 +536,35 @@ describe("StudioWorkspace", () => {
       expect(useCases.getReleaseDraft).toHaveBeenCalledTimes(1);
     });
 
+    it("says in the status bar whether the draft is saved, while its text waits to be written and once it is", async () => {
+      window.history.replaceState(null, "", studioRouteToHash({ screen: "chapter", draftUrl: DRAFT_URL, chapter: "ch-pods" }));
+      const useCases = draftUseCases();
+      renderWorkspace(useCases);
+      const status = within(screen.getByRole("complementary", { name: "Studio status" }));
+      expect(await status.findByText(instanceA.name)).toBeInTheDocument();
+      const title = await screen.findByRole("textbox", { name: "Title" });
+      await waitFor(() => expect(title).toBeEnabled());
+      expect(status.getByText("Draft saved")).toBeInTheDocument();
+      fireEvent.input(title, { target: { value: "Pods!" } });
+      expect(status.getByText("Saving the draft…")).toBeInTheDocument();
+      expect(await status.findByText("Draft saved", {}, { timeout: 3000 })).toBeInTheDocument();
+      expect(useCases.editReleaseDraft).toHaveBeenCalledTimes(1);
+    });
+
+    it("says in the status bar that the draft's last change was not saved, when its write failed", async () => {
+      window.history.replaceState(null, "", studioRouteToHash({ screen: "chapter", draftUrl: DRAFT_URL, chapter: "ch-pods" }));
+      const useCases = draftUseCases();
+      useCases.editReleaseDraft = vi.fn(async () => {
+        throw new Error("Pod unreachable");
+      });
+      renderWorkspace(useCases);
+      const status = within(screen.getByRole("complementary", { name: "Studio status" }));
+      const title = await screen.findByRole("textbox", { name: "Title" });
+      await waitFor(() => expect(title).toBeEnabled());
+      fireEvent.input(title, { target: { value: "Pods!" } });
+      expect(await status.findByText("Last change not saved", {}, { timeout: 3000 })).toBeInTheDocument();
+    });
+
     it("keeps the cards' view in the URL, replacing the entry", async () => {
       window.history.replaceState(null, "", studioRouteToHash({ screen: "draftCards", draftUrl: DRAFT_URL, filter: "retired", language: "en", page: 2 }));
       renderWorkspace(draftUseCases());

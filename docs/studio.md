@@ -72,6 +72,49 @@ never opens the Studio never downloads it. Meanwhile, under the
 masthead, the page says the Studio is opening; if the chunk cannot be
 fetched (offline, or after a new deploy), it says so.
 
+## Layout
+
+The Studio is a workspace for authors, not a column to read
+([`shell/StudioShell.tsx`](../apps/studio/src/ui/shell/StudioShell.tsx)).
+It takes the whole window, and the window does not scroll:
+
+- **The header** is one row: the masthead (the Studio's name, who is
+  signed in, Log out), the theme and the languages, and the link back
+  to Solid Memo. It wraps on a narrow screen.
+- **The main content**, under it, scrolls on its own: the trail, then
+  the screen. A table's header row stays in sight as it scrolls, and a
+  table too wide for it scrolls it sideways; on a narrow screen (48rem
+  or less) such a table scrolls sideways in its own box.
+- **The status bar**, at the foot, beside the site's footer, names the
+  open instance, says on a draft's screens whether the draft is saved
+  ("Saving the draft…", then "Draft saved", or "Last change not saved"
+  when its write failed or the draft refused it;
+  [below](#how-edits-are-saved)), and switches the density.
+
+Its look is calm: headings in the body's type, sections flat with a
+thin border, and no tilt, stamp or pop as a screen comes in. Its
+colours are Solid Memo's, so the theme and an instance's colours carry
+over ([theme.md](theme.md)).
+
+**Density.** Rows and controls are compact, about 28px high, on every
+screen and on touch too: above WCAG 2.2's 24px minimum target. The
+status bar's Comfortable makes them 44px; Compact goes back. The choice
+is kept on the device, never in the pod
+([`shell/prefs.ts`](../apps/studio/src/ui/shell/prefs.ts), key
+`solid-memo:studioLayout.v1`; storage that is missing or refuses gives
+compact), and changes no history entry.
+
+**Its stylesheet** is
+[`studio.css`](../apps/studio/src/ui/studio.css), over the site's
+`style.css`. The shell imports it, so it comes with the Studio's chunk
+and a learner never downloads it. Solid Memo shares the page, and the
+app switches between the two without a reload, so every rule holds
+under `<html data-surface="studio">`, which the shell sets while it is
+shown and takes away after; the density is `data-density` beside it.
+A test ([studio.test.ts](../apps/studio/src/ui/studio.test.ts)) checks
+the rules through the cascade, and that Solid Memo's screens are left
+as they were.
+
 ## Routes
 
 The Studio has its own hash router
@@ -991,7 +1034,8 @@ Every edit is made at once on the screen, then written in the pod
   the draft the last one returns holds them all. Only that one is put
   on the screen: an earlier one's would undo changes not yet written.
 - **Said.** A status line says "Saving…" while a change waits or is
-  written, then "All changes saved." A write that fails, or that the
+  written, then "All changes saved.", and the status bar says so too,
+  whichever of the draft's screens is open ([above](#layout)). A write that fails, or that the
   draft as it now is refuses, says why. Once the writes after it are
   done, the draft is read afresh: the screens then show what the pod
   has.
@@ -1603,7 +1647,8 @@ health.
   through the dynamic `import("@solid-memo/studio")` in
   `apps/web/src/main.tsx`, as a chunk of its own. Solid Memo's build
   test ([build.test.ts](../apps/web/src/build.test.ts)) checks that
-  nothing the page loads up front holds any of the Studio, and checks
+  nothing the page loads up front holds any of the Studio, its
+  stylesheet included ([above](#layout)), and checks
   the whole bundle, the Studio's chunk included, for HTML sinks
   ([markdown.md](markdown.md#safety)).
 - `npm run build` and `npm run dev` therefore build and serve the

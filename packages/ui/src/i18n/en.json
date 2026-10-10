@@ -1402,6 +1402,15 @@
     "open": "Open in Studio",
     "loading": "Opening the Studio…",
     "loadFailed": "The Studio could not be opened. Reload the page to try again.",
+    "shell": {
+      "status": "Studio status",
+      "density": "Density",
+      "compact": "Compact",
+      "comfortable": "Comfortable",
+      "saving": "Saving the draft…",
+      "saved": "Draft saved",
+      "failed": "Last change not saved"
+    },
     "decks": {
       "heading": "Decks",
       "caption": "The decks of {instance}",

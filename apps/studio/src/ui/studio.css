@@ -1,0 +1,307 @@
+/*
+ * Solid Memo Studio's own look (docs/studio.md, Layout), over the site's
+ * style.css. It ships with the Studio's chunk, and every rule holds only
+ * under :root[data-surface="studio"], which the Studio's shell sets while
+ * it is shown: Solid Memo shares the page, and keeps its own look. Its
+ * colours are style.css's tokens, so the theme and an instance's colours
+ * carry over.
+ */
+
+/* How densely rows and controls are packed: compact unless the status bar says comfortable, which is 44px, for touch. */
+:root[data-surface="studio"] {
+  --s-control-h: 1.75rem;
+  --s-row-h: 1.75rem;
+  --s-cell-px: 0.5rem;
+  --s-cell-py: 0.2rem;
+  --s-font-size: 0.875rem;
+}
+
+:root[data-surface="studio"][data-density="comfortable"] {
+  --s-control-h: 2.75rem;
+  --s-row-h: 2.75rem;
+  --s-cell-px: 0.8rem;
+  --s-cell-py: 0.6rem;
+  --s-font-size: 1rem;
+}
+
+/* No paper behind a workspace. */
+:root[data-surface="studio"] body {
+  min-height: 0;
+  background: var(--bg);
+}
+
+/*
+ * The page is a grid the window's height: the header, the main content,
+ * which alone scrolls, and at the foot the status bar beside the site's
+ * footer. Nothing is capped to a column.
+ */
+:root[data-surface="studio"] #app {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100dvh;
+  min-height: 0;
+}
+
+:root[data-surface="studio"] header.site-header,
+:root[data-surface="studio"] main.workspace {
+  grid-column: 1 / -1;
+  max-width: none;
+  margin: 0;
+}
+
+/* Narrow: the site's footer under the status bar. */
+@media (max-width: 48rem) {
+  :root[data-surface="studio"] #app {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+  }
+}
+
+/*
+ * The header as one row: the masthead (the name, who is signed in, Log
+ * out), then the theme and the languages, then the way back to Solid
+ * Memo. It wraps on a narrow screen.
+ */
+:root[data-surface="studio"] header.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.75rem;
+  min-height: 2.5rem;
+  padding: 0.25rem 0.75rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+:root[data-surface="studio"] .top-bar {
+  order: 1;
+  padding-top: 0;
+}
+
+:root[data-surface="studio"] header.site-header .header-link {
+  order: 2;
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+/* The masthead, flat in the header: no navy, no blobs, no tilt. */
+:root[data-surface="studio"] .masthead {
+  --link-hover-bg: inherit;
+  --link-hover-border: inherit;
+  --logo-height: 1.75rem;
+  flex: 1 1 auto;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  color: var(--text);
+  background: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+:root[data-surface="studio"] .masthead-title {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 0.75rem;
+  padding-left: calc(var(--logo-height) * 1.5 + 0.5rem);
+}
+
+:root[data-surface="studio"] .masthead img.logo,
+:root[data-surface="studio"] .masthead a.brand:hover img.logo {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: none;
+  transform: translateY(-50%);
+}
+
+:root[data-surface="studio"] .masthead h1 {
+  font-size: 1rem;
+}
+
+:root[data-surface="studio"] .wordmark,
+:root[data-surface="studio"] .masthead a.brand:hover .wordmark {
+  transform: none;
+  animation: none;
+}
+
+:root[data-surface="studio"] .session-line {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+:root[data-surface="studio"] .session-line a:hover {
+  color: var(--link);
+}
+
+:root[data-surface="studio"] .masthead button {
+  color: var(--text);
+  background: var(--surface);
+  border-color: var(--border-strong);
+  box-shadow: none;
+}
+
+:root[data-surface="studio"] .masthead button:hover:not(:disabled),
+:root[data-surface="studio"] .masthead button:focus-visible {
+  background: var(--surface-hover);
+}
+
+:root[data-surface="studio"] .masthead :focus-visible,
+:root[data-surface="studio"] .masthead a.brand:focus-visible img.logo {
+  outline-color: var(--primary);
+}
+
+:root[data-surface="studio"] main.workspace {
+  padding: 0.5rem 1rem 1.5rem;
+  overflow: auto;
+  font-size: var(--s-font-size);
+}
+
+/* Calm headings, in the body's type: no display font, tilt or stamp. */
+:root[data-surface="studio"] :is(h1, h2, h3) {
+  font-family: inherit;
+  font-weight: 600;
+  letter-spacing: 0;
+  word-spacing: normal;
+  text-shadow: none;
+  transform: none;
+  animation: none;
+}
+
+/* Korean text in a heading too (style.css gives it the display font). */
+:root[data-surface="studio"] :is(h1, h2, h3) * {
+  font-family: inherit;
+}
+
+:root[data-surface="studio"] main h2 {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+:root[data-surface="studio"] main h3 {
+  font-size: 1rem;
+}
+
+/* Sections are flat and bordered, and come in without a pop. */
+:root[data-surface="studio"] main section {
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+  border-radius: var(--radius-sm);
+  box-shadow: none;
+  animation: none;
+}
+
+:root[data-surface="studio"] :is(.breadcrumbs, .instance-list li, .deck-list li, .card-table tbody tr) {
+  animation: none;
+}
+
+:root[data-surface="studio"] .breadcrumbs ol {
+  margin-bottom: 0.5rem;
+  font-size: 0.8125rem;
+}
+
+/* Controls as tall as the density says; a sort button, a switch and a picture keep their own size. */
+:root[data-surface="studio"] main :is(button, a.button, select, input:not([type="radio"], [type="checkbox"])):not(.sort, .switch, .picture-zoom-button),
+:root[data-surface="studio"] :is(.masthead, .studio-status-bar) button {
+  min-height: var(--s-control-h);
+  padding: 0.15rem 0.6rem;
+  font-size: var(--s-font-size);
+  border-radius: var(--radius-sm);
+}
+
+:root[data-surface="studio"] main .row-menu {
+  min-width: var(--s-control-h);
+}
+
+/* A button stays where it is under the pointer. */
+:root[data-surface="studio"] :is(button, a.button):hover:not(:disabled, [aria-disabled="true"]) {
+  transform: none;
+}
+
+/*
+ * Tables: rows as tall as the density says, and the header row kept in
+ * sight while the main content scrolls. A table's wrapper does not
+ * scroll on its own here (it would hold the header), so the main
+ * content scrolls sideways too; but on a narrow screen a wide table
+ * scrolls in its own box, its header row with it.
+ */
+:root[data-surface="studio"] main .studio-table {
+  overflow: visible;
+}
+
+@media (max-width: 48rem) {
+  :root[data-surface="studio"] main .studio-table {
+    overflow-x: auto;
+  }
+}
+
+:root[data-surface="studio"] main table {
+  border-collapse: collapse;
+  border-radius: 0;
+  overflow: visible;
+}
+
+:root[data-surface="studio"] main :is(th, td) {
+  height: var(--s-row-h);
+  padding: var(--s-cell-py) var(--s-cell-px);
+}
+
+:root[data-surface="studio"] main td.clickable {
+  padding: 0;
+}
+
+:root[data-surface="studio"] main td.clickable a {
+  padding: var(--s-cell-py) var(--s-cell-px);
+}
+
+/* Its line drawn as a shadow: a collapsed border stays behind when the row sticks. */
+:root[data-surface="studio"] main thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  box-shadow: inset 0 -1px 0 var(--border);
+}
+
+/* The status bar: the instance, whether the draft is saved, and the density. */
+:root[data-surface="studio"] .studio-status-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 1rem;
+  min-width: 0;
+  padding: 0.2rem 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  background: var(--surface-sunken);
+  border-top: 1px solid var(--border);
+}
+
+:root[data-surface="studio"] .studio-status-bar p {
+  margin: 0;
+}
+
+:root[data-surface="studio"] .studio-density {
+  display: flex;
+  gap: 0.25rem;
+  margin-left: auto;
+}
+
+:root[data-surface="studio"] .studio-density button[aria-pressed="true"] {
+  color: var(--text);
+  background: var(--primary-soft);
+  border-color: var(--primary);
+}
+
+:root[data-surface="studio"] .site-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0 1rem;
+  padding: 0.2rem 0.75rem;
+  font-size: 0.75rem;
+  background: var(--surface-sunken);
+  border-top: 1px solid var(--border);
+}
