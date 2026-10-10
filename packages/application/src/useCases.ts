@@ -223,6 +223,7 @@ import type {
 import { createReleaseDraftUseCases, type ReleaseDraftUseCases } from "./releaseDrafts";
 import { createReleasePublishingUseCases, type ReleasePublishingUseCases } from "./releasePublishing";
 import { startTrial, type TrialOpening, type TrialSandbox } from "./trial";
+import { draftContainerOf, type ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout";
 import { draftReleaseModel } from "@solid-memo/domain/release/draftModel";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { trialProblems } from "@solid-memo/domain/release/trial";
@@ -258,7 +259,7 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
    * What adding the guest's study to `target`, an instance the user has,
    * would add (domain/guest.ts GuestMergePlan): the guest's decks, each
    * with the target's decks from the same library release, and how many
-   * drafts the guest wrote, which are not added. Reads only.
+   * drafts the guest wrote, which are copied too. Reads only.
    */
   planGuestMerge(guestInstance: Instance, target: Instance): Promise<GuestMergePlan>;
   /**
@@ -266,12 +267,14 @@ export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCase
    * "Adding to an instance"): the guest's study is read and checked, then
    * each of its decks (but those in `skip`, by URL) is added to `target`
    * as a new deck — its cards and review states, then its catalog entry,
-   * then its answers — the guest's deck groups made around them, and,
+   * then its answers — the guest's deck groups made around them, each of
+   * the guest's drafts copied (copyReleaseDraft: under its name, or the
+   * next one free, never over a draft the instance has), and,
    * once the guest's study is found unchanged since it was read, it is
    * deleted from the device. The target's preferences stay; the guest's
    * are not carried over. A failure leaves every deck added whole, and
-   * the guest's study as it was; run again, a deck already added from
-   * this device, and unchanged since, is not added twice.
+   * the guest's study as it was; run again, a deck or draft already
+   * added from this device, and unchanged since, is not added twice.
    */
   mergeGuestStudy(
     session: Session,
@@ -2117,6 +2120,7 @@ export function createUseCases({
       // Answers still on their way to the guest's log go there first, to be added with it.
       await logAnswers();
       const added: Deck[] = [];
+      const copied: ReleaseDraftSummary[] = [];
       const notes: string[] = [];
       const release = writeFence.hold(source);
       try {
@@ -2130,12 +2134,14 @@ export function createUseCases({
           throw new AppError("guestStudyTooNew");
         }
         progress.stepped();
-        const [decks, tree, months, targetDecks, targetTree] = await Promise.all([
+        const [decks, tree, months, targetDecks, targetTree, guestDrafts, targetDrafts] = await Promise.all([
           deckRepository.listDecks(source),
           deckRepository.readDeckTree(source),
           answerLog.months(source),
           deckRepository.listDecks(targetUrl),
           deckRepository.readDeckTree(targetUrl),
+          releaseDraftRepository.list(source),
+          releaseDraftRepository.list(targetUrl),
         ]);
         // Groups to make in an arrangement a newer version wrote could not be: refused before anything is written.
         if (targetTree.readOnly && tree.children.some((node) => node.kind === "group")) throw new AppError("deckTreeTooNew");
@@ -2178,6 +2184,27 @@ export function createUseCases({
         });
         if (nodes.length > 0) await deckRepository.editDeckTree(targetUrl, { kind: "graft", nodes });
 
+        // Each draft copied whole, under its name or the next free one; again only when its documents changed since.
+        progress.finished("drafts", guestDrafts.length);
+        for (const draft of guestDrafts) {
+          const key = guestMergeKey(draft.url, targetUrl);
+          const container = draftContainerOf(draft.url);
+          const stamp = [...versions]
+            .filter(([url]) => url.startsWith(container))
+            .map(([url, version]) => `${url} ${version}`)
+            .join("\n");
+          const note = decodeGuestMergeNote(updateJournal.staging(key));
+          // Copied from this device before, its documents unchanged since, and the copy still there: there it is.
+          let copy = note?.stamp === stamp ? targetDrafts.find((candidate) => candidate.url === note.url) : undefined;
+          if (copy === undefined) {
+            copy = await drafts.copyReleaseDraft(draft.url, targetUrl);
+            updateJournal.begin(key, encodeGuestMergeNote({ url: copy.url, stamp }));
+          }
+          notes.push(key);
+          copied.push(copy);
+          progress.stepped();
+        }
+
         // Listing the guest's study again, then each of its documents: what was added is what it holds.
         progress.finished("verify", versions.size + 1);
         if ((await listed()).join("\n") !== resources.join("\n")) throw new AppError("guestStudyChanged");
@@ -2187,7 +2214,7 @@ export function createUseCases({
           progress.stepped();
         }
       } catch (error) {
-        return { ok: false, instance: target, step: progress.step(), error, added };
+        return { ok: false, instance: target, step: progress.step(), error, added, copied };
       } finally {
         release();
       }

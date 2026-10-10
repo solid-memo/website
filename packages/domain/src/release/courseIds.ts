@@ -13,8 +13,9 @@ import { DRAFT_ID, idIn, idsInUse, type QuestionPlace, type ReleaseDraft } from 
  * A step asks its questions in the order of their ids (course.ts), so a
  * new question's id sorts after the step's last: there is no term for
  * the order, and a published id is never renamed. Past `z`, it is the
- * last's id with a number after it (idBetween, which also finds an id
- * between two others).
+ * last's id with a number after it (idBetween). One asked before
+ * another gets an id between that one's and the one before it
+ * (questionIdBefore).
  */
 
 /** Every id the draft has, or a release before it published: none of them is a new subject's. */
@@ -123,6 +124,32 @@ export function questionIdFor(draft: ReleaseDraft, place: QuestionPlace | null):
   const base = questionBase(draft, place.step);
   const lettered = [..."abcdefghijklmnopqrstuvwxyz"].map((letter) => `${base}${letter}`).find((id) => !taken.has(id) && (last === null || id > last));
   return lettered ?? idBetween(last ?? base, null, taken);
+}
+
+/** The cards asked at `place`, by id, in the order they are asked: their ids'. */
+export function questionsAt(draft: ReleaseDraft, place: QuestionPlace): string[] {
+  return place.kind === "step" ? questionsOfStep(draft, place.step) : reviewQuestionsOf(draft, place.chapter);
+}
+
+/**
+ * A new card's id that is asked at `place` just before `next`, one of the
+ * cards asked there: it sorts between `next` and the card asked before
+ * it. In a step, a letter between them when one is free
+ * (`q-<topic>-<n><letter>`), else an id between (idBetween); before the
+ * first, the place's own name (`q-<topic>-<n>`, `q-<topic>-r00`) is the
+ * lower end. Null when no id lies between, or the first sorts before
+ * the place's name: the user writes one.
+ */
+export function questionIdBefore(draft: ReleaseDraft, place: QuestionPlace, next: string): string | null {
+  const taken = takenIds(draft);
+  const asked = questionsAt(draft, place);
+  const previous = asked[asked.indexOf(next) - 1] ?? null;
+  const base = place.kind === "step" ? questionBase(draft, place.step) : `q-${topicOf(place.chapter)}-r00`;
+  const lower = previous ?? (base < next ? base : null);
+  if (lower === null) return null;
+  const lettered =
+    place.kind === "step" ? [..."abcdefghijklmnopqrstuvwxyz"].map((letter) => `${base}${letter}`).find((id) => !taken.has(id) && id > lower && id < next) : undefined;
+  return lettered ?? idBetween(lower, next, taken);
 }
 
 /** Whether a subject of the draft was published by a release before it: it is then retired, never deleted. */

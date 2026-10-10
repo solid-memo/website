@@ -4,6 +4,7 @@ import {
   chapterIdFor,
   idBetween,
   idProblem,
+  questionIdBefore,
   isPublished,
   questionIdFor,
   questionsOfStep,
@@ -111,6 +112,30 @@ describe("questions and their ids", () => {
     expect(questionIdFor(courseDraft(), null)).toBe("q-1");
     expect(questionIdFor(deckDraft(), null)).toBe("card-1");
     expect(questionIdFor({ ...deckDraft(), published: NOTHING_PUBLISHED }, null)).toBe("card-1");
+  });
+});
+
+describe("questionIdBefore", () => {
+  const asking = (checkedBy: string[], published = NOTHING_PUBLISHED): ReleaseDraft => {
+    const draft = courseDraft(published);
+    return { ...draft, steps: draft.steps.map((node) => (node.id === "ch-a-1" ? { ...node, data: { ...node.data, checkedBy: checkedBy.map(of) } } : node)) };
+  };
+  const step = { kind: "step" as const, step: "ch-a-1" };
+
+  it("names a question asked before another between it and the one before, by letter when one is free", () => {
+    expect(questionIdBefore(asking(["q-a-1a", "q-a-1c"]), step, "q-a-1c")).toBe("q-a-1b");
+    // b was published: an id between the two.
+    expect(questionIdBefore(asking(["q-a-1a", "q-a-1c"], { ids: { "q-a-1b": "card" }, activities: [] }), step, "q-a-1c")).toBe("q-a-1a1");
+  });
+
+  it("puts one before the first after the place's own name", () => {
+    expect(questionIdBefore(asking(["q-a-1a"]), step, "q-a-1a")).toBe("q-a-11");
+    expect(questionIdBefore(courseDraft(), { kind: "review", chapter: "ch-a" }, "q-a-r01")).toBe("q-a-r001");
+  });
+
+  it("finds none when the first sorts before the place's name, or no id lies between", () => {
+    expect(questionIdBefore(asking(["a-1"]), step, "a-1")).toBeNull();
+    expect(questionIdBefore(asking(["q-a-1a", "q-a-1a-"]), step, "q-a-1a-")).toBeNull();
   });
 });
 

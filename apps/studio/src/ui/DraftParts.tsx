@@ -216,11 +216,14 @@ export function IdField({
   id,
   draft,
   value,
+  describedBy,
   onChange,
 }: {
   id: string;
   draft: ReleaseDraft;
   value: string;
+  /** Another hint of the form's that tells of the id, by its id. */
+  describedBy?: string;
   onChange: (value: string) => void;
 }) {
   const { t } = useI18n();
@@ -234,7 +237,7 @@ export function IdField({
         spellcheck={false}
         autocomplete="off"
         aria-invalid={problem !== null}
-        aria-describedby={`${id}-hint`}
+        aria-describedby={describedBy === undefined ? `${id}-hint` : `${id}-hint ${describedBy}`}
         onInput={(event) => onChange(event.currentTarget.value)}
       />
       <p id={`${id}-hint`} class={problem === null ? "hint field-hint" : "error"}>

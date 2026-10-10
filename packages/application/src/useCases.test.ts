@@ -22,6 +22,9 @@ import type {
 import { GUEST_INSTANCE_URL, GUEST_ORIGIN, GUEST_SESSION, GUEST_WEBID, guestDeckStamp } from "@solid-memo/domain/guest";
 import { createUseCases, type UseCases } from "./useCases";
 import { courseDraft, deckDraft, DRAFT, playableCourseDraft } from "@solid-memo/domain/testing/releaseDraft";
+import { draftSummaryOf, draftUrlOf } from "@solid-memo/domain/release/draftLayout";
+import { rebaseDraft } from "@solid-memo/domain/release/releaseToDraft";
+import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { TRIAL_INSTANCE_URL, TRIAL_SESSION } from "@solid-memo/domain/release/trial";
 import type { InstanceDigest } from "@solid-memo/domain/studyDigest";
 import { CARD_FORMAT_VERSION, DECK_FORMAT_VERSION, type Card, type Deck } from "@solid-memo/domain/deck";
@@ -3737,18 +3740,19 @@ describe("library deck upgrade", () => {
         );
         expect(journal.size).toBe(0);
         expect(progress).toEqual([
-          "read 0/5 (0 of 2)",
-          "read 0/5 (1 of 2)",
-          "decks 1/5 (0 of 2)",
-          "decks 1/5 (1 of 2)",
-          "arrange 2/5",
-          "verify 3/5 (0 of 5)",
-          "verify 3/5 (1 of 5)",
-          "verify 3/5 (2 of 5)",
-          "verify 3/5 (3 of 5)",
-          "verify 3/5 (4 of 5)",
-          "tidy 4/5",
-          "tidy 5/5",
+          "read 0/6 (0 of 2)",
+          "read 0/6 (1 of 2)",
+          "decks 1/6 (0 of 2)",
+          "decks 1/6 (1 of 2)",
+          "arrange 2/6",
+          "drafts 3/6 (0 of 0)",
+          "verify 4/6 (0 of 5)",
+          "verify 4/6 (1 of 5)",
+          "verify 4/6 (2 of 5)",
+          "verify 4/6 (3 of 5)",
+          "verify 4/6 (4 of 5)",
+          "tidy 5/6",
+          "tidy 6/6",
         ]);
       });
 
@@ -3768,6 +3772,86 @@ describe("library deck upgrade", () => {
         ]);
         expect(deps.deckRepository.editDeckTree).not.toHaveBeenCalled();
         expect(guestPod.discard).toHaveBeenCalledOnce();
+      });
+
+      describe("a guest's drafts", () => {
+        const GUEST_DRAFT = draftUrlOf(GUEST_INSTANCE_URL, "solid", 1);
+        const guestDraft = rebaseDraft(courseDraft(), GUEST_DRAFT);
+        const DRAFT_DOCUMENTS = [GUEST_DRAFT, `${GUEST_INSTANCE_URL}drafts/solid/v1/chapter-ch-a.ttl`];
+        const stamp = DRAFT_DOCUMENTS.map((url) => `${url} version of ${url}`).join("\n");
+        const copyNamed = (name: string) => draftUrlOf(TARGET, name, 1);
+
+        /** mergeDeps with the guest's draft, its documents listed, and the instance's drafts `targetDrafts`. */
+        function draftDeps(targetDrafts: string[]) {
+          const merge = mergeDeps();
+          vi.mocked(merge.deps.instanceCopier.listResources).mockResolvedValue([...RESOURCES, `${GUEST_INSTANCE_URL}drafts/`, ...DRAFT_DOCUMENTS]);
+          const summaryOf = (url: string) => draftSummaryOf(rebaseDraft(guestDraft, url))!;
+          const releaseDraftRepository = {
+            list: vi.fn(async (url: string) => (url === GUEST_INSTANCE_URL ? [summaryOf(GUEST_DRAFT)] : targetDrafts.map(summaryOf))),
+            documents: vi.fn(async (url: string) => (url === GUEST_INSTANCE_URL ? DRAFT_DOCUMENTS : [])),
+            read: vi.fn(async () => ({ draft: guestDraft, version: "v1" })),
+            create: vi.fn(async (_instance: string, draft: ReleaseDraft) => draftSummaryOf(draft)!),
+          } as unknown as ReleaseDraftRepository & { create: ReturnType<typeof vi.fn> };
+          return { ...merge, deps: { ...merge.deps, releaseDraftRepository }, releaseDraftRepository };
+        }
+
+        it("copies each into the instance, under the next free name, never over one of its drafts", async () => {
+          const { deps, releaseDraftRepository, journal } = draftDeps([copyNamed("solid")]);
+          const progress: string[] = [];
+          const outcome = await createUseCases(deps).mergeGuestStudy(session, guestInstance, target, {}, (p) =>
+            progress.push(`${p.step} ${p.done}/${p.total}${p.part === undefined ? "" : ` (${p.part.done} of ${p.part.total})`}`),
+          );
+          expect(outcome).toMatchObject({ ok: true, tidied: true });
+          expect(releaseDraftRepository.read).toHaveBeenCalledWith(GUEST_DRAFT);
+          expect(releaseDraftRepository.create).toHaveBeenCalledExactlyOnceWith(TARGET, rebaseDraft(guestDraft, copyNamed("solid-2")));
+          expect(progress).toContain("drafts 3/6 (0 of 1)");
+          // Its note kept while the guest's study was here, then forgotten.
+          expect(deps.updateJournal.begin).toHaveBeenCalledWith(`${GUEST_DRAFT} added to ${TARGET}`, JSON.stringify({ url: copyNamed("solid-2"), stamp }));
+          expect(journal.size).toBe(0);
+          // Copied before the guest's study goes.
+          expect(releaseDraftRepository.create.mock.invocationCallOrder[0]).toBeLessThan(vi.mocked(deps.instanceRepository.deleteInstance).mock.invocationCallOrder[0]!);
+        });
+
+        it("copies one copied from this device before only when the guest changed it since, or the instance no longer has the copy", async () => {
+          const unchanged = draftDeps([copyNamed("solid"), copyNamed("solid-2")]);
+          unchanged.journal.set(`${GUEST_DRAFT} added to ${TARGET}`, JSON.stringify({ url: copyNamed("solid-2"), stamp }));
+          expect(await createUseCases(unchanged.deps).mergeGuestStudy(session, guestInstance, target)).toMatchObject({ ok: true });
+          expect(unchanged.releaseDraftRepository.create).not.toHaveBeenCalled();
+
+          const changed = draftDeps([copyNamed("solid"), copyNamed("solid-2")]);
+          changed.journal.set(`${GUEST_DRAFT} added to ${TARGET}`, JSON.stringify({ url: copyNamed("solid-2"), stamp: "older versions" }));
+          await createUseCases(changed.deps).mergeGuestStudy(session, guestInstance, target);
+          expect(changed.releaseDraftRepository.create).toHaveBeenCalledExactlyOnceWith(TARGET, rebaseDraft(guestDraft, copyNamed("solid-3")));
+
+          const gone = draftDeps([copyNamed("solid")]);
+          gone.journal.set(`${GUEST_DRAFT} added to ${TARGET}`, JSON.stringify({ url: copyNamed("solid-2"), stamp }));
+          await createUseCases(gone.deps).mergeGuestStudy(session, guestInstance, target);
+          expect(gone.releaseDraftRepository.create).toHaveBeenCalledOnce();
+        });
+
+        it("keeps the guest's study, and the decks added, when a draft cannot be copied", async () => {
+          const { deps, releaseDraftRepository } = draftDeps([]);
+          releaseDraftRepository.create.mockRejectedValueOnce(new AppError("changedElsewhere", { url: `${TARGET}catalog.ttl` }));
+          const outcome = await createUseCases(deps).mergeGuestStudy(session, guestInstance, target);
+          expect(outcome).toMatchObject({ ok: false, step: "drafts", error: { code: "changedElsewhere" }, added: [added("deck-n1", course), added("deck-n2", own)], copied: [] });
+          expect(deps.instanceRepository.deleteInstance).not.toHaveBeenCalled();
+        });
+
+        it("says which drafts are in the instance when it fails after copying them, those copied before among them", async () => {
+          const fresh = draftDeps([]);
+          const listed = [...RESOURCES, `${GUEST_INSTANCE_URL}drafts/`, ...DRAFT_DOCUMENTS];
+          vi.mocked(fresh.deps.instanceCopier.listResources).mockResolvedValueOnce(listed).mockResolvedValueOnce([...listed, `${GUEST_INSTANCE_URL}new.ttl`]);
+          const outcome = await createUseCases(fresh.deps).mergeGuestStudy(session, guestInstance, target);
+          expect(outcome).toMatchObject({ ok: false, step: "verify", error: { code: "guestStudyChanged" }, copied: [{ url: copyNamed("solid"), name: "solid" }] });
+          expect(fresh.deps.instanceRepository.deleteInstance).not.toHaveBeenCalled();
+
+          const before = draftDeps([copyNamed("solid")]);
+          before.journal.set(`${GUEST_DRAFT} added to ${TARGET}`, JSON.stringify({ url: copyNamed("solid"), stamp }));
+          vi.mocked(before.deps.instanceCopier.listResources).mockResolvedValueOnce(listed).mockResolvedValueOnce([]);
+          const again = await createUseCases(before.deps).mergeGuestStudy(session, guestInstance, target);
+          expect(again).toMatchObject({ ok: false, step: "verify", copied: [{ url: copyNamed("solid"), name: "solid" }] });
+          expect(before.releaseDraftRepository.create).not.toHaveBeenCalled();
+        });
       });
 
       it("mergeGuestStudy adds a deck it added from this device before, unchanged since, only its answers again", async () => {
@@ -3890,6 +3974,7 @@ describe("library deck upgrade", () => {
           step: "read",
           error: new AppError("guestStudyInvalid", { count: 1 }),
           added: [],
+          copied: [],
         });
         vi.mocked(deps.shapeValidator.validateDocument).mockImplementation(async (url) => ({
           url,
@@ -3925,7 +4010,7 @@ describe("library deck upgrade", () => {
         vi.mocked(deps.deckRepository.addDeck).mockResolvedValueOnce(added("deck-n1", own)).mockRejectedValueOnce(new Error("offline"));
         vi.mocked(deps.deckRepository.deleteDocument).mockRejectedValueOnce(new Error("still offline"));
         const outcome = await createUseCases(deps).mergeGuestStudy(session, guestInstance, target);
-        expect(outcome).toEqual({ ok: false, instance: target, step: "decks", error: new Error("offline"), added: [added("deck-n1", own)] });
+        expect(outcome).toEqual({ ok: false, instance: target, step: "decks", error: new Error("offline"), added: [added("deck-n1", own)], copied: [] });
         // The entry was not written after all: the documents nothing names go.
         expect(deps.deckRepository.readDeck).toHaveBeenCalledWith(`${TARGET}catalog.ttl#deck-n2`);
         expect(vi.mocked(deps.deckRepository.deleteDocument).mock.calls).toEqual([
@@ -3940,7 +4025,7 @@ describe("library deck upgrade", () => {
       it("mergeGuestStudy deletes only what it wrote of a deck it could not add, and counts a deck whose entry was written though its answer was lost", async () => {
         const { deps } = mergeDeps();
         vi.mocked(deps.reviewStateRepository.createReviewStates).mockRejectedValueOnce(new AppError("createdElsewhere", { url: "x" }));
-        expect(await createUseCases(deps).mergeGuestStudy(session, guestInstance, target)).toMatchObject({ ok: false, step: "decks", added: [] });
+        expect(await createUseCases(deps).mergeGuestStudy(session, guestInstance, target)).toMatchObject({ ok: false, step: "decks", added: [], copied: [] });
         expect(deps.deckRepository.readDeck).not.toHaveBeenCalled();
         // The cards document it wrote goes; the reviews document someone else created stays.
         expect(vi.mocked(deps.deckRepository.deleteDocument).mock.calls).toEqual([[`${TARGET}decks/deck-n1.ttl`]]);

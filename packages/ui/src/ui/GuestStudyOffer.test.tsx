@@ -359,7 +359,7 @@ describe("GuestStudyOffer", () => {
         "Main already has this deck from the same library release. It is added beside it as a deck of its own, with its own progress, not merged into it: untick it to leave it out.",
       );
       expect(screen.getByText(/A deck you leave out is not kept/)).toBeInTheDocument();
-      expect(screen.queryByText(/Drafts are not added/)).toBeNull();
+      expect(screen.queryByText(/drafts? in the Studio as a guest/)).toBeNull();
       const announced = screen.getByRole("status");
       fireEvent.click(screen.getByRole("button", { name: "Add to Main" }));
       await waitFor(() => expect(mergeGuestStudy).toHaveBeenCalledWith(session, guestInstance, main, { skip: [] }, expect.any(Function)));
@@ -416,12 +416,12 @@ describe("GuestStudyOffer", () => {
       await waitFor(() => expect(useCases.mergeGuestStudy).toHaveBeenCalledWith(session, guestInstance, main, { skip: [] }, expect.any(Function)));
     });
 
-    it("says the guest's drafts are not added, but deleted with the rest of the study", async () => {
+    it("says the guest's drafts are copied too, never over one of the instance's", async () => {
       renderMerge({ planGuestMerge: vi.fn(async () => ({ decks: [{ deck: capitals, sameRelease: [] }], drafts: 2 })) });
       await openForm();
       expect(
         await screen.findByText(
-          "You wrote 2 drafts in the Studio as a guest. Drafts are not added: they are deleted with the rest of your study in this browser. To keep them, go back and leave your study here for now.",
+          "You wrote 2 drafts in the Studio as a guest. They are copied to Main too, each under its own name, or, where Main has a draft of that name and version, the next free one (“-2”, “-3”…).",
         ),
       ).toBeInTheDocument();
     });
@@ -469,8 +469,8 @@ describe("GuestStudyOffer", () => {
     it("says where adding failed, which decks are in the instance, whole, and that the study is still here", async () => {
       const mergeGuestStudy = vi
         .fn<UseCases["mergeGuestStudy"]>()
-        .mockResolvedValueOnce({ ok: false, instance: main, step: "decks", error: new AppError("guestStudyChanged"), added: [addedAs(capitals, main)] })
-        .mockResolvedValueOnce({ ok: false, instance: main, step: "read", error: "offline", added: [] });
+        .mockResolvedValueOnce({ ok: false, instance: main, step: "decks", error: new AppError("guestStudyChanged"), added: [addedAs(capitals, main)], copied: [] })
+        .mockResolvedValueOnce({ ok: false, instance: main, step: "read", error: "offline", added: [], copied: [] });
       window.location.hash = "#/statistics";
       renderMerge({ mergeGuestStudy });
       await openForm();
@@ -494,6 +494,39 @@ describe("GuestStudyOffer", () => {
       expect(invalidations).not.toHaveBeenCalledWith();
       expect(again).toHaveTextContent("Nothing was added to Main.");
       expect(within(again).queryByRole("list")).toBeNull();
+    });
+
+    it("says which drafts are in the instance when adding failed after copying them", async () => {
+      const copy = (name: string, title: Record<string, string>) => ({
+        url: `${main.url}drafts/${name}/v1/release.ttl`,
+        instanceUrl: main.url,
+        name,
+        version: 1,
+        readable: true,
+        title,
+        course: false,
+      });
+      const mergeGuestStudy = vi.fn<UseCases["mergeGuestStudy"]>().mockResolvedValueOnce({
+        ok: false,
+        instance: main,
+        step: "verify",
+        error: new AppError("guestStudyChanged"),
+        added: [],
+        copied: [copy("solid-2", { en: "Solid fundamentals" }), copy("notes", {})],
+      });
+      renderMerge({ mergeGuestStudy });
+      await openForm();
+      await screen.findByRole("group", { name: "Decks to add" });
+      fireEvent.click(screen.getByRole("button", { name: "Add to Main" }));
+      const failed = await screen.findByRole("region", { name: "Adding failed" });
+      // The instance has drafts more: what is on screen of it is read again.
+      expect(invalidations).toHaveBeenCalledWith();
+      expect(failed).not.toHaveTextContent("Nothing was added");
+      expect(failed).toHaveTextContent("These drafts are in Main now, whole:");
+      expect(within(failed).getAllByRole("listitem").map((item) => item.textContent)).toEqual([
+        "Solid fundamentals (“solid-2”, version 1)",
+        "(“notes”, version 1)",
+      ]);
     });
   });
 });

@@ -3,7 +3,8 @@
  * Keeping a guest's study (docs/guest-mode.md) against a real Solid server:
  * a guest studies in the pod kept on their device, then logs in and moves
  * their study into their pod on the server, as a new instance or added to
- * the instance they have — through the app's own use cases and Solid
+ * the instance they have, their drafts of releases copied with it —
+ * through the app's own use cases and Solid
  * adapters, wired as in createAppUseCases: one fetch routed to the guest's pod or
  * the server by URL. Runs against each server globalSetup.ts starts.
  */
@@ -16,6 +17,7 @@ import { GUEST_ORIGIN, GUEST_SESSION } from "@solid-memo/domain/guest";
 import type { LibraryCard, LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
 import { librarySeriesUrlOf } from "@solid-memo/domain/libraryLayout";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
+import { draftUrlOf } from "@solid-memo/domain/release/draftLayout";
 import { createLocalGuestPod } from "@solid-memo/solid/localGuestPod";
 import { createLocalPod } from "@solid-memo/solid/localPod";
 import { createMemoryResourceStore } from "@solid-memo/solid/memoryResourceStore";
@@ -27,6 +29,7 @@ import { createSolidDigestRepository } from "@solid-memo/solid/solidDigestReposi
 import { createSolidInstanceCopier } from "@solid-memo/solid/solidInstanceCopier";
 import { createSolidInstanceRepository } from "@solid-memo/solid/solidInstanceRepository";
 import { createSolidPreferencesRepository } from "@solid-memo/solid/solidPreferencesRepository";
+import { createSolidReleaseDraftRepository } from "@solid-memo/solid/solidReleaseDraftRepository";
 import { createSolidRepairRepository } from "@solid-memo/solid/solidRepairRepository";
 import { createSolidReviewStateRepository } from "@solid-memo/solid/solidReviewStateRepository";
 import { createSolidStorageGateway } from "@solid-memo/solid/solidStorageGateway";
@@ -144,6 +147,7 @@ function app() {
     answerLog: createSolidAnswerLog({ fetch: podFetch, checkWrite }),
     guestPod: createLocalGuestPod({ fetch: guestFetch, store: guestStore }),
     writeFence,
+    releaseDraftRepository: createSolidReleaseDraftRepository({ fetch: podFetch, checkWrite }),
   });
   return { useCases, guestStore };
 }
@@ -301,6 +305,45 @@ describe.each(SERVERS)("a guest's study on $name", ({ url: server }) => {
       `<${addedCourse.cardsDocumentUrl}#q-iri> <https://schema.org/suggestedAnswer> <${addedCourse.cardsDocumentUrl}#q-iri-d1> .`,
     );
     expect(await useCases.listInstances(session)).toEqual([target]);
+    expect(await guestStore.urls()).toEqual([]);
+  });
+
+  it("copies the guest's drafts to the instance the user has, never over one of its own", async () => {
+    const { base, session } = await seedPod(server);
+    const { useCases, guestStore } = app();
+    const target = await useCases.createInstance(session, {
+      containerUrl: `${base}solid-memo/main/`,
+      name: "Main",
+      registrationTarget: "private",
+    });
+    // The instance has a draft of the name the guest's will want.
+    const theirs = await useCases.createReleaseDraft(target.url, { kind: "blankCourse", title: { en: "Solid" } });
+    await useCases.startGuest("My study");
+    const [guestInstance] = await useCases.listInstances(GUEST_SESSION);
+    const written = await useCases.createReleaseDraft(guestInstance!.url, { kind: "blankCourse", title: { en: "Solid" } });
+    await useCases.editReleaseDraft(written!.draft.url, [
+      { kind: "addChapter", id: "ch-a", text: { title: { en: "A" } } },
+      { kind: "addStep", id: "ch-a-1", chapter: "ch-a", text: { theory: { en: "Pods hold data." } } },
+      { kind: "addCard", id: "q-a-1a", card: { front: { en: "What holds data?" }, back: { en: "A pod" } } },
+      { kind: "addQuestion", card: "q-a-1a", place: { kind: "step", step: "ch-a-1" } },
+    ]);
+    expect(await useCases.planGuestMerge(guestInstance!, target)).toEqual({ decks: [], drafts: 1 });
+
+    const outcome = await useCases.mergeGuestStudy(session, guestInstance!, target);
+
+    expect(outcome).toMatchObject({ ok: true, instance: target, tidied: true });
+    const drafts = await useCases.listReleaseDrafts(target.url);
+    expect(drafts.map((draft) => draft.name).sort()).toEqual(["solid", "solid-2"]);
+    const copy = await useCases.getReleaseDraft(draftUrlOf(target.url, "solid-2", 1));
+    expect(copy.chapters.map((node) => node.id)).toEqual(["ch-a"]);
+    expect(copy.steps.map((node) => node.data.theory)).toEqual([{ en: "Pods hold data." }]);
+    expect(copy.steps[0]!.data.checkedBy).toEqual([`${copy.url}#q-a-1a`]);
+    expect(copy.cards.map((node) => node.data.front)).toEqual([{ en: "What holds data?" }]);
+    // The instance's own draft is as it was.
+    expect((await useCases.getReleaseDraft(theirs!.draft.url)).chapters).toEqual([]);
+    expect((await useCases.validateInstance(target.url)).conforms).toBe(true);
+    const served = await contents(target.url);
+    expect([...served].filter(([, body]) => body.includes(GUEST_ORIGIN)).map(([url]) => url)).toEqual([]);
     expect(await guestStore.urls()).toEqual([]);
   });
 });

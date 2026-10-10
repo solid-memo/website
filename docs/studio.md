@@ -904,8 +904,14 @@ survive; such a release is refused (`releaseIdUnsupported`) before
 anything is written.
 
 It is named after its title, or its release's name, unlike the
-instance's other drafts of that version. The use cases are
-`listReleaseDrafts`, `createReleaseDraft`, `getReleaseDraft`,
+instance's other drafts of that version. Only a draft's place taken
+meanwhile (its release document made there first) gives it the next
+name; any other failure, such as the catalogue's link refused on 412
+a few times, takes back what was written and is thrown, so no draft is
+left that the catalogue does not link. The use cases are
+`listReleaseDrafts`, `createReleaseDraft`, `copyReleaseDraft` (a
+guest's draft, as the guest's study is added to an instance,
+[guest-mode.md](guest-mode.md#adding-to-an-instance)), `getReleaseDraft`,
 `editReleaseDraft` and `deleteReleaseDraft`
 ([releaseDrafts.ts](../packages/application/src/releaseDrafts.ts)), over
 the `ReleaseDraftRepository` port. When a document changed
@@ -1045,7 +1051,8 @@ it would not show as meant, by the rules of prose (`PROSE`,
 [markdown.md](markdown.md)). Under it, a preview shows the theory as the
 course player does (`ProseField` in `ui`, with the player's
 `DataProse`). The screen lists the questions that check the step, and
-adds one: its front and back, and its id.
+adds one: its front and back, its id, and the question it is asked
+before, if not after the last.
 
 ### A question
 
@@ -1083,9 +1090,18 @@ The field says at once when an id is none a subject can have, or one
 the draft or a release before it has. A step asks its questions in the
 order of their ids, and a published id is never renamed, so a new
 question's id sorts after the step's last. Past `z`, it is the last's id
-with a number after it. `idBetween` finds an id that sorts between two
-others: a number after the first when one fits, else one made code unit
-by code unit. A seeded property test checks that it keeps the order.
+with a number after it. A new question may instead be asked before one
+the step or review asks already ("Ask it", `questionIdBefore`): its id
+then sorts between that one and the one before it, a free letter when
+there is one, else an id from `idBetween`. Before the first, the
+place's own name (`q-<topic>-<n>`, `q-<topic>-r00`) is the lower end.
+When no id sorts there, the form says so, and the user writes one.
+An id the user writes is asked where it sorts: when that is not where
+"Ask it" says, the form says so too.
+`idBetween` finds an id that sorts between two others, by code unit,
+and is none taken: a number after the first when one fits, else one
+made code unit by code unit. A seeded property test checks that it
+keeps the order and never gives an id taken.
 
 Nothing an earlier release published is deleted: a learner's progress
 may name it. Its Delete is held, and the screen offers to retire it

@@ -1,7 +1,9 @@
 import { useState } from "preact/hooks";
 import { isEmptyText } from "@solid-memo/domain/deck";
-import { questionIdFor } from "@solid-memo/domain/release/courseIds";
+import { questionIdBefore, questionIdFor, questionsAt } from "@solid-memo/domain/release/courseIds";
+import { draftCardOf } from "@solid-memo/domain/release/draftOutline";
 import type { DraftChange, QuestionPlace, ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
+import { cardName } from "@solid-memo/ui/DataText";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { draftOf, LangTextField, rememberLanguages, textOfDraft, type DraftEntry, type LangTextDraft } from "@solid-memo/ui/LangTextField";
 import { recentLanguages } from "@solid-memo/ui/remembered";
@@ -16,7 +18,11 @@ function emptySide(): LangTextDraft {
  * A new card of a draft, asked where `place` says (a step, a chapter's
  * final review) or nowhere yet (a deck's card): its front and back, each
  * in the languages the user states, and its id, as the id assistant
- * suggests it (questionIdFor) unless the user writes another. Adding it
+ * suggests it (questionIdFor) unless the user writes another. Where the
+ * place asks others, the user may ask it before one of them: its id is
+ * then one that sorts there (questionIdBefore), as the place asks its
+ * cards in the order of their ids; an id the user writes that sorts
+ * elsewhere is asked there, and the form says so. Adding it
  * adds the card and asks it there (`onAdd`, which makes the changes and
  * returns whether they were made); its wrong options are written in the
  * question's editor. The form is then empty again, for the next.
@@ -34,13 +40,25 @@ export function NewQuestionForm({
   legend: string;
   onAdd: (changes: DraftChange[], card: string) => boolean;
 }) {
-  const { t } = useI18n();
+  const { t, readerText } = useI18n();
   const [typedId, setTypedId] = useState<string | null>(null);
+  /** The card it is asked before; null: after the last. */
+  const [before, setBefore] = useState<string | null>(null);
   const [front, setFront] = useState(emptySide);
   const [back, setBack] = useState(emptySide);
   const [missing, setMissing] = useState<{ side: "front" | "back"; entry: DraftEntry } | null>(null);
   const [empty, setEmpty] = useState(false);
-  const cardId = typedId ?? questionIdFor(draft, place);
+  const asked = place === null ? [] : questionsAt(draft, place);
+  const next = before !== null && asked.includes(before) ? before : null;
+  const suggested = next === null ? questionIdFor(draft, place) : questionIdBefore(draft, place!, next);
+  const cardId = typedId ?? suggested ?? "";
+  // The place asks its cards in the order of their ids: one the user writes is asked where it sorts, which may not be where they chose.
+  const previous = next === null ? (asked.at(-1) ?? null) : (asked[asked.indexOf(next) - 1] ?? null);
+  const sortsThere = (previous === null || cardId > previous) && (next === null || cardId < next);
+  const whereHint =
+    typedId === null
+      ? suggested === null && t("studio.draftEdit.noIdBetween")
+      : !sortsThere && idUsable(draft, cardId) && t("studio.draftEdit.notAskedThere");
 
   function submit(event: Event) {
     event.preventDefault();
@@ -63,6 +81,7 @@ export function NewQuestionForm({
     rememberLanguages("own", frontText.text, front);
     rememberLanguages("own", backText.text, back);
     setTypedId(null);
+    setBefore(null);
     setFront(emptySide());
     setBack(emptySide());
   }
@@ -92,7 +111,36 @@ export function NewQuestionForm({
           errorId={errorId}
           onChange={setBack}
         />
-        <IdField id={`${id}-id`} draft={draft} value={cardId} onChange={setTypedId} />
+        {asked.length > 0 && (
+          <>
+            <label for={`${id}-where`}>{t("studio.draftEdit.askedWhere")}</label>
+            <select
+              id={`${id}-where`}
+              value={next ?? ""}
+              onChange={(event) => {
+                setBefore(event.currentTarget.value || null);
+                setTypedId(null);
+              }}
+            >
+              <option value="">{t("studio.draftEdit.askedLast")}</option>
+              {asked.map((card) => {
+                const found = draftCardOf(draft, card);
+                const name = found === null ? card : cardName({ ...found.content, id: card }, readerText);
+                return (
+                  <option key={card} value={card}>
+                    {t("studio.draftEdit.askedBefore", { name })}
+                  </option>
+                );
+              })}
+            </select>
+          </>
+        )}
+        <IdField id={`${id}-id`} draft={draft} value={cardId} describedBy={whereHint ? `${id}-where-hint` : undefined} onChange={setTypedId} />
+        {whereHint && (
+          <p id={`${id}-where-hint`} class={typedId === null ? "hint" : "warning"}>
+            {whereHint}
+          </p>
+        )}
         <p id={errorId} class="error" role="alert">
           {missing !== null
             ? t("studio.draftEdit.chooseLanguage", { field: t(`language.field.${missing.side}`) })

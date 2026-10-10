@@ -41,6 +41,7 @@ function mergeStepLabels(t: I18n["t"]): Record<GuestMergeStep, string> {
     read: t("guestOffer.mergeStep.read"),
     decks: t("guestOffer.mergeStep.decks"),
     arrange: t("guestOffer.mergeStep.arrange"),
+    drafts: t("guestOffer.mergeStep.drafts"),
     verify: t("guestOffer.mergeStep.verify"),
     tidy: t("guestOffer.mergeStep.tidy"),
   };
@@ -123,8 +124,8 @@ function GuestStudyOfferStage({
     setProgress(null);
     onOutcome(result);
     if (!result.outcome.ok) {
-      // Decks added before adding failed are in the instance: its lists, which may be on screen, are read again, while the user reads why.
-      if (result.kind === "merge" && result.outcome.added.length > 0) void queryClient.invalidateQueries();
+      // Decks and drafts added before adding failed are in the instance: its lists, which may be on screen, are read again, while the user reads why.
+      if (result.kind === "merge" && result.outcome.added.length + result.outcome.copied.length > 0) void queryClient.invalidateQueries();
       return;
     }
     // The user's instances have changed, and so may every list of the instance: its decks, groups and statistics.
@@ -533,7 +534,7 @@ function GuestMergeFields({
           </fieldset>
         )}
         <p class="hint">{t("guestOffer.leftOut")}</p>
-        {plan !== undefined && plan.drafts > 0 && <p class="warning">{t("guestOffer.draftsDeleted", { count: plan.drafts })}</p>}
+        {plan !== undefined && plan.drafts > 0 && <p class="hint">{t("guestOffer.draftsCopied", { count: plan.drafts, name: target.name })}</p>}
         <ErrorMessage error={noneChosen ? t("guestOffer.chooseDeck") : error} focus={cameWithError} />
         <FormActions start={t("guestOffer.addStart", { name: target.name })} busy={busy} onBack={onBack} />
       </form>
@@ -698,7 +699,7 @@ function GuestTransferFailed({
   );
 }
 
-/** Adding the study to an instance failed: which decks are there now, whole, and that the study is still here. */
+/** Adding the study to an instance failed: which decks and drafts are there now, whole, and that the study is still here. */
 function GuestMergeFailed({
   outcome,
   onClose,
@@ -715,15 +716,31 @@ function GuestMergeFailed({
       error={outcome.error}
       onClose={onClose}
     >
-      {outcome.added.length === 0 ? (
-        <p>{t("guestOffer.nothingAdded", { name })}</p>
-      ) : (
+      {outcome.added.length + outcome.copied.length === 0 && <p>{t("guestOffer.nothingAdded", { name })}</p>}
+      {outcome.added.length > 0 && (
         <>
           <p>{t("guestOffer.keptDecks", { name, count: outcome.added.length })}</p>
           <ul>
             {outcome.added.map((deck) => (
               <li key={deck.url} lang={readerLang(deck.title)}>
                 {readerText(deck.title)}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+      {outcome.copied.length > 0 && (
+        <>
+          <p>{t("guestOffer.keptDrafts", { name, count: outcome.copied.length })}</p>
+          <ul>
+            {outcome.copied.map((draft) => (
+              <li key={draft.url}>
+                {Object.keys(draft.title).length > 0 && (
+                  <>
+                    <span lang={readerLang(draft.title)}>{readerText(draft.title)}</span>{" "}
+                  </>
+                )}
+                {t("guestOffer.keptDraftName", { name: draft.name, version: draft.version })}
               </li>
             ))}
           </ul>

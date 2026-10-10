@@ -8,7 +8,8 @@
  * compared with the release it follows, the card it retires retired in a
  * learner's copy too, nothing lost; and edited again when a document changed elsewhere, keeping that change;
  * checked as the instance's check checks it; deleted, documents, folders
- * and link. An instance deleted with a draft in it leaves nothing. The
+ * and link. A draft whose link on the catalogue is raced every time is
+ * taken back whole. An instance deleted with a draft in it leaves nothing. The
  * course is read with its text made ASCII: an edit of a draft is a
  * PATCH, which Community Solid Server's in-memory store cuts a document
  * short after when it holds text beyond ASCII (docs/testing.md).
@@ -163,6 +164,35 @@ describe.each(SERVERS)("drafts of releases on $name", ({ url: server }) => {
     const read = await page().getReleaseDraft(draftUrl);
     expect(read.steps[0]!.data.theory).toEqual({ en: "Written elsewhere" });
     expect(read.cards[0]!.data.front).toEqual({ en: "Q?" });
+  });
+
+  it("leaves no draft behind when its link on the catalogue keeps being raced, nor takes another name", { timeout: 120_000 }, async (context) => {
+    if (!(await preconditionsOf(server)).edits) context.skip("this server ignores If-Match, so a change made elsewhere cannot be detected");
+    if (!(await etagMarksEveryEdit(server))) context.skip(ETAG_OUTLIVES_EDITS);
+    const { instance } = await seed(server);
+    const catalog = `${instance.url}catalog.ttl`;
+    // Another tab makes a draft of its own just before each write of the catalogue: every attempt to link this one is refused.
+    let raced = 0;
+    const racing: typeof globalThis.fetch = async (input, init) => {
+      const url = String(input instanceof Request ? input.url : input);
+      const method = init?.method ?? "GET";
+      if (url === catalog && method !== "GET" && method !== "HEAD") {
+        raced++;
+        await page().createReleaseDraft(instance.url, { kind: "blankDeck", title: { en: `Other ${raced}` } });
+      }
+      return fetch(input, init);
+    };
+    await expect(page(racing).createReleaseDraft(instance.url, { kind: "blankCourse", title: { en: "Solid" } })).rejects.toMatchObject({
+      code: "changedElsewhere",
+    });
+    expect(raced).toBe(3);
+    // The other tab's drafts alone: none under this one's name, nor the next.
+    const drafts = await page().listReleaseDrafts(instance.url);
+    expect(drafts.map((draft) => draft.name).sort()).toEqual(["other-1", "other-2", "other-3"]);
+    for (const name of ["solid", "solid-2"]) {
+      expect((await fetch(`${instance.url}drafts/${name}/v1/release.ttl`, { method: "HEAD" })).status).toBe(404);
+    }
+    expect((await page().validateInstance(instance.url)).conforms).toBe(true);
   });
 
   it("leaves nothing of an instance deleted with a draft in it", { timeout: 120_000 }, async () => {

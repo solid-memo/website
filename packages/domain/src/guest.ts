@@ -4,6 +4,7 @@ import type { DeckGroup, DeckTree, GraftNode, TreeNode } from "./deckTree";
 import type { StepPart } from "./deckUpgrade";
 import type { Instance } from "./instance";
 import { cardsContainerOf, catalogUrlOf, ensureTrailingSlash, reviewsContainerOf } from "./instanceLayout";
+import type { ReleaseDraftSummary } from "./release/draftLayout";
 import type { Session } from "./session";
 import { fragmentIdOf } from "./subjectUrl";
 
@@ -80,10 +81,11 @@ export interface GuestStudy {
  * (docs/guest-mode.md "Adding to an instance"): the guest's study is
  * read and checked, each deck chosen is added as a new deck (its
  * documents first, its catalog entry last, then its answers), the guest's
- * deck groups are made around them, the guest's study is found unchanged
- * since it was read, and only then is it deleted from the device.
+ * deck groups are made around them, each of the guest's drafts is copied
+ * to the instance, the guest's study is found unchanged since it was
+ * read, and only then is it deleted from the device.
  */
-export const GUEST_MERGE_STEPS = ["read", "decks", "arrange", "verify", "tidy"] as const;
+export const GUEST_MERGE_STEPS = ["read", "decks", "arrange", "drafts", "verify", "tidy"] as const;
 
 export type GuestMergeStep = (typeof GUEST_MERGE_STEPS)[number];
 
@@ -107,16 +109,18 @@ export type GuestMergeOutcome =
    * Failed at `step`. The decks in `added` are in `instance`, each whole
    * (its documents and its entry), with its answers unless adding them
    * failed; the guest's groups were made when the failure came after
-   * "arrange"; nothing else was written. The guest's study is as it was.
+   * "arrange"; the drafts in `copied` are in `instance`, each whole;
+   * nothing else was written. The guest's study is as it was.
    */
-  | { ok: false; instance: Instance; step: GuestMergeStep; error: unknown; added: Deck[] };
+  | { ok: false; instance: Instance; step: GuestMergeStep; error: unknown; added: Deck[]; copied: ReleaseDraftSummary[] };
 
 /**
  * What adding a guest's study to an instance would add: each of the
  * guest's decks, with the instance's decks copied from the same library
  * release, which it is added beside rather than merged into. And how
- * many drafts of releases the guest wrote: they are not added, and go
- * with the rest of the guest's study.
+ * many drafts of releases the guest wrote: each is copied to the
+ * instance, under its name unless the instance has a draft of that name
+ * and version, then the next free one.
  */
 export interface GuestMergePlan {
   decks: { deck: Deck; sameRelease: Deck[] }[];
