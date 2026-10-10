@@ -84,6 +84,29 @@ interface Waiting {
 }
 
 /**
+ * What of a draft waits to be written, by document, whichever of its
+ * editors made it (the screen's, and the outline's beside it), and the
+ * editors to tell as it changes. One for each draft, shared: a write of
+ * any editor goes after all that waits, and none takes a write's draft
+ * while another's typing waits, which that draft does not hold.
+ */
+interface Pending {
+  documents: Map<string, Waiting>;
+  listeners: Set<() => void>;
+}
+
+const pending = new Map<string, Pending>();
+
+function pendingOf(draftUrl: string): Pending {
+  let found = pending.get(draftUrl);
+  if (found === undefined) {
+    found = { documents: new Map(), listeners: new Set() };
+    pending.set(draftUrl, found);
+  }
+  return found;
+}
+
+/**
  * A draft to edit (docs/studio.md, Writing a draft): read once
  * (getReleaseDraft), and changed as the user edits it, optimistically.
  * Each change is made at once in the draft the screens show, then
@@ -111,13 +134,25 @@ export function useDraftEditor(useCases: UseCases, draftUrl: string): DraftEdito
     staleTime: Infinity,
   });
   const [failure, setFailure] = useState<DraftFailure | null>(null);
-  const waiting = useRef(new Map<string, Waiting>());
+  const waiting = pendingOf(draftUrl);
   const [waitingCount, setWaitingCount] = useState(0);
   const mutationKey = writeKey(draftUrl);
   const writing = useIsMutating({ mutationKey });
 
-  /** Nothing else of the draft is on its way: no write after this one, of any screen, and nothing waiting here. */
-  const last = () => queryClient.isMutating({ mutationKey }) === 0 && waiting.current.size === 0;
+  // Every editor of the draft hears what waits, whichever made it.
+  useEffect(() => {
+    const heard = () => setWaitingCount(waiting.documents.size);
+    waiting.listeners.add(heard);
+    heard();
+    return () => waiting.listeners.delete(heard);
+  }, [draftUrl]);
+
+  function told() {
+    for (const heard of waiting.listeners) heard();
+  }
+
+  /** Nothing else of the draft is on its way: no write after this one, of any screen, and nothing waiting, of any editor. */
+  const last = () => queryClient.isMutating({ mutationKey }) === 0 && waiting.documents.size === 0;
 
   function readAfresh() {
     return last() ? queryClient.invalidateQueries({ queryKey: draftKey(draftUrl) }) : undefined;
@@ -147,19 +182,19 @@ export function useDraftEditor(useCases: UseCases, draftUrl: string): DraftEdito
   }
 
   function flush(documentUrl: string) {
-    const held = waiting.current.get(documentUrl)!;
+    const held = waiting.documents.get(documentUrl)!;
     clearTimeout(held.timer);
-    waiting.current.delete(documentUrl);
-    setWaitingCount(waiting.current.size);
+    waiting.documents.delete(documentUrl);
+    told();
     write(held.changes);
   }
 
   function flushAll() {
-    for (const documentUrl of [...waiting.current.keys()]) flush(documentUrl);
+    for (const documentUrl of [...waiting.documents.keys()]) flush(documentUrl);
   }
 
-  // Leaving the screen writes what waits.
-  useEffect(() => flushAll, []);
+  // Leaving the screen, or the draft, writes what waits.
+  useEffect(() => flushAll, [draftUrl]);
 
   // The status bar counts what waits here too, and says when the last change failed.
   const report = useContext(DraftWaiting);
@@ -182,19 +217,19 @@ export function useDraftEditor(useCases: UseCases, draftUrl: string): DraftEdito
     if (documents.length === 0) return null;
     queryClient.setQueryData(draftKey(draftUrl), after);
     if (!debounce || documents.length > 1) {
-      // What waits goes first, so the writes keep the order the user made them in.
+      // What waits goes first, whichever editor it waits for, so the writes keep the order the user made them in.
       flushAll();
       write(changes);
       return null;
     }
     const documentUrl = documents[0]!;
-    const held = waiting.current.get(documentUrl);
+    const held = waiting.documents.get(documentUrl);
     if (held !== undefined) clearTimeout(held.timer);
-    waiting.current.set(documentUrl, {
+    waiting.documents.set(documentUrl, {
       changes: [...(held?.changes ?? []), ...changes],
       timer: setTimeout(() => flush(documentUrl), DEBOUNCE_MS),
     });
-    setWaitingCount(waiting.current.size);
+    told();
     return null;
   }
 

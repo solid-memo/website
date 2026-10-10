@@ -29,7 +29,8 @@ export interface WorkspaceProblems {
  * lists the problems of the deck or the draft shown (`problems`; a hint
  * elsewhere), each a link to where it is fixed; Activity, what the
  * Studio's screens said was done since the page was opened, the last
- * first. Its tabs are a tablist: Left and Right go from one to the other.
+ * first, a line said again just after itself counted ("Draft saved
+ * ×5"). Its tabs are a tablist: Left and Right go from one to the other.
  */
 export function BottomDock({
   id,
@@ -99,7 +100,7 @@ export function BottomDock({
               {activity.map((entry) => (
                 <li key={entry.id}>
                   <time dateTime={entry.at.toISOString()}>{entry.at.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" })}</time>{" "}
-                  {entry.text}
+                  {entry.count === 1 ? entry.text : t("studio.dock.repeated", { text: entry.text, count: entry.count })}
                 </li>
               ))}
             </ol>

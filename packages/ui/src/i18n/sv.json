@@ -1499,6 +1499,7 @@
       "activity": "Aktivitet",
       "resize": "Panelens höjd",
       "noActivity": "Inget gjort ännu sedan Studion öppnades.",
+      "repeated": "{text} ×{count}",
       "noProblemsHere": "En kortleks eller ett utkasts problem listas på dess skärmar.",
       "checking": "Letar efter problem…",
       "none": "Inga problem hittades.",
@@ -1666,7 +1667,7 @@
         "one": "{shown} av {count} kort",
         "other": "{shown} av {count} kort"
       },
-      "keys": "Tangenter: {j} och {k} flyttar mellan korten, {x} väljer ett, {enter} öppnar det.",
+      "keys": "Tangenter: {j} och {k} flyttar mellan korten, {x} väljer ett, {enter} öppnar det, {shiftJ} och {shiftK} väljer också nästa eller det före, och {escape} tömmer urvalet.",
       "selected": {
         "one": "{count} kort valt",
         "other": "{count} kort valda"
@@ -1717,7 +1718,8 @@
       "previous": "Föregående kort",
       "next": "Nästa kort",
       "detail": "Kort",
-      "close": "Stäng kortet"
+      "close": "Stäng kortet",
+      "saved": "Sparade kortet {card}."
     },
     "confirm": {
       "unsaved": {

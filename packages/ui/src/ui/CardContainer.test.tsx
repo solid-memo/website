@@ -28,7 +28,7 @@ const card: Card = {
   formatVersion: 1,
 };
 
-function renderContainer(useCases: UseCases, { shown = card, of = deck }: { shown?: Card; of?: Deck } = {}) {
+function renderContainer(useCases: UseCases, { shown = card, of = deck, onSaved }: { shown?: Card; of?: Deck; onSaved?: () => void } = {}) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
@@ -41,6 +41,7 @@ function renderContainer(useCases: UseCases, { shown = card, of = deck }: { show
         deck={of}
         card={shown}
         onRemoved={onRemoved}
+        onSaved={onSaved}
       />
     </QueryClientProvider>,
   );
@@ -52,7 +53,8 @@ describe("CardContainer", () => {
     const useCases = makeUseCasesFake({
       updateCard: vi.fn(async () => ({ ...card, back: { en: "water (mizu)" } })),
     });
-    const { invalidate, queryClient } = renderContainer(useCases);
+    const onSaved = vi.fn();
+    const { invalidate, queryClient } = renderContainer(useCases, { onSaved });
     const queueKey = ["studyQueue", deck.url];
     queryClient.setQueryData(queueKey, { due: [card], newCards: [], studiedToday: 0 });
 
@@ -72,6 +74,7 @@ describe("CardContainer", () => {
     await waitFor(() => {
       expect(queryClient.getQueryData(queueKey)).toBeUndefined();
     });
+    expect(onSaved).toHaveBeenCalledTimes(1);
   });
 
   it("starts the card's new text in the language the deck's cards have", async () => {

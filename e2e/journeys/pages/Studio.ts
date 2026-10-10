@@ -407,7 +407,7 @@ export class Studio extends Screen {
    */
   async selectCardsWithKeys(deck: string, count: number): Promise<void> {
     await this.intent(`Select ${count} cards with the keyboard`, async () => {
-      await expect(this.page.getByText(this.t("studio.cards.keys", { j: "j", k: "k", x: "x", enter: "Enter" }))).toBeVisible();
+      await expect(this.page.getByText(this.t("studio.cards.keys", { j: "j", k: "k", x: "x", enter: "Enter", shiftJ: "Shift+J", shiftK: "Shift+K", escape: "Escape" }))).toBeVisible();
       await this.page.keyboard.press("j");
       await expect(this.cards(deck).getByRole("rowheader").first().getByRole("link")).toBeFocused();
       for (let index = 0; index < count; index++) {

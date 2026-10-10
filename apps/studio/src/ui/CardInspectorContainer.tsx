@@ -8,6 +8,8 @@ import { fragmentIdOf } from "@solid-memo/domain/subjectUrl";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import { untouched } from "@solid-memo/domain/libraryUpgrade";
 import { CardContainer } from "@solid-memo/ui/CardContainer";
+import type { CardEdits } from "@solid-memo/ui/CardScreen";
+import { cardName } from "@solid-memo/ui/DataText";
 import { useDataCheck } from "@solid-memo/ui/dataCheck";
 import { publishedDistractorIds, useDeckRelease } from "@solid-memo/ui/deckRelease";
 import { DistractorFields } from "@solid-memo/ui/DistractorFields";
@@ -19,6 +21,7 @@ import { CardInspectorScreen, type CardReleaseLink } from "./CardInspectorScreen
 import { CardScheduleContainer } from "./CardScheduleContainer";
 import { ReadOnlyScope } from "./ReadOnly";
 import type { CardTab } from "./router";
+import { useActivityLog } from "./shell/activity";
 
 /** How the card stands to the release (`release`, as useDeckRelease reads it): unknown while it is read, or when it cannot be. */
 export function releaseLinkOf(card: Card, release: LibraryDeckContent | null | undefined): CardReleaseLink {
@@ -48,7 +51,10 @@ export function releaseLinkOf(card: Card, release: LibraryDeckContent | null | u
  * (useDataCheck), every tab is shown but nothing can be changed
  * (ReadOnlyScope), with a link to the deck's health (`healthHref`). The
  * content tab says while its edits are not saved (`onUnsaved`, as
- * CardScreen's), so the workspace asks before they are left.
+ * CardScreen's), so the workspace asks before they are left, and keeps
+ * them where the workspace says (`keep`, as CardScreen's), so the card
+ * shown beside its deck's cards or alone, as the window changes, has
+ * them still. Each save, of either tab, is told to the Studio's activity.
  */
 export function CardInspectorContainer({
   useCases,
@@ -63,6 +69,7 @@ export function CardInspectorContainer({
   onRemoved,
   steps,
   onUnsaved,
+  keep,
 }: {
   useCases: UseCases;
   deck: Deck;
@@ -80,8 +87,11 @@ export function CardInspectorContainer({
   /** As CardInspectorScreen's: the cards before and after it beside it. */
   steps?: { previous: (() => void) | null; next: (() => void) | null };
   onUnsaved?: (save: (() => Promise<boolean>) | null) => void;
+  keep?: { current: CardEdits | null };
 }) {
-  const { t, errorText } = useI18n();
+  const { t, errorText, readerText } = useI18n();
+  const log = useActivityLog();
+  const logSaved = () => log(t("studio.card.saved", { card: cardName(card, readerText) }));
   const queryClient = useQueryClient();
   const release = useDeckRelease(useCases, deck);
   const readOnly = useDataCheck(useCases, instanceUrlOfDeck(deck.url)).readOnly(deck);
@@ -100,6 +110,7 @@ export function CardInspectorContainer({
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["cards", deck.cardsDocumentUrl] });
       queryClient.removeQueries({ queryKey: ["studyQueue", deck.url] });
+      logSaved();
     },
   });
 
@@ -125,6 +136,8 @@ export function CardInspectorContainer({
             // A field the content does not have marks none.
             arrival={field as CardTextPart | undefined}
             onUnsaved={onUnsaved}
+            onSaved={logSaved}
+            keep={keep}
           />
         ) : tab === "schedule" ? (
           <CardScheduleContainer useCases={useCases} deck={deck} card={card} />

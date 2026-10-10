@@ -1499,6 +1499,7 @@
       "activity": "Activity",
       "resize": "Height of the panel",
       "noActivity": "Nothing done yet since the Studio was opened.",
+      "repeated": "{text} ×{count}",
       "noProblemsHere": "A deck's or a draft's problems are listed on its screens.",
       "checking": "Looking for problems…",
       "none": "No problems found.",
@@ -1666,7 +1667,7 @@
         "one": "{shown} of {count} card",
         "other": "{shown} of {count} cards"
       },
-      "keys": "Keys: {j} and {k} move between the cards, {x} selects one, {enter} opens it.",
+      "keys": "Keys: {j} and {k} move between the cards, {x} selects one, {enter} opens it, {shiftJ} and {shiftK} select the next one or the one before too, and {escape} clears the selection.",
       "selected": {
         "one": "{count} card selected",
         "other": "{count} cards selected"
@@ -1717,7 +1718,8 @@
       "previous": "Previous card",
       "next": "Next card",
       "detail": "Card",
-      "close": "Close the card"
+      "close": "Close the card",
+      "saved": "Saved the card {card}."
     },
     "confirm": {
       "unsaved": {

@@ -15,7 +15,7 @@ import { applyDraftChanges, type ReleaseDraft } from "@solid-memo/domain/release
 import { problem } from "@solid-memo/domain/release/problems";
 import { courseDraft, DRAFT_URL, instanceA, instanceB, makeCard, makeDeck, session } from "../test/fixtures";
 import { courseDeck, courseInstance, makeCourse } from "@solid-memo/ui/test/course";
-import { wideScreen } from "../test/media";
+import { narrowScreen, wideScreen } from "../test/media";
 
 const kanji = makeDeck("deck-1", { en: "Kanji N5" });
 const verbs = makeDeck("deck-2", { en: "Verbs" });
@@ -130,20 +130,16 @@ describe("StudioWorkspace", () => {
     expect(screen.queryByRole("navigation", { name: "Deck" })).toBeNull();
   });
 
-  it("shows Home's views from their tabs, replacing the entry, the filter's text kept", async () => {
-    window.history.replaceState(null, "", studioRouteToHash({ screen: "home", instanceUrl: instanceA.url, view: { filter: "k" } }));
+  it("shows Home's views from their tabs, replacing the entry, the filter's text and the sort kept", async () => {
+    const view = { filter: "k", sort: { column: "title" as const, descending: true } };
+    window.history.replaceState(null, "", studioRouteToHash({ screen: "home", instanceUrl: instanceA.url, view }));
     const length = window.history.length;
     renderWorkspace(makeUseCasesFake({ listInstances: vi.fn(async () => [instanceA]), listDecks: vi.fn(async () => [kanji, verbs]) }));
     const views = within(await screen.findByRole("group", { name: "Views" }));
     fireEvent.click(views.getByRole("button", { name: /^Due today/ }));
-    expect(parseStudioHash(window.location.hash)).toEqual({
-      screen: "home",
-      instanceUrl: instanceA.url,
-      view: { filter: "k", sort: { column: "due", descending: true } },
-      show: "due",
-    });
+    expect(parseStudioHash(window.location.hash)).toEqual({ screen: "home", instanceUrl: instanceA.url, view, show: "due" });
     fireEvent.click(views.getByRole("button", { name: /^All/ }));
-    expect(parseStudioHash(window.location.hash)).toEqual({ screen: "home", instanceUrl: instanceA.url, view: { filter: "k" } });
+    expect(parseStudioHash(window.location.hash)).toEqual({ screen: "home", instanceUrl: instanceA.url, view });
     expect(window.history.length).toBe(length);
   });
 
@@ -703,6 +699,64 @@ describe("StudioWorkspace", () => {
       answer("Save");
       expect(await detail().findByRole("heading", { name: "Card: water" })).toBeInTheDocument();
       expect(useCases.updateCard).toHaveBeenCalledWith(kanji, fire, expect.objectContaining({ front: { en: "blaze" } }));
+    });
+
+    it("keeps a card's edits not saved as the window narrows to the card alone, and widens to it beside the list again", async () => {
+      const window_ = narrowScreen(true);
+      window_.widen();
+      const [water, fire] = [makeCard(kanji, "water"), makeCard(kanji, "fire")];
+      window.history.replaceState(null, "", studioRouteToHash({ screen: "card", deckUrl: kanji.url, cardUrl: water!.url }));
+      const useCases = useCasesOf([water!, fire!]);
+      renderWorkspace(useCases);
+      fireEvent.input(await (await detailFound()).findByLabelText("Front"), { target: { value: "wet" } });
+      window_.narrow();
+      expect(screen.queryByRole("complementary", { name: "Card" })).toBeNull();
+      expect(await inMain().findByLabelText("Front")).toHaveValue("wet");
+      window_.widen();
+      expect(await (await detailFound()).findByLabelText("Front")).toHaveValue("wet");
+      // Still asked about before they are left.
+      fireEvent.click(detail().getByRole("button", { name: "Close" }));
+      expect(screen.getByRole("dialog", { name: "Save your changes?" })).toBeInTheDocument();
+    });
+
+    it("starts a card's editor afresh once its edits are discarded for another tab, and it is opened again", async () => {
+      const [water, fire] = [makeCard(kanji, "water"), makeCard(kanji, "fire")];
+      window.history.replaceState(null, "", studioRouteToHash({ screen: "card", deckUrl: kanji.url, cardUrl: water!.url }));
+      renderWorkspace(useCasesOf([water!, fire!]));
+      fireEvent.input(await (await detailFound()).findByLabelText("Front"), { target: { value: "wet" } });
+      fireEvent.click(detail().getByRole("link", { name: "Schedule" }));
+      fireEvent.click(within(screen.getByRole("dialog", { name: "Save your changes?" })).getByRole("button", { name: "Discard" }));
+      await waitFor(() => expect(detail().queryByLabelText("Front")).toBeNull());
+      fireEvent.click(detail().getByRole("link", { name: "Content" }));
+      expect(await detail().findByLabelText("Front")).toHaveValue("water");
+    });
+
+    it("asks before Back leaves a card's edits not saved, the card shown meanwhile, and goes back once they are discarded", async () => {
+      const [water, fire] = [makeCard(kanji, "water"), makeCard(kanji, "fire")];
+      const route = { screen: "card" as const, deckUrl: kanji.url, cardUrl: water!.url };
+      window.history.replaceState(null, "", studioRouteToHash(route));
+      const back = vi.spyOn(window.history, "back").mockImplementation(() => undefined);
+      renderWorkspace(useCasesOf([water!, fire!]));
+      fireEvent.input(await (await detailFound()).findByLabelText("Front"), { target: { value: "wet" } });
+      const oldURL = window.location.href;
+      window.history.replaceState(null, "", studioRouteToHash({ screen: "cards", deckUrl: kanji.url }));
+      fireEvent(window, new HashChangeEvent("hashchange", { oldURL, newURL: window.location.href }));
+      const question = await screen.findByRole("dialog", { name: "Save your changes?" });
+      expect(parseStudioHash(window.location.hash)).toEqual(route);
+      expect(detail().getByLabelText("Front")).toHaveValue("wet");
+      fireEvent.click(within(question).getByRole("button", { name: "Discard" }));
+      expect(back).toHaveBeenCalled();
+    });
+
+    it("shows the list at the page of a card opened from elsewhere, so its row is in sight, with no Back stop", async () => {
+      const route = { screen: "card" as const, deckUrl: kanji.url, cardUrl: many[11]!.url, query: { ...DEFAULT_CARD_QUERY, size: 10 as const } };
+      window.history.replaceState(null, "", studioRouteToHash(route));
+      const length = window.history.length;
+      renderWorkspace(useCasesOf(many));
+      await detailFound();
+      await waitFor(() => expect(parseStudioHash(window.location.hash)).toEqual({ ...route, query: { ...route.query, page: 2 } }));
+      expect(await list().findByRole("row", { name: /c11/ })).toHaveAttribute("aria-current", "true");
+      expect(window.history.length).toBe(length);
     });
   });
 

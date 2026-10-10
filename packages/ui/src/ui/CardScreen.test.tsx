@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
-import { CardScreen } from "./CardScreen";
+import { CardScreen, type CardEdits } from "./CardScreen";
 import type { Card } from "@solid-memo/domain/deck";
 import { alertTexts, statusTexts } from "../test/liveRegions";
 import { I18nProvider } from "./i18n";
@@ -454,6 +454,26 @@ describe("CardScreen", () => {
     expect(onUnsaved).toHaveBeenLastCalledWith(expect.any(Function));
     rerender(<p>Another card</p>);
     expect(onUnsaved).toHaveBeenLastCalledWith(null);
+  });
+
+  it("keeps its edits where it is told, and starts from them when shown again", () => {
+    const keep: { current: CardEdits | null } = { current: null };
+    const { props, unmount } = renderScreen({ keep });
+    fireEvent.input(screen.getByLabelText("Back"), { target: { value: "fire" } });
+    fireEvent.click(screen.getByRole("button", { name: "Add a wrong option" }));
+    fireEvent.input(screen.getByLabelText("Wrong option"), { target: { value: "earth" } });
+    fireEvent.click(screen.getByRole("button", { name: "Add" }));
+    unmount();
+    const onUnsaved = vi.fn();
+    render(<CardScreen {...props} keep={keep} onUnsaved={onUnsaved} />);
+    expect(screen.getByLabelText("Back")).toHaveValue("fire");
+    expect(onUnsaved).toHaveBeenLastCalledWith(expect.any(Function));
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    expect(props.onSave).toHaveBeenLastCalledWith({
+      front: { ja: "水" },
+      back: { en: "fire" },
+      distractors: [{ id: "card-1-d1", text: { en: "earth" } }],
+    });
   });
 
   it("refuses to save an incomplete card and says why", () => {

@@ -169,12 +169,17 @@ describe("DeckTableScreen", () => {
     const views = screen.getByRole("group", { name: "Views" });
     expect(within(views).getAllByRole("button").map((button) => button.textContent)).toEqual([
       "All 2",
-      "Due today 1",
+      // Verbs' cards are still counted: shown as they may be due.
+      "Due today 2",
       "Courses 0",
       "Library copies 1",
       "Needs attention 1",
     ]);
     expect(within(views).getByRole("button", { name: "All 2" })).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(within(views).getByRole("button", { name: "Due today 2" }));
+    expect(names()).toEqual(["Kanji N5", "Verbs"]);
+    const verbsDue = within(within(table()).getByRole("row", { name: /Verbs/ })).getAllByRole("cell")[5]!;
+    expect(verbsDue).toHaveTextContent("Counting…");
     fireEvent.click(within(views).getByRole("button", { name: "Needs attention 1" }));
     expect(within(views).getByRole("button", { name: "Needs attention 1" })).toHaveAttribute("aria-pressed", "true");
     expect(names()).toEqual(["Kanji N5"]);

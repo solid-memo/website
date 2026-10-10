@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from "preact/hooks";
+import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { DEFAULT_CARD_QUERY } from "@solid-memo/domain/cardQuery";
 import { DEFAULT_DECK_TABLE_VIEW } from "@solid-memo/domain/deckTable";
 import type { Card } from "@solid-memo/domain/deck";
 import type { WorkspaceProps } from "@solid-memo/ui/App";
+import type { CardEdits } from "@solid-memo/ui/CardScreen";
 import { Breadcrumbs } from "@solid-memo/ui/Breadcrumbs";
 import { useDocumentTitle } from "@solid-memo/ui/documentTitle";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
@@ -77,7 +78,10 @@ import {
  * wide enough, else the inspector alone), and the problems of the deck
  * or the draft shown (useWorkspaceProblems), the draft's counted in its
  * Check tab. A card's edits not saved are asked about before they are
- * left (useUnsavedEdits).
+ * left (useUnsavedEdits), and kept as the window changes from the card
+ * beside its deck's cards to the card alone, or back. A card opened
+ * beside its deck's cards from elsewhere (the palette, a deck's
+ * schedule) has the list at its page, so that its row is in sight.
  */
 export function StudioWorkspace({ useCases, session, banner, children }: WorkspaceProps) {
   const { t, errorText, readerText } = useI18n();
@@ -95,6 +99,8 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
   const [order, setOrder] = useState<readonly string[]>([]);
   // The library copy at the cursor of the table of them, shown beside it, by its deck's URL.
   const [libraryDeck, setLibraryDeck] = useState<string | null>(null);
+  // The card the list was last put at the page of.
+  const placed = useRef<string | null>(null);
 
   const instancesQuery = useQuery({
     queryKey: ["instances", session.webId],
@@ -123,6 +129,10 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
     enabled: cardUrl !== null && activeDeck !== null,
   });
   const activeCard = cardUrl === null ? null : (cardsQuery.data?.find((card) => card.url === cardUrl) ?? null);
+  // What the card's editor holds, for the editor shown next of the same card on the same tab (beside its deck's cards, or alone):
+  // another card, or another tab and back (its edits saved or discarded on the way), starts afresh.
+  const cardTab = route?.screen === "card" ? (route.tab ?? "content") : null;
+  const cardEdits = useMemo<{ current: CardEdits | null }>(() => ({ current: null }), [cardUrl, cardTab]);
   const draftUrl = route !== null && isDraftRoute(route) ? route.draftUrl : null;
   // The draft's editors share this query (useDraftEditor): it is read once, and changed as they edit it.
   const draftQuery = useQuery({
@@ -155,6 +165,14 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
       replace({ screen: "draft", draftUrl: draftUrl! });
     }
   }, [route, instances, decksQuery.data, cardsQuery.data, draftQuery.data]);
+
+  // A card beside its deck's cards, once the list has it: the list at its page, once for each card.
+  useEffect(() => {
+    if (!split || placed.current === cardUrl || !order.includes(cardUrl!)) return;
+    placed.current = cardUrl;
+    const at = atItsPage(route as CardRoute);
+    if (at.query!.page !== ((route as CardRoute).query ?? DEFAULT_CARD_QUERY).page) replace(at);
+  }, [split, cardUrl, order]);
 
   const waiting = instancesQuery.error ? (
     <ErrorMessage error={errorText(instancesQuery.error)} />
@@ -258,6 +276,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
         onRemoved={() => replace(workbenchOf(route))}
         {...(split ? { steps: { previous: step(-1), next: step(1) } } : {})}
         onUnsaved={unsaved.report}
+        keep={cardEdits}
       />
     );
   };

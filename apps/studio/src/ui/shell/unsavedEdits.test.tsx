@@ -67,10 +67,14 @@ describe("useUnsavedEdits", () => {
     answer("Discard");
     expect(move).toHaveBeenCalledTimes(1);
     expect(save).not.toHaveBeenCalled();
+    // Discarded, the edits are left behind: the editor reports any made after.
+    act(() => guarded.guard(move));
+    expect(move).toHaveBeenCalledTimes(2);
+    act(() => guarded.report(save));
     act(() => guarded.guard(move));
     answer("Save");
     expect(question()).toBeNull();
-    await waitFor(() => expect(move).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(move).toHaveBeenCalledTimes(3));
     expect(save).toHaveBeenCalled();
   });
 
@@ -94,10 +98,67 @@ describe("useUnsavedEdits", () => {
     expect(onFollow).not.toHaveBeenCalled();
     answer("Discard");
     expect(onFollow).toHaveBeenCalledTimes(1);
+    act(() => guarded.report(async () => true));
     fireEvent.click(screen.getByRole("link", { name: "Drafts" }));
     expect(window.location.hash).toBe("#/studio/cards");
     answer("Discard");
     expect(window.location.hash).toBe("#/studio/drafts");
+  });
+
+  it("undoes Back or Forward first while edits are unsaved, before the router hears of it, and goes there once answered", async () => {
+    const router = vi.fn();
+    window.addEventListener("hashchange", router);
+    const back = vi.spyOn(window.history, "back").mockImplementation(() => undefined);
+    const save = vi.fn(async () => true);
+    renderPage(save);
+    /** The browser going to another entry of the history, as Back does. */
+    const pop = (to: string) =>
+      act(() => {
+        const oldURL = window.location.href;
+        window.history.replaceState(null, "", to);
+        window.dispatchEvent(new HashChangeEvent("hashchange", { oldURL, newURL: window.location.href }));
+      });
+    const length = window.history.length;
+    pop("#/studio/drafts");
+    expect(router).not.toHaveBeenCalled();
+    expect(window.location.hash).toBe("#/studio/cards");
+    // The page shown is put back on top: Back from it goes where Back went.
+    expect(window.history.length).toBe(length + 1);
+    answer("Stay");
+    expect(back).not.toHaveBeenCalled();
+    pop("#/studio/drafts");
+    answer("Discard");
+    expect(back).toHaveBeenCalledTimes(1);
+    // Answered, the move is not asked about again.
+    pop("#/studio/drafts");
+    expect(question()).toBeNull();
+    expect(router).toHaveBeenCalledTimes(1);
+    act(() => guarded.report(save));
+    pop("#/studio/groups");
+    answer("Save");
+    await waitFor(() => expect(back).toHaveBeenCalledTimes(2));
+    expect(save).toHaveBeenCalled();
+    window.removeEventListener("hashchange", router);
+  });
+
+  it("leaves a hash change to the page shown, or with nothing unsaved, to the router", () => {
+    const router = vi.fn();
+    window.addEventListener("hashchange", router);
+    renderPage(async () => true);
+    window.dispatchEvent(new HashChangeEvent("hashchange", { oldURL: window.location.href, newURL: window.location.href }));
+    act(() => guarded.report(null));
+    window.dispatchEvent(new HashChangeEvent("hashchange", { oldURL: "https://app.example/#/studio/drafts", newURL: window.location.href }));
+    expect(router).toHaveBeenCalledTimes(2);
+    expect(question()).toBeNull();
+    window.removeEventListener("hashchange", router);
+  });
+
+  it("has the browser ask before the page is left while edits are unsaved", () => {
+    renderPage(async () => true);
+    const leave = () => window.dispatchEvent(new Event("beforeunload", { cancelable: true }));
+    expect(leave()).toBe(false);
+    act(() => guarded.report(null));
+    expect(leave()).toBe(true);
   });
 
   it("leaves alone a link to the page shown, within the page, or opened elsewhere", () => {

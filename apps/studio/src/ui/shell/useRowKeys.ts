@@ -151,8 +151,8 @@ export function useRowKeys({
         select.onChoose(toggled(select.chosen, [keys[at]!], !select.chosen.has(keys[at]!)));
         break;
       case "open":
-        // The row's link opens the row itself.
-        if (onOpen === undefined || at === -1 || event.target instanceof HTMLAnchorElement) return;
+        // The row's link opens the row itself, and its buttons do what they do.
+        if (onOpen === undefined || at === -1 || event.target instanceof HTMLAnchorElement || event.target instanceof HTMLButtonElement) return;
         onOpen(at);
         break;
       case "clear":

@@ -22,9 +22,10 @@ type ReleaseColumn = "release" | "readers" | "draft";
  * draft it was published from, while the instance has it (`draftOf`),
  * and its next version to start as a draft. A release is never changed here.
  * The table is a DataTable: a column's header sorts it by the column,
- * then the other way, then as the catalogue lists them, and a filter
- * keeps the releases whose name or address holds its text, case and
- * accents aside.
+ * then the other way, then as the catalogue lists them, Enter opens the
+ * release at the cursor, as its name's link does, and a filter keeps
+ * the releases whose name or address holds its text, case and accents
+ * aside.
  * Starting a next version writes the catalogue, so it is held while the
  * catalogue may not be written (`hold`).
  */
@@ -172,6 +173,7 @@ export function ReleasesScreen({
               ]}
               sort={sort}
               onSort={(key) => setSort(nextSort(sort, key as ReleaseColumn))}
+              onOpen={(release) => window.location.assign(release.url)}
             />
           )}
         </>

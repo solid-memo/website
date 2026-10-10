@@ -1,5 +1,5 @@
 import type { ComponentChildren } from "preact";
-import { useCallback, useEffect, useRef, useState } from "preact/hooks";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { ConfirmDialog } from "./ConfirmDialog";
 
@@ -10,11 +10,16 @@ export type SaveEdits = () => Promise<boolean>;
  * Keeps edits not saved from being dropped unasked (docs/studio.md, Card
  * inspector). An editor reports them (`report`: how to save them, then
  * null once there are none). While there are some, a move away from the
- * page (`guard`, and any link to another of the app's pages followed by
- * a plain click) first asks, in a dialog: Save saves them, then moves,
- * unless the save failed or was refused, which the editor shows; Discard
- * moves without them; Stay, Escape or Close moves nowhere. A link
- * followed after the question is followed as it would have been.
+ * page (`guard`, any link to another of the app's pages followed by a
+ * plain click, and Back, Forward or a hash typed in) first asks, in a
+ * dialog: Save saves them, then moves, unless the save failed or was
+ * refused, which the editor shows; Discard moves without them; Stay,
+ * Escape or Close moves nowhere. A link followed after the question is
+ * followed as it would have been. Back or Forward is undone before the
+ * question, the page shown before it put back on top of the history, and
+ * done again once answered, by going back from there to where it went.
+ * Leaving the app (a reload, closing the tab) is left to the browser's
+ * own question.
  */
 export function useUnsavedEdits(): {
   report: (save: SaveEdits | null) => void;
@@ -57,6 +62,27 @@ export function useUnsavedEdits(): {
     return () => document.removeEventListener("click", click, true);
   }, []);
 
+  // Before the router's own listener (useHashRouter), which then never hears of the move.
+  useLayoutEffect(() => {
+    const hashChange = (event: HashChangeEvent) => {
+      if (unsaved.current === null) return;
+      const shown = new URL(event.oldURL).hash;
+      if (shown === window.location.hash) return;
+      event.stopImmediatePropagation();
+      window.history.pushState(null, "", shown);
+      setAsked(() => () => window.history.back());
+    };
+    const unload = (event: BeforeUnloadEvent) => {
+      if (unsaved.current !== null) event.preventDefault();
+    };
+    window.addEventListener("hashchange", hashChange, true);
+    window.addEventListener("beforeunload", unload);
+    return () => {
+      window.removeEventListener("hashchange", hashChange, true);
+      window.removeEventListener("beforeunload", unload);
+    };
+  }, []);
+
   const dialog = asked !== null && (
     <ConfirmDialog
       heading={t("studio.confirm.unsaved.heading")}
@@ -66,7 +92,9 @@ export function useUnsavedEdits(): {
           onChoose: () => {
             setAsked(null);
             void unsaved.current!().then((saved) => {
-              if (saved) asked();
+              if (!saved) return;
+              unsaved.current = null;
+              asked();
             });
           },
         },
@@ -75,6 +103,8 @@ export function useUnsavedEdits(): {
           danger: true,
           onChoose: () => {
             setAsked(null);
+            // Left behind: the move it makes is not asked about again.
+            unsaved.current = null;
             asked();
           },
         },

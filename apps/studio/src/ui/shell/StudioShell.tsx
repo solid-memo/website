@@ -5,7 +5,7 @@ import { useI18n } from "@solid-memo/ui/i18n";
 import { MAIN_ID } from "@solid-memo/ui/SkipLink";
 import { DraftWaiting, useDraftSaving, type EditorReport } from "../draftEditor";
 import { studioRouteToHash, type StudioRoute } from "../router";
-import { ACTIVITY_LIMIT, ActivityLog, useActivity, type ActivityEntry } from "./activity";
+import { ActivityLog, addActivity, useActivity, type ActivityEntry } from "./activity";
 import { BottomDock, type DockTab, type WorkspaceProblems } from "./BottomDock";
 import type { Command, ScreenCommand } from "./commandIndex";
 import { CommandPalette } from "./CommandPalette";
@@ -449,7 +449,12 @@ export function StudioShell({
           {instance !== null && <p>{instance.name}</p>}
           {draftUrl !== null && <DraftSaveState draftUrl={draftUrl} reports={waiting.total} />}
           {problems?.count !== undefined && (
-            <button type="button" class={problems.count > 0 ? "studio-problem-count" : undefined} aria-controls={DOCK_ID} onClick={showProblems}>
+            <button
+              type="button"
+              class={problems.count > 0 ? "studio-problem-count" : undefined}
+              aria-controls={dockShown ? DOCK_ID : undefined}
+              onClick={showProblems}
+            >
               {t("studio.shell.problems", { count: problems.count })}
             </button>
           )}
@@ -457,7 +462,8 @@ export function StudioShell({
             <button
               type="button"
               aria-expanded={dockShown}
-              aria-controls={DOCK_ID}
+              // It controls the dock only while there is one to control.
+              aria-controls={dockShown ? DOCK_ID : undefined}
               aria-keyshortcuts="Control+J"
               onClick={toggleDock}
             >
@@ -538,14 +544,14 @@ function useDrawer(open: boolean, paneRef: { current: HTMLElement | null }, butt
   }, [open]);
 }
 
-/** The activity the screens tell of (ActivityLog), the last first, and how they tell it. */
+/** The activity the screens tell of (ActivityLog), the last first, a line said again counted (addActivity), and how they tell it. */
 function useActivityEntries() {
   const [entries, setEntries] = useState<ActivityEntry[]>([]);
   const next = useRef(0);
   // One function for the page's life, as the editors' report is.
   const log = useCallback((text: string) => {
     const id = next.current++;
-    setEntries((before) => [{ id, at: new Date(), text }, ...before].slice(0, ACTIVITY_LIMIT));
+    setEntries((before) => addActivity(before, text, new Date(), id));
   }, []);
   return { entries, log };
 }

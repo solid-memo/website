@@ -7,7 +7,8 @@ describe("inView", () => {
   it.each<[string, DeckFacts, HomeView[]]>([
     ["a deck of the user's own, nothing due", plain, ["all"]],
     ["one with cards due", { due: 3, badges: [] }, ["all", "due"]],
-    ["one whose cards are still counted", { due: undefined, badges: [] }, ["all"]],
+    ["one whose cards are still counted", { due: "loading", badges: [] }, ["all", "due"]],
+    ["one whose cards could not be counted", { due: "unreadable", badges: [] }, ["all"]],
     ["a copy of a library course", { due: 0, badges: ["course"] }, ["all", "courses"]],
     ["a copy of a library deck", { due: 0, badges: ["library"] }, ["all", "copies"]],
     ["a copy of a course from a link", { due: 0, badges: ["course", { from: "pod.example" }] }, ["all", "courses", "copies"]],
@@ -36,17 +37,14 @@ describe("viewOf and showFromParam", () => {
 });
 
 describe("withView", () => {
-  it("sorts the decks due by their cards due, the most first, keeping the filter's text", () => {
-    expect(withView({ view: { filter: "kanji" } }, "due")).toEqual({
-      view: { filter: "kanji", sort: { column: "due", descending: true } },
-      show: "due",
-    });
+  it("keeps the filter's text and the sort, in every view", () => {
+    const sorted = { view: { filter: "kanji", sort: { column: "title" as const, descending: false } } };
+    expect(withView(sorted, "due")).toEqual({ ...sorted, show: "due" });
+    expect(withView({ ...sorted, show: "due" }, "courses")).toEqual({ ...sorted, show: "courses" });
   });
 
-  it("leaves another view in the user's order, and every deck out of the URL", () => {
-    const sorted = { view: { filter: "", sort: { column: "title" as const, descending: false } }, show: "due" as const };
-    expect(withView(sorted, "courses")).toEqual({ show: "courses" });
+  it("leaves every deck, and a query as it starts, out of the URL", () => {
     expect(withView({ view: { filter: "kanji" }, show: "copies" }, "all")).toEqual({ view: { filter: "kanji" } });
-    expect(withView({}, "all")).toEqual({});
+    expect(withView({ show: "due" }, "all")).toEqual({});
   });
 });
