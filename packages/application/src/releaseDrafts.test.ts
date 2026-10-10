@@ -5,11 +5,15 @@ import { draftSummaryOf, draftUrlOf, type ReleaseDraftSummary } from "@solid-mem
 import { applyDraftChanges, blankDraft, type DraftChange, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { rebaseDraft } from "@solid-memo/domain/release/releaseToDraft";
 import { courseDraft, NOW } from "@solid-memo/domain/testing/releaseDraft";
-import type { DeckRepository, FileExchange, ReleaseDraftRepository } from "./ports";
+import { problem } from "@solid-memo/domain/release/problems";
+import { SM } from "@solid-memo/vocab/vocab.generated";
+import type { DeckLibrary, DeckRepository, FileExchange, ReleaseDraftRepository, ShapeValidator } from "./ports";
 import { createReleaseDraftUseCases } from "./releaseDrafts";
 
 const INSTANCE = "https://pod.example/solid-memo/main/";
 const V1 = "https://pod.example/solid-memo/main/releases/solid/v1.ttl";
+const DECKS = "https://site.example/decks/";
+const INDEX = `${DECKS}index.ttl`;
 
 const deck: Deck = {
   id: "deck-1",
@@ -42,14 +46,22 @@ function setUp({ drafts = [] as ReleaseDraftSummary[], stored = courseDraft() as
   } satisfies ReleaseDraftRepository;
   const deckRepository = { listCards: vi.fn(async () => cards) } as unknown as DeckRepository;
   const fileExchange: FileExchange = { save: vi.fn(), open: vi.fn(async () => ({ name: "solid.ttl", text: "<> a <x> ." })) };
+  const deckLibrary = {
+    readLibraryIndex: vi.fn(async () => ({ url: INDEX, publisher: `${INDEX}#solid-memo`, releases: [`${DECKS}solid/v1.ttl`] })),
+  } as unknown as DeckLibrary & { readLibraryIndex: ReturnType<typeof vi.fn> };
+  const shapeValidator = {
+    validateRelease: vi.fn(async (draft: ReleaseDraft) => [problem(draft.url, { code: "unshaped", params: {} }, { severity: "warning" })]),
+  } as unknown as ShapeValidator & { validateRelease: ReturnType<typeof vi.fn> };
   const useCases = createReleaseDraftUseCases({
     releaseDraftRepository: repository,
     deckRepository,
+    deckLibrary,
+    shapeValidator,
     fileExchange,
     now: () => new Date(NOW),
   });
   const created = () => repository.create.mock.calls.at(-1)![1];
-  return { repository, deckRepository, fileExchange, useCases, created };
+  return { repository, deckRepository, deckLibrary, shapeValidator, fileExchange, useCases, created };
 }
 
 const summary = (name: string, version: number): ReleaseDraftSummary => ({
@@ -251,5 +263,96 @@ describe("editReleaseDraft", () => {
     repository.applyChanges.mockRejectedValueOnce(new AppError("changedElsewhere", { url: "x" }));
     await expect(useCases.editReleaseDraft(courseDraft().url, changes)).resolves.toEqual({ ok: false, refusal: { refused: "idTaken", id: "ch-c" } });
     expect(repository.applyChanges).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("checkReleaseDraft", () => {
+  /** A Markdown check that finds one thing in every text, and counts its calls. */
+  const markdownCheck = { problems: vi.fn(() => [{ code: "html" }]), chunks: () => ({ chunks: 1, empty: 0 }) };
+  /** The course, its first question written in Markdown. */
+  function marked(): ReleaseDraft {
+    const draft = courseDraft();
+    return { ...draft, cards: draft.cards.map((card, at) => (at === 0 ? { ...card, data: { ...card.data, textFormat: SM.markdown } } : card)) };
+  }
+
+  it("checks the draft for a pod by the domain's rules, once for each draft, the shapes only when asked", async () => {
+    const { useCases, deckLibrary, shapeValidator, repository } = setUp();
+    markdownCheck.problems.mockClear();
+    const draft = marked();
+    const check = await useCases.checkReleaseDraft(draft, markdownCheck, "pod");
+    expect(check.rules.map((p) => p.code)).toContain("chapterWithoutStep");
+    expect(check.library).toEqual([]);
+    expect(check.drops).toEqual([]);
+    expect(check.markdown.map((p) => [p.code, p.subject])).toContainEqual(["markdown", `${draft.url}#q-a-1a`]);
+    expect(check.shapes).toBeNull();
+    expect(deckLibrary.readLibraryIndex).not.toHaveBeenCalled();
+    expect(repository.readRelease).not.toHaveBeenCalled();
+    const calls = markdownCheck.problems.mock.calls.length;
+    await expect(useCases.checkReleaseDraft(draft, markdownCheck, "pod")).resolves.toEqual(check);
+    expect(markdownCheck.problems.mock.calls.length).toBe(calls);
+    expect(shapeValidator.validateRelease).not.toHaveBeenCalled();
+
+    const shaped = await useCases.checkReleaseDraft(draft, markdownCheck, "pod", { shapes: true });
+    expect(shaped).toEqual({ ...check, shapes: [problem(draft.url, { code: "unshaped", params: {} }, { severity: "warning" })] });
+    expect(shapeValidator.validateRelease).toHaveBeenCalledWith(draft, draft.url);
+    await useCases.checkReleaseDraft(draft, markdownCheck, "pod", { shapes: true });
+    expect(shapeValidator.validateRelease).toHaveBeenCalledTimes(1);
+    // Another version of the draft is checked afresh.
+    await useCases.checkReleaseDraft({ ...draft }, markdownCheck, "pod", { shapes: true });
+    expect(shapeValidator.validateRelease).toHaveBeenCalledTimes(2);
+  });
+
+  it("checks the draft for the library at its place there, by the index, naming its subjects in the draft", async () => {
+    const { useCases, deckLibrary, shapeValidator } = setUp();
+    const draft = courseDraft();
+    const check = await useCases.checkReleaseDraft(draft, markdownCheck, "library", { shapes: true });
+    expect(check.rules.map((p) => p.code)).toContain("missingLanguage");
+    // The fixture states version 1, its place version 2.
+    expect(check.library.map((p) => [p.code, p.subject, p.field])).toEqual([
+      ["versionMismatch", draft.url, "http://www.w3.org/ns/dcat#version"],
+      ["linkMismatch", draft.url, "http://www.w3.org/ns/dcat#inSeries"],
+      ["linkMismatch", draft.url, "http://www.w3.org/ns/dcat#isVersionOf"],
+      ["linkMismatch", draft.url, "http://purl.org/dc/terms/publisher"],
+      ["linkMismatch", draft.url, "http://www.w3.org/ns/dcat#prev"],
+      ["linkMismatch", draft.url, "http://www.w3.org/ns/dcat#previousVersion"],
+    ]);
+    expect(shapeValidator.validateRelease).toHaveBeenCalledWith(draft, `${DECKS}solid/v2.ttl`, INDEX);
+    expect(deckLibrary.readLibraryIndex).toHaveBeenCalledTimes(2);
+  });
+
+  it("checks the draft against the release it follows, read once, and again when it could not be", async () => {
+    const { useCases, repository } = setUp();
+    const draft = courseDraft();
+    const next: ReleaseDraft = { ...draft, root: { ...draft.root, prev: V1, version: "2" }, cards: draft.cards.slice(1) };
+    repository.readRelease.mockRejectedValueOnce(new AppError("releaseUnreadable", { url: V1 }));
+    // The rest of the check stands.
+    const unread = await useCases.checkReleaseDraft(next, markdownCheck, "pod");
+    expect(unread.drops).toEqual([problem(next.url, { code: "previousUnread", params: { previous: V1 } }, { related: [V1] })]);
+    expect(unread.rules.map((p) => p.code)).toContain("chapterWithoutStep");
+    const check = await useCases.checkReleaseDraft(next, markdownCheck, "pod");
+    expect(check.drops).toEqual([expect.objectContaining({ code: "cardsDropped", params: { ids: ["q-a-1a"], previous: V1 } })]);
+    await useCases.checkReleaseDraft({ ...next }, markdownCheck, "pod");
+    expect(repository.readRelease).toHaveBeenCalledTimes(2);
+  });
+
+  it("runs the shapes again when they failed", async () => {
+    const { useCases, shapeValidator } = setUp();
+    const draft = courseDraft();
+    shapeValidator.validateRelease.mockRejectedValueOnce(new Error("offline"));
+    await expect(useCases.checkReleaseDraft(draft, markdownCheck, "pod", { shapes: true })).rejects.toThrow("offline");
+    await expect(useCases.checkReleaseDraft(draft, markdownCheck, "pod", { shapes: true })).resolves.toMatchObject({ shapes: expect.any(Array) });
+    expect(shapeValidator.validateRelease).toHaveBeenCalledTimes(2);
+  });
+
+  it("checks the draft for the library without its place there when the index cannot be read, and again next time", async () => {
+    const { useCases, deckLibrary } = setUp();
+    const draft = courseDraft();
+    deckLibrary.readLibraryIndex.mockRejectedValueOnce(new Error("offline"));
+    const unread = await useCases.checkReleaseDraft(draft, markdownCheck, "library");
+    expect(unread.library).toEqual([problem(draft.url, { code: "libraryUnread", params: {} })]);
+    expect(unread.rules.map((p) => p.code)).toContain("missingLanguage");
+    const check = await useCases.checkReleaseDraft(draft, markdownCheck, "library");
+    expect(check.library.map((p) => p.code)).toContain("versionMismatch");
+    expect(deckLibrary.readLibraryIndex).toHaveBeenCalledTimes(2);
   });
 });

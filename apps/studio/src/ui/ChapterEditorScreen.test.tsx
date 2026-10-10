@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/preact";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/preact";
 import { applyDraftChanges, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { ChapterEditorScreen, proseFormat } from "./ChapterEditorScreen";
@@ -140,5 +140,32 @@ describe("ChapterEditorScreen", () => {
     fireEvent.click(screen.getByRole("button", { name: "Delete" }));
     expect(confirm).toHaveBeenCalledTimes(2);
     expect(onDeleted).not.toHaveBeenCalled();
+  });
+
+  it("marks the field it was opened at where the user arrives", () => {
+    const at = (field: "title" | "description" | "steps" | "review") =>
+      render(
+        <ChapterEditorScreen
+          draft={courseDraft()}
+          chapter="ch-pods"
+          readOnly={null}
+          status={{ saving: false, failure: null }}
+          links={draftLinks}
+          field={field}
+          onEdit={vi.fn()}
+          onDeleted={vi.fn()}
+        />,
+      );
+    at("title");
+    expect(screen.getByRole("textbox", { name: "Title" })).toHaveAttribute("data-arrival");
+    cleanup();
+    at("description");
+    expect(screen.getByRole("textbox", { name: "Description" })).toHaveAttribute("data-arrival");
+    cleanup();
+    at("steps");
+    expect(screen.getByRole("heading", { name: "Steps" })).toHaveAttribute("data-arrival");
+    cleanup();
+    at("review");
+    expect(screen.getByRole("heading", { name: "Final review" })).toHaveAttribute("data-arrival");
   });
 });

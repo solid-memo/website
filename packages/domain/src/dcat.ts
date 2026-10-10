@@ -1,4 +1,4 @@
-import { english, inEnglish, sameText, shown, type LangText } from "./langText";
+import { english, inEnglish, sameText, shown, type LangText } from "./langText.ts";
 /**
  * The DCAT side of Solid Memo's data (see docs/data-model.md): the
  * terms of the EU vocabularies it uses, and what a deck states when the

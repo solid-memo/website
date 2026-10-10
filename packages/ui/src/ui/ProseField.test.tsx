@@ -4,7 +4,7 @@ import { DataProse } from "./DataText";
 import { draftOf } from "./LangTextField";
 import { ProseField } from "./ProseField";
 
-function renderField(value: string, markdown: boolean) {
+function renderField(value: string, markdown: boolean, arrival?: boolean) {
   const onChange = vi.fn();
   const onMarkdown = vi.fn();
   render(
@@ -17,6 +17,7 @@ function renderField(value: string, markdown: boolean) {
       suggestions={[]}
       disabled={false}
       preview={(text, inMarkdown) => <DataProse class="course-theory" text={text} markdown={inMarkdown} />}
+      {...(arrival === undefined ? {} : { arrival })}
       onChange={onChange}
       onMarkdown={onMarkdown}
     />,
@@ -25,6 +26,11 @@ function renderField(value: string, markdown: boolean) {
 }
 
 describe("ProseField", () => {
+  it("marks its main text where the user arrives when the screen was opened at it", () => {
+    renderField("One.", false, true);
+    expect(screen.getByRole("textbox", { name: "Theory" })).toHaveAttribute("data-arrival");
+  });
+
   it("edits prose in its languages, previewed as the player shows it", () => {
     const { onChange, onMarkdown } = renderField("One.\n\nTwo.", false);
     const theory = screen.getByRole("textbox", { name: "Theory" });

@@ -29,6 +29,7 @@ export function ProseField({
   preview,
   missing,
   errorId,
+  arrival = false,
   onChange,
   onMarkdown,
 }: {
@@ -43,6 +44,8 @@ export function ProseField({
   /** An entry whose text needs its language, asked for under `errorId`. */
   missing?: DraftEntry;
   errorId?: string;
+  /** The screen was opened at this field: its main text is where the user arrives (LangTextField). */
+  arrival?: boolean;
   onChange: (draft: LangTextDraft) => void;
   onMarkdown: (on: boolean) => void;
 }) {
@@ -62,6 +65,7 @@ export function ProseField({
         entryHints={markdown ? (entry) => markdownHints(entry.value, PROSE, t) : undefined}
         missing={missing}
         errorId={errorId}
+        arrival={arrival}
         onChange={onChange}
       />
       <div class="markdown-toggle">

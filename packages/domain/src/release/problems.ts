@@ -1,3 +1,4 @@
+import type { LangText } from "../langText.ts";
 import type { ReleaseKind, ReleaseTerm } from "./releaseModel.ts";
 
 /**
@@ -27,7 +28,10 @@ export type ProblemDetail =
   | ContinuityProblem
   | CourseProblem
   | TextProblem
-  | CurationProblem;
+  | CurationProblem
+  | ReadinessProblem
+  | ShapeProblem
+  | UnreadProblem;
 
 /** A deck's place among the library's files (libraryRules). */
 export type LayoutProblem =
@@ -107,13 +111,46 @@ export type CurationProblem =
   | { code: "missingLanguage"; params: { language: string } }
   | { code: "missingTheme"; params: { theme: string } };
 
+/**
+ * What a release needs that a draft may still lack (readinessProblems):
+ * the draft shapes leave it out, the release's shapes ask it.
+ */
+export type ReadinessProblem =
+  /** No value of `field`, which a release states. */
+  { code: "required"; params: Record<string, never> };
+
+/** A release against the shapes (ShapeValidator.validateRelease), each result in the shape's own words. */
+export type ShapeProblem =
+  /**
+   * A result of a shape or a profile: its message, in the languages it
+   * gives (or the validator's own English, `builtIn`), the constraint it
+   * is of, and the value it is about.
+   */
+  | { code: "shape"; params: { message: LangText; constraint: string; builtIn?: true; value?: string; profile?: string } }
+  /** A subject typed with a Solid Memo term no shape of this app describes, or in a format it does not know. */
+  | { code: "unshaped"; params: Record<string, never> };
+
+/**
+ * A part of the Studio's check that could not be made, as what it reads
+ * could not be read (releaseDrafts.ts): the rest of the check stands.
+ */
+export type UnreadProblem =
+  /** The release the draft follows, so nothing is checked against it. */
+  | { code: "previousUnread"; params: { previous: string } }
+  /** The library's index, so the draft's place in the library is not checked. */
+  | { code: "libraryUnread"; params: Record<string, never> };
+
 export type ProblemCode = ProblemDetail["code"];
 
-/** An error in `subject`: every rule here names one; warnings are the Studio's own. */
-export function problem(subject: string, detail: ProblemDetail, more: { field?: string; related?: readonly string[] } = {}): ReleaseProblem {
-  const { field, related = [] } = more;
+/** A problem in `subject`: an error, as every rule here names, unless `severity` says it is a warning (a shape's). */
+export function problem(
+  subject: string,
+  detail: ProblemDetail,
+  more: { field?: string; related?: readonly string[]; severity?: ReleaseSeverity } = {},
+): ReleaseProblem {
+  const { field, related = [], severity = "error" } = more;
   return {
-    severity: "error",
+    severity,
     subject,
     ...(field === undefined ? {} : { field }),
     ...(related.length === 0 ? {} : { related }),

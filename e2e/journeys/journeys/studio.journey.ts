@@ -34,8 +34,12 @@ import { BRIGHTEST_STARS } from "../pages/Library.ts";
  * due as before. They draft a release of a deck and a blank course,
  * which Home lists, and delete the course's draft, confirming. They
  * write a course in a blank draft: a chapter, a step with its theory,
- * and two questions with two wrong options each, saved as they go,
- * trying one question as the course would ask it. They rename the instance
+ * and two questions, the first with two wrong options, saved as they
+ * go, trying one question as the course would ask it. Its release check
+ * lists what is still wrong: the second question has no wrong options
+ * and the release no description. They follow each problem to its field,
+ * fix it, and see it clear; the shapes find what a release still lacks,
+ * and the listing preview shows the course as the library will. They rename the instance
  * and describe its catalogue, under a licence, then pick it, by its new
  * name, from the picker. Among its library copies, the library deck is
  * up to date. They go back to Solid Memo, still logged in, which lists
@@ -244,31 +248,48 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     await app.draftEditor.addWrongOption("In the app", "Apps only read it.");
     await app.draftEditor.addWrongOption("On a server of the app's", "The pod is yours.");
     await app.draftEditor.answerPreviewWrong("In the app", "Apps only read it.");
-    await app.draftEditor.backToStep(authored, "Step 1.1");
-    await app.draftEditor.openQuestion("Who chooses the app?");
+    await app.draftEditor.expectOutline(authored, "Pods", "Step 1.1", ["Where does your data live?", "Who chooses the app?"]);
+    await app.draftEditor.expectBadge("Who chooses the app?", 1);
+  });
+
+  await app.step("26 · Check the release: follow its problems to their fields, fix them, and see them clear", async () => {
+    const fewOptions = app.t("studio.problem.fewDistractors", { count: 0, least: 2 });
+    const noDescription = app.t("studio.problem.required", { field: app.t("studio.field.description") });
+    const release = app.t("studio.check.release");
+    await app.draftEditor.openCheck(authored);
+    await app.draftEditor.expectProblem("Who chooses the app?", fewOptions);
+    await app.draftEditor.expectProblem(release, noDescription);
+    await app.draftEditor.followProblem("Who chooses the app?", fewOptions);
     await app.draftEditor.addWrongOption("The pod", "A pod holds data.");
     await app.draftEditor.addWrongOption("Its maker", "The user chooses.");
-    await app.draftEditor.expectOutline(authored, "Pods", "Step 1.1", ["Where does your data live?", "Who chooses the app?"]);
+    await app.draftEditor.openCheck(authored);
+    await app.draftEditor.expectNoProblem("Who chooses the app?", fewOptions);
+    await app.draftEditor.followProblem(release, noDescription);
+    await app.draftEditor.writeDescription("What a pod is, and who holds the data in it.");
+    await app.draftEditor.openCheck(authored);
+    await app.draftEditor.expectNoProblem(release, noDescription);
+    await app.draftEditor.checkShapes();
+    await app.draftEditor.openPreview(authored);
     await app.chrome.breadcrumb("breadcrumbs.decks");
   });
 
-  await app.step("26 · Rename the instance and describe its catalogue", async () => {
+  await app.step("27 · Rename the instance and describe its catalogue", async () => {
     await app.studio.openInstance(instance);
     await app.studio.renameInstance(renamed);
     await app.studio.describeCatalog("Decks for the Studio journey.", "CC0 1.0");
   });
 
-  await app.step("27 · Pick the instance, by its new name, from the instance picker", async () => {
+  await app.step("28 · Pick the instance, by its new name, from the instance picker", async () => {
     await app.studio.pickInstance(renamed);
     await app.studio.expectDeck(renamed, alpha, { cards: 1, due: 0 });
   });
 
-  await app.step("28 · See the library deck among the library copies, up to date", async () => {
+  await app.step("29 · See the library deck among the library copies, up to date", async () => {
     await app.studio.openLibraryCopies(renamed, BRIGHTEST_STARS.en);
     await app.chrome.breadcrumb("breadcrumbs.decks");
   });
 
-  await app.step("29 · Go back to Solid Memo, still logged in", async () => {
+  await app.step("30 · Go back to Solid Memo, still logged in", async () => {
     await app.studio.backToApp();
     await app.chrome.expectLoggedInAs(account.webId);
     await app.decks.expectDeck(alpha);

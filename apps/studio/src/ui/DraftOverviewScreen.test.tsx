@@ -1,15 +1,24 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/preact";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/preact";
 import { applyDraftChanges, blankDraft, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { recentLanguages } from "@solid-memo/ui/remembered";
 import type { DraftEditor } from "./draftEditor";
-import { DraftOverviewScreen } from "./DraftOverviewScreen";
+import { problem } from "@solid-memo/domain/release/problems";
+import type { DraftField } from "@solid-memo/domain/release/releaseCheck";
+import { AppError } from "@solid-memo/domain/appError";
+import { DraftOverviewScreen, type OverviewCheck } from "./DraftOverviewScreen";
 import { courseDraft, DRAFT_URL, draftLinks } from "../test/fixtures";
 
 const idle = { saving: false, failure: null };
 
-function renderScreen(draft: ReleaseDraft = courseDraft(), onEdit = vi.fn<DraftEditor["edit"]>(() => null)) {
-  render(<DraftOverviewScreen draft={draft} readOnly={null} status={idle} links={draftLinks} onEdit={onEdit} />);
+function renderScreen(
+  draft: ReleaseDraft = courseDraft(),
+  onEdit = vi.fn<DraftEditor["edit"]>(() => null),
+  { check = { problems: [], error: null } as OverviewCheck, field }: { check?: OverviewCheck; field?: DraftField } = {},
+) {
+  render(
+    <DraftOverviewScreen draft={draft} readOnly={null} status={idle} links={draftLinks} check={check} {...(field === undefined ? {} : { field })} onEdit={onEdit} />,
+  );
   return onEdit;
 }
 
@@ -38,17 +47,44 @@ describe("DraftOverviewScreen", () => {
     expect(onEdit).toHaveBeenLastCalledWith([{ kind: "setMeta", meta: { description: null } }], { debounce: true });
   });
 
-  it("shows the outline, counts the questions and says the release check is still to come", () => {
+  it("shows the outline, counts the questions, and says the release check finds no problems", () => {
     const onEdit = renderScreen();
     expect(screen.getByRole("link", { name: "Step 1.1" })).toHaveAttribute("href", "#/step/ch-pods-1");
     expect(screen.getByText("2 cards in all.")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "All cards" })).toHaveAttribute("href", "#/draft-cards");
-    expect(screen.getByText(/release check, which counts this draft's problems/)).toBeInTheDocument();
+    expect(screen.getByText("The release check finds no problems.")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "See the release check" })).toHaveAttribute("href", "#/check");
+    expect(screen.getByRole("link", { name: "Preview the listing" })).toHaveAttribute("href", "#/preview");
     fireEvent.click(screen.getByRole("button", { name: "Actions for Pods" }));
     fireEvent.click(screen.getByRole("menuitem", { name: "Move down" }));
     expect(onEdit).toHaveBeenCalledWith([{ kind: "moveChapter", id: "ch-pods", to: 1 }]);
     // A course's cards are added where they are asked.
     expect(screen.queryByRole("group", { name: "New card" })).toBeNull();
+  });
+
+  it("counts the release check's problems, each chapter's in the outline, and says while it checks or why it could not", () => {
+    const draft = courseDraft();
+    const problems = [problem(`${draft.url}#ch-apps`, { code: "chapterWithoutStep", params: {} }), problem(draft.url, { code: "noBack", params: {} })];
+    renderScreen(draft, undefined, { check: { problems, error: null } });
+    expect(screen.getByText("The release check finds 2 problems.")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "1 problem in Apps" })).toHaveAttribute("href", "#/check");
+    cleanup();
+    renderScreen(draft, undefined, { check: { problems: undefined, error: null } });
+    expect(screen.getByText("Checking the draft…")).toBeInTheDocument();
+    cleanup();
+    renderScreen(draft, undefined, { check: { problems: undefined, error: new AppError("draftGone") } });
+    expect(within(screen.getByRole("region", { name: "Problems" })).getByRole("alert")).toHaveTextContent("That draft no longer exists.");
+  });
+
+  it("marks the field it was opened at where the user arrives", () => {
+    renderScreen(courseDraft(), undefined, { field: "title" });
+    expect(screen.getByRole("textbox", { name: "Title" })).toHaveAttribute("data-arrival");
+    cleanup();
+    renderScreen(courseDraft(), undefined, { field: "description" });
+    expect(screen.getByRole("textbox", { name: "Description" })).toHaveAttribute("data-arrival");
+    cleanup();
+    renderScreen(courseDraft(), undefined, { field: "outline" });
+    expect(screen.getByRole("heading", { name: "Outline" })).toHaveAttribute("data-arrival");
   });
 
   it("adds a chapter under the id made of its title, or another the user writes", () => {

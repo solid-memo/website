@@ -17,7 +17,9 @@ progress, and the instance's name and catalogue. It keeps the drafts
 of releases a creator writes in the instance: started from nothing,
 from a deck, as the next version of a release or from a release saved
 as a file, written (what a release says of itself, a course's outline,
-its chapters, steps and questions, their wrong options), and deleted.
+its chapters, steps and questions, their wrong options), checked by
+every rule a release is held to, previewed as the library will list
+them, and deleted.
 
 ## What it shares with Solid Memo
 
@@ -84,11 +86,13 @@ others.
 | `#/studio/library?instance=…` | the instance's copies of library releases, the newer releases and what upgrading would change ([below](#library-copies)). |
 | `#/studio/transfer?instance=…[&deck=…&deck=…]` | import and export: the instance's decks to save as files, those of each `deck` ticked, and a file to make a deck of ([below](#import-and-export)). |
 | `#/studio/drafts?instance=…` | the instance's drafts of releases, and a new one to start ([below](#drafts)). |
-| `#/studio/draft?draft=…` | a draft's overview: what the release says of itself and, for a course, its outline ([below](#a-drafts-overview)). `draft` is the draft's release document, which names the instance. |
-| `#/studio/chapter?draft=…&chapter=…` | a chapter of a course draft, by its id ([below](#a-chapter)). |
-| `#/studio/step?draft=…&step=…` | a step of a course draft, by its id ([below](#a-step)). |
-| `#/studio/question?draft=…&card=…` | a card of a draft, by its id: a course's question, or a deck's card ([below](#a-question)). |
+| `#/studio/draft?draft=…[&field=…]` | a draft's overview: what the release says of itself and, for a course, its outline ([below](#a-drafts-overview)). `draft` is the draft's release document, which names the instance. |
+| `#/studio/chapter?draft=…&chapter=…[&field=…]` | a chapter of a course draft, by its id ([below](#a-chapter)). |
+| `#/studio/step?draft=…&step=…[&field=…]` | a step of a course draft, by its id ([below](#a-step)). |
+| `#/studio/question?draft=…&card=…[&field=…]` | a card of a draft, by its id: a course's question, or a deck's card ([below](#a-question)). |
 | `#/studio/draft-cards?draft=…[&filter=…&lang=…&page=…]` | a draft's cards as a table ([below](#a-drafts-cards)): `filter` is `unasked`, `askedTwice`, `fewDistractors` or `retired`, `lang` a language. |
+| `#/studio/check?draft=…[&policy=library]` | a draft's release check ([below](#the-release-check)): for a release in a pod, or with `policy=library` for the Solid Memo library. |
+| `#/studio/preview?draft=…` | a draft as the library will list it ([below](#the-listing-preview)). |
 
 `#/studio/` and its query count as `#/studio`. Anything else under
 `#/studio`, `#/studio` itself among them, is the default route: the only
@@ -96,6 +100,12 @@ instance's Home, or else the picker. An unknown instance falls back to
 the picker, an unknown deck to its instance's Home, and an unknown card
 (one removed, say) to its deck's cards. A chapter, step or card a draft
 does not have (one deleted, say) falls back to the draft's overview.
+`field` opens a draft's screen at one of its fields, where the release
+check links: the overview's `title`, `description` or `outline`; a
+chapter's `title`, `description`, `steps` or `review`; a step's
+`theory` or `questions`; a question's text (`front`, `backNote`…), its
+wrong options (`distractors`) or one of them (`distractor:<id>`). A
+field the screen does not have is left out.
 Like Solid Memo's fallbacks, these replace the history entry.
 
 Changing Home's filter or sort, the workbench's query, the
@@ -115,8 +125,9 @@ catalogue on the instance's screen, › Health on the instance's health,
 copies, › Import and export on import and export, and › Drafts on the
 drafts. A draft's screens go on from › Drafts: › *draft* on its
 overview, › *draft* › *chapter* on a chapter, › *draft* › *chapter* ›
-Step 2 on a step, › *draft* › Cards on its cards, and › *draft* › Cards
-› *card* on a question. The document title is the trail's
+Step 2 on a step, › *draft* › Cards on its cards, › *draft* › Cards
+› *card* on a question, › *draft* › Release check on its check, and
+› *draft* › Listing preview on its preview. The document title is the trail's
 last step and "Solid Memo Studio". After a move, the screen's heading
 takes the focus (`useScreenFocus`). The header has a link back to
 Solid Memo, at the open instance's decks when there is one, and the
@@ -900,7 +911,8 @@ human review."). A creator names the ids, the way
 A draft is written in five screens: its overview, a chapter, a step, a
 question, and its cards. They share the draft as one query, read once
 (`getReleaseDraft`), and change it by `DraftChange`s
-([below](#how-edits-are-saved)).
+([below](#how-edits-are-saved)). Two more read it: its release check
+and its listing preview.
 
 ### How edits are saved
 
@@ -945,8 +957,9 @@ names the draft, its kind and version. Its title and description are
 saved as they are typed. For a course, it shows the outline, adds a
 chapter (its title, and its id), and lists the chapters retired, to
 restore. It counts the draft's cards, with a link to their table; a
-deck's cards are added here. The release check is not in the Studio
-yet: a line says so where it will count the draft's problems.
+deck's cards are added here. It counts the problems the release check
+finds (for a pod, the shapes left out), and links to the check and the
+listing preview.
 
 ### The outline
 
@@ -970,6 +983,9 @@ Each move is a `moveChapter` or `moveStep` change (`outlineMove` in
 [draftOutline.ts](../packages/domain/src/release/draftOutline.ts)). A
 drop the draft no longer has a place for (it changed under the drag)
 comes to nothing, and says so.
+
+A chapter, step or question the release check finds problems in has a
+badge beside it ("2 problems"), a link to the check.
 
 ### A chapter
 
@@ -1036,6 +1052,105 @@ by code unit. A seeded property test checks that it keeps the order.
 Nothing an earlier release published is deleted: a learner's progress
 may name it. Its Delete is held, and the screen offers to retire it
 instead. A wrong option it published is likewise only retired.
+
+## The release check
+
+The release check
+([`ReleaseCheckContainer`](../apps/studio/src/ui/ReleaseCheckContainer.tsx))
+runs every rule a release is held to on the draft, as the release it
+will be. They are the rules `npm run library:check` runs on `decks/`
+([deck-library.md](deck-library.md)), from one source: the domain's
+([`release/`](../packages/domain/src/release/)). The use case is
+`checkReleaseDraft(draft, markdownCheck, policy)`. It finds:
+
+- **Rules** (`ruleProblems` in
+  [releaseCheck.ts](../packages/domain/src/release/releaseCheck.ts)):
+  the course's (`courseProblems`), what a release needs that a draft may
+  lack (`readinessProblems`: a title and a description with English
+  text, a publisher, a version, a series, a distribution, the theme
+  EDUC, and each chapter's and step's fields the draft shapes relax),
+  and the policy's curation (`curationProblems`).
+- **Library** (the library policy only): the draft's place in the
+  library, by its live index (`readLibraryIndex`): its name, its
+  version among the deck's others, and its metadata against that place
+  (`libraryProblems`).
+- **Drops**: against the release it follows, when there is one
+  (`continuityProblems`): nothing dropped, no id given to another kind
+  of subject, and its version the next.
+- **Markdown**: its text formats, its text in Markdown, and how a
+  step's theory is split into chunks: none empty, and as many in each
+  language (`markdownProblems`, [markdown.md](markdown.md#chunks)). The
+  domain reads no Markdown: the screen passes the markdown package's
+  check in (`releaseMarkdownCheck` in `ui`, its `problems` and
+  `chunks`), which keeps the problems of every text it has checked, by
+  field rule, and the chunks of every theory.
+  A course has thousands of texts, so a check of a draft just changed
+  reads only the text that changed.
+- **Shapes**, when asked: the release as it is assembled, moved to its
+  address (`mapIris`), each subject against its library shape
+  (`LibraryDeckV6` for the release), and the whole against DCAT-AP and
+  SKOS with the reference data (`ShapeValidator.validateRelease`). For
+  the library, its index is beside it, with the release's series in it
+  (described from the release when the index lists it not yet). In a
+  pod, a publisher or series the release links to in another document
+  is not held to its class there: nothing beside the release describes
+  it ([validation.md](validation.md)). They
+  take a while on a large draft, so a button runs them, for the draft
+  as it is then; once it changes, they say so and offer to check again.
+  When they fail, the same button runs them again.
+
+The library and drops parts read what is elsewhere: the library's
+index, and the release the draft follows. One that cannot be read is a
+problem of its own (`libraryUnread`, `previousUnread`), and the rest of
+the check stands. Such a check is not kept, so the next one reads again:
+the screen checks again when it is opened again, or when its window
+is focused.
+
+The draft checked is the editor's, changes not yet written included, so
+a problem fixed clears at once. Each version of it is checked once:
+the editor makes a new draft for each change, and the use case keeps
+each part per draft. The release a draft follows is read once.
+
+The policy is a pod's by default: a release in a pod is held to its
+data's rules only. `policy=library` adds the Solid Memo library's
+curation (`repoPolicy`: English and Swedish keywords, the theme EDUC)
+and its place among the library's decks. Neither names a series,
+author or host: a library is its index, and a policy is data.
+
+Problems are codes, never text ([problems.ts](../packages/domain/src/release/problems.ts)).
+The screen words each in the reader's language
+(`studio.problem.<code>`, [problemText.ts](../apps/studio/src/ui/problemText.ts)),
+by severity, errors first, then by what it is in. Each subject links
+to its editor, and each problem to its field there (`problemTarget`):
+a wrong option's problem opens its question at it. The editor opens
+with that field focused. The outline's badges count a wrong option's
+problems under its question.
+
+Not every problem can be fixed in the Studio yet:
+
+- The overview has no field yet for the publisher, the version, the
+  series (`inSeries`, `isVersionOf`), the distribution or the theme
+  EDUC. A problem about one of them links to the overview. The
+  metadata editor will fix them.
+- The library policy places the draft at `decks/<draft name>/v<N>.ttl`
+  and reports each link that differs from that place. A draft that
+  follows a release in a pod links to that release, its series and its
+  publisher, so it has a `linkMismatch` for each.
+- A version the library's index lists already shows up as a
+  `versionGap`, with that version twice.
+
+So a new draft's problem count may not reach zero.
+
+## The listing preview
+
+The listing preview
+([`ListingPreviewContainer`](../apps/studio/src/ui/ListingPreviewContainer.tsx))
+shows the draft as learners will see it in the library: its row in the
+library's list (`LibraryDeckRow`) and its own page
+(`LibraryDeckScreen`), Solid Memo's own components, over a library
+deck built from the draft alone (`draftLibraryDeck` in
+[draftListing.ts](../packages/domain/src/release/draftListing.ts)).
+Both are inert: a picture, nothing in it to follow or press.
 
 ## Data set aside
 

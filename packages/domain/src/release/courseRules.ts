@@ -1,12 +1,16 @@
 import { SM } from "@solid-memo/vocab/vocab.generated";
+import { EDUCATION_THEME } from "../dcat.ts";
 import { problem, type ReleaseProblem } from "./problems.ts";
 import {
+  DCAT_NS,
+  DCTERMS_NS,
   languagesOf,
   SCHEMA_NS,
   type ReleaseCard,
   type ReleaseDistractor,
   type ReleaseModel,
   type ReleaseSubject,
+  type ReleaseTerm,
 } from "./releaseModel.ts";
 
 /** The fewest distractors a card a course asks has in use. */
@@ -137,6 +141,55 @@ export function courseProblems(model: ReleaseModel): ReleaseProblem[] {
       );
     }
     if (inUse(chapter) && ofChapter.length === 0) problems.push(problem(chapter.iri, { code: "chapterWithoutStep", params: {} }));
+  }
+  return problems;
+}
+
+/**
+ * What a release needs that its draft may still lack (docs/studio.md,
+ * The release check): the draft shapes ask none of it, so a draft is
+ * written while it is unfinished; the release's shapes ask all of it.
+ * The release has a title and a description, each with an English text,
+ * a publisher, a version, a series it is a version of, a distribution
+ * and the EU data theme EDUC; each chapter, retired or not, a title with
+ * an English text, the course it is part of and its place; each step its
+ * theory with an English text, the cards that check it, its chapter and
+ * its place.
+ */
+export function readinessProblems(model: ReleaseModel): ReleaseProblem[] {
+  const problems: ReleaseProblem[] = [];
+  const required = (subject: string, field: string, values: readonly unknown[]) => {
+    if (values.length === 0) problems.push(problem(subject, { code: "required", params: {} }, { field }));
+    return values.length > 0;
+  };
+  // A language range, as sh:languageIn reads it: "en" is met by "en-gb" too.
+  const english = (subject: string, field: string, texts: readonly ReleaseTerm[]) => {
+    if (!required(subject, field, texts)) return;
+    if (!texts.some((term) => term.kind === "literal" && (term.language === "en" || term.language.startsWith("en-")))) {
+      problems.push(problem(subject, { code: "missingLanguage", params: { language: "en" } }, { field }));
+    }
+  };
+  const { url } = model;
+  english(url, `${DCTERMS_NS}title`, model.title);
+  english(url, `${DCTERMS_NS}description`, model.description);
+  required(url, `${DCTERMS_NS}publisher`, model.publisher);
+  required(url, `${DCAT_NS}version`, model.version);
+  required(url, `${DCAT_NS}inSeries`, model.inSeries);
+  required(url, `${DCAT_NS}isVersionOf`, model.isVersionOf);
+  required(url, `${DCAT_NS}distribution`, model.distribution);
+  if (!model.themes.some((theme) => theme.value === EDUCATION_THEME)) {
+    problems.push(problem(url, { code: "missingTheme", params: { theme: EDUCATION_THEME } }, { field: `${DCAT_NS}theme` }));
+  }
+  for (const chapter of model.chapters) {
+    english(chapter.iri, `${DCTERMS_NS}title`, chapter.title);
+    required(chapter.iri, IS_PART_OF, chapter.isPartOf);
+    required(chapter.iri, POSITION, chapter.positions);
+  }
+  for (const step of model.steps) {
+    english(step.iri, SM.theory, step.theory);
+    required(step.iri, SM.checkedBy, step.checkedBy);
+    required(step.iri, IS_PART_OF, step.isPartOf);
+    required(step.iri, POSITION, step.positions);
   }
   return problems;
 }

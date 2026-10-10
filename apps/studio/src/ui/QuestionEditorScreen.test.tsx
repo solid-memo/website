@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/preact";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/preact";
+import type { QuestionField } from "@solid-memo/domain/release/releaseCheck";
 import { applyDraftChanges, blankDraft, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import type { DraftEditor } from "./draftEditor";
@@ -110,5 +111,30 @@ describe("QuestionEditorScreen", () => {
     fireEvent.click(screen.getByRole("button", { name: "Restore" }));
     expect(onEdit).toHaveBeenLastCalledWith([{ kind: "restore", of: "card", id: "w1" }]);
     expect(onDeleted).not.toHaveBeenCalled();
+  });
+
+  it("marks the field it was opened at where the user arrives: a text, the wrong options, or one of them", () => {
+    const at = (field: QuestionField) =>
+      render(
+        <QuestionEditorScreen
+          draft={courseDraft()}
+          card="q-pods-1a"
+          readOnly={null}
+          status={{ saving: false, failure: null }}
+          links={draftLinks}
+          field={field}
+          onEdit={vi.fn()}
+          onDeleted={vi.fn()}
+        />,
+      );
+    at("back");
+    expect(screen.getByRole("textbox", { name: "Back" })).toHaveAttribute("data-arrival");
+    cleanup();
+    at("distractors");
+    expect(document.getElementById("question-distractors")).toHaveAttribute("data-arrival");
+    cleanup();
+    at("distractor:q-pods-1a-d1");
+    expect(screen.getByRole("button", { name: "Edit the wrong option “An app”" })).toHaveAttribute("data-arrival");
+    expect(document.getElementById("question-distractors")).not.toHaveAttribute("data-arrival");
   });
 });

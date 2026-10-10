@@ -1,10 +1,10 @@
-import { chunksOf } from "@solid-memo/markdown/chunks";
+import { chunksOf, inspectChunks } from "@solid-memo/markdown/chunks";
 import { parseInlineMarkdown } from "@solid-memo/markdown/inline";
 import { parseMarkdown, type MdBlock, type MdPhrase } from "@solid-memo/markdown/parse";
 import { plainText } from "@solid-memo/markdown/plainText";
 import { markdownProblems, OPTION, PROSE, SIDE, type FieldRule, type MarkdownProblem } from "@solid-memo/markdown/problems";
 import type { DeckTextCheck } from "@solid-memo/domain/deckHealth";
-import type { FieldRuleName } from "@solid-memo/domain/release/markdownFields";
+import type { FieldRuleName, MarkdownCheck } from "@solid-memo/domain/release/markdownFields";
 
 /** How many texts each cache keeps; the oldest goes first. */
 export const CACHE_SIZE = 500;
@@ -43,20 +43,28 @@ export const markdownChunks: (text: string) => MdBlock[][] | null = remembered((
 });
 
 /**
- * A plainText that remembers every text it was given, however many: one
+ * A function of a text remembered for every text it was given, however
+ * many: for a list of texts read again and again in the same order,
+ * which a cache of the last CACHE_SIZE would miss on every text once the
+ * list is longer.
+ */
+function rememberedAll<T>(compute: (text: string) => T): (text: string) => T {
+  const cache = new Map<string, T>();
+  return (text) => {
+    if (cache.has(text)) return cache.get(text)!;
+    const value = compute(text);
+    cache.set(text, value);
+    return value;
+  };
+}
+
+/**
+ * A plainText that remembers every text it was given (rememberedAll): one
  * for each list of texts searched again and again, such as a deck's cards
  * in the Studio's workbench, which holds more texts than CACHE_SIZE.
  */
 export function plainTexts(): (text: string) => string {
-  const cache = new Map<string, string>();
-  return (text) => {
-    let plain = cache.get(text);
-    if (plain === undefined) {
-      plain = plainText(text);
-      cache.set(text, plain);
-    }
-    return plain;
-  };
+  return rememberedAll(plainText);
 }
 
 /** The markdown package's rule of each field rule the domain names. */
@@ -69,4 +77,21 @@ const RULES: Record<FieldRuleName, FieldRule> = { side: SIDE, option: OPTION, pr
  */
 export function deckTextCheck(): DeckTextCheck<MarkdownProblem> {
   return { plain: plainTexts(), check: (text, rule) => markdownProblems(text, RULES[rule]) };
+}
+
+/**
+ * How the Studio's release check reads a release's text in Markdown
+ * (UseCases.checkReleaseDraft): the markdown package's check of a field
+ * held to a rule, and its chunks of a step's theory (inspectChunks),
+ * remembered for every text of each rule (rememberedAll):
+ * a draft is checked again as it changes, most of its text as it was,
+ * and a course has more texts of a rule than CACHE_SIZE.
+ */
+export function releaseMarkdownCheck(): MarkdownCheck {
+  const byRule: Record<FieldRuleName, (text: string) => MarkdownProblem[]> = {
+    side: rememberedAll((text) => markdownProblems(text, SIDE)),
+    option: rememberedAll((text) => markdownProblems(text, OPTION)),
+    prose: rememberedAll((text) => markdownProblems(text, PROSE)),
+  };
+  return { problems: (text, rule) => byRule[rule](text), chunks: rememberedAll(inspectChunks) };
 }

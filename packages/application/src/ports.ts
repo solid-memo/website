@@ -26,6 +26,8 @@ import type { DocumentReport } from "@solid-memo/domain/validation";
 import type { InstanceDigest } from "@solid-memo/domain/studyDigest";
 import type { WebIdDocument } from "@solid-memo/domain/webIdDocument";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
+import type { LibraryIndexView } from "@solid-memo/domain/release/releaseCheck";
+import type { ReleaseProblem } from "@solid-memo/domain/release/problems";
 import type { ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout";
 
 /**
@@ -344,6 +346,8 @@ export interface DeckRepository {
 export interface DeckLibrary {
   /** Every deck the library's index lists; empty when the library is. */
   listLibraryDecks(): Promise<LibraryDeck[]>;
+  /** What the index says that places a release in the library: its address, its publisher, every release it lists. */
+  readLibraryIndex(): Promise<LibraryIndexView>;
   /** The deck document with its cards. */
   fetchLibraryDeck(url: string): Promise<LibraryDeckContent>;
   /**
@@ -581,6 +585,17 @@ export interface ShapeValidator {
   validateDocument(url: string, context?: DocumentContext): Promise<DocumentReport>;
   /** The document's report unless it is still at `version` (undefined: check it). */
   validateDocumentSince(url: string, version: string | undefined, context?: DocumentContext): Promise<Since<DocumentReport>>;
+  /**
+   * What the shapes say of a draft as the release it will be, published
+   * at `asUrl` (docs/studio.md, The release check): the release as it is
+   * assembled, every subject moved there, each subject of a Solid Memo
+   * class checked against its library shape, and the whole against
+   * DCAT-AP and SKOS with the reference data. With `indexUrl`, a
+   * library's index is beside it, the release's series in it (described
+   * there for a release it does not list yet). Each problem names its
+   * subject in the draft.
+   */
+  validateRelease(draft: ReleaseDraft, asUrl: string, indexUrl?: string): Promise<ReleaseProblem[]>;
 }
 
 /** Where a guest's study moves: every IRI under the container `from` becomes one under `to`. */

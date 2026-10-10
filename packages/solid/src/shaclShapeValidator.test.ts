@@ -18,7 +18,11 @@ import { withCatalog } from "./mappers/deckMapper";
 import { toReviewStateThing } from "./mappers/reviewStateMapper";
 import type { ShapeEngine } from "@solid-memo/shacl/engine";
 import { createShaclShapeValidator } from "./shaclShapeValidator";
+import { courseDraft, DRAFT, of } from "@solid-memo/domain/testing/releaseDraft";
 import type { ShapeLoader } from "@solid-memo/shacl/shapeLoader";
+import { draftUrlOf } from "@solid-memo/domain/release/draftLayout";
+import { nextVersionDraft } from "@solid-memo/domain/release/releaseVersion";
+import { DECKS, draftPod, INSTANCE } from "./testing/releaseDrafts";
 
 vi.mock("./datasets", async (importOriginal) => ({
   ...(await importOriginal<typeof import("./datasets")>()),
@@ -80,7 +84,7 @@ function makeValidator() {
     fetch: vi.fn() as unknown as typeof fetch,
     shapesFetch: vi.fn() as unknown as typeof fetch,
     ...SHAPE_SOURCES,
-    loadEngine: async () => ({ createEngine, mergeDatasets: (...parts) => parts.flatMap((p) => [...p]) as never }),
+    loadEngine: async () => ({ createEngine, mergeDatasets: (...parts) => parts.flatMap((p) => [...p]) as never, mapIris: (data) => data }),
     loader,
   });
   return { validator, validateNode, validate, createEngine, loader };
@@ -480,5 +484,103 @@ describe("createShaclShapeValidator", () => {
       );
       await expect(validator.checkSubjects(dataset, [`${DOC}#note`, `${DOC}#future`], "pod")).resolves.toBeUndefined();
     });
+  });
+});
+
+describe("validateRelease", () => {
+  const INDEX = "https://site.example/decks/index.ttl";
+  const AT = "https://site.example/decks/solid/v2.ttl";
+  const INDEX_TURTLE = `@base <${INDEX}> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+<> a dcat:Catalog ; dcterms:title "Library"@en ; dcterms:description "Decks."@en ; dcterms:publisher <#pub> ; dcat:dataset <#listed> .
+<#pub> a foaf:Agent ; foaf:name "Publisher" .
+<#listed> a dcat:DatasetSeries , dcat:Dataset ; dcterms:title "Listed"@en .
+`;
+  /** The site's documents, and the library's index. */
+  const siteFetch = (async (input: RequestInfo | URL) =>
+    String(input) === INDEX ? new Response(INDEX_TURTLE, { headers: { "content-type": "text/turtle" } }) : shapesFetch(input)) as typeof globalThis.fetch;
+  const validator = createShaclShapeValidator({ fetch: siteFetch, shapesFetch: siteFetch, ...SHAPE_SOURCES });
+  const DCTERMS_NS = "http://purl.org/dc/terms/";
+  const DCAT_NS = "http://www.w3.org/ns/dcat#";
+  const brief = (problems: Awaited<ReturnType<typeof validator.validateRelease>>) =>
+    problems.map((p) => [p.severity, p.code, p.subject, p.field, "profile" in p.params ? p.params.profile : undefined]);
+
+  it("checks a draft as the release it will be against the library shapes and DCAT-AP, each result once, in the draft's names", async () => {
+    const draft = courseDraft();
+    const found = await validator.validateRelease(draft, draft.url);
+    expect(brief(found)).toEqual(
+      expect.arrayContaining([
+        ["error", "shape", DRAFT, `${DCTERMS_NS}publisher`, undefined],
+        ["error", "shape", DRAFT, `${DCAT_NS}theme`, undefined],
+        ["error", "shape", DRAFT, `${DCTERMS_NS}description`, "dcat-ap"],
+        ["error", "shape", of("series"), `${DCTERMS_NS}description`, undefined],
+      ]),
+    );
+    expect(new Set(found.map((p) => JSON.stringify(p))).size).toBe(found.length);
+    expect(found.find((p) => p.field === `${DCTERMS_NS}publisher`)!.params).toEqual({
+      message: { en: "A library deck names its publisher, a foaf:Agent.", sv: "En bibliotekskortlek anger sin utgivare, en foaf:Agent." },
+      constraint: "MinCount",
+    });
+  }, 60_000);
+
+  it("names a subject typed with a Solid Memo term no shape describes, and a value a result is about", async () => {
+    const base = courseDraft();
+    const draft = {
+      ...base,
+      root: { ...base.root, publisher: of("me") },
+      triples: [...base.triples, { subject: of("odd"), predicate: RDF.type, object: { kind: "iri" as const, value: "https://solid-memo.com/ns/vocab/v1.ttl#Nothing" } }],
+    };
+    const found = await validator.validateRelease(draft, AT);
+    expect(found).toContainEqual({ severity: "error", subject: of("odd"), code: "unshaped", params: {} });
+    expect(found.find((p) => p.field === `${DCTERMS_NS}publisher`)!.params).toMatchObject({ value: of("me"), profile: "dcat-ap", constraint: "Class", builtIn: true });
+  }, 60_000);
+
+  it("checks a release for a library with its index beside it, the series it names a version of it, described when the index has it not", async () => {
+    const base = courseDraft();
+    const inLibrary = (series: string, publisher = `${INDEX}#pub`) => ({ ...base, root: { ...base.root, inSeries: series, isVersionOf: series, publisher } });
+    // Without the index, nothing beside the release describes its series and publisher: their class is not checked.
+    const without = brief(await validator.validateRelease(inLibrary(`${INDEX}#solid`), AT));
+    expect(without.filter(([, , , field]) => field === `${DCAT_NS}inSeries` || field === `${DCTERMS_NS}publisher`)).toEqual([]);
+    // With it, they are: a publisher the index describes as something else is not one.
+    const wrong = brief(await validator.validateRelease(inLibrary(`${INDEX}#solid`, `${INDEX}#listed`), AT, INDEX));
+    expect(wrong).toContainEqual(["error", "shape", DRAFT, `${DCTERMS_NS}publisher`, "dcat-ap"]);
+    for (const series of [`${INDEX}#solid`, `${INDEX}#listed`]) {
+      const found = brief(await validator.validateRelease(inLibrary(series), AT, INDEX));
+      expect(found.filter(([, , , field]) => field === `${DCAT_NS}inSeries` || field === `${DCTERMS_NS}publisher`)).toEqual([]);
+      expect(found.every(([, , subject]) => (subject as string).startsWith(DRAFT))).toBe(true);
+    }
+    // A release that describes its series itself has no need of the index's.
+    const own = await validator.validateRelease(base, AT, INDEX);
+    expect(brief(own)).toContainEqual(["error", "shape", of("series"), `${DCTERMS_NS}description`, undefined]);
+  }, 60_000);
+
+  it.each(["capitals-of-the-world/v1.ttl", "solid-fundamentals/v1.ttl"])(
+    "finds nothing wrong with the next version of decks/%s, in a pod or for the library, its publisher and series described in the index",
+    async (path) => {
+      const pod = await draftPod();
+      const release = await pod.repository.readRelease(`${DECKS}${path}`);
+      const name = path.split("/")[0]!;
+      const draft = nextVersionDraft(release, draftUrlOf(INSTANCE, name, 2));
+      expect(await pod.validator.validateRelease(draft, draft.url)).toEqual([]);
+      expect(await pod.validator.validateRelease(draft, `${DECKS}${name}/v2.ttl`, `${DECKS}index.ttl`)).toEqual([]);
+    },
+    120_000,
+  );
+
+  it("keeps a shape's warning a warning, and a result about no field the subject's", async () => {
+    const warning = { message: { en: "Careful." }, severity: "warning" as const, constraint: "Node" };
+    const engine: ShapeEngine = { validateNode: vi.fn(async () => [warning]), validate: vi.fn(async () => []) };
+    const loader: ShapeLoader = { load: vi.fn(async () => ({ size: 0 }) as never), loadProfile: vi.fn(async () => []), loadReferenceData: vi.fn(async () => []) };
+    const faked = createShaclShapeValidator({
+      fetch: vi.fn() as unknown as typeof fetch,
+      shapesFetch: vi.fn() as unknown as typeof fetch,
+      ...SHAPE_SOURCES,
+      loadEngine: async () => ({ createEngine: () => engine, mergeDatasets: (...parts) => parts.flatMap((p) => [...p]) as never, mapIris: (data) => data }),
+      loader,
+    });
+    const found = await faked.validateRelease(courseDraft(), DRAFT);
+    expect(found).toContainEqual({ severity: "warning", subject: DRAFT, code: "shape", params: { message: { en: "Careful." }, constraint: "Node" } });
   });
 });

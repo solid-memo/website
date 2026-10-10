@@ -3,7 +3,9 @@ import { choicesOf, type Choice } from "@solid-memo/domain/course";
 import type { CardContent } from "@solid-memo/domain/deck";
 import { isPublished } from "@solid-memo/domain/release/courseIds";
 import { cardTextOf, distractorChanges, draftCardOf, draftOutline } from "@solid-memo/domain/release/draftOutline";
+import type { QuestionField } from "@solid-memo/domain/release/releaseCheck";
 import { placeOf, type QuestionPlace, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
+import type { CardTextPart } from "@solid-memo/domain/deck";
 import {
   CardContentFields,
   CardFieldsErrorMessage,
@@ -41,7 +43,9 @@ const IN_ORDER = () => 0.5;
  * a preview of it as the course asks it (CourseQuestion), as typed,
  * which can be answered and answered again; and the card retired,
  * restored or deleted (one an earlier release published is only
- * retired, and so is a wrong option it published).
+ * retired, and so is a wrong option it published). Opened at a field
+ * (`field`, from the release check: a text, the wrong options, or one
+ * of them), that field is where the user arrives.
  */
 export function QuestionEditorScreen({
   draft,
@@ -49,6 +53,7 @@ export function QuestionEditorScreen({
   readOnly,
   status,
   links,
+  field,
   onEdit,
   onDeleted,
 }: {
@@ -57,6 +62,7 @@ export function QuestionEditorScreen({
   readOnly: DraftReadOnly | null;
   status: Pick<DraftEditor, "saving" | "failure">;
   links: DraftLinks;
+  field?: QuestionField;
   onEdit: DraftEditor["edit"];
   onDeleted: () => void;
 }) {
@@ -132,6 +138,7 @@ export function QuestionEditorScreen({
             busy={false}
             invalid={invalid}
             suggestions={{ front: [], back: [], own: [] }}
+            {...(field === undefined || field === "distractors" || field.startsWith("distractor:") ? {} : { arrival: field as CardTextPart })}
             onChange={(next) => {
               if (invalid?.entry !== undefined) setInvalid(null);
               setForm(next);
@@ -143,6 +150,7 @@ export function QuestionEditorScreen({
           </button>
         </form>
 
+        <div id="question-distractors" tabIndex={-1} data-arrival={field === "distractors" || undefined}>
         <DistractorFields
           cardId={card}
           distractors={saved.content.distractors ?? []}
@@ -151,8 +159,10 @@ export function QuestionEditorScreen({
           textFormat={saved.content.textFormat}
           busy={held}
           suggestions={[]}
+          {...(field?.startsWith("distractor:") === true ? { arrival: field.slice("distractor:".length) } : {})}
           onChange={(next) => Promise.resolve(onEdit(distractorChanges(draft, card, next)) === null)}
         />
+        </div>
 
         <LifeActions
           of="card"

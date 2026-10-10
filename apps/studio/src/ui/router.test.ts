@@ -3,7 +3,7 @@ import { act, renderHook } from "@testing-library/preact";
 import { isStudioHash, studioHref } from "@solid-memo/ui/router";
 import { DEFAULT_CARD_QUERY } from "@solid-memo/domain/cardQuery";
 import type { Card } from "@solid-memo/domain/deck";
-import { instanceOfRoute, isDraftRoute, parseStudioHash, spotRoute, studioRouteToHash, useStudioRoute, type StudioRoute } from "./router";
+import { instanceOfRoute, isDraftRoute, parseStudioHash, spotRoute, studioRouteToHash, targetRoute, useStudioRoute, type StudioRoute } from "./router";
 
 const DRAFT = "https://pod.example/solid-memo/a/drafts/solid/v1/release.ttl";
 
@@ -52,6 +52,13 @@ describe("the Studio's routes", () => {
     { screen: "question", draftUrl: DRAFT, card: "q-pods-1a" },
     { screen: "draftCards", draftUrl: DRAFT },
     { screen: "draftCards", draftUrl: DRAFT, filter: "unasked", language: "sv", page: 3 },
+    { screen: "check", draftUrl: DRAFT },
+    { screen: "check", draftUrl: DRAFT, policy: "library" },
+    { screen: "preview", draftUrl: DRAFT },
+    { screen: "draft", draftUrl: DRAFT, field: "outline" },
+    { screen: "chapter", draftUrl: DRAFT, chapter: "ch-pods", field: "review" },
+    { screen: "step", draftUrl: DRAFT, step: "ch-pods-1", field: "theory" },
+    { screen: "question", draftUrl: DRAFT, card: "q-pods-1a", field: "distractor:q-pods-1a-d1" },
   ];
 
   it("round-trip through the hash", () => {
@@ -141,7 +148,7 @@ describe("the Studio's routes", () => {
   });
 
   it("name the instance a route is in, the deck's for the workbench", () => {
-    expect(routes.map(instanceOfRoute)).toEqual([null, ...Array(23).fill("https://pod.example/solid-memo/a/")]);
+    expect(routes.map(instanceOfRoute)).toEqual([null, ...Array(30).fill("https://pod.example/solid-memo/a/")]);
   });
 
   it("keep a draft and the subject of it shown in their query, and the cards' view, the first page and no filter left out", () => {
@@ -152,6 +159,19 @@ describe("the Studio's routes", () => {
     expect(parseStudioHash(at("draft-cards", { page: "1.5" }))).toEqual({ screen: "draftCards", draftUrl: DRAFT });
     expect(isDraftRoute({ screen: "draft", draftUrl: DRAFT })).toBe(true);
     expect(isDraftRoute({ screen: "drafts", instanceUrl: "https://pod.example/solid-memo/a/" })).toBe(false);
+  });
+
+  it("leave out a pod's policy, which is the default, and a field the screen has not", () => {
+    const at = (path: string, params: Record<string, string>) => `#/studio/${path}?${new URLSearchParams({ draft: DRAFT, ...params }).toString()}`;
+    expect(studioRouteToHash({ screen: "check", draftUrl: DRAFT, policy: "pod" })).toBe(at("check", {}));
+    expect(parseStudioHash(at("check", { policy: "nonsense" }))).toEqual({ screen: "check", draftUrl: DRAFT });
+    expect(parseStudioHash(at("step", { step: "s", field: "title" }))).toEqual({ screen: "step", draftUrl: DRAFT, step: "s" });
+    expect(parseStudioHash(at("draft", { field: "theory" }))).toEqual({ screen: "draft", draftUrl: DRAFT });
+  });
+
+  it("open a draft's editor where a problem is", () => {
+    expect(targetRoute(DRAFT, { screen: "chapter", chapter: "ch-pods", field: "title" })).toEqual({ screen: "chapter", draftUrl: DRAFT, chapter: "ch-pods", field: "title" });
+    expect(targetRoute(DRAFT, { screen: "draft" })).toEqual({ screen: "draft", draftUrl: DRAFT });
   });
 
   it("leave a draft's route without its draft, or the subject it names, to the default route", () => {

@@ -37,7 +37,9 @@ export const OUTLINE_RULES: DropRules = {
  * moveChapter or moveStep change (outlineMove). The menu also retires a
  * chapter or step, or deletes one no release published, once the user
  * confirms; a published one is retired, never deleted. Nothing moves
- * while the draft cannot be changed (`readOnly`).
+ * while the draft cannot be changed (`readOnly`). A chapter, step or
+ * question the release check finds problems in has a badge counting
+ * them, a link to the check.
  */
 export function DraftOutline({
   draft,
@@ -45,6 +47,8 @@ export function DraftOutline({
   chapterHref,
   stepHref,
   questionHref,
+  checkHref,
+  problems,
   onEdit,
 }: {
   draft: ReleaseDraft;
@@ -52,9 +56,13 @@ export function DraftOutline({
   chapterHref: (chapter: string) => string;
   stepHref: (step: string) => string;
   questionHref: (card: string) => string;
+  checkHref: string;
+  /** How many problems the release check finds in each subject, by its id. */
+  problems: ReadonlyMap<string, number>;
   onEdit: (changes: DraftChange[]) => DraftRefusal | null;
 }) {
   const { t, readerText } = useI18n();
+  const badge = (id: string, name: string) => <ProblemBadge count={problems.get(id) ?? 0} name={name} href={checkHref} />;
   const listRef = useRef<HTMLDivElement>(null);
   const [menu, setMenu] = useState<string | null>(null);
   const [announcement, setAnnouncement] = useState("");
@@ -175,6 +183,7 @@ export function DraftOutline({
                     <a class="deck-open" href={chapterHref(chapter.key)} draggable={false}>
                       <ReaderText text={chapter.title} />
                     </a>
+                    {badge(chapter.key, name)}
                     <span class="hint">{t("studio.outline.stepCount", { count: steps.length })}</span>
                     {rowMenu(chapter.key, name, "chapter")}
                   </div>
@@ -199,15 +208,18 @@ export function DraftOutline({
                               <a class="deck-open" href={stepHref(step.key)} draggable={false}>
                                 {label}
                               </a>
+                              {badge(step.key, label)}
                               <span class="hint">{theory === "" ? t("studio.outline.noTheory") : plainDataText(theory, isMarkdown(data.textFormat), 80)}</span>
                               <ul class="outline-questions">
                                 {questionsOfStep(draft, step.key).map((card) => {
                                   const found = draftCardOf(draft, card);
+                                  const question = found === null ? card : cardName({ ...found.content, id: card }, readerText);
                                   return (
                                     <li key={card}>
                                       <a href={questionHref(card)} draggable={false}>
-                                        {found === null ? card : cardName({ ...found.content, id: card }, readerText)}
+                                        {question}
                                       </a>
+                                      {badge(card, question)}
                                     </li>
                                   );
                                 })}
@@ -237,6 +249,17 @@ export function DraftOutline({
         {announcement}
       </p>
     </div>
+  );
+}
+
+/** How many problems the release check finds in a subject, linking to the check; nothing for none. */
+function ProblemBadge({ count, name, href }: { count: number; name: string; href: string }) {
+  const { t } = useI18n();
+  return count === 0 ? null : (
+    <a class="studio-badge studio-badge-warning" href={href} draggable={false}>
+      {t("studio.check.badge", { count })}
+      <span class="visually-hidden"> {t("studio.check.badgeOf", { name })}</span>
+    </a>
   );
 }
 

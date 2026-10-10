@@ -11,6 +11,7 @@ import { parseStudioHash, studioRouteToHash } from "./router";
 import { StudioWorkspace } from "./StudioWorkspace";
 import { choose } from "../test/choose";
 import { applyDraftChanges, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
+import { problem } from "@solid-memo/domain/release/problems";
 import { courseDraft, DRAFT_URL, instanceA, instanceB, makeCard, makeDeck, session } from "../test/fixtures";
 
 const kanji = makeDeck("deck-1", { en: "Kanji N5" });
@@ -29,6 +30,9 @@ function renderWorkspace(useCases: UseCases) {
     </QueryClientProvider>,
   );
 }
+
+/** The release check of the Studio's Markdown, as the screens pass it on. */
+const MARKDOWN_CHECK = { problems: expect.any(Function), chunks: expect.any(Function) };
 
 const home = (instanceUrl: string) => studioRouteToHash({ screen: "home", instanceUrl });
 
@@ -569,6 +573,77 @@ describe("StudioWorkspace", () => {
       renderWorkspace(draftUseCases({ ...draft, chapters: draft.chapters.map((node) => ({ ...node, data: { ...node.data, title: undefined } })) }));
       expect(await screen.findByRole("heading", { level: 2, name: "Chapter ch-pods" })).toBeInTheDocument();
       expect(trailOf().at(-1)).toBe("ch-pods");
+    });
+
+    it("checks a release from the draft's overview, for a pod or the library, each problem a link to its field, the shapes when asked", async () => {
+      const draft = courseDraft();
+      const useCases = draftUseCases(draft);
+      const chapterless = problem(`${DRAFT_URL}#ch-apps`, { code: "chapterWithoutStep", params: {} });
+      const shaped = problem(DRAFT_URL, { code: "unshaped", params: {} }, { severity: "warning" });
+      vi.mocked(useCases.checkReleaseDraft).mockImplementation(async (_draft, _check, _policy, options) => ({
+        rules: [chapterless],
+        library: [],
+        drops: [],
+        markdown: [],
+        shapes: options?.shapes === true ? [shaped] : null,
+      }));
+      window.history.replaceState(null, "", studioRouteToHash({ screen: "draft", draftUrl: DRAFT_URL }));
+      renderWorkspace(useCases);
+      expect(await screen.findByText("The release check finds 1 problem.")).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: "1 problem in Apps" })).toBeInTheDocument();
+      fireEvent.click(screen.getByRole("link", { name: "See the release check" }));
+      expect(await screen.findByRole("heading", { level: 2, name: "Release check" })).toBeInTheDocument();
+      expect(trailOf()).toEqual(["Instances", "Decks", "Drafts", "Solid", "Release check"]);
+      expect(useCases.checkReleaseDraft).toHaveBeenLastCalledWith(draft, MARKDOWN_CHECK, "pod");
+      fireEvent.click(screen.getByRole("button", { name: "Check against the shapes" }));
+      expect(await screen.findByText("The shapes find 1 problem, among those above.")).toBeInTheDocument();
+      expect(useCases.checkReleaseDraft).toHaveBeenLastCalledWith(draft, MARKDOWN_CHECK, "pod", { shapes: true });
+      expect(within(screen.getByRole("region", { name: "Warnings" })).getByRole("link", { name: "This release" })).toBeInTheDocument();
+      fireEvent.click(screen.getByRole("link", { name: "The Solid Memo library" }));
+      await waitFor(() => expect(parseStudioHash(window.location.hash)).toEqual({ screen: "check", draftUrl: DRAFT_URL, policy: "library" }));
+      await waitFor(() => expect(useCases.checkReleaseDraft).toHaveBeenLastCalledWith(draft, MARKDOWN_CHECK, "library"));
+      // Another policy: the shapes are asked afresh.
+      expect(await screen.findByRole("button", { name: "Check against the shapes" })).toBeInTheDocument();
+      fireEvent.click(screen.getByRole("link", { name: "Has no step in use." }));
+      await waitFor(() => expect(parseStudioHash(window.location.hash)).toEqual({ screen: "chapter", draftUrl: DRAFT_URL, chapter: "ch-apps", field: "steps" }));
+      expect(await screen.findByRole("heading", { level: 3, name: "Steps" })).toHaveAttribute("data-arrival");
+    });
+
+    it("checks the shapes again after they failed, the draft as it was", async () => {
+      const draft = courseDraft();
+      const useCases = draftUseCases(draft);
+      let fail = true;
+      vi.mocked(useCases.checkReleaseDraft).mockImplementation(async (_draft, _check, _policy, options) => {
+        if (options?.shapes === true && fail) throw new AppError("draftGone");
+        return { rules: [], library: [], drops: [], markdown: [], shapes: options?.shapes === true ? [] : null };
+      });
+      window.history.replaceState(null, "", studioRouteToHash({ screen: "check", draftUrl: DRAFT_URL }));
+      renderWorkspace(useCases);
+      fireEvent.click(await screen.findByRole("button", { name: "Check against the shapes" }));
+      const again = await screen.findByRole("button", { name: "Check again" });
+      fail = false;
+      fireEvent.click(again);
+      expect(await screen.findByText("The shapes find nothing wrong.")).toBeInTheDocument();
+      expect(vi.mocked(useCases.checkReleaseDraft).mock.calls.filter(([, , , options]) => options?.shapes === true)).toHaveLength(2);
+    });
+
+    it("previews the draft's listing, with its trail", async () => {
+      window.history.replaceState(null, "", studioRouteToHash({ screen: "check", draftUrl: DRAFT_URL }));
+      renderWorkspace(draftUseCases());
+      fireEvent.click(await screen.findByRole("link", { name: "Preview the listing" }));
+      expect(await screen.findByRole("heading", { level: 2, name: "Listing preview" })).toBeInTheDocument();
+      expect(trailOf()).toEqual(["Instances", "Decks", "Drafts", "Solid", "Listing preview"]);
+    });
+
+    it("opens a step, a question or the overview at a field", async () => {
+      window.history.replaceState(null, "", studioRouteToHash({ screen: "step", draftUrl: DRAFT_URL, step: "ch-pods-1", field: "theory" }));
+      renderWorkspace(draftUseCases());
+      expect(await screen.findByRole("textbox", { name: "Theory" })).toHaveAttribute("data-arrival");
+      window.location.hash = studioRouteToHash({ screen: "question", draftUrl: DRAFT_URL, card: "q-pods-1a", field: "front" });
+      expect(await screen.findByRole("heading", { level: 2, name: "What holds data?" })).toBeInTheDocument();
+      expect(screen.getByRole("textbox", { name: "Front" })).toHaveAttribute("data-arrival");
+      window.location.hash = studioRouteToHash({ screen: "draft", draftUrl: DRAFT_URL, field: "title" });
+      await waitFor(() => expect(screen.getByRole("textbox", { name: "Title" })).toHaveAttribute("data-arrival"));
     });
 
     it("says why a draft could not be read", async () => {

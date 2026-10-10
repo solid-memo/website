@@ -33,9 +33,11 @@ import { DraftCardsContainer } from "./DraftCardsContainer";
 import { draftKey } from "./draftEditor";
 import { DraftOverviewContainer } from "./DraftOverviewContainer";
 import type { DraftLinks } from "./DraftOverviewScreen";
+import { ListingPreviewContainer } from "./ListingPreviewContainer";
 import { QuestionEditorContainer } from "./QuestionEditorContainer";
+import { ReleaseCheckContainer } from "./ReleaseCheckContainer";
 import { StepEditorContainer } from "./StepEditorContainer";
-import { instanceOfRoute, isDraftRoute, spotRoute, studioRouteToHash, useStudioRoute, type StudioRoute } from "./router";
+import { instanceOfRoute, isDraftRoute, spotRoute, studioRouteToHash, targetRoute, useStudioRoute, type StudioRoute } from "./router";
 
 /**
  * The signed-in Studio: the site header, with a way back to Solid Memo,
@@ -161,6 +163,10 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
         return [instancesCrumb, decks, ...draftCrumbs(route.draftUrl)];
       case "draftCards":
         return [instancesCrumb, decks, ...draftCrumbs(route.draftUrl), { label: t("studio.draftCards.crumb"), route }];
+      case "check":
+        return [instancesCrumb, decks, ...draftCrumbs(route.draftUrl), { label: t("studio.check.crumb"), route }];
+      case "preview":
+        return [instancesCrumb, decks, ...draftCrumbs(route.draftUrl), { label: t("studio.preview.crumb"), route }];
       case "chapter":
         return [instancesCrumb, decks, ...draftCrumbs(route.draftUrl), { label: chapterName(activeDraft!, route.chapter), route }];
       case "step": {
@@ -220,12 +226,39 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
     chapterHref: (chapter) => studioRouteToHash({ screen: "chapter", draftUrl, chapter }),
     stepHref: (step) => studioRouteToHash({ screen: "step", draftUrl, step }),
     questionHref: (card) => studioRouteToHash({ screen: "question", draftUrl, card }),
+    checkHref: studioRouteToHash({ screen: "check", draftUrl }),
+    previewHref: studioRouteToHash({ screen: "preview", draftUrl }),
   });
 
   const screenFor = (route: StudioRoute) => {
     switch (route.screen) {
       case "draft":
-        return <DraftOverviewContainer key={route.draftUrl} useCases={useCases} draftUrl={route.draftUrl} links={draftLinks(route.draftUrl)} />;
+        return (
+          <DraftOverviewContainer
+            key={route.draftUrl}
+            useCases={useCases}
+            draftUrl={route.draftUrl}
+            links={draftLinks(route.draftUrl)}
+            {...(route.field === undefined ? {} : { field: route.field })}
+          />
+        );
+      case "check":
+        return (
+          <ReleaseCheckContainer
+            // Another draft or policy: the shapes are asked afresh.
+            key={`${route.draftUrl} ${route.policy ?? "pod"}`}
+            useCases={useCases}
+            draftUrl={route.draftUrl}
+            policy={route.policy ?? "pod"}
+            links={{
+              policyHref: (policy) => studioRouteToHash({ screen: "check", draftUrl: route.draftUrl, policy }),
+              targetHref: (target) => studioRouteToHash(targetRoute(route.draftUrl, target)),
+              previewHref: studioRouteToHash({ screen: "preview", draftUrl: route.draftUrl }),
+            }}
+          />
+        );
+      case "preview":
+        return <ListingPreviewContainer key={route.draftUrl} useCases={useCases} draftUrl={route.draftUrl} />;
       case "chapter":
         return (
           <ChapterEditorContainer
@@ -235,6 +268,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             draftUrl={route.draftUrl}
             chapter={route.chapter}
             links={draftLinks(route.draftUrl)}
+            {...(route.field === undefined ? {} : { field: route.field })}
             onDeleted={() => replace({ screen: "draft", draftUrl: route.draftUrl })}
           />
         );
@@ -246,6 +280,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             draftUrl={route.draftUrl}
             step={route.step}
             links={draftLinks(route.draftUrl)}
+            {...(route.field === undefined ? {} : { field: route.field })}
             onDeleted={() => replace({ screen: "draft", draftUrl: route.draftUrl })}
           />
         );
@@ -257,6 +292,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             draftUrl={route.draftUrl}
             card={route.card}
             links={draftLinks(route.draftUrl)}
+            {...(route.field === undefined ? {} : { field: route.field })}
             onDeleted={() => replace({ screen: "draftCards", draftUrl: route.draftUrl })}
           />
         );

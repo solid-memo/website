@@ -267,10 +267,12 @@ the Studio can run them in the browser as the command does:
 | `problems.ts` | `ReleaseProblem`: a code, a severity, the subject and field it is in, and what it needs to be worded. No text. |
 | `libraryRules.ts` | The layout and each version's metadata against its place. |
 | `continuityRules.ts` | A version against the one before it. |
-| `courseRules.ts` | The [course rules](#course-rules). |
+| `courseRules.ts` | The [course rules](#course-rules); and what a release needs that its draft may lack (`readinessProblems`), which the Studio's check adds. |
 | `markdownFields.ts` | Which fields are Markdown, and by which rule; the check itself is passed in, since the domain reads no Markdown. |
 | `curationRules.ts` | A `LibraryPolicy`: what a library asks beyond the data. `repoPolicy` asks a title and description in English, keywords in English and Swedish and the theme `EDUC`; `podPolicy` asks nothing. |
 | `seriesEntry.ts` | What the index says of a deck. |
+| `releaseCheck.ts` | The Studio's release check: the rules a policy runs, where a library publishes a release (`libraryReleaseUrl`, `librarySeriesUrl`, which this command uses too), and where each problem is fixed. |
+| `draftModel.ts` | A Studio draft as a release model, at its own address or another. |
 
 The command builds each release's model from its quads
 ([`quadsToReleaseModel.ts`](../packages/shacl/node/quadsToReleaseModel.ts)),

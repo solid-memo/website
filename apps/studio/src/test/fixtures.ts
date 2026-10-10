@@ -144,4 +144,6 @@ export const draftLinks = {
   chapterHref: (chapter: string) => `#/chapter/${chapter}`,
   stepHref: (step: string) => `#/step/${step}`,
   questionHref: (card: string) => `#/question/${card}`,
+  checkHref: "#/check",
+  previewHref: "#/preview",
 };

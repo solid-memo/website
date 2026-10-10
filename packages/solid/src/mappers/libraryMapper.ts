@@ -28,6 +28,7 @@ import { agentNamesOf, distractorsOf } from "./deckMapper";
 import { ADMS, DCAT, DCTERMS, RDF, SCHEMA, SM } from "../vocab";
 import { courseOutlineFromRecords, type CourseOutline } from "@solid-memo/domain/course";
 import { AppError } from "@solid-memo/domain/appError";
+import type { LibraryIndexView } from "@solid-memo/domain/release/releaseCheck";
 
 /**
  * Every deck the library's index lists (see docs/deck-library.md): the
@@ -54,6 +55,20 @@ export function toLibraryDecks(index: SolidDataset): LibraryDeck[] {
         ? { ...deck, forNewcomers: true as const }
         : deck,
     );
+}
+
+/**
+ * What the index says that places a release in the library (the
+ * Studio's release check, domain/release/releaseCheck.ts): its address,
+ * its catalogue's publisher, and every release of every deck it lists.
+ */
+export function toLibraryIndexView(indexUrl: string, index: SolidDataset): LibraryIndexView {
+  const catalog = getThingAll(index).find((thing) => getUrlAll(thing, RDF.type).includes(DCAT.Catalog));
+  return {
+    url: indexUrl,
+    publisher: catalog === undefined ? null : getUrl(catalog, DCTERMS.publisher),
+    releases: toLibraryDecks(index).flatMap((deck) => deck.releases.map((release) => release.url)),
+  };
 }
 
 function toLibraryDeck(

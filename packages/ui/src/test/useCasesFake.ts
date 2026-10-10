@@ -161,6 +161,7 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
       throw new Error("editReleaseDraft fake not configured");
     }),
     deleteReleaseDraft: vi.fn(async () => undefined),
+    checkReleaseDraft: vi.fn(async (_draft, _check, _policy, options) => ({ rules: [], library: [], drops: [], markdown: [], shapes: options?.shapes === true ? [] : null })),
     exportDeckFile: vi.fn(async () => undefined),
     openDeckFile: vi.fn(async () => null),
     importDeckFile: vi.fn(async () => {

@@ -266,7 +266,17 @@ the shapes, as `pickShape` picks them for a read:
   not yet ask what a release needs; its cards, distractors and agents
   against the shapes every context shares. DCAT-AP is not run: a draft
   may still lack what a published dataset needs, such as a description.
-  The release check holds the draft to all of it before it is published.
+  The [release check](studio.md#the-release-check) holds the draft to
+  all of it before it is published: `validateRelease` checks the
+  release it will be, moved to its address, against the library shapes
+  (`"library"`), DCAT-AP and SKOS, with a library's index beside it
+  for the library's policy. Its publisher and series are often in
+  another document, a library's index. When nothing beside the release
+  describes them (in a pod, the index is not read), DCAT-AP's class
+  check on `dcterms:publisher`, `dcat:inSeries` and
+  `dcterms:isVersionOf` says nothing (`isLinkElsewhere`), as with a
+  member listed from elsewhere. With the index beside it, they are held
+  to their class.
   Every write of a draft is one
   ([solidReleaseDraftRepository.ts](../packages/solid/src/solidReleaseDraftRepository.ts)),
   and so is the check of a draft's documents.

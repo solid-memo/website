@@ -1824,7 +1824,7 @@ export function createUseCases({
     };
   }
   return {
-    ...createReleaseDraftUseCases({ releaseDraftRepository, deckRepository, fileExchange, now }),
+    ...createReleaseDraftUseCases({ releaseDraftRepository, deckRepository, deckLibrary, shapeValidator, fileExchange, now }),
     async restoreSession() {
       const established = await sessionGateway.restore();
       if (established !== null) return established;

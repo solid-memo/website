@@ -136,7 +136,7 @@ describe("cards, review states and checks since a version", () => {
       vocabBaseUrl: "https://vocab.example/",
       vendorBaseUrl: "https://app.example/vendor/",
       loader: { load: async () => createSolidDataset() as never, loadProfile: async () => [], loadReferenceData: async () => [] },
-      loadEngine: async () => ({ createEngine: () => ({ validateNode: async () => [], validate: async () => [] }), mergeDatasets: () => ({}) as never }),
+      loadEngine: async () => ({ createEngine: () => ({ validateNode: async () => [], validate: async () => [] }), mergeDatasets: () => ({}) as never, mapIris: (data) => data }),
     });
     expect(await validator.validateDocumentSince(CARDS, pod.etag(CARDS))).toEqual({ unchanged: true });
     const checked = await validator.validateDocumentSince(CARDS, undefined);

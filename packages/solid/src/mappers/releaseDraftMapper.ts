@@ -241,6 +241,26 @@ export function draftEntries(draft: ReleaseDraft): Map<string, DraftEntry> {
   return entries;
 }
 
+/**
+ * The draft's statements, every subject at its IRI in the draft: each
+ * record as its shape writes it, and every other statement as it is.
+ * What its documents hold together, but named as in its release.
+ */
+export function draftQuads(draft: ReleaseDraft): Quad[] {
+  const root: DraftEntry = {
+    document: draft.url,
+    subject: draft.url,
+    shaped: { descriptor: DRAFT_DECK_V1, record: draft.root },
+    raw: draft.course ? [{ subject: draft.url, predicate: RDF_TYPE, object: { kind: "iri", value: SCHEMA_COURSE } }] : [],
+  };
+  const nodes = KINDS.flatMap(({ list, shape }) =>
+    (draft[list] as readonly DraftNode<unknown>[]).map(
+      (node): DraftEntry => ({ document: draft.url, subject: iriIn(draft, node.id), shaped: { descriptor: LATEST(shape), record: node.data }, raw: [] }),
+    ),
+  );
+  return [...[root, ...nodes].flatMap(entryQuads), ...draft.triples.map((triple) => quadOf(triple.subject, triple.predicate, triple.object))];
+}
+
 /** A subject as the quads its document holds of it, written new. */
 export function entryQuads(entry: DraftEntry): Quad[] {
   const shaped =

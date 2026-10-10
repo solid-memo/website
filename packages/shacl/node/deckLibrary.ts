@@ -15,6 +15,7 @@ import {
   versionGapProblems,
 } from "@solid-memo/domain/release/libraryRules";
 import { markdownProblems as releaseMarkdownProblems, type FieldRuleName } from "@solid-memo/domain/release/markdownFields";
+import { libraryReleaseUrl, librarySeriesUrl } from "@solid-memo/domain/release/releaseCheck";
 import type { ReleaseProblem } from "@solid-memo/domain/release/problems";
 import { SCHEMA_NS, type ReleaseModel, type ReleaseTerm } from "@solid-memo/domain/release/releaseModel";
 import { keptInIndex, lastIssued, seriesEntry } from "@solid-memo/domain/release/seriesEntry";
@@ -80,12 +81,13 @@ export const NEWCOMER_COURSE: string | undefined = "getting-started";
  */
 export const LIBRARY_DECK_SERIES_FORMAT = 3;
 
+/** Where the site publishes a release, as the Studio's check places one (@solid-memo/domain/release/releaseCheck). */
 export function releaseUrlOf(deck: string, version: number): string {
-  return `${DECKS_BASE}${deck}/v${version}.ttl`;
+  return libraryReleaseUrl(INDEX_URL, deck, version);
 }
 
 export function seriesUrlOf(deck: string): string {
-  return `${INDEX_URL}#${deck}`;
+  return librarySeriesUrl(INDEX_URL, deck);
 }
 
 /** Where a release is kept in this repository, as problems name it: decks/<name>/v<N>.ttl. */

@@ -3,6 +3,7 @@ import { isMarkdown } from "@solid-memo/domain/deck";
 import type { LangText } from "@solid-memo/domain/langText";
 import { isPublished, reviewQuestionsOf, stepIdFor } from "@solid-memo/domain/release/courseIds";
 import { draftCardOf, retiredSteps } from "@solid-memo/domain/release/draftOutline";
+import type { ChapterField } from "@solid-memo/domain/release/releaseCheck";
 import { liveChapters, liveSteps, type ChapterText, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { cardName, DataText } from "@solid-memo/ui/DataText";
@@ -31,7 +32,9 @@ export function proseFormat(markdown: boolean, was: string | undefined): string 
  * up or down, a new one added under the id the assistant suggests, and
  * its retired ones restored; the questions it asks only in its final
  * review, and a new one; and the chapter retired, restored or deleted
- * (one an earlier release published is only retired).
+ * (one an earlier release published is only retired). Opened at a field
+ * (`field`, from the release check), that field is where the user
+ * arrives.
  */
 export function ChapterEditorScreen({
   draft,
@@ -39,6 +42,7 @@ export function ChapterEditorScreen({
   readOnly,
   status,
   links,
+  field,
   onEdit,
   onDeleted,
 }: {
@@ -47,6 +51,7 @@ export function ChapterEditorScreen({
   readOnly: DraftReadOnly | null;
   status: Pick<DraftEditor, "saving" | "failure">;
   links: DraftLinks;
+  field?: ChapterField;
   onEdit: DraftEditor["edit"];
   onDeleted: () => void;
 }) {
@@ -89,6 +94,7 @@ export function ChapterEditorScreen({
           field={t("language.field.title")}
           text={data.title}
           disabled={held}
+          arrival={field === "title"}
           onSave={(title) => save({ ...text, title: emptyAsNone(title) })}
         />
         <DraftProseField
@@ -99,13 +105,16 @@ export function ChapterEditorScreen({
           text={data.description}
           markdown={isMarkdown(data.textFormat)}
           disabled={held}
+          arrival={field === "description"}
           // As the course's screen shows a chapter's description.
           preview={(shown, markdown) => <DataText text={shown} markdown={markdown} />}
           onSave={(description, markdown) => save({ ...text, description: emptyAsNone(description), textFormat: proseFormat(markdown, data.textFormat) })}
         />
 
         <section aria-labelledby="chapter-steps-heading">
-          <h3 id="chapter-steps-heading">{t("studio.chapter.steps")}</h3>
+          <h3 id="chapter-steps-heading" tabIndex={-1} data-arrival={field === "steps" || undefined}>
+            {t("studio.chapter.steps")}
+          </h3>
           {steps.length === 0 ? (
             <p class="hint">{t("studio.outline.noSteps")}</p>
           ) : (
@@ -163,7 +172,9 @@ export function ChapterEditorScreen({
         </section>
 
         <section aria-labelledby="chapter-review-heading">
-          <h3 id="chapter-review-heading">{t("studio.chapter.review")}</h3>
+          <h3 id="chapter-review-heading" tabIndex={-1} data-arrival={field === "review" || undefined}>
+            {t("studio.chapter.review")}
+          </h3>
           <p class="hint">{t("studio.chapter.reviewHint")}</p>
           <ul>
             {reviewQuestionsOf(draft, chapter).map((card) => {

@@ -67,6 +67,21 @@ describe("listLibraryDecks", () => {
   });
 });
 
+describe("readLibraryIndex", () => {
+  it("reads what the index says that places a release", async () => {
+    const index = setThing(
+      mockSolidDatasetFrom(INDEX),
+      buildThing(createThing({ url: INDEX }))
+        .addIri(RDF.type, "http://www.w3.org/ns/dcat#Catalog")
+        .addIri(DCTERMS.publisher, `${INDEX}#me`)
+        .build(),
+    );
+    vi.mocked(getSolidDataset).mockResolvedValue(index);
+    await expect(makeLibrary().readLibraryIndex()).resolves.toEqual({ url: INDEX, publisher: `${INDEX}#me`, releases: [] });
+    expect(getSolidDataset).toHaveBeenCalledWith(INDEX, expect.objectContaining({ fetch }));
+  });
+});
+
 describe("fetchLibraryDeck", () => {
   it("fetches the document and maps its content", async () => {
     vi.mocked(getSolidDataset).mockResolvedValue(deckDocument());

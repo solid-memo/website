@@ -1,4 +1,5 @@
 import type { UseCases } from "@solid-memo/application/useCases";
+import type { QuestionField } from "@solid-memo/domain/release/releaseCheck";
 import { useDraftEditor } from "./draftEditor";
 import type { DraftLinks } from "./DraftOverviewScreen";
 import { QuestionEditorScreen } from "./QuestionEditorScreen";
@@ -9,12 +10,14 @@ export function QuestionEditorContainer({
   draftUrl,
   card,
   links,
+  field,
   onDeleted,
 }: {
   useCases: UseCases;
   draftUrl: string;
   card: string;
   links: DraftLinks;
+  field?: QuestionField;
   onDeleted: () => void;
 }) {
   const editor = useDraftEditor(useCases, draftUrl);
@@ -25,6 +28,7 @@ export function QuestionEditorContainer({
       readOnly={editor.readOnly}
       status={editor}
       links={links}
+      {...(field === undefined ? {} : { field })}
       onEdit={editor.edit}
       onDeleted={onDeleted}
     />
