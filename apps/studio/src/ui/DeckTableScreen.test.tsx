@@ -35,6 +35,9 @@ function Harness({ initial = { filter: "" }, ...overrides }: Partial<Props> & { 
       onView={setView}
       shownView={shown}
       onShow={setShown}
+      savedViews={[]}
+      onSavedViews={() => undefined}
+      onApply={() => undefined}
       onCursor={() => undefined}
       onOpen={() => undefined}
       pending={(deck, figure) => (deck.url === verbs.url && figure === "cards" ? "unreadable" : "loading")}
@@ -177,6 +180,7 @@ describe("DeckTableScreen", () => {
       "Courses 0",
       "Library copies 1",
       "Needs attention 1",
+      "+ Save view",
     ]);
     expect(within(views).getByRole("button", { name: "All 2" })).toHaveAttribute("aria-pressed", "true");
     fireEvent.click(within(views).getByRole("button", { name: "Due today 2" }));
@@ -375,6 +379,60 @@ describe("DeckTableScreen", () => {
     expect(onRemove).toHaveBeenCalledWith([kanji, verbs]);
     expect(await screen.findByText("Deleted 2 decks.")).toBeInTheDocument();
     expect(screen.queryByRole("group", { name: "Selected decks" })).toBeNull();
+  });
+
+  it("edits a deck's pace and direction in its cell, as the bulk actions change them, and says so", async () => {
+    const onPace = vi.fn(async () => true);
+    const onDirection = vi.fn(async () => true);
+    render(<Harness onPace={onPace} onDirection={onDirection} />);
+    const edit = (name: string, role: "spinbutton" | "combobox", value: string) => {
+      fireEvent.click(screen.getByRole("button", { name }));
+      const field = screen.getByRole(role, { name: name.replace(/:.*/, "") });
+      if (role === "combobox") choose(name.replace(/:.*/, ""), value);
+      else fireEvent.input(field, { target: { value } });
+      fireEvent.keyDown(field, { key: "Enter" });
+    };
+    edit("New per day of Kanji N5: 20 (instance)", "spinbutton", "8");
+    await waitFor(() => expect(onPace).toHaveBeenCalledWith([kanji], { newCardsPerDay: 8 }));
+    await waitFor(() => expect(said()).toHaveTextContent("Set the pace of 1 deck."));
+    edit("Reviews per day of Verbs: 200 (instance)", "spinbutton", "50");
+    await waitFor(() => expect(onPace).toHaveBeenLastCalledWith([verbs], { newCardsPerDay: 5, maxReviewsPerDay: 50 }));
+    // Empty, the instance's pace again.
+    fireEvent.click(screen.getByRole("button", { name: "New per day of Verbs: 5" }));
+    expect(screen.getByRole("spinbutton", { name: "New per day of Verbs" })).toHaveValue(5);
+    fireEvent.input(screen.getByRole("spinbutton", { name: "New per day of Verbs" }), { target: { value: "" } });
+    fireEvent.keyDown(screen.getByRole("spinbutton", { name: "New per day of Verbs" }), { key: "Enter" });
+    await waitFor(() => expect(onPace).toHaveBeenLastCalledWith([verbs], {}));
+    edit("Direction of Kanji N5: Front → back", "combobox", "bidirectional");
+    await waitFor(() => expect(onDirection).toHaveBeenCalledWith([kanji], "bidirectional"));
+    await waitFor(() => expect(said()).toHaveTextContent("Set the direction of 1 deck."));
+  });
+
+  it("edits no cell of a deck that may not be changed", () => {
+    render(<Harness selectable={(deck) => deck.url !== kanji.url} />);
+    const row = within(table()).getByRole("row", { name: /Kanji N5/ });
+    expect(within(row).queryByRole("button", { name: /of Kanji N5/ })).toBeNull();
+    expect(screen.getByRole("button", { name: "Direction of Verbs: Both ways" })).toBeInTheDocument();
+  });
+
+  it("shows the views saved beside Home's own, saves the view it is in, and puts Home in one chosen", () => {
+    const onApply = vi.fn();
+    const onSavedViews = vi.fn();
+    render(<Harness savedViews={[{ name: "Kanji due", params: "q=kanji&show=due" }]} onApply={onApply} onSavedViews={onSavedViews} />);
+    const views = screen.getByRole("group", { name: "Views" });
+    expect(within(views).getByRole("button", { name: "Kanji due" })).toHaveAttribute("aria-pressed", "false");
+    fireEvent.click(within(views).getByRole("button", { name: "Due today 2" }));
+    fireEvent.input(screen.getByRole("searchbox", { name: "Filter by name or group" }), { target: { value: "kanji" } });
+    expect(within(views).getByRole("button", { name: "Kanji due" })).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(within(views).getByRole("button", { name: "Kanji due" }));
+    expect(onApply).toHaveBeenCalledWith({ view: { filter: "kanji" }, show: "due" });
+    fireEvent.click(within(views).getByRole("button", { name: "+ Save view" }));
+    fireEvent.input(within(dialog("Save the view")).getByRole("textbox", { name: "Name" }), { target: { value: "Mine" } });
+    fireEvent.click(within(dialog("Save the view")).getByRole("button", { name: "Save" }));
+    expect(onSavedViews).toHaveBeenCalledWith([
+      { name: "Kanji due", params: "q=kanji&show=due" },
+      { name: "Mine", params: "q=kanji&show=due" },
+    ]);
   });
 
   it("sends the user to Solid Memo for decks when there are none", () => {

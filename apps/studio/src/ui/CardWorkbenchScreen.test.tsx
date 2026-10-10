@@ -6,7 +6,7 @@ import { planCardEdit } from "@solid-memo/domain/cardBulk";
 import { DEFAULT_CARD_QUERY, type CardQuery, type CardRow } from "@solid-memo/domain/cardQuery";
 import { CardWorkbenchScreen } from "./CardWorkbenchScreen";
 import { choose } from "../test/choose";
-import { answer, pick } from "../test/dialogs";
+import { answer, dialog, pick } from "../test/dialogs";
 import { makeCard, makeDeck } from "../test/fixtures";
 import { WithKeys } from "../test/keys";
 
@@ -43,6 +43,8 @@ function Harness({ initial = DEFAULT_CARD_QUERY, onQuery, ...overrides }: Partia
           onQuery?.(next);
           setQuery(next);
         }}
+        savedViews={[]}
+        onSavedViews={() => undefined}
         cardHref={(card) => `#/card?card=${card.id}`}
         onOpen={() => undefined}
         plan={(ids, edit) => planCardEdit(rows.map((row) => row.card), ids, edit)}
@@ -118,7 +120,7 @@ describe("CardWorkbenchScreen", () => {
     );
     expect(screen.getByText("3 of 4 cards")).toBeInTheDocument();
     expect(screen.getByText(/move between the cards/)).toHaveTextContent(
-      "Keys: j and k move between the cards, x selects one, Enter opens it, Shift+J and Shift+K select the next one or the one before too, Escape clears the selection, and . opens the actions of the selected cards.",
+      "Keys: j and k move between the cards, x selects one, Enter opens it, Shift+J and Shift+K select the next one or the one before too, Escape clears the selection, F2 edits a front or a back in its cell, and . opens the actions of the selected cards.",
     );
     expect(screen.queryByText("Course")).toBeNull();
   });
@@ -331,6 +333,7 @@ describe("CardWorkbenchScreen", () => {
     key(document.body, ".");
     expect(document.body).toHaveFocus();
     expect(screen.getByRole("button", { name: "Undo" })).toBeDisabled();
+    expect(within(table()).queryByRole("button", { name: /^Back of/ })).toBeNull();
   });
 
   it("forgets or reschedules the selected cards' progress, and says what it did", () => {
@@ -412,5 +415,55 @@ describe("CardWorkbenchScreen", () => {
     rerender(<Harness undone error="The cards changed elsewhere." />);
     expect(screen.getByText("Undone: the cards are as they were.")).toBeInTheDocument();
     expect(screen.getByRole("alert")).toHaveTextContent("The cards changed elsewhere.");
+  });
+  it("shows the cards of a view from its tab, the view the query is in pressed, beside the views saved", () => {
+    const onQuery = vi.fn();
+    const onSavedViews = vi.fn();
+    const saved = { name: "Hard", params: "state=leech&sort=lapses&order=desc" };
+    render(<Harness initial={{ ...DEFAULT_CARD_QUERY, page: 2 }} onQuery={onQuery} savedViews={[saved]} onSavedViews={onSavedViews} />);
+    const views = screen.getByRole("group", { name: "Views" });
+    expect(within(views).getAllByRole("button").map((button) => button.textContent)).toEqual(["All", "Due", "New", "Leeches", "Hard", "", "+ Save view"]);
+    expect(within(views).getByRole("button", { name: "All" })).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(within(views).getByRole("button", { name: "Leeches" }));
+    expect(onQuery).toHaveBeenLastCalledWith({ ...DEFAULT_CARD_QUERY, state: "leech" });
+    expect(within(views).getByRole("button", { name: "Leeches" })).toHaveAttribute("aria-pressed", "true");
+    choose("State", "mature");
+    expect(within(views).queryAllByRole("button", { pressed: true })).toEqual([]);
+    fireEvent.click(within(views).getByRole("button", { name: "Hard" }));
+    expect(onQuery).toHaveBeenLastCalledWith({ ...DEFAULT_CARD_QUERY, state: "leech", sort: { key: "lapses", descending: true } });
+    expect(within(views).getByRole("button", { name: "Hard" })).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(within(views).getByRole("button", { name: "+ Save view" }));
+    fireEvent.input(within(dialog("Save the view")).getByRole("textbox", { name: "Name" }), { target: { value: "Hard" } });
+    fireEvent.click(within(dialog("Save the view")).getByRole("button", { name: "Save" }));
+    expect(onSavedViews).toHaveBeenCalledWith([saved]);
+  });
+
+  it("edits a plain text card's front and back in their cells, as an edit of that card alone", async () => {
+    const onEdit = vi.fn(async () => true);
+    render(<Harness onEdit={onEdit} />);
+    // In Markdown: edited in the inspector.
+    expect(within(table()).queryByRole("button", { name: /^Back of 水/ })).toBeNull();
+    fireEvent.click(within(table()).getByRole("button", { name: "Back of 木: Tree" }));
+    const back = screen.getByRole("textbox", { name: "Back of 木" });
+    expect(back).toHaveValue("Tree");
+    // Left empty, the side is refused.
+    fireEvent.input(back, { target: { value: " " } });
+    key(back, "Enter");
+    await waitFor(() => expect(back).toHaveAttribute("aria-invalid", "true"));
+    expect(screen.getByText("Not saved: a side or a wrong option would be left empty.")).toHaveAttribute("role", "alert");
+    fireEvent.input(back, { target: { value: "Trees" } });
+    key(back, "Enter");
+    const edit = { kind: "setText", side: "back", tag: "en", text: "Trees" };
+    await waitFor(() => expect(onEdit).toHaveBeenCalledWith(["tree"], edit, planCardEdit([tree], ["tree"], edit as never)));
+    expect(screen.queryByText(/^Not saved/)).toBeNull();
+    // From the keyboard, the front, whose cell is the card's link.
+    link("木").focus();
+    key(link("木"), "F2");
+    const front = screen.getByRole("textbox", { name: "Front of 木" });
+    // Saved as it was, after the spaces are trimmed: nothing to write.
+    fireEvent.input(front, { target: { value: " 木 " } });
+    key(front, "Enter");
+    await waitFor(() => expect(link("木")).toHaveFocus());
+    expect(onEdit).toHaveBeenCalledTimes(1);
   });
 });

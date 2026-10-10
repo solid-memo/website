@@ -98,7 +98,12 @@ It takes the whole window, and the window does not scroll:
   its overview with its version, the deck or draft shown marked, both
   kept to those whose name holds the filter above them, case and
   accents aside. They are the screens' own queries, so a deck or draft
-  made, renamed or deleted shows there too. Its button in the header, or
+  made, renamed or deleted shows there too. Above the decks, those opened
+  last (Recently opened, five at most, the last first), but those pinned:
+  each deck and draft has a pin beside it (**Pin** *name*, pressed while
+  it is pinned), and those pinned are listed at the sidebar's top
+  (Pinned), in the order pinned, above the sections. A deck is opened by
+  any of its screens, a draft by any of its. Its button in the header, or
   Ctrl+B, hides it, and the main content takes its room; the device
   remembers. On a narrow screen it is a drawer over the page, closed
   until its button opens it, and closed again by a link followed in it,
@@ -139,7 +144,11 @@ It takes the whole window, and the window does not scroll:
   open instance, says on a draft's screens whether the draft is saved
   ("Saving the draft…", then "Draft saved", or "Last change not saved"
   when its write failed or the draft refused it;
-  [below](#how-edits-are-saved)), counts the problems of the deck or
+  [below](#how-edits-are-saved)), and whether it can be published: **Ready
+  to publish**, a link to its Release tab, while the release check finds
+  no error that keeps it from it, else "2 problems block publishing", a
+  link to its Check tab; **Released** once it is (both
+  [below](#publishing-a-release)). Then it counts the problems of the deck or
   the draft shown (a button that opens the dock at them), shows or
   hides the dock (**Panel**), switches the density, and shows the keys
   (**? Keys**).
@@ -179,7 +188,12 @@ is kept on the device, never in the pod
 compact), and changes no history entry. So are whether the sidebar,
 the aside and the dock are shown, and the aside's width (the outline's,
 and a card's beside its deck's cards) and the dock's height (each kept
-within its bounds), and the columns each table hides.
+within its bounds), and the columns each table hides. What the device
+keeps of each instance is under a key of its own
+(`solid-memo:studioInstances.v1`, by the instance's URL): the views
+saved of Home and of the workbench ([below](#home)), the decks and
+drafts pinned, and those opened last. Storage that refuses keeps them
+for the page's life only.
 
 **Keys.** The Studio has one listener of keys, in its shell
 ([`shell/useShortcuts.ts`](../apps/studio/src/ui/shell/useShortcuts.ts)),
@@ -203,6 +217,7 @@ and its keymap is data
 | `j`, `k`, `x`, Enter | a table: the card workbench (a card beside it too), Home, the library copies, a draft's cards, the releases | the next row, the one before (beside a card, show it; on Home and the library copies, show it in the aside), select it, open it ([below](#card-workbench)) |
 | Shift+J, Shift+K, Escape | a table whose rows are selected | select the row and the next, or the one before; clear the selection |
 | `.` | a table whose rows are selected | open the first menu of the selection's bar, or go to its first button ([below](#bulk-edits)) |
+| F2 | a table with cells to edit: Home, the card workbench | edit the cell the focus is in, or the row's first that can be edited ([below](#layout)) |
 
 A pair such as `g d` is pressed one key after the other, the second
 within 1.5 seconds; a key held down counts once, so a held `g` is not
@@ -250,6 +265,35 @@ cards, decks, a draft or a part of it, forgetting progress, restarting
 a course, and removing data from the pod on the health screen. A bulk
 edit that needs to be told more (a language, a day, a deck, a group)
 asks in a dialog too, not in the page above the table.
+
+**Editing in a cell.** Some cells are edited where they are
+([`shell/EditableCell.tsx`](../apps/studio/src/ui/shell/EditableCell.tsx)):
+on Home a deck's direction and pace, on the workbench a card's front
+and back. Such a cell is a button that shows what the cell does (named
+"New per day of Kanji N5: 20 (instance)"), outlined as it is pointed at;
+a click, Enter on it or F2 on its row opens a field in the cell (F2
+opens the cell the focus is in, else the row's first: a card's front,
+whose cell is its link, opens so alone). **Enter**, or its **Save**,
+saves it the way the bulk edits do, and the cell has the focus again;
+**Escape**, or **Cancel**, leaves the value as it was. A value refused
+stays in the field, marked invalid, and the screen says why. A value
+changed and not saved stays in its field as the focus goes elsewhere,
+and is asked about before it is left, as a card's edits are
+([below](#card-inspector)); one left unchanged closes as the focus
+leaves it. Nothing is saved unasked.
+
+**Saved views.** Beside a table's own views (Home's and the
+workbench's, [below](#home)), **+ Save view** saves the table's query
+under a name, asked in a dialog
+([`shell/SavedViews.tsx`](../apps/studio/src/ui/shell/SavedViews.tsx)).
+Each view saved is a tab with the others, pressed while the table is in
+its query, which a press puts it in (no Back stop, as a view's tab); its
+menu renames it or removes it, once the user confirms. A name is a
+view's own: a view saved or renamed under a name taken replaces that
+view. The device keeps them for each instance ([Density](#layout)), a
+view of the workbench for every deck of it. A view keeps the query as
+its URL has it (`q=kanji&show=due`; [`shell/views.ts`](../apps/studio/src/ui/shell/views.ts)),
+the workbench's without its page.
 
 ### The dock
 
@@ -327,8 +371,9 @@ an entry matches when its name holds the letters typed in their order,
 case and accents aside ("kn5" finds Kanji N5); a letter at the start of
 a word, or right after the one before, counts for more, and a shorter
 name a little. The best come first, each group under its heading where
-its best is, 50 at most. With nothing typed, the entries the device
-remembers as used last come first, under Recently used (eight at most,
+its best is, 50 at most. With nothing typed, the decks and drafts
+pinned in the sidebar come first, under Pinned; then the entries the device
+remembers as used last, under Recently used (eight at most, those pinned aside,
 the last first; [`shell/prefs.ts`](../apps/studio/src/ui/shell/prefs.ts),
 key `solid-memo:studioRecent.v1`, each by its group and where it goes,
 or by its command), then the rest but the cards. Each entry shows the
@@ -508,7 +553,15 @@ cards that could not be read). Each is a preset of Home's query
 ([`shell/views.ts`](../apps/studio/src/ui/shell/views.ts)): it sets
 the view (`show`), and keeps the filter's text and the sort. A deck's
 problems ([health](#health)) and its newer release are found only as
-its row comes into view, so no view keeps decks by them.
+its row comes into view, so no view keeps decks by them. After them,
+the views the user saved, and **+ Save view** ([Layout](#layout)).
+
+**Editing a deck in its row.** A deck that may be changed has its
+direction, new cards per day and reviews per day edited in their cells
+([Layout](#layout)): a choice of the directions, or a whole number,
+which left empty follows the instance's pace again. Each is saved as the
+bulk edits save it, for that deck alone, and said as they say it ("Set
+the pace of 1 deck.").
 
 The table is a [`DataTable`](#card-workbench): **j** and **k** move its
 cursor, **x** selects a deck, and **Enter** opens the deck's about
@@ -595,6 +648,23 @@ The URL holds how the cards are looked at. The domain applies it
 
 A change of the search or a filter goes back to the first page.
 
+**Views.** Tabs above the filters (a group named Views) put the cards
+in one state: All (none), Due, New and Leeches; the one the query is
+in is pressed, none when its state is another. A view keeps the rest of
+the query, and goes to the first page. After them, the views the user
+saved ([Layout](#layout)), each a whole query, for any deck of the
+instance.
+
+**Editing a card in its row.** A plain text card (not in Markdown) has
+its front and back edited in their cells, each side only while its text
+is in one language, stated ([Layout](#layout)). It is an edit of that
+card alone (`setText` in [cardBulk.ts](../packages/domain/src/cardBulk.ts)),
+planned and written as the bulk edits are: the status line says it,
+and **Undo** undoes it ([below](#bulk-edits)). A side left empty is
+refused; one written as it was is closed with nothing written. A card
+in Markdown, or a side in several languages, is edited in the
+[inspector](#card-inspector).
+
 The table is the Studio's `DataTable`
 ([`shell/DataTable.tsx`](../apps/studio/src/ui/shell/DataTable.tsx)):
 its header row and its first column (the checkboxes and the fronts)
@@ -605,7 +675,8 @@ the view changes, and the selection's bar under the table counts it
 ([Layout](#layout)). The keys say so, quietly, under the bar: **j** and **k** move the cursor between the rows (the focus
 goes to the row's front), **x** selects the row, **Shift+J** and
 **Shift+K** select on from where the selection was last made, **Escape**
-clears the selection, **Enter** opens the card, and **`.`** opens the
+clears the selection, **Enter** opens the card, **F2** edits the
+row's front, or the cell the focus is in, and **`.`** opens the
 bar's first menu. The cursor's row is
 marked, as is each row selected. **j** and **k** work wherever the
 focus is: from outside the table, they go on from the cursor's row, or
@@ -826,6 +897,9 @@ on the Studio's `Dialog`): **Save** saves them as Save does, then goes
 on, unless the save failed or was refused, which the editor shows;
 **Discard** goes on without them; **Stay**, Escape or Close goes
 nowhere ([`shell/unsavedEdits.tsx`](../apps/studio/src/ui/shell/unsavedEdits.tsx)).
+A table's cell edited and not saved ([Layout](#layout)) is asked about
+the same way, beside a card's edits: Save saves them all, and goes on
+only once each is saved.
 Back or Forward is undone before the question, before the Studio's
 router hears of it: the card's page is put back on top of the history,
 and once the question is answered so, the Studio goes back from there,
@@ -1882,7 +1956,9 @@ releases it, two ways.
   changes typed above to be saved, and for the catalogue to be writable
   ([below](#data-set-aside)).
 - **Checked.** The screen counts the errors the release check finds
-  (its rules, for a pod), with a link to it. Publishing checks the draft
+  (its rules, for a pod), with a link to it; so does the status bar, on
+  every screen of the draft ([Layout](#layout); `publishErrors` in
+  [releaseCheck.ts](../apps/studio/src/ui/releaseCheck.ts)). Publishing checks the draft
   again, as the release check does for a pod, the shapes too: an error
   stops it (`releaseHasErrors`), and nothing is written. A warning does
   not.

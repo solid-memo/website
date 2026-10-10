@@ -1,5 +1,20 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { DEFAULT_PREFS, RECENT_LIMIT, recentCommands, rememberCommand, rememberPrefs, studioPrefs } from "./prefs";
+import {
+  DEFAULT_PREFS,
+  instancePrefs,
+  NO_INSTANCE_PREFS,
+  openedNow,
+  RECENT_ITEMS,
+  RECENT_LIMIT,
+  recentCommands,
+  rememberCommand,
+  rememberInstancePrefs,
+  rememberPrefs,
+  studioPrefs,
+  togglePin,
+  type InstancePrefs,
+  type WorkItem,
+} from "./prefs";
 import { ASIDE_WIDTH, DETAIL_WIDTH, DOCK_HEIGHT } from "./splitter";
 
 const KEY = "solid-memo:studioLayout.v1";
@@ -97,5 +112,70 @@ describe("the palette's entries used last", () => {
     };
     expect(recentCommands(refusing)).toEqual([]);
     expect(() => rememberCommand("a", refusing)).not.toThrow();
+  });
+});
+
+describe("what the device keeps of an instance", () => {
+  const INSTANCES = "solid-memo:studioInstances.v1";
+  const a = "https://pod.example/a/";
+  const b = "https://pod.example/b/";
+  const kanji: WorkItem = { kind: "deck", url: `${a}decks/kanji.ttl` };
+  const solid: WorkItem = { kind: "draft", url: `${a}drafts/solid/v1/release.ttl` };
+  const kept: InstancePrefs = {
+    views: { home: [{ name: "Due", params: "show=due" }], cards: [{ name: "Leeches", params: "state=leech" }] },
+    pinned: [kanji],
+    recent: [solid, kanji],
+  };
+  beforeEach(() => localStorage.clear());
+
+  it("is nothing at first, then what was kept, for each instance on its own", () => {
+    expect(instancePrefs(a)).toEqual(NO_INSTANCE_PREFS);
+    rememberInstancePrefs(a, kept);
+    rememberInstancePrefs(b, { ...NO_INSTANCE_PREFS, pinned: [solid] });
+    expect(instancePrefs(a)).toEqual(kept);
+    expect(instancePrefs(b)).toEqual({ ...NO_INSTANCE_PREFS, pinned: [solid] });
+  });
+
+  it("keeps only the views and the items that are, each part on its own", () => {
+    localStorage.setItem(
+      INSTANCES,
+      JSON.stringify({
+        [a]: {
+          views: { home: [{ name: "Due", params: "show=due" }, { name: "", params: "q=x" }, { name: "No query" }, null, "Due"], cards: "Leeches" },
+          pinned: [kanji, { kind: "card", url: "x" }, { kind: "deck" }, 3],
+          recent: Array.from({ length: RECENT_ITEMS + 2 }, (_, n) => ({ kind: "deck", url: `${a}decks/${n}.ttl` })),
+        },
+        [b]: { views: null, pinned: {}, recent: "kanji" },
+      }),
+    );
+    const read = instancePrefs(a);
+    expect(read.views).toEqual({ home: [{ name: "Due", params: "show=due" }], cards: [] });
+    expect(read.pinned).toEqual([kanji]);
+    expect(read.recent).toHaveLength(RECENT_ITEMS);
+    expect(instancePrefs(b)).toEqual(NO_INSTANCE_PREFS);
+    for (const stored of ["{not json", "[]", JSON.stringify({ [a]: "kept" })]) {
+      localStorage.setItem(INSTANCES, stored);
+      expect(instancePrefs(a)).toEqual(NO_INSTANCE_PREFS);
+    }
+  });
+
+  it("is nothing, and is not kept, when the browser's storage refuses", () => {
+    const refusing = () => {
+      throw new Error("SecurityError");
+    };
+    expect(instancePrefs(a, refusing)).toEqual(NO_INSTANCE_PREFS);
+    expect(() => rememberInstancePrefs(a, kept, refusing)).not.toThrow();
+  });
+
+  it("pins an item at the end, and unpins it", () => {
+    expect(togglePin([kanji], solid)).toEqual([kanji, solid]);
+    expect(togglePin([kanji, solid], { ...kanji })).toEqual([solid]);
+  });
+
+  it("lists the item opened now first, once, as many as it keeps", () => {
+    expect(openedNow([kanji, solid], solid)).toEqual([solid, kanji]);
+    expect(openedNow([kanji], { kind: "draft", url: kanji.url })).toEqual([{ kind: "draft", url: kanji.url }, kanji]);
+    const many = Array.from({ length: RECENT_ITEMS }, (_, n): WorkItem => ({ kind: "deck", url: `${a}decks/${n}.ttl` }));
+    expect(openedNow(many, kanji)).toEqual([kanji, ...many.slice(0, RECENT_ITEMS - 1)]);
   });
 });

@@ -28,6 +28,9 @@ function renderContainer(useCases: UseCases) {
         onView={() => undefined}
         shownView="all"
         onShow={() => undefined}
+        savedViews={[]}
+        onSavedViews={() => undefined}
+        onApply={() => undefined}
         onCursor={() => undefined}
         onOpen={() => undefined}
         appHref="#/decks"

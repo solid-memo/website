@@ -1,7 +1,7 @@
 import type { ComponentChildren } from "preact";
 import { useState } from "preact/hooks";
-import type { Deck, DeckDirection } from "@solid-memo/domain/deck";
-import type { DeckPace } from "@solid-memo/domain/deckPace";
+import { DECK_DIRECTIONS, type Deck, type DeckDirection } from "@solid-memo/domain/deck";
+import { paceOf, type DeckPace } from "@solid-memo/domain/deckPace";
 import {
   arrangeDeckRows,
   nextSort,
@@ -22,8 +22,10 @@ import { ReadOnlyNotice } from "./ReadOnly";
 import { useActivityLog } from "./shell/activity";
 import { BulkBar } from "./shell/BulkBar";
 import { DataTable, type Column } from "./shell/DataTable";
+import { EditableCell } from "./shell/EditableCell";
+import { SavedViews } from "./shell/SavedViews";
 import { NO_SELECTION, type Selection } from "./shell/tableModel";
-import { HOME_VIEWS, inView, type HomeView } from "./shell/views";
+import { homeParams, homeQueryOf, HOME_VIEWS, inView, paramsText, type HomeQuery, type HomeView, type SavedView } from "./shell/views";
 
 /** One figure of a deck's row: a number, or why there is none yet. */
 export type Count = number | "loading" | "unreadable";
@@ -58,7 +60,9 @@ const COLUMNS: readonly Exclude<DeckColumn, "title">[] = [
  * column to sort by (each column's header button sorts by it, then the
  * other way, then not), else the order the user arranged the decks in;
  * and the view it is in (`shownView`, views.ts), whose tabs above it
- * count the decks each keeps. The table is a DataTable, whose Columns
+ * count the decks each keeps; beside them the views the user saved
+ * (`savedViews`, SavedViews), each a query to put Home in (`onApply`).
+ * The table is a DataTable, whose Columns
  * menu shows or hides its columns. The deck at its cursor is shown
  * beside it (`onCursor`, `current`); Enter opens it (`onOpen`).
  *
@@ -74,6 +78,8 @@ const COLUMNS: readonly Exclude<DeckColumn, "title">[] = [
  * (`updateBadge`). Only a deck that may be changed (`selectable`) can be
  * selected: none while the instance's data is being checked, and none
  * set aside, which a line says (`readOnly`), with a link to the health.
+ * Such a deck's direction and pace are edited in their cells too
+ * (EditableCell), as the bulk actions change them, one deck at a time.
  */
 export function DeckTableScreen({
   instance,
@@ -82,6 +88,9 @@ export function DeckTableScreen({
   onView,
   shownView,
   onShow,
+  savedViews,
+  onSavedViews,
+  onApply,
   current,
   onCursor,
   onOpen,
@@ -112,6 +121,11 @@ export function DeckTableScreen({
   /** The view of Home the table is in (views.ts). */
   shownView: HomeView;
   onShow: (view: HomeView) => void;
+  /** The views of Home the user saved, and keeping them as they change. */
+  savedViews: readonly SavedView[];
+  onSavedViews: (views: SavedView[]) => void;
+  /** Put Home in a query, a saved view's. */
+  onApply: (query: HomeQuery) => void;
   /** The deck shown beside the table, by its URL. */
   current?: string;
   /** Show the deck at the table's cursor beside it. */
@@ -192,16 +206,54 @@ export function DeckTableScreen({
     return ok;
   }
 
-  const pace = (row: DeckTableRow, cap: "newCardsPerDay" | "maxReviewsPerDay") => (
-    <>
-      {row[cap]}
-      {row.deck[cap] === undefined && <span class="hint"> {t("studio.decks.followsInstance")}</span>}
-    </>
-  );
+  /** What a deck's cell is, for its field's name: "New per day of Kanji N5". */
+  const fieldOf = (column: DeckColumn, deck: Deck) => t("studio.inline.field", { column: t(`studio.decks.${column}`), row: readerText(deck.title) });
+  const pace = ({ deck, ...row }: DeckTableRow, cap: "newCardsPerDay" | "maxReviewsPerDay") => {
+    const follows = deck[cap] === undefined;
+    return (
+      <EditableCell
+        edit={
+          selectable(deck)
+            ? {
+                label: fieldOf(cap, deck),
+                shown: follows ? `${row[cap]} ${t("studio.decks.followsInstance")}` : String(row[cap]),
+                // Empty, the instance's pace again.
+                value: follows ? "" : String(deck[cap]),
+                number: true,
+                onSave: (value) => {
+                  const { [cap]: _old, ...rest } = paceOf(deck);
+                  const change = value.trim() === "" ? rest : { ...rest, [cap]: Number(value) };
+                  return bulk(onPace([deck], change), t("studio.bulk.paced", { count: 1 }));
+                },
+              }
+            : null
+        }
+      >
+        {row[cap]}
+        {follows && <span class="hint"> {t("studio.decks.followsInstance")}</span>}
+      </EditableCell>
+    );
+  };
   const cells: Record<Exclude<DeckColumn, "title">, (row: DeckTableRow) => ComponentChildren> = {
     group: (row) =>
       row.groups.length === 0 ? <span class="hint">{t("studio.decks.topLevel")}</span> : row.groups.map((group) => readerText(group.title)).join(" › "),
-    direction: (row) => directionLabel(row.deck.direction),
+    direction: ({ deck }) => (
+      <EditableCell
+        edit={
+          selectable(deck)
+            ? {
+                label: fieldOf("direction", deck),
+                shown: directionLabel(deck.direction),
+                value: deck.direction,
+                options: DECK_DIRECTIONS.map((direction) => ({ value: direction, label: directionLabel(direction) })),
+                onSave: (value) => bulk(onDirection([deck], value as DeckDirection), t("studio.bulk.directed", { count: 1 })),
+              }
+            : null
+        }
+      >
+        {directionLabel(deck.direction)}
+      </EditableCell>
+    ),
     newCardsPerDay: (row) => pace(row, "newCardsPerDay"),
     maxReviewsPerDay: (row) => pace(row, "maxReviewsPerDay"),
     due: (row) => <CountCell count={figure(row, "due")} />,
@@ -237,6 +289,12 @@ export function DeckTableScreen({
             {t(`studio.views.${each}`)} <span class="studio-count">{rows.filter((row) => inView(each, factsOf(row))).length}</span>
           </button>
         ))}
+        <SavedViews
+          views={savedViews}
+          current={paramsText(homeParams({ view, ...(shownView === "all" ? {} : { show: shownView }) }))}
+          onApply={(params) => onApply(homeQueryOf(new URLSearchParams(params)))}
+          onViews={onSavedViews}
+        />
       </div>
       <div class="studio-filters">
         <label class="studio-filter">

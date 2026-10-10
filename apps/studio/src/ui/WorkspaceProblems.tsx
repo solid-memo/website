@@ -13,7 +13,7 @@ import { problemText, type MarkdownProblem } from "@solid-memo/ui/MarkdownEditin
 import { deckHealthQuery } from "./HealthBadge";
 import { placeText } from "./HealthScreen";
 import { listedProblems, ProblemList } from "./ProblemList";
-import { useReleaseCheck } from "./releaseCheck";
+import { publishErrors, useReleaseCheck } from "./releaseCheck";
 import { isDraftRoute, spotRoute, studioRouteToHash, targetRoute, type StudioRoute } from "./router";
 import type { WorkspaceProblems } from "./shell/BottomDock";
 
@@ -30,6 +30,11 @@ type Health = DeckHealth<MarkdownProblem>;
  * check the overview and the check itself make, the same query, so it
  * is made once for each version of the draft whichever shows it.
  *
+ * On a draft's screens, too, whether it can be published (`publish`):
+ * how many problems keep it from it (publishErrors, of its check for a
+ * pod, as its release screen counts them; undefined while it is made),
+ * or that it is published already.
+ *
  * A deck's are what its health found (deckHealthQuery), as the badges
  * and its health screen check it: read here only from what they found,
  * and checked only when the dock shows them (DeckProblems), so a deck's
@@ -39,12 +44,14 @@ export function useWorkspaceProblems(
   useCases: UseCases,
   route: StudioRoute | null,
   shown: { deck: Deck | null; draft: ReleaseDraft | null },
-): { problems: WorkspaceProblems | null; draft: ReleaseProblem[] | undefined } {
+): { problems: WorkspaceProblems | null; draft: ReleaseProblem[] | undefined; publish: PublishReadiness | null } {
   const i18n = useI18n();
   const queryClient = useQueryClient();
   const draftRoute = route !== null && isDraftRoute(route) ? route : null;
   const draft = draftRoute === null ? null : shown.draft;
   const check = useReleaseCheck(useCases, draft, draftRoute?.screen === "check" ? (draftRoute.policy ?? "pod") : "pod");
+  // A pod's, as publishing checks it: the one above but where the check shows the library's.
+  const podCheck = useReleaseCheck(useCases, draft, "pod");
   const deck = shown.deck;
   const health = useQuery<Health>({
     queryKey: deck === null ? ["validation", null] : deckHealthQuery(useCases, queryClient, instanceUrlOfDeck(deck.url), deck).queryKey,
@@ -61,6 +68,10 @@ export function useWorkspaceProblems(
         list: <DraftProblems draft={draft} problems={found} error={check.error} targetHref={targetHref} />,
       },
       draft: found,
+      publish: {
+        blocking: podCheck.data === undefined ? undefined : publishErrors(podCheck.data),
+        released: draft.root.releasedAs !== undefined,
+      },
     };
   }
   if (deck !== null) {
@@ -71,9 +82,36 @@ export function useWorkspaceProblems(
         list: <DeckProblems useCases={useCases} deck={deck} />,
       },
       draft: undefined,
+      publish: null,
     };
   }
-  return { problems: null, draft: undefined };
+  return { problems: null, draft: undefined, publish: null };
+}
+
+/** Whether a draft can be published: how many problems keep it from it (undefined while it is checked), or that it is published already. */
+export interface PublishReadiness {
+  blocking: number | undefined;
+  released: boolean;
+}
+
+/**
+ * Whether the draft can be published, in the Studio's status bar: a
+ * link to its Release tab while nothing keeps it from it ("Ready to
+ * publish") or once it is published ("Released"), else to its Check tab
+ * ("2 problems block publishing"). Nothing while it is checked.
+ */
+export function PublishState({ readiness, checkHref, releaseHref }: { readiness: PublishReadiness; checkHref: string; releaseHref: string }) {
+  const { t } = useI18n();
+  const { blocking, released } = readiness;
+  if (released) return <a href={releaseHref}>{t("studio.shell.released")}</a>;
+  if (blocking === undefined) return null;
+  return blocking === 0 ? (
+    <a href={releaseHref}>{t("studio.shell.ready")}</a>
+  ) : (
+    <a href={checkHref} class="studio-problem-count">
+      {t("studio.shell.blocked", { count: blocking })}
+    </a>
+  );
 }
 
 /** A draft's problems in the dock: its release check's, once it is made. */

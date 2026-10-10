@@ -51,6 +51,7 @@ function renderShell(
     aside?: AsidePane;
     problems?: WorkspaceProblems;
     table?: true;
+    status?: true;
   } = {},
 ) {
   const queryClient = props.queryClient ?? new QueryClient();
@@ -76,6 +77,8 @@ function renderShell(
         draftUrl={props.draftUrl ?? null}
         aside={props.aside ?? null}
         problems={props.problems ?? null}
+        pinned={[]}
+        status={props.status && <a href="#/release">Ready to publish</a>}
         onGo={props.onGo ?? (() => undefined)}
       >
         <Editor />
@@ -146,6 +149,11 @@ describe("StudioShell", () => {
     renderShell();
     expect(statusBar().getByText(instanceA.name)).toBeInTheDocument();
     expect(statusBar().queryByText("Draft saved")).toBeNull();
+  });
+
+  it("says in the status bar what the screen adds, after whether the draft is saved", () => {
+    renderShell({ draftUrl: DRAFT_URL, status: true });
+    expect(statusBar().getByRole("link", { name: "Ready to publish" }).previousElementSibling).toHaveTextContent("Draft saved");
   });
 
   it("switches the density from the status bar, without a history entry, and keeps it on this device", () => {

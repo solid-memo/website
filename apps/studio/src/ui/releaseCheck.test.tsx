@@ -6,7 +6,7 @@ import { problem } from "@solid-memo/domain/release/problems";
 import type { CheckPolicy, ReleaseCheck } from "@solid-memo/domain/release/releaseCheck";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
-import { useReleaseCheck } from "./releaseCheck";
+import { publishErrors, useReleaseCheck } from "./releaseCheck";
 import { courseDraft, DRAFT_URL } from "../test/fixtures";
 
 const draft = courseDraft();
@@ -83,5 +83,15 @@ describe("useReleaseCheck, as the draft and the policy change", () => {
     expect(screen.getByText("nothing")).toBeInTheDocument();
     view.rerender(shown({ ...draft, url: `${DRAFT_URL}-other` }));
     expect(screen.getByText("nothing")).toBeInTheDocument();
+  });
+});
+
+describe("publishErrors", () => {
+  it("counts the errors of the rules, the drops and the Markdown, as publishing checks them", () => {
+    const error = problem(DRAFT_URL, { code: "libraryUnread", params: {} });
+    const warning = problem(DRAFT_URL, { code: "libraryUnread", params: {} }, { severity: "warning" });
+    expect(publishErrors({ rules: [error, warning], drops: [error], markdown: [error] })).toBe(3);
+    const elsewhere: ReleaseCheck = { ...check([warning]), library: [error], shapes: [error] };
+    expect(publishErrors(elsewhere)).toBe(0);
   });
 });

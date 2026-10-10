@@ -6,7 +6,7 @@ import { draftsKey } from "../DraftsContainer";
 import { studioRouteToHash, type StudioRoute } from "../router";
 import type { ScreenCommand } from "./commandIndex";
 import { CommandPalette } from "./CommandPalette";
-import { recentCommands } from "./prefs";
+import { recentCommands, rememberCommand, type WorkItem } from "./prefs";
 import { deckTabs } from "./workspaceLayout";
 
 const kanji = makeDeck("deck-1", { en: "Kanji N5" });
@@ -23,7 +23,7 @@ function readCache() {
   return queryClient;
 }
 
-function renderPalette(props: { route?: StudioRoute | null; queryClient?: QueryClient; commands?: ScreenCommand[] } = {}) {
+function renderPalette(props: { route?: StudioRoute | null; queryClient?: QueryClient; commands?: ScreenCommand[]; pinned?: WorkItem[] } = {}) {
   const onChoose = vi.fn();
   const onClose = vi.fn();
   const route = props.route === undefined ? cardsRoute : props.route;
@@ -34,6 +34,7 @@ function renderPalette(props: { route?: StudioRoute | null; queryClient?: QueryC
         instances={[instanceA, instanceB]}
         tabs={route?.screen === "cards" ? deckTabs(route, route.deckUrl) : []}
         commands={props.commands ?? [{ id: "help", label: "Show the keyboard shortcuts", keys: "?", run: () => undefined }]}
+        pinned={props.pinned ?? []}
         onChoose={onChoose}
         onClose={onClose}
       />
@@ -144,6 +145,18 @@ describe("CommandPalette", () => {
     renderPalette();
     expect(within(list()).getAllByRole("group")[0]).toBe(within(list()).getByRole("group", { name: "Recently used" }));
     expect(picked()).toHaveTextContent("Verbs");
+  });
+
+  it("lists the decks and drafts pinned first, then those used last but those pinned, with nothing typed", () => {
+    rememberCommand(`decks:${studioRouteToHash({ screen: "cards", deckUrl: verbs.url })}`);
+    rememberCommand(`decks:${studioRouteToHash(cardsRoute)}`);
+    renderPalette({ pinned: [{ kind: "deck", url: verbs.url }, { kind: "draft", url: DRAFT_URL }] });
+    expect(headings().slice(0, 2)).toEqual(["Pinned", "Recently used"]);
+    expect(within(list()).getAllByRole("group")[0]).toHaveTextContent(/^PinnedVerbs$/);
+    expect(within(list()).getAllByRole("group")[1]).toHaveTextContent(/^Recently usedKanji N5$/);
+    expect(within(list()).queryByRole("group", { name: "Decks" })).toBeNull();
+    type("verbs");
+    expect(headings()).toEqual(["Decks"]);
   });
 
   it("closes on Escape", () => {

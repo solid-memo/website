@@ -1,8 +1,3 @@
-import {
-  DEFAULT_DECK_TABLE_VIEW,
-  deckTableViewFromParams,
-  deckTableViewToParams,
-} from "@solid-memo/domain/deckTable";
 import { isDefaultQuery, queryFromParams, queryToParams, type CardQuery } from "@solid-memo/domain/cardQuery";
 import type { CardSpot } from "@solid-memo/domain/deckHealth";
 import { instanceUrlOfDeck } from "@solid-memo/domain/instanceLayout";
@@ -21,7 +16,7 @@ import {
 import { STUDIO_PATH } from "@solid-memo/ui/router";
 import type { TableSort } from "./shell/tableModel";
 import { hashParams, useHashRouter } from "@solid-memo/ui/routerCore";
-import { showFromParam, type HomeQuery } from "./shell/views";
+import { homeParams, homeQueryOf, type HomeQuery } from "./shell/views";
 
 /**
  * A Studio view, as its URL hash carries it (docs/studio.md): only
@@ -178,8 +173,7 @@ export function studioRouteToHash(route: StudioRoute): string {
     case "home":
       return `#${STUDIO_PATH}${hashParams({
         instance: route.instanceUrl,
-        ...deckTableViewToParams(route.view ?? DEFAULT_DECK_TABLE_VIEW),
-        ...(route.show === undefined ? {} : { show: route.show }),
+        ...homeParams(route),
         ...(route.deckUrl === undefined ? {} : { deck: route.deckUrl }),
       })}`;
     case "groups":
@@ -266,14 +260,11 @@ export function parseStudioHash(hash: string): StudioRoute | null {
     case "":
     case "/": {
       if (instanceUrl === null) return null;
-      const view = deckTableViewFromParams(query);
-      const show = showFromParam(query.get("show"));
       const deckUrl = query.get("deck");
       return {
         screen: "home",
         instanceUrl,
-        ...(view.filter === "" && view.sort === undefined ? {} : { view }),
-        ...(show === undefined ? {} : { show }),
+        ...homeQueryOf(query),
         ...(deckUrl === null ? {} : { deckUrl }),
       };
     }

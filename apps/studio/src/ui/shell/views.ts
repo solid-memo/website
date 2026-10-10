@@ -1,10 +1,13 @@
-import type { DeckTableView } from "@solid-memo/domain/deckTable";
+import { queryToParams, type CardQuery, type CardState } from "@solid-memo/domain/cardQuery";
+import { DEFAULT_DECK_TABLE_VIEW, deckTableViewFromParams, deckTableViewToParams, type DeckTableView } from "@solid-memo/domain/deckTable";
 
 /**
- * Home's views (docs/studio.md, Home): each a preset of Home's query,
- * shown as a tab above its table. A view keeps the decks of one kind
- * (`show` in the URL); the filter's text and the sort stay as the user
- * left them.
+ * Home's views and the card workbench's (docs/studio.md, Home and Card
+ * workbench): each a preset of the table's query, shown as a tab above
+ * it. A view of Home's keeps the decks of one kind (`show` in the URL),
+ * one of the workbench's the cards in one state (`state`); the rest of
+ * the query stays as the user left it. Beside them, the views the user
+ * saved, each a whole query under a name.
  */
 
 /** A view of Home: every deck, those due today, the courses, the copies of releases, or those that need attention. */
@@ -63,4 +66,82 @@ export function withView(query: HomeQuery, view: HomeView): HomeQuery {
     ...(query.view === undefined ? {} : { view: query.view }),
     ...(view === "all" ? {} : { show: view }),
   };
+}
+
+/** Home's query as its URL's parameters hold it: none for what is as by default. */
+export function homeParams(query: HomeQuery): Record<string, string> {
+  return {
+    ...deckTableViewToParams(query.view ?? DEFAULT_DECK_TABLE_VIEW),
+    ...(query.show === undefined ? {} : { show: query.show }),
+  };
+}
+
+/** Home's query from its URL's parameters (homeParams): a view as by default, or a name it does not know, left out. */
+export function homeQueryOf(params: URLSearchParams): HomeQuery {
+  const view = deckTableViewFromParams(params);
+  const show = showFromParam(params.get("show"));
+  return {
+    ...(view.filter === "" && view.sort === undefined ? {} : { view }),
+    ...(show === undefined ? {} : { show }),
+  };
+}
+
+/** A view of the workbench: every card, those due, the new ones, or the leeches. */
+export type CardView = "all" | Extract<CardState, "due" | "new" | "leech">;
+
+/** The workbench's views, in their tabs' order. */
+export const CARD_VIEWS: readonly CardView[] = ["all", "due", "new", "leech"];
+
+/** The view of the workbench a query is in: every card without a state, else the state's; none for a state no view has. */
+export function cardViewOf(query: CardQuery): CardView | null {
+  if (query.state === undefined) return "all";
+  return CARD_VIEWS.find((view) => view === query.state) ?? null;
+}
+
+/** The workbench's query in another view, from its first page: the rest of the query kept. */
+export function withCardView(query: CardQuery, view: CardView): CardQuery {
+  const { state: _state, ...rest } = query;
+  return { ...rest, page: 1, ...(view === "all" ? {} : { state: view }) };
+}
+
+/** The workbench's query as a saved view keeps it: its page left out, as a view opens at the first. */
+export function cardParams(query: CardQuery): Record<string, string> {
+  return queryToParams({ ...query, page: 1 });
+}
+
+/** The tables whose views can be saved: Home and the card workbench (any deck's). */
+export type ViewTable = "home" | "cards";
+
+export const VIEW_TABLES: readonly ViewTable[] = ["home", "cards"];
+
+/** A view saved under its name: the query it keeps, as the URL's parameters hold it ("q=kanji&sort=title"). */
+export interface SavedView {
+  name: string;
+  params: string;
+}
+
+/** A query's parameters as a saved view keeps them. */
+export function paramsText(params: Record<string, string>): string {
+  return new URLSearchParams(params).toString();
+}
+
+/**
+ * The saved views with one saved under `name` (trimmed): a name is a
+ * view's own, so one saved under a name taken replaces that view, where
+ * it was; another is added at the end.
+ */
+export function withSavedView(views: readonly SavedView[], name: string, params: string): SavedView[] {
+  const view = { name: name.trim(), params };
+  return views.some((each) => each.name === view.name) ? views.map((each) => (each.name === view.name ? view : each)) : [...views, view];
+}
+
+/** The saved views with one renamed (`from`), where it was: another of the new name gives way to it. */
+export function renamedView(views: readonly SavedView[], from: string, to: string): SavedView[] {
+  const name = to.trim();
+  return views.flatMap((each) => (each.name === from ? [{ ...each, name }] : each.name === name ? [] : [each]));
+}
+
+/** The saved views without one. */
+export function withoutView(views: readonly SavedView[], name: string): SavedView[] {
+  return views.filter((each) => each.name !== name);
 }

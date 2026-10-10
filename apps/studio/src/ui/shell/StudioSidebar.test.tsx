@@ -8,6 +8,7 @@ import type { ValidationReport } from "@solid-memo/domain/validation";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { DRAFT_URL, instanceA, makeDeck } from "../../test/fixtures";
 import { studioRouteToHash, type StudioRoute } from "../router";
+import type { WorkItem } from "./prefs";
 import { StudioSidebar } from "./StudioSidebar";
 
 const kanji = makeDeck("deck-1", { en: "Kanji N5", sv: "Kanji N5 på svenska" });
@@ -26,7 +27,12 @@ const solid: ReleaseDraftSummary = {
 const untitled: ReleaseDraftSummary = { ...solid, url: `${instanceUrl}drafts/verbs/v3/release.ttl`, name: "verbs", version: 3, title: {}, course: false };
 const unreadable: ReleaseDraftSummary = { ...solid, url: `${instanceUrl}drafts/broken/v1/release.ttl`, name: "broken", readable: false, title: {} };
 
-function renderSidebar(route: StudioRoute, overrides: Partial<UseCases> = {}, queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })) {
+function renderSidebar(
+  route: StudioRoute,
+  overrides: Partial<UseCases> = {},
+  queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } }),
+  items: { pinned?: WorkItem[]; recent?: WorkItem[]; onPin?: (item: WorkItem) => void } = {},
+) {
   const useCases = makeUseCasesFake({
     listDecks: vi.fn(async () => [kanji, verbs]),
     listReleaseDrafts: vi.fn(async () => [solid, untitled, unreadable]),
@@ -34,7 +40,14 @@ function renderSidebar(route: StudioRoute, overrides: Partial<UseCases> = {}, qu
   });
   render(
     <QueryClientProvider client={queryClient}>
-      <StudioSidebar useCases={useCases} instance={instanceA} route={route} />
+      <StudioSidebar
+        useCases={useCases}
+        instance={instanceA}
+        route={route}
+        pinned={items.pinned ?? []}
+        recent={items.recent ?? []}
+        onPin={items.onPin ?? (() => undefined)}
+      />
     </QueryClientProvider>,
   );
   return useCases;
@@ -126,6 +139,43 @@ describe("StudioSidebar", () => {
     await loaded();
     expect(sections().getByRole("link", { name: "Health" }).closest("li")).toHaveTextContent(/^Health$/);
     expect(useCases.checkInstance).not.toHaveBeenCalled();
+  });
+
+  it("lists the decks and drafts pinned first, then those opened last but those pinned, each with its button to pin it or not", async () => {
+    const onPin = vi.fn();
+    const pinned: WorkItem[] = [
+      { kind: "draft", url: DRAFT_URL },
+      { kind: "deck", url: kanji.url },
+      { kind: "deck", url: `${instanceUrl}decks/gone.ttl` },
+    ];
+    const recent: WorkItem[] = [{ kind: "deck", url: kanji.url }, { kind: "deck", url: verbs.url }, { kind: "draft", url: unreadable.url }];
+    renderSidebar({ screen: "cards", deckUrl: verbs.url }, {}, undefined, { pinned, recent, onPin });
+    await loaded();
+    const pins = screen.getByRole("list", { name: "Pinned" });
+    expect(screen.getAllByRole("list")[0]).toBe(pins);
+    expect(within(pins).getAllByRole("link").map((link) => [link.textContent, link.getAttribute("href")])).toEqual([
+      ["Solid", studioRouteToHash({ screen: "draft", draftUrl: DRAFT_URL })],
+      ["Kanji N5", studioRouteToHash({ screen: "cards", deckUrl: kanji.url })],
+    ]);
+    const opened = screen.getByRole("list", { name: "Recently opened" });
+    expect(within(opened).getAllByRole("listitem").map((item) => item.textContent)).toEqual(["Verbs", "Untitled (broken) v1"]);
+    expect(within(opened).getByRole("link", { name: "Verbs" })).toHaveAttribute("aria-current", "true");
+    expect(within(pins).getByRole("button", { name: "Pin Kanji N5" })).toHaveAttribute("aria-pressed", "true");
+    expect(within(decks()).getByRole("button", { name: "Pin Kanji N5" })).toHaveAttribute("aria-pressed", "true");
+    expect(within(decks()).getByRole("button", { name: "Pin Verbs" })).toHaveAttribute("aria-pressed", "false");
+    fireEvent.click(within(opened).getByRole("button", { name: "Pin Verbs" }));
+    expect(onPin).toHaveBeenCalledWith({ kind: "deck", url: verbs.url });
+    fireEvent.click(within(drafts()).getByRole("button", { name: "Pin Untitled (broken)" }));
+    expect(onPin).toHaveBeenLastCalledWith({ kind: "draft", url: unreadable.url });
+  });
+
+  it("lists nothing pinned or opened last before the decks and drafts are read", () => {
+    renderSidebar({ screen: "home", instanceUrl }, { listDecks: vi.fn(() => new Promise<never>(() => undefined)), listReleaseDrafts: vi.fn(() => new Promise<never>(() => undefined)) }, undefined, {
+      pinned: [{ kind: "deck", url: kanji.url }],
+      recent: [{ kind: "draft", url: DRAFT_URL }],
+    });
+    expect(screen.queryByRole("list", { name: "Pinned" })).toBeNull();
+    expect(screen.queryByRole("list", { name: "Recently opened" })).toBeNull();
   });
 
   it("says why the decks or the drafts could not be read", async () => {

@@ -144,6 +144,76 @@ describe("StudioWorkspace", () => {
     expect(window.history.length).toBe(length);
   });
 
+  it("saves Home's view and the workbench's, the device keeping them for the instance, and puts the table in one, replacing the entry", async () => {
+    window.history.replaceState(null, "", home(instanceA.url));
+    renderWorkspace(
+      makeUseCasesFake({
+        listInstances: vi.fn(async () => [instanceA]),
+        listDecks: vi.fn(async () => [kanji, verbs]),
+        listCards: vi.fn(async (deck: Deck) => [makeCard(deck, "water")]),
+      }),
+    );
+    const save = (name: string) => {
+      fireEvent.click(screen.getByRole("button", { name: "+ Save view" }));
+      const asked = within(screen.getByRole("dialog", { name: "Save the view" }));
+      fireEvent.input(asked.getByRole("textbox", { name: "Name" }), { target: { value: name } });
+      fireEvent.click(asked.getByRole("button", { name: "Save" }));
+    };
+    fireEvent.input(await screen.findByRole("searchbox", { name: "Filter by name or group" }), { target: { value: "verb" } });
+    save("Verbs");
+    fireEvent.input(screen.getByRole("searchbox", { name: "Filter by name or group" }), { target: { value: "" } });
+    const length = window.history.length;
+    fireEvent.click(screen.getByRole("button", { name: "Verbs" }));
+    expect(parseStudioHash(window.location.hash)).toEqual({ screen: "home", instanceUrl: instanceA.url, view: { filter: "verb" } });
+    expect(window.history.length).toBe(length);
+    expect(JSON.parse(localStorage.getItem("solid-memo:studioInstances.v1")!)[instanceA.url].views.home).toEqual([{ name: "Verbs", params: "q=verb" }]);
+
+    fireEvent.click(sidebar().getByRole("link", { name: "Kanji N5" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Leeches" }));
+    save("Leeches of any deck");
+    fireEvent.click(sidebar().getByRole("link", { name: "Verbs" }));
+    await screen.findByRole("heading", { name: "Cards: Verbs" });
+    fireEvent.click(await screen.findByRole("button", { name: "Leeches of any deck" }));
+    await waitFor(() => expect(parseStudioHash(window.location.hash)).toEqual({ screen: "cards", deckUrl: verbs.url, query: { ...DEFAULT_CARD_QUERY, state: "leech" } }));
+  });
+
+  it("edits a deck's pace in its cell on Home, asking before the edit not saved is left, and saving it first if asked", async () => {
+    window.history.replaceState(null, "", home(instanceA.url));
+    const useCases = makeUseCasesFake({ listInstances: vi.fn(async () => [instanceA]), listDecks: vi.fn(async () => [kanji]) });
+    renderWorkspace(useCases);
+    fireEvent.click(await screen.findByRole("button", { name: /^New per day of Kanji N5: / }));
+    fireEvent.input(screen.getByRole("spinbutton", { name: "New per day of Kanji N5" }), { target: { value: "7" } });
+    fireEvent.click(sidebar().getByRole("link", { name: "Groups" }));
+    const question = within(screen.getByRole("dialog", { name: "Save your changes?" }));
+    fireEvent.click(question.getByRole("button", { name: "Save" }));
+    expect(await screen.findByRole("heading", { name: "Groups", level: 2 })).toBeInTheDocument();
+    expect(useCases.setDecksPace).toHaveBeenCalledWith([kanji], { newCardsPerDay: 7 });
+  });
+
+  it("pins decks and drafts at the sidebar's top, lists those opened last, and the palette lists those pinned first", async () => {
+    window.history.replaceState(null, "", home(instanceA.url));
+    renderWorkspace(
+      makeUseCasesFake({
+        listInstances: vi.fn(async () => [instanceA]),
+        listDecks: vi.fn(async () => [kanji, verbs]),
+      }),
+    );
+    const decks = within(await screen.findByRole("list", { name: "Decks" }));
+    expect(screen.queryByRole("list", { name: "Recently opened" })).toBeNull();
+    fireEvent.click(decks.getByRole("link", { name: "Kanji N5" }));
+    const opened = within(await screen.findByRole("list", { name: "Recently opened" }));
+    expect(opened.getByRole("link", { name: "Kanji N5" })).toHaveAttribute("aria-current", "true");
+    fireEvent.click(decks.getByRole("button", { name: "Pin Verbs" }));
+    expect(within(screen.getByRole("list", { name: "Pinned" })).getByRole("link", { name: "Verbs" })).toBeInTheDocument();
+    expect(JSON.parse(localStorage.getItem("solid-memo:studioInstances.v1")!)[instanceA.url]).toMatchObject({
+      pinned: [{ kind: "deck", url: verbs.url }],
+      recent: [{ kind: "deck", url: kanji.url }],
+    });
+    fireEvent.keyDown(document.body, { key: "k", ctrlKey: true });
+    const palette = within(await screen.findByRole("listbox"));
+    expect(palette.getAllByRole("group")[0]).toHaveTextContent(/^PinnedVerbs$/);
+  });
+
   it("shows the deck at Home's cursor beside the table, in the URL with no Back stop, and opens it with Enter", async () => {
     wideScreen();
     window.history.replaceState(null, "", home(instanceA.url));
@@ -1061,6 +1131,32 @@ describe("StudioWorkspace", () => {
       fireEvent.keyDown(document.body, { key: "F8" });
       await waitFor(() => expect(parseStudioHash(window.location.hash)).toEqual({ screen: "chapter", draftUrl: DRAFT_URL, chapter: "ch-apps", field: "steps" }));
       expect(await screen.findByRole("heading", { level: 3, name: "Steps" })).toHaveFocus();
+    });
+
+    it("says in the status bar whether the draft can be published, a link to its Release tab, or to its Check tab while problems keep it from it", async () => {
+      const useCases = draftUseCases();
+      window.history.replaceState(null, "", studioRouteToHash({ screen: "check", draftUrl: DRAFT_URL, policy: "library" }));
+      const { unmount } = renderWorkspace(useCases);
+      const status = within(screen.getByRole("complementary", { name: "Studio status" }));
+      expect(await status.findByRole("link", { name: "Ready to publish" })).toHaveAttribute("href", studioRouteToHash({ screen: "release", draftUrl: DRAFT_URL }));
+      // Checked as publishing checks it, for a pod, beside the check the screen shows.
+      expect(useCases.checkReleaseDraft).toHaveBeenCalledWith(expect.anything(), MARKDOWN_CHECK, "pod");
+      unmount();
+      const backless = problem(`${DRAFT_URL}#q-pods-1a`, { code: "noBack", params: {} });
+      vi.mocked(useCases.checkReleaseDraft).mockResolvedValue({ rules: [backless, backless], library: [], drops: [], markdown: [], shapes: null });
+      renderWorkspace(useCases);
+      expect(await within(screen.getByRole("complementary", { name: "Studio status" })).findByRole("link", { name: "2 problems block publishing" })).toHaveAttribute(
+        "href",
+        studioRouteToHash({ screen: "check", draftUrl: DRAFT_URL }),
+      );
+    });
+
+    it("says in the status bar that a draft is released", async () => {
+      const draft = courseDraft();
+      window.history.replaceState(null, "", studioRouteToHash({ screen: "draft", draftUrl: DRAFT_URL }));
+      renderWorkspace(draftUseCases({ ...draft, root: { ...draft.root, releasedAs: "https://pod.example/releases/solid/v1.ttl" } }));
+      const status = within(screen.getByRole("complementary", { name: "Studio status" }));
+      expect(await status.findByRole("link", { name: "Released" })).toHaveAttribute("href", studioRouteToHash({ screen: "release", draftUrl: DRAFT_URL }));
     });
 
     it("says in the dock while the draft is checked, when it is clear, and why it could not be checked", async () => {

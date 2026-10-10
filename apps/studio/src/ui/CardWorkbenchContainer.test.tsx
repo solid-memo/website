@@ -44,6 +44,8 @@ function renderContainer(useCases: UseCases, query: CardQuery = DEFAULT_CARD_QUE
         decks={decks}
         query={query}
         onQuery={() => undefined}
+        savedViews={[]}
+        onSavedViews={() => undefined}
         cardHref={(card) => `#/card?card=${card.id}`}
         onOpen={() => undefined}
         healthHref="#/health"

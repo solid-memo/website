@@ -1436,7 +1436,16 @@
       "switchInstance": "Byt instans: {instance}",
       "allInstances": "Alla instanser",
       "resizeAside": "Sidopanelens bredd",
-      "hide": "Dölj"
+      "hide": "Dölj",
+      "pinned": "Fästa",
+      "recent": "Nyligen öppnade",
+      "pin": "Fäst {name}",
+      "ready": "Redo att publicera",
+      "blocked": {
+        "one": "{count} problem hindrar publicering",
+        "other": "{count} problem hindrar publicering"
+      },
+      "released": "Publicerad"
     },
     "tabs": {
       "deck": "Kortlek",
@@ -1491,7 +1500,8 @@
       "extendDown": "Välj raden och nästa också",
       "extendUp": "Välj raden och den före också",
       "clear": "Rensa valet",
-      "bulk": "Öppna åtgärderna för de valda raderna"
+      "bulk": "Öppna åtgärderna för de valda raderna",
+      "edit": "Redigera cellen: Enter sparar, Escape avbryter"
     },
     "dock": {
       "label": "Panel",
@@ -1525,7 +1535,8 @@
         "instances": "Instanser",
         "decks": "Kortlekar",
         "drafts": "Utkast",
-        "cards": "Kortlekens kort"
+        "cards": "Kortlekens kort",
+        "pinned": "Fästa"
       }
     },
     "decks": {
@@ -1572,7 +1583,24 @@
       "courses": "Kurser",
       "copies": "Bibliotekskopior",
       "attention": "Behöver åtgärdas",
-      "none": "Ingen kortlek i den här vyn."
+      "none": "Ingen kortlek i den här vyn.",
+      "cards": {
+        "all": "Alla",
+        "due": "Att repetera",
+        "new": "Nya",
+        "leech": "Igelkort"
+      },
+      "options": "Alternativ för vyn {name}",
+      "rename": "Byt namn…",
+      "remove": "Ta bort",
+      "removeHeading": "Ta bort vyn",
+      "removeConfirm": "Ta bort vyn {name}? Bara vyn försvinner: inget i din Pod ändras.",
+      "save": "+ Spara vy",
+      "saveHeading": "Spara vyn",
+      "renameHeading": "Byt namn på vyn {name}",
+      "name": "Namn",
+      "nameHint": "En vy med samma namn ersätts.",
+      "saveButton": "Spara"
     },
     "peek": {
       "label": "Kortlek",
@@ -1677,7 +1705,7 @@
         "one": "{shown} av {count} kort",
         "other": "{shown} av {count} kort"
       },
-      "keys": "Tangenter: {j} och {k} flyttar mellan korten, {x} väljer ett, {enter} öppnar det, {shiftJ} och {shiftK} väljer också nästa eller det före, {escape} tömmer urvalet, och {dot} öppnar åtgärderna för de valda korten.",
+      "keys": "Tangenter: {j} och {k} flyttar mellan korten, {x} väljer ett, {enter} öppnar det, {shiftJ} och {shiftK} väljer också nästa eller det före, {escape} tömmer urvalet, {f2} redigerar en fram- eller baksida i sin cell, och {dot} öppnar åtgärderna för de valda korten.",
       "selected": {
         "one": "{count} kort valt",
         "other": "{count} kort valda"
@@ -1733,7 +1761,7 @@
     "confirm": {
       "unsaved": {
         "heading": "Spara dina ändringar?",
-        "text": "Kortet har ändringar som inte är sparade. Spara dem innan du går vidare, kasta dem, eller stanna kvar på kortet.",
+        "text": "Vissa ändringar är inte sparade. Spara dem innan du går vidare, kasta dem eller stanna kvar.",
         "save": "Spara",
         "discard": "Kasta",
         "stay": "Stanna"
@@ -1941,6 +1969,10 @@
         "reschedule": {
           "one": "{count} kort repeteras nu den {due}.",
           "other": "{count} kort repeteras nu den {due}."
+        },
+        "setText": {
+          "one": "Sparade texten på {count} kort.",
+          "other": "Sparade texten på {count} kort."
         }
       },
       "skipped": {
@@ -2564,7 +2596,10 @@
       "markdown": "{field}, {language}: {finding}",
       "theoryEmptyChunk": "{field}, {language}: ett tematiskt avbrott först, sist eller direkt efter ett annat ger en tom del, som appen hoppar över. Ett stegs teori visas en del i taget, delad vid sina tematiska avbrott: skriv text mellan varje två.",
       "theoryChunks": "{field}: i {counts}. Ett stegs teori har lika många delar på varje språk, så att den som byter språk inte tappar sin plats.",
-      "theoryChunkCount": { "one": "{count} del på {language}", "other": "{count} delar på {language}" },
+      "theoryChunkCount": {
+        "one": "{count} del på {language}",
+        "other": "{count} delar på {language}"
+      },
       "missingLanguage": "{field}: ingen text på {language}.",
       "missingTheme": "Teman: saknar {theme}.",
       "required": "{field}: inte angivet än.",
@@ -2826,6 +2861,13 @@
       "startNextOf": "Börja på nästa version av {release}",
       "starting": "Börjar på nästa version…",
       "drafts": "Utkast till utgåvor"
+    },
+    "inline": {
+      "field": "{column} för {row}",
+      "cell": "{field}: {value}",
+      "save": "Spara",
+      "cancel": "Avbryt",
+      "refused": "Inte sparat: {reason}."
     }
   },
   "proseField": {

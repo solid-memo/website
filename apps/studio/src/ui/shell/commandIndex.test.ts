@@ -3,7 +3,7 @@ import { createI18n } from "@solid-memo/ui/i18n";
 import type { ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout";
 import { DRAFT_URL, instanceA, instanceB, makeCard, makeDeck } from "../../test/fixtures";
 import { studioRouteToHash, type StudioRoute } from "../router";
-import { buildCommands, matchScore, MAX_SHOWN, rankCommands, type Command, type CommandSources } from "./commandIndex";
+import { buildCommands, itemCommandId, matchScore, MAX_SHOWN, rankCommands, type Command, type CommandSources } from "./commandIndex";
 import { deckTabs } from "./workspaceLayout";
 
 const en = createI18n("en");
@@ -110,8 +110,8 @@ describe("matching what was typed", () => {
 describe("ranking the entries", () => {
   const commands = buildCommands(sources, en);
   /** The ranked entries as their groups, each with its entries' names. */
-  const ranked = (query: string, recent: readonly string[] = []) =>
-    rankCommands(commands, query, recent).map((section) => [section.group, section.commands.map((command) => command.label)]);
+  const ranked = (query: string, recent: readonly string[] = [], pinned: readonly string[] = []) =>
+    rankCommands(commands, query, recent, pinned).map((section) => [section.group, section.commands.map((command) => command.label)]);
 
   it("lists every entry but the cards when nothing is typed, the entries used last first", () => {
     const recent = [`decks:${hash({ screen: "cards", deckUrl: verbs.url })}`, "gone", "command:checkAgain"];
@@ -119,6 +119,18 @@ describe("ranking the entries", () => {
     expect(shown[0]).toEqual(["recent", ["Verbs", "Check again"]]);
     expect(shown.map(([group]) => group)).toEqual(["recent", "tabs", "sections", "instances", "decks", "drafts"]);
     expect(shown.find(([group]) => group === "decks")![1]).toEqual(["Kanji N5"]);
+  });
+
+  it("lists the decks and drafts pinned before those used last, each once, when nothing is typed", () => {
+    const verbsId = itemCommandId({ kind: "deck", url: verbs.url });
+    const pinned = [itemCommandId({ kind: "draft", url: DRAFT_URL }), verbsId, "gone"];
+    const shown = ranked("", [verbsId, "command:checkAgain"], pinned);
+    expect(shown.slice(0, 2)).toEqual([
+      ["pinned", ["Solid", "Verbs"]],
+      ["recent", ["Check again"]],
+    ]);
+    expect(shown.find(([group]) => group === "drafts")).toEqual(["drafts", ["Untitled (capitals)"]]);
+    expect(ranked("verbs", [], pinned)).toEqual([["decks", ["Verbs"]]]);
   });
 
   it("keeps the matches, the best first, each group where its best is, case and accents aside", () => {

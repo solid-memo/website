@@ -16,6 +16,7 @@ import { plainTexts } from "@solid-memo/ui/markdownCache";
 import type { ReviewEdit } from "./CardBulkActions";
 import { CardWorkbenchScreen, type CardEditMade, type ReviewEditMade, type TransferMade } from "./CardWorkbenchScreen";
 import type { CardTransfer } from "./TransferCardsDialog";
+import type { SavedView } from "./shell/views";
 
 /**
  * The card workbench's data: the deck's cards and review states, read as
@@ -53,6 +54,8 @@ export function CardWorkbenchContainer({
   decks,
   query,
   onQuery,
+  savedViews,
+  onSavedViews,
   cardHref,
   onOpen,
   current,
@@ -67,6 +70,9 @@ export function CardWorkbenchContainer({
   decks: readonly Deck[];
   query: CardQuery;
   onQuery: (query: CardQuery) => void;
+  /** As CardWorkbenchScreen's: the views saved, and keeping them. */
+  savedViews: readonly SavedView[];
+  onSavedViews: (views: SavedView[]) => void;
   /** A card's editor in Solid Memo. */
   cardHref: (card: Card) => string;
   onOpen: (card: Card) => void;
@@ -203,6 +209,8 @@ export function CardWorkbenchContainer({
       healthHref={healthHref}
       query={query}
       onQuery={onQuery}
+      savedViews={savedViews}
+      onSavedViews={onSavedViews}
       cardHref={cardHref}
       onOpen={onOpen}
       current={current}

@@ -7,7 +7,7 @@ import { catalogScope } from "@solid-memo/ui/deckTreeEditor";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { draftKey, type DraftEditor } from "./draftEditor";
 import { draftsKey } from "./DraftsContainer";
-import { markdownCheck, useReleaseCheck } from "./releaseCheck";
+import { markdownCheck, publishErrors, useReleaseCheck } from "./releaseCheck";
 import { publicKey, publishedKey, useMakePublic, useStartNextVersion } from "./releaseActions";
 import { ReleasePublishScreen, type ReleasePublishLinks } from "./ReleasePublishScreen";
 
@@ -60,7 +60,7 @@ export function ReleasePublishContainer({
   const publicMutation = useMakePublic(useCases, instanceUrl);
   const nextMutation = useStartNextVersion(useCases, instanceUrl, onStarted);
   const downloadMutation = useMutation({ mutationFn: () => useCases.downloadRelease(draft.url) });
-  const errors = rules.data === undefined ? undefined : [...rules.data.rules, ...rules.data.drops, ...rules.data.markdown].filter((one) => one.severity === "error").length;
+  const errors = rules.data === undefined ? undefined : publishErrors(rules.data);
   return (
     <ReleasePublishScreen
       draft={draft}

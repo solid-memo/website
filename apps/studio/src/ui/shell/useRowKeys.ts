@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "preact/hooks";
+import { EDIT_CELL } from "./EditableCell";
 import { rangeToggled, stepCursor, toggled, NO_SELECTION, type Selection } from "./tableModel";
 import { shortcutOf } from "./shortcuts";
 import { useScreenKeys } from "./useShortcuts";
@@ -21,7 +22,8 @@ export interface RowSelection {
  * on the row the focus is in, or, with the focus on the page's body (as
  * a reload or a cleared selection leaves it), the cursor's: elsewhere
  * (a button of the page) they are that element's own. On the row's link
- * Enter is the link's own.
+ * Enter is the link's own. F2 edits the row's cell the focus is in, or
+ * its first that can be edited (EditableCell).
  *
  * The cursor goes where the focus goes in the table. While a row is
  * shown beside the table (`current`, by its key), the cursor stays on
@@ -159,6 +161,17 @@ export function useRowKeys({
         if (select === undefined || select.chosen.size === 0) return;
         select.onChoose(NO_SELECTION);
         break;
+      case "edit": {
+        if (at === -1) return;
+        const row = body.current!.children[at]!;
+        const target = event.target as Element;
+        // The cell the focus is in, if it can be edited; else the row's first that can.
+        const own = row.contains(target) ? target.closest("td, th")!.querySelector("[data-cell-edit]") : null;
+        const cell = own ?? row.querySelector("[data-cell-edit]");
+        if (cell === null) return;
+        cell.dispatchEvent(new Event(EDIT_CELL));
+        break;
+      }
       default:
         return;
     }

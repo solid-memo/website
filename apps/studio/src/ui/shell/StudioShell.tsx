@@ -11,7 +11,7 @@ import type { Command, ScreenCommand } from "./commandIndex";
 import { CommandPalette } from "./CommandPalette";
 import { HiddenColumns } from "./DataTable";
 import { KeyHelp, Keys } from "./KeyHelp";
-import { DENSITIES, rememberPrefs, studioPrefs, type StudioPrefs } from "./prefs";
+import { DENSITIES, rememberPrefs, studioPrefs, type StudioPrefs, type WorkItem } from "./prefs";
 import { keysOf, nextRegion, sectionRoute, type Section } from "./shortcuts";
 import { ASIDE_WIDTH, DETAIL_WIDTH } from "./splitter";
 import { Splitter } from "./Splitter";
@@ -49,7 +49,8 @@ export interface AsidePane {
  * (BottomDock), with the problems of the deck or draft shown
  * (`problems`) and the activity the screens tell of
  * (ActivityLog); and a status bar, with the open instance, whether the
- * open draft is saved, its problems, the dock's button, how densely the
+ * open draft is saved, what the screen adds (`status`: whether the draft
+ * can be published), its problems, the dock's button, how densely the
  * Studio is laid out, and its keys. The device keeps the columns the
  * screens' tables hide (DataTable's HiddenColumns) with the rest of the
  * layout (prefs.ts). Its stylesheet (studio.css)
@@ -88,6 +89,8 @@ export function StudioShell({
   draftUrl,
   aside,
   problems,
+  pinned,
+  status,
   onGo,
   children,
 }: {
@@ -112,6 +115,10 @@ export function StudioShell({
   aside: AsidePane | null;
   /** The problems of the deck or draft shown; null off their screens. */
   problems: WorkspaceProblems | null;
+  /** The open instance's decks and drafts pinned, which the palette lists first. */
+  pinned: readonly WorkItem[];
+  /** What the status bar says of the screen shown, after whether the draft is saved. */
+  status?: ComponentChildren;
   /** Goes to a section or a tab, as a link would (a `g` chord, `]`). */
   onGo: (route: StudioRoute) => void;
   /** The main content. */
@@ -448,6 +455,7 @@ export function StudioShell({
         <aside class="studio-status-bar" aria-label={t("studio.shell.status")} data-region tabIndex={-1}>
           {instance !== null && <p>{instance.name}</p>}
           {draftUrl !== null && <DraftSaveState draftUrl={draftUrl} reports={waiting.total} />}
+          {status}
           {problems?.count !== undefined && (
             <button
               type="button"
@@ -493,6 +501,7 @@ export function StudioShell({
             instances={instances}
             tabs={tabs}
             commands={[...screenCommands.commands(), ...shellCommands()]}
+            pinned={pinned}
             onChoose={chooseCommand}
             onClose={() => setPalette(false)}
           />

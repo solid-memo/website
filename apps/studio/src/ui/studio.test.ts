@@ -126,6 +126,21 @@ describe("the Studio's stylesheet", () => {
     expect(styleOf(page(" hidden"), ".studio-aside").display).toBe("none");
   });
 
+  it("draws a cell edited in place as its text, and a sidebar's pin faint unless the item is pinned", () => {
+    root.setAttribute("data-surface", "studio");
+    const page = `
+      <main class="workspace">
+        <table class="studio-data-table"><tbody><tr><td><span class="studio-cell"><button class="studio-cell-edit">20</button></span></td></tr></tbody></table>
+      </main>
+      <nav class="studio-sidebar"><ul><li><a href="#">Kanji</a><button class="studio-pin" aria-pressed="false"></button></li></ul></nav>
+      <nav class="studio-sidebar"><ul><li><a href="#">Verbs</a><button class="studio-pin pinned" aria-pressed="true"></button></li></ul></nav>`;
+    expect(styleOf(page, ".studio-cell-edit").minHeight).toBe("0");
+    expect(styleOf(page, ".studio-cell-edit").backgroundImage).toBe("none");
+    expect(styleOf(page, ".studio-cell-edit").cursor).toBe("text");
+    expect(styleOf(page, ".studio-pin").opacity).toBe("0.35");
+    expect(styleOf(page, ".studio-pin.pinned").opacity).toBe("1");
+  });
+
   it("keeps a data table's first column in sight, and marks its cursor's row, the rows selected and the row shown beside it", () => {
     root.setAttribute("data-surface", "studio");
     const page = `

@@ -16,7 +16,7 @@ import { Loading } from "@solid-memo/ui/Loading";
 import { DeckTableScreen, type DeckBadge } from "./DeckTableScreen";
 import { HealthBadge } from "./HealthBadge";
 import { UpdateBadge } from "./UpdateBadge";
-import type { HomeView } from "./shell/views";
+import type { HomeQuery, HomeView, SavedView } from "./shell/views";
 
 /** A bulk action on the selected decks. */
 type Bulk =
@@ -53,6 +53,9 @@ export function DeckTableContainer({
   onView,
   shownView,
   onShow,
+  savedViews,
+  onSavedViews,
+  onApply,
   current,
   onCursor,
   onOpen,
@@ -69,6 +72,10 @@ export function DeckTableContainer({
   onView: (view: DeckTableView) => void;
   shownView: HomeView;
   onShow: (view: HomeView) => void;
+  /** As DeckTableScreen's: the views saved, and a query to put Home in. */
+  savedViews: readonly SavedView[];
+  onSavedViews: (views: SavedView[]) => void;
+  onApply: (query: HomeQuery) => void;
   /** The deck shown beside the table, by its URL. */
   current?: string;
   onCursor: (deck: Deck) => void;
@@ -195,6 +202,9 @@ export function DeckTableContainer({
       onView={onView}
       shownView={shownView}
       onShow={onShow}
+      savedViews={savedViews}
+      onSavedViews={onSavedViews}
+      onApply={onApply}
       current={current}
       onCursor={onCursor}
       onOpen={onOpen}

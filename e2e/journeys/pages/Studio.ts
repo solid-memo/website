@@ -407,7 +407,7 @@ export class Studio extends Screen {
    */
   async selectCardsWithKeys(deck: string, count: number): Promise<void> {
     await this.intent(`Select ${count} cards with the keyboard`, async () => {
-      await expect(this.page.getByText(this.t("studio.cards.keys", { j: "j", k: "k", x: "x", enter: "Enter", shiftJ: "Shift+J", shiftK: "Shift+K", escape: "Escape", dot: "." }))).toBeVisible();
+      await expect(this.page.getByText(this.t("studio.cards.keys", { j: "j", k: "k", x: "x", enter: "Enter", shiftJ: "Shift+J", shiftK: "Shift+K", escape: "Escape", f2: "F2", dot: "." }))).toBeVisible();
       await this.page.keyboard.press("j");
       await expect(this.cards(deck).getByRole("rowheader").first().getByRole("link")).toBeFocused();
       for (let index = 0; index < count; index++) {
@@ -484,7 +484,7 @@ export class Studio extends Screen {
     await this.intent(`Write the card in Markdown, its back ${back}`, async () => {
       await this.page.getByRole("checkbox", { name: this.t("cardContentFields.markdown"), exact: true }).check();
       await this.page.getByLabel(this.t("cardContentFields.back"), { exact: true }).fill(back);
-      await this.page.getByRole("button", { name: this.t("card.saveButton") }).click();
+      await this.page.getByRole("button", { name: this.t("card.saveButton"), exact: true }).click();
       await this.expectStatus(this.t("card.saved"));
     });
   }
@@ -519,7 +519,7 @@ export class Studio extends Screen {
     await this.intent(`Write ${value} in the field instead`, async () => {
       await this.page.keyboard.press("ControlOrMeta+a");
       await this.page.keyboard.type(value);
-      await this.page.getByRole("button", { name: this.t("card.saveButton") }).click();
+      await this.page.getByRole("button", { name: this.t("card.saveButton"), exact: true }).click();
       await this.expectStatus(this.t("card.saved"));
     });
   }
