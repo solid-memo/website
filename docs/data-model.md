@@ -299,7 +299,14 @@ graph LR
   "Kortlek: <title>."@sv, app-written text for any title), and may name its
   authors (`dcterms:creator`, each a `foaf:Agent` node `#agent-<slug>`
   beside the deck, with `foaf:name` and a `mailto:` `foaf:mbox`; the app
-  shows them as "Name <email>"), licence (`dcterms:license`, a URL),
+  shows them as "Name <email>"; the slug is the author folded to ASCII,
+  `unnamed` when nothing is left of it, and an author the folding loses
+  letters or digits of, such as 김민수 or "Kim 민수", or that has none
+  to lose, such as "—", gets six hex digits of a hash of the whole author
+  after it, `#agent-unnamed-5a5e6e` and `#agent-kim-ad54ba`, so that two
+  such authors stay two agents; an agent is read by the IRI the deck names, so one
+  written under an older rule is still read, and replaced on the deck's
+  next save), licence (`dcterms:license`, a URL),
   topics (`dcat:theme`, concepts of the [topics](vocab.md#concept-schemes)
   scheme) and keywords (`dcat:keyword`: since deck format 6
   language-tagged, several per language; untagged ones saved before

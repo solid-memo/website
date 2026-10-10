@@ -132,6 +132,13 @@ describe("deck records", () => {
       },
     });
   });
+
+  it("keep two co-authors whose names fold to the same slug as two agents", () => {
+    const withKorean: Deck = { ...deck, authors: ["김민수", "이지은", "Kim 민수", "Kim 철수"] };
+    const agents = deckAgents(withKorean);
+    expect(agents.map((agent) => agent.record.name)).toEqual(["김민수", "이지은", "Kim 민수", "Kim 철수"]);
+    expect(deckToRecord(withKorean).creator).toEqual(agents.map((agent) => agent.url));
+  });
 });
 
 describe("card records", () => {

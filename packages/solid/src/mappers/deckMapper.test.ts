@@ -128,6 +128,32 @@ describe("toDeck", () => {
     ]);
   });
 
+  it("reads a creator at an agent IRI written before names were hashed, and a rewrite leaves no stray agent", () => {
+    const deck = deckThing((t) =>
+      t
+        .addIri(RDF.type, SM.Deck)
+        .addStringNoLocale(DCTERMS.title, "Korean")
+        .addStringNoLocale(DCTERMS.description, "Korean.")
+        .addIri(SM.studyDirection, SM.frontToBack)
+        .addIri(DCTERMS.creator, `${CATALOG}#agent-unnamed`)
+        .addIri(SM.cardsDocument, CARDS_DOC)
+        .addIri(SM.reviewsDocument, REVIEWS_DOC)
+        .addInteger(SM.formatVersion, 3),
+    );
+    const agent = buildThing(createThing({ url: `${CATALOG}#agent-unnamed` }))
+      .addIri(RDF.type, "http://xmlns.com/foaf/0.1/Agent")
+      .addStringNoLocale("http://xmlns.com/foaf/0.1/name", "김민수")
+      .build();
+    const [read] = toDecks(setThing(setThing(mockSolidDatasetFrom(CATALOG), deck), agent));
+    expect(read!.authors).toEqual(["김민수"]);
+    const rewritten = withDeck(setThing(setThing(mockSolidDatasetFrom(CATALOG), deck), agent), {
+      ...read!,
+      authors: ["김민수", "이지은"],
+    });
+    expect(getThing(rewritten, `${CATALOG}#agent-unnamed`)).toBeNull();
+    expect(toDecks(rewritten)[0]!.authors).toEqual(["김민수", "이지은"]);
+  });
+
   it("reads a newer format version with the latest shape it knows, keeping the stored version", () => {
     const thing = deckThing((t) =>
       t
@@ -153,6 +179,21 @@ describe("toDeck", () => {
         .addInteger(SM.formatVersion, 2),
     );
     expect(toDeck(thing)).toMatchObject({ direction: "bidirectional", createdAt: "", formatVersion: 2 });
+  });
+
+  it("keeps a format-2 deck's co-authors whose names fold to the same slug apart", () => {
+    const thing = deckThing((t) =>
+      t
+        .addIri(RDF.type, SM.Deck)
+        .addStringNoLocale(DCTERMS.title, "Korean")
+        .addStringNoLocale(SM.direction, "bidirectional")
+        .addStringNoLocale(DCTERMS.creator, "김민수")
+        .addStringNoLocale(DCTERMS.creator, "이지은")
+        .addIri(SM.cardsDocument, CARDS_DOC)
+        .addIri(SM.reviewsDocument, REVIEWS_DOC)
+        .addInteger(SM.formatVersion, 2),
+    );
+    expect([...toDeck(thing)!.authors].sort()).toEqual(["김민수", "이지은"].sort());
   });
 
   it("rejects a deck without a title, and a format-2 deck without a direction", () => {
