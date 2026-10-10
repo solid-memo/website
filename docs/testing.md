@@ -365,6 +365,14 @@ Code that cannot reach 100% is restructured until it can (e.g. an
 unreachable defensive branch is removed rather than excluded). New code
 ships with its tests in the same change; coverage never dips.
 
+A test may take 30 seconds, not vitest's 5, also set in
+[vitest.shared.ts](../vitest.shared.ts). CI runs every package's tests
+at once with coverage on, and its runner takes some tests fifty times
+as long as a laptop does. The generator's check of `ns/`, for example,
+takes 0.1 s on a laptop and ran out of 5 s on CI. A test that hangs
+still fails. For the same reason, a test of speed is timed against the
+same machine, never against the clock (see Domain and Markdown below).
+
 ## Strategy per layer
 
 Dependency inversion gives every layer a seam that makes mocks trivial:
