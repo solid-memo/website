@@ -55,6 +55,16 @@ export interface ShaclShapeValidatorDeps {
   loader?: ShapeLoader;
 }
 
+/**
+ * The ShapeValidator, with the check of subjects before they are written
+ * (WriteCheck), and `over`: the same validator, its shapes and engines,
+ * over the documents of another fetch (a Studio trial's pod, say).
+ */
+export type ShaclShapeValidator = ShapeValidator & {
+  checkSubjects: WriteCheck;
+  over(fetch: typeof globalThis.fetch): ShaclShapeValidator;
+};
+
 /** The classes the DCAT-AP profile has something to say about. */
 const PROFILED_CLASSES = [
   "http://www.w3.org/ns/dcat#Catalog",
@@ -158,7 +168,7 @@ export function createShaclShapeValidator({
   vendorBaseUrl,
   loadEngine = () => import("@solid-memo/shacl/engine"),
   loader = createShapeLoader({ fetch: shapesFetch, shapesBaseUrl, vocabBaseUrl, vendorBaseUrl }),
-}: ShaclShapeValidatorDeps): ShapeValidator & { checkSubjects: WriteCheck } {
+}: ShaclShapeValidatorDeps): ShaclShapeValidator {
   const engines = new Map<string, Promise<ShapeEngine>>();
 
   function engineFor(descriptor: ShapeDescriptor): Promise<ShapeEngine> {
@@ -303,7 +313,10 @@ export function createShaclShapeValidator({
     return { url, status: "checked", subjects };
   }
 
-  return {
+  /** The validator over the pod documents `podFetch` reads. */
+  const over = (podFetch: typeof globalThis.fetch): ShaclShapeValidator => ({
+    over,
+
     async checkSubjects(dataset, subjects, context) {
       const problems = await subjectViolations(dataset, subjects, context);
       if (problems.length > 0) {
@@ -312,11 +325,11 @@ export function createShaclShapeValidator({
     },
 
     async validateDocument(url, context = "pod"): Promise<DocumentReport> {
-      return reportOf(url, await getSolidDatasetOrNull(url, fetch), context);
+      return reportOf(url, await getSolidDatasetOrNull(url, podFetch), context);
     },
 
     async validateDocumentSince(url, version, context = "pod") {
-      const since = await readSince(url, version, fetch);
+      const since = await readSince(url, version, podFetch);
       return since.unchanged ? since : { ...since, value: await reportOf(url, since.value, context) };
     },
 
@@ -386,7 +399,8 @@ export function createShaclShapeValidator({
         return !seen.has(key) && seen.add(key) !== undefined;
       });
     },
-  };
+  });
+  return over(fetch);
 }
 
 const SM_FORMAT_VERSION = `${SM_NS}formatVersion`;

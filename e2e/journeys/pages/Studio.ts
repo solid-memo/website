@@ -100,6 +100,15 @@ export class Studio extends Screen {
     });
   }
 
+  /** Home does not list the deck: the instance has none by that name. */
+  async expectNoDeck(instance: string, deck: string): Promise<void> {
+    await this.intent(`See no ${deck} in the Studio`, async () => {
+      await expect(this.page.getByRole("heading", { name: this.t("studio.decks.heading"), level: 2 })).toBeVisible();
+      await expect(this.decks(instance).getByRole("rowheader").first()).toBeVisible();
+      await expect(this.row(instance, deck)).toHaveCount(0);
+    });
+  }
+
   /** Follows Home's link to the Groups screen, which arranges the decks as Solid Memo's list does (app.groups). */
   async openGroups(): Promise<void> {
     await this.intent("Open the Groups screen", async () => {

@@ -33,8 +33,9 @@ const SPARKLES = 8;
  * open or done chapter's title links to it; a locked one's does not. A
  * chapter's description may be in Markdown (its `textFormat`); its title
  * is always plain. Once every chapter is done, the course says it is
- * finished, with a link back to the decks. A notice (a newer release of
- * the course on offer) goes under the blurb.
+ * finished, with a link back to the decks where there are any (none in
+ * the Studio's trial). A notice (a newer release of the course on offer)
+ * goes under the blurb.
  *
  * Coming back from a chapter just completed, the page cheers: a word
  * that the chapter is done, above the button on, which takes the focus
@@ -66,8 +67,8 @@ export function CourseScreen({
   chapterHref: (chapter: CourseChapter) => string;
   /** Where to go on; absent once every chapter is done. */
   continueHref?: string;
-  /** The instance's deck list, which a finished course links back to. */
-  decksHref: string;
+  /** The instance's deck list, which a finished course links back to; no link without one. */
+  decksHref?: string;
   /** The chapter the learner has just completed, to cheer about. */
   justCompleted?: CompletedChapter;
   /** Shown under the blurb: the offer of a newer release. */
@@ -109,11 +110,13 @@ export function CourseScreen({
               <CheckIcon />
               {t("course.finished")}
             </p>
-            <div class="actions">
-              <a class="button primary" href={decksHref}>
-                {t("course.backToDecks")}
-              </a>
-            </div>
+            {decksHref !== undefined && (
+              <div class="actions">
+                <a class="button primary" href={decksHref}>
+                  {t("course.backToDecks")}
+                </a>
+              </div>
+            )}
           </>
         ) : (
           <div class="actions">

@@ -28,6 +28,8 @@ export interface DraftLinks {
   checkHref: string;
   /** The draft as the library will list it. */
   previewHref: string;
+  /** The draft played in a sandbox. */
+  trialHref: string;
 }
 
 /** The release check of the draft as the overview counts it: its problems, undefined while it runs, or why it did not. */
@@ -160,7 +162,8 @@ export function DraftOverviewScreen({
             <p>{check.problems.length === 0 ? t("studio.draft.problemsNone") : t("studio.draft.problemsCount", { count: check.problems.length })}</p>
           )}
           <p>
-            <a href={links.checkHref}>{t("studio.draft.problemsLink")}</a> · <a href={links.previewHref}>{t("studio.draft.previewLink")}</a>
+            <a href={links.checkHref}>{t("studio.draft.problemsLink")}</a> · <a href={links.previewHref}>{t("studio.draft.previewLink")}</a> ·{" "}
+            <a href={links.trialHref}>{t("studio.draft.trialLink")}</a>
           </p>
         </section>
       </DraftScope>

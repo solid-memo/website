@@ -1,3 +1,4 @@
+import { expect } from "@playwright/test";
 import { test } from "../fixtures.ts";
 import { BRIGHTEST_STARS } from "../pages/Library.ts";
 
@@ -42,8 +43,12 @@ import { BRIGHTEST_STARS } from "../pages/Library.ts";
  * and the listing preview shows the course as the library will. They rename the instance
  * and describe its catalogue, under a licence, then pick it, by its new
  * name, from the picker. Among its library copies, the library deck is
- * up to date. They go back to Solid Memo, still logged in, which lists
- * the deck they made that is left.
+ * up to date. They note what Solid Memo's statistics count, then
+ * test-play the course they wrote in the Studio's trial, to the end of
+ * its one chapter's final review. The instance's decks, and Solid
+ * Memo's statistics, are as they were: the trial is played in a sandbox.
+ * They go back to Solid Memo, still logged in, which lists the deck they
+ * made that is left.
  */
 test("open the Studio from Solid Memo and manage an instance's decks @studio", async ({ app, account, runId }) => {
   const instance = `Studio ${runId}`;
@@ -289,8 +294,37 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     await app.chrome.breadcrumb("breadcrumbs.decks");
   });
 
-  await app.step("30 · Go back to Solid Memo, still logged in", async () => {
+  const counted: Record<string, string> = {};
+  const tiles = ["answers", "studyDays", "cards"] as const;
+  await app.step("30 · Note what Solid Memo's statistics count", async () => {
     await app.studio.backToApp();
+    await app.statistics.open();
+    for (const tile of tiles) counted[tile] = await app.statistics.value(tile);
+  });
+
+  await app.step("31 · Test-play the course in the Studio's trial, to the end of its final review", async () => {
+    await app.studio.openFromApp();
+    await app.studio.openDrafts(renamed);
+    await app.draftEditor.openDraft(authored);
+    await app.trial.open(authored);
+    await app.trial.playToTheEnd("Pods", "A pod is where your data lives.", {
+      "Where does your data live?": "In a pod",
+      "Who chooses the app?": "You do",
+    });
+  });
+
+  await app.step("32 · The instance's decks and Solid Memo's statistics are as they were", async () => {
+    await app.chrome.breadcrumb("breadcrumbs.decks");
+    await app.studio.expectDeck(renamed, alpha, { cards: 1, due: 0 });
+    await app.studio.expectDeck(renamed, beta, { cards: 1, due: 1 });
+    await app.studio.expectNoDeck(renamed, authored);
+    await app.studio.backToApp();
+    await app.statistics.open();
+    for (const tile of tiles) expect(await app.statistics.value(tile), tile).toBe(counted[tile]);
+  });
+
+  await app.step("33 · Go back to Solid Memo, still logged in", async () => {
+    await app.chrome.breadcrumb("breadcrumbs.decks");
     await app.chrome.expectLoggedInAs(account.webId);
     await app.decks.expectDeck(alpha);
   });

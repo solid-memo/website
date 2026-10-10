@@ -24,6 +24,7 @@ import { Preferences } from "./Preferences.ts";
 import { Statistics } from "./Statistics.ts";
 import { Study } from "./Study.ts";
 import { Studio } from "./Studio.ts";
+import { Trial } from "./Trial.ts";
 import { Validation } from "./Validation.ts";
 
 /**
@@ -56,6 +57,7 @@ export class App {
   readonly libraryPreview = new LibraryPreview(this);
   readonly studio = new Studio(this);
   readonly draftEditor = new DraftEditor(this);
+  readonly trial = new Trial(this);
   readonly course = new Course(this);
   readonly chapter = new Chapter(this);
   readonly chapterReview = new ChapterReview(this);

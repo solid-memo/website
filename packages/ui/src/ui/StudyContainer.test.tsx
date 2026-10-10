@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StudyContainer } from "./StudyContainer";
+import { Clock } from "./courseLinks";
 import { DeckStudyActionContainer } from "./DeckStudyAction";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck, Prompt } from "@solid-memo/domain/deck";
@@ -211,6 +212,24 @@ describe("StudyContainer", () => {
 
     expect(await screen.findByText("review save failed")).toBeInTheDocument();
     expect(screen.getByText("front-a")).toBeInTheDocument();
+  });
+
+  it("studies at the screen's time, its deck linked where it is told", async () => {
+    const later = new Date("2026-12-24T10:00:00.000Z");
+    const useCases = makeUseCasesFake({
+      getStudyQueue: vi.fn(async () => ({ due: [makePrompt("card-a", "front-a")], newPrompts: [], studiedToday: 0 })),
+    });
+    render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <Clock.Provider value={() => later}>
+          <StudyContainer useCases={useCases} instance={instance} deck={deck} onExit={vi.fn()} deckLink="#/trial" />
+        </Clock.Provider>
+      </QueryClientProvider>,
+    );
+    expect(await screen.findByRole("link", { name: "Kanji N5" })).toHaveAttribute("href", "#/trial");
+    expect(useCases.getStudyQueue).toHaveBeenCalledWith(instance.url, deck, later);
+    await answer("5 — Easy");
+    await waitFor(() => expect(useCases.recordReview).toHaveBeenCalledWith(instance.url, deck, expect.anything(), 5, later));
   });
 
   it("shows the empty state when nothing is due", async () => {

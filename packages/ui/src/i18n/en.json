@@ -2042,7 +2042,8 @@
         "other": "The release check finds {count} problems."
       },
       "problemsLink": "See the release check",
-      "previewLink": "Preview the listing"
+      "previewLink": "Preview the listing",
+      "trialLink": "Try it out"
     },
     "outline": {
       "empty": "No chapters yet.",
@@ -2213,7 +2214,8 @@
         "step": "a step",
         "distractor": "a wrong option"
       },
-      "profile": "{profile}: {message}"
+      "profile": "{profile}: {message}",
+      "trialLink": "Try it out"
     },
     "field": {
       "title": "Title",
@@ -2294,6 +2296,33 @@
       "intro": "This release in the library, as learners will see it. Nothing here can be clicked: it is a picture.",
       "row": "In the library's list",
       "page": "On its own page"
+    },
+    "trial": {
+      "crumb": "Trial",
+      "heading": "Trial",
+      "intro": "The draft played as a learner will play it, in a sandbox kept in this page: nothing done here reaches your pod, and starting over forgets it all.",
+      "opening": "Setting up the trial…",
+      "notReady": "This draft cannot be played yet. Fix these first:",
+      "controls": "Trial controls",
+      "coursePage": "The course's page",
+      "chapter": "Chapter",
+      "jump": "Open the chapter",
+      "jumpHint": "As a learner who completed every chapter before it.",
+      "answers": "Answers",
+      "answersCourse": "Every question of the chapter in view, or of the chapter to take next:",
+      "answersDeck": "Every card to study now:",
+      "allRight": "Answer all right",
+      "allWrong": "Answer all wrong",
+      "days": "Days ahead",
+      "advance": "Advance",
+      "ahead": {
+        "one": "The trial is {count} day ahead.",
+        "other": "The trial is {count} days ahead."
+      },
+      "today": "The trial is at today's date.",
+      "working": "Working…",
+      "reset": "Start over",
+      "reload": "Reload the draft"
     }
   },
   "proseField": {

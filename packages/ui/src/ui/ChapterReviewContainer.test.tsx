@@ -4,26 +4,29 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import { ChapterReviewContainer } from "./ChapterReviewContainer";
+import { APP_COURSE_LINKS, CourseLinksContext, type CourseLinks } from "./courseLinks";
 import { courseHref } from "./router";
 import { makeUseCasesFake } from "../test/useCasesFake";
 import { CH1, CH2, courseInstance, makeCourse, noShuffle } from "../test/course";
 
 const course = makeCourse(["q-1", "q-2", "q-3"]);
 
-function renderReview(useCases: UseCases, chapterIndex = 0, reviewed = course) {
+function renderReview(useCases: UseCases, chapterIndex = 0, reviewed = course, links: CourseLinks = APP_COURSE_LINKS) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const invalidate = vi.spyOn(queryClient, "invalidateQueries");
   const onCompleted = vi.fn();
   const { unmount } = render(
     <QueryClientProvider client={queryClient}>
-      <ChapterReviewContainer
-        useCases={useCases}
-        instance={courseInstance}
-        course={reviewed}
-        chapter={reviewed.outline.chapters[chapterIndex]!}
-        onCompleted={onCompleted}
-        random={noShuffle}
-      />
+      <CourseLinksContext.Provider value={links}>
+        <ChapterReviewContainer
+          useCases={useCases}
+          instance={courseInstance}
+          course={reviewed}
+          chapter={reviewed.outline.chapters[chapterIndex]!}
+          onCompleted={onCompleted}
+          random={noShuffle}
+        />
+      </CourseLinksContext.Provider>
     </QueryClientProvider>,
   );
   return { invalidate, onCompleted, unmount };
@@ -97,6 +100,11 @@ describe("ChapterReviewContainer", () => {
     await waitFor(() => expect(onCompleted).toHaveBeenCalledWith(false));
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["course", course.deck.url] });
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["decks", courseInstance.url] });
+  });
+
+  it("links back to the course's page where the course links say", () => {
+    renderReview(makeUseCasesFake(), 0, course, { ...APP_COURSE_LINKS, courseHref: (_instance, deckUrl) => `#/trial/${deckUrl}` });
+    expect(screen.getByRole("link", { name: "Back to the chapters" })).toHaveAttribute("href", `#/trial/${course.deck.url}`);
   });
 
   it("leaves a learner who goes elsewhere while the chapter is completed where they went", async () => {

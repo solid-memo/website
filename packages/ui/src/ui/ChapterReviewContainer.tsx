@@ -7,8 +7,8 @@ import { useCourseAnswer } from "./ChapterPlayerContainer";
 import { ChapterReviewScreen, type Completion } from "./ChapterReviewScreen";
 import { courseKey } from "./CourseContainer";
 import type { CheckedAnswer } from "./CourseQuestion";
+import { useCourseLinks } from "./courseLinks";
 import { useI18n } from "./i18n";
-import { courseHref } from "./router";
 
 /**
  * Owns one final review of a chapter: it starts when the learner says
@@ -19,7 +19,8 @@ import { courseHref } from "./router";
  * course is read afresh before `onCompleted`, so the course's page the
  * learner is taken to shows it done and the next chapter open. A learner
  * who leaves the review while that is saved stays where they went: the
- * course is still read afresh, but `onCompleted` is not called.
+ * course is still read afresh, but `onCompleted` is not called. Back to
+ * the course's page links where the course links say.
  */
 export function ChapterReviewContainer({
   useCases,
@@ -39,6 +40,7 @@ export function ChapterReviewContainer({
   random?: () => number;
 }) {
   const { errorText } = useI18n();
+  const links = useCourseLinks();
   const queryClient = useQueryClient();
   const deck = course.deck;
   const [started, setStarted] = useState(false);
@@ -92,7 +94,7 @@ export function ChapterReviewContainer({
     <ChapterReviewScreen
       chapterTitle={chapter.title}
       started={started}
-      courseHref={courseHref(instance.url, deck.url)}
+      courseHref={links.courseHref(instance.url, deck.url)}
       position={position + 1}
       total={queue.length}
       card={card}

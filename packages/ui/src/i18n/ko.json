@@ -2042,7 +2042,8 @@
         "other": "릴리스 검사에서 문제점 {count}개를 찾았어요."
       },
       "problemsLink": "릴리스 검사 보기",
-      "previewLink": "목록 미리보기"
+      "previewLink": "목록 미리보기",
+      "trialLink": "사용해 보기"
     },
     "outline": {
       "empty": "아직 챕터가 없어요.",
@@ -2213,7 +2214,8 @@
         "step": "단계",
         "distractor": "오답 선택지"
       },
-      "profile": "{profile}: {message}"
+      "profile": "{profile}: {message}",
+      "trialLink": "체험해 보기"
     },
     "field": {
       "title": "제목",
@@ -2297,6 +2299,33 @@
       "intro": "학습자에게 보일 덱 라이브러리 속 이 릴리스의 모습이에요. 그림일 뿐이라 아무것도 클릭할 수 없어요.",
       "row": "덱 라이브러리 목록에서",
       "page": "자체 페이지에서"
+    },
+    "trial": {
+      "crumb": "체험",
+      "heading": "체험",
+      "intro": "학습자가 하게 될 그대로 초안을 체험해요. 이 페이지 안의 샌드박스에서 진행되므로 여기서 한 일은 Pod에 전혀 반영되지 않고, 처음부터 다시 하면 모두 잊혀요.",
+      "opening": "체험을 준비하는 중…",
+      "notReady": "이 초안은 아직 체험할 수 없어요. 먼저 다음을 고쳐 주세요:",
+      "controls": "체험 조작",
+      "coursePage": "코스 페이지",
+      "chapter": "챕터",
+      "jump": "챕터 열기",
+      "jumpHint": "그 앞의 모든 챕터를 마친 학습자로서 열어요.",
+      "answers": "답변",
+      "answersCourse": "지금 보고 있는 챕터, 또는 다음에 할 챕터의 모든 문제:",
+      "answersDeck": "지금 학습할 모든 카드:",
+      "allRight": "모두 맞게 답하기",
+      "allWrong": "모두 틀리게 답하기",
+      "days": "앞당길 일수",
+      "advance": "앞당기기",
+      "ahead": {
+        "one": "체험이 {count}일 앞서 있어요.",
+        "other": "체험이 {count}일 앞서 있어요."
+      },
+      "today": "체험이 오늘 날짜에 있어요.",
+      "working": "처리하는 중…",
+      "reset": "처음부터 다시 하기",
+      "reload": "초안 다시 불러오기"
     }
   },
   "proseField": {

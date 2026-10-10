@@ -211,6 +211,10 @@ import type {
   ReleaseDraftRepository,
 } from "./ports";
 import { createReleaseDraftUseCases, type ReleaseDraftUseCases } from "./releaseDrafts";
+import { startTrial, type TrialOpening, type TrialSandbox } from "./trial";
+import { draftReleaseModel } from "@solid-memo/domain/release/draftModel";
+import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
+import { trialProblems } from "@solid-memo/domain/release/trial";
 import { AppError } from "@solid-memo/domain/appError";
 
 export interface UseCases extends ReleaseDraftUseCases {
@@ -774,6 +778,15 @@ export interface UseCases extends ReleaseDraftUseCases {
    * restart the course. The learner's answers and review states stay.
    */
   setCompletedChapters(deck: Deck, edit: CompletedChaptersEdit): Promise<Deck>;
+  /**
+   * Test-play the draft (docs/studio.md, The trial), for the user of the
+   * instance at `instanceUrl`: in a new sandbox of its own (trial.ts),
+   * kept in memory, as a learner with the instance's answer scale and
+   * study day. The trial, with the use cases to play it with; or, for a
+   * draft that cannot be played, the problems that keep it from it
+   * (trialProblems), with nothing made.
+   */
+  openTrial(draft: ReleaseDraft, instanceUrl: string): Promise<TrialOpening>;
 }
 
 /** What the Studio's schedule screen shows of a deck (UseCases.deckInsight). */
@@ -866,6 +879,8 @@ export interface Dependencies {
   fileExchange?: FileExchange;
   /** The drafts of releases in each instance; by default there are none. */
   releaseDraftRepository?: ReleaseDraftRepository;
+  /** A new sandbox to test-play a draft in, each one empty; by default there is none. */
+  trialSandbox?: (draft: ReleaseDraft) => TrialSandbox;
 }
 
 /**
@@ -992,6 +1007,9 @@ const NO_DRAFTS: ReleaseDraftRepository = {
   parseRelease: noDrafts,
   delete: noDrafts,
 };
+const noTrials = (): never => {
+  throw new Error("This app plays no trials.");
+};
 const NO_GUEST_POD: GuestPod = {
   exists: async () => false,
   start: async () => {
@@ -1115,6 +1133,7 @@ export function createUseCases({
   deckArchive = NO_DECK_ARCHIVE,
   fileExchange = NO_FILE_EXCHANGE,
   releaseDraftRepository = NO_DRAFTS,
+  trialSandbox = noTrials,
 }: Dependencies): UseCases {
   const runsElsewhere = fenceMovesElsewhere(updateJournal, writeFence);
 
@@ -2666,6 +2685,12 @@ export function createUseCases({
     },
     setCompletedChapters(deck, edit) {
       return deckRepository.setCompletedChapters(deck, edit);
+    },
+    async openTrial(draft, instanceUrl) {
+      const problems = trialProblems(draftReleaseModel(draft));
+      if (problems.length > 0) return { ok: false, problems };
+      const prefs = await getPreferences(instanceUrl);
+      return { ok: true, trial: await startTrial(trialSandbox(draft), draft, prefs) };
     },
   };
 }

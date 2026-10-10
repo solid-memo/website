@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { LibraryUpgradePlan } from "@solid-memo/domain/libraryUpgrade";
 import { CourseContainer } from "./CourseContainer";
+import { CourseLinksContext, type CourseLinks } from "./courseLinks";
 import { decksHref, routeToHash } from "./router";
 import { CH1, CH2, courseDeck, courseInstance, makeCourse } from "../test/course";
 import { makeUseCasesFake } from "../test/useCasesFake";
@@ -101,6 +102,35 @@ describe("CourseContainer", () => {
     expect(within(first).getByText("Done")).toBeInTheDocument();
     expect(within(first).getByRole("link")).toHaveAttribute("href", chapter(CH1));
     expect(within(chapterItem(/Pods/)).getByRole("link", { name: "Pods" })).toHaveAttribute("href", chapter(CH2));
+  });
+
+  it("links its chapters where the course links say, and no way back to the decks where they say none", () => {
+    const links: CourseLinks = {
+      courseHref: (_instance, deckUrl) => `#/trial/${deckUrl}`,
+      chapterHref: (_instance, _deck, chapterUrl) => `#/trial/${chapterUrl}`,
+      reviewHref: (_instance, _deck, chapterUrl) => `#/trial/review/${chapterUrl}`,
+    };
+    const { unmount } = render(
+      <CourseLinksContext.Provider value={links}>
+        <Page course={makeCourse()} />
+      </CourseLinksContext.Provider>,
+    );
+    expect(screen.getByRole("link", { name: "Start the course" })).toHaveAttribute("href", `#/trial/${CH1}`);
+    unmount();
+    const second = render(
+      <CourseLinksContext.Provider value={links}>
+        <Page course={makeCourse(["q-1", "q-2", "q-3"])} />
+      </CourseLinksContext.Provider>,
+    );
+    expect(screen.getByRole("link", { name: "Continue" })).toHaveAttribute("href", `#/trial/review/${CH1}`);
+    second.unmount();
+    render(
+      <CourseLinksContext.Provider value={links}>
+        <Page course={makeCourse(["q-1", "q-2", "q-3", "r-1", "q-4"], [CH1, CH2])} />
+      </CourseLinksContext.Provider>,
+    );
+    expect(screen.getByText(/^You have finished this course/)).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Back to decks" })).toBeNull();
   });
 
   it("says the course is finished once every chapter is, with the way back to the decks", () => {

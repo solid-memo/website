@@ -12,6 +12,7 @@ const links = {
   policyHref: (policy: CheckPolicy) => `#/check/${policy}`,
   targetHref: (target: ProblemTarget) => `#/${Object.values(target).join("/")}`,
   previewHref: "#/preview",
+  trialHref: "#/trial",
 };
 const notAsked: ShapesState = { asked: false, running: false, stale: false, problems: undefined, error: null };
 

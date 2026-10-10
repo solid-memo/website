@@ -69,3 +69,22 @@ export function deckDraft(): ReleaseDraft {
   const blank = blankDraft({ url: DRAFT, course: false, title: { en: "Words" }, now: NOW });
   return { ...blank, root: { ...blank.root, studyDirection: SM.bidirectional as ReleaseDraft["root"]["studyDirection"] }, cards: [{ id: "w1", data: card("w1") }] };
 }
+
+/**
+ * A course that can be played (domain/release/trial.ts): the course
+ * without chapter `ch-b`, each question it asks with two distractors.
+ */
+export function playableCourseDraft(): ReleaseDraft {
+  const draft = courseDraft();
+  const options = (cardId: string) => [of(`${cardId}-d1`), of(`${cardId}-d2`)];
+  const asked = ["q-a-2a", "q-a-r01"];
+  return {
+    ...draft,
+    chapters: draft.chapters.filter((chapter) => chapter.id !== "ch-b"),
+    cards: draft.cards.map((node) => (asked.includes(node.id) ? { ...node, data: { ...node.data, distractor: options(node.id) } } : node)),
+    distractors: [
+      ...draft.distractors,
+      ...asked.flatMap((cardId) => [1, 2].map((n) => ({ id: `${cardId}-d${n}`, data: { text: { en: `${cardId} no ${n}` } } }))),
+    ],
+  };
+}

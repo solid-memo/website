@@ -27,6 +27,7 @@ import { createSolidRepairRepository } from "@solid-memo/solid/solidRepairReposi
 import { createSolidReviewStateRepository } from "@solid-memo/solid/solidReviewStateRepository";
 import { createSolidStorageGateway } from "@solid-memo/solid/solidStorageGateway";
 import { createSolidWebIdDocumentRepository } from "@solid-memo/solid/solidWebIdDocumentRepository";
+import { createTrialUseCases } from "./trialUseCases";
 
 /** What an app built on the use cases says of itself and of the page it runs in. */
 export interface AppOptions {
@@ -48,8 +49,9 @@ export interface AppOptions {
 
 /**
  * Wires the layers together: every adapter behind its port, and the use
- * cases over them. Each app calls it once, from its src/main.tsx, and
- * hands the result to its components.
+ * cases over them, a Studio trial's sandbox (createTrialUseCases) among
+ * them. Each app calls it once, from its src/main.tsx, and hands the
+ * result to its components.
  */
 export function createAppUseCases({ clientName, servedSite, libraryIndexUrl, ruleset, indexedDB }: AppOptions): UseCases {
   /** A guest's pod, kept in this browser (docs/guest-mode.md). */
@@ -113,6 +115,8 @@ export function createAppUseCases({ clientName, servedSite, libraryIndexUrl, rul
       releaseFetch: routedFetch({ origin: SITE, local: siteFetch, remote: podFetch }),
       checkWrite,
     }),
+    // A Studio trial plays a draft in a pod of its own, reading the page's pods, never writing them.
+    trialSandbox: (draft) => createTrialUseCases(draft, { podFetch, shapeValidator, ruleset }),
   });
 }
 

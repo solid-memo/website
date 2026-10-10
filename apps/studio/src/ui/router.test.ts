@@ -59,6 +59,9 @@ describe("the Studio's routes", () => {
     { screen: "chapter", draftUrl: DRAFT, chapter: "ch-pods", field: "review" },
     { screen: "step", draftUrl: DRAFT, step: "ch-pods-1", field: "theory" },
     { screen: "question", draftUrl: DRAFT, card: "q-pods-1a", field: "distractor:q-pods-1a-d1" },
+    { screen: "trial", draftUrl: DRAFT },
+    { screen: "trial", draftUrl: DRAFT, chapter: "ch-pods" },
+    { screen: "trial", draftUrl: DRAFT, chapter: "ch-pods", review: true },
   ];
 
   it("round-trip through the hash", () => {
@@ -148,7 +151,7 @@ describe("the Studio's routes", () => {
   });
 
   it("name the instance a route is in, the deck's for the workbench", () => {
-    expect(routes.map(instanceOfRoute)).toEqual([null, ...Array(30).fill("https://pod.example/solid-memo/a/")]);
+    expect(routes.map(instanceOfRoute)).toEqual([null, ...Array(33).fill("https://pod.example/solid-memo/a/")]);
   });
 
   it("keep a draft and the subject of it shown in their query, and the cards' view, the first page and no filter left out", () => {
@@ -167,6 +170,13 @@ describe("the Studio's routes", () => {
     expect(parseStudioHash(at("check", { policy: "nonsense" }))).toEqual({ screen: "check", draftUrl: DRAFT });
     expect(parseStudioHash(at("step", { step: "s", field: "title" }))).toEqual({ screen: "step", draftUrl: DRAFT, step: "s" });
     expect(parseStudioHash(at("draft", { field: "theory" }))).toEqual({ screen: "draft", draftUrl: DRAFT });
+  });
+
+  it("keep a trial's chapter in its query, and its review as a part of the chapter", () => {
+    expect(studioRouteToHash({ screen: "trial", draftUrl: DRAFT, chapter: "ch-pods", review: true })).toMatch(/\/trial\?draft=.*&chapter=ch-pods&part=review$/);
+    // A review is of a chapter.
+    expect(parseStudioHash(`#/studio/trial?draft=${encodeURIComponent(DRAFT)}&part=review`)).toEqual({ screen: "trial", draftUrl: DRAFT });
+    expect(parseStudioHash(`#/studio/trial?draft=${encodeURIComponent(DRAFT)}&chapter=c&part=x`)).toEqual({ screen: "trial", draftUrl: DRAFT, chapter: "c" });
   });
 
   it("open a draft's editor where a problem is", () => {
