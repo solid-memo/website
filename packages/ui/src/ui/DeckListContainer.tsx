@@ -2,6 +2,7 @@ import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import { decksOf } from "@solid-memo/domain/deckTree";
 import type { Instance } from "@solid-memo/domain/instance";
+import { CourseStripContainer } from "./CourseStrip";
 import { DeckListScreen } from "./DeckListScreen";
 import { DeckStudyActionContainer } from "./DeckStudyAction";
 import { useCopies, useDeckTreeEditor } from "./deckTreeEditor";
@@ -17,7 +18,8 @@ import { courseHref, deckHref, importUrlHref, libraryHref, routeToHash, studioHr
  * groups, and its edits (useDeckTreeEditor). A deck set aside for
  * invalid data (docs/validation.md) is listed, but not offered for study.
  *
- * A deck copied from a course (docs/courses.md) is continued from its
+ * A deck copied from a course (docs/courses.md) is continued from the
+ * strip of courses above the list, while it is unfinished, and from its
  * menu, and a copy of a release added from a link says the host it came
  * from (useCopies). An instance with no decks (groups aside) is
  * offered the library's course for newcomers under the list's heading
@@ -45,7 +47,8 @@ export function DeckListContainer({
 }) {
   const { t, errorText } = useI18n();
   const { treeQuery, editor } = useDeckTreeEditor(useCases, instance);
-  const { isCourse, linkedHost } = useCopies(useCases, decksOf(treeQuery.data?.children ?? []));
+  const decks = decksOf(treeQuery.data?.children ?? []);
+  const { isCourse, linkedHost } = useCopies(useCases, decks);
 
   if (treeQuery.error) {
     return <ErrorMessage error={errorText(treeQuery.error)} />;
@@ -57,6 +60,11 @@ export function DeckListContainer({
   return (
     <>
       <TodaySummaryContainer useCases={useCases} instance={instance} />
+      <CourseStripContainer
+        useCases={useCases}
+        instance={instance}
+        decks={decks.filter((deck) => isCourse(deck) && !isSetAside(deck))}
+      />
       <DeckListScreen
         {...editor}
         arrangementSetAside={arrangementSetAside}

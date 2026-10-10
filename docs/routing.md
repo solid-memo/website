@@ -47,7 +47,7 @@ full URLs, carried URL-encoded in hash query parameters.
 | `#/storages` | storage picker |
 | `#/instances` | instance picker |
 | `#/new-instance?storage=…&source=…` | instance creator |
-| `#/decks?instance=…` | deck list (home) |
+| `#/decks?instance=…` | deck list (home), under today's study and the [courses](courses.md#the-learners-flow) to go on with |
 | `#/new-deck?instance=…` | deck creator |
 | `#/library?instance=…` | [deck library](deck-library.md): ready-made decks to import into the instance |
 | `#/library-deck?instance=…&deck=…` | one library deck's page — its description, topics, keywords in the reader's language, release, authors, licence, dates and sources, with an import button for that deck alone. `deck` is the deck's series (`…/decks/index.ttl#name`); a release's URL finds it too, and an unknown deck falls back to the library |

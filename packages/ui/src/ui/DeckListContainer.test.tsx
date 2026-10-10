@@ -11,7 +11,7 @@ import { alertTexts, statusTexts } from "../test/liveRegions";
 import { AppError } from "@solid-memo/domain/appError";
 import { makeUseCasesFake } from "../test/useCasesFake";
 import { courseHref, deckHref, routeToHash } from "./router";
-import { courseLibraryDeck } from "../test/course";
+import { CH1, CH2, courseLibraryDeck, makeCourse } from "../test/course";
 
 const instance: Instance = {
   url: "https://pod.example/solid-memo/a/",
@@ -43,6 +43,7 @@ const prompt: Prompt = { card, direction: "front-to-back" };
 function renderContainer(
   useCases: UseCases,
   seed: (queryClient: QueryClient) => void = () => { },
+  isSetAside?: (deck: Deck) => boolean,
 ) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
@@ -55,6 +56,7 @@ function renderContainer(
       <DeckListContainer
         useCases={useCases}
         instance={instance}
+        isSetAside={isSetAside}
         onStudyDeck={onStudyDeck}
         onCourseStarted={onCourseStarted}
       />
@@ -112,6 +114,53 @@ describe("DeckListContainer", () => {
       expect(screen.queryByRole("menuitem", { name: "Continue course" })).toBeNull();
       fireEvent.keyDown(screen.getByRole("menuitem", { name: "Preferences" }), { key: "Escape" });
     }
+  });
+
+  it("shows the courses to go on with above the list: neither one finished, set aside, nor unreadable", async () => {
+    const copy = (n: number, title: string): Deck => ({
+      ...deck,
+      id: `deck-${n}`,
+      url: `${instance.url}catalog.ttl#deck-${n}`,
+      title: { en: title },
+      sourceUrl: courseLibraryDeck.url,
+    });
+    const going = copy(2, "Going");
+    const finished = copy(3, "Finished");
+    const setAside = copy(4, "Aside");
+    const unreadable = copy(5, "Unreadable");
+    const useCases = makeUseCasesFake({
+      listDecks: vi.fn(async () => [deck, going, finished, setAside, unreadable]),
+      listLibraryDecks: vi.fn(async () => [courseLibraryDeck]),
+      getCourse: vi.fn(async (d: Deck) => {
+        if (d === unreadable) throw new Error("course unreachable");
+        const course = d === finished ? makeCourse(["q-1", "q-2", "q-3", "r-1", "q-4"], [CH1, CH2]) : makeCourse(["q-1"]);
+        return { ...course, deck: d };
+      }),
+    });
+    renderContainer(useCases, undefined, (d) => d === setAside);
+    const button = await screen.findByRole("link", { name: "Continue Solid fundamentals" });
+    expect(button).toHaveAttribute(
+      "href",
+      routeToHash({ screen: "courseChapter", instanceUrl: instance.url, deckUrl: going.url, chapterUrl: CH1 }),
+    );
+    const strip = screen.getByRole("complementary", { name: "Your courses" });
+    expect(within(strip).getAllByRole("listitem")).toHaveLength(1);
+    expect(within(strip).getByRole("link", { name: "Solid fundamentals" })).toHaveAttribute(
+      "href",
+      courseHref(instance.url, going.url),
+    );
+    expect(strip).toHaveTextContent("0 of 2 chapters done");
+    await waitFor(() => expect(useCases.getCourse).toHaveBeenCalledTimes(3));
+    expect(useCases.getCourse).not.toHaveBeenCalledWith(setAside);
+    expect(useCases.getCourse).not.toHaveBeenCalledWith(deck);
+  });
+
+  it("shows no strip of courses when no deck is a course", async () => {
+    const useCases = makeUseCasesFake({ listDecks: vi.fn(async () => [deck]) });
+    renderContainer(useCases);
+    await screen.findByRole("link", { name: "Kanji N5" });
+    expect(screen.queryByRole("complementary", { name: "Your courses" })).toBeNull();
+    expect(useCases.getCourse).not.toHaveBeenCalled();
   });
 
   it("says where a copy of a release added from a link came from, its own release saying whether it is a course", async () => {

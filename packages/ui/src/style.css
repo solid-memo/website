@@ -4064,6 +4064,82 @@ p[role="status"]:not(.loading) {
   }
 }
 
+/* The courses to go on with, above the deck list: each its title and the
+   chapters done beside its button, so the title wraps before the button. */
+.course-strip {
+  margin: 0 0 1rem;
+  padding: 0.5rem 0.9rem;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.course-strip ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.course-strip li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 0.75rem;
+  row-gap: 0.25rem;
+  padding: 0.4rem 0;
+}
+
+.course-strip li+li {
+  border-top: 1px solid var(--border);
+}
+
+.course-strip-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  font-weight: 650;
+  color: inherit;
+  overflow-wrap: anywhere;
+}
+
+.course-strip-title svg.icon {
+  flex: none;
+  color: var(--primary);
+}
+
+.course-strip .button {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+}
+
+.course-strip .hint {
+  padding-left: 1.75rem;
+  font-size: 0.85rem;
+}
+
+.course-strip progress {
+  display: block;
+  width: calc(100% - 1.75rem);
+  height: 0.4rem;
+  margin-left: 1.75rem;
+  accent-color: var(--primary);
+}
+
+/* Too narrow for the title beside the button: the button goes under it. */
+@media (max-width: 34rem) {
+  .course-strip li {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .course-strip .button {
+    grid-column: 1;
+    grid-row: 4;
+    justify-self: start;
+    margin: 0.4rem 0 0 1.75rem;
+  }
+}
+
 .statistics figure {
   margin: 0.75rem 0 1.25rem;
 }
