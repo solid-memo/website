@@ -10,13 +10,16 @@ export function DraftCardsContainer({
   view,
   links,
   onView,
+  onOpen,
 }: {
   useCases: UseCases;
   draftUrl: string;
   view: DraftCardsView;
   links: DraftLinks;
   onView: (view: DraftCardsView) => void;
+  /** Open a card's editor, by its id. */
+  onOpen: (card: string) => void;
 }) {
   const editor = useDraftEditor(useCases, draftUrl);
-  return <DraftCardsScreen draft={editor.draft!} view={view} readOnly={editor.readOnly} status={editor} links={links} onView={onView} onEdit={editor.edit} />;
+  return <DraftCardsScreen draft={editor.draft!} view={view} readOnly={editor.readOnly} status={editor} links={links} onView={onView} onOpen={onOpen} onEdit={editor.edit} />;
 }

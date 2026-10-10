@@ -1,9 +1,15 @@
+import { useState } from "preact/hooks";
 import type { Answer } from "@solid-memo/domain/answer";
 import { isRecalled } from "@solid-memo/domain/answer";
 import { isMarkdown, type Card } from "@solid-memo/domain/deck";
 import { fragmentIdOf } from "@solid-memo/domain/subjectUrl";
 import { DataLine } from "@solid-memo/ui/DataText";
 import { useI18n } from "@solid-memo/ui/i18n";
+import { DataTable } from "./shell/DataTable";
+import { nextSort, sortedRows, type TableSort } from "./shell/tableModel";
+
+/** A column of the answers, to sort them by. */
+type HistoryColumn = "when" | "direction" | "grade" | "mode";
 
 /** How each SM-2 grade is named, as Solid Memo's study names it. */
 const GRADES = ["blackout", "wrong", "almost", "hard", "good", "easy"] as const;
@@ -14,10 +20,14 @@ const GRADES = ["blackout", "wrong", "almost", "hard", "good", "easy"] as const;
  * its grade, how (recalled, or chosen among options) and, for a wrong
  * choice, the wrong option chosen, named as the card has it now (by its
  * id when the card no longer has it). Above, how many there are and how
- * many forgot the card.
+ * many forgot the card. The table is a DataTable: a column's header
+ * sorts it by the column (but the wrong option's), then the other way,
+ * then newest first again. Beside the deck's cards, the keys are the
+ * cards' table's, not its own.
  */
 export function CardHistoryScreen({ card, answers }: { card: Card; answers: readonly Answer[] }) {
   const { t, locale, directionLabel } = useI18n();
+  const [sort, setSort] = useState<TableSort<HistoryColumn>>();
   const instant = (iso: string) => new Date(iso).toLocaleString(locale, { dateStyle: "long", timeStyle: "short" });
   const markdown = isMarkdown(card.textFormat);
   const chosen = (iri: string) => {
@@ -33,31 +43,39 @@ export function CardHistoryScreen({ card, answers }: { card: Card; answers: read
       ) : (
         <>
           <p>{t("studio.history.summary", { count: answers.length, forgotten })}</p>
-          <div class="studio-table">
-            <table class="studio-list">
-              <caption>{t("studio.history.caption")}</caption>
-              <thead>
-                <tr>
-                  <th scope="col">{t("studio.history.column.when")}</th>
-                  <th scope="col">{t("studio.history.column.direction")}</th>
-                  <th scope="col">{t("studio.history.column.grade")}</th>
-                  <th scope="col">{t("studio.history.column.mode")}</th>
-                  <th scope="col">{t("studio.history.column.chosen")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {answers.map((answer) => (
-                  <tr key={answer.id} class={isRecalled(answer) ? undefined : "forgotten"}>
-                    <td>{instant(answer.answeredAt)}</td>
-                    <td>{directionLabel(answer.direction)}</td>
-                    <td>{t(`study.quality.${GRADES[answer.grade]}`)}</td>
-                    <td>{t(`studio.history.mode.${answer.mode ?? "recall"}`)}</td>
-                    <td>{answer.chosenDistractor === undefined ? "" : chosen(answer.chosenDistractor)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            caption={t("studio.history.caption")}
+            rows={sortedRows(
+              answers,
+              sort,
+              (answer, column) =>
+                column === "when"
+                  ? Date.parse(answer.answeredAt)
+                  : column === "direction"
+                    ? directionLabel(answer.direction)
+                    : column === "grade"
+                      ? answer.grade
+                      : t(`studio.history.mode.${answer.mode ?? "recall"}`),
+              locale,
+            )}
+            keyOf={(answer) => answer.id}
+            classOf={(answer) => (isRecalled(answer) ? undefined : "forgotten")}
+            name={{ key: "when", label: t("studio.history.column.when"), cell: (answer) => instant(answer.answeredAt) }}
+            columns={[
+              { key: "direction", label: t("studio.history.column.direction"), cell: (answer) => directionLabel(answer.direction) },
+              { key: "grade", label: t("studio.history.column.grade"), cell: (answer) => t(`study.quality.${GRADES[answer.grade]}`) },
+              { key: "mode", label: t("studio.history.column.mode"), cell: (answer) => t(`studio.history.mode.${answer.mode ?? "recall"}`) },
+              {
+                key: "chosen",
+                label: t("studio.history.column.chosen"),
+                unsorted: true,
+                cell: (answer) => (answer.chosenDistractor === undefined ? "" : chosen(answer.chosenDistractor)),
+              },
+            ]}
+            sort={sort}
+            onSort={(key) => setSort(nextSort(sort, key as HistoryColumn))}
+            keys={false}
+          />
         </>
       )}
       <p class="hint">{t("studio.history.hint")}</p>

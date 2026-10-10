@@ -11,6 +11,7 @@ import { ACTIVITY_LIMIT, useActivityLog } from "./activity";
 import type { WorkspaceProblems } from "./BottomDock";
 import { StudioShell, type AsidePane } from "./StudioShell";
 import { useScreenCommands } from "./useScreenCommands";
+import { DataTable } from "./DataTable";
 import { ASIDE_WIDTH, DETAIL_WIDTH, DOCK_HEIGHT } from "./splitter";
 import type { ContextTab } from "./workspaceLayout";
 import { narrowScreen, wideScreen } from "../../test/media";
@@ -49,6 +50,7 @@ function renderShell(
     commands?: ScreenCommand[];
     aside?: AsidePane;
     problems?: WorkspaceProblems;
+    table?: true;
   } = {},
 ) {
   const queryClient = props.queryClient ?? new QueryClient();
@@ -79,6 +81,16 @@ function renderShell(
         <Editor />
         <Activity />
         {props.commands && <Commands commands={props.commands} />}
+        {props.table && (
+          <DataTable
+            caption="Planets"
+            rows={["Mars"]}
+            keyOf={(planet) => planet}
+            name={{ key: "name", label: "Planet", cell: (planet) => planet }}
+            columns={[{ key: "moons", label: "Moons", cell: () => 2 }]}
+            columnsOf="planets"
+          />
+        )}
         {props.filter && (
           <label>
             Filter
@@ -116,6 +128,18 @@ describe("StudioShell", () => {
     unmount();
     await waitFor(() => expect(root.getAttribute("data-surface")).toBeNull());
     expect(root.getAttribute("data-density")).toBeNull();
+  });
+
+  it("keeps the columns a table hides on this device, without a history entry", () => {
+    const length = window.history.length;
+    const { unmount } = renderShell({ table: true });
+    fireEvent.click(screen.getByRole("button", { name: "Show or hide columns" }));
+    fireEvent.click(screen.getByRole("menuitemcheckbox", { name: "Moons" }));
+    expect(screen.queryByRole("columnheader", { name: "Moons" })).toBeNull();
+    expect(window.history.length).toBe(length);
+    unmount();
+    renderShell({ table: true });
+    expect(screen.getAllByRole("columnheader").map((cell) => cell.textContent)).toEqual(["Planet"]);
   });
 
   it("names the open instance in the status bar, and says nothing of a draft off a draft's screens", () => {
@@ -187,10 +211,10 @@ describe("StudioShell", () => {
     const help = screen.getByRole("dialog", { name: "Keyboard shortcuts" });
     expect(help).toHaveAttribute("open");
     expect(within(help).getByRole("heading", { name: "Anywhere in the Studio" })).toBeInTheDocument();
-    expect(within(help).getByRole("heading", { name: "In the card workbench" })).toBeInTheDocument();
+    expect(within(help).getByRole("heading", { name: "In a table: the cards, the decks, a draft's cards…" })).toBeInTheDocument();
     expect(within(help).getByText("Go to the decks").previousElementSibling).toHaveTextContent("g d");
     expect(within(help).getByText("Go to the previous region").previousElementSibling!.querySelectorAll("kbd")).toHaveLength(2);
-    expect(within(help).getByText("Open the card")).toBeInTheDocument();
+    expect(within(help).getByText("Open the row")).toBeInTheDocument();
     // Ctrl+K and Cmd+K as one.
     expect(within(help).getByText("Search, go to or run a command").previousElementSibling).toHaveTextContent(/^Ctrl\+K$/);
     // The nine tabs' keys as one.
@@ -771,7 +795,7 @@ describe("StudioShell", () => {
       choose("Show or hide the panel: problems and activity");
       expect(dock()).toBeInTheDocument();
       expect(screen.getByRole("complementary", { name: "Outline" })).toBeVisible();
-      choose("Show or hide the outline, or close the card beside the cards");
+      choose("Show or hide the aside (the outline, the deck, the upgrade), or close the card beside the cards");
       expect(screen.getByRole("button", { name: "Outline" })).toHaveAttribute("aria-expanded", "false");
     });
   });

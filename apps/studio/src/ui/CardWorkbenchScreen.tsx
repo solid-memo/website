@@ -60,7 +60,8 @@ function doneKey(edit: CardEdit) {
  * A column's header sorts by it, then the other way, then back to the
  * deck's own order; the sorted column says so (`aria-sort`).
  *
- * The table is a DataTable. Cards are selected by their checkbox, or a
+ * The table is a DataTable, whose Columns menu shows or hides its
+ * columns. Cards are selected by their checkbox, or a
  * page's at once; the selection stays as the view changes, and a status
  * line counts it. The keys j and k move between the rows (the focus goes
  * to the row's link; from outside the table, to the first), x selects
@@ -397,6 +398,7 @@ export function CardWorkbenchScreen({
                   ),
                 }}
                 columns={columns}
+                columnsOf="cards"
                 sort={query.sort}
                 // Sorted afresh: from the first page.
                 onSort={(key) => {

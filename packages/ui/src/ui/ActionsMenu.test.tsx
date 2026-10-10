@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, within } from "@testing-library/preact";
 import { useState } from "preact/hooks";
-import { ActionsMenu, MENU_EDGE, MENU_GAP, MenuGroup, MenuItem, MenuLink, MenuSeparator, placeMenu } from "./ActionsMenu";
+import { ActionsMenu, MENU_EDGE, MENU_GAP, MenuCheckbox, MenuGroup, MenuItem, MenuLink, MenuSeparator, placeMenu } from "./ActionsMenu";
 
 function Harness({ onFirst, onLast }: { onFirst: () => void; onLast: () => void }) {
   const [open, setOpen] = useState(false);
@@ -199,6 +199,31 @@ describe("ActionsMenu", () => {
     expect(fireEvent.keyDown(item("Rename"), { key: " " })).toBe(true);
     expect(onFirst).not.toHaveBeenCalled();
     expect(menu()).not.toBeNull();
+  });
+
+  it("turns an item that is on or off the other way, and stays open, its arrows going round it too", () => {
+    function Columns() {
+      const [open, setOpen] = useState(false);
+      const [shown, setShown] = useState(true);
+      return (
+        <ActionsMenu label="Columns" text="Columns" buttonClass="" open={open} onOpen={() => setOpen(true)} onClose={() => setOpen(false)}>
+          <MenuCheckbox checked={shown} onChange={setShown}>
+            Due
+          </MenuCheckbox>
+          <MenuItem onSelect={() => undefined}>Reset</MenuItem>
+        </ActionsMenu>
+      );
+    }
+    render(<Columns />);
+    fireEvent.click(screen.getByRole("button", { name: "Columns" }));
+    const due = screen.getByRole("menuitemcheckbox", { name: "Due" });
+    expect(due).toHaveFocus();
+    expect(due).toHaveAttribute("aria-checked", "true");
+    fireEvent.click(due);
+    expect(screen.getByRole("menuitemcheckbox", { name: "Due" })).toHaveAttribute("aria-checked", "false");
+    expect(menu()).not.toBeNull();
+    fireEvent.keyDown(due, { key: "ArrowDown" });
+    expect(item("Reset")).toHaveFocus();
   });
 
   it("marks an item that cannot be done now, keeps it focusable, and does nothing on it", () => {

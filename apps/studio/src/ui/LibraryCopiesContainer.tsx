@@ -10,7 +10,7 @@ import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { libraryUpgradeQuery, refreshUpgradedDeck } from "@solid-memo/ui/LibraryUpgradeContainer";
 import { Loading } from "@solid-memo/ui/Loading";
-import { LibraryCopiesScreen, type BatchResult, type BatchRun, type PlanState } from "./LibraryCopiesScreen";
+import { LibraryCopiesScreen, LibraryPlanScreen, type BatchResult, type BatchRun, type CopyRow, type PlanState } from "./LibraryCopiesScreen";
 import { libraryUpdatesQuery } from "./UpdateBadge";
 
 /**
@@ -33,6 +33,8 @@ export function LibraryCopiesContainer({
   deckHref,
   libraryHref,
   healthHref,
+  current,
+  onCursor,
 }: {
   useCases: UseCases;
   instance: Instance;
@@ -40,20 +42,15 @@ export function LibraryCopiesContainer({
   libraryHref: string;
   /** The instance's health, where data set aside is repaired. */
   healthHref: string;
+  /** The copy shown beside the table, by its deck's URL. */
+  current?: string;
+  onCursor: (deck: Deck) => void;
 }) {
   const { t, errorText } = useI18n();
   const queryClient = useQueryClient();
   const check = useDataCheck(useCases, instance.url);
-  const copiesQuery = useQuery(libraryUpdatesQuery(useCases, instance.url));
+  const { copiesQuery, rows } = useCopyRows(useCases, instance.url);
   const copies = copiesQuery.data ?? [];
-  const planQueries = useQueries({
-    queries: copies.map((copy) => ({
-      ...libraryUpgradeQuery(useCases, copy.deck),
-      // A copy with a newer release has its series, as the copies found it: it is not looked for again.
-      queryFn: () => useCases.planLibraryUpgrade(copy.deck, copy),
-      enabled: copy.newer === true,
-    })),
-  });
   const [running, setRunning] = useState<BatchRun | null>(null);
   const [results, setResults] = useState<BatchResult[]>([]);
 
@@ -94,14 +91,10 @@ export function LibraryCopiesContainer({
 
   if (copiesQuery.error) return <ErrorMessage error={errorText(copiesQuery.error)} />;
   if (copiesQuery.data === undefined) return <Loading label={t("studio.library.loading")} />;
-  const planOf = (index: number): PlanState => {
-    const query = planQueries[index]!;
-    return query.isError ? "failed" : query.data === undefined ? "loading" : query.data;
-  };
   return (
     <LibraryCopiesScreen
       instance={instance}
-      rows={copies.map((copy, index) => ({ copy, plan: planOf(index) }))}
+      rows={rows}
       running={running}
       results={results}
       deckHref={deckHref}
@@ -110,6 +103,42 @@ export function LibraryCopiesContainer({
       selectable={(deck) => check.readOnly(deck) === null}
       healthHref={healthHref}
       onUpgrade={(chosen) => batchMutation.mutate(chosen)}
+      current={current}
+      onCursor={onCursor}
     />
   );
+}
+
+/**
+ * The library copy beside the table of them (LibraryPlanScreen), by its
+ * deck's URL (`deckUrl`; none when null), from the table's own queries,
+ * so it reads nothing the table has not. A copy the instance no longer
+ * has, or not yet read, is none.
+ */
+export function LibraryPlanContainer({ useCases, instance, deckUrl }: { useCases: UseCases; instance: Instance; deckUrl: string | null }) {
+  const { rows } = useCopyRows(useCases, instance.url);
+  return <LibraryPlanScreen row={rows.find((row) => row.copy.deck.url === deckUrl) ?? null} />;
+}
+
+/**
+ * The instance's copies of library releases, and for each with a newer
+ * release what upgrading it would do, as each is planned.
+ */
+function useCopyRows(useCases: UseCases, instanceUrl: string) {
+  const copiesQuery = useQuery(libraryUpdatesQuery(useCases, instanceUrl));
+  const copies = copiesQuery.data ?? [];
+  const planQueries = useQueries({
+    queries: copies.map((copy) => ({
+      ...libraryUpgradeQuery(useCases, copy.deck),
+      // A copy with a newer release has its series, as the copies found it: it is not looked for again.
+      queryFn: () => useCases.planLibraryUpgrade(copy.deck, copy),
+      enabled: copy.newer === true,
+    })),
+  });
+  const planOf = (index: number): PlanState => {
+    const query = planQueries[index]!;
+    return query.isError ? "failed" : query.data === undefined ? "loading" : query.data;
+  };
+  const rows: CopyRow[] = copies.map((copy, index) => ({ copy, plan: planOf(index) }));
+  return { copiesQuery, rows };
 }

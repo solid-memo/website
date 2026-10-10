@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, within } from "@testing-library/preact";
-import { LibraryCopiesScreen, type BatchResult, type BatchRun, type CopyRow } from "./LibraryCopiesScreen";
+import { LibraryCopiesScreen, LibraryPlanScreen, type BatchResult, type BatchRun, type CopyRow } from "./LibraryCopiesScreen";
+import { WithKeys } from "../test/keys";
 import { capitals, instanceA, makeCard, makeCopy, makePlan } from "../test/fixtures";
 
 const old = makeCopy("deck-1", { en: "Capitals" }, "1");
@@ -40,8 +41,10 @@ function renderScreen(overrides: Partial<Props> = {}) {
       selectable={() => true}
       healthHref="#/health"
       onUpgrade={onUpgrade}
+      onCursor={() => undefined}
       {...overrides}
     />,
+    { wrapper: WithKeys },
   );
   return { onUpgrade };
 }
@@ -58,7 +61,7 @@ describe("LibraryCopiesScreen", () => {
     expect(within(row("Capitals")).getByRole("link", { name: "Capitals" })).toHaveAttribute("href", "#/about?deck=deck-1");
     expect(cells("Capitals")[1]).toBe("Release 1");
     expect(cells("Capitals")[2]).toBe("Release 2");
-    expect(cells("Capitals")[3]).toMatch(/^Release 2: updating adds 1 card, changes 1 card and removes 1 card\.What changes/);
+    expect(cells("Capitals")[3]).toBe("Release 2: updating adds 1 card, changes 1 card and removes 1 card.");
     expect(cells("Fresh capitals")[3]).toBe("Up to date");
     expect(cells("Rivers").slice(1)).toEqual(["Unknown release", "No longer in the library", ""]);
     expect(cells("Odd capitals")[1]).toBe("Unknown release");
@@ -82,28 +85,51 @@ describe("LibraryCopiesScreen", () => {
     expect(cells("Lakes From bob.example")[3]).toBe("Up to date");
   });
 
-  it("details what updating keeps, the releases' notes, and the cards each change touches", () => {
-    renderScreen();
-    const details = within(row("Capitals")).getByText("What changes").closest("details")!;
-    expect(details).toHaveTextContent("Your review history is kept, but for the cards removed.");
-    expect(details).toHaveTextContent("Release 2: Norway added.");
-    expect(within(details).getAllByRole("heading").map((heading) => heading.textContent)).toEqual([
+  it("shows the copy at its cursor beside it, marking the one shown", () => {
+    const onCursor = vi.fn();
+    renderScreen({ current: mine.url, onCursor });
+    expect(within(table()).getByRole("row", { current: true })).toHaveTextContent("My capitals");
+    document.body.focus();
+    fireEvent.keyDown(document.body, { key: "k" });
+    expect(onCursor).toHaveBeenCalledWith(old);
+  });
+
+  it("details beside the table what updating the copy keeps, the releases' notes, and the cards each change touches", () => {
+    render(<LibraryPlanScreen row={rows[0]!} />);
+    const plan = screen.getByRole("region", { name: "Capitals" });
+    expect(plan).toHaveTextContent("Release 2: updating adds 1 card, changes 1 card and removes 1 card.");
+    expect(plan).toHaveTextContent("Your review history is kept, but for the cards removed.");
+    expect(within(plan).getAllByRole("heading").map((heading) => heading.textContent)).toEqual([
+      "Capitals",
       "Added: 1 card",
       "Changed: 1 card",
       "Removed: 1 card",
     ]);
-    expect(within(details).getAllByRole("listitem").map((item) => item.textContent)).toEqual([
+    expect(within(plan).getAllByRole("listitem").map((item) => item.textContent)).toEqual([
       "Release 2: Norway added.",
       "Norway",
       "Sweden",
       "latvia",
     ]);
-    const other = within(row("My capitals")).getByText("What changes").closest("details")!;
-    expect(other).toHaveTextContent("a retired card is kept, but no longer studied. 1 card you changed is left as you have it.");
-    expect(within(other).getAllByRole("heading").map((heading) => heading.textContent)).toEqual([
+  });
+
+  it("details a copy's plan without notes, and with the cards kept as the user has them", () => {
+    render(<LibraryPlanScreen row={rows[1]!} />);
+    const plan = screen.getByRole("region", { name: "My capitals" });
+    expect(plan).toHaveTextContent("a retired card is kept, but no longer studied. 1 card you changed is left as you have it.");
+    expect(within(plan).getAllByRole("heading").map((heading) => heading.textContent)).toEqual([
+      "My capitals",
       "Retired: 1 card",
       "Left as you have it: 1 card",
     ]);
+  });
+
+  it("says beside the table what it would do for a copy not to update, and how to show one", () => {
+    render(<LibraryPlanScreen row={rows[2]!} />);
+    expect(screen.getByRole("region", { name: "Fresh capitals" })).toHaveTextContent("Up to date");
+    expect(screen.queryByRole("list")).toBeNull();
+    render(<LibraryPlanScreen row={null} />);
+    expect(screen.getByText(/to see what upgrading it would change/)).toBeInTheDocument();
   });
 
   it("updates the copies chosen, all at once or one by one, only those that can be", () => {

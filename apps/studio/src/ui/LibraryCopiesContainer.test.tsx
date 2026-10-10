@@ -22,6 +22,7 @@ function renderContainer(useCases: UseCases) {
         deckHref={(deck) => `#/about?deck=${deck.id}`}
         libraryHref="#/library"
         healthHref="#/health"
+        onCursor={() => undefined}
       />
     </QueryClientProvider>,
   );

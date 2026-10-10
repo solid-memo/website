@@ -145,5 +145,8 @@ describe("the Studio's stylesheet", () => {
     expect(styleOf(page, "tbody tr.selected > td:last-child").backgroundColor).toBe(styleOf(page, "tbody tr[aria-current] > td:last-child").backgroundColor);
     expect(styleOf(page, "tbody tr.selected > td:last-child").backgroundColor).not.toBe(styleOf(page, "tbody tr.cursor > td:last-child").backgroundColor);
     expect(styleOf(page, "tbody tr[aria-current] > td:first-child").boxShadow).toContain("inset");
+    // The row's name, though it stays in sight on a colour of its own, takes the row's.
+    expect(styleOf(page, "tbody tr.cursor > th").backgroundColor).toBe(styleOf(page, "tbody tr.cursor > td:last-child").backgroundColor);
+    expect(styleOf(page, "tbody tr.selected > th").backgroundColor).toBe(styleOf(page, "tbody tr.selected > td:last-child").backgroundColor);
   });
 });

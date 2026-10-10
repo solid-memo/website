@@ -1735,7 +1735,7 @@ table.studio-list tr.forgotten td:nth-child(3) {
 
 /* An item: a row the menu's width, 44px tall, its text not to select
    (a link's neither). */
-.actions-menu [role="menuitem"] {
+.actions-menu :is([role="menuitem"], [role="menuitemcheckbox"]) {
   justify-content: flex-start;
   min-height: 2.75rem;
   padding: 0.5rem 0.75rem;
@@ -1760,15 +1760,26 @@ a[role="menuitem"] {
   line-height: 1.2;
 }
 
-.actions-menu [role="menuitem"]:hover:not([aria-disabled="true"]),
-.actions-menu [role="menuitem"]:focus {
+.actions-menu :is([role="menuitem"], [role="menuitemcheckbox"]):hover:not([aria-disabled="true"]),
+.actions-menu :is([role="menuitem"], [role="menuitemcheckbox"]):focus {
   background: var(--surface-hover);
   transform: none;
 }
 
 /* Ringed inside, clear of the menu's own clipping. */
-.actions-menu [role="menuitem"]:focus-visible {
+.actions-menu :is([role="menuitem"], [role="menuitemcheckbox"]):focus-visible {
   outline-offset: -2px;
+}
+
+/* An item that is on or off: a tick when on, its room kept when off. */
+.actions-menu [role="menuitemcheckbox"]::before {
+  content: "";
+  display: inline-block;
+  width: 1.25em;
+}
+
+.actions-menu [role="menuitemcheckbox"][aria-checked="true"]::before {
+  content: "✓";
 }
 
 .actions-menu [role="menuitem"].danger {

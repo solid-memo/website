@@ -12,7 +12,8 @@ import { describeChanges, historyKept } from "@solid-memo/ui/LibraryUpgradeNotic
 import { LoadingDots } from "@solid-memo/ui/Loading";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
 import { ReadOnlyNotice } from "./ReadOnly";
-import { allSelected, NO_SELECTION, toggled, type Selection } from "./shell/tableModel";
+import { DataTable } from "./shell/DataTable";
+import { NO_SELECTION, type Selection } from "./shell/tableModel";
 
 /** What upgrading a copy would do: its plan, null when there is nothing to offer, or why it is not known yet. */
 export type PlanState = LibraryUpgradePlan | null | "loading" | "failed";
@@ -49,8 +50,9 @@ const CHANGES = ["add", "change", "retire", "restore", "remove", "kept"] as cons
  * The instance's decks copied from a library release, as a table: the
  * release each was copied from, the library's current one and, when it
  * is newer, what upgrading would change (planLibraryUpgrade): a sentence,
- * as Solid Memo's offer says it, and a list of the cards each change
- * touches. The copies that can be upgraded are selected by their
+ * as Solid Memo's offer says it. The copy at the table's cursor
+ * (a DataTable) is shown beside it (`onCursor`, `current`), with the
+ * cards each change touches (LibraryPlanScreen). The copies that can be upgraded are selected by their
  * checkbox, or all at once, and upgraded in turn (`onUpgrade`): the deck
  * being upgraded, with its steps, then how each upgrade ended. Only a
  * deck that may be changed (`selectable`) can be: none while the
@@ -71,6 +73,8 @@ export function LibraryCopiesScreen({
   selectable,
   healthHref,
   onUpgrade,
+  current,
+  onCursor,
 }: {
   instance: Instance;
   rows: readonly CopyRow[];
@@ -89,9 +93,12 @@ export function LibraryCopiesScreen({
   /** The instance's health, where data set aside is repaired. */
   healthHref: string;
   onUpgrade: (chosen: readonly { deck: Deck; plan: LibraryUpgradePlan }[]) => void;
+  /** The copy shown beside the table, by its deck's URL. */
+  current?: string;
+  /** Show the copy at the table's cursor beside it (LibraryPlanScreen). */
+  onCursor: (deck: Deck) => void;
 }) {
-  const i18n = useI18n();
-  const { t, tx, readerText } = i18n;
+  const { t, tx, readerText } = useI18n();
   const [chosen, setChosen] = useState<Selection>(NO_SELECTION);
 
   const heading = <h2>{t("studio.library.heading", { instance: instance.name })}</h2>;
@@ -104,15 +111,12 @@ export function LibraryCopiesScreen({
     );
   }
 
-  const planOf = (row: CopyRow) => (row.copy.newer === true && typeof row.plan === "object" && row.plan !== null ? row.plan : null);
   const upgradable = rows.flatMap((row) => {
     const plan = planOf(row);
     return plan === null || !selectable(row.copy.deck) ? [] : [{ deck: row.copy.deck, plan }];
   });
   const selected = upgradable.filter((each) => chosen.has(each.deck.url));
   const busy = running !== null;
-  const toggle = (urls: readonly string[], on: boolean) =>
-    setChosen((all) => toggled(all, urls, on));
 
   return (
     <section>
@@ -158,89 +162,101 @@ export function LibraryCopiesScreen({
           </ul>
         )}
       </div>
-      <div class="studio-table">
-        <table class="studio-list">
-          <caption>{t("studio.library.caption", { instance: instance.name })}</caption>
-          <thead>
-            <tr>
-              <th scope="col">
-                <span class="visually-hidden">{t("studio.decks.select")}</span>
-                {upgradable.length > 0 && (
-                  <input
-                    type="checkbox"
-                    aria-label={t("studio.library.selectAll")}
-                    checked={allSelected(chosen, upgradable.map((each) => each.deck.url))}
-                    disabled={busy}
-                    onChange={(event) => toggle(upgradable.map((each) => each.deck.url), event.currentTarget.checked)}
-                  />
-                )}
-              </th>
-              <th scope="col">{t("studio.decks.title")}</th>
-              <th scope="col">{t("studio.library.copied")}</th>
-              <th scope="col">{t("studio.library.current")}</th>
-              <th scope="col">{t("studio.library.update")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => {
-              const { deck, series, version } = row.copy;
-              const plan = planOf(row);
-              return (
-                <tr key={deck.url}>
-                  <td>
-                    {plan !== null && selectable(deck) && (
-                      <input
-                        type="checkbox"
-                        aria-label={t("studio.decks.selectDeck", { deck: readerText(deck.title) })}
-                        checked={chosen.has(deck.url)}
-                        disabled={busy}
-                        onChange={(event) => toggle([deck.url], event.currentTarget.checked)}
-                      />
-                    )}
-                  </td>
-                  <th scope="row">
-                    <a href={deckHref(deck)}>
-                      <ReaderText text={deck.title} />
-                    </a>
-                    {row.copy.fromLink === true && (
-                      <span class="studio-badge">{t("studio.decks.badge.from", { host: releaseHost(deck.sourceUrl!) })}</span>
-                    )}
-                  </th>
-                  <td>{version === null ? <span class="hint">{t("studio.library.unknown")}</span> : t("studio.library.release", { version })}</td>
-                  <td>
-                    {series === null ? (
-                      <span class="hint">{t("studio.library.gone")}</span>
-                    ) : (
-                      t("studio.library.release", { version: series.version })
-                    )}
-                  </td>
-                  <td>
-                    {series === null ? null : row.copy.newer === "unknown" ? (
-                      <span class="hint">{t("studio.library.newerUnknown")}</span>
-                    ) : !row.copy.newer ? (
-                      t("studio.library.upToDate")
-                    ) : row.plan === "loading" ? (
-                      <>
-                        <LoadingDots />
-                        <span class="visually-hidden">{t("studio.library.planning")}</span>
-                      </>
-                    ) : row.plan === "failed" ? (
-                      t("studio.library.planFailed", { version: series.version })
-                    ) : plan === null ? (
-                      t("studio.library.nothingToUpdate", { version: series.version })
-                    ) : (
-                      <>
-                        {t("studio.library.changes", { version: plan.toVersion, changes: describeChanges(plan, i18n) })}
-                        <PlanDetails plan={plan} />
-                      </>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        caption={t("studio.library.caption", { instance: instance.name })}
+        rows={rows}
+        keyOf={(row) => row.copy.deck.url}
+        name={{
+          key: "title",
+          label: t("studio.decks.title"),
+          cell: ({ copy }) => (
+            <>
+              <a href={deckHref(copy.deck)}>
+                <ReaderText text={copy.deck.title} />
+              </a>
+              {copy.fromLink === true && <span class="studio-badge">{t("studio.decks.badge.from", { host: releaseHost(copy.deck.sourceUrl!) })}</span>}
+            </>
+          ),
+        }}
+        columns={[
+          {
+            key: "copied",
+            label: t("studio.library.copied"),
+            cell: ({ copy }) =>
+              copy.version === null ? <span class="hint">{t("studio.library.unknown")}</span> : t("studio.library.release", { version: copy.version }),
+          },
+          {
+            key: "current",
+            label: t("studio.library.current"),
+            cell: ({ copy }) =>
+              copy.series === null ? <span class="hint">{t("studio.library.gone")}</span> : t("studio.library.release", { version: copy.series.version }),
+          },
+          { key: "update", label: t("studio.library.update"), cell: (row) => <UpdateText row={row} /> },
+        ]}
+        select={{
+          label: t("studio.decks.select"),
+          allLabel: t("studio.library.selectAll"),
+          rowLabel: ({ copy }) => t("studio.decks.selectDeck", { deck: readerText(copy.deck.title) }),
+          offered: (row) => planOf(row) !== null && selectable(row.copy.deck),
+          disabled: busy,
+          chosen,
+          onChoose: setChosen,
+        }}
+        current={current}
+        onCursor={(row) => onCursor(row.copy.deck)}
+      />
+    </section>
+  );
+}
+
+/** What updating a copy would do, in a sentence; nothing for a copy whose release is gone. */
+function UpdateText({ row }: { row: CopyRow }) {
+  const i18n = useI18n();
+  const { t } = i18n;
+  const { series, newer } = row.copy;
+  const plan = planOf(row);
+  if (series === null) return null;
+  if (newer === "unknown") return <span class="hint">{t("studio.library.newerUnknown")}</span>;
+  if (!newer) return <>{t("studio.library.upToDate")}</>;
+  if (row.plan === "loading") {
+    return (
+      <>
+        <LoadingDots />
+        <span class="visually-hidden">{t("studio.library.planning")}</span>
+      </>
+    );
+  }
+  if (row.plan === "failed") return <>{t("studio.library.planFailed", { version: series.version })}</>;
+  if (plan === null) return <>{t("studio.library.nothingToUpdate", { version: series.version })}</>;
+  return <>{t("studio.library.changes", { version: plan.toVersion, changes: describeChanges(plan, i18n) })}</>;
+}
+
+/** What upgrading a copy would do, once planned: null when there is nothing to offer, or it is not known yet. */
+function planOf(row: CopyRow): LibraryUpgradePlan | null {
+  return row.copy.newer === true && typeof row.plan === "object" && row.plan !== null ? row.plan : null;
+}
+
+/**
+ * A library copy beside the table of them (docs/studio.md, Library
+ * copies): the copy at the table's cursor, its release and the
+ * library's, what upgrading it would change and, once planned, all it
+ * would do: what it keeps, the releases' notes, and the cards each
+ * change touches. Without one (`row` null: none at the cursor yet, or
+ * one no longer there), how to show one.
+ */
+export function LibraryPlanScreen({ row }: { row: CopyRow | null }) {
+  const { tx } = useI18n();
+  if (row === null) return <p class="hint">{tx("studio.library.peek", { j: <kbd>j</kbd>, k: <kbd>k</kbd> })}</p>;
+  const plan = planOf(row);
+  return (
+    <section class="studio-peek" aria-labelledby="studio-plan-heading">
+      <h3 id="studio-plan-heading">
+        <ReaderText text={row.copy.deck.title} />
+      </h3>
+      <p>
+        <UpdateText row={row} />
+      </p>
+      {plan !== null && <PlanDetails plan={plan} />}
     </section>
   );
 }
@@ -249,8 +265,7 @@ export function LibraryCopiesScreen({
 function PlanDetails({ plan }: { plan: LibraryUpgradePlan }) {
   const { t, readerText } = useI18n();
   return (
-    <details class="studio-diff">
-      <summary>{t("studio.library.details")}</summary>
+    <div class="studio-diff">
       <p>
         {historyKept(plan, t)}
         {plan.kept.length > 0 && ` ${t("libraryUpgradeNotice.kept", { count: plan.kept.length })}`}
@@ -277,7 +292,7 @@ function PlanDetails({ plan }: { plan: LibraryUpgradePlan }) {
           )
         );
       })}
-    </details>
+    </div>
   );
 }
 

@@ -70,7 +70,7 @@ export function ActionsMenu({
   open: boolean;
   onOpen: () => void;
   onClose: () => void;
-  /** MenuItem, MenuLink, MenuGroup and MenuSeparator. */
+  /** MenuItem, MenuCheckbox, MenuLink, MenuGroup and MenuSeparator. */
   children: ComponentChildren;
 }) {
   const buttonId = useId();
@@ -82,7 +82,7 @@ export function ActionsMenu({
   const close = useRef(onClose);
   close.current = onClose;
 
-  const items = () => [...menuRef.current!.querySelectorAll<HTMLElement>('[role="menuitem"]')];
+  const items = () => [...menuRef.current!.querySelectorAll<HTMLElement>('[role="menuitem"], [role="menuitemcheckbox"]')];
 
   useLayoutEffect(() => {
     if (!open) return;
@@ -244,6 +244,19 @@ export function MenuItem({
         if (!disabled) choose(onSelect);
       }}
     >
+      {children}
+    </button>
+  );
+}
+
+/**
+ * An item of an ActionsMenu that is on or off (a column shown, say):
+ * choosing it turns it the other way (`onChange`), and the menu stays
+ * open, for the next.
+ */
+export function MenuCheckbox({ checked, onChange, children }: { checked: boolean; onChange: (checked: boolean) => void; children: ComponentChildren }) {
+  return (
+    <button type="button" role="menuitemcheckbox" tabIndex={-1} aria-checked={checked} onClick={() => onChange(!checked)}>
       {children}
     </button>
   );

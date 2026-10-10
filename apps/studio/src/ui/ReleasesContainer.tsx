@@ -1,31 +1,37 @@
 import { useQuery } from "@tanstack/react-query";
 import type { CreatedDraft } from "@solid-memo/application/releaseDrafts";
+import type { ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Instance } from "@solid-memo/domain/instance";
 import { useDataCheck } from "@solid-memo/ui/dataCheck";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
+import { draftsKey } from "./DraftsContainer";
 import { publishedKey, useMakePublic, useStartNextVersion } from "./releaseActions";
 import { ReleasesScreen } from "./ReleasesScreen";
 
 /**
  * The releases screen's data: the releases the instance published, each
- * with whether it is public (listPublishedReleases); making one public
- * again; and starting the next version of one, which then opens
- * (`onStarted`).
+ * with whether it is public (listPublishedReleases), and the drafts each
+ * was published from (the drafts screen's query: a draft says what it
+ * was released as), each a link (`draftHref`); making one public again;
+ * and starting the next version of one, which then opens (`onStarted`).
  */
 export function ReleasesContainer({
   useCases,
   instance,
   healthHref,
   draftsHref,
+  draftHref,
   onStarted,
 }: {
   useCases: UseCases;
   instance: Instance;
   healthHref: string;
   draftsHref: string;
+  /** A draft's overview. */
+  draftHref: (draft: ReleaseDraftSummary) => string;
   onStarted: (created: CreatedDraft) => void;
 }) {
   const { t, errorText } = useI18n();
@@ -33,6 +39,11 @@ export function ReleasesContainer({
   const releasesQuery = useQuery({
     queryKey: publishedKey(instance.url),
     queryFn: () => useCases.listPublishedReleases(instance.url),
+  });
+  // Drafts that cannot be read say nothing of their release: they are no source of one.
+  const draftsQuery = useQuery({
+    queryKey: draftsKey(instance.url),
+    queryFn: () => useCases.listReleaseDrafts(instance.url),
   });
   const publicMutation = useMakePublic(useCases, instance.url);
   const nextMutation = useStartNextVersion(useCases, instance.url, onStarted);
@@ -46,6 +57,10 @@ export function ReleasesContainer({
       hold={check.readOnly() ?? (check.arrangementSetAside ? "setAside" : null)}
       healthHref={healthHref}
       draftsHref={draftsHref}
+      draftOf={(url) => {
+        const draft = draftsQuery.data?.find((each) => each.releasedAs === url);
+        return draft === undefined ? null : { draft, href: draftHref(draft) };
+      }}
       makingPublic={publicMutation.isPending ? publicMutation.variables! : null}
       publicError={errorText(publicMutation.error)}
       onMakePublic={(url) => publicMutation.mutate(url)}

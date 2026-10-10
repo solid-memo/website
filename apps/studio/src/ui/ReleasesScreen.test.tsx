@@ -1,10 +1,21 @@
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/preact";
+import { fireEvent, render, screen, within } from "@testing-library/preact";
+import type { ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout";
 import { ReleasesScreen } from "./ReleasesScreen";
 import { instanceA } from "../test/fixtures";
 
 const SOLID = `${instanceA.url}releases/solid/v2.ttl`;
 const ELSEWHERE = "https://pod.example/public/course.ttl";
+const source: ReleaseDraftSummary = {
+  url: `${instanceA.url}drafts/solid/v2/release.ttl`,
+  instanceUrl: instanceA.url,
+  name: "solid",
+  version: 2,
+  readable: true,
+  title: { en: "Solid basics" },
+  course: true,
+  releasedAs: SOLID,
+};
 
 type Props = Parameters<typeof ReleasesScreen>[0];
 
@@ -18,6 +29,7 @@ function renderScreen(overrides: Partial<Props> = {}) {
     hold: null,
     healthHref: "#/health",
     draftsHref: "#/drafts",
+    draftOf: (url) => (url === SOLID ? { draft: source, href: "#/draft/solid" } : null),
     makingPublic: null,
     publicError: null,
     onMakePublic: vi.fn(),
@@ -44,6 +56,44 @@ describe("ReleasesScreen", () => {
     expect(onStartNext).toHaveBeenCalledWith(SOLID);
     expect(screen.getByRole("button", { name: `Copy the link ${SOLID}` })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Drafts of releases" })).toHaveAttribute("href", "#/drafts");
+  });
+
+  it("links each release to the draft it was published from, while the instance has it", () => {
+    renderScreen();
+    expect(screen.getByRole("link", { name: "Solid basics, version 2" })).toHaveAttribute("href", "#/draft/solid");
+    expect(screen.getByText("Not among this instance's drafts")).toBeInTheDocument();
+    // A draft of no title, by its name.
+    renderScreen({ draftOf: () => ({ draft: { ...source, title: {} }, href: "#/draft/solid" }) });
+    expect(screen.getAllByRole("link", { name: "solid, version 2" })).toHaveLength(4);
+  });
+
+  it("sorts by a column's header, then the other way, then as listed, but by its actions", () => {
+    const third = `${instanceA.url}releases/apps/v1.ttl`;
+    renderScreen({ releases: [{ url: SOLID, public: true }, { url: ELSEWHERE, public: false }, { url: third, public: true }] });
+    const table = within(screen.getByRole("table", { name: "Releases published from Deck set A" }));
+    const order = () => table.getAllByRole("rowheader").map((cell) => cell.querySelector("a")!.textContent);
+    expect(table.queryByRole("button", { name: "Actions" })).toBeNull();
+    fireEvent.click(table.getByRole("button", { name: "Release" }));
+    expect(order()).toEqual(["apps, version 1", ELSEWHERE, "solid, version 2"]);
+    fireEvent.click(table.getByRole("button", { name: "Readable by" }));
+    expect(order()).toEqual(["solid, version 2", "apps, version 1", ELSEWHERE]);
+    fireEvent.click(table.getByRole("button", { name: "Draft" }));
+    expect(order()).toEqual(["solid, version 2", ELSEWHERE, "apps, version 1"]);
+    fireEvent.click(table.getByRole("button", { name: "Draft" }));
+    fireEvent.click(table.getByRole("button", { name: "Draft" }));
+    expect(order()).toEqual(["solid, version 2", ELSEWHERE, "apps, version 1"]);
+  });
+
+  it("filters the releases by name or address, case and accents aside, and says when none matches", () => {
+    renderScreen();
+    const filter = screen.getByRole("searchbox", { name: "Filter by name or address" });
+    fireEvent.input(filter, { target: { value: "SOLÍD" } });
+    expect(screen.getAllByRole("rowheader")).toHaveLength(1);
+    fireEvent.input(filter, { target: { value: "public/" } });
+    expect(screen.getByRole("rowheader")).toHaveTextContent(ELSEWHERE);
+    fireEvent.input(filter, { target: { value: "rivers " } });
+    expect(screen.queryByRole("table")).toBeNull();
+    expect(screen.getByText("No release matches “rivers”.")).toBeInTheDocument();
   });
 
   it("says when there are none", () => {

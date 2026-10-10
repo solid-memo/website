@@ -9,7 +9,9 @@ export const DENSITIES: readonly Density[] = ["compact", "comfortable"];
  * How the Studio is laid out on this device: its density, whether the
  * sidebar and the aside are shown on a wide screen, and the aside's
  * width, as itself and as a detail; whether the dock is shown, and its
- * height (in CSS pixels).
+ * height (in CSS pixels); and the columns each table hides, by the
+ * table's name (DataTable's `columnsOf`), every column shown when a
+ * table has none.
  */
 export interface StudioPrefs {
   density: Density;
@@ -19,6 +21,7 @@ export interface StudioPrefs {
   detailWidth: number;
   dock: boolean;
   dockHeight: number;
+  hiddenColumns: Readonly<Record<string, readonly string[]>>;
 }
 
 export const DEFAULT_PREFS: StudioPrefs = {
@@ -29,6 +32,7 @@ export const DEFAULT_PREFS: StudioPrefs = {
   detailWidth: DETAIL_WIDTH.initial,
   dock: false,
   dockHeight: DOCK_HEIGHT.initial,
+  hiddenColumns: {},
 };
 
 /** Versioned: a later shape of the preferences gets a key of its own, and starts from the defaults. */
@@ -47,7 +51,7 @@ export function studioPrefs(storage: () => Storage = () => globalThis.localStora
   } catch {
     return DEFAULT_PREFS;
   }
-  const { density, sidebar, aside, asideWidth, detailWidth, dock, dockHeight } =
+  const { density, sidebar, aside, asideWidth, detailWidth, dock, dockHeight, hiddenColumns } =
     typeof stored === "object" && stored !== null ? (stored as Record<string, unknown>) : {};
   const shown = (value: unknown, fallback: boolean) => (typeof value === "boolean" ? value : fallback);
   // A size out of its bounds is brought within them: the bounds may have changed since.
@@ -60,7 +64,18 @@ export function studioPrefs(storage: () => Storage = () => globalThis.localStora
     detailWidth: sized(detailWidth, DETAIL_WIDTH),
     dock: shown(dock, DEFAULT_PREFS.dock),
     dockHeight: sized(dockHeight, DOCK_HEIGHT),
+    hiddenColumns: columnsHidden(hiddenColumns),
   };
+}
+
+/** The columns each table hides, as stored: only lists of names, by the tables' names; none of anything else. */
+function columnsHidden(value: unknown): Record<string, string[]> {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return {};
+  return Object.fromEntries(
+    Object.entries(value).flatMap(([table, keys]) =>
+      Array.isArray(keys) ? [[table, keys.filter((key): key is string => typeof key === "string")]] : [],
+    ),
+  );
 }
 
 /** Notes the Studio's layout on this device. */

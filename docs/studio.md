@@ -112,7 +112,10 @@ It takes the whole window, and the window does not scroll:
 - **The aside**, right of the main content, a complementary region
   named for what it shows: on a course draft's screens, its
   [outline](#the-outline), but on the overview, which shows the outline
-  itself to arrange. Its button at the header's end, its own **Hide**,
+  itself to arrange; on Home, the deck at its table's cursor (named
+  Deck, [below](#home)); on the library copies, what upgrading the copy
+  at their table's cursor would do (named Upgrade,
+  [below](#library-copies)). Its button at the header's end, its own **Hide**,
   or Ctrl+\ hides it, and the main content takes its room; its
   splitter, on its left edge, sets its width (with the pointer, or the
   arrow keys, Home and End once it has the focus). The device remembers
@@ -176,7 +179,7 @@ is kept on the device, never in the pod
 compact), and changes no history entry. So are whether the sidebar,
 the aside and the dock are shown, and the aside's width (the outline's,
 and a card's beside its deck's cards) and the dock's height (each kept
-within its bounds).
+within its bounds), and the columns each table hides.
 
 **Keys.** The Studio has one listener of keys, in its shell
 ([`shell/useShortcuts.ts`](../apps/studio/src/ui/shell/useShortcuts.ts)),
@@ -187,18 +190,18 @@ and its keymap is data
 | --- | --- | --- |
 | Ctrl+K, Cmd+K | anywhere, a field too | search, go to or run a command, in the palette ([below](#quick-open-and-commands)); **Search or run…** in the header does too |
 | `?` | anywhere | list every key, in a dialog; **? Keys** in the status bar does too |
-| `/` | anywhere | go to the screen's search or filter: Home's, the workbench's, a draft's cards' |
+| `/` | anywhere | go to the screen's search or filter: Home's, the workbench's, a draft's cards', the releases' |
 | F6, Shift+F6 | anywhere, a field too | go to the next region, or the one before: the header, the sidebar, the main content, the aside, the dock (each while it is shown), the status bar |
 | `g d`, `g g`, `g r`, `g p`, `g h`, `g l`, `g t` | with an instance open | go to its decks (Home), groups, drafts, releases, health, library copies, or import and export |
 | `g i` | anywhere | go to the instances |
 | Ctrl+B | with an instance open | show or hide the sidebar; on a narrow screen, open or close the drawer |
-| Ctrl+\ | a course draft's screens but its overview; a card beside its deck's cards | show or hide the aside, the outline; on a screen not wide, open or close its drawer; close the card, going to the deck's cards |
+| Ctrl+\ | Home, the library copies, a course draft's screens but its overview; a card beside its deck's cards | show or hide the aside (the deck, the copy's upgrade, the outline); on a screen not wide, open or close its drawer; close the card, going to the deck's cards |
 | Ctrl+J | with an instance open | show or hide the dock |
 | F8, Shift+F8 | a deck's or a draft's screens, a field too | go to the field of the next problem in the dock's list, or the one before, round from either end ([below](#the-dock)) |
 | `]`, `[` | a deck's or a draft's screens | go to the next tab, or the one before, round from either end |
 | `1` … `9` | a deck's or a draft's screens, but the trial | go to the tab of that number; in the trial they are the learner's, a grade or an option |
-| `j`, `k`, `x`, Enter | the card workbench, a card beside it too | the next card, the one before (beside a card, show it), select it, open it ([below](#card-workbench)) |
-| Shift+J, Shift+K, Escape | the card workbench, a card beside it too | select the card and the next, or the one before; clear the selection |
+| `j`, `k`, `x`, Enter | a table: the card workbench (a card beside it too), Home, the library copies, a draft's cards, the releases | the next row, the one before (beside a card, show it; on Home and the library copies, show it in the aside), select it, open it ([below](#card-workbench)) |
+| Shift+J, Shift+K, Escape | a table whose rows are selected | select the row and the next, or the one before; clear the selection |
 
 A pair such as `g d` is pressed one key after the other, the second
 within 1.5 seconds; a key held down counts once, so a held `g` is not
@@ -336,7 +339,7 @@ others.
 | Hash | Screen |
 | --- | --- |
 | `#/studio/instances` | the instance picker. A new instance is made in Solid Memo, so its link goes to Solid Memo's storage picker. |
-| `#/studio?instance=…[&q=…&sort=…&order=desc]` | Home: every deck of the instance as a table ([below](#home)). `q` filters it, `sort` names the column it is sorted by, and `order=desc` sorts it the other way. |
+| `#/studio?instance=…[&q=…&sort=…&order=desc&show=…&deck=…]` | Home: every deck of the instance as a table ([below](#home)). `q` filters it, `sort` names the column it is sorted by, and `order=desc` sorts it the other way. `show` is the view its tabs show: `due`, `courses`, `copies` or `attention`; every deck without it. `deck` is the deck beside the table, at its cursor. |
 | `#/studio/groups?instance=…` | Groups: the instance's decks arranged into groups, as Solid Memo's deck list arranges them. |
 | `#/studio/cards?deck=…[&q&field&lang&state&has&sort&order&page&size]` | the card workbench: a deck's cards as a table ([below](#card-workbench)). The deck names the instance: its catalog's folder. |
 | `#/studio/card?deck=…&card=…[&tab=distractors\|schedule\|history&field=…][&q&in&lang&state&has&sort&order&page&size]` | the card inspector: one card, its content, with `tab=distractors` its wrong options, with `tab=schedule` its review state, or with `tab=history` its answers ([below](#card-inspector)). The content is the default tab, and is left out of the URL. `field` opens it at one field: a text of the content (`front`, `backNote`…), or a wrong option by its id. The rest is the query of the workbench beside the card, as the workbench's own, but `in` for its `field` (where to look); without it, the deck's cards as listed. |
@@ -351,7 +354,7 @@ others.
 | `#/studio/chapter?draft=…&chapter=…[&field=…]` | a chapter of a course draft, by its id ([below](#a-chapter)). |
 | `#/studio/step?draft=…&step=…[&field=…]` | a step of a course draft, by its id ([below](#a-step)). |
 | `#/studio/question?draft=…&card=…[&field=…]` | a card of a draft, by its id: a course's question, or a deck's card ([below](#a-question)). |
-| `#/studio/draft-cards?draft=…[&filter=…&lang=…&page=…]` | a draft's cards as a table ([below](#a-drafts-cards)): `filter` is `unasked`, `askedTwice`, `fewDistractors` or `retired`, `lang` a language. |
+| `#/studio/draft-cards?draft=…[&filter=…&lang=…&sort=…&order=desc&page=…]` | a draft's cards as a table ([below](#a-drafts-cards)): `filter` is `unasked`, `askedTwice`, `fewDistractors` or `retired`, `lang` a language, `sort` the column it is sorted by (`front`, `back`, `place`, `distractors` or `id`; by id without it), and `order=desc` the other way. |
 | `#/studio/check?draft=…[&policy=library]` | a draft's release check ([below](#the-release-check)): for a release in a pod, or with `policy=library` for the Solid Memo library. |
 | `#/studio/preview?draft=…` | a draft as the library will list it ([below](#the-listing-preview)). |
 | `#/studio/trial?draft=…[&chapter=…&part=review]` | a draft played in a sandbox ([below](#the-trial)): a course's page, with `chapter` (an id) that chapter's steps, and with `part=review` its final review; a deck's study. |
@@ -375,12 +378,13 @@ release screen's `versionNotes`, `languages`, `license`, `publisher`,
 not have is left out.
 Like Solid Memo's fallbacks, these replace the history entry.
 
-Changing Home's filter or sort, the workbench's query, the
-inspector's tab, the decks ticked to export, or the view of a draft's
-cards, replaces the history entry: it is the same screen,
-looked at another way, so Back leaves it. So does going from card to
-card beside the deck's cards (`j` and `k`, Previous and Next);
-opening a card from the list is a Back stop.
+Changing Home's filter, sort or view, the deck beside its table, the
+workbench's query, the inspector's tab, the decks ticked to export, or
+the view of a draft's cards, replaces the history entry: it is the
+same screen, looked at another way, so Back leaves it. So does going
+from card to card beside the deck's cards (`j` and `k`, Previous and
+Next); opening a card from the list is a Back stop, as is opening a
+deck from Home or a card from a draft's cards with Enter.
 
 Solid Memo links to Home as `#/studio?instance=…` ("Open in Studio",
 in its instance bar, each deck's actions menu and the deck page;
@@ -463,6 +467,33 @@ sorted column says so (`aria-sort`). A figure not known yet sorts last,
 either way. The filter keeps the decks whose name, in any language, or
 whose groups' names hold its text, case and accents aside. The domain
 does both ([deckTable.ts](../packages/domain/src/deckTable.ts)).
+
+**Views.** Tabs above the table (a group named Views, the one shown
+pressed) each keep the decks of one kind, and count them: All, Due
+today (cards due today, sorted the most first), Courses (copies of a
+course), Library copies (copies of a release, from the library or a
+link) and Needs attention (invalid data, or cards that could not be
+read). Each is a preset of Home's query
+([`shell/views.ts`](../apps/studio/src/ui/shell/views.ts)): it sets
+the view (`show`) and the sort, and keeps the filter's text. A deck's
+problems ([health](#health)) and its newer release are found only as
+its row comes into view, so no view keeps decks by them.
+
+The table is a [`DataTable`](#card-workbench): **j** and **k** move its
+cursor, **x** selects a deck, and **Enter** opens the deck's about
+screen. Its **Columns** menu shows or hides each column but the
+deck's name; the device keeps which are hidden, as it keeps the
+layout, and every column is shown until hidden there. The workbench
+and a draft's cards have the menu too, each table its own.
+
+**The deck beside the table.** The deck at the table's cursor is in
+the aside, named Deck ([`DeckPeekContainer`](../apps/studio/src/ui/DeckPeekContainer.tsx)):
+its groups, its cards, today's due and new cards, when it last
+changed, its health, and links to its tabs (Cards, Schedule, Health,
+About, Export). It reads the table's own queries, so it reads nothing
+the table has not. The URL names it (`deck`), each move of the cursor
+replacing the history entry; a deck the instance does not have shows
+none. Before the cursor has moved, the aside says how to show one.
 
 Decks are selected by their checkbox, or all those shown at once. The
 selected decks the table shows can be (a selected deck the filter hides
@@ -550,8 +581,13 @@ focus, and to whatever took them first; they are the screen's own keys
 of the Studio's ([Keys](#layout); `useRowKeys`). What is selected,
 how the table is sorted, where the cursor goes and which columns show
 is worked out apart from the page
-([`shell/tableModel.ts`](../apps/studio/src/ui/shell/tableModel.ts));
-Home and the library copies select with it too.
+([`shell/tableModel.ts`](../apps/studio/src/ui/shell/tableModel.ts)).
+Home, the library copies, a draft's cards, the releases and a card's
+answers are DataTables too, each with the keys and the marks it has
+use for. A row that cannot be selected now (a deck set aside, a copy
+with nothing to upgrade) has its checkbox disabled, or none, and a
+range or a page's checkbox passes over it. Its **Columns** menu shows
+or hides each column but the first ([Home](#home)).
 
 The selected cards can be edited at once ([below](#bulk-edits)).
 
@@ -686,7 +722,10 @@ Its four tabs are links, the one shown marked
   ([`CardHistoryScreen`](../apps/studio/src/ui/CardHistoryScreen.tsx)):
   when each was given, which way, its grade, how (recalled, or chosen
   among options in a course) and, for a wrong choice, the wrong option
-  chosen. One no longer on the card is named by its id. A line says
+  chosen. One no longer on the card is named by its id. A column's
+  name sorts the answers by it (but the wrong option's), then the
+  other way, then newest first again; beside the deck's cards, **j**
+  and **k** stay the cards' table's. A line says
   how many answers there are, and how many forgot the card. The use
   case `cardAnswers` reads them from the
   [answer log](data-model.md#the-answer-log) (`loadAnswerLog`). Only the
@@ -1040,11 +1079,15 @@ For each copy with a newer release, the screen asks what upgrading
 would do (`planLibraryUpgrade`, the plan Solid Memo's deck page offers;
 [migrations.md](migrations.md#catching-up-with-the-library)). It gives
 the copy as the copies were found, its series with it, so the index is
-not read again for each copy, nor a link's catalogue. It says so in a sentence, as Solid Memo does, and
-"What changes" folds out the
-rest: what history is kept, the new releases' notes, and the cards
-added, changed, retired, brought back, removed, and left as the user
-has them. A newer release with nothing for the copy says so.
+not read again for each copy, nor a link's catalogue. It says so in a sentence, as Solid Memo does. A newer release with nothing for the copy says so.
+
+The table is a [`DataTable`](#card-workbench): **j** and **k** move its
+cursor, and the copy at the cursor is shown in the aside (named
+Upgrade, [Layout](#layout)), with the rest of its plan: what history
+is kept, the new releases' notes, and the cards added, changed,
+retired, brought back, removed, and left as the user has them. Which
+copy that is lives in the page, not in the URL; on another screen and
+back, none is shown until the cursor moves.
 
 The copies that can be upgraded are selected by their checkbox, or all
 at once; a copy set aside cannot be, nor any until the data check is
@@ -1392,7 +1435,13 @@ back, where it is asked, its wrong options in use, and its id. The URL
 holds the view ([above](#routes)). The filters keep the cards asked
 nowhere (in a course), asked from two places, with fewer than two wrong
 options in use, or retired; the language keeps those with text in it on
-their front or back. A page holds 50. A new card is added under the
+their front or back. A column's name sorts by it, then the other way,
+then by id again, from the first page. A page holds 50. The table is a
+[`DataTable`](#card-workbench): cards are selected by their checkbox,
+or a page's at once, and **Retire 2 cards** or **Restore 1 card**
+retires or restores those selected the filter keeps, in one edit;
+nothing is selected while the draft may not be changed. **Enter**
+opens a card's editor, as its link does. A new card is added under the
 table, asked nowhere yet.
 
 ### Ids
@@ -1846,8 +1895,13 @@ The releases screen
 its catalogue links them. Each has its address, named by it ("capitals,
 version 2") when it is named as releases are, a link to copy, who can
 read it (everyone, or only its owner, with **Make it public**), and
-**Start the next version**, which makes a draft of it and opens it. It
-changes no release. The sidebar and the drafts screen link to it
+**Start the next version**, which makes a draft of it and opens it.
+Each links the draft it was published from (the draft says what it was
+released as), while the instance has it. It changes no release. The
+table is a [`DataTable`](#card-workbench): a column's name sorts it,
+then the other way, then as the catalogue lists them, and a filter
+keeps the releases whose name or address holds its text, case and
+accents aside. The sidebar and the drafts screen link to it
 ("Published releases" there). A learner adds a release in Solid Memo by
 the link copied here ([deck-library.md](deck-library.md#from-a-link)).
 

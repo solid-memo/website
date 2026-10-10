@@ -36,8 +36,8 @@ routes: following one pushes a history entry, as any link does, and
 none adds a route or a parameter of its own. The chrome around a
 screen (which section, deck or draft the sidebar marks, which tabs
 there are and which is current, whether the aside shows a course's
-outline or a card) is worked out from the route alone, and hiding the sidebar,
-the aside or the dock changes no URL ([studio.md](studio.md#layout)).
+outline, a deck, a library copy's upgrade or a card) is worked out from the route alone, and hiding the sidebar,
+the aside or the dock, or a table's columns, changes no URL ([studio.md](studio.md#layout)).
 F8 goes to a problem's field as a link does.
 
 A card's route, `#/studio/card`, also carries the card workbench's
@@ -49,6 +49,14 @@ without them lists the deck's cards as the workbench does by default.
 Opening a card from the list pushes a history entry; going from card
 to card beside it (`j` and `k`, Previous and Next) replaces it
 ([studio.md](studio.md#card-inspector)).
+
+Home's route, `#/studio`, carries the view its tabs show (`show`:
+`due`, `courses`, `copies` or `attention`; every deck without it) and
+the deck beside its table (`deck`, the deck at the table's cursor). A
+draft's cards, `#/studio/draft-cards`, carry how they are sorted
+(`sort` and `order=desc`). Each is optional, and each change of them
+replaces the history entry: it is the same screen, looked at another
+way ([studio.md](studio.md#home)).
 
 ## Hash routing, not pathname routing
 

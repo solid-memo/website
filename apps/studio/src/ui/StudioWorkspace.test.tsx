@@ -58,6 +58,8 @@ describe("StudioWorkspace", () => {
     // The layout the device remembers: none, the dock hidden.
     localStorage.clear();
   });
+  // A screen widened by a test.
+  afterEach(() => vi.restoreAllMocks());
 
   it("opens the only instance's decks, its trail and title, under the banner and the notices", async () => {
     const useCases = makeUseCasesFake({
@@ -126,6 +128,49 @@ describe("StudioWorkspace", () => {
     // Home is the decks' section; a deck's screens have tabs, Home none.
     expect(sidebar().getByRole("link", { name: "Decks" })).toHaveAttribute("aria-current", "page");
     expect(screen.queryByRole("navigation", { name: "Deck" })).toBeNull();
+  });
+
+  it("shows Home's views from their tabs, replacing the entry, the filter's text kept", async () => {
+    window.history.replaceState(null, "", studioRouteToHash({ screen: "home", instanceUrl: instanceA.url, view: { filter: "k" } }));
+    const length = window.history.length;
+    renderWorkspace(makeUseCasesFake({ listInstances: vi.fn(async () => [instanceA]), listDecks: vi.fn(async () => [kanji, verbs]) }));
+    const views = within(await screen.findByRole("group", { name: "Views" }));
+    fireEvent.click(views.getByRole("button", { name: /^Due today/ }));
+    expect(parseStudioHash(window.location.hash)).toEqual({
+      screen: "home",
+      instanceUrl: instanceA.url,
+      view: { filter: "k", sort: { column: "due", descending: true } },
+      show: "due",
+    });
+    fireEvent.click(views.getByRole("button", { name: /^All/ }));
+    expect(parseStudioHash(window.location.hash)).toEqual({ screen: "home", instanceUrl: instanceA.url, view: { filter: "k" } });
+    expect(window.history.length).toBe(length);
+  });
+
+  it("shows the deck at Home's cursor beside the table, in the URL with no Back stop, and opens it with Enter", async () => {
+    wideScreen();
+    window.history.replaceState(null, "", home(instanceA.url));
+    const length = window.history.length;
+    renderWorkspace(makeUseCasesFake({ listInstances: vi.fn(async () => [instanceA]), listDecks: vi.fn(async () => [kanji, verbs]) }));
+    await inMain().findByRole("rowheader", { name: "Kanji N5" });
+    const aside = within(screen.getByRole("complementary", { name: "Deck" }));
+    expect(aside.getByText(/to see it here/)).toBeInTheDocument();
+    document.body.focus();
+    // The table takes its keys once its effects have run.
+    await waitFor(() => {
+      fireEvent.keyDown(document.body, { key: "j" });
+      expect(parseStudioHash(window.location.hash)).toEqual({ screen: "home", instanceUrl: instanceA.url, deckUrl: kanji.url });
+    });
+    expect(window.history.length).toBe(length);
+    expect(await aside.findByRole("heading", { name: "Kanji N5" })).toBeInTheDocument();
+    expect(aside.getByRole("link", { name: "Cards – Kanji N5" })).toHaveAttribute("href", studioRouteToHash({ screen: "cards", deckUrl: kanji.url }));
+    expect(inMain().getByRole("row", { current: true })).toHaveTextContent("Kanji N5");
+    fireEvent.keyDown(document.activeElement!, { key: "j" });
+    expect(parseStudioHash(window.location.hash)).toEqual({ screen: "home", instanceUrl: instanceA.url, deckUrl: verbs.url });
+    expect(await aside.findByRole("heading", { name: "Verbs" })).toBeInTheDocument();
+    fireEvent.keyDown(screen.getByRole("checkbox", { name: "Select Verbs" }), { key: "Enter" });
+    expect(await screen.findByRole("heading", { name: "About: Verbs" })).toBeInTheDocument();
+    expect(window.history.length).toBe(length + 1);
   });
 
   it("opens what a deck says of itself from Home: its trail and title, its page in Solid Memo", async () => {
@@ -344,6 +389,7 @@ describe("StudioWorkspace", () => {
   });
 
   it("opens the instance's library copies from the sidebar, with a link to the library in Solid Memo and each deck's about screen", async () => {
+    wideScreen();
     const copy = { ...kanji, sourceUrl: "https://solid-memo.com/decks/capitals/v1.ttl" };
     window.history.replaceState(null, "", home(instanceA.url));
     renderWorkspace(
@@ -362,6 +408,15 @@ describe("StudioWorkspace", () => {
       `#/library?instance=${encodeURIComponent(instanceA.url)}`,
     );
     expect(inMain().getByRole("link", { name: "Kanji N5" })).toHaveAttribute("href", studioRouteToHash({ screen: "about", deckUrl: kanji.url }));
+    // The copy at the cursor, beside the table.
+    const aside = within(screen.getByRole("complementary", { name: "Upgrade" }));
+    expect(aside.getByText(/to see what upgrading it would change/)).toBeInTheDocument();
+    document.body.focus();
+    await waitFor(() => {
+      fireEvent.keyDown(document.body, { key: "j" });
+      expect(aside.getByRole("heading", { name: "Kanji N5" })).toBeInTheDocument();
+    });
+    expect(parseStudioHash(window.location.hash)).toEqual({ screen: "library", instanceUrl: instanceA.url });
   });
 
   it("lists the instance's decks and drafts in the sidebar, the draft or deck shown marked, and opens the drafts' section", async () => {
@@ -816,7 +871,19 @@ describe("StudioWorkspace", () => {
       await waitFor(() => expect(parseStudioHash(window.location.hash)).toEqual({ screen: "draftCards", draftUrl: DRAFT_URL, filter: "unasked", language: "en" }));
       choose("Language", "");
       await waitFor(() => expect(parseStudioHash(window.location.hash)).toEqual({ screen: "draftCards", draftUrl: DRAFT_URL, filter: "unasked" }));
+      choose("Show", "");
+      fireEvent.click(await inMain().findByRole("button", { name: "Id" }));
+      expect(parseStudioHash(window.location.hash)).toEqual({ screen: "draftCards", draftUrl: DRAFT_URL, sort: { key: "id", descending: false } });
       expect(window.history.length).toBe(length);
+      // Enter opens a card's editor, a Back stop as its link is.
+      const box = within(inMain().getAllByRole("row")[1]!).getByRole("checkbox");
+      box.focus();
+      // The table takes its keys once its effects have run.
+      await waitFor(() => {
+        fireEvent.keyDown(box, { key: "Enter" });
+        expect(parseStudioHash(window.location.hash)).toMatchObject({ screen: "question", draftUrl: DRAFT_URL });
+      });
+      expect(window.history.length).toBe(length + 1);
     });
 
     it("leaves a chapter, step or question once it is deleted, and falls back from one the draft has not", async () => {
@@ -1078,6 +1145,9 @@ describe("StudioWorkspace", () => {
       const target = `${instanceA.url}releases/solid/v1.ttl`;
       const useCases = draftUseCases();
       vi.mocked(useCases.listPublishedReleases).mockResolvedValue([{ url: target, public: true }]);
+      vi.mocked(useCases.listReleaseDrafts).mockResolvedValue([
+        { url: DRAFT_URL, instanceUrl: instanceA.url, name: "solid", version: 1, readable: true, title: { en: "Solid" }, course: true, releasedAs: target },
+      ]);
       vi.mocked(useCases.createReleaseDraft).mockResolvedValue({
         draft: { url: DRAFT_URL, instanceUrl: instanceA.url, name: "solid", version: 1, readable: true, title: { en: "Solid" }, course: true },
       });
@@ -1087,6 +1157,8 @@ describe("StudioWorkspace", () => {
       expect(parseStudioHash(window.location.hash)).toEqual({ screen: "releases", instanceUrl: instanceA.url });
       expect(trailOf()).toEqual(["Instances", "Decks", "Releases"]);
       await waitFor(() => expect(document.title).toBe("Releases – Solid Memo Studio"));
+      // The draft it was published from.
+      expect(await inMain().findByRole("link", { name: "Solid, version 1" })).toHaveAttribute("href", studioRouteToHash({ screen: "draft", draftUrl: DRAFT_URL }));
       const start = await screen.findByRole("button", { name: "Start the next version of solid, version 1" });
       await waitFor(() => expect(start).toBeEnabled());
       fireEvent.click(start);

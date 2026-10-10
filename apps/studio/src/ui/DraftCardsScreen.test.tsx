@@ -1,16 +1,30 @@
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/preact";
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/preact";
 import { applyDraftChanges, blankDraft, type DraftChange, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
-import type { DraftEditor } from "./draftEditor";
+import type { DraftEditor, DraftReadOnly } from "./draftEditor";
 import { DraftCardsScreen, type DraftCardsView } from "./DraftCardsScreen";
 import { choose } from "../test/choose";
+import { WithKeys } from "../test/keys";
 import { courseDraft, DRAFT_URL, draftLinks } from "../test/fixtures";
 
-function renderScreen(draft: ReleaseDraft = courseDraft(), view: DraftCardsView = {}) {
+function renderScreen(draft: ReleaseDraft = courseDraft(), view: DraftCardsView = {}, readOnly: DraftReadOnly | null = null) {
   const onView = vi.fn();
+  const onOpen = vi.fn();
   const onEdit = vi.fn<DraftEditor["edit"]>(() => null);
-  render(<DraftCardsScreen draft={draft} view={view} readOnly={null} status={{ saving: false, failure: null }} links={draftLinks} onView={onView} onEdit={onEdit} />);
-  return { onView, onEdit };
+  render(
+    <DraftCardsScreen
+      draft={draft}
+      view={view}
+      readOnly={readOnly}
+      status={{ saving: false, failure: null }}
+      links={draftLinks}
+      onView={onView}
+      onOpen={onOpen}
+      onEdit={onEdit}
+    />,
+    { wrapper: WithKeys },
+  );
+  return { onView, onOpen, onEdit };
 }
 
 const table = () => screen.getByRole("table", { name: "The draft's cards" });
@@ -36,7 +50,7 @@ describe("DraftCardsScreen", () => {
     expect(screen.getByRole("heading", { level: 2, name: "Questions of Solid" })).toBeInTheDocument();
     expect(screen.getByText("4 cards")).toBeInTheDocument();
     expect(fronts()).toEqual(["Loose", "Old (retired)", "What holds data?", "Who owns a pod?"]);
-    const cells = (front: string) => within(within(table()).getByRole("rowheader", { name: new RegExp(front) }).closest("tr")!).getAllByRole("cell").map((cell) => cell.textContent);
+    const cells = (front: string) => within(within(table()).getByRole("rowheader", { name: new RegExp(front) }).closest("tr")!).getAllByRole("cell").slice(1).map((cell) => cell.textContent);
     expect(cells("What holds data")).toEqual(["A pod", "Pods, step 1", "1", "q-pods-1a"]);
     expect(cells("Who owns")).toEqual(["Its user", "Pods, final review", "0", "q-pods-r01"]);
     expect(cells("Loose")).toEqual(["Yes", "Asked from 2 places", "0", "q-loose"]);
@@ -124,5 +138,65 @@ describe("DraftCardsScreen", () => {
     const { onView } = renderScreen(applyDraftChanges(courseDraft(), changes) as ReleaseDraft);
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
     expect(onView).toHaveBeenCalledWith({ page: 2 });
+  });
+
+  it("sorts by a column's header, from the first page, and shows the cards as the URL sorts them", () => {
+    const { onView } = renderScreen(courseDraft(), { sort: { key: "distractors", descending: true } });
+    expect(fronts()).toEqual(["What holds data?", "Who owns a pod?"]);
+    expect(within(table()).getByRole("columnheader", { name: "Wrong options" })).toHaveAttribute("aria-sort", "descending");
+    fireEvent.click(within(table()).getByRole("button", { name: "Wrong options" }));
+    expect(onView).toHaveBeenCalledWith({});
+    fireEvent.click(within(table()).getByRole("button", { name: "Front" }));
+    expect(onView).toHaveBeenLastCalledWith({ sort: { key: "front", descending: false } });
+  });
+
+  it.each([
+    ["front", false, ["What holds data?", "Who owns a pod?"]],
+    ["front", true, ["Who owns a pod?", "What holds data?"]],
+    ["back", true, ["Who owns a pod?", "What holds data?"]],
+    ["place", true, ["What holds data?", "Who owns a pod?"]],
+    ["id", true, ["Who owns a pod?", "What holds data?"]],
+  ] as const)("sorts by %s (descending: %s)", (key, descending, order) => {
+    renderScreen(courseDraft(), { sort: { key, descending } });
+    expect(fronts()).toEqual(order);
+  });
+
+  it("sorts a card of no front by its id, and one of no back last", () => {
+    const draft = applyDraftChanges(courseDraft(), [{ kind: "addCard", id: "a-pic", card: { frontImage: "https://x.example/a.png" } }]) as ReleaseDraft;
+    renderScreen(draft, { sort: { key: "front", descending: false } });
+    expect(fronts()[0]).toBe("a-pic");
+    cleanup();
+    renderScreen(draft, { sort: { key: "back", descending: false } });
+    expect(fronts().at(-1)).toBe("a-pic");
+  });
+
+  it("retires or restores the cards selected at once, and opens one's editor with Enter", () => {
+    const draft = applyDraftChanges(courseDraft(), [{ kind: "retire", of: "card", id: "q-pods-r01" }]) as ReleaseDraft;
+    const { onEdit, onOpen } = renderScreen(draft);
+    expect(screen.getByText("0 cards selected")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Select every card on this page" }));
+    expect(screen.getByText("2 cards selected")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Retire 1 card" }));
+    expect(onEdit).toHaveBeenLastCalledWith([{ kind: "retire", of: "card", id: "q-pods-1a" }]);
+    fireEvent.click(screen.getByRole("button", { name: "Restore 1 card" }));
+    expect(onEdit).toHaveBeenLastCalledWith([{ kind: "restore", of: "card", id: "q-pods-r01" }]);
+    fireEvent.click(screen.getByRole("button", { name: "Clear selection" }));
+    expect(screen.queryByRole("button", { name: /^Retire/ })).toBeNull();
+    const box = screen.getByRole("checkbox", { name: "Select Who owns a pod?" });
+    act(() => box.focus());
+    fireEvent.keyDown(box, { key: "Enter" });
+    expect(onOpen).toHaveBeenCalledWith("q-pods-r01");
+  });
+
+  it("selects nothing while the draft may not be changed", () => {
+    renderScreen(courseDraft(), {}, "released");
+    expect(screen.queryByRole("checkbox")).toBeNull();
+    expect(screen.queryByText("0 cards selected")).toBeNull();
+  });
+
+  it("shows or hides its columns from the Columns menu", () => {
+    renderScreen();
+    fireEvent.click(screen.getByRole("button", { name: "Show or hide columns" }));
+    expect(screen.getAllByRole("menuitemcheckbox").map((item) => item.textContent)).toEqual(["Back", "Asked", "Wrong options", "Id"]);
   });
 });

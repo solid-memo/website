@@ -9,6 +9,7 @@ import { ACTIVITY_LIMIT, ActivityLog, useActivity, type ActivityEntry } from "./
 import { BottomDock, type DockTab, type WorkspaceProblems } from "./BottomDock";
 import type { Command, ScreenCommand } from "./commandIndex";
 import { CommandPalette } from "./CommandPalette";
+import { HiddenColumns } from "./DataTable";
 import { KeyHelp, Keys } from "./KeyHelp";
 import { DENSITIES, rememberPrefs, studioPrefs, type StudioPrefs } from "./prefs";
 import { keysOf, nextRegion, sectionRoute, type Section } from "./shortcuts";
@@ -49,7 +50,9 @@ export interface AsidePane {
  * (`problems`) and the activity the screens tell of
  * (ActivityLog); and a status bar, with the open instance, whether the
  * open draft is saved, its problems, the dock's button, how densely the
- * Studio is laid out, and its keys. Its stylesheet (studio.css)
+ * Studio is laid out, and its keys. The device keeps the columns the
+ * screens' tables hide (DataTable's HiddenColumns) with the rest of the
+ * layout (prefs.ts). Its stylesheet (studio.css)
  * holds only while it is shown, under `data-surface="studio"` on the
  * page's root: Solid Memo shares the page.
  *
@@ -292,6 +295,12 @@ export function StudioShell({
     rememberPrefs(next);
   }
 
+  // The columns the screens' tables hide, as the device keeps them.
+  const hiddenColumns: HiddenColumns = {
+    hidden: (table) => new Set(prefs.hiddenColumns[table]),
+    onHidden: (table, hidden) => choose({ ...prefs, hiddenColumns: { ...prefs.hiddenColumns, [table]: [...hidden] } }),
+  };
+
   const dockShown = docked && prefs.dock;
   return (
     <ActivityLog.Provider value={activity.log}>
@@ -376,7 +385,9 @@ export function StudioShell({
         )}
         <main id={MAIN_ID} tabIndex={-1} class="workspace" data-region>
           <ScreenKeys.Provider value={register}>
-            <ScreenCommands.Provider value={screenCommands.register}>{children}</ScreenCommands.Provider>
+            <ScreenCommands.Provider value={screenCommands.register}>
+              <HiddenColumns.Provider value={hiddenColumns}>{children}</HiddenColumns.Provider>
+            </ScreenCommands.Provider>
           </ScreenKeys.Provider>
         </main>
         {aside !== null && (

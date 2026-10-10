@@ -29,24 +29,31 @@ export interface RowSelection {
  * end of the table the one beyond it (`around`, on another page), and
  * the focus goes to that row once it is shown. Once none is shown, the
  * cursor stays on the row that was, and the focus, lost with the row
- * shown, goes back to it. `keys` are the rows', in the table's order.
+ * shown, goes back to it. With `onCursor`, each move of the cursor (j,
+ * k, or the focus) is told, so that its row is shown beside the table,
+ * as `current` then. `keys` are the rows', in the table's order. A
+ * table not `enabled` takes no key.
  */
 export function useRowKeys({
   body,
   keys,
+  enabled = true,
   select,
   current,
   around,
   onMove,
+  onCursor,
   onOpen,
 }: {
   body: { current: HTMLTableSectionElement | null };
   keys: readonly string[];
+  enabled?: boolean;
   select?: RowSelection;
   current?: string;
   /** The keys of the rows just before the table's first and after its last, on other pages. */
   around?: { previous?: string; next?: string };
   onMove?: (key: string) => void;
+  onCursor?: (key: string) => void;
   onOpen?: (at: number) => void;
 }): { cursor: number; anchor: { current: string | null }; follow: (at: number) => void } {
   const [own, setOwn] = useState<string | null>(null);
@@ -57,6 +64,8 @@ export function useRowKeys({
   const shown = useRef<string | null>(null);
   // The row shown beside the table before.
   const was = useRef(current);
+  // The row the cursor was told to be on last (onCursor).
+  const told = useRef(current);
 
   // A row asked for may have left the table meanwhile (its cards read afresh, say).
   const linkOf = (at: number) => body.current!.children[at]?.querySelector<HTMLElement>("th a");
@@ -64,6 +73,8 @@ export function useRowKeys({
   useEffect(() => {
     const left = was.current;
     was.current = current;
+    // Told afresh from here: a row no longer shown (a link went without it) is told again when the cursor comes back to it.
+    told.current = current;
     if (current === undefined) {
       if (left === undefined) return;
       setOwn(left);
@@ -87,11 +98,21 @@ export function useRowKeys({
       show(keys[at]!);
       return;
     }
-    setOwn(keys[at]!);
+    cursorTo(at);
     linkOf(at)?.focus();
   }
 
+  /** The cursor on a row, told as it moves: not again while the row is shown, or about to be. */
+  function cursorTo(at: number) {
+    const key = keys[at]!;
+    setOwn(key);
+    if (onCursor === undefined || key === current || key === told.current) return;
+    told.current = key;
+    onCursor(key);
+  }
+
   useScreenKeys((event, key) => {
+    if (!enabled) return;
     const focused = [...body.current!.children].findIndex((row) => row.contains(document.activeElement));
     const onBody = document.activeElement === document.body;
     // The row x, Enter and the extending keys act on.
@@ -144,5 +165,5 @@ export function useRowKeys({
     event.preventDefault();
   });
 
-  return { cursor, anchor, follow: (at) => setOwn(keys[at]!) };
+  return { cursor, anchor, follow: cursorTo };
 }

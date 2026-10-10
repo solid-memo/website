@@ -1393,7 +1393,7 @@
       "chords": "g d처럼 나란히 표시된 키는 차례로 눌러요. 입력란에 입력하는 동안에는 Ctrl+K, F6, Shift+F6, F8, Shift+F8만 작동해요.",
       "scope": {
         "studio": "스튜디오 어디서나",
-        "cards": "카드 작업대에서"
+        "cards": "표에서: 카드, 덱, 초안의 카드…"
       },
       "help": "이 단축키 보기",
       "filter": "화면의 검색 또는 필터로 이동",
@@ -1410,19 +1410,19 @@
         "instances": "인스턴스로 이동"
       },
       "toggleSidebar": "사이드바 보이기 또는 숨기기",
-      "toggleAside": "개요 보이기 또는 숨기기, 또는 목록 옆의 카드 닫기",
+      "toggleAside": "옆 패널(개요, 덱, 업그레이드) 보이기 또는 숨기기, 또는 목록 옆의 카드 닫기",
       "toggleDock": "패널 보이기 또는 숨기기: 문제와 활동",
       "nextProblem": "다음 문제의 입력란으로 이동",
       "previousProblem": "이전 문제의 입력란으로 이동",
       "previousTab": "덱이나 초안의 이전 탭으로 이동",
       "nextTab": "덱이나 초안의 다음 탭으로 이동",
       "tab": "번호로 덱이나 초안의 탭으로 이동",
-      "down": "다음 카드",
-      "up": "이전 카드",
-      "select": "카드 선택",
-      "open": "카드 열기",
-      "extendDown": "이 카드와 다음 카드도 선택",
-      "extendUp": "이 카드와 이전 카드도 선택",
+      "down": "다음 행",
+      "up": "이전 행",
+      "select": "행 선택",
+      "open": "행 열기",
+      "extendDown": "이 행과 다음 행도 선택",
+      "extendUp": "이 행과 이전 행도 선택",
       "clear": "선택 해제"
     },
     "dock": {
@@ -1494,6 +1494,20 @@
         "from": "{host}에서 가져옴"
       },
       "healthOf": "{deck}에서"
+    },
+    "views": {
+      "label": "보기",
+      "all": "전체",
+      "due": "오늘 복습",
+      "courses": "코스",
+      "copies": "라이브러리 사본",
+      "attention": "확인 필요",
+      "none": "이 보기에 덱이 없어요."
+    },
+    "peek": {
+      "label": "덱",
+      "none": "덱의 행으로 이동하면({j}, {k}) 여기에 표시돼요.",
+      "of": "– {deck}"
     },
     "bulk": {
       "label": "선택한 덱",
@@ -1605,6 +1619,10 @@
       "lapsesNone": "잊은 횟수는 이 카드에 틀리게 답한 횟수예요. 아직 기록된 답변이 없어요.",
       "lapsesLoading": "잊은 횟수를 알기 위해 답변 기록을 읽는 중…",
       "lapsesFailed": "답변 기록을 읽을 수 없어서 잊은 횟수를 알 수 없어요."
+    },
+    "columns": {
+      "button": "열",
+      "label": "열 표시 또는 숨기기"
     },
     "card": {
       "heading": "카드: {card}",
@@ -1981,7 +1999,6 @@
       "planFailed": "릴리스 {version}이(가) 나왔지만, 바뀔 내용을 읽을 수 없어요.",
       "nothingToUpdate": "릴리스 {version}이(가) 나왔지만, 내 복사본에 업데이트할 내용이 없어요.",
       "changes": "릴리스 {version}: 업데이트 내용: {changes}.",
-      "details": "바뀌는 내용",
       "cards": {
         "add": {
           "other": "추가: 카드 {count}장"
@@ -2006,7 +2023,9 @@
       "failed": "{deck}: ‘{step}’ 단계에서 업데이트에 실패했어요:",
       "badge": "릴리스 {version} 나옴",
       "badgeOf": "{deck}의 새 릴리스",
-      "newerUnknown": "알 수 없음: 만든 사람의 공개 카탈로그 어디에도 없어요"
+      "newerUnknown": "알 수 없음: 만든 사람의 공개 카탈로그 어디에도 없어요",
+      "peek": "사본의 행으로 이동하면({j}, {k}) 업그레이드로 바뀔 내용을 볼 수 있어요.",
+      "plan": "업그레이드"
     },
     "transfer": {
       "crumb": "가져오기와 내보내기",
@@ -2218,7 +2237,15 @@
       },
       "retired": "(사용 중지됨)",
       "askedTimes": "{count}곳에서 나옴",
-      "newQuestion": "새 질문, 아직 어디에도 나오지 않음"
+      "newQuestion": "새 질문, 아직 어디에도 나오지 않음",
+      "retire": {
+        "one": "카드 {count}장 사용 중지",
+        "other": "카드 {count}장 사용 중지"
+      },
+      "restore": {
+        "one": "카드 {count}장 복원",
+        "other": "카드 {count}장 복원"
+      }
     },
     "draftEdit": {
       "saving": "저장하는 중…",
@@ -2619,8 +2646,12 @@
       "column": {
         "release": "릴리스",
         "readers": "읽을 수 있는 사람",
+        "draft": "초안",
         "actions": "작업"
       },
+      "filter": "이름이나 주소로 필터",
+      "noMatch": "‘{filter}’와(과) 일치하는 릴리스가 없어요.",
+      "noDraft": "이 인스턴스의 초안에 없어요",
       "name": "{name}, 버전 {version}",
       "public": "누구나",
       "private": "나만",
