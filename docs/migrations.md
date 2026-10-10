@@ -500,7 +500,10 @@ offers to bring the copy up to it (`planLibraryUpgrade` in
 [domain/libraryUpgrade.ts](../packages/domain/src/libraryUpgrade.ts), shown by
 [LibraryUpgradeContainer.tsx](../packages/ui/src/ui/LibraryUpgradeContainer.tsx)).
 The Studio lists every copy of an instance, and upgrades several in
-turn, each the same way ([studio.md](studio.md#library-copies)).
+turn, each the same way ([studio.md](studio.md#library-copies)). A copy
+of a release added from a link is upgraded the same way too, to the
+newest version its creator's catalogue lists, when it can be read
+([deck-library.md](deck-library.md#from-a-link)).
 
 The plan compares three sets of cards by fragment id — the release the
 copy came from, the current release, and the copy — so the library's

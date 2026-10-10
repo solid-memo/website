@@ -20,41 +20,10 @@ export class Trial extends Screen {
   }
 
   /**
-   * Plays the course's first chapter from its page: its step's theory,
-   * then each question answered right (`answers`, the right answer by
-   * the question), then its final review, answered right too, to the end
-   * of the course.
+   * Plays the course's first chapter from its page, to the end of the
+   * course, as Solid Memo's own course screens play it (Course.playChapter).
    */
   async playToTheEnd(chapter: string, theory: string, answers: Record<string, string>): Promise<void> {
-    await this.intent(`Play ${chapter} to the end of the course`, async () => {
-      await this.page.getByRole("link", { name: this.t("course.start") }).click();
-      await expect(this.page.getByRole("heading", { level: 2, name: chapter, exact: true })).toBeVisible();
-      await expect(this.page.getByText(theory, { exact: true })).toBeVisible();
-      const count = Object.keys(answers).length;
-      await this.page.getByRole("button", { name: this.tp("chapterPlayer.toQuestions", { count }) }).click();
-      for (let asked = 1; asked <= count; asked++) {
-        await this.answerRight(answers);
-        const onwards = asked === count ? this.t("chapterPlayer.toReview") : this.t("chapterPlayer.next");
-        await this.page.getByRole("button", { name: onwards, exact: true }).click();
-      }
-      await expect(this.page.getByRole("heading", { level: 2, name: this.t("chapterReview.heading", { chapter }) })).toBeVisible();
-      for (let asked = 1; asked <= count; asked++) {
-        await this.answerRight(answers);
-        await this.page.getByRole("button", { name: this.t("chapterReview.next"), exact: true }).click();
-      }
-      await expect(this.page.getByText(this.t("chapterReview.courseDone"), { exact: true })).toBeVisible();
-    });
-  }
-
-  /** Answers the question shown with its right answer, which the course says is right. */
-  private async answerRight(answers: Record<string, string>): Promise<void> {
-    const question = this.page.locator(".course-question .card-question p");
-    await expect(question).toBeVisible();
-    const front = (await question.innerText()).trim();
-    const right = answers[front];
-    expect(right, `The right answer to ${front}`).toBeDefined();
-    await this.page.getByRole("radio", { name: right, exact: true }).check();
-    await this.page.getByRole("button", { name: this.t("multipleChoice.check"), exact: true }).click();
-    await expect(this.page.locator(".course-question")).toContainText(this.t("courseQuestion.right"));
+    await this.app.course.playChapter(chapter, theory, answers);
   }
 }

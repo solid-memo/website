@@ -117,9 +117,54 @@ export interface LibraryCard extends CardContent {
   retired?: true;
 }
 
-/** Whether a deck in the pod is a copy of a library deck, of any of its releases. */
+/**
+ * Whether a deck in the pod is a copy of a library deck, of any of its
+ * releases: one its series is named after, or one it lists (a release
+ * published in a pod names its series after its first version).
+ */
 export function isCopyOf(deck: Deck, libraryDeck: LibraryDeck): boolean {
-  return deck.sourceUrl !== undefined && librarySeriesUrlOf(deck.sourceUrl) === libraryDeck.seriesUrl;
+  const { sourceUrl } = deck;
+  return (
+    sourceUrl !== undefined &&
+    (librarySeriesUrlOf(sourceUrl) === libraryDeck.seriesUrl ||
+      sourceUrl === libraryDeck.url ||
+      libraryDeck.releases.some((release) => release.url === sourceUrl))
+  );
+}
+
+/**
+ * The address of a release a learner can add from a link
+ * (docs/deck-library.md, From a link), as the URL standard writes it:
+ * the text an http(s) URL of a document, with no fragment, in any form
+ * the standard reads (a host in capitals, a default port). Null when it
+ * is none.
+ */
+export function releaseUrlOf(text: string): string | null {
+  let url: URL;
+  try {
+    url = new URL(text);
+  } catch {
+    return null;
+  }
+  return (url.protocol === "https:" || url.protocol === "http:") && !url.href.includes("#") && !url.pathname.endsWith("/") ? url.href : null;
+}
+
+/** The host a release is published on, as a "from <host>" badge names it. */
+export function releaseHost(url: string): string {
+  return new URL(url).host;
+}
+
+/**
+ * The newest release of the copied one's series among `found` (the
+ * releases its creator's catalogue links, read): the copied one when
+ * none is newer. A release in another series is none of it.
+ */
+export function newestRelease(copied: LibraryDeck, found: readonly (LibraryDeck | null)[]): LibraryDeck {
+  return found.reduce<LibraryDeck>(
+    (newest, release) =>
+      release !== null && release.seriesUrl === copied.seriesUrl && Number(release.version) > Number(newest.version) ? release : newest,
+    copied,
+  );
 }
 
 /** A topic of Solid Memo's topics scheme, as the library lists them: its label in English and Swedish. */
@@ -187,15 +232,31 @@ export function offersNewerRelease(deck: Deck, series: LibraryDeck): boolean {
   return copied === undefined || Number(series.version) > Number(copied.version);
 }
 
-/** A deck in the pod copied from a library release (it has prov:wasDerivedFrom), as the library's index sees it. */
+/**
+ * A deck in the pod copied from a library release (it has
+ * prov:wasDerivedFrom), as the library's index sees it, or a release
+ * added from a link as the release and its creator's catalogue do.
+ */
 export interface LibraryCopy {
   deck: Deck;
-  /** The library deck it is a copy of; null when the index no longer lists its series. */
+  /**
+   * The library deck it is a copy of; null when the index no longer lists
+   * its series (and it is no release that can be read from its link). For
+   * a release added from a link, its series as its newest release known
+   * describes it.
+   */
   series: LibraryDeck | null;
   /** The version of the release it was copied from; null when the index does not list that release. */
   version: string | null;
-  /** Whether the library has a newer release to offer (offersNewerRelease); planLibraryUpgrade says what it would change. */
-  newer: boolean;
+  /**
+   * Whether the library has a newer release to offer (offersNewerRelease);
+   * planLibraryUpgrade says what it would change. "unknown" for a release
+   * added from a link whose creator's catalogue cannot be read, which
+   * alone would list a newer one.
+   */
+  newer: boolean | "unknown";
+  /** Set on a copy of a release added from a link (docs/deck-library.md, From a link), which no index lists. */
+  fromLink?: true;
 }
 
 /**

@@ -74,8 +74,8 @@ describe("LibraryCopiesContainer", () => {
     // Only the copies with a newer release are planned.
     expect(useCases.planLibraryUpgrade).toHaveBeenCalledTimes(2);
     expect(useCases.planLibraryUpgrade).not.toHaveBeenCalledWith(fresh, expect.anything());
-    // With the series the copies' one read of the index found.
-    expect(useCases.planLibraryUpgrade).toHaveBeenCalledWith(old, capitals);
+    // With the series the copies' one look found.
+    expect(useCases.planLibraryUpgrade).toHaveBeenCalledWith(old, { deck: old, series: capitals, version: "1", newer: true });
 
     fireEvent.click(select);
     fireEvent.click(screen.getByRole("button", { name: "Update 2 decks" }));

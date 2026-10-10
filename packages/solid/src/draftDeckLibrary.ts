@@ -14,8 +14,8 @@ import { datasetOf, draftQuads } from "./mappers/releaseDraftMapper";
  * read makes it afresh from the draft. Its cards and a course's outline
  * are read from the draft's statements as a release's are; what the
  * release says of itself is what the listing preview shows
- * (draftLibraryDeck), as a draft may not say all of it yet. Any other
- * release is none of it: releaseUnreadable.
+ * (draftLibraryDeck), as a draft may not say all of it yet, read on its
+ * own too. Any other release is none of it: releaseUnreadable.
  */
 export function createDraftDeckLibrary(draft: ReleaseDraft): DeckLibrary {
   /** The draft's statements, for the release at `url` (the draft's own only). */
@@ -42,6 +42,16 @@ export function createDraftDeckLibrary(draft: ReleaseDraft): DeckLibrary {
 
     async fetchCourseOutline(url) {
       return toCourseOutline(url, release(url));
+    },
+
+    async readRelease(url) {
+      release(url);
+      return listed();
+    },
+
+    // A draft is published nowhere yet.
+    async publishedBeside() {
+      return null;
     },
   };
 }

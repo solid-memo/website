@@ -1,30 +1,34 @@
 # Studio
 
 Solid Memo Studio is a second app beside Solid Memo, in the same page,
-at `https://solid-memo.com/#/studio`. It is where users manage their decks.
-Later it is also where creators build decks and courses and publish
-them. For now it shows the decks of an instance in a table, changes
-several of them at once, arranges them into groups, lists a deck's
-cards to search, filter, sort, select, edit at once and move or copy
-to another deck, and edits one card, its wrong options and its
-schedule included, with its history of answers. It shows a deck's
-schedule to come, its lapses and leeches, and everything wrong with a
-deck or the instance. It lists the decks copied from the library, and
-upgrades them to newer releases. It exports decks as Turtle or JSON-LD
-files, and imports them. It also edits what
-a deck says of itself (its authors and licence among it), a course's
-progress, and the instance's name and catalogue. It keeps the drafts
-of releases a creator writes in the instance: started from nothing,
-from a deck, as the next version of a release or from a release saved
-as a file, written (what a release says of itself, a course's outline,
-its chapters, steps and questions, their wrong options, how it was made
-and from what), checked by
-every rule a release is held to, previewed as the library will list
-them, played in a sandbox as learners will play them, compared with
-the release they follow, and deleted. A draft is released by
-publishing it in the pod, where anyone can read it, or by saving it as a
-file for the library; the releases an instance published are listed,
-each to share or to start the next version of.
+at `https://solid-memo.com/#/studio`. It is where users manage their
+decks, and where creators write decks and courses and publish them.
+
+To manage, it shows the decks of an instance in a table, changes
+several of them at once, and arranges them into groups. It lists a
+deck's cards to search, filter, sort, select, edit at once, and move or
+copy to another deck. It edits one card, its wrong options and its
+schedule, with its history of answers. It shows a deck's schedule to
+come, its lapses and leeches, and everything wrong with a deck or the
+instance. It lists the decks copied from the library or added from a
+link, and upgrades them to newer releases. It exports decks as Turtle
+or JSON-LD files, and imports them. It edits what a deck says of itself
+(its authors and licence among it), a course's progress, and the
+instance's name and catalogue.
+
+To create, it keeps the drafts of releases a creator writes in the
+instance. A draft is started from nothing, from a deck, as the next
+version of a release, or from a release saved as a file. It is written:
+what the release says of itself, a course's outline, its chapters,
+steps and questions, their wrong options, and how it was made and from
+what. It is checked by every rule a release is held to, previewed as
+the library will list it, played in a sandbox as learners will play
+it, compared with the release it follows, and deleted. A draft is
+released by publishing it in the pod, where anyone can read it, or by
+saving it as a file for the library. The releases an instance published
+are listed, each to share or to start the next version of. A learner
+adds a published release in Solid Memo from its link
+([deck-library.md](deck-library.md#from-a-link)).
 
 ## What it shares with Solid Memo
 
@@ -165,7 +169,10 @@ is a table with a row per deck. Its columns are:
 - the deck's name, a link to its [about screen](#a-decks-about-screen),
   and its badges:
   **Library** for a copy of a library deck (it has
-  `prov:wasDerivedFrom`), **Course** for a copy of a course, **Invalid
+  `prov:wasDerivedFrom`), **From \<host>** for a copy of a release
+  added from a link, which no index lists
+  ([deck-library.md](deck-library.md#from-a-link)), **Course** for a
+  copy of a course, wherever it came from, **Invalid
   data** when the instance's check finds a problem in its entry or its
   documents ([validation.md](validation.md)), and **Unreadable** when
   its cards could not be read;
@@ -183,11 +190,12 @@ link to the deck's health. A deck is checked only once its row is on
 the screen (`IntersectionObserver`), so a long table checks only the
 decks the user scrolls to. A deck with no problem gets no badge.
 
-Beside a library copy's name, "Release 2 out" when the library has a
-newer release of it, a link to the [library copies](#library-copies).
-It too is looked up once its row is on the screen: one read of the
-library's index for every copy (`listLibraryUpdates`). A copy up to
-date, or one whose library cannot be read, gets no badge.
+Beside a copy's name, "Release 2 out" when a newer release of it is
+out, a link to the [library copies](#library-copies). It too is looked
+up once its row is on the screen: one read of the library's index for
+every copy (`listLibraryUpdates`), and for a copy from a link its
+creator's catalogue. A copy up to date, or one whose newer releases
+cannot be known, gets no badge.
 
 Above the table are links to the [Groups](#groups) screen, to the
 instance's [name and catalogue](#the-instance), to its
@@ -721,10 +729,10 @@ it checks again and a removal that clears it included
 ## Library copies
 
 The library copies screen ([`LibraryCopiesContainer`](../apps/studio/src/ui/LibraryCopiesContainer.tsx))
-lists the instance's decks copied from a library release (they have
-`prov:wasDerivedFrom`), a row each: the release it came from, the
-library's current one, and what upgrading would change. It links to
-Solid Memo's deck library.
+lists the instance's decks copied from a release (they have
+`prov:wasDerivedFrom`), from the library or added from a link, a row
+each: the release it came from, the newest one out, and what upgrading
+would change. It links to Solid Memo's deck library.
 
 The use case `listLibraryUpdates` reads the instance's decks and the
 library's index once, however many copies of a deck there are. The
@@ -738,8 +746,8 @@ not list is an unknown release.
 For each copy with a newer release, the screen asks what upgrading
 would do (`planLibraryUpgrade`, the plan Solid Memo's deck page offers;
 [migrations.md](migrations.md#catching-up-with-the-library)). It gives
-the copy's series, as the index listed it, so the index is not read
-again for each copy. It says so in a sentence, as Solid Memo does, and
+the copy as the copies were found, its series with it, so the index is
+not read again for each copy, nor a link's catalogue. It says so in a sentence, as Solid Memo does, and
 "What changes" folds out the
 rest: what history is kept, the new releases' notes, and the cards
 added, changed, retired, brought back, removed, and left as the user
@@ -764,9 +772,23 @@ it now is. The end-to-end tests hold `listLibraryUpdates` and a
 batch of two upgrades against real servers
 ([deckUpgrade.integration.test.ts](../e2e/pod/src/deckUpgrade.integration.test.ts)).
 
-A copy of a release outside the library's index (one imported by its
-URL, once that can be) shows as no longer in the library: there is no
-index to find a newer release in.
+A copy whose series the index does not list is looked up as a copy
+of a release added from a link
+([deck-library.md](deck-library.md#from-a-link)). Its release is read,
+and its row says "From \<host>". Its creator's catalogue, found in the
+folders above the release and read as anyone reads it, lists the
+releases its instance published (`sm:publishedRelease`): the newest of
+the copy's series is its upgrade, planned and applied as a library
+copy's. Each release a catalogue links is read once for all the copies,
+and none the copy's own release lists, which is no newer. Before an
+upgrade is planned, the newer release and those in between are checked
+against the library's shapes, as the first was; one that breaks them
+is refused (`releaseNotConforming`). When no public catalogue of its
+creator lists the release, it is unknown whether a newer version is
+out, and the row says "Not known: no public catalogue of its creator
+lists it". A catalogue can be private (an instance's is, unless its
+owner shares it), or not link the release. A copy whose release cannot
+be read either shows as no longer in the library.
 
 ## Import and export
 
@@ -1490,7 +1512,8 @@ version 2") when it is named as releases are, a link to copy, who can
 read it (everyone, or only its owner, with **Make it public**), and
 **Start the next version**, which makes a draft of it and opens it. It
 changes no release. Home's drafts panel and the drafts screen link to
-it ("Published releases").
+it ("Published releases"). A learner adds a release in Solid Memo by
+the link copied here ([deck-library.md](deck-library.md#from-a-link)).
 
 ## Data set aside
 

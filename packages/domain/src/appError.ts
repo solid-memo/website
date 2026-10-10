@@ -135,6 +135,11 @@ export const ERROR_TEMPLATES = {
     "A guest's study is kept in this browser alone, where no one else can read a release. Move your study into a Pod to publish it, or download the release as a file.",
   publicAccessRefused:
     "Your Pod did not let Solid Memo make the release at {url} public, so only you can read it. Try again, or make it readable by everyone with your Pod provider's tools.",
+  releaseUrlInvalid: "That is not the address of a release. Paste its whole address, starting with https:// or http://.",
+  releaseNotConforming: {
+    one: "The release on {host} breaks Solid Memo's rules in {count} place, so it cannot be added. Ask its creator to check it.",
+    other: "The release on {host} breaks Solid Memo's rules in {count} places, so it cannot be added. Ask its creator to check it.",
+  },
 } as const satisfies Record<string, ErrorTemplate>;
 
 export type ErrorCode = keyof typeof ERROR_TEMPLATES;

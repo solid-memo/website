@@ -17,11 +17,14 @@ import { ReaderText, ReaderTexts } from "./ReaderText";
  * with a look at its cards and an import button for this deck alone.
  * A course (docs/courses.md) is started instead of imported: its cards
  * join the learner's deck as its questions are answered. Everything
- * shown comes from the library index, so any link in it goes through
- * ExternalLink.
+ * shown comes from the library index, or from a release added from a
+ * link (`host`, where it is published, then said, with what it is), so
+ * any link in it goes through ExternalLink. A release from a link has no
+ * card list or preview to link to.
  */
 export function LibraryDeckScreen({
   deck,
+  host,
   browseHref,
   previewHref,
   imported,
@@ -31,10 +34,12 @@ export function LibraryDeckScreen({
   onStartCourse,
 }: {
   deck: LibraryDeck;
-  /** URL of the deck's card list. */
-  browseHref: string;
-  /** URL of the deck's preview, which tries its cards before import. */
-  previewHref: string;
+  /** The host a release added from a link is published on; none for the library's. */
+  host?: string;
+  /** URL of the deck's card list; none for a release from a link. */
+  browseHref?: string;
+  /** URL of the deck's preview, which tries its cards before import; none for a release from a link. */
+  previewHref?: string;
   /**
    * The instance already holds a copy; a second one is still allowed,
    * but a course is started once: it is continued.
@@ -59,9 +64,11 @@ export function LibraryDeckScreen({
           <LibraryIcon />
           <ReaderText text={deck.title} />
         </h2>
-        <a class="button" href={browseHref}>
-          {t("libraryDeck.browseCards")}
-        </a>
+        {browseHref !== undefined && (
+          <a class="button" href={browseHref}>
+            {t("libraryDeck.browseCards")}
+          </a>
+        )}
       </header>
       {deck.description !== undefined && (
         <p class="deck-description" lang={readerLang(deck.description)}>
@@ -70,6 +77,14 @@ export function LibraryDeckScreen({
       )}
       {deck.isCourse === true && <p class="hint">{t("libraryDeck.courseChapters")}</p>}
       <dl class="facts">
+        {host !== undefined && (
+          <>
+            <dt>{t("libraryDeck.host")}</dt>
+            <dd>{host}</dd>
+            <dt>{t("libraryDeck.kind")}</dt>
+            <dd>{deck.isCourse === true ? t("libraryDeck.kindCourse") : t("libraryDeck.kindDeck")}</dd>
+          </>
+        )}
         <dt>{t("libraryDeck.size")}</dt>
         <dd>{t("common.cardCount", { count: deck.cardCount })}</dd>
         <dt>{t("libraryDeck.studied")}</dt>
@@ -166,9 +181,11 @@ export function LibraryDeckScreen({
             {busy ? t("libraryDeck.importing") : t("libraryDeck.import")}
           </button>
         )}
-        <a class="button" href={previewHref}>
-          {t("libraryDeck.preview")}
-        </a>
+        {previewHref !== undefined && (
+          <a class="button" href={previewHref}>
+            {t("libraryDeck.preview")}
+          </a>
+        )}
         {imported && deck.isCourse !== true && (
           <span class="hint library-imported">{t("libraryDeck.alreadyImported")}</span>
         )}

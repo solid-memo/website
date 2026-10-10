@@ -95,3 +95,13 @@ describe.each(releases)("decks/%s", (path) => {
     }
   });
 });
+
+it("reads each deck's current release on its own, as from a link, as the index describes it", async () => {
+  for (const deck of await library.listLibraryDecks()) {
+    const { releases, forNewcomers: _forNewcomers, sources, ...described } = deck;
+    const { sources: own, ...read } = await library.readRelease(deck.url);
+    expect(read, deck.url).toEqual({ ...described, releases: [releases.find((release) => release.url === deck.url)] });
+    // The index describes a source as every release does, the release as it does.
+    expect(own.map((source) => source.url), deck.url).toEqual(sources.map((source) => source.url));
+  }
+});

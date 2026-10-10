@@ -6,7 +6,7 @@ import { ErrorMessage } from "./ErrorMessage";
 import { useI18n } from "./i18n";
 import { forgetLibrarySelection, LibraryScreen } from "./LibraryScreen";
 import { Loading } from "./Loading";
-import { libraryDeckHref, libraryPreviewHref } from "./router";
+import { importUrlHref, libraryDeckHref, libraryPreviewHref } from "./router";
 
 /**
  * Owns the library listing and the import mutation for one instance;
@@ -70,6 +70,7 @@ export function LibraryContainer({
       decks={libraryQuery.data}
       deckHref={(deck) => libraryDeckHref(instance.url, deck.seriesUrl)}
       previewHref={(deck) => libraryPreviewHref(instance.url, deck.seriesUrl)}
+      importUrlHref={importUrlHref(instance.url)}
       isImported={(deck) => podDecks.some((podDeck) => isCopyOf(podDeck, deck))}
       busy={importMutation.isPending}
       error={errorText(importMutation.error)}

@@ -2,7 +2,7 @@ import { useState } from "preact/hooks";
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import type { StepPart, DeckUpgradeOutcome } from "@solid-memo/domain/deckUpgrade";
 import type { Instance } from "@solid-memo/domain/instance";
-import type { LibraryCard, LibraryCopy } from "@solid-memo/domain/library";
+import { releaseHost, type LibraryCard, type LibraryCopy } from "@solid-memo/domain/library";
 import type { LibraryUpgradePlan } from "@solid-memo/domain/libraryUpgrade";
 import type { ReadOnlyReason } from "@solid-memo/ui/dataCheck";
 import { cardName } from "@solid-memo/ui/DataText";
@@ -54,7 +54,10 @@ const CHANGES = ["add", "change", "retire", "restore", "remove", "kept"] as cons
  * being upgraded, with its steps, then how each upgrade ended. Only a
  * deck that may be changed (`selectable`) can be: none while the
  * instance's data is being checked, and none set aside, which a line
- * says (`readOnly`), with a link to the health (`healthHref`).
+ * says (`readOnly`), with a link to the health (`healthHref`). A copy of
+ * a release added from a link says the host it came from; whether a
+ * newer version of it is out is unknown when its creator's catalogue
+ * cannot be read.
  */
 export function LibraryCopiesScreen({
   instance,
@@ -100,7 +103,7 @@ export function LibraryCopiesScreen({
     );
   }
 
-  const planOf = (row: CopyRow) => (row.copy.newer && typeof row.plan === "object" && row.plan !== null ? row.plan : null);
+  const planOf = (row: CopyRow) => (row.copy.newer === true && typeof row.plan === "object" && row.plan !== null ? row.plan : null);
   const upgradable = rows.flatMap((row) => {
     const plan = planOf(row);
     return plan === null || !selectable(row.copy.deck) ? [] : [{ deck: row.copy.deck, plan }];
@@ -198,6 +201,9 @@ export function LibraryCopiesScreen({
                     <a href={deckHref(deck)}>
                       <ReaderText text={deck.title} />
                     </a>
+                    {row.copy.fromLink === true && (
+                      <span class="studio-badge">{t("studio.decks.badge.from", { host: releaseHost(deck.sourceUrl!) })}</span>
+                    )}
                   </th>
                   <td>{version === null ? <span class="hint">{t("studio.library.unknown")}</span> : t("studio.library.release", { version })}</td>
                   <td>
@@ -208,7 +214,9 @@ export function LibraryCopiesScreen({
                     )}
                   </td>
                   <td>
-                    {series === null ? null : !row.copy.newer ? (
+                    {series === null ? null : row.copy.newer === "unknown" ? (
+                      <span class="hint">{t("studio.library.newerUnknown")}</span>
+                    ) : !row.copy.newer ? (
                       t("studio.library.upToDate")
                     ) : row.plan === "loading" ? (
                       <>

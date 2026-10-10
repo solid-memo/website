@@ -1,10 +1,11 @@
 import { useState } from "preact/hooks";
-import { hashKey, useMutation, useQuery, useQueryClient, type UseQueryResult } from "@tanstack/react-query";
+import { hashKey, useMutation, useQueries, useQuery, useQueryClient, type UseQueryResult } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import { applyDeckTreeEdit, type DeckGroup, type DeckTree, type DeckTreeEdit, type TreeNode } from "@solid-memo/domain/deckTree";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { LangText } from "@solid-memo/domain/langText";
+import { isCopyOf, releaseHost } from "@solid-memo/domain/library";
 import { librarySeriesUrlOf } from "@solid-memo/domain/libraryLayout";
 import { useI18n, type ErrorText } from "./i18n";
 import { collapsedGroups, rememberCollapsed } from "./remembered";
@@ -203,11 +204,19 @@ export function useDeckTreeEditor(
 }
 
 /**
- * Which of the decks are copies of a course (docs/courses.md): the
- * library says which of its decks are courses, read once some deck is a
- * library copy (only then, and once: ["library"]).
+ * What the decks that are copies are copies of: which are copies of a
+ * course (docs/courses.md), and where those added from a link came from.
+ * The library says which of its decks are courses, read once some deck
+ * is a copy (only then, and once: ["library"]). A copy whose series the
+ * library does not list is of a release added from a link
+ * (docs/deck-library.md, From a link): `linkedHost` names the host it
+ * came from, and its own release, read once (["deckRelease"]), says
+ * whether it is a course.
  */
-export function useCourseCopies(useCases: UseCases, decks: readonly Deck[]): (deck: Deck) => boolean {
+export function useCopies(
+  useCases: UseCases,
+  decks: readonly Deck[],
+): { isCourse: (deck: Deck) => boolean; linkedHost: (deck: Deck) => string | null } {
   const isCopy = decks.some((deck) => deck.sourceUrl !== undefined);
   const libraryQuery = useQuery({
     queryKey: ["library"],
@@ -215,8 +224,25 @@ export function useCourseCopies(useCases: UseCases, decks: readonly Deck[]): (de
     enabled: isCopy,
     refetchOnWindowFocus: false,
   });
-  const courses = new Set(
-    (libraryQuery.data ?? []).filter((deck) => deck.isCourse === true).map((deck) => deck.seriesUrl),
-  );
-  return (deck) => deck.sourceUrl !== undefined && courses.has(librarySeriesUrlOf(deck.sourceUrl));
+  const library = libraryQuery.data;
+  const linked =
+    library === undefined
+      ? []
+      : decks.filter((deck) => deck.sourceUrl !== undefined && !library.some((libraryDeck) => isCopyOf(deck, libraryDeck)));
+  const releaseQueries = useQueries({
+    queries: linked.map((deck) => ({
+      queryKey: ["deckRelease", deck.sourceUrl],
+      queryFn: () => useCases.deckRelease(deck),
+      staleTime: Infinity,
+      refetchOnWindowFocus: false,
+    })),
+  });
+  const courses = new Set((library ?? []).filter((deck) => deck.isCourse === true).map((deck) => deck.seriesUrl));
+  const linkedSources = new Set(linked.map((deck) => deck.sourceUrl!));
+  const linkedCourses = new Set(linked.filter((_, at) => releaseQueries[at]!.data?.isCourse === true).map((deck) => deck.sourceUrl!));
+  return {
+    isCourse: (deck) =>
+      deck.sourceUrl !== undefined && (courses.has(librarySeriesUrlOf(deck.sourceUrl)) || linkedCourses.has(deck.sourceUrl)),
+    linkedHost: (deck) => (deck.sourceUrl !== undefined && linkedSources.has(deck.sourceUrl) ? releaseHost(deck.sourceUrl) : null),
+  };
 }

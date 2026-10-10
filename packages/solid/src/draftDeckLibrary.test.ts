@@ -31,4 +31,11 @@ describe("createDraftDeckLibrary", () => {
     expect((await library.fetchCourseOutline(DRAFT)).chapters).toEqual([]);
     await expect(library.fetchLibraryDeck("https://pod.example/other.ttl")).rejects.toMatchObject({ code: "releaseUnreadable" });
   });
+
+  it("reads the draft on its own as it lists it, published nowhere yet", async () => {
+    const library = createDraftDeckLibrary(deckDraft());
+    expect(await library.readRelease(DRAFT)).toEqual((await library.listLibraryDecks())[0]);
+    await expect(library.readRelease("https://pod.example/other.ttl")).rejects.toMatchObject({ code: "releaseUnreadable" });
+    expect(await library.publishedBeside(DRAFT)).toBeNull();
+  });
 });

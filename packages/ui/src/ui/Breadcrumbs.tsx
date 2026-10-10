@@ -61,6 +61,7 @@ export function breadcrumbsFor(route: RouteRef, names: CrumbNames, t: I18n["t"])
     route: { screen: "library", instanceUrl: route.instanceUrl },
   };
   if (route.screen === "library") return [decks, library];
+  if (route.screen === "importUrl") return [decks, library, { label: t("breadcrumbs.importUrl"), route }];
   if (
     route.screen === "libraryDeck" ||
     route.screen === "libraryBrowser" ||

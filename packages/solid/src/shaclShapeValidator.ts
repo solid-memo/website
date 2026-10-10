@@ -34,7 +34,7 @@ import { releaseQuadsOf } from "./solidReleaseDraftRepository";
 export interface ShaclShapeValidatorDeps {
   /** Fetches pod documents (authenticated). */
   fetch: typeof globalThis.fetch;
-  /** Fetches the shape documents, the reference data, the profiles and a library's index, all public (plain). */
+  /** Fetches the shape documents, the reference data, the profiles, a library's index and a release checked on its own, all public (plain). */
   shapesFetch: typeof globalThis.fetch;
   /** Where the shapes are published (SHAPES_BASE). */
   shapesBaseUrl: string;
@@ -325,7 +325,8 @@ export function createShaclShapeValidator({
     },
 
     async validateDocument(url, context = "pod"): Promise<DocumentReport> {
-      return reportOf(url, await getSolidDatasetOrNull(url, podFetch), context);
+      // A release is public: read as anyone reads it, as a library's index is, with no login sent to its host.
+      return reportOf(url, await getSolidDatasetOrNull(url, context === "library" ? shapesFetch : podFetch), context);
     },
 
     async validateDocumentSince(url, version, context = "pod") {

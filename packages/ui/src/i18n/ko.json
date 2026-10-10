@@ -118,7 +118,8 @@
     "statistics": "통계",
     "course": "코스",
     "courseReview": "마무리 복습",
-    "groups": "그룹"
+    "groups": "그룹",
+    "importUrl": "링크로 추가"
   },
   "browser": {
     "heading": "카드 브라우저: {deck}",
@@ -441,7 +442,9 @@
     "deckDeleted": "‘{name}’ 덱을 삭제했어요.",
     "afterGroup": "‘{group}’ 그룹 다음",
     "dragCancelled": "이동을 취소했어요. 덱이나 그룹은 원래 자리에 그대로 있어요.",
-    "continueCourse": "코스 계속하기"
+    "continueCourse": "코스 계속하기",
+    "fromHost": "{host}에서 가져옴",
+    "fromLink": "링크로 추가"
   },
   "studyPace": {
     "startSmall": "새 카드는 모두 이후 며칠 동안 복습 카드로 다시 나와요. 그래서 지금 숫자를 크게 잡으면 나중에 복습이 쌓여요. 작게 시작해서 꾸준히 하는 편이 좋아요. 언제든 늘릴 수 있어요."
@@ -643,7 +646,9 @@
     },
     "importing": "가져오는 중…",
     "loading": "덱 라이브러리를 불러오는 중…",
-    "course": "코스"
+    "course": "코스",
+    "fromLink": "링크로 추가",
+    "fromLinkHint": "누군가 자기 Pod에 게시한 덱이나 코스를 공유해 주었나요? {link}."
   },
   "libraryBrowser": {
     "heading": "카드: {deck}",
@@ -694,7 +699,11 @@
     "courseChapters": "코스예요. 짧은 설명마다 질문으로 이해도를 확인해요. 답한 질문은 모두 덱의 카드가 돼요.",
     "startCourse": "코스 시작하기",
     "continueCourse": "코스 계속하기",
-    "starting": "시작하는 중…"
+    "starting": "시작하는 중…",
+    "host": "게시 위치",
+    "kind": "종류",
+    "kindCourse": "코스",
+    "kindDeck": "덱"
   },
   "libraryPreview": {
     "heading": "미리보기: {deck}",
@@ -1269,7 +1278,12 @@
     },
     "draftReleased": "이 초안은 이미 {url}에 릴리스되어 더 이상 바뀌지 않아요. 대신 다음 버전을 시작해 주세요.",
     "guestCannotPublish": "게스트 학습은 이 브라우저에만 저장되어 다른 사람이 릴리스를 읽을 수 없어요. 게시하려면 학습을 Pod로 옮기거나, 릴리스를 파일로 다운로드해 주세요.",
-    "publicAccessRefused": "Pod가 Solid Memo에게 {url}의 릴리스를 공개하도록 허용하지 않아서 나만 읽을 수 있어요. 다시 시도하거나, Pod 제공자의 도구로 모든 사람이 읽을 수 있게 설정해 주세요."
+    "publicAccessRefused": "Pod가 Solid Memo에게 {url}의 릴리스를 공개하도록 허용하지 않아서 나만 읽을 수 있어요. 다시 시도하거나, Pod 제공자의 도구로 모든 사람이 읽을 수 있게 설정해 주세요.",
+    "releaseUrlInvalid": "릴리스 주소가 아니에요. https:// 또는 http://로 시작하는 전체 주소를 붙여 넣어 주세요.",
+    "releaseNotConforming": {
+      "one": "{host}의 릴리스가 {count}곳에서 Solid Memo의 규칙을 어겨서 추가할 수 없어요. 만든 사람에게 확인을 요청해 주세요.",
+      "other": "{host}의 릴리스가 {count}곳에서 Solid Memo의 규칙을 어겨서 추가할 수 없어요. 만든 사람에게 확인을 요청해 주세요."
+    }
   },
   "statistics": {
     "heading": "통계",
@@ -1359,7 +1373,8 @@
         "library": "라이브러리",
         "course": "코스",
         "invalid": "잘못된 데이터",
-        "unreadable": "읽을 수 없음"
+        "unreadable": "읽을 수 없음",
+        "from": "{host}에서 가져옴"
       },
       "healthLink": "상태 점검",
       "libraryLink": "라이브러리 복사본",
@@ -1908,7 +1923,8 @@
       "updated": "{deck}: 릴리스 {version}(으)로 업데이트했어요.",
       "failed": "{deck}: ‘{step}’ 단계에서 업데이트에 실패했어요:",
       "badge": "릴리스 {version} 나옴",
-      "badgeOf": "{deck}의 새 릴리스"
+      "badgeOf": "{deck}의 새 릴리스",
+      "newerUnknown": "알 수 없음: 만든 사람의 공개 카탈로그 어디에도 없어요"
     },
     "transfer": {
       "crumb": "가져오기와 내보내기",
@@ -2567,5 +2583,13 @@
     "markdownHint": "제목, 목록, 코드, 표, 링크를 코스 플레이어에서 보이는 그대로 써요. 끄면 입력한 그대로 표시되고, 빈 줄로 새 문단을 시작해요.",
     "preview": "{field} 미리보기",
     "empty": "아직 표시할 내용이 없어요."
+  },
+  "importUrl": {
+    "heading": "링크로 추가",
+    "intro": "누구나 자신의 Pod에 덱이나 코스를 게시할 수 있어요. 릴리스 링크를 붙여 넣어 무엇인지 확인한 다음, 덱 라이브러리에서처럼 내 덱에 추가해 보세요.",
+    "label": "릴리스 링크",
+    "show": "보기",
+    "reading": "릴리스를 읽고 확인하는 중…",
+    "notLibrary": "이것은 Solid Memo의 덱 라이브러리에 없어요. {host}에 게시된 것이에요. Solid Memo는 읽을 수 있는지만 확인했고, 내용은 확인하지 않았어요. 내 사본은 어디서 왔는지 기억하고, 그곳에는 아무것도 쓰지 않아요."
   }
 }

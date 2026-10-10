@@ -1,6 +1,20 @@
 import { expect } from "@playwright/test";
 import { test } from "../fixtures.ts";
+import { logInAndCreateInstance } from "../flows/logIn.ts";
 import { BRIGHTEST_STARS } from "../pages/Library.ts";
+
+// The second journey adds what the first publishes: they run in turn, the second only after the first passed.
+test.describe.configure({ mode: "serial" });
+
+/** The course the Studio journey published, at its address: what the next journey adds from a link. */
+let published: { url: string; title: string } | null = null;
+
+/** The course the Studio journey writes: its one chapter, its step's theory, and its questions by their right answers. */
+const COURSE = {
+  chapter: "Pods",
+  theory: "A pod is where your data lives.",
+  answers: { "Where does your data live?": "In a pod", "Who chooses the app?": "You do" },
+};
 
 /**
  * Solid Memo Studio in Solid Memo's page (docs/studio.md): a visitor
@@ -312,10 +326,7 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     await app.studio.openDrafts(renamed);
     await app.draftEditor.openDraft(authored);
     await app.trial.open(authored);
-    await app.trial.playToTheEnd("Pods", "A pod is where your data lives.", {
-      "Where does your data live?": "In a pod",
-      "Who chooses the app?": "You do",
-    });
+    await app.trial.playToTheEnd(COURSE.chapter, COURSE.theory, COURSE.answers);
   });
 
   await app.step("32 · The instance's decks and Solid Memo's statistics are as they were", async () => {
@@ -375,11 +386,43 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     await anyone.dispose();
     await app.studio.openReleases(renamed);
     await app.studio.expectRelease(renamed, url, `authored-${runId}`, 1);
+    published = { url, title: authored };
   });
 
   await app.step("36 · Go back to Solid Memo, still logged in", async () => {
     await app.studio.backToApp();
     await app.chrome.expectLoggedInAs(account.webId);
     await app.decks.expectDeck(alpha);
+  });
+});
+
+/**
+ * A course published in a pod, added from its link by someone else
+ * (docs/deck-library.md, From a link): another user, with an account and
+ * a pod of their own, opens "Add from a link" from their empty deck list
+ * and pastes the address of the course the Studio journey published.
+ * The release is read and shown, with the host it is published on, as a
+ * course. They start it, and play its chapter to the end of its final
+ * review, as a library course is played. Their deck list then says where
+ * the course came from.
+ */
+test("add a course published in a pod from its link, as another user, and play its chapter @studio", async ({ app, account, runId }) => {
+  const course = published;
+  expect(course, "the Studio journey, just before, publishes the course").not.toBeNull();
+  const { url, title } = course!;
+
+  await app.step("01 · Visit Solid Memo", () => app.onboarding.visit());
+  await app.step("02 · Log in as another user and create an instance", () => logInAndCreateInstance(app, account, `Learner ${runId}`));
+  await app.step("03 · Paste the course's link: what it is, and where it is published", async () => {
+    await app.importUrl.openFromDeckList();
+    await app.importUrl.showCourse(url, title);
+  });
+  await app.step("04 · Start the course and play its chapter to the end of its final review", async () => {
+    await app.importUrl.startCourse(title);
+    await app.course.playChapter(COURSE.chapter, COURSE.theory, COURSE.answers);
+  });
+  await app.step("05 · Back at Decks: the course says where it came from", async () => {
+    await app.chrome.breadcrumb("breadcrumbs.decks");
+    await app.decks.expectDeckFrom(title, new URL(url).host);
   });
 });

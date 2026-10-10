@@ -18,8 +18,9 @@ export const DRAG_CLASS: Record<RowDrag, string> = {
 
 /**
  * A deck in the deck list: its name, a link all over the row to its
- * page, what it offers today (`action`), and last the menu of what can
- * be done with it (`menu`). While the deck is being renamed, an inline
+ * page, the host a copy of a release added from a link came from
+ * (`fromHost`), what it offers today (`action`), and last the menu of
+ * what can be done with it (`menu`). While the deck is being renamed, an inline
  * field stands in for the link. The whole row is a handle to drag it by
  * (deckTree/useDragReorder.ts), `drag` saying what part it takes in a
  * drag.
@@ -29,6 +30,7 @@ export function DeckRow({
   depth,
   drag,
   href,
+  fromHost = null,
   action,
   naming,
   onNamed,
@@ -39,6 +41,8 @@ export function DeckRow({
   depth: number;
   drag?: RowDrag;
   href: string;
+  /** The host the release the deck is a copy of was added from, by a link; none for any other deck. */
+  fromHost?: string | null;
   action: ComponentChildren;
   /** Whether the name field is open. */
   naming: boolean;
@@ -56,6 +60,7 @@ export function DeckRow({
         <a class="deck-open" href={href} draggable={false}>
           <DeckIcon />
           <ReaderText text={deck.title} />
+          {fromHost !== null && <span class="hint deck-source">{t("deckList.fromHost", { host: fromHost })}</span>}
         </a>
       )}
       <span class="deck-meta">{action}</span>

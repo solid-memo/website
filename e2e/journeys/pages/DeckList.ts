@@ -73,6 +73,11 @@ export class DeckList extends Screen {
     await expect(this.heading).toBeVisible();
   }
 
+  /** Expects the deck named `name` in the list, a copy of a release added from a link, saying the host it came from. */
+  async expectDeckFrom(name: string, host: string): Promise<void> {
+    await expect(this.deckLink(`${name} ${this.t("deckList.fromHost", { host })}`)).toBeVisible();
+  }
+
   async expectDeck(name: string): Promise<void> {
     await expect(this.deckLink(name)).toBeVisible();
   }

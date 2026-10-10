@@ -9,7 +9,7 @@ import type { Instance } from "@solid-memo/domain/instance";
 import { setAsideDecks } from "@solid-memo/domain/validation";
 import { useDataCheck } from "@solid-memo/ui/dataCheck";
 import { studyCountsQuery } from "@solid-memo/ui/DeckStudyAction";
-import { catalogScope, deckTreeKey, useCourseCopies } from "@solid-memo/ui/deckTreeEditor";
+import { catalogScope, deckTreeKey, useCopies } from "@solid-memo/ui/deckTreeEditor";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
@@ -30,8 +30,9 @@ type Bulk =
  * instance's preferences (the pace a deck without its own follows),
  * then each deck's cards and today's counts, read as Solid Memo reads
  * them, each row's figures as they come. The check of the instance
- * (as Solid Memo makes it when it is opened) and which decks are
- * courses come in later, as badges; each deck's health (HealthBadge),
+ * (as Solid Memo makes it when it is opened), which decks are courses
+ * and which are copies of a release added from a link, with the host it
+ * came from (useCopies), come in later, as badges; each deck's health (HealthBadge),
  * and for a library copy whether a newer release is out (UpdateBadge),
  * only once its row is on the screen.
  *
@@ -104,7 +105,7 @@ export function DeckTableContainer({
   const countQueries = useQueries({
     queries: decks.map((deck) => studyCountsQuery(useCases, instance.url, deck)),
   });
-  const isCourse = useCourseCopies(useCases, decks);
+  const { isCourse, linkedHost } = useCopies(useCases, decks);
 
   const bulkMutation = useMutation({
     scope: { id: catalogScope(instance.url) },
@@ -173,7 +174,11 @@ export function DeckTableContainer({
     return (figure === "cards" ? cards : counts).isError ? "unreadable" : "loading";
   };
   const badges = (deck: Deck): DeckBadge[] => [
-    ...(deck.sourceUrl === undefined ? [] : [isCourse(deck) ? ("course" as const) : ("library" as const)]),
+    ...(deck.sourceUrl === undefined
+      ? []
+      : linkedHost(deck) === null
+        ? [isCourse(deck) ? ("course" as const) : ("library" as const)]
+        : [...(isCourse(deck) ? ["course" as const] : []), { from: linkedHost(deck)! }]),
     ...(report !== null && setAsideDecks(report, [deck]).size > 0 ? ["invalid" as const] : []),
     ...(queries(deck).cards.isError ? ["unreadable" as const] : []),
   ];

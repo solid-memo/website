@@ -8,7 +8,7 @@ import type { Card, Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import { studyDayOf } from "@solid-memo/domain/scheduling";
 import { useDataCheck } from "@solid-memo/ui/dataCheck";
-import { useCourseCopies } from "@solid-memo/ui/deckTreeEditor";
+import { useCopies } from "@solid-memo/ui/deckTreeEditor";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
@@ -104,7 +104,7 @@ export function CardWorkbenchContainer({
   const answers = answersQuery.data;
   const lapses = useMemo(() => (answers === undefined ? undefined : lapseIndex(deckAnswers(answers, deck))), [answers, deck]);
   const needsLapses = query.state === "leech" || query.sort?.key === "lapses";
-  const isCourse = useCourseCopies(useCases, [deck]);
+  const isCourse = useCopies(useCases, [deck]).isCourse;
   const cards = cardsQuery.data;
   const plain = useMemo(() => plainTexts(), [cards]);
   const today = preferencesQuery.data === undefined ? undefined : studyDayOf(new Date(), preferencesQuery.data.dayBoundaryHour);

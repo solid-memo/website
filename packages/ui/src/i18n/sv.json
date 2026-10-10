@@ -118,7 +118,8 @@
     "statistics": "Statistik",
     "course": "Kurs",
     "courseReview": "Slutrepetition",
-    "groups": "Grupper"
+    "groups": "Grupper",
+    "importUrl": "Lägg till från en länk"
   },
   "browser": {
     "heading": "Bläddra: {deck}",
@@ -441,7 +442,9 @@
     "deckDeleted": "Tog bort kortleken ”{name}”.",
     "afterGroup": "efter {group}",
     "dragCancelled": "Flytten avbröts: kortleken eller gruppen ligger kvar där den låg.",
-    "continueCourse": "Fortsätt kursen"
+    "continueCourse": "Fortsätt kursen",
+    "fromHost": "från {host}",
+    "fromLink": "Lägg till från en länk"
   },
   "studyPace": {
     "startSmall": "Varje nytt kort kommer tillbaka för repetition de följande dagarna, så ett högt antal nu ger en hög med repetitioner senare. Börja hellre smått och var regelbunden: du kan alltid öka sen."
@@ -640,7 +643,9 @@
     },
     "importing": "Importerar…",
     "loading": "Läser in kortleksbiblioteket…",
-    "course": "Kurs"
+    "course": "Kurs",
+    "fromLink": "Lägg till från en länk",
+    "fromLinkHint": "Har någon delat en kortlek eller en kurs som de publicerat i sin Pod? {link}."
   },
   "libraryBrowser": {
     "heading": "Kort: {deck}",
@@ -691,7 +696,11 @@
     "courseChapters": "En kurs: korta avsnitt teori, vart och ett följt av en fråga. Varje fråga du besvarar blir ett kort i din kortlek.",
     "startCourse": "Börja kursen",
     "continueCourse": "Fortsätt kursen",
-    "starting": "Startar…"
+    "starting": "Startar…",
+    "host": "Publicerad på",
+    "kind": "Typ",
+    "kindCourse": "Kurs",
+    "kindDeck": "Kortlek"
   },
   "libraryPreview": {
     "heading": "Förhandsvisning: {deck}",
@@ -1266,7 +1275,12 @@
     },
     "draftReleased": "Utkastet är redan utgivet, på {url}, och ändras inte längre. Påbörja nästa version i stället.",
     "guestCannotPublish": "En gästs studier finns bara i den här webbläsaren, där ingen annan kan läsa en utgåva. Flytta dina studier till en Pod för att publicera den, eller ladda ner utgåvan som en fil.",
-    "publicAccessRefused": "Din Pod lät inte Solid Memo göra utgåvan på {url} offentlig, så bara du kan läsa den. Försök igen, eller gör den läsbar för alla med verktygen hos din Pod-leverantör."
+    "publicAccessRefused": "Din Pod lät inte Solid Memo göra utgåvan på {url} offentlig, så bara du kan läsa den. Försök igen, eller gör den läsbar för alla med verktygen hos din Pod-leverantör.",
+    "releaseUrlInvalid": "Det är inte adressen till en utgåva. Klistra in hela adressen, som börjar med https:// eller http://.",
+    "releaseNotConforming": {
+      "one": "Utgåvan på {host} bryter mot Solid Memos regler på {count} ställe, så den kan inte läggas till. Be den som gjort den att kontrollera den.",
+      "other": "Utgåvan på {host} bryter mot Solid Memos regler på {count} ställen, så den kan inte läggas till. Be den som gjort den att kontrollera den."
+    }
   },
   "statistics": {
     "heading": "Statistik",
@@ -1356,7 +1370,8 @@
         "library": "Bibliotek",
         "course": "Kurs",
         "invalid": "Ogiltiga data",
-        "unreadable": "Oläslig"
+        "unreadable": "Oläslig",
+        "from": "Från {host}"
       },
       "healthLink": "Hälsa",
       "libraryLink": "Kopior från biblioteket",
@@ -1857,7 +1872,7 @@
       "empty": "Ingen kortlek här är en kopia av en kortlek från biblioteket. Hitta en i {library}.",
       "libraryLink": "kortleksbiblioteket",
       "browse": "Bläddra i kortleksbiblioteket",
-      "intro": "Varje kortlek som kopierats från kortleksbiblioteket, utgåvan den kom från och bibliotekets nuvarande. En uppdatering för över bibliotekets ändringar till de kort som du har lämnat som biblioteket hade dem; din repetitionshistorik behålls.",
+      "intro": "Varje kortlek som kopierats från kortleksbiblioteket eller lagts till från en länk, utgåvan den kom från och den senaste. En uppdatering för över utgåvans ändringar till de kort som du har lämnat som utgåvan hade dem; din repetitionshistorik behålls.",
       "upgrade": {
         "one": "Uppdatera {count} kortlek",
         "other": "Uppdatera {count} kortlekar"
@@ -1905,7 +1920,8 @@
       "updated": "{deck}: uppdaterad till utgåva {version}.",
       "failed": "{deck}: uppdateringen misslyckades i steget ”{step}”:",
       "badge": "Utgåva {version} finns",
-      "badgeOf": "för {deck}"
+      "badgeOf": "för {deck}",
+      "newerUnknown": "Okänt: ingen offentlig katalog hos skaparen listar den"
     },
     "transfer": {
       "crumb": "Importera och exportera",
@@ -2561,5 +2577,13 @@
     "markdownHint": "Rubriker, listor, kod, tabeller och länkar, så som kursspelaren visar dem. Avstängt visas texten som den skrivs, och en tom rad börjar ett nytt stycke.",
     "preview": "Förhandsvisning av {field}",
     "empty": "Inget att visa än."
+  },
+  "importUrl": {
+    "heading": "Lägg till från en länk",
+    "intro": "Vem som helst kan publicera en kortlek eller en kurs i sin Pod. Klistra in länken till dess utgåva för att se vad den är, och lägg sedan till den bland dina kortlekar som en från biblioteket.",
+    "label": "Länk till utgåvan",
+    "show": "Visa",
+    "reading": "Läser och kontrollerar utgåvan…",
+    "notLibrary": "Den här finns inte i Solid Memos bibliotek: den är publicerad på {host}. Solid Memo har kontrollerat att den går att läsa, inte vad den säger. Din kopia minns var den kom ifrån, och inget skrivs där."
   }
 }

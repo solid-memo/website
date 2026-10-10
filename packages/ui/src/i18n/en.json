@@ -118,7 +118,8 @@
     "statistics": "Statistics",
     "course": "Course",
     "courseReview": "Final review",
-    "groups": "Groups"
+    "groups": "Groups",
+    "importUrl": "Add from a link"
   },
   "browser": {
     "heading": "Browser: {deck}",
@@ -441,7 +442,9 @@
     "deckDeleted": "Deleted the deck \"{name}\".",
     "afterGroup": "after {group}",
     "dragCancelled": "Move cancelled: the deck or group stays where it was.",
-    "continueCourse": "Continue course"
+    "continueCourse": "Continue course",
+    "fromHost": "from {host}",
+    "fromLink": "Add from a link"
   },
   "studyPace": {
     "startSmall": "Every new card comes back for reviews in the days that follow, so a high number now piles up reviews later. Better to start small and be consistent: you can always raise it."
@@ -643,7 +646,9 @@
     },
     "importing": "Importing…",
     "loading": "Loading the deck library…",
-    "course": "Course"
+    "course": "Course",
+    "fromLink": "Add from a link",
+    "fromLinkHint": "Has someone shared a deck or a course they published in their Pod? {link}."
   },
   "libraryBrowser": {
     "heading": "Cards: {deck}",
@@ -694,7 +699,11 @@
     "courseChapters": "A course: short pieces of theory, each checked by a question. Every question you answer becomes a card in your deck.",
     "startCourse": "Start course",
     "continueCourse": "Continue course",
-    "starting": "Starting…"
+    "starting": "Starting…",
+    "host": "Published on",
+    "kind": "Kind",
+    "kindCourse": "Course",
+    "kindDeck": "Deck"
   },
   "libraryPreview": {
     "heading": "Preview: {deck}",
@@ -1269,7 +1278,12 @@
     },
     "draftReleased": "This draft was released already, at {url}, and is no longer changed. Start its next version instead.",
     "guestCannotPublish": "A guest's study is kept in this browser alone, where no one else can read a release. Move your study into a Pod to publish it, or download the release as a file.",
-    "publicAccessRefused": "Your Pod did not let Solid Memo make the release at {url} public, so only you can read it. Try again, or make it readable by everyone with your Pod provider's tools."
+    "publicAccessRefused": "Your Pod did not let Solid Memo make the release at {url} public, so only you can read it. Try again, or make it readable by everyone with your Pod provider's tools.",
+    "releaseUrlInvalid": "That is not the address of a release. Paste its whole address, starting with https:// or http://.",
+    "releaseNotConforming": {
+      "one": "The release on {host} breaks Solid Memo's rules in {count} place, so it cannot be added. Ask its creator to check it.",
+      "other": "The release on {host} breaks Solid Memo's rules in {count} places, so it cannot be added. Ask its creator to check it."
+    }
   },
   "statistics": {
     "heading": "Statistics",
@@ -1359,7 +1373,8 @@
         "library": "Library",
         "course": "Course",
         "invalid": "Invalid data",
-        "unreadable": "Unreadable"
+        "unreadable": "Unreadable",
+        "from": "From {host}"
       },
       "healthLink": "Health",
       "libraryLink": "Library copies",
@@ -1860,7 +1875,7 @@
       "empty": "No deck here is a copy of a library deck. Find one in {library}.",
       "libraryLink": "the deck library",
       "browse": "Browse the deck library",
-      "intro": "Each deck copied from the deck library, the release it came from and the library's current one. Updating a deck applies the library's changes to the cards you have left as it had them; your review history is kept.",
+      "intro": "Each deck copied from the deck library or added from a link, the release it came from and the newest one out. Updating a deck applies the release's changes to the cards you have left as it had them; your review history is kept.",
       "upgrade": {
         "one": "Update {count} deck",
         "other": "Update {count} decks"
@@ -1908,7 +1923,8 @@
       "updated": "{deck}: updated to release {version}.",
       "failed": "{deck}: the update failed while {step}:",
       "badge": "Release {version} out",
-      "badgeOf": "for {deck}"
+      "badgeOf": "for {deck}",
+      "newerUnknown": "Not known: no public catalogue of its creator lists it"
     },
     "transfer": {
       "crumb": "Import and export",
@@ -2564,5 +2580,13 @@
     "markdownHint": "Headings, lists, code, tables and links, as the course player shows them. Off, the text is shown as typed, a blank line starting a new paragraph.",
     "preview": "Preview of {field}",
     "empty": "Nothing to show yet."
+  },
+  "importUrl": {
+    "heading": "Add from a link",
+    "intro": "Anyone can publish a deck or a course in their Pod. Paste the link to its release to see what it is, then add it to your decks as you would one from the library.",
+    "label": "Link to the release",
+    "show": "Show",
+    "reading": "Reading and checking the release…",
+    "notLibrary": "This is not in Solid Memo's library: it is published on {host}. Solid Memo checked that it can read it, not what it says. Your copy remembers where it came from, and nothing is written there."
   }
 }

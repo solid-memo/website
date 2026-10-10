@@ -3,7 +3,7 @@ import { decksOf } from "@solid-memo/domain/deckTree";
 import type { Instance } from "@solid-memo/domain/instance";
 import { useDataCheck } from "@solid-memo/ui/dataCheck";
 import { DeckListScreen } from "@solid-memo/ui/DeckListScreen";
-import { useCourseCopies, useDeckTreeEditor } from "@solid-memo/ui/deckTreeEditor";
+import { useCopies, useDeckTreeEditor } from "@solid-memo/ui/deckTreeEditor";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
@@ -38,7 +38,7 @@ export function GroupsContainer({
   const { treeQuery, editor } = useDeckTreeEditor(useCases, instance);
   const check = useDataCheck(useCases, instance.url);
   const decks = decksOf(treeQuery.data?.children ?? []);
-  const isCourse = useCourseCopies(useCases, decks);
+  const isCourse = useCopies(useCases, decks).isCourse;
 
   if (treeQuery.error) return <ErrorMessage error={errorText(treeQuery.error)} />;
   if (editor === undefined) return <Loading label={t("deckList.loading")} />;

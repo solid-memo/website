@@ -283,6 +283,13 @@ the shapes, as `pickShape` picks them for a read:
 
 A published release is never written, so no write is checked as one.
 
+A release a learner adds [from a link](deck-library.md#from-a-link) is
+read, not written, and checked as a document in the `"library"` context
+(`validateDocument(url, "library")`): each subject against its library
+shape, no DCAT-AP. It is read as anyone reads it, with the fetch the
+shapes are read with: no login goes to its host. A violation refuses
+the release; a warning does not.
+
 ## Repair
 
 `planRepair` ([domain/repair.ts](../packages/domain/src/repair.ts)) turns a

@@ -40,6 +40,7 @@ function renderScreen(
     memoryKey: `library-test-${++renders}`,
     deckHref: (deck: LibraryDeck) => `#/library-deck?deck=${deck.url}`,
     previewHref: (deck: LibraryDeck) => `#/library-preview?deck=${deck.url}`,
+    importUrlHref: "#/import-url?instance=x",
     isImported: () => false,
     busy: false,
     error: null,
@@ -59,6 +60,11 @@ function importButton() {
 }
 
 describe("LibraryScreen", () => {
+  it("offers to add a deck or course published elsewhere from a link", () => {
+    renderScreen();
+    expect(screen.getByRole("link", { name: "Add from a link" })).toHaveAttribute("href", "#/import-url?instance=x");
+  });
+
   it("lists every deck with its card count under a heading that is no link to this page", () => {
     renderScreen();
     expect(

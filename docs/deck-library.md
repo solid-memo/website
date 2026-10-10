@@ -508,3 +508,77 @@ flowchart LR
   deck's page offers to update the copy card by card, keeping what the
   user changed and their review history
   ([migrations.md](migrations.md#catching-up-with-the-library)).
+
+### From a link
+
+A deck or a course published anywhere, a [release outside the
+library](#a-release-outside-the-library) in its creator's pod say, is
+added by its address: **Add from a link**, on the deck list and the
+library, opens `#/import-url` ([routing.md](routing.md)). Nothing about
+it is special to one creator, host or series: any release this app can
+read is added the same way.
+
+```mermaid
+flowchart LR
+    ui["ImportUrlContainer / ImportUrlScreen<br/>#/import-url?instance=…&url=…"] --> read["readReleaseFromLink"]
+    read --> lib["DeckLibrary.readRelease<br/>(solidDeckLibrary.ts)"]
+    read --> shapes["ShapeValidator.validateDocument<br/>(context library)"]
+    ui --> add["importReleaseFromUrl"]
+    add --> imp["importLibraryDeck / startCourse"]
+    lib -->|plain fetch| rel["any host: …/name/vN.ttl"]
+    shapes -->|plain fetch| rel
+    imp -->|authenticated| pod["the learner's instance"]
+```
+
+- The learner pastes the link. It must be an http(s) address of a
+  document, with no fragment (`releaseUrlOf`). It goes into the URL as
+  the URL standard writes it, a host in capitals or a default port
+  aside, so Back and a bookmark work and the copy names its release one
+  way.
+- `readReleaseFromLink` reads the document with no index
+  (`DeckLibrary.readRelease`, `toStandaloneLibraryDeck` in
+  [libraryMapper.ts](../packages/solid/src/mappers/libraryMapper.ts)):
+  its deck, its cards counted, its creators and licence, and its series
+  with every version the document describes (format 6 describes it in
+  the release; a `decks/` release at an older format lists only
+  itself). It is read afresh each time, never kept: an address may hold
+  anything, now or later.
+- The same read is checked against the library's shapes, as anyone reads
+  it, with no login sent (`validateDocument(url, "library")`). A subject
+  that breaks its shape refuses the release (`releaseNotConforming`);
+  warnings do not. A release in a newer format than the app reads is
+  refused as the library's are.
+- The screen shows the release as the library's page does, with where
+  it is published (its host) and whether it is a deck or a course, and
+  says it is not the library's. Its text is shown as the library's is,
+  any link through `ExternalLink`; its cards and a course's theory, once
+  added, are shown with Markdown's [safety limits](markdown.md), as any
+  data is. There is no card list or preview.
+- `importReleaseFromUrl` then imports a deck (`importLibraryDeck`) or
+  starts a course (`startCourse`). The copy names its release with
+  `prov:wasDerivedFrom <url>`, as a library copy does. Nothing is ever
+  written to the release's host: every write goes to the learner's
+  instance, checked as every write is.
+- A copy whose series the library's index does not list is a copy from
+  a link (`useCopies` in
+  [deckTreeEditor.ts](../packages/ui/src/ui/deckTreeEditor.ts)). The
+  deck list says "from \<host>" after its name, and the Studio's Home a
+  "From \<host>" badge. Its own release says whether it is a course,
+  read once.
+- **Newer versions.** No index lists the versions of a release from a
+  link. The creator's catalogue may: it links what its instance
+  published (`sm:publishedRelease`, [data-model.md](data-model.md)).
+  `DeckLibrary.publishedBeside` looks for it in the folders above the
+  release, nearest first, as anyone reads them, and takes the first
+  catalogue that links the release. Each release it links is read, but
+  those the copy's release lists, which are no newer, and the newest of
+  the same series is the copy's upgrade (`listLibraryUpdates`,
+  `planLibraryUpgrade`, the Studio's
+  [library copies](studio.md#library-copies)). `listLibraryUpdates`
+  reads each release once for all the copies. An instance's catalogue
+  is private unless its owner shares it; then whether a newer version is
+  out is unknown, and the Studio says so.
+- An upgrade from a link reads releases no index lists. Before it is
+  planned, the newer release and each one in between are checked against
+  the library's shapes, as the first was (`checkLinkedRelease`); one
+  that breaks them refuses the upgrade (`releaseNotConforming`).

@@ -30,6 +30,7 @@ import { useDataCheck } from "./dataCheck";
 import { LibraryBrowserContainer } from "./LibraryBrowserContainer";
 import { LibraryCardScreen } from "./LibraryCardScreen";
 import { LibraryContainer } from "./LibraryContainer";
+import { ImportUrlContainer } from "./ImportUrlContainer";
 import { LibraryDeckContainer } from "./LibraryDeckContainer";
 import { LibraryPreviewContainer } from "./LibraryPreviewContainer";
 import { Loading } from "./Loading";
@@ -536,6 +537,19 @@ export function Workspace({
             onDone={() =>
               navigate({ screen: "home", instanceUrl: instanceUrl! })
             }
+            onCourseStarted={(started) =>
+              navigate({ screen: "course", instanceUrl: instanceUrl!, deckUrl: started.url })
+            }
+          />
+        );
+      case "importUrl":
+        return (
+          <ImportUrlContainer
+            useCases={useCases}
+            instance={activeInstance!}
+            url={route.url}
+            onShow={(url) => navigate({ screen: "importUrl", instanceUrl: instanceUrl!, url })}
+            onDone={() => navigate({ screen: "home", instanceUrl: instanceUrl! })}
             onCourseStarted={(started) =>
               navigate({ screen: "course", instanceUrl: instanceUrl!, deckUrl: started.url })
             }

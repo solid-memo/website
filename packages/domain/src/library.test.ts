@@ -4,7 +4,10 @@ import {
   filterLibraryDecks,
   isCopyOf,
   libraryCopiesOf,
+  newestRelease,
   offersNewerRelease,
+  releaseHost,
+  releaseUrlOf,
   topicLabels,
   topicsOf,
   type LibraryDeck,
@@ -43,6 +46,45 @@ describe("isCopyOf", () => {
     expect(isCopyOf({ sourceUrl: "https://solid-memo.com/decks/capitals/v3.ttl" } as Deck, capitals)).toBe(true);
     expect(isCopyOf(deck, http)).toBe(false);
     expect(isCopyOf({} as Deck, capitals)).toBe(false);
+  });
+
+  it("matches a copy of a release published in a pod, its series named after its first version, by the releases it lists", () => {
+    const v1 = "https://alice.example/memo/releases/capitals/v1.ttl";
+    const v2 = "https://alice.example/memo/releases/capitals/v2.ttl";
+    const published = libraryDeck("capitals", [], { url: v2, seriesUrl: `${v1}#series`, releases: [{ url: v1, version: "1" }] });
+    expect(isCopyOf({ sourceUrl: v1 } as Deck, published)).toBe(true);
+    expect(isCopyOf({ sourceUrl: v2 } as Deck, published)).toBe(true);
+    expect(isCopyOf({ sourceUrl: "https://alice.example/memo/releases/capitals/v3.ttl" } as Deck, published)).toBe(false);
+  });
+});
+
+describe("releaseUrlOf and releaseHost", () => {
+  it("take an http(s) address of a document, as the URL standard writes it, and no other", () => {
+    expect(releaseUrlOf("https://alice.example/memo/releases/capitals/v1.ttl")).toBe("https://alice.example/memo/releases/capitals/v1.ttl");
+    expect(releaseUrlOf("http://alice.example/v1.ttl")).toBe("http://alice.example/v1.ttl");
+    expect(releaseUrlOf("https://Alice.example/r/v1.ttl")).toBe("https://alice.example/r/v1.ttl");
+    expect(releaseUrlOf("https://alice.example:443/r/v1.ttl")).toBe("https://alice.example/r/v1.ttl");
+    expect(releaseUrlOf(" https://alice.example/v1.ttl")).toBe("https://alice.example/v1.ttl");
+    for (const text of ["", "capitals", "ftp://alice.example/v1.ttl", "https://alice.example/v1.ttl#it", "https://alice.example/v1.ttl#", "https://alice.example/releases/", "https://alice.example"]) {
+      expect(releaseUrlOf(text), text).toBeNull();
+    }
+  });
+
+  it("name the host a release is published on, with its port", () => {
+    expect(releaseHost("https://alice.example/v1.ttl")).toBe("alice.example");
+    expect(releaseHost("https://127.0.0.1:8443/v1.ttl")).toBe("127.0.0.1:8443");
+  });
+});
+
+describe("newestRelease", () => {
+  const copied = libraryDeck("capitals", [], { version: "1" });
+  it("is the newest release of the copied one's series found, else the copied one", () => {
+    const v2 = { ...copied, url: "v2", version: "2" };
+    const v3 = { ...copied, url: "v3", version: "3" };
+    const other = { ...copied, url: "other", seriesUrl: "elsewhere", version: "9" };
+    expect(newestRelease(copied, [v2, null, v3, other])).toBe(v3);
+    expect(newestRelease(copied, [v3, v2])).toBe(v3);
+    expect(newestRelease(copied, [other, null])).toBe(copied);
   });
 });
 

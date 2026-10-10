@@ -23,8 +23,12 @@ import { ReadOnlyNotice } from "./ReadOnly";
 /** One figure of a deck's row: a number, or why there is none yet. */
 export type Count = number | "loading" | "unreadable";
 
-/** What a deck is, beside its name: a copy of a library deck or of a course, or one whose data is invalid or could not be read. */
-export type DeckBadge = "library" | "course" | "invalid" | "unreadable";
+/**
+ * What a deck is, beside its name: a copy of a library deck or of a
+ * course, one of a release added from a link (the host it came from),
+ * or one whose data is invalid or could not be read.
+ */
+export type DeckBadge = "library" | "course" | "invalid" | "unreadable" | { from: string };
 
 /** The columns of figures, aligned to compare. */
 const NUMBERS: ReadonlySet<DeckColumn> = new Set(["newCardsPerDay", "maxReviewsPerDay", "due", "new", "cards"]);
@@ -274,11 +278,17 @@ export function DeckTableScreen({
                       <a href={deckHref(deck)}>
                         <ReaderText text={deck.title} />
                       </a>
-                      {badges(deck).map((badge) => (
-                        <span key={badge} class="studio-badge">
-                          {t(`studio.decks.badge.${badge}`)}
-                        </span>
-                      ))}
+                      {badges(deck).map((badge) =>
+                        typeof badge === "string" ? (
+                          <span key={badge} class="studio-badge">
+                            {t(`studio.decks.badge.${badge}`)}
+                          </span>
+                        ) : (
+                          <span key="from" class="studio-badge">
+                            {t("studio.decks.badge.from", { host: badge.from })}
+                          </span>
+                        ),
+                      )}
                       {healthBadge(deck)}
                       {updateBadge(deck)}
                     </th>

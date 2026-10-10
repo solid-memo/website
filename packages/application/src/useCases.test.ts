@@ -176,6 +176,10 @@ function makeDeps() {
     fetchLibraryDeck: vi.fn(async () => libraryContent),
     fetchCourseOutline: vi.fn(async (releaseUrl) => ({ releaseUrl, chapters: [] })),
     readLibraryIndex: vi.fn(async () => ({ url: "https://site.example/decks/index.ttl", publisher: null, releases: [] })),
+    readRelease: vi.fn(async (url: string): Promise<LibraryDeck> => {
+      throw new AppError("releaseUnreadable", { url });
+    }),
+    publishedBeside: vi.fn(async (): Promise<string[] | null> => null),
   };
   const preferencesRepository: PreferencesRepository = {
     getPreferences: vi.fn(async () => null),
@@ -1656,7 +1660,7 @@ describe("createUseCases", () => {
     const copy: Deck = { ...deck, sourceUrl: libraryDeck.url };
     const current: LibraryDeck = { ...libraryDeck, url: "https://solid-memo.com/decks/capitals/v2.ttl", version: "2" };
     vi.mocked(deps.deckLibrary.listLibraryDecks).mockResolvedValue([
-      { ...libraryDeck, seriesUrl: "https://solid-memo.com/decks/index.ttl#rivers", url: "https://solid-memo.com/decks/rivers/v1.ttl" },
+      { ...libraryDeck, ...firstRelease("https://solid-memo.com/decks/rivers/v1.ttl"), url: "https://solid-memo.com/decks/rivers/v1.ttl" },
       current,
     ]);
     vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) =>
@@ -1675,7 +1679,7 @@ describe("createUseCases", () => {
     expect(deps.deckRepository.saveDeck).not.toHaveBeenCalled();
   });
 
-  it("planLibraryUpgrade does not read the index again for a series it is given", async () => {
+  it("planLibraryUpgrade does not read the index again for a copy whose series is found", async () => {
     const deps = makeDeps();
     const copy: Deck = { ...deck, sourceUrl: libraryDeck.url };
     const current: LibraryDeck = { ...libraryDeck, url: "https://solid-memo.com/decks/capitals/v2.ttl", version: "2" };
@@ -1685,8 +1689,12 @@ describe("createUseCases", () => {
         : libraryContent,
     );
     vi.mocked(deps.deckRepository.listCards).mockResolvedValue([]);
-    await expect(createUseCases(deps).planLibraryUpgrade(copy, current)).resolves.toMatchObject({ toVersion: "2", add: [{ id: "norway" }] });
+    const plan = createUseCases(deps).planLibraryUpgrade(copy, { deck: copy, series: current, version: "1", newer: true });
+    await expect(plan).resolves.toMatchObject({ toVersion: "2", add: [{ id: "norway" }] });
     expect(deps.deckLibrary.listLibraryDecks).not.toHaveBeenCalled();
+    // A release from the library's index is not checked as one from a link is.
+    expect(deps.shapeValidator.validateDocument).not.toHaveBeenCalled();
+    await expect(createUseCases(deps).planLibraryUpgrade(copy, { deck: copy, series: null, version: null, newer: false })).resolves.toBeNull();
   });
 
   it("planLibraryUpgrade plans a copy more than one release behind with the releases in between, whose cards are the library's", async () => {
@@ -1773,6 +1781,160 @@ describe("createUseCases", () => {
     expect(deps.deckLibrary.fetchLibraryDeck).toHaveBeenCalledWith(libraryDeck.url);
     await expect(useCases.deckRelease({ ...deck, sourceUrl: undefined })).resolves.toBeNull();
     expect(deps.deckLibrary.fetchLibraryDeck).toHaveBeenCalledOnce();
+  });
+
+  describe("a release added from a link", () => {
+    const RELEASES = "https://bob.example/memo/releases/rivers/";
+    const linked = (version: number, extra: Partial<LibraryDeck> = {}): LibraryDeck => ({
+      ...libraryDeck,
+      url: `${RELEASES}v${version}.ttl`,
+      seriesUrl: `${RELEASES}v1.ttl#series`,
+      version: String(version),
+      releases: Array.from({ length: version }, (_, at) => ({ url: `${RELEASES}v${at + 1}.ttl`, version: String(at + 1) })),
+      ...extra,
+    });
+    const reading = (deps: ReturnType<typeof makeDeps>, releases: readonly LibraryDeck[]) =>
+      vi.mocked(deps.deckLibrary.readRelease).mockImplementation(async (url) => {
+        const found = releases.find((release) => release.url === url);
+        if (found === undefined) throw new AppError("releaseUnreadable", { url });
+        return found;
+      });
+
+    it("readReleaseFromLink reads the release and checks it against the library's shapes, as anyone, writing nothing", async () => {
+      const deps = makeDeps();
+      reading(deps, [linked(1)]);
+      await expect(createUseCases(deps).readReleaseFromLink(`${RELEASES}v1.ttl`)).resolves.toEqual(linked(1));
+      expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(`${RELEASES}v1.ttl`, "library");
+      expect(deps.deckRepository.importDeck).not.toHaveBeenCalled();
+    });
+
+    it("readReleaseFromLink reads a link as the URL standard writes it", async () => {
+      const deps = makeDeps();
+      reading(deps, [linked(1)]);
+      await expect(createUseCases(deps).readReleaseFromLink(`https://Bob.example:443/memo/releases/rivers/v1.ttl`)).resolves.toEqual(linked(1));
+      expect(deps.deckLibrary.readRelease).toHaveBeenCalledWith(`${RELEASES}v1.ttl`);
+    });
+
+    it("readReleaseFromLink refuses text that is no release's address, before reading anything", async () => {
+      const deps = makeDeps();
+      await expect(createUseCases(deps).readReleaseFromLink("rivers")).rejects.toMatchObject({ code: "releaseUrlInvalid" });
+      expect(deps.deckLibrary.readRelease).not.toHaveBeenCalled();
+    });
+
+    it("readReleaseFromLink refuses a release that breaks its shapes, counting its violations, not its warnings", async () => {
+      const deps = makeDeps();
+      reading(deps, [linked(1)]);
+      const violation = (severity: "violation" | "warning") => ({ path: SM.front, message: { en: "Less than 1 values" }, severity, constraint: "MinCount" });
+      vi.mocked(deps.shapeValidator.validateDocument).mockResolvedValue({
+        url: `${RELEASES}v1.ttl`,
+        status: "checked",
+        subjects: [
+          { url: `${RELEASES}v1.ttl#a`, status: "checked", shape: "card", version: 5, violations: [violation("violation"), violation("warning")] },
+          { url: `${RELEASES}v1.ttl#b`, status: "checked", shape: "card", version: 5, violations: [{ ...violation("violation"), path: undefined }] },
+          { url: `${RELEASES}v1.ttl#c`, status: "untyped" },
+        ],
+      });
+      const refused = createUseCases(deps).readReleaseFromLink(`${RELEASES}v1.ttl`);
+      await expect(refused).rejects.toMatchObject({ code: "releaseNotConforming", vars: { host: "bob.example", count: 2 } });
+      await expect(refused).rejects.toThrow("Less than 1 values");
+    });
+
+    it("importReleaseFromUrl imports a deck as the library's are, and starts a course once", async () => {
+      const deps = makeDeps();
+      const useCases = createUseCases(deps);
+      await expect(useCases.importReleaseFromUrl(instance.url, linked(1))).resolves.toEqual(deck);
+      expect(deps.deckLibrary.fetchLibraryDeck).toHaveBeenCalledWith(`${RELEASES}v1.ttl`);
+      expect(deps.deckRepository.importDeck).toHaveBeenLastCalledWith(instance.url, libraryContent);
+      await useCases.importReleaseFromUrl(instance.url, linked(1, { isCourse: true }));
+      expect(deps.deckRepository.importDeck).toHaveBeenLastCalledWith(instance.url, { ...libraryContent, cards: [] });
+      const started: Deck = { ...deck, sourceUrl: `${RELEASES}v1.ttl` };
+      vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([started]);
+      await expect(useCases.importReleaseFromUrl(instance.url, linked(2, { isCourse: true }))).resolves.toEqual(started);
+      expect(deps.deckRepository.importDeck).toHaveBeenCalledTimes(2);
+    });
+
+    it("listLibraryUpdates finds a newer version of a linked copy in its creator's catalogue, else says it does not know", async () => {
+      const deps = makeDeps();
+      const elsewhere = linked(3, { url: "https://bob.example/memo/releases/lakes/v3.ttl", seriesUrl: "https://bob.example/memo/releases/lakes/v1.ttl#series" });
+      reading(deps, [linked(1), linked(2), elsewhere]);
+      const copy: Deck = { ...deck, sourceUrl: `${RELEASES}v1.ttl` };
+      const gone: Deck = { ...deck, url: `${deck.url}-gone`, sourceUrl: "https://carol.example/v1.ttl" };
+      vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([copy, gone]);
+      vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue([`${RELEASES}v1.ttl`, `${RELEASES}v2.ttl`, elsewhere.url, `${RELEASES}v9.ttl`]);
+      const useCases = createUseCases(deps);
+      await expect(useCases.listLibraryUpdates(instance.url)).resolves.toEqual([
+        { deck: copy, series: linked(2), version: "1", newer: true, fromLink: true },
+        { deck: gone, series: null, version: null, newer: false },
+      ]);
+      // Each release is read once, however many copies the catalogue serves; none the copied one lists, which is no newer.
+      const reads = vi.mocked(deps.deckLibrary.readRelease).mock.calls.map(([url]) => url);
+      expect(reads).toEqual([`${RELEASES}v1.ttl`, "https://carol.example/v1.ttl", `${RELEASES}v2.ttl`, elsewhere.url, `${RELEASES}v9.ttl`]);
+      vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue(null);
+      await expect(useCases.listLibraryUpdates(instance.url)).resolves.toEqual([
+        { deck: copy, series: linked(1), version: "1", newer: "unknown", fromLink: true },
+        { deck: gone, series: null, version: null, newer: false },
+      ]);
+      // Two copies the same catalogue serves.
+      const lakes: Deck = { ...deck, url: `${deck.url}-lakes`, sourceUrl: elsewhere.url };
+      vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([copy, lakes]);
+      vi.mocked(deps.deckLibrary.readRelease).mockClear();
+      vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue([`${RELEASES}v1.ttl`, `${RELEASES}v2.ttl`, elsewhere.url, `${RELEASES}v9.ttl`]);
+      await expect(useCases.listLibraryUpdates(instance.url)).resolves.toEqual([
+        { deck: copy, series: linked(2), version: "1", newer: true, fromLink: true },
+        { deck: lakes, series: elsewhere, version: "3", newer: false, fromLink: true },
+      ]);
+      expect(vi.mocked(deps.deckLibrary.readRelease).mock.calls.map(([url]) => url)).toEqual([
+        `${RELEASES}v1.ttl`,
+        elsewhere.url,
+        `${RELEASES}v2.ttl`,
+        `${RELEASES}v9.ttl`,
+      ]);
+    });
+
+    it("planLibraryUpgrade plans a linked copy against the newest version its creator's catalogue lists, and offers nothing when it cannot be read", async () => {
+      const deps = makeDeps();
+      reading(deps, [linked(1), linked(2)]);
+      const copy: Deck = { ...deck, sourceUrl: `${RELEASES}v1.ttl` };
+      vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) =>
+        url === `${RELEASES}v2.ttl`
+          ? { ...libraryContent, url, version: "2", cards: [...libraryContent.cards, { id: "norway", front: { "": "Norway" }, back: { "": "Oslo" }, formatVersion: 1 }] }
+          : { ...libraryContent, url },
+      );
+      vi.mocked(deps.deckRepository.listCards).mockResolvedValue([]);
+      const useCases = createUseCases(deps);
+      await expect(useCases.planLibraryUpgrade(copy)).resolves.toBeNull();
+      vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue([`${RELEASES}v1.ttl`, `${RELEASES}v2.ttl`]);
+      await expect(useCases.planLibraryUpgrade(copy)).resolves.toMatchObject({ fromVersion: "1", toVersion: "2", add: [{ id: "norway" }] });
+      expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(`${RELEASES}v2.ttl`, "library");
+    });
+
+    it("planLibraryUpgrade refuses a linked copy's newer release, or one in between, that breaks the library's shapes", async () => {
+      const deps = makeDeps();
+      reading(deps, [linked(1), linked(2), linked(3)]);
+      vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue([`${RELEASES}v1.ttl`, `${RELEASES}v2.ttl`, `${RELEASES}v3.ttl`]);
+      vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) => ({ ...libraryContent, url, version: url.slice(-5, -4) }));
+      vi.mocked(deps.deckRepository.listCards).mockResolvedValue([]);
+      const broken = (bad: string) =>
+        vi.mocked(deps.shapeValidator.validateDocument).mockImplementation(async (url) => ({
+          url,
+          status: "checked",
+          subjects:
+            url === bad
+              ? [{ url: `${url}#a`, status: "checked", shape: "card", version: 5, violations: [{ path: SM.front, message: { en: "Less than 1 values" }, severity: "violation", constraint: "MinCount" }] }]
+              : [],
+        }));
+      const copy: Deck = { ...deck, sourceUrl: `${RELEASES}v1.ttl` };
+      const useCases = createUseCases(deps);
+      for (const bad of [`${RELEASES}v3.ttl`, `${RELEASES}v2.ttl`]) {
+        broken(bad);
+        await expect(useCases.planLibraryUpgrade(copy)).rejects.toMatchObject({ code: "releaseNotConforming", vars: { host: "bob.example", count: 1 } });
+      }
+      // Given the copy as the copies' look found it, its releases are checked all the same.
+      await expect(
+        useCases.planLibraryUpgrade(copy, { deck: copy, series: linked(3), version: "1", newer: true, fromLink: true }),
+      ).rejects.toMatchObject({ code: "releaseNotConforming" });
+      expect(deps.deckLibrary.fetchLibraryDeck).not.toHaveBeenCalledWith(`${RELEASES}v2.ttl`);
+    });
   });
 
   it("importLibraryDeck fetches the deck's content and imports it", async () => {

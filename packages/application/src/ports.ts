@@ -356,6 +356,23 @@ export interface DeckLibrary {
    * Empty for a release that is no course.
    */
   fetchCourseOutline(releaseUrl: string): Promise<CourseOutline>;
+  /**
+   * A release read on its own, as a learner adds it from a link
+   * (docs/deck-library.md, From a link): what its one document says of
+   * it, its series and its earlier versions, with no index. Read afresh
+   * each time, as an address may hold anything, now or later. Throws
+   * releaseUnreadable when nothing can be read there, notADeck when it
+   * holds no deck, libraryDeckTooNew when its deck is in a newer format.
+   */
+  readRelease(url: string): Promise<LibraryDeck>;
+  /**
+   * The releases the catalogue of the instance that published `url`
+   * links (`sm:publishedRelease`), read as anyone reads it: looked for
+   * in the folders above the release, nearest first, the first that
+   * links it. Null when none can be read: an instance's catalogue is
+   * private unless its owner shares it.
+   */
+  publishedBeside(url: string): Promise<string[] | null>;
 }
 
 /**
@@ -606,11 +623,12 @@ export interface AnswerLog {
 }
 
 /**
- * Where a document checked is: an instance's own ("pod"), or a release's
- * draft ("draft"), whose deck, chapters and steps the draft shapes check
- * (docs/validation.md).
+ * Where a document checked is: an instance's own ("pod"), a release's
+ * draft ("draft"), whose deck, chapters and steps the draft shapes check,
+ * or a release ("library"), which the library shapes check, as a release
+ * added from a link is (docs/validation.md).
  */
-export type DocumentContext = "pod" | "draft";
+export type DocumentContext = "pod" | "draft" | "library";
 
 export interface ShapeValidator {
   validateDocument(url: string, context?: DocumentContext): Promise<DocumentReport>;
