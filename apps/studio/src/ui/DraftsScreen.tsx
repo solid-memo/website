@@ -34,6 +34,7 @@ export function DraftsScreen({
   decks,
   readOnly,
   healthHref,
+  releasesHref,
   draftHref,
   creating,
   created,
@@ -52,6 +53,8 @@ export function DraftsScreen({
   readOnly: ReadOnlyReason | null;
   /** The instance's health, where data set aside is repaired. */
   healthHref: string;
+  /** The releases the instance published. */
+  releasesHref: string;
   /** A draft's overview, where it is written. */
   draftHref: (draft: ReleaseDraftSummary) => string;
   creating: boolean;
@@ -108,6 +111,9 @@ export function DraftsScreen({
         <h2>{t("studio.drafts.heading", { instance: instance.name })}</h2>
       </header>
       <p class="hint">{t("studio.drafts.intro")}</p>
+      <p>
+        <a href={releasesHref}>{t("studio.releases.link")}</a>
+      </p>
       <ReadOnlyScope reason={readOnly} subject="catalogue" healthHref={healthHref}>
         <section aria-labelledby="drafts-new-heading">
           <h3 id="drafts-new-heading">{t("studio.drafts.new")}</h3>

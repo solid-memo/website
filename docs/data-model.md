@@ -136,9 +136,12 @@ flowchart LR
   has the server delete a resource's ACL with it. Whether each document
   is there is asked first (HEAD), since node-solid-server answers a
   DELETE of what is not there with 401; what is gone counts as deleted.
-  Anything else in the folder, which another app put there, is kept, and
-  so is every container on its path: the user is told the folder was
-  kept, and why, with a link to it (`KeptFolderNotice`). Data goes
+  Anything else in the folder, which another app put there, is kept, as
+  are the releases published from the instance (`releases/`), which
+  others may have added by their address; so is every container on its
+  path: the user is told the folder was kept, and why (another app's
+  files, or the releases, `keptReleases`), with a link to it
+  (`KeptFolderNotice`). The delete's confirmation says both are kept. Data goes
   before registration so a failure leaves the instance listed and the
   delete retryable. Every blocking server the end-to-end tests start
   ([testing.md](testing.md#commands)), and Pivot and Community Solid
@@ -272,6 +275,10 @@ data.
 │                        and how it was made; chapter-<id>.ttl per
 │                        chapter; cards.ttl, the cards no chapter asks
 │                        ([below](#drafts-and-releases))
+├── releases/<name>/v<N>.ttl  a release published from a draft, linked
+│                        from the catalogue (sm:publishedRelease): one
+│                        document, readable by everyone, never written
+│                        again (the user may publish elsewhere instead)
 └── digest.ttl      derived data (below): a sm:DocumentReceipt per document
                          (#receipt-<path>) and a sm:DeckSchedule per deck
                          (#schedule-<path>), each stamped with the versions
@@ -788,6 +795,29 @@ own pod, as a draft, before publishing it
   ([deck-library.md](deck-library.md#a-release-outside-the-library)).
   A draft is made a release's text (`assemble`) with every subject moved
   to the release's address, `@base` that address, its release time set.
+- **Publishing a release**
+  ([solidReleasePublisher.ts](../packages/solid/src/solidReleasePublisher.ts),
+  [studio.md](studio.md#publishing-a-release)) puts that text, as it is,
+  at `releases/<name>/v<N>.ttl` of the instance, or in another folder the
+  user chooses: one PUT, only where nothing is (`If-None-Match: *`; a
+  412 is `releaseTaken`, nothing written, unless the document there
+  states the same statements, its `dcterms:issued` and
+  `dcterms:modified` aside: that is this release, written by a
+  publishing cut short, and publishing goes on from there; not when
+  another draft of the instance names it as its release). Then the release alone is made
+  readable by everyone: its own ACL, or its ACR, gets public read and
+  nothing else, and no folder's access control is changed (a server that
+  names the folder's as the document's is left as it is, the release
+  private). Then the catalogue links it (`sm:publishedRelease`, If-Match,
+  read and made again on a 412), and the draft names it
+  (`sm:releasedAs`), If-Match on the version the draft was checked and
+  assembled at, never on a later one (`changedElsewhere`). A failure
+  after the PUT leaves the release written and the draft unmarked;
+  publishing again at the same address finishes it. A release is never
+  written again, nor deleted by the app: deleting the instance keeps it,
+  and the folder holding it, since others may have added it by its
+  address. It is in no type index: the
+  catalogue's link is how its author's releases are found.
 
 ## The answer log
 

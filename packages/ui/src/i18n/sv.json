@@ -559,7 +559,7 @@
     "heading": "Välj en instans av Solid Memo",
     "intro": "En instans är en samling av dina kortlekar och studier, sparad i en mapp i din Pod. De flesta behöver bara en.",
     "empty": "Inga instanser är registrerade än.",
-    "deleteConfirm": "Ta bort instansen ”{name}” med alla dess kortlekar och kort? Det går inte att ångra. Filer som en annan app har lagt i dess mapp behålls.",
+    "deleteConfirm": "Ta bort instansen ”{name}” med alla dess kortlekar och kort? Det går inte att ångra. Filer som en annan app har lagt i dess mapp behålls, och så gör de utgåvor som publicerats från den.",
     "deleteLabel": "Ta bort instansen {name}",
     "delete": "Ta bort…",
     "newInstance": "Ny instans…",
@@ -570,6 +570,7 @@
   },
   "keptFolder": {
     "text": "Solid Memo tog bort sina egna data och behöll {link}: en annan app har lagt filer där.",
+    "releases": "Solid Memo tog bort sina egna data och behöll {link}: där finns de utgåvor som publicerats från den, som andra kan läsa. Det som en annan app har lagt där behålls också.",
     "folder": "mappen i din Pod"
   },
   "instanceUpdate": {
@@ -1257,7 +1258,15 @@
     "draftGone": "Det utkastet finns inte längre. Det kanske togs bort i en annan flik eller app.",
     "releaseUnreadable": "Solid Memo kan inte läsa någon utgåva på {url}. Kontrollera adressen och att utgåvan är publicerad där.",
     "notAReleaseFile": "Den filen innehåller inte en utgåva av en kortlek eller kurs. Välj en utgåva sparad som Turtle eller JSON-LD.",
-    "releaseIdUnsupported": "Utgåvan kallar en del av sig ”#{id}”, som ett utkast inte kan behålla: ett id i ett utkast består av bokstäverna A till Z, siffror, ”.”, ”_” och ”-” och börjar med en bokstav eller siffra. Den kan inte göras till ett utkast."
+    "releaseIdUnsupported": "Utgåvan kallar en del av sig ”#{id}”, som ett utkast inte kan behålla: ett id i ett utkast består av bokstäverna A till Z, siffror, ”.”, ”_” och ”-” och börjar med en bokstav eller siffra. Den kan inte göras till ett utkast.",
+    "releaseTaken": "En utgåva är redan publicerad på {url}, och en utgåva skrivs aldrig över. Publicera nästa version, eller välj en annan mapp.",
+    "releaseHasErrors": {
+      "one": "Utgåvekontrollen hittar {count} fel. Rätta det innan du publicerar utgåvan.",
+      "other": "Utgåvekontrollen hittar {count} fel. Rätta dem innan du publicerar utgåvan."
+    },
+    "draftReleased": "Utkastet är redan utgivet, på {url}, och ändras inte längre. Påbörja nästa version i stället.",
+    "guestCannotPublish": "En gästs studier finns bara i den här webbläsaren, där ingen annan kan läsa en utgåva. Flytta dina studier till en Pod för att publicera den, eller ladda ner utgåvan som en fil.",
+    "publicAccessRefused": "Din Pod lät inte Solid Memo göra utgåvan på {url} offentlig, så bara du kan läsa den. Försök igen, eller gör den läsbar för alla med verktygen hos din Pod-leverantör."
   },
   "statistics": {
     "heading": "Statistik",
@@ -2483,6 +2492,68 @@
       "remove": "Ta bort",
       "editOf": "Ändra {name}",
       "removeOf": "Ta bort {name}"
+    },
+    "publish": {
+      "heading": "Publicera",
+      "intro": "När du publicerar skrivs utgåvan i din Pod som ett Turtle-dokument, på en adress som aldrig ändras, och blir läsbar för alla. En utgåva ändras aldrig efteråt: för att ändra den skriver du ett utkast till nästa version.",
+      "checking": "Kontrollerar utkastet…",
+      "noErrors": "Utgåvekontrollen hittar inga fel. När du publicerar kontrolleras utgåvan igen, mot formerna också.",
+      "errors": {
+        "one": "Utgåvekontrollen hittar {count} fel. Rätta det innan du publicerar.",
+        "other": "Utgåvekontrollen hittar {count} fel. Rätta dem innan du publicerar."
+      },
+      "folder": "Mapp i din Pod",
+      "folderInvalid": "Ange mappens webbadress, som börjar med https:// eller http:// och slutar med /.",
+      "address": "Utgåvan publiceras på {url}.",
+      "confirm": "Jag förstår att utgåvan blir offentlig: alla som har dess adress kan läsa den. När den är publicerad kan den aldrig ändras eller tas tillbaka här.",
+      "publish": "Publicera i min Pod",
+      "publishing": "Kontrollerar och publicerar utgåvan…",
+      "waitSaving": "Väntar på att dina ändringar sparas…",
+      "guest": "En gästs studier finns bara i den här webbläsaren, där ingen annan skulle kunna läsa en utgåva. Flytta dina studier till en Pod för att publicera den där. Under tiden kan du ladda ner den som en fil.",
+      "releasedAt": "Utkastet gavs ut på {url}.",
+      "askingPublic": "Frågar om vem som helst kan läsa den…",
+      "public": "Alla som har dess adress kan läsa den.",
+      "private": "Bara du kan läsa den: din Pod gjorde den inte offentlig. Försök igen, eller gör den läsbar för alla med verktygen hos din Pod-leverantör.",
+      "makePublic": "Gör den offentlig",
+      "makingPublic": "Gör utgåvan offentlig…",
+      "nextHint": "En utgåva ändras aldrig. För att ändra den börjar du på nästa version: ett nytt utkast som behåller allt som den här utgåvan gav ut.",
+      "downloadHeading": "Ladda ner",
+      "downloadIntro": "Spara utgåvan som en Turtle-fil, med den adress den skulle få i Solid Memos bibliotek, för att föreslå den till biblioteket. Inget i din Pod ändras.",
+      "download": "Ladda ner .ttl",
+      "downloaded": "Sparade {file}, som utgåvan på {url}.",
+      "stepsIntro": "För att föreslå den till biblioteket, i en kopia av Solid Memos kodförråd:",
+      "stepCopy": "Lägg filen i decks/ som {file}.",
+      "stepLibrary": "Formatera den, och för in den i bibliotekets index:",
+      "stepCheck": "Kontrollera den mot bibliotekets regler:",
+      "stepAll": "Kör alla kontroller:",
+      "stepPullRequest": "Öppna en pull request med den nya filen och indexet.",
+      "libraryCheck": "Kontrollera utkastet för biblioteket först"
+    },
+    "releases": {
+      "crumb": "Utgåvor",
+      "link": "Publicerade utgåvor",
+      "loading": "Läser utgåvorna…",
+      "heading": "Utgåvor publicerade från {instance}",
+      "intro": "Varje utgåva är ett dokument i din Pod, som den som lär sig lägger till med dess adress. En utgåva ändras aldrig: för att ändra en börjar du på nästa version.",
+      "none": "Den här instansen har inte publicerat några utgåvor än.",
+      "caption": "Utgåvor publicerade från {instance}",
+      "column": {
+        "release": "Utgåva",
+        "readers": "Läsbar för",
+        "actions": "Åtgärder"
+      },
+      "name": "{name}, version {version}",
+      "public": "Alla",
+      "private": "Bara dig",
+      "makePublicOf": "Gör {release} offentlig",
+      "copy": "Kopiera länken",
+      "copyLink": "Kopiera länken {url}",
+      "copied": "Länken är kopierad.",
+      "copyFailed": "Länken kunde inte kopieras. Markera adressen och kopiera den.",
+      "startNext": "Börja på nästa version",
+      "startNextOf": "Börja på nästa version av {release}",
+      "starting": "Börjar på nästa version…",
+      "drafts": "Utkast till utgåvor"
     }
   },
   "proseField": {

@@ -170,7 +170,7 @@ describe.each(SERVERS)("drafts of releases on $name", ({ url: server }) => {
     const useCases = page();
     await useCases.createReleaseDraft(instance.url, { kind: "blankCourse", title: { en: "Solid" } });
     await useCases.createReleaseDraft(instance.url, { kind: "blankDeck", title: { en: "Words" } });
-    await expect(useCases.deleteInstance(session, instance)).resolves.toEqual({ keptFolder: null });
+    await expect(useCases.deleteInstance(session, instance)).resolves.toEqual({ keptFolder: null, keptReleases: false });
     expect((await fetch(instance.url, { method: "HEAD" })).status).toBe(404);
   });
 });

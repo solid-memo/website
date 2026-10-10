@@ -46,6 +46,7 @@ describe("the Studio's routes", () => {
       deckUrls: ["https://pod.example/solid-memo/a/catalog.ttl#deck-1", "https://pod.example/solid-memo/a/catalog.ttl#deck-2"],
     },
     { screen: "drafts", instanceUrl: "https://pod.example/solid-memo/a/" },
+    { screen: "releases", instanceUrl: "https://pod.example/solid-memo/a/" },
     { screen: "draft", draftUrl: DRAFT },
     { screen: "chapter", draftUrl: DRAFT, chapter: "ch-pods" },
     { screen: "step", draftUrl: DRAFT, step: "ch-pods-1" },
@@ -154,7 +155,7 @@ describe("the Studio's routes", () => {
   });
 
   it("name the instance a route is in, the deck's for the workbench", () => {
-    expect(routes.map(instanceOfRoute)).toEqual([null, ...Array(36).fill("https://pod.example/solid-memo/a/")]);
+    expect(routes.map(instanceOfRoute)).toEqual([null, ...Array(37).fill("https://pod.example/solid-memo/a/")]);
   });
 
   it("keep a draft and the subject of it shown in their query, and the cards' view, the first page and no filter left out", () => {
@@ -203,6 +204,7 @@ describe("the Studio's routes", () => {
     expect(parseStudioHash("#/studio/groups")).toBeNull();
     expect(parseStudioHash("#/studio/library")).toBeNull();
     expect(parseStudioHash("#/studio/drafts")).toBeNull();
+    expect(parseStudioHash("#/studio/releases")).toBeNull();
     expect(parseStudioHash("#/studio/transfer?deck=x")).toBeNull();
     expect(parseStudioHash("#/studio/decks?instance=x")).toBeNull();
   });

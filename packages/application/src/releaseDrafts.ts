@@ -31,6 +31,7 @@ import {
   type ReleaseCheck,
 } from "@solid-memo/domain/release/releaseCheck";
 import type { ReleaseModel } from "@solid-memo/domain/release/releaseModel";
+import { releasePlaceOf } from "@solid-memo/domain/release/releasePlace";
 import { releaseToDraft } from "@solid-memo/domain/release/releaseToDraft";
 import { nextVersionDraft } from "@solid-memo/domain/release/releaseVersion";
 import type { DeckLibrary, DeckRepository, FileExchange, ReleaseDraftRepository, ShapeValidator } from "./ports";
@@ -95,6 +96,8 @@ export interface ReleaseDraftUseCases {
    * published: nothing is deleted that might have been.
    */
   getReleaseDraft(draftUrl: string): Promise<ReleaseDraft>;
+  /** The draft as getReleaseDraft has it, with the version its documents were at together (ReleaseDraftRepository.read). */
+  readReleaseDraft(draftUrl: string): Promise<{ draft: ReleaseDraft; version: string }>;
   /**
    * Make the changes, in turn, to the draft as it is now, and write what
    * they change. A change refused writes nothing. When a document
@@ -153,7 +156,7 @@ function draftable(release: ReleaseDraft): ReleaseDraft {
 
 /** The name a release's URL gives its series (`…/capitals/v2.ttl` → `capitals`); null when it is named otherwise. */
 function nameInUrl(url: string): string | null {
-  return /\/([a-z0-9][a-z0-9-]*)\/v[1-9][0-9]*\.ttl$/.exec(url)?.[1] ?? null;
+  return releasePlaceOf(url)?.name ?? null;
 }
 
 /** What a check made of a draft, by policy: made once for each draft (a version of it). */
@@ -354,6 +357,11 @@ export function createReleaseDraftUseCases({
 
     async getReleaseDraft(draftUrl) {
       return withPublished((await releaseDraftRepository.read(draftUrl)).draft);
+    },
+
+    async readReleaseDraft(draftUrl) {
+      const { draft, version } = await releaseDraftRepository.read(draftUrl);
+      return { draft: await withPublished(draft), version };
     },
 
     async editReleaseDraft(draftUrl, changes) {

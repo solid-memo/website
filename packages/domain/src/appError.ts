@@ -125,6 +125,16 @@ export const ERROR_TEMPLATES = {
   notAReleaseFile: "That file does not hold one deck or course release. Choose a release saved as Turtle or JSON-LD.",
   releaseIdUnsupported:
     "This release names a part of it “#{id}”, which a draft cannot keep: an id of a draft is letters A to Z, digits, “.”, “_” and “-”, starting with a letter or digit. It cannot be made a draft.",
+  releaseTaken: "A release is already published at {url}, and a release is never written over. Publish the next version, or choose another folder.",
+  releaseHasErrors: {
+    one: "The release check finds {count} error. Fix it before you publish the release.",
+    other: "The release check finds {count} errors. Fix them before you publish the release.",
+  },
+  draftReleased: "This draft was released already, at {url}, and is no longer changed. Start its next version instead.",
+  guestCannotPublish:
+    "A guest's study is kept in this browser alone, where no one else can read a release. Move your study into a Pod to publish it, or download the release as a file.",
+  publicAccessRefused:
+    "Your Pod did not let Solid Memo make the release at {url} public, so only you can read it. Try again, or make it readable by everyone with your Pod provider's tools.",
 } as const satisfies Record<string, ErrorTemplate>;
 
 export type ErrorCode = keyof typeof ERROR_TEMPLATES;

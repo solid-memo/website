@@ -209,15 +209,17 @@ import type {
   DocumentContext,
   FileExchange,
   ReleaseDraftRepository,
+  ReleasePublisher,
 } from "./ports";
 import { createReleaseDraftUseCases, type ReleaseDraftUseCases } from "./releaseDrafts";
+import { createReleasePublishingUseCases, type ReleasePublishingUseCases } from "./releasePublishing";
 import { startTrial, type TrialOpening, type TrialSandbox } from "./trial";
 import { draftReleaseModel } from "@solid-memo/domain/release/draftModel";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { trialProblems } from "@solid-memo/domain/release/trial";
 import { AppError } from "@solid-memo/domain/appError";
 
-export interface UseCases extends ReleaseDraftUseCases {
+export interface UseCases extends ReleaseDraftUseCases, ReleasePublishingUseCases {
   /** The session of a login or an earlier one; else a guest's, when a guest studied on this device; else null. */
   restoreSession(): Promise<EstablishedSession | null>;
   /**
@@ -350,8 +352,8 @@ export interface UseCases extends ReleaseDraftUseCases {
   /**
    * Permanently delete an instance: all its decks and cards, and every
    * other document Solid Memo wrote there, then its registrations. Its
-   * folder goes too unless it holds what another app put there, which is
-   * kept, and the result says so.
+   * folder goes too unless it holds what another app put there, or the
+   * releases published from it, which are kept, and the result says so.
    */
   deleteInstance(session: Session, instance: Instance): Promise<InstanceDeletion>;
   /**
@@ -879,6 +881,8 @@ export interface Dependencies {
   fileExchange?: FileExchange;
   /** The drafts of releases in each instance; by default there are none. */
   releaseDraftRepository?: ReleaseDraftRepository;
+  /** Where releases are published from each instance; by default none is. */
+  releasePublisher?: ReleasePublisher;
   /** A new sandbox to test-play a draft in, each one empty; by default there is none. */
   trialSandbox?: (draft: ReleaseDraft) => TrialSandbox;
 }
@@ -1007,6 +1011,12 @@ const NO_DRAFTS: ReleaseDraftRepository = {
   parseRelease: noDrafts,
   delete: noDrafts,
 };
+const NO_RELEASES: ReleasePublisher = {
+  publish: noDrafts,
+  makePublic: noDrafts,
+  isPublic: noDrafts,
+  listPublished: none,
+};
 const noTrials = (): never => {
   throw new Error("This app plays no trials.");
 };
@@ -1133,6 +1143,7 @@ export function createUseCases({
   deckArchive = NO_DECK_ARCHIVE,
   fileExchange = NO_FILE_EXCHANGE,
   releaseDraftRepository = NO_DRAFTS,
+  releasePublisher = NO_RELEASES,
   trialSandbox = noTrials,
 }: Dependencies): UseCases {
   const runsElsewhere = fenceMovesElsewhere(updateJournal, writeFence);
@@ -1842,8 +1853,10 @@ export function createUseCases({
       publisher: { webId: session.webId, name: name ?? session.webId },
     };
   }
+  const drafts = createReleaseDraftUseCases({ releaseDraftRepository, deckRepository, deckLibrary, shapeValidator, fileExchange, now });
   return {
-    ...createReleaseDraftUseCases({ releaseDraftRepository, deckRepository, deckLibrary, shapeValidator, fileExchange, now }),
+    ...drafts,
+    ...createReleasePublishingUseCases({ drafts, releaseDraftRepository, releasePublisher, deckLibrary, fileExchange, now }),
     async restoreSession() {
       const established = await sessionGateway.restore();
       if (established !== null) return established;

@@ -186,6 +186,11 @@ describe("getReleaseDraft", () => {
     await expect(useCases.getReleaseDraft(courseDraft().url)).resolves.toEqual(courseDraft());
   });
 
+  it("is read with the version its documents were at, by readReleaseDraft", async () => {
+    const { useCases } = setUp();
+    await expect(useCases.readReleaseDraft(courseDraft().url)).resolves.toEqual({ draft: courseDraft(), version: "v1" });
+  });
+
   it("knows what the release before it published, read once", async () => {
     const draft = { ...courseDraft(), root: { ...courseDraft().root, prev: V1 } };
     const { useCases, repository } = setUp({ stored: draft });

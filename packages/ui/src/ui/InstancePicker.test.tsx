@@ -159,7 +159,7 @@ describe("InstancePicker", () => {
     );
 
     expect(confirm).toHaveBeenCalledWith(
-      'Delete the instance "Deck set B" and all its decks and cards? This cannot be undone. Files another app put in its folder are kept.',
+      'Delete the instance "Deck set B" and all its decks and cards? This cannot be undone. Files another app put in its folder are kept, and so are the releases published from it.',
     );
     expect(props.onDelete).toHaveBeenCalledWith(instances[1]);
   });

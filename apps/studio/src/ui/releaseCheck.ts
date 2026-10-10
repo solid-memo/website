@@ -16,8 +16,8 @@ import { releaseMarkdownCheck } from "@solid-memo/ui/markdownCache";
  * version it is in.
  */
 
-/** The Markdown check every check of this page shares, every text remembered (releaseMarkdownCheck). */
-const markdownCheck = releaseMarkdownCheck();
+/** The Markdown check every check of this page shares, a release's publishing among them, every text remembered (releaseMarkdownCheck). */
+export const markdownCheck = releaseMarkdownCheck();
 
 const revisions = new WeakMap<ReleaseDraft, number>();
 let latest = 0;

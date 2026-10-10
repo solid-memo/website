@@ -423,6 +423,17 @@ describe("assemble", () => {
     expect(quads.filter((quad) => quad.predicate.value.endsWith("#first"))).toEqual([]);
   });
 
+  it("makes the draft as it was at a version read, or says it changed since", async () => {
+    const pod = await draftPod();
+    await pod.repository.create(INSTANCE, course());
+    const target = `${INSTANCE}releases/solid/v1.ttl`;
+    const { draft, version } = await pod.repository.read(DRAFT);
+    const turtle = await pod.repository.assemble(DRAFT, target, NOW, version);
+    expect(turtle).toBe(await pod.repository.assemble(DRAFT, target, NOW));
+    await pod.repository.applyChanges(draft, changed(draft, { kind: "retire", of: "card", id: "q-loose" }), version);
+    await expect(pod.repository.assemble(DRAFT, target, NOW, version)).rejects.toMatchObject({ code: "changedElsewhere", vars: { url: DRAFT } });
+  });
+
   it("leaves a series described elsewhere to where it is, and a release with none as it is", async () => {
     const pod = await draftPod();
     const elsewhere = { ...course(), root: { ...course().root, inSeries: "https://solid-memo.com/decks/index.ttl#solid" } };

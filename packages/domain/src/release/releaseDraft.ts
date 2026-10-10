@@ -9,7 +9,7 @@ import type {
   LangText,
 } from "@solid-memo/vocab/types.generated";
 import { SM } from "@solid-memo/vocab/vocab.generated";
-import { TURTLE_MEDIA_TYPE } from "../dcat.ts";
+import { EDUCATION_THEME, TURTLE_MEDIA_TYPE } from "../dcat.ts";
 import type { ReleaseKind, ReleaseTerm, ReleaseText } from "./releaseModel.ts";
 
 /**
@@ -106,7 +106,9 @@ export const SERIES_ID = "series";
 /**
  * A blank draft at `url`: a deck, or a course (studied front to back),
  * titled as given, version 1 of a series of its own (`#series`), with
- * its Turtle distribution (`#turtle`); nothing published before it. Ids
+ * its Turtle distribution (`#turtle`); nothing published before it. A
+ * course is about education (the EU's data theme EDUC), as every
+ * course release says it is (courseRules.ts). Ids
  * the draft will give other subjects (`taken`) are left to them: the
  * series and distribution are then `#series-2`, `#turtle-2`, …
  */
@@ -140,7 +142,7 @@ export function blankDraft({
       created: now,
       creator: [],
       studyDirection: SM.frontToBack as DraftDeckV1["studyDirection"],
-      theme: [],
+      theme: course ? [EDUCATION_THEME] : [],
       keyword: {},
       language: [],
       version: "1",

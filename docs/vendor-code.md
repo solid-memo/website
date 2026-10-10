@@ -7,7 +7,7 @@ replacing one would cost.
 
 | Vendor | Packages | Confined to | Role |
 |---|---|---|---|
-| Inrupt Solid clients | `@inrupt/solid-client`, `@inrupt/solid-client-authn-browser` | `packages/solid/src/` | RDF datasets, pod I/O, Solid-OIDC auth |
+| Inrupt Solid clients | `@inrupt/solid-client`, `@inrupt/solid-client-authn-browser` | `packages/solid/src/`; its universal access API in `solidReleasePublisher.ts` alone | RDF datasets, pod I/O, Solid-OIDC auth, and the app's one access-control write: a published release made readable by everyone, on WAC or ACP ([boundaries.md](boundaries.md#access-control)) |
 | TanStack | `@tanstack/react-query` (via `preact/compat`) | `packages/ui/src/ui/`, `apps/studio/src/`, `apps/web/src/` | Async-state caching and invalidation |
 | Preact | `preact` | `packages/ui/src/ui/`, `apps/studio/src/`, `apps/web/src/` | Rendering |
 | Fontsource | `@fontsource-variable/fredoka`, `@fontsource/bangers` (both SIL OFL-1.1) | `packages/ui/src/style.css` (`@import`) | Typefaces — Fredoka for text, Bangers (comic lettering) for `h1`/`h2` — self-hosted: bundled into `dist/`, no third-party font requests |

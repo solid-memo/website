@@ -62,6 +62,8 @@ export type StudioRoute =
   | { screen: "transfer"; instanceUrl: string; deckUrls?: readonly string[] }
   /** The drafts of releases the instance holds, and a new one to start. */
   | { screen: "drafts"; instanceUrl: string }
+  /** The releases the instance published, each to share or to start the next version of. */
+  | { screen: "releases"; instanceUrl: string }
   /**
    * A draft (by its release document): what it says of itself, and its
    * outline. A draft's editors open at one of their fields when `field`
@@ -172,6 +174,8 @@ export function studioRouteToHash(route: StudioRoute): string {
       return `#${STUDIO_PATH}/library${hashParams({ instance: route.instanceUrl })}`;
     case "drafts":
       return `#${STUDIO_PATH}/drafts${hashParams({ instance: route.instanceUrl })}`;
+    case "releases":
+      return `#${STUDIO_PATH}/releases${hashParams({ instance: route.instanceUrl })}`;
     case "draft":
       return `#${STUDIO_PATH}/draft${hashParams({ draft: route.draftUrl, ...fieldParam(route.field) })}`;
     case "chapter":
@@ -242,6 +246,8 @@ export function parseStudioHash(hash: string): StudioRoute | null {
       return instanceUrl === null ? null : { screen: "library", instanceUrl };
     case "/drafts":
       return instanceUrl === null ? null : { screen: "drafts", instanceUrl };
+    case "/releases":
+      return instanceUrl === null ? null : { screen: "releases", instanceUrl };
     case "/draft":
     case "/chapter":
     case "/step":

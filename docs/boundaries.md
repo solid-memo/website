@@ -19,6 +19,9 @@ package and fails on:
 - a node-only import (`node:*`, `n3`, `@solid-memo/turtle`, any
   package's `tooling/` or `node/` entry) in code that runs in the
   browser.
+- an import of `@inrupt/solid-client`'s access control from any file
+  but the release publisher's, tests aside
+  ([below](#access-control)).
 
 Test files follow the same rules as their subject; they and the vitest
 configs may also use the shared test tooling of the root `package.json`.
@@ -52,7 +55,7 @@ used nowhere else):
 
 | Library | Package | Notes |
 |---|---|---|
-| `@inrupt/solid-client`, `@inrupt/solid-client-authn-browser` | `solid` | `shacl` also uses `@inrupt/solid-client` to parse shape documents; deck files are written and read with it too ([below](#files-without-a-vendor-library)) |
+| `@inrupt/solid-client`, `@inrupt/solid-client-authn-browser` | `solid` | `shacl` also uses `@inrupt/solid-client` to parse shape documents; deck files are written and read with it too ([below](#files-without-a-vendor-library)); its access control (universal access, ACP, the ACL functions) only in `src/solidReleasePublisher.ts` ([below](#access-control)) |
 | `@tanstack/react-query`, `preact` | `ui`, `web`, `studio` | the components; in `web`, `main.tsx` to render the page and `App.tsx`, the page; in `studio`, its screens |
 | `@fontsource/*`, `@fontsource-variable/*` | `ui` | `src/style.css` only |
 | `rdf-validate-shacl` | `shacl` | `src/engine.ts` only, loaded lazily |
@@ -75,6 +78,26 @@ needs no library of its own:
   ([fileExchange.ts](../packages/browser/src/fileExchange.ts)): a `Blob`
   behind a link with `download`, and a hidden `<input type="file">`.
   It is the `FileExchange` port; the UI never touches a file itself.
+
+## Access control
+
+The app changes who may read something in one place only: a release it
+publishes is made readable by everyone
+([studio.md](studio.md#publishing-a-release)). That write is confined to
+the `ReleasePublisher` port's adapter,
+[solidReleasePublisher.ts](../packages/solid/src/solidReleasePublisher.ts),
+which calls `@inrupt/solid-client`'s `universalAccess.setPublicAccess`
+for the release's document alone, asking read and nothing else. The
+library writes that document's own ACL (Web Access Control) or ACR
+(Access Control Policies). No other module imports `universalAccess`,
+or writes an ACL or an ACR; no folder's access control is changed.
+`npm run check:boundaries` enforces the imports
+([checkBoundaries.ts](../scripts/checkBoundaries.ts), `VENDOR_ONLY_FROM`):
+outside tests, only that file may import `@inrupt/solid-client`'s access
+control (`universalAccess`, the `acp_*` modules, the ACL functions), or
+all of the library at once (`import * as`). That no module writes an
+ACL or an ACR with a plain request is for review: the check sees
+imports alone.
 
 ## Further rules
 

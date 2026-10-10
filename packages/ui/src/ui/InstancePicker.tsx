@@ -29,6 +29,7 @@ export function InstancePicker({
   onAttach,
   onDelete,
   keptFolder = null,
+  keptReleases = false,
 }: {
   instances: Instance[];
   options: RegistrationOptions | null;
@@ -39,8 +40,10 @@ export function InstancePicker({
   newInstanceHref: string;
   onAttach: (url: string, target: RegistrationTarget) => void;
   onDelete: (instance: Instance) => void;
-  /** The folder the last deletion kept, as it holds another app's files; null when none. */
+  /** The folder the last deletion kept, as it holds another app's files or the instance's releases; null when none. */
   keptFolder?: string | null;
+  /** Whether the kept folder holds the releases published from the instance, which are why it is kept, or part of why. */
+  keptReleases?: boolean;
 }) {
   const { t } = useI18n();
   const [attachUrl, setAttachUrl] = useState("");
@@ -139,7 +142,7 @@ export function InstancePicker({
       <p class="visually-hidden" role="status">
         {deleted}
       </p>
-      <KeptFolderNotice url={keptFolder} />
+      <KeptFolderNotice url={keptFolder} releases={keptReleases} />
       <ErrorMessage error={error} />
     </section>
   );

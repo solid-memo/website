@@ -16,7 +16,7 @@ import { Screen } from "./Screen.ts";
  * authors and licence), the instance's name and catalogue, a deck
  * exported to a file and imported from it, the instance's drafts of
  * releases (made, the next version of a release among them, listed on
- * Home and deleted), and its way back to
+ * Home and deleted), the releases it published, and its way back to
  * Solid Memo.
  */
 export class Studio extends Screen {
@@ -250,6 +250,26 @@ export class Studio extends Screen {
       await this.page.getByRole("link", { name: this.t("studio.decks.draftsLink"), exact: true }).click();
       await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.drafts.heading", { instance }) })).toBeVisible();
       await this.app.chrome.expectBreadcrumbHere("studio.drafts.crumb");
+    });
+  }
+
+  /** Opens the releases the instance published, from Home's drafts panel, reached by the trail. */
+  async openReleases(instance: string): Promise<void> {
+    await this.intent("Open the instance's releases", async () => {
+      await this.app.chrome.breadcrumb("breadcrumbs.decks");
+      await this.page.getByRole("link", { name: this.t("studio.releases.link"), exact: true }).click();
+      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.releases.heading", { instance }) })).toBeVisible();
+      await this.app.chrome.expectBreadcrumbHere("studio.releases.crumb");
+    });
+  }
+
+  /** The releases list one, by its address and its name and version, readable by everyone. */
+  async expectRelease(instance: string, url: string, name: string, version: number): Promise<void> {
+    await this.intent(`See ${name}, version ${version}, among the releases`, async () => {
+      const table = this.page.getByRole("table", { name: this.t("studio.releases.caption", { instance }) });
+      const row = table.getByRole("row").filter({ has: this.page.getByRole("link", { name: this.t("studio.releases.name", { name, version }), exact: true }) });
+      await expect(row.getByRole("link", { name: this.t("studio.releases.name", { name, version }), exact: true })).toHaveAttribute("href", url);
+      await expect(row.getByRole("cell", { name: this.t("studio.releases.public"), exact: true })).toBeVisible();
     });
   }
 
