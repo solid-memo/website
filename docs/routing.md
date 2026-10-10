@@ -40,9 +40,9 @@ full URLs, carried URL-encoded in hash query parameters.
 | `#/new-card?instance=…&deck=…` | card creator (opened from, and returning to, the Browser) |
 | `#/card?instance=…&deck=…&card=…` | one card's own page: the card, its editor, remove (opened by clicking a Browser row; an unknown card falls back to the Browser) |
 | `#/study?instance=…&deck=…` | study session: the deck's due and new prompts for today, interleaved |
-| `#/course?instance=…&deck=…` | the [course](courses.md) `deck` is the learner's copy of: its chapters, each locked, open or done, with its steps done, and a button to go on where the learner left off. A deck that is no library copy falls back to its page |
+| `#/course?instance=…&deck=…` | the [course](courses.md) `deck` is the learner's copy of: its chapters, each locked, open or done, with its steps done, and a button to go on where the learner left off; once every chapter is done, a link back to the deck list. Where a passed final review takes the learner, and then it cheers the chapter just completed, which `Workspace` keeps in memory, not in the URL, and drops at the next route: a reload, Back to it or a later visit cheers nothing. A deck that is no library copy falls back to its page |
 | `#/course-chapter?instance=…&deck=…&chapter=…` | one chapter of the course (`chapter` is its subject in the release), a step at a time: the theory, then its questions without it. The step to take is derived from the learner's progress (the first not done), not carried in the URL; a chapter the course does not have, or one still locked, falls back to the course |
-| `#/course-review?instance=…&deck=…&chapter=…` | a chapter's final review, which completes it; falls back as `course-chapter` does |
+| `#/course-review?instance=…&deck=…&chapter=…` | a chapter's final review, which completes it. It opens on a word before the review, with a link back to the course, however it is reached; once the chapter is completed it navigates (*pushes*) to the course. Falls back as `course-chapter` does |
 | `#/preferences?instance=…` | preferences |
 | `#/validate?instance=…` | developer tool: the instance's documents checked against the shapes ([validation.md](validation.md)); shows how to turn developer mode on when it is off |
 
@@ -86,9 +86,11 @@ flowchart LR
 the current route alone — Decks › *deck* › Browser › *card* — and
 `Workspace` renders it above every screen. Every crumb — the current page
 included, marked `aria-current="page"` — is a plain `<a href="#/…">` link
-built with `routeToHash` — and the only way back up: screens have no
-"Back to …" buttons — so following one is an
+built with `routeToHash`, so following one is an
 ordinary hash navigation: Back/Forward, new-tab and keyboard use all work
-without extra code. Top-level screens (deck list, instance picker) show a
+without extra code. The trail is the way back up: screens have no
+"Back to …" buttons, save where going back is one of the choices a
+screen puts to the user, as a course's final review does before it
+starts and a finished course does; those are plain links too. Top-level screens (deck list, instance picker) show a
 single crumb, so "Decks" is on hand everywhere inside an instance. The
 masthead's logo and "Solid Memo" title both link to `#/`, the root.

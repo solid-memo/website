@@ -2243,7 +2243,10 @@ describe("Workspace", () => {
       fireEvent.click(screen.getByRole("button", { name: "On to the questions" }));
       await answer("Three terms", "Next");
       await answer("A syntax", "On to the final review");
-      expect(await screen.findByRole("heading", { name: "Final review: Linked data" })).toBeInTheDocument();
+      // The review opens on a word before it, its heading focused.
+      const reviewHeading = await screen.findByRole("heading", { name: "Final review: Linked data" });
+      await waitFor(() => expect(reviewHeading).toHaveFocus());
+      expect(screen.getByRole("button", { name: "Start the final review" })).toBeInTheDocument();
       expect(document.querySelector(".course-theory")).toBeNull();
       expect(window.location.hash).toBe(routeToHash(reviewRoute));
       expect(within(screen.getByRole("navigation", { name: "Breadcrumb" })).getAllByRole("link").map((l) => l.textContent)).toEqual([
@@ -2253,6 +2256,59 @@ describe("Workspace", () => {
         "Linked data",
         "Final review",
       ]);
+    });
+
+    it("takes the learner back to the course from a chapter completed, cheering it once", async () => {
+      const completed: string[] = [];
+      const answers: Record<string, string> = {
+        "What names a thing?": "An IRI",
+        "What is a triple?": "Three terms",
+        "What is Turtle?": "A syntax",
+        "Which is linked data?": "Data with links",
+      };
+      const useCases = courseUseCases({
+        getCourse: vi.fn(async () => makeCourse(["q-1", "q-2", "q-3", ...(completed.length > 0 ? ["r-1"] : [])], [...completed])),
+        answerCourseQuestion: vi.fn(async () => ({ effect: "review" as const, state: null })),
+        completeChapter: vi.fn(async (deck: Deck, chapterUrl: string) => {
+          completed.push(chapterUrl);
+          return deck;
+        }),
+      });
+      window.history.replaceState(null, "", routeToHash(courseRoute));
+      renderWorkspace(useCases);
+      // A chapter whose steps are done goes on to its final review, which opens on the word before it.
+      fireEvent.click(await screen.findByRole("link", { name: "Continue" }));
+      const reviewHeading = await screen.findByRole("heading", { name: "Final review: Linked data" });
+      expect(window.location.hash).toBe(routeToHash(reviewRoute));
+      await waitFor(() => expect(reviewHeading).toHaveFocus());
+      // Back to the chapters is the way out before starting.
+      expect(screen.getByRole("link", { name: "Back to the chapters" })).toHaveAttribute("href", routeToHash(courseRoute));
+
+      fireEvent.click(screen.getByRole("button", { name: "Start the final review" }));
+      for (let asked = 0; asked < 4; asked++) {
+        const question = Object.keys(answers).find((text) => screen.queryByText(text) !== null)!;
+        fireEvent.click(screen.getByRole("radio", { name: answers[question] }));
+        fireEvent.click(screen.getByRole("button", { name: "Check" }));
+        fireEvent.click(await screen.findByRole("button", { name: "Next" }));
+      }
+
+      const cheer = (await screen.findByText("Well done! You have completed Linked data.")).closest(".course-cheer");
+      expect(useCases.completeChapter).toHaveBeenCalledWith(expect.objectContaining({ url: courseDeck.url }), CH1);
+      expect(window.location.hash).toBe(routeToHash(courseRoute));
+      await waitFor(() => expect(cheer).toHaveFocus());
+      expect(screen.getByText("1 of 2 chapters done")).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: "Continue" })).toHaveAttribute(
+        "href",
+        routeToHash({ ...chapterRoute, chapterUrl: CH2 }),
+      );
+
+      // Gone once the learner goes elsewhere: coming back does not cheer again.
+      fireEvent.click(screen.getByRole("link", { name: "Continue" }));
+      expect(await screen.findByRole("heading", { name: "Step 1 of 1" })).toBeInTheDocument();
+      window.history.back();
+      expect(await screen.findByText("1 of 2 chapters done")).toBeInTheDocument();
+      expect(window.location.hash).toBe(routeToHash(courseRoute));
+      expect(document.querySelector(".course-cheer")).toBeNull();
     });
 
     it("falls back to the course for a chapter it does not have, or one still locked", async () => {

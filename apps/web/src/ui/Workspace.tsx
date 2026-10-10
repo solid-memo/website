@@ -1,5 +1,5 @@
 import type { ComponentChildren } from "preact";
-import { useEffect } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
@@ -16,7 +16,7 @@ import { CardContainer } from "./CardContainer";
 import { CardCreatorContainer } from "./CardCreatorContainer";
 import { ChapterPlayerContainer } from "./ChapterPlayerContainer";
 import { ChapterReviewContainer } from "./ChapterReviewContainer";
-import { CourseContainer, courseKey } from "./CourseContainer";
+import { CourseContainer, courseKey, type CompletedChapter } from "./CourseContainer";
 import { DeckCreatorContainer } from "./DeckCreatorContainer";
 import { DeckDetailContainer } from "./DeckDetailContainer";
 import { DeckPreferencesContainer } from "./DeckPreferencesContainer";
@@ -229,6 +229,15 @@ export function Workspace({
     chapterIndex >= 0 && activeCourse!.progress.chapters[chapterIndex]!.state !== "locked"
       ? activeCourse!.outline.chapters[chapterIndex]!
       : null;
+
+  // The chapter the learner has just completed, for the course's page to
+  // celebrate as they come back to it. Kept in memory, not the URL, and
+  // dropped as they go anywhere else, so neither a reload nor a later
+  // visit shows it again.
+  const [justCompleted, setJustCompleted] = useState<CompletedChapter | null>(null);
+  useEffect(() => {
+    if (route?.screen !== "course") setJustCompleted(null);
+  }, [route]);
 
   useEffect(() => {
     if (!needsCourse) return;
@@ -716,7 +725,9 @@ export function Workspace({
           />
         );
       case "course":
-        return <CourseContainer instanceUrl={instanceUrl!} course={activeCourse!} />;
+        return (
+          <CourseContainer instanceUrl={instanceUrl!} course={activeCourse!} justCompleted={justCompleted ?? undefined} />
+        );
       case "courseChapter":
         return (
           <ChapterPlayerContainer
@@ -736,6 +747,10 @@ export function Workspace({
             instance={activeInstance!}
             course={activeCourse!}
             chapter={activeChapter!}
+            onCompleted={(finishedCourse) => {
+              setJustCompleted({ chapterUrl: route.chapterUrl, finishedCourse });
+              navigate({ screen: "course", instanceUrl: instanceUrl!, deckUrl: deckUrl! });
+            }}
           />
         );
       case "preferences":

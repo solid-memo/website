@@ -172,11 +172,30 @@ new type-index entries ([data-model.md](data-model.md#courses)):
    release checked by the library never has), a chunk past the last
    shows the last.
 3. **The final review.** Once every step is done, the chapter's final
-   review asks all its questions, shuffled and again without the theory.
-   A question answered wrongly comes back until it is answered right.
-   Then the chapter is completed (`completeChapter`), which opens the
-   next.
-4. **Afterwards.** The cards are studied like any deck's, by
+   review comes next, whether the learner gets there with Next after
+   the last step or from the course's page. It opens on a word before
+   it: that every step of the chapter is done, and what the review is.
+   A button starts it, and a link goes back to the course's chapters;
+   the heading takes the focus. The review asks all the chapter's
+   questions, shuffled and again without the theory, each taking the
+   focus as it comes up. A question answered wrongly comes back until
+   it is answered right. Then the chapter is completed
+   (`completeChapter`), which opens the next; while that is saved, and
+   when it fails, with a way to try again, the review says so.
+4. **Back to the chapters.** Once the chapter is completed, and the
+   course read afresh, the learner is taken back to the course's page,
+   to go on or stop there. The page cheers the chapter just completed:
+   a word that it is done, which takes the focus, so a screen reader
+   reads it and Tab goes on to Continue, now to the next chapter. The
+   chapter's Done badge pops with a burst of sparkles. When that was
+   the course's last chapter left, the word says the course is
+   complete and confetti falls over the page for under three seconds.
+   The cheer is kept in memory, not in the URL, and only until the
+   learner goes elsewhere: a reload or a later visit does not show it
+   again. The motion is decoration only, hidden from screen readers,
+   and none of it plays when the reader asks for reduced motion.
+5. **Afterwards.** A finished course says so on its page, with a link
+   back to the decks. The cards are studied like any deck's, by
    flip-and-grade ([srs.md](srs.md)). A chapter can be retaken at any
    time, as practice: a chapter whose steps are all done opens at its
    first step, and each step shows its theory again. No single earlier

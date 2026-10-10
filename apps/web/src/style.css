@@ -2440,6 +2440,163 @@ form.card-edit {
   font-weight: 600;
 }
 
+/* A finished course's link back to the decks, under what it says. */
+.course-finished + .actions {
+  margin-top: 0.75rem;
+}
+
+/* The word on a chapter just completed, as the learner comes back to the
+   course's page: it bounces in, and takes the focus. */
+.course-cheer {
+  margin: 1rem 0;
+  padding: 0.75rem 1rem;
+  border: 2px solid color-mix(in srgb, var(--primary) 35%, transparent);
+  border-radius: var(--radius);
+  background:
+    radial-gradient(circle at 100% 0, var(--paper-yellow), transparent 60%),
+    var(--primary-soft);
+  animation: bounce-in 0.42s cubic-bezier(0.2, 0.8, 0.3, 1) 0.1s backwards;
+}
+
+.course-cheer p {
+  margin: 0;
+}
+
+.course-cheer p:first-child {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.course-cheer:focus-visible {
+  outline-offset: 0.25rem;
+}
+
+/* The chapter just completed: its Done badge pops, and sparkles burst
+   from it. A sparkle at rest is transparent, so with motion reduced
+   (every animation stopped) there are none; it stays within the row's
+   padding and the page's, so it widens nothing at phone width. */
+.course-chapter.just-completed .course-state {
+  position: relative;
+  animation: badge-pop 0.5s cubic-bezier(0.2, 0.8, 0.3, 1) 0.35s backwards;
+}
+
+@keyframes badge-pop {
+  from {
+    transform: scale(0.4);
+  }
+
+  55% {
+    transform: scale(1.3);
+  }
+}
+
+.course-sparkles {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  pointer-events: none;
+}
+
+.course-sparkles>span {
+  position: absolute;
+  width: 0.4rem;
+  height: 0.4rem;
+  margin: -0.2rem;
+  border-radius: 50%;
+  background: var(--accent-yellow);
+  opacity: 0;
+  animation: sparkle 0.7s ease-out 0.5s backwards;
+}
+
+.course-sparkles>span:nth-child(even) {
+  background: var(--primary);
+}
+
+@keyframes sparkle {
+  from {
+    opacity: 1;
+    transform: rotate(var(--angle)) translateY(0) scale(0.4);
+  }
+
+  60% {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+    transform: rotate(var(--angle)) translateY(-1.5rem) scale(1);
+  }
+}
+
+/* Confetti over the page for a course just completed (ui/Confetti.tsx):
+   fixed over the viewport and clipped to it, so it neither moves nor
+   widens the page, out of the pointer's way, and over in under three
+   seconds. A piece at rest is transparent, so with motion reduced there
+   is no confetti at all, not a frozen scatter of it. */
+.confetti {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.confetti>span {
+  position: absolute;
+  top: 0;
+  left: var(--x);
+  width: 0.5rem;
+  height: 0.8rem;
+  border-radius: 2px;
+  background: var(--primary);
+  opacity: 0;
+  animation: confetti-fall 2.2s cubic-bezier(0.3, 0.6, 0.6, 1) var(--delay) backwards;
+}
+
+.confetti>span:nth-child(4n + 2) {
+  background: var(--accent-yellow);
+}
+
+.confetti>span:nth-child(4n + 3) {
+  background: var(--accent-red);
+}
+
+.confetti>span:nth-child(4n) {
+  background: var(--accent-blue);
+}
+
+.confetti>span:nth-child(3n) {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+}
+
+@keyframes confetti-fall {
+  from {
+    opacity: 1;
+    transform: translate(0, -2rem) rotate(0);
+  }
+
+  80% {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+    transform: translate(var(--drift), 100vh) rotate(var(--spin));
+  }
+}
+
+/* The word before a chapter's final review, and its two ways on. */
+.course-review-start p {
+  margin: 0 0 0.75rem;
+}
+
+.course-review-cheer {
+  color: var(--primary);
+  font-weight: 600;
+}
+
 .course-chapters {
   display: grid;
   gap: 0.75rem;

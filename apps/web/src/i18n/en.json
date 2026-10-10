@@ -192,6 +192,10 @@
     "start": "Start the course",
     "continue": "Continue",
     "finished": "You have finished this course. Its cards are in your deck, to study like any other.",
+    "backToDecks": "Back to decks",
+    "chapterCompleted": "Well done! You have completed {chapter}.",
+    "courseCompleted": "Congratulations! That was the last chapter: you have completed the whole course.",
+    "continueOrStop": "Go on with the next chapter when you are ready, or stop here for now: your progress is kept.",
     "chapterNumber": "Chapter {number}:",
     "locked": "Locked",
     "open": "Open",
@@ -219,14 +223,14 @@
   },
   "chapterReview": {
     "heading": "Final review: {chapter}",
-    "intro": "Every question of the chapter once more. One you answer wrongly comes back until you get it right.",
+    "cheer": "Well done: you have worked through every step of this chapter!",
+    "about": "Now the final review: every question of the chapter once more, shuffled, without the theory. One you answer wrongly comes back until you get it right. Pass it, and the chapter is complete.",
+    "start": "Start the final review",
+    "backToCourse": "Back to the chapters",
     "position": "Question {position} of {total}",
     "next": "Next",
     "completing": "Completing the chapter…",
-    "retry": "Try again",
-    "chapterDone": "Chapter complete. The next one is open.",
-    "courseDone": "Chapter complete. You have finished the course.",
-    "nextChapter": "Next chapter: {chapter}"
+    "retry": "Try again"
   },
   "courseQuestion": {
     "right": "Right!",

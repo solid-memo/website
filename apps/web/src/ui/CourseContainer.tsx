@@ -1,7 +1,7 @@
 import type { Course } from "@solid-memo/application/useCases";
 import type { CourseChapter } from "@solid-memo/domain/course";
 import { CourseScreen } from "./CourseScreen";
-import { routeToHash } from "./router";
+import { decksHref, routeToHash } from "./router";
 
 /**
  * The key a course as the learner has it (UseCases.getCourse) is queried
@@ -28,11 +28,28 @@ export function chapterHref(instanceUrl: string, course: Course, chapter: Course
   });
 }
 
+/** A chapter the learner has just completed, as they come back to the course's page. */
+export interface CompletedChapter {
+  chapterUrl: string;
+  /** Completing it completed the course: it was the last chapter left. */
+  finishedCourse: boolean;
+}
+
 /**
  * Owns a course's page. The course itself is resolved by Workspace
- * (courseQuery), which the page needs for its trail too.
+ * (courseQuery), which the page needs for its trail too; so is the
+ * chapter just completed, which Workspace keeps as the learner comes
+ * back from its final review.
  */
-export function CourseContainer({ instanceUrl, course }: { instanceUrl: string; course: Course }) {
+export function CourseContainer({
+  instanceUrl,
+  course,
+  justCompleted,
+}: {
+  instanceUrl: string;
+  course: Course;
+  justCompleted?: CompletedChapter;
+}) {
   const current = course.outline.chapters.find((chapter) => chapter.url === course.progress.currentChapterUrl);
   return (
     <CourseScreen
@@ -43,6 +60,8 @@ export function CourseContainer({ instanceUrl, course }: { instanceUrl: string; 
       started={course.answeredCardIds.length > 0}
       chapterHref={(chapter) => chapterHref(instanceUrl, course, chapter)}
       continueHref={current === undefined ? undefined : chapterHref(instanceUrl, course, current)}
+      decksHref={decksHref(instanceUrl)}
+      justCompleted={justCompleted}
     />
   );
 }
