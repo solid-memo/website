@@ -14,6 +14,7 @@ import { problemText, type MarkdownProblem } from "@solid-memo/ui/MarkdownEditin
 import { ReaderText } from "@solid-memo/ui/ReaderText";
 import { repairLabels } from "@solid-memo/ui/RepairContainer";
 import { summaryClass, summaryOf, ViolationMessage } from "@solid-memo/ui/ValidationScreen";
+import { useScreenCommands } from "./shell/useScreenCommands";
 
 /** What can be repaired of what a check found, and the actions that repair it. */
 export interface RepairActions {
@@ -194,6 +195,7 @@ export function DeckHealthScreen({
   held?: boolean;
 }) {
   const { t, tx } = useI18n();
+  useCheckAgain(checking, onCheck);
   const count = healthProblemCount(health);
   const about = (text: string) => (held ? text : <a href={aboutHref}>{text}</a>);
   const toSpot = held ? null : spotHref;
@@ -298,6 +300,7 @@ export function InstanceHealthScreen({
   badge: (deck: Deck) => ComponentChildren;
 }) {
   const { t, readerText } = useI18n();
+  useCheckAgain(checking, onCheck);
   const link: SubjectLink = (subjectUrl) => {
     const document = documentUrlOf(subjectUrl);
     const deck = decks.find(
@@ -340,4 +343,10 @@ export function InstanceHealthScreen({
       </section>
     </section>
   );
+}
+
+/** "Check again" in the palette too, while the screen is not checking. */
+function useCheckAgain(checking: boolean, onCheck: () => void) {
+  const { t } = useI18n();
+  useScreenCommands(checking ? [] : [{ id: "checkAgain", label: t("studio.health.checkAgain"), run: onCheck }]);
 }

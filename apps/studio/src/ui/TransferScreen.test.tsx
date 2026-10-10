@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
 import type { DeckFile } from "@solid-memo/domain/deckFile";
 import { TransferScreen } from "./TransferScreen";
+import { screenCommands, WithCommands } from "../test/commands";
 import { instanceA, makeCard, makeDeck } from "../test/fixtures";
 
 const kanji = makeDeck("deck-1", { en: "Kanji N5" });
@@ -56,7 +57,11 @@ function renderScreen(overrides: Partial<Props> = {}) {
     cardsHref: (deck) => `#/cards?deck=${deck.id}`,
     ...overrides,
   };
-  render(<TransferScreen {...props} />);
+  render(
+    <WithCommands>
+      <TransferScreen {...props} />
+    </WithCommands>,
+  );
   return props;
 }
 
@@ -74,6 +79,18 @@ describe("TransferScreen", () => {
     expect(props.onExport).toHaveBeenCalledWith([verbs], { format: "jsonld", withProgress: true });
   });
 
+  it("exports the decks ticked from the palette too, while some are and none is being exported", () => {
+    const props = renderScreen({ chosen: [verbs.url, kanji.url] });
+    expect(screenCommands().export!.label).toBe("Export 2 decks");
+    screenCommands().export!.run();
+    expect(props.onExport).toHaveBeenCalledWith([kanji, verbs], { format: "turtle", withProgress: false });
+  });
+
+  it("offers no export in the palette with no deck ticked", () => {
+    renderScreen();
+    expect(screenCommands()).toEqual({});
+  });
+
   it("exports nothing until a deck is ticked", () => {
     renderScreen();
     expect(screen.getByRole("button", { name: "Export 0 decks" })).toBeDisabled();
@@ -84,6 +101,7 @@ describe("TransferScreen", () => {
     expect(screen.getByText("Exporting Verbs (2 of 2)…")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Export 2 decks" })).toBeDisabled();
     expect(screen.getByRole("checkbox", { name: "Kanji N5" })).toBeDisabled();
+    expect(screenCommands()).toEqual({});
   });
 
   it("says how many decks it handed the browser, and that it may ask to allow several downloads", () => {

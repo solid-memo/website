@@ -5,9 +5,12 @@ import { useI18n } from "@solid-memo/ui/i18n";
 import { MAIN_ID } from "@solid-memo/ui/SkipLink";
 import { DraftWaiting, useDraftSaving, type EditorReport } from "../draftEditor";
 import { studioRouteToHash, type StudioRoute } from "../router";
-import { KeyHelp } from "./KeyHelp";
+import type { Command, ScreenCommand } from "./commandIndex";
+import { CommandPalette } from "./CommandPalette";
+import { KeyHelp, Keys } from "./KeyHelp";
 import { DENSITIES, rememberPrefs, studioPrefs, type StudioPrefs } from "./prefs";
-import { nextRegion, sectionRoute, type Section } from "./shortcuts";
+import { keysOf, nextRegion, sectionRoute, type Section } from "./shortcuts";
+import { ScreenCommands, useCommandRegistry } from "./useScreenCommands";
 import { ScreenKeys, useShortcuts } from "./useShortcuts";
 import { NARROW, stepTab, type ContextTab } from "./workspaceLayout";
 import "../studio.css";
@@ -16,13 +19,14 @@ const SIDEBAR_ID = "studio-sidebar";
 
 /**
  * The Studio's workspace around its screens: the site header, with a
- * button that shows or hides the sidebar, the open instance (`switcher`)
- * and a way back to Solid Memo; the sidebar (`sidebar`, a `nav`), when
- * an instance is open; the main content, which scrolls on its own; and a
- * status bar, with the open instance, whether the open draft is saved,
- * how densely the Studio is laid out, and its keys. Its stylesheet
- * (studio.css) holds only while it is shown, under
- * `data-surface="studio"` on the page's root: Solid Memo shares the page.
+ * button that shows or hides the sidebar, the open instance (`switcher`),
+ * a button that opens the palette (CommandPalette) and a way back to
+ * Solid Memo; the sidebar (`sidebar`, a `nav`), when an instance is
+ * open; the main content, which scrolls on its own; and a status bar,
+ * with the open instance, whether the open draft is saved, how densely
+ * the Studio is laid out, and its keys. Its stylesheet (studio.css)
+ * holds only while it is shown, under `data-surface="studio"` on the
+ * page's root: Solid Memo shares the page.
  *
  * The sidebar is shown beside the main content until the user hides it,
  * which the device remembers (prefs.ts). On a narrow screen (NARROW) it
@@ -30,17 +34,21 @@ const SIDEBAR_ID = "studio-sidebar";
  * again once a link in it is followed, on a press outside it, or on
  * Escape.
  *
- * It listens for the Studio's keys (useShortcuts, docs/studio.md): `?`
- * shows them all (KeyHelp), `/` goes to the screen's filter (the field
- * whose `aria-keyshortcuts` is "/"), F6 and Shift+F6 go from region to
- * region (each a `data-region` shown), the `g` chords go to a section
- * (`onGo`), Ctrl+B shows or hides the sidebar, and `[`, `]` and 1 to 9
- * go to another of the context tabs (`tabs`). The screens' own keys come
- * first (ScreenKeys).
+ * It listens for the Studio's keys (useShortcuts, docs/studio.md):
+ * Ctrl+K (or Cmd+K) opens the palette, with the screen's own commands
+ * (useScreenCommands) and the shell's, `?` shows every key (KeyHelp),
+ * `/` goes to the screen's filter (the field whose `aria-keyshortcuts`
+ * is "/"), F6 and Shift+F6 go from region to region (each a
+ * `data-region` shown), the `g` chords go to a section (`onGo`), Ctrl+B
+ * shows or hides the sidebar, and `[`, `]` and 1 to 9 go to another of
+ * the context tabs (`tabs`). The screens' own keys come first
+ * (ScreenKeys).
  */
 export function StudioShell({
   banner,
   backHref,
+  route,
+  instances,
   instance,
   switcher,
   sidebar,
@@ -53,6 +61,10 @@ export function StudioShell({
   banner?: ComponentChildren;
   /** Solid Memo, at the open instance's decks when there is one. */
   backHref: string;
+  /** The route shown; null while it is worked out. */
+  route: StudioRoute | null;
+  /** The user's instances, as read so far. */
+  instances: readonly Instance[];
   instance: Instance | null;
   /** The open instance, to switch to another (InstanceSwitcher). */
   switcher?: ComponentChildren;
@@ -71,6 +83,10 @@ export function StudioShell({
   const [prefs, setPrefs] = useState<StudioPrefs>(() => studioPrefs());
   const waiting = useWaiting();
   const [help, setHelp] = useState(false);
+  const [palette, setPalette] = useState(false);
+  // What the palette chose to do, done once it has closed and given the focus back.
+  const [chosen, setChosen] = useState<(() => void) | null>(null);
+  const screenCommands = useCommandRegistry();
   const narrow = useNarrow();
   const [drawer, setDrawer] = useState(false);
   const shown = sidebar !== null && (narrow ? drawer : prefs.sidebar);
@@ -87,8 +103,29 @@ export function StudioShell({
     else choose({ ...prefs, sidebar: !prefs.sidebar });
   }
 
+  /** The shell's own commands in the palette, beside the screen's. */
+  const shellCommands = (): ScreenCommand[] => [
+    { id: "help", label: t("studio.palette.help"), keys: keysOf("help"), run: () => setHelp(true) },
+    ...(sidebar === null ? [] : [{ id: "toggleSidebar", label: t("studio.keys.toggleSidebar"), keys: keysOf("toggleSidebar"), run: toggleSidebar }]),
+  ];
+
+  function chooseCommand(command: Command) {
+    setPalette(false);
+    if ("route" in command) go(command.route);
+    else setChosen(() => command.run);
+  }
+
+  useEffect(() => {
+    if (chosen === null) return;
+    setChosen(null);
+    chosen();
+  }, [chosen]);
+
   const register = useShortcuts((shortcut) => {
     switch (shortcut) {
+      case "palette":
+        setPalette(true);
+        return true;
       case "help":
         setHelp(true);
         return true;
@@ -182,6 +219,12 @@ export function StudioShell({
         )}
         {banner}
         {switcher}
+        <button type="button" class="studio-search" aria-keyshortcuts="Control+K Meta+K" onClick={() => setPalette(true)}>
+          <span>{t("studio.palette.button")}</span>
+          <span class="studio-palette-keys" aria-hidden="true">
+            <Keys keys="Ctrl+K" />
+          </span>
+        </button>
         <p class="header-link">
           <a href={backHref}>{t("studio.backToApp")}</a>
         </p>
@@ -209,7 +252,9 @@ export function StudioShell({
         </nav>
       )}
       <main id={MAIN_ID} tabIndex={-1} class="workspace" data-region>
-        <ScreenKeys.Provider value={register}>{children}</ScreenKeys.Provider>
+        <ScreenKeys.Provider value={register}>
+          <ScreenCommands.Provider value={screenCommands.register}>{children}</ScreenCommands.Provider>
+        </ScreenKeys.Provider>
       </main>
       <aside class="studio-status-bar" aria-label={t("studio.shell.status")} data-region tabIndex={-1}>
         {instance !== null && <p>{instance.name}</p>}
@@ -231,6 +276,16 @@ export function StudioShell({
         </button>
       </aside>
       {help && <KeyHelp onClose={() => setHelp(false)} />}
+      {palette && (
+        <CommandPalette
+          route={route}
+          instances={instances}
+          tabs={tabs}
+          commands={[...screenCommands.commands(), ...shellCommands()]}
+          onChoose={chooseCommand}
+          onClose={() => setPalette(false)}
+        />
+      )}
     </DraftWaiting.Provider>
   );
 }

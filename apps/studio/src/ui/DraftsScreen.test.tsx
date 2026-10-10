@@ -3,6 +3,7 @@ import { fireEvent, render, screen, within } from "@testing-library/preact";
 import type { ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout";
 import { DraftsScreen } from "./DraftsScreen";
 import { choose } from "../test/choose";
+import { screenCommands, WithCommands } from "../test/commands";
 import { instanceA, makeDeck } from "../test/fixtures";
 
 const kanji = makeDeck("deck-1", { en: "Kanji N5" });
@@ -40,7 +41,11 @@ function renderScreen(overrides: Partial<Props> = {}) {
     onDelete: vi.fn(),
     ...overrides,
   };
-  render(<DraftsScreen {...props} />);
+  render(
+    <WithCommands>
+      <DraftsScreen {...props} />
+    </WithCommands>,
+  );
   return props;
 }
 
@@ -48,6 +53,18 @@ beforeEach(() => localStorage.clear());
 afterEach(() => vi.unstubAllGlobals());
 
 describe("DraftsScreen", () => {
+  it("goes to the new draft's form from the palette, while a draft can be made", () => {
+    renderScreen();
+    expect(screenCommands().newDraft!.label).toBe("New draft");
+    screenCommands().newDraft!.run();
+    expect(screen.getByRole("radio", { name: "A blank deck" })).toHaveFocus();
+  });
+
+  it("offers no new draft in the palette while none can be made", () => {
+    renderScreen({ readOnly: "setAside" });
+    expect(screenCommands()).toEqual({});
+  });
+
   it("lists the drafts: their kind, version and state", () => {
     renderScreen({
       drafts: [

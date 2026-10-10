@@ -1452,9 +1452,10 @@
       "release": "Utgåva"
     },
     "keys": {
+      "palette": "Sök, gå till eller kör ett kommando",
       "button": "? Tangenter",
       "heading": "Kortkommandon",
-      "chords": "Tangenter sida vid sida, som g d, trycks en efter en. Medan du skriver i ett fält fungerar bara F6 och Shift+F6.",
+      "chords": "Tangenter sida vid sida, som g d, trycks en efter en. Medan du skriver i ett fält fungerar bara Ctrl+K, F6 och Shift+F6.",
       "scope": {
         "studio": "Överallt i Studion",
         "cards": "I kortbänken"
@@ -1481,6 +1482,23 @@
       "up": "Föregående kort",
       "select": "Välj kortet",
       "open": "Öppna kortet"
+    },
+    "palette": {
+      "button": "Sök eller kör…",
+      "heading": "Snabböppna",
+      "label": "Sök kortlekar, utkast, kort och kommandon",
+      "none": "Inget matchar.",
+      "help": "Visa kortkommandona",
+      "group": {
+        "recent": "Senast använda",
+        "commands": "Kommandon",
+        "tabs": "Flikar",
+        "sections": "Avsnitt",
+        "instances": "Instanser",
+        "decks": "Kortlekar",
+        "drafts": "Utkast",
+        "cards": "Kortlekens kort"
+      }
     },
     "decks": {
       "heading": "Kortlekar",

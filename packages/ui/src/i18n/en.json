@@ -1452,9 +1452,10 @@
       "release": "Release"
     },
     "keys": {
+      "palette": "Search, go to or run a command",
       "button": "? Keys",
       "heading": "Keyboard shortcuts",
-      "chords": "Keys shown side by side, such as g d, are pressed one after the other. While you type in a field, only F6 and Shift+F6 work.",
+      "chords": "Keys shown side by side, such as g d, are pressed one after the other. While you type in a field, only Ctrl+K, F6 and Shift+F6 work.",
       "scope": {
         "studio": "Anywhere in the Studio",
         "cards": "In the card workbench"
@@ -1481,6 +1482,23 @@
       "up": "Previous card",
       "select": "Select the card",
       "open": "Open the card"
+    },
+    "palette": {
+      "button": "Search or run…",
+      "heading": "Quick open",
+      "label": "Search decks, drafts, cards and commands",
+      "none": "Nothing matches.",
+      "help": "Show the keyboard shortcuts",
+      "group": {
+        "recent": "Recently used",
+        "commands": "Commands",
+        "tabs": "Tabs",
+        "sections": "Sections",
+        "instances": "Instances",
+        "decks": "Decks",
+        "drafts": "Drafts",
+        "cards": "Cards of this deck"
+      }
     },
     "decks": {
       "heading": "Decks",

@@ -80,7 +80,8 @@ It takes the whole window, and the window does not scroll:
 
 - **The header** is one row: the sidebar's button, the masthead (the
   Studio's name, who is signed in, Log out), the open instance, the
-  theme and the languages, and the link back to Solid Memo. On a narrow
+  palette's button (**Search or run…**, [below](#quick-open-and-commands)),
+  the theme and the languages, and the link back to Solid Memo. On a narrow
   screen (48rem or less) it is two: the button, the name and Log out,
   then the rest; who is signed in is left out there.
 - **The open instance**, for a user with several, is a menu
@@ -150,6 +151,7 @@ and its keymap is data
 
 | Keys | Where | What they do |
 | --- | --- | --- |
+| Ctrl+K, Cmd+K | anywhere, a field too | search, go to or run a command, in the palette ([below](#quick-open-and-commands)); **Search or run…** in the header does too |
 | `?` | anywhere | list every key, in a dialog; **? Keys** in the status bar does too |
 | `/` | anywhere | go to the screen's search or filter: Home's, the workbench's, a draft's cards' |
 | F6, Shift+F6 | anywhere, a field too | go to the next region, or the one before: the header, the sidebar (while it is shown), the main content, the status bar |
@@ -164,8 +166,8 @@ A pair such as `g d` is pressed one key after the other, the second
 within 1.5 seconds; a key held down counts once, so a held `g` is not
 `g g`. A `g` chord, and a tab's key, goes where a link would, and is a
 Back stop as a link is, except to the page already shown. While the user types in a field (a text, a search,
-a list to choose from), the field keeps its keys, F6 and Shift+F6
-aside. A key goes first to what has the focus, which may take it (a
+a list to choose from), the field keeps its keys, Ctrl+K, F6 and
+Shift+F6 aside. A key goes first to what has the focus, which may take it (a
 menu's arrows, say); then to the screen's own keys (`useScreenKeys`),
 then to the Studio's. Keys in a dialog are the dialog's. A field or
 button with a key says so to screen readers (`aria-keyshortcuts`): the
@@ -184,6 +186,57 @@ shown and takes away after; the density is `data-density` beside it.
 A test ([studio.test.ts](../apps/studio/src/ui/studio.test.ts)) checks
 the rules through the cascade, and that Solid Memo's screens are left
 as they were.
+
+### Quick open and commands
+
+The palette ([`shell/CommandPalette.tsx`](../apps/studio/src/ui/shell/CommandPalette.tsx),
+a dialog named Quick open) opens with Ctrl+K (Cmd+K on a Mac), or
+with **Search or run…** in the header. It finds, as the user types:
+
+- the **commands** of the screen shown, and the Studio's own (show the
+  keys, show or hide the sidebar);
+- the **tabs** of the deck or draft shown, each with its number;
+- the open instance's **sections**, each with its `g` chord, and All
+  instances;
+- the user's **instances**, each at its decks;
+- the open instance's **decks**, each at its cards, and its **drafts**
+  (those that can be read), each at its overview;
+- the **cards of the deck shown**, each in the inspector, only once
+  something is typed.
+
+It lists what the workspace has read, from its cache, as it was when
+the palette opened: it reads nothing from the pod, so a deck's cards
+are there once a screen of the deck has read them. Which entries there
+are, and how they rank, is worked out apart from the page
+([`shell/commandIndex.ts`](../apps/studio/src/ui/shell/commandIndex.ts)):
+an entry matches when its name holds the letters typed in their order,
+case and accents aside ("kn5" finds Kanji N5); a letter at the start of
+a word, or right after the one before, counts for more, and a shorter
+name a little. The best come first, each group under its heading where
+its best is, 50 at most. With nothing typed, the entries the device
+remembers as used last come first, under Recently used (eight at most,
+the last first; [`shell/prefs.ts`](../apps/studio/src/ui/shell/prefs.ts),
+key `solid-memo:studioRecent.v1`, each by its group and where it goes,
+or by its command), then the rest but the cards. Each entry shows the
+keys that do the same, if any.
+
+The field is a combobox over the list, as screen readers know it: the
+focus stays in the field, and the entry picked is its
+`aria-activedescendant`. Down and Up pick the next entry or the one
+before, round from either end; Enter, or a click, chooses it; Escape
+closes the palette, and the focus goes back where it was. An entry
+that goes somewhere goes as a link does, a Back stop, except to the
+page already shown; a command is done once the palette has closed.
+
+A screen adds its commands while it is shown, and only those it can
+do at the moment (`useScreenCommands`, in
+[`shell/useScreenCommands.ts`](../apps/studio/src/ui/shell/useScreenCommands.ts)):
+
+| Screen | Command | What it does |
+| --- | --- | --- |
+| [Drafts](#drafts) | New draft | goes to the new draft's form, while a draft can be made |
+| [Health](#health), an instance's or a deck's | Check again | checks again, while it is not checking |
+| [Import and export](#import-and-export) | Export *n* decks | exports the decks ticked, as the form's button does, while some are and none is being exported |
 
 ## Routes
 

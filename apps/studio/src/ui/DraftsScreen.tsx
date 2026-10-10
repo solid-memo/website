@@ -1,4 +1,4 @@
-import { useState } from "preact/hooks";
+import { useRef, useState } from "preact/hooks";
 import type { CreatedDraft, NewDraft } from "@solid-memo/application/releaseDrafts";
 import { AppError } from "@solid-memo/domain/appError";
 import type { Deck } from "@solid-memo/domain/deck";
@@ -10,6 +10,7 @@ import { useI18n, type ErrorText } from "@solid-memo/ui/i18n";
 import { draftOf, LangTextField, rememberLanguages, textOfDraft, useMissingLanguage } from "@solid-memo/ui/LangTextField";
 import { recentLanguages } from "@solid-memo/ui/remembered";
 import { ReadOnlyScope } from "./ReadOnly";
+import { useScreenCommands } from "./shell/useScreenCommands";
 
 /** What a new draft starts from, as the form offers it. */
 type Start = NewDraft["kind"];
@@ -75,6 +76,13 @@ export function DraftsScreen({
   const [deckUrl, setDeckUrl] = useState(decks[0]?.url ?? "");
   const [releaseUrl, setReleaseUrl] = useState("");
   const { missing, ask, clear } = useMissingLanguage("draft-name");
+  const formRef = useRef<HTMLFormElement>(null);
+  // From the palette: the form's first field, what to start from, while a draft can be made.
+  useScreenCommands(
+    readOnly === null
+      ? [{ id: "newDraft", label: t("studio.drafts.new"), run: () => formRef.current!.querySelector<HTMLInputElement>("input:checked")!.focus() }]
+      : [],
+  );
 
   const nameOf = (draft: ReleaseDraftSummary) =>
     Object.keys(draft.title).length === 0 ? t("studio.drafts.untitled", { name: draft.name }) : readerText(draft.title);
@@ -117,7 +125,7 @@ export function DraftsScreen({
       <ReadOnlyScope reason={readOnly} subject="catalogue" healthHref={healthHref}>
         <section aria-labelledby="drafts-new-heading">
           <h3 id="drafts-new-heading">{t("studio.drafts.new")}</h3>
-          <form class="card-edit" onSubmit={handleSubmit}>
+          <form ref={formRef} class="card-edit" onSubmit={handleSubmit}>
             <fieldset>
               <legend>{t("studio.drafts.from")}</legend>
               {STARTS.map((option) => (
