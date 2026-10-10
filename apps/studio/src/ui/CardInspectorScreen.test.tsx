@@ -58,4 +58,25 @@ describe("CardInspectorScreen", () => {
     renderScreen({ release: "changed" });
     expect(screen.getByRole("note")).toHaveTextContent("newer releases no longer update it");
   });
+
+  it("shows the card before or after it beside the deck's cards, none at either end", () => {
+    const next = vi.fn();
+    renderScreen({ steps: { previous: null, next } });
+    const steps = screen.getByRole("group", { name: "Cards in the list" });
+    expect(steps).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Previous card" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Previous card" })).toHaveAttribute("aria-keyshortcuts", "k");
+    fireEvent.click(screen.getByRole("button", { name: "Next card" }));
+    expect(next).toHaveBeenCalled();
+  });
+
+  it("shows the card before at the end of the list, and has no Previous and Next alone", () => {
+    const previous = vi.fn();
+    renderScreen({ steps: { previous, next: null } });
+    expect(screen.getByRole("button", { name: "Next card" })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "Previous card" }));
+    expect(previous).toHaveBeenCalled();
+    renderScreen();
+    expect(screen.getAllByRole("button", { name: "Next card" })).toHaveLength(1);
+  });
 });

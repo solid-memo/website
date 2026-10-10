@@ -1,10 +1,9 @@
-import { useCallback, useMemo, useRef, useState } from "preact/hooks";
+import { useCallback, useMemo, useState } from "preact/hooks";
 import {
   CARD_FEATURES,
   CARD_FIELDS,
   CARD_PAGE_SIZES,
   CARD_STATES,
-  nextCardSort,
   UNSTATED,
   type CardPageSize,
   type CardQuery,
@@ -27,14 +26,8 @@ import { CardBulkActions, type ReviewEdit } from "./CardBulkActions";
 import { ReadOnlyNotice } from "./ReadOnly";
 import type { CardTransfer } from "./TransferCardsDialog";
 import { useActivity } from "./shell/activity";
-import { shortcutOf } from "./shell/shortcuts";
-import { useScreenKeys } from "./shell/useShortcuts";
-
-/** The columns after the card's front, each sorted by its key. */
-const COLUMNS: readonly Exclude<CardSort, "front">[] = ["back", "due", "interval", "ease", "lapses", "created", "id"];
-
-/** The columns of figures, aligned to compare. */
-const NUMBERS: ReadonlySet<CardSort> = new Set(["interval", "ease", "lapses"]);
+import { DataTable, type Column } from "./shell/DataTable";
+import { nextSort, NO_SELECTION, toggled, type Selection } from "./shell/tableModel";
 
 /** An edit made, which can be undone while the page is open. */
 export interface CardEditMade {
@@ -67,15 +60,16 @@ function doneKey(edit: CardEdit) {
  * A column's header sorts by it, then the other way, then back to the
  * deck's own order; the sorted column says so (`aria-sort`).
  *
- * Cards are selected by their checkbox, or a page's at once; the
- * selection stays as the view changes, and a status line counts it.
- * The keys j and k move between the rows (the focus goes to the row's
- * link; from outside the table, to the first), x selects the row, and
- * Enter opens it: its card in Solid Memo's editor (`cardHref`,
- * `onOpen`), as the link does. They work wherever the focus is, the
- * page's body too, as a reload or a cleared selection leaves it: they
- * are the screen's own keys of the Studio's (useScreenKeys), which
- * leaves them to the search and the filters while they have the focus.
+ * The table is a DataTable. Cards are selected by their checkbox, or a
+ * page's at once; the selection stays as the view changes, and a status
+ * line counts it. The keys j and k move between the rows (the focus goes
+ * to the row's link; from outside the table, to the first), x selects
+ * the row, Shift+J and Shift+K select on from it, Escape clears the
+ * selection, and Enter opens the row: its card in the inspector
+ * (`cardHref`, `onOpen`), as the link does (useRowKeys). While a card is
+ * shown beside the table (`current`), its row is the cursor's, and j and
+ * k show the next card or the one before instead (`onMove`), from either
+ * end of the page the card on the page beyond it.
  *
  * The selected cards the query keeps (on any page; one it hides stays
  * selected, but is left alone) can be edited at once (CardBulkActions):
@@ -113,6 +107,8 @@ export function CardWorkbenchScreen({
   onQuery,
   cardHref,
   onOpen,
+  current,
+  onMove,
   plan,
   onEdit,
   lastEdit,
@@ -147,6 +143,10 @@ export function CardWorkbenchScreen({
   onQuery: (query: CardQuery) => void;
   cardHref: (card: Card) => string;
   onOpen: (card: Card) => void;
+  /** The card shown beside the table, by its URL. */
+  current?: string;
+  /** Show another card beside the table, as j and k ask. */
+  onMove?: (card: Card) => void;
   /** What an edit of the cards of these ids would do. */
   plan: (ids: readonly string[], edit: CardEdit) => CardEditPlan;
   /** Make the edit as planned; whether it was made. */
@@ -175,8 +175,7 @@ export function CardWorkbenchScreen({
   error: ErrorText | null;
 }) {
   const { t, tx, readerText, languageLabel, formatDate, formatMonth } = useI18n();
-  const [chosen, setChosen] = useState<ReadonlySet<string>>(new Set());
-  const bodyRef = useRef<HTMLTableSectionElement>(null);
+  const [chosen, setChosen] = useState<Selection>(NO_SELECTION);
 
   const selected = useMemo(
     () => rows.filter((row) => chosen.has(row.card.url)).map((row) => row.card),
@@ -188,9 +187,8 @@ export function CardWorkbenchScreen({
   const page = paginate([...rows], query.page, query.size);
   const shown = page.items;
   const count = chosen.size;
-  const allShown = shown.length > 0 && shown.every((row) => chosen.has(row.card.url));
-  const toggle = (urls: readonly string[], on: boolean) =>
-    setChosen((all) => new Set(on ? [...all, ...urls] : [...all].filter((url) => !urls.includes(url))));
+  /** Cards leave the selection, once they leave the deck. */
+  const unselect = (cards: readonly Card[]) => setChosen((all) => toggled(all, cards.map((card) => card.url), false));
   const editSaid =
     lastEdit === null
       ? ""
@@ -216,52 +214,41 @@ export function CardWorkbenchScreen({
     onQuery({ ...rest, ...(value === "" ? {} : { [key]: value }), page: 1 } as CardQuery);
   };
 
-  useScreenKeys((event, key) => {
-    const links = [...(bodyRef.current?.querySelectorAll<HTMLAnchorElement>("tr > th a") ?? [])];
-    const at = links.findIndex((link) => link.closest("tr")!.contains(document.activeElement));
-    const row = at === -1 ? undefined : shown[at];
-    const shortcut = shortcutOf(key, "cards");
-    switch (shortcut) {
-      case "down":
-      case "up": {
-        const next = shortcut === "down" ? Math.min(at + 1, links.length - 1) : Math.max(at - 1, 0);
-        links[next]?.focus();
-        break;
-      }
-      case "select":
-        if (row === undefined) return;
-        toggle([row.card.url], !chosen.has(row.card.url));
-        break;
-      case "open":
-        // The row's link opens the card itself.
-        if (row === undefined || event.target instanceof HTMLAnchorElement) return;
-        onOpen(row.card);
-        break;
-      default:
-        return;
-    }
-    event.preventDefault();
-  });
-
   // A language the URL names but the cards' sides do not have (one of
   // the notes', say) is still offered, so the filter shows and clears.
   const langOptions =
     query.lang === undefined || languages.includes(query.lang) ? languages : [...languages, query.lang];
-  const sortOf = (key: CardSort) =>
-    query.sort?.key !== key ? undefined : query.sort.descending ? "descending" : "ascending";
-  const header = (key: CardSort) => (
-    <th key={key} scope="col" class={NUMBERS.has(key) ? "number" : undefined} aria-sort={sortOf(key)}>
-      <button type="button" class="sort" onClick={() => onQuery(nextCardSort(query, key))}>
-        {t(`studio.cards.column.${key}`)}
-      </button>
-    </th>
-  );
   const none = (
     <>
       <span aria-hidden="true">–</span>
       <span class="visually-hidden">{t("studio.cards.notStudied")}</span>
     </>
   );
+  const columns: Column<CardRow>[] = [
+    {
+      key: "back",
+      label: t("studio.cards.column.back"),
+      cell: ({ card }) => (
+        <CardRowBack back={card.back} imageUrl={card.backImageUrl} imageDescription={card.backImageDescription} textFormat={card.textFormat} />
+      ),
+    },
+    { key: "due", label: t("studio.cards.column.due"), cell: ({ due }) => (due === undefined ? none : formatDate(due)) },
+    {
+      key: "interval",
+      label: t("studio.cards.column.interval"),
+      number: true,
+      cell: ({ intervalDays }) => (intervalDays === undefined ? none : t("studio.cards.days", { count: intervalDays })),
+    },
+    {
+      key: "ease",
+      label: t("studio.cards.column.ease"),
+      number: true,
+      cell: ({ easeFactor }) => (easeFactor === undefined ? none : easeFactor.toFixed(2)),
+    },
+    { key: "lapses", label: t("studio.cards.column.lapses"), number: true, cell: ({ lapses }) => lapses ?? <span aria-hidden="true">–</span> },
+    { key: "created", label: t("studio.cards.column.created"), cell: ({ card }) => formatDate(card.createdAt) },
+    { key: "id", label: t("studio.cards.column.id"), cell: ({ card }) => <code>{card.id}</code> },
+  ];
   const select = (label: string, value: string, onChange: (value: string) => void, options: [string, string][]) => (
     <label>
       {label}
@@ -355,7 +342,7 @@ export function CardWorkbenchScreen({
           <div class="studio-selection">
             <p role="status">{t("studio.cards.selected", { count })}</p>
             {count > 0 && (
-              <button type="button" onClick={() => setChosen(new Set())}>
+              <button type="button" onClick={() => setChosen(NO_SELECTION)}>
                 {t("studio.cards.clear")}
               </button>
             )}
@@ -368,7 +355,7 @@ export function CardWorkbenchScreen({
               plan={planSelected}
               onEdit={(edit, planned) =>
                 onEdit(ids, edit, planned).then((ok) => {
-                  if (ok && edit.kind === "remove") toggle(selected.map((card) => card.url), false);
+                  if (ok && edit.kind === "remove") unselect(selected);
                   return ok;
                 })
               }
@@ -377,7 +364,7 @@ export function CardWorkbenchScreen({
               decks={decks}
               onTransfer={(transfer) =>
                 onTransfer(ids, transfer).then((ok) => {
-                  if (ok && transfer.mode === "move") toggle(selected.map((card) => card.url), false);
+                  if (ok && transfer.mode === "move") unselect(selected);
                   return ok;
                 })
               }
@@ -387,71 +374,51 @@ export function CardWorkbenchScreen({
             <p>{t("studio.cards.noMatch")}</p>
           ) : (
             <>
-              <div class="studio-table">
-                <table class="studio-list studio-cards">
-                  <caption>{tx("studio.cards.caption", { deck: <ReaderText text={deck.title} /> })}</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">
-                        <span class="visually-hidden">{t("studio.cards.select")}</span>
-                        <input
-                          type="checkbox"
-                          aria-label={t("studio.cards.selectAll")}
-                          checked={allShown}
-                          onChange={(event) => toggle(shown.map((row) => row.card.url), event.currentTarget.checked)}
-                        />
-                      </th>
-                      {header("front")}
-                      {COLUMNS.map(header)}
-                    </tr>
-                  </thead>
-                  <tbody ref={bodyRef}>
-                    {shown.map(({ card, due, intervalDays, easeFactor, lapses: forgotten }) => (
-                      <tr key={card.url} class={card.retired ? "retired" : undefined}>
-                        <td>
-                          <input
-                            type="checkbox"
-                            aria-label={t("studio.cards.selectCard", { card: cardName(card, readerText) })}
-                            aria-keyshortcuts="x"
-                            checked={chosen.has(card.url)}
-                            onChange={(event) => toggle([card.url], event.currentTarget.checked)}
-                          />
-                        </td>
-                        <th scope="row">
-                          <a href={cardHref(card)}>
-                            <CardRowFront
-                              front={card.front}
-                              back={card.back}
-                              imageUrl={card.frontImageUrl}
-                              imageDescription={card.frontImageDescription}
-                              textFormat={card.textFormat}
-                            />
-                            {card.retired && <RetiredTag />}
-                          </a>
-                        </th>
-                        <td>
-                          <CardRowBack
-                            back={card.back}
-                            imageUrl={card.backImageUrl}
-                            imageDescription={card.backImageDescription}
-                            textFormat={card.textFormat}
-                          />
-                        </td>
-                        <td>{due === undefined ? none : formatDate(due)}</td>
-                        <td class="number">
-                          {intervalDays === undefined ? none : t("studio.cards.days", { count: intervalDays })}
-                        </td>
-                        <td class="number">{easeFactor === undefined ? none : easeFactor.toFixed(2)}</td>
-                        <td class="number">{forgotten ?? <span aria-hidden="true">–</span>}</td>
-                        <td>{formatDate(card.createdAt)}</td>
-                        <td>
-                          <code>{card.id}</code>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <DataTable
+                caption={tx("studio.cards.caption", { deck: <ReaderText text={deck.title} /> })}
+                class="studio-cards"
+                rows={shown}
+                keyOf={(row) => row.card.url}
+                classOf={(row) => (row.card.retired ? "retired" : undefined)}
+                name={{
+                  key: "front",
+                  label: t("studio.cards.column.front"),
+                  cell: ({ card }) => (
+                    <a href={cardHref(card)}>
+                      <CardRowFront
+                        front={card.front}
+                        back={card.back}
+                        imageUrl={card.frontImageUrl}
+                        imageDescription={card.frontImageDescription}
+                        textFormat={card.textFormat}
+                      />
+                      {card.retired && <RetiredTag />}
+                    </a>
+                  ),
+                }}
+                columns={columns}
+                sort={query.sort}
+                // Sorted afresh: from the first page.
+                onSort={(key) => {
+                  const { sort: _old, ...rest } = query;
+                  const sort = nextSort(query.sort, key as CardSort);
+                  onQuery({ ...rest, page: 1, ...(sort === undefined ? {} : { sort }) });
+                }}
+                select={{
+                  label: t("studio.cards.select"),
+                  allLabel: t("studio.cards.selectAll"),
+                  rowLabel: ({ card }) => t("studio.cards.selectCard", { card: cardName(card, readerText) }),
+                  chosen,
+                  onChoose: setChosen,
+                }}
+                current={current}
+                around={{
+                  ...(page.firstIndex === 0 ? {} : { previous: rows[page.firstIndex - 1]! }),
+                  ...(page.firstIndex + shown.length === rows.length ? {} : { next: rows[page.firstIndex + shown.length]! }),
+                }}
+                onMove={onMove === undefined ? undefined : (row) => onMove(row.card)}
+                onOpen={(row) => onOpen(row.card)}
+              />
               {page.pageCount > 1 && (
                 <Pager page={page.currentPage} pageCount={page.pageCount} onPageChange={(to) => onQuery({ ...query, page: to })} />
               )}

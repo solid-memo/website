@@ -1477,7 +1477,7 @@
         "instances": "Go to the instances"
       },
       "toggleSidebar": "Show or hide the sidebar",
-      "toggleAside": "Show or hide the outline",
+      "toggleAside": "Show or hide the outline, or close the card beside the cards",
       "toggleDock": "Show or hide the panel: problems and activity",
       "nextProblem": "Go to the next problem's field",
       "previousProblem": "Go to the previous problem's field",
@@ -1487,7 +1487,10 @@
       "down": "Next card",
       "up": "Previous card",
       "select": "Select the card",
-      "open": "Open the card"
+      "open": "Open the card",
+      "extendDown": "Select the card and the next one too",
+      "extendUp": "Select the card and the one before too",
+      "clear": "Clear the selection"
     },
     "dock": {
       "label": "Panel",
@@ -1691,7 +1694,21 @@
       },
       "releaseSame": "This card is as the release this deck was copied from has it, so a newer release updates it. An edit detaches it: newer releases no longer update it, though they may still retire it.",
       "releaseChanged": "This card was changed from the release this deck was copied from, so newer releases no longer update it, though they may still retire it.",
-      "openInApp": "Open this card in Solid Memo"
+      "openInApp": "Open this card in Solid Memo",
+      "steps": "Cards in the list",
+      "previous": "Previous card",
+      "next": "Next card",
+      "detail": "Card",
+      "close": "Close the card"
+    },
+    "confirm": {
+      "unsaved": {
+        "heading": "Save your changes?",
+        "text": "This card has changes that are not saved. Save them before you go on, discard them, or stay on the card.",
+        "save": "Save",
+        "discard": "Discard",
+        "stay": "Stay"
+      }
     },
     "schedule": {
       "loading": "Loading the schedule…",

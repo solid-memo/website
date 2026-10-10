@@ -121,4 +121,29 @@ describe("the Studio's stylesheet", () => {
     expect(styleOf(page(""), ".studio-dock").boxShadow).toBe("none");
     expect(styleOf(page(" hidden"), ".studio-aside").display).toBe("none");
   });
+
+  it("keeps a data table's first column in sight, and marks its cursor's row, the rows selected and the row shown beside it", () => {
+    root.setAttribute("data-surface", "studio");
+    const page = `
+      <main class="workspace">
+        <table class="studio-list studio-data-table selectable">
+          <thead><tr><th>Select</th><th>Front</th><th>Back</th></tr></thead>
+          <tbody>
+            <tr class="cursor"><td><input type="checkbox"></td><th>water</th><td>mizu</td></tr>
+            <tr class="selected"><td><input type="checkbox"></td><th>fire</th><td>hi</td></tr>
+            <tr aria-current="true"><td><input type="checkbox"></td><th>tree</th><td>ki</td></tr>
+          </tbody>
+        </table>
+      </main>`;
+    expect(styleOf(page, "tbody tr.cursor > td").position).toBe("sticky");
+    expect(styleOf(page, "tbody tr.cursor > th").position).toBe("sticky");
+    expect(styleOf(page, "tbody tr.cursor > th").left).toBe("32px");
+    expect(styleOf(page, "tbody tr.cursor > td:last-child").position).not.toBe("sticky");
+    expect(styleOf(page, "thead th:first-child").zIndex).toBe("2");
+    expect(styleOf(page, "tbody tr.cursor > td:first-child").boxShadow).toContain("inset");
+    expect(styleOf(page, "tbody tr.selected > td:first-child").boxShadow).not.toContain("inset");
+    expect(styleOf(page, "tbody tr.selected > td:last-child").backgroundColor).toBe(styleOf(page, "tbody tr[aria-current] > td:last-child").backgroundColor);
+    expect(styleOf(page, "tbody tr.selected > td:last-child").backgroundColor).not.toBe(styleOf(page, "tbody tr.cursor > td:last-child").backgroundColor);
+    expect(styleOf(page, "tbody tr[aria-current] > td:first-child").boxShadow).toContain("inset");
+  });
 });

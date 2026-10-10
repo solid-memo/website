@@ -3,7 +3,18 @@ import { act, renderHook } from "@testing-library/preact";
 import { isStudioHash, studioHref } from "@solid-memo/ui/router";
 import { DEFAULT_CARD_QUERY } from "@solid-memo/domain/cardQuery";
 import type { Card } from "@solid-memo/domain/deck";
-import { instanceOfRoute, isDraftRoute, parseStudioHash, spotRoute, studioRouteToHash, targetRoute, useStudioRoute, type StudioRoute } from "./router";
+import {
+  instanceOfRoute,
+  isDraftRoute,
+  parseStudioHash,
+  spotRoute,
+  studioRouteToHash,
+  targetRoute,
+  useStudioRoute,
+  workbenchOf,
+  type CardRoute,
+  type StudioRoute,
+} from "./router";
 
 const DRAFT = "https://pod.example/solid-memo/a/drafts/solid/v1/release.ttl";
 
@@ -66,10 +77,32 @@ describe("the Studio's routes", () => {
     { screen: "diff", draftUrl: DRAFT },
     { screen: "release", draftUrl: DRAFT },
     { screen: "release", draftUrl: DRAFT, field: "sources" },
+    {
+      screen: "card",
+      deckUrl: "https://pod.example/solid-memo/a/catalog.ttl#deck-1",
+      cardUrl: "https://pod.example/solid-memo/a/decks/deck-1.ttl#c1",
+      tab: "content",
+      field: "backNote",
+      query: {
+        ...DEFAULT_CARD_QUERY,
+        text: "hus",
+        field: "back",
+        lang: "sv",
+        state: "due",
+        has: "notes",
+        sort: { key: "ease", descending: true },
+        page: 2,
+        size: 10,
+      },
+    },
   ];
 
   it("round-trip through the hash", () => {
-    for (const route of routes) expect(parseStudioHash(studioRouteToHash(route))).toEqual(route);
+    for (const route of routes) {
+      // The content tab, the default, is left out.
+      const { tab, ...rest } = route as Extract<StudioRoute, { screen: "card" }>;
+      expect(parseStudioHash(studioRouteToHash(route))).toEqual(tab === "content" ? rest : route);
+    }
   });
 
   it("include Home as Solid Memo links to it, all under /studio", () => {
@@ -116,6 +149,28 @@ describe("the Studio's routes", () => {
     expect(parseStudioHash("#/studio/card?card=c")).toBeNull();
   });
 
+  it("keep the workbench's query beside a card, where to look as `in`, and leave out a query that is the default", () => {
+    const beside = routes.at(-1)!;
+    const hash = studioRouteToHash(beside);
+    expect(hash).toBe(
+      `${studioRouteToHash({ ...routes[6]!, field: "backNote" } as StudioRoute)}&q=hus&lang=sv&state=due&has=notes&sort=ease&order=desc&page=2&size=10&in=back`,
+    );
+    expect(studioRouteToHash({ ...routes[6]!, query: DEFAULT_CARD_QUERY } as StudioRoute)).toBe(studioRouteToHash(routes[6]!));
+    // A link to a card as it was before the workbench came beside it opens it with the default query.
+    expect(parseStudioHash(`${studioRouteToHash(routes[6]!)}&field=front`)).toEqual({ ...routes[6], field: "front" });
+    expect(parseStudioHash(`${studioRouteToHash(routes[6]!)}&in=front&q=x`)).toEqual({
+      ...routes[6],
+      query: { ...DEFAULT_CARD_QUERY, text: "x", field: "front" },
+    });
+  });
+
+  it("go from a card to its deck's cards as the workbench beside it has them", () => {
+    const card = routes[6] as CardRoute;
+    expect(workbenchOf(card)).toEqual({ screen: "cards", deckUrl: card.deckUrl });
+    const beside = routes.at(-1) as CardRoute;
+    expect(workbenchOf(beside)).toEqual({ screen: "cards", deckUrl: beside.deckUrl, query: beside.query });
+  });
+
   it("keep a deck's about screen and the instance's screen in their query", () => {
     expect(studioRouteToHash(routes[8]!)).toBe("#/studio/about?deck=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2Fcatalog.ttl%23deck-1");
     expect(studioRouteToHash(routes[9]!)).toBe("#/studio/instance?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2F");
@@ -155,7 +210,7 @@ describe("the Studio's routes", () => {
   });
 
   it("name the instance a route is in, the deck's for the workbench", () => {
-    expect(routes.map(instanceOfRoute)).toEqual([null, ...Array(37).fill("https://pod.example/solid-memo/a/")]);
+    expect(routes.map(instanceOfRoute)).toEqual([null, ...Array(38).fill("https://pod.example/solid-memo/a/")]);
   });
 
   it("keep a draft and the subject of it shown in their query, and the cards' view, the first page and no filter left out", () => {

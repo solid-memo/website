@@ -1,8 +1,9 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { DEFAULT_CARD_QUERY } from "@solid-memo/domain/cardQuery";
+import type { Card, Deck } from "@solid-memo/domain/deck";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { AppError } from "@solid-memo/domain/appError";
 import { AppName } from "@solid-memo/ui/documentTitle";
@@ -14,6 +15,7 @@ import { applyDraftChanges, type ReleaseDraft } from "@solid-memo/domain/release
 import { problem } from "@solid-memo/domain/release/problems";
 import { courseDraft, DRAFT_URL, instanceA, instanceB, makeCard, makeDeck, session } from "../test/fixtures";
 import { courseDeck, courseInstance, makeCourse } from "@solid-memo/ui/test/course";
+import { wideScreen } from "../test/media";
 
 const kanji = makeDeck("deck-1", { en: "Kanji N5" });
 const verbs = makeDeck("deck-2", { en: "Verbs" });
@@ -220,7 +222,13 @@ describe("StudioWorkspace", () => {
     box.focus();
     fireEvent.keyDown(box, { key: "Enter" });
     expect(await screen.findByRole("heading", { name: "Card: water" })).toBeInTheDocument();
-    expect(window.location.hash).toBe(inspector);
+    // The card keeps the workbench's query, for the list beside it.
+    expect(parseStudioHash(window.location.hash)).toEqual({
+      screen: "card",
+      deckUrl: kanji.url,
+      cardUrl: card.url,
+      query: { ...DEFAULT_CARD_QUERY, text: "wat" },
+    });
     expect(window.history.length).toBe(length + 1);
   });
 
@@ -522,6 +530,125 @@ describe("StudioWorkspace", () => {
     expect(parseStudioHash(window.location.hash)).toEqual({ ...route, tab: "distractors" });
     expect(window.history.length).toBe(length);
     expect(screen.queryByLabelText("Front")).toBeNull();
+  });
+
+  describe("on a screen wide enough, a card beside its deck's cards", () => {
+    beforeEach(wideScreen);
+    afterEach(() => vi.restoreAllMocks());
+
+    const many = Array.from({ length: 12 }, (_, i) => makeCard(kanji, `c${i}`));
+    const detail = () => within(screen.getByRole("complementary", { name: "Card" }));
+    /** The card beside the list, once it is read. */
+    const detailFound = async () => within(await screen.findByRole("complementary", { name: "Card" }));
+    const list = () => within(screen.getByRole("table", { name: "The cards of Kanji N5" }));
+    const useCasesOf = (cards: Card[]) =>
+      makeUseCasesFake({
+        listInstances: vi.fn(async () => [instanceA]),
+        listDecks: vi.fn(async () => [kanji]),
+        listCards: vi.fn(async () => cards),
+        updateCard: vi.fn(async (_deck: Deck, card: Card) => card),
+      });
+
+    it("goes from card to card with j and k, Previous and Next, each at its page of the list and no Back stop, and closes back to the list", async () => {
+      const route = { screen: "card" as const, deckUrl: kanji.url, cardUrl: many[9]!.url, query: { ...DEFAULT_CARD_QUERY, size: 10 as const } };
+      window.history.replaceState(null, "", studioRouteToHash(route));
+      renderWorkspace(useCasesOf(many));
+      expect(await (await detailFound()).findByRole("heading", { name: "Card: c9" })).toBeInTheDocument();
+      await waitFor(() => expect(document.title).toBe("c9 – Solid Memo Studio"));
+      await screen.findByRole("table", { name: "The cards of Kanji N5" });
+      expect(list().getByRole("row", { name: /c9/ })).toHaveAttribute("aria-current", "true");
+      expect(inMain().getByRole("heading", { name: "Cards: Kanji N5" })).toBeInTheDocument();
+      const length = window.history.length;
+
+      await waitFor(() => expect(detail().getByRole("button", { name: "Next card" })).toBeEnabled());
+      // From the page's last row, j shows the next page's first.
+      document.body.focus();
+      fireEvent.keyDown(document.body, { key: "j" });
+      expect(await detail().findByRole("heading", { name: "Card: c10" })).toBeInTheDocument();
+      expect(parseStudioHash(window.location.hash)).toEqual({ ...route, cardUrl: many[10]!.url, query: { ...route.query, page: 2 } });
+      expect(list().getAllByRole("rowheader").map((cell) => cell.textContent)).toEqual(["c10", "c11"]);
+      await waitFor(() => expect(list().getByRole("link", { name: "c10" })).toHaveFocus());
+      fireEvent.click(detail().getByRole("button", { name: "Next card" }));
+      expect(await detail().findByRole("heading", { name: "Card: c11" })).toBeInTheDocument();
+      expect(detail().getByRole("button", { name: "Next card" })).toBeDisabled();
+      document.body.focus();
+      fireEvent.keyDown(document.body, { key: "k" });
+      expect(await detail().findByRole("heading", { name: "Card: c10" })).toBeInTheDocument();
+      fireEvent.click(detail().getByRole("button", { name: "Previous card" }));
+      expect(await detail().findByRole("heading", { name: "Card: c9" })).toBeInTheDocument();
+      expect(parseStudioHash(window.location.hash)).toEqual(route);
+      expect(window.history.length).toBe(length);
+
+      fireEvent.click(detail().getByRole("button", { name: "Close" }));
+      await waitFor(() => expect(screen.queryByRole("complementary", { name: "Card" })).toBeNull());
+      expect(parseStudioHash(window.location.hash)).toEqual({ screen: "cards", deckUrl: kanji.url, query: route.query });
+      expect(window.history.length).toBe(length + 1);
+      // The focus, lost with the card, goes back to its row.
+      await waitFor(() => expect(list().getByRole("link", { name: "c9" })).toHaveFocus());
+    });
+
+    it("opens a card of the list beside it, its heading taking the focus, on the tab shown and with the list's query", async () => {
+      const [water, fire, ice] = [makeCard(kanji, "water"), makeCard(kanji, "fire"), makeCard(kanji, "ice")];
+      window.history.replaceState(null, "", studioRouteToHash({ screen: "cards", deckUrl: kanji.url }));
+      renderWorkspace(useCasesOf([water!, fire!, ice!]));
+      fireEvent.input(await screen.findByRole("searchbox", { name: "Search" }), { target: { value: "i" } });
+      const length = window.history.length;
+      fireEvent.click(list().getByRole("link", { name: "fire" }));
+      const route = { screen: "card" as const, deckUrl: kanji.url, cardUrl: fire!.url, query: { ...DEFAULT_CARD_QUERY, text: "i" } };
+      expect(await (await detailFound()).findByRole("heading", { name: "Card: fire" })).toBeInTheDocument();
+      await waitFor(() => expect(detail().getByRole("heading", { name: "Card: fire" })).toHaveFocus());
+      expect(parseStudioHash(window.location.hash)).toEqual(route);
+      expect(window.history.length).toBe(length + 1);
+      // The list read before the card opened: the card after it is there.
+      expect(detail().getByRole("button", { name: "Previous card" })).toBeDisabled();
+      expect(detail().getByRole("button", { name: "Next card" })).toBeEnabled();
+      // The card's tab is kept from card to card; its field is not.
+      fireEvent.click(detail().getByRole("link", { name: "History" }));
+      expect(await detail().findByText(/No answers/)).toBeInTheDocument();
+      expect(list().getByRole("link", { name: "fire" })).toHaveAttribute("href", studioRouteToHash({ ...route, tab: "history" }));
+      // Not in the list: no card before or after it.
+      fireEvent.input(screen.getByRole("searchbox", { name: "Search" }), { target: { value: "zz" } });
+      expect(await screen.findByText("No card matches.")).toBeInTheDocument();
+      expect(detail().getByRole("button", { name: "Previous card" })).toBeDisabled();
+      expect(detail().getByRole("button", { name: "Next card" })).toBeDisabled();
+    });
+
+    it("asks before a card's edits not saved are left, by a key, a card of the list, a tab or Close, and saves them first if asked", async () => {
+      const [water, fire] = [makeCard(kanji, "water"), makeCard(kanji, "fire")];
+      const route = { screen: "card" as const, deckUrl: kanji.url, cardUrl: water!.url };
+      window.history.replaceState(null, "", studioRouteToHash(route));
+      const useCases = useCasesOf([water!, fire!]);
+      renderWorkspace(useCases);
+      fireEvent.input(await (await detailFound()).findByLabelText("Front"), { target: { value: "wet" } });
+      // Once the list beside it is read, and its keys taken.
+      await waitFor(() => expect(detail().getByRole("button", { name: "Next card" })).toBeEnabled());
+      const question = () => screen.queryByRole("dialog", { name: "Save your changes?" });
+      const answer = (name: string) => fireEvent.click(within(question()!).getByRole("button", { name }));
+
+      document.body.focus();
+      fireEvent.keyDown(document.body, { key: "j" });
+      expect(question()).toBeInTheDocument();
+      answer("Stay");
+      fireEvent.click(detail().getByRole("button", { name: "Close" }));
+      answer("Stay");
+      fireEvent.click(detail().getByRole("link", { name: "Schedule" }));
+      answer("Stay");
+      expect(parseStudioHash(window.location.hash)).toEqual(route);
+      expect(detail().getByLabelText("Front")).toHaveValue("wet");
+
+      const length = window.history.length;
+      fireEvent.click(list().getByRole("link", { name: "fire" }));
+      answer("Discard");
+      expect(await detail().findByRole("heading", { name: "Card: fire" })).toBeInTheDocument();
+      expect(window.history.length).toBe(length + 1);
+      expect(useCases.updateCard).not.toHaveBeenCalled();
+
+      fireEvent.input(detail().getByLabelText("Front"), { target: { value: "blaze" } });
+      fireEvent.click(detail().getByRole("button", { name: "Previous card" }));
+      answer("Save");
+      expect(await detail().findByRole("heading", { name: "Card: water" })).toBeInTheDocument();
+      expect(useCases.updateCard).toHaveBeenCalledWith(kanji, fire, expect.objectContaining({ front: { en: "blaze" } }));
+    });
   });
 
   it("goes back to the deck's cards once the card inspected is removed, leaving no Back stop", async () => {

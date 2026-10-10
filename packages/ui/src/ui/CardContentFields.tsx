@@ -348,6 +348,22 @@ export function checkDraft(draft: CardDraft, saved?: CardContent): CardDraftChec
   return { ok: false, invalid: { error, part, entry: draft[part].find((entry) => entry.tag === "") } };
 }
 
+/**
+ * Whether a draft says other than it did (`from`, as it started, or as
+ * last saved): another word or language in a text, a text added or
+ * taken away, another picture, or Markdown switched. Which texts were
+ * touched does not count: a text changed and changed back is as it was.
+ */
+export function draftChanged(draft: CardDraft, from: CardDraft): boolean {
+  const entries = (text: LangTextDraft) => JSON.stringify(text.map(({ tag, value }) => [tag, value]));
+  return (
+    TEXT_PARTS.some((part) => entries(draft[part]) !== entries(from[part])) ||
+    draft.frontImageUrl !== from.frontImageUrl ||
+    draft.backImageUrl !== from.backImageUrl ||
+    draft.markdown !== from.markdown
+  );
+}
+
 /** Notes the languages of the user's own text a saved card states, as this device's latest choices for it. */
 export function rememberCardLanguages(content: CardContent, draft: CardDraft): void {
   for (const part of TEXT_PARTS) {

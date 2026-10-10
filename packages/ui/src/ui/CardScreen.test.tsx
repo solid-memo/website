@@ -413,6 +413,49 @@ describe("CardScreen", () => {
     });
   });
 
+  it("says while its edits are not saved, with a way to save them, and that there are none once saved or changed back", async () => {
+    const onUnsaved = vi.fn();
+    const { props, rerender } = renderScreen({ onUnsaved });
+    expect(onUnsaved).not.toHaveBeenCalled();
+    fireEvent.input(screen.getByLabelText("Back"), { target: { value: "fire" } });
+    const save = onUnsaved.mock.lastCall![0] as () => Promise<boolean>;
+    fireEvent.input(screen.getByLabelText("Back"), { target: { value: "water" } });
+    expect(onUnsaved).toHaveBeenLastCalledWith(null);
+    fireEvent.input(screen.getByLabelText("Back"), { target: { value: "wet" } });
+    // The save asked for has the edits as they are now.
+    expect(await (onUnsaved.mock.lastCall![0] as () => Promise<boolean>)()).toBe(true);
+    expect(props.onSave).toHaveBeenLastCalledWith({ front: { ja: "水" }, back: { en: "wet" } });
+    expect(save).not.toBe(onUnsaved.mock.lastCall![0]);
+    rerender(<CardScreen {...props} onUnsaved={onUnsaved} saved />);
+    expect(onUnsaved).toHaveBeenLastCalledWith(null);
+  });
+
+  it("says a save asked for failed, was refused, or was not made while another was under way", async () => {
+    const onUnsaved = vi.fn();
+    const { props, rerender } = renderScreen({ onUnsaved, onSave: vi.fn(async () => false) });
+    fireEvent.input(screen.getByLabelText("Back"), { target: { value: "fire" } });
+    const save = () => (onUnsaved.mock.lastCall![0] as () => Promise<boolean>)();
+    expect(await save()).toBe(false);
+    expect(props.onSave).toHaveBeenCalledTimes(1);
+    fireEvent.input(screen.getByLabelText("Back"), { target: { value: " " } });
+    expect(await save()).toBe(false);
+    expect(alertTexts()).toEqual(["The back needs text or an image."]);
+    rerender(<CardScreen {...props} busy />);
+    expect(await save()).toBe(false);
+    expect(props.onSave).toHaveBeenCalledTimes(1);
+  });
+
+  it("counts wrong options changed as edits not saved, and says there are none once it is gone", () => {
+    const onUnsaved = vi.fn();
+    const { rerender } = renderScreen({ onUnsaved });
+    fireEvent.click(screen.getByRole("button", { name: "Add a wrong option" }));
+    fireEvent.input(screen.getByLabelText("Wrong option"), { target: { value: "earth" } });
+    fireEvent.click(screen.getByRole("button", { name: "Add" }));
+    expect(onUnsaved).toHaveBeenLastCalledWith(expect.any(Function));
+    rerender(<p>Another card</p>);
+    expect(onUnsaved).toHaveBeenLastCalledWith(null);
+  });
+
   it("refuses to save an incomplete card and says why", () => {
     const { props } = renderScreen();
     fireEvent.input(screen.getByLabelText("Back"), { target: { value: " " } });

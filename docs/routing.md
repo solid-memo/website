@@ -36,9 +36,19 @@ routes: following one pushes a history entry, as any link does, and
 none adds a route or a parameter of its own. The chrome around a
 screen (which section, deck or draft the sidebar marks, which tabs
 there are and which is current, whether the aside shows a course's
-outline) is worked out from the route alone, and hiding the sidebar,
+outline or a card) is worked out from the route alone, and hiding the sidebar,
 the aside or the dock changes no URL ([studio.md](studio.md#layout)).
 F8 goes to a problem's field as a link does.
+
+A card's route, `#/studio/card`, also carries the card workbench's
+query, so the deck's cards stay listed beside the card: the
+workbench's own parameters (`q`, `lang`, `state`, `has`, `sort`,
+`order`, `page`, `size`), but `in` for where to look, as the card's
+`field` is the field it opens at. They are optional: a link to a card
+without them lists the deck's cards as the workbench does by default.
+Opening a card from the list pushes a history entry; going from card
+to card beside it (`j` and `k`, Previous and Next) replaces it
+([studio.md](studio.md#card-inspector)).
 
 ## Hash routing, not pathname routing
 

@@ -1,4 +1,4 @@
-import { useEffect } from "preact/hooks";
+import { useEffect, useMemo, useState } from "preact/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { DEFAULT_CARD_QUERY } from "@solid-memo/domain/cardQuery";
 import { DEFAULT_DECK_TABLE_VIEW } from "@solid-memo/domain/deckTable";
@@ -46,9 +46,21 @@ import { ProblemCount } from "./shell/ProblemCount";
 import { StudioShell } from "./shell/StudioShell";
 import { StudioSidebar } from "./shell/StudioSidebar";
 import { crumbsOf } from "./shell/titles";
-import { asideOf, contextTabsOf, currentOutlineKey } from "./shell/workspaceLayout";
+import { useUnsavedEdits } from "./shell/unsavedEdits";
+import { useMedia } from "./shell/useMedia";
+import { asideOf, contextTabsOf, currentOutlineKey, MEDIUM } from "./shell/workspaceLayout";
 import { useWorkspaceProblems } from "./WorkspaceProblems";
-import { instanceOfRoute, isDraftRoute, spotRoute, studioRouteToHash, targetRoute, useStudioRoute, type StudioRoute } from "./router";
+import {
+  instanceOfRoute,
+  isDraftRoute,
+  spotRoute,
+  studioRouteToHash,
+  targetRoute,
+  useStudioRoute,
+  workbenchOf,
+  type CardRoute,
+  type StudioRoute,
+} from "./router";
 
 /**
  * The signed-in Studio: in its shell (StudioShell), with the open
@@ -56,14 +68,27 @@ import { instanceOfRoute, isDraftRoute, spotRoute, studioRouteToHash, targetRout
  * main content, from the breadcrumbs and the deck's or draft's tabs to
  * the screen the route names, once the instances it needs are read
  * (and, for a deck's screen, the instance's decks; for a card's, the
- * deck's cards); a course draft's outline in the aside, and the
- * problems of the deck or the draft shown (useWorkspaceProblems), the
- * draft's counted in its Check tab.
+ * deck's cards); a course draft's outline in the aside, or a card in
+ * the inspector beside its deck's cards in the workbench (on a screen
+ * wide enough, else the inspector alone), and the problems of the deck
+ * or the draft shown (useWorkspaceProblems), the draft's counted in its
+ * Check tab. A card's edits not saved are asked about before they are
+ * left (useUnsavedEdits).
  */
 export function StudioWorkspace({ useCases, session, banner, children }: WorkspaceProps) {
   const { t, errorText, readerText } = useI18n();
   const { route, change, navigate, replace } = useStudioRoute();
-  const screenRef = useScreenFocus(route, change);
+  const medium = useMedia(MEDIUM);
+  // A card beside its deck's cards, on a screen wide enough for both.
+  const split = route?.screen === "card" && !medium;
+  // After a move, the screen's heading takes the focus: beside a card, the
+  // workbench stays where it is, and the card's takes it.
+  const mainScreen = useMemo(() => route, [route?.screen === "cards" || split ? `cards ${(route as CardRoute).deckUrl}` : route]);
+  const screenRef = useScreenFocus(mainScreen, change);
+  const detailRef = useScreenFocus(split ? route : null, change);
+  const unsaved = useUnsavedEdits();
+  // The cards the workbench beside a card lists, in its order, for the card's Previous and Next.
+  const [order, setOrder] = useState<readonly string[]>([]);
 
   const instancesQuery = useQuery({
     queryKey: ["instances", session.webId],
@@ -118,7 +143,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
       replace({ screen: "home", instanceUrl: instanceUrl! });
     } else if (cardUrl !== null && cardsQuery.data !== undefined && activeCard === null) {
       // A card the deck does not have (removed, perhaps): the deck's cards.
-      replace({ screen: "cards", deckUrl: deckUrl! });
+      replace(workbenchOf(route as CardRoute));
     } else if (activeDraft !== null && draftSubject === false) {
       // A chapter, step or card the draft does not have (deleted, perhaps): the draft's overview.
       replace({ screen: "draft", draftUrl: draftUrl! });
@@ -158,6 +183,78 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
     questionHref: (card) => studioRouteToHash({ screen: "question", draftUrl, card }),
     checkHref: studioRouteToHash({ screen: "check", draftUrl }),
   });
+
+  /** A deck's cards in the workbench, as the route's query says; beside a card, that card's row the current one. */
+  const workbench = (route: Extract<StudioRoute, { screen: "cards" }> | CardRoute) => {
+    // A card opens from the list with the list beside it, on the tab shown, if a card is.
+    const cardRoute = (card: Card): CardRoute =>
+      route.screen === "card"
+        ? { ...withoutField(route), cardUrl: card.url }
+        : { screen: "card", deckUrl: route.deckUrl, cardUrl: card.url, ...(route.query === undefined ? {} : { query: route.query }) };
+    return (
+      <CardWorkbenchContainer
+        // Another deck's cards: a new page, its selection and its Undo gone. A card beside them keeps them.
+        key={route.deckUrl}
+        useCases={useCases}
+        instance={activeInstance!}
+        deck={activeDeck!}
+        decks={decksQuery.data!}
+        query={route.query ?? DEFAULT_CARD_QUERY}
+        // Like Home's view, the query is no Back stop.
+        onQuery={(query) => replace({ ...route, query })}
+        cardHref={(card) => studioRouteToHash(cardRoute(card))}
+        onOpen={(card) => unsaved.guard(() => navigate(cardRoute(card)))}
+        // Moving from card to card beside them is no Back stop either.
+        {...(route.screen === "card"
+          ? { current: route.cardUrl, onMove: (card: Card) => unsaved.guard(() => replace(atItsPage(cardRoute(card)))) }
+          : {})}
+        // Read already as a card opens beside them.
+        onRows={setOrder}
+        healthHref={studioRouteToHash({ screen: "health", instanceUrl: activeInstance!.url, deckUrl: route.deckUrl })}
+      />
+    );
+  };
+
+  /** A card's route beside its deck's cards, the list at the card's page there. */
+  const atItsPage = (route: CardRoute): CardRoute => {
+    const query = route.query ?? DEFAULT_CARD_QUERY;
+    return { ...route, query: { ...query, page: Math.floor(order.indexOf(route.cardUrl) / query.size) + 1 } };
+  };
+
+  /**
+   * The card a route names in the inspector; beside its deck's cards, with
+   * the cards before and after it in the workbench's list, each shown at
+   * its page there.
+   */
+  const inspector = (route: CardRoute) => {
+    const base = withoutField(route);
+    const at = order.indexOf(route.cardUrl);
+    const step = (by: 1 | -1) => {
+      const url = at === -1 ? undefined : order[at + by];
+      if (url === undefined) return null;
+      return () => unsaved.guard(() => replace(atItsPage({ ...base, cardUrl: url })));
+    };
+    return (
+      <CardInspectorContainer
+        // Another card: its editors start afresh.
+        key={route.cardUrl}
+        useCases={useCases}
+        deck={activeDeck!}
+        card={activeCard!}
+        tab={route.tab ?? "content"}
+        field={route.field}
+        // Another tab is opened at none of its fields.
+        tabHref={(tab) => studioRouteToHash({ ...base, tab })}
+        // Like the workbench's query, the tab is no Back stop.
+        onTab={(tab) => replace({ ...base, tab })}
+        appHref={routeToHash({ screen: "card", instanceUrl: activeInstance!.url, deckUrl: route.deckUrl, cardUrl: route.cardUrl })}
+        healthHref={studioRouteToHash({ screen: "health", instanceUrl: activeInstance!.url, deckUrl: route.deckUrl })}
+        onRemoved={() => replace(workbenchOf(route))}
+        {...(split ? { steps: { previous: step(-1), next: step(1) } } : {})}
+        onUnsaved={unsaved.report}
+      />
+    );
+  };
 
   const screenFor = (route: StudioRoute) => {
     switch (route.screen) {
@@ -400,25 +497,8 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             healthHref={studioRouteToHash({ screen: "health", instanceUrl: activeInstance!.url, deckUrl: route.deckUrl })}
           />
         );
-      case "cards": {
-        const inspector = (card: Card): StudioRoute => ({ screen: "card", deckUrl: route.deckUrl, cardUrl: card.url });
-        return (
-          <CardWorkbenchContainer
-            // Another deck's cards: a new page, its selection and its Undo gone.
-            key={route.deckUrl}
-            useCases={useCases}
-            instance={activeInstance!}
-            deck={activeDeck!}
-            decks={decksQuery.data!}
-            query={route.query ?? DEFAULT_CARD_QUERY}
-            // Like Home's view, the query is no Back stop.
-            onQuery={(query) => replace({ ...route, query })}
-            cardHref={(card) => studioRouteToHash(inspector(card))}
-            onOpen={(card) => navigate(inspector(card))}
-            healthHref={studioRouteToHash({ screen: "health", instanceUrl: activeInstance!.url, deckUrl: route.deckUrl })}
-          />
-        );
-      }
+      case "cards":
+        return workbench(route);
       case "schedule":
         return (
           <DeckInsightContainer
@@ -434,24 +514,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
           />
         );
       case "card":
-        return (
-          <CardInspectorContainer
-            // Another card: its editors start afresh.
-            key={route.cardUrl}
-            useCases={useCases}
-            deck={activeDeck!}
-            card={activeCard!}
-            tab={route.tab ?? "content"}
-            field={route.field}
-            // Another tab is opened at none of its fields.
-            tabHref={(tab) => studioRouteToHash({ screen: "card", deckUrl: route.deckUrl, cardUrl: route.cardUrl, tab })}
-            // Like the workbench's query, the tab is no Back stop.
-            onTab={(tab) => replace({ screen: "card", deckUrl: route.deckUrl, cardUrl: route.cardUrl, tab })}
-            appHref={routeToHash({ screen: "card", instanceUrl: activeInstance!.url, deckUrl: route.deckUrl, cardUrl: route.cardUrl })}
-            healthHref={studioRouteToHash({ screen: "health", instanceUrl: activeInstance!.url, deckUrl: route.deckUrl })}
-            onRemoved={() => replace({ screen: "cards", deckUrl: route.deckUrl })}
-          />
-        );
+        return split ? workbench(route) : inspector(route);
     }
   };
 
@@ -467,25 +530,36 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
       tabs={tabs?.tabs ?? []}
       draftUrl={draftUrl}
       aside={
-        aside === null
-          ? null
-          : {
-              label: t("studio.draft.outline"),
+        split && waiting === null
+          ? {
+              label: t("studio.card.detail"),
               content: (
-                <OutlineAside
-                  useCases={useCases}
-                  draftUrl={draftUrl!}
-                  links={draftLinks(draftUrl!)}
-                  currentKey={currentOutlineKey(route!)}
-                  problems={found.draft}
-                />
+                <div ref={detailRef} class="screen">
+                  {inspector(route as CardRoute)}
+                </div>
               ),
+              detail: { closeLabel: t("studio.card.close"), onClose: () => unsaved.guard(() => navigate(workbenchOf(route as CardRoute))) },
             }
+          : aside === null
+            ? null
+            : {
+                label: t("studio.draft.outline"),
+                content: (
+                  <OutlineAside
+                    useCases={useCases}
+                    draftUrl={draftUrl!}
+                    links={draftLinks(draftUrl!)}
+                    currentKey={currentOutlineKey(route!)}
+                    problems={found.draft}
+                  />
+                ),
+              }
       }
       problems={found.problems}
-      onGo={navigate}
+      onGo={(to) => unsaved.guard(() => navigate(to))}
     >
       {children}
+      {unsaved.dialog}
       {waiting === null && <Breadcrumbs crumbs={crumbs} toHash={studioRouteToHash} />}
       {tabs !== null && (
         <ContextTabs
@@ -510,6 +584,11 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
       </div>
     </StudioShell>
   );
+}
+
+/** A card's route but the field it opens at, which another tab or card does not. */
+function withoutField({ field: _field, ...route }: CardRoute): CardRoute {
+  return route;
 }
 
 /**

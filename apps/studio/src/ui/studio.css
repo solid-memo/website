@@ -391,6 +391,64 @@
 }
 
 /*
+ * A DataTable (shell/DataTable.tsx): its first column (the checkbox that
+ * selects a row, then the row's name) stays in sight as the main content
+ * scrolls sideways, on the table's own colour. The cursor's row has a
+ * bar at its start and the hover's colour; a row selected, the primary's
+ * soft tint; the row shown beside the table, both bar and tint.
+ */
+:root[data-surface="studio"] main .studio-data-table {
+  --s-select-w: 2rem;
+}
+
+:root[data-surface="studio"] main .studio-data-table tr > :first-child,
+:root[data-surface="studio"] main .studio-data-table.selectable tr > :nth-child(2) {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+
+:root[data-surface="studio"] main .studio-data-table.selectable tr > :first-child {
+  width: var(--s-select-w);
+  min-width: var(--s-select-w);
+  max-width: var(--s-select-w);
+}
+
+:root[data-surface="studio"] main .studio-data-table.selectable tr > :nth-child(2) {
+  left: var(--s-select-w);
+}
+
+/* Where the header row and the first column meet, over both. */
+:root[data-surface="studio"] main .studio-data-table thead tr > :first-child,
+:root[data-surface="studio"] main .studio-data-table.selectable thead tr > :nth-child(2) {
+  z-index: 2;
+}
+
+:root[data-surface="studio"] main .studio-data-table tbody tr > :first-child,
+:root[data-surface="studio"] main .studio-data-table.selectable tbody tr > :nth-child(2) {
+  background: var(--surface);
+}
+
+:root[data-surface="studio"] main .studio-data-table tbody tr.cursor > * {
+  background: var(--surface-hover);
+}
+
+:root[data-surface="studio"] main .studio-data-table tbody tr:is(.selected, [aria-current]) > * {
+  background: var(--primary-soft);
+}
+
+:root[data-surface="studio"] main .studio-data-table tbody tr:is(.cursor, [aria-current]) > :first-child {
+  box-shadow: inset 3px 0 0 var(--primary);
+}
+
+/* A card beside its deck's cards: Previous and Next at its heading's end. */
+:root[data-surface="studio"] .studio-card-steps {
+  display: flex;
+  gap: 0.25rem;
+  margin-left: auto;
+}
+
+/*
  * The sidebar: the instance's sections, then its decks and drafts, each a
  * row as tall as the density says, the one shown marked.
  */

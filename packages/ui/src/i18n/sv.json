@@ -1477,7 +1477,7 @@
         "instances": "Gå till instanserna"
       },
       "toggleSidebar": "Visa eller dölj sidofältet",
-      "toggleAside": "Visa eller dölj dispositionen",
+      "toggleAside": "Visa eller dölj dispositionen, eller stäng kortet bredvid korten",
       "toggleDock": "Visa eller dölj panelen: problem och aktivitet",
       "nextProblem": "Gå till nästa problems fält",
       "previousProblem": "Gå till föregående problems fält",
@@ -1487,7 +1487,10 @@
       "down": "Nästa kort",
       "up": "Föregående kort",
       "select": "Välj kortet",
-      "open": "Öppna kortet"
+      "open": "Öppna kortet",
+      "extendDown": "Välj kortet och nästa också",
+      "extendUp": "Välj kortet och det före också",
+      "clear": "Rensa valet"
     },
     "dock": {
       "label": "Panel",
@@ -1691,7 +1694,21 @@
       },
       "releaseSame": "Det här kortet är som i utgåvan som kortleken kopierades från, så en nyare utgåva uppdaterar det. En ändring kopplar loss det: nyare utgåvor uppdaterar det inte längre, men kan fortfarande ta det ur bruk.",
       "releaseChanged": "Det här kortet har ändrats sedan utgåvan som kortleken kopierades från, så nyare utgåvor uppdaterar det inte längre, men kan fortfarande ta det ur bruk.",
-      "openInApp": "Öppna kortet i Solid Memo"
+      "openInApp": "Öppna kortet i Solid Memo",
+      "steps": "Korten i listan",
+      "previous": "Föregående kort",
+      "next": "Nästa kort",
+      "detail": "Kort",
+      "close": "Stäng kortet"
+    },
+    "confirm": {
+      "unsaved": {
+        "heading": "Spara dina ändringar?",
+        "text": "Kortet har ändringar som inte är sparade. Spara dem innan du går vidare, kasta dem, eller stanna kvar på kortet.",
+        "save": "Spara",
+        "discard": "Kasta",
+        "stay": "Stanna"
+      }
     },
     "schedule": {
       "loading": "Läser in schemat…",

@@ -11,8 +11,9 @@ import { ACTIVITY_LIMIT, useActivityLog } from "./activity";
 import type { WorkspaceProblems } from "./BottomDock";
 import { StudioShell, type AsidePane } from "./StudioShell";
 import { useScreenCommands } from "./useScreenCommands";
-import { ASIDE_WIDTH, DOCK_HEIGHT } from "./splitter";
-import { MEDIUM, NARROW, type ContextTab } from "./workspaceLayout";
+import { ASIDE_WIDTH, DETAIL_WIDTH, DOCK_HEIGHT } from "./splitter";
+import type { ContextTab } from "./workspaceLayout";
+import { narrowScreen, wideScreen } from "../../test/media";
 
 /** Says what a draft editor would: how many of its changes wait. */
 let report: (editor: object, report: EditorReport) => void;
@@ -97,35 +98,6 @@ const root = document.documentElement;
 /** The sidebar, by its button: hidden, it has no name to be found by. */
 const sidebar = () => document.getElementById(toggle().getAttribute("aria-controls")!)!;
 const toggle = () => screen.getByRole("button", { name: "Sidebar" });
-
-/**
- * A screen as narrow as a phone's (NARROW, and MEDIUM), or (`medium`)
- * as a tablet's (MEDIUM only), and a way to widen it, as the browser
- * says it.
- */
-function narrowScreen(medium = false) {
-  const listeners = new Set<() => void>();
-  let wide = false;
-  vi.spyOn(window, "matchMedia").mockImplementation((query) => {
-    expect([NARROW, MEDIUM]).toContain(query);
-    return {
-      get matches() {
-        return !wide && (query === MEDIUM || !medium);
-      },
-      addEventListener: (_: string, listener: () => void) => listeners.add(listener),
-      removeEventListener: (_: string, listener: () => void) => listeners.delete(listener),
-    } as unknown as MediaQueryList;
-  });
-  return {
-    widen() {
-      wide = true;
-      act(() => listeners.forEach((listener) => listener()));
-    },
-  };
-}
-
-/** A screen wide enough for the aside beside the main content (the test DOM's is not). */
-const wideScreen = () => narrowScreen().widen();
 
 describe("StudioShell", () => {
   beforeEach(() => {
@@ -599,6 +571,33 @@ describe("StudioShell", () => {
       expect(pane()).toBeVisible();
     });
 
+    it("shows a detail of the main content while the route has it, as wide as its own splitter makes it, closed by going to the main content alone", () => {
+      const onClose = vi.fn();
+      localStorage.setItem("solid-memo:studioLayout.v1", JSON.stringify({ aside: false }));
+      const { unmount } = renderShell({ aside: { label: "Card", content: <p>The card</p>, detail: { closeLabel: "Close the card", onClose } } });
+      const detail = screen.getByRole("complementary", { name: "Card" });
+      // Shown though the outline would be hidden, and with no button to show or hide it.
+      expect(detail).toBeVisible();
+      expect(within(screen.getByText("The masthead").closest("header")!).queryByRole("button", { name: "Card" })).toBeNull();
+      expect(root).toHaveAttribute("data-aside");
+      expect(detail).toHaveStyle({ width: `${DETAIL_WIDTH.initial}px` });
+      fireEvent.keyDown(within(detail).getByRole("separator", { name: "Width of the side pane" }), { key: "Home" });
+      expect(detail).toHaveStyle({ width: `${DETAIL_WIDTH.min}px` });
+      const close = within(detail).getByRole("button", { name: "Close" });
+      expect(close).toHaveAttribute("aria-keyshortcuts", "Control+\\");
+      fireEvent.click(close);
+      document.body.focus();
+      expect(press("\\", { ctrlKey: true })).toBe(true);
+      fireEvent.click(screen.getByRole("button", { name: "Search or run…" }));
+      fireEvent.click(within(screen.getByRole("dialog", { name: "Quick open" })).getByRole("option", { name: "Close the card" }));
+      expect(onClose).toHaveBeenCalledTimes(3);
+      unmount();
+      // The outline keeps its own width.
+      renderShell({ aside: { label: "Card", content: <p>The card</p>, detail: { closeLabel: "Close the card", onClose } } });
+      expect(screen.getByRole("complementary", { name: "Card" })).toHaveStyle({ width: `${DETAIL_WIDTH.min}px` });
+      expect(JSON.parse(localStorage.getItem("solid-memo:studioLayout.v1")!)).toMatchObject({ asideWidth: ASIDE_WIDTH.initial });
+    });
+
     it("leaves Escape and links in it alone beside the page", () => {
       renderShell({ aside });
       fireEvent.click(within(pane()).getByRole("link", { name: "Step 1.1" }));
@@ -772,7 +771,7 @@ describe("StudioShell", () => {
       choose("Show or hide the panel: problems and activity");
       expect(dock()).toBeInTheDocument();
       expect(screen.getByRole("complementary", { name: "Outline" })).toBeVisible();
-      choose("Show or hide the outline");
+      choose("Show or hide the outline, or close the card beside the cards");
       expect(screen.getByRole("button", { name: "Outline" })).toHaveAttribute("aria-expanded", "false");
     });
   });

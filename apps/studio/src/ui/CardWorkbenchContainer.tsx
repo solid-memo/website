@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "preact/hooks";
+import { useCallback, useEffect, useMemo, useState } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { planCardEdit, type CardEdit, type CardEditPlan } from "@solid-memo/domain/cardBulk";
@@ -43,7 +43,8 @@ import type { CardTransfer } from "./TransferCardsDialog";
  * the instance's decks too, for their counts. Until the instance's data
  * check is done, and while the deck is set aside (useDataCheck), no edit
  * is offered; a deck set aside is never offered to move or copy cards
- * to.
+ * to. It says which cards the query keeps, in its order (`onRows`), for
+ * the Previous and Next of a card shown beside them (`current`).
  */
 export function CardWorkbenchContainer({
   useCases,
@@ -54,6 +55,9 @@ export function CardWorkbenchContainer({
   onQuery,
   cardHref,
   onOpen,
+  current,
+  onMove,
+  onRows,
   healthHref,
 }: {
   useCases: UseCases;
@@ -66,6 +70,11 @@ export function CardWorkbenchContainer({
   /** A card's editor in Solid Memo. */
   cardHref: (card: Card) => string;
   onOpen: (card: Card) => void;
+  /** As CardWorkbenchScreen's: the card shown beside the table, and showing another. */
+  current?: string;
+  onMove?: (card: Card) => void;
+  /** The URLs of the cards the query keeps, in its order, as they change. */
+  onRows?: (urls: readonly string[]) => void;
   /** The deck's health, where data set aside is repaired. */
   healthHref: string;
 }) {
@@ -112,6 +121,10 @@ export function CardWorkbenchContainer({
         : queryCards(cards, { direction: deck.direction, states }, query, today, plain, languages, lapses?.lapses),
     [cards, states, today, query, deck.direction, plain, languages, lapses, needsLapses],
   );
+
+  useEffect(() => {
+    if (rows !== undefined) onRows?.(rows.map((row) => row.card.url));
+  }, [rows]);
 
   const plan = useCallback(
     (ids: readonly string[], edit: CardEdit) => planCardEdit(cards!, ids, edit, states!),
@@ -192,6 +205,8 @@ export function CardWorkbenchContainer({
       onQuery={onQuery}
       cardHref={cardHref}
       onOpen={onOpen}
+      current={current}
+      onMove={onMove}
       plan={plan}
       onEdit={(ids, edit, planned) =>
         editMutation.mutateAsync({ ids, edit, plan: planned }).then(

@@ -25,8 +25,8 @@ import { hashParams, useHashRouter } from "@solid-memo/ui/routerCore";
 /**
  * A Studio view, as its URL hash carries it (docs/studio.md): only
  * identifiers (instance, deck and card URLs) and how a screen is looked
- * at (Home's filter and sort, the card workbench's query, the card
- * inspector's tab), so it round-trips through the hash. The Studio
+ * at (Home's filter and sort, the card workbench's query, beside a card
+ * too, the card inspector's tab), so it round-trips through the hash. The Studio
  * shares the site's one page with Solid Memo, so its hashes all start
  * with `#/studio` (STUDIO_PATH); Solid Memo's own routes are the others
  * (packages/ui/src/ui/router.ts). Both keep the hash with the same core
@@ -45,9 +45,11 @@ export type StudioRoute =
    * The card inspector: one card of a deck, its content, its wrong
    * options, its schedule or its history (`tab`; the content when
    * absent), opened at one of its fields when `field` says (a text of
-   * its content, or a wrong option by its id).
+   * its content, or a wrong option by its id). Beside the card, on a
+   * wide screen, the deck's cards in the workbench, as `query` says (all,
+   * as listed, when absent).
    */
-  | { screen: "card"; deckUrl: string; cardUrl: string; tab?: CardTab; field?: string }
+  | { screen: "card"; deckUrl: string; cardUrl: string; tab?: CardTab; field?: string; query?: CardQuery }
   /** A deck's schedule: the reviews to come, how its intervals and eases are spread, its lapses and leeches. */
   | { screen: "schedule"; deckUrl: string }
   /** What a deck says of itself, how it is studied and, for a course, the learner's progress through it. */
@@ -92,6 +94,14 @@ export type StudioRoute =
    * study.
    */
   | { screen: "trial"; draftUrl: string; chapter?: string; review?: true };
+
+/** The route of a card in the inspector. */
+export type CardRoute = Extract<StudioRoute, { screen: "card" }>;
+
+/** The deck's cards in the workbench, as a card's route has them beside it (its query). */
+export function workbenchOf(route: CardRoute): StudioRoute {
+  return { screen: "cards", deckUrl: route.deckUrl, ...(route.query === undefined ? {} : { query: route.query }) };
+}
 
 /** The routes of a draft's screens. */
 export type DraftRoute = Extract<StudioRoute, { draftUrl: string }>;
@@ -161,6 +171,7 @@ export function studioRouteToHash(route: StudioRoute): string {
         card: route.cardUrl,
         ...(route.tab === undefined || route.tab === "content" ? {} : { tab: route.tab }),
         ...(route.field === undefined ? {} : { field: route.field }),
+        ...(route.query === undefined ? {} : besideParams(route.query)),
       })}`;
     case "about":
       return `#${STUDIO_PATH}/about${hashParams({ deck: route.deckUrl })}`;
@@ -289,12 +300,14 @@ export function parseStudioHash(hash: string): StudioRoute | null {
       if (deckUrl === null || cardUrl === null) return null;
       const tab = CARD_TABS.find((known) => known !== "content" && known === query.get("tab"));
       const field = query.get("field");
+      const beside = besideQuery(query);
       return {
         screen: "card",
         deckUrl,
         cardUrl,
         ...(tab === undefined ? {} : { tab }),
         ...(field === null ? {} : { field }),
+        ...(isDefaultQuery(beside) ? {} : { query: beside }),
       };
     }
     default:
@@ -349,6 +362,25 @@ function draftRouteOf(path: string, query: URLSearchParams): DraftRoute | null {
       };
     }
   }
+}
+
+/**
+ * The parameters of the workbench's query beside a card: as the
+ * workbench's own, but where to look (its `field`) is `in`, as the
+ * card's own `field` is the field it opens at.
+ */
+function besideParams(query: CardQuery): Record<string, string> {
+  const { field, ...rest } = queryToParams(query);
+  return field === undefined ? rest : { ...rest, in: field };
+}
+
+/** The workbench's query beside a card, from the card's parameters (besideParams). */
+function besideQuery(params: URLSearchParams): CardQuery {
+  const query = new URLSearchParams(params);
+  query.delete("field");
+  const where = params.get("in");
+  if (where !== null) query.set("field", where);
+  return queryFromParams(query);
 }
 
 /** A route's field as a hash names it: none when absent. */

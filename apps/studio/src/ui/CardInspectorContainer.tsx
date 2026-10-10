@@ -46,7 +46,9 @@ export function releaseLinkOf(card: Card, release: LibraryDeckContent | null | u
  * text of the content, or a wrong option's Edit button. Until the
  * instance's data check is done, and while the deck is set aside
  * (useDataCheck), every tab is shown but nothing can be changed
- * (ReadOnlyScope), with a link to the deck's health (`healthHref`).
+ * (ReadOnlyScope), with a link to the deck's health (`healthHref`). The
+ * content tab says while its edits are not saved (`onUnsaved`, as
+ * CardScreen's), so the workspace asks before they are left.
  */
 export function CardInspectorContainer({
   useCases,
@@ -59,6 +61,8 @@ export function CardInspectorContainer({
   appHref,
   healthHref,
   onRemoved,
+  steps,
+  onUnsaved,
 }: {
   useCases: UseCases;
   deck: Deck;
@@ -73,6 +77,9 @@ export function CardInspectorContainer({
   healthHref: string;
   /** The card is gone; leave its page. */
   onRemoved: () => void;
+  /** As CardInspectorScreen's: the cards before and after it beside it. */
+  steps?: { previous: (() => void) | null; next: (() => void) | null };
+  onUnsaved?: (save: (() => Promise<boolean>) | null) => void;
 }) {
   const { t, errorText } = useI18n();
   const queryClient = useQueryClient();
@@ -97,7 +104,15 @@ export function CardInspectorContainer({
   });
 
   return (
-    <CardInspectorScreen card={card} release={releaseLinkOf(card, release)} tab={tab} tabHref={tabHref} onTab={onTab} appHref={appHref}>
+    <CardInspectorScreen
+      card={card}
+      release={releaseLinkOf(card, release)}
+      tab={tab}
+      tabHref={tabHref}
+      onTab={onTab}
+      appHref={appHref}
+      steps={steps}
+    >
       <ReadOnlyScope reason={readOnly} subject="deck" healthHref={healthHref}>
         {tab === "content" ? (
           <CardContainer
@@ -109,6 +124,7 @@ export function CardInspectorContainer({
             withDistractors={false}
             // A field the content does not have marks none.
             arrival={field as CardTextPart | undefined}
+            onUnsaved={onUnsaved}
           />
         ) : tab === "schedule" ? (
           <CardScheduleContainer useCases={useCases} deck={deck} card={card} />
