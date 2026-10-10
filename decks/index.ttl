@@ -84,6 +84,7 @@
                  <#physics-equations> ,
                  <#portuguese-basics> ,
                  <#python-built-ins> ,
+                 <#rijksmuseum-collection> ,
                  <#roman-numerals> ,
                  <#shakespeare-plays> ,
                  <#si-units> ,
@@ -11471,6 +11472,194 @@
     a dcat:Distribution ;
     dcat:accessURL <https://solid-memo.com/decks/python-built-ins/v2.ttl> ;
     dcat:downloadURL <https://solid-memo.com/decks/python-built-ins/v2.ttl> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
+
+<#rijksmuseum-collection>
+    a dcat:DatasetSeries ,
+      dcat:Dataset ;
+    solid-memo:formatVersion 3 ;
+    dcterms:title "Rijksmuseum collection"@en ,
+                  "Rijksmuseums samlingar"@sv ,
+                  "암스테르담 국립미술관 소장품"@ko ,
+                  "Sammlung des Rijksmuseums"@de ,
+                  "Colección del Rijksmuseum"@es ,
+                  "Collection du Rijksmuseum"@fr ;
+    dcterms:description "93 highlights of the Rijksmuseum in Amsterdam, the museum’s own “Top 100” as its linked open data lists it: the object on the front; its title, maker (or, for an anonymous work, where it was made) and date on the back, in English, Swedish, Korean, German, Spanish and French. Paintings, sculpture, silver, furniture, Delftware, a dolls’ house, a ship model and an aeroplane. Paintings already in the library’s Famous paintings deck and works still in copyright are left out, and the parts of one work, such as the ten weepers from the tomb of Isabella of Bourbon, are one card. Objects, makers, dates and pictures from the Rijksmuseum’s Linked Art data (metadata CC0, pictures in the public domain), names in the other languages from Wikidata and Wikipedia."@en ,
+                        "93 höjdpunkter ur Rijksmuseum i Amsterdam, museets egen ”Top 100” som dess länkade öppna data anger den: föremålet på framsidan; dess titel, upphovsperson (eller, för ett anonymt verk, var det tillverkades) och datering på baksidan, på engelska, svenska, koreanska, tyska, spanska och franska. Målningar, skulptur, silver, möbler, delftporslin, ett dockskåp, en fartygsmodell och ett flygplan. Målningar som redan finns i bibliotekets kortlek Berömda målningar och verk som fortfarande är upphovsrättsskyddade ingår inte, och delarna av ett verk, som de tio sörjande figurerna från Isabella av Bourbons gravmonument, är ett kort. Föremål, upphovspersoner, dateringar och bilder från Rijksmuseums Linked Art-data (metadata CC0, bilderna i public domain), namn på de andra språken från Wikidata och Wikipedia."@sv ,
+                        "암스테르담 국립미술관이 링크드 오픈 데이터에 직접 올려 둔 ‘Top 100’에서 고른 대표 소장품 93점입니다. 앞면에는 작품 사진, 뒷면에는 제목, 제작자(작자 미상인 작품은 제작지), 제작 시기가 영어, 스웨덴어, 한국어, 독일어, 스페인어, 프랑스어로 있습니다. 회화, 조각, 은 공예품, 가구, 델프트 도자기, 인형의 집, 선박 모형, 비행기까지 들어 있습니다. 라이브러리의 ‘유명한 그림’ 덱에 이미 있는 그림과 아직 저작권이 남아 있는 작품은 빠졌고, 부르봉의 이사벨라 묘의 애도자상 열 점처럼 한 작품을 이루는 부분들은 카드 한 장으로 묶었습니다. 작품, 제작자, 제작 시기, 사진은 암스테르담 국립미술관의 Linked Art 데이터(메타데이터 CC0, 사진은 퍼블릭 도메인)에서, 다른 언어의 이름은 위키데이터와 위키백과에서 가져왔습니다."@ko ,
+                        "93 Höhepunkte des Rijksmuseums in Amsterdam, die „Top 100“ des Museums selbst, wie seine Linked Open Data sie aufführen: das Objekt auf der Vorderseite; sein Titel, sein Urheber (oder, bei einem anonymen Werk, wo es entstand) und seine Datierung auf der Rückseite, auf Englisch, Schwedisch, Koreanisch, Deutsch, Spanisch und Französisch. Gemälde, Skulpturen, Silber, Möbel, Delfter Fayence, ein Puppenhaus, ein Schiffsmodell und ein Flugzeug. Gemälde, die schon im Stapel „Berühmte Gemälde“ der Bibliothek stehen, und noch urheberrechtlich geschützte Werke fehlen; die Teile eines Werks, etwa die zehn Klagenden vom Prunkgrab Isabellas von Bourbon, sind eine Karte. Objekte, Urheber, Datierungen und Bilder aus den Linked-Art-Daten des Rijksmuseums (Metadaten CC0, Bilder gemeinfrei), Namen in den anderen Sprachen aus Wikidata und Wikipedia."@de ,
+                        "93 obras destacadas del Rijksmuseum de Ámsterdam, el «Top 100» del propio museo tal como lo recogen sus datos abiertos enlazados: el objeto en el anverso; su título, su autor (o, en una obra anónima, dónde se hizo) y su fecha en el reverso, en inglés, sueco, coreano, alemán, español y francés. Pinturas, escultura, platería, muebles, loza de Delft, una casa de muñecas, una maqueta de barco y un avión. Se dejan fuera las pinturas que ya están en el mazo Pinturas famosas de la biblioteca y las obras aún protegidas por derechos de autor, y las partes de una misma obra, como los diez plorantes de la tumba de Isabel de Borbón, son una sola tarjeta. Objetos, autores, fechas e imágenes de los datos Linked Art del Rijksmuseum (metadatos CC0, imágenes de dominio público); los nombres en las demás lenguas, de Wikidata y Wikipedia."@es ,
+                        "93 chefs-d’œuvre du Rijksmuseum d’Amsterdam, le « Top 100 » du musée lui-même tel que ses données ouvertes liées le donnent : l’objet au recto ; son titre, son auteur (ou, pour une œuvre anonyme, son lieu de fabrication) et sa date au verso, en anglais, suédois, coréen, allemand, espagnol et français. Peintures, sculptures, orfèvrerie, mobilier, faïence de Delft, une maison de poupée, une maquette de navire et un avion. Les peintures déjà présentes dans le paquet Peintures célèbres de la bibliothèque et les œuvres encore protégées par le droit d’auteur sont écartées, et les parties d’une même œuvre, comme les dix pleurants du tombeau d’Isabelle de Bourbon, forment une seule carte. Objets, auteurs, dates et images des données Linked Art du Rijksmuseum (métadonnées CC0, images dans le domaine public) ; noms dans les autres langues tirés de Wikidata et de Wikipédia."@fr ;
+    dcterms:publisher <#solid-memo> ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:art ,
+               topic:history ;
+    dcat:keyword "Rijksmuseum"@en ,
+                 "museums"@en ,
+                 "art"@en ,
+                 "art history"@en ,
+                 "Dutch art"@en ,
+                 "decorative arts"@en ,
+                 "Amsterdam"@en ,
+                 "Rijksmuseum"@sv ,
+                 "museer"@sv ,
+                 "konst"@sv ,
+                 "konsthistoria"@sv ,
+                 "nederländsk konst"@sv ,
+                 "konsthantverk"@sv ,
+                 "Amsterdam"@sv ,
+                 "암스테르담 국립미술관"@ko ,
+                 "박물관"@ko ,
+                 "미술"@ko ,
+                 "미술사"@ko ,
+                 "네덜란드 미술"@ko ,
+                 "공예"@ko ,
+                 "암스테르담"@ko ,
+                 "Rijksmuseum"@de ,
+                 "Museen"@de ,
+                 "Kunst"@de ,
+                 "Kunstgeschichte"@de ,
+                 "niederländische Kunst"@de ,
+                 "Kunsthandwerk"@de ,
+                 "Amsterdam"@de ,
+                 "Rijksmuseum"@es ,
+                 "museos"@es ,
+                 "arte"@es ,
+                 "historia del arte"@es ,
+                 "arte neerlandés"@es ,
+                 "artes decorativas"@es ,
+                 "Ámsterdam"@es ,
+                 "Rijksmuseum"@fr ,
+                 "musées"@fr ,
+                 "art"@fr ,
+                 "histoire de l’art"@fr ,
+                 "art néerlandais"@fr ,
+                 "arts décoratifs"@fr ,
+                 "Amsterdam"@fr ;
+    dcat:first <https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl> ;
+    dcat:last <https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl> ;
+    dcat:hasVersion <https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl> .
+
+<https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Rijksmuseum collection"@en ,
+                  "Rijksmuseums samlingar"@sv ,
+                  "암스테르담 국립미술관 소장품"@ko ,
+                  "Sammlung des Rijksmuseums"@de ,
+                  "Colección del Rijksmuseum"@es ,
+                  "Collection du Rijksmuseum"@fr ;
+    dcterms:creator <https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "93 highlights of the Rijksmuseum in Amsterdam, the museum’s own “Top 100” as its linked open data lists it: the object on the front; its title, maker (or, for an anonymous work, where it was made) and date on the back, in English, Swedish, Korean, German, Spanish and French. Paintings, sculpture, silver, furniture, Delftware, a dolls’ house, a ship model and an aeroplane. Paintings already in the library’s Famous paintings deck and works still in copyright are left out, and the parts of one work, such as the ten weepers from the tomb of Isabella of Bourbon, are one card. Objects, makers, dates and pictures from the Rijksmuseum’s Linked Art data (metadata CC0, pictures in the public domain), names in the other languages from Wikidata and Wikipedia."@en ,
+                        "93 höjdpunkter ur Rijksmuseum i Amsterdam, museets egen ”Top 100” som dess länkade öppna data anger den: föremålet på framsidan; dess titel, upphovsperson (eller, för ett anonymt verk, var det tillverkades) och datering på baksidan, på engelska, svenska, koreanska, tyska, spanska och franska. Målningar, skulptur, silver, möbler, delftporslin, ett dockskåp, en fartygsmodell och ett flygplan. Målningar som redan finns i bibliotekets kortlek Berömda målningar och verk som fortfarande är upphovsrättsskyddade ingår inte, och delarna av ett verk, som de tio sörjande figurerna från Isabella av Bourbons gravmonument, är ett kort. Föremål, upphovspersoner, dateringar och bilder från Rijksmuseums Linked Art-data (metadata CC0, bilderna i public domain), namn på de andra språken från Wikidata och Wikipedia."@sv ,
+                        "암스테르담 국립미술관이 링크드 오픈 데이터에 직접 올려 둔 ‘Top 100’에서 고른 대표 소장품 93점입니다. 앞면에는 작품 사진, 뒷면에는 제목, 제작자(작자 미상인 작품은 제작지), 제작 시기가 영어, 스웨덴어, 한국어, 독일어, 스페인어, 프랑스어로 있습니다. 회화, 조각, 은 공예품, 가구, 델프트 도자기, 인형의 집, 선박 모형, 비행기까지 들어 있습니다. 라이브러리의 ‘유명한 그림’ 덱에 이미 있는 그림과 아직 저작권이 남아 있는 작품은 빠졌고, 부르봉의 이사벨라 묘의 애도자상 열 점처럼 한 작품을 이루는 부분들은 카드 한 장으로 묶었습니다. 작품, 제작자, 제작 시기, 사진은 암스테르담 국립미술관의 Linked Art 데이터(메타데이터 CC0, 사진은 퍼블릭 도메인)에서, 다른 언어의 이름은 위키데이터와 위키백과에서 가져왔습니다."@ko ,
+                        "93 Höhepunkte des Rijksmuseums in Amsterdam, die „Top 100“ des Museums selbst, wie seine Linked Open Data sie aufführen: das Objekt auf der Vorderseite; sein Titel, sein Urheber (oder, bei einem anonymen Werk, wo es entstand) und seine Datierung auf der Rückseite, auf Englisch, Schwedisch, Koreanisch, Deutsch, Spanisch und Französisch. Gemälde, Skulpturen, Silber, Möbel, Delfter Fayence, ein Puppenhaus, ein Schiffsmodell und ein Flugzeug. Gemälde, die schon im Stapel „Berühmte Gemälde“ der Bibliothek stehen, und noch urheberrechtlich geschützte Werke fehlen; die Teile eines Werks, etwa die zehn Klagenden vom Prunkgrab Isabellas von Bourbon, sind eine Karte. Objekte, Urheber, Datierungen und Bilder aus den Linked-Art-Daten des Rijksmuseums (Metadaten CC0, Bilder gemeinfrei), Namen in den anderen Sprachen aus Wikidata und Wikipedia."@de ,
+                        "93 obras destacadas del Rijksmuseum de Ámsterdam, el «Top 100» del propio museo tal como lo recogen sus datos abiertos enlazados: el objeto en el anverso; su título, su autor (o, en una obra anónima, dónde se hizo) y su fecha en el reverso, en inglés, sueco, coreano, alemán, español y francés. Pinturas, escultura, platería, muebles, loza de Delft, una casa de muñecas, una maqueta de barco y un avión. Se dejan fuera las pinturas que ya están en el mazo Pinturas famosas de la biblioteca y las obras aún protegidas por derechos de autor, y las partes de una misma obra, como los diez plorantes de la tumba de Isabel de Borbón, son una sola tarjeta. Objetos, autores, fechas e imágenes de los datos Linked Art del Rijksmuseum (metadatos CC0, imágenes de dominio público); los nombres en las demás lenguas, de Wikidata y Wikipedia."@es ,
+                        "93 chefs-d’œuvre du Rijksmuseum d’Amsterdam, le « Top 100 » du musée lui-même tel que ses données ouvertes liées le donnent : l’objet au recto ; son titre, son auteur (ou, pour une œuvre anonyme, son lieu de fabrication) et sa date au verso, en anglais, suédois, coréen, allemand, espagnol et français. Peintures, sculptures, orfèvrerie, mobilier, faïence de Delft, une maison de poupée, une maquette de navire et un avion. Les peintures déjà présentes dans le paquet Peintures célèbres de la bibliothèque et les œuvres encore protégées par le droit d’auteur sont écartées, et les parties d’une même œuvre, comme les dix pleurants du tombeau d’Isabelle de Bourbon, forment une seule carte. Objets, auteurs, dates et images des données Linked Art du Rijksmuseum (métadonnées CC0, images dans le domaine public) ; noms dans les autres langues tirés de Wikidata et de Wikipédia."@fr ;
+    prov:wasDerivedFrom <https://id.rijksmuseum.nl/260213> ,
+                        <https://iiif.micr.io/> ,
+                        <https://www.wikidata.org/> ,
+                        <https://commons.wikimedia.org/wiki/File:Zelfportret_Rijksmuseum_SK-A-3262.jpeg> ,
+                        <https://www.wikipedia.org/> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl#compilation> ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:art ,
+               topic:history ;
+    dcat:keyword "Rijksmuseum"@en ,
+                 "museums"@en ,
+                 "art"@en ,
+                 "art history"@en ,
+                 "Dutch art"@en ,
+                 "decorative arts"@en ,
+                 "Amsterdam"@en ,
+                 "Rijksmuseum"@sv ,
+                 "museer"@sv ,
+                 "konst"@sv ,
+                 "konsthistoria"@sv ,
+                 "nederländsk konst"@sv ,
+                 "konsthantverk"@sv ,
+                 "Amsterdam"@sv ,
+                 "암스테르담 국립미술관"@ko ,
+                 "박물관"@ko ,
+                 "미술"@ko ,
+                 "미술사"@ko ,
+                 "네덜란드 미술"@ko ,
+                 "공예"@ko ,
+                 "암스테르담"@ko ,
+                 "Rijksmuseum"@de ,
+                 "Museen"@de ,
+                 "Kunst"@de ,
+                 "Kunstgeschichte"@de ,
+                 "niederländische Kunst"@de ,
+                 "Kunsthandwerk"@de ,
+                 "Amsterdam"@de ,
+                 "Rijksmuseum"@es ,
+                 "museos"@es ,
+                 "arte"@es ,
+                 "historia del arte"@es ,
+                 "arte neerlandés"@es ,
+                 "artes decorativas"@es ,
+                 "Ámsterdam"@es ,
+                 "Rijksmuseum"@fr ,
+                 "musées"@fr ,
+                 "art"@fr ,
+                 "histoire de l’art"@fr ,
+                 "art néerlandais"@fr ,
+                 "arts décoratifs"@fr ,
+                 "Amsterdam"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <#solid-memo> ;
+    dcat:inSeries <#rijksmuseum-collection> ;
+    dcat:isVersionOf <#rijksmuseum-collection> ;
+    dcat:distribution <https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl#turtle> ;
+    solid-memo:cardCount 93 .
+
+<https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl#compilation>
+    a prov:Activity .
+
+<https://id.rijksmuseum.nl/260213>
+    dcterms:title "Rijksmuseum: Top 100 (a set of its collection’s linked open data)" ;
+    dcterms:creator "Rijksmuseum" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> .
+
+<https://iiif.micr.io/>
+    dcterms:title "Rijksmuseum pictures (IIIF Image API, served by Micrio)" ;
+    dcterms:creator "Rijksmuseum" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> .
+
+<https://commons.wikimedia.org/wiki/File:Zelfportret_Rijksmuseum_SK-A-3262.jpeg>
+    dcterms:title "Zelfportret Rijksmuseum SK-A-3262.jpeg (Wikimedia Commons)" ;
+    dcterms:creator "Wikimedia Commons contributors" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> .
+
+<https://www.wikipedia.org/>
+    dcterms:title "Wikipedia (English, Swedish, Korean, German, Spanish and French)" ;
+    dcterms:creator "Wikipedia contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> .
+
+<https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/rijksmuseum-collection/v1.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
