@@ -300,7 +300,7 @@ export ([import and export](#import-and-export), the deck ticked).
 A card opens in the [card inspector](#card-inspector). The
 workbench reads the cards and the review states with the same queries
 as Solid Memo, and the instance's preferences for today's study day.
-A time-budget test keeps a query over 5,000 cards fast.
+A test keeps a query over 5,000 cards linear: timed at two sizes on the same machine, four times the cards take less than ten times as long.
 
 ## Bulk edits
 
@@ -587,7 +587,7 @@ case `deckInsight` reads what it needs. It writes nothing to the deck.
   forgotten 4 times or more (`LEECH_LAPSES`, `leechesOf`), the most
   forgotten first. Each links to its card's history, and a link shows
   them all in the workbench (`state=leech&sort=lapses&order=desc`).
-  A time-budget test keeps `lapseIndex` fast over five years of answers.
+  A test keeps `lapseIndex` linear over five years of answers: timed at two sizes on the same machine, four times the answers take less than ten times as long.
 
 The charts are the statistics' own (`BarChart` and `StatTile` in `ui`):
 a bar pointed at, or tapped, says what it holds, and each chart has its

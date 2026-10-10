@@ -84,13 +84,18 @@ describe("releaseMarkdownCheck", () => {
     texts.forEach((text, index) => expect(check.problems(text, "option")).toBe(first[index]));
   });
 
-  it("checks a course's 1400 options again and again in no time, once each has been read", () => {
+  it("checks a course's 1400 options ten times over in less time than reading them once", () => {
+    // Timed against the first read on the same machine, not the clock: CI
+    // runs the tests, coverage on, many times slower than a laptop.
     const check = releaseMarkdownCheck();
     const texts = Array.from({ length: 1400 }, (_, index) => `**Option** ${index} with [a link](https://example.org/${index}) and \`code\``);
+    let started = performance.now();
     for (const text of texts) check.problems(text, "option");
-    const start = performance.now();
+    const read = performance.now() - started;
+    started = performance.now();
     for (let pass = 0; pass < 10; pass++) for (const text of texts) check.problems(text, "option");
-    expect(performance.now() - start).toBeLessThan(50);
+    const again = performance.now() - started;
+    expect(again, `${Math.round(again)} ms against ${Math.round(read)} ms`).toBeLessThan(read);
   });
 
   it("chunks a step's theory, each text once", () => {
