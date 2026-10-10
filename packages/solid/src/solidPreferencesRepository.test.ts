@@ -94,7 +94,7 @@ describe("savePreferences, checked", () => {
       throw new Error("does not conform");
     });
     await expect(makeRepository(checkWrite).savePreferences(INSTANCE, DEFAULT_PREFERENCES)).rejects.toThrow("does not conform");
-    expect(checkWrite).toHaveBeenCalledWith(expect.anything(), [`${DOCUMENT}#it`]);
+    expect(checkWrite).toHaveBeenCalledWith(expect.anything(), [`${DOCUMENT}#it`], "pod");
     expect(saveSolidDatasetAt).not.toHaveBeenCalled();
   });
 });
@@ -171,7 +171,7 @@ describe("upgradePreferences", () => {
     expect(getInteger(thing, SM.maxReviewsPerDay)).toBe(DEFAULT_PREFERENCES.maxReviewsPerDay);
     expect(getStringNoLocale(thing, "https://other.example/#note")).toBe("kept");
     expect(getInteger(thing, SM.formatVersion)).toBe(4);
-    expect(checkWrite).toHaveBeenCalledWith(saved, [`${DOCUMENT}#it`]);
+    expect(checkWrite).toHaveBeenCalledWith(saved, [`${DOCUMENT}#it`], "pod");
   });
 
   it("writes nothing for preferences up to date, none, or no preferences document", async () => {

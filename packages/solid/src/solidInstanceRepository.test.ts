@@ -525,7 +525,7 @@ describe("readMeta and upgradeMeta", () => {
     expect(getStringNoLocale(thing, DCTERMS.title)).toBe("Main");
     expect(getStringNoLocale(thing, "https://other.example/#note")).toBe("kept");
     expect(getInteger(thing, SM.formatVersion)).toBe(2);
-    expect(checkWrite).toHaveBeenCalledWith(saved, [`${META}#it`]);
+    expect(checkWrite).toHaveBeenCalledWith(saved, [`${META}#it`], "pod");
   });
 
   it("writes nothing for a subject up to date, missing or unreadable, or no meta document", async () => {
@@ -578,7 +578,7 @@ describe("saveMeta", () => {
     expect(getStringNoLocale(thing, DCTERMS.title)).toBe("Renamed");
     expect(getStringNoLocale(thing, "https://other.example/#note")).toBe("kept");
     expect(getInteger(thing, SM.formatVersion)).toBe(2);
-    expect(checkWrite).toHaveBeenCalledWith(saved, [`${META}#it`]);
+    expect(checkWrite).toHaveBeenCalledWith(saved, [`${META}#it`], "pod");
   });
 
   it("refuses to save when the meta document or its subject is missing", async () => {

@@ -71,7 +71,7 @@ describe("the deck tree in the pod", () => {
     expect(shape(written.children)).toEqual([{ "group-1": ["a", "c"] }, "b"]);
     expect(writes(pod)).toEqual([expect.objectContaining({ method: "PATCH", url: CATALOG, ifMatch: '"v1"', status: 205 })]);
     // The decks whose positions changed are not checked: only what a shape owns.
-    expect(checkWrite).toHaveBeenCalledWith(expect.anything(), [group.url, ROOT]);
+    expect(checkWrite).toHaveBeenCalledWith(expect.anything(), [group.url, ROOT], "pod");
     expect(await repository.readDeckTree(INSTANCE)).toEqual(written);
 
     const moved = await repository.editDeckTree(INSTANCE, { kind: "move", node: at("b"), to: { parent: group.url, after: null } });

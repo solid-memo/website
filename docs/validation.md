@@ -249,6 +249,23 @@ would not conform is refused with every problem named, and nothing is
 saved. Only what the write touches is checked, so a document with an
 old problem elsewhere can still be written to.
 
+Every caller names where the write goes (`WriteContext` in
+[writeCheck.ts](../packages/solid/src/writeCheck.ts)), and that picks
+the shapes, as `pickShape` picks them for a read:
+
+- `"pod"`: an instance's documents, checked against the pod's shapes
+  and, where they have DCAT subjects, DCAT-AP. Every write the app makes
+  today is one.
+- `"draft"`: a release's draft. Its deck, chapters and steps are checked
+  against the draft shapes (`DraftDeckV1`, `DraftChapterV1`,
+  `DraftStepV1`, [shapes.md](shapes.md#version-by-version)), which do
+  not yet ask what a release needs; its cards, distractors and agents
+  against the shapes every context shares. DCAT-AP is not run: a draft
+  may still lack what a published dataset needs, such as a description.
+  The release check holds the draft to all of it before it is published.
+
+A published release is never written, so no write is checked as one.
+
 ## Repair
 
 `planRepair` ([domain/repair.ts](../packages/domain/src/repair.ts)) turns a
@@ -283,7 +300,13 @@ holds the [deck library](deck-library.md)'s index and every version,
 and the pod catalog documents of the deck format 4, 5 and 6 fixtures (format 5 titles a deck in any
 language, English or not; format 6 tags its keywords) and of the deck group 1 fixtures (nested
 groups), to DCAT-AP, and the vocabulary's concept schemes to
-SkoHub's SKOS shapes, best practice included. A disagreement between the
+SkoHub's SKOS shapes, best practice included. It also holds a release
+published in a pod (the library deck 6 fixtures, which describe their
+series and publisher themselves) to DCAT-AP with no index beside it, and
+that release and the draft fixtures (draft deck, chapter and step 1) to
+Solid Memo's own shapes: the script picks each subject's shape by class,
+format version and context as `pickShape` does, and targets it with
+`sh:targetNode`. A disagreement between the
 engines, or a constraint the browser's engine cannot run, fails CI. It
 reads `ns/` and `decks/` from the repository, each file at the IRI the
 site publishes it under, and needs neither a build nor the network, so

@@ -87,7 +87,7 @@ export function createSolidDeckRepository({
     subjects: readonly string[],
     options?: { whole?: boolean },
   ): Promise<void> {
-    await checkWrite(dataset, subjects);
+    await checkWrite(dataset, subjects, "pod");
     await saveDataset(url, dataset, fetch, options);
   }
 
@@ -217,7 +217,7 @@ export function createSolidDeckRepository({
         const { dataset: updated, subjects } = withTreeChanges(dataset, catalogUrl, treeChanges(stored, after));
         // Only the groups and the catalogue are checked: a deck's position is
         // no shape's, and a deck set aside beside the moved one must not stop it.
-        await checkWrite(updated, subjects);
+        await checkWrite(updated, subjects, "pod");
         try {
           // A PATCH, If-Match the read above: where the pod has no strong ETag
           // to match, a whole PUT would undo what changed meanwhile.
@@ -431,7 +431,7 @@ export function createSolidDeckRepository({
       for (const url of changed.remove) builder = builder.removeUrl(SM.completedChapter, url);
       for (const url of changed.add) builder = builder.addIri(SM.completedChapter, url);
       const updated = setThing(dataset!, builder.build());
-      if (checked) await checkWrite(updated, [deck.url]);
+      if (checked) await checkWrite(updated, [deck.url], "pod");
       try {
         // A PATCH of the triples changed, If-Match the read above.
         await saveDataset(catalogUrl, updated, fetch);

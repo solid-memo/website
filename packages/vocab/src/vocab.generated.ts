@@ -1,6 +1,6 @@
 /* Generated from ns/vocab/v1.ttl by `npm run generate`. Do not edit: change the source and regenerate. */
 
-/** Solid Memo's own vocabulary, version 1.17 (see docs/vocab.md). */
+/** Solid Memo's own vocabulary, version 1.18 (see docs/vocab.md). */
 export const SM_NS = "https://solid-memo.com/ns/vocab/v1.ttl#";
 
 export const SM = {
@@ -152,6 +152,12 @@ export const SM = {
   distractorNote: `${SM_NS}distractorNote`,
   /** A chapter of the course the deck was copied from (its prov:wasDerivedFrom release) whose final review the learner has passed. (Added in 1.14. On a deck it is outside the deck format, without a version bump: an older reader ignores it and an older writer keeps it.) */
   completedChapter: `${SM_NS}completedChapter`,
+  /** A draft of a deck or course release that the catalogue's owner is writing in the same instance: the draft's release document, whose subject is the draft deck itself, as a release is its document. The draft becomes a release when it is published, and then names it with releasedAs. (Added in 1.18. It belongs to no shape: CatalogV1 does not own it, so the catalogue format did not move.) */
+  releaseDraft: `${SM_NS}releaseDraft`,
+  /** A release (a dcat:Dataset, one document) that the catalogue's owner published from this instance, frozen once published. Where the catalogue is readable, it is where a reader finds the releases an author published. (Added in 1.18. It belongs to no shape: CatalogV1 does not own it, so the catalogue format did not move.) */
+  publishedRelease: `${SM_NS}publishedRelease`,
+  /** On a draft deck: the release it was published as. A draft that states it is released, and is no longer edited; absent, the draft is still being written. (Added in 1.18 for draft deck format 1.) */
+  releasedAs: `${SM_NS}releasedAs`,
   /** The deck the answer was given in: its catalog entry, which may since have been removed. (Added in 1.10.) */
   answeredDeck: `${SM_NS}answeredDeck`,
   /** The card the answer was given to, which may since have been removed. (Added in 1.10.) */

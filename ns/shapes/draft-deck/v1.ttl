@@ -1,0 +1,274 @@
+@base <https://solid-memo.com/ns/shapes/draft-deck/v1.ttl> .
+
+@prefix sh:         <http://www.w3.org/ns/shacl#> .
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+
+# A draft deck, format 1: a release of a deck or course while its author
+# writes it in a pod, before it is published (docs/studio.md). It is the
+# draft's release document itself, as a release is, and holds what the
+# release will hold, unfinished: the property shapes are library deck
+# format 6's (shapes/library-deck/v6.ttl), but nothing a release needs
+# only once it is published is asked yet. The title and description are
+# language-tagged text in any language, none required; publisher, series,
+# version, release time, version notes, distribution and the theme EDUC
+# are each optional. What a release needs on top is the release check's
+# business, which reads the draft as the release it will be. Its cards,
+# distractors and agents are checked as anywhere else, never relaxed.
+# Once published, a draft names its release with solid-memo:releasedAs
+# and is no longer edited. Subjects of a draft, never of an instance's
+# catalogue or the deck library.
+<#inDraft>
+    a sh:NodeShape ;
+    sh:name "DraftDeckV1" ;
+    rdfs:comment "Draft deck format 1: a deck or course release being written in a pod, a dcat:Dataset with library deck format 6's properties, its English text and release metadata not yet required, and the release it was published as, once it was." ;
+    sh:nodeKind sh:IRI ;
+    sh:class solid-memo:Deck ;
+    sh:property <#formatVersion> ,
+                <#dataset> ,
+                <#title> ,
+                <#description> ,
+                <#created> ,
+                <#modified> ,
+                <#issued> ,
+                <#creator> ,
+                <#publisher> ,
+                <#license> ,
+                <#studyDirection> ,
+                <#noDirection> ,
+                <#themes> ,
+                <#keywords> ,
+                <#languages> ,
+                <#version> ,
+                <#versionNotes> ,
+                <#inSeries> ,
+                <#isVersionOf> ,
+                <#previous> ,
+                <#previousVersion> ,
+                <#distributions> ,
+                <#derivedFrom> ,
+                <#releasedAs> ,
+                <#noCardsDocument> ,
+                <#noReviewsDocument> ,
+                <#noSource> ,
+                <#noNewCardsPerDay> ,
+                <#noMaxReviewsPerDay> .
+
+<#formatVersion>
+    a sh:PropertyShape ;
+    sh:path solid-memo:formatVersion ;
+    sh:datatype xsd:integer ;
+    sh:maxCount 1 ;
+    sh:in ( 1 ) .
+
+<#dataset>
+    a sh:PropertyShape ;
+    sh:path rdf:type ;
+    sh:hasValue dcat:Dataset ;
+    sh:message "A draft deck is a dcat:Dataset."@en ,
+               "En utkastkortlek är ett dcat:Dataset."@sv .
+
+<#title>
+    a sh:PropertyShape ;
+    sh:path dcterms:title ;
+    sh:datatype rdf:langString ;
+    sh:uniqueLang true ;
+    sh:message "A draft's title is language-tagged text in any language, one per language (\"…\"@sv)."@en ,
+               "Ett utkasts titel är språktaggad text på valfritt språk, en per språk (\"…\"@sv)."@sv .
+
+<#description>
+    a sh:PropertyShape ;
+    sh:path dcterms:description ;
+    sh:datatype rdf:langString ;
+    sh:uniqueLang true ;
+    sh:message "A draft's description is language-tagged text in any language, one per language (\"…\"@sv)."@en ,
+               "Ett utkasts beskrivning är språktaggad text på valfritt språk, en per språk (\"…\"@sv)."@sv .
+
+<#created>
+    a sh:PropertyShape ;
+    sh:path dcterms:created ;
+    sh:datatype xsd:dateTime ;
+    sh:maxCount 1 .
+
+<#modified>
+    a sh:PropertyShape ;
+    sh:path dcterms:modified ;
+    sh:datatype xsd:dateTime ;
+    sh:maxCount 1 ;
+    sh:message "A modification time is an xsd:dateTime, like the creation time."@en ,
+               "En ändringstid är ett xsd:dateTime, liksom tiden då den skapades."@sv .
+
+<#issued>
+    a sh:PropertyShape ;
+    sh:path dcterms:issued ;
+    sh:datatype xsd:dateTime ;
+    sh:maxCount 1 ;
+    sh:message "A release time is an xsd:dateTime."@en ,
+               "En utgivningstid är ett xsd:dateTime."@sv .
+
+<#creator>
+    a sh:PropertyShape ;
+    sh:path dcterms:creator ;
+    sh:nodeKind sh:IRI ;
+    sh:message "A creator is a foaf:Agent node (<#agent-…>), never a string literal."@en ,
+               "En skapare är en foaf:Agent-nod (<#agent-…>), aldrig en strängliteral."@sv .
+
+<#publisher>
+    a sh:PropertyShape ;
+    sh:path dcterms:publisher ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+    sh:message "A draft names at most one publisher, a foaf:Agent."@en ,
+               "Ett utkast anger högst en utgivare, en foaf:Agent."@sv .
+
+<#license>
+    a sh:PropertyShape ;
+    sh:path dcterms:license ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+    sh:message "A licence is an IRI (<https://…>), never a string literal."@en ,
+               "En licens är en IRI (<https://…>), aldrig en strängliteral."@sv .
+
+<#studyDirection>
+    a sh:PropertyShape ;
+    sh:path solid-memo:studyDirection ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:in ( solid-memo:frontToBack solid-memo:backToFront solid-memo:bidirectional ) ;
+    sh:message "A draft deck states its study direction, a concept of solid-memo:StudyDirections."@en ,
+               "En utkastkortlek anger sin studieriktning, ett begrepp i solid-memo:StudyDirections."@sv .
+
+<#noDirection>
+    a sh:PropertyShape ;
+    sh:path solid-memo:direction ;
+    sh:maxCount 0 ;
+    sh:message "A draft deck states the study direction with solid-memo:studyDirection, not the deprecated solid-memo:direction."@en ,
+               "En utkastkortlek anger studieriktningen med solid-memo:studyDirection, inte med den utfasade solid-memo:direction."@sv .
+
+<#themes>
+    a sh:PropertyShape ;
+    sh:path dcat:theme ;
+    sh:nodeKind sh:IRI ;
+    sh:message "A theme is a concept's IRI, never a string literal."@en ,
+               "Ett tema är ett begrepps IRI, aldrig en strängliteral."@sv .
+
+<#keywords>
+    a sh:PropertyShape ;
+    sh:path dcat:keyword ;
+    sh:datatype rdf:langString ;
+    sh:message "A draft's keyword is language-tagged text (\"…\"@sv), several per language."@en ,
+               "Ett utkasts nyckelord är språktaggad text (\"…\"@sv), flera per språk."@sv .
+
+<#languages>
+    a sh:PropertyShape ;
+    sh:path dcterms:language ;
+    sh:nodeKind sh:IRI ;
+    sh:message "A language is an EU authority-table IRI, never a string literal."@en ,
+               "Ett språk är en IRI ur EU:s auktoritetstabeller, aldrig en strängliteral."@sv .
+
+<#version>
+    a sh:PropertyShape ;
+    sh:path dcat:version ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:pattern "^[1-9][0-9]*$" ;
+    sh:message "A draft's version, when stated, is one of 1, 2, …"@en ,
+               "Ett utkasts version är, när den anges, en av 1, 2, …"@sv .
+
+<#versionNotes>
+    a sh:PropertyShape ;
+    sh:path adms:versionNotes ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 .
+
+<#inSeries>
+    a sh:PropertyShape ;
+    sh:path dcat:inSeries ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+    sh:message "A draft belongs to at most one series, an IRI."@en ,
+               "Ett utkast hör till högst en serie, en IRI."@sv .
+
+<#isVersionOf>
+    a sh:PropertyShape ;
+    sh:path dcat:isVersionOf ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+    sh:message "A draft is a version of at most one series, an IRI."@en ,
+               "Ett utkast är en version i högst en serie, en IRI."@sv .
+
+<#previous>
+    a sh:PropertyShape ;
+    sh:path dcat:prev ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 .
+
+<#previousVersion>
+    a sh:PropertyShape ;
+    sh:path dcat:previousVersion ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 .
+
+<#distributions>
+    a sh:PropertyShape ;
+    sh:path dcat:distribution ;
+    sh:nodeKind sh:IRI ;
+    sh:message "A distribution is an IRI (<#turtle>), never a string literal."@en ,
+               "En distribution är en IRI (<#turtle>), aldrig en strängliteral."@sv .
+
+<#derivedFrom>
+    a sh:PropertyShape ;
+    sh:path prov:wasDerivedFrom ;
+    sh:nodeKind sh:IRI ;
+    sh:message "A source the deck is drawn from is an IRI (<https://…>), never a string literal."@en ,
+               "En källa som kortleken bygger på är en IRI (<https://…>), aldrig en strängliteral."@sv .
+
+<#releasedAs>
+    a sh:PropertyShape ;
+    sh:path solid-memo:releasedAs ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+    sh:message "A released draft names the one release it was published as, an IRI."@en ,
+               "Ett utgivet utkast anger den enda utgåva det gavs ut som, en IRI."@sv .
+
+<#noCardsDocument>
+    a sh:PropertyShape ;
+    sh:path solid-memo:cardsDocument ;
+    sh:maxCount 0 ;
+    sh:message "A draft deck has no cards document link: its cards are in the draft's documents."@en ,
+               "En utkastkortlek har ingen länk till ett kortdokument: dess kort finns i utkastets dokument."@sv .
+
+<#noReviewsDocument>
+    a sh:PropertyShape ;
+    sh:path solid-memo:reviewsDocument ;
+    sh:maxCount 0 ;
+    sh:message "A draft deck has no reviews document."@en ,
+               "En utkastkortlek har inget repetitionsdokument."@sv .
+
+<#noSource>
+    a sh:PropertyShape ;
+    sh:path dcterms:source ;
+    sh:maxCount 0 ;
+    sh:message "A draft deck names what it is drawn from with prov:wasDerivedFrom: dcterms:source is for datasets described alongside."@en ,
+               "En utkastkortlek anger vad den bygger på med prov:wasDerivedFrom: dcterms:source är för datamängder som beskrivs bredvid."@sv .
+
+<#noNewCardsPerDay>
+    a sh:PropertyShape ;
+    sh:path solid-memo:deckNewCardsPerDay ;
+    sh:maxCount 0 ;
+    sh:message "A draft deck sets no study caps: they are the learner's."@en ,
+               "En utkastkortlek anger inga studiegränser: dem bestämmer den som studerar."@sv .
+
+<#noMaxReviewsPerDay>
+    a sh:PropertyShape ;
+    sh:path solid-memo:deckMaxReviewsPerDay ;
+    sh:maxCount 0 ;
+    sh:message "A draft deck sets no study caps: they are the learner's."@en ,
+               "En utkastkortlek anger inga studiegränser: dem bestämmer den som studerar."@sv .

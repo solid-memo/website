@@ -1,0 +1,103 @@
+@base <https://solid-memo.com/ns/shapes/draft-chapter/v1.ttl> .
+
+@prefix sh:         <http://www.w3.org/ns/shacl#> .
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl:        <http://www.w3.org/2002/07/owl#> .
+@prefix schema:     <https://schema.org/> .
+
+# A chapter of a draft course, format 1: chapter format 1
+# (shapes/chapter/v1.ttl) while its author writes it, in a draft
+# (shapes/draft-deck/v1.ttl). The property shapes are chapter format 1's,
+# but its title (in any language, none required), the course it is part
+# of and its place are not asked yet: the release check asks them of the
+# release the draft will be.
+<#inDraft>
+    a sh:NodeShape ;
+    sh:name "DraftChapterV1" ;
+    rdfs:comment "Draft chapter format 1: a chapter of a course being written in a pod, chapter format 1's properties with its title, course and place not yet required." ;
+    sh:nodeKind sh:IRI ;
+    sh:class solid-memo:Chapter ;
+    sh:property <#formatVersion> ,
+                <#syllabus> ,
+                <#title> ,
+                <#description> ,
+                <#course> ,
+                <#position> ,
+                <#reviewQuestion> ,
+                <#deprecated> ,
+                <#textFormat> .
+
+<#formatVersion>
+    a sh:PropertyShape ;
+    sh:path solid-memo:formatVersion ;
+    sh:datatype xsd:integer ;
+    sh:maxCount 1 ;
+    sh:in ( 1 ) .
+
+<#syllabus>
+    a sh:PropertyShape ;
+    sh:path rdf:type ;
+    sh:hasValue schema:Syllabus ;
+    sh:message "A chapter is a schema:Syllabus."@en ,
+               "Ett kapitel är en schema:Syllabus."@sv .
+
+<#title>
+    a sh:PropertyShape ;
+    sh:path dcterms:title ;
+    sh:datatype rdf:langString ;
+    sh:uniqueLang true ;
+    sh:message "A chapter's title is language-tagged text in any language, one per language (\"…\"@sv)."@en ,
+               "Ett kapitels titel är språktaggad text på valfritt språk, en per språk (\"…\"@sv)."@sv .
+
+<#description>
+    a sh:PropertyShape ;
+    sh:path dcterms:description ;
+    sh:datatype rdf:langString ;
+    sh:uniqueLang true ;
+    sh:message "A chapter's description is language-tagged text, one per language (\"…\"@en)."@en ,
+               "Ett kapitels beskrivning är språktaggad text, en per språk (\"…\"@en)."@sv .
+
+<#course>
+    a sh:PropertyShape ;
+    sh:path schema:isPartOf ;
+    sh:name "course" ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+    sh:message "A chapter is part of at most one course (schema:isPartOf <…>)."@en ,
+               "Ett kapitel är del av högst en kurs (schema:isPartOf <…>)."@sv .
+
+<#position>
+    a sh:PropertyShape ;
+    sh:path schema:position ;
+    sh:datatype xsd:integer ;
+    sh:minInclusive 0 ;
+    sh:maxCount 1 ;
+    sh:message "A chapter's place among the course's chapters is one whole number, 0 or more, 0 first."@en ,
+               "Ett kapitels plats bland kursens kapitel är ett heltal, 0 eller mer, 0 först."@sv .
+
+<#reviewQuestion>
+    a sh:PropertyShape ;
+    sh:path solid-memo:reviewQuestion ;
+    sh:nodeKind sh:IRI ;
+    sh:message "A chapter's review questions are cards of the release, IRIs (<#…>)."@en ,
+               "Ett kapitels repetitionsfrågor är kort i utgåvan, IRI:er (<#…>)."@sv .
+
+<#deprecated>
+    a sh:PropertyShape ;
+    sh:path owl:deprecated ;
+    sh:datatype xsd:boolean ;
+    sh:maxCount 1 ;
+    sh:message "A retired chapter states owl:deprecated true, a boolean."@en ,
+               "Ett kapitel som tagits ur bruk anger owl:deprecated true, ett booleskt värde."@sv .
+
+<#textFormat>
+    a sh:PropertyShape ;
+    sh:path solid-memo:textFormat ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+    sh:message "A chapter's text format is at most one IRI, a concept of solid-memo:TextFormats."@en ,
+               "Ett kapitels textformat är högst en IRI, ett begrepp i solid-memo:TextFormats."@sv .

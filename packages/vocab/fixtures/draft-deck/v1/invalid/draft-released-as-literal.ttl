@@ -1,0 +1,9 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:releasedAs "https://alice.example/solid-memo/main/releases/capitals/v1.ttl" .

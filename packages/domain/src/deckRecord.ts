@@ -4,7 +4,7 @@ import { defaultDeckDescriptionText, distributionUrlOf, TURTLE_MEDIA_TYPE } from
 import { isEmptyText, type Card, type CardContent, type Deck, type Distractor } from "./deck";
 import type { LibraryCard, LibraryDeckContent } from "./library";
 import { copyKeywords, noKeywords } from "./keywords";
-import type { AgentV1, CardV5, DeckV6, DistractorV1, DistributionV1, LibraryDeckV5 } from "@solid-memo/vocab/types.generated";
+import type { AgentV1, CardV5, DeckV6, DistractorV1, DistributionV1, LibraryDeckV6 } from "@solid-memo/vocab/types.generated";
 import { fragmentIdOf } from "./subjectUrl";
 
 /**
@@ -194,7 +194,7 @@ export function distractorToRecord(distractor: Distractor): DistractorV1 {
 export function libraryDeckFromRecord(
   url: string,
   storedVersion: number,
-  data: LibraryDeckV5,
+  data: LibraryDeckV6,
   cards: LibraryCard[],
   authorOf: AuthorOf,
 ): LibraryDeckContent {

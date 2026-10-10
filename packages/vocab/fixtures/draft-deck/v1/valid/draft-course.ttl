@@ -1,0 +1,57 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix schema:     <https://schema.org/> .
+
+# A course being written, titled in Japanese only, with neither a series
+# nor a version, a chapter without a title or place and a step without
+# theory or questions; its cards and distractors are whole. It was
+# released once, and names that release.
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ,
+      schema:Course ;
+    solid-memo:formatVersion 1 ;
+    dcterms:title "日本の首都"@ja ;
+    dcterms:creator <#hanako> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    dcat:keyword "首都"@ja ,
+                 "地理"@ja ;
+    solid-memo:releasedAs <https://hanako.example/solid-memo/main/releases/capitals/v1.ttl> .
+
+<#hanako>
+    a foaf:Agent ;
+    foaf:name "Hanako" .
+
+<#ch-1>
+    a solid-memo:Chapter ,
+      schema:Syllabus ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:reviewQuestion <#q-1> .
+
+<#st-1>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <#ch-1> .
+
+<#q-1>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    solid-memo:front "日本の首都は？"@ja ;
+    solid-memo:back "東京"@ja ;
+    solid-memo:distractor <#q-1-d1> ,
+                          <#q-1-d2> .
+
+<#q-1-d1>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "大阪"@ja .
+
+<#q-1-d2>
+    a solid-memo:Distractor ,
+      schema:Answer ;
+    solid-memo:formatVersion 1 ;
+    solid-memo:distractorText "京都"@ja .

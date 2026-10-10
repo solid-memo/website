@@ -89,9 +89,32 @@ describe("migrate", () => {
     expect(migrate("libraryDeckSeries", { version: 2, data: series }, CONTEXT)).toEqual({ ...series, keyword: { "": keyword } });
   });
 
-  it("brings the library's kinds to the formats whose keywords state their language", () => {
-    expect(LATEST_VERSION.libraryDeck).toBe(5);
+  it("brings the library's kinds to the formats whose keywords state their language, a release to the one that may describe its series", () => {
+    expect(LATEST_VERSION.libraryDeck).toBe(6);
     expect(LATEST_VERSION.libraryDeckSeries).toBe(3);
+  });
+
+  it("reads a format-5 release as format 6 unchanged: its series and publisher stay in the index", () => {
+    const release = {
+      title: { en: "Capitals" },
+      description: { en: "Capitals." },
+      creator: [],
+      publisher: "https://solid-memo.com/decks/index.ttl#solid-memo",
+      studyDirection: `${SM}frontToBack` as const,
+      theme: [EDUC],
+      keyword: { en: ["capitals"], sv: ["huvudstäder"] },
+      language: [],
+      version: "3",
+      inSeries: "https://solid-memo.com/decks/index.ttl#capitals",
+      isVersionOf: "https://solid-memo.com/decks/index.ttl#capitals",
+      distribution: [],
+      wasDerivedFrom: [],
+    };
+    expect(migrate("libraryDeck", { version: 5, data: release }, CONTEXT)).toEqual(release);
+  });
+
+  it("has no migration for the draft kinds, which start at format 1", () => {
+    expect([LATEST_VERSION.draftDeck, LATEST_VERSION.draftChapter, LATEST_VERSION.draftStep]).toEqual([1, 1, 1]);
   });
 
   it("walks a record up to the latest version", () => {

@@ -230,9 +230,9 @@ describe("applyReviewChanges", () => {
     await expect(
       makeRepository(checkWrite).applyReviewChanges(deck, { save: [state], remove: [] }),
     ).rejects.toThrow("does not conform");
-    expect(checkWrite).toHaveBeenCalledWith(expect.anything(), [`${deck.reviewsDocumentUrl}#card-1`]);
+    expect(checkWrite).toHaveBeenCalledWith(expect.anything(), [`${deck.reviewsDocumentUrl}#card-1`], "pod");
     await expect(makeRepository(checkWrite).saveReviewState(deck, state)).rejects.toThrow("does not conform");
-    expect(checkWrite).toHaveBeenLastCalledWith(expect.anything(), [`${deck.reviewsDocumentUrl}#card-1`]);
+    expect(checkWrite).toHaveBeenLastCalledWith(expect.anything(), [`${deck.reviewsDocumentUrl}#card-1`], "pod");
     expect(saveSolidDatasetAt).not.toHaveBeenCalled();
   });
 
@@ -244,7 +244,7 @@ describe("applyReviewChanges", () => {
     expect(checkWrite).toHaveBeenCalledWith(expect.anything(), [
       `${deck.reviewsDocumentUrl}#card-1`,
       `${deck.reviewsDocumentUrl}#card-1@back-to-front`,
-    ]);
+    ], "pod");
     expect(saveSolidDatasetAt).toHaveBeenCalledOnce();
     const [saveUrl, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0]!;
     expect(saveUrl).toBe(deck.reviewsDocumentUrl);
@@ -433,7 +433,7 @@ describe("upgradeReviewStates", () => {
     const upgraded = getThing(saved, `${deck.reviewsDocumentUrl}#card-1`)!;
     expect(toReviewState(upgraded, deck)).toEqual(state);
     expect(upgraded.predicates["https://other.example/#note"]).toBeDefined();
-    expect(checkWrite).toHaveBeenCalledWith(saved, [`${deck.reviewsDocumentUrl}#card-1`]);
+    expect(checkWrite).toHaveBeenCalledWith(saved, [`${deck.reviewsDocumentUrl}#card-1`], "pod");
   });
 
   it("writes nothing when no state is outdated, or there is no reviews document", async () => {

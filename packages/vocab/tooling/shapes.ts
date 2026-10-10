@@ -47,7 +47,7 @@ export type TermKind =
   | "text"
   | "anyText";
 export type Cardinality = "one" | "optional" | "many";
-export type ShapeContext = "pod" | "library" | "any";
+export type ShapeContext = "pod" | "library" | "draft" | "any";
 
 export interface ShapeField {
   name: string;
@@ -75,6 +75,13 @@ export interface ShapeModel {
   comment: string;
   fields: ShapeField[];
 }
+
+/** The node shape fragments that name where a subject lives; any other fits everywhere. */
+const CONTEXTS = new Map<string, ShapeContext>([
+  ["inPod", "pod"],
+  ["inLibrary", "library"],
+  ["inDraft", "draft"],
+]);
 
 const DATATYPES: Record<string, TermKind> = {
   [`${XSD}string`]: "string",
@@ -135,8 +142,7 @@ function parseShapeFile(file: TurtleFile): ShapeModel[] {
         fail(`"${name}" needs an sh:class in the Solid Memo, DCAT or FOAF vocabulary.`);
       }
       const fragment = localName(iri);
-      const context: ShapeContext =
-        fragment === "inPod" ? "pod" : fragment === "inLibrary" ? "library" : "any";
+      const context: ShapeContext = CONTEXTS.get(fragment) ?? "any";
       const fields: ShapeField[] = [];
       const additionalTypes: string[] = [];
       const absent: string[] = [];

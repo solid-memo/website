@@ -35,7 +35,7 @@ export function createSolidAnswerLog({
     async append(instanceUrl, answer) {
       const url = historyUrlOf(instanceUrl, monthOfStudyDay(answer.studyDay));
       const thing = toAnswerThing(url, answer);
-      await checkWrite(setThing(createSolidDataset(), thing), [`${url}#${answer.id}`]);
+      await checkWrite(setThing(createSolidDataset(), thing), [`${url}#${answer.id}`], "pod");
       await appendToDocument(url, thing, fetch);
     },
 
@@ -47,7 +47,7 @@ export function createSolidAnswerLog({
       }
       for (const [url, month] of byMonth) {
         const things = month.map((answer) => toAnswerThing(url, answer));
-        await checkWrite(things.reduce(setThing, createSolidDataset()), month.map((answer) => `${url}#${answer.id}`));
+        await checkWrite(things.reduce(setThing, createSolidDataset()), month.map((answer) => `${url}#${answer.id}`), "pod");
         await appendAllToDocument(url, things, fetch);
       }
     },

@@ -99,6 +99,12 @@ const EXPECTED: Record<string, { path?: string; message: string }> = {
   "deck/v5/invalid/pod-without-description.ttl": { path: `${DC}description`, message: "A deck's description is language-tagged text in any language, one per language" },
   "deck/v6/invalid/pod-with-typed-keyword.ttl": { path: "http://www.w3.org/ns/dcat#keyword", message: "A keyword is language-tagged text (\"…\"@sv), several per language; untagged keywords are kept only from older formats." },
   "deck/v6/invalid/pod-with-keyword-iri.ttl": { path: "http://www.w3.org/ns/dcat#keyword", message: "A keyword is language-tagged text" },
+  "library-deck/v6/invalid/library-without-series.ttl": { path: "http://www.w3.org/ns/dcat#inSeries", message: "A release belongs to its deck's series." },
+  "draft-deck/v1/invalid/draft-with-two-titles-in-one-language.ttl": { path: `${DC}title`, message: 'Language "sv" has been used by 2 values' },
+  "draft-deck/v1/invalid/draft-released-as-literal.ttl": { path: `${SM}releasedAs`, message: "A released draft names the one release it was published as, an IRI." },
+  "draft-deck/v1/invalid/draft-with-card-without-back.ttl": { message: "Each side of a card needs text or a picture" },
+  "draft-chapter/v1/invalid/draft-with-negative-position.ttl": { path: `${SCHEMA}position`, message: "A chapter's place among the course's chapters is one whole number, 0 or more" },
+  "draft-step/v1/invalid/draft-in-two-chapters.ttl": { path: `${SCHEMA}isPartOf`, message: "A step is part of at most one chapter" },
   "library-deck/v5/invalid/library-with-untagged-keyword.ttl": { path: "http://www.w3.org/ns/dcat#keyword", message: "A library deck's keyword is language-tagged text (\"…\"@sv), several per language." },
   "deck-series/v3/invalid/library-with-keyword-iri.ttl": { path: "http://www.w3.org/ns/dcat#keyword", message: "A keyword is language-tagged text (\"…\"@sv), several per language, or untagged as copied from an older release." },
   "deck-series/v2/invalid/library-with-untagged-description.ttl": { path: `${DC}description`, message: "A description is language-tagged text, one per language, and one of them English" },
@@ -113,7 +119,7 @@ const EXPECTED: Record<string, { path?: string; message: string }> = {
 };
 
 const contextOf = (path: string) =>
-  path.includes("/library-") ? ("library" as const) : ("pod" as const);
+  path.includes("/library-") ? ("library" as const) : path.includes("/draft-") ? ("draft" as const) : ("pod" as const);
 
 describe("the shapes over the fixtures", async () => {
   const engine = await loadEngine();
@@ -243,6 +249,14 @@ describe("the vendored profiles over their fixtures", async () => {
         ` (${expected.path}): ${expected.message}`,
       );
     }
+  });
+
+  it("accept a release that describes its series and publisher itself, with no index beside it", async () => {
+    const path = "library-deck/v6/valid/library-standalone-release.ttl";
+    const turtle = await readFile(`${ROOT}fixtures/${path}`, "utf8");
+    await expect(
+      validateProfile(path, parseTurtle(turtle, `https://pod.example/${path}`), engines["dcat-ap"], reference),
+    ).resolves.toBeUndefined();
   });
 
   it("let a profile's warnings pass unless asked to fail on them", async () => {

@@ -109,7 +109,10 @@ string, so other applications can look up what it means:
   ([Review states](#review-states)). 1.17's `sm:newcomerCourse` is written
   on the library index's catalogue outside `CatalogV1`, as `sm:position`
   is on a deck, so the catalogue format did not move
-  ([The library index](#the-library-index)).
+  ([The library index](#the-library-index)). 1.18's `sm:releaseDraft`
+  and `sm:publishedRelease` are written on a pod's catalogue the same
+  way, and its `sm:releasedAs` joined a new shape, draft deck format 1
+  ([Drafts and releases](#drafts-and-releases)).
 - **A new concept of a scheme whose property shape lists no `sh:in`
   needs no format bump.** `sm:textFormat` is such a property: its shape
   says only "at most one IRI", so a reader that meets a concept it does
@@ -251,6 +254,23 @@ cards in use of a listed release, and, since 1.17, `sm:newcomerCourse`
 (`dcat:Catalog` → `dcat:DatasetSeries`), the course the app offers to
 someone with no decks yet ([courses.md](courses.md#the-course-for-newcomers)).
 Absent, none is offered. A pod's `catalog.ttl` never has it.
+
+## Drafts and releases
+
+Three terms of 1.18 let anyone write a release in their own pod and
+publish it there (the Studio, [studio.md](studio.md)):
+
+| Term | From → to | What |
+|---|---|---|
+| `sm:releaseDraft` | `dcat:Catalog` → `sm:Deck` | A draft of a release the catalogue's owner is writing in the instance: the draft's release document, whose subject is the draft deck itself, as a release is its document. |
+| `sm:publishedRelease` | `dcat:Catalog` → `dcat:Dataset` | A release the owner published from the instance, frozen once published. Where the catalogue is readable, a reader finds the author's releases there. |
+| `sm:releasedAs` | `sm:Deck` → `dcat:Dataset` | On a draft: the release it was published as. A draft that states it is released, and no longer edited; absent, it is still being written. |
+
+The two catalogue links belong to no shape, as `sm:newcomerCourse`
+does: `CatalogV1` does not own them, so the catalogue format did not
+move, and every writer of the catalogue keeps them. `sm:releasedAs`
+belongs to draft deck format 1 ([shapes.md](shapes.md#version-by-version)).
+A link to the release, rather than a flag, says where the draft went.
 
 ## The language of text
 

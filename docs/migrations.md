@@ -195,6 +195,32 @@ format version:
 - **One full re-check.** The shape files changed, so the rules' hash
   changed: every instance is checked in full once on its next opening.
 
+Library deck format 6 (vocabulary 1.18) lets a release describe its
+series and its publisher in its own document, so a release published in
+a pod is whole without an index
+([deck-library.md](deck-library.md#a-release-outside-the-library)):
+
+- **Why the version moved.** A format-5 reader looks for a release's
+  series in an index only. It would find none for a release in a pod,
+  and could neither list nor upgrade it. The property shapes did not
+  change.
+- **Releases stay frozen at their format.** Every release in `decks/`
+  stays at the format it was published in. The library check takes a
+  release at format 5 or 6, each against its own shape, and the app
+  reads both. New releases are written at format 6.
+- **The step from format 5 changes nothing** (`libraryDeck/5-to-6`,
+  run in memory as every step is): a format-5 release's series and
+  publisher are where they always were, in the index.
+- **The drafts are new.** Draft deck, chapter and step format 1 are new
+  shapes in a new place, a release's draft, so nothing old is in their
+  format. `sm:releaseDraft` and `sm:publishedRelease` are written on the
+  catalogue outside `CatalogV1`, as `sm:newcomerCourse` is on the
+  library's, so the catalogue format did not move.
+- **One full re-check.** New shape files joined the rules, so the rules'
+  hash changed: every instance is checked in full once on its next
+  opening, and its documents get new receipts. No subject in a pod is
+  checked against the new shapes, so the check finds nothing new.
+
 Rules that hold across versions:
 
 - **Readers never refuse older data.** A subject is read with the shape
@@ -238,6 +264,7 @@ flowchart LR
     l2["LibraryDeckV2"] -->|libraryDeck/2-to-3<br/>release 1 of its series| l3["LibraryDeckV3"]
     l3 -->|libraryDeck/3-to-4<br/>title and description tagged English| l4["LibraryDeckV4"]
     l4 -->|libraryDeck/4-to-5<br/>keywords: untagged kept| l5["LibraryDeckV5"]
+    l5 -->|libraryDeck/5-to-6<br/>nothing to change| l6["LibraryDeckV6"]
     s1["LibraryDeckSeriesV1"] -->|libraryDeckSeries/1-to-2<br/>title and description tagged English| s2["LibraryDeckSeriesV2"]
     s2 -->|libraryDeckSeries/2-to-3<br/>keywords: untagged kept| s3["LibraryDeckSeriesV3"]
     r1["ReviewStateV1"] -->|reviewState/1-to-2<br/>partial snapshot dropped| r2["ReviewStateV2"]
