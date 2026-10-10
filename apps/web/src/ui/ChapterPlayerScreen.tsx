@@ -2,7 +2,7 @@ import { useId, useLayoutEffect, useRef } from "preact/hooks";
 import type { Choice, CourseChapter } from "@solid-memo/domain/course";
 import { isMarkdown, type CardContent } from "@solid-memo/domain/deck";
 import { CourseQuestion, type CheckedAnswer } from "./CourseQuestion";
-import { DataProse } from "./DataText";
+import { DataProse, useProseChunks } from "./DataText";
 import { useI18n, type ErrorText } from "./i18n";
 import { ReaderText } from "./ReaderText";
 
@@ -29,18 +29,28 @@ export type StepPhase = "read" | "answer";
  *
  * Theory in Markdown (the step's `textFormat`) is shown as its blocks;
  * plain theory as paragraphs, split at its blank lines (DataProse).
+ * Markdown theory with top-level thematic breaks is read a chunk at a
+ * time: which part of how many, the chunk, Back to the one before (from
+ * the second on) and Continue to the next; the last chunk has the hint
+ * and the button on to the questions. Moving to another chunk of the
+ * same step puts the focus on which part it is, so the chunk is read
+ * from its start. A chunk past the last, as when switching the reader's
+ * language leaves fewer, shows the last. Theory in one chunk shows as it
+ * always has.
  */
 export function ChapterPlayerScreen({
   chapter,
   stepIndex,
   phase,
   questionIndex,
+  chunkIndex,
   card,
   choices,
   answer,
   busy,
   error,
   onAnswerPhase,
+  onChunk,
   onCheck,
   onNext,
 }: {
@@ -50,6 +60,8 @@ export function ChapterPlayerScreen({
   phase: StepPhase;
   /** The question shown while answering, 0-based in the step's. */
   questionIndex: number;
+  /** The chunk of the step's theory shown while reading, 0-based. */
+  chunkIndex: number;
   /** The question's card. */
   card: CardContent;
   choices: readonly Choice[];
@@ -58,6 +70,8 @@ export function ChapterPlayerScreen({
   error: ErrorText | null;
   /** Leaves the theory for the step's questions. */
   onAnswerPhase: () => void;
+  /** Shows another chunk of the step's theory, 0-based. */
+  onChunk: (index: number) => void;
   onCheck: (choice: Choice) => void;
   onNext: () => void;
 }) {
@@ -66,7 +80,13 @@ export function ChapterPlayerScreen({
   const hintId = useId();
   const stepRef = useRef<HTMLHeadingElement>(null);
   const checkRef = useRef<HTMLHeadingElement>(null);
+  const partRef = useRef<HTMLParagraphElement>(null);
   const shownStep = useRef(stepIndex);
+  const markdown = isMarkdown(step.textFormat);
+  const chunks = useProseChunks(step.theory, markdown);
+  const chunk = Math.min(chunkIndex, chunks - 1);
+  const lastChunk = chunk === chunks - 1;
+  const shownChunk = useRef({ step: stepIndex, chunk: chunkIndex });
   const last = stepIndex === chapter.steps.length - 1 && questionIndex === step.questionIds.length - 1;
 
   useLayoutEffect(() => {
@@ -74,6 +94,12 @@ export function ChapterPlayerScreen({
     shownStep.current = stepIndex;
     stepRef.current!.focus();
   }, [stepIndex]);
+  useLayoutEffect(() => {
+    const before = shownChunk.current;
+    shownChunk.current = { step: stepIndex, chunk: chunkIndex };
+    // A new step's heading takes the focus; only a chunk the learner moved to within a step moves it.
+    if (before.step === stepIndex && before.chunk !== chunkIndex) partRef.current!.focus();
+  }, [stepIndex, chunkIndex]);
   useLayoutEffect(() => {
     if (phase === "answer") checkRef.current!.focus();
   }, [phase, stepIndex, questionIndex]);
@@ -97,14 +123,30 @@ export function ChapterPlayerScreen({
         />
         {phase === "read" && (
           <>
-            <DataProse class="course-theory" text={step.theory} markdown={isMarkdown(step.textFormat)} />
-            <div class="course-to-questions">
-              <p id={hintId} class="hint">
-                {t("chapterPlayer.theoryHidden")}
+            {chunks > 1 && (
+              <p ref={partRef} class="course-part" tabIndex={-1}>
+                {t("chapterPlayer.part", { number: chunk + 1, count: chunks })}
               </p>
-              <button class="primary" aria-describedby={hintId} onClick={onAnswerPhase}>
-                {t("chapterPlayer.toQuestions", { count: step.questionIds.length })}
-              </button>
+            )}
+            <DataProse class="course-theory" text={step.theory} markdown={markdown} chunk={chunk} />
+            <div class="course-to-questions">
+              {lastChunk && (
+                <p id={hintId} class="hint">
+                  {t("chapterPlayer.theoryHidden")}
+                </p>
+              )}
+              <div class="actions">
+                {chunk > 0 && <button onClick={() => onChunk(chunk - 1)}>{t("chapterPlayer.back")}</button>}
+                {lastChunk ? (
+                  <button class="primary" aria-describedby={hintId} onClick={onAnswerPhase}>
+                    {t("chapterPlayer.toQuestions", { count: step.questionIds.length })}
+                  </button>
+                ) : (
+                  <button class="primary" onClick={() => onChunk(chunk + 1)}>
+                    {t("chapterPlayer.continue")}
+                  </button>
+                )}
+              </div>
             </div>
           </>
         )}

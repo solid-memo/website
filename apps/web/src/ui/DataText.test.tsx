@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { render } from "@testing-library/preact";
+import type { LangText } from "@solid-memo/domain/langText";
 import { MAX_CHARS } from "@solid-memo/markdown/parse";
 import { SM } from "@solid-memo/vocab/vocab.generated";
-import { cardName, cardNameText, DataLine, DataProse, DataText, plainDataText } from "./DataText";
+import { cardName, cardNameText, DataLine, DataProse, DataText, plainDataText, useProseChunks } from "./DataText";
 import { I18nProvider } from "./i18n";
 
 function html(children: preact.ComponentChildren): string {
@@ -58,6 +59,44 @@ describe("DataProse", () => {
     expect(html(<DataProse class="course-theory" text={{ en: `${long}\n\nb` }} markdown />)).toBe(
       `<div class="course-theory"><p>${long}</p><p>b</p></div>`,
     );
+  });
+
+  it("shows Markdown a chunk at a time, split at its top-level rules, the first unless told", () => {
+    const text = { en: "---\n\n*a*\n\n- b\n\n  ---\n\n---\n\n---\n\nc\n\n---" };
+    expect(html(<DataProse class="course-theory" text={text} markdown />)).toBe(
+      '<div class="course-theory md"><p><em>a</em></p><ul><li>b<hr></li></ul></div>',
+    );
+    expect(html(<DataProse class="course-theory" text={text} markdown chunk={1} />)).toBe(
+      '<div class="course-theory md"><p>c</p></div>',
+    );
+  });
+
+  it("shows plain text whole, rules and all", () => {
+    expect(html(<DataProse class="course-theory" text={{ en: "a\n\n---\n\nb" }} markdown={false} />)).toBe(
+      '<div class="course-theory"><p>a</p><p>---</p><p>b</p></div>',
+    );
+  });
+});
+
+describe("useProseChunks", () => {
+  function Count({ text, markdown }: { text: LangText; markdown: boolean }) {
+    return <>{useProseChunks(text, markdown)}</>;
+  }
+
+  it("counts the chunks DataProse shows a text in, in the reader's language", () => {
+    const text = { en: "a\n\n---\n\nb\n\n---\n\nc", sv: "a\n\n---\n\nb" };
+    expect(html(<Count text={text} markdown />)).toBe("3");
+    const swedish = render(
+      <I18nProvider locale="sv" onChoose={() => undefined}>
+        <Count text={text} markdown />
+      </I18nProvider>,
+    );
+    expect(swedish.container).toHaveTextContent("2");
+  });
+
+  it("is one for plain text and for text past the parser's limits", () => {
+    expect(html(<Count text={{ en: "a\n\n---\n\nb" }} markdown={false} />)).toBe("1");
+    expect(html(<Count text={{ en: `a\n\n---\n\n${"b".repeat(MAX_CHARS)}` }} markdown />)).toBe("1");
   });
 });
 

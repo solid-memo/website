@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { Course, UseCases } from "@solid-memo/application/useCases";
+import { SM } from "@solid-memo/vocab/vocab.generated";
 import { ChapterPlayerContainer } from "./ChapterPlayerContainer";
 import { makeUseCasesFake } from "../test/useCasesFake";
 import { courseCards, courseInstance, makeCourse, noShuffle } from "../test/course";
@@ -119,6 +120,42 @@ describe("ChapterPlayerContainer", () => {
     expect(screen.getByRole("heading", { name: "Check your understanding: question 1 of 2" })).toHaveFocus();
     expect(screen.getByRole("heading", { name: "Step 2 of 2" })).not.toHaveFocus();
     expect(screen.getByText("What is a triple?")).toBeInTheDocument();
+  });
+
+  it("reads theory in chunks a chunk at a time, and starts every step at its first", async () => {
+    const course = makeCourse();
+    const [chapter] = course.outline.chapters;
+    const chunked = {
+      ...course,
+      outline: {
+        ...course.outline,
+        chapters: [
+          {
+            ...chapter!,
+            steps: chapter!.steps.map((step) => ({
+              ...step,
+              theory: { en: `${step.id} one.\n\n---\n\n${step.id} two.` },
+              textFormat: SM.markdown,
+            })),
+          },
+        ],
+      },
+    };
+    renderPlayer(makeUseCasesFake(), chunked);
+    expect(screen.getByText("Part 1 of 2")).toBeInTheDocument();
+    expect(screen.getByText("s-1 one.")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    expect(screen.getByText("Part 2 of 2")).toHaveFocus();
+    expect(screen.getByText("s-1 two.")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Back" }));
+    expect(screen.getByText("Part 1 of 2")).toHaveFocus();
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    toQuestions();
+    answer("An IRI");
+    fireEvent.click(await screen.findByRole("button", { name: "Next" }));
+    expect(screen.getByRole("heading", { name: "Step 2 of 2" })).toHaveFocus();
+    expect(screen.getByText("Part 1 of 2")).toBeInTheDocument();
+    expect(screen.getByText("s-2 one.")).toBeInTheDocument();
   });
 
   it("opens at the first step when every step is done, and writes nothing for practice", async () => {

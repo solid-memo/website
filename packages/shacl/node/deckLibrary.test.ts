@@ -847,6 +847,24 @@ describe("markdownProblems", () => {
     ]);
   });
 
+  it("holds a step's theory to chunks with text in each, as many in each language", () => {
+    const theory = (id: string, position: number, texts: string) =>
+      step(id, "ch-1", position, ["q-1"], MD).replace(`"Theory ${id}."@en`, texts);
+    const outline = [
+      chapter("ch-1", 0),
+      // Rules inside a list or a quote, and a step not in Markdown, split nothing.
+      theory("s-1", 0, `"""a\n\n---\n\nb"""@en , """c\n\n***\n\nd"""@sv`),
+      theory("s-2", 1, `"""- a\n\n  ---\n\n> b\n>\n> ---"""@en , "c"@sv`),
+      step("s-3", "ch-1", 2, ["q-1"]).replace(`"Theory s-3."@en`, `"""---\n\na"""@en , "b"@sv`),
+      theory("s-4", 3, `"""---\n\na\n\n---\n\n---\n\nb\n\n---"""@en , """a\n\n---\n\nb"""@sv`),
+      theory("s-5", 4, `"""a\n\n---\n\nb"""@en , "c"@sv , """d\n\n---\n\ne\n\n---\n\nf"""`),
+    ].join("");
+    expect(problemsOf(outline)).toEqual([
+      `${L}: <#s-4> solid-memo:theory@en has a thematic break first, last or right after another, which makes an empty chunk the app drops: a step's theory is shown a chunk at a time, split at its top-level thematic breaks, with text between each two.`,
+      `${L}: <#s-5> has its theory in 2 chunks in solid-memo:theory@en, 1 chunk in solid-memo:theory@sv, 3 chunks in solid-memo:theory: a step's theory is in as many chunks in each language, so a learner who switches language keeps their place.`,
+    ]);
+  });
+
   it("names a text format on what has none of its own, and one that is no concept of solid-memo:TextFormats", () => {
     const outline = [
       chapter("ch-1", 0),

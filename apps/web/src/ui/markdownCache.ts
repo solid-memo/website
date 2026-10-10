@@ -1,3 +1,4 @@
+import { chunksOf } from "@solid-memo/markdown/chunks";
 import { parseInlineMarkdown } from "@solid-memo/markdown/inline";
 import { parseMarkdown, type MdBlock, type MdPhrase } from "@solid-memo/markdown/parse";
 
@@ -25,3 +26,14 @@ export const markdownBlocks: (text: string) => MdBlock[] | null = remembered(par
 
 /** The text as one line of Markdown phrasing (parseInlineMarkdown), null when it is to be shown as plain text. */
 export const markdownPhrases: (text: string) => MdPhrase[] | null = remembered(parseInlineMarkdown);
+
+/**
+ * The text as Markdown chunks (chunksOf), split at its top-level
+ * thematic breaks, as a step's theory is shown; null when it is to be
+ * shown as plain text, one chunk. Read from markdownBlocks, so a text is
+ * parsed once for both.
+ */
+export const markdownChunks: (text: string) => MdBlock[][] | null = remembered((text) => {
+  const blocks = markdownBlocks(text);
+  return blocks === null ? null : chunksOf(blocks);
+});

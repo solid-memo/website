@@ -48,7 +48,8 @@ export function useCourseAnswer(useCases: UseCases, instance: Instance, course: 
  * first, for a chapter whose steps are all done), then goes on step by
  * step and question by question as the learner does, whatever the
  * progress says meanwhile. Every step, the one opened at included,
- * starts with its theory; its questions follow, without it. Each
+ * starts with its theory, at its first chunk; its questions follow,
+ * without it. Each
  * question's options are shuffled once, as it comes up.
  */
 export function ChapterPlayerContainer({
@@ -69,9 +70,9 @@ export function ChapterPlayerContainer({
   random?: () => number;
 }) {
   const { errorText } = useI18n();
-  const [at, setAt] = useState<{ step: number; phase: StepPhase; question: number }>(() => {
+  const [at, setAt] = useState<{ step: number; phase: StepPhase; chunk: number; question: number }>(() => {
     const resume = course.progress.chapters.find((entry) => entry.url === chapter.url)!.resumeStepId;
-    return { step: Math.max(chapter.steps.findIndex((step) => step.id === resume), 0), phase: "read", question: 0 };
+    return { step: Math.max(chapter.steps.findIndex((step) => step.id === resume), 0), phase: "read", chunk: 0, question: 0 };
   });
   const [answer, setAnswer] = useState<CheckedAnswer | null>(null);
   const step = chapter.steps[at.step]!;
@@ -85,7 +86,7 @@ export function ChapterPlayerContainer({
     if (at.question + 1 < step.questionIds.length) {
       setAt({ ...at, question: at.question + 1 });
     } else if (at.step + 1 < chapter.steps.length) {
-      setAt({ step: at.step + 1, phase: "read", question: 0 });
+      setAt({ step: at.step + 1, phase: "read", chunk: 0, question: 0 });
     } else {
       onReview();
     }
@@ -97,12 +98,14 @@ export function ChapterPlayerContainer({
       stepIndex={at.step}
       phase={at.phase}
       questionIndex={at.question}
+      chunkIndex={at.chunk}
       card={card}
       choices={choices}
       answer={answer}
       busy={answerMutation.isPending}
       error={errorText(answerMutation.error)}
       onAnswerPhase={() => setAt({ ...at, phase: "answer" })}
+      onChunk={(chunk) => setAt({ ...at, chunk })}
       onCheck={(choice) => answerMutation.mutate({ card, choice })}
       onNext={next}
     />
