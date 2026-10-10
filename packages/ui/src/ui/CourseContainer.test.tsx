@@ -189,12 +189,27 @@ describe("CourseContainer", () => {
 
     const confetti = document.querySelector(".confetti")!;
     expect(confetti).toHaveAttribute("aria-hidden", "true");
-    expect(confetti.children).toHaveLength(40);
-    const piece = (index: number) => confetti.children[index] as HTMLElement;
-    expect(piece(1).style.getPropertyValue("--x")).toBe("37%");
-    expect(piece(1).style.getPropertyValue("--drift")).toBe("0rem");
-    expect(piece(3).style.getPropertyValue("--delay")).toBe("0.27s");
-    expect(piece(3).style.getPropertyValue("--spin")).toBe("900deg");
+    // Three shooters along the bottom pop one after the other: left, right, then the middle.
+    const shooters = [...confetti.children] as HTMLElement[];
+    expect(shooters.map((shooter) => shooter.className)).toEqual(Array(3).fill("confetti-shooter"));
+    expect(shooters.map((shooter) => shooter.style.getPropertyValue("--x"))).toEqual(["15%", "85%", "50%"]);
+    expect(shooters.map((shooter) => shooter.style.getPropertyValue("--delay"))).toEqual(["0s", "0.28s", "0.56s"]);
+    for (const shooter of shooters) expect(shooter.children).toHaveLength(24);
+    const flight = (shooter: number, index: number) =>
+      ["--dx", "--rise", "--sway", "--spin", "--flip", "--time", "--jitter"].map((name) =>
+        (shooters[shooter]!.children[index] as HTMLElement).style.getPropertyValue(name),
+      );
+    // The left shooter leans right, the right one left, each piece at its own angle, height and pace.
+    expect(flight(0, 0)).toEqual(["15.72vw", "47.68vh", "-1.84vw", "-540deg", "1080deg", "3.99s", "0.01s"]);
+    expect(flight(1, 0)).toEqual(["-25.03vw", "70.98vh", "-1.2vw", "-540deg", "1080deg", "3.53s", "0.07s"]);
+    expect(flight(2, 3)).toEqual(["-5.5vw", "65.13vh", "2.2vw", "360deg", "1080deg", "3.04s", "0.06s"]);
+    // Every piece has landed within five seconds (WCAG 2.2.2): its shooter's pop, its own jitter, its flight.
+    const seconds = (element: HTMLElement, name: string) => parseFloat(element.style.getPropertyValue(name));
+    for (const shooter of shooters) {
+      for (const piece of shooter.children as HTMLCollectionOf<HTMLElement>) {
+        expect(seconds(shooter, "--delay") + seconds(piece, "--jitter") + seconds(piece, "--time")).toBeLessThan(5);
+      }
+    }
     // Outside the page's section, whose entrance would otherwise carry it along.
     expect(confetti.closest("section")).toBeNull();
   });

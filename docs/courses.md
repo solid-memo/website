@@ -203,7 +203,9 @@ new type-index entries ([data-model.md](data-model.md#courses)):
    reads it and Tab goes on to Continue, now to the next chapter. The
    chapter's Done badge pops with a burst of sparkles. When that was
    the course's last chapter left, the word says the course is
-   complete and confetti falls over the page for under three seconds.
+   complete and three confetti shooters along the bottom of the page
+   pop one after the other, their confetti shooting up and fluttering
+   slowly back down, all over in under five seconds.
    The cheer is kept in memory, not in the URL, and only until the
    learner goes elsewhere: a reload or a later visit does not show it
    again. The motion is decoration only, hidden from screen readers,

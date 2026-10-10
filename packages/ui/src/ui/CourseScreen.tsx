@@ -42,8 +42,9 @@ const SPARKLES = 8;
  * (marked `data-arrival` for useScreenFocus), so a screen reader reads it
  * and Tab goes on to Continue; the chapter's Done badge pops with a
  * burst of sparkles; and when it was the course's last chapter left,
- * confetti falls over the page (Confetti). The motion is decoration only
- * (style.css), and none of it plays with motion reduced.
+ * confetti shooters pop from the bottom of the page (Confetti). The
+ * motion is decoration only (style.css), and none of it plays with
+ * motion reduced.
  */
 export function CourseScreen({
   title,
