@@ -1409,7 +1409,35 @@
       "comfortable": "Comfortable",
       "saving": "Saving the draft…",
       "saved": "Draft saved",
-      "failed": "Last change not saved"
+      "failed": "Last change not saved",
+      "close": "Close"
+    },
+    "keys": {
+      "button": "? Keys",
+      "heading": "Keyboard shortcuts",
+      "chords": "Keys shown side by side, such as g d, are pressed one after the other. While you type in a field, only F6 and Shift+F6 work.",
+      "scope": {
+        "studio": "Anywhere in the Studio",
+        "cards": "In the card workbench"
+      },
+      "help": "Show these shortcuts",
+      "filter": "Go to the screen's search or filter",
+      "nextRegion": "Go to the next region: header, main content, status bar",
+      "previousRegion": "Go to the previous region",
+      "go": {
+        "decks": "Go to the decks",
+        "groups": "Go to the groups",
+        "drafts": "Go to the drafts",
+        "releases": "Go to the releases",
+        "health": "Go to health",
+        "library": "Go to the library copies",
+        "transfer": "Go to import and export",
+        "instances": "Go to the instances"
+      },
+      "down": "Next card",
+      "up": "Previous card",
+      "select": "Select the card",
+      "open": "Open the card"
     },
     "decks": {
       "heading": "Decks",

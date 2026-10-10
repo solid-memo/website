@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "preact/hooks";
+import { useCallback, useMemo, useRef, useState } from "preact/hooks";
 import {
   CARD_FEATURES,
   CARD_FIELDS,
@@ -26,6 +26,8 @@ import type { LapseIndex } from "@solid-memo/domain/cardHistory";
 import { CardBulkActions, type ReviewEdit } from "./CardBulkActions";
 import { ReadOnlyNotice } from "./ReadOnly";
 import type { CardTransfer } from "./TransferCardsDialog";
+import { shortcutOf } from "./shell/shortcuts";
+import { useScreenKeys } from "./shell/useShortcuts";
 
 /** The columns after the card's front, each sorted by its key. */
 const COLUMNS: readonly Exclude<CardSort, "front">[] = ["back", "due", "interval", "ease", "lapses", "created", "id"];
@@ -57,11 +59,6 @@ function doneKey(edit: CardEdit) {
   return edit.kind === "setTextFormat" ? (edit.markdown ? "markdownOn" : "markdownOff") : edit.kind;
 }
 
-/** Whether a key goes to a field the user types or chooses in (the search, a filter), which keeps it. */
-function typedInto(target: EventTarget | null): boolean {
-  return target instanceof HTMLInputElement ? target.type !== "checkbox" : target instanceof HTMLSelectElement;
-}
-
 /**
  * The card workbench: a deck's cards as a table, a row each, searched,
  * filtered and sorted as the URL says (`query`, which the domain applies:
@@ -75,7 +72,9 @@ function typedInto(target: EventTarget | null): boolean {
  * link; from outside the table, to the first), x selects the row, and
  * Enter opens it: its card in Solid Memo's editor (`cardHref`,
  * `onOpen`), as the link does. They work wherever the focus is, the
- * page's body too, as a reload or a cleared selection leaves it.
+ * page's body too, as a reload or a cleared selection leaves it: they
+ * are the screen's own keys of the Studio's (useScreenKeys), which
+ * leaves them to the search and the filters while they have the focus.
  *
  * The selected cards the query keeps (on any page; one it hides stays
  * selected, but is left alone) can be edited at once (CardBulkActions):
@@ -204,31 +203,23 @@ export function CardWorkbenchScreen({
     onQuery({ ...rest, ...(value === "" ? {} : { [key]: value }), page: 1 } as CardQuery);
   };
 
-  const onKeyRef = useRef(onKeyDown);
-  onKeyRef.current = onKeyDown;
-  useEffect(() => {
-    const listener = (event: KeyboardEvent) => onKeyRef.current(event);
-    document.addEventListener("keydown", listener);
-    return () => document.removeEventListener("keydown", listener);
-  }, []);
-
-  function onKeyDown(event: KeyboardEvent) {
-    if (event.altKey || event.ctrlKey || event.metaKey || typedInto(event.target)) return;
+  useScreenKeys((event, key) => {
     const links = [...(bodyRef.current?.querySelectorAll<HTMLAnchorElement>("tr > th a") ?? [])];
     const at = links.findIndex((link) => link.closest("tr")!.contains(document.activeElement));
     const row = at === -1 ? undefined : shown[at];
-    switch (event.key) {
-      case "j":
-      case "k": {
-        const next = event.key === "j" ? Math.min(at + 1, links.length - 1) : Math.max(at - 1, 0);
+    const shortcut = shortcutOf(key, "cards");
+    switch (shortcut) {
+      case "down":
+      case "up": {
+        const next = shortcut === "down" ? Math.min(at + 1, links.length - 1) : Math.max(at - 1, 0);
         links[next]?.focus();
         break;
       }
-      case "x":
+      case "select":
         if (row === undefined) return;
         toggle([row.card.url], !chosen.has(row.card.url));
         break;
-      case "Enter":
+      case "open":
         // The row's link opens the card itself.
         if (row === undefined || event.target instanceof HTMLAnchorElement) return;
         onOpen(row.card);
@@ -237,7 +228,7 @@ export function CardWorkbenchScreen({
         return;
     }
     event.preventDefault();
-  }
+  });
 
   // A language the URL names but the cards' sides do not have (one of
   // the notes', say) is still offered, so the filter shows and clears.
@@ -313,7 +304,12 @@ export function CardWorkbenchScreen({
           <div class="studio-filters">
             <label class="studio-filter">
               {t("studio.cards.search")}
-              <input type="search" value={query.text} onInput={(event) => filter({ text: event.currentTarget.value })} />
+              <input
+                type="search"
+                aria-keyshortcuts="/"
+                value={query.text}
+                onInput={(event) => filter({ text: event.currentTarget.value })}
+              />
             </label>
             {select(
               t("studio.cards.field"),
@@ -418,6 +414,7 @@ export function CardWorkbenchScreen({
                           <input
                             type="checkbox"
                             aria-label={t("studio.cards.selectCard", { card: cardName(card, readerText) })}
+                            aria-keyshortcuts="x"
                             checked={chosen.has(card.url)}
                             onChange={(event) => toggle([card.url], event.currentTarget.checked)}
                           />

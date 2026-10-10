@@ -7,6 +7,7 @@ import { DEFAULT_CARD_QUERY, type CardQuery, type CardRow } from "@solid-memo/do
 import { CardWorkbenchScreen } from "./CardWorkbenchScreen";
 import { choose } from "../test/choose";
 import { makeCard, makeDeck } from "../test/fixtures";
+import { WithKeys } from "../test/keys";
 
 const deck = makeDeck("deck-1", { en: "Kanji N5" });
 const nouns = makeDeck("nouns", { en: "Nouns" });
@@ -26,40 +27,42 @@ type Props = Parameters<typeof CardWorkbenchScreen>[0];
 function Harness({ initial = DEFAULT_CARD_QUERY, onQuery, ...overrides }: Partial<Props> & { initial?: CardQuery }) {
   const [query, setQuery] = useState<CardQuery>(initial);
   return (
-    <CardWorkbenchScreen
-      deck={deck}
-      course={false}
-      rows={rows}
-      total={4}
-      languages={["en", "ja", "unstated"]}
-      lapses={{ lapses: new Map([[water.url, 2]]), since: "2025-03" }}
-      lapsesFailed={false}
-      scheduleHref="#/schedule"
-      healthHref="#/health"
-      exportHref="#/transfer"
-      query={query}
-      onQuery={(next) => {
-        onQuery?.(next);
-        setQuery(next);
-      }}
-      cardHref={(card) => `#/card?card=${card.id}`}
-      onOpen={() => undefined}
-      plan={(ids, edit) => planCardEdit(rows.map((row) => row.card), ids, edit)}
-      onEdit={async () => true}
-      lastEdit={null}
-      undone={false}
-      onUndo={() => undefined}
-      today="2026-10-09"
-      onReviewEdit={async () => true}
-      reviewDone={null}
-      decks={[nouns]}
-      onTransfer={async () => true}
-      transferDone={null}
-      readOnly={null}
-      busy={false}
-      error={null}
-      {...overrides}
-    />
+    <WithKeys>
+      <CardWorkbenchScreen
+        deck={deck}
+        course={false}
+        rows={rows}
+        total={4}
+        languages={["en", "ja", "unstated"]}
+        lapses={{ lapses: new Map([[water.url, 2]]), since: "2025-03" }}
+        lapsesFailed={false}
+        scheduleHref="#/schedule"
+        healthHref="#/health"
+        exportHref="#/transfer"
+        query={query}
+        onQuery={(next) => {
+          onQuery?.(next);
+          setQuery(next);
+        }}
+        cardHref={(card) => `#/card?card=${card.id}`}
+        onOpen={() => undefined}
+        plan={(ids, edit) => planCardEdit(rows.map((row) => row.card), ids, edit)}
+        onEdit={async () => true}
+        lastEdit={null}
+        undone={false}
+        onUndo={() => undefined}
+        today="2026-10-09"
+        onReviewEdit={async () => true}
+        reviewDone={null}
+        decks={[nouns]}
+        onTransfer={async () => true}
+        transferDone={null}
+        readOnly={null}
+        busy={false}
+        error={null}
+        {...overrides}
+      />
+    </WithKeys>
   );
 }
 
@@ -279,6 +282,16 @@ describe("CardWorkbenchScreen", () => {
     key(screen.getByRole("heading", { level: 2 }), "j", { ctrlKey: true });
     key(screen.getByRole("heading", { level: 2 }), "q");
     expect(document.activeElement).not.toBe(link("水"));
+  });
+
+  it("leaves a key to what took it first, and says which keys it has", () => {
+    render(<Harness />);
+    const heading = screen.getByRole("heading", { level: 2 });
+    heading.addEventListener("keydown", (event) => event.preventDefault());
+    key(heading, "j");
+    expect(document.activeElement).not.toBe(link("水"));
+    expect(screen.getByRole("searchbox", { name: "Search" })).toHaveAttribute("aria-keyshortcuts", "/");
+    expect(screen.getByRole("checkbox", { name: "Select 水" })).toHaveAttribute("aria-keyshortcuts", "x");
   });
 
   it("edits the selected cards the query keeps, deleted ones leaving the selection", async () => {

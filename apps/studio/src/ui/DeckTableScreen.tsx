@@ -209,7 +209,12 @@ export function DeckTableScreen({
       </header>
       <label class="studio-filter">
         {t("studio.decks.filter")}
-        <input type="search" value={view.filter} onInput={(event) => onView({ ...view, filter: event.currentTarget.value })} />
+        <input
+          type="search"
+          aria-keyshortcuts="/"
+          value={view.filter}
+          onInput={(event) => onView({ ...view, filter: event.currentTarget.value })}
+        />
       </label>
       {view.filter.trim() !== "" && (
         <p class="hint">{t("studio.decks.shown", { shown: shown.length, count: rows.length })}</p>
