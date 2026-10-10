@@ -1043,6 +1043,7 @@ const NO_DRAFTS: ReleaseDraftRepository = {
   applyChanges: noDrafts,
   assemble: noDrafts,
   readRelease: noDrafts,
+  readLinked: noDrafts,
   parseRelease: noDrafts,
   delete: noDrafts,
 };

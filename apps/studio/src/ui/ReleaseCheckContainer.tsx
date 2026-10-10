@@ -9,7 +9,8 @@ import { ReleaseCheckScreen, type ReleaseCheckLinks } from "./ReleaseCheckScreen
 /**
  * A draft's release check, over the draft as its editor keeps it
  * (useDraftEditor): its rules for the policy as the draft changes, and
- * the shapes for the version of it they were asked of.
+ * the shapes for the version of it they were asked of; the check run
+ * again when asked, after a part of it could not be read or it failed.
  */
 export function ReleaseCheckContainer({
   useCases,
@@ -34,10 +35,13 @@ export function ReleaseCheckContainer({
       policy={policy}
       problems={check.data === undefined ? undefined : checkProblems({ ...check.data, shapes: found ?? null })}
       error={check.error}
+      checking={check.isFetching}
       shapes={{ asked: asked !== null, running: shapes.isFetching, stale: asked !== null && asked !== draft, problems: found, error: shapes.error }}
       links={links}
       // The same version asked again only after the shapes failed: the query is run again, its key the same.
       onCheckShapes={() => (asked === draft ? void shapes.refetch() : setAsked(draft))}
+      // A check a part of which could not be read is not kept (useReleaseCheck): run again, it reads again.
+      onCheckAgain={() => void check.refetch()}
     />
   );
 }

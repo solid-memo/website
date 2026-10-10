@@ -1,5 +1,5 @@
 import type { ReleaseProblem } from "@solid-memo/domain/release/problems";
-import { CHECK_POLICIES, groupProblems, problemTarget, type CheckPolicy, type ProblemTarget } from "@solid-memo/domain/release/releaseCheck";
+import { CHECK_POLICIES, groupProblems, isUnread, problemTarget, type CheckPolicy, type ProblemTarget } from "@solid-memo/domain/release/releaseCheck";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
@@ -31,25 +31,32 @@ export interface ShapesState {
  * subject linking to its editor and each problem to its field there.
  * The shapes and profiles run when asked, their problems among the
  * others; what they found for an older version of the draft says so,
- * with a way to check again.
+ * with a way to check again. A check a part of which could not be read
+ * (the release before, the library's index), or that failed, offers to
+ * check again.
  */
 export function ReleaseCheckScreen({
   draft,
   policy,
   problems,
   error,
+  checking,
   shapes,
   links,
   onCheckShapes,
+  onCheckAgain,
 }: {
   draft: ReleaseDraft;
   policy: CheckPolicy;
   /** Every problem found; undefined while the draft is first checked. */
   problems: ReleaseProblem[] | undefined;
   error: unknown;
+  /** The check is running: the problems shown are those it found before. */
+  checking: boolean;
   shapes: ShapesState;
   links: ReleaseCheckLinks;
   onCheckShapes: () => void;
+  onCheckAgain: () => void;
 }) {
   const i18n = useI18n();
   const { t, errorText } = i18n;
@@ -60,6 +67,7 @@ export function ReleaseCheckScreen({
     const { field: _field, ...editor } = problemTarget(draft, problem);
     return links.targetHref(editor);
   };
+  const incomplete = problems === undefined ? Boolean(error) : problems.some(isUnread);
 
   return (
     <section>
@@ -104,6 +112,13 @@ export function ReleaseCheckScreen({
             </section>
           ))}
         </>
+      )}
+      {incomplete && (
+        <p>
+          <button type="button" disabled={checking} onClick={onCheckAgain}>
+            {t("studio.check.again")}
+          </button>
+        </p>
       )}
       <section aria-labelledby="check-shapes">
         <h3 id="check-shapes">{t("studio.check.shapesHeading")}</h3>

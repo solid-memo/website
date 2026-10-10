@@ -14,6 +14,7 @@ import {
   movedProblems,
   problemCounts,
   problemTarget,
+  isUnread,
   readWhole,
   ruleProblems,
   type ReleaseCheck,
@@ -80,6 +81,11 @@ describe("readWhole", () => {
     expect(readWhole({ drops: [], library: [other] })).toBe(true);
     expect(readWhole({ drops: [problem(DRAFT, { code: "previousUnread", params: { previous: INDEX } })], library: [] })).toBe(false);
     expect(readWhole({ drops: [], library: [problem(DRAFT, { code: "libraryUnread", params: {} })] })).toBe(false);
+  });
+
+  it("says which problems are a part of the check left unread", () => {
+    expect(isUnread(problem(DRAFT, { code: "libraryUnread", params: {} }))).toBe(true);
+    expect(isUnread(problem(DRAFT, { code: "noBack", params: {} }))).toBe(false);
   });
 });
 

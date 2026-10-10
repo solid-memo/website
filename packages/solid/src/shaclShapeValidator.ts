@@ -92,30 +92,6 @@ function isMemberElsewhere(focusNode: string, violation: Violation): boolean {
   );
 }
 
-/** The links by which a release names what another document describes: its publisher and its series. */
-const RELEASE_LINKS: readonly (string | undefined)[] = [
-  "http://purl.org/dc/terms/publisher",
-  "http://www.w3.org/ns/dcat#inSeries",
-  "http://purl.org/dc/terms/isVersionOf",
-];
-
-/**
- * DCAT-AP's class check on a release's link to a publisher or series of
- * another document that nothing checked beside the release describes
- * (in a pod, a library's index is not read): its class is stated where
- * it is described, so the check says nothing about it, as with a member
- * listed from elsewhere (isMemberElsewhere).
- */
-function isLinkElsewhere(asUrl: string, described: ReadonlySet<string>, violation: Violation): boolean {
-  return (
-    violation.constraint === "Class" &&
-    RELEASE_LINKS.includes(violation.path) &&
-    violation.value !== undefined &&
-    violation.value.split("#")[0] !== asUrl &&
-    !described.has(violation.value)
-  );
-}
-
 /**
  * A result about a catalogue's or deck group's link to a member another
  * app wrote: a subject of the document that is not Solid Memo's, or a
@@ -383,13 +359,13 @@ export function createShaclShapeValidator({
       }
 
       // The profiles, over the release with the reference data and, for a library, its index; their violations of the release's subjects.
+      // In a pod nothing else is read: a release is whole on its own, its publisher and series described in it (docs/deck-library.md).
       const index = indexUrl === undefined ? [] : withSeriesEntry(quadsOf(await getSolidDatasetLinear(indexUrl, { fetch: shapesFetch })), quads, asUrl, indexUrl);
       const subjects = new Set(quads.map((q) => q.subject.value));
-      const described = new Set([...subjects, ...index.map((q) => q.subject.value)]);
       for (const [name, beside] of [["dcat-ap", index], ["skos", []]] as const) {
         const { engine, reference } = await profile(name);
         for (const { focusNode, ...v } of await engine.validate(mergeDatasets(quads, beside, ...(reference as Iterable<Quad>[])))) {
-          if (v.severity !== "violation" || !subjects.has(focusNode) || isLinkElsewhere(asUrl, described, v)) continue;
+          if (v.severity !== "violation" || !subjects.has(focusNode)) continue;
           problems.push(shapeProblem(focusNode, { ...v, profile: name }, "error"));
         }
       }

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/preact";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/preact";
 import { AppError } from "@solid-memo/domain/appError";
 import { problem, type ReleaseProblem } from "@solid-memo/domain/release/problems";
 import type { CheckPolicy, ProblemTarget } from "@solid-memo/domain/release/releaseCheck";
@@ -17,14 +17,27 @@ const links = {
 const notAsked: ShapesState = { asked: false, running: false, stale: false, problems: undefined, error: null };
 
 function renderScreen(
-  options: { problems?: ReleaseProblem[] | undefined; error?: unknown; shapes?: ShapesState; policy?: CheckPolicy } = {},
+  options: { problems?: ReleaseProblem[] | undefined; error?: unknown; checking?: boolean; shapes?: ShapesState; policy?: CheckPolicy } = {},
 ) {
   const { error = null, shapes = notAsked, policy = "pod" } = options;
   // Undefined stated: the draft is being checked.
   const problems = "problems" in options ? options.problems : [];
   const onCheckShapes = vi.fn();
-  render(<ReleaseCheckScreen draft={courseDraft()} policy={policy} problems={problems} error={error} shapes={shapes} links={links} onCheckShapes={onCheckShapes} />);
-  return onCheckShapes;
+  const onCheckAgain = vi.fn();
+  render(
+    <ReleaseCheckScreen
+      draft={courseDraft()}
+      policy={policy}
+      problems={problems}
+      error={error}
+      checking={options.checking ?? false}
+      shapes={shapes}
+      links={links}
+      onCheckShapes={onCheckShapes}
+      onCheckAgain={onCheckAgain}
+    />,
+  );
+  return Object.assign(onCheckShapes, { onCheckAgain });
 }
 
 describe("ReleaseCheckScreen", () => {
@@ -66,6 +79,21 @@ describe("ReleaseCheckScreen", () => {
     expect(screen.getByText("Checking the draft…")).toBeInTheDocument();
     renderScreen({ problems: undefined, error: new AppError("draftGone") });
     expect(screen.getAllByRole("alert").some((alert) => alert.textContent?.includes("That draft no longer exists."))).toBe(true);
+  });
+
+  it("offers to check again when a part of the check could not be read, or the check failed, until it runs", () => {
+    const again = () => screen.queryByRole("button", { name: "Check the draft again" });
+    renderScreen({ problems: [problem(DRAFT_URL, { code: "noBack", params: {} })] });
+    expect(again()).toBeNull();
+    const { onCheckAgain } = renderScreen({ problems: [problem(DRAFT_URL, { code: "libraryUnread", params: {} })] });
+    fireEvent.click(again()!);
+    expect(onCheckAgain).toHaveBeenCalledTimes(1);
+    cleanup();
+    renderScreen({ problems: undefined, error: new AppError("draftGone") });
+    expect(again()).toBeEnabled();
+    cleanup();
+    renderScreen({ problems: [problem(DRAFT_URL, { code: "previousUnread", params: { previous: "https://pod.example/v1.ttl" } })], checking: true });
+    expect(again()).toBeDisabled();
   });
 
   it("checks against the shapes when asked, says what they found, and offers to check again once the draft changed or they failed", () => {

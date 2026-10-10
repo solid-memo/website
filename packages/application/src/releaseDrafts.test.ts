@@ -3,7 +3,7 @@ import { AppError } from "@solid-memo/domain/appError";
 import { GUEST_INSTANCE_URL } from "@solid-memo/domain/guest";
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import { draftSummaryOf, draftUrlOf, type ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout";
-import { applyDraftChanges, blankDraft, type DraftChange, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
+import { applyDraftChanges, blankDraft, type DraftChange, type DraftTriple, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { rebaseDraft } from "@solid-memo/domain/release/releaseToDraft";
 import { nextVersionDraft } from "@solid-memo/domain/release/releaseVersion";
 import { courseDraft, NOW } from "@solid-memo/domain/testing/releaseDraft";
@@ -43,6 +43,7 @@ function setUp({ drafts = [] as ReleaseDraftSummary[], stored = courseDraft() as
     applyChanges: vi.fn(async () => undefined),
     assemble: vi.fn(),
     readRelease: vi.fn(async () => v1),
+    readLinked: vi.fn(async (): Promise<DraftTriple[]> => []),
     parseRelease: vi.fn(async () => v1),
     delete: vi.fn(async () => undefined),
   } satisfies ReleaseDraftRepository;
@@ -115,6 +116,18 @@ describe("createReleaseDraft", () => {
     expect(repository.readRelease).toHaveBeenCalledWith(V1);
     expect(created().root).toMatchObject({ version: "2", prev: V1 });
     expect(created().published.ids).toMatchObject({ "q-a-1a": "card" });
+  });
+
+  it("describes in the next version the series and publisher its release names in another document, as that document does", async () => {
+    const { useCases, repository, created } = setUp();
+    const INDEX = "https://solid-memo.com/decks/index.ttl";
+    const release = { ...v1, root: { ...v1.root, inSeries: `${INDEX}#solid`, isVersionOf: `${INDEX}#solid` } };
+    repository.readRelease.mockResolvedValueOnce({ ...release, triples: v1.triples.filter((triple) => !triple.subject.endsWith("#series")) });
+    const series = { subject: `${INDEX}#solid`, predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", object: { kind: "iri" as const, value: "http://www.w3.org/ns/dcat#DatasetSeries" } };
+    repository.readLinked.mockResolvedValueOnce([series]);
+    await useCases.createReleaseDraft(INSTANCE, { kind: "nextVersionOf", url: V1 });
+    expect(repository.readLinked).toHaveBeenCalledWith(expect.objectContaining({ url: V1 }));
+    expect(created().triples).toContainEqual(series);
   });
 
   it("names the next version of a release elsewhere after its title, and counts one stating no version as 1", async () => {

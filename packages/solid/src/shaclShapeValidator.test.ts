@@ -22,7 +22,7 @@ import { courseDraft, DRAFT, of } from "@solid-memo/domain/testing/releaseDraft"
 import type { ShapeLoader } from "@solid-memo/shacl/shapeLoader";
 import { draftUrlOf } from "@solid-memo/domain/release/draftLayout";
 import { nextVersionDraft } from "@solid-memo/domain/release/releaseVersion";
-import { DECKS, draftPod, INSTANCE } from "./testing/releaseDrafts";
+import { DECKS, draftPod, INSTANCE, quadsOfTurtle } from "./testing/releaseDrafts";
 
 vi.mock("./datasets", async (importOriginal) => ({
   ...(await importOriginal<typeof import("./datasets")>()),
@@ -569,9 +569,15 @@ describe("validateRelease", () => {
   it("checks a release for a library with its index beside it, the series it names a version of it, described when the index has it not", async () => {
     const base = courseDraft();
     const inLibrary = (series: string, publisher = `${INDEX}#pub`) => ({ ...base, root: { ...base.root, inSeries: series, isVersionOf: series, publisher } });
-    // Without the index, nothing beside the release describes its series and publisher: their class is not checked.
-    const without = brief(await validator.validateRelease(inLibrary(`${INDEX}#solid`), AT));
-    expect(without.filter(([, , , field]) => field === `${DCAT_NS}inSeries` || field === `${DCTERMS_NS}publisher`)).toEqual([]);
+    const links = (found: ReturnType<typeof brief>) => found.filter(([, , , field]) => field === `${DCAT_NS}inSeries` || field === `${DCTERMS_NS}publisher`);
+    // Without the index, nothing beside the release describes its series and publisher, and nothing is read for them: a release in a pod is whole on its own, or they are none.
+    const reads = vi.fn(siteFetch);
+    const alone = createShaclShapeValidator({ fetch: reads, shapesFetch: reads, ...SHAPE_SOURCES });
+    expect(links(brief(await alone.validateRelease(inLibrary(`${INDEX}#listed`), AT)))).toEqual([
+      ["error", "shape", DRAFT, `${DCTERMS_NS}publisher`, "dcat-ap"],
+      ["error", "shape", DRAFT, `${DCAT_NS}inSeries`, "dcat-ap"],
+    ]);
+    expect(reads.mock.calls.map(([input]) => String(input))).not.toContain(INDEX);
     // With it, they are: a publisher the index describes as something else is not one.
     const wrong = brief(await validator.validateRelease(inLibrary(`${INDEX}#solid`, `${INDEX}#listed`), AT, INDEX));
     expect(wrong).toContainEqual(["error", "shape", DRAFT, `${DCTERMS_NS}publisher`, "dcat-ap"]);
@@ -586,14 +592,41 @@ describe("validateRelease", () => {
   }, 60_000);
 
   it.each(["capitals-of-the-world/v1.ttl", "solid-fundamentals/v1.ttl"])(
-    "finds nothing wrong with the next version of decks/%s, in a pod or for the library, its publisher and series described in the index",
+    "finds nothing wrong with the next version of decks/%s, in a pod, where it is published and as published, alone, or for the library: it describes its publisher and series as the index does",
     async (path) => {
       const pod = await draftPod();
       const release = await pod.repository.readRelease(`${DECKS}${path}`);
       const name = path.split("/")[0]!;
-      const draft = nextVersionDraft(release, draftUrlOf(INSTANCE, name, 2));
+      const url = draftUrlOf(INSTANCE, name, 2);
+      // The draft as the Studio makes it, written in the pod and read back, as the pod answers.
+      const datasets = await vi.importActual<typeof import("./datasets")>("./datasets");
+      vi.mocked(getSolidDatasetOrNull).mockImplementation(datasets.getSolidDatasetOrNull);
+      await pod.repository.create(INSTANCE, nextVersionDraft(release, url, await pod.repository.readLinked(release)));
+      const { draft } = await pod.repository.read(url);
+      const published = `${INSTANCE}releases/${name}/v2.ttl`;
       expect(await pod.validator.validateRelease(draft, draft.url)).toEqual([]);
+      expect(await pod.validator.validateRelease(draft, published)).toEqual([]);
       expect(await pod.validator.validateRelease(draft, `${DECKS}${name}/v2.ttl`, `${DECKS}index.ttl`)).toEqual([]);
+      // The document published, and downloaded, read back as it is, with nothing of the library's to read beside it.
+      const turtle = await pod.repository.assemble(url, published, "2026-10-10T00:00:00Z");
+      const quads = await quadsOfTurtle(turtle, published);
+      for (const iri of [`${DECKS}index.ttl#${name}`, `${DECKS}index.ttl#solid-memo`, `${DECKS}${name}/v1.ttl`]) {
+        expect(quads.some((quad) => quad.subject.value === iri)).toBe(true);
+      }
+      const offline = (async (input: RequestInfo | URL) =>
+        String(input).startsWith(DECKS) ? new Response("gone", { status: 404 }) : shapesFetch(input)) as typeof globalThis.fetch;
+      const alone = createShaclShapeValidator({ fetch: offline, shapesFetch: offline, ...SHAPE_SOURCES });
+      const read = await pod.repository.parseRelease(turtle, "turtle");
+      expect(read.url).toBe(published);
+      expect(await alone.validateRelease(read, published)).toEqual([]);
+      // Its publisher and series are held to their class: named as something it does not describe, they are none.
+      const elsewhere = { ...draft, root: { ...draft.root, publisher: `${DECKS}index.ttl#nobody`, inSeries: `${DECKS}index.ttl#nothing` } };
+      expect(brief(await alone.validateRelease(elsewhere, elsewhere.url))).toEqual(
+        expect.arrayContaining([
+          ["error", "shape", url, `${DCTERMS_NS}publisher`, "dcat-ap"],
+          ["error", "shape", url, `${DCAT_NS}inSeries`, "dcat-ap"],
+        ]),
+      );
     },
     120_000,
   );

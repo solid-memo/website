@@ -12,7 +12,7 @@ import { releaseMarkdownCheck } from "@solid-memo/ui/markdownCache";
  * Each version of the draft (each draft the editor makes) is checked
  * once, unless a part of it could not be read (previousUnread,
  * libraryUnread): such a check is checked again whenever it is shown
- * anew. The Markdown of a text is read once by each rule, whatever
+ * anew, or when asked (refetch). The Markdown of a text is read once by each rule, whatever
  * version it is in.
  */
 

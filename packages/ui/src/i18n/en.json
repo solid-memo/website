@@ -2230,6 +2230,7 @@
       "shapesHint": "The shapes, and the DCAT-AP and SKOS profiles, check the release as published data. They take a while on a large draft, so they run only when asked.",
       "shapesRun": "Check against the shapes",
       "shapesRunning": "Checking against the shapes…",
+      "again": "Check the draft again",
       "shapesAgain": "Check again",
       "shapesStale": "The draft changed since: these are the problems it had then.",
       "shapesClear": "The shapes find nothing wrong.",

@@ -2227,6 +2227,7 @@
       "shapesHint": "Formerna, och profilerna DCAT-AP och SKOS, kontrollerar utgåvan som publicerade data. De tar en stund på ett stort utkast, så de körs bara när du ber om det.",
       "shapesRun": "Kontrollera mot formerna",
       "shapesRunning": "Kontrollerar mot formerna …",
+      "again": "Kontrollera utkastet igen",
       "shapesAgain": "Kontrollera igen",
       "shapesStale": "Utkastet har ändrats sedan dess: det här är problemen det hade då.",
       "shapesClear": "Formerna hittar inget fel.",

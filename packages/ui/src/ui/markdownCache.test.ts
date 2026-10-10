@@ -84,6 +84,15 @@ describe("releaseMarkdownCheck", () => {
     texts.forEach((text, index) => expect(check.problems(text, "option")).toBe(first[index]));
   });
 
+  it("checks a course's 1400 options again and again in no time, once each has been read", () => {
+    const check = releaseMarkdownCheck();
+    const texts = Array.from({ length: 1400 }, (_, index) => `**Option** ${index} with [a link](https://example.org/${index}) and \`code\``);
+    for (const text of texts) check.problems(text, "option");
+    const start = performance.now();
+    for (let pass = 0; pass < 10; pass++) for (const text of texts) check.problems(text, "option");
+    expect(performance.now() - start).toBeLessThan(50);
+  });
+
   it("chunks a step's theory, each text once", () => {
     const check = releaseMarkdownCheck();
     const chunks = check.chunks("---\n\na\n\n---\n\nb");

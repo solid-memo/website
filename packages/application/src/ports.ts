@@ -25,7 +25,7 @@ import type { Storage } from "@solid-memo/domain/storage";
 import type { DocumentReport } from "@solid-memo/domain/validation";
 import type { InstanceDigest } from "@solid-memo/domain/studyDigest";
 import type { WebIdDocument } from "@solid-memo/domain/webIdDocument";
-import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
+import type { DraftTriple, ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import type { LibraryIndexView } from "@solid-memo/domain/release/releaseCheck";
 import type { ReleaseProblem } from "@solid-memo/domain/release/problems";
 import type { ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout";
@@ -461,6 +461,15 @@ export interface ReleaseDraftRepository {
    * is none of 1, 2, ….
    */
   readRelease(url: string): Promise<ReleaseDraft>;
+  /**
+   * What the documents a release names its series and publisher in say
+   * (a library's index), read as the release is: each document the
+   * release links to by `dcat:inSeries`, `dcat:isVersionOf` or
+   * `dcterms:publisher` outside its own and does not describe, once; none when
+   * it describes them all. Read as no one; one that cannot be read
+   * gives nothing.
+   */
+  readLinked(release: ReleaseDraft): Promise<DraftTriple[]>;
   /**
    * A release from a file's text, at the address its root names (the
    * file's own when it names none); notAReleaseFile when it holds no

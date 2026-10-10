@@ -430,7 +430,14 @@ set, at library deck format 6. A series the draft starts (its own
 `<#series>`) is described in it, the release its first, last and
 current version; a series an earlier release described goes on being
 described, the release added as its last and current version; a series
-an index describes, as this library's, is left to the index. Every
+an index describes, as this library's, is left to the index. The next
+version of such a release describes it, though: the draft copies from
+the index its series, its publisher and its earlier versions
+(`readLinked`, `linkedDescription`), so the release it makes is whole
+too. So a release downloaded for `decks/` from a next version carries
+the index's statements of its series, publisher and earlier versions.
+Only what a release needs is copied: of the series, what an index says
+of one; of a publisher, its class and name. Every
 release in `decks/` made a draft and published again comes back as it
 was, apart from what publishing sets (a test of its own,
 [testing.md](testing.md#strategy-per-layer)).
