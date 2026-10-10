@@ -3320,4 +3320,27 @@ describe("courses", () => {
     vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) => (url === v2 ? next : plain));
     await expect(useCases.planLibraryUpgrade(courseDeck)).resolves.toMatchObject({ add: [{ id: "q-new" }] });
   });
+
+  it("planLibraryUpgrade offers a course's deck a release that changes only the course's outline", async () => {
+    const { deps, useCases } = setup();
+    const v2 = "https://solid-memo.com/decks/solid/v2.ttl";
+    vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) => ({ ...release, url, version: url === v2 ? "2" : "1" }));
+    vi.mocked(deps.deckRepository.listCards).mockResolvedValue([]);
+    vi.mocked(deps.deckLibrary.listLibraryDecks).mockResolvedValue([
+      { ...course, url: v2, version: "2", releases: [...course.releases, { url: v2, version: "2" }] },
+    ]);
+    // The same outline in both: nothing to offer.
+    await expect(useCases.planLibraryUpgrade(courseDeck)).resolves.toBeNull();
+    expect(deps.deckLibrary.fetchCourseOutline).toHaveBeenCalledWith(RELEASE);
+    expect(deps.deckLibrary.fetchCourseOutline).toHaveBeenCalledWith(v2);
+    // A step's theory rewritten (in chunks, say): offered, though no card changes.
+    const [first, ...rest] = outline.chapters;
+    const [step, ...steps] = first!.steps;
+    const rewritten: CourseOutline = {
+      releaseUrl: v2,
+      chapters: [{ ...first!, steps: [{ ...step!, theory: { en: "IRIs\n\n---\n\nname things." } }, ...steps] }, ...rest],
+    };
+    vi.mocked(deps.deckLibrary.fetchCourseOutline).mockImplementation(async (url) => (url === v2 ? rewritten : outline));
+    await expect(useCases.planLibraryUpgrade(courseDeck)).resolves.toMatchObject({ toVersion: "2", change: [], outline: true });
+  });
 });

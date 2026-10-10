@@ -778,6 +778,11 @@ export function createUseCases({
         .filter((release) => Number(release.version) > Number(from.version) && Number(release.version) < Number(to.version))
         .map((release) => deckLibrary.fetchLibraryDeck(release.url)),
     );
+    // A course's outline stays in its release: a newer one may change only that.
+    const outlines =
+      from.isCourse === true && to.isCourse === true
+        ? await Promise.all([deckLibrary.fetchCourseOutline(from.url), deckLibrary.fetchCourseOutline(to.url)])
+        : null;
     return planLibraryUpgrade({
       deck,
       cards: copy,
@@ -787,6 +792,7 @@ export function createUseCases({
       releases: series.releases,
       // A course's deck holds only the cards the learner reached: an upgrade adds none.
       course: series.isCourse === true || from.isCourse === true,
+      ...(outlines === null ? {} : { outlines: { from: outlines[0], to: outlines[1] } }),
     });
   }
 

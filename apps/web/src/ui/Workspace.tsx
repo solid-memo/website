@@ -736,7 +736,12 @@ export function Workspace({
         );
       case "course":
         return (
-          <CourseContainer instanceUrl={instanceUrl!} course={activeCourse!} justCompleted={justCompleted ?? undefined} />
+          <CourseContainer
+            useCases={useCases}
+            instance={activeInstance!}
+            course={activeCourse!}
+            justCompleted={justCompleted ?? undefined}
+          />
         );
       case "courseChapter":
         return (

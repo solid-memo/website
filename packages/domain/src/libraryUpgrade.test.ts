@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { CourseOutline } from "./course";
 import type { Card, Deck } from "./deck";
 import type { LibraryCard, LibraryDeckContent } from "./library";
 import { applyLibraryUpgrade, planLibraryUpgrade, sameContent, upgradedCards, withReleaseLanguages } from "./libraryUpgrade";
@@ -273,6 +274,55 @@ describe("planLibraryUpgrade", () => {
     const removed = release(2, from.cards.filter((card) => card.id !== "is"));
     expect(planLibraryUpgrade({ deck, cards: reached, from, to: removed, releases, course: true })).toBeNull();
     expect(planLibraryUpgrade({ deck, cards: reached, from, to: removed, releases })).toMatchObject({ gone: ["is"] });
+  });
+
+  it("offers a course's deck a release that changes its outline alone, which the deck reads from the release it names", () => {
+    const outline = (releaseUrl: string, theory: string): CourseOutline => ({
+      releaseUrl,
+      chapters: [
+        {
+          id: "ch-1",
+          url: `${releaseUrl}#ch-1`,
+          position: 0,
+          title: { en: "Nordics" },
+          steps: [{ id: "ch-1-1", url: `${releaseUrl}#ch-1-1`, position: 0, theory: { en: theory }, questionIds: ["se"] }],
+          reviewQuestionIds: [],
+        },
+      ],
+    });
+    const now = release(2, from.cards);
+    const reached = [podCard("se", "Stockholm?")];
+    const plan = (theory: string) =>
+      planLibraryUpgrade({
+        deck,
+        cards: reached,
+        from,
+        to: now,
+        releases,
+        course: true,
+        outlines: { from: outline(from.url, "Capitals."), to: outline(now.url, theory) },
+      });
+    expect(plan("Capitals.")).toBeNull();
+    expect(plan("Capitals.\n\n---\n\nOf the north.")).toMatchObject({ toVersion: "2", change: [], outline: true });
+    expect(planLibraryUpgrade({ deck, cards: reached, from, to: now, releases, course: true })).toBeNull();
+  });
+
+  it("offers a course's deck a release that changes only questions the learner has not reached", () => {
+    const reached = [podCard("se", "Stockholm?")];
+    const plan = (to: LibraryDeckContent) => planLibraryUpgrade({ deck, cards: reached, from, to, releases, course: true });
+    // Iceland's answer fixed, a wrong option given to Finland, Latvia retired: none of them in the deck yet.
+    const fixed = release(2, from.cards.map((card) => (card.id === "is" ? libraryCard("is", "Reykjavík") : card)));
+    const distracted = release(2, from.cards.map((card) => (card.id === "fi" ? { ...card, distractors: [{ id: "fi-d1", text: { "": "Turku" } }] } : card)));
+    const retired = release(2, from.cards.map((card) => (card.id === "lv" ? { ...card, retired: true as const } : card)));
+    for (const to of [fixed, distracted, retired]) {
+      expect(plan(to)).toMatchObject({ change: [], add: [], unreached: true });
+    }
+    // A plain copy has those cards, so their changes are its own.
+    expect(planLibraryUpgrade({ deck, cards: [...reached, podCard("is", "Reykjavik")], from, to: fixed, releases })).not.toHaveProperty("unreached");
+    // A reached question, changed, is changed in the deck instead.
+    const reachedFixed = release(2, from.cards.map((card) => (card.id === "se" ? libraryCard("se", "Stockholm") : card)));
+    expect(plan(reachedFixed)).not.toHaveProperty("unreached");
+    expect(plan(release(2, from.cards))).toBeNull();
   });
 
   it("takes a retirement the copy already has as done, and only moves the deck to the release", () => {

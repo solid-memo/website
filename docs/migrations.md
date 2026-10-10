@@ -468,8 +468,8 @@ Repairs edit in place, as the update does.
 
 A deck imported from the [deck library](deck-library.md) says which
 release it came from (`prov:wasDerivedFrom <…/decks/name/vN.ttl>`). When the
-library publishes a newer release, the deck page offers to bring the
-copy up to it (`planLibraryUpgrade` in
+library publishes a newer release, the deck page (and a course's page)
+offers to bring the copy up to it (`planLibraryUpgrade` in
 [domain/libraryUpgrade.ts](../packages/domain/src/libraryUpgrade.ts), shown by
 [ui/LibraryUpgradeContainer.tsx](../apps/web/src/ui/LibraryUpgradeContainer.tsx)).
 
@@ -507,7 +507,17 @@ wrong option, its note or their order changes the card. A
 cards the learner has answered, so its upgrade adds none; the learner
 reaches them through the course. It changes, retires and restores the
 cards it holds as above. A card the release removed that it lacks is
-no offer there: it lacks every card the learner has not reached.
+no offer there: it lacks every card the learner has not reached. The
+course's outline (its chapters, steps and theory) is never copied, but
+read from the release the deck names, so a release that changes only
+the outline is an offer of its own (`LibraryUpgradePlan.outline`,
+compared by `sameOutline` in
+[domain/course.ts](../packages/domain/src/course.ts)): the upgrade
+writes no card, and moving the deck to the release brings it. So is a
+release that changes only questions the learner has not reached
+(`LibraryUpgradePlan.unreached`): their content, wrong options or
+retirement, which the deck meets as the release it names has them. The
+course's page offers the upgrade too, as the deck's page does.
 
 A card's [text format](vocab.md#text-formats) is part of its content
 too: a release that only marks a card as Markdown changes it. No text
@@ -578,7 +588,7 @@ flowchart TD
     read --> cards["2 cards: one PUT of the whole document,<br/>If-Match the read the plan was made from<br/>(none when no card changes)"]
     cards --> reviews["3 reviews: the removed cards' states dropped,<br/>If-Match the read (none when there are none)"]
     reviews --> entry["4 entry: moved to the new release,<br/>with the deck's texts, If-Match the read"]
-    entry --> refresh["The deck page reads everything again at once"]
+    entry --> refresh["The page reads everything again at once,<br/>a course's outline and questions included"]
     read & cards & reviews & entry -->|error| stop["Stopped where it is, nothing put back:<br/>the deck readable, still naming the release<br/>it came from; planned again, it finishes"]
 ```
 

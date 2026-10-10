@@ -6,6 +6,7 @@ import {
   type DeckDirection,
   textFormatOf,
 } from "./deck";
+import { sameOutline, type CourseOutline } from "./course";
 import type { LibraryCard, LibraryDeckContent, LibraryRelease } from "./library";
 import { isDefaultDeckDescription } from "./dcat";
 import { copyKeywords, noKeywords, sameKeywords, type LangTexts } from "./keywords";
@@ -104,6 +105,22 @@ export interface LibraryUpgradePlan {
    */
   keywords?: LangTexts;
   themes?: string[];
+  /**
+   * Set when the deck is a course's and the newer release shows its
+   * outline otherwise (sameOutline): its chapters, steps or their theory.
+   * Nothing of it is written, as the outline stays in the release and the
+   * deck reads it from the one it names; moving the deck to the newer
+   * release is what brings it, so it is an offer of its own.
+   */
+  outline?: true;
+  /**
+   * Set when the deck is a course's and the newer release changed a
+   * question the learner has not reached, which the deck therefore lacks:
+   * its content, its wrong options or its retirement. As with `outline`,
+   * nothing is written; the deck meets the question as the release it
+   * names has it, so moving it there is an offer of its own.
+   */
+  unreached?: true;
 }
 
 /**
@@ -266,7 +283,9 @@ function sameDistractors(a: CardContent, b: CardContent): boolean {
  * the newer release has it, counts as the library's, not the user's. A
  * course's deck (`course`) holds only the cards the learner has reached,
  * each joining it when its question is first answered: its upgrade adds
- * none, but changes, retires and restores those it holds as any copy's.
+ * none, but changes, retires and restores those it holds as any copy's;
+ * and a change of its outline alone (`outlines`), or of questions the
+ * learner has not reached, is offered too.
  */
 export function planLibraryUpgrade({
   deck,
@@ -276,6 +295,7 @@ export function planLibraryUpgrade({
   to,
   releases,
   course = false,
+  outlines,
 }: {
   deck: Deck;
   /** The copy's cards, as the pod holds them. */
@@ -294,6 +314,8 @@ export function planLibraryUpgrade({
   releases: readonly LibraryRelease[];
   /** Whether the copy is a course's deck (either release is a course). */
   course?: boolean;
+  /** A course's outline in the release the copy came from and in the newer one, when both are courses. */
+  outlines?: { from: CourseOutline; to: CourseOutline };
 }): LibraryUpgradePlan | null {
   if (Number(to.version) <= Number(from.version)) return null;
   if (to.cards.some((card) => card.formatVersion > CARD_FORMAT_VERSION)) return null;
@@ -313,6 +335,7 @@ export function planLibraryUpgrade({
   const kept: Card[] = [];
   const applied: Card[] = [];
   const gone: string[] = [];
+  let unreached = false;
   /** The copy's card against the newer release's: `old` the one the copy came from (absent for one a later release adds). */
   const plan = (mine: Card, old: LibraryCard | undefined, next: LibraryCard) => {
     const earlier = earlierOf(mine.id);
@@ -341,8 +364,12 @@ export function planLibraryUpgrade({
       if (mine === undefined) gone.push(id);
       else (earlierOf(id).some((card) => untouched(mine, card)) ? remove : kept).push(mine);
     } else if (mine !== undefined) plan(mine, old, next);
-    // Not in the copy: added unless the user removed it, or, in a course's deck, the learner has not reached it.
+    // Not in the copy: added unless the user removed it, or, in a course's deck, the learner has not reached it,
+    // and will meet it as the release the deck names has it.
     else if (old === undefined && !course) add.push(next);
+    else if (old !== undefined && course && (!sameContent(old, next) || (old.retired === true) !== (next.retired === true))) {
+      unreached = true;
+    }
   }
   const direction =
     to.direction !== from.direction && deck.direction === from.direction ? to.direction : undefined;
@@ -359,6 +386,7 @@ export function planLibraryUpgrade({
     themes: upgradedList(deck.themes, from.themes, to.themes),
   };
   const aboutChanged = Object.values(about).some((value) => value !== undefined);
+  const outlineChanged = outlines !== undefined && !sameOutline(outlines.from, outlines.to);
   // What of the deck itself the newer release changed and the copy already has as it has it.
   const appliedAbout = (
     [
@@ -374,7 +402,9 @@ export function planLibraryUpgrade({
     // A course's deck lacks every card the learner has not reached: one the release removed is no sign of an upgrade.
     (course || gone.length === 0) &&
     direction === undefined &&
-    !aboutChanged
+    !aboutChanged &&
+    !outlineChanged &&
+    !unreached
   ) {
     return null;
   }
@@ -396,6 +426,8 @@ export function planLibraryUpgrade({
     appliedAbout,
     ...(direction === undefined ? {} : { direction }),
     ...Object.fromEntries(Object.entries(about).filter(([, value]) => value !== undefined)),
+    ...(outlineChanged ? { outline: true as const } : {}),
+    ...(unreached ? { unreached: true as const } : {}),
   };
 }
 

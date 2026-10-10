@@ -76,6 +76,24 @@ describe("describeChanges", () => {
       "behåller kortlekens namn, beskrivning, nyckelord, ämnen eller riktning som redan är som i utgåvan",
     );
   });
+
+  it("says when a course's chapters, steps, theory or questions not reached change, alone or with its cards", () => {
+    expect(describeChanges({ ...plan, add: [], change: [], remove: [], outline: true }, en)).toBe(
+      "updates the course's chapters, steps or theory",
+    );
+    expect(describeChanges({ ...plan, add: [], remove: [], outline: true }, en)).toBe(
+      "changes 2 cards and updates the course's chapters, steps or theory",
+    );
+    expect(describeChanges({ ...plan, add: [], change: [], remove: [], outline: true }, createI18n("sv"))).toBe(
+      "uppdaterar kursens kapitel, steg eller teori",
+    );
+    expect(describeChanges({ ...plan, add: [], change: [], remove: [], outline: true, unreached: true }, en)).toBe(
+      "updates the course's chapters, steps or theory and changes questions you have not reached yet",
+    );
+    expect(describeChanges({ ...plan, add: [], change: [], remove: [], unreached: true }, createI18n("sv"))).toBe(
+      "ändrar frågor som du inte har kommit till än",
+    );
+  });
 });
 
 describe("LibraryUpgradeNotice", () => {

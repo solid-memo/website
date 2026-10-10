@@ -291,6 +291,9 @@ and chapter that states `sm:textFormat sm:markdown`, by the
   link text otherwise;
 - no bidi control, zero-width or other hidden character in code or a link (docs/markdown.md lists them);
 - no character reference (`&aring;`) outside code;
+- no heading underlined with dashes, a line of text with `---` right
+  under it, which looks like the text and a thematic break: leave a
+  blank line before the break, or write the heading with `##`;
 - on a card with distractors, its `back` and each `distractorText` one
   paragraph, not a heading, as options are;
 - a step's theory with no empty [chunk](markdown.md#chunks) (a

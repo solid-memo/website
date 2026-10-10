@@ -1,6 +1,8 @@
-import type { Course } from "@solid-memo/application/useCases";
+import type { Course, UseCases } from "@solid-memo/application/useCases";
 import type { CourseChapter } from "@solid-memo/domain/course";
+import type { Instance } from "@solid-memo/domain/instance";
 import { CourseScreen } from "./CourseScreen";
+import { LibraryUpgradeContainer } from "./LibraryUpgradeContainer";
 import { decksHref, routeToHash } from "./router";
 
 /**
@@ -39,17 +41,22 @@ export interface CompletedChapter {
  * Owns a course's page. The course itself is resolved by Workspace
  * (courseQuery), which the page needs for its trail too; so is the
  * chapter just completed, which Workspace keeps as the learner comes
- * back from its final review.
+ * back from its final review. A newer release of the course is offered
+ * here as on the deck's page (LibraryUpgradeContainer), since the
+ * learner comes here, not there.
  */
 export function CourseContainer({
-  instanceUrl,
+  useCases,
+  instance,
   course,
   justCompleted,
 }: {
-  instanceUrl: string;
+  useCases: UseCases;
+  instance: Instance;
   course: Course;
   justCompleted?: CompletedChapter;
 }) {
+  const instanceUrl = instance.url;
   const current = course.outline.chapters.find((chapter) => chapter.url === course.progress.currentChapterUrl);
   return (
     <CourseScreen
@@ -62,6 +69,7 @@ export function CourseContainer({
       continueHref={current === undefined ? undefined : chapterHref(instanceUrl, course, current)}
       decksHref={decksHref(instanceUrl)}
       justCompleted={justCompleted}
+      notice={<LibraryUpgradeContainer useCases={useCases} instance={instance} deck={course.deck} />}
     />
   );
 }

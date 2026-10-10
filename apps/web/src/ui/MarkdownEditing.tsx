@@ -68,6 +68,8 @@ export function problemText(problem: MarkdownProblem, t: I18n["t"]): string {
       return t("markdownProblem.characterReference", { source: problem.source });
     case "notOneParagraph":
       return t("markdownProblem.notOneParagraph");
+    case "dashHeading":
+      return t("markdownProblem.dashHeading");
   }
 }
 

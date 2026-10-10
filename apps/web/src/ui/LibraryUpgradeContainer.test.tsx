@@ -173,6 +173,8 @@ describe("LibraryUpgradeContainer", () => {
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["cards", imported.cardsDocumentUrl] });
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["reviews", imported.reviewsDocumentUrl] });
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["migration", instance.url] });
+    // A course's deck follows the newer release's outline: the course is read again.
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ["course", imported.url] });
     expect(screen.queryByRole("region")).toBeNull();
   });
 

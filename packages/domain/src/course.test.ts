@@ -7,6 +7,7 @@ import {
   courseProgress,
   finalReviewQueue,
   gradeOfChoice,
+  sameOutline,
   type CourseOutline,
 } from "./course";
 import type { CardContent } from "./deck";
@@ -106,6 +107,60 @@ describe("a course's outline", () => {
       ["ch-y", []],
       ["ch-z", ["z-2"]],
     ]);
+  });
+});
+
+describe("two releases' outlines", () => {
+  const V2 = "https://solid-memo.com/decks/solid/v2.ttl";
+  const MARKDOWN = "https://solid-memo.com/ns/vocab/v1.ttl#markdown";
+  /** What release 2 changes: of chapter ch-a or ch-b, or of step a-1, a-2 or b-1. */
+  type Change = Partial<Record<"ch-a" | "ch-b", Partial<ChapterV1>> & Record<"a-1" | "a-2" | "b-1", Partial<StepV1>>>;
+  /** The outline as release 2 states it, each subject at its own URL there, as `change` has it. */
+  const next = (change: Change = {}) => {
+    const in2 = (id: string) => `${V2}#${id}`;
+    const ofChapter = (chapterId: string, position: number, questions: string[], id: "a-1" | "a-2" | "b-1") => ({
+      url: in2(id),
+      data: { ...step(chapterId, position, questions), chapter: in2(chapterId), ...change[id] },
+    });
+    return courseOutlineFromRecords(
+      V2,
+      [
+        { url: in2("ch-a"), data: chapter(0, { description: { en: "First." }, reviewQuestion: [at("q-review")], ...change["ch-a"] }) },
+        { url: in2("ch-b"), data: chapter(1, change["ch-b"]) },
+      ],
+      [ofChapter("ch-a", 0, ["q1", "q2"], "a-1"), ofChapter("ch-a", 1, ["q3"], "a-2"), ofChapter("ch-b", 0, ["q4"], "b-1")],
+    );
+  };
+
+  it("are the same when they show the same course, wherever its parts are and whatever their positions", () => {
+    expect(sameOutline(outline, next())).toBe(true);
+    expect(sameOutline(outline, next({ "ch-b": { position: 7 } }))).toBe(true);
+  });
+
+  it("differ in a chapter's title, description, text format, review questions or steps, or in which chapters there are", () => {
+    for (const change of [
+      { "ch-a": { title: { en: "Chapter 0", sv: "Kapitel 0" } } },
+      { "ch-a": { description: { en: "First!" } } },
+      { "ch-a": { textFormat: MARKDOWN } },
+      { "ch-a": { reviewQuestion: [] } },
+      { "ch-a": { deprecated: true } },
+      { "ch-a": { position: 2 } },
+      { "a-2": { deprecated: true } },
+    ] satisfies Change[]) {
+      expect(sameOutline(outline, next(change))).toBe(false);
+    }
+  });
+
+  it("differ in a step's theory, its text format, its questions or its place", () => {
+    for (const change of [
+      { "a-1": { theory: { en: "Theory ch-a 0\n\n---\n\nMore." } } },
+      { "a-1": { textFormat: MARKDOWN } },
+      { "a-1": { checkedBy: [at("q1")] } },
+      { "a-1": { checkedBy: [at("q1"), at("q5")] } },
+      { "a-1": { position: 2 } },
+    ] satisfies Change[]) {
+      expect(sameOutline(outline, next(change))).toBe(false);
+    }
   });
 });
 

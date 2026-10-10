@@ -65,6 +65,9 @@ describe("markdownHints", () => {
     expect(hint("a\n\nb", OPTION)).toEqual([
       "This card's back is one of the options of a question: keep it to one paragraph, as the others are.",
     ]);
+    expect(hint("a\n---")).toEqual([
+      "A line with --- right under it shows as a heading. For a line across instead, leave a blank line before the ---; for a heading, start the line with ##.",
+    ]);
   });
 });
 

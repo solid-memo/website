@@ -8,7 +8,9 @@ import { useI18n, type I18n, type ErrorText } from "./i18n";
  * what the plan does to the cards the user studies: a card that is added
  * or changed retired is out of sight. Cards, and what the deck says of
  * itself, already as the release has them (an upgrade cut off half-way)
- * are said to be kept so.
+ * are said to be kept so; a course's chapters, steps and theory, and
+ * the questions the learner has not reached, when they change, are said
+ * to be updated.
  */
 export function describeChanges(
   plan: LibraryUpgradePlan,
@@ -30,6 +32,8 @@ export function describeChanges(
     ...([plan.title, plan.description, plan.keywords, plan.themes].some((value) => value !== undefined)
       ? [t("libraryUpgradeNotice.describes")]
       : []),
+    ...(plan.outline === true ? [t("libraryUpgradeNotice.outline")] : []),
+    ...(plan.unreached === true ? [t("libraryUpgradeNotice.unreached")] : []),
   ];
   if (parts.length === 0) return t("libraryUpgradeNotice.noStudiedChanges");
   return parts.length === 1
