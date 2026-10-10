@@ -1,0 +1,1744 @@
+@base <https://solid-memo.com/decks/german-basics/v3.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix prov:       <http://www.w3.org/ns/prov#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix topic:      <https://solid-memo.com/ns/vocab/topics.ttl#> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Basic German"@en ,
+                  "Grundläggande tyska"@sv ,
+                  "기초 독일어"@ko ,
+                  "Deutsch-Grundlagen"@de ,
+                  "Alemán básico"@es ,
+                  "Allemand de base"@fr ;
+    dcterms:creator <#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "125 basic German words and phrases for beginners: the numbers 0–20, the tens and 100, the days of the week, the months, eight colours, family members, greetings and polite phrases, and everyday nouns, adjectives and verbs. The front shows the German word in current spelling; nouns, days and months are given with their definite article (der Tisch, die Tür, das Buch). The back gives its meaning in English and Swedish, and also in Korean, Spanish and French (translated with the help of AI from the English and Swedish meanings), or the digits for a number, with the plural of most nouns in a note. Words, genders and meanings from Wikidata's lexemes and a public-domain US Government course and phrase book (the Foreign Service Institute's German Basic Course and the War Department's German Phrase Book), checked against German and English Wiktionary, Folkets lexikon and the official German spelling rules."@en ,
+                        "125 grundläggande tyska ord och fraser för nybörjare: talen 0–20, tiotalen och 100, veckodagarna, månaderna, åtta färger, familjemedlemmar, hälsningar och artighetsfraser samt vardagliga substantiv, adjektiv och verb. Framsidan visar det tyska ordet i nutida stavning; substantiv, veckodagar och månader står med bestämd artikel (der Tisch, die Tür, das Buch). Baksidan ger betydelsen på engelska och svenska, och även på koreanska, spanska och franska (översatt med hjälp av AI från de engelska och svenska betydelserna), eller siffrorna för ett tal, och de flesta substantiv har pluralformen i en anteckning. Ord, genus och betydelser från Wikidatas lexem och en amerikansk statlig kurs och parlör fria från upphovsrätt (Foreign Service Institutes German Basic Course och krigsdepartementets German Phrase Book), kontrollerade mot tyska och engelska Wiktionary, Folkets lexikon och de officiella tyska stavningsreglerna."@sv ,
+                        "초보자를 위한 기초 독일어 단어와 표현 125개입니다. 0–20의 수, 십의 배수와 100, 요일, 달, 여덟 가지 색, 가족 구성원, 인사와 예의 표현, 일상적인 명사·형용사·동사를 다룹니다. 앞면은 현행 맞춤법의 독일어 단어이며, 명사와 요일, 달은 정관사와 함께 나옵니다(der Tisch, die Tür, das Buch). 뒷면은 영어와 스웨덴어 뜻에 더해 한국어, 스페인어, 프랑스어 뜻(영어와 스웨덴어 뜻을 AI의 도움을 받아 번역)이나 수의 경우 숫자이며, 대부분의 명사는 복수형이 메모에 있습니다. 단어, 성, 뜻은 Wikidata의 어휘소와 퍼블릭 도메인인 미국 정부의 교재와 회화집(Foreign Service Institute의 German Basic Course와 War Department의 German Phrase Book)에서 가져왔고, 독일어·영어 위키낱말사전, Folkets lexikon, 공식 독일어 맞춤법 규정과 대조해 확인했습니다."@ko ,
+                        "125 grundlegende deutsche Wörter und Redewendungen für Anfänger: die Zahlen 0–20, die Zehner und 100, die Wochentage, die Monate, acht Farben, Familienmitglieder, Begrüßungen und Höflichkeitsformeln sowie Substantive, Adjektive und Verben des Alltags. Die Vorderseite zeigt das deutsche Wort in aktueller Rechtschreibung; Substantive, Wochentage und Monate stehen mit bestimmtem Artikel (der Tisch, die Tür, das Buch). Die Rückseite gibt die Bedeutung auf Englisch und Schwedisch an, außerdem auf Koreanisch, Spanisch und Französisch (mithilfe von KI aus der englischen und schwedischen Bedeutung übersetzt), bei einer Zahl die Ziffern, und bei den meisten Substantiven steht der Plural in einer Anmerkung. Wörter, Genera und Bedeutungen aus den Lexemen von Wikidata und einem gemeinfreien Kurs und Sprachführer der US-Regierung (German Basic Course des Foreign Service Institute und German Phrase Book des War Department), geprüft anhand des deutschen und englischen Wiktionary, Folkets lexikon und der amtlichen Regeln der deutschen Rechtschreibung."@de ,
+                        "125 palabras y frases básicas de alemán para principiantes: los números del 0 al 20, las decenas y el 100, los días de la semana, los meses, ocho colores, miembros de la familia, saludos y frases de cortesía, y sustantivos, adjetivos y verbos de uso cotidiano. El anverso muestra la palabra alemana en la ortografía actual; los sustantivos, los días y los meses aparecen con su artículo definido (der Tisch, die Tür, das Buch). El reverso da su significado en inglés y en sueco, y también en coreano, español y francés (traducido con ayuda de IA a partir de los significados en inglés y en sueco), o las cifras en el caso de un número, con el plural de la mayoría de los sustantivos en una nota. Palabras, géneros y significados tomados de los lexemas de Wikidata y de un curso y una guía de conversación del Gobierno de Estados Unidos de dominio público (el German Basic Course del Foreign Service Institute y el German Phrase Book del War Department), contrastados con el Wiktionary alemán e inglés, el Folkets lexikon y las normas ortográficas oficiales del alemán."@es ,
+                        "125 mots et expressions de base en allemand pour débutants : les nombres de 0 à 20, les dizaines et 100, les jours de la semaine, les mois, huit couleurs, les membres de la famille, les salutations et formules de politesse, ainsi que des noms, adjectifs et verbes du quotidien. Le recto montre le mot allemand dans l’orthographe actuelle ; les noms, les jours et les mois sont donnés avec leur article défini (der Tisch, die Tür, das Buch). Le verso donne son sens en anglais et en suédois, et aussi en coréen, en espagnol et en français (traduit avec l’aide de l’IA à partir des sens anglais et suédois), ou les chiffres pour un nombre, avec le pluriel de la plupart des noms dans une note. Mots, genres et sens tirés des lexèmes de Wikidata et d’un cours et d’un guide de conversation du gouvernement des États-Unis, dans le domaine public (le German Basic Course du Foreign Service Institute et le German Phrase Book du War Department), vérifiés auprès des Wiktionary allemand et anglais, du Folkets lexikon et des règles officielles de l’orthographe allemande."@fr ;
+    prov:wasDerivedFrom <https://www.wikidata.org/> ,
+                        <https://archive.org/details/Fsi-GermanBasicCourse-StudentText> ,
+                        <https://archive.org/details/GermanPhraseBook> ;
+    prov:wasGeneratedBy <#compilation> ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:languages ,
+               topic:german ;
+    dcat:keyword "German"@en ,
+                 "vocabulary"@en ,
+                 "beginners"@en ,
+                 "phrases"@en ,
+                 "tyska"@sv ,
+                 "ordförråd"@sv ,
+                 "nybörjare"@sv ,
+                 "fraser"@sv ,
+                 "독일어"@ko ,
+                 "어휘"@ko ,
+                 "초보자"@ko ,
+                 "표현"@ko ,
+                 "Deutsch"@de ,
+                 "Wortschatz"@de ,
+                 "Anfänger"@de ,
+                 "Redewendungen"@de ,
+                 "alemán"@es ,
+                 "vocabulario"@es ,
+                 "principiantes"@es ,
+                 "frases"@es ,
+                 "allemand"@fr ,
+                 "vocabulaire"@fr ,
+                 "débutants"@fr ,
+                 "expressions"@fr ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/german-basics/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/german-basics/v2.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Each card's meaning, and its note, in Korean, Spanish and French as well as English and Swedish; no word was added, removed or changed." ;
+    dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;
+    dcat:inSeries <https://solid-memo.com/decks/index.ttl#german-basics> ;
+    dcat:isVersionOf <https://solid-memo.com/decks/index.ttl#german-basics> ;
+    dcat:distribution <#turtle> .
+
+<#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/2.5/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/licenses/by/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/mark/1.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+# How this deck was made (W3C PROV-O): researched card by card from the sources below,
+# each card checked against at least two of them, then in the review rounds below.
+<#compilation>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    prov:used <https://www.wikidata.org/> ,
+              <https://archive.org/details/Fsi-GermanBasicCourse-StudentText> ,
+              <https://archive.org/details/GermanPhraseBook> ,
+              <https://www.rechtschreibrat.com/DOX/RfdR_Amtliches-Regelwerk_2024.pdf> ,
+              <https://de.wiktionary.org/> ,
+              <https://en.wiktionary.org/> ,
+              <https://folkets-lexikon.csc.kth.se/folkets/> ;
+    prov:wasAssociatedWith <#anton-wiklund> ;
+    prov:wasInformedBy <#review-0> ,
+                       <#review-1> ,
+                       <#review-2> ,
+                       <#review-3> ,
+                       <#review-4> ,
+                       <#review-5> ,
+                       <#review-6> ,
+                       <#review-7> ,
+                       <#review-8> ;
+    rdfs:comment "Compiled by Anton Wiklund with the help of AI."@en ,
+                 "Sammanställd av Anton Wiklund med hjälp av AI."@sv ,
+                 "About this record: the comments on this compilation, its review rounds and its sources are condensed from the deck's dossier, the working record kept while the deck was compiled, from which a provenance report was generated. The dossier's per-card evidence and Wikidata checks, its numbered queries and scripts (its Queries section) and its logs of discrepancies are not part of this release; where the text refers to them, to the dossier or the report, or to findings listed below, it means that record. The builder is the script that built the deck from the dossier and ran its Wikidata checks."@en ,
+                 "The cards were checked by machine (live Wikidata and the app's SHACL and DCAT-AP validators)."@en ,
+                 "Word list. A list of 125 words and phrases for a first German course was drawn up by hand from the library editor's brief (numbers 0–20, the tens and 100; days; months; colours; family; greetings and polite phrases; everyday nouns, adjectives and verbs), choosing the most basic, standard word for each concept and avoiding words whose everyday form differs by region (see Excluded). No frequency list, textbook word list or phrase-book list was copied: the public-domain US Government course and phrase book below were read only for the meaning of greetings already on the list and for facts in the notes."@en ,
+                 "Wikidata lexemes. SPARQL query 1 fetched every German lexeme (language Q188) whose lemma is a candidate, with its lexical category, grammatical gender (P5185), senses, English and German glosses and sense items (P5137). Phrases not found were looked up with the lexeme search (API calls 2): Wikidata has no German lexeme for guten Tag, guten Abend, gute Nacht or auf Wiedersehen. The full JSON of the lexeme chosen for each word (the numeral lexeme for numbers, the noun lexeme for nouns, the verb lexeme for verbs, and so on) was fetched with API calls 3; it gave the nominative plural form of each noun (the form with the features plural Q146786 and nominative Q131105). The English and Swedish lexemes named by the senses' translation statements (P5972) were fetched with API calls 4, and query 7 looked for English and Swedish senses that point to the German senses."@en ,
+                 "Wikidata items. The items linked from the senses (P5137) were fetched with API calls 5 (labels and aliases in German, English, Swedish and mul). For concepts whose lexeme sense has no item (the colours red, blue, white and brown; cold; the greetings guten Tag and guten Abend) items were found with the item search (API calls 6). The items give the English and Swedish labels for numbers, days, months, colours, family members and everyday things, and the German label or alias that the builder checked against the front."@en ,
+                 "Phrases. For the greetings with no lexeme, and as a second content source for the others, a public-domain US Government course and a phrase book on the Internet Archive were read (calls 9 and 10): the Foreign Service Institute's German Basic Course (1961), whose Unit 1 basic sentences give Guten Morgen, Guten Tag (\"Hello (Good day)\"), Guten Abend, Auf Wiedersehen (\"good bye\"), danke, bitte, ja and nein with their English meaning (its Unit 4 also gives the facts behind the notes on Sonnabend, meine Frau and the possessive sein); and the War Department's German Phrase Book TM 30-606 (1943), whose greetings page gives \"Good night — Gute Nacht\", the only source of that card's content. The FSI text was read in the Internet Archive's OCR text; the phrase book's OCR text is poor, so its pages 10–17 were rendered from the scanned PDF with PyMuPDF (call 10) and read directly."@en ,
+                 "Writing the cards. The front is the German word in the current (post-reform) spelling, as in the lexeme's lemma. Nouns, the days and the months are capitalised and preceded by the definite article that matches the lexeme's grammatical gender (der for masculine, die for feminine, das for neuter); every gender was confirmed against German Wiktionary's Genus. Numbers, colours and other adjectives, verbs (in the infinitive) and the interjections are in lower case, as in the dictionary. The multi-word greetings are given in their dictionary form, lower case except for the noun (guten Morgen, auf Wiedersehen), as Wikidata, German Wiktionary and the official word list write them. Entschuldigung, a noun used on its own as an apology, is capitalised and has no article; its note gives the noun. Of the two official spellings tschüss and tschüs, the card uses tschüss (the Wikidata and German Wiktionary lemma) and the note names tschüs."@en ,
+                 "The back is our own short English and Swedish rendering of the main sense: for nouns the bare noun, for verbs the infinitive (English \"to …\", Swedish \"att …\"), for numbers the digits, tagged zxx (text in no language). English and Swedish follow the Wikidata labels where an item exists and its label is the everyday word; otherwise they are the standard English and Swedish equivalents chosen by the authors and checked in English Wiktionary and Folkets lexikon (step 9). Where German has one word for two English or Swedish words, both are given (Stadt: town, city; Straße: street, road / gata, väg; groß: big, large; Großvater: farfar eller morfar). Swedish uses lower case for days and months. Every text is tagged with its language: the front de, the back en and sv, digits zxx."@en ,
+                 "Notes. A short note was added where it helps a beginner and the sources confirm it: the nominative plural of countable nouns (from the lexeme form, checked against German Wiktionary; not given for Wasser, Milch, Geld and Arbeit, whose plurals are rare or have another meaning), the spelling of sechzehn, sechzig, siebzehn, siebzig and dreißig, einhundert (a Wikidata alias of 100), Sonnabend (northern and eastern Germany) and Jänner (Austria), weiß as a form of wissen, Schwester also meaning nurse, Mann also husband, Frau also wife and Mrs, Strasse in Switzerland, groß also tall, Wie geht es Ihnen?, the possessive sein, guten Tag as a daytime greeting, “see you again” as another rendering of auf Wiedersehen, tschüss as a goodbye among friends and its spelling tschüs, the other uses of bitte, and the noun die Entschuldigung. Notes are our own wording, and each note's fact comes from a content source: Wikidata (the senses husband L7302-S3, wife L2945-S2 and nurse L34032-S4 with their items; Jänner's location of sense usage, Austria; the Swiss lemma Strasse of Straße; the lexemes tschüs and possessive sein; tschüss's gloss \"freundschaftlicher Verabschiedungsgruß\"), the FSI course (Sonnabend in northern and eastern Germany, meine Frau for one's wife, sein Sohn, Sie as the formal address, Frau Kunze, Wie geht es Ihnen?) or the War Department phrase book (\"See you again — Auf Wiedersehen\", \"Good day or Good afternoon — Guten Tag\"). German Wiktionary and the Regelwerk only confirm them. In review round 3 the notes on gute Nacht, tschüss, auf Wiedersehen and guten Tag, which had followed German Wiktionary's definitions, were rewritten or removed for this reason (see quality control, round 3)."@en ,
+                 "Cross-checking. Every German word was looked up in German Wiktionary (calls 12: its wikitext, read with Python): spelling, part of speech, the gender of every noun against the card's article, the nominative plural, the first meaning, and its English and Swedish translations (the evidence quotes the first English and the first Swedish translation line of the entry; where those belong to a sense other than the card's, as for hallo and Straße, the evidence quotes the lines of the matching sense instead). Every English meaning was checked against the German section of English Wiktionary (calls 13). Every Swedish word was checked in Folkets lexikon (calls 14), one look-up per Swedish word on the card, English → Swedish, or Swedish → English when the first direction had no match; the look-up prefers an entry of the card's word class. The spelling points listed under the Rechtschreibrat source were checked in the official rules and word list of 2024 (call 11). A Python script built the evidence lines from the responses saved during authoring, so each quotation is what the source returned; wiki markup was rendered as plain text (links as their text, label templates such as {{K|…}} and {{ugs.}} as their names in brackets, gender markers dropped), and lists of translations longer than 140 characters were cut. The raw responses were working files and are not published; the code that read them (the Wiktionary parsing, the word-list look-up in the Regelwerk, the PDF text extraction and the Folkets matching) is recorded under queries 11, 12 and 14."@en ,
+                 "Duden and DWDS. The brief asked for each German form to be verified in Duden online or the DWDS. The DWDS terms of use (https://www.dwds.de/d/nutzungsbedingungen) say: \"Jegliche Nutzung der Inhalte des DWDS, einschließlich jedoch nicht beschränkt auf automatisierte Abfragen und Auswertungen (Crawlen, Parsen, Text- und Data-Mining), sofern nicht über § 60d UrhG zulässig, ist nur mit ausdrücklicher Genehmigung gestattet.\" An AI agent can only consult a dictionary through automated requests, so the DWDS was not used: one entry page (https://www.dwds.de/wb/Tisch) had been fetched before the terms were read, and nothing from it is in this deck or its evidence. Duden online was not consulted either. German Wiktionary (open licence, automated access allowed) and the official spelling rules of the Rat für deutsche Rechtschreibung took their place as verification sources."@en ,
+                 "Machine checks. The dossier's Wikidata checks (270 checks on 108 items: the German label or alias of each linked item that matches the front, its English and Swedish label or alias that matches the back, the mul digit label of each number, and, since review round 3, the labels of the items behind the notes on Mann, Frau, Schwester, Januar, Straße and auf Wiedersehen: husband, wife, nurse, Austria, the Swiss Standard German label Strasse, goodbye and adjö) are re-run against live Wikidata by the builder on every build. Where an item's label does not match the card, no check was added and the difference is listed under quality control, round 0. Wikidata lexemes cannot be checked by the builder (it checks items only); the lexeme facts in the evidence were read from the API responses of 4 October 2026."@en ,
+                 "Excluded: words whose everyday form differs by region (Brötchen/Semmel, Junge/Bub, Sonnabend and Jänner, which appear only in notes), words with two equally common meanings that a single card cannot separate (Morgen/morgen: morning/tomorrow; die Bank: bench/bank), pairs a beginner cannot tell apart without context (wissen/kennen, both \"to know\"), the pronouns du/Sie, which need more than a flashcard, the colloquial Mama, Papa, Oma and Opa, and the colours orange, rosa and lila, which do not inflect like the others."@en ,
+                 "Selection: 125 cards: the cardinal numbers 0–20, the tens 30–90 and 100 (29); the seven days of the week; the twelve months; eight colours (red, blue, green, yellow, black, white, grey, brown); eight family members (mother, father, brother, sister, son, daughter, grandfather, grandmother); twelve greetings and polite phrases (hallo, guten Morgen, guten Tag, guten Abend, gute Nacht, tschüss, auf Wiedersehen, danke, bitte, Entschuldigung, ja, nein); 25 everyday nouns (Haus, Wasser, Brot, Milch, Apfel, Buch, Tisch, Stuhl, Tür, Fenster, Hund, Katze, Stadt, Straße, Schule, Mann, Frau, Kind, Geld, Arbeit, Hand, Tag, Nacht, Jahr, Woche); eight adjectives (groß, klein, gut, schlecht, neu, alt, kalt, warm); and 16 common verbs in the infinitive (sein, haben, gehen, kommen, machen, sprechen, essen, trinken, wohnen, lesen, schreiben, schlafen, arbeiten, kaufen, sehen, sagen). The list was chosen by the deck's authors for a first course, not copied from any frequency list, textbook or phrase book. Every word has a Wikidata lexeme except guten Tag, guten Abend, gute Nacht and auf Wiedersehen, which come from the public-domain FSI course and the War Department's phrase book (guten Tag and guten Abend also from Wikidata items). The standard form common to Germany, Austria and Switzerland was chosen where one exists; where usage differs by country or region, the card gives the form standard in Germany and the note names the variant (Sonnabend, Jänner, Strasse). Left out: regional words (Brötchen/Semmel, Junge/Bub), words with two equally common meanings (Morgen, Bank), word pairs a beginner cannot tell apart on one card (wissen/kennen), the pronouns du and Sie, colloquial family words (Mama, Papa, Oma, Opa) and the uninflected colours orange, rosa and lila. The deck is studied front to back only: although no two backs are identical, the reverse direction would be ambiguous for the greetings (hello: hallo or guten Tag; bye and goodbye: tschüss or auf Wiedersehen, both hej då in Swedish)."@en ,
+                 "Licensing: The deck is CC0 1.0. Its content comes from three sources whose terms allow any reuse: Wikidata's lexemes and items (CC0 1.0: German lemmas, genders, plurals, glosses, translations and German, English and Swedish labels), the Foreign Service Institute's German Basic Course (1961) and the War Department's German Phrase Book TM 30-606 (1943), both works of the United States Government with no copyright protection under 17 U.S.C. § 105 (the German greetings with their meaning, and a few facts of usage in the notes: Sonnabend in northern and eastern Germany, meine Frau, sein Sohn, Sie as the formal address). Section 105 applies in the United States; what the deck takes from these two works is the German form and English meaning of standard greetings and such facts of usage, which are not protectable expression anywhere, so the deck's CC0 dedication does not depend on § 105 applying outside the US. The phrase book's notice that it \"is not to be republished … without the consent of the War Department\" and its \"RESTRICTED\" marking are a wartime distribution instruction, not a copyright; what the deck takes from it is the gute Nacht card (a two-word greeting) and the facts in two notes, the gloss \"see you again\" for auf Wiedersehen and guten Tag as a daytime greeting; all three are uncopyrightable facts of usage, confirmed by the other sources. The selection of words is the authors' own. The English and Swedish renderings not taken from Wikidata are the usual equivalents chosen by the authors; several of them are the same short stock glosses that English Wiktionary, German Wiktionary or Folkets lexikon give, as the method says. Single words and fixed greetings such as \"good night\" or \"god natt\" are facts of usage, not protectable expression, so this does not carry those sources' licences into the deck; no definition, example, comment or list was taken from them. German Wiktionary (CC BY-SA 4.0), English Wiktionary (CC BY-SA 4.0), Folkets lexikon (CC BY-SA 2.5) and the Amtliches Regelwerk der deutschen Rechtschreibung (CC BY 4.0) were used for verification only: every fact in a note has a CC0 or public-domain content source (method, step 8), and the Regelwerk's spelling rules and German Wiktionary's regional labels only confirm them. So no source requires attribution or share-alike for the deck, although all are credited in its provenance. The quotations in the provenance report are not covered by the deck's CC0 dedication or the repository's MIT licence: quotations from German and English Wiktionary are © Wiktionary contributors, CC BY-SA 4.0; quotations from Folkets lexikon are CC BY-SA 2.5; quotations from the Amtliches Regelwerk are © 2024 Geschäftsstelle des Rats für deutsche Rechtschreibung, CC BY 4.0; quotations from the FSI course and the War Department phrase book are in the public domain."@en .
+
+<#review-0>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Sources, licences and machine checks"@en ;
+    rdfs:comment "Scope: All 125 cards: every German form, article, plural, English and Swedish meaning and note against the content sources and the verification sources; the builder's Wikidata checks."@en ,
+                 "Outcome: Every card has evidence from a content source (Wikidata, the FSI course or the War Department phrase book) and from German and English Wiktionary; every Swedish back is also checked in Folkets lexikon. German Wiktionary agrees with the spelling, part of speech and article of every card, and with the plural of every noun that has a plural note. The builder's Wikidata checks cover the German, English, Swedish or mul labels and aliases of 104 linked items (253 checks); they all pass. Discrepancies between the sources and how they were resolved are listed below."@en .
+
+<#review-1>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Factual accuracy"@en ;
+    rdfs:comment "Scope: All 125 cards: German spelling, articles, plurals, English and Swedish meanings and notes, against the official Regelwerk 2024, German Wiktionary and a live run of the builder's Wikidata checks."@en ,
+                 "Outcome: No card was found factually wrong; all 253 Wikidata checks passed. Two warnings: the front \"sein\" can also be the possessive \"his/its\", and the selection overstated that only words common to Germany, Austria and Switzerland were kept. Three suggestions: Liechtenstein in the Strasse note, the phrase book called a \"course\", and the vowel length behind tschüs/tschüss. Each finding was checked against the sources; the two warnings and the course wording were fixed, the other two suggestions declined."@en .
+
+<#review-2>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Language, translation and language tags"@en ;
+    rdfs:comment "Scope: All 125 cards: language tags of every text, German spelling and grammar, English and Swedish idiom, the study direction, and the description."@en ,
+                 "Outcome: No errors or warnings: every text is tagged (de fronts, zxx digits, en and sv backs and notes), the German follows current spelling, and the English and Swedish are idiomatic. Three suggestions: the phrase book called a \"course\" and an ambiguous front-side sentence in the description, the dated Swedish \"Hur mår ni?\" in the gehen note, and Swedish syster also meaning nurse. All three were applied, the last in a form that has a CC0 source."@en .
+
+<#review-3>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Licensing, attribution and documentation"@en ;
+    rdfs:comment "Scope: The licences and licence evidence of all seven sources, the deck's attribution, the method and queries, and the evidence of about 28 cards against live sources."@en ,
+                 "Outcome: All seven licences and the attribution in the built deck were confirmed. The findings were in the notes and the documentation: one note closely followed a CC BY-SA definition and several note facts were supported only by verification sources; one locator was wrong; the phrase book was called a course; helper scripts were not recorded; two Wiktionary quotes came from the wrong sense; and the US-only scope of 17 U.S.C. § 105 was not addressed. Every finding was checked and fixed. Every note fact now has a CC0 or public-domain content source (Wikidata lexemes and items, the FSI course, the War Department phrase book), found by fetching the Wikidata entities again (query 15) and searching the FSI text (query 16); notes with no such source were rewritten or removed."@en .
+
+<#review-4>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The 13 cards changed in round 3 and every third card (positions 1, 4, 7 … 124), 51 cards in all, against live sources; the licensing paragraph and source records."@en ,
+                 "Outcome: The review confirmed the round 1–3 fixes, the Wikidata facts, the FSI quotations, the language tags and the build. One error: the licensing paragraph and the phrase book's usedFor still said the phrase book was the content source for gute Nacht only, although since round 3 it also supplies the facts in the auf Wiedersehen and guten Tag notes. Two suggestions on auf Wiedersehen. All three were checked against the dossier and fixed."@en .
+
+<#review-5>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Re-check of changed cards and a sample (facts, language, documentation)"@en ;
+    rdfs:comment "Scope: The card changed in round 4 (auf-wiedersehen) and every third card (positions 2, 5, 8 … 125), 42 cards in all, against live sources (42 Wikidata lexemes, FSI Unit 1, the War Department phrase book p. 17 rendered from the archive.org PDF, German Wiktionary); the builder's 270 Wikidata checks, the validator and the documentation."@en ,
+                 "Outcome: The review confirmed the round 4 fixes, the sampled cards' facts, language tags and Swedish, the metadata, the CC0 decision and the build. One documentation warning: method step 8 still described the auf Wiedersehen note as giving its literal sense, which round 4 had withdrawn. Checked against the dossier and fixed."@en .
+
+<#review-6>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-04T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Final full-deck review (facts and language)"@en ;
+    rdfs:comment "Scope: All 125 cards: German spelling, genders, plurals, English and Swedish meanings, notes, language tags, study direction, title, description, keywords, evidence, and a re-run of the builder's 270 Wikidata checks; the round 5 fix to method step 8."@en ,
+                 "Outcome: No errors or warnings; the round 5 fix was confirmed. One optional suggestion on the gehen note's Swedish, which was applied."@en .
+
+<#review-7>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 2: title, description and keywords in Korean, German, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: the deck’s title, description and keywords, translated by an AI agent from the English (the Swedish settling what was ambiguous) into Korean, German, Spanish and French, in the words the app itself uses, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with version 1, which found the new title, description and keywords and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: the title, description and keywords are in Korean, German, Spanish and French as well; no card changed."@en .
+
+<#review-8>
+    a prov:Activity ;
+    prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    rdfs:label "Version 3: meanings and notes in Korean, Spanish and French (AI)"@en ;
+    rdfs:comment "Scope: every card’s back and note, the word’s meaning,, translated by AI agents from the English (the Swedish settling what was ambiguous) into Korean, Spanish and French, and checked by a second AI agent that translated every text back into English and fixed what had drifted; the release compared by a script with the version before, which found the new texts, the description, the languages and the release’s own metadata the only changes, and checked by the library checker; not a human review."@en ,
+                 "Outcome: every back and note is in Korean, Spanish and French as well; the fronts, the English and Swedish meanings and the sources are unchanged."@en .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata (German lexemes and items)" ;
+    dcterms:creator "Wikidata contributors (Wikimedia Foundation)" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    rdfs:comment "https://www.wikidata.org/wiki/Wikidata:Licensing — \"All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the public domain under Creative Commons Zero.\""@en .
+
+<https://archive.org/details/Fsi-GermanBasicCourse-StudentText>
+    dcterms:title "German Basic Course, Units 1–12 (Foreign Service Institute, 1961), volume 1 as scanned on the Internet Archive" ;
+    dcterms:creator "Samuel A. Brown and the German staff of the Foreign Service Institute, U.S. Department of State" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> ;
+    rdfs:comment "A work of the United States Government: the title page reads \"Foreign Service Institute, Department of State … Washington, D.C. 1961\" and the preface says the course \"has been designed to assist United States Government representatives\" and \"has benefited from the labors of many members and former members of the FSI staff. In its present form it was prepared under the supervision of Dr. Samuel A. Brown\". 17 U.S.C. § 105 (https://www.law.cornell.edu/uscode/text/17/105): \"Copyright protection under this title is not available for any work of the United States Government\". The Internet Archive item's metadata (https://archive.org/metadata/Fsi-GermanBasicCourse-StudentText) gives licenseurl \"http://creativecommons.org/licenses/publicdomain/\". Recorded here with the Public Domain Mark: free of known copyright."@en .
+
+<https://archive.org/details/GermanPhraseBook>
+    dcterms:title "German Phrase Book, TM 30-606 (War Department, 30 November 1943), as scanned on the Internet Archive" ;
+    dcterms:creator "United States War Department" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> ;
+    rdfs:comment "A work of the United States Government: the cover reads \"German Phrase Book … War Department, Washington, November 30, 1943\", and the page after it \"TM 30-606, German Phrase Book, is published for military personnel only, and is not to be republished in whole or in part without the consent of the War Department. … By order of the Secretary of War: G. C. Marshall, Chief of Staff.\" 17 U.S.C. § 105 (https://www.law.cornell.edu/uscode/text/17/105): \"Copyright protection under this title is not available for any work of the United States Government\". The republication notice and the cover marking \"RESTRICTED\" are a wartime War Department distribution instruction, not a claim of copyright; the booklet is published openly by the Internet Archive (metadata https://archive.org/metadata/GermanPhraseBook, which states no licence). Recorded here with the Public Domain Mark: free of known copyright."@en .
+
+<https://www.rechtschreibrat.com/DOX/RfdR_Amtliches-Regelwerk_2024.pdf>
+    dcterms:title "Amtliches Regelwerk der deutschen Rechtschreibung: Regeln und Wörterverzeichnis (2024)" ;
+    dcterms:creator "Geschäftsstelle des Rats für deutsche Rechtschreibung; published by the Leibniz-Institut für Deutsche Sprache (IDS-Verlag), Mannheim" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    rdfs:comment "Imprint page (PDF page 6): \"Dieses Werk ist unter der Creative-Commons-Lizenz 4.0 (CC BY 4.0) veröffentlicht. Die Umschlaggestaltung unterliegt der Creative-Commons-Lizenz CC BY-ND 4.0.\" and \"© 2024 Geschäftsstelle des Rats für deutsche Rechtschreibung\". Linked as the current rules from https://www.rechtschreibrat.com/regeln-und-woerterverzeichnis/."@en .
+
+<https://de.wiktionary.org/>
+    dcterms:title "German Wiktionary (Wiktionary, das freie Wörterbuch)" ;
+    dcterms:creator "Wiktionary contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://de.wiktionary.org/wiki/Tisch — page footer: \"Der Text ist unter der Lizenz Creative Commons Namensnennung – Weitergabe unter gleichen Bedingungen 4.0 Unported verfügbar; zusätzliche Bedingungen können gelten.\""@en .
+
+<https://en.wiktionary.org/>
+    dcterms:title "English Wiktionary (German entries)" ;
+    dcterms:creator "Wiktionary contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    rdfs:comment "https://en.wiktionary.org/wiki/Tisch — page footer: \"Definitions and other text are available under the Creative Commons Attribution-ShareAlike License; additional terms may apply.\", linking to https://creativecommons.org/licenses/by-sa/4.0/."@en .
+
+<https://folkets-lexikon.csc.kth.se/folkets/>
+    dcterms:title "Folkets lexikon (English–Swedish and Swedish–English)" ;
+    dcterms:creator "Viggo Kann and Joachim Hollman (Algoritmica HB) and the contributors of Folkets lexikon; hosted by KTH" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/2.5/> ;
+    rdfs:comment "https://folkets-lexikon.csc.kth.se/folkets/om.html — \"Både engelsk-svenska lexikonet och svensk-engelska lexikonet kan laddas ner i ett eget XML-format under Distributed Creative Commons Attribution-Share Alike 2.5 Generic license.\""@en .
+
+<#null>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "null"@de ;
+    solid-memo:back "0"@zxx .
+
+<#eins>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "eins"@de ;
+    solid-memo:back "1"@zxx .
+
+<#zwei>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "zwei"@de ;
+    solid-memo:back "2"@zxx .
+
+<#drei>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "drei"@de ;
+    solid-memo:back "3"@zxx .
+
+<#vier>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "vier"@de ;
+    solid-memo:back "4"@zxx .
+
+<#fuenf>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "fünf"@de ;
+    solid-memo:back "5"@zxx .
+
+<#sechs>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "sechs"@de ;
+    solid-memo:back "6"@zxx .
+
+<#sieben>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "sieben"@de ;
+    solid-memo:back "7"@zxx .
+
+<#acht>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "acht"@de ;
+    solid-memo:back "8"@zxx .
+
+<#neun>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "neun"@de ;
+    solid-memo:back "9"@zxx .
+
+<#zehn>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "zehn"@de ;
+    solid-memo:back "10"@zxx .
+
+<#elf>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "elf"@de ;
+    solid-memo:back "11"@zxx .
+
+<#zwoelf>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "zwölf"@de ;
+    solid-memo:back "12"@zxx .
+
+<#dreizehn>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "dreizehn"@de ;
+    solid-memo:back "13"@zxx .
+
+<#vierzehn>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "vierzehn"@de ;
+    solid-memo:back "14"@zxx .
+
+<#fuenfzehn>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "fünfzehn"@de ;
+    solid-memo:back "15"@zxx .
+
+<#sechzehn>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "sechzehn"@de ;
+    solid-memo:back "16"@zxx ;
+    solid-memo:backNote "Spelt without the s of sechs, as in sechzig."@en ,
+                        "Stavas utan s:et i sechs, liksom sechzig."@sv ,
+                        "sechzig처럼 sechs의 s 없이 써요."@ko ,
+                        "Se escribe sin la s de sechs, como sechzig."@es ,
+                        "S’écrit sans le s de sechs, comme sechzig."@fr .
+
+<#siebzehn>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "siebzehn"@de ;
+    solid-memo:back "17"@zxx ;
+    solid-memo:backNote "Spelt without the -en of sieben, as in siebzig."@en ,
+                        "Stavas utan -en i sieben, liksom siebzig."@sv ,
+                        "siebzig처럼 sieben의 -en 없이 써요."@ko ,
+                        "Se escribe sin el -en de sieben, como siebzig."@es ,
+                        "S’écrit sans le -en de sieben, comme siebzig."@fr .
+
+<#achtzehn>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "achtzehn"@de ;
+    solid-memo:back "18"@zxx .
+
+<#neunzehn>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "neunzehn"@de ;
+    solid-memo:back "19"@zxx .
+
+<#zwanzig>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "zwanzig"@de ;
+    solid-memo:back "20"@zxx .
+
+<#dreissig>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "dreißig"@de ;
+    solid-memo:back "30"@zxx ;
+    solid-memo:backNote "The only ten ending in -ßig; the others end in -zig (zwanzig, vierzig …)."@en ,
+                        "Det enda tiotalet som slutar på -ßig; de andra slutar på -zig (zwanzig, vierzig …)."@sv ,
+                        "-ßig로 끝나는 유일한 십의 배수예요. 나머지는 -zig로 끝나요(zwanzig, vierzig …)."@ko ,
+                        "La única decena que termina en -ßig; las demás terminan en -zig (zwanzig, vierzig …)."@es ,
+                        "La seule dizaine en -ßig ; les autres se terminent en -zig (zwanzig, vierzig …)."@fr .
+
+<#vierzig>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "vierzig"@de ;
+    solid-memo:back "40"@zxx .
+
+<#fuenfzig>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "fünfzig"@de ;
+    solid-memo:back "50"@zxx .
+
+<#sechzig>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "sechzig"@de ;
+    solid-memo:back "60"@zxx ;
+    solid-memo:backNote "Spelt without the s of sechs, as in sechzehn."@en ,
+                        "Stavas utan s:et i sechs, liksom sechzehn."@sv ,
+                        "sechzehn처럼 sechs의 s 없이 써요."@ko ,
+                        "Se escribe sin la s de sechs, como sechzehn."@es ,
+                        "S’écrit sans le s de sechs, comme sechzehn."@fr .
+
+<#siebzig>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "siebzig"@de ;
+    solid-memo:back "70"@zxx ;
+    solid-memo:backNote "Spelt without the -en of sieben, as in siebzehn."@en ,
+                        "Stavas utan -en i sieben, liksom siebzehn."@sv ,
+                        "siebzehn처럼 sieben의 -en 없이 써요."@ko ,
+                        "Se escribe sin el -en de sieben, como siebzehn."@es ,
+                        "S’écrit sans le -en de sieben, comme siebzehn."@fr .
+
+<#achtzig>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "achtzig"@de ;
+    solid-memo:back "80"@zxx .
+
+<#neunzig>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "neunzig"@de ;
+    solid-memo:back "90"@zxx .
+
+<#hundert>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "hundert"@de ;
+    solid-memo:back "100"@zxx ;
+    solid-memo:backNote "Also einhundert."@en ,
+                        "Även einhundert."@sv ,
+                        "einhundert라고도 해요."@ko ,
+                        "También einhundert."@es ,
+                        "Aussi einhundert."@fr .
+
+<#montag>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "der Montag"@de ;
+    solid-memo:back "Monday"@en ,
+                    "måndag"@sv ,
+                    "월요일"@ko ,
+                    "lunes"@es ,
+                    "lundi"@fr .
+
+<#dienstag>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "der Dienstag"@de ;
+    solid-memo:back "Tuesday"@en ,
+                    "tisdag"@sv ,
+                    "화요일"@ko ,
+                    "martes"@es ,
+                    "mardi"@fr .
+
+<#mittwoch>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "der Mittwoch"@de ;
+    solid-memo:back "Wednesday"@en ,
+                    "onsdag"@sv ,
+                    "수요일"@ko ,
+                    "miércoles"@es ,
+                    "mercredi"@fr .
+
+<#donnerstag>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "der Donnerstag"@de ;
+    solid-memo:back "Thursday"@en ,
+                    "torsdag"@sv ,
+                    "목요일"@ko ,
+                    "jueves"@es ,
+                    "jeudi"@fr .
+
+<#freitag>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "der Freitag"@de ;
+    solid-memo:back "Friday"@en ,
+                    "fredag"@sv ,
+                    "금요일"@ko ,
+                    "viernes"@es ,
+                    "vendredi"@fr .
+
+<#samstag>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "der Samstag"@de ;
+    solid-memo:back "Saturday"@en ,
+                    "lördag"@sv ,
+                    "토요일"@ko ,
+                    "sábado"@es ,
+                    "samedi"@fr ;
+    solid-memo:backNote "In northern and eastern Germany also der Sonnabend."@en ,
+                        "I norra och östra Tyskland även der Sonnabend."@sv ,
+                        "독일 북부와 동부에서는 der Sonnabend라고도 해요."@ko ,
+                        "En el norte y el este de Alemania, también der Sonnabend."@es ,
+                        "Dans le nord et l’est de l’Allemagne, aussi der Sonnabend."@fr .
+
+<#sonntag>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "der Sonntag"@de ;
+    solid-memo:back "Sunday"@en ,
+                    "söndag"@sv ,
+                    "일요일"@ko ,
+                    "domingo"@es ,
+                    "dimanche"@fr .
+
+<#januar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "der Januar"@de ;
+    solid-memo:back "January"@en ,
+                    "januari"@sv ,
+                    "1월"@ko ,
+                    "enero"@es ,
+                    "janvier"@fr ;
+    solid-memo:backNote "In Austria der Jänner is used."@en ,
+                        "I Österrike används der Jänner."@sv ,
+                        "오스트리아에서는 der Jänner를 써요."@ko ,
+                        "En Austria se usa der Jänner."@es ,
+                        "En Autriche, on emploie der Jänner."@fr .
+
+<#februar>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "der Februar"@de ;
+    solid-memo:back "February"@en ,
+                    "februari"@sv ,
+                    "2월"@ko ,
+                    "febrero"@es ,
+                    "février"@fr .
+
+<#maerz>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "der März"@de ;
+    solid-memo:back "March"@en ,
+                    "mars"@sv ,
+                    "3월"@ko ,
+                    "marzo"@es ,
+                    "mars"@fr .
+
+<#april>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "der April"@de ;
+    solid-memo:back "April"@en ,
+                    "april"@sv ,
+                    "4월"@ko ,
+                    "abril"@es ,
+                    "avril"@fr .
+
+<#mai>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "der Mai"@de ;
+    solid-memo:back "May"@en ,
+                    "maj"@sv ,
+                    "5월"@ko ,
+                    "mayo"@es ,
+                    "mai"@fr .
+
+<#juni>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "der Juni"@de ;
+    solid-memo:back "June"@en ,
+                    "juni"@sv ,
+                    "6월"@ko ,
+                    "junio"@es ,
+                    "juin"@fr .
+
+<#juli>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "der Juli"@de ;
+    solid-memo:back "July"@en ,
+                    "juli"@sv ,
+                    "7월"@ko ,
+                    "julio"@es ,
+                    "juillet"@fr .
+
+<#august>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "der August"@de ;
+    solid-memo:back "August"@en ,
+                    "augusti"@sv ,
+                    "8월"@ko ,
+                    "agosto"@es ,
+                    "août"@fr .
+
+<#september>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "der September"@de ;
+    solid-memo:back "September"@en ,
+                    "september"@sv ,
+                    "9월"@ko ,
+                    "septiembre"@es ,
+                    "septembre"@fr .
+
+<#oktober>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "der Oktober"@de ;
+    solid-memo:back "October"@en ,
+                    "oktober"@sv ,
+                    "10월"@ko ,
+                    "octubre"@es ,
+                    "octobre"@fr .
+
+<#november>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "der November"@de ;
+    solid-memo:back "November"@en ,
+                    "november"@sv ,
+                    "11월"@ko ,
+                    "noviembre"@es ,
+                    "novembre"@fr .
+
+<#dezember>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "der Dezember"@de ;
+    solid-memo:back "December"@en ,
+                    "december"@sv ,
+                    "12월"@ko ,
+                    "diciembre"@es ,
+                    "décembre"@fr .
+
+<#rot>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "rot"@de ;
+    solid-memo:back "red"@en ,
+                    "röd"@sv ,
+                    "빨간"@ko ,
+                    "rojo"@es ,
+                    "rouge"@fr .
+
+<#blau>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "blau"@de ;
+    solid-memo:back "blue"@en ,
+                    "blå"@sv ,
+                    "파란"@ko ,
+                    "azul"@es ,
+                    "bleu"@fr .
+
+<#gruen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "grün"@de ;
+    solid-memo:back "green"@en ,
+                    "grön"@sv ,
+                    "초록색의"@ko ,
+                    "verde"@es ,
+                    "vert"@fr .
+
+<#gelb>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "gelb"@de ;
+    solid-memo:back "yellow"@en ,
+                    "gul"@sv ,
+                    "노란"@ko ,
+                    "amarillo"@es ,
+                    "jaune"@fr .
+
+<#schwarz>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "schwarz"@de ;
+    solid-memo:back "black"@en ,
+                    "svart"@sv ,
+                    "검은"@ko ,
+                    "negro"@es ,
+                    "noir"@fr .
+
+<#weiss>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "weiß"@de ;
+    solid-memo:back "white"@en ,
+                    "vit"@sv ,
+                    "하얀"@ko ,
+                    "blanco"@es ,
+                    "blanc"@fr ;
+    solid-memo:backNote "Also a form of the verb wissen: ich weiß, “I know”."@en ,
+                        "Även en form av verbet wissen: ich weiß, ”jag vet”."@sv ,
+                        "동사 wissen의 형태이기도 해요: ich weiß, ‘나는 알아요’."@ko ,
+                        "También una forma del verbo wissen: ich weiß, «yo sé»."@es ,
+                        "Aussi une forme du verbe wissen : ich weiß, « je sais »."@fr .
+
+<#grau>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "grau"@de ;
+    solid-memo:back "grey"@en ,
+                    "grå"@sv ,
+                    "회색의"@ko ,
+                    "gris"@es ,
+                    "gris"@fr .
+
+<#braun>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "braun"@de ;
+    solid-memo:back "brown"@en ,
+                    "brun"@sv ,
+                    "갈색의"@ko ,
+                    "marrón"@es ,
+                    "brun"@fr .
+
+<#mutter>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "die Mutter"@de ;
+    solid-memo:back "mother"@en ,
+                    "mor"@sv ,
+                    "어머니"@ko ,
+                    "madre"@es ,
+                    "mère"@fr ;
+    solid-memo:backNote "Plural: die Mütter."@en ,
+                        "Plural: die Mütter."@sv ,
+                        "복수형: die Mütter."@ko ,
+                        "Plural: die Mütter."@es ,
+                        "Pluriel : die Mütter."@fr .
+
+<#vater>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "der Vater"@de ;
+    solid-memo:back "father"@en ,
+                    "far"@sv ,
+                    "아버지"@ko ,
+                    "padre"@es ,
+                    "père"@fr ;
+    solid-memo:backNote "Plural: die Väter."@en ,
+                        "Plural: die Väter."@sv ,
+                        "복수형: die Väter."@ko ,
+                        "Plural: die Väter."@es ,
+                        "Pluriel : die Väter."@fr .
+
+<#bruder>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "der Bruder"@de ;
+    solid-memo:back "brother"@en ,
+                    "bror"@sv ,
+                    "형제(형, 오빠, 남동생)"@ko ,
+                    "hermano"@es ,
+                    "frère"@fr ;
+    solid-memo:backNote "Plural: die Brüder."@en ,
+                        "Plural: die Brüder."@sv ,
+                        "복수형: die Brüder."@ko ,
+                        "Plural: die Brüder."@es ,
+                        "Pluriel : die Brüder."@fr .
+
+<#schwester>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "die Schwester"@de ;
+    solid-memo:back "sister"@en ,
+                    "syster"@sv ,
+                    "자매(언니, 누나, 여동생)"@ko ,
+                    "hermana"@es ,
+                    "sœur"@fr ;
+    solid-memo:backNote "Plural: die Schwestern. Also a nurse (short for Krankenschwester)."@en ,
+                        "Plural: die Schwestern. Även sjuksköterska (kortform av Krankenschwester; jfr svenska sjuksyster)."@sv ,
+                        "복수형: die Schwestern. 간호사를 뜻하기도 해요(Krankenschwester의 줄임말)."@ko ,
+                        "Plural: die Schwestern. También enfermera (forma abreviada de Krankenschwester)."@es ,
+                        "Pluriel : die Schwestern. Désigne aussi une infirmière (forme abrégée de Krankenschwester)."@fr .
+
+<#sohn>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "der Sohn"@de ;
+    solid-memo:back "son"@en ,
+                    "son"@sv ,
+                    "아들"@ko ,
+                    "hijo"@es ,
+                    "fils"@fr ;
+    solid-memo:backNote "Plural: die Söhne."@en ,
+                        "Plural: die Söhne."@sv ,
+                        "복수형: die Söhne."@ko ,
+                        "Plural: die Söhne."@es ,
+                        "Pluriel : die Söhne."@fr .
+
+<#tochter>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "die Tochter"@de ;
+    solid-memo:back "daughter"@en ,
+                    "dotter"@sv ,
+                    "딸"@ko ,
+                    "hija"@es ,
+                    "fille"@fr ;
+    solid-memo:backNote "Plural: die Töchter."@en ,
+                        "Plural: die Töchter."@sv ,
+                        "복수형: die Töchter."@ko ,
+                        "Plural: die Töchter."@es ,
+                        "Pluriel : die Töchter."@fr .
+
+<#grossvater>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "der Großvater"@de ;
+    solid-memo:back "grandfather"@en ,
+                    "farfar eller morfar"@sv ,
+                    "할아버지"@ko ,
+                    "abuelo"@es ,
+                    "grand-père"@fr ;
+    solid-memo:backNote "Plural: die Großväter."@en ,
+                        "Plural: die Großväter."@sv ,
+                        "복수형: die Großväter."@ko ,
+                        "Plural: die Großväter."@es ,
+                        "Pluriel : die Großväter."@fr .
+
+<#grossmutter>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "die Großmutter"@de ;
+    solid-memo:back "grandmother"@en ,
+                    "farmor eller mormor"@sv ,
+                    "할머니"@ko ,
+                    "abuela"@es ,
+                    "grand-mère"@fr ;
+    solid-memo:backNote "Plural: die Großmütter."@en ,
+                        "Plural: die Großmütter."@sv ,
+                        "복수형: die Großmütter."@ko ,
+                        "Plural: die Großmütter."@es ,
+                        "Pluriel : die Großmütter."@fr .
+
+<#hallo>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "hallo"@de ;
+    solid-memo:back "hello"@en ,
+                    "hej"@sv ,
+                    "안녕"@ko ,
+                    "hola"@es ,
+                    "salut"@fr .
+
+<#guten-morgen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "guten Morgen"@de ;
+    solid-memo:back "good morning"@en ,
+                    "god morgon"@sv ,
+                    "좋은 아침"@ko ,
+                    "buenos días"@es ,
+                    "bonjour"@fr .
+
+<#guten-tag>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "guten Tag"@de ;
+    solid-memo:back "hello, good day"@en ,
+                    "hej, god dag"@sv ,
+                    "안녕하세요"@ko ,
+                    "hola, buenos días"@es ,
+                    "bonjour"@fr ;
+    solid-memo:backNote "A greeting used during the day."@en ,
+                        "En hälsning som används under dagen."@sv ,
+                        "낮 동안 쓰는 인사예요."@ko ,
+                        "Saludo que se usa durante el día."@es ,
+                        "Salutation employée pendant la journée."@fr .
+
+<#guten-abend>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "guten Abend"@de ;
+    solid-memo:back "good evening"@en ,
+                    "god kväll"@sv ,
+                    "안녕하세요(저녁 인사)"@ko ,
+                    "buenas tardes"@es ,
+                    "bonsoir"@fr .
+
+<#gute-nacht>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "gute Nacht"@de ;
+    solid-memo:back "good night"@en ,
+                    "god natt"@sv ,
+                    "안녕히 주무세요"@ko ,
+                    "buenas noches"@es ,
+                    "bonne nuit"@fr .
+
+<#tschuess>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "tschüss"@de ;
+    solid-memo:back "bye"@en ,
+                    "hej då"@sv ,
+                    "잘 가"@ko ,
+                    "chao"@es ,
+                    "tchao"@fr ;
+    solid-memo:backNote "A goodbye among friends. Also spelt tschüs."@en ,
+                        "Avskedshälsning bland vänner. Stavas också tschüs."@sv ,
+                        "친구 사이에서 하는 작별 인사예요. tschüs로도 써요."@ko ,
+                        "Despedida entre amigos. También se escribe tschüs."@es ,
+                        "Pour se dire au revoir entre amis. S’écrit aussi tschüs."@fr .
+
+<#auf-wiedersehen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "auf Wiedersehen"@de ;
+    solid-memo:back "goodbye"@en ,
+                    "adjö, hej då"@sv ,
+                    "안녕히 가세요, 안녕히 계세요"@ko ,
+                    "adiós"@es ,
+                    "au revoir"@fr ;
+    solid-memo:backNote "Also rendered “see you again”."@en ,
+                        "Återges även ”vi ses igen”."@sv ,
+                        "‘또 만나요’로 옮기기도 해요."@ko ,
+                        "También se traduce «hasta la vista»."@es ,
+                        "Se traduit aussi « au plaisir de vous revoir »."@fr .
+
+<#danke>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "danke"@de ;
+    solid-memo:back "thank you, thanks"@en ,
+                    "tack"@sv ,
+                    "고맙습니다, 고마워요"@ko ,
+                    "gracias"@es ,
+                    "merci"@fr .
+
+<#bitte>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "bitte"@de ;
+    solid-memo:back "please"@en ,
+                    "snälla"@sv ,
+                    "부디, 제발"@ko ,
+                    "por favor"@es ,
+                    "s’il vous plaît"@fr ;
+    solid-memo:backNote "Also the reply to danke (“you’re welcome”) and Wie bitte? (“Pardon?”). Swedish requests often end with tack instead."@en ,
+                        "Även svaret på danke (”varsågod”) och Wie bitte? (”Förlåt?”). På svenska avslutas en begäran ofta med tack i stället."@sv ,
+                        "danke에 대한 대답(‘천만에요’)과 Wie bitte?(‘뭐라고요?’)에도 써요. 스웨덴어에서는 부탁할 때 대신 끝에 tack을 붙이는 경우가 많아요."@ko ,
+                        "También es la respuesta a danke («de nada») y Wie bitte? («¿Perdón?»). En sueco, una petición suele terminar con tack."@es ,
+                        "Aussi la réponse à danke (« de rien ») et Wie bitte? (« Pardon ? »). En suédois, une demande se termine souvent plutôt par tack."@fr .
+
+<#entschuldigung>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "Entschuldigung"@de ;
+    solid-memo:back "excuse me, sorry"@en ,
+                    "ursäkta, förlåt"@sv ,
+                    "실례합니다, 미안합니다"@ko ,
+                    "disculpe, perdón"@es ,
+                    "excusez-moi, pardon"@fr ;
+    solid-memo:backNote "Also the noun die Entschuldigung, “apology” (plural Entschuldigungen)."@en ,
+                        "Även substantivet die Entschuldigung, ”ursäkt” (plural Entschuldigungen)."@sv ,
+                        "명사 die Entschuldigung(‘사과, 사죄’, 복수형 Entschuldigungen)이기도 해요."@ko ,
+                        "También el sustantivo die Entschuldigung, «disculpa» (plural Entschuldigungen)."@es ,
+                        "Aussi le nom die Entschuldigung, « excuse » (pluriel Entschuldigungen)."@fr .
+
+<#ja>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "ja"@de ;
+    solid-memo:back "yes"@en ,
+                    "ja"@sv ,
+                    "네"@ko ,
+                    "sí"@es ,
+                    "oui"@fr .
+
+<#nein>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "nein"@de ;
+    solid-memo:back "no"@en ,
+                    "nej"@sv ,
+                    "아니요"@ko ,
+                    "no"@es ,
+                    "non"@fr .
+
+<#haus>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "das Haus"@de ;
+    solid-memo:back "house"@en ,
+                    "hus"@sv ,
+                    "집"@ko ,
+                    "casa"@es ,
+                    "maison"@fr ;
+    solid-memo:backNote "Plural: die Häuser."@en ,
+                        "Plural: die Häuser."@sv ,
+                        "복수형: die Häuser."@ko ,
+                        "Plural: die Häuser."@es ,
+                        "Pluriel : die Häuser."@fr .
+
+<#wasser>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "das Wasser"@de ;
+    solid-memo:back "water"@en ,
+                    "vatten"@sv ,
+                    "물"@ko ,
+                    "agua"@es ,
+                    "eau"@fr .
+
+<#brot>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "das Brot"@de ;
+    solid-memo:back "bread"@en ,
+                    "bröd"@sv ,
+                    "빵"@ko ,
+                    "pan"@es ,
+                    "pain"@fr ;
+    solid-memo:backNote "Plural: die Brote."@en ,
+                        "Plural: die Brote."@sv ,
+                        "복수형: die Brote."@ko ,
+                        "Plural: die Brote."@es ,
+                        "Pluriel : die Brote."@fr .
+
+<#milch>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "die Milch"@de ;
+    solid-memo:back "milk"@en ,
+                    "mjölk"@sv ,
+                    "우유"@ko ,
+                    "leche"@es ,
+                    "lait"@fr .
+
+<#apfel>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "der Apfel"@de ;
+    solid-memo:back "apple"@en ,
+                    "äpple"@sv ,
+                    "사과"@ko ,
+                    "manzana"@es ,
+                    "pomme"@fr ;
+    solid-memo:backNote "Plural: die Äpfel."@en ,
+                        "Plural: die Äpfel."@sv ,
+                        "복수형: die Äpfel."@ko ,
+                        "Plural: die Äpfel."@es ,
+                        "Pluriel : die Äpfel."@fr .
+
+<#buch>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "das Buch"@de ;
+    solid-memo:back "book"@en ,
+                    "bok"@sv ,
+                    "책"@ko ,
+                    "libro"@es ,
+                    "livre"@fr ;
+    solid-memo:backNote "Plural: die Bücher."@en ,
+                        "Plural: die Bücher."@sv ,
+                        "복수형: die Bücher."@ko ,
+                        "Plural: die Bücher."@es ,
+                        "Pluriel : die Bücher."@fr .
+
+<#tisch>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "der Tisch"@de ;
+    solid-memo:back "table"@en ,
+                    "bord"@sv ,
+                    "탁자"@ko ,
+                    "mesa"@es ,
+                    "table"@fr ;
+    solid-memo:backNote "Plural: die Tische."@en ,
+                        "Plural: die Tische."@sv ,
+                        "복수형: die Tische."@ko ,
+                        "Plural: die Tische."@es ,
+                        "Pluriel : die Tische."@fr .
+
+<#stuhl>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "der Stuhl"@de ;
+    solid-memo:back "chair"@en ,
+                    "stol"@sv ,
+                    "의자"@ko ,
+                    "silla"@es ,
+                    "chaise"@fr ;
+    solid-memo:backNote "Plural: die Stühle."@en ,
+                        "Plural: die Stühle."@sv ,
+                        "복수형: die Stühle."@ko ,
+                        "Plural: die Stühle."@es ,
+                        "Pluriel : die Stühle."@fr .
+
+<#tuer>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "die Tür"@de ;
+    solid-memo:back "door"@en ,
+                    "dörr"@sv ,
+                    "문"@ko ,
+                    "puerta"@es ,
+                    "porte"@fr ;
+    solid-memo:backNote "Plural: die Türen."@en ,
+                        "Plural: die Türen."@sv ,
+                        "복수형: die Türen."@ko ,
+                        "Plural: die Türen."@es ,
+                        "Pluriel : die Türen."@fr .
+
+<#fenster>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "das Fenster"@de ;
+    solid-memo:back "window"@en ,
+                    "fönster"@sv ,
+                    "창문"@ko ,
+                    "ventana"@es ,
+                    "fenêtre"@fr ;
+    solid-memo:backNote "Plural: die Fenster (unchanged)."@en ,
+                        "Plural: die Fenster (oförändrat)."@sv ,
+                        "복수형: die Fenster(형태 변화 없음)."@ko ,
+                        "Plural: die Fenster (sin cambios)."@es ,
+                        "Pluriel : die Fenster (invariable)."@fr .
+
+<#hund>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "der Hund"@de ;
+    solid-memo:back "dog"@en ,
+                    "hund"@sv ,
+                    "개"@ko ,
+                    "perro"@es ,
+                    "chien"@fr ;
+    solid-memo:backNote "Plural: die Hunde."@en ,
+                        "Plural: die Hunde."@sv ,
+                        "복수형: die Hunde."@ko ,
+                        "Plural: die Hunde."@es ,
+                        "Pluriel : die Hunde."@fr .
+
+<#katze>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "die Katze"@de ;
+    solid-memo:back "cat"@en ,
+                    "katt"@sv ,
+                    "고양이"@ko ,
+                    "gato"@es ,
+                    "chat"@fr ;
+    solid-memo:backNote "Plural: die Katzen."@en ,
+                        "Plural: die Katzen."@sv ,
+                        "복수형: die Katzen."@ko ,
+                        "Plural: die Katzen."@es ,
+                        "Pluriel : die Katzen."@fr .
+
+<#stadt>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "die Stadt"@de ;
+    solid-memo:back "town, city"@en ,
+                    "stad"@sv ,
+                    "도시"@ko ,
+                    "ciudad"@es ,
+                    "ville"@fr ;
+    solid-memo:backNote "Plural: die Städte."@en ,
+                        "Plural: die Städte."@sv ,
+                        "복수형: die Städte."@ko ,
+                        "Plural: die Städte."@es ,
+                        "Pluriel : die Städte."@fr .
+
+<#strasse>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "die Straße"@de ;
+    solid-memo:back "street, road"@en ,
+                    "gata, väg"@sv ,
+                    "거리, 길"@ko ,
+                    "calle, carretera"@es ,
+                    "rue, route"@fr ;
+    solid-memo:backNote "Plural: die Straßen. In Switzerland written Strasse."@en ,
+                        "Plural: die Straßen. I Schweiz skrivs det Strasse."@sv ,
+                        "복수형: die Straßen. 스위스에서는 Strasse로 써요."@ko ,
+                        "Plural: die Straßen. En Suiza se escribe Strasse."@es ,
+                        "Pluriel : die Straßen. En Suisse, on écrit Strasse."@fr .
+
+<#schule>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "die Schule"@de ;
+    solid-memo:back "school"@en ,
+                    "skola"@sv ,
+                    "학교"@ko ,
+                    "escuela"@es ,
+                    "école"@fr ;
+    solid-memo:backNote "Plural: die Schulen."@en ,
+                        "Plural: die Schulen."@sv ,
+                        "복수형: die Schulen."@ko ,
+                        "Plural: die Schulen."@es ,
+                        "Pluriel : die Schulen."@fr .
+
+<#mann>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "der Mann"@de ;
+    solid-memo:back "man"@en ,
+                    "man"@sv ,
+                    "남자"@ko ,
+                    "hombre"@es ,
+                    "homme"@fr ;
+    solid-memo:backNote "Plural: die Männer. Also “husband”."@en ,
+                        "Plural: die Männer. Betyder också ”make”."@sv ,
+                        "복수형: die Männer. ‘남편’이라는 뜻도 있어요."@ko ,
+                        "Plural: die Männer. También «marido»."@es ,
+                        "Pluriel : die Männer. Aussi « mari »."@fr .
+
+<#frau>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "die Frau"@de ;
+    solid-memo:back "woman"@en ,
+                    "kvinna"@sv ,
+                    "여자"@ko ,
+                    "mujer"@es ,
+                    "femme"@fr ;
+    solid-memo:backNote "Plural: die Frauen. Also “wife”, and the title Mrs/Ms: Frau Kunze."@en ,
+                        "Plural: die Frauen. Betyder också ”fru, hustru” och är titeln fru: Frau Kunze."@sv ,
+                        "복수형: die Frauen. ‘아내’라는 뜻도 있고, 기혼·미혼 여성의 존칭으로도 써요: Frau Kunze."@ko ,
+                        "Plural: die Frauen. También «esposa», y el tratamiento de señora: Frau Kunze."@es ,
+                        "Pluriel : die Frauen. Aussi « épouse », et le titre Madame : Frau Kunze."@fr .
+
+<#kind>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "das Kind"@de ;
+    solid-memo:back "child"@en ,
+                    "barn"@sv ,
+                    "아이"@ko ,
+                    "niño"@es ,
+                    "enfant"@fr ;
+    solid-memo:backNote "Plural: die Kinder."@en ,
+                        "Plural: die Kinder."@sv ,
+                        "복수형: die Kinder."@ko ,
+                        "Plural: die Kinder."@es ,
+                        "Pluriel : die Kinder."@fr .
+
+<#geld>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "das Geld"@de ;
+    solid-memo:back "money"@en ,
+                    "pengar"@sv ,
+                    "돈"@ko ,
+                    "dinero"@es ,
+                    "argent"@fr .
+
+<#arbeit>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "die Arbeit"@de ;
+    solid-memo:back "work, job"@en ,
+                    "arbete, jobb"@sv ,
+                    "일, 직업"@ko ,
+                    "trabajo, empleo"@es ,
+                    "travail, emploi"@fr .
+
+<#hand>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "die Hand"@de ;
+    solid-memo:back "hand"@en ,
+                    "hand"@sv ,
+                    "손"@ko ,
+                    "mano"@es ,
+                    "main"@fr ;
+    solid-memo:backNote "Plural: die Hände."@en ,
+                        "Plural: die Hände."@sv ,
+                        "복수형: die Hände."@ko ,
+                        "Plural: die Hände."@es ,
+                        "Pluriel : die Hände."@fr .
+
+<#tag>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "der Tag"@de ;
+    solid-memo:back "day"@en ,
+                    "dag"@sv ,
+                    "날"@ko ,
+                    "día"@es ,
+                    "jour"@fr ;
+    solid-memo:backNote "Plural: die Tage."@en ,
+                        "Plural: die Tage."@sv ,
+                        "복수형: die Tage."@ko ,
+                        "Plural: die Tage."@es ,
+                        "Pluriel : die Tage."@fr .
+
+<#nacht>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "die Nacht"@de ;
+    solid-memo:back "night"@en ,
+                    "natt"@sv ,
+                    "밤"@ko ,
+                    "noche"@es ,
+                    "nuit"@fr ;
+    solid-memo:backNote "Plural: die Nächte."@en ,
+                        "Plural: die Nächte."@sv ,
+                        "복수형: die Nächte."@ko ,
+                        "Plural: die Nächte."@es ,
+                        "Pluriel : die Nächte."@fr .
+
+<#jahr>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "das Jahr"@de ;
+    solid-memo:back "year"@en ,
+                    "år"@sv ,
+                    "해"@ko ,
+                    "año"@es ,
+                    "an"@fr ;
+    solid-memo:backNote "Plural: die Jahre."@en ,
+                        "Plural: die Jahre."@sv ,
+                        "복수형: die Jahre."@ko ,
+                        "Plural: die Jahre."@es ,
+                        "Pluriel : die Jahre."@fr .
+
+<#woche>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "die Woche"@de ;
+    solid-memo:back "week"@en ,
+                    "vecka"@sv ,
+                    "주"@ko ,
+                    "semana"@es ,
+                    "semaine"@fr ;
+    solid-memo:backNote "Plural: die Wochen."@en ,
+                        "Plural: die Wochen."@sv ,
+                        "복수형: die Wochen."@ko ,
+                        "Plural: die Wochen."@es ,
+                        "Pluriel : die Wochen."@fr .
+
+<#gross>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "groß"@de ;
+    solid-memo:back "big, large"@en ,
+                    "stor"@sv ,
+                    "큰, 커다란"@ko ,
+                    "grande"@es ,
+                    "grand, gros"@fr ;
+    solid-memo:backNote "Of people also “tall”: Er ist groß."@en ,
+                        "Om personer även ”lång”: Er ist groß."@sv ,
+                        "사람에 대해서는 ‘키가 큰’이라는 뜻도 있어요: Er ist groß."@ko ,
+                        "Referido a personas, también «alto»: Er ist groß."@es ,
+                        "Pour une personne, aussi « de grande taille » : Er ist groß."@fr .
+
+<#klein>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "klein"@de ;
+    solid-memo:back "small, little"@en ,
+                    "liten"@sv ,
+                    "작은"@ko ,
+                    "pequeño"@es ,
+                    "petit"@fr .
+
+<#gut>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "gut"@de ;
+    solid-memo:back "good"@en ,
+                    "bra, god"@sv ,
+                    "좋은"@ko ,
+                    "bueno"@es ,
+                    "bon"@fr .
+
+<#schlecht>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "schlecht"@de ;
+    solid-memo:back "bad"@en ,
+                    "dålig"@sv ,
+                    "나쁜"@ko ,
+                    "malo"@es ,
+                    "mauvais"@fr .
+
+<#neu>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "neu"@de ;
+    solid-memo:back "new"@en ,
+                    "ny"@sv ,
+                    "새로운"@ko ,
+                    "nuevo"@es ,
+                    "nouveau"@fr .
+
+<#alt>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "alt"@de ;
+    solid-memo:back "old"@en ,
+                    "gammal"@sv ,
+                    "늙은, 오래된"@ko ,
+                    "viejo"@es ,
+                    "vieux"@fr .
+
+<#kalt>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "kalt"@de ;
+    solid-memo:back "cold"@en ,
+                    "kall"@sv ,
+                    "추운, 차가운"@ko ,
+                    "frío"@es ,
+                    "froid"@fr .
+
+<#warm>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "warm"@de ;
+    solid-memo:back "warm"@en ,
+                    "varm"@sv ,
+                    "따뜻한"@ko ,
+                    "cálido"@es ,
+                    "chaud"@fr .
+
+<#sein>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "sein"@de ;
+    solid-memo:frontNote "verb"@en ,
+                         "verb"@sv ,
+                         "동사"@ko ,
+                         "verbo"@es ,
+                         "verbe"@fr ;
+    solid-memo:back "to be"@en ,
+                    "att vara"@sv ,
+                    "이다, 있다"@ko ,
+                    "ser, estar"@es ,
+                    "être"@fr ;
+    solid-memo:backNote "Also the possessive sein, “his”: sein Sohn."@en ,
+                        "Även possessivt sein, ”hans”: sein Sohn."@sv ,
+                        "소유 관사 sein(‘그의’)이기도 해요: sein Sohn."@ko ,
+                        "También el posesivo sein, «su (de él)»: sein Sohn."@es ,
+                        "Aussi le possessif sein, « son (à lui) » : sein Sohn."@fr .
+
+<#haben>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "haben"@de ;
+    solid-memo:back "to have"@en ,
+                    "att ha"@sv ,
+                    "가지다"@ko ,
+                    "tener"@es ,
+                    "avoir"@fr .
+
+<#gehen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "gehen"@de ;
+    solid-memo:back "to go, to walk"@en ,
+                    "att gå"@sv ,
+                    "가다, 걷다"@ko ,
+                    "ir, andar"@es ,
+                    "aller, marcher"@fr ;
+    solid-memo:backNote "Also in Wie geht es Ihnen? “How are you?” (polite Sie form)."@en ,
+                        "Även i Wie geht es Ihnen? ”Hur står det till?” (artigt tilltal med Sie)."@sv ,
+                        "Wie geht es Ihnen?(‘어떻게 지내세요?’, 존칭 Sie를 쓴 형태)에도 쓰여요."@ko ,
+                        "También en Wie geht es Ihnen? «¿Cómo está usted?» (forma de cortesía con Sie)."@es ,
+                        "Aussi dans Wie geht es Ihnen? « Comment allez-vous ? » (forme de politesse avec Sie)."@fr .
+
+<#kommen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "kommen"@de ;
+    solid-memo:back "to come"@en ,
+                    "att komma"@sv ,
+                    "오다"@ko ,
+                    "venir"@es ,
+                    "venir"@fr .
+
+<#machen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "machen"@de ;
+    solid-memo:back "to do, to make"@en ,
+                    "att göra"@sv ,
+                    "하다, 만들다"@ko ,
+                    "hacer"@es ,
+                    "faire"@fr .
+
+<#sprechen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "sprechen"@de ;
+    solid-memo:back "to speak, to talk"@en ,
+                    "att tala, att prata"@sv ,
+                    "말하다, 이야기하다"@ko ,
+                    "hablar"@es ,
+                    "parler"@fr .
+
+<#essen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "essen"@de ;
+    solid-memo:back "to eat"@en ,
+                    "att äta"@sv ,
+                    "먹다"@ko ,
+                    "comer"@es ,
+                    "manger"@fr .
+
+<#trinken>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "trinken"@de ;
+    solid-memo:back "to drink"@en ,
+                    "att dricka"@sv ,
+                    "마시다"@ko ,
+                    "beber"@es ,
+                    "boire"@fr .
+
+<#wohnen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "wohnen"@de ;
+    solid-memo:back "to live (reside)"@en ,
+                    "att bo"@sv ,
+                    "살다(거주하다)"@ko ,
+                    "vivir (residir)"@es ,
+                    "habiter"@fr .
+
+<#lesen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "lesen"@de ;
+    solid-memo:back "to read"@en ,
+                    "att läsa"@sv ,
+                    "읽다"@ko ,
+                    "leer"@es ,
+                    "lire"@fr .
+
+<#schreiben>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "schreiben"@de ;
+    solid-memo:back "to write"@en ,
+                    "att skriva"@sv ,
+                    "쓰다"@ko ,
+                    "escribir"@es ,
+                    "écrire"@fr .
+
+<#schlafen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "schlafen"@de ;
+    solid-memo:back "to sleep"@en ,
+                    "att sova"@sv ,
+                    "자다"@ko ,
+                    "dormir"@es ,
+                    "dormir"@fr .
+
+<#arbeiten>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "arbeiten"@de ;
+    solid-memo:back "to work"@en ,
+                    "att arbeta"@sv ,
+                    "일하다"@ko ,
+                    "trabajar"@es ,
+                    "travailler"@fr .
+
+<#kaufen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "kaufen"@de ;
+    solid-memo:back "to buy"@en ,
+                    "att köpa"@sv ,
+                    "사다"@ko ,
+                    "comprar"@es ,
+                    "acheter"@fr .
+
+<#sehen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "sehen"@de ;
+    solid-memo:back "to see"@en ,
+                    "att se"@sv ,
+                    "보다"@ko ,
+                    "ver"@es ,
+                    "voir"@fr .
+
+<#sagen>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 4 ;
+    dcterms:created "2026-10-04T12:00:00.000Z"^^xsd:dateTime ;
+    solid-memo:front "sagen"@de ;
+    solid-memo:back "to say"@en ,
+                    "att säga"@sv ,
+                    "말하다"@ko ,
+                    "decir"@es ,
+                    "dire"@fr .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
