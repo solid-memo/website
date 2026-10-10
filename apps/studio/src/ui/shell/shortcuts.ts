@@ -10,6 +10,7 @@ export type ShortcutScope = "studio" | "cards";
 export type Section = "decks" | "groups" | "drafts" | "releases" | "health" | "library" | "transfer" | "instances";
 
 export type ShortcutId =
+  | "palette"
   | "help"
   | "filter"
   | "nextRegion"
@@ -52,6 +53,9 @@ const GO_KEYS: Record<Section, string> = {
 
 /** Every shortcut of the Studio, in the order the key help lists them. */
 export const SHORTCUTS: readonly Shortcut[] = [
+  // Ctrl+K, or Cmd+K on a Mac: the key help lists the two as one.
+  { id: "palette", keys: "Ctrl+k", scope: "studio", whileTyping: true, help: "Ctrl+K" },
+  { id: "palette", keys: "Meta+k", scope: "studio", whileTyping: true, help: null },
   { id: "help", keys: "?", scope: "studio" },
   { id: "filter", keys: "/", scope: "studio" },
   { id: "nextRegion", keys: "F6", scope: "studio", whileTyping: true },
@@ -67,6 +71,11 @@ export const SHORTCUTS: readonly Shortcut[] = [
   { id: "select", keys: "x", scope: "cards" },
   { id: "open", keys: "Enter", scope: "cards" },
 ];
+
+/** A shortcut's keys, as the keymap names them (its first, for one with several). */
+export function keysOf(id: ShortcutId): string {
+  return SHORTCUTS.find((shortcut) => shortcut.id === id)!.keys;
+}
 
 /** How long the second key of a chord may wait for, in milliseconds. */
 export const CHORD_TIMEOUT = 1500;

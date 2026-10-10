@@ -450,6 +450,8 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
     <StudioShell
       banner={banner}
       backHref={instanceUrl === null ? "#/" : decksHref(instanceUrl)}
+      route={route}
+      instances={instances ?? []}
       instance={activeInstance}
       switcher={activeInstance !== null && <InstanceSwitcher instances={instances!} instance={activeInstance} />}
       sidebar={activeInstance === null ? null : <StudioSidebar useCases={useCases} instance={activeInstance} route={route!} />}

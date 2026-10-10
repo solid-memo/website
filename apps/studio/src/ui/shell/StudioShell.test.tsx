@@ -5,7 +5,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { DRAFT_URL, instanceA } from "../../test/fixtures";
 import { DraftWaiting, type EditorReport } from "../draftEditor";
 import { studioRouteToHash, type StudioRoute } from "../router";
+import type { ScreenCommand } from "./commandIndex";
 import { StudioShell } from "./StudioShell";
+import { useScreenCommands } from "./useScreenCommands";
 import { NARROW, type ContextTab } from "./workspaceLayout";
 
 /** Says what a draft editor would: how many of its changes wait. */
@@ -13,6 +15,12 @@ let report: (editor: object, report: EditorReport) => void;
 function Editor() {
   report = useContext(DraftWaiting);
   return <p>An editor</p>;
+}
+
+/** A screen with commands of its own in the palette. */
+function Commands({ commands }: { commands: ScreenCommand[] }) {
+  useScreenCommands(commands);
+  return null;
 }
 
 const groups: StudioRoute = { screen: "groups", instanceUrl: instanceA.url };
@@ -26,6 +34,7 @@ function renderShell(
     noInstance?: true;
     filter?: true;
     tabs?: readonly ContextTab[];
+    commands?: ScreenCommand[];
   } = {},
 ) {
   const queryClient = props.queryClient ?? new QueryClient();
@@ -34,6 +43,8 @@ function renderShell(
       <StudioShell
         banner={<p>The masthead</p>}
         backHref="#/decks"
+        route={props.noInstance ? { screen: "instances" } : groups}
+        instances={[instanceA]}
         instance={props.noInstance ? null : instanceA}
         switcher={<button type="button">Deck set A</button>}
         sidebar={
@@ -50,6 +61,7 @@ function renderShell(
         onGo={props.onGo ?? (() => undefined)}
       >
         <Editor />
+        {props.commands && <Commands commands={props.commands} />}
         {props.filter && (
           <label>
             Filter
@@ -182,6 +194,8 @@ describe("StudioShell", () => {
     expect(within(help).getByText("Go to the decks").previousElementSibling).toHaveTextContent("g d");
     expect(within(help).getByText("Go to the previous region").previousElementSibling!.querySelectorAll("kbd")).toHaveLength(2);
     expect(within(help).getByText("Open the card")).toBeInTheDocument();
+    // Ctrl+K and Cmd+K as one.
+    expect(within(help).getByText("Search, go to or run a command").previousElementSibling).toHaveTextContent(/^Ctrl\+K$/);
     // The nine tabs' keys as one.
     expect(within(help).getByText("Go to a tab of the deck or draft by its number").previousElementSibling).toHaveTextContent(/^1–9$/);
     expect(within(help).getAllByText("Go to a tab of the deck or draft by its number")).toHaveLength(1);
@@ -394,5 +408,49 @@ describe("StudioShell", () => {
     document.body.focus();
     expect(press("]")).toBe(false);
     expect(press("1")).toBe(false);
+  });
+  it("opens the palette with Ctrl+K or Cmd+K, from a field too, or from its button, and goes where an entry does, as a link does", () => {
+    const onGo = vi.fn();
+    renderShell({ onGo, filter: true });
+    const button = screen.getByRole("button", { name: "Search or run…" });
+    expect(button).toHaveAttribute("aria-keyshortcuts", "Control+K Meta+K");
+    screen.getByRole("searchbox", { name: "Filter" }).focus();
+    expect(press("k", { ctrlKey: true })).toBe(true);
+    const palette = screen.getByRole("dialog", { name: "Quick open" });
+    expect(within(palette).getByRole("combobox")).toHaveFocus();
+    fireEvent.click(within(palette).getByRole("button", { name: "Close" }));
+    expect(screen.queryByRole("dialog")).toBeNull();
+    document.body.focus();
+    expect(press("k", { metaKey: true })).toBe(true);
+    fireEvent.click(within(screen.getByRole("dialog")).getByRole("option", { name: "Drafts" }));
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(onGo).toHaveBeenCalledWith(drafts);
+    fireEvent.click(button);
+    expect(screen.getByRole("dialog", { name: "Quick open" })).toBeInTheDocument();
+  });
+
+  it("lists the screen's commands and the shell's in the palette, and does one once the palette has closed and given the focus back", () => {
+    const run = vi.fn(() => expect(screen.queryByRole("dialog")).toBeNull());
+    renderShell({ commands: [{ id: "checkAgain", label: "Check again", run }] });
+    const button = screen.getByRole("button", { name: "Search or run…" });
+    const choose = (name: string) => {
+      button.focus();
+      fireEvent.click(button);
+      fireEvent.click(within(screen.getByRole("dialog", { name: "Quick open" })).getByRole("option", { name }));
+    };
+    choose("Check again");
+    expect(run).toHaveBeenCalledTimes(1);
+    expect(button).toHaveFocus();
+    choose("Show or hide the sidebar");
+    expect(sidebar()).not.toBeVisible();
+    choose("Show the keyboard shortcuts");
+    expect(screen.getByRole("dialog", { name: "Keyboard shortcuts" })).toBeInTheDocument();
+  });
+
+  it("offers no sidebar in the palette without one", () => {
+    renderShell({ noInstance: true });
+    fireEvent.click(screen.getByRole("button", { name: "Search or run…" }));
+    expect(within(screen.getByRole("dialog")).queryByRole("option", { name: "Show or hide the sidebar" })).toBeNull();
+    expect(within(screen.getByRole("dialog")).getByRole("option", { name: "Show the keyboard shortcuts" })).toBeInTheDocument();
   });
 });

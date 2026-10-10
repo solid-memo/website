@@ -34,7 +34,7 @@ export function KeyHelp({ onClose }: { onClose: () => void }) {
 }
 
 /** A shortcut's keys, each its own `kbd`: a chord's one after the other, a modifier's joined with "+". */
-function Keys({ keys }: { keys: string }) {
+export function Keys({ keys }: { keys: string }) {
   return (
     <>
       {keys.split(" ").map((press, at) => (

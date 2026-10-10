@@ -6,7 +6,9 @@ import { useI18n } from "@solid-memo/ui/i18n";
  * A modal dialog, open while it is shown: the browser's own `<dialog>`,
  * which keeps the focus in it and closes on Escape. Its heading names it.
  * Its Close button closes it too, and closed (`onClose`, which stops
- * showing it), the focus goes back where it was before it opened. While
+ * showing it), the focus goes back where it was before it opened.
+ * Opened, the focus goes to the field marked `autoFocus` in it, if one
+ * is, as the browser does (and the test DOM does not). While
  * it is open, the Studio's shortcuts leave its keys to it.
  */
 export function Dialog({
@@ -26,6 +28,7 @@ export function Dialog({
   useEffect(() => {
     const opener = document.activeElement as HTMLElement;
     ref.current!.showModal();
+    ref.current!.querySelector<HTMLElement>("[autofocus]")?.focus();
     return () => opener.focus();
   }, []);
 

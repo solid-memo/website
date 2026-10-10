@@ -29,13 +29,14 @@ instance bar, each deck's actions menu and the deck page have this
 `studioHref` spells that route itself, and a Studio test checks that
 the two agree.
 
-Within the Studio, its sidebar's sections, decks and drafts, and the
-tabs of a deck or a draft, are links to its routes: following one
-pushes a history entry, as any link does, and none adds a route or a
-parameter of its own. The chrome around a screen (which section, deck
-or draft the sidebar marks, which tabs there are and which is current)
-is worked out from the route alone, and hiding the sidebar changes no
-URL ([studio.md](studio.md#layout)).
+Within the Studio, its sidebar's sections, decks and drafts, the
+tabs of a deck or a draft, and the palette's entries that go somewhere
+([studio.md](studio.md#quick-open-and-commands)), are links to its
+routes: following one pushes a history entry, as any link does, and
+none adds a route or a parameter of its own. The chrome around a
+screen (which section, deck or draft the sidebar marks, which tabs
+there are and which is current) is worked out from the route alone,
+and hiding the sidebar changes no URL ([studio.md](studio.md#layout)).
 
 ## Hash routing, not pathname routing
 

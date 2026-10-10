@@ -42,3 +42,34 @@ export function rememberPrefs(prefs: StudioPrefs, storage: () => Storage = () =>
     // Without storage the layout starts from the defaults on the next visit; nothing else depends on it.
   }
 }
+
+/** How many of the palette's entries the device remembers as used last. */
+export const RECENT_LIMIT = 8;
+
+const RECENT_KEY = "solid-memo:studioRecent.v1";
+
+/**
+ * The palette's entries used last on this device, the last first, by
+ * their ids (commandIndex.ts). Like the layout, kept in the browser's
+ * storage; storage that is missing, refuses or holds something else
+ * gives none.
+ */
+export function recentCommands(storage: () => Storage = () => globalThis.localStorage): string[] {
+  let stored: unknown;
+  try {
+    stored = JSON.parse(storage().getItem(RECENT_KEY) ?? "[]");
+  } catch {
+    return [];
+  }
+  return Array.isArray(stored) ? stored.filter((id): id is string => typeof id === "string").slice(0, RECENT_LIMIT) : [];
+}
+
+/** Notes an entry of the palette as the one used last. */
+export function rememberCommand(id: string, storage: () => Storage = () => globalThis.localStorage): void {
+  const recent = [id, ...recentCommands(storage).filter((each) => each !== id)].slice(0, RECENT_LIMIT);
+  try {
+    storage().setItem(RECENT_KEY, JSON.stringify(recent));
+  } catch {
+    // Without storage the palette lists no entry as used last; nothing else depends on it.
+  }
+}

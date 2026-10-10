@@ -7,6 +7,7 @@ import type { RepairPlan } from "@solid-memo/domain/repair";
 import { summarize, type DocumentReport, type Violation } from "@solid-memo/domain/validation";
 import type { MarkdownProblem } from "@solid-memo/ui/MarkdownEditing";
 import { DeckHealthScreen, InstanceHealthScreen, placeText, type RepairActions } from "./HealthScreen";
+import { screenCommands, WithCommands } from "../test/commands";
 import { instanceA, makeCard, makeDeck } from "../test/fixtures";
 
 const deck = makeDeck("deck-1", { en: "Kanji N5" });
@@ -59,17 +60,19 @@ const spotHref = ({ card, place }: CardSpot) =>
 function renderDeck(shown: DeckHealth<MarkdownProblem>, repairs = actions(), checking = false, held = false) {
   const onCheck = vi.fn();
   render(
-    <DeckHealthScreen
-      deck={deck}
-      health={shown}
-      cards={[water, fire, twin]}
-      checking={checking}
-      onCheck={onCheck}
-      repairs={repairs}
-      spotHref={spotHref}
-      aboutHref="#/about"
-      held={held}
-    />,
+    <WithCommands>
+      <DeckHealthScreen
+        deck={deck}
+        health={shown}
+        cards={[water, fire, twin]}
+        checking={checking}
+        onCheck={onCheck}
+        repairs={repairs}
+        spotHref={spotHref}
+        aboutHref="#/about"
+        held={held}
+      />
+    </WithCommands>,
   );
   return { onCheck, repairs };
 }
@@ -89,12 +92,14 @@ describe("placeText", () => {
 });
 
 describe("DeckHealthScreen", () => {
-  it("counts the deck's problems, and checks again", () => {
+  it("counts the deck's problems, and checks again, from the palette too", () => {
     const { onCheck } = renderDeck(health);
     expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent("Health of Kanji N5");
     expect(screen.getByRole("status")).toHaveTextContent("8 problems found.");
     fireEvent.click(screen.getByRole("button", { name: "Check again" }));
-    expect(onCheck).toHaveBeenCalled();
+    expect(onCheck).toHaveBeenCalledTimes(1);
+    screenCommands().checkAgain!.run();
+    expect(onCheck).toHaveBeenCalledTimes(2);
   });
 
   it("lists what the data check found, each linking where it is fixed, and its repairs", () => {
@@ -142,6 +147,7 @@ describe("DeckHealthScreen", () => {
     renderDeck({ ...fine, unstated: null }, actions({ plan: { repairs: [], unrepairable: [] } }), true);
     expect(screen.getByRole("status")).toHaveTextContent("");
     expect(screen.getByRole("button", { name: "Checking…" })).toBeDisabled();
+    expect(screenCommands()).toEqual({});
     expect(part("Languages")).toHaveTextContent("could not be read");
     expect(part("Cards that say the same")).toHaveTextContent("No two cards in use say the same.");
     expect(part("Markdown")).toHaveTextContent("shows as its author meant");
@@ -184,16 +190,18 @@ describe("InstanceHealthScreen", () => {
     ]);
     const onCheck = vi.fn();
     render(
-      <InstanceHealthScreen
-        instance={instanceA}
-        report={instanceReport}
-        decks={[deck, other]}
-        checking={false}
-        onCheck={onCheck}
-        repairs={actions({ plan: { repairs: [], unrepairable: [] } })}
-        deckHref={(each) => `#/health?deck=${each.id}`}
-        badge={(each) => <span>badge of {each.id}</span>}
-      />,
+      <WithCommands>
+        <InstanceHealthScreen
+          instance={instanceA}
+          report={instanceReport}
+          decks={[deck, other]}
+          checking={false}
+          onCheck={onCheck}
+          repairs={actions({ plan: { repairs: [], unrepairable: [] } })}
+          deckHref={(each) => `#/health?deck=${each.id}`}
+          badge={(each) => <span>badge of {each.id}</span>}
+        />
+      </WithCommands>,
     );
     expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent("Health of Deck set A");
     const items = within(part("Data check")).getAllByRole("listitem");
@@ -205,22 +213,29 @@ describe("InstanceHealthScreen", () => {
     expect(decks[0]).toHaveTextContent("Kanji N5badge of deck-1");
     expect(within(decks[1]!).getByRole("link", { name: "Verbs" })).toHaveAttribute("href", "#/health?deck=deck-2");
     fireEvent.click(screen.getByRole("button", { name: "Check again" }));
-    expect(onCheck).toHaveBeenCalled();
+    expect(onCheck).toHaveBeenCalledTimes(1);
+    // The palette's Check again does the same.
+    expect(screenCommands().checkAgain!.label).toBe("Check again");
+    screenCommands().checkAgain!.run();
+    expect(onCheck).toHaveBeenCalledTimes(2);
   });
 
-  it("says while the instance is checked again", () => {
+  it("says while the instance is checked again, and offers no Check again in the palette then", () => {
     render(
-      <InstanceHealthScreen
-        instance={instanceA}
-        report={summarize(instanceA.url, [])}
-        decks={[]}
-        checking
-        onCheck={vi.fn()}
-        repairs={actions({ plan: { repairs: [], unrepairable: [] } })}
-        deckHref={() => "#"}
-        badge={() => null}
-      />,
+      <WithCommands>
+        <InstanceHealthScreen
+          instance={instanceA}
+          report={summarize(instanceA.url, [])}
+          decks={[]}
+          checking
+          onCheck={vi.fn()}
+          repairs={actions({ plan: { repairs: [], unrepairable: [] } })}
+          deckHref={() => "#"}
+          badge={() => null}
+        />
+      </WithCommands>,
     );
     expect(screen.getByRole("button", { name: "Checking…" })).toBeDisabled();
+    expect(screenCommands()).toEqual({});
   });
 });

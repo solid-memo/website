@@ -542,6 +542,82 @@
   margin: 0.5rem 0;
 }
 
+/* The palette's button in the header, between the open instance and the theme: a field to look at, its keys at its end. */
+:root[data-surface="studio"] .studio-search {
+  display: inline-flex;
+  flex: 0 1 18rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 2rem;
+  margin-inline: auto;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  text-align: left;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: none;
+}
+
+:root[data-surface="studio"] .studio-search:hover {
+  border-color: var(--border-strong);
+}
+
+/* The palette: near the top, so it stays put as the entries that match come and go. */
+:root[data-surface="studio"] .studio-dialog:has(.studio-palette-input) {
+  margin-block-start: 10dvh;
+}
+
+/* Its field, then the entries under their headings, the one picked tinted. */
+:root[data-surface="studio"] .studio-palette-input {
+  width: 100%;
+  min-height: var(--s-control-h);
+}
+
+:root[data-surface="studio"] .studio-palette-list {
+  max-height: min(24rem, 50dvh);
+  margin-top: 0.5rem;
+  overflow-y: auto;
+}
+
+:root[data-surface="studio"] .studio-palette-list ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+:root[data-surface="studio"] .studio-palette-group {
+  padding: 0.5rem 0.5rem 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+:root[data-surface="studio"] .studio-palette-list [role="option"] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: var(--s-row-h);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+:root[data-surface="studio"] .studio-palette-list [aria-selected="true"] {
+  background: var(--primary-soft);
+}
+
+:root[data-surface="studio"] .studio-palette-keys {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
 /* The key help: the keys, then what they do. */
 :root[data-surface="studio"] .studio-keymap {
   display: grid;
@@ -554,7 +630,7 @@
   margin: 0;
 }
 
-:root[data-surface="studio"] .studio-keymap kbd {
+:root[data-surface="studio"] :is(.studio-keymap, .studio-palette-keys) kbd {
   padding: 0 0.3rem;
   border: 1px solid var(--border-strong);
   border-radius: 4px;

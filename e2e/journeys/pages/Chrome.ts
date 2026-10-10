@@ -43,6 +43,23 @@ export class Chrome extends Screen {
     await expect(link).toHaveAttribute("aria-current", "page");
   }
 
+  /**
+   * Quick opens an entry of the Studio's palette: Ctrl+K, the query
+   * typed, the entry named picked first, then Enter. The palette closes.
+   */
+  async quickOpen(query: string, entry: string): Promise<void> {
+    await this.intent(`Quick open ${entry}`, async () => {
+      await this.page.keyboard.press("Control+k");
+      const palette = this.page.getByRole("dialog", { name: this.t("studio.palette.heading") });
+      const field = palette.getByRole("combobox", { name: this.t("studio.palette.label") });
+      await expect(field).toBeFocused();
+      await field.fill(query);
+      await expect(palette.getByRole("option", { name: entry, exact: true })).toHaveAttribute("aria-selected", "true");
+      await field.press("Enter");
+      await expect(palette).toBeHidden();
+    });
+  }
+
   /** The language list above the masthead, not the choice in Preferences. */
   get languageSelector(): Locator {
     return this.page.getByRole("banner").getByRole("combobox", { name: this.t("language.label") });

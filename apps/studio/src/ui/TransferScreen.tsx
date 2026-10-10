@@ -7,6 +7,7 @@ import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n, type ErrorText } from "@solid-memo/ui/i18n";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
 import { ReadOnlyScope } from "./ReadOnly";
+import { useScreenCommands } from "./shell/useScreenCommands";
 
 /** How far an export of several decks is. */
 export interface ExportRun {
@@ -84,6 +85,10 @@ export function TransferScreen({
 
   const selected = decks.filter((deck) => chosen.includes(deck.url));
   const toggle = (url: string, on: boolean) => onChoose(on ? [...chosen, url] : chosen.filter((each) => each !== url));
+  const exportLabel = t("studio.transfer.exportButton", { count: selected.length });
+  const exportSelected = () => onExport(selected, { format, withProgress });
+  // The palette's command does what the form's button does, when it can.
+  useScreenCommands(selected.length === 0 || exporting !== null ? [] : [{ id: "export", label: exportLabel, run: exportSelected }]);
 
   return (
     <section>
@@ -101,7 +106,7 @@ export function TransferScreen({
             class="card-edit"
             onSubmit={(event) => {
               event.preventDefault();
-              onExport(selected, { format, withProgress });
+              exportSelected();
             }}
           >
             <fieldset>
@@ -138,7 +143,7 @@ export function TransferScreen({
               {t("studio.transfer.withProgress")}
             </label>
             <button type="submit" class="primary" disabled={selected.length === 0 || exporting !== null}>
-              {t("studio.transfer.exportButton", { count: selected.length })}
+              {exportLabel}
             </button>
           </form>
         )}

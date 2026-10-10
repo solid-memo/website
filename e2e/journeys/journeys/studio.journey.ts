@@ -35,8 +35,9 @@ const COURSE = {
  * progress on its schedule tab; its history still has its answer. They
  * write that card's back in Markdown with an HTML tag, which the deck's
  * health finds; its link opens the card at its back, where they fix it,
- * and the deck's health, then the instance's, find nothing wrong. The
- * deck's schedule counts the other card's review tomorrow, and no leech.
+ * and the deck's health, then the instance's, find nothing wrong. They
+ * quick open the deck with Ctrl+K: its schedule counts the other card's
+ * review tomorrow, and no leech.
  * Back in the workbench they set the other
  * card due today, which Home then counts as due, and move it, with its
  * progress, to the other deck, where Home then counts it. From Home they open a
@@ -171,8 +172,9 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     await app.chrome.breadcrumb("breadcrumbs.decks");
   });
 
-  await app.step("14 · Open the deck's schedule: one review tomorrow, and no leech", async () => {
-    await app.studio.openCards(instance, alpha, ["Sun", "Moon"]);
+  await app.step("14 · Quick open the deck with Ctrl+K, and open its schedule: one review tomorrow, and no leech", async () => {
+    await app.chrome.quickOpen(alpha, alpha);
+    await expect(app.page).toHaveURL(/#\/studio\/cards\?deck=/);
     await app.studio.openDeckSchedule(alpha, { today: 0, week: 1, studied: 1 });
     await app.chrome.breadcrumb("breadcrumbs.decks");
   });
