@@ -15,6 +15,8 @@ describe("markdownProblems", () => {
     expect(markdownProblems("git clone <url>", SIDE)).toEqual([{ code: "html", source: "<url>" }]);
     expect(markdownProblems("&aring;", SIDE)).toEqual([{ code: "characterReference", source: "&aring;" }]);
     expect(markdownProblems('"<ex:title>"', OPTION)).toEqual([{ code: "link", source: "<ex:title>", autolink: true }]);
+    // A rule meant under a line of text, with no blank line between them, underlines it as a heading.
+    expect(markdownProblems("Intro\n---\n\nMore.", PROSE)).toEqual([{ code: "dashHeading", source: "Intro\n---" }]);
   });
 
   it("names a text past the parser's limits, and nothing else in it", () => {

@@ -273,6 +273,7 @@
     "hiddenControl": "Hidden characters in code or a link show as markers: {controls}.",
     "characterReference": "{source} shows as the character it names. Write \\{source} to show it as typed.",
     "notOneParagraph": "This card's back is one of the options of a question: keep it to one paragraph, as the others are.",
+    "dashHeading": "A line with --- right under it shows as a heading. For a line across instead, leave a blank line before the ---; for a heading, start the line with ##.",
     "noText": "This shows no text as Markdown."
   },
   "multipleChoice": {
@@ -716,6 +717,8 @@
     "alreadyDescribed": "keeps the deck's name, description, keywords, topics or direction already as the release has them",
     "studies": "studies it {direction}",
     "describes": "updates the deck's name, description or keywords",
+    "outline": "updates the course's chapters, steps or theory",
+    "unreached": "changes questions you have not reached yet",
     "noStudiedChanges": "updates cards you no longer study",
     "list": "{items} and {last}",
     "listSeparator": ", ",

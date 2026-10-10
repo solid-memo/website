@@ -1,3 +1,4 @@
+import type { ComponentChildren } from "preact";
 import type { ChapterState, CourseChapter, CourseOutline, CourseProgress } from "@solid-memo/domain/course";
 import { isMarkdown } from "@solid-memo/domain/deck";
 import type { LangText } from "@solid-memo/domain/langText";
@@ -32,7 +33,8 @@ const SPARKLES = 8;
  * open or done chapter's title links to it; a locked one's does not. A
  * chapter's description may be in Markdown (its `textFormat`); its title
  * is always plain. Once every chapter is done, the course says it is
- * finished, with a link back to the decks.
+ * finished, with a link back to the decks. A notice (a newer release of
+ * the course on offer) goes under the blurb.
  *
  * Coming back from a chapter just completed, the page cheers: a word
  * that the chapter is done, above the button on, which takes the focus
@@ -52,6 +54,7 @@ export function CourseScreen({
   continueHref,
   decksHref,
   justCompleted,
+  notice,
 }: {
   title: LangText;
   description?: LangText;
@@ -67,6 +70,8 @@ export function CourseScreen({
   decksHref: string;
   /** The chapter the learner has just completed, to cheer about. */
   justCompleted?: CompletedChapter;
+  /** Shown under the blurb: the offer of a newer release. */
+  notice?: ComponentChildren;
 }) {
   const { t, tx, readerText, readerLang } = useI18n();
   const completed = outline.chapters.find((chapter) => chapter.url === justCompleted?.chapterUrl);
@@ -87,6 +92,7 @@ export function CourseScreen({
             {linkify(readerText(description))}
           </p>
         )}
+        {notice}
         {completed !== undefined && (
           <div class="course-cheer" data-arrival>
             <p>

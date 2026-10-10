@@ -273,6 +273,7 @@
     "hiddenControl": "Dolda tecken i kod eller en länk visas som markörer: {controls}.",
     "characterReference": "{source} visas som tecknet den namnger. Skriv \\{source} för att visa den som den skrivits.",
     "notOneParagraph": "Kortets baksida är ett av svarsalternativen i en fråga: håll den till ett stycke, som de andra.",
+    "dashHeading": "En rad med --- direkt under sig visas som en rubrik. Lämna en tom rad före --- för ett streck i stället; börja raden med ## för en rubrik.",
     "noText": "Det här visar ingen text som Markdown."
   },
   "multipleChoice": {
@@ -713,6 +714,8 @@
     "alreadyDescribed": "behåller kortlekens namn, beskrivning, nyckelord, ämnen eller riktning som redan är som i utgåvan",
     "studies": "studerar den {direction}",
     "describes": "uppdaterar kortlekens namn, beskrivning eller nyckelord",
+    "outline": "uppdaterar kursens kapitel, steg eller teori",
+    "unreached": "ändrar frågor som du inte har kommit till än",
     "noStudiedChanges": "uppdaterar kort som du inte längre studerar",
     "list": "{items} och {last}",
     "listSeparator": ", ",

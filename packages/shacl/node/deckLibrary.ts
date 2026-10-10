@@ -564,6 +564,8 @@ function problemText(problem: MarkdownProblem): string {
       return `has the character reference ${problem.source}, which Markdown shows decoded: write it as code, or escape its "&" (\\${problem.source}).`;
     case "notOneParagraph":
       return "is an option but not one paragraph: the right option and the wrong ones must look alike.";
+    case "dashHeading":
+      return `underlines a line with dashes, ${code(problem.source)}, which makes it a heading, not a line of text and a thematic break: put a blank line before the break (in a step's theory, it ends a chunk), or write the heading with "##".`;
   }
 }
 

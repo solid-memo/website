@@ -55,7 +55,12 @@ export type MarkdownProblem =
   /** A character reference outside code, which CommonMark decodes: `&aring;` shows as "å". */
   | { code: "characterReference"; source: string }
   /** An option of more than one paragraph (FieldRule.inline). */
-  | { code: "notOneParagraph" };
+  | { code: "notOneParagraph" }
+  /**
+   * A line of text with `---` right under it: a heading, not the text
+   * and a thematic break, which a blank line between them would make.
+   */
+  | { code: "dashHeading"; source: string };
 
 /**
  * The problems of a text written in Markdown, in a field held to `rule`,
@@ -74,6 +79,7 @@ export function markdownProblems(text: string, rule: FieldRule): MarkdownProblem
       case "tooDeep":
       case "largeTable":
       case "characterReference":
+      case "dashHeading":
         problems.push({ code: note.type, source: note.source });
         break;
       case "code": {

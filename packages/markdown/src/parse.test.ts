@@ -308,6 +308,16 @@ describe("inspectMarkdown", () => {
     ]);
   });
 
+  it("notes a heading underlined with dashes, wherever it is, but no other heading, rule or table", () => {
+    expect(notesOf("Intro\n---\n\nmore\n- - -")).toEqual([{ type: "dashHeading", source: "Intro\n---" }]);
+    expect(notesOf("a\nb &aring;\n   -   \n\n> c\n> ---")).toEqual([
+      { type: "dashHeading", source: "a\nb &aring;\n   -   " },
+      { type: "characterReference", source: "&aring;" },
+      { type: "dashHeading", source: "c\n> ---" },
+    ]);
+    expect(notesOf("a\n\n---\n\n## b\n\nc\n===\n\n| d |\n|---|\n\n```\ne\n---\n```")).toEqual([{ type: "code", value: "e\n---" }]);
+  });
+
   it("notes a table past its caps, and what nests past MAX_DEPTH, once each, as their source", () => {
     const wide = `|${" &aring; |".repeat(MAX_TABLE_COLUMNS + 1)}\n|${"-|".repeat(MAX_TABLE_COLUMNS + 1)}`;
     expect(notesOf(wide)).toEqual([{ type: "largeTable", source: wide }]);

@@ -240,9 +240,11 @@ else offers nothing.
   [deckLibrary.ts](../packages/shacl/node/deckLibrary.ts) names the
   deck, and `npm run library` writes it into the index; set it to
   another course, or to `undefined` for none, and run `npm run library`
-  again. The app needs no change, but with none named the journey
-  `newcomer-course.journey.ts`, which expects an offer, is to be
-  retired too ([testing.md](testing.md)).
+  again. The app needs no change, but with none named the journeys
+  `newcomer-course.journey.ts`, which expects an offer, and
+  `course-chapter.journey.ts`, which works through the offered course's
+  first chapter (its theory in chunks), are to be retired or moved to
+  another way in too ([testing.md](testing.md)).
 
 ## Use cases and ports
 
@@ -316,7 +318,9 @@ these additions:
    and hold no links.
 7. To have the learner read a step's theory in chunks, write it in
    Markdown and put a thematic break, `---` with a blank line before
-   and after it, between each two chunks. Every language of the theory
+   and after it, between each two chunks (without the blank line before
+   it, `---` underlines the line above as a heading, which the check
+   refuses). Every language of the theory
    has as many chunks, none of them empty: no break first, last, or
    right after another ([deck-library.md](deck-library.md#markdown-rules)).
    Break at a change of topic, where a learner could pause, and keep a
@@ -349,15 +353,19 @@ keep them:
   the step asks them.
 
 Each learner's deck follows the release it was copied or
-last upgraded to, and its outline with it. An upgrade of a course's deck
-adds no cards: the learner reaches new questions through the course.
-It still changes, retires and restores the cards the deck holds, their
-distractors included
-([migrations.md](migrations.md#catching-up-with-the-library)). An
-upgrade is offered only when it changes something the deck holds or
-describes. A release that only adds chapters and their cards changes
-none of that, so it is offered only when, say, its description changed
-too.
+last upgraded to, and its outline with it. An upgrade is offered on
+the course's page, as on the deck's, when the newer release changes
+something the deck holds or describes, the outline (a chapter, a step
+or its theory, their order, or which questions they ask:
+`sameOutline`), or a question the learner has not reached yet. An upgrade of a course's deck adds no cards: the
+learner reaches new questions through the course. It still changes,
+retires and restores the cards the deck holds, their distractors
+included
+([migrations.md](migrations.md#catching-up-with-the-library)). A
+release that changes only the outline, or questions not reached yet,
+writes nothing to the deck but its release: the learner then reads the
+newer outline and meets the newer questions, with the chapters
+completed and the questions answered kept.
 
 ## Why schema.org
 

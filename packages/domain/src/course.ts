@@ -1,6 +1,6 @@
 import type { ChapterV1, StepV1 } from "@solid-memo/vocab/types.generated";
 import type { CardContent } from "./deck";
-import type { LangText } from "./langText";
+import { sameText, type LangText } from "./langText";
 import type { ReviewQuality, ReviewState } from "./review";
 import { shuffle, studyDayOf } from "./scheduling";
 import { fragmentIdOf } from "./subjectUrl";
@@ -116,6 +116,29 @@ function idsOf(urls: readonly string[]): string[] {
 
 function byPosition<T extends { id: string; position: number }>(items: T[]): T[] {
   return items.sort((a, b) => a.position - b.position || a.id.localeCompare(b.id));
+}
+
+/**
+ * Whether two releases' outlines show the learner the same course: the
+ * same chapters in the same order, each with the same title, description
+ * and review questions, and the same steps in the same order, each with
+ * the same theory and questions, the text formats too. Where each is
+ * (its URL, in its own release) and the positions that order them are
+ * not compared.
+ */
+export function sameOutline(a: CourseOutline, b: CourseOutline): boolean {
+  const sameIds = (x: readonly string[], y: readonly string[]) => x.length === y.length && x.every((id, i) => id === y[i]);
+  const sameStep = (x: CourseStep, y: CourseStep) =>
+    x.id === y.id && sameText(x.theory, y.theory) && x.textFormat === y.textFormat && sameIds(x.questionIds, y.questionIds);
+  const sameChapter = (x: CourseChapter, y: CourseChapter) =>
+    x.id === y.id &&
+    sameText(x.title, y.title) &&
+    sameText(x.description, y.description) &&
+    x.textFormat === y.textFormat &&
+    sameIds(x.reviewQuestionIds, y.reviewQuestionIds) &&
+    x.steps.length === y.steps.length &&
+    x.steps.every((step, i) => sameStep(step, y.steps[i]!));
+  return a.chapters.length === b.chapters.length && a.chapters.every((chapter, i) => sameChapter(chapter, b.chapters[i]!));
 }
 
 /**

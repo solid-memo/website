@@ -3,8 +3,11 @@ import type { Diagnostics } from "../fixtures.ts";
 import { text, textPattern, type Locale } from "../harness/strings.ts";
 import { CardCreator } from "./CardCreator.ts";
 import { CardEditor } from "./CardEditor.ts";
+import { Chapter } from "./Chapter.ts";
+import { ChapterReview } from "./ChapterReview.ts";
 import { Chrome } from "./Chrome.ts";
 import { Course } from "./Course.ts";
+import { CourseQuestion } from "./CourseQuestion.ts";
 import { CssLogin } from "./CssLogin.ts";
 import { DeckBrowser } from "./DeckBrowser.ts";
 import { DeckCreator } from "./DeckCreator.ts";
@@ -50,6 +53,9 @@ export class App {
   readonly libraryDeck = new LibraryDeck(this);
   readonly libraryPreview = new LibraryPreview(this);
   readonly course = new Course(this);
+  readonly chapter = new Chapter(this);
+  readonly chapterReview = new ChapterReview(this);
+  readonly question = new CourseQuestion(this);
 
   constructor(
     readonly page: Page,

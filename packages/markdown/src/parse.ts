@@ -137,7 +137,8 @@ function read(text: string): Root | null {
  * is an autolink, `<…>`), the value of each code span and block,
  * character references outside code (`&aring;`, which CommonMark
  * decodes), what nests past MAX_DEPTH and a table past its caps (both
- * shown as their source). Each with the Markdown it was read from.
+ * shown as their source), and a heading underlined with dashes. Each
+ * with the Markdown it was read from.
  */
 export type MdNote =
   | { type: "html"; source: string }
@@ -146,7 +147,9 @@ export type MdNote =
   | { type: "code"; value: string }
   | { type: "characterReference"; source: string }
   | { type: "tooDeep"; source: string }
-  | { type: "largeTable"; source: string };
+  | { type: "largeTable"; source: string }
+  /** A heading underlined with dashes (`Text` over `---`), which reads like a line of text over a thematic break. */
+  | { type: "dashHeading"; source: string };
 
 /**
  * The text's notes, and whether it is one paragraph as written, link
@@ -454,6 +457,14 @@ class Inspect {
         if (!autolink) this.visitAll(node.children, depth + 1, true);
         return;
       }
+      case "heading":
+        // Underlined with dashes (a heading of level 2 over more than one line, as `##` takes one), as `---` right
+        // under a line of text is when no blank line comes between them.
+        if (node.depth === 2 && node.position!.start.line < node.position!.end.line) {
+          this.notes.push({ type: "dashHeading", source: this.source(node) });
+        }
+        this.visitAll(node.children, depth + 1, inLink);
+        return;
       case "list":
         for (const item of node.children) this.visitAll(item.children, depth + 1, inLink);
         return;

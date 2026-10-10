@@ -865,6 +865,17 @@ describe("markdownProblems", () => {
     ]);
   });
 
+  it("names a line with a thematic break right under it, which underlines it as a heading instead of ending a chunk", () => {
+    const outline = [
+      chapter("ch-1", 0),
+      step("s-1", "ch-1", 0, ["q-1"], MD).replace(`"Theory s-1."@en`, `"""a\n---\n\nb"""@en`),
+      step("s-2", "ch-1", 1, ["q-1"], MD).replace(`"Theory s-2."@en`, `"""a\n\n---\n\nb"""@en`),
+    ].join("");
+    expect(problemsOf(outline)).toEqual([
+      `${L}: <#s-1> solid-memo:theory@en underlines a line with dashes, "a\\n---", which makes it a heading, not a line of text and a thematic break: put a blank line before the break (in a step's theory, it ends a chunk), or write the heading with "##".`,
+    ]);
+  });
+
   it("names a text format on what has none of its own, and one that is no concept of solid-memo:TextFormats", () => {
     const outline = [
       chapter("ch-1", 0),

@@ -61,7 +61,7 @@ folded to what the app shows:
 | `plainText(text)` | `plainText` | the text as plain text |
 | `labelText(text, max?)` | `plainText` | a short name: the plain text of its first block that shows any |
 | `liveLink(url)` | `links` | whether a link is followed, and its host |
-| `inspectMarkdown(text)` | `parse` | whether the text is one paragraph as written (a heading is not), and notes of what the tree folds away or a check looks at: raw HTML, pictures, links (an autolink told apart), code outside a link, character references, what nests too deep and would not show as written, a table past its caps |
+| `inspectMarkdown(text)` | `parse` | whether the text is one paragraph as written (a heading is not), and notes of what the tree folds away or a check looks at: raw HTML, pictures, links (an autolink told apart), code outside a link, character references, what nests too deep and would not show as written, a table past its caps, a heading underlined with dashes |
 | `markdownProblems(text, rule)` | `problems` | what would not show as its author meant, by the [rules for a release](#rules-for-a-release), in a field held to `SIDE`, `OPTION` or `PROSE` |
 | `chunksOf(blocks)` | `chunks` | the [chunks](#chunks) blocks are shown in, split at their top-level rules |
 | `splitAtRules(blocks)` | `chunks` | the pieces between top-level rules, empty ones included |
@@ -119,7 +119,8 @@ a note or a chapter's description it shows as a rule.
   reference link in one chunk resolves by a definition in another, and
   a `---` line in a code block splits nothing. A `---` right under a
   line of text underlines it as a heading instead: leave a blank line
-  before it.
+  before it. The checks name such a heading (`dashHeading`, in the
+  [rules for a release](#rules-for-a-release)), wherever it is.
 - **The breaks are not shown.** A chunk is the blocks between two of
   them. Empty chunks, from a break first, last or right after another,
   are dropped; the library refuses them
@@ -233,6 +234,7 @@ shows the same problems as hints, never as a block
 | Link text that reads as an address or a host name other than the link's (`linkHost`) | Misleading text. The named host must be the link's, give or take a `www.`: `[solidproject.org](https://www.solidproject.org/)` is fine, `[bank.example](https://evil.example/)` is not, and neither is `[github.io](https://evil.github.io/)`, for a domain the host is in says nothing of who runs it. The test is by shape, a dotted word ending in letters, so text that reads as a host name but is none counts too: "Node.js", and a file's name such as `package.json`, `v1.ttl` or `README.md`, even as code. Word it otherwise ("npm's documentation of package.json"). This is a check of the data only: the defence against a link that misleads is the host the app shows beside it ([safety](#safety)). |
 | A bidi control, zero-width or other hidden character in code or a link (`hiddenControl`) | Code that reads other than it runs ("Trojan Source"); the app shows them as markers. |
 | A character reference outside code (`characterReference`), such as `&aring;` | CommonMark decodes it: it shows as "å". Write it as code, or escape its `&` (`\&aring;`). An unknown name, `&nosuchname;`, is text and passes. |
+| A heading underlined with dashes (`dashHeading`): a line of text with `---` right under it, no blank line between | It reads like a line of text over a thematic break, which it would be with a blank line before the `---`; in a step's theory that break would end a [chunk](#chunks). Leave the blank line, or write the heading with `##`. Underlined with `===`, a heading is no such look-alike, and passes. |
 | An option that is not one paragraph (`notOneParagraph`): a distractor's `distractorText`, and the `back` of a card with distractors (field `OPTION`) | Options show on one line, in the inline profile, and must look alike, or the odd one out gives the answer away. A heading is no paragraph: it would show bold on a revealed back. |
 | Past the [limits](#limits): longer than `MAX_CHARS` (`tooLong`), past the parser's others (`tooComplex`), nested past `MAX_DEPTH` (`tooDeep`, unless it is plain text that shows as written anyway), a table past its caps (`largeTable`) | The text, or that part of it, shows as plain text or as its source. |
 
