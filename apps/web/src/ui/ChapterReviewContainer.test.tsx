@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/preact";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
@@ -14,7 +14,7 @@ function renderReview(useCases: UseCases, chapterIndex = 0, reviewed = course) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const invalidate = vi.spyOn(queryClient, "invalidateQueries");
   const onCompleted = vi.fn();
-  render(
+  const { unmount } = render(
     <QueryClientProvider client={queryClient}>
       <ChapterReviewContainer
         useCases={useCases}
@@ -26,7 +26,7 @@ function renderReview(useCases: UseCases, chapterIndex = 0, reviewed = course) {
       />
     </QueryClientProvider>,
   );
-  return { invalidate, onCompleted };
+  return { invalidate, onCompleted, unmount };
 }
 
 /** Starts the review, past the word before it. */
@@ -97,6 +97,28 @@ describe("ChapterReviewContainer", () => {
     await waitFor(() => expect(onCompleted).toHaveBeenCalledWith(false));
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["course", course.deck.url] });
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["decks", courseInstance.url] });
+  });
+
+  it("leaves a learner who goes elsewhere while the chapter is completed where they went", async () => {
+    let complete!: (deck: Deck) => void;
+    const completeChapter = vi.fn(() => new Promise<Deck>((resolve) => (complete = resolve)));
+    const useCases = makeUseCasesFake({ completeChapter });
+    rightAnswers(useCases);
+    const { invalidate, onCompleted, unmount } = renderReview(useCases, 1);
+    start();
+    await answer("A store");
+    expect(screen.getByText("Completing the chapter…")).toBeInTheDocument();
+
+    // The learner leaves the review, as for the deck list.
+    act(() => {
+      unmount();
+    });
+    complete({ ...course.deck, completedChapters: [CH2] });
+    // The course is still read afresh, but nothing takes the learner anywhere.
+    await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: ["decks", courseInstance.url] }));
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ["course", course.deck.url] });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(onCompleted).not.toHaveBeenCalled();
   });
 
   it("says the course is finished by its last chapter left, and not by one retaken", async () => {

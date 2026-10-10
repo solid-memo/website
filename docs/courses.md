@@ -181,10 +181,14 @@ new type-index entries ([data-model.md](data-model.md#courses)):
    focus as it comes up. A question answered wrongly comes back until
    it is answered right. Then the chapter is completed
    (`completeChapter`), which opens the next; while that is saved, and
-   when it fails, with a way to try again, the review says so.
+   when it fails, with a way to try again, the review says so. A final
+   review reached some other way (a bookmark, a typed link, Back) for a
+   chapter with steps not done goes to the chapter instead, at the
+   first of them, so the word before the review is never wrong.
 4. **Back to the chapters.** Once the chapter is completed, and the
    course read afresh, the learner is taken back to the course's page,
-   to go on or stop there. The page cheers the chapter just completed:
+   to go on or stop there. A learner who has left the review while it
+   was saved stays where they went, and nothing is cheered. The page cheers the chapter just completed:
    a word that it is done, which takes the focus, so a screen reader
    reads it and Tab goes on to Continue, now to the next chapter. The
    chapter's Done badge pops with a burst of sparkles. When that was

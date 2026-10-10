@@ -647,8 +647,8 @@
     a prov:Activity ;
     prov:endedAtTime "2026-10-10T00:00:00Z"^^xsd:dateTime ;
     rdfs:label "Version 2: theory in chunks (AI)"@en ;
-    rdfs:comment "Scope: every step's theory split by an AI agent into chunks read one at a time, with a Markdown thematic break where its topic turns, never between a request or code and the sentence that leads into it; the release compared by a script with version 1, which found the breaks and the release's own metadata the only changes, and checked by the library checker (no empty chunk); not a human review."@en ,
-                 "Outcome: 140 steps are read in two chunks and 14 in three; the other 39, short enough to read at once, stay whole. No text was reworded, and every chapter, step, card and distractor keeps its id."@en .
+    rdfs:comment "Scope: every step's theory split by an AI agent into chunks read one at a time, with a Markdown thematic break where its topic turns, never between a request or code and the sentence that leads into it, nor before a sentence that points back at what an earlier chunk shows; the release compared by a script with version 1, which found the breaks and the release's own metadata the only changes, and checked by the library checker (no empty chunk); not a human review."@en ,
+                 "Outcome: 139 steps are read in two chunks and 14 in three; the other 40, short enough to read at once, stay whole. No text was reworded, and every chapter, step, card and distractor keeps its id."@en .
 
 <http://xmlns.com/foaf/spec/>
     dcterms:title "FOAF Vocabulary Specification 0.99" ;
@@ -4572,9 +4572,9 @@ After `jsonld.compact` (jsonld.js 9.0):
   "name": "Alice" }
 ```
 
----
-
 Compacting the same input with `knows` left out of the context keeps `"http://xmlns.com/foaf/0.1/knows": { "@id": "https://bob.example.org/profile#me" }`. Undefined properties stay as full IRIs; keep them when writing back.
+
+---
 
 A document with several subjects (a profile) compacts to `{ "@graph": [ … ] }`, so `doc.name` is undefined: find your node by its `@id`. Compaction also turns one-element arrays into plain values, so a key may hold a value or an array. For a nested tree (a note with its author inside), use framing: `jsonld.frame(doc, frame)` picks nodes "by example" and nests related ones. On CSS 7.2, framing a profile with `{ "@context": ctx, "@id": webId }` returns the WebID's node, so `doc.name` is set."""@en ;
     solid-memo:checkedBy <#q-rdf-syntaxes-7a> ,
@@ -8062,8 +8062,6 @@ Slug: second
 HTTP/1.1 201 Created
 Location: https://pod.example/alice/notes/second
 ```
-
----
 
 The `Slug` header (defined in AtomPub, RFC 5023, and adopted by LDP as a client hint) lets you suggest a name. It is only a hint, and current Solid specs do not require servers to honour it. A server may use it, change it or ignore it, so always read the URL from `Location`. ⚠ CSS 7.2 happens to keep a Slug exactly and adds no extension, as above; that is no promise for other servers (Step 6.6 shows NSS 6.0.0 adding one).
 
@@ -12261,8 +12259,6 @@ Sharing with a team one WebID at a time means editing many ACLs whenever the tea
 
 To give Dave Read on everything that uses the group, add him to `friends.ttl`; no ACL changes. The flip side: **whoever can write the group document decides who gets that access**, so keep write access to it tight with its own ACL.
 
----
-
 ⚠ CSS 7.2 fetches the group document anonymously, so it must be publicly readable. In a test in October 2026, a note shared with the group above went like this for Bob:
 
 | Group document readable by | Bob's GET of the note |
@@ -12272,6 +12268,8 @@ To give Dave Read on everything that uses the group, add him to `friends.ttl`; n
 | Everyone | 200, `wac-allow: user="read"` |
 
 The privacy cost: anyone can read who is in the group.
+
+---
 
 ACP matchers have no group attribute; they test agent, client or issuer (Step 9.1). One matcher can list several `acp:agent` values, any of which may match, and Inrupt's ESS 2.0 dropped group matching by URL. So on ACP, keep the WebIDs in the policy itself."""@en ;
     solid-memo:checkedBy <#q-sharing-8a> ,
