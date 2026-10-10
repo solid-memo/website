@@ -47,7 +47,11 @@ workbench's own parameters (`q`, `lang`, `state`, `has`, `sort`,
 `field` is the field it opens at. They are optional: a link to a card
 without them lists the deck's cards as the workbench does by default.
 Opening a card from the list pushes a history entry; going from card
-to card beside it (`j` and `k`, Previous and Next) replaces it
+to card beside it (`j` and `k`, Previous and Next) replaces it, as
+does putting the list at the page of a card opened from elsewhere.
+While the card's edits are not saved, a hashchange (Back, Forward, a
+hash typed in) is undone before the router hears of it, the card's
+route pushed back, and asked about first
 ([studio.md](studio.md#card-inspector)).
 
 Home's route, `#/studio`, carries the view its tabs show (`show`:

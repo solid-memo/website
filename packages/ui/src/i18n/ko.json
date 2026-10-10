@@ -1432,6 +1432,7 @@
       "activity": "활동",
       "resize": "패널 높이",
       "noActivity": "Studio를 연 뒤로 아직 한 일이 없어요.",
+      "repeated": "{text} ×{count}",
       "noProblemsHere": "덱이나 초안의 문제는 그 화면에서 보여요.",
       "checking": "문제를 찾는 중…",
       "none": "찾은 문제가 없어요.",
@@ -1591,7 +1592,7 @@
       "shown": {
         "other": "카드 {count}장 중 {shown}장"
       },
-      "keys": "키: {j}와(과) {k}(으)로 카드 사이를 이동하고, {x}(으)로 카드를 선택하고, {enter}(으)로 카드를 열어요.",
+      "keys": "키: {j}와(과) {k}(으)로 카드 사이를 이동하고, {x}(으)로 카드를 선택하고, {enter}(으)로 카드를 열어요. {shiftJ}와(과) {shiftK}(으)로 다음 카드나 이전 카드까지 함께 선택하고, {escape}(으)로 선택을 해제해요.",
       "selected": {
         "other": "카드 {count}장 선택됨"
       },
@@ -1640,7 +1641,8 @@
       "previous": "이전 카드",
       "next": "다음 카드",
       "detail": "카드",
-      "close": "카드 닫기"
+      "close": "카드 닫기",
+      "saved": "카드 {card}을(를) 저장했어요."
     },
     "confirm": {
       "unsaved": {

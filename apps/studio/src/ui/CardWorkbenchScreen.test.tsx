@@ -117,7 +117,7 @@ describe("CardWorkbenchScreen", () => {
     );
     expect(screen.getByText("3 of 4 cards")).toBeInTheDocument();
     expect(screen.getByText(/move between the cards/)).toHaveTextContent(
-      "Keys: j and k move between the cards, x selects one, Enter opens it.",
+      "Keys: j and k move between the cards, x selects one, Enter opens it, Shift+J and Shift+K select the next one or the one before too, and Escape clears the selection.",
     );
     expect(screen.queryByText("Course")).toBeNull();
   });

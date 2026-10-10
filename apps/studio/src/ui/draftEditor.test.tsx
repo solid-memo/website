@@ -202,6 +202,56 @@ describe("useDraftEditor", () => {
     expect(other.draft).toBe(editor.draft);
   });
 
+  it("writes what another editor of the draft has waiting before its own change, and every editor says it saves", async () => {
+    const { useCases } = await renderEditor({ editReleaseDraft: vi.fn(async (_url, changes) => made(courseDraft(), changes)) }, { twice: true });
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    act(() => {
+      editor.edit([rename("Typed")], { debounce: true });
+    });
+    expect(other.saving).toBe(true);
+    act(() => {
+      other.edit([{ kind: "moveChapter", id: "ch-apps", to: 0 }]);
+    });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(vi.mocked(useCases.editReleaseDraft).mock.calls.map(([, changes]) => changes)).toEqual([[rename("Typed")], [{ kind: "moveChapter", id: "ch-apps", to: 0 }]]);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(DEBOUNCE_MS);
+    });
+    expect(useCases.editReleaseDraft).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps the typing another editor has waiting on the screen when a write's draft, which lacks it, comes back", async () => {
+    const move: DraftChange = { kind: "moveChapter", id: "ch-apps", to: 0 };
+    const moved = deferred<DraftEdit>();
+    const edit = vi
+      .fn<UseCases["editReleaseDraft"]>()
+      .mockReturnValueOnce(moved.promise)
+      .mockImplementation(async (_url, changes) => made(courseDraft(), [move, ...changes]));
+    const { useCases } = await renderEditor({ editReleaseDraft: edit }, { twice: true });
+    act(() => {
+      other.edit([move]);
+    });
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    act(() => {
+      editor.edit([rename("Typed")], { debounce: true });
+    });
+    await act(async () => moved.resolve(made(courseDraft(), [move])));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(10);
+    });
+    expect(useCases.editReleaseDraft).toHaveBeenCalledTimes(1);
+    expect(chapterTitle("ch-apps")).toEqual({ en: "Typed" });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(DEBOUNCE_MS);
+    });
+    vi.useRealTimers();
+    await waitFor(() => expect(editor.saving).toBe(false));
+    expect(other.saving).toBe(false);
+    expect(chapterTitle("ch-apps")).toEqual({ en: "Typed" });
+  });
+
   it("reads the draft afresh after a failed write only once the writes after it are done", async () => {
     const first = deferred<DraftEdit>();
     const second = deferred<DraftEdit>();

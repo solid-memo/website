@@ -210,7 +210,10 @@ Back stop as a link is, except to the page already shown. While the user types i
 a list to choose from), the field keeps its keys, Ctrl+K, F6,
 Shift+F6, F8 and Shift+F8 aside. A key goes first to what has the focus, which may take it (a
 menu's arrows, say); then to the screen's own keys (`useScreenKeys`),
-then to the Studio's. Keys in a dialog are the dialog's. A field or
+then to the Studio's. Keys in a dialog are the dialog's, but Ctrl+K
+(Cmd+K), which closes the dialog and opens the palette in its place,
+rather than reach the browser; while a menu is open (Columns, say),
+every key is the menu's, so `j` and `k` do not move the table under it. A field or
 button with a key says so to screen readers (`aria-keyshortcuts`): the
 search or filter `/` goes to is the one marked so. The key help is a
 modal dialog, the browser's own
@@ -248,8 +251,11 @@ has two tabs, a tablist (Left and Right go from one to the other):
 - **Activity**: what the Studio's screens said they did since the page
   was opened, the last first, each after its time, 50 at most: the
   draft saved (or its last change not), a draft made or deleted, Home's
-  bulk changes, the workbench's bulk edits, undo, moves and copies, an
-  export or an import, a release published or saved as a file. A screen
+  bulk changes, the workbench's bulk edits, undo, moves and copies, a
+  card saved in the inspector, an export or an import, a release
+  published or saved as a file. A line said again just after itself is
+  not repeated: the last line counts it ("Draft saved ×5"), at the
+  time it was said last (`addActivity`). A screen
   tells it through `ActivityLog` (`useActivity`, in
   [`shell/activity.ts`](../apps/studio/src/ui/shell/activity.ts)), the
   line its status says; what a screen shows as it opens is not told.
@@ -470,12 +476,13 @@ does both ([deckTable.ts](../packages/domain/src/deckTable.ts)).
 
 **Views.** Tabs above the table (a group named Views, the one shown
 pressed) each keep the decks of one kind, and count them: All, Due
-today (cards due today, sorted the most first), Courses (copies of a
-course), Library copies (copies of a release, from the library or a
-link) and Needs attention (invalid data, or cards that could not be
-read). Each is a preset of Home's query
+today (cards due today, and those whose cards are still counted, their
+count a loader meanwhile, so none is hidden while it may be due),
+Courses (copies of a course), Library copies (copies of a release,
+from the library or a link) and Needs attention (invalid data, or
+cards that could not be read). Each is a preset of Home's query
 ([`shell/views.ts`](../apps/studio/src/ui/shell/views.ts)): it sets
-the view (`show`) and the sort, and keeps the filter's text. A deck's
+the view (`show`), and keeps the filter's text and the sort. A deck's
 problems ([health](#health)) and its newer release are found only as
 its row comes into view, so no view keeps decks by them.
 
@@ -575,7 +582,8 @@ clears the selection, and **Enter** opens the card. The cursor's row is
 marked, as is each row selected. **j** and **k** work wherever the
 focus is: from outside the table, they go on from the cursor's row, or
 to the first. **x**, **Enter** and the Shift keys act on the row the
-focus is in, or, with the focus on the page's body, the cursor's. The
+focus is in, or, with the focus on the page's body, the cursor's;
+Enter on a row's link or button is the link's or the button's. The
 keys are left to the search and the filters while they have the
 focus, and to whatever took them first; they are the screen's own keys
 of the Studio's ([Keys](#layout); `useRowKeys`). What is selected,
@@ -691,7 +699,10 @@ goes back there. **Previous** and **Next** at its heading's end, or
 **k** and **j**, show the card before it in the list, or the one after
 (each at its page of the list), on the same tab, with no Back stop; at
 either end of the list, or for a card the query does not keep, there
-is none. Below that width the inspector is the main content alone.
+is none. A card opened from elsewhere (the palette, a deck's schedule,
+a link) puts the list at its page, so that its row is in sight,
+replacing the history entry. Below that width the inspector is the
+main content alone.
 
 Its four tabs are links, the one shown marked
 (`aria-current`):
@@ -699,7 +710,8 @@ Its four tabs are links, the one shown marked
 - **Content**: Solid Memo's card editor (`CardContainer` in `ui`): the
   card as it is studied, its sides, pictures, notes, label and Markdown,
   Save, and Remove, which goes back to the deck's cards. Its wrong
-  options are left to their own tab.
+  options are left to their own tab. Each save is told to the
+  [dock](#the-dock)'s activity, as each change of the wrong options is.
 - **Wrong options**, with their number: the card's distractors
   ([`DistractorFields`](../packages/ui/src/ui/DistractorFields.tsx) in
   `ui`). Each shows its text, its note on why it is wrong, its id and
@@ -773,14 +785,21 @@ is shown but nothing in it can be changed ([below](#data-set-aside)).
 **Edits not saved.** The content tab's card editor says while it holds
 changes not saved, since it opened or was last saved. Leaving them then
 (another card by `j`, `k`, Previous, Next or a row of the list, Close,
-another tab, or any other link or key that goes to another page)
-first asks, in a dialog ([`shell/ConfirmDialog.tsx`](../apps/studio/src/ui/shell/ConfirmDialog.tsx),
+another tab, any other link or key that goes to another page, or the
+browser's Back and Forward, or a hash typed in) first asks, in a dialog ([`shell/ConfirmDialog.tsx`](../apps/studio/src/ui/shell/ConfirmDialog.tsx),
 on the Studio's `Dialog`): **Save** saves them as Save does, then goes
 on, unless the save failed or was refused, which the editor shows;
 **Discard** goes on without them; **Stay**, Escape or Close goes
 nowhere ([`shell/unsavedEdits.tsx`](../apps/studio/src/ui/shell/unsavedEdits.tsx)).
-A card's edits are never saved unasked. The browser's own Back and
-Forward are not asked about.
+Back or Forward is undone before the question, before the Studio's
+router hears of it: the card's page is put back on top of the history,
+and once the question is answered so, the Studio goes back from there,
+where Back or Forward went. A card's edits are never saved unasked.
+Leaving the app (a reload, closing the tab) meanwhile is asked by the
+browser itself (`beforeunload`). The edits are kept as the window
+crosses 64rem, the card going from beside its deck's cards to alone,
+or back: the editor starts again from what the one before held
+(`keep`, in `CardScreen`), until another card or tab is shown.
 
 Opened at a field (`field`, as the [health](#health) screen links to
 one), the inspector puts the focus there: on the text, or on the wrong
@@ -1321,7 +1340,10 @@ Every edit is made at once on the screen, then written in the pod
   (`changedDocuments` in
   [draftLayout.ts](../packages/domain/src/release/draftLayout.ts)) waits
   on its own. A change of several documents (a move, say) is written at
-  once.
+  once. What waits is the draft's, not an editor's: the screen's editor
+  and the outline's beside it share it, so a move in the outline writes
+  the text typed on the screen first, and no write's draft is put on
+  the screen while typing waits that it does not hold.
 - **Queued per draft.** The writes of a draft wait for one another, in
   one mutation scope, whatever their documents and whichever screen
   made them. Each write reads the draft after the writes before it, so
@@ -1899,7 +1921,8 @@ read it (everyone, or only its owner, with **Make it public**), and
 Each links the draft it was published from (the draft says what it was
 released as), while the instance has it. It changes no release. The
 table is a [`DataTable`](#card-workbench): a column's name sorts it,
-then the other way, then as the catalogue lists them, and a filter
+then the other way, then as the catalogue lists them, **Enter** opens
+the release at the cursor, as its name's link does, and a filter
 keeps the releases whose name or address holds its text, case and
 accents aside. The sidebar and the drafts screen link to it
 ("Published releases" there). A learner adds a release in Solid Memo by

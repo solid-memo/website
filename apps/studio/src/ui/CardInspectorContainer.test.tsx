@@ -8,6 +8,7 @@ import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { CardInspectorContainer, releaseLinkOf } from "./CardInspectorContainer";
 import type { CardTab } from "./router";
+import { ActivityLog } from "./shell/activity";
 import { instanceA, invalidReport, makeCard, makeDeck } from "../test/fixtures";
 
 afterEach(() => vi.unstubAllGlobals());
@@ -21,23 +22,26 @@ function renderContainer(useCases: UseCases, { tab = "distractors" as CardTab, o
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const invalidate = vi.spyOn(queryClient, "invalidateQueries");
   const onRemoved = vi.fn();
+  const log = vi.fn();
   render(
     <QueryClientProvider client={queryClient}>
-      <CardInspectorContainer
-        useCases={useCases}
-        deck={of}
-        card={shown}
-        tab={tab}
-        field={field}
-        tabHref={(each) => `#${each}`}
-        onTab={vi.fn()}
-        appHref="#/card"
-        healthHref="#/health"
-        onRemoved={onRemoved}
-      />
+      <ActivityLog.Provider value={log}>
+        <CardInspectorContainer
+          useCases={useCases}
+          deck={of}
+          card={shown}
+          tab={tab}
+          field={field}
+          tabHref={(each) => `#${each}`}
+          onTab={vi.fn()}
+          appHref="#/card"
+          healthHref="#/health"
+          onRemoved={onRemoved}
+        />
+      </ActivityLog.Provider>
     </QueryClientProvider>,
   );
-  return { invalidate, queryClient, onRemoved };
+  return { invalidate, queryClient, onRemoved, log };
 }
 
 describe("releaseLinkOf", () => {
@@ -53,12 +57,14 @@ describe("releaseLinkOf", () => {
 describe("CardInspectorContainer", () => {
   it("edits the card's content in Solid Memo's editor, without its wrong options", async () => {
     const useCases = makeUseCasesFake({ updateCard: vi.fn(async () => card) });
-    renderContainer(useCases, { tab: "content" });
+    const { log } = renderContainer(useCases, { tab: "content" });
     expect(screen.queryByRole("group", { name: "Wrong options" })).toBeNull();
     expect(screen.queryByRole("heading", { name: "Card" })).toBeNull();
     fireEvent.input(screen.getByLabelText("Back"), { target: { value: "H2O" } });
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
     await waitFor(() => expect(useCases.updateCard).toHaveBeenCalledWith(deck, card, { front: { en: "water" }, back: { en: "H2O" } }));
+    // The Studio's activity is told.
+    await waitFor(() => expect(log).toHaveBeenCalledWith("Saved the card water."));
   });
 
   it("holds every tab's controls while the data is checked, and while the deck is set aside, with a link to its health", async () => {
@@ -137,10 +143,11 @@ describe("CardInspectorContainer", () => {
 
   it("saves each change of the wrong options as it is made, then reads the cards afresh", async () => {
     const useCases = makeUseCasesFake({ updateCard: vi.fn(async () => card) });
-    const { invalidate, queryClient } = renderContainer(useCases);
+    const { invalidate, queryClient, log } = renderContainer(useCases);
     queryClient.setQueryData(["studyQueue", deck.url], { due: [card], newCards: [], studiedToday: 0 });
     fireEvent.click(screen.getByRole("button", { name: "Retire the wrong option “fire”" }));
     await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("Saved."));
+    expect(log).toHaveBeenCalledWith("Saved the card water.");
     expect(useCases.updateCard).toHaveBeenCalledWith(deck, card, { ...card, distractors: [{ id: "water-d1", text: { en: "fire" }, retired: true }] });
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["cards", deck.cardsDocumentUrl] });
     expect(queryClient.getQueryData(["studyQueue", deck.url])).toBeUndefined();

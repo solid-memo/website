@@ -27,6 +27,13 @@ const NO_TITLE: LangText = {};
 const NONE_PUBLISHED: ReadonlySet<string> = new Set();
 const NO_DISTRACTORS: readonly Distractor[] = [];
 
+/** What a card's editor holds: its fields as edited and as they were last saved, and its wrong options as changed (null while they are not). */
+export interface CardEdits {
+  draft: CardDraft;
+  pristine: CardDraft;
+  changed: Distractor[] | null;
+}
+
 /**
  * One card's own page: the card as it looks in study, and its editor.
  * While a change saves, its buttons keep the focus (aria-disabled), as
@@ -50,7 +57,10 @@ const NO_DISTRACTORS: readonly Distractor[] = [];
  * While the editor holds changes not saved (since it opened, or since
  * the last save), it says so (`onUnsaved`) with a way to save them as
  * Save does, which resolves to whether they were saved; then, once
- * there are none (saved, or the editor gone), null.
+ * there are none (saved, or the editor gone), null. With `keep`, the
+ * editor keeps what it holds there as it changes, and starts from what
+ * is there: a page that shows it elsewhere as the window changes (the
+ * Studio's card beside its deck's cards, or alone) loses none of it.
  */
 export function CardScreen({
   card,
@@ -66,6 +76,7 @@ export function CardScreen({
   onSave,
   onRemove,
   onUnsaved,
+  keep,
 }: {
   card: Card;
   /** The deck's name: its languages are suggested for the card's text. */
@@ -88,16 +99,20 @@ export function CardScreen({
   onSave: (content: CardContent) => void | Promise<boolean>;
   onRemove: () => void;
   onUnsaved?: (save: (() => Promise<boolean>) | null) => void;
+  /** Where the editor's edits are kept, by its owner, for the editor shown next of the same card. */
+  keep?: { current: CardEdits | null };
 }) {
   const { t, locale, readerText } = useI18n();
   const hints = useMemo(() => cardLanguageHints(languages, deckTitle), [languages, deckTitle]);
   const startDraft = () => draftOf(card, [locale, ...navigator.languages], { defaults: hints.defaults });
-  const [draft, setDraft] = useState(startDraft);
+  const [draft, setDraft] = useState(() => keep?.current?.draft ?? startDraft());
   /** The draft as it started, or as last saved: what is not saved differs from it. */
-  const [pristine, setPristine] = useState(draft);
+  const [pristine, setPristine] = useState(keep?.current?.pristine ?? draft);
   const [invalid, setInvalid] = useState<CardFieldsError | null>(null);
   /** The wrong options as changed here, until saved; null while left as the card has them. */
-  const [changed, setChanged] = useState<Distractor[] | null>(null);
+  const [changed, setChanged] = useState<Distractor[] | null>(keep?.current?.changed ?? null);
+  // As it is rendered, so an editor gone the next moment has kept its last edit.
+  if (keep !== undefined) keep.current = { draft, pristine, changed };
   const distractors = changed ?? card.distractors ?? NO_DISTRACTORS;
 
   // What is known of the deck (its cards' languages) may come

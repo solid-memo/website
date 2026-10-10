@@ -27,6 +27,7 @@ import { ReadOnlyNotice } from "./ReadOnly";
 import type { CardTransfer } from "./TransferCardsDialog";
 import { useActivity } from "./shell/activity";
 import { DataTable, type Column } from "./shell/DataTable";
+import { Keys } from "./shell/KeyHelp";
 import { nextSort, NO_SELECTION, toggled, type Selection } from "./shell/tableModel";
 
 /** An edit made, which can be undone while the page is open. */
@@ -338,6 +339,9 @@ export function CardWorkbenchScreen({
               k: <kbd>k</kbd>,
               x: <kbd>x</kbd>,
               enter: <kbd>Enter</kbd>,
+              shiftJ: <Keys keys="Shift+J" />,
+              shiftK: <Keys keys="Shift+K" />,
+              escape: <kbd>Escape</kbd>,
             })}
           </p>
           <div class="studio-selection">

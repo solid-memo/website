@@ -1,6 +1,6 @@
 import { createContext } from "preact";
 import { useCallback, useContext, useEffect, useRef } from "preact/hooks";
-import { isTyping, keyOf, pressKey, SHORTCUTS, type Chord, type ShortcutId } from "./shortcuts";
+import { isTyping, keyOf, pressKey, shortcutOf, SHORTCUTS, type Chord, type ShortcutId } from "./shortcuts";
 
 /** A screen's own keys, given the key as the keymap names it (keyOf): the screen takes one with `preventDefault`. */
 export type ScreenKeyHandler = (event: KeyboardEvent, key: string) => void;
@@ -25,7 +25,9 @@ const TYPING_KEYS = STUDIO_KEYS.filter((shortcut) => shortcut.whileTyping);
  * The Studio's one listener of keys, on the document. A key goes first
  * to what has the focus, which takes it with `preventDefault` (a menu, a
  * field's own keys): the listener leaves it. A key in a dialog is the
- * dialog's. Then the screen's own keys (useScreenKeys) have it, the last
+ * dialog's, but Ctrl+K (Cmd+K), which closes it and opens the palette,
+ * rather than reach the browser; while a menu is open, every key is the
+ * menu's. Then the screen's own keys (useScreenKeys) have it, the last
  * screen to register first, and then the Studio's (SHORTCUTS), chords
  * among them: `run` does one, and says whether it could (a section with
  * no instance open cannot be gone to), and only then is the key's own
@@ -42,8 +44,19 @@ export function useShortcuts(run: (shortcut: ShortcutId) => boolean): Register {
 
   useEffect(() => {
     const listener = (event: KeyboardEvent) => {
-      if (event.defaultPrevented || (event.target instanceof Element && event.target.closest("dialog") !== null)) return;
+      if (event.defaultPrevented) return;
       const key = keyOf(event);
+      // A key goes to an element: the one focused, else the page's body.
+      const dialog = (event.target as Element).closest("dialog");
+      if (dialog !== null) {
+        if (shortcutOf(key, "studio") !== "palette") return;
+        event.preventDefault();
+        // Once it has closed, and its owner stopped showing it.
+        dialog.addEventListener("close", () => runRef.current("palette"), { once: true });
+        dialog.close();
+        return;
+      }
+      if (document.querySelector('[role="menu"]') !== null) return;
       const typing = isTyping(event.target);
       if (!typing) {
         for (const screen of [...screens.current].reverse()) {

@@ -3,6 +3,7 @@ import { fireEvent, render, screen, within } from "@testing-library/preact";
 import type { ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout";
 import { ReleasesScreen } from "./ReleasesScreen";
 import { instanceA } from "../test/fixtures";
+import { WithKeys } from "../test/keys";
 
 const SOLID = `${instanceA.url}releases/solid/v2.ttl`;
 const ELSEWHERE = "https://pod.example/public/course.ttl";
@@ -38,7 +39,11 @@ function renderScreen(overrides: Partial<Props> = {}) {
     onStartNext: vi.fn(),
     ...overrides,
   };
-  render(<ReleasesScreen {...props} />);
+  render(
+    <WithKeys>
+      <ReleasesScreen {...props} />
+    </WithKeys>,
+  );
   return props;
 }
 
@@ -65,6 +70,24 @@ describe("ReleasesScreen", () => {
     // A draft of no title, by its name.
     renderScreen({ draftOf: () => ({ draft: { ...source, title: {} }, href: "#/draft/solid" }) });
     expect(screen.getAllByRole("link", { name: "solid, version 2" })).toHaveLength(4);
+  });
+
+  it("opens the release at the cursor with Enter, as its name's link does", () => {
+    const assign = vi.spyOn(window.location, "assign").mockImplementation(() => undefined);
+    renderScreen();
+    document.body.focus();
+    fireEvent.keyDown(document.body, { key: "j" });
+    fireEvent.keyDown(document.body, { key: "j" });
+    document.body.focus();
+    fireEvent.keyDown(document.body, { key: "Enter" });
+    expect(assign).toHaveBeenCalledWith(ELSEWHERE);
+    // A row's button keeps its own Enter.
+    assign.mockClear();
+    const startNext = screen.getAllByRole("button", { name: /^Start the next version/ })[0]!;
+    startNext.focus();
+    fireEvent.keyDown(startNext, { key: "Enter" });
+    expect(assign).not.toHaveBeenCalled();
+    assign.mockRestore();
   });
 
   it("sorts by a column's header, then the other way, then as listed, but by its actions", () => {

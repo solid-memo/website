@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Card, CardContent, CardTextPart, Deck } from "@solid-memo/domain/deck";
 import { deckLanguages } from "@solid-memo/domain/deckLanguages";
-import { CardScreen } from "./CardScreen";
+import { CardScreen, type CardEdits } from "./CardScreen";
 import { publishedDistractorIds, useDeckRelease } from "./deckRelease";
 import { useI18n } from "./i18n";
 
@@ -13,7 +13,8 @@ import { useI18n } from "./i18n";
  * up here as a fresh `card` prop once that query is invalidated. The
  * deck's cards (the same query) give the languages its new text starts
  * in, and the release the deck came from, if any, the wrong options it
- * published, which are never deleted.
+ * published, which are never deleted. A save made says so (`onSaved`),
+ * once the deck's cards are read afresh.
  */
 export function CardContainer({
   useCases,
@@ -24,6 +25,8 @@ export function CardContainer({
   withDistractors,
   arrival,
   onUnsaved,
+  onSaved,
+  keep,
 }: {
   useCases: UseCases;
   deck: Deck;
@@ -37,6 +40,10 @@ export function CardContainer({
   arrival?: CardTextPart;
   /** As CardScreen's: the editor holds changes not saved, and how to save them. */
   onUnsaved?: (save: (() => Promise<boolean>) | null) => void;
+  /** The card was saved. */
+  onSaved?: () => void;
+  /** As CardScreen's: where its edits are kept. */
+  keep?: { current: CardEdits | null };
 }) {
   const { errorText } = useI18n();
   const queryClient = useQueryClient();
@@ -56,6 +63,7 @@ export function CardContainer({
         queryKey: ["cards", deck.cardsDocumentUrl],
       });
       queryClient.removeQueries({ queryKey: ["studyQueue", deck.url] });
+      onSaved?.();
     },
   });
 
@@ -96,6 +104,7 @@ export function CardContainer({
       }
       onRemove={() => removeCardMutation.mutate()}
       onUnsaved={onUnsaved}
+      keep={keep}
     />
   );
 }

@@ -165,7 +165,8 @@ export function DeckTableScreen({
     );
   }
 
-  const factsOf = (row: DeckTableRow) => ({ due: row.figures.due, badges: badges(row.deck) });
+  const figure = (row: DeckTableRow, which: DeckFigure): Count => row.figures[which] ?? pending(row.deck, which);
+  const factsOf = (row: DeckTableRow) => ({ due: figure(row, "due"), badges: badges(row.deck) });
   const shown = arrangeDeckRows(
     rows.filter((row) => inView(shownView, factsOf(row))),
     view,
@@ -190,7 +191,6 @@ export function DeckTableScreen({
     return ok;
   }
 
-  const figure = (row: DeckTableRow, which: DeckFigure): Count => row.figures[which] ?? pending(row.deck, which);
   const pace = (row: DeckTableRow, cap: "newCardsPerDay" | "maxReviewsPerDay") => (
     <>
       {row[cap]}

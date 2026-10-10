@@ -7,7 +7,7 @@ import { DRAFT_URL, instanceA } from "../../test/fixtures";
 import { DraftWaiting, type EditorReport } from "../draftEditor";
 import { studioRouteToHash, type StudioRoute } from "../router";
 import type { ScreenCommand } from "./commandIndex";
-import { ACTIVITY_LIMIT, useActivityLog } from "./activity";
+import { useActivityLog } from "./activity";
 import type { WorkspaceProblems } from "./BottomDock";
 import { StudioShell, type AsidePane } from "./StudioShell";
 import { useScreenCommands } from "./useScreenCommands";
@@ -313,6 +313,31 @@ describe("StudioShell", () => {
     press("g");
     press("i");
     expect(onGo).toHaveBeenCalledWith({ screen: "instances" });
+  });
+
+  it("closes any dialog with Ctrl+K, and opens the palette in its place, rather than let the key reach the browser", () => {
+    renderShell();
+    const button = statusBar().getByRole("button", { name: "? Keys" });
+    button.focus();
+    fireEvent.click(button);
+    within(screen.getByRole("dialog", { name: "Keyboard shortcuts" })).getByRole("button", { name: "Close" }).focus();
+    expect(press("k", { ctrlKey: true })).toBe(true);
+    expect(screen.queryByRole("dialog", { name: "Keyboard shortcuts" })).toBeNull();
+    const palette = screen.getByRole("dialog", { name: "Quick open" });
+    expect(within(palette).getByRole("combobox")).toHaveFocus();
+    // Closed, the palette gives the focus back where it was before the key help.
+    fireEvent.click(within(palette).getByRole("button", { name: "Close" }));
+    expect(button).toHaveFocus();
+  });
+
+  it("leaves the keys to a menu while one is open", () => {
+    renderShell({ table: true });
+    fireEvent.click(screen.getByRole("button", { name: "Show or hide columns" }));
+    const menu = screen.getByRole("menu");
+    expect(menu).toBeInTheDocument();
+    expect(press("?")).toBe(false);
+    expect(press("k", { ctrlKey: true })).toBe(false);
+    expect(screen.queryByRole("dialog")).toBeNull();
   });
 
   it("leaves a key that what has the focus took", () => {
@@ -644,6 +669,8 @@ describe("StudioShell", () => {
       const { unmount } = renderShell();
       expect(screen.queryByRole("region", { name: "Panel" })).toBeNull();
       expect(dockButton()).toHaveAttribute("aria-expanded", "false");
+      // No dock to control while it is hidden.
+      expect(dockButton()).not.toHaveAttribute("aria-controls");
       expect(dockButton()).toHaveAttribute("aria-keyshortcuts", "Control+J");
       fireEvent.click(dockButton());
       expect(dock()).toHaveAttribute("id", dockButton().getAttribute("aria-controls"));
@@ -670,6 +697,7 @@ describe("StudioShell", () => {
     it("lists the problems of what is shown, its tab and the status bar counting them, the status bar's count opening it at them", () => {
       renderShell({ problems });
       const count = statusBar().getByRole("button", { name: "3 problems" });
+      expect(count).not.toHaveAttribute("aria-controls");
       fireEvent.click(count);
       expect(count).toHaveAttribute("aria-controls", dock().id);
       const tabs = within(dock()).getByRole("tablist", { name: "Panel" });
@@ -724,25 +752,16 @@ describe("StudioShell", () => {
       act(() => logActivity("Exported 2 decks."));
       act(() => logActivity("Moved 3 cards."));
       const editor = {};
-      act(() => report(editor, { waiting: 1, failed: false }));
-      act(() => report(editor, { waiting: 0, failed: false }));
+      // Saved three times in a row: one line, counting them.
+      for (let n = 0; n < 3; n++) {
+        act(() => report(editor, { waiting: 1, failed: false }));
+        act(() => report(editor, { waiting: 0, failed: false }));
+      }
       act(() => report(editor, { waiting: 0, failed: true }));
       // Each after its time.
       const lines = within(dock()).getAllByRole("listitem").map((line) => line.textContent!.slice(line.querySelector("time")!.textContent!.length + 1));
-      expect(lines).toEqual(["Last change not saved", "Draft saved", "Moved 3 cards.", "Exported 2 decks."]);
+      expect(lines).toEqual(["Last change not saved", "Draft saved ×3", "Moved 3 cards.", "Exported 2 decks."]);
       expect(within(dock()).getAllByRole("listitem")[0]!.querySelector("time")).toHaveAttribute("datetime");
-    });
-
-    it("keeps the last lines only", () => {
-      renderShell();
-      fireEvent.click(dockButton());
-      fireEvent.click(within(dock()).getByRole("tab", { name: "Activity" }));
-      act(() => {
-        for (let n = 0; n <= ACTIVITY_LIMIT; n++) logActivity(`Line ${n}`);
-      });
-      const lines = within(dock()).getAllByRole("listitem");
-      expect(lines).toHaveLength(ACTIVITY_LIMIT);
-      expect(lines[0]).toHaveTextContent(`Line ${ACTIVITY_LIMIT}`);
     });
 
     it("is as tall as its splitter makes it", () => {

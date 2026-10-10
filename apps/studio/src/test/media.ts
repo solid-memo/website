@@ -4,8 +4,8 @@ import { MEDIUM, NARROW } from "../ui/shell/workspaceLayout";
 
 /**
  * A screen as narrow as a phone's (NARROW, and MEDIUM), or (`medium`)
- * as a tablet's (MEDIUM only), and a way to widen it, as the browser
- * says it.
+ * as a tablet's (MEDIUM only), and a way to widen it, and to make it
+ * as narrow again, as the browser says it.
  */
 export function narrowScreen(medium = false) {
   const listeners = new Set<() => void>();
@@ -20,11 +20,13 @@ export function narrowScreen(medium = false) {
       removeEventListener: (_: string, listener: () => void) => listeners.delete(listener),
     } as unknown as MediaQueryList;
   });
+  const resize = (to: boolean) => {
+    wide = to;
+    act(() => listeners.forEach((listener) => listener()));
+  };
   return {
-    widen() {
-      wide = true;
-      act(() => listeners.forEach((listener) => listener()));
-    },
+    widen: () => resize(true),
+    narrow: () => resize(false),
   };
 }
 
