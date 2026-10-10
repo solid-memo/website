@@ -9,7 +9,10 @@ course the learner has a deck of every card they studied.
 
 A course is not a new kind of thing in the pod. It is a
 [library](deck-library.md) release with an outline, and the learner's
-copy is an ordinary deck. The pure parts are in
+copy is an ordinary deck. A course published anywhere else, in its
+creator's pod say, is the same: a learner adds it
+[from a link](deck-library.md#from-a-link) to its release, and plays it
+as one from the library, its outline read from that address. The pure parts are in
 [domain/course.ts](../packages/domain/src/course.ts); the use cases are
 in [useCases.ts](../packages/application/src/useCases.ts).
 
@@ -152,7 +155,9 @@ new type-index entries ([data-model.md](data-model.md#courses)):
    it (`startCourse`) copies the release's metadata into an empty deck
    (`importDeck` with no cards). An instance that already has a copy of
    any release of the course gets that copy back: a course is started
-   once.
+   once. A course added from a link is started the same way; its own
+   release says it is a course, so the deck list offers to continue it
+   as it does a library course (`useCopies`).
 2. **A step.** A step comes in two phases. First the learner reads the
    theory, with no question shown. Theory in chunks is read one chunk
    at a time, starting at the first: "Part 2 of 3" says where the
@@ -256,6 +261,7 @@ else offers nothing.
 | Use case | Does |
 |---|---|
 | `startCourse(instanceUrl, course)` | The instance's deck of the course: the copy it has (`isCopyOf`), else a new, empty copy of the current release. |
+| `importReleaseFromUrl(instanceUrl, release)` | A course added from a link is started so too (`readReleaseFromLink` reads and checks it first, [deck-library.md](deck-library.md#from-a-link)). |
 | `getCourse(deck)` | The course as the learner has it: the deck as its entry is now, the release, its outline, its cards by id, the cards answered and the progress. Writes nothing. A deck that is gone throws `deckGone`. |
 | `answerCourseQuestion(instanceUrl, deck, card, choice, now)` | Grades one answer as `courseAnswerEffect` says. A card introduced is written first (`applyCardChanges`), then graded, so a review state never exists without its card. Returns the effect and the card's state. |
 | `completeChapter(deck, chapterUrl)` | Adds `sm:completedChapter` to the deck's entry. |
@@ -269,6 +275,10 @@ Two ports gained methods ([ports.ts](../packages/application/src/ports.ts)):
   each with its shape and brought up to its latest format. The adapter
   ([solidDeckLibrary.ts](../packages/solid/src/solidDeckLibrary.ts))
   reads each release document once, for both its cards and its outline.
+  It takes any address: `getCourse` reads the release the learner's
+  deck names (`prov:wasDerivedFrom`), wherever it is, so a course added
+  from a link plays as the library's do. Nothing in the player knows
+  where a course came from.
 - **`DeckRepository.completeChapter(deck, chapterUrl)`**
   ([solidDeckRepository.ts](../packages/solid/src/solidDeckRepository.ts))
   adds the one triple with a PATCH made only if `catalog.ttl` is as it

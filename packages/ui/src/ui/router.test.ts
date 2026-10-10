@@ -4,6 +4,7 @@ import {
   courseHref,
   deckHref,
   decksHref,
+  importUrlHref,
   isStudioHash,
   libraryDeckHref,
   libraryHref,
@@ -53,6 +54,8 @@ const roundTrips: RouteRef[] = [
     instanceUrl: "https://pod.example/solid-memo/a/",
     libraryDeckUrl: "https://solid-memo.com/decks/capitals/v1.ttl",
   },
+  { screen: "importUrl", instanceUrl: "https://pod.example/solid-memo/a/" },
+  { screen: "importUrl", instanceUrl: "https://pod.example/solid-memo/a/", url: "https://bob.example/releases/rivers/v1.ttl" },
   {
     screen: "deckDetail",
     instanceUrl: "https://pod.example/solid-memo/a/",
@@ -206,6 +209,8 @@ describe("routeToHash / parseHash", () => {
     "#/library-card?deck=b&card=c",
     "#/library-preview?instance=https%3A%2F%2Fpod.example%2F",
     "#/library-preview?deck=https%3A%2F%2Fsolid-memo.com%2Fdecks%2Fcapitals%2Fv1.ttl",
+    "#/import-url",
+    "#/import-url?url=https%3A%2F%2Fbob.example%2Fv1.ttl",
     "#/deck",
     "#/deck?instance=https%3A%2F%2Fpod.example%2F",
     "#/deck-preferences?instance=https%3A%2F%2Fpod.example%2F",
@@ -232,6 +237,12 @@ describe("routeToHash / parseHash", () => {
     "#/validate",
   ])("rejects invalid hash %j", (hash) => {
     expect(parseHash(hash)).toBeNull();
+  });
+});
+
+describe("importUrlHref", () => {
+  it("is the hash URL of the screen that adds a release from a link, none pasted yet", () => {
+    expect(importUrlHref("https://pod.example/a/")).toBe("#/import-url?instance=https%3A%2F%2Fpod.example%2Fa%2F");
   });
 });
 

@@ -116,6 +116,15 @@ describe("breadcrumbsFor", () => {
     ]);
   });
 
+  it("puts adding a release from a link under the library", () => {
+    const importUrl: RouteRef = { screen: "importUrl", instanceUrl, url: "https://bob.example/v1.ttl" };
+    expect(breadcrumbsFor(importUrl, NO_NAMES)).toEqual([
+      { label: "Decks", route: home },
+      { label: "Deck library", route: { screen: "library", instanceUrl } },
+      { label: "Add from a link", route: importUrl },
+    ]);
+  });
+
   it("ends the deck view's trail with a link to the deck itself", () => {
     expect(breadcrumbsFor(deckDetail, { deck: "Kanji N5", card: "", libraryDeck: "" })).toEqual([
       { label: "Decks", route: home },

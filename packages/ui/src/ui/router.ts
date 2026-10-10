@@ -40,6 +40,10 @@ export type RouteRef =
   /** A library deck's cards shown at random, for a try before import;
       nothing is recorded. */
   | { screen: "libraryPreview"; instanceUrl: string; libraryDeckUrl: string }
+  /** A deck or course added from a link to its release, anywhere
+      (docs/deck-library.md, From a link): `url` the address pasted, read
+      and shown before it is added; absent until one is. */
+  | { screen: "importUrl"; instanceUrl: string; url?: string }
   | { screen: "deckDetail"; instanceUrl: string; deckUrl: string }
   /** The deck's own preferences: its daily limits. `section` is the part
       the screen opens on, its heading focused: the deck's languages. */
@@ -122,6 +126,8 @@ export function routeToHash(ref: RouteRef): string {
         instance: ref.instanceUrl,
         deck: ref.libraryDeckUrl,
       })}`;
+    case "importUrl":
+      return `#/import-url${params({ instance: ref.instanceUrl, ...(ref.url === undefined ? {} : { url: ref.url }) })}`;
     case "deckDetail":
       return `#/deck${params({ instance: ref.instanceUrl, deck: ref.deckUrl })}`;
     case "deckPreferences":
@@ -199,6 +205,11 @@ export function statisticsHref(instanceUrl: string): string {
 /** Hash URL of the deck library, where ready-made decks are imported. */
 export function libraryHref(instanceUrl: string): string {
   return routeToHash({ screen: "library", instanceUrl });
+}
+
+/** Hash URL of the screen where a deck or course is added from a link to its release. */
+export function importUrlHref(instanceUrl: string): string {
+  return routeToHash({ screen: "importUrl", instanceUrl });
 }
 
 /**
@@ -308,6 +319,11 @@ export function parseHash(hash: string): RouteRef | null {
       return instanceUrl === null || deckUrl === null
         ? null
         : { screen: "libraryPreview", instanceUrl, libraryDeckUrl: deckUrl };
+    case "/import-url": {
+      if (instanceUrl === null) return null;
+      const url = query.get("url");
+      return url === null ? { screen: "importUrl", instanceUrl } : { screen: "importUrl", instanceUrl, url };
+    }
     case "/deck":
       return instanceUrl === null || deckUrl === null
         ? null

@@ -4,13 +4,13 @@ import { decksOf } from "@solid-memo/domain/deckTree";
 import type { Instance } from "@solid-memo/domain/instance";
 import { DeckListScreen } from "./DeckListScreen";
 import { DeckStudyActionContainer } from "./DeckStudyAction";
-import { useCourseCopies, useDeckTreeEditor } from "./deckTreeEditor";
+import { useCopies, useDeckTreeEditor } from "./deckTreeEditor";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n } from "./i18n";
 import { Loading } from "./Loading";
 import { NewcomerCourseContainer } from "./NewcomerCourseContainer";
 import { TodaySummaryContainer } from "./TodaySummaryContainer";
-import { courseHref, deckHref, libraryHref, routeToHash, studioHref } from "./router";
+import { courseHref, deckHref, importUrlHref, libraryHref, routeToHash, studioHref } from "./router";
 
 /**
  * Owns the deck list of one instance, as the user arranged it into
@@ -18,7 +18,8 @@ import { courseHref, deckHref, libraryHref, routeToHash, studioHref } from "./ro
  * invalid data (docs/validation.md) is listed, but not offered for study.
  *
  * A deck copied from a course (docs/courses.md) is continued from its
- * menu (useCourseCopies). An instance with no decks (groups aside) is
+ * menu, and a copy of a release added from a link says the host it came
+ * from (useCopies). An instance with no decks (groups aside) is
  * offered the library's course for newcomers under the list's heading
  * (NewcomerCourseContainer), which opens once started.
  */
@@ -44,7 +45,7 @@ export function DeckListContainer({
 }) {
   const { t, errorText } = useI18n();
   const { treeQuery, editor } = useDeckTreeEditor(useCases, instance);
-  const isCourse = useCourseCopies(useCases, decksOf(treeQuery.data?.children ?? []));
+  const { isCourse, linkedHost } = useCopies(useCases, decksOf(treeQuery.data?.children ?? []));
 
   if (treeQuery.error) {
     return <ErrorMessage error={errorText(treeQuery.error)} />;
@@ -63,6 +64,8 @@ export function DeckListContainer({
         libraryHref={libraryHref(instance.url)}
         deckHref={(deck) => deckHref(instance.url, deck.url)}
         courseHref={(deck) => (isCourse(deck) ? courseHref(instance.url, deck.url) : undefined)}
+        fromHost={linkedHost}
+        importUrlHref={importUrlHref(instance.url)}
         preferencesHref={(deck) =>
           routeToHash({ screen: "deckPreferences", instanceUrl: instance.url, deckUrl: deck.url })
         }

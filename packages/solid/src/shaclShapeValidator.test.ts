@@ -80,14 +80,15 @@ function makeValidator() {
     loadProfile: vi.fn(async () => []),
     loadReferenceData: vi.fn(async () => []),
   };
+  const publicFetch = vi.fn() as unknown as typeof fetch;
   const validator = createShaclShapeValidator({
     fetch: vi.fn() as unknown as typeof fetch,
-    shapesFetch: vi.fn() as unknown as typeof fetch,
+    shapesFetch: publicFetch,
     ...SHAPE_SOURCES,
     loadEngine: async () => ({ createEngine, mergeDatasets: (...parts) => parts.flatMap((p) => [...p]) as never, mapIris: (data) => data }),
     loader,
   });
-  return { validator, validateNode, validate, createEngine, loader };
+  return { validator, validateNode, validate, createEngine, loader, publicFetch };
 }
 
 beforeEach(() => {
@@ -125,6 +126,22 @@ describe("createShaclShapeValidator", () => {
     expect(vi.mocked(getSolidDatasetOrNull).mock.calls.at(-1)![1]).toBe(other);
     expect(loader.load).toHaveBeenCalledOnce();
     expect(createEngine).toHaveBeenCalledOnce();
+  });
+
+  it("reads a release checked on its own as anyone does, against the library's shapes, with no profile", async () => {
+    const release = "https://alice.example/releases/capitals/v1.ttl";
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(
+        mockSolidDatasetFrom(release),
+        buildThing(createThing({ url: release })).addIri(RDF.type, SM.Deck).addIri(RDF.type, DCAT.Dataset).addInteger(SM.formatVersion, 6).build(),
+      ),
+    );
+    const { validator, validateNode, validate, publicFetch } = makeValidator();
+    const report = await validator.validateDocument(release, "library");
+    expect(vi.mocked(getSolidDatasetOrNull).mock.calls[0]![1]).toBe(publicFetch);
+    expect(report.subjects).toEqual([{ url: release, status: "checked", shape: "libraryDeck", version: 6, violations: [] }]);
+    expect(validateNode).toHaveBeenCalledOnce();
+    expect(validate).not.toHaveBeenCalled();
   });
 
   it("reports a missing document as missing, without loading anything", async () => {

@@ -67,6 +67,21 @@ describe("LibraryCopiesScreen", () => {
     expect(cells("Broken capitals")[3]).toBe("Release 2 is out, but what it would change could not be read.");
   });
 
+  it("says where a copy of a release added from a link came from, and when a newer version is not known", () => {
+    const linked = { ...makeCopy("deck-8", { en: "Pods" }, "1"), sourceUrl: "https://bob.example/releases/pods/v1.ttl" };
+    const known = { ...makeCopy("deck-9", { en: "Lakes" }, "1"), sourceUrl: "https://bob.example/releases/lakes/v1.ttl" };
+    const series = { ...capitals, url: linked.sourceUrl, version: "1" };
+    renderScreen({
+      rows: [
+        { copy: { deck: linked, series, version: "1", newer: "unknown", fromLink: true }, plan: "loading" },
+        { copy: { deck: known, series: { ...series, url: known.sourceUrl }, version: "1", newer: false, fromLink: true }, plan: "loading" },
+      ],
+    });
+    expect(within(table()).getByRole("rowheader", { name: "Pods From bob.example" })).toBeInTheDocument();
+    expect(cells("Pods From bob.example").slice(1)).toEqual(["Release 1", "Release 1", "Not known: no public catalogue of its creator lists it"]);
+    expect(cells("Lakes From bob.example")[3]).toBe("Up to date");
+  });
+
   it("details what updating keeps, the releases' notes, and the cards each change touches", () => {
     renderScreen();
     const details = within(row("Capitals")).getByText("What changes").closest("details")!;

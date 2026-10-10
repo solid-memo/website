@@ -32,6 +32,8 @@ export function forgetLibrarySelection(memoryKey: string): void {
  * deck's name and size; clicking it (anywhere but the checkbox and the
  * Preview button) opens the deck's own page, where it is described in
  * full and can be imported on its own. Preview tries its cards first.
+ * A deck or course published elsewhere is added from a link to it
+ * (`importUrlHref`).
  *
  * The filters sit outside the import form, so Enter in the search field
  * never imports, and only the ticked decks still shown are imported. A
@@ -45,6 +47,7 @@ export function LibraryScreen({
   memoryKey,
   deckHref,
   previewHref,
+  importUrlHref,
   isImported,
   busy,
   error,
@@ -57,6 +60,8 @@ export function LibraryScreen({
   deckHref: (deck: LibraryDeck) => string;
   /** URL of a library deck's preview; its Preview button links there. */
   previewHref: (deck: LibraryDeck) => string;
+  /** URL of the screen that adds a deck or course from a link to its release, published anywhere. */
+  importUrlHref: string;
   /** Whether the instance already holds a copy of the deck. */
   isImported: (deck: LibraryDeck) => boolean;
   /** An import is in progress. */
@@ -64,7 +69,7 @@ export function LibraryScreen({
   error: ErrorText | null;
   onImport: (decks: LibraryDeck[]) => void;
 }) {
-  const { t } = useI18n();
+  const { t, tx } = useI18n();
   const [selectedUrls, setSelectedUrls] = useRemembered<string[]>(`${memoryKey}:selected`, []);
   const [topics, setTopics] = useRemembered<string[]>(`${memoryKey}:topics`, []);
   const [query, setQuery] = useRemembered(`${memoryKey}:query`, "");
@@ -120,6 +125,7 @@ export function LibraryScreen({
         <span class="hint">{count}</span>
       </header>
       <p>{t("library.intro")}</p>
+      <p class="hint">{tx("library.fromLinkHint", { link: <a href={importUrlHref}>{t("library.fromLink")}</a> })}</p>
       {decks.length === 0 ? (
         <p>{t("library.empty")}</p>
       ) : (

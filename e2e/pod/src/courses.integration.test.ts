@@ -102,6 +102,11 @@ const library: DeckLibrary = {
   fetchCourseOutline: async () => outline,
   // The release check is the Studio's: no index is read here.
   readLibraryIndex: async () => ({ url: "https://site.example/decks/index.ttl", publisher: null, releases: [] }),
+  // No release is added from a link here.
+  readRelease: async (url) => {
+    throw new Error(`No release is read from a link: ${url}`);
+  },
+  publishedBeside: async () => null,
 };
 
 /** The app as createAppUseCases wires it, every write checked against the shapes read from this repository. */

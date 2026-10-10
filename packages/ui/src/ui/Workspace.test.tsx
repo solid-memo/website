@@ -1123,6 +1123,79 @@ describe("Workspace", () => {
     expect((await screen.findByText("library offline")).closest(".error")).toBeInTheDocument();
   });
 
+  it("adds a deck from a link, the link in the URL, from the library, then opens a course added so", async () => {
+    const release = "https://bob.example/releases/pods/v1.ttl";
+    const deck: Deck = {
+      id: "deck-1",
+      url: `${instanceA.url}catalog.ttl#deck-1`,
+      title: { en: "Pods" },
+      cardsDocumentUrl: `${instanceA.url}decks/deck-1.ttl`,
+      reviewsDocumentUrl: `${instanceA.url}reviews/deck-1.ttl`,
+      direction: "front-to-back" as const,
+      createdAt: "2026-09-21T10:00:00.000Z",
+      formatVersion: 1,
+      authors: [],
+      sourceUrl: release,
+    };
+    const pods = {
+      url: release,
+      ...firstRelease(release),
+      title: { en: "Pods" },
+      cardCount: 2,
+      authors: [],
+      direction: "front-to-back" as const,
+      sources: [],
+      isCourse: true as const,
+    };
+    const useCases = makeUseCases({
+      listInstances: vi.fn(async () => [instanceA]),
+      readReleaseFromLink: vi.fn(async () => pods),
+      importReleaseFromUrl: vi.fn(async () => deck),
+      getCourse: vi.fn(() => new Promise<never>(() => undefined)),
+    });
+    window.history.replaceState(null, "", routeToHash({ screen: "library", instanceUrl: instanceA.url }));
+    renderWorkspace(useCases);
+
+    fireEvent.click(await screen.findByRole("link", { name: "Add from a link" }));
+    expect(await screen.findByRole("heading", { name: "Add from a link" })).toBeInTheDocument();
+    fireEvent.input(screen.getByRole("textbox", { name: "Link to the release" }), { target: { value: release } });
+    fireEvent.click(screen.getByRole("button", { name: "Show" }));
+    expect(await screen.findByRole("heading", { name: "Pods" })).toBeInTheDocument();
+    expect(window.location.hash).toBe(routeToHash({ screen: "importUrl", instanceUrl: instanceA.url, url: release }));
+
+    fireEvent.click(screen.getByRole("button", { name: "Start course" }));
+    await waitFor(() => expect(window.location.hash).toBe(routeToHash({ screen: "course", instanceUrl: instanceA.url, deckUrl: deck.url })));
+    expect(useCases.importReleaseFromUrl).toHaveBeenCalledWith(instanceA.url, pods);
+  });
+
+  it("returns to the deck list once a deck is added from a link", async () => {
+    const release = "https://bob.example/releases/rivers/v1.ttl";
+    const rivers = { url: release, ...firstRelease(release), title: { en: "Rivers" }, cardCount: 2, authors: [], direction: "front-to-back" as const, sources: [] };
+    window.history.replaceState(null, "", routeToHash({ screen: "importUrl", instanceUrl: instanceA.url, url: release }));
+    renderWorkspace(
+      makeUseCases({
+        listInstances: vi.fn(async () => [instanceA]),
+        readReleaseFromLink: vi.fn(async () => rivers),
+        importReleaseFromUrl: vi.fn(
+          async (): Promise<Deck> => ({
+            id: "deck-1",
+            url: `${instanceA.url}catalog.ttl#deck-1`,
+            title: { en: "Rivers" },
+            cardsDocumentUrl: `${instanceA.url}decks/deck-1.ttl`,
+            reviewsDocumentUrl: `${instanceA.url}reviews/deck-1.ttl`,
+            direction: "front-to-back",
+            createdAt: "2026-09-21T10:00:00.000Z",
+            formatVersion: 1,
+            authors: [],
+            sourceUrl: release,
+          }),
+        ),
+      }),
+    );
+    fireEvent.click(await screen.findByRole("button", { name: "Import this deck" }));
+    await waitFor(() => expect(window.location.hash).toBe(routeToHash({ screen: "home", instanceUrl: instanceA.url })));
+  });
+
   it("opens a library deck's page from a link to one of its releases", async () => {
     const release = "https://solid-memo.com/decks/capitals/v1.ttl";
     window.history.replaceState(

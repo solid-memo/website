@@ -102,6 +102,12 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
       throw new Error("importLibraryDeck fake not configured");
     }),
     listLibraryCards: vi.fn(async () => []),
+    readReleaseFromLink: vi.fn(async () => {
+      throw new Error("readReleaseFromLink fake not configured");
+    }),
+    importReleaseFromUrl: vi.fn(async () => {
+      throw new Error("importReleaseFromUrl fake not configured");
+    }),
     planLibraryUpgrade: vi.fn(async () => null),
     listLibraryUpdates: vi.fn(async () => []),
     getStatistics: vi.fn(async () => statisticsOf([], "2026-09-21")),

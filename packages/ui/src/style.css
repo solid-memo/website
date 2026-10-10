@@ -2210,6 +2210,16 @@ html.drag-active {
   text-decoration: underline;
 }
 
+/* "from <host>": a copy of a release added from a link, after its name. */
+.deck-list .deck-source {
+  display: inline-block;
+  margin-inline-start: 0.5em;
+  text-indent: 0;
+  font-weight: 400;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;

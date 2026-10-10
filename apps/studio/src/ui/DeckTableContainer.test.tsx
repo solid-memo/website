@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor, within } from "@testing-library/pre
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { DeckTree } from "@solid-memo/domain/deckTree";
-import type { LibraryDeck } from "@solid-memo/domain/library";
+import type { LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
 import { firstRelease } from "@solid-memo/domain/testing/libraryDeck";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import type { ValidationReport } from "@solid-memo/domain/validation";
@@ -80,9 +80,11 @@ describe("DeckTableContainer", () => {
     expect(useCases.getStudyCounts).toHaveBeenCalledWith(instanceA.url, { ...kanji, newCardsPerDay: 5 }, expect.any(Date));
   });
 
-  it("shows a row's figures that could not be read as such, and badges a library copy, a course and invalid data", async () => {
+  it("shows a row's figures that could not be read as such, and badges a library copy, a course, copies from a link and invalid data", async () => {
     const course = { ...makeDeck("deck-3", { en: "Solid" }), sourceUrl: "https://solid-memo.com/decks/solid/v1.ttl" };
     const copy = { ...makeDeck("deck-4", { en: "Capitals" }), sourceUrl: "https://solid-memo.com/decks/capitals/v2.ttl" };
+    const linked = { ...makeDeck("deck-5", { en: "Rivers" }), sourceUrl: "https://bob.example/releases/rivers/v1.ttl" };
+    const linkedCourse = { ...makeDeck("deck-6", { en: "Pods" }), sourceUrl: "https://bob.example/releases/pods/v1.ttl" };
     const report: ValidationReport = {
       instanceUrl: instanceA.url,
       conforms: false,
@@ -113,15 +115,17 @@ describe("DeckTableContainer", () => {
       sources: [],
       isCourse: true,
     };
+    const { isCourse: _course, ...plain } = solid;
     const useCases = makeUseCasesFake({
-      listDecks: vi.fn(async () => [kanji, verbs, course, copy]),
+      listDecks: vi.fn(async () => [kanji, verbs, course, copy, linked, linkedCourse]),
       listCards: vi.fn(async (deck) => {
         if (deck.url === kanji.url) throw new Error("gone");
         return [];
       }),
       getStudyCounts: vi.fn(() => new Promise<never>(() => undefined)),
       checkInstance: vi.fn(async () => report),
-      listLibraryDecks: vi.fn(async () => [solid]),
+      listLibraryDecks: vi.fn(async () => [solid, { ...plain, ...firstRelease(copy.sourceUrl), url: copy.sourceUrl }]),
+      deckRelease: vi.fn(async (deck) => (deck.url === linkedCourse.url ? ({ isCourse: true } as LibraryDeckContent) : ({} as LibraryDeckContent))),
     });
     renderContainer(useCases);
     const row = await screen.findByRole("row", { name: /Kanji N5/ });
@@ -131,6 +135,8 @@ describe("DeckTableContainer", () => {
     await waitFor(() => expect(screen.getByRole("rowheader", { name: /Verbs/ })).toHaveTextContent("VerbsInvalid data"));
     await waitFor(() => expect(screen.getByRole("rowheader", { name: /Solid/ })).toHaveTextContent("SolidCourse"));
     expect(screen.getByRole("rowheader", { name: /Capitals/ })).toHaveTextContent("CapitalsLibrary");
+    await waitFor(() => expect(screen.getByRole("rowheader", { name: /Pods/ })).toHaveTextContent("PodsCourseFrom bob.example"));
+    expect(screen.getByRole("rowheader", { name: /Rivers/ })).toHaveTextContent("RiversFrom bob.example");
   });
 
   it("leaves a deck set aside out of the bulk actions, and moves none while the arrangement is set aside", async () => {

@@ -340,9 +340,11 @@ graph LR
   language-tagged, several per language; untagged ones saved before
   are kept, their language unknown). Its cards document is named as
   its `dcat:distribution` (`#deck-X-cards`, with `dcat:accessURL`). A
-  deck copied from the [deck library](deck-library.md) inherits the
+  deck copied from the [deck library](deck-library.md), or from a
+  release added [from a link](deck-library.md#from-a-link), inherits the
   provenance and says which release it came from with
-  `prov:wasDerivedFrom` (`dcterms:source` before format 3). Agents no
+  `prov:wasDerivedFrom` (`dcterms:source` before format 3), wherever
+  that release is: it is read, never written. Agents no
   deck names any more are removed with the deck that named them. The
   Studio edits the authors and the licence (`setDeckProvenance`,
   [deckProvenance.ts](../packages/domain/src/deckProvenance.ts)): two
@@ -752,7 +754,10 @@ own pod, as a draft, before publishing it
   document, `sm:publishedRelease` a release published from the
   instance. Like `sm:newcomerCourse` on the library's, they belong to no
   shape, so `CatalogV1` keeps them through every write of the catalogue.
-  Only a link to a draft's place in the same instance is followed.
+  Only a link to a draft's place in the same instance is followed. A
+  learner's app reads `sm:publishedRelease` in a creator's catalogue,
+  when the creator shares it, to find newer versions of a release it
+  added from a link.
 - **A draft is checked as a draft.** Its deck, chapters and steps are
   checked against the draft shapes, which do not yet ask what only a
   published release needs; its cards and distractors as anywhere else

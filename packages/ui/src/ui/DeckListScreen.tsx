@@ -93,6 +93,8 @@ export function DeckListScreen({
   studioHref,
   heading,
   courseHref = () => undefined,
+  fromHost = () => null,
+  importUrlHref,
   renderStudyAction,
   createDeckHref,
   offer,
@@ -137,6 +139,10 @@ export function DeckListScreen({
   heading?: string;
   /** URL of the course a deck is the copy of; undefined for a deck that is none. */
   courseHref?: (deck: Deck) => string | undefined;
+  /** The host a copy of a release added from a link came from; null for any other deck. */
+  fromHost?: (deck: Deck) => string | null;
+  /** URL of the screen that adds a deck or course from a link to its release; none where it is not offered. */
+  importUrlHref?: string;
   /**
    * What the row offers for the deck today (Study, or nothing). Supplied
    * by the container: it depends on each deck's queue.
@@ -478,6 +484,7 @@ export function DeckListScreen({
           depth={depth}
           drag={dragOf(node.deck.url)}
           href={deckHref(node.deck)}
+          fromHost={fromHost(node.deck)}
           action={renderStudyAction(node.deck)}
           naming={naming === node.deck.url}
           onNamed={(name, refocus) => renamedDeck(node.deck, name, refocus)}
@@ -570,6 +577,11 @@ export function DeckListScreen({
           <LibraryIcon />
           {t("deckList.libraryLink")}
         </a>
+        {importUrlHref !== undefined && (
+          <a class="button" href={importUrlHref}>
+            {t("deckList.fromLink")}
+          </a>
+        )}
       </div>
     </section>
   );

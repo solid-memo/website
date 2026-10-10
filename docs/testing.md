@@ -225,12 +225,14 @@ at `#/studio`) in Chromium with
 takes: logging in with a WebID at a real identity provider, setting
 preferences, making and studying decks, grouping them, importing from
 the library, starting the library's course for newcomers from an empty
-deck list and working through its first chapter and final review, describing a deck in two languages, validating the
+deck list and working through its first chapter and final review,
+describing a deck in two languages, validating the
 instance, logging out, and opening the Studio to manage an
 instance's decks and its drafts of releases, writing a course in one
 and test-playing it in the trial, the instance's decks and statistics
 unchanged after, then publishing it, public, which someone with no
-login then reads. Each journey runs against a fresh account, pod
+login then reads, and another user adds from its link and plays. Each
+journey runs against a fresh account, pod
 and WebID on a Community Solid Server 7
 ([css/compose.yml](../e2e/journeys/css/compose.yml)) that the global
 setup starts in Docker and takes down after. The app logs in only with
@@ -317,6 +319,11 @@ test("a learner's first deck @smoke", async ({ app, account, runId }) => {
   share, such as logging in.
 - **Dialogs**: a step that expects a `confirm` names it with
   `app.expectDialog(pattern)`; any other dialog fails the journey.
+- **One after another**: a journey that needs what another made is in
+  its file, after it, and the file runs in turn (`mode: "serial"`): the
+  course the Studio journey publishes is added from its link by the next
+  journey in [studio.journey.ts](../e2e/journeys/journeys/studio.journey.ts),
+  which is skipped when the first fails.
 
 The harness's own code (`harness/`) has unit tests (`npm test`, so `npm
 run check`). The page objects and journeys are themselves tests, run by

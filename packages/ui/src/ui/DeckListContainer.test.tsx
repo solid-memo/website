@@ -114,6 +114,23 @@ describe("DeckListContainer", () => {
     }
   });
 
+  it("says where a copy of a release added from a link came from, its own release saying whether it is a course", async () => {
+    const linkedCourse = { ...deck, id: "deck-2", url: `${instance.url}catalog.ttl#deck-2`, title: { en: "Pods" }, sourceUrl: "https://bob.example/releases/pods/v1.ttl" };
+    const linked = { ...deck, id: "deck-3", url: `${instance.url}catalog.ttl#deck-3`, title: { en: "Rivers" }, sourceUrl: "https://bob.example:8443/releases/rivers/v1.ttl" };
+    const useCases = makeUseCasesFake({
+      listDecks: vi.fn(async () => [deck, linkedCourse, linked]),
+      listLibraryDecks: vi.fn(async () => [courseLibraryDeck]),
+      deckRelease: vi.fn(async (copy: Deck) => ({ ...courseLibraryDeck, url: copy.sourceUrl!, formatVersion: 6, cards: [], isCourse: copy === linkedCourse ? (true as const) : undefined })),
+    });
+    renderContainer(useCases);
+    expect(await screen.findByRole("link", { name: "Rivers from bob.example:8443" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Kanji N5" })).toBeInTheDocument();
+    await waitFor(() => expect(useCases.deckRelease).toHaveBeenCalledTimes(2));
+    fireEvent.click(screen.getByRole("button", { name: "Actions for Pods" }));
+    expect(await screen.findByRole("menuitem", { name: "Continue course" })).toHaveAttribute("href", courseHref(instance.url, linkedCourse.url));
+    expect(screen.getByRole("link", { name: "Add from a link" })).toHaveAttribute("href", routeToHash({ screen: "importUrl", instanceUrl: instance.url }));
+  });
+
   it("reads no library when no deck is copied from it", async () => {
     const useCases = makeUseCasesFake({ listDecks: vi.fn(async () => [deck]) });
     renderContainer(useCases);

@@ -6,7 +6,7 @@ import { deckLanguages, type StatedLanguages } from "@solid-memo/domain/deckLang
 import type { Instance } from "@solid-memo/domain/instance";
 import { useDataCheck } from "@solid-memo/ui/dataCheck";
 import { useDeckReleaseQuery } from "@solid-memo/ui/deckRelease";
-import { useCourseCopies } from "@solid-memo/ui/deckTreeEditor";
+import { useCopies } from "@solid-memo/ui/deckTreeEditor";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
@@ -48,7 +48,7 @@ export function DeckAboutContainer({
 }) {
   const { t, errorText } = useI18n();
   const queryClient = useQueryClient();
-  const isCourse = useCourseCopies(useCases, [deck])(deck);
+  const isCourse = useCopies(useCases, [deck]).isCourse(deck);
   const { release, error: releaseError } = useDeckReleaseQuery(useCases, deck);
 
   const preferencesQuery = useQuery({

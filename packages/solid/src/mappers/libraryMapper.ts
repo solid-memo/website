@@ -186,6 +186,34 @@ export function toLibraryDeckContent(
 }
 
 /**
+ * A release as its one document describes it, with no index (a release
+ * added from a link, docs/deck-library.md): its content as an import
+ * reads it (toLibraryDeckContent), its sources and creation time, its
+ * live cards counted, and every version of its series the document
+ * describes (library deck format 6 describes its series in it), else the
+ * release alone, as the release says of itself.
+ */
+export function toStandaloneLibraryDeck(url: string, dataset: SolidDataset): LibraryDeck {
+  const { cards, formatVersion: _formatVersion, ...content } = toLibraryDeckContent(url, dataset);
+  const deck = getThingAll(dataset).find((thing) => getUrlAll(thing, RDF.type).includes(SM.Deck))!;
+  const subject = asUrl(deck);
+  const release = migrate("libraryDeck", readVersioned(deck, "libraryDeck")!.record, { subject });
+  const seriesThing = getThing(dataset, release.inSeries);
+  const series = seriesThing === null ? null : readVersioned(seriesThing, "libraryDeckSeries");
+  const versions = series === null ? [subject] : migrate("libraryDeckSeries", series.record, { subject: release.inSeries }).hasVersion;
+  return {
+    ...content,
+    releases: versions
+      .map((version) => toLibraryRelease(dataset, version))
+      .map((one) => (one.url === subject ? { ...one, url } : one))
+      .sort((a, b) => Number(a.version) - Number(b.version)),
+    cardCount: cards.filter((card) => card.retired !== true).length,
+    ...(release.created === undefined ? {} : { createdAt: release.created }),
+    sources: release.wasDerivedFrom.map((sourceUrl) => toLibrarySource(sourceUrl, getThing(dataset, sourceUrl))),
+  };
+}
+
+/**
  * A fetched release's course outline (see domain/course.ts): its
  * chapter and step subjects, each read with its format's shape (one that
  * does not fit is left out) and brought up to the current format. A

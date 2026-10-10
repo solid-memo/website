@@ -23,8 +23,8 @@ import { libraryUpdatesQuery } from "./UpdateBadge";
  * changed since is refused, as there. A failure is that deck's alone;
  * the next is upgraded all the same. Then everything the upgrades
  * touched is read afresh, the copies among it, failed decks included.
- * The plans take each copy's series from the copies' one read of the
- * library's index. Until the instance's data check is done no copy can
+ * The plans take each copy's series from the copies' one look: the
+ * library's index read once, the releases from links each read once. Until the instance's data check is done no copy can
  * be upgraded, nor, after it, one it sets aside (useDataCheck).
  */
 export function LibraryCopiesContainer({
@@ -49,9 +49,9 @@ export function LibraryCopiesContainer({
   const planQueries = useQueries({
     queries: copies.map((copy) => ({
       ...libraryUpgradeQuery(useCases, copy.deck),
-      // A copy with a newer release has its series, as the index listed it: the index is not read again.
-      queryFn: () => useCases.planLibraryUpgrade(copy.deck, copy.series!),
-      enabled: copy.newer,
+      // A copy with a newer release has its series, as the copies found it: it is not looked for again.
+      queryFn: () => useCases.planLibraryUpgrade(copy.deck, copy),
+      enabled: copy.newer === true,
     })),
   });
   const [running, setRunning] = useState<BatchRun | null>(null);
