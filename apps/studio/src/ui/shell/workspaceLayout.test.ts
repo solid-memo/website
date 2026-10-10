@@ -178,7 +178,12 @@ describe("asideOf", () => {
     expect(asideOf(route, draft)).toBe(aside);
   });
 
-  it("shows nothing for a deck's draft, nor off a draft's screens", () => {
+  it("shows the deck at Home's cursor, and the plan of the library copy at theirs", () => {
+    expect(asideOf({ screen: "home", instanceUrl, deckUrl }, null)).toBe("peek");
+    expect(asideOf({ screen: "library", instanceUrl }, null)).toBe("plan");
+  });
+
+  it("shows nothing for a deck's draft, nor on another screen", () => {
     expect(asideOf({ screen: "check", draftUrl }, deck)).toBeNull();
     expect(asideOf({ screen: "cards", deckUrl }, null)).toBeNull();
   });

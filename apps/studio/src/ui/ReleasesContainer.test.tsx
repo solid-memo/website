@@ -29,7 +29,7 @@ function renderContainer(useCases: UseCases, onStarted = vi.fn()) {
   const remove = vi.spyOn(queryClient, "removeQueries");
   render(
     <QueryClientProvider client={queryClient}>
-      <ReleasesContainer useCases={useCases} instance={instanceA} healthHref="#/health" draftsHref="#/drafts" onStarted={onStarted} />
+      <ReleasesContainer useCases={useCases} instance={instanceA} healthHref="#/health" draftsHref="#/drafts" draftHref={(draft) => `#/draft/${draft.name}`} onStarted={onStarted} />
     </QueryClientProvider>,
   );
   return { invalidate, remove, onStarted };
@@ -51,6 +51,15 @@ describe("ReleasesContainer", () => {
     expect(useCases.makeReleasePublic).toHaveBeenCalledWith(SOLID);
     expect(invalidate).toHaveBeenCalledWith({ queryKey: publicKey(SOLID) });
     expect(invalidate).toHaveBeenCalledWith({ queryKey: publishedKey(instanceA.url) });
+  });
+
+  it("links a release to the draft it was published from", async () => {
+    const useCases = makeUseCasesFake({
+      listPublishedReleases: vi.fn(async () => [{ url: SOLID, public: true }]),
+      listReleaseDrafts: vi.fn(async () => [next, { ...next, url: `${instanceA.url}drafts/solid/v1/release.ttl`, version: 1, releasedAs: SOLID }]),
+    });
+    renderContainer(useCases);
+    expect(await screen.findByRole("link", { name: "Solid, version 1" })).toHaveAttribute("href", "#/draft/solid");
   });
 
   it("starts the next version of a release, forgets what was read at its draft's URL, and opens it", async () => {

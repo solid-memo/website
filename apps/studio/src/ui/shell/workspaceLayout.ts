@@ -151,15 +151,18 @@ export const NARROW = "(max-width: 48rem)";
 /** Below this width the aside is a drawer over the page too, at its right, closed until asked for (studio.css says the same). */
 export const MEDIUM = "(max-width: 64rem)";
 
-/** What the aside, right of the main content, shows: a course draft's outline. */
-export type Aside = "outline";
+/** What the aside, right of the main content, shows: a course draft's outline, the deck at Home's cursor, or what upgrading a library copy would do. */
+export type Aside = "outline" | "peek" | "plan";
 
 /**
  * What the aside shows on a route: a course draft's outline (`draft`, as
  * read) on its screens, but its overview, which shows the outline itself,
- * to arrange; nothing elsewhere.
+ * to arrange; on Home, the deck at its table's cursor; on the library
+ * copies, the plan of the copy at theirs; nothing elsewhere.
  */
 export function asideOf(route: StudioRoute, draft: ReleaseDraft | null): Aside | null {
+  if (route.screen === "home") return "peek";
+  if (route.screen === "library") return "plan";
   return isDraftRoute(route) && route.screen !== "draft" && draft!.course ? "outline" : null;
 }
 

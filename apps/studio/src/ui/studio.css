@@ -424,8 +424,9 @@
   z-index: 2;
 }
 
-:root[data-surface="studio"] main .studio-data-table tbody tr > :first-child,
-:root[data-surface="studio"] main .studio-data-table.selectable tbody tr > :nth-child(2) {
+/* Below the cursor's and the selection's colours, which cover the first column too. */
+:root[data-surface="studio"] main .studio-data-table tbody tr > :where(:first-child),
+:root[data-surface="studio"] main .studio-data-table:where(.selectable) tbody tr > :where(:nth-child(2)) {
   background: var(--surface);
 }
 
@@ -439,6 +440,56 @@
 
 :root[data-surface="studio"] main .studio-data-table tbody tr:is(.cursor, [aria-current]) > :first-child {
   box-shadow: inset 3px 0 0 var(--primary);
+}
+
+/* A table's Columns menu, at the end of the row above it. */
+:root[data-surface="studio"] main .studio-table-tools {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.25rem;
+}
+
+/* Home's views: a row of tabs, the one shown pressed, each with its count. */
+:root[data-surface="studio"] main .studio-views {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+:root[data-surface="studio"] main .studio-views button[aria-pressed="true"] {
+  color: var(--text);
+  background: var(--primary-soft);
+  border-color: var(--primary);
+}
+
+:root[data-surface="studio"] main .studio-views .studio-count {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* A deck or a library copy beside its table: its figures as name and value, a row each. */
+:root[data-surface="studio"] .studio-peek h3 {
+  margin: 0 0 0.5rem;
+}
+
+:root[data-surface="studio"] .studio-peek dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.25rem 0.75rem;
+  margin: 0.5rem 0;
+}
+
+:root[data-surface="studio"] .studio-peek dd {
+  margin: 0;
+}
+
+:root[data-surface="studio"] .studio-peek-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  padding: 0;
+  list-style: none;
 }
 
 /* A card beside its deck's cards: Previous and Next at its heading's end. */

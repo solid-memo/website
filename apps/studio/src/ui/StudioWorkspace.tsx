@@ -19,12 +19,13 @@ import { CardInspectorContainer } from "./CardInspectorContainer";
 import { CardWorkbenchContainer } from "./CardWorkbenchContainer";
 import { DeckAboutContainer } from "./DeckAboutContainer";
 import { DeckInsightContainer } from "./DeckInsightContainer";
+import { DeckPeekContainer } from "./DeckPeekContainer";
 import { DeckTableContainer } from "./DeckTableContainer";
 import { DraftsContainer } from "./DraftsContainer";
 import { GroupsContainer } from "./GroupsContainer";
 import { HealthContainer } from "./HealthContainer";
 import { InstanceAboutContainer } from "./InstanceAboutContainer";
-import { LibraryCopiesContainer } from "./LibraryCopiesContainer";
+import { LibraryCopiesContainer, LibraryPlanContainer } from "./LibraryCopiesContainer";
 import { TransferContainer } from "./TransferContainer";
 import { ChapterEditorContainer } from "./ChapterEditorContainer";
 import { DraftCardsContainer } from "./DraftCardsContainer";
@@ -48,7 +49,8 @@ import { StudioSidebar } from "./shell/StudioSidebar";
 import { crumbsOf } from "./shell/titles";
 import { useUnsavedEdits } from "./shell/unsavedEdits";
 import { useMedia } from "./shell/useMedia";
-import { asideOf, contextTabsOf, currentOutlineKey, MEDIUM } from "./shell/workspaceLayout";
+import { viewOf, withView } from "./shell/views";
+import { asideOf, contextTabsOf, currentOutlineKey, MEDIUM, type Aside } from "./shell/workspaceLayout";
 import { useWorkspaceProblems } from "./WorkspaceProblems";
 import {
   instanceOfRoute,
@@ -68,7 +70,9 @@ import {
  * main content, from the breadcrumbs and the deck's or draft's tabs to
  * the screen the route names, once the instances it needs are read
  * (and, for a deck's screen, the instance's decks; for a card's, the
- * deck's cards); a course draft's outline in the aside, or a card in
+ * deck's cards); in the aside a course draft's outline, the deck at
+ * Home's cursor (its route's `deckUrl`), the library copy at the
+ * cursor of the table of them (kept here, not in the URL), or a card in
  * the inspector beside its deck's cards in the workbench (on a screen
  * wide enough, else the inspector alone), and the problems of the deck
  * or the draft shown (useWorkspaceProblems), the draft's counted in its
@@ -89,6 +93,8 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
   const unsaved = useUnsavedEdits();
   // The cards the workbench beside a card lists, in its order, for the card's Previous and Next.
   const [order, setOrder] = useState<readonly string[]>([]);
+  // The library copy at the cursor of the table of them, shown beside it, by its deck's URL.
+  const [libraryDeck, setLibraryDeck] = useState<string | null>(null);
 
   const instancesQuery = useQuery({
     queryKey: ["instances", session.webId],
@@ -256,6 +262,26 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
     );
   };
 
+  /** What the aside shows on the route. */
+  const asideFor = (aside: Aside, route: StudioRoute) => {
+    switch (aside) {
+      case "outline":
+        return (
+          <OutlineAside
+            useCases={useCases}
+            draftUrl={draftUrl!}
+            links={draftLinks(draftUrl!)}
+            currentKey={currentOutlineKey(route)}
+            problems={found.draft}
+          />
+        );
+      case "peek":
+        return <DeckPeekContainer useCases={useCases} instance={activeInstance!} route={route} deckUrl={(route as HomeRoute).deckUrl ?? null} />;
+      case "plan":
+        return <LibraryPlanContainer useCases={useCases} instance={activeInstance!} deckUrl={libraryDeck} />;
+    }
+  };
+
   const screenFor = (route: StudioRoute) => {
     switch (route.screen) {
       case "draft":
@@ -376,6 +402,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             links={draftLinks(route.draftUrl)}
             // Like the workbench's query, the view is no Back stop.
             onView={(view) => replace({ screen: "draftCards", draftUrl: route.draftUrl, ...view })}
+            onOpen={(card) => navigate({ screen: "question", draftUrl: route.draftUrl, card })}
           />
         );
       case "instances":
@@ -389,7 +416,8 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             onOpen={(instance) => navigate({ screen: "home", instanceUrl: instance.url })}
           />
         );
-      case "home":
+      case "home": {
+        const { view: _view, show: _show, ...rest } = route;
         return (
           <DeckTableContainer
             useCases={useCases}
@@ -397,6 +425,12 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             view={route.view ?? DEFAULT_DECK_TABLE_VIEW}
             // How the table is looked at is no Back stop: the screen stays the same.
             onView={(view) => replace({ ...route, view })}
+            shownView={viewOf(route)}
+            onShow={(view) => replace({ ...rest, ...withView(route, view) })}
+            current={route.deckUrl}
+            // Nor is the deck shown beside it.
+            onCursor={(deck) => replace({ ...route, deckUrl: deck.url })}
+            onOpen={(deck) => navigate({ screen: "about", deckUrl: deck.url })}
             appHref={decksHref(route.instanceUrl)}
             healthHref={(deck) => studioRouteToHash({ screen: "health", instanceUrl: route.instanceUrl, ...(deck === undefined ? {} : { deckUrl: deck.url }) })}
             libraryHref={studioRouteToHash({ screen: "library", instanceUrl: route.instanceUrl })}
@@ -407,6 +441,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             cardsHref={(deck) => studioRouteToHash({ screen: "cards", deckUrl: deck.url })}
           />
         );
+      }
       case "drafts":
         return (
           <DraftsContainer
@@ -428,6 +463,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             instance={activeInstance!}
             healthHref={studioRouteToHash({ screen: "health", instanceUrl: route.instanceUrl })}
             draftsHref={studioRouteToHash({ screen: "drafts", instanceUrl: route.instanceUrl })}
+            draftHref={(draft) => studioRouteToHash({ screen: "draft", draftUrl: draft.url })}
             onStarted={(created) => navigate({ screen: "draft", draftUrl: created.draft.url })}
           />
         );
@@ -458,6 +494,8 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             deckHref={(deck) => studioRouteToHash({ screen: "about", deckUrl: deck.url })}
             libraryHref={libraryHref(route.instanceUrl)}
             healthHref={studioRouteToHash({ screen: "health", instanceUrl: route.instanceUrl })}
+            current={libraryDeck ?? undefined}
+            onCursor={(deck) => setLibraryDeck(deck.url)}
           />
         );
       case "transfer":
@@ -542,18 +580,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             }
           : aside === null
             ? null
-            : {
-                label: t("studio.draft.outline"),
-                content: (
-                  <OutlineAside
-                    useCases={useCases}
-                    draftUrl={draftUrl!}
-                    links={draftLinks(draftUrl!)}
-                    currentKey={currentOutlineKey(route!)}
-                    problems={found.draft}
-                  />
-                ),
-              }
+            : { label: t(ASIDE_LABELS[aside]), content: asideFor(aside, route!) }
       }
       problems={found.problems}
       onGo={(to) => unsaved.guard(() => navigate(to))}
@@ -585,6 +612,11 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
     </StudioShell>
   );
 }
+
+/** What each aside is named, as its region. */
+const ASIDE_LABELS = { outline: "studio.draft.outline", peek: "studio.peek.label", plan: "studio.library.plan" } as const;
+
+type HomeRoute = Extract<StudioRoute, { screen: "home" }>;
 
 /** A card's route but the field it opens at, which another tab or card does not. */
 function withoutField({ field: _field, ...route }: CardRoute): CardRoute {

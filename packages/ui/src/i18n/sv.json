@@ -1460,7 +1460,7 @@
       "chords": "Tangenter sida vid sida, som g d, trycks en efter en. Medan du skriver i ett fält fungerar bara Ctrl+K, F6, Shift+F6, F8 och Shift+F8.",
       "scope": {
         "studio": "Överallt i Studion",
-        "cards": "I kortbänken"
+        "cards": "I en tabell: korten, kortlekarna, ett utkasts kort…"
       },
       "help": "Visa kortkommandona",
       "filter": "Gå till skärmens sökning eller filter",
@@ -1477,19 +1477,19 @@
         "instances": "Gå till instanserna"
       },
       "toggleSidebar": "Visa eller dölj sidofältet",
-      "toggleAside": "Visa eller dölj dispositionen, eller stäng kortet bredvid korten",
+      "toggleAside": "Visa eller dölj sidopanelen (dispositionen, kortleken, uppgraderingen), eller stäng kortet bredvid korten",
       "toggleDock": "Visa eller dölj panelen: problem och aktivitet",
       "nextProblem": "Gå till nästa problems fält",
       "previousProblem": "Gå till föregående problems fält",
       "previousTab": "Gå till kortlekens eller utkastets föregående flik",
       "nextTab": "Gå till kortlekens eller utkastets nästa flik",
       "tab": "Gå till en flik i kortleken eller utkastet efter dess nummer",
-      "down": "Nästa kort",
-      "up": "Föregående kort",
-      "select": "Välj kortet",
-      "open": "Öppna kortet",
-      "extendDown": "Välj kortet och nästa också",
-      "extendUp": "Välj kortet och det före också",
+      "down": "Nästa rad",
+      "up": "Föregående rad",
+      "select": "Välj raden",
+      "open": "Öppna raden",
+      "extendDown": "Välj raden och nästa också",
+      "extendUp": "Välj raden och den före också",
       "clear": "Rensa valet"
     },
     "dock": {
@@ -1562,6 +1562,20 @@
         "from": "Från {host}"
       },
       "healthOf": "i {deck}"
+    },
+    "views": {
+      "label": "Vyer",
+      "all": "Alla",
+      "due": "Att repetera i dag",
+      "courses": "Kurser",
+      "copies": "Bibliotekskopior",
+      "attention": "Behöver åtgärdas",
+      "none": "Ingen kortlek i den här vyn."
+    },
+    "peek": {
+      "label": "Kortlek",
+      "none": "Gå till en kortleks rad ({j}, {k}) för att se den här.",
+      "of": "– {deck}"
     },
     "bulk": {
       "label": "Valda kortlekar",
@@ -1682,6 +1696,10 @@
       "lapsesNone": "Missar räknar kortets felaktiga svar: inga är loggade än.",
       "lapsesLoading": "Läser svarsloggen för missarna…",
       "lapsesFailed": "Svarsloggen kunde inte läsas, så missarna är okända."
+    },
+    "columns": {
+      "button": "Kolumner",
+      "label": "Visa eller dölj kolumner"
     },
     "card": {
       "heading": "Kort: {card}",
@@ -2085,7 +2103,6 @@
       "planFailed": "Utgåva {version} finns, men vad den skulle ändra kunde inte läsas.",
       "nothingToUpdate": "Utgåva {version} finns, men inget i den uppdaterar din kopia.",
       "changes": "Utgåva {version}: en uppdatering {changes}.",
-      "details": "Vad som ändras",
       "cards": {
         "add": {
           "one": "Läggs till: {count} kort",
@@ -2116,7 +2133,9 @@
       "failed": "{deck}: uppdateringen misslyckades i steget ”{step}”:",
       "badge": "Utgåva {version} finns",
       "badgeOf": "för {deck}",
-      "newerUnknown": "Okänt: ingen offentlig katalog hos skaparen listar den"
+      "newerUnknown": "Okänt: ingen offentlig katalog hos skaparen listar den",
+      "peek": "Gå till en kopias rad ({j}, {k}) för att se vad en uppgradering skulle ändra.",
+      "plan": "Uppgradering"
     },
     "transfer": {
       "crumb": "Importera och exportera",
@@ -2339,7 +2358,15 @@
       },
       "retired": "(ur bruk)",
       "askedTimes": "Ställs från {count} ställen",
-      "newQuestion": "Ny fråga, som inte ställs någonstans än"
+      "newQuestion": "Ny fråga, som inte ställs någonstans än",
+      "retire": {
+        "one": "Ta {count} kort ur bruk",
+        "other": "Ta {count} kort ur bruk"
+      },
+      "restore": {
+        "one": "Återställ {count} kort",
+        "other": "Återställ {count} kort"
+      }
     },
     "draftEdit": {
       "saving": "Sparar…",
@@ -2748,8 +2775,12 @@
       "column": {
         "release": "Utgåva",
         "readers": "Läsbar för",
+        "draft": "Utkast",
         "actions": "Åtgärder"
       },
+      "filter": "Filtrera på namn eller adress",
+      "noMatch": "Ingen utgåva matchar ”{filter}”.",
+      "noDraft": "Inte bland den här instansens utkast",
       "name": "{name}, version {version}",
       "public": "Alla",
       "private": "Bara dig",

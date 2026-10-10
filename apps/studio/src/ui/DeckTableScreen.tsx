@@ -20,7 +20,9 @@ import { ReaderText } from "@solid-memo/ui/ReaderText";
 import { DeckBulkActions, type MoveLock } from "./DeckBulkActions";
 import { ReadOnlyNotice } from "./ReadOnly";
 import { useActivityLog } from "./shell/activity";
-import { allSelected, NO_SELECTION, toggled, type Selection } from "./shell/tableModel";
+import { DataTable, type Column } from "./shell/DataTable";
+import { NO_SELECTION, type Selection } from "./shell/tableModel";
+import { HOME_VIEWS, inView, type HomeView } from "./shell/views";
 
 /** One figure of a deck's row: a number, or why there is none yet. */
 export type Count = number | "loading" | "unreadable";
@@ -53,7 +55,11 @@ const COLUMNS: readonly Exclude<DeckColumn, "title">[] = [
  * instance's), today's figures as they come in, when it last changed and
  * its cards. The URL holds how it is looked at (`view`): a filter, and a
  * column to sort by (each column's header button sorts by it, then the
- * other way, then not), else the order the user arranged the decks in.
+ * other way, then not), else the order the user arranged the decks in;
+ * and the view it is in (`shownView`, views.ts), whose tabs above it
+ * count the decks each keeps. The table is a DataTable, whose Columns
+ * menu shows or hides its columns. The deck at its cursor is shown
+ * beside it (`onCursor`, `current`); Enter opens it (`onOpen`).
  *
  * Rows are selected by their checkbox, or all those shown at once, and
  * DeckBulkActions does what can be done with those shown, in the
@@ -73,6 +79,11 @@ export function DeckTableScreen({
   rows,
   view,
   onView,
+  shownView,
+  onShow,
+  current,
+  onCursor,
+  onOpen,
   pending,
   badges,
   groups,
@@ -97,6 +108,15 @@ export function DeckTableScreen({
   rows: readonly DeckTableRow[];
   view: DeckTableView;
   onView: (view: DeckTableView) => void;
+  /** The view of Home the table is in (views.ts). */
+  shownView: HomeView;
+  onShow: (view: HomeView) => void;
+  /** The deck shown beside the table, by its URL. */
+  current?: string;
+  /** Show the deck at the table's cursor beside it. */
+  onCursor: (deck: Deck) => void;
+  /** Open a deck's about screen, as Enter on its row asks. */
+  onOpen: (deck: Deck) => void;
   /** Why a deck's figure is not in its row yet. */
   pending: (deck: Deck, figure: DeckFigure) => "loading" | "unreadable";
   badges: (deck: Deck) => readonly DeckBadge[];
@@ -145,15 +165,16 @@ export function DeckTableScreen({
     );
   }
 
-  const shown = arrangeDeckRows(rows, view, readerText, locale);
+  const factsOf = (row: DeckTableRow) => ({ due: row.figures.due, badges: badges(row.deck) });
+  const shown = arrangeDeckRows(
+    rows.filter((row) => inView(shownView, factsOf(row))),
+    view,
+    readerText,
+    locale,
+  );
   // Only decks shown, in the table's order: one filtered out, or deleted here or elsewhere, is left alone.
   const selected = shown.map((row) => row.deck).filter((deck) => chosen.has(deck.url) && selectable(deck));
   const count = selected.length;
-  const choosable = shown.map((row) => row.deck).filter(selectable);
-  const allShown = allSelected(chosen, choosable.map((deck) => deck.url));
-
-  const toggle = (urls: readonly string[], on: boolean) =>
-    setChosen((all) => toggled(all, urls, on));
 
   /** Makes a bulk action; once it is done, says so, the Studio's activity too (and, after a deletion, nothing stays selected). */
   async function bulk(made: Promise<boolean>, said: string, clear = false): Promise<boolean> {
@@ -169,15 +190,6 @@ export function DeckTableScreen({
     return ok;
   }
 
-  const sortOf = (column: DeckColumn) =>
-    view.sort?.column !== column ? undefined : view.sort.descending ? "descending" : "ascending";
-  const header = (column: DeckColumn) => (
-    <th key={column} scope="col" class={NUMBERS.has(column) ? "number" : undefined} aria-sort={sortOf(column)}>
-      <button type="button" class="sort" onClick={() => onView(nextSort(view, column))}>
-        {t(`studio.decks.${column}`)}
-      </button>
-    </th>
-  );
   const figure = (row: DeckTableRow, which: DeckFigure): Count => row.figures[which] ?? pending(row.deck, which);
   const pace = (row: DeckTableRow, cap: "newCardsPerDay" | "maxReviewsPerDay") => (
     <>
@@ -185,12 +197,46 @@ export function DeckTableScreen({
       {row.deck[cap] === undefined && <span class="hint"> {t("studio.decks.followsInstance")}</span>}
     </>
   );
+  const cells: Record<Exclude<DeckColumn, "title">, (row: DeckTableRow) => ComponentChildren> = {
+    group: (row) =>
+      row.groups.length === 0 ? <span class="hint">{t("studio.decks.topLevel")}</span> : row.groups.map((group) => readerText(group.title)).join(" › "),
+    direction: (row) => directionLabel(row.deck.direction),
+    newCardsPerDay: (row) => pace(row, "newCardsPerDay"),
+    maxReviewsPerDay: (row) => pace(row, "maxReviewsPerDay"),
+    due: (row) => <CountCell count={figure(row, "due")} />,
+    new: (row) => <CountCell count={figure(row, "new")} />,
+    modified: (row) => formatDate(row.deck.modifiedAt ?? row.deck.createdAt),
+    cards: (row) => {
+      const cards = figure(row, "cards");
+      return typeof cards === "number" ? (
+        <a href={cardsHref(row.deck)}>
+          {cards}
+          <span class="visually-hidden"> {t("studio.decks.cardsOf", { deck: readerText(row.deck.title) })}</span>
+        </a>
+      ) : (
+        <CountCell count={cards} />
+      );
+    },
+  };
+  const columns: Column<DeckTableRow>[] = COLUMNS.map((column) => ({
+    key: column,
+    label: t(`studio.decks.${column}`),
+    number: NUMBERS.has(column),
+    cell: cells[column],
+  }));
 
   return (
     <section>
       <header>
         <h2>{t("studio.decks.heading")}</h2>
       </header>
+      <div class="studio-views" role="group" aria-label={t("studio.views.label")}>
+        {HOME_VIEWS.map((each) => (
+          <button key={each} type="button" aria-pressed={each === shownView} onClick={() => onShow(each)}>
+            {t(`studio.views.${each}`)} <span class="studio-count">{rows.filter((row) => inView(each, factsOf(row))).length}</span>
+          </button>
+        ))}
+      </div>
       <label class="studio-filter">
         {t("studio.decks.filter")}
         <input
@@ -200,7 +246,7 @@ export function DeckTableScreen({
           onInput={(event) => onView({ ...view, filter: event.currentTarget.value })}
         />
       </label>
-      {view.filter.trim() !== "" && (
+      {(view.filter.trim() !== "" || shownView !== "all") && (
         <p class="hint">{t("studio.decks.shown", { shown: shown.length, count: rows.length })}</p>
       )}
       {count > 0 && (
@@ -227,100 +273,59 @@ export function DeckTableScreen({
       <ReadOnlyNotice reason={readOnly} subject="decks" healthHref={healthHref} />
       <ErrorMessage error={error} />
       {shown.length === 0 ? (
-        <p>{t("studio.decks.noMatch", { filter: view.filter.trim() })}</p>
+        <p>{view.filter.trim() === "" ? t("studio.views.none") : t("studio.decks.noMatch", { filter: view.filter.trim() })}</p>
       ) : (
-        <div class="studio-table">
-          <table class="studio-list">
-            <caption>{t("studio.decks.caption", { instance: instance.name })}</caption>
-            <thead>
-              <tr>
-                <th scope="col">
-                  <span class="visually-hidden">{t("studio.decks.select")}</span>
-                  <input
-                    type="checkbox"
-                    aria-label={t("studio.decks.selectAll")}
-                    checked={allShown}
-                    disabled={choosable.length === 0}
-                    onChange={(event) => toggle(choosable.map((deck) => deck.url), event.currentTarget.checked)}
-                  />
-                </th>
-                {header("title")}
-                {COLUMNS.map(header)}
-              </tr>
-            </thead>
-            <tbody>
-              {shown.map((row) => {
-                const { deck } = row;
-                const cards = figure(row, "cards");
-                return (
-                  <tr key={deck.url}>
-                    <td>
-                      <input
-                        type="checkbox"
-                        aria-label={t("studio.decks.selectDeck", { deck: readerText(deck.title) })}
-                        checked={chosen.has(deck.url) && selectable(deck)}
-                        disabled={!selectable(deck)}
-                        onChange={(event) => toggle([deck.url], event.currentTarget.checked)}
-                      />
-                    </td>
-                    <th scope="row">
-                      <a href={deckHref(deck)}>
-                        <ReaderText text={deck.title} />
-                      </a>
-                      {badges(deck).map((badge) =>
-                        typeof badge === "string" ? (
-                          <span key={badge} class="studio-badge">
-                            {t(`studio.decks.badge.${badge}`)}
-                          </span>
-                        ) : (
-                          <span key="from" class="studio-badge">
-                            {t("studio.decks.badge.from", { host: badge.from })}
-                          </span>
-                        ),
-                      )}
-                      {healthBadge(deck)}
-                      {updateBadge(deck)}
-                    </th>
-                    <td>
-                      {row.groups.length === 0 ? (
-                        <span class="hint">{t("studio.decks.topLevel")}</span>
-                      ) : (
-                        row.groups.map((group) => readerText(group.title)).join(" › ")
-                      )}
-                    </td>
-                    <td>{directionLabel(deck.direction)}</td>
-                    <td class="number">{pace(row, "newCardsPerDay")}</td>
-                    <td class="number">{pace(row, "maxReviewsPerDay")}</td>
-                    <td class="number">
-                      <CountCell count={figure(row, "due")} />
-                    </td>
-                    <td class="number">
-                      <CountCell count={figure(row, "new")} />
-                    </td>
-                    <td>{formatDate(deck.modifiedAt ?? deck.createdAt)}</td>
-                    <td class="number">
-                      {typeof cards === "number" ? (
-                        <a href={cardsHref(deck)}>
-                          {cards}
-                          <span class="visually-hidden"> {t("studio.decks.cardsOf", { deck: readerText(deck.title) })}</span>
-                        </a>
-                      ) : (
-                        <CountCell count={cards} />
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          caption={t("studio.decks.caption", { instance: instance.name })}
+          rows={shown}
+          keyOf={(row) => row.deck.url}
+          name={{
+            key: "title",
+            label: t("studio.decks.title"),
+            cell: ({ deck }) => (
+              <>
+                <a href={deckHref(deck)}>
+                  <ReaderText text={deck.title} />
+                </a>
+                {badges(deck).map((badge) =>
+                  typeof badge === "string" ? (
+                    <span key={badge} class="studio-badge">
+                      {t(`studio.decks.badge.${badge}`)}
+                    </span>
+                  ) : (
+                    <span key="from" class="studio-badge">
+                      {t("studio.decks.badge.from", { host: badge.from })}
+                    </span>
+                  ),
+                )}
+                {healthBadge(deck)}
+                {updateBadge(deck)}
+              </>
+            ),
+          }}
+          columns={columns}
+          columnsOf="decks"
+          sort={view.sort === undefined ? undefined : { key: view.sort.column, descending: view.sort.descending }}
+          onSort={(column) => onView(nextSort(view, column as DeckColumn))}
+          select={{
+            label: t("studio.decks.select"),
+            allLabel: t("studio.decks.selectAll"),
+            rowLabel: ({ deck }) => t("studio.decks.selectDeck", { deck: readerText(deck.title) }),
+            enabled: ({ deck }) => selectable(deck),
+            chosen,
+            onChoose: setChosen,
+          }}
+          current={current}
+          onCursor={({ deck }) => onCursor(deck)}
+          onOpen={({ deck }) => onOpen(deck)}
+        />
       )}
     </section>
   );
 }
 
 /** A figure, or while it is counted a loader, or a dash for one that could not be read; each named for a screen reader. */
-function CountCell({ count }: { count: Count }) {
+export function CountCell({ count }: { count: Count }) {
   const { t } = useI18n();
   if (typeof count === "number") return <>{count}</>;
   return count === "loading" ? (

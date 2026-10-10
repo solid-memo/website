@@ -25,6 +25,10 @@ function renderContainer(useCases: UseCases) {
         instance={instanceA}
         view={{ filter: "" }}
         onView={() => undefined}
+        shownView="all"
+        onShow={() => undefined}
+        onCursor={() => undefined}
+        onOpen={() => undefined}
         appHref="#/decks"
         healthHref={(deck) => (deck === undefined ? "#/health" : `#/health?deck=${deck.id}`)}
         libraryHref="#/library"

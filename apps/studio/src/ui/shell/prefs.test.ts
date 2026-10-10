@@ -16,13 +16,14 @@ describe("the Studio's layout preferences", () => {
       detailWidth: DETAIL_WIDTH.initial,
       dock: false,
       dockHeight: DOCK_HEIGHT.initial,
+      hiddenColumns: {},
     };
     expect(studioPrefs()).toEqual(first);
     expect(DEFAULT_PREFS).toEqual(first);
   });
 
   it("are kept on this device", () => {
-    const prefs = { density: "comfortable", sidebar: false, aside: false, asideWidth: 400, detailWidth: 600, dock: true, dockHeight: 300 } as const;
+    const prefs = { density: "comfortable", sidebar: false, aside: false, asideWidth: 400, detailWidth: 600, dock: true, dockHeight: 300, hiddenColumns: { cards: ["ease", "id"] } } as const;
     rememberPrefs(prefs);
     expect(studioPrefs()).toEqual(prefs);
     expect(JSON.parse(localStorage.getItem(KEY)!)).toEqual(prefs);
@@ -41,6 +42,15 @@ describe("the Studio's layout preferences", () => {
     expect(studioPrefs()).toEqual(DEFAULT_PREFS);
     localStorage.setItem(KEY, "null");
     expect(studioPrefs()).toEqual(DEFAULT_PREFS);
+  });
+
+  it("keep only lists of columns' names, by their tables' names", () => {
+    localStorage.setItem(KEY, JSON.stringify({ hiddenColumns: { cards: ["ease", 2, null, "id"], decks: "due", home: {} } }));
+    expect(studioPrefs().hiddenColumns).toEqual({ cards: ["ease", "id"] });
+    for (const stored of [["cards"], "cards", null]) {
+      localStorage.setItem(KEY, JSON.stringify({ hiddenColumns: stored }));
+      expect(studioPrefs().hiddenColumns).toEqual({});
+    }
   });
 
   it("keep the panes' sizes within their bounds", () => {

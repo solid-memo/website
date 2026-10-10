@@ -1460,7 +1460,7 @@
       "chords": "Keys shown side by side, such as g d, are pressed one after the other. While you type in a field, only Ctrl+K, F6, Shift+F6, F8 and Shift+F8 work.",
       "scope": {
         "studio": "Anywhere in the Studio",
-        "cards": "In the card workbench"
+        "cards": "In a table: the cards, the decks, a draft's cards…"
       },
       "help": "Show these shortcuts",
       "filter": "Go to the screen's search or filter",
@@ -1477,19 +1477,19 @@
         "instances": "Go to the instances"
       },
       "toggleSidebar": "Show or hide the sidebar",
-      "toggleAside": "Show or hide the outline, or close the card beside the cards",
+      "toggleAside": "Show or hide the aside (the outline, the deck, the upgrade), or close the card beside the cards",
       "toggleDock": "Show or hide the panel: problems and activity",
       "nextProblem": "Go to the next problem's field",
       "previousProblem": "Go to the previous problem's field",
       "previousTab": "Go to the previous tab of the deck or draft",
       "nextTab": "Go to the next tab of the deck or draft",
       "tab": "Go to a tab of the deck or draft by its number",
-      "down": "Next card",
-      "up": "Previous card",
-      "select": "Select the card",
-      "open": "Open the card",
-      "extendDown": "Select the card and the next one too",
-      "extendUp": "Select the card and the one before too",
+      "down": "Next row",
+      "up": "Previous row",
+      "select": "Select the row",
+      "open": "Open the row",
+      "extendDown": "Select the row and the next one too",
+      "extendUp": "Select the row and the one before too",
       "clear": "Clear the selection"
     },
     "dock": {
@@ -1562,6 +1562,20 @@
         "from": "From {host}"
       },
       "healthOf": "in {deck}"
+    },
+    "views": {
+      "label": "Views",
+      "all": "All",
+      "due": "Due today",
+      "courses": "Courses",
+      "copies": "Library copies",
+      "attention": "Needs attention",
+      "none": "No deck in this view."
+    },
+    "peek": {
+      "label": "Deck",
+      "none": "Move to a deck's row ({j}, {k}) to see it here.",
+      "of": "– {deck}"
     },
     "bulk": {
       "label": "Selected decks",
@@ -1682,6 +1696,10 @@
       "lapsesNone": "Lapses count the card's wrong answers: none are logged yet.",
       "lapsesLoading": "Reading the answer log for the lapses…",
       "lapsesFailed": "The answer log could not be read, so the lapses are not known."
+    },
+    "columns": {
+      "button": "Columns",
+      "label": "Show or hide columns"
     },
     "card": {
       "heading": "Card: {card}",
@@ -2085,7 +2103,6 @@
       "planFailed": "Release {version} is out, but what it would change could not be read.",
       "nothingToUpdate": "Release {version} is out, with nothing to update your copy with.",
       "changes": "Release {version}: updating {changes}.",
-      "details": "What changes",
       "cards": {
         "add": {
           "one": "Added: {count} card",
@@ -2116,7 +2133,9 @@
       "failed": "{deck}: the update failed while {step}:",
       "badge": "Release {version} out",
       "badgeOf": "for {deck}",
-      "newerUnknown": "Not known: no public catalogue of its creator lists it"
+      "newerUnknown": "Not known: no public catalogue of its creator lists it",
+      "peek": "Move to a copy's row ({j}, {k}) to see what upgrading it would change.",
+      "plan": "Upgrade"
     },
     "transfer": {
       "crumb": "Import and export",
@@ -2339,7 +2358,15 @@
       },
       "retired": "(retired)",
       "askedTimes": "Asked from {count} places",
-      "newQuestion": "New question, asked nowhere yet"
+      "newQuestion": "New question, asked nowhere yet",
+      "retire": {
+        "one": "Retire {count} card",
+        "other": "Retire {count} cards"
+      },
+      "restore": {
+        "one": "Restore {count} card",
+        "other": "Restore {count} cards"
+      }
     },
     "draftEdit": {
       "saving": "Saving…",
@@ -2748,8 +2775,12 @@
       "column": {
         "release": "Release",
         "readers": "Readable by",
+        "draft": "Draft",
         "actions": "Actions"
       },
+      "filter": "Filter by name or address",
+      "noMatch": "No release matches “{filter}”.",
+      "noDraft": "Not among this instance's drafts",
       "name": "{name}, version {version}",
       "public": "Everyone",
       "private": "Only you",

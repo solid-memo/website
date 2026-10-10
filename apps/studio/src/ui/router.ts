@@ -2,7 +2,6 @@ import {
   DEFAULT_DECK_TABLE_VIEW,
   deckTableViewFromParams,
   deckTableViewToParams,
-  type DeckTableView,
 } from "@solid-memo/domain/deckTable";
 import { isDefaultQuery, queryFromParams, queryToParams, type CardQuery } from "@solid-memo/domain/cardQuery";
 import type { CardSpot } from "@solid-memo/domain/deckHealth";
@@ -20,13 +19,16 @@ import {
   type StepField,
 } from "@solid-memo/domain/release/releaseCheck";
 import { STUDIO_PATH } from "@solid-memo/ui/router";
+import type { TableSort } from "./shell/tableModel";
 import { hashParams, useHashRouter } from "@solid-memo/ui/routerCore";
+import { showFromParam, type HomeQuery } from "./shell/views";
 
 /**
  * A Studio view, as its URL hash carries it (docs/studio.md): only
  * identifiers (instance, deck and card URLs) and how a screen is looked
- * at (Home's filter and sort, the card workbench's query, beside a card
- * too, the card inspector's tab), so it round-trips through the hash. The Studio
+ * at (Home's filter, sort and view, and the deck it shows beside its
+ * table; the card workbench's query, beside a card too; the card
+ * inspector's tab; how a draft's cards are looked at), so it round-trips through the hash. The Studio
  * shares the site's one page with Solid Memo, so its hashes all start
  * with `#/studio` (STUDIO_PATH); Solid Memo's own routes are the others
  * (packages/ui/src/ui/router.ts). Both keep the hash with the same core
@@ -35,8 +37,13 @@ import { hashParams, useHashRouter } from "@solid-memo/ui/routerCore";
 export type StudioRoute =
   /** The user's instances, to pick the one to manage. */
   | { screen: "instances" }
-  /** Home: every deck of the instance, filtered and sorted as `view` says (all, as arranged, when absent). */
-  | { screen: "home"; instanceUrl: string; view?: DeckTableView }
+  /**
+   * Home: every deck of the instance, filtered and sorted as `view` says
+   * (all, as arranged, when absent), those of one kind (`show`, a view of
+   * Home's; all when absent), and beside them one of them (`deckUrl`, the
+   * deck at the table's cursor; none when absent).
+   */
+  | ({ screen: "home"; instanceUrl: string; deckUrl?: string } & HomeQuery)
   /** The instance's deck groups, to arrange. */
   | { screen: "groups"; instanceUrl: string }
   /** The card workbench: a deck's cards, searched, filtered, sorted and paged as `query` says (all, as listed, when absent). */
@@ -78,8 +85,12 @@ export type StudioRoute =
   | { screen: "step"; draftUrl: string; step: string; field?: StepField }
   /** A card of a draft (a course's question), by its id. */
   | { screen: "question"; draftUrl: string; card: string; field?: QuestionField }
-  /** A draft's cards as a table: those `filter` keeps, with text in `language`, on `page` (all, the first, when absent). */
-  | { screen: "draftCards"; draftUrl: string; filter?: DraftCardFilter; language?: string; page?: number }
+  /**
+   * A draft's cards as a table: those `filter` keeps, with text in
+   * `language`, sorted by `sort`, on `page` (all, by id, the first, when
+   * absent).
+   */
+  | { screen: "draftCards"; draftUrl: string; filter?: DraftCardFilter; language?: string; sort?: TableSort<DraftCardColumn>; page?: number }
   /** The release check of a draft, for a pod or (`policy`) the repository's library; a pod's when absent. */
   | { screen: "check"; draftUrl: string; policy?: CheckPolicy }
   /** A draft as the library lists the release it will be. */
@@ -94,6 +105,11 @@ export type StudioRoute =
    * study.
    */
   | { screen: "trial"; draftUrl: string; chapter?: string; review?: true };
+
+/** A column of a draft's cards, to sort them by. */
+export type DraftCardColumn = "front" | "back" | "place" | "distractors" | "id";
+
+export const DRAFT_CARD_COLUMNS: readonly DraftCardColumn[] = ["front", "back", "place", "distractors", "id"];
 
 /** The route of a card in the inspector. */
 export type CardRoute = Extract<StudioRoute, { screen: "card" }>;
@@ -160,7 +176,12 @@ export function studioRouteToHash(route: StudioRoute): string {
     case "instances":
       return `#${STUDIO_PATH}/instances`;
     case "home":
-      return `#${STUDIO_PATH}${hashParams({ instance: route.instanceUrl, ...deckTableViewToParams(route.view ?? DEFAULT_DECK_TABLE_VIEW) })}`;
+      return `#${STUDIO_PATH}${hashParams({
+        instance: route.instanceUrl,
+        ...deckTableViewToParams(route.view ?? DEFAULT_DECK_TABLE_VIEW),
+        ...(route.show === undefined ? {} : { show: route.show }),
+        ...(route.deckUrl === undefined ? {} : { deck: route.deckUrl }),
+      })}`;
     case "groups":
       return `#${STUDIO_PATH}/groups${hashParams({ instance: route.instanceUrl })}`;
     case "cards":
@@ -214,6 +235,7 @@ export function studioRouteToHash(route: StudioRoute): string {
         draft: route.draftUrl,
         ...(route.filter === undefined ? {} : { filter: route.filter }),
         ...(route.language === undefined ? {} : { lang: route.language }),
+        ...(route.sort === undefined ? {} : { sort: route.sort.key, ...(route.sort.descending ? { order: "desc" } : {}) }),
         ...(route.page === undefined || route.page === 1 ? {} : { page: String(route.page) }),
       })}`;
     case "transfer":
@@ -230,8 +252,8 @@ export function studioRouteToHash(route: StudioRoute): string {
  * without an instance among them: the default route, which depends on
  * how many instances the user has. Home is `#/studio`, or `#/studio/` as
  * the redirect from the Studio's old address makes it (docs/studio.md).
- * Home's view, and the workbench's query, are left out when they are the
- * default ones.
+ * Home's view and query, and the workbench's query, are left out when
+ * they are the default ones.
  */
 export function parseStudioHash(hash: string): StudioRoute | null {
   const [path, search] = hash.replace(/^#/, "").split("?");
@@ -245,9 +267,15 @@ export function parseStudioHash(hash: string): StudioRoute | null {
     case "/": {
       if (instanceUrl === null) return null;
       const view = deckTableViewFromParams(query);
-      return view.filter === "" && view.sort === undefined
-        ? { screen: "home", instanceUrl }
-        : { screen: "home", instanceUrl, view };
+      const show = showFromParam(query.get("show"));
+      const deckUrl = query.get("deck");
+      return {
+        screen: "home",
+        instanceUrl,
+        ...(view.filter === "" && view.sort === undefined ? {} : { view }),
+        ...(show === undefined ? {} : { show }),
+        ...(deckUrl === null ? {} : { deckUrl }),
+      };
     }
     case "/groups":
       return instanceUrl === null ? null : { screen: "groups", instanceUrl };
@@ -352,12 +380,14 @@ function draftRouteOf(path: string, query: URLSearchParams): DraftRoute | null {
     default: {
       const filter = DRAFT_CARD_FILTERS.find((known) => known === query.get("filter"));
       const language = query.get("lang");
+      const sort = DRAFT_CARD_COLUMNS.find((known) => known === query.get("sort"));
       const page = Number(query.get("page"));
       return {
         screen: "draftCards",
         draftUrl,
         ...(filter === undefined ? {} : { filter }),
         ...(language === null || language === "" ? {} : { language }),
+        ...(sort === undefined ? {} : { sort: { key: sort, descending: query.get("order") === "desc" } }),
         ...(Number.isInteger(page) && page > 1 ? { page } : {}),
       };
     }

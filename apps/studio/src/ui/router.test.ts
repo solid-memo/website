@@ -63,7 +63,7 @@ describe("the Studio's routes", () => {
     { screen: "step", draftUrl: DRAFT, step: "ch-pods-1" },
     { screen: "question", draftUrl: DRAFT, card: "q-pods-1a" },
     { screen: "draftCards", draftUrl: DRAFT },
-    { screen: "draftCards", draftUrl: DRAFT, filter: "unasked", language: "sv", page: 3 },
+    { screen: "draftCards", draftUrl: DRAFT, filter: "unasked", language: "sv", sort: { key: "front", descending: true }, page: 3 },
     { screen: "check", draftUrl: DRAFT },
     { screen: "check", draftUrl: DRAFT, policy: "library" },
     { screen: "preview", draftUrl: DRAFT },
@@ -77,6 +77,13 @@ describe("the Studio's routes", () => {
     { screen: "diff", draftUrl: DRAFT },
     { screen: "release", draftUrl: DRAFT },
     { screen: "release", draftUrl: DRAFT, field: "sources" },
+    { screen: "home", instanceUrl: "https://pod.example/solid-memo/a/", show: "courses", deckUrl: "https://pod.example/solid-memo/a/catalog.ttl#deck-1" },
+    {
+      screen: "home",
+      instanceUrl: "https://pod.example/solid-memo/a/",
+      view: { filter: "", sort: { column: "due", descending: true } },
+      show: "due",
+    },
     {
       screen: "card",
       deckUrl: "https://pod.example/solid-memo/a/catalog.ttl#deck-1",
@@ -123,6 +130,14 @@ describe("the Studio's routes", () => {
     expect(studioRouteToHash({ ...routes[1]!, view: { filter: "" } } as StudioRoute)).toBe(studioRouteToHash(routes[1]!));
     expect(parseStudioHash("#/studio?instance=a&sort=colour")).toEqual({ screen: "home", instanceUrl: "a" });
     expect(studioRouteToHash(routes[3]!)).toBe("#/studio/groups?instance=https%3A%2F%2Fpod.example%2Fsolid-memo%2Fa%2F");
+  });
+
+  it("keep Home's view and the deck beside its table in its query, and leave out every deck's view", () => {
+    expect(studioRouteToHash({ screen: "home", instanceUrl: "a", show: "courses", deckUrl: "https://pod.example/a/catalog.ttl#deck-1" })).toBe(
+      "#/studio?instance=a&show=courses&deck=https%3A%2F%2Fpod.example%2Fa%2Fcatalog.ttl%23deck-1",
+    );
+    expect(parseStudioHash("#/studio?instance=a&show=all")).toEqual({ screen: "home", instanceUrl: "a" });
+    expect(parseStudioHash("#/studio?instance=a&show=everything&deck=d")).toEqual({ screen: "home", instanceUrl: "a", deckUrl: "d" });
   });
 
   it("keep the workbench's deck and query in its query, and leave out a query that is the default", () => {
@@ -210,7 +225,7 @@ describe("the Studio's routes", () => {
   });
 
   it("name the instance a route is in, the deck's for the workbench", () => {
-    expect(routes.map(instanceOfRoute)).toEqual([null, ...Array(38).fill("https://pod.example/solid-memo/a/")]);
+    expect(routes.map(instanceOfRoute)).toEqual([null, ...Array(40).fill("https://pod.example/solid-memo/a/")]);
   });
 
   it("keep a draft and the subject of it shown in their query, and the cards' view, the first page and no filter left out", () => {
@@ -219,6 +234,11 @@ describe("the Studio's routes", () => {
     expect(studioRouteToHash({ screen: "draftCards", draftUrl: DRAFT, page: 1 })).toBe(at("draft-cards", {}));
     expect(parseStudioHash(at("draft-cards", { filter: "nonsense", lang: "", page: "0" }))).toEqual({ screen: "draftCards", draftUrl: DRAFT });
     expect(parseStudioHash(at("draft-cards", { page: "1.5" }))).toEqual({ screen: "draftCards", draftUrl: DRAFT });
+    expect(studioRouteToHash({ screen: "draftCards", draftUrl: DRAFT, sort: { key: "distractors", descending: true } })).toBe(
+      at("draft-cards", { sort: "distractors", order: "desc" }),
+    );
+    expect(parseStudioHash(at("draft-cards", { sort: "place" }))).toEqual({ screen: "draftCards", draftUrl: DRAFT, sort: { key: "place", descending: false } });
+    expect(parseStudioHash(at("draft-cards", { sort: "colour", order: "desc" }))).toEqual({ screen: "draftCards", draftUrl: DRAFT });
     expect(isDraftRoute({ screen: "draft", draftUrl: DRAFT })).toBe(true);
     expect(isDraftRoute({ screen: "drafts", instanceUrl: "https://pod.example/solid-memo/a/" })).toBe(false);
   });

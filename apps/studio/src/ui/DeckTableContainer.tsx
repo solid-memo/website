@@ -16,6 +16,7 @@ import { Loading } from "@solid-memo/ui/Loading";
 import { DeckTableScreen, type DeckBadge } from "./DeckTableScreen";
 import { HealthBadge } from "./HealthBadge";
 import { UpdateBadge } from "./UpdateBadge";
+import type { HomeView } from "./shell/views";
 
 /** A bulk action on the selected decks. */
 type Bulk =
@@ -50,6 +51,11 @@ export function DeckTableContainer({
   instance,
   view,
   onView,
+  shownView,
+  onShow,
+  current,
+  onCursor,
+  onOpen,
   appHref,
   healthHref,
   libraryHref,
@@ -61,6 +67,12 @@ export function DeckTableContainer({
   instance: Instance;
   view: DeckTableView;
   onView: (view: DeckTableView) => void;
+  shownView: HomeView;
+  onShow: (view: HomeView) => void;
+  /** The deck shown beside the table, by its URL. */
+  current?: string;
+  onCursor: (deck: Deck) => void;
+  onOpen: (deck: Deck) => void;
   /** Solid Memo, open at the instance's decks. */
   appHref: string;
   /** The health of a deck, or (none named) of the instance. */
@@ -181,6 +193,11 @@ export function DeckTableContainer({
       rows={rows}
       view={view}
       onView={onView}
+      shownView={shownView}
+      onShow={onShow}
+      current={current}
+      onCursor={onCursor}
+      onOpen={onOpen}
       pending={pending}
       badges={badges}
       groups={groupTrails(treeQuery.data)}

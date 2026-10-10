@@ -69,3 +69,43 @@ export function visibleColumns<C extends { key: string }>(columns: readonly C[],
 export function withColumn(hidden: ReadonlySet<string>, key: string, shown: boolean): ReadonlySet<string> {
   return toggled(hidden, [key], !shown);
 }
+
+/**
+ * The selection asked for (`next`), but for the rows it would add that
+ * cannot be selected (`allowed` says which can): a range or a page's
+ * checkbox passes over them. One selected already stays, as one kept
+ * selected while its row is not shown does.
+ */
+export function onlyAllowed(selection: Selection, next: Selection, allowed: (key: string) => boolean): Selection {
+  return new Set([...next].filter((key) => selection.has(key) || allowed(key)));
+}
+
+/** What a row is sorted by in a column: text, a number, or undefined for none (which comes last, either way). */
+export type SortValue = string | number | undefined;
+
+/**
+ * Rows sorted by a column (`sort`; in their own order without one), by
+ * what each has in it (`valueOf`), ties in their own order. Text is
+ * compared as the reader's language sorts it (`locale`), case aside and
+ * numbers by value ("Kanji 2" before "Kanji 10").
+ */
+export function sortedRows<R, K extends string>(
+  rows: readonly R[],
+  sort: TableSort<K> | undefined,
+  valueOf: (row: R, key: K) => SortValue,
+  locale: string,
+): R[] {
+  if (sort === undefined) return [...rows];
+  const collator = new Intl.Collator(locale, { sensitivity: "base", numeric: true });
+  const compare = (a: string | number, b: string | number) =>
+    typeof a === "number" && typeof b === "number" ? a - b : collator.compare(String(a), String(b));
+  return rows
+    .map((row, index) => ({ row, index, value: valueOf(row, sort.key) }))
+    .sort((a, b) => {
+      if (a.value === undefined || b.value === undefined) {
+        return a.value === b.value ? a.index - b.index : a.value === undefined ? 1 : -1;
+      }
+      return (sort.descending ? compare(b.value, a.value) : compare(a.value, b.value)) || a.index - b.index;
+    })
+    .map(({ row }) => row);
+}

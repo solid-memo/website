@@ -5,7 +5,9 @@ import type { DeckTableRow, DeckTableView } from "@solid-memo/domain/deckTable";
 import type { DeckGroup } from "@solid-memo/domain/deckTree";
 import { I18nProvider } from "@solid-memo/ui/i18n";
 import { DeckTableScreen, type DeckBadge } from "./DeckTableScreen";
+import type { HomeView } from "./shell/views";
 import { choose } from "../test/choose";
+import { WithKeys } from "../test/keys";
 import { instanceA, makeDeck } from "../test/fixtures";
 
 const languages: DeckGroup = { url: `${instanceA.url}catalog.ttl#group-1`, title: { en: "Languages" } };
@@ -23,12 +25,17 @@ type Props = Parameters<typeof DeckTableScreen>[0];
 /** The screen with its view kept as the workspace keeps it (in the URL). */
 function Harness({ initial = { filter: "" }, ...overrides }: Partial<Props> & { initial?: DeckTableView }) {
   const [view, setView] = useState<DeckTableView>(initial);
+  const [shown, setShown] = useState<HomeView>("all");
   return (
     <DeckTableScreen
       instance={instanceA}
       rows={rows}
       view={view}
       onView={setView}
+      shownView={shown}
+      onShow={setShown}
+      onCursor={() => undefined}
+      onOpen={() => undefined}
       pending={(deck, figure) => (deck.url === verbs.url && figure === "cards" ? "unreadable" : "loading")}
       badges={(deck): DeckBadge[] => (deck.url === kanji.url ? ["library", "invalid"] : [])}
       groups={[
@@ -155,6 +162,50 @@ describe("DeckTableScreen", () => {
     fireEvent.input(screen.getByRole("searchbox", { name: "Filter by name or group" }), { target: { value: "nouns " } });
     expect(screen.queryByRole("table")).toBeNull();
     expect(screen.getByText("No deck matches “nouns”.")).toBeInTheDocument();
+  });
+
+  it("shows the decks of a view from its tab, each counting its decks, the view chosen pressed", () => {
+    render(<Harness />);
+    const views = screen.getByRole("group", { name: "Views" });
+    expect(within(views).getAllByRole("button").map((button) => button.textContent)).toEqual([
+      "All 2",
+      "Due today 1",
+      "Courses 0",
+      "Library copies 1",
+      "Needs attention 1",
+    ]);
+    expect(within(views).getByRole("button", { name: "All 2" })).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(within(views).getByRole("button", { name: "Needs attention 1" }));
+    expect(within(views).getByRole("button", { name: "Needs attention 1" })).toHaveAttribute("aria-pressed", "true");
+    expect(names()).toEqual(["Kanji N5"]);
+    expect(screen.getByText("1 of 2 decks")).toBeInTheDocument();
+    fireEvent.click(within(views).getByRole("button", { name: "Courses 0" }));
+    expect(screen.queryByRole("table")).toBeNull();
+    expect(screen.getByText("No deck in this view.")).toBeInTheDocument();
+  });
+
+  it("shows or hides its columns from the Columns menu", () => {
+    render(<Harness />);
+    fireEvent.click(screen.getByRole("button", { name: "Show or hide columns" }));
+    fireEvent.click(screen.getByRole("menuitemcheckbox", { name: "Direction" }));
+    expect(within(table()).queryByRole("columnheader", { name: /^Direction/ })).toBeNull();
+    expect(within(table()).getByRole("columnheader", { name: /^Group/ })).toBeInTheDocument();
+  });
+
+  it("marks the deck shown beside it, shows the one at its cursor, and opens one with Enter", () => {
+    const onCursor = vi.fn();
+    const onOpen = vi.fn();
+    render(
+      <WithKeys>
+        <Harness current={verbs.url} onCursor={onCursor} onOpen={onOpen} />
+      </WithKeys>,
+    );
+    expect(within(table()).getByRole("row", { current: true })).toHaveTextContent("Verbs");
+    document.body.focus();
+    fireEvent.keyDown(document.body, { key: "k" });
+    expect(onCursor).toHaveBeenCalledWith(kanji);
+    fireEvent.keyDown(screen.getByRole("checkbox", { name: "Select Kanji N5" }), { key: "Enter" });
+    expect(onOpen).toHaveBeenCalledWith(kanji);
   });
 
   it("selects decks one by one or all those shown, and offers what can be done with them", () => {
