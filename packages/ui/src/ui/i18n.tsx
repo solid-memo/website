@@ -9,10 +9,14 @@ import { DEFAULT_LOCALE, type Locale } from "@solid-memo/domain/locale";
 import en from "../i18n/en.json";
 import sv from "../i18n/sv.json";
 import ko from "../i18n/ko.json";
+import de from "../i18n/de.json";
+import es from "../i18n/es.json";
+import fr from "../i18n/fr.json";
 
 /**
  * A message with a form per plural category its language's plural rules
- * name: "one" and "other" in English and Swedish, only "other" in Korean.
+ * name: "one" and "other" in English, Swedish and German, "one", "many"
+ * and "other" in Spanish and French, only "other" in Korean.
  * Every language has "other", the form a message without a count takes.
  */
 type Plural = Partial<Record<Intl.LDMLPluralRule, string>> & { other: string };
@@ -45,7 +49,7 @@ type KeysOf<T, Prefix extends string = ""> = {
 
 export type MessageKey = KeysOf<typeof en>;
 
-const CATALOGS: Record<Locale, Messages> = { en, sv, ko };
+const CATALOGS: Record<Locale, Messages> = { en, sv, ko, de, es, fr };
 
 function isPlural(node: Message | Messages): node is Plural {
   return typeof node === "object" && typeof node.other === "string";

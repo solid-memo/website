@@ -13,7 +13,10 @@ describe("LanguageSelector", () => {
     const list = screen.getByRole("combobox", { name: "Språk" });
     expect(list).toHaveValue("sv");
     expect(screen.getAllByRole("option").map((option) => [option.textContent, option.getAttribute("lang")])).toEqual([
+      ["Deutsch", "de"],
       ["English", "en"],
+      ["Español", "es"],
+      ["Français", "fr"],
       ["Svenska", "sv"],
       ["한국어", "ko"],
     ]);

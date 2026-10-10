@@ -6,14 +6,15 @@ import { afterEach, beforeAll, describe, expect, it } from "vitest";
  * The focus indicators in style.css, checked through the cascade itself,
  * since a later or more specific rule can silently take a ring away. The
  * font imports are left out: the test DOM has no packages to fetch. Nor
- * does it know :lang(), so it reads an element marked lang="ko" itself
- * (of the same specificity) for it.
+ * does it know :lang(), so it reads an element marked lang="ko" or
+ * lang="de" itself (of the same specificity) for it.
  */
 beforeAll(() => {
   const style = document.createElement("style");
   style.textContent = readFileSync(join(import.meta.dirname, "style.css"), "utf8")
     .replace(/^@import .*$/gm, "")
-    .replaceAll(":lang(ko)", '[lang|="ko"]');
+    .replaceAll(":lang(ko)", '[lang|="ko"]')
+    .replaceAll(":lang(de)", '[lang|="de"]');
   document.head.append(style);
 });
 
@@ -665,5 +666,14 @@ describe("a course's celebrations", () => {
     expect(sparkles.position).toBe("absolute");
     expect(sparkles.pointerEvents).toBe("none");
     expect(getComputedStyle(document.querySelector(".course-sparkles>span")!).opacity).toBe("0");
+  });
+});
+
+describe("German", () => {
+  it("hyphenates German words at line ends, and no other language's", () => {
+    document.body.innerHTML = `<p lang="de">Lernfortschritt</p><p lang="en">x</p>`;
+    const [german, english] = document.querySelectorAll("p");
+    expect(getComputedStyle(german).hyphens).toBe("auto");
+    expect(getComputedStyle(english).hyphens).not.toBe("auto");
   });
 });

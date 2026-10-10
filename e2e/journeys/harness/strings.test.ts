@@ -6,6 +6,9 @@ describe("text", () => {
     expect(text("en", "app.logOut")).toBe("Log out");
     expect(text("sv", "app.logOut")).toBe("Logga ut");
     expect(text("ko", "language.label")).toBe("언어");
+    expect(text("de", "app.logOut")).toBe("Abmelden");
+    expect(text("es", "app.logOut")).toBe("Cerrar sesión");
+    expect(text("fr", "app.logOut")).toBe("Se déconnecter");
   });
 
   it("fills placeholders", () => {
@@ -22,6 +25,8 @@ describe("text", () => {
     expect(text("en", "common.cardCount", { count: "1" })).toBe("1 card");
     expect(text("en", "common.cardCount", { count: 0 })).toBe("0 cards");
     expect(text("ko", "common.cardCount", { count: 1 })).toBe("카드 1장");
+    expect(text("fr", "common.cardCount", { count: 0 })).toBe("0 carte");
+    expect(text("es", "common.cardCount", { count: 1_000_000 })).toBe("1.000.000 de tarjetas");
   });
 
   it("leaves a placeholder it has no value for", () => {

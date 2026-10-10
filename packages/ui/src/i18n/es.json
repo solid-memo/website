@@ -1,0 +1,2796 @@
+{
+  "language": {
+    "label": "Idioma",
+    "button": "Idioma: {language}",
+    "notStated": "Idioma: no indicado",
+    "unstatedHint": "Indica en qué idioma está este texto.",
+    "legend": {
+      "front": "Idioma del anverso",
+      "back": "Idioma del reverso",
+      "deckName": "Idioma del nombre del mazo",
+      "description": "Idioma de la descripción",
+      "keywords": "Idioma de las palabras clave",
+      "frontNote": "Idioma de la nota del anverso",
+      "backLabel": "Idioma de la etiqueta",
+      "backNote": "Idioma de la nota del reverso",
+      "pictureDescription": "Idioma de la descripción de la imagen",
+      "distractor": "Idioma de la opción incorrecta",
+      "distractorNote": "Idioma de la nota de la opción incorrecta",
+      "title": "Idioma del título",
+      "theory": "Idioma de la teoría"
+    },
+    "none": "Sin idioma (códigos, números, símbolos)",
+    "otherOption": "Otro idioma…",
+    "otherLabel": "Código de idioma, p. ej., fi, pt-BR",
+    "done": "Listo",
+    "translations": "Traducciones ({count})",
+    "add": "Añadir una traducción",
+    "translationLabel": "Texto en {language}",
+    "translationUnstated": "Traducción sin idioma elegido",
+    "remove": "Quitar el texto en {language}",
+    "removeUnstated": "Quitar esta traducción",
+    "field": {
+      "deckName": "el nombre del mazo",
+      "description": "la descripción",
+      "keywords": "las palabras clave",
+      "front": "el anverso",
+      "back": "el reverso",
+      "frontNote": "la nota del anverso",
+      "backLabel": "la etiqueta",
+      "backNote": "la nota del reverso",
+      "frontImageDescription": "la descripción de la imagen del anverso",
+      "backImageDescription": "la descripción de la imagen del reverso",
+      "distractor": "la opción incorrecta",
+      "distractorNote": "la nota de la opción incorrecta",
+      "title": "el título",
+      "theory": "la teoría"
+    }
+  },
+  "theme": {
+    "toDark": "Cambiar a modo oscuro",
+    "toLight": "Cambiar a modo claro",
+    "system": "Como mi navegador",
+    "light": "Claro",
+    "dark": "Oscuro"
+  },
+  "common": {
+    "cardCount": {
+      "one": "{count} tarjeta",
+      "many": "{count} de tarjetas",
+      "other": "{count} tarjetas"
+    },
+    "toReview": {
+      "one": "{count} por repasar",
+      "many": "{count} por repasar",
+      "other": "{count} por repasar"
+    },
+    "direction": {
+      "frontToBack": "Anverso → reverso",
+      "backToFront": "Reverso → anverso",
+      "bidirectional": "En ambos sentidos"
+    },
+    "networkError": "No se pudo conectar con tu Pod. Comprueba tu conexión e inténtalo de nuevo.",
+    "unexpectedError": "Algo salió mal. Inténtalo de nuevo o vuelve a cargar la página. Detalles: {detail}",
+    "technicalDetails": "Detalles técnicos",
+    "opensInNewTab": "(se abre en una pestaña nueva)"
+  },
+  "footer": {
+    "createdBy": "Creado por {author}",
+    "version": "Versión {version}"
+  },
+  "addCardForm": {
+    "submitButton": "Añadir tarjeta",
+    "added": "Tarjeta añadida."
+  },
+  "app": {
+    "restoringSession": "Restaurando la sesión…",
+    "skipToContent": "Saltar al contenido",
+    "tagline": "Tarjetas de memoria con repetición espaciada que viven en tu propio Pod de Solid.",
+    "sessionExpired": "Tu sesión ha caducado. Vuelve a iniciar sesión.",
+    "loggedInAs": "Sesión iniciada como {name}",
+    "logOut": "Cerrar sesión",
+    "guestLine": "Estás probando Solid Memo sin cuenta: lo que estudies se guarda solo en este navegador.",
+    "keepStudy": "Conservar lo que he estudiado: iniciar sesión",
+    "discardGuest": "Descartar",
+    "discardRegion": "Descartar tus datos de estudio en modo invitado",
+    "discardConfirm": "¿Eliminar todo lo que has estudiado en modo invitado? No se puede deshacer.",
+    "discardYes": "Eliminar",
+    "cancel": "Cancelar",
+    "loginToKeep": "Inicia sesión para conservar lo que has estudiado: una vez dentro, Solid Memo te ofrecerá trasladarlo a tu Pod.",
+    "backToStudy": "Volver a mi espacio de estudio",
+    "documentTitle": "Solid Memo",
+    "landingTitle": "Iniciar sesión",
+    "connectingTitle": "Conectando tu Pod"
+  },
+  "breadcrumbs": {
+    "label": "Ruta de navegación",
+    "instances": "Instancias",
+    "storagePicker": "Elegir un almacenamiento",
+    "instanceCreator": "Instancia nueva",
+    "decks": "Mazos",
+    "deckCreator": "Mazo nuevo",
+    "library": "Biblioteca de mazos",
+    "cards": "Tarjetas",
+    "preview": "Vista previa",
+    "preferences": "Preferencias",
+    "validation": "Validación",
+    "browser": "Explorador",
+    "cardCreator": "Tarjeta nueva",
+    "study": "Estudiar",
+    "statistics": "Estadísticas",
+    "course": "Curso",
+    "courseReview": "Repaso final",
+    "groups": "Grupos",
+    "importUrl": "Añadir desde un enlace"
+  },
+  "browser": {
+    "heading": "Explorador: {deck}",
+    "intro": "El Explorador muestra todas las tarjetas de este mazo. Aquí añades, editas y retiras tarjetas, y eliges cómo se estudia el mazo.",
+    "addCardButton": "Añadir tarjeta",
+    "directionLegend": "Sentido de estudio",
+    "bidirectionalHint": "Cada tarjeta se pregunta en ambos sentidos, y cada sentido se programa por separado.",
+    "directionHint": "Cámbialo cuando quieras; lo que has aprendido en cada sentido se conserva.",
+    "empty": "Este mazo aún no tiene tarjetas.",
+    "allRetired": "Todas las tarjetas de este mazo están retiradas.",
+    "pageHint": "Tarjetas {first}–{last} de {total}. Abre una tarjeta para editarla.",
+    "openHint": "Abre una tarjeta para editarla.",
+    "frontColumn": "Anverso",
+    "backColumn": "Reverso",
+    "actionsColumn": "Acciones",
+    "removeButton": "Eliminar",
+    "removeCardLabel": "Eliminar la tarjeta {card}",
+    "removeConfirm": "¿Eliminar la tarjeta «{card}»? No se puede deshacer.",
+    "loading": "Cargando tarjetas…",
+    "removed": "Se eliminó la tarjeta «{card}».",
+    "unstatedTag": "Idioma no indicado",
+    "languageFilter": {
+      "legend": "Tarjetas que mostrar",
+      "all": "Todas las tarjetas",
+      "unstated": "Idioma no indicado"
+    }
+  },
+  "card": {
+    "heading": "Tarjeta",
+    "saveButton": "Guardar",
+    "removeButton": "Eliminar tarjeta",
+    "removeConfirm": "¿Eliminar la tarjeta «{card}»? No se puede deshacer.",
+    "saved": "Guardado."
+  },
+  "cardContentFields": {
+    "front": "Anverso",
+    "frontPlaceholder": "Pregunta o indicación",
+    "frontImage": "Imagen del anverso (URL, opcional)",
+    "frontImageDescription": "Descripción de la imagen del anverso (opcional)",
+    "imagePlaceholder": "https://…",
+    "imageDescriptionHint": "Se lee en lugar de la imagen a quien no pueda verla. Describe lo que muestra sin revelar la respuesta.",
+    "frontNote": "Nota del anverso (opcional)",
+    "frontNoteHint": "Se muestra bajo el anverso una vez mostrada la respuesta.",
+    "backLabel": "Etiqueta (opcional)",
+    "backLabelHint": "Se muestra sobre el reverso, p. ej., qué tipo de respuesta es.",
+    "back": "Reverso",
+    "backPlaceholder": "Respuesta",
+    "backImage": "Imagen del reverso (URL, opcional)",
+    "backImageDescription": "Descripción de la imagen del reverso (opcional)",
+    "backNote": "Nota del reverso (opcional)",
+    "backNoteHint": "Se muestra bajo el reverso una vez mostrada la respuesta.",
+    "sidesHint": "Cada cara necesita texto, una imagen o ambos.",
+    "markdown": "Formatear con Markdown",
+    "markdownHint": "Si está activado, el texto de la tarjeta es Markdown: código, listas, tablas y más. Si está desactivado, se muestra tal como se escribió.",
+    "markdownDiffers": "Parte del texto de esta tarjeta se interpreta de otra forma en Markdown: revisa la vista previa.",
+    "markdownDiffersTranslation": "Algunas traducciones de esta tarjeta se interpretan de otra forma en Markdown: revísalas antes de guardar.",
+    "preview": "Vista previa",
+    "previewOption": "Como opción:"
+  },
+  "distractorFields": {
+    "legend": "Opciones incorrectas",
+    "hint": "Se muestran junto al reverso, la respuesta correcta, cuando la tarjeta se plantea como pregunta de opción múltiple, como hace un curso. Cada una debería estar en los idiomas del reverso.",
+    "none": "Esta tarjeta no tiene opciones incorrectas.",
+    "retiredTag": "Retirada",
+    "text": "Opción incorrecta",
+    "note": "Por qué es incorrecta (opcional)",
+    "noteHint": "Se muestra a quien elige esta opción.",
+    "add": "Añadir una opción incorrecta",
+    "addDone": "Añadir",
+    "update": "Actualizar",
+    "cancel": "Cancelar",
+    "edit": "Editar",
+    "editLabel": "Editar la opción incorrecta «{option}»",
+    "retire": "Retirar",
+    "retireLabel": "Retirar la opción incorrecta «{option}»",
+    "restore": "Recuperar",
+    "restoreLabel": "Recuperar la opción incorrecta «{option}»",
+    "delete": "Eliminar",
+    "deleteLabel": "Eliminar la opción incorrecta «{option}»",
+    "deleteConfirm": "¿Eliminar la opción incorrecta «{option}»?",
+    "noLanguage": "sin idioma indicado",
+    "issues": "Conviene revisar",
+    "issue": {
+      "missing": "«{option}» no tiene texto en {languages}, y el reverso sí.",
+      "extra": "«{option}» está en {languages}, y el reverso no.",
+      "few": {
+        "one": "Hay {count} opción incorrecta en uso; un curso hace una pregunta con al menos {least}.",
+        "many": "Hay {count} de opciones incorrectas en uso; un curso hace una pregunta con al menos {least}.",
+        "other": "Hay {count} opciones incorrectas en uso; un curso hace una pregunta con al menos {least}."
+      }
+    },
+    "picks": {
+      "one": "Elegida {count} vez",
+      "many": "Elegida {count} de veces",
+      "other": "Elegida {count} veces"
+    }
+  },
+  "cardCreator": {
+    "heading": "Tarjeta nueva",
+    "backButton": "Volver",
+    "addingTo": "Añadiendo a «{deck}»."
+  },
+  "cardFace": {
+    "frontPictureAlt": "Imagen del anverso de la tarjeta",
+    "backPictureAlt": "Imagen del reverso de la tarjeta",
+    "pictureFor": "Imagen para: {back}",
+    "notWebUrl": "Imagen no mostrada: su dirección no es una URL web.",
+    "front": "Anverso",
+    "back": "Reverso",
+    "question": "Pregunta",
+    "answer": "Respuesta"
+  },
+  "course": {
+    "chaptersDone": {
+      "one": "{done} de {count} capítulo completado",
+      "many": "{done} de {count} de capítulos completados",
+      "other": "{done} de {count} capítulos completados"
+    },
+    "start": "Empezar el curso",
+    "continue": "Continuar",
+    "finished": "Has terminado este curso. Sus tarjetas están en tu mazo, para estudiarlas como cualquier otra.",
+    "backToDecks": "Volver a los mazos",
+    "chapterCompleted": "¡Buen trabajo! Has completado {chapter}.",
+    "courseCompleted": "¡Felicidades! Ese era el último capítulo: has completado el curso entero.",
+    "continueOrStop": "Sigue con el siguiente capítulo cuando quieras, o déjalo aquí por ahora: tu progreso se conserva.",
+    "chapterNumber": "Capítulo {number}:",
+    "locked": "Bloqueado",
+    "open": "Abierto",
+    "done": "Completado",
+    "stepsDone": {
+      "one": "{done} de {count} paso completado",
+      "many": "{done} de {count} de pasos completados",
+      "other": "{done} de {count} pasos completados"
+    }
+  },
+  "chapterPlayer": {
+    "step": "Paso {number} de {count}",
+    "progress": "Pasos completados en este capítulo",
+    "theoryHidden": "La teoría no se muestra mientras respondes a las preguntas.",
+    "part": "Parte {number} de {count}",
+    "continue": "Continuar",
+    "back": "Volver",
+    "toQuestions": {
+      "one": "Ir a la pregunta",
+      "many": "Ir a las preguntas",
+      "other": "Ir a las preguntas"
+    },
+    "check": "Comprueba lo que has entendido",
+    "checkNumbered": "Comprueba lo que has entendido: pregunta {number} de {count}",
+    "next": "Siguiente",
+    "toReview": "Ir al repaso final"
+  },
+  "chapterReview": {
+    "heading": "Repaso final: {chapter}",
+    "cheer": "¡Buen trabajo: has hecho todos los pasos de este capítulo!",
+    "about": "Ahora viene el repaso final: todas las preguntas del capítulo una vez más, mezcladas y sin la teoría. Si fallas una, vuelve a salir hasta que la aciertes. Supéralo y el capítulo quedará completado.",
+    "start": "Empezar el repaso final",
+    "backToCourse": "Volver a los capítulos",
+    "position": "Pregunta {position} de {total}",
+    "next": "Siguiente",
+    "completing": "Completando el capítulo…",
+    "retry": "Reintentar"
+  },
+  "courseQuestion": {
+    "right": "¡Correcto!",
+    "wrong": "No exactamente.",
+    "added": "Añadida a tu mazo.",
+    "why": "Por qué no:"
+  },
+  "markdown": {
+    "code": "Código",
+    "table": "Tabla",
+    "linkHost": "({host})"
+  },
+  "markdownHelp": {
+    "summary": "Ayuda de formato",
+    "intro": "Una línea en blanco empieza un párrafo nuevo. Los enlaces solo se pueden abrir en las notas.",
+    "write": "Escribe",
+    "gives": "Resultado",
+    "emphasis": "énfasis",
+    "strong": "énfasis fuerte",
+    "code": "código dentro de una línea",
+    "codeBlock": "un bloque de código, con las líneas tal como se escriben",
+    "list": "una lista",
+    "numbered": "una lista numerada",
+    "quote": "una cita",
+    "table": "una tabla",
+    "link": "un enlace, en una nota",
+    "escape": "un signo que se muestra tal cual"
+  },
+  "markdownProblem": {
+    "tooLong": "Demasiado largo para leerlo como Markdown ({length} caracteres): se muestra como texto sin formato.",
+    "tooComplex": "Demasiado complejo para leerlo como Markdown: se muestra como texto sin formato.",
+    "tooDeep": "Demasiados niveles anidados: la parte más interna se muestra tal como se escribió.",
+    "largeTable": "Una tabla tan grande se muestra tal como se escribió: como máximo 20 columnas y 2000 celdas.",
+    "html": "El HTML como {source} se muestra tal como se escribió. Ponlo entre acentos graves para mostrarlo como código.",
+    "image": "Las imágenes en Markdown no se muestran, solo su descripción: añade una con el campo de imagen de la cara.",
+    "link": "Aquí no hay enlaces, porque estorbarían al estudiar: {source} se muestra como su texto. Pon el enlace en una nota.",
+    "autolink": "{source} se lee como un enlace y se muestra sin sus corchetes angulares. Ponlo entre acentos graves para mostrarlo tal como se escribió.",
+    "linkNotFollowed": "Solo se siguen los enlaces https: {url} se muestra como texto.",
+    "linkHost": "El texto del enlace «{text}» nombra un sitio distinto del que abre, {host}.",
+    "hiddenControl": "Los caracteres ocultos en el código o en un enlace se muestran como marcas: {controls}.",
+    "characterReference": "{source} se muestra como el carácter que nombra. Escribe \\{source} para mostrarlo tal como se escribió.",
+    "notOneParagraph": "El reverso de esta tarjeta es una de las opciones de una pregunta: déjalo en un solo párrafo, como las demás.",
+    "dashHeading": "Una línea con --- justo debajo se muestra como encabezado. Para una línea horizontal, deja una línea en blanco antes de ---; para un encabezado, empieza la línea con ##.",
+    "noText": "Esto no muestra ningún texto como Markdown."
+  },
+  "multipleChoice": {
+    "check": "Comprobar",
+    "checking": "Comprobando…",
+    "keys": "Pulsa de 1 a {last} para elegir y luego Enter para comprobar.",
+    "right": "Respuesta correcta",
+    "chosen": "Tu respuesta"
+  },
+  "dataCheckNotice": {
+    "region": "Comprobación de datos",
+    "heading": "Algunos datos de {name} no están en el formato que espera Solid Memo.",
+    "blockInstance": "Solid Memo no usará esta instancia hasta que se repare.",
+    "restKeepsWorking": "Lo demás sigue funcionando.",
+    "setAside": {
+      "one": "Se aparta {names} hasta que se repare; lo demás sigue funcionando.",
+      "many": "Se apartan {names} hasta que se reparen; lo demás sigue funcionando.",
+      "other": "Se apartan {names} hasta que se reparen; lo demás sigue funcionando."
+    },
+    "keepsWorking": "Solid Memo sigue trabajando con ellos.",
+    "arrangementSetAside": "La lista de mazos no se puede reordenar hasta que se repare su orden.",
+    "policyHint": "Lo que pasa con los datos no válidos se configura en {preferences}.",
+    "preferences": "Preferencias",
+    "repair": "Reparar"
+  },
+  "deckAbout": {
+    "label": "Acerca de este mazo",
+    "topicsLine": "Temas: {topics}",
+    "keywordsLine": "Palabras clave: {keywords}",
+    "describeButton": "Describir mazo",
+    "description": "Descripción",
+    "topics": "Temas (opcional)",
+    "keywords": "Palabras clave (opcional)",
+    "keywordsHint": "Separa las palabras clave con comas; añade palabras clave en otro idioma como traducción.",
+    "saveButton": "Guardar descripción",
+    "cancelLabel": "Cancelar la descripción",
+    "cancelButton": "Cancelar"
+  },
+  "deckCreator": {
+    "heading": "Mazo nuevo",
+    "nameLabel": "Nombre",
+    "namePlaceholder": "Mi mazo nuevo",
+    "createButton": "Crear mazo"
+  },
+  "deckDetail": {
+    "loading": "Cargando tarjetas…",
+    "preferencesLabel": "Preferencias del mazo",
+    "preferencesButton": "Preferencias",
+    "browseButton": "Explorador",
+    "noCards": "Este mazo aún no tiene tarjetas. Añade algunas en el Explorador.",
+    "allStudied": "Ya has estudiado todas las tarjetas — no queda nada más que estudiar hoy.",
+    "newOnly": {
+      "one": "Hoy no hay tarjetas por repasar; {count} nueva por empezar.",
+      "many": "Hoy no hay tarjetas por repasar; {count} nuevas por empezar.",
+      "other": "Hoy no hay tarjetas por repasar; {count} nuevas por empezar."
+    },
+    "dueOnly": "Para repasar hoy: {due}.",
+    "dueAndNew": {
+      "one": "Para repasar hoy: {due}; además, {count} nueva por empezar.",
+      "many": "Para repasar hoy: {due}; además, {count} nuevas por empezar.",
+      "other": "Para repasar hoy: {due}; además, {count} nuevas por empezar."
+    },
+    "studyButton": "Estudiar",
+    "studiedToday": "Hoy has estudiado {studied}.",
+    "resetButton": "Restablecer el estudio de hoy",
+    "resetting": "Restableciendo…",
+    "resetConfirm": "¿Restablecer el estudio de hoy de «{title}»? Lo que has estudiado hoy ({studied}) volverá a su estado anterior y se descartarán las respuestas de hoy.",
+    "cardsInDeck": "Este mazo tiene {cards}. Añade, edita o elimina tarjetas en el Explorador."
+  },
+  "deckLanguagesNotice": {
+    "region": "Idiomas del texto del mazo",
+    "heading": "Parte del texto de este mazo no indica en qué idioma está.",
+    "unstated": {
+      "one": "{count} cara de tarjeta no indica ningún idioma.",
+      "many": "{count} de caras de tarjeta no indican ningún idioma.",
+      "other": "{count} caras de tarjeta no indican ningún idioma."
+    },
+    "unchecked": "No se pudo leer la versión de la biblioteca de la que se copió, así que no se sabe cuánto te toca indicar a ti.",
+    "link": "Indicar los idiomas"
+  },
+  "deckList": {
+    "courses": "Tus cursos",
+    "continueCourseNamed": "Continuar {course}",
+    "startCourseNamed": "Empezar el curso {course}",
+    "courseProgress": "Capítulos completados",
+    "loading": "Cargando mazos…",
+    "setAside": "Apartado: sus datos necesitan reparación",
+    "heading": "Mazos",
+    "deckCount": {
+      "one": "{count} mazo",
+      "many": "{count} de mazos",
+      "other": "{count} mazos"
+    },
+    "empty": "Aún no hay mazos. Crea tu primer mazo abajo o importa uno de la biblioteca de mazos.",
+    "createButton": "Crear mazo",
+    "libraryLink": "Biblioteca de mazos",
+    "emptyGroup": "Este grupo aún está vacío.",
+    "readOnly": "Una versión más reciente de Solid Memo ordenó estos mazos, así que aquí no se pueden reordenar. Vuelve a cargar la página para obtener la última versión.",
+    "arrangementSetAside": "El orden de estos mazos tiene datos no válidos, así que no se pueden reordenar hasta que se repare.",
+    "newGroupName": "Grupo nuevo",
+    "groupName": "Nombre del grupo",
+    "saveName": "Guardar nombre",
+    "deckName": "Nombre del mazo",
+    "actions": "Acciones para {name}",
+    "preferences": "Preferencias",
+    "rename": "Renombrar",
+    "deleteDeck": "Eliminar mazo",
+    "deleteGroup": "Eliminar grupo",
+    "deleteGroupConfirm": {
+      "one": "¿Eliminar el grupo «{name}»? Su único mazo se conserva, un nivel más arriba.",
+      "many": "¿Eliminar el grupo «{name}»? Sus {count} de mazos se conservan, un nivel más arriba.",
+      "other": "¿Eliminar el grupo «{name}»? Sus {count} mazos se conservan, un nivel más arriba."
+    },
+    "deleteGroupOfGroupsConfirm": "¿Eliminar el grupo «{name}»? Los grupos que contiene se conservan, un nivel más arriba.",
+    "deleteEmptyGroupConfirm": "¿Eliminar el grupo vacío «{name}»?",
+    "moveUp": "Subir",
+    "moveDown": "Bajar",
+    "moveOut": "Sacar de {group}",
+    "moveInto": "Mover a",
+    "groupWithPrevious": "Agrupar con el de arriba",
+    "groupWithNext": "Agrupar con el de abajo",
+    "atTopLevel": "en el nivel superior",
+    "inGroup": "en {group}",
+    "moved": "Se movió {name}: {position} de {count} {place}.",
+    "combined": "Se pusieron {name} y {other} en un grupo nuevo. Ponle un nombre o pulsa Escape para mantener «{group}».",
+    "deleted": "Se eliminó el grupo «{name}»; lo que contenía subió un nivel.",
+    "deletedEmpty": "Se eliminó el grupo «{name}».",
+    "renamed": "Se cambió el nombre del grupo a «{name}».",
+    "deckRenamed": "Se cambió el nombre del mazo a «{name}».",
+    "deckDeleted": "Se eliminó el mazo «{name}».",
+    "afterGroup": "después de {group}",
+    "dragCancelled": "Movimiento cancelado: el mazo o grupo sigue donde estaba.",
+    "continueCourse": "Continuar el curso",
+    "fromHost": "de {host}",
+    "fromLink": "Añadir desde un enlace"
+  },
+  "studyPace": {
+    "startSmall": "Cada tarjeta nueva vuelve para repasarse en los días siguientes, así que una cifra alta ahora acumula repasos después. Mejor empieza con poco y mantén el ritmo: siempre puedes subirla."
+  },
+  "today": {
+    "heading": "Hoy",
+    "cheer": {
+      "few": "¡Buen trabajo!",
+      "some": "¡Gran sesión!",
+      "many": "¡Qué esfuerzo!"
+    },
+    "streakCount": {
+      "one": "Racha de {count} día",
+      "many": "Racha de {count} días",
+      "other": "Racha de {count} días"
+    },
+    "streakFirstDay": "¡Primer día! Vuelve mañana y serán dos.",
+    "streakRecord": "¡Tu racha más larga hasta ahora!",
+    "streakToBeat": "Récord: {count} días",
+    "answers": {
+      "one": "{count} tarjeta",
+      "many": "{count} de tarjetas",
+      "other": "{count} tarjetas"
+    },
+    "introduced": {
+      "one": "{count} nueva",
+      "many": "{count} nuevas",
+      "other": "{count} nuevas"
+    },
+    "remembered": "{percent} recordadas",
+    "allStatistics": "Todas las estadísticas"
+  },
+  "newcomerCourse": {
+    "eyebrow": "¿Primera vez aquí?",
+    "pitch": "Comienza aquí: un curso para quien empieza. Cada pregunta que respondes se convierte en una tarjeta de tu mazo.",
+    "start": "Empezar el curso",
+    "about": "Sobre este curso"
+  },
+  "deckPreferences": {
+    "loading": "Cargando preferencias…",
+    "heading": "Preferencias: {deck}",
+    "renameButton": "Renombrar mazo",
+    "removeButton": "Eliminar mazo",
+    "removeConfirm": "¿Eliminar el mazo «{title}» y todas sus tarjetas? No se puede deshacer.",
+    "deckName": "Nombre del mazo",
+    "saveName": "Guardar nombre",
+    "cancelRenamingLabel": "Cancelar el cambio de nombre",
+    "cancelButton": "Cancelar",
+    "newCardsPerDay": "Tarjetas nuevas por día",
+    "maxReviewsPerDay": "Máx. de repasos por día",
+    "newCardsUnit": {
+      "one": "tarjeta nueva por día",
+      "many": "de tarjetas nuevas por día",
+      "other": "tarjetas nuevas por día"
+    },
+    "maxReviewsUnit": {
+      "one": "repaso como máximo por día",
+      "many": "de repasos como máximo por día",
+      "other": "repasos como máximo por día"
+    },
+    "emptyHint": "Un campo vacío usa tus {link}.",
+    "studyPreferencesLink": "preferencias de estudio",
+    "saveButton": "Guardar preferencias",
+    "languages": {
+      "heading": "Idiomas",
+      "loading": "Comprobando los idiomas de las tarjetas…",
+      "unreadable": "No se pudieron comprobar los idiomas de las tarjetas.",
+      "unstated": {
+        "one": "Sin idioma indicado: {count} anverso y {backs}.",
+        "many": "Sin idioma indicado: {count} de anversos y {backs}.",
+        "other": "Sin idioma indicado: {count} anversos y {backs}."
+      },
+      "backs": {
+        "one": "{count} reverso",
+        "many": "{count} de reversos",
+        "other": "{count} reversos"
+      },
+      "fronts": "Anversos",
+      "backsLegend": "Reversos",
+      "stateButton": "Indicar el idioma",
+      "confirmFronts": {
+        "one": "¿Guardar {count} anverso en {language}?",
+        "many": "¿Guardar {count} de anversos en {language}?",
+        "other": "¿Guardar {count} anversos en {language}?"
+      },
+      "confirmBacks": {
+        "one": "¿Guardar {count} reverso en {language}?",
+        "many": "¿Guardar {count} de reversos en {language}?",
+        "other": "¿Guardar {count} reversos en {language}?"
+      },
+      "stated": {
+        "one": "Se guardó el idioma de {count} tarjeta.",
+        "many": "Se guardó el idioma de {count} de tarjetas.",
+        "other": "Se guardó el idioma de {count} tarjetas."
+      },
+      "releaseHint": "No se cuentan las tarjetas que siguen tal como las trae su versión de la biblioteca: una versión posterior las actualiza.",
+      "settled": "Todas las tarjetas indican en qué idioma está su texto."
+    }
+  },
+  "deckProvenance": {
+    "by": "De {authors}",
+    "updated": "Actualizado el {date}"
+  },
+  "deckStudyAction": {
+    "checking": "Comprobando qué hay por repasar",
+    "done": "Listo por hoy",
+    "studyLabel": "Estudiar {deck}",
+    "studyButton": "Estudiar"
+  },
+  "instanceBar": {
+    "statistics": "Estadísticas",
+    "preferences": "Preferencias",
+    "switch": "Cambiar de instancia",
+    "inBrowser": "Se guarda en este navegador",
+    "openInPod": "Abrir en tu Pod",
+    "label": "Instancia"
+  },
+  "instanceCreator": {
+    "heading": "Nueva instancia de Solid Memo",
+    "name": "Nombre",
+    "namePlaceholder": "Mi instancia",
+    "location": "Ubicación",
+    "locationHint": "La carpeta de tu Pod donde esta instancia guarda sus mazos y tus datos de estudio.",
+    "create": "Crear instancia",
+    "back": "Volver"
+  },
+  "instancePicker": {
+    "heading": "Elige una instancia de Solid Memo",
+    "intro": "Una instancia es una colección de tus mazos y tus datos de estudio, guardada en una carpeta de tu Pod. La mayoría de la gente solo necesita una.",
+    "empty": "Todavía no hay ninguna instancia registrada.",
+    "deleteConfirm": "¿Eliminar la instancia «{name}» con todos sus mazos y tarjetas? No se puede deshacer. Los archivos que otra aplicación haya puesto en su carpeta se conservan, igual que las publicaciones que se hicieron desde ella.",
+    "deleteLabel": "Eliminar la instancia {name}",
+    "delete": "Eliminar…",
+    "newInstance": "Instancia nueva…",
+    "attachSummary": "Vincular una instancia existente por URL",
+    "attachUrl": "URL del contenedor de la instancia",
+    "attach": "Vincular",
+    "deleted": "Se eliminó la instancia «{name}»."
+  },
+  "keptFolder": {
+    "text": "Solid Memo eliminó sus propios datos y conservó {link}: otra aplicación guardó archivos allí.",
+    "releases": "Solid Memo eliminó sus propios datos y conservó {link}: allí están las publicaciones hechas desde ella, que otras personas pueden estar leyendo. También se conserva todo lo que otra aplicación guardó allí.",
+    "folder": "la carpeta de tu Pod"
+  },
+  "instanceUpdate": {
+    "confirmRegion": "Iniciar la actualización",
+    "confirmHeading": "Cómo protege tus datos la actualización.",
+    "confirmBody": "Solid Memo actualiza los documentos de {name} uno a uno, cada uno donde está, en una sola escritura que tu Pod hace entera o no hace en absoluto y, si tu Pod lo comprueba, solo si nada más lo ha cambiado desde que Solid Memo lo leyó. Todos los documentos se pueden leer en todo momento, estén ya actualizados o no. Si uno no se puede actualizar ahora, por ejemplo porque mientras tanto cambió en otro sitio, se deja como está y puedes intentarlo de nuevo: entonces solo se actualiza lo que siga desactualizado. Todas las direcciones siguen siendo las mismas, y también las personas con quienes las compartiste.",
+    "start": "Iniciar la actualización",
+    "notNow": "Ahora no",
+    "progressRegion": "Actualizando",
+    "running": "{step}…",
+    "progressLabel": "Progreso de la actualización",
+    "keepOpen": "Mantén esta página abierta hasta que termine la actualización. Si se interrumpe, todos los documentos se podrán seguir leyendo, actualizados o no, y podrás actualizar el resto más tarde.",
+    "step": {
+      "read": "Buscando qué actualizar",
+      "write": "Actualizando tus documentos",
+      "register": "Haciendo que otras aplicaciones puedan localizar tus datos"
+    },
+    "count": {
+      "one": "{done} de {count} documento",
+      "many": "{done} de {count} de documentos",
+      "other": "{done} de {count} documentos"
+    },
+    "resultRegion": "Actualización sin terminar",
+    "notFinished": {
+      "one": "{count} documento no se pudo actualizar ahora:",
+      "many": "{count} de documentos no se pudieron actualizar ahora:",
+      "other": "{count} documentos no se pudieron actualizar ahora:"
+    },
+    "updatedAlso": {
+      "one": "Se actualizó {count} documento más.",
+      "many": "Se actualizaron otros {count} de documentos.",
+      "other": "Se actualizaron otros {count} documentos."
+    },
+    "document": {
+      "instance": "El registro de la instancia",
+      "preferences": "Tus preferencias",
+      "catalog": "El catálogo de los mazos",
+      "cards": "Las tarjetas de {deck}",
+      "reviews": "Los estados de repaso de {deck}"
+    },
+    "failedItem": "{document}: {reason}",
+    "retryHint": "Todos los documentos se pueden leer tal como están, actualizados o no. Si lo intentas de nuevo, solo se actualiza lo que siga desactualizado.",
+    "tryAgain": "Reintentar",
+    "close": "Cerrar",
+    "done": "Tus datos están actualizados."
+  },
+  "library": {
+    "heading": "Biblioteca de mazos",
+    "deckCount": {
+      "one": "{count} mazo",
+      "many": "{count} de mazos",
+      "other": "{count} mazos"
+    },
+    "shownCount": {
+      "one": "{shown} de {count} mazo",
+      "many": "{shown} de {count} de mazos",
+      "other": "{shown} de {count} mazos"
+    },
+    "intro": "Mazos ya preparados. Abre uno para ver de qué trata, o marca varios e impórtalos a esta instancia como copias tuyas.",
+    "empty": "La biblioteca aún no tiene mazos.",
+    "topics": "Temas",
+    "search": "Buscar",
+    "searchPlaceholder": "Nombre, descripción o palabra clave",
+    "noMatch": "Ningún mazo coincide.",
+    "alreadyImported": "Ya importado",
+    "preview": "Vista previa",
+    "previewDeck": "Previsualizar {deck}",
+    "importSelected": "Importar seleccionados",
+    "importDecks": {
+      "one": "Importar {count} mazo",
+      "many": "Importar {count} de mazos",
+      "other": "Importar {count} mazos"
+    },
+    "importing": "Importando…",
+    "loading": "Cargando la biblioteca de mazos…",
+    "course": "Curso",
+    "fromLink": "Añadir desde un enlace",
+    "fromLinkHint": "¿Alguien ha compartido un mazo o un curso que publicó en su Pod? {link}."
+  },
+  "libraryBrowser": {
+    "heading": "Tarjetas: {deck}",
+    "empty": "Este mazo no tiene tarjetas.",
+    "range": "Tarjetas {first}–{last} de {total}.",
+    "count": {
+      "one": "{count} tarjeta.",
+      "many": "{count} de tarjetas.",
+      "other": "{count} tarjetas."
+    },
+    "hint": "Abre una tarjeta para verla completa. Importa el mazo para estudiarlas o editarlas.",
+    "front": "Anverso",
+    "back": "Reverso",
+    "loading": "Cargando tarjetas…"
+  },
+  "libraryCard": {
+    "heading": "Tarjeta",
+    "from": "Del mazo {deck}. Importa el mazo para estudiar o editar sus tarjetas."
+  },
+  "libraryDeck": {
+    "browseCards": "Explorar las tarjetas",
+    "size": "Tamaño",
+    "studied": "Sentido de estudio",
+    "bothWays": "{direction} — cada tarjeta se pregunta en ambos sentidos; puedes cambiarlo después de importar",
+    "topics": {
+      "one": "Tema",
+      "many": "Temas",
+      "other": "Temas"
+    },
+    "keywords": "Palabras clave",
+    "release": "Publicación",
+    "version": "Versión {version}",
+    "versionReleased": "Versión {version}, publicada el {date}",
+    "releaseNotes": "Notas de la versión",
+    "authors": {
+      "one": "Autoría",
+      "many": "Autoría",
+      "other": "Autoría"
+    },
+    "licence": "Licencia",
+    "created": "Creado",
+    "updated": "Actualizado",
+    "sources": {
+      "one": "Fuente",
+      "many": "Fuentes",
+      "other": "Fuentes"
+    },
+    "import": "Importar este mazo",
+    "importing": "Importando…",
+    "preview": "Vista previa",
+    "alreadyImported": "Ya importado",
+    "courseChapters": "Un curso: breves fragmentos de teoría, cada uno comprobado con una pregunta. Cada pregunta que respondes se convierte en una tarjeta de tu mazo.",
+    "startCourse": "Empezar el curso",
+    "continueCourse": "Continuar el curso",
+    "starting": "Empezando…",
+    "host": "Publicado en",
+    "kind": "Tipo",
+    "kindCourse": "Curso",
+    "kindDeck": "Mazo"
+  },
+  "libraryPreview": {
+    "heading": "Vista previa: {deck}",
+    "back": "Volver a la biblioteca",
+    "empty": "Este mazo no tiene tarjetas.",
+    "hint": "Tarjetas al azar del mazo. No se registra nada: importa el mazo para estudiarlo.",
+    "nextCard": "Siguiente tarjeta",
+    "reveal": "Mostrar respuesta",
+    "loading": "Cargando tarjetas…"
+  },
+  "libraryUpgrade": {
+    "updated": "Actualizado a la versión {version} de la biblioteca."
+  },
+  "stepProgress": {
+    "done": "completado",
+    "current": "en curso",
+    "count": "{done} de {total}"
+  },
+  "deckUpgrade": {
+    "progressRegion": "Actualizando el mazo",
+    "running": "{step}…",
+    "progressLabel": "Progreso de la actualización",
+    "keepOpen": "Mantén esta página abierta hasta que termine la actualización. Si se interrumpe, el mazo se puede seguir estudiando tal como está, y al actualizarlo de nuevo se completa.",
+    "step": {
+      "read": "Leyendo el mazo y sus tarjetas",
+      "cards": "Escribiendo las tarjetas actualizadas",
+      "reviews": "Descartando los estados de repaso de las tarjetas eliminadas",
+      "entry": "Pasando el mazo a la nueva versión",
+      "refresh": "Mostrando el mazo actualizado"
+    },
+    "failedRegion": "La actualización falló",
+    "failedWhile": "La actualización falló en el paso «{step}»:",
+    "noChanges": "Tu mazo no ha cambiado.",
+    "partlyChanged": "Puede que parte de la nueva versión ya esté en tu mazo, que puedes estudiar tal como está. Actualízalo de nuevo para terminar.",
+    "tryAgain": "Reintentar",
+    "close": "Cerrar"
+  },
+  "libraryUpgradeNotice": {
+    "region": "Versión más reciente en la biblioteca",
+    "heading": "La biblioteca de mazos tiene una versión más reciente de este mazo.",
+    "body": "{deck} procede de la versión {from}; ya está disponible la versión {to}. La actualización {changes}.",
+    "adds": {
+      "one": "añade {count} tarjeta",
+      "many": "añade {count} de tarjetas",
+      "other": "añade {count} tarjetas"
+    },
+    "changes": {
+      "one": "cambia {count} tarjeta",
+      "many": "cambia {count} de tarjetas",
+      "other": "cambia {count} tarjetas"
+    },
+    "retires": {
+      "one": "retira {count} tarjeta",
+      "many": "retira {count} de tarjetas",
+      "other": "retira {count} tarjetas"
+    },
+    "bringsBack": {
+      "one": "recupera {count} tarjeta",
+      "many": "recupera {count} de tarjetas",
+      "other": "recupera {count} tarjetas"
+    },
+    "removes": {
+      "one": "elimina {count} tarjeta",
+      "many": "elimina {count} de tarjetas",
+      "other": "elimina {count} tarjetas"
+    },
+    "alreadyApplied": {
+      "one": "conserva {count} tarjeta que ya está como en la versión",
+      "many": "conserva {count} de tarjetas que ya están como en la versión",
+      "other": "conserva {count} tarjetas que ya están como en la versión"
+    },
+    "alreadyDescribed": "conserva el nombre, la descripción, las palabras clave, los temas o el sentido del mazo, que ya están como en la versión",
+    "studies": "hace que se estudie {direction}",
+    "describes": "actualiza el nombre, la descripción o las palabras clave del mazo",
+    "outline": "actualiza los capítulos, los pasos o la teoría del curso",
+    "unreached": "cambia preguntas a las que aún no has llegado",
+    "noStudiedChanges": "actualiza tarjetas que ya no estudias",
+    "list": "{items} y {last}",
+    "listSeparator": ", ",
+    "historyKept": "Tu historial de repasos se conserva.",
+    "historyKeptButRemoved": "Tu historial de repasos se conserva, salvo el de las tarjetas eliminadas.",
+    "historyKeptRetired": "Tu historial de repasos se conserva; una tarjeta retirada se conserva, pero ya no se estudia.",
+    "historyKeptButRemovedRetired": "Tu historial de repasos se conserva, salvo el de las tarjetas eliminadas; una tarjeta retirada se conserva, pero ya no se estudia.",
+    "kept": {
+      "one": "{count} tarjeta que has cambiado se deja como la tienes.",
+      "many": "{count} de tarjetas que has cambiado se dejan como las tienes.",
+      "other": "{count} tarjetas que has cambiado se dejan como las tienes."
+    },
+    "releaseNote": "Versión {version}: {notes}",
+    "update": "Actualizar a la versión {version}",
+    "updating": "Actualizando…"
+  },
+  "migrationNotice": {
+    "region": "Actualización de formato",
+    "heading": "Tus datos necesitan una actualización de formato.",
+    "stored": {
+      "one": "Se guarda en un formato anterior: {outdated}.",
+      "many": "Se guardan en un formato anterior: {outdated}.",
+      "other": "Se guardan en un formato anterior: {outdated}."
+    },
+    "writes": "Solid Memo ahora escribe {formats}.",
+    "howItWorks": "La actualización pone al día cada documento por separado, donde está, uno tras otro, cada uno en una sola escritura que tu Pod aplica entera o no aplica en absoluto. Todos los documentos se pueden leer en todo momento, estén actualizados o no; uno que no se pueda actualizar ahora se deja como está, y puedes intentarlo de nuevo. Todas las direcciones siguen siendo las mismas; los nombres de los mazos, el texto de las tarjetas, los sentidos de estudio, tu historial de repasos y tus ajustes se quedan como están, y un mazo sin descripción recibe una breve que puedes cambiar.",
+    "listAnd": "{rest} y {last}",
+    "instanceRecord": "el registro de la instancia",
+    "instanceCatalogue": "el catálogo de la instancia",
+    "yourPreferences": "tus preferencias",
+    "deckEntries": {
+      "one": "{count} entrada de mazo",
+      "many": "{count} de entradas de mazo",
+      "other": "{count} entradas de mazo"
+    },
+    "reviewStates": {
+      "one": "{count} estado de repaso",
+      "many": "{count} de estados de repaso",
+      "other": "{count} estados de repaso"
+    },
+    "inDecks": {
+      "one": "un mazo",
+      "many": "{count} de mazos",
+      "other": "{count} mazos"
+    },
+    "countIn": "{what} en {decks}",
+    "instanceFormat": "el formato de instancia {version}",
+    "catalogueFormat": "un catálogo de los mazos de cada instancia, que otras aplicaciones leen como un catálogo DCAT",
+    "preferencesFormat": "el formato de preferencias {version}, que guarda la escala de respuestas, el modo de desarrollador, qué hacer con los datos no válidos y la apariencia",
+    "deckFormat": "el formato de mazo {version}, que describe los mazos con los estándares DCAT y SKOS, da a cada mazo una descripción y permite que el título, la descripción y las palabras clave de un mazo estén en cualquier idioma que indiques",
+    "cardFormat": "el formato de tarjeta {version}, que añade imágenes a las tarjetas, permite que un mazo de la biblioteca retire una tarjeta que ya no usa y que el texto de una tarjeta esté en cualquier idioma que indiques",
+    "reviewFormat": "el formato de estado de repaso {version}, que guarda el estado de cada sentido de estudio y la instantánea para deshacer del día",
+    "itemInstanceRecord": "Registro de la instancia",
+    "itemCatalogue": "Catálogo de los mazos",
+    "itemPreferences": "Preferencias",
+    "deckEntry": "entrada de mazo",
+    "updating": "Actualizando…",
+    "updateButton": "Actualizar {what}",
+    "buttonDecks": {
+      "one": "{count} mazo",
+      "many": "{count} de mazos",
+      "other": "{count} mazos"
+    },
+    "buttonPreferences": "las preferencias",
+    "buttonInstanceRecord": "el registro de la instancia",
+    "buttonCatalogue": "el catálogo"
+  },
+  "onboardingFlow": {
+    "tryHeading": "Pruébalo ahora mismo",
+    "tryAsGuest": "Probar sin iniciar sesión",
+    "tryAsGuestHint": "No necesitas cuenta: estudia en modo invitado. Lo que aprendas se guarda en este navegador, y puedes trasladarlo a tu propio Pod cuando inicies sesión.",
+    "connectHeading": "Conecta tu Pod",
+    "providerHeading": "O elige tu proveedor",
+    "providerHint": "¿No tienes tu WebID a mano? Elige dónde está tu Pod e inicia sesión allí — tu WebID vuelve con el inicio de sesión.",
+    "setUpHeading": "Configura tu Pod de Solid",
+    "intro": "Tus datos se guardan en un Pod de Solid que tú controlas. Crea uno con un proveedor de Pods o conecta un Pod que ya tengas.",
+    "createPodLabel": "Crear un Pod con {provider} (se abre en una pestaña nueva)",
+    "createPod": "Crear un Pod ↗",
+    "createPodHint": "El Pod se crea en el sitio del proveedor, en una pestaña nueva. Cuando termines, vuelve aquí y conéctalo.",
+    "havePod": "Ya tengo un Pod"
+  },
+  "guest": {
+    "instanceName": "Mi espacio de estudio"
+  },
+  "guestOffer": {
+    "region": "Tus datos de estudio en modo invitado",
+    "heading": "Has estudiado en modo invitado en este navegador.",
+    "body": {
+      "one": "{name} tiene {count} mazo. Trasládalo a tu Pod para conservarlo o descártalo.",
+      "many": "{name} tiene {count} de mazos. Trasládalo a tu Pod para conservarlo o descártalo.",
+      "other": "{name} tiene {count} mazos. Trasládalo a tu Pod para conservarlo o descártalo."
+    },
+    "move": "Trasladar a mi Pod",
+    "discard": "Descartar",
+    "notNow": "Ahora no",
+    "discardConfirm": "¿Eliminar todo lo que has estudiado en modo invitado? No se puede deshacer.",
+    "discardYes": "Eliminar",
+    "cancel": "Cancelar",
+    "formHeading": "Traslada tus datos de estudio a tu Pod",
+    "explain": "Solid Memo copia tus datos de estudio en tu Pod y comprueba la copia. Solo cuando todas las comprobaciones salen bien, se registra como tuya y se elimina de este navegador. Si algo falla, la copia se elimina y tus datos de estudio se quedan aquí.",
+    "storage": "Almacenamiento del Pod",
+    "noStorage": "Tu perfil no indica ningún almacenamiento de Pod. Indica dónde guardar tus datos de estudio.",
+    "location": "Ubicación en tu Pod",
+    "start": "Trasladar",
+    "back": "Volver",
+    "progressRegion": "Trasladando tus datos de estudio",
+    "running": "{step}…",
+    "progressLabel": "Progreso del traslado",
+    "keepOpen": "Mantén esta página abierta hasta que termine el traslado.",
+    "step": {
+      "stage": "Preparando una carpeta en tu Pod",
+      "copy": "Copiando tus datos de estudio",
+      "adopt": "Haciéndolos tuyos",
+      "validate": "Comprobando la copia",
+      "verify": "Comprobando que nada haya cambiado mientras tanto",
+      "register": "Registrándolos en tu Pod",
+      "tidy": "Eliminándolos de este navegador"
+    },
+    "failedRegion": "El traslado falló",
+    "failedWhile": "El traslado de tus datos de estudio falló en el paso «{step}»:",
+    "stillHere": "Tus datos de estudio siguen en este navegador.",
+    "copyRemoved": "La copia parcial se eliminó de tu Pod.",
+    "copyLeft": "No se pudo eliminar la copia parcial de tu Pod; está en {url}.",
+    "close": "Cerrar",
+    "moved": "Tus datos de estudio ya están en tu Pod.",
+    "movedNotTidied": "Tus datos de estudio ya están en tu Pod. No se pudieron eliminar de este navegador: descártalos allí cuando ya no los necesites.",
+    "findingInstances": "Buscando tus instancias…",
+    "mergeExplain": "Cada mazo que has estudiado se añade a una de tus instancias como un mazo nuevo, con sus tarjetas, tu progreso, tus respuestas y tus grupos de mazos. La instancia conserva sus propias preferencias: las que elegiste en modo invitado no se trasladan. Cuando todos los mazos estén dentro, tus datos de estudio se eliminarán de este navegador.",
+    "addTo": "Añadir a",
+    "addingTo": "Tus mazos se añaden a {name}.",
+    "readingStudy": "Leyendo tus datos de estudio…",
+    "decks": "Mazos que añadir",
+    "noDecks": "Tus datos de estudio no tienen mazos que añadir.",
+    "sameRelease": "{name} ya tiene este mazo de la misma versión de la biblioteca. Se añade al lado como un mazo aparte, con su propio progreso, sin combinarse con el otro: desmárcalo para dejarlo fuera.",
+    "leftOut": "Un mazo que dejes fuera no se conserva: se va con el resto de tus datos de estudio en este navegador.",
+    "draftsCopied": {
+      "one": "Has escrito {count} borrador en el Studio en modo invitado. También se copia en {name}, con su propio nombre o, si {name} ya tiene un borrador con ese nombre y esa versión, con el siguiente libre («-2», «-3»…).",
+      "many": "Has escrito {count} de borradores en el Studio en modo invitado. También se copian en {name}, cada uno con su propio nombre o, si {name} ya tiene un borrador con ese nombre y esa versión, con el siguiente libre («-2», «-3»…).",
+      "other": "Has escrito {count} borradores en el Studio en modo invitado. También se copian en {name}, cada uno con su propio nombre o, si {name} ya tiene un borrador con ese nombre y esa versión, con el siguiente libre («-2», «-3»…)."
+    },
+    "chooseDeck": "Elige al menos un mazo que añadir, o descarta tus datos de estudio.",
+    "addStart": "Añadir a {name}",
+    "mergeProgressRegion": "Añadiendo tus datos de estudio",
+    "mergeProgressLabel": "Progreso al añadir tus datos de estudio",
+    "mergeKeepOpen": "Mantén esta página abierta hasta que se hayan añadido tus datos de estudio.",
+    "mergeStep": {
+      "read": "Leyendo y comprobando tus datos de estudio",
+      "decks": "Añadiendo tus mazos",
+      "arrange": "Agrupando tus mazos",
+      "drafts": "Copiando tus borradores",
+      "verify": "Comprobando que nada haya cambiado mientras tanto",
+      "tidy": "Eliminándolos de este navegador"
+    },
+    "mergeFailedRegion": "No se pudo añadir",
+    "mergeFailedWhile": "No se pudieron añadir tus datos de estudio en el paso «{step}»:",
+    "keptDecks": {
+      "one": "Este mazo ya está completo en {name}:",
+      "many": "Estos mazos ya están completos en {name}:",
+      "other": "Estos mazos ya están completos en {name}:"
+    },
+    "keptDrafts": {
+      "one": "Este borrador ya está completo en {name}:",
+      "many": "Estos borradores ya están completos en {name}:",
+      "other": "Estos borradores ya están completos en {name}:"
+    },
+    "keptDraftName": "(«{name}», versión {version})",
+    "nothingAdded": "No se añadió nada a {name}.",
+    "stillHereRetry": "Tus datos de estudio siguen en este navegador. Si lo intentas de nuevo, se añadirá lo que aún no esté en {name}.",
+    "added": "Tus datos de estudio ya están en {name}.",
+    "addedNotTidied": "Tus datos de estudio ya están en {name}. No se pudieron eliminar de este navegador: descártalos allí cuando ya no los necesites."
+  },
+  "interruptedMove": {
+    "region": "Traslado interrumpido",
+    "text": "El traslado de {name} a tu Pod se interrumpió antes de terminar; tus datos de estudio siguen aquí como estaban. La copia parcial sigue en {url}.",
+    "removing": "Eliminando…",
+    "remove": "Eliminarla"
+  },
+  "pager": {
+    "label": "Páginas de tarjetas",
+    "previous": "Anterior",
+    "page": "Página {page} de {pageCount}",
+    "next": "Siguiente"
+  },
+  "podConnection": {
+    "discoveringHeading": "Buscando tu Pod…",
+    "discoveringLabel": "Leyendo tu perfil WebID para saber dónde están tus datos.",
+    "errorHeading": "No se pudo encontrar tu Pod",
+    "tryAgain": "Reintentar",
+    "logOut": "Cerrar sesión",
+    "noPodHeading": "No se encontró ningún Pod",
+    "noPodWarning": "Has iniciado sesión como {name}, pero tu perfil WebID no enlaza con ningún almacenamiento de Pod, así que Solid Memo no sabe dónde guardar tus datos.",
+    "noPodHint": "Tu proveedor de Pods puede añadir el enlace al almacenamiento en tu perfil. También puedes continuar e indicar tú un almacenamiento a Solid Memo.",
+    "continueAnyway": "Continuar de todos modos",
+    "connectedHeading": "Tu Pod está conectado.",
+    "identityProvider": "Proveedor de identidad",
+    "continue": "Continuar"
+  },
+  "preferences": {
+    "language": {
+      "legend": "Idioma",
+      "hint": "Se aplica al instante y se guarda en este dispositivo, no en tu Pod."
+    },
+    "theme": {
+      "legend": "Apariencia",
+      "hint": "Se aplica al instante. Cuando guardes estas preferencias, se conserva en tu Pod, así que se ve igual en todos los dispositivos donde inicies sesión."
+    },
+    "heading": "Preferencias de estudio",
+    "loading": "Cargando preferencias…",
+    "newCardsPerDay": "Tarjetas nuevas por día",
+    "maxReviewsPerDay": "Máx. de repasos por día",
+    "dayBoundaryHour": "El día empieza a las (hora)",
+    "dayBoundaryHint": "Una hora de 0 a 23 en formato de 24 horas: a esa hora empieza un nuevo día de estudio, con tarjetas nuevas y repasos.",
+    "answerScale": {
+      "legend": "Botones de respuesta",
+      "sm2": {
+        "label": "Escala de 0 a 5",
+        "hint": "Todas las calificaciones de SuperMemo-2 (SM-2), el método que programa tus repasos: de 0 (no recuerdas nada) a 5 (fácil)."
+      },
+      "minimal": {
+        "label": "Otra vez · Difícil · Bien · Fácil",
+        "hint": "Cuatro botones. «Otra vez» repite la tarjeta más adelante en la sesión."
+      }
+    },
+    "policy": {
+      "legend": "Cuando los datos no se ajustan",
+      "blockInstance": {
+        "label": "Bloquear la instancia",
+        "hint": "Cualquier dato no válido impide que la aplicación use la instancia hasta que se repare."
+      },
+      "blockSubject": {
+        "label": "Apartar los datos no válidos",
+        "hint": "Los mazos con datos no válidos quedan apartados hasta que se reparen; todo lo demás sigue funcionando. Es la opción predeterminada."
+      },
+      "warnOnly": {
+        "label": "Solo avisar",
+        "hint": "Se informa de los datos no válidos, y la aplicación sigue funcionando con ellos."
+      }
+    },
+    "developer": {
+      "legend": "Ajustes de desarrollador",
+      "mode": "Modo de desarrollador",
+      "hint": "Muestra las herramientas de desarrollador: tu documento WebID sin procesar debajo de la aplicación y una comprobación de los documentos de esta instancia con las formas de Solid Memo."
+    },
+    "save": "Guardar"
+  },
+  "findable": {
+    "heading": "Localizable por otras aplicaciones",
+    "intro": "Otras aplicaciones Solid encuentran tus datos a través de los índices de tipos de tu Pod: un registro por cada tipo de datos, que dice dónde están. Solid Memo los añade cuando crea una instancia o actualiza su formato, y aquí cuando lo pides. Nunca vuelve a añadir por su cuenta un registro que hayas quitado tú o que haya quitado otra aplicación.",
+    "loading": "Leyendo tus índices de tipos…",
+    "class": {
+      "instance": "Esta instancia (la carpeta de Solid Memo)",
+      "catalog": "Su catálogo de mazos",
+      "deck": "Mazos",
+      "card": "Tarjetas",
+      "reviewState": "Estados de repaso",
+      "answer": "Respuestas",
+      "draft": "Borradores de publicaciones"
+    },
+    "index": {
+      "private": "índice de tipos privado",
+      "public": "índice de tipos público"
+    },
+    "registered": "en tu {index}",
+    "missing": "falta en tu {index}",
+    "noPrivateIndex": "Los estados de repaso y las respuestas dicen qué has estudiado y lo bien que lo has hecho, así que solo se registran en tu índice de tipos privado. No tienes ninguno, así que no están registrados.",
+    "unreadable": "No se pudo leer tu {index}, así que lo que registra no se muestra aquí, y no se le añade nada.",
+    "add": "Registrar lo que falta",
+    "adding": "Registrando…",
+    "complete": "Todo está registrado."
+  },
+  "registrationTargetChooser": {
+    "legend": "Registrar en",
+    "intro": "Un índice de tipos es una lista en tu perfil que indica a las aplicaciones dónde están tus datos. Solo tú puedes ver uno privado.",
+    "noPrivateIndex": "Tu perfil aún no tiene un índice de tipos privado. Solid Memo puede crear uno (recomendado) o registrar en tu índice de tipos público — los registros públicos son visibles para cualquiera que pueda leer tu perfil.",
+    "private": "Índice de tipos privado",
+    "privateCreated": "Índice de tipos privado (se creará)",
+    "public": "Índice de tipos público",
+    "publicCreated": "Índice de tipos público (se creará)"
+  },
+  "repair": {
+    "removeConfirm": "¿Eliminar <{url}> de tu Pod? No se puede deshacer.",
+    "canRepair": "Solid Memo puede reparar estos:",
+    "repairing": "Reparando…",
+    "repairButton": {
+      "one": "Reparar {count} problema",
+      "many": "Reparar {count} de problemas",
+      "other": "Reparar {count} problemas"
+    },
+    "needDecision": "Estos necesitan que decidas: corrígelos en el documento o elimínalos.",
+    "problem": "{subject} en {document}: {messages}",
+    "removeButton": "Eliminar",
+    "fullReport": "El informe completo",
+    "action": {
+      "describeDeck": "Dar al mazo la descripción predeterminada",
+      "directDeck": "Estudiar el mazo de anverso a reverso",
+      "dropSnapshot": "Descartar la instantánea para deshacer que el repaso dejó a medio escribir",
+      "recomputeDue": "Volver a calcular el día del próximo repaso",
+      "nameAgent": "Dar a la persona u organización el nombre de su dirección",
+      "dropDanglingMembers": "Quitar los enlaces a mazos y grupos que ya no existen",
+      "removeSubject": "Eliminarlo"
+    }
+  },
+  "retiredCards": {
+    "showToggle": "Mostrar tarjetas retiradas",
+    "toggleHint": {
+      "one": "{count} tarjeta está retirada: se conserva, con su historial de repasos, pero ya no se estudia.",
+      "many": "{count} de tarjetas están retiradas: se conservan, con su historial de repasos, pero ya no se estudian.",
+      "other": "{count} tarjetas están retiradas: se conservan, con su historial de repasos, pero ya no se estudian."
+    },
+    "tag": "Retirada",
+    "notice": "Esta tarjeta está retirada: el mazo de la biblioteca ya no la usa. Se conserva, con su historial de repasos, pero ya no se estudia."
+  },
+  "storagePicker": {
+    "heading": "Elegir un almacenamiento",
+    "intro": "Un almacenamiento es un lugar de tu Pod donde Solid Memo puede guardar su carpeta. Normalmente hay solo uno: el propio Pod.",
+    "empty": "No se encontró ningún almacenamiento para tu WebID. Escribe abajo la URL raíz de tu Pod.",
+    "source": {
+      "profile": "de tu perfil",
+      "linkHeader": "encontrado a través del servidor de tu Pod",
+      "manual": "escrito a mano"
+    },
+    "url": "URL del almacenamiento",
+    "use": "Usar este almacenamiento"
+  },
+  "study": {
+    "heading": "Estudiar: {deck}",
+    "endSession": "Terminar sesión",
+    "nothingToday": "Nada que estudiar hoy — ¡vuelve mañana!",
+    "finished": "Sesión terminada — has repasado todas las tarjetas.",
+    "position": "Tarjeta {position} de {total}",
+    "putBack": "Volverás a ver la última tarjeta más adelante en esta sesión.",
+    "reveal": "Mostrar respuesta",
+    "gradePrompt": "¿Qué tal lo recordabas?",
+    "keys": {
+      "reveal": "Pulsa la barra espaciadora para mostrar la respuesta.",
+      "grade": "Pulsa de {first} a {last} para responder."
+    },
+    "preparing": "Preparando tu sesión de estudio…",
+    "quality": {
+      "blackout": "0 — En blanco",
+      "wrong": "1 — Mal",
+      "almost": "2 — Casi",
+      "hard": "3 — Difícil",
+      "good": "4 — Bien",
+      "easy": "5 — Fácil"
+    },
+    "minimal": {
+      "again": "Otra vez",
+      "hard": "Difícil",
+      "good": "Bien",
+      "easy": "Fácil"
+    }
+  },
+  "validation": {
+    "heading": "Validación de {name}",
+    "validating": "Validando…",
+    "validateAgain": "Validar de nuevo",
+    "allConform": {
+      "one": "{count} documento comprobado: se ajusta a su forma.",
+      "many": "Los {count} de documentos se ajustan a sus formas.",
+      "other": "Los {count} documentos se ajustan a sus formas."
+    },
+    "violationsIn": "{violations} en {documents}.",
+    "violationCount": {
+      "one": "{count} infracción",
+      "many": "{count} de infracciones",
+      "other": "{count} infracciones"
+    },
+    "documentCount": {
+      "one": "{count} documento",
+      "many": "{count} de documentos",
+      "other": "{count} documentos"
+    },
+    "notCreated": "Aún no creado.",
+    "noSubjects": "Sin sujetos.",
+    "untyped": "{name} — no es un sujeto de Solid Memo.",
+    "newer": "{name} — el formato {shape} {version} es más reciente de lo que conoce esta aplicación (hasta {latest}); se omite.",
+    "profiled": "{name} — no es un sujeto de Solid Memo; DCAT-AP indica:",
+    "foreign": "{name} — escrito por otra aplicación; Solid Memo solo avisa sobre él:",
+    "conforms": "{name} — se ajusta al formato {shape} {version}.",
+    "checked": "{name} — formato {shape} {version}:",
+    "severity": "Gravedad",
+    "property": "Propiedad",
+    "message": "Mensaje",
+    "value": "Valor",
+    "theSubject": "(el sujeto)",
+    "severityLevel": {
+      "violation": "infracción",
+      "warning": "advertencia",
+      "info": "información"
+    },
+    "constraint": {
+      "Datatype": "El valor tiene un tipo de datos incorrecto.",
+      "MinCount": "Falta un valor.",
+      "MaxCount": "Hay demasiados valores.",
+      "Class": "El valor no es de la clase correcta.",
+      "NodeKind": "El valor es de un tipo incorrecto (un IRI o un literal).",
+      "In": "El valor no es uno de los permitidos.",
+      "HasValue": "Falta un valor obligatorio.",
+      "Pattern": "El valor no tiene la forma correcta.",
+      "Or": "No se cumple ninguna de las alternativas permitidas.",
+      "Xone": "Debe cumplirse exactamente una de las alternativas.",
+      "Not": "El valor es algo que no debe ser.",
+      "Node": "El valor no se ajusta a su forma.",
+      "UniqueLang": "El mismo idioma se usa en más de un valor.",
+      "LanguageIn": "El texto está en un idioma no permitido aquí.",
+      "QualifiedMinCount": "Hay muy pocos valores del tipo requerido.",
+      "QualifiedMaxCount": "Hay demasiados valores de cierto tipo.",
+      "MinInclusive": "El valor es demasiado pequeño.",
+      "MaxInclusive": "El valor es demasiado grande.",
+      "MinLength": "El texto es demasiado corto.",
+      "MaxLength": "El texto es demasiado largo.",
+      "Closed": "La propiedad no está permitida aquí."
+    }
+  },
+  "webIdDocument": {
+    "summary": "Documento WebID",
+    "loading": "Cargando el perfil…"
+  },
+  "webIdForm": {
+    "help": "Tu WebID es la dirección web que te identifica y que te da tu proveedor de Pods. Iniciarás sesión en la propia página de tu proveedor — Solid Memo nunca ve tu contraseña.",
+    "redirecting": "Redirigiendo…",
+    "logIn": "Iniciar sesión con Solid",
+    "back": "Volver"
+  },
+  "workspace": {
+    "loadingInstances": "Cargando tus instancias de Solid Memo…",
+    "loadingDeck": "Cargando el mazo…",
+    "loadingCard": "Cargando la tarjeta…",
+    "loadingLibrary": "Cargando la biblioteca de mazos…",
+    "discoveringStorages": "Buscando almacenamientos…",
+    "loadingPreferences": "Cargando las preferencias…",
+    "developerModeOff": "El modo de desarrollador está desactivado. Actívalo en {preferences} para comprobar esta instancia con las formas de Solid Memo.",
+    "preferencesLink": "Preferencias",
+    "checkingData": "Comprobando los datos de esta instancia…",
+    "deckSetAside": "Este mazo está apartado: sus datos no se ajustan a su forma. Repáralo arriba para volver a usarlo.",
+    "checkFailed": "No se pudieron comprobar los datos de esta instancia: {error}",
+    "developerTools": "Herramientas de desarrollador",
+    "validateInstance": "Validar esta instancia",
+    "loadingCourse": "Cargando el curso…"
+  },
+  "errors": {
+    "cardFrontImageNotWebUrl": "La imagen del anverso debe ser una URL http(s).",
+    "cardBackImageNotWebUrl": "La imagen del reverso debe ser una URL http(s).",
+    "cardFrontEmpty": "El anverso necesita texto o una imagen.",
+    "cardBackEmpty": "El reverso necesita texto o una imagen.",
+    "deckNeedsDescription": "Un mazo necesita una descripción.",
+    "textNeedsLanguage": "Elige el idioma para {field}.",
+    "textLanguageInvalid": "«{tag}» no es un código de idioma.",
+    "textLanguageTaken": "Ya hay un texto en {language}. Edítalo o quítalo primero.",
+    "textMixesUnstated": "Este texto no indica en qué idioma está, así que no puede tener traducciones. Elige primero su idioma.",
+    "distractorEmpty": "Una opción incorrecta necesita texto.",
+    "distractorPublished": "Esta opción incorrecta está en la publicación de la que viene el mazo, así que no se puede eliminar. Retírala en su lugar.",
+    "dailyLimitInvalid": "Un límite diario es un número entero, 0 o mayor.",
+    "dueDayInvalid": "«{day}» no es un día. Elige el día en que toca repasar la tarjeta.",
+    "cardTransferSameDeck": "Las tarjetas ya están en este mazo. Elige otro mazo.",
+    "licenseUnknown": "Elige una de las licencias que se ofrecen.",
+    "authorEmpty": "Cada persona autora necesita un nombre.",
+    "authorTwice": "{author} aparece dos veces. Nombra a cada persona autora una sola vez.",
+    "instanceNameEmpty": "Una instancia necesita un nombre.",
+    "catalogNeedsDescription": "El catálogo necesita una descripción.",
+    "noCatalogToUpdate": "Esta instancia aún no tiene catálogo. Actualiza primero la instancia en Solid Memo.",
+    "noMetaToUpdate": "Esta instancia no tiene ninguna descripción que actualizar. Vuelve a cargar la página e inténtalo de nuevo.",
+    "webIdEmpty": "Escribe tu WebID.",
+    "webIdInvalidUrl": "Esa URL no es válida. Un WebID tiene este aspecto: https://you.example/profile/card#me.",
+    "webIdNotHttps": "Un WebID debe empezar por https://.",
+    "webIdWithCredentials": "Un WebID no debe contener un nombre de usuario ni una contraseña.",
+    "providerNotHttps": "Un proveedor de identidad debe ser una URL https://.",
+    "webIdNoSubject": "Tu perfil WebID no te describe. Comprueba que has escrito tu WebID exactamente, con la parte después de #, o elige tu proveedor.",
+    "webIdNoIssuer": "Tu perfil WebID no indica dónde inicias sesión. Elige tu proveedor en lugar de escribir tu WebID.",
+    "webIdIssuerNotHttps": "Tu perfil WebID indica un lugar para iniciar sesión que no es una dirección https:// segura. Elige tu proveedor en lugar de escribir tu WebID.",
+    "profileNoSubject": "Tu perfil no te describe, así que Solid Memo no puede anotar en él dónde están tus datos. Revisa tu perfil con tu proveedor de Pods e inténtalo de nuevo.",
+    "privateTypeIndexNotLinked": "Solid Memo no pudo enlazar desde tu perfil su lista privada de tus datos. Comprueba que Solid Memo puede editar tu perfil e inténtalo de nuevo.",
+    "publicTypeIndexNotLinked": "Solid Memo no pudo enlazar desde tu perfil su lista pública de tus datos. Comprueba que Solid Memo puede editar tu perfil e inténtalo de nuevo.",
+    "storageInaccessible": "Solid Memo no puede abrir ese almacenamiento. Comprueba la dirección y que has iniciado sesión con la cuenta a la que pertenece.",
+    "notAnInstanceNoMeta": "Esa dirección no es una instancia de Solid Memo. Comprueba que has pegado la dirección de la carpeta de una instancia, terminada en /.",
+    "notAnInstanceNoSubject": "Esa carpeta no es una instancia de Solid Memo: no se puede leer su descripción. Comprueba que has pegado la dirección correcta.",
+    "movedCopyInvalid": {
+      "one": "La copia de tu Pod no está en el formato que espera Solid Memo ({count} problema), así que tus datos de estudio se quedan como estaban. Inténtalo de nuevo más tarde.",
+      "many": "La copia de tu Pod no está en el formato que espera Solid Memo ({count} de problemas), así que tus datos de estudio se quedan como estaban. Inténtalo de nuevo más tarde.",
+      "other": "La copia de tu Pod no está en el formato que espera Solid Memo ({count} problemas), así que tus datos de estudio se quedan como estaban. Inténtalo de nuevo más tarde."
+    },
+    "guestUrlsLeft": "La copia de tu Pod todavía apunta a los datos de estudio en modo invitado, así que tus datos de estudio se quedan como estaban. Inténtalo de nuevo.",
+    "guestStudyInvalid": {
+      "one": "Parte de tus datos de estudio en este navegador no está en el formato que espera Solid Memo ({count} problema), así que no se añadió nada a tu Pod. Siguen aquí.",
+      "many": "Parte de tus datos de estudio en este navegador no está en el formato que espera Solid Memo ({count} de problemas), así que no se añadió nada a tu Pod. Siguen aquí.",
+      "other": "Parte de tus datos de estudio en este navegador no está en el formato que espera Solid Memo ({count} problemas), así que no se añadió nada a tu Pod. Siguen aquí."
+    },
+    "guestStudyTooNew": "Una versión más reciente de Solid Memo guardó parte de tus datos de estudio en este navegador, así que esta versión no la añade a tu Pod. Vuelve a cargar la página para obtener la última versión.",
+    "guestStudyChanged": "Tus datos de estudio en este navegador cambiaron mientras se añadían, quizá en otra pestaña, así que se conservan aquí. Inténtalo de nuevo para añadir lo que cambió.",
+    "instanceChangedDuringCopy": "Tus datos de estudio en este navegador cambiaron mientras se copiaban, quizá en otra pestaña, así que se conservan aquí. Inténtalo de nuevo.",
+    "resourceChangedDuringCopy": "Parte de tus datos de estudio en este navegador cambió mientras se copiaba, quizá en otra pestaña, así que se conservan aquí. Inténtalo de nuevo.",
+    "guestStudyBeingMoved": "Solid Memo está trasladando a tu Pod tus datos de estudio de este navegador y no guarda nada en ellos hasta que termine. Espera a que acabe e inténtalo de nuevo.",
+    "deckChangedSinceOffer": "El mazo cambió después de que se ofreciera la actualización, quizá en otra pestaña o aplicación, así que no se cambió nada. Vuelve a mirar la oferta.",
+    "deckChangedDuringUpgrade": "El mazo cambió mientras se actualizaba, quizá en otra pestaña o aplicación. Inténtalo de nuevo.",
+    "changedElsewhere": "Esto se cambió en otro lugar, quizá en otra pestaña o aplicación, después de que Solid Memo lo leyera, así que no se guardó nada. Vuelve a cargar la página e inténtalo de nuevo.",
+    "deckTreeChanged": "Tus mazos se reordenaron en otro lugar, quizá en otra pestaña o aplicación, así que este cambio no se hizo. La lista ya los muestra como están.",
+    "writtenByNewerApp": "Una versión más reciente de Solid Memo ha actualizado estos datos, así que esta versión no los sobrescribe. Vuelve a cargar la página para obtener la última versión.",
+    "deckTreeTooNew": "Una versión más reciente de Solid Memo ordenó estos mazos, así que esta no puede reordenarlos. Vuelve a cargar la página para obtener la última versión.",
+    "createdElsewhere": "Esto se creó en otro lugar, quizá en otra pestaña o aplicación, justo cuando Solid Memo iba a crearlo, así que no se guardó nada. Vuelve a cargar la página e inténtalo de nuevo.",
+    "alreadyExists": "Ya hay algo guardado en ese lugar de tu Pod. Elige otro lugar.",
+    "cannotCheck": "Solid Memo no pudo comprobar tu Pod. Comprueba tu conexión e inténtalo de nuevo.",
+    "dataNotConforming": "Solid Memo no guardó esto: no está en el formato que espera Solid Memo. No se cambió nada. Vuelve a cargar la página e inténtalo de nuevo.",
+    "deckGone": "El mazo «{deck}» ya no existe. Quizá se eliminó en otra pestaña o aplicación.",
+    "cardsDocumentGone": "Ya no se encuentran las tarjetas de «{deck}». Vuelve a cargar la página e inténtalo de nuevo.",
+    "cardGone": "Esa tarjeta ya no existe. Quizá se eliminó en otra pestaña o aplicación. Vuelve a cargar la página.",
+    "notADeck": "Eso no es un mazo de Solid Memo, así que no se puede añadir. Elige otro mazo.",
+    "libraryDeckTooNew": "Este mazo está en un formato más reciente del que puede leer esta versión de Solid Memo. Vuelve a cargar la página para obtener la última versión.",
+    "libraryCardTooNew": "Una tarjeta de este mazo está en un formato más reciente del que puede leer esta versión de Solid Memo. Vuelve a cargar la página para obtener la última versión.",
+    "deckFileUnreadable": "Solid Memo no puede leer ese archivo. Elige un archivo Turtle o JSON-LD exportado desde Solid Memo.",
+    "notADeckFile": "Ese archivo no contiene un único mazo de Solid Memo. Elige un archivo exportado desde Solid Memo.",
+    "deckFileTooNew": "Ese archivo lo escribió una versión más reciente de Solid Memo, así que esta no puede importarlo. Vuelve a cargar la página para obtener la última versión.",
+    "noGuestPod": "No hay datos de estudio en modo invitado en este dispositivo.",
+    "guestPodStartFailed": "No se pudieron abrir los datos de estudio en modo invitado de este dispositivo. Vuelve a cargar la página e inténtalo de nuevo.",
+    "guestStorageAborted": "Este navegador se negó a guardar un cambio en los datos de estudio en modo invitado. Comprueba que tiene espacio para guardar datos e inténtalo de nuevo.",
+    "addFailed": "Solid Memo no pudo guardar en tu Pod. Comprueba tu conexión e inténtalo de nuevo.",
+    "draftGone": "Ese borrador ya no existe. Quizá se eliminó en otra pestaña o aplicación.",
+    "releaseUnreadable": "Solid Memo no puede leer ninguna publicación en {url}. Comprueba la dirección y que la publicación esté disponible allí.",
+    "notAReleaseFile": "Ese archivo no contiene una única publicación de un mazo o un curso. Elige una publicación guardada como Turtle o JSON-LD.",
+    "releaseIdUnsupported": "Esta publicación llama «#{id}» a una de sus partes, algo que un borrador no puede conservar: el ID de un borrador lleva letras de la A a la Z, dígitos, «.», «_» y «-», y empieza por una letra o un dígito. No se puede convertir en borrador.",
+    "releaseTaken": "Ya hay una publicación en {url}, y una publicación nunca se sobrescribe. Publica la siguiente versión o elige otra carpeta.",
+    "releaseHasErrors": {
+      "one": "La comprobación de la publicación encuentra {count} error. Corrígelo antes de publicarla.",
+      "many": "La comprobación de la publicación encuentra {count} de errores. Corrígelos antes de publicarla.",
+      "other": "La comprobación de la publicación encuentra {count} errores. Corrígelos antes de publicarla."
+    },
+    "draftReleased": "Este borrador ya se publicó, en {url}, y ya no cambia. Empieza su siguiente versión.",
+    "guestCannotPublish": "En modo invitado, tus datos de estudio se guardan solo en este navegador, donde nadie más puede leer una publicación. Traslada tus datos de estudio a un Pod para publicarla, o descarga la publicación como archivo.",
+    "publicAccessRefused": "Tu Pod no dejó que Solid Memo hiciera pública la publicación en {url}, así que solo tú puedes leerla. Inténtalo de nuevo, o hazla legible para todo el mundo con las herramientas de tu proveedor de Pods.",
+    "releaseUrlInvalid": "Esa no es la dirección de una publicación. Pega la dirección completa, que empieza por https:// o http://.",
+    "releaseNotConforming": {
+      "one": "La publicación de {host} incumple las reglas de Solid Memo en {count} sitio, así que no se puede añadir. Pide a quien la creó que la revise.",
+      "many": "La publicación de {host} incumple las reglas de Solid Memo en {count} de sitios, así que no se puede añadir. Pide a quien la creó que la revise.",
+      "other": "La publicación de {host} incumple las reglas de Solid Memo en {count} sitios, así que no se puede añadir. Pide a quien la creó que la revise."
+    }
+  },
+  "statistics": {
+    "heading": "Estadísticas",
+    "loading": "Cargando estadísticas…",
+    "empty": "Aún no hay respuestas: las estadísticas empiezan con tu próxima sesión de estudio.",
+    "answers": "Respuestas",
+    "studyDays": "Días de estudio",
+    "cards": "Tarjetas estudiadas",
+    "currentStreak": "Racha actual",
+    "longestStreak": "Racha más larga",
+    "dayCount": {
+      "one": "{count} día",
+      "many": "{count} de días",
+      "other": "{count} días"
+    },
+    "remembered": "Recordadas en los repasos",
+    "young": "Tarjetas jóvenes (intervalo de menos de 21 días)",
+    "mature": "Tarjetas maduras (21 días o más)",
+    "ofReviews": {
+      "one": "de {count} repaso",
+      "many": "de {count} de repasos",
+      "other": "de {count} repasos"
+    },
+    "noReviews": "Aún no hay repasos",
+    "activity": "Actividad de las últimas {weeks} semanas",
+    "activityLabel": "Respuestas por día en las últimas {weeks} semanas: cuanto más intenso el verde, más respuestas.",
+    "lastDays": "Respuestas de los últimos {count} días",
+    "lastDaysLabel": "Respuestas de cada uno de los últimos {count} días.",
+    "less": "Menos",
+    "more": "Más",
+    "pointAtDay": "Señala un día para ver qué contiene, o abre la tabla de abajo.",
+    "dayDetail": "{date}: {answers}, nuevas: {introduced}, olvidadas: {forgotten}.",
+    "dayNothing": "{date}: no se estudió nada.",
+    "answerCount": {
+      "one": "{count} respuesta",
+      "many": "{count} de respuestas",
+      "other": "{count} respuestas"
+    },
+    "showTable": "Mostrar como tabla",
+    "day": "Día",
+    "introduced": "Nuevas",
+    "forgotten": "Olvidadas",
+    "byDeck": "Por mazo",
+    "deck": "Mazo",
+    "lastStudied": "Último estudio",
+    "removedDeck": "Un mazo eliminado",
+    "pointAtMonth": "Señala un mes para ver lo bien que se recordó, o abre la tabla de abajo.",
+    "pointAtDayAhead": "Señala un día para ver qué toca repasar, o abre la tabla de abajo.",
+    "progress": "Progreso",
+    "introducedOverTime": "Tarjetas empezadas a lo largo del tiempo",
+    "introducedNote": "Total acumulado de las tarjetas vistas por primera vez en los últimos 12 meses, incluidos los mazos eliminados y las tarjetas retiradas. Una tarjeta estudiada en ambos sentidos cuenta una vez por sentido.",
+    "introducedLabel": "Una línea que sube, día a día, con cada tarjeta vista por primera vez.",
+    "introducedDetail": {
+      "one": "{date}: {count} empezada en total.",
+      "many": "{date}: {count} empezadas en total.",
+      "other": "{date}: {count} empezadas en total."
+    },
+    "introducedTotal": "Empezadas en total",
+    "recallByMonth": "Recordadas por mes",
+    "recallLabel": "Proporción de repasos recordados cada mes, del 0 % al 100 %: las tarjetas jóvenes como línea discontinua y las maduras como línea continua.",
+    "recallNote": "De los repasos de cada mes, la proporción recordada. Jóvenes: repasadas con un intervalo de menos de 21 días; maduras: 21 días o más.",
+    "recallDetail": "{month}: tarjetas jóvenes {young}, tarjetas maduras {mature}.",
+    "recallShare": {
+      "one": "{percent} de {count} repaso",
+      "many": "{percent} de {count} de repasos",
+      "other": "{percent} de {count} repasos"
+    },
+    "noReviewsThen": "sin repasos",
+    "month": "Mes",
+    "youngShort": "Jóvenes",
+    "matureShort": "Maduras",
+    "progressHeading": "Cómo van tus tarjetas",
+    "progressLoading": "Cargando el progreso de tus tarjetas…",
+    "progressUnavailable": "Ahora mismo no se puede leer el progreso de tus tarjetas.",
+    "maturity": "Madurez de las tarjetas",
+    "maturityHint": "Nuevas: aún sin repasar. Jóvenes: repasadas con un intervalo de menos de 21 días. Maduras: 21 días o más. Una tarjeta estudiada en ambos sentidos cuenta una vez por sentido.",
+    "maturityLabel": "{new}, {young} y {mature}.",
+    "maturityNew": {
+      "one": "{count} nueva",
+      "many": "{count} nuevas",
+      "other": "{count} nuevas"
+    },
+    "maturityYoung": {
+      "one": "{count} joven",
+      "many": "{count} jóvenes",
+      "other": "{count} jóvenes"
+    },
+    "maturityMature": {
+      "one": "{count} madura",
+      "many": "{count} maduras",
+      "other": "{count} maduras"
+    },
+    "maturityByDeck": "Madurez por mazo",
+    "forecast": "Repasos de los próximos {count} días",
+    "forecastLabel": "Repasos pendientes en cada uno de los próximos {count} días; los de hoy incluyen todos los atrasados.",
+    "forecastNote": "Se cuentan sin tu límite diario de repasos, que puede pasar algunos a un día posterior.",
+    "dueDetail": "{date}: {reviews} por hacer.",
+    "dueTodayDetail": "{date}, hoy: {reviews} por hacer, incluidos los atrasados.",
+    "nothingDue": "No hay repasos pendientes en los próximos {count} días.",
+    "reviewCount": {
+      "one": "{count} repaso",
+      "many": "{count} de repasos",
+      "other": "{count} repasos"
+    },
+    "due": "Pendientes"
+  },
+  "zoomableImage": {
+    "enlarge": "Ampliar imagen",
+    "shrink": "Reducir imagen"
+  },
+  "studio": {
+    "name": "Solid Memo Studio",
+    "tagline": "Gestiona los mazos de tu Pod de Solid.",
+    "backToApp": "Volver a Solid Memo",
+    "open": "Abrir en Studio",
+    "loading": "Abriendo el Studio…",
+    "loadFailed": "No se pudo abrir el Studio. Vuelve a cargar la página para intentarlo de nuevo.",
+    "decks": {
+      "heading": "Mazos",
+      "caption": "Los mazos de {instance}",
+      "loading": "Cargando mazos…",
+      "empty": "Aún no hay mazos: créalos o impórtalos en {app}.",
+      "groupsLink": "Organizar los grupos",
+      "instanceLink": "Nombre y catálogo",
+      "filter": "Filtrar por nombre o grupo",
+      "shown": {
+        "one": "{shown} de {count} mazo",
+        "many": "{shown} de {count} de mazos",
+        "other": "{shown} de {count} mazos"
+      },
+      "noMatch": "Ningún mazo coincide con «{filter}».",
+      "select": "Seleccionar",
+      "selectAll": "Seleccionar todos los mazos mostrados",
+      "selectDeck": "Seleccionar {deck}",
+      "title": "Mazo",
+      "group": "Grupo",
+      "direction": "Sentido",
+      "newCardsPerDay": "Nuevas por día",
+      "maxReviewsPerDay": "Repasos por día",
+      "due": "Por repasar hoy",
+      "new": "Nuevas hoy",
+      "modified": "Última modificación",
+      "cards": "Tarjetas",
+      "cardsOf": "tarjetas de {deck}",
+      "topLevel": "Nivel superior",
+      "followsInstance": "(instancia)",
+      "counting": "Contando…",
+      "unreadable": "No se pudo leer",
+      "badge": {
+        "library": "Biblioteca",
+        "course": "Curso",
+        "invalid": "Datos no válidos",
+        "unreadable": "Ilegible",
+        "from": "De {host}"
+      },
+      "healthLink": "Diagnóstico",
+      "libraryLink": "Copias de la biblioteca",
+      "healthOf": "en {deck}",
+      "transferLink": "Importar y exportar",
+      "draftsLink": "Borradores"
+    },
+    "bulk": {
+      "label": "Mazos seleccionados",
+      "selected": {
+        "one": "{count} mazo seleccionado",
+        "many": "{count} de mazos seleccionados",
+        "other": "{count} mazos seleccionados"
+      },
+      "move": "Mover a un grupo",
+      "pace": "Fijar el ritmo",
+      "direction": "Fijar el sentido",
+      "remove": "Eliminar",
+      "clear": "Borrar la selección",
+      "group": "Grupo",
+      "topLevel": "Nivel superior (sin grupo)",
+      "moveReadOnly": "Una versión más reciente de Solid Memo organizó estos grupos, así que aquí no se pueden mover mazos a ellos.",
+      "newCardsPerDay": "Tarjetas nuevas por día",
+      "maxReviewsPerDay": "Máx. de repasos por día",
+      "paceHint": "Un límite que se deja vacío sigue las preferencias de la instancia.",
+      "apply": "Aplicar",
+      "cancel": "Cancelar",
+      "removeConfirm": {
+        "one": "¿Eliminar el mazo {names} y todas sus tarjetas? No se puede deshacer.",
+        "many": "¿Eliminar {count} de mazos y todas sus tarjetas: {names}? No se puede deshacer.",
+        "other": "¿Eliminar {count} mazos y todas sus tarjetas: {names}? No se puede deshacer."
+      },
+      "moved": {
+        "one": "Se movió {count} mazo a {group}.",
+        "many": "Se movieron {count} de mazos a {group}.",
+        "other": "Se movieron {count} mazos a {group}."
+      },
+      "paced": {
+        "one": "Se fijó el ritmo de {count} mazo.",
+        "many": "Se fijó el ritmo de {count} de mazos.",
+        "other": "Se fijó el ritmo de {count} mazos."
+      },
+      "directed": {
+        "one": "Se fijó el sentido de {count} mazo.",
+        "many": "Se fijó el sentido de {count} de mazos.",
+        "other": "Se fijó el sentido de {count} mazos."
+      },
+      "removed": {
+        "one": "Se eliminó {count} mazo.",
+        "many": "Se eliminaron {count} de mazos.",
+        "other": "Se eliminaron {count} mazos."
+      },
+      "export": "Exportar",
+      "moveSetAside": "La organización de estos mazos tiene datos no válidos, así que no se pueden mover mazos a grupos hasta que se repare."
+    },
+    "groups": {
+      "heading": "Grupos"
+    },
+    "cards": {
+      "crumb": "Tarjetas de {deck}",
+      "heading": "Tarjetas: {deck}",
+      "loading": "Cargando tarjetas…",
+      "courseHint": "Una copia de un curso: sus tarjetas son las preguntas del curso.",
+      "empty": "Este mazo aún no tiene tarjetas.",
+      "search": "Buscar",
+      "field": "En",
+      "fields": {
+        "any": "Cualquier texto",
+        "front": "Anverso",
+        "back": "Reverso",
+        "note": "Notas",
+        "label": "Etiqueta",
+        "distractor": "Opciones incorrectas"
+      },
+      "lang": "Idioma",
+      "anyLang": "Cualquier idioma",
+      "unstated": "Sin idioma indicado",
+      "state": "Estado",
+      "anyState": "Cualquier estado",
+      "states": {
+        "live": "En uso",
+        "retired": "Retirada",
+        "new": "Nueva",
+        "learning": "Aprendiendo",
+        "young": "Joven",
+        "mature": "Madura",
+        "due": "Por repasar",
+        "leech": "Sanguijuela: se olvida a menudo"
+      },
+      "has": "Tiene",
+      "anything": "Cualquier cosa",
+      "features": {
+        "picture": "Una imagen",
+        "distractors": "Opciones incorrectas",
+        "markdown": "Markdown",
+        "notes": "Notas"
+      },
+      "pageSize": "Tarjetas por página",
+      "shown": {
+        "one": "{shown} de {count} tarjeta",
+        "many": "{shown} de {count} de tarjetas",
+        "other": "{shown} de {count} tarjetas"
+      },
+      "keys": "Teclas: {j} y {k} para moverte entre las tarjetas, {x} para seleccionar una, {enter} para abrirla.",
+      "selected": {
+        "one": "{count} tarjeta seleccionada",
+        "many": "{count} de tarjetas seleccionadas",
+        "other": "{count} tarjetas seleccionadas"
+      },
+      "clear": "Borrar la selección",
+      "noMatch": "Ninguna tarjeta coincide.",
+      "caption": "Las tarjetas de {deck}",
+      "select": "Seleccionar",
+      "selectAll": "Seleccionar todas las tarjetas de esta página",
+      "selectCard": "Seleccionar {card}",
+      "column": {
+        "front": "Anverso",
+        "back": "Reverso",
+        "due": "Para repasar",
+        "interval": "Intervalo",
+        "ease": "Facilidad",
+        "lapses": "Fallos",
+        "created": "Añadida",
+        "id": "ID"
+      },
+      "days": {
+        "one": "{count} día",
+        "many": "{count} de días",
+        "other": "{count} días"
+      },
+      "notStudied": "Aún sin estudiar",
+      "lapsesSince": "Los fallos cuentan las respuestas incorrectas de la tarjeta desde {month}, el mes de la primera respuesta del mazo en el registro.",
+      "lapsesNone": "Los fallos cuentan las respuestas incorrectas de la tarjeta: aún no hay ninguna en el registro.",
+      "lapsesLoading": "Leyendo el registro de respuestas para los fallos…",
+      "lapsesFailed": "No se pudo leer el registro de respuestas, así que no se conocen los fallos.",
+      "scheduleLink": "Programación, fallos y sanguijuelas",
+      "healthLink": "Diagnóstico",
+      "exportLink": "Exportar"
+    },
+    "card": {
+      "heading": "Tarjeta: {card}",
+      "tabs": "Qué editar",
+      "tab": {
+        "content": "Contenido",
+        "distractors": "Opciones incorrectas ({count})",
+        "schedule": "Programación",
+        "history": "Historial"
+      },
+      "releaseSame": "Esta tarjeta está tal como la tiene la publicación de la que se copió este mazo, así que una publicación más reciente la actualiza. Al editarla, se desvincula: las publicaciones más recientes dejan de actualizarla, aunque todavía pueden retirarla.",
+      "releaseChanged": "Esta tarjeta se cambió respecto a la publicación de la que se copió este mazo, así que las publicaciones más recientes ya no la actualizan, aunque todavía pueden retirarla.",
+      "openInApp": "Abrir esta tarjeta en Solid Memo"
+    },
+    "schedule": {
+      "loading": "Cargando la programación…",
+      "notStudiedSo": "El mazo ya no se estudia en este sentido. Se conserva el progreso de la tarjeta en este sentido.",
+      "new": "Aún sin estudiar en este sentido: la tarjeta es nueva.",
+      "due": "Para repasar",
+      "interval": "Intervalo",
+      "ease": "Facilidad",
+      "repetitions": "Aciertos seguidos",
+      "firstReviewed": "Primer repaso",
+      "lastReviewed": "Último repaso",
+      "dueLabel": "Para repasar el",
+      "reschedule": "Fijar día de repaso",
+      "reset": "Olvidar el progreso",
+      "resetConfirm": "¿Olvidar el progreso de la tarjeta en este sentido? Vuelve a ser nueva. Sus respuestas se quedan en el historial.",
+      "hint": "Ninguna de las dos cosas cambia las respuestas de la tarjeta: se quedan en el historial y en las estadísticas.",
+      "done": {
+        "reset": "Se olvidó el progreso de la tarjeta en el sentido «{direction}».",
+        "reschedule": "«{direction}» se repasará el {due}."
+      }
+    },
+    "history": {
+      "loading": "Cargando las respuestas a la tarjeta…",
+      "empty": "Todavía no hay respuestas a esta tarjeta en este mazo.",
+      "summary": {
+        "one": "{count} respuesta; olvidadas: {forgotten}.",
+        "many": "{count} de respuestas; olvidadas: {forgotten}.",
+        "other": "{count} respuestas; olvidadas: {forgotten}."
+      },
+      "caption": "Respuestas a la tarjeta, de la más reciente a la más antigua",
+      "column": {
+        "when": "Cuándo",
+        "direction": "Sentido",
+        "grade": "Calificación",
+        "mode": "Cómo",
+        "chosen": "Opción incorrecta elegida"
+      },
+      "mode": {
+        "recall": "De memoria",
+        "multiple-choice": "Opción múltiple"
+      },
+      "unknownOption": "{id} (ya no está en la tarjeta)",
+      "hint": "Solo se muestran las respuestas dadas en este mazo: una tarjeta movida aquí desde otro mazo empieza su historial de nuevo. Olvidar el progreso de la tarjeta conserva sus respuestas."
+    },
+    "insight": {
+      "crumb": "Programación",
+      "heading": "Programación: {deck}",
+      "loading": "Cargando la programación…",
+      "today": "Repasos de hoy",
+      "week": "Repasos de los próximos {count} días",
+      "scheduled": "Estudiadas, por sentido",
+      "leeches": "Sanguijuelas",
+      "forecastHeading": "Próximos repasos",
+      "capDeck": "Como máximo {max} repasos al día, según lo fija este mazo: lo que el límite retiene espera al día siguiente. «Repasos de hoy» cuenta todas las tarjetas pendientes hasta hoy.",
+      "capInstance": "Como máximo {max} repasos al día, según lo fijan las preferencias de la instancia: lo que el límite retiene espera al día siguiente. «Repasos de hoy» cuenta todas las tarjetas pendientes hasta hoy.",
+      "forecast": "Repasos de los próximos {count} días",
+      "forecastLabel": "Repasos de cada uno de los próximos {count} días, según lo que deja pasar el límite diario.",
+      "forecastDay": "{date}: {reviews} por repasar; vencen: {due}.",
+      "due": "Pendientes ese día",
+      "reviews": "Por repasar",
+      "spreadHeading": "Intervalos y facilidades",
+      "noneScheduled": "Aún no se ha estudiado ninguna tarjeta de este mazo.",
+      "intervals": "Intervalos",
+      "intervalsLabel": "Cuántas tarjetas, contando cada sentido, tienen cada intervalo.",
+      "interval": "Intervalo",
+      "intervalRange": "{from}–{to} días",
+      "intervalFrom": "{from} días o más",
+      "eases": "Facilidades",
+      "easesLabel": "Cuántas tarjetas, contando cada sentido, tienen cada facilidad.",
+      "ease": "Facilidad",
+      "easeRange": "De {from} a menos de {to}",
+      "easeFrom": "{from} o más",
+      "prompts": "Tarjetas, por sentido",
+      "binText": "{range}: {count}.",
+      "pointAtBar": "Señala una barra para ver su recuento, o abre la tabla de abajo.",
+      "lapsesHeading": "Fallos y sanguijuelas",
+      "lapsesSince": "Los fallos cuentan las respuestas incorrectas desde {month}, el mes de la primera respuesta del mazo en el registro.",
+      "noAnswers": "Aún no hay respuestas en el registro.",
+      "leechHint": "Una sanguijuela es una tarjeta olvidada {count} veces o más. Sigue costando repasos: reescríbela, divídela o retírala.",
+      "noLeeches": "Ninguna sanguijuela.",
+      "leechLapses": {
+        "one": "olvidada {count} vez",
+        "many": "olvidada {count} de veces",
+        "other": "olvidada {count} veces"
+      },
+      "allLeeches": "Mostrar las sanguijuelas entre las tarjetas del mazo"
+    },
+    "cardBulk": {
+      "label": "Tarjetas seleccionadas",
+      "retire": "Retirar",
+      "restore": "Recuperar",
+      "markdownOn": "Escribir en Markdown",
+      "markdownOff": "Escribir como texto sin formato",
+      "stateLanguage": "Indicar idioma",
+      "findReplace": "Buscar y reemplazar",
+      "reschedule": "Fijar día de repaso",
+      "reset": "Olvidar el progreso",
+      "remove": "Eliminar",
+      "removeConfirm": {
+        "one": "¿Eliminar {count} tarjeta y su progreso? Puedes deshacerlo hasta tu próxima edición o hasta que salgas de esta página.",
+        "many": "¿Eliminar {count} de tarjetas y su progreso? Puedes deshacerlo hasta tu próxima edición o hasta que salgas de esta página.",
+        "other": "¿Eliminar {count} tarjetas y su progreso? Puedes deshacerlo hasta tu próxima edición o hasta que salgas de esta página."
+      },
+      "resetConfirm": {
+        "one": "¿Olvidar el progreso de {count} tarjeta? Vuelve a ser nueva. Sus respuestas se quedan en el historial.",
+        "many": "¿Olvidar el progreso de {count} de tarjetas? Vuelven a ser nuevas. Sus respuestas se quedan en el historial.",
+        "other": "¿Olvidar el progreso de {count} tarjetas? Vuelven a ser nuevas. Sus respuestas se quedan en el historial."
+      },
+      "dueLabel": "Para repasar el",
+      "rescheduleHint": "Una tarjeta que aún no se ha estudiado sigue siendo nueva.",
+      "notStudied": "Ninguna de las tarjetas seleccionadas se ha estudiado todavía.",
+      "nothing": "Ninguna de las tarjetas seleccionadas cambiaría.",
+      "tag": "Código de idioma",
+      "side": "De",
+      "sides": {
+        "both": "Ambas caras",
+        "front": "El anverso",
+        "back": "El reverso"
+      },
+      "stateHint": "Solo cambia una cara cuyo idioma aún no está indicado. Su texto se queda como está.",
+      "find": "Buscar",
+      "replaceWith": "Reemplazar por",
+      "fields": "En",
+      "lang": "En el idioma",
+      "caseSensitive": "Distinguir mayúsculas y minúsculas",
+      "wholeWord": "Solo palabras completas",
+      "preview": "Vista previa",
+      "previewEmpty": "Escribe el texto que quieres buscar. No cambia nada hasta que confirmes.",
+      "noChange": "Ninguna de las tarjetas seleccionadas tiene este texto.",
+      "changes": {
+        "one": "Cambia {count} tarjeta:",
+        "many": "Cambian {count} de tarjetas:",
+        "other": "Cambian {count} tarjetas:"
+      },
+      "skippedHeading": {
+        "one": "{count} tarjeta se queda tal como está:",
+        "many": "{count} de tarjetas se quedan tal como están:",
+        "other": "{count} tarjetas se quedan tal como están:"
+      },
+      "reasons": {
+        "missing": "ya no está en el mazo",
+        "unchanged": "no cambia nada en ella",
+        "wouldEmpty": "una cara o una opción incorrecta quedaría vacía",
+        "unstatedLanguage": "su texto no indica ningún idioma; indícalo primero",
+        "invalid": "la tarjeta no es válida tal como está; corrígela en el editor de tarjeta"
+      },
+      "part": {
+        "front": "Anverso",
+        "back": "Reverso",
+        "frontNote": "Nota del anverso",
+        "backNote": "Nota del reverso",
+        "backLabel": "Etiqueta",
+        "distractor": "Opción incorrecta",
+        "distractorNote": "Nota de una opción incorrecta"
+      },
+      "removed": "(eliminado)",
+      "confirmReplace": {
+        "one": "Reemplazar en {count} tarjeta",
+        "many": "Reemplazar en {count} de tarjetas",
+        "other": "Reemplazar en {count} tarjetas"
+      },
+      "done": {
+        "retire": {
+          "one": "Se retiró {count} tarjeta.",
+          "many": "Se retiraron {count} de tarjetas.",
+          "other": "Se retiraron {count} tarjetas."
+        },
+        "restore": {
+          "one": "Se recuperó {count} tarjeta.",
+          "many": "Se recuperaron {count} de tarjetas.",
+          "other": "Se recuperaron {count} tarjetas."
+        },
+        "remove": {
+          "one": "Se eliminó {count} tarjeta.",
+          "many": "Se eliminaron {count} de tarjetas.",
+          "other": "Se eliminaron {count} tarjetas."
+        },
+        "replaceText": {
+          "one": "Se reemplazó texto en {count} tarjeta.",
+          "many": "Se reemplazó texto en {count} de tarjetas.",
+          "other": "Se reemplazó texto en {count} tarjetas."
+        },
+        "markdownOn": {
+          "one": "Se escribió {count} tarjeta en Markdown.",
+          "many": "Se escribieron {count} de tarjetas en Markdown.",
+          "other": "Se escribieron {count} tarjetas en Markdown."
+        },
+        "markdownOff": {
+          "one": "Se escribió {count} tarjeta como texto sin formato.",
+          "many": "Se escribieron {count} de tarjetas como texto sin formato.",
+          "other": "Se escribieron {count} tarjetas como texto sin formato."
+        },
+        "stateLanguage": {
+          "one": "Se indicó el idioma de {count} tarjeta.",
+          "many": "Se indicó el idioma de {count} de tarjetas.",
+          "other": "Se indicó el idioma de {count} tarjetas."
+        },
+        "reset": {
+          "one": "Se olvidó el progreso de {count} tarjeta.",
+          "many": "Se olvidó el progreso de {count} de tarjetas.",
+          "other": "Se olvidó el progreso de {count} tarjetas."
+        },
+        "reschedule": {
+          "one": "{count} tarjeta se repasará el {due}.",
+          "many": "{count} de tarjetas se repasarán el {due}.",
+          "other": "{count} tarjetas se repasarán el {due}."
+        }
+      },
+      "skipped": {
+        "one": "{count} tarjeta se quedó tal como estaba.",
+        "many": "{count} de tarjetas se quedaron tal como estaban.",
+        "other": "{count} tarjetas se quedaron tal como estaban."
+      },
+      "undo": "Deshacer",
+      "undone": "Deshecho: las tarjetas están como estaban.",
+      "moveTo": "Mover al mazo…",
+      "copyTo": "Copiar al mazo…",
+      "transfer": {
+        "deck": "Al mazo",
+        "keepProgress": "Conservar su progreso",
+        "moveHint": "Las tarjetas salen de este mazo una vez que el otro mazo las tiene. Sus respuestas anteriores se quedan con este mazo, así que su historial empieza de nuevo allí.",
+        "copyHint": "Este mazo conserva las tarjetas. El historial de las copias empieza en el otro mazo.",
+        "noDeck": "Esta instancia no tiene otro mazo en el que poner las tarjetas.",
+        "move": {
+          "one": "Mover {count} tarjeta",
+          "many": "Mover {count} de tarjetas",
+          "other": "Mover {count} tarjetas"
+        },
+        "copy": {
+          "one": "Copiar {count} tarjeta",
+          "many": "Copiar {count} de tarjetas",
+          "other": "Copiar {count} tarjetas"
+        },
+        "moved": {
+          "one": "Se movió {count} tarjeta a {deck}.",
+          "many": "Se movieron {count} de tarjetas a {deck}.",
+          "other": "Se movieron {count} tarjetas a {deck}."
+        },
+        "copied": {
+          "one": "Se copió {count} tarjeta a {deck}.",
+          "many": "Se copiaron {count} de tarjetas a {deck}.",
+          "other": "Se copiaron {count} tarjetas a {deck}."
+        },
+        "renamed": {
+          "one": "{count} tarjeta recibió un ID nuevo: el mazo ya tenía una con su ID.",
+          "many": "{count} de tarjetas recibieron un ID nuevo: el mazo ya tenía tarjetas con sus ID.",
+          "other": "{count} tarjetas recibieron un ID nuevo: el mazo ya tenía tarjetas con sus ID."
+        },
+        "present": {
+          "one": "{count} tarjeta ya estaba allí.",
+          "many": "{count} de tarjetas ya estaban allí.",
+          "other": "{count} tarjetas ya estaban allí."
+        }
+      }
+    },
+    "license": {
+      "label": "Licencia",
+      "none": "No indicada"
+    },
+    "about": {
+      "crumb": "Acerca de {deck}",
+      "heading": "Acerca de: {deck}",
+      "openInApp": "Abrir este mazo en Solid Memo",
+      "name": "Nombre",
+      "rename": "Renombrar",
+      "provenance": "Autoría y licencia",
+      "noProvenance": "No se indica autoría ni licencia.",
+      "editProvenance": "Editar la autoría y la licencia",
+      "authors": "Autoría",
+      "authorsHint": "Un nombre, o un nombre y una dirección de correo electrónico: Ada Lovelace <ada@example.org>. Deja una línea vacía para quitarla.",
+      "author": "Persona autora {number}",
+      "removeAuthor": "Quitar la persona autora {number}",
+      "addAuthor": "Añadir una persona autora",
+      "saveProvenance": "Guardar la autoría y la licencia",
+      "study": "Estudio",
+      "saveStudy": "Guardar los ajustes de estudio",
+      "progress": "Progreso del curso",
+      "progressLoading": "Cargando el curso…",
+      "chapter": {
+        "done": "Completado",
+        "open": "Abierto",
+        "locked": "Bloqueado"
+      },
+      "notDone": "Marcar como no completado",
+      "notDoneLabel": "Marcar {chapter} como no completado",
+      "goneChapters": "Capítulos completados que el curso ya no tiene:",
+      "progressHint": "Tus respuestas y tu progreso en las tarjetas se conservan tal como están.",
+      "restart": "Reiniciar el curso",
+      "restartConfirm": "¿Reiniciar el curso? Todos los capítulos se marcan como no completados, así que el primero vuelve a abrirse. Tus respuestas y tu progreso en las tarjetas se conservan.",
+      "saved": "Guardado."
+    },
+    "instance": {
+      "crumb": "Nombre y catálogo",
+      "heading": "Instancia: {instance}",
+      "loading": "Cargando el catálogo…",
+      "preferencesLink": "Preferencias de estudio en Solid Memo",
+      "address": "Dirección",
+      "name": "Nombre",
+      "nameLabel": "Nombre de la instancia",
+      "nameHint": "Se guarda en la instancia, en su catálogo y en las listas de datos de tu Pod, donde otras aplicaciones la encuentran.",
+      "saveName": "Guardar el nombre",
+      "catalog": "Catálogo",
+      "noCatalog": "Esta instancia aún no tiene catálogo. Ábrela en Solid Memo para actualizarla.",
+      "publisher": "Publicado por",
+      "description": "Descripción",
+      "licenseHint": "La licencia con la que se ofrecen los mazos, para las aplicaciones que leen el catálogo.",
+      "saveCatalog": "Guardar el catálogo"
+    },
+    "health": {
+      "crumb": "Diagnóstico",
+      "heading": "Diagnóstico de {instance}",
+      "deckHeading": "Diagnóstico de {deck}",
+      "loading": "Comprobando…",
+      "checkAgain": "Volver a comprobar",
+      "checking": "Comprobando…",
+      "summary": {
+        "one": "Se encontró {count} problema.",
+        "many": "Se encontraron {count} de problemas.",
+        "other": "Se encontraron {count} problemas."
+      },
+      "allWell": "Este mazo no tiene ningún problema.",
+      "dataHeading": "Comprobación de datos",
+      "dataHint": "La entrada del mazo en el catálogo y sus documentos, comprobados con las formas de Solid Memo.",
+      "held": "No se puede cambiar nada de este mazo hasta que se reparen los datos, así que los problemas de abajo solo se nombran, sin enlace a sus formularios. Repara aquí lo que se pueda reparar y elimina lo que ninguna reparación cubra.",
+      "instanceDataHint": "Los documentos de la instancia, comprobados con las formas de Solid Memo. Los documentos que no han cambiado desde la última vez que pasaron la comprobación no se vuelven a comprobar.",
+      "deckEntry": "La entrada del mazo",
+      "deckDistribution": "La distribución del mazo",
+      "inDeck": "en {deck}",
+      "remove": "Eliminar {subject}",
+      "removeHint": "Ninguna reparación cubre esto: corrígelo en el documento o elimínalo.",
+      "decksHeading": "Mazos",
+      "decksHint": "Cada mazo se comprueba en cuanto aparece en la pantalla.",
+      "languagesHeading": "Idiomas",
+      "languagesFine": "Cada cara de tarjeta indica su idioma.",
+      "unstated": {
+        "one": "{count} cara de tarjeta no indica su idioma.",
+        "many": "{count} de caras de tarjeta no indican su idioma.",
+        "other": "{count} caras de tarjeta no indican su idioma."
+      },
+      "unstatedLink": "Indicar los idiomas en la ficha del mazo",
+      "languagesUnchecked": "No se pudo leer la publicación de la que se copió este mazo, así que no se sabe qué caras te toca resolver a ti.",
+      "duplicatesHeading": "Tarjetas que dicen lo mismo",
+      "duplicatesFine": "No hay dos tarjetas en uso que digan lo mismo.",
+      "duplicatesHint": "Estas tarjetas tienen el mismo anverso y el mismo reverso, en los mismos idiomas, y las mismas imágenes.",
+      "duplicateGroup": "La misma tarjeta {count} veces:",
+      "markdownHeading": "Markdown",
+      "markdownFine": "El texto escrito en Markdown se muestra tal como se quería.",
+      "markdownHint": "Lo que no se mostraría tal como se quería, en las tarjetas escritas en Markdown.",
+      "part": {
+        "front": "anverso",
+        "back": "reverso",
+        "frontNote": "nota del anverso",
+        "backNote": "nota del reverso",
+        "backLabel": "etiqueta",
+        "frontImageDescription": "descripción de la imagen del anverso",
+        "backImageDescription": "descripción de la imagen del reverso"
+      },
+      "place": {
+        "card": "{card}",
+        "part": "{card}, {part}",
+        "distractor": "{card}, opción incorrecta {id}",
+        "distractorText": "{card}, opción incorrecta {id}",
+        "distractorNote": "{card}, nota de la opción incorrecta {id}",
+        "schedule": "{card}, su programación"
+      },
+      "language": "{place} ({language})",
+      "badge": {
+        "problems": {
+          "one": "{count} problema",
+          "many": "{count} de problemas",
+          "other": "{count} problemas"
+        },
+        "healthy": "Sin problemas",
+        "failed": "Sin comprobar"
+      }
+    },
+    "library": {
+      "crumb": "Copias de la biblioteca",
+      "heading": "Copias de la biblioteca en {instance}",
+      "caption": "Los mazos de {instance} copiados de la biblioteca",
+      "loading": "Consultando la biblioteca…",
+      "empty": "Ningún mazo de aquí es una copia de un mazo de la biblioteca. Encuentra uno en {library}.",
+      "libraryLink": "la biblioteca de mazos",
+      "browse": "Explorar la biblioteca de mazos",
+      "intro": "Cada mazo copiado de la biblioteca de mazos o añadido desde un enlace, la publicación de la que procede y la más reciente disponible. Al actualizar un mazo, los cambios de la publicación se aplican a las tarjetas que has dejado tal como estaban; tu historial de repasos se conserva.",
+      "upgrade": {
+        "one": "Actualizar {count} mazo",
+        "many": "Actualizar {count} de mazos",
+        "other": "Actualizar {count} mazos"
+      },
+      "running": "Actualizando {deck} ({at} de {total})",
+      "selectAll": "Seleccionar todos los mazos que se pueden actualizar",
+      "copied": "Copiado de",
+      "current": "En la biblioteca",
+      "update": "Actualizar",
+      "unknown": "Publicación desconocida",
+      "release": "Versión {version}",
+      "gone": "Ya no está en la biblioteca",
+      "upToDate": "Al día",
+      "planning": "Calculando qué cambiaría una actualización…",
+      "planFailed": "Ya está disponible la versión {version}, pero no se pudo leer qué cambiaría.",
+      "nothingToUpdate": "Ya está disponible la versión {version}, pero no trae nada con lo que actualizar tu copia.",
+      "changes": "Versión {version}: la actualización {changes}.",
+      "details": "Qué cambia",
+      "cards": {
+        "add": {
+          "one": "Añadida: {count} tarjeta",
+          "many": "Añadidas: {count} de tarjetas",
+          "other": "Añadidas: {count} tarjetas"
+        },
+        "change": {
+          "one": "Cambiada: {count} tarjeta",
+          "many": "Cambiadas: {count} de tarjetas",
+          "other": "Cambiadas: {count} tarjetas"
+        },
+        "retire": {
+          "one": "Retirada: {count} tarjeta",
+          "many": "Retiradas: {count} de tarjetas",
+          "other": "Retiradas: {count} tarjetas"
+        },
+        "restore": {
+          "one": "Recuperada: {count} tarjeta",
+          "many": "Recuperadas: {count} de tarjetas",
+          "other": "Recuperadas: {count} tarjetas"
+        },
+        "remove": {
+          "one": "Eliminada: {count} tarjeta",
+          "many": "Eliminadas: {count} de tarjetas",
+          "other": "Eliminadas: {count} tarjetas"
+        },
+        "kept": {
+          "one": "Se deja como la tienes: {count} tarjeta",
+          "many": "Se dejan como las tienes: {count} de tarjetas",
+          "other": "Se dejan como las tienes: {count} tarjetas"
+        }
+      },
+      "updated": "{deck}: actualizado a la versión {version}.",
+      "failed": "{deck}: la actualización falló en el paso «{step}»:",
+      "badge": "Versión {version} disponible",
+      "badgeOf": "para {deck}",
+      "newerUnknown": "Se desconoce: ningún catálogo público de quien la creó la incluye"
+    },
+    "transfer": {
+      "crumb": "Importar y exportar",
+      "heading": "Importar y exportar mazos de {instance}",
+      "export": "Exportar",
+      "exportIntro": "Guarda mazos como archivos, cada uno en su propio archivo, en Turtle o JSON-LD: el mazo, sus tarjetas y sus opciones incorrectas y, si quieres, tu progreso. Cualquier aplicación que lea RDF puede leerlos, y Solid Memo puede volver a importarlos.",
+      "noDecks": "Esta instancia aún no tiene mazos que exportar.",
+      "decks": "Mazos que exportar",
+      "format": "Formato",
+      "formats": {
+        "turtle": "Turtle (.ttl)",
+        "jsonld": "JSON-LD (.jsonld)"
+      },
+      "withProgress": "Incluir mi progreso: cuándo toca repasar cada tarjeta y los capítulos de un curso que he completado",
+      "exportButton": {
+        "one": "Exportar {count} mazo",
+        "many": "Exportar {count} de mazos",
+        "other": "Exportar {count} mazos"
+      },
+      "exporting": "Exportando {deck} ({at} de {total})…",
+      "exported": {
+        "one": "Se exportó {count} mazo. Tu navegador lo guarda como descarga.",
+        "many": "Se entregaron {count} de mazos a tu navegador, cada uno para guardarlo como una descarga propia. Puede pedirte que permitas varias descargas: las que bloquee no se guardan.",
+        "other": "Se entregaron {count} mazos a tu navegador, cada uno para guardarlo como una descarga propia. Puede pedirte que permitas varias descargas: las que bloquee no se guardan."
+      },
+      "import": "Importar",
+      "importIntro": "Añade un mazo desde un archivo Turtle o JSON-LD a {instance}, como mazo nuevo. Un archivo de una versión anterior de Solid Memo se pone al día al leerlo.",
+      "choose": "Elegir un archivo…",
+      "reading": "Leyendo el archivo…",
+      "file": "{name}: {deck}",
+      "cards": {
+        "one": "{count} tarjeta",
+        "many": "{count} de tarjetas",
+        "other": "{count} tarjetas"
+      },
+      "states": {
+        "one": "Progreso: {count} estado de repaso",
+        "many": "Progreso: {count} de estados de repaso",
+        "other": "Progreso: {count} estados de repaso"
+      },
+      "chapters": {
+        "one": "{count} capítulo completado",
+        "many": "{count} de capítulos completados",
+        "other": "{count} capítulos completados"
+      },
+      "upgraded": {
+        "one": "{count} parte está en un formato anterior y se pone al día.",
+        "many": "{count} de partes están en un formato anterior y se ponen al día.",
+        "other": "{count} partes están en un formato anterior y se ponen al día."
+      },
+      "dropped": {
+        "one": "{count} parte no se puede leer y se omite.",
+        "many": "{count} de partes no se pueden leer y se omiten.",
+        "other": "{count} partes no se pueden leer y se omiten."
+      },
+      "importProgress": "Importar también el progreso",
+      "importButton": "Importar en {instance}",
+      "importing": "Importando el mazo…",
+      "imported": "Se importó {deck}."
+    },
+    "readOnly": {
+      "checking": "Se están comprobando los datos de esta instancia. No se puede cambiar nada hasta que termine la comprobación.",
+      "blocked": "Esta instancia tiene datos no válidos y tus preferencias la mantienen cerrada hasta que se repare, así que aquí no se puede cambiar nada. {repair}",
+      "deck": "Este mazo tiene datos no válidos, así que queda apartado: se muestra aquí, pero no se puede cambiar nada en él hasta que se repare. {repair}",
+      "decks": "Los mazos con datos no válidos quedan apartados: no se pueden seleccionar ni cambiar hasta que se reparen. {repair}",
+      "catalogue": "El catálogo de la instancia o uno de sus grupos tiene datos no válidos, así que queda apartado: no se puede añadir ni cambiar nada en él hasta que se repare. {repair}",
+      "repair": "Repáralo en la pantalla Diagnóstico.",
+      "repairDecks": "Repáralos en la pantalla Diagnóstico."
+    },
+    "drafts": {
+      "crumb": "Borradores",
+      "loading": "Leyendo los borradores…",
+      "heading": "Borradores de publicaciones en {instance}",
+      "intro": "Un borrador es un mazo o un curso que escribes aquí, en tu Pod, antes de publicarlo como una publicación que otras personas pueden añadir. Está solo en esta instancia y nadie más lo ve.",
+      "new": "Borrador nuevo",
+      "from": "Empezar desde",
+      "start": {
+        "blankDeck": "Un mazo en blanco",
+        "blankCourse": "Un curso en blanco",
+        "fromDeck": "Un mazo de esta instancia",
+        "nextVersionOf": "La siguiente versión de una publicación",
+        "fromFile": "Una publicación guardada como archivo"
+      },
+      "name": "Nombre",
+      "deck": "Mazo",
+      "release": "Dirección de la publicación",
+      "releaseHint": "Dónde está publicada, como un mazo de la biblioteca (https://solid-memo.com/decks/<nombre>/v1.ttl) o una publicación en un Pod. El borrador conserva todas las tarjetas, capítulos y pasos que publicó.",
+      "fileHint": "Un archivo Turtle o JSON-LD con la publicación de un mazo o un curso. El borrador la conserva tal como está.",
+      "create": "Crear el borrador",
+      "chooseFile": "Elegir un archivo y crear el borrador…",
+      "creating": "Creando el borrador…",
+      "created": "Se creó el borrador {draft}, versión {version}.",
+      "basedOn": "Este mazo es una copia de la publicación {release}. Su siguiente versión conserva lo que han estudiado sus estudiantes, así que quizá prefieras empezarla en su lugar.",
+      "startNext": "Empezar la siguiente versión de esa publicación",
+      "list": "Borradores",
+      "none": "Esta instancia aún no tiene borradores.",
+      "caption": "Borradores en {instance}",
+      "column": {
+        "name": "Borrador",
+        "kind": "Tipo",
+        "version": "Versión",
+        "state": "Estado",
+        "actions": "Acciones"
+      },
+      "kind": {
+        "deck": "Mazo",
+        "course": "Curso"
+      },
+      "state": {
+        "writing": "En redacción",
+        "released": "Publicado",
+        "unreadable": "No se puede leer"
+      },
+      "untitled": "Sin título ({name})",
+      "summary": "{kind}, versión {version}",
+      "manage": "Borradores de publicaciones",
+      "delete": "Eliminar",
+      "deleteDraft": "Eliminar el borrador {draft}, versión {version}",
+      "deleteConfirm": "¿Eliminar el borrador {draft}, versión {version}? No se puede deshacer.",
+      "deleting": "Eliminando el borrador {draft}…",
+      "deleted": "Se eliminó el borrador {draft}, versión {version}."
+    },
+    "draft": {
+      "untitled": "Borrador sin título",
+      "about": "Acerca de esta publicación",
+      "title": "Título",
+      "description": "Descripción",
+      "outline": "Estructura",
+      "outlineHint": "Los capítulos, y los pasos de cada uno, en el orden en que los recorre quien estudia. Arrastra uno a otro sitio o usa su menú. Las preguntas de un paso se hacen en el orden de sus ID.",
+      "newChapter": "Capítulo nuevo",
+      "chapterTitle": "Título del capítulo",
+      "addChapter": "Añadir el capítulo",
+      "retiredChapters": "Capítulos retirados",
+      "questions": "Preguntas",
+      "cards": "Tarjetas",
+      "cardCount": {
+        "one": "{count} tarjeta en total.",
+        "many": "{count} de tarjetas en total.",
+        "other": "{count} tarjetas en total."
+      },
+      "allCards": "Todas las tarjetas",
+      "newCard": "Tarjeta nueva",
+      "problems": "Problemas",
+      "problemsChecking": "Comprobando el borrador…",
+      "problemsNone": "La comprobación de la publicación no encuentra ningún problema.",
+      "problemsCount": {
+        "one": "La comprobación de la publicación encuentra {count} problema.",
+        "many": "La comprobación de la publicación encuentra {count} de problemas.",
+        "other": "La comprobación de la publicación encuentra {count} problemas."
+      },
+      "problemsLink": "Ver la comprobación de la publicación",
+      "previewLink": "Previsualizar la ficha",
+      "trialLink": "Probarlo",
+      "diffLink": "Comparar con la versión anterior",
+      "releaseLink": "Metadatos y procedencia de la publicación"
+    },
+    "outline": {
+      "empty": "Aún no hay capítulos.",
+      "noSteps": "Aún no hay pasos.",
+      "noTheory": "Aún no hay teoría.",
+      "stepNumber": "Paso {chapter}.{step}",
+      "stepCount": {
+        "one": "{count} paso",
+        "many": "{count} de pasos",
+        "other": "{count} pasos"
+      },
+      "actions": "Acciones para {name}",
+      "moveTo": "Mover al capítulo",
+      "inChapter": "en {chapter}",
+      "afterChapter": "después de {chapter}",
+      "moved": "Se movió.",
+      "dragCancelled": "Movimiento cancelado.",
+      "retired": "Se retiró {name}.",
+      "deleted": "Se eliminó {name}."
+    },
+    "chapter": {
+      "untitled": "Capítulo {id}",
+      "number": "Capítulo {number} de {count}",
+      "retired": "Capítulo retirado",
+      "title": "Título",
+      "description": "Descripción",
+      "steps": "Pasos",
+      "step": "Paso {number}",
+      "stepUp": "Subir {step}",
+      "stepDown": "Bajar {step}",
+      "newStep": "Paso nuevo",
+      "addStep": "Añadir el paso",
+      "retiredSteps": "Pasos retirados",
+      "review": "Repaso final",
+      "reviewHint": "Preguntas que solo se hacen en el repaso final del capítulo, después de las preguntas de sus pasos.",
+      "newReviewQuestion": "Pregunta de repaso nueva"
+    },
+    "step": {
+      "inChapter": "En",
+      "retired": "Paso retirado",
+      "theory": "Teoría",
+      "questions": "Preguntas que la comprueban",
+      "questionsHint": "Se hacen después de la teoría, que no se muestra mientras se responden, en el orden de sus ID.",
+      "newQuestion": "Pregunta nueva"
+    },
+    "question": {
+      "retired": "Retirada",
+      "place": "Se pregunta en",
+      "nowhere": "Todavía en ningún sitio",
+      "atStep": "{chapter}, paso {step}",
+      "atReview": "{chapter}, repaso final",
+      "preview": "Tal como la pregunta el curso",
+      "again": "Preguntar de nuevo"
+    },
+    "draftCards": {
+      "crumb": "Tarjetas",
+      "heading": "Tarjetas de {draft}",
+      "headingCourse": "Preguntas de {draft}",
+      "overview": "Resumen del borrador",
+      "filter": "Mostrar",
+      "all": "Todas las tarjetas",
+      "filters": {
+        "unasked": "No se pregunta en ningún sitio",
+        "askedTwice": "Se pregunta en dos sitios",
+        "fewDistractors": "Faltan opciones incorrectas",
+        "retired": "Retiradas"
+      },
+      "language": "Idioma",
+      "anyLanguage": "Cualquier idioma",
+      "unstated": "Sin idioma indicado",
+      "count": {
+        "one": "{count} tarjeta",
+        "many": "{count} de tarjetas",
+        "other": "{count} tarjetas"
+      },
+      "caption": "Las tarjetas del borrador",
+      "column": {
+        "front": "Anverso",
+        "back": "Reverso",
+        "place": "Se pregunta en",
+        "distractors": "Opciones incorrectas",
+        "id": "ID"
+      },
+      "retired": "(retirada)",
+      "askedTimes": "Se pregunta en {count} sitios",
+      "newQuestion": "Pregunta nueva, aún no se pregunta en ningún sitio"
+    },
+    "draftEdit": {
+      "saving": "Guardando…",
+      "saved": "Todos los cambios guardados.",
+      "released": "Este borrador se publicó, así que está congelado: no se puede cambiar nada en él. Su siguiente versión se empieza desde {drafts}.",
+      "releasedLink": "los borradores",
+      "chooseLanguage": "Para guardar {field}, elige su idioma.",
+      "id": "ID",
+      "idHint": "Forma parte de su dirección en la publicación y no cambia nunca una vez publicado. Letras de la A a la Z, dígitos, «.», «_» y «-».",
+      "idProblem": {
+        "invalid": "Un ID consta de letras de la A a la Z, dígitos, «.», «_» y «-», y empieza por una letra o un dígito.",
+        "taken": "Este borrador, o una publicación anterior, ya tiene este ID."
+      },
+      "addQuestion": "Añadir la pregunta",
+      "questionEmpty": "Escribe el anverso y el reverso.",
+      "askedWhere": "Preguntarla",
+      "askedLast": "Después de la última pregunta",
+      "askedBefore": "Antes de «{name}»",
+      "noIdBetween": "El asistente no encuentra ningún ID que se ordene ahí: escribe uno que sí lo haga.",
+      "notAskedThere": "Este ID no se ordena ahí, así que la pregunta no se haría donde dice «Preguntarla»: escribe uno que sí lo haga.",
+      "retire": "Retirar",
+      "restore": "Recuperar",
+      "delete": "Eliminar",
+      "published": "Una publicación anterior ya lo publicó, así que el progreso de quien estudia puede nombrarlo: se puede retirar, pero nunca eliminar.",
+      "life": {
+        "chapter": "Retirar o eliminar el capítulo",
+        "step": "Retirar o eliminar el paso",
+        "card": "Retirar o eliminar la tarjeta"
+      },
+      "deleteConfirm": {
+        "chapter": "¿Eliminar el capítulo «{name}» con sus pasos? Sus preguntas se conservan, sin preguntarse en ningún sitio.",
+        "step": "¿Eliminar «{name}»? Sus preguntas se conservan, sin preguntarse en ningún sitio.",
+        "card": "¿Eliminar la tarjeta «{name}» con sus opciones incorrectas?"
+      },
+      "refused": {
+        "released": "Este borrador se publicó: ya no se cambia.",
+        "missing": "«{id}» ya no está en este borrador. Quizá se cambió en otra pestaña.",
+        "published": "Una publicación anterior publicó «{id}»: se puede retirar, pero nunca eliminar.",
+        "idTaken": "El ID «{id}» ya está en uso, en este borrador o en una publicación anterior.",
+        "idInvalid": "«{id}» no puede ser un ID: letras de la A a la Z, dígitos, «.», «_» y «-», empezando por una letra o un dígito.",
+        "askedElsewhere": "Esta tarjeta ya se pregunta en otro sitio: muévela allí.",
+        "notACourse": "Solo un curso tiene capítulos, pasos y preguntas.",
+        "notFrontToBack": "Un curso se estudia de anverso a reverso.",
+        "carriedActivity": "No se reescribe cómo se elaboró una publicación anterior.",
+        "noAuthors": "Añade primero una persona autora: la atribución nombra la autoría de la publicación.",
+        "unusedSource": "Una fuente es una de la que deriva la publicación o que se usó para elaborarla: marca al menos una opción."
+      }
+    },
+    "check": {
+      "crumb": "Comprobación de la publicación",
+      "heading": "Comprobación de la publicación",
+      "intro": "Todas las reglas que debe cumplir una publicación, aplicadas a este borrador como la publicación que será. Cada problema enlaza con la parte del borrador a la que se refiere.",
+      "policy": "Comprobar para",
+      "policyPod": "Una publicación en tu Pod",
+      "policyLibrary": "La biblioteca de Solid Memo",
+      "policyHintPod": "Una publicación en un Pod debe cumplir las reglas de sus datos: su curso, lo que declara una publicación, su Markdown y la publicación a la que sigue.",
+      "policyHintLibrary": "Un mazo enviado a la biblioteca de Solid Memo debe cumplir también sus criterios de selección (palabras clave en inglés y sueco, el tema Education), y el índice de la biblioteca lo coloca entre sus mazos.",
+      "checking": "Comprobando el borrador…",
+      "clear": "No se encontraron problemas.",
+      "summary": {
+        "one": "{count} problema.",
+        "many": "{count} de problemas.",
+        "other": "{count} problemas."
+      },
+      "errors": "Errores",
+      "warnings": "Advertencias",
+      "shapesHeading": "Formas",
+      "shapesHint": "Las formas, y los perfiles DCAT-AP y SKOS, comprueban la publicación como datos publicados. En un borrador grande tardan un rato, así que solo se ejecutan cuando lo pides.",
+      "shapesRun": "Comprobar con las formas",
+      "shapesRunning": "Comprobando con las formas…",
+      "again": "Volver a comprobar el borrador",
+      "shapesAgain": "Volver a comprobar",
+      "shapesStale": "El borrador ha cambiado desde entonces: estos son los problemas que tenía en ese momento.",
+      "shapesClear": "Las formas no encuentran ningún problema.",
+      "shapesCount": {
+        "one": "Las formas encuentran {count} problema, entre los de arriba.",
+        "many": "Las formas encuentran {count} de problemas, entre los de arriba.",
+        "other": "Las formas encuentran {count} problemas, entre los de arriba."
+      },
+      "previewLink": "Previsualizar la ficha",
+      "release": "Esta publicación",
+      "distractor": "Opción incorrecta {id}",
+      "badge": {
+        "one": "{count} problema",
+        "many": "{count} de problemas",
+        "other": "{count} problemas"
+      },
+      "badgeOf": "en {name}",
+      "untagged": "texto sin idioma",
+      "nothing": "nada",
+      "firstVersion": "nada, por ser la primera versión",
+      "kind": {
+        "card": "una tarjeta",
+        "chapter": "un capítulo",
+        "step": "un paso",
+        "distractor": "una opción incorrecta"
+      },
+      "profile": "{profile}: {message}",
+      "trialLink": "Probarlo"
+    },
+    "field": {
+      "title": "Título",
+      "description": "Descripción",
+      "publisher": "Publicado por",
+      "license": "Licencia",
+      "version": "Versión",
+      "inSeries": "Serie",
+      "isVersionOf": "Serie de la que es versión",
+      "distribution": "Distribución",
+      "theme": "Temas",
+      "keyword": "Palabras clave",
+      "prev": "Versión anterior",
+      "previousVersion": "Versión anterior",
+      "studyDirection": "Sentido de estudio",
+      "theory": "Teoría",
+      "checkedBy": "Preguntas",
+      "isPartOf": "Forma parte de",
+      "position": "Posición",
+      "reviewQuestion": "Preguntas de repaso",
+      "front": "Anverso",
+      "back": "Reverso",
+      "backLabel": "Etiqueta del reverso",
+      "frontNote": "Nota del anverso",
+      "backNote": "Nota del reverso",
+      "distractor": "Opciones incorrectas",
+      "distractorText": "Opción incorrecta",
+      "distractorNote": "Por qué es incorrecta",
+      "textFormat": "Formato de texto",
+      "versionNotes": "Notas de la versión",
+      "language": "Idiomas",
+      "creator": "Autoría",
+      "comment": "Comentario",
+      "wasDerivedFrom": "Fuentes"
+    },
+    "problem": {
+      "notARelease": "{path} no es una ubicación válida para una publicación de la biblioteca: su nombre solo puede tener letras minúsculas, dígitos y guiones.",
+      "versionGap": "Las versiones de {deck} en la biblioteca no seguirían la secuencia 1, 2, … sin huecos: {versions}.",
+      "notOneDeck": "La publicación debe describir exactamente un mazo, ella misma, pero describe: {decks}.",
+      "versionMismatch": "Indica la versión {stated}; su ubicación indica {expected}.",
+      "linkMismatch": "{field}: {stated}, según lo indicado; {expected}, según su ubicación.",
+      "cardsDropped": "Quita {ids}, que {previous} sí tiene. Nunca se elimina una tarjeta: retírala, para que quienes estudian la conserven junto con su historial.",
+      "outlineDropped": "Quita {ids}, que {previous} sí tiene. Nunca se elimina un capítulo, un paso ni una opción incorrecta: retíralo, para que quienes estudian no pierdan su sitio.",
+      "idReused": "{id} es {now} aquí, pero era {was} en {previous}: un ID nombra siempre un mismo sujeto.",
+      "versionNotNext": "La versión {version} no es la siguiente a {previous}, versión {previousVersion}.",
+      "outlineWithoutCourse": "Tiene capítulos o pasos, pero no es un curso.",
+      "courseWithoutChapter": "Un curso tiene al menos un capítulo.",
+      "courseDirection": "Un curso se estudia del anverso al reverso; aquí se indica {stated}.",
+      "chapterPartOf": "Forma parte de {parts}: un capítulo forma parte de la publicación en la que está.",
+      "stepPartOf": "Forma parte de {part}, que no es un capítulo de esta publicación.",
+      "askedNotACard": "Pregunta {card}, que no es una tarjeta de esta publicación.",
+      "askedRetired": "Pregunta {card}, que está retirada: pregunta una tarjeta en uso, o retira también esto.",
+      "notADistractor": "Indica {distractor} como opción incorrecta, pero no es una opción incorrecta de esta publicación.",
+      "distractorShared": "Es una opción incorrecta de {cards}: cada tarjeta tiene las suyas.",
+      "checkedTwice": "Se pregunta en los pasos {steps}: cada pregunta se hace como mucho en un paso.",
+      "checkedAndReviewed": "Se pregunta en {steps} y en el repaso de {chapters}: cada pregunta se hace en un solo sitio.",
+      "noBack": "No tiene texto en el reverso, la opción correcta.",
+      "fewDistractors": {
+        "one": "Tiene {count} opción incorrecta en uso: una pregunta de un curso tiene al menos {least}.",
+        "many": "Tiene {count} de opciones incorrectas en uso: una pregunta de un curso tiene al menos {least}.",
+        "other": "Tiene {count} opciones incorrectas en uso: una pregunta de un curso tiene al menos {least}."
+      },
+      "distractorLanguages": "No tiene texto en {missing}, que sí tiene el reverso de {card}.",
+      "chapterPositions": "Los capítulos {chapters} comparten la posición {position}.",
+      "stepPositions": "Los pasos {steps} comparten la posición {position}.",
+      "chapterWithoutStep": "No tiene ningún paso en uso.",
+      "textFormatMisplaced": "Indica un formato de texto, algo que solo hacen una tarjeta, un paso o un capítulo.",
+      "textFormatUnknown": "Indica un formato de texto que esta aplicación no conoce, {format}: su texto se muestra como texto sin formato.",
+      "markdown": "{field}, {language}: {finding}",
+      "theoryEmptyChunk": "{field}, {language}: un separador temático al principio, al final o justo después de otro crea una parte vacía, que la aplicación descarta. La teoría de un paso se muestra parte por parte, dividida por sus separadores temáticos: pon texto entre cada dos.",
+      "theoryChunks": "{field}: {counts}. La teoría de un paso tiene el mismo número de partes en cada idioma, para que quien cambie de idioma no pierda su sitio.",
+      "theoryChunkCount": {
+        "one": "{count} parte en {language}",
+        "many": "{count} de partes en {language}",
+        "other": "{count} partes en {language}"
+      },
+      "missingLanguage": "{field}: no hay texto en {language}.",
+      "missingTheme": "Temas: falta {theme}.",
+      "required": "{field}: aún no se ha indicado.",
+      "previousUnread": "No se pudo leer la publicación a la que sigue, {previous}, así que no se comprueba nada con ella. Vuelve a comprobarlo más tarde.",
+      "libraryUnread": "No se pudo leer el índice de la biblioteca, así que no se comprueba la ubicación del borrador en la biblioteca. Vuelve a comprobarlo más tarde.",
+      "shape": "{field}: {message}",
+      "unshaped": "Es de una clase de Solid Memo que ninguna forma de esta aplicación describe.",
+      "sourceUndescribed": "No indica {missing}: una fuente dice qué es, de quién es y en qué condiciones se usó.",
+      "usedNotDerived": "Se usó para elaborar la publicación, que no indica que derive de ella.",
+      "countDisagrees": "Indica {stated} {what}, pero la publicación tiene {counted}."
+    },
+    "preview": {
+      "crumb": "Vista previa de la ficha",
+      "heading": "Vista previa de la ficha",
+      "intro": "Esta publicación en la biblioteca, tal como la verán quienes estudian. Aquí no se puede pulsar nada: es una imagen.",
+      "row": "En la lista de la biblioteca",
+      "page": "En su propia página"
+    },
+    "diff": {
+      "crumb": "Cambios",
+      "heading": "Cambios desde la versión anterior",
+      "intro": "Este borrador comparado con la publicación a la que sigue: qué añade, cambia, retira y recupera, y qué recibirían de él quienes estudian con esa publicación.",
+      "comparing": "Comparando el borrador…",
+      "first": "Este borrador es una primera versión: no sigue a ninguna publicación, así que no hay nada con qué compararlo.",
+      "against": "Comparado con la versión {version}, {url}.",
+      "rules": "Reglas de la serie",
+      "rulesKept": "No quita nada, no da ningún ID a otro tipo de sujeto y su versión es la siguiente.",
+      "about": "Lo que dice de sí mismo",
+      "aboutSame": "Sin cambios.",
+      "aboutChanged": "Cambios en: {fields}.",
+      "detail": {
+        "course": "curso o mazo",
+        "title": "título",
+        "description": "descripción",
+        "keywords": "palabras clave",
+        "themes": "temas",
+        "direction": "sentido de estudio",
+        "license": "licencia",
+        "authors": "autoría",
+        "languages": "idiomas",
+        "sources": "fuentes"
+      },
+      "subjects": "Su contenido",
+      "subjectsSame": "Todos los capítulos, pasos, tarjetas y opciones incorrectas están como estaban.",
+      "kind": {
+        "chapter": "Capítulos",
+        "step": "Pasos",
+        "card": "Tarjetas",
+        "distractor": "Opciones incorrectas"
+      },
+      "unchanged": {
+        "one": "{count} como estaba.",
+        "many": "{count} como estaban.",
+        "other": "{count} como estaban."
+      },
+      "status": {
+        "added": "añadido",
+        "changed": "cambiado",
+        "retired": "retirado",
+        "restored": "recuperado",
+        "retiredChanged": "retirado y cambiado",
+        "restoredChanged": "recuperado y cambiado"
+      },
+      "learners": "Qué reciben quienes estudian",
+      "notNewer": "A quienes estudian solo se les ofrece una publicación más reciente, y la versión {version} no es posterior a la versión {previous}.",
+      "noUpgrade": "La copia de la versión {previous} de quien estudia no cambiaría.",
+      "upgrade": "La actualización de la copia de la versión {previous} de quien estudia {changes}.",
+      "retiredOnly": "solo actualiza tarjetas retiradas",
+      "courseLearner": "La copia de aquí es la de alguien que ha llegado a todas las preguntas. Quienes estudian un curso reciben sus preguntas nuevas a medida que llegan a ellas.",
+      "nothingLost": "Nadie que estudie pierde progreso: lo que el borrador ya no usa, lo retira, y una tarjeta retirada conserva su historial.",
+      "lost": "Progreso que perderían quienes estudian",
+      "lostCards": {
+        "one": "El historial de repasos de {count} tarjeta que el borrador quita: {ids}.",
+        "many": "El historial de repasos de {count} de tarjetas que el borrador quita: {ids}.",
+        "other": "El historial de repasos de {count} tarjetas que el borrador quita: {ids}."
+      },
+      "lostChapters": {
+        "one": "La finalización de {count} capítulo que el borrador quita: {ids}.",
+        "many": "La finalización de {count} de capítulos que el borrador quita: {ids}.",
+        "other": "La finalización de {count} capítulos que el borrador quita: {ids}."
+      }
+    },
+    "trial": {
+      "crumb": "Prueba",
+      "heading": "Prueba",
+      "intro": "El borrador tal como lo usará quien estudie, en un entorno de pruebas dentro de esta página: nada de lo que hagas aquí llega a tu Pod, y al empezar de nuevo se olvida todo.",
+      "opening": "Preparando la prueba…",
+      "notReady": "Este borrador aún no se puede probar. Corrige esto primero:",
+      "controls": "Controles de la prueba",
+      "coursePage": "La página del curso",
+      "chapter": "Capítulo",
+      "jump": "Abrir el capítulo",
+      "jumpHint": "Como quien ha completado todos los capítulos anteriores.",
+      "answers": "Respuestas",
+      "answersCourse": "Todas las preguntas del capítulo que se ve, o del siguiente capítulo por hacer:",
+      "answersDeck": "Todas las tarjetas por estudiar ahora:",
+      "allRight": "Responder todo bien",
+      "allWrong": "Responder todo mal",
+      "days": "Días que avanzar",
+      "advance": "Avanzar",
+      "ahead": {
+        "one": "La prueba va {count} día por delante.",
+        "many": "La prueba va {count} de días por delante.",
+        "other": "La prueba va {count} días por delante."
+      },
+      "today": "La prueba está en la fecha de hoy.",
+      "working": "Trabajando…",
+      "reset": "Empezar de nuevo",
+      "reload": "Volver a cargar el borrador"
+    },
+    "release": {
+      "crumb": "Publicación",
+      "heading": "Metadatos y procedencia de la publicación",
+      "intro": "Lo que la publicación dice de sí misma más allá de su ficha: quién la recopiló y cómo, y a partir de qué se hizo. Cada cambio se guarda en cuanto lo haces.",
+      "about": "Acerca de esta versión",
+      "versionNotes": "Notas de la versión",
+      "versionNotesHint": "Qué es esta versión, o qué cambia, en pocas palabras para quienes estudian.",
+      "languages": "Idiomas",
+      "languagesHint": "Los idiomas de su contenido, según la tabla de idiomas de la UE.",
+      "languageOther": "{iri} (no está en la tabla)",
+      "licenseHint": "Indicada como documento de licencia, como pide DCAT-AP.",
+      "publisher": "Publicado por",
+      "publisherNone": "No indicado",
+      "publisherHint": "Quién la publica: una de sus personas autoras, o quien ya figura como responsable de publicarla.",
+      "authors": "Autoría",
+      "authorsHint": "Las personas que recopilaron la publicación, guardadas en la propia publicación.",
+      "noAuthors": "Aún no hay ninguna persona autora.",
+      "otherAuthors": "También figuran, en otro documento, y se conservan tal como están: {authors}",
+      "authorName": "Nombre",
+      "authorEmail": "Correo electrónico (opcional)",
+      "saveAuthor": "Guardar",
+      "newAuthor": "Persona autora nueva",
+      "addAuthor": "Añadir la persona autora",
+      "authorEmpty": "Escribe el nombre de la persona autora.",
+      "making": "Cómo se elaboró",
+      "attribution": "Atribución",
+      "attributionHint": "Indica quién recopiló la publicación, en inglés y en sueco. Nada de esto dice que alguien la haya revisado.",
+      "attributionNone": "Sin atribución",
+      "attributionNeedsAuthors": "Indica primero una persona autora: la atribución nombra a las personas autoras de la publicación.",
+      "makingNotes": "Notas sobre su elaboración",
+      "makingNotesHint": "Cada párrafo se guarda como una nota sobre la elaboración de la publicación: sus fuentes, su estructura, la selección o las licencias, por ejemplo. Si una nota indica una cantidad (capítulos, pasos, fuentes o tarjetas en total), se comprueba con la publicación.",
+      "sources": "Fuentes",
+      "sourcesHint": "A partir de qué se hizo la publicación. Cada fuente indica qué es, de quién es y en qué condiciones se usó: su licencia o la constancia de una. El Studio muestra su dirección, pero nunca la abre.",
+      "noSources": "Aún no hay fuentes.",
+      "sourceIri": "Dirección",
+      "sourceTitle": "Título",
+      "sourceCreator": "Autoría",
+      "sourceLicense": "Licencia (su dirección)",
+      "sourceEvidence": "Constancia de su licencia",
+      "derivedFrom": "La publicación deriva de ella",
+      "used": "Se usó para elaborar esta versión",
+      "usedEarlier": "Se usó para elaborar una versión anterior.",
+      "sourceOthers": {
+        "one": "{count} declaración más sobre ella se conserva tal como está.",
+        "many": "{count} de declaraciones más sobre ella se conservan tal como están.",
+        "other": "{count} declaraciones más sobre ella se conservan tal como están."
+      },
+      "saveSource": "Guardar la fuente",
+      "newSource": "Fuente nueva",
+      "addSource": "Añadir la fuente",
+      "sourceInvalid": "Indica la dirección web de la fuente, empezando por https:// o http://.",
+      "sourceExists": "La publicación ya nombra esta fuente.",
+      "sourceUnused": "Marca al menos una opción: la publicación deriva de ella, o se usó para elaborar esta versión.",
+      "licenseInvalid": "Indica la dirección web de la licencia, empezando por https:// o http://, o deja el campo vacío.",
+      "checks": "Comprobaciones",
+      "checksHint": "Comprobaciones que ha tenido la publicación, hechas por una máquina (los validadores, la comprobación de la publicación) o por IA. Cada una se registra indicando que no es una revisión humana: el Studio no registra ninguna revisión humana.",
+      "noChecks": "Aún no hay comprobaciones registradas.",
+      "checkKind": "Comprobado por",
+      "checkMachine": "Una máquina",
+      "checkAi": "IA",
+      "checkLabel": "Qué revisó",
+      "checkScope": "Alcance",
+      "checkOutcome": "Resultado",
+      "checkEnded": "Terminó el",
+      "checkLanguage": "Escrita en",
+      "checkLanguageEn": "Inglés",
+      "checkLanguageSv": "Sueco",
+      "checkEmpty": "Escribe qué revisó, su alcance y su resultado.",
+      "newCheck": "Comprobación nueva",
+      "addCheck": "Registrar la comprobación",
+      "saveCheck": "Guardar la comprobación",
+      "checkOtherwise": "No está escrita como el Studio escribe las comprobaciones: se puede eliminar, pero no editar.",
+      "carried": "De versiones anteriores",
+      "carriedHint": "Cómo se elaboraron las versiones anteriores. Se conservan tal como están: una publicación nunca se reescribe.",
+      "detail": {
+        "title": "su título",
+        "creator": "su autoría",
+        "licence": "su licencia o la constancia de una"
+      },
+      "counted": {
+        "chapters": "capítulos",
+        "steps": "pasos",
+        "sources": "fuentes",
+        "cards": "tarjetas en total"
+      },
+      "edit": "Editar",
+      "cancel": "Cancelar",
+      "remove": "Quitar",
+      "editOf": "Editar {name}",
+      "removeOf": "Quitar {name}"
+    },
+    "publish": {
+      "heading": "Publicar",
+      "intro": "Al publicar, la publicación se escribe en tu Pod como un único documento Turtle, en una dirección que nunca cambia, y todo el mundo puede leerla. Una publicación nunca se cambia después: para cambiarla, preparas un borrador de su siguiente versión.",
+      "checking": "Comprobando el borrador…",
+      "noErrors": "La comprobación de la publicación no encuentra errores. Al publicar, se comprueba de nuevo, también con las formas.",
+      "errors": {
+        "one": "La comprobación de la publicación encuentra {count} error. Corrígelo antes de publicar.",
+        "many": "La comprobación de la publicación encuentra {count} de errores. Corrígelos antes de publicar.",
+        "other": "La comprobación de la publicación encuentra {count} errores. Corrígelos antes de publicar."
+      },
+      "folder": "Carpeta en tu Pod",
+      "folderInvalid": "Indica la dirección web de la carpeta, que empiece por https:// o http:// y termine en /.",
+      "address": "La publicación estará en {url}.",
+      "confirm": "Entiendo que esta publicación será pública: cualquiera con su dirección puede leerla. Una vez publicada, ya no se podrá cambiar ni anular desde aquí.",
+      "publish": "Publicar en mi Pod",
+      "publishing": "Comprobando y publicando…",
+      "waitSaving": "Esperando a que se guarden tus cambios…",
+      "guest": "Los datos de estudio en modo invitado se guardan solo en este navegador, donde nadie más podría leer una publicación. Traslada tus datos de estudio a un Pod para publicarla allí. Mientras tanto, puedes descargarla como archivo.",
+      "releasedAt": "Este borrador se publicó en {url}.",
+      "askingPublic": "Comprobando si cualquiera puede leerla…",
+      "public": "Cualquiera con su dirección puede leerla.",
+      "private": "Solo tú puedes leerla: tu Pod no la hizo pública. Inténtalo de nuevo, o haz que todo el mundo pueda leerla con las herramientas de tu proveedor de Pods.",
+      "makePublic": "Hacerla pública",
+      "makingPublic": "Haciéndola pública…",
+      "nextHint": "Una publicación nunca se cambia. Para cambiarla, empieza su siguiente versión: un borrador nuevo que conserva todo lo que esta publicación contiene.",
+      "downloadHeading": "Descarga",
+      "downloadIntro": "Guarda la publicación como archivo Turtle, con la dirección que tendría en la biblioteca de Solid Memo, para proponerla a la biblioteca. No cambia nada en tu Pod.",
+      "download": "Descargar .ttl",
+      "downloaded": "Se guardó {file}, como la publicación en {url}.",
+      "stepsIntro": "Para proponerla a la biblioteca, en una copia del repositorio de Solid Memo:",
+      "stepCopy": "Pon el archivo en decks/ como {file}.",
+      "stepLibrary": "Dale formato e inclúyelo en el índice de la biblioteca:",
+      "stepCheck": "Compruébalo con las reglas de la biblioteca:",
+      "stepAll": "Ejecuta todas las comprobaciones:",
+      "stepPullRequest": "Abre una pull request con el archivo nuevo y el índice.",
+      "libraryCheck": "Comprobar primero el borrador para la biblioteca"
+    },
+    "releases": {
+      "crumb": "Publicaciones",
+      "link": "Publicaciones",
+      "loading": "Leyendo las publicaciones…",
+      "heading": "Publicaciones de {instance}",
+      "intro": "Cada publicación es un documento de tu Pod, que quienes estudian añaden por su dirección. Una publicación nunca cambia: para cambiarla, empieza su siguiente versión.",
+      "none": "Esta instancia aún no ha publicado nada.",
+      "caption": "Publicaciones de {instance}",
+      "column": {
+        "release": "Publicación",
+        "readers": "Quién puede leerla",
+        "actions": "Acciones"
+      },
+      "name": "{name}, versión {version}",
+      "public": "Todo el mundo",
+      "private": "Solo tú",
+      "makePublicOf": "Hacer pública {release}",
+      "copy": "Copiar el enlace",
+      "copyLink": "Copiar el enlace {url}",
+      "copied": "Enlace copiado.",
+      "copyFailed": "No se pudo copiar el enlace. Selecciona su dirección y cópiala.",
+      "startNext": "Empezar la siguiente versión",
+      "startNextOf": "Empezar la siguiente versión de {release}",
+      "starting": "Empezando la siguiente versión…",
+      "drafts": "Borradores de publicaciones"
+    }
+  },
+  "proseField": {
+    "markdown": "Formatear con Markdown",
+    "markdownHint": "Encabezados, listas, código, tablas y enlaces, tal como los muestra el reproductor de cursos. Si está desactivado, el texto se muestra tal como se escribió y una línea en blanco empieza un párrafo nuevo.",
+    "preview": "Vista previa: {field}",
+    "empty": "Aún no hay nada que mostrar."
+  },
+  "importUrl": {
+    "heading": "Añadir desde un enlace",
+    "intro": "Cualquiera puede publicar un mazo o un curso en su Pod. Pega el enlace a su publicación para ver qué es y, luego, añádelo a tus mazos como harías con uno de la biblioteca.",
+    "label": "Enlace a la publicación",
+    "show": "Mostrar",
+    "reading": "Leyendo y comprobando la publicación…",
+    "notLibrary": "Esto no está en la biblioteca de Solid Memo: está publicado en {host}. Solid Memo ha comprobado que puede leerlo, no lo que dice. Tu copia recuerda de dónde viene, y no se escribe nada allí."
+  }
+}

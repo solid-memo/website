@@ -9,12 +9,15 @@ describe("localeOf", () => {
     ["EN-gb", "en"],
     ["ko", "ko"],
     ["ko-KR", "ko"],
+    ["de-AT", "de"],
+    ["es-419", "es"],
+    ["fr-CA", "fr"],
   ])("names %s as %s", (tag, locale) => {
     expect(localeOf(tag)).toBe(locale);
   });
 
   it("is null for a language the app does not speak", () => {
-    expect(localeOf("de-DE")).toBeNull();
+    expect(localeOf("fi-FI")).toBeNull();
   });
 });
 
@@ -24,12 +27,13 @@ describe("pickLocale", () => {
   });
 
   it("else speaks the first preferred language it can", () => {
-    expect(pickLocale(null, ["de", "sv-SE", "en"])).toBe("sv");
-    expect(pickLocale(null, ["de", "ko-KR", "en"])).toBe("ko");
+    expect(pickLocale(null, ["fi", "sv-SE", "en"])).toBe("sv");
+    expect(pickLocale(null, ["fi", "ko-KR", "en"])).toBe("ko");
+    expect(pickLocale(null, ["ja", "de-CH", "en"])).toBe("de");
   });
 
   it("else speaks English", () => {
-    expect(pickLocale(null, ["de", "fr"])).toBe("en");
+    expect(pickLocale(null, ["fi", "ja"])).toBe("en");
     expect(pickLocale(null, [])).toBe("en");
   });
 });

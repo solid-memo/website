@@ -74,7 +74,7 @@ export class Chrome extends Screen {
    * the list's own name ("Language", "Språk") with it.
    */
   async switchLanguage(locale: Locale): Promise<void> {
-    const name = { en: "English", sv: "Svenska", ko: "한국어" }[locale];
+    const name = { en: "English", sv: "Svenska", ko: "한국어", de: "Deutsch", es: "Español", fr: "Français" }[locale];
     await this.intent(`Switch the language to ${name}`, async () => {
       await this.languageSelector.selectOption({ label: name });
       this.app.locale = locale;

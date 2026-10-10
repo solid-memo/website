@@ -180,6 +180,15 @@ th:lang(ko),
   letter-spacing: 0;
 }
 
+/*
+ * German, on a German page or in text marked lang="de": its long
+ * compound words are hyphenated at line ends by the browser's German
+ * dictionary, rather than run past their box or broken at any letter.
+ */
+:where(:lang(de)) {
+  hyphens: auto;
+}
+
 *,
 *::before,
 *::after {

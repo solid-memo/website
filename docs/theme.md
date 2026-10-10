@@ -54,3 +54,11 @@ cannot draw in Korean, are bold, and neither they nor the uppercase
 labels are tracked apart. Code, `kbd`, `samp` and `pre` keep the
 monospace font (`--font-mono`), which the Korean font rule would
 otherwise take from them.
+
+## German text
+
+German, on a German page or in card text marked `lang="de"` on another,
+is hyphenated at line ends (`hyphens: auto` under `:lang(de)`), so a
+long compound word ("Wiederholungsintervall") breaks at a syllable with
+a hyphen rather than at any letter. Spanish and French need no rules of
+their own: Fredoka and Bangers draw their letters.

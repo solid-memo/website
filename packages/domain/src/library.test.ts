@@ -121,7 +121,7 @@ describe("topicsOf and topicLabels", () => {
   });
 
   it("label a deck's topics, leaving out the EU themes", () => {
-    expect(topicLabels(nouns.themes)).toEqual([{ en: "Swedish", ko: "스웨덴어", sv: "Svenska" }]);
+    expect(topicLabels(nouns.themes)).toEqual([{ en: "Swedish", de: "Schwedisch", es: "Sueco", fr: "Suédois", ko: "스웨덴어", sv: "Svenska" }]);
     expect(topicLabels([EDUC])).toEqual([]);
   });
 });
