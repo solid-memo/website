@@ -1,10 +1,10 @@
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { AppError } from "./appError";
 import { inLanguage, type CardField } from "./cardQuery";
-import { CARD_FORMAT_VERSION, isMarkdown, validateCardContent, type Card, type CardContent, type Distractor } from "./deck";
+import { CARD_FORMAT_VERSION, isFormatted, isMarkdown, validateCardContent, type Card, type CardContent, type Distractor } from "./deck";
 import { withStatedLanguages } from "./deckLanguages";
 import { canonicalTag } from "./languageTag";
-import type { LangText } from "./langText";
+import { tidied, type LangText } from "./langText";
 import { sameContent } from "./libraryUpgrade";
 import { reviewKeyOf, type ReviewKey, type ReviewState } from "./review";
 
@@ -26,7 +26,8 @@ export type StatedSide = "front" | "back";
  * One edit of the selected cards: retire them (kept, with their review
  * state, but not studied), restore them, remove them (with their review
  * state), replace text in them, write them in Markdown or as plain
- * text, or state the language of their untagged sides.
+ * text, state the language of their untagged sides, or write a side's
+ * text in one language anew (as the workbench's cells edit one card's).
  */
 export type CardEdit =
   | { kind: "retire" }
@@ -45,13 +46,14 @@ export type CardEdit =
       wholeWord: boolean;
     }
   | { kind: "setTextFormat"; markdown: boolean }
-  | { kind: "stateLanguage"; tag: string; side?: StatedSide };
+  | { kind: "stateLanguage"; tag: string; side?: StatedSide }
+  | { kind: "setText"; side: StatedSide; tag: string; text: string };
 
 /**
  * Why a selected card is left as it is:
  * - `missing`: the deck no longer has it;
  * - `unchanged`: the edit changes nothing on it (no match, retired already…);
- * - `wouldEmpty`: a replace would leave a side's text, or a wrong option's, empty;
+ * - `wouldEmpty`: a replace, or a text written anew, would leave a side's text, or a wrong option's, empty;
  * - `unstatedLanguage`: it would change text whose language is not stated, which may not be saved so;
  * - `invalid`: the card would not pass validateCardContent otherwise.
  */
@@ -142,6 +144,13 @@ function editOf(edit: Exclude<CardEdit, { kind: "remove" }>): (card: Card) => Ca
     }
     case "replaceText":
       return replacing(edit);
+    case "setText":
+      return (card) => {
+        const text = tidied(edit.text, isFormatted(card.textFormat));
+        if (card[edit.side][edit.tag] === text) return "unchanged";
+        if (text === "") return "wouldEmpty";
+        return validated(card, { ...card, [edit.side]: { ...card[edit.side], [edit.tag]: text } }, card.retired === true);
+      };
   }
 }
 

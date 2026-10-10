@@ -1436,7 +1436,16 @@
       "switchInstance": "Switch instance: {instance}",
       "allInstances": "All instances",
       "resizeAside": "Width of the side pane",
-      "hide": "Hide"
+      "hide": "Hide",
+      "pinned": "Pinned",
+      "recent": "Recently opened",
+      "pin": "Pin {name}",
+      "ready": "Ready to publish",
+      "blocked": {
+        "one": "{count} problem blocks publishing",
+        "other": "{count} problems block publishing"
+      },
+      "released": "Released"
     },
     "tabs": {
       "deck": "Deck",
@@ -1491,7 +1500,8 @@
       "extendDown": "Select the row and the next one too",
       "extendUp": "Select the row and the one before too",
       "clear": "Clear the selection",
-      "bulk": "Open the actions of the selected rows"
+      "bulk": "Open the actions of the selected rows",
+      "edit": "Edit the cell: Enter saves, Escape cancels"
     },
     "dock": {
       "label": "Panel",
@@ -1525,7 +1535,8 @@
         "instances": "Instances",
         "decks": "Decks",
         "drafts": "Drafts",
-        "cards": "Cards of this deck"
+        "cards": "Cards of this deck",
+        "pinned": "Pinned"
       }
     },
     "decks": {
@@ -1572,7 +1583,24 @@
       "courses": "Courses",
       "copies": "Library copies",
       "attention": "Needs attention",
-      "none": "No deck in this view."
+      "none": "No deck in this view.",
+      "cards": {
+        "all": "All",
+        "due": "Due",
+        "new": "New",
+        "leech": "Leeches"
+      },
+      "options": "Options of the view {name}",
+      "rename": "Rename…",
+      "remove": "Remove",
+      "removeHeading": "Remove the view",
+      "removeConfirm": "Remove the view {name}? Only the view goes: nothing in your Pod changes.",
+      "save": "+ Save view",
+      "saveHeading": "Save the view",
+      "renameHeading": "Rename the view {name}",
+      "name": "Name",
+      "nameHint": "A view of the same name is replaced.",
+      "saveButton": "Save"
     },
     "peek": {
       "label": "Deck",
@@ -1677,7 +1705,7 @@
         "one": "{shown} of {count} card",
         "other": "{shown} of {count} cards"
       },
-      "keys": "Keys: {j} and {k} move between the cards, {x} selects one, {enter} opens it, {shiftJ} and {shiftK} select the next one or the one before too, {escape} clears the selection, and {dot} opens the actions of the selected cards.",
+      "keys": "Keys: {j} and {k} move between the cards, {x} selects one, {enter} opens it, {shiftJ} and {shiftK} select the next one or the one before too, {escape} clears the selection, {f2} edits a front or a back in its cell, and {dot} opens the actions of the selected cards.",
       "selected": {
         "one": "{count} card selected",
         "other": "{count} cards selected"
@@ -1733,7 +1761,7 @@
     "confirm": {
       "unsaved": {
         "heading": "Save your changes?",
-        "text": "This card has changes that are not saved. Save them before you go on, discard them, or stay on the card.",
+        "text": "Some changes are not saved. Save them before you go on, discard them, or stay where you are.",
         "save": "Save",
         "discard": "Discard",
         "stay": "Stay"
@@ -1941,6 +1969,10 @@
         "reschedule": {
           "one": "Set {count} card due on {due}.",
           "other": "Set {count} cards due on {due}."
+        },
+        "setText": {
+          "one": "Saved the text of {count} card.",
+          "other": "Saved the text of {count} cards."
         }
       },
       "skipped": {
@@ -2564,7 +2596,10 @@
       "markdown": "{field}, {language}: {finding}",
       "theoryEmptyChunk": "{field}, {language}: a thematic break first, last or right after another makes an empty part, which the app drops. A step's theory is shown a part at a time, split at its thematic breaks: put text between each two.",
       "theoryChunks": "{field}: in {counts}. A step's theory is in as many parts in each language, so a learner who switches language keeps their place.",
-      "theoryChunkCount": { "one": "{count} part in {language}", "other": "{count} parts in {language}" },
+      "theoryChunkCount": {
+        "one": "{count} part in {language}",
+        "other": "{count} parts in {language}"
+      },
       "missingLanguage": "{field}: no text in {language}.",
       "missingTheme": "Themes: {theme} is missing.",
       "required": "{field}: not stated yet.",
@@ -2826,6 +2861,13 @@
       "startNextOf": "Start the next version of {release}",
       "starting": "Starting the next version…",
       "drafts": "Drafts of releases"
+    },
+    "inline": {
+      "field": "{column} of {row}",
+      "cell": "{field}: {value}",
+      "save": "Save",
+      "cancel": "Cancel",
+      "refused": "Not saved: {reason}."
     }
   },
   "proseField": {

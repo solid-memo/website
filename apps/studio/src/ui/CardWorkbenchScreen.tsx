@@ -4,14 +4,15 @@ import {
   CARD_FIELDS,
   CARD_PAGE_SIZES,
   CARD_STATES,
+  queryFromParams,
   UNSTATED,
   type CardPageSize,
   type CardQuery,
   type CardRow,
   type CardSort,
 } from "@solid-memo/domain/cardQuery";
-import type { CardEdit, CardEditPlan } from "@solid-memo/domain/cardBulk";
-import type { Card, Deck } from "@solid-memo/domain/deck";
+import type { CardEdit, CardEditPlan, SkipReason } from "@solid-memo/domain/cardBulk";
+import { isMarkdown, type Card, type Deck } from "@solid-memo/domain/deck";
 import { CardRowBack, CardRowFront } from "@solid-memo/ui/CardFace";
 import type { ReadOnlyReason } from "@solid-memo/ui/dataCheck";
 import { cardName } from "@solid-memo/ui/DataText";
@@ -28,8 +29,11 @@ import type { CardTransfer } from "./TransferCardsDialog";
 import { useActivity } from "./shell/activity";
 import { BulkBar } from "./shell/BulkBar";
 import { DataTable, type Column } from "./shell/DataTable";
+import { EditableCell, type CellEdit } from "./shell/EditableCell";
 import { Keys } from "./shell/KeyHelp";
+import { SavedViews } from "./shell/SavedViews";
 import { nextSort, NO_SELECTION, toggled, type Selection } from "./shell/tableModel";
+import { cardParams, cardViewOf, CARD_VIEWS, paramsText, withCardView, type SavedView } from "./shell/views";
 
 /** An edit made, which can be undone while the page is open. */
 export interface CardEditMade {
@@ -60,7 +64,9 @@ function doneKey(edit: CardEdit) {
  * filtered and sorted as the URL says (`query`, which the domain applies:
  * `rows` are every card that matches, in order), a page at a time.
  * A column's header sorts by it, then the other way, then back to the
- * deck's own order; the sorted column says so (`aria-sort`).
+ * deck's own order; the sorted column says so (`aria-sort`). Its views,
+ * tabs above it, each keep the cards in one state (views.ts), and the
+ * views the user saved (`savedViews`, SavedViews) each a whole query.
  *
  * The table is a DataTable, whose Columns menu shows or hides its
  * columns. Cards are selected by their checkbox, or a
@@ -79,7 +85,10 @@ function doneKey(edit: CardEdit) {
  * the table (BulkBar, CardBulkActions; `.` opens its first menu):
  * each edit is planned on them (`plan`) and made (`onEdit`), then the
  * status line says what it did, with a way to undo it (`lastEdit`,
- * `onUndo`) until the next edit, or until the page is left. Deleted
+ * `onUndo`) until the next edit, or until the page is left. A plain
+ * text card's front and back, each in one language, are edited in their
+ * cells too (EditableCell), as an edit of that card alone, which Undo
+ * undoes the same way. Deleted
  * cards leave the selection. Their review states can be forgotten or
  * set due on a day (`onReviewEdit`); the status line then says how many
  * cards changed (`reviewDone`), with no undo. They can be moved or
@@ -109,6 +118,8 @@ export function CardWorkbenchScreen({
   healthHref,
   query,
   onQuery,
+  savedViews,
+  onSavedViews,
   cardHref,
   onOpen,
   current,
@@ -145,6 +156,9 @@ export function CardWorkbenchScreen({
   healthHref: string;
   query: CardQuery;
   onQuery: (query: CardQuery) => void;
+  /** The views of the workbench the user saved, and keeping them as they change. */
+  savedViews: readonly SavedView[];
+  onSavedViews: (views: SavedView[]) => void;
   cardHref: (card: Card) => string;
   onOpen: (card: Card) => void;
   /** The card shown beside the table, by its URL. */
@@ -180,6 +194,8 @@ export function CardWorkbenchScreen({
 }) {
   const { t, tx, readerText, languageLabel, formatDate, formatMonth } = useI18n();
   const [chosen, setChosen] = useState<Selection>(NO_SELECTION);
+  // Why the last side edited in its cell was not saved, until another is.
+  const [refusal, setRefusal] = useState<SkipReason | null>(null);
 
   const selected = useMemo(
     () => rows.filter((row) => chosen.has(row.card.url)).map((row) => row.card),
@@ -222,6 +238,29 @@ export function CardWorkbenchScreen({
   // the notes', say) is still offered, so the filter shows and clears.
   const langOptions =
     query.lang === undefined || languages.includes(query.lang) ? languages : [...languages, query.lang];
+  /**
+   * How a side of a card is edited in its cell: only a plain text one's,
+   * in one language that is stated, while the deck may be changed; as an
+   * edit of that card alone, one that changes nothing saved at once, one
+   * that would leave the side empty refused, and why said.
+   */
+  const textEdit = (card: Card, side: "front" | "back"): CellEdit | null => {
+    const tags = Object.keys(card[side]);
+    if (readOnly !== null || isMarkdown(card.textFormat) || tags.length !== 1 || tags[0] === "") return null;
+    const tag = tags[0]!;
+    return {
+      label: t("studio.inline.field", { column: t(`studio.cards.column.${side}`), row: cardName(card, readerText) }),
+      shown: card[side][tag]!,
+      value: card[side][tag]!,
+      onSave: (text) => {
+        const edit: CardEdit = { kind: "setText", side, tag, text };
+        const planned = plan([card.id], edit);
+        const reason = planned.save.length === 0 ? planned.skipped[0]!.reason : null;
+        setRefusal(reason === "unchanged" ? null : reason);
+        return reason === null ? onEdit([card.id], edit, planned) : Promise.resolve(reason === "unchanged");
+      },
+    };
+  };
   const none = (
     <>
       <span aria-hidden="true">–</span>
@@ -233,7 +272,9 @@ export function CardWorkbenchScreen({
       key: "back",
       label: t("studio.cards.column.back"),
       cell: ({ card }) => (
-        <CardRowBack back={card.back} imageUrl={card.backImageUrl} imageDescription={card.backImageDescription} textFormat={card.textFormat} />
+        <EditableCell edit={textEdit(card, "back")}>
+          <CardRowBack back={card.back} imageUrl={card.backImageUrl} imageDescription={card.backImageDescription} textFormat={card.textFormat} />
+        </EditableCell>
       ),
     },
     { key: "due", label: t("studio.cards.column.due"), cell: ({ due }) => (due === undefined ? none : formatDate(due)) },
@@ -286,10 +327,28 @@ export function CardWorkbenchScreen({
       {reviewDone !== null && <p role="status">{reviewSaid}</p>}
       {transferDone !== null && <p role="status">{transferText(transferDone, { t, readerText })}</p>}
       <ErrorMessage error={error} />
+      {refusal !== null && (
+        <p class="error" role="alert">
+          {t("studio.inline.refused", { reason: t(`studio.cardBulk.reasons.${refusal}`) })}
+        </p>
+      )}
       {total === 0 ? (
         <p>{t("studio.cards.empty")}</p>
       ) : (
         <>
+          <div class="studio-views" role="group" aria-label={t("studio.views.label")}>
+            {CARD_VIEWS.map((each) => (
+              <button key={each} type="button" aria-pressed={cardViewOf(query) === each} onClick={() => onQuery(withCardView(query, each))}>
+                {t(`studio.views.cards.${each}`)}
+              </button>
+            ))}
+            <SavedViews
+              views={savedViews}
+              current={paramsText(cardParams(query))}
+              onApply={(params) => onQuery(queryFromParams(new URLSearchParams(params)))}
+              onViews={onSavedViews}
+            />
+          </div>
           <div class="studio-filters">
             <label class="studio-filter">
               {t("studio.cards.search")}
@@ -349,16 +408,18 @@ export function CardWorkbenchScreen({
                   key: "front",
                   label: t("studio.cards.column.front"),
                   cell: ({ card }) => (
-                    <a href={cardHref(card)}>
-                      <CardRowFront
-                        front={card.front}
-                        back={card.back}
-                        imageUrl={card.frontImageUrl}
-                        imageDescription={card.frontImageDescription}
-                        textFormat={card.textFormat}
-                      />
-                      {card.retired && <RetiredTag />}
-                    </a>
+                    <EditableCell edit={textEdit(card, "front")} link>
+                      <a href={cardHref(card)}>
+                        <CardRowFront
+                          front={card.front}
+                          back={card.back}
+                          imageUrl={card.frontImageUrl}
+                          imageDescription={card.frontImageDescription}
+                          textFormat={card.textFormat}
+                        />
+                        {card.retired && <RetiredTag />}
+                      </a>
+                    </EditableCell>
                   ),
                 }}
                 columns={columns}
@@ -424,6 +485,7 @@ export function CardWorkbenchScreen({
               shiftJ: <Keys keys="Shift+J" />,
               shiftK: <Keys keys="Shift+K" />,
               escape: <kbd>Escape</kbd>,
+              f2: <kbd>F2</kbd>,
               dot: <kbd>.</kbd>,
             })}
           </p>

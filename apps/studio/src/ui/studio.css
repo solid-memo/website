@@ -1153,3 +1153,110 @@
 :root[data-surface="studio"] main .studio-tabs .studio-count {
   margin: 0 0 0 0.25rem;
 }
+
+/*
+ * A pin beside each deck and draft of the sidebar: faint until its row
+ * is pointed at or has the focus, marked while the item is pinned.
+ */
+:root[data-surface="studio"] .studio-sidebar .studio-pin {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--s-row-h);
+  min-height: var(--s-row-h);
+  padding: 0;
+  color: var(--text-muted);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  box-shadow: none;
+  opacity: 0.35;
+}
+
+:root[data-surface="studio"] .studio-sidebar li:is(:hover, :focus-within) .studio-pin,
+:root[data-surface="studio"] .studio-sidebar .studio-pin[aria-pressed="true"] {
+  opacity: 1;
+}
+
+:root[data-surface="studio"] .studio-sidebar .studio-pin[aria-pressed="true"] {
+  color: var(--primary);
+}
+
+:root[data-surface="studio"] .studio-sidebar .studio-pin svg.icon {
+  margin: 0;
+}
+
+/* A saved view among a table's views, its menu right after it. */
+:root[data-surface="studio"] main .studio-views .studio-saved-view {
+  margin-right: -0.25rem;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+:root[data-surface="studio"] main .studio-views button.studio-view-menu {
+  min-width: 0;
+  padding: 0 0.25rem;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+:root[data-surface="studio"] main .studio-views .studio-view-menu svg.icon {
+  margin: 0;
+}
+
+:root[data-surface="studio"] main .studio-views .studio-saved-view[aria-pressed="true"] {
+  color: var(--text);
+  background: var(--primary-soft);
+  border-color: var(--primary);
+}
+
+/*
+ * A cell edited in place: its button looks as the cell's text does,
+ * outlined only as it is pointed at or has the focus; open, the field
+ * and its Save and Cancel on one line.
+ */
+:root[data-surface="studio"] main .studio-data-table button.studio-cell-edit {
+  min-height: 0;
+  margin: -0.1rem -0.3rem;
+  padding: 0.1rem 0.3rem;
+  font: inherit;
+  text-align: inherit;
+  color: inherit;
+  background: none;
+  border: 1px dashed transparent;
+  box-shadow: none;
+  cursor: text;
+}
+
+:root[data-surface="studio"] main .studio-data-table button.studio-cell-edit:is(:hover, :focus-visible) {
+  border-color: var(--border-strong);
+}
+
+:root[data-surface="studio"] main .studio-data-table .studio-cell.editing {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+:root[data-surface="studio"] main .studio-data-table .studio-cell.editing :is(input, select) {
+  min-width: 6rem;
+}
+
+:root[data-surface="studio"] main .studio-data-table .studio-cell.editing input[type="number"] {
+  width: 5rem;
+  min-width: 0;
+}
+
+/* Whether the draft can be published, in the status bar: a link, marked while problems keep it from it. */
+:root[data-surface="studio"] .studio-status-bar a {
+  color: inherit;
+}
+
+:root[data-surface="studio"] .studio-status-bar a.studio-problem-count {
+  padding: 0 0.4rem;
+  color: var(--warning-text);
+  background: var(--warning-soft);
+  border: 1px solid var(--warning-border);
+  border-radius: var(--radius-sm);
+}

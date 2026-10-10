@@ -45,14 +45,16 @@ import { OutlineAside } from "./OutlineAside";
 import { ContextTabs } from "./shell/ContextTabs";
 import { InstanceSwitcher } from "./shell/InstanceSwitcher";
 import { ProblemCount } from "./shell/ProblemCount";
+import { openedNow, togglePin, type WorkItem } from "./shell/prefs";
 import { StudioShell } from "./shell/StudioShell";
 import { StudioSidebar } from "./shell/StudioSidebar";
 import { crumbsOf } from "./shell/titles";
-import { useUnsavedEdits } from "./shell/unsavedEdits";
+import { UnsavedEdits, useUnsavedEdits } from "./shell/unsavedEdits";
+import { useInstancePrefs } from "./shell/useInstancePrefs";
 import { useMedia } from "./shell/useMedia";
-import { viewOf, withView } from "./shell/views";
+import { viewOf, withView, type SavedView, type ViewTable } from "./shell/views";
 import { asideOf, contextTabsOf, currentOutlineKey, MEDIUM, type Aside } from "./shell/workspaceLayout";
-import { useWorkspaceProblems } from "./WorkspaceProblems";
+import { PublishState, useWorkspaceProblems } from "./WorkspaceProblems";
 import {
   instanceOfRoute,
   isDraftRoute,
@@ -82,6 +84,12 @@ import {
  * beside its deck's cards to the card alone, or back. A card opened
  * beside its deck's cards from elsewhere (the palette, a deck's
  * schedule) has the list at its page, so that its row is in sight.
+ * What the device keeps of the open instance (useInstancePrefs) holds
+ * the views saved of Home and of the workbench, and the decks and drafts
+ * pinned, and opened last, each noted as it is opened; a table's cell
+ * edited and not saved is asked about as a card's edits are
+ * (UnsavedEdits). On a draft's screens, the status bar says whether it
+ * can be published (PublishState).
  */
 export function StudioWorkspace({ useCases, session, banner, children }: WorkspaceProps) {
   const { t, errorText, readerText } = useI18n();
@@ -143,8 +151,15 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
   });
   const activeDraft = draftUrl === null ? null : (draftQuery.data ?? null);
   const draftSubject = activeDraft === null ? null : subjectOf(activeDraft, route!);
+  const mine = useInstancePrefs(activeInstance?.url ?? null);
+  // The deck or the draft the route is about, as the sidebar lists those opened last.
+  const opened: WorkItem | null = deckUrl !== null ? { kind: "deck", url: deckUrl } : draftUrl !== null ? { kind: "draft", url: draftUrl } : null;
 
   useInstanceTheme(useCases, activeInstance?.url ?? null);
+
+  useEffect(() => {
+    if (opened !== null && activeInstance !== null) mine.change((prefs) => ({ ...prefs, recent: openedNow(prefs.recent, opened) }));
+  }, [opened?.url, activeInstance?.url]);
 
   // No route: the only instance's decks, else the picker. An instance the
   // user does not have: the picker. Neither is a Back stop.
@@ -197,6 +212,11 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
   const found = useWorkspaceProblems(useCases, waiting === null ? route : null, { deck: activeDeck, draft: activeDraft });
   const checkCount = found.draft?.length ?? 0;
   const aside = waiting === null ? asideOf(route!, activeDraft) : null;
+  /** The views saved of a table, and keeping them as they change. */
+  const saved = (table: ViewTable) => ({
+    savedViews: mine.prefs.views[table],
+    onSavedViews: (views: SavedView[]) => mine.change((prefs) => ({ ...prefs, views: { ...prefs.views, [table]: views } })),
+  });
 
   const draftLinks = (draftUrl: string): DraftLinks => ({
     draftsHref: studioRouteToHash({ screen: "drafts", instanceUrl: instanceOfRoute(route!)! }),
@@ -226,6 +246,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
         query={route.query ?? DEFAULT_CARD_QUERY}
         // Like Home's view, the query is no Back stop.
         onQuery={(query) => replace({ ...route, query })}
+        {...saved("cards")}
         cardHref={(card) => studioRouteToHash(cardRoute(card))}
         onOpen={(card) => unsaved.guard(() => navigate(cardRoute(card)))}
         // Moving from card to card beside them is no Back stop either.
@@ -446,6 +467,8 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             onView={(view) => replace({ ...route, view })}
             shownView={viewOf(route)}
             onShow={(view) => replace({ ...rest, ...withView(route, view) })}
+            {...saved("home")}
+            onApply={(query) => replace({ ...rest, ...query })}
             current={route.deckUrl}
             // Nor is the deck shown beside it.
             onCursor={(deck) => replace({ ...route, deckUrl: deck.url })}
@@ -583,7 +606,18 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
       instances={instances ?? []}
       instance={activeInstance}
       switcher={activeInstance !== null && <InstanceSwitcher instances={instances!} instance={activeInstance} />}
-      sidebar={activeInstance === null ? null : <StudioSidebar useCases={useCases} instance={activeInstance} route={route!} />}
+      sidebar={
+        activeInstance === null ? null : (
+          <StudioSidebar
+            useCases={useCases}
+            instance={activeInstance}
+            route={route!}
+            pinned={mine.prefs.pinned}
+            recent={mine.prefs.recent}
+            onPin={(item) => mine.change((prefs) => ({ ...prefs, pinned: togglePin(prefs.pinned, item) }))}
+          />
+        )
+      }
       tabs={tabs?.tabs ?? []}
       draftUrl={draftUrl}
       aside={
@@ -602,6 +636,16 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             : { label: t(ASIDE_LABELS[aside]), content: asideFor(aside, route!) }
       }
       problems={found.problems}
+      pinned={mine.prefs.pinned}
+      status={
+        found.publish !== null && (
+          <PublishState
+            readiness={found.publish}
+            checkHref={studioRouteToHash({ screen: "check", draftUrl: draftUrl! })}
+            releaseHref={studioRouteToHash({ screen: "release", draftUrl: draftUrl! })}
+          />
+        )
+      }
       onGo={(to) => unsaved.guard(() => navigate(to))}
     >
       {children}
@@ -626,7 +670,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
         />
       )}
       <div ref={screenRef} class="screen">
-        {waiting ?? screenFor(route!)}
+        <UnsavedEdits.Provider value={unsaved.report}>{waiting ?? screenFor(route!)}</UnsavedEdits.Provider>
       </div>
     </StudioShell>
   );

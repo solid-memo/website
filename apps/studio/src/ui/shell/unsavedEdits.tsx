@@ -1,4 +1,4 @@
-import type { ComponentChildren } from "preact";
+import { createContext, type ComponentChildren } from "preact";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { ConfirmDialog } from "./ConfirmDialog";
@@ -6,10 +6,17 @@ import { ConfirmDialog } from "./ConfirmDialog";
 /** Edits not saved, as an editor reports them: a way to save them, which resolves to whether they were. */
 export type SaveEdits = () => Promise<boolean>;
 
+/** How an editor reports its edits not saved (`save`, null once there are none), under its own key (`from`) beside the others'. */
+export type ReportUnsaved = (save: SaveEdits | null, from?: unknown) => void;
+
+/** How an editor deep in a screen (a table's cell, EditableCell) reports its edits; outside the Studio, to no one. */
+export const UnsavedEdits = createContext<ReportUnsaved>(() => undefined);
+
 /**
  * Keeps edits not saved from being dropped unasked (docs/studio.md, Card
  * inspector). An editor reports them (`report`: how to save them, then
- * null once there are none). While there are some, a move away from the
+ * null once there are none), each under its own key: the card inspector
+ * and a table's cell beside it are two. While there are some, a move away from the
  * page (`guard`, any link to another of the app's pages followed by a
  * plain click, and Back, Forward or a hash typed in) first asks, in a
  * dialog: Save saves them, then moves, unless the save failed or was
@@ -22,30 +29,32 @@ export type SaveEdits = () => Promise<boolean>;
  * own question.
  */
 export function useUnsavedEdits(): {
-  report: (save: SaveEdits | null) => void;
+  report: ReportUnsaved;
   guard: (move: () => void) => void;
   dialog: ComponentChildren;
 } {
   const { t } = useI18n();
-  const unsaved = useRef<SaveEdits | null>(null);
+  const unsaved = useRef(new Map<unknown, SaveEdits>());
+  const none = () => unsaved.current.size === 0;
   // The move asked about, until it is answered.
   const [asked, setAsked] = useState<(() => void) | null>(null);
   // A link followed once answered: its click is let through.
   const passing = useRef(false);
 
   // One function for the page's life, as the editor reports through it.
-  const report = useCallback((save: SaveEdits | null) => {
-    unsaved.current = save;
+  const report = useCallback<ReportUnsaved>((save, from = "editor") => {
+    if (save === null) unsaved.current.delete(from);
+    else unsaved.current.set(from, save);
   }, []);
 
   function guard(move: () => void) {
-    if (unsaved.current === null) move();
+    if (none()) move();
     else setAsked(() => move);
   }
 
   useEffect(() => {
     const click = (event: MouseEvent) => {
-      if (unsaved.current === null || passing.current || event.button !== 0) return;
+      if (none() || passing.current || event.button !== 0) return;
       if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
       const link = (event.target as Element).closest<HTMLAnchorElement>('a[href^="#/"]');
       if (link === null || link.getAttribute("href") === window.location.hash) return;
@@ -65,7 +74,7 @@ export function useUnsavedEdits(): {
   // Before the router's own listener (useHashRouter), which then never hears of the move.
   useLayoutEffect(() => {
     const hashChange = (event: HashChangeEvent) => {
-      if (unsaved.current === null) return;
+      if (none()) return;
       const shown = new URL(event.oldURL).hash;
       if (shown === window.location.hash) return;
       event.stopImmediatePropagation();
@@ -73,7 +82,7 @@ export function useUnsavedEdits(): {
       setAsked(() => () => window.history.back());
     };
     const unload = (event: BeforeUnloadEvent) => {
-      if (unsaved.current !== null) event.preventDefault();
+      if (!none()) event.preventDefault();
     };
     window.addEventListener("hashchange", hashChange, true);
     window.addEventListener("beforeunload", unload);
@@ -91,9 +100,9 @@ export function useUnsavedEdits(): {
           label: t("studio.confirm.unsaved.save"),
           onChoose: () => {
             setAsked(null);
-            void unsaved.current!().then((saved) => {
-              if (!saved) return;
-              unsaved.current = null;
+            void Promise.all([...unsaved.current.values()].map((save) => save())).then((saved) => {
+              if (!saved.every(Boolean)) return;
+              unsaved.current.clear();
               asked();
             });
           },
@@ -104,7 +113,7 @@ export function useUnsavedEdits(): {
           onChoose: () => {
             setAsked(null);
             // Left behind: the move it makes is not asked about again.
-            unsaved.current = null;
+            unsaved.current.clear();
             asked();
           },
         },

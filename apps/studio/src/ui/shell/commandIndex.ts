@@ -5,6 +5,7 @@ import type { ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout
 import { cardName } from "@solid-memo/ui/DataText";
 import type { I18n } from "@solid-memo/ui/i18n";
 import { studioRouteToHash, type StudioRoute } from "../router";
+import type { WorkItem } from "./prefs";
 import { keysOf } from "./shortcuts";
 import { sectionHome, SIDEBAR_SECTIONS, type ContextTab, type DeckTab, type DraftTab } from "./workspaceLayout";
 
@@ -20,8 +21,8 @@ export interface ScreenCommand {
   run: () => void;
 }
 
-/** The palette's groups, each under its heading: the entries used last first, then as buildCommands lists them. */
-export type CommandGroup = "recent" | "commands" | "tabs" | "sections" | "instances" | "decks" | "drafts" | "cards";
+/** The palette's groups, each under its heading: the decks and drafts pinned, and the entries used last, first; then as buildCommands lists them. */
+export type CommandGroup = "pinned" | "recent" | "commands" | "tabs" | "sections" | "instances" | "decks" | "drafts" | "cards";
 
 /**
  * An entry of the palette: where it goes (`route`, as a link does) or
@@ -33,7 +34,7 @@ export type CommandGroup = "recent" | "commands" | "tabs" | "sections" | "instan
  */
 export type Command = {
   id: string;
-  group: Exclude<CommandGroup, "recent">;
+  group: Exclude<CommandGroup, "pinned" | "recent">;
   label: string;
   keys?: string;
 } & ({ route: StudioRoute } | { run: () => void });
@@ -102,6 +103,13 @@ export function buildCommands(sources: CommandSources, i18n: Pick<I18n, "t" | "r
   ];
 }
 
+/** The id of a deck's or a draft's entry (buildCommands): a deck at its cards, a draft at its overview. */
+export function itemCommandId(item: WorkItem): string {
+  return item.kind === "deck"
+    ? `decks:${studioRouteToHash({ screen: "cards", deckUrl: item.url })}`
+    : `drafts:${studioRouteToHash({ screen: "draft", draftUrl: item.url })}`;
+}
+
 /** The most entries the palette shows at once: the rest are a few more letters away. */
 export const MAX_SHOWN = 50;
 
@@ -113,19 +121,27 @@ export interface CommandSection {
 
 /**
  * The entries the palette shows for what the user typed, under their
- * headings, MAX_SHOWN at most. With nothing typed: the entries used last
- * (`recent`, the last first, those the screen still has), then every
- * other but the cards, in their order. Else those whose name holds the
+ * headings, MAX_SHOWN at most. With nothing typed: the decks and drafts
+ * pinned (`pinned`, by their ids, in their order), the entries used last
+ * (`recent`, the last first), each of those the palette still has, then
+ * every other but the cards, in their order. Else those whose name holds the
  * letters typed in their order (matchScore), case and accents aside, the
  * best first, and their groups in the order of their best.
  */
-export function rankCommands(commands: readonly Command[], query: string, recent: readonly string[]): CommandSection[] {
+export function rankCommands(commands: readonly Command[], query: string, recent: readonly string[], pinned: readonly string[] = []): CommandSection[] {
   const wanted = folded(query.trim());
   const shown: { group: CommandGroup; command: Command }[] = [];
   if (wanted === "") {
-    const used = recent.flatMap((id) => commands.find((command) => command.id === id) ?? []);
+    const find = (ids: readonly string[]) => ids.flatMap((id) => commands.find((command) => command.id === id) ?? []);
+    const first = find(pinned);
+    const used = find(recent).filter((command) => !first.includes(command));
+    shown.push(...first.map((command) => ({ group: "pinned" as const, command })));
     shown.push(...used.map((command) => ({ group: "recent" as const, command })));
-    shown.push(...commands.filter((command) => command.group !== "cards" && !used.includes(command)).map((command) => ({ group: command.group, command })));
+    shown.push(
+      ...commands
+        .filter((command) => command.group !== "cards" && !first.includes(command) && !used.includes(command))
+        .map((command) => ({ group: command.group, command })),
+    );
   } else {
     const scored = commands.flatMap((command) => {
       const score = matchScore(wanted, folded(command.label));

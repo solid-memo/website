@@ -50,6 +50,15 @@ export function useReleaseCheck(useCases: UseCases, draft: ReleaseDraft | null, 
   });
 }
 
+/**
+ * How many of a check's problems keep the draft from being published:
+ * the errors of its rules, of what it drops and of its Markdown, as
+ * publishing checks them (the library's own, and the shapes, aside).
+ */
+export function publishErrors(check: Pick<ReleaseCheck, "rules" | "drops" | "markdown">): number {
+  return [...check.rules, ...check.drops, ...check.markdown].filter((one) => one.severity === "error").length;
+}
+
 /** What the shapes say of the version of the draft they were asked of (`asked`); nothing until they are. */
 export function useShapeCheck(useCases: UseCases, asked: ReleaseDraft | null, policy: CheckPolicy) {
   return useQuery<ReleaseProblem[]>({

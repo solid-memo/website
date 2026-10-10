@@ -226,6 +226,34 @@ describe("planCardEdit, replacing text", () => {
 
 });
 
+describe("planCardEdit, writing a side's text anew", () => {
+  const setText = (side: "front" | "back", tag: string, text: string): CardEdit => ({ kind: "setText", side, tag, text });
+
+  it("writes the side's text in one language, trimmed, its other languages and the card retired or not as they were", () => {
+    const both = card("both", { front: { en: "cat", sv: "katt" }, retired: true });
+    const plan = planCardEdit([both], ["both"], setText("front", "en", "  dog "));
+    expect(plan.save).toEqual([{ ...both, front: { en: "dog", sv: "katt" }, formatVersion: 5 }]);
+    expect(plan.inverse.save).toEqual([both]);
+    expect(planCardEdit([live], ["live"], setText("back", "sv", "hund")).save[0]?.back).toEqual({ sv: "hund" });
+  });
+
+  it("keeps the spaces a Markdown text starts with", () => {
+    const code = card("code", { textFormat: SM.markdown });
+    expect(planCardEdit([code], ["code"], setText("front", "en", "\n    x = 1\n")).save[0]?.front).toEqual({ en: "    x = 1" });
+  });
+
+  it("skips a card the text leaves as it is, one it would leave empty, and one whose text is untagged", () => {
+    const untagged = card("u", { front: { "": "cat" } });
+    const plan = planCardEdit([live, untagged], ["live", "u"], setText("front", "en", " live "));
+    expect(plan.skipped).toEqual([
+      { id: "live", reason: "unchanged" },
+      { id: "u", reason: "unstatedLanguage" },
+    ]);
+    expect(planCardEdit([live], ["live"], setText("front", "en", "  ")).skipped).toEqual([{ id: "live", reason: "wouldEmpty" }]);
+    expect(planCardEdit([untagged], ["u"], setText("front", "", "dog")).skipped).toEqual([{ id: "u", reason: "unstatedLanguage" }]);
+  });
+});
+
 describe("sameCardEditPlan", () => {
   const cards = [live, retired, card("third")];
   const plan = planCardEdit(cards, ["live", "retired"], { kind: "retire" });

@@ -7,10 +7,10 @@ import { composing } from "@solid-memo/ui/composing";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { draftsKey } from "../DraftsContainer";
 import { instanceOfRoute, type StudioRoute } from "../router";
-import { buildCommands, rankCommands, type Command, type ScreenCommand } from "./commandIndex";
+import { buildCommands, itemCommandId, rankCommands, type Command, type ScreenCommand } from "./commandIndex";
 import { Dialog } from "./Dialog";
 import { Keys } from "./KeyHelp";
-import { recentCommands, rememberCommand } from "./prefs";
+import { recentCommands, rememberCommand, type WorkItem } from "./prefs";
 import { keyOf, shortcutOf } from "./shortcuts";
 import { deckOf, type ContextTab } from "./workspaceLayout";
 
@@ -20,7 +20,8 @@ import { deckOf, type ContextTab } from "./workspaceLayout";
  * each with its keys. It lists what the workspace has read, from the
  * cache, as it was when the palette opened: the instances, the open
  * instance's decks and drafts, the cards of the deck shown, the
- * sections, the tabs and the commands (`commands`).
+ * sections, the tabs and the commands (`commands`). With nothing typed,
+ * the decks and drafts pinned (`pinned`) come first.
  *
  * The field is a combobox over the list (the focus stays in it, the
  * entry picked its `aria-activedescendant`): Down and Up pick the next
@@ -34,6 +35,7 @@ export function CommandPalette({
   instances,
   tabs,
   commands,
+  pinned,
   onChoose,
   onClose,
 }: {
@@ -42,6 +44,8 @@ export function CommandPalette({
   instances: readonly Instance[];
   tabs: readonly ContextTab[];
   commands: readonly ScreenCommand[];
+  /** The open instance's decks and drafts pinned, in their order. */
+  pinned: readonly WorkItem[];
   /** An entry was chosen: close the palette, then go where it goes or do it. */
   onChoose: (command: Command) => void;
   onClose: () => void;
@@ -71,7 +75,7 @@ export function CommandPalette({
     );
   });
   const [recent] = useState(() => recentCommands());
-  const sections = rankCommands(all, query, recent);
+  const sections = rankCommands(all, query, recent, pinned.map(itemCommandId));
   const shown = sections.flatMap((section) => section.commands);
   const optionId = (index: number) => `${listId}-${index}`;
 

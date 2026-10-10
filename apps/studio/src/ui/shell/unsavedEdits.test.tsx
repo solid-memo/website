@@ -50,13 +50,31 @@ describe("useUnsavedEdits", () => {
     expect(question()).toBeNull();
   });
 
+  it("keeps each editor's edits apart, and saves them all before it moves, staying when one is not saved", async () => {
+    const card = vi.fn(async () => true);
+    const cell = vi.fn(async () => false);
+    renderPage(card);
+    act(() => guarded.report(cell, "cell"));
+    const move = vi.fn();
+    act(() => guarded.guard(move));
+    answer("Save");
+    await waitFor(() => expect(cell).toHaveBeenCalled());
+    expect(card).toHaveBeenCalled();
+    expect(move).not.toHaveBeenCalled();
+    act(() => guarded.report(null, "cell"));
+    act(() => guarded.guard(move));
+    expect(question()).not.toBeNull();
+    answer("Discard");
+    expect(move).toHaveBeenCalledTimes(1);
+  });
+
   it("asks first while edits are unsaved: Stay moves nowhere, Discard moves without them, Save saves them, then moves", async () => {
     const save = vi.fn(async () => true);
     renderPage(save);
     const move = vi.fn();
     screen.getByText("The editor").focus();
     act(() => guarded.guard(move));
-    expect(question()).toHaveTextContent("This card has changes that are not saved.");
+    expect(question()).toHaveTextContent("Some changes are not saved.");
     expect(within(question()!).getByRole("button", { name: "Save" })).toHaveFocus();
     expect(within(question()!).getByRole("button", { name: "Discard" })).toHaveClass("danger");
     answer("Stay");
