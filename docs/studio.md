@@ -89,7 +89,8 @@ It takes the whole window, and the window does not scroll:
   open instance, says on a draft's screens whether the draft is saved
   ("Saving the draft…", then "Draft saved", or "Last change not saved"
   when its write failed or the draft refused it;
-  [below](#how-edits-are-saved)), and switches the density.
+  [below](#how-edits-are-saved)), switches the density, and shows the
+  keys (**? Keys**).
 
 Its look is calm: headings in the body's type, sections flat with a
 thin border, and no tilt, stamp or pop as a screen comes in. Its
@@ -103,6 +104,34 @@ is kept on the device, never in the pod
 ([`shell/prefs.ts`](../apps/studio/src/ui/shell/prefs.ts), key
 `solid-memo:studioLayout.v1`; storage that is missing or refuses gives
 compact), and changes no history entry.
+
+**Keys.** The Studio has one listener of keys, in its shell
+([`shell/useShortcuts.ts`](../apps/studio/src/ui/shell/useShortcuts.ts)),
+and its keymap is data
+([`shell/shortcuts.ts`](../apps/studio/src/ui/shell/shortcuts.ts)):
+
+| Keys | Where | What they do |
+| --- | --- | --- |
+| `?` | anywhere | list every key, in a dialog; **? Keys** in the status bar does too |
+| `/` | anywhere | go to the screen's search or filter: Home's, the workbench's, a draft's cards' |
+| F6, Shift+F6 | anywhere, a field too | go to the next region, or the one before: the header, the main content, the status bar |
+| `g d`, `g g`, `g r`, `g p`, `g h`, `g l`, `g t` | with an instance open | go to its decks (Home), groups, drafts, releases, health, library copies, or import and export |
+| `g i` | anywhere | go to the instances |
+| `j`, `k`, `x`, Enter | the card workbench | the next card, the one before, select it, open it ([below](#card-workbench)) |
+
+A pair such as `g d` is pressed one key after the other, the second
+within 1.5 seconds; a key held down counts once, so a held `g` is not
+`g g`. A `g` chord goes where a link would, and is a Back stop as a
+link is, except to the page already shown. While the user types in a field (a text, a search,
+a list to choose from), the field keeps its keys, F6 and Shift+F6
+aside. A key goes first to what has the focus, which may take it (a
+menu's arrows, say); then to the screen's own keys (`useScreenKeys`),
+then to the Studio's. Keys in a dialog are the dialog's. A field or
+button with a key says so to screen readers (`aria-keyshortcuts`): the
+search or filter `/` goes to is the one marked so. The key help is a
+modal dialog, the browser's own
+([`shell/Dialog.tsx`](../apps/studio/src/ui/shell/Dialog.tsx)): Escape
+or Close closes it, and the focus goes back where it was.
 
 **Its stylesheet** is
 [`studio.css`](../apps/studio/src/ui/studio.css), over the site's
@@ -328,7 +357,9 @@ The selection stays while the view changes, and a status line counts
 it. The keys say so on the screen: **j** and **k** move between the
 rows, **x** selects one, and **Enter** opens it. They work wherever the
 focus is: from outside the table, **j** goes to the first row. The keys
-are left to the search and the filters while they have the focus.
+are left to the search and the filters while they have the focus, and
+to whatever took them first; they are the screen's own keys of the
+Studio's ([Keys](#layout)).
 
 The selected cards can be edited at once ([below](#bulk-edits)).
 

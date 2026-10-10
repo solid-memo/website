@@ -159,6 +159,23 @@ describe("StudioWorkspace", () => {
     );
   });
 
+  it("goes to a section with a g chord, a Back stop as a link is, and to Home's filter with /", async () => {
+    window.history.replaceState(null, "", home(instanceA.url));
+    const useCases = makeUseCasesFake({ listInstances: vi.fn(async () => [instanceA]), listDecks: vi.fn(async () => [kanji]) });
+    renderWorkspace(useCases);
+    await inMain().findByRole("rowheader", { name: "Kanji N5" });
+    document.body.focus();
+    fireEvent.keyDown(document.body, { key: "/" });
+    expect(inMain().getByRole("searchbox", { name: "Filter by name or group" })).toHaveFocus();
+    const length = window.history.length;
+    document.body.focus();
+    fireEvent.keyDown(document.body, { key: "g" });
+    fireEvent.keyDown(document.body, { key: "g" });
+    expect(await screen.findByRole("heading", { name: "Groups" })).toBeInTheDocument();
+    expect(parseStudioHash(window.location.hash)).toEqual({ screen: "groups", instanceUrl: instanceA.url });
+    expect(window.history.length).toBe(length + 1);
+  });
+
   it("opens a deck's cards in the workbench, keeping its query in the URL, and a card in the inspector", async () => {
     window.history.replaceState(null, "", home(instanceA.url));
     const card = makeCard(kanji, "water");

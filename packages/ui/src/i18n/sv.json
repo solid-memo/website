@@ -1409,7 +1409,35 @@
       "comfortable": "Luftig",
       "saving": "Sparar utkastet…",
       "saved": "Utkastet är sparat",
-      "failed": "Senaste ändringen sparades inte"
+      "failed": "Senaste ändringen sparades inte",
+      "close": "Stäng"
+    },
+    "keys": {
+      "button": "? Tangenter",
+      "heading": "Kortkommandon",
+      "chords": "Tangenter sida vid sida, som g d, trycks en efter en. Medan du skriver i ett fält fungerar bara F6 och Shift+F6.",
+      "scope": {
+        "studio": "Överallt i Studion",
+        "cards": "I kortbänken"
+      },
+      "help": "Visa kortkommandona",
+      "filter": "Gå till skärmens sökning eller filter",
+      "nextRegion": "Gå till nästa område: sidhuvud, huvudinnehåll, statusfält",
+      "previousRegion": "Gå till föregående område",
+      "go": {
+        "decks": "Gå till kortlekarna",
+        "groups": "Gå till grupperna",
+        "drafts": "Gå till utkasten",
+        "releases": "Gå till utgåvorna",
+        "health": "Gå till hälsan",
+        "library": "Gå till bibliotekskopiorna",
+        "transfer": "Gå till import och export",
+        "instances": "Gå till instanserna"
+      },
+      "down": "Nästa kort",
+      "up": "Föregående kort",
+      "select": "Välj kortet",
+      "open": "Öppna kortet"
     },
     "decks": {
       "heading": "Kortlekar",

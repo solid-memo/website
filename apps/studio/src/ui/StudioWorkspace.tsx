@@ -461,7 +461,13 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
   };
 
   return (
-    <StudioShell banner={banner} backHref={instanceUrl === null ? "#/" : decksHref(instanceUrl)} instance={activeInstance} draftUrl={draftUrl}>
+    <StudioShell
+      banner={banner}
+      backHref={instanceUrl === null ? "#/" : decksHref(instanceUrl)}
+      instance={activeInstance}
+      draftUrl={draftUrl}
+      onGo={navigate}
+    >
       {children}
       {waiting === null && <Breadcrumbs crumbs={crumbs} toHash={studioRouteToHash} />}
       <div ref={screenRef} class="screen">

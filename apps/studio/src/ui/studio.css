@@ -305,3 +305,55 @@
   background: var(--surface-sunken);
   border-top: 1px solid var(--border);
 }
+
+/* A region F6 moves to rings as the focus does from the keyboard, not after a click. */
+:root[data-surface="studio"] [data-region]:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* A dialog over the workspace (Dialog), its heading beside its Close. */
+:root[data-surface="studio"] .studio-dialog {
+  width: min(36rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 4rem);
+  padding: 0.75rem 1rem 1rem;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+}
+
+:root[data-surface="studio"] .studio-dialog::backdrop {
+  background: var(--zoom-backdrop);
+}
+
+:root[data-surface="studio"] .studio-dialog > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+:root[data-surface="studio"] .studio-dialog :is(h2, h3) {
+  margin: 0.5rem 0;
+}
+
+/* The key help: the keys, then what they do. */
+:root[data-surface="studio"] .studio-keymap {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.25rem 1rem;
+  margin: 0;
+}
+
+:root[data-surface="studio"] .studio-keymap dd {
+  margin: 0;
+}
+
+:root[data-surface="studio"] .studio-keymap kbd {
+  padding: 0 0.3rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.85em;
+}

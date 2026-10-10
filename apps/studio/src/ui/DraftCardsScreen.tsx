@@ -87,6 +87,7 @@ export function DraftCardsScreen({
         <label>
           {t("studio.draftCards.filter")}
           <select
+            aria-keyshortcuts="/"
             value={view.filter ?? ""}
             onChange={(event) => {
               const value = event.currentTarget.value;
