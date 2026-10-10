@@ -1434,7 +1434,9 @@
       "noDrafts": "Inga utkast.",
       "version": "v{version}",
       "switchInstance": "Byt instans: {instance}",
-      "allInstances": "Alla instanser"
+      "allInstances": "Alla instanser",
+      "resizeAside": "Sidopanelens bredd",
+      "hide": "Dölj"
     },
     "tabs": {
       "deck": "Kortlek",
@@ -1455,14 +1457,14 @@
       "palette": "Sök, gå till eller kör ett kommando",
       "button": "? Tangenter",
       "heading": "Kortkommandon",
-      "chords": "Tangenter sida vid sida, som g d, trycks en efter en. Medan du skriver i ett fält fungerar bara Ctrl+K, F6 och Shift+F6.",
+      "chords": "Tangenter sida vid sida, som g d, trycks en efter en. Medan du skriver i ett fält fungerar bara Ctrl+K, F6, Shift+F6, F8 och Shift+F8.",
       "scope": {
         "studio": "Överallt i Studion",
         "cards": "I kortbänken"
       },
       "help": "Visa kortkommandona",
       "filter": "Gå till skärmens sökning eller filter",
-      "nextRegion": "Gå till nästa område: sidhuvud, sidofält, huvudinnehåll, statusfält",
+      "nextRegion": "Gå till nästa område: sidhuvud, sidofält, huvudinnehåll, disposition, panel, statusfält",
       "previousRegion": "Gå till föregående område",
       "go": {
         "decks": "Gå till kortlekarna",
@@ -1475,6 +1477,10 @@
         "instances": "Gå till instanserna"
       },
       "toggleSidebar": "Visa eller dölj sidofältet",
+      "toggleAside": "Visa eller dölj dispositionen",
+      "toggleDock": "Visa eller dölj panelen: problem och aktivitet",
+      "nextProblem": "Gå till nästa problems fält",
+      "previousProblem": "Gå till föregående problems fält",
       "previousTab": "Gå till kortlekens eller utkastets föregående flik",
       "nextTab": "Gå till kortlekens eller utkastets nästa flik",
       "tab": "Gå till en flik i kortleken eller utkastet efter dess nummer",
@@ -1482,6 +1488,23 @@
       "up": "Föregående kort",
       "select": "Välj kortet",
       "open": "Öppna kortet"
+    },
+    "dock": {
+      "label": "Panel",
+      "problems": "Problem",
+      "problemsCount": "Problem ({count})",
+      "activity": "Aktivitet",
+      "resize": "Panelens höjd",
+      "noActivity": "Inget gjort ännu sedan Studion öppnades.",
+      "noProblemsHere": "En kortleks eller ett utkasts problem listas på dess skärmar.",
+      "checking": "Letar efter problem…",
+      "none": "Inga problem hittades.",
+      "deckData": {
+        "one": "{count} problem i kortlekens data",
+        "other": "{count} problem i kortlekens data"
+      },
+      "unstated": "{place}: språket anges inte",
+      "duplicate": "{place}: säger samma sak som ett annat kort"
     },
     "palette": {
       "button": "Sök eller kör…",

@@ -7,6 +7,7 @@ import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n, type ErrorText } from "@solid-memo/ui/i18n";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
 import { ReadOnlyScope } from "./ReadOnly";
+import { useActivity } from "./shell/activity";
 import { useScreenCommands } from "./shell/useScreenCommands";
 
 /** How far an export of several decks is. */
@@ -79,6 +80,8 @@ export function TransferScreen({
   cardsHref: (deck: Deck) => string;
 }) {
   const { t, tx, readerText } = useI18n();
+  useActivity(exported, () => t("studio.transfer.exported", { count: exported! }));
+  useActivity(imported, () => t("studio.transfer.imported", { deck: readerText(imported!.title) }));
   const [format, setFormat] = useState<DeckFileFormat>("turtle");
   const [withProgress, setWithProgress] = useState(false);
   const [importProgress, setImportProgress] = useState(true);

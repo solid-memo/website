@@ -53,6 +53,8 @@ const tabsOf = (name: "Deck" | "Draft") => within(screen.getByRole("navigation",
 describe("StudioWorkspace", () => {
   beforeEach(() => {
     window.history.replaceState(null, "", window.location.pathname);
+    // The layout the device remembers: none, the dock hidden.
+    localStorage.clear();
   });
 
   it("opens the only instance's decks, its trail and title, under the banner and the notices", async () => {
@@ -256,6 +258,46 @@ describe("StudioWorkspace", () => {
     });
   });
 
+  it("counts a deck's problems as its health found them, and lists them in the dock, checking it there if no screen has", async () => {
+    const water = makeCard(kanji, "water");
+    window.history.replaceState(null, "", studioRouteToHash({ screen: "about", deckUrl: kanji.url }));
+    const useCases = makeUseCasesFake({
+      listInstances: vi.fn(async () => [instanceA]),
+      listDecks: vi.fn(async () => [kanji]),
+      listCards: vi.fn(async () => [water]),
+    });
+    const checkDeck = vi.mocked(useCases.checkDeck);
+    const healthy = await checkDeck.getMockImplementation()!(instanceA.url, kanji, { plain: String, check: () => [] });
+    checkDeck.mockImplementation(async () => ({ ...healthy, unstated: [{ card: water, place: { tab: "content", part: "front" } }] }));
+    renderWorkspace(useCases);
+    expect(await screen.findByRole("heading", { level: 2, name: /Kanji N5/ })).toBeInTheDocument();
+    const status = within(screen.getByRole("complementary", { name: "Studio status" }));
+    // No screen has checked it: nothing is counted, and nothing checked.
+    expect(status.queryByRole("button", { name: /problems?$/ })).toBeNull();
+    expect(checkDeck).not.toHaveBeenCalled();
+    fireEvent.click(status.getByRole("button", { name: "Panel" }));
+    const dock = within(screen.getByRole("region", { name: "Panel" }));
+    expect(await dock.findByRole("link", { name: "water, front: its language is not stated" })).toHaveAttribute(
+      "href",
+      studioRouteToHash({ screen: "card", deckUrl: kanji.url, cardUrl: water.url, tab: "content", field: "front" }),
+    );
+    expect(await status.findByRole("button", { name: "1 problem" })).toBeInTheDocument();
+    fireEvent.keyDown(document.body, { key: "F8" });
+    await waitFor(() => expect(parseStudioHash(window.location.hash)).toMatchObject({ screen: "card", cardUrl: water.url, field: "front" }));
+  });
+
+  it("says in the dock when a deck is healthy, and why its health could not be checked", async () => {
+    window.history.replaceState(null, "", studioRouteToHash({ screen: "about", deckUrl: kanji.url }));
+    localStorage.setItem("solid-memo:studioLayout.v1", JSON.stringify({ dock: true }));
+    const useCases = makeUseCasesFake({ listInstances: vi.fn(async () => [instanceA]), listDecks: vi.fn(async () => [kanji]) });
+    const view = renderWorkspace(useCases);
+    expect(await within(await screen.findByRole("region", { name: "Panel" })).findByText("No problems found.")).toBeInTheDocument();
+    view.unmount();
+    vi.mocked(useCases.checkDeck).mockRejectedValue(new AppError("draftGone"));
+    renderWorkspace(useCases);
+    expect(await within(await screen.findByRole("region", { name: "Panel" })).findByRole("alert")).toBeInTheDocument();
+  });
+
   it("opens the instance's health from the sidebar, a deck's from there, and a problem's field in the inspector", async () => {
     const twin = makeCard(kanji, "water");
     const marked = { ...makeCard(kanji, "fire"), backNote: { en: "<b>hot</b>" }, textFormat: SM.markdown };
@@ -287,8 +329,10 @@ describe("StudioWorkspace", () => {
     await waitFor(() => expect(document.getElementById("card-back-note")).toHaveFocus());
     // Another tab opens at none of the fields.
     expect(screen.getByRole("link", { name: "Wrong options (0)" })).toHaveAttribute("href", studioRouteToHash({ ...route, tab: "distractors" }));
-    // A card is among its deck's cards.
-    expect(tabsOf("Deck").getByRole("link", { name: "Cards" })).toHaveAttribute("aria-current", "page");
+    // A card is under its deck's cards; only its own tab is the page.
+    expect(tabsOf("Deck").getByRole("link", { name: "Cards" })).toHaveAttribute("aria-current", "true");
+    const pages = [...document.querySelectorAll("nav.studio-tabs [aria-current=page]")].map((link) => link.textContent);
+    expect(pages).toEqual(["Content"]);
   });
 
   it("opens the instance's library copies from the sidebar, with a link to the library in Solid Memo and each deck's about screen", async () => {
@@ -599,7 +643,7 @@ describe("StudioWorkspace", () => {
       fireEvent.click(inMain().getByRole("link", { name: "What holds data?" }));
       expect(await screen.findByRole("heading", { level: 2, name: "What holds data?" })).toBeInTheDocument();
       expect(trailOf()).toEqual(["Instances", "Decks", "Drafts", "Solid", "Cards", "What holds data?"]);
-      expect(tabsOf("Draft").getByRole("link", { name: "Cards" })).toHaveAttribute("aria-current", "page");
+      expect(tabsOf("Draft").getByRole("link", { name: "Cards" })).toHaveAttribute("aria-current", "true");
       fireEvent.click(tabsOf("Draft").getByRole("link", { name: "Cards" }));
       expect(await screen.findByRole("heading", { level: 2, name: "Questions of Solid" })).toBeInTheDocument();
       expect(trailOf()).toEqual(["Instances", "Decks", "Drafts", "Solid", "Cards"]);
@@ -699,7 +743,8 @@ describe("StudioWorkspace", () => {
       renderWorkspace(useCases);
       expect(await screen.findByText("The release check finds 1 problem.")).toBeInTheDocument();
       expect(inMain().getByRole("link", { name: "1 problem in Apps" })).toBeInTheDocument();
-      fireEvent.click(tabsOf("Draft").getByRole("link", { name: "Check" }));
+      // Its tab counts them too.
+      fireEvent.click(await tabsOf("Draft").findByRole("link", { name: "Check 1 problem" }));
       expect(await screen.findByRole("heading", { level: 2, name: "Release check" })).toBeInTheDocument();
       expect(trailOf()).toEqual(["Instances", "Decks", "Drafts", "Solid", "Release check"]);
       expect(useCases.checkReleaseDraft).toHaveBeenLastCalledWith(draft, MARKDOWN_CHECK, "pod");
@@ -715,6 +760,76 @@ describe("StudioWorkspace", () => {
       fireEvent.click(screen.getByRole("link", { name: "Has no step in use." }));
       await waitFor(() => expect(parseStudioHash(window.location.hash)).toEqual({ screen: "chapter", draftUrl: DRAFT_URL, chapter: "ch-apps", field: "steps" }));
       expect(await screen.findByRole("heading", { level: 3, name: "Steps" })).toHaveAttribute("data-arrival");
+    });
+
+    it("shows a course's outline in the aside on its screens but the overview, the page shown marked, each badge a link to its first problem's field", async () => {
+      const draft = courseDraft();
+      const useCases = draftUseCases(draft);
+      const chapterless = problem(`${DRAFT_URL}#ch-apps`, { code: "chapterWithoutStep", params: {} });
+      vi.mocked(useCases.checkReleaseDraft).mockResolvedValue({ rules: [chapterless], library: [], drops: [], markdown: [], shapes: null });
+      window.history.replaceState(null, "", studioRouteToHash({ screen: "chapter", draftUrl: DRAFT_URL, chapter: "ch-pods" }));
+      renderWorkspace(useCases);
+      expect(await screen.findByRole("heading", { level: 2, name: "Pods" })).toBeInTheDocument();
+      // The test DOM's screen is not wide: the aside is a drawer, closed at first.
+      fireEvent.click(screen.getByRole("button", { name: "Outline" }));
+      const aside = within(screen.getByRole("complementary", { name: "Outline" }));
+      expect(aside.getByRole("link", { name: "Pods" })).toHaveAttribute("aria-current", "page");
+      expect(await aside.findByRole("link", { name: "1 problem in Apps" })).toHaveAttribute(
+        "href",
+        studioRouteToHash({ screen: "chapter", draftUrl: DRAFT_URL, chapter: "ch-apps", field: "steps" }),
+      );
+      // Arranged there too, as on the overview.
+      fireEvent.click(aside.getByRole("button", { name: "Actions for Pods" }));
+      fireEvent.click(screen.getByRole("menuitem", { name: "Move down" }));
+      await waitFor(() => expect(useCases.editReleaseDraft).toHaveBeenCalledWith(DRAFT_URL, [{ kind: "moveChapter", id: "ch-pods", to: 1 }]));
+      // The overview shows the outline itself, to arrange: the aside has none there.
+      fireEvent.click(tabsOf("Draft").getByRole("link", { name: "Overview" }));
+      expect(await screen.findByRole("heading", { level: 2, name: "Solid" })).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Outline" })).toBeNull();
+      expect(screen.getAllByRole("list", { name: "Outline" })).toHaveLength(1);
+    });
+
+    it("counts the draft's problems in its Check tab and the status bar, lists them in the dock, and goes to each one's field with F8", async () => {
+      const draft = courseDraft();
+      const useCases = draftUseCases(draft);
+      const chapterless = problem(`${DRAFT_URL}#ch-apps`, { code: "chapterWithoutStep", params: {} });
+      const backless = problem(`${DRAFT_URL}#q-pods-1a`, { code: "noBack", params: {} });
+      vi.mocked(useCases.checkReleaseDraft).mockResolvedValue({ rules: [backless, chapterless], library: [], drops: [], markdown: [], shapes: null });
+      window.history.replaceState(null, "", studioRouteToHash({ screen: "preview", draftUrl: DRAFT_URL }));
+      renderWorkspace(useCases);
+      expect(await screen.findByRole("link", { name: "Check 2 problems" })).toBeInTheDocument();
+      const status = within(screen.getByRole("complementary", { name: "Studio status" }));
+      fireEvent.click(status.getByRole("button", { name: "2 problems" }));
+      const dock = within(screen.getByRole("region", { name: "Panel" }));
+      expect(dock.getByRole("tab", { name: "Problems (2)" })).toHaveAttribute("aria-selected", "true");
+      expect(within(dock.getByRole("list", { name: "Errors" })).getByRole("link", { name: "Has no step in use." })).toHaveAttribute(
+        "href",
+        studioRouteToHash({ screen: "chapter", draftUrl: DRAFT_URL, chapter: "ch-apps", field: "steps" }),
+      );
+      fireEvent.keyDown(document.body, { key: "F8" });
+      await waitFor(() => expect(parseStudioHash(window.location.hash)).toMatchObject({ screen: "question", card: "q-pods-1a" }));
+      fireEvent.keyDown(document.body, { key: "F8" });
+      await waitFor(() => expect(parseStudioHash(window.location.hash)).toEqual({ screen: "chapter", draftUrl: DRAFT_URL, chapter: "ch-apps", field: "steps" }));
+      expect(await screen.findByRole("heading", { level: 3, name: "Steps" })).toHaveFocus();
+    });
+
+    it("says in the dock while the draft is checked, when it is clear, and why it could not be checked", async () => {
+      const useCases = draftUseCases();
+      let finish!: (check: Awaited<ReturnType<UseCases["checkReleaseDraft"]>>) => void;
+      vi.mocked(useCases.checkReleaseDraft).mockImplementation(() => new Promise((resolve) => (finish = resolve)));
+      window.history.replaceState(null, "", studioRouteToHash({ screen: "preview", draftUrl: DRAFT_URL }));
+      const view = renderWorkspace(useCases);
+      fireEvent.click(await screen.findByRole("button", { name: "Panel" }));
+      const dock = within(screen.getByRole("region", { name: "Panel" }));
+      expect(await dock.findByText("Looking for problems…")).toBeInTheDocument();
+      await waitFor(() => expect(finish).toBeDefined());
+      finish({ rules: [], library: [], drops: [], markdown: [], shapes: null });
+      expect(await dock.findByText("No problems found.")).toBeInTheDocument();
+      expect(tabsOf("Draft").getByRole("link", { name: "Check" })).toBeInTheDocument();
+      view.unmount();
+      vi.mocked(useCases.checkReleaseDraft).mockRejectedValue(new AppError("draftGone"));
+      renderWorkspace(useCases);
+      expect(await within(await screen.findByRole("region", { name: "Panel" })).findByRole("alert")).toBeInTheDocument();
     });
 
     it("checks the shapes again after they failed, the draft as it was", async () => {
@@ -810,6 +925,25 @@ describe("StudioWorkspace", () => {
       fireEvent.click(screen.getByRole("button", { name: "Start the next version" }));
       await waitFor(() => expect(parseStudioHash(window.location.hash)).toEqual({ screen: "draft", draftUrl: nextUrl }));
       expect(useCases.createReleaseDraft).toHaveBeenCalledWith(instanceA.url, { kind: "nextVersionOf", url: target });
+    });
+
+    it("opens a draft made on the drafts screen, which the activity tells of", async () => {
+      window.history.replaceState(null, "", studioRouteToHash({ screen: "drafts", instanceUrl: instanceA.url }));
+      const useCases = draftUseCases();
+      vi.mocked(useCases.listDecks).mockResolvedValue([kanji]);
+      vi.mocked(useCases.createReleaseDraft).mockResolvedValue({
+        draft: { url: DRAFT_URL, instanceUrl: instanceA.url, name: "solid", version: 1, readable: true, title: { en: "Solid" }, course: true },
+      });
+      renderWorkspace(useCases);
+      fireEvent.click(await screen.findByRole("radio", { name: "A deck of this instance" }));
+      const create = screen.getByRole("button", { name: "Create the draft" });
+      await waitFor(() => expect(create).toBeEnabled());
+      fireEvent.click(create);
+      await waitFor(() => expect(parseStudioHash(window.location.hash)).toEqual({ screen: "draft", draftUrl: DRAFT_URL }));
+      expect(await screen.findByRole("heading", { level: 2, name: "Solid" })).toBeInTheDocument();
+      fireEvent.click(screen.getByRole("button", { name: "Panel" }));
+      fireEvent.click(screen.getByRole("tab", { name: "Activity" }));
+      expect(screen.getByRole("tabpanel", { name: "Activity" })).toHaveTextContent("Created the draft Solid, version 1.");
     });
 
     it("lists the instance's releases from the sidebar, with their trail, and opens a next version started", async () => {

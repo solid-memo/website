@@ -157,18 +157,18 @@ function cardOfDistractor(draft: Pick<ReleaseDraft, "cards">, subject: string) {
 }
 
 /**
- * How many problems each subject has, by its fragment id in the draft
- * (the outline's badges); a wrong option's under its card's, which the
- * outline shows it in.
+ * The problems of each subject, by its fragment id in the draft (the
+ * outline's badges count them, and link to the first), in their order; a
+ * wrong option's under its card's, which the outline shows it in.
  */
-export function problemCounts(draft: Pick<ReleaseDraft, "url" | "cards">, problems: readonly ReleaseProblem[]): ReadonlyMap<string, number> {
-  const counts = new Map<string, number>();
+export function outlineProblems(draft: Pick<ReleaseDraft, "url" | "cards">, problems: readonly ReleaseProblem[]): ReadonlyMap<string, ReleaseProblem[]> {
+  const found = new Map<string, ReleaseProblem[]>();
   for (const one of problems) {
     const own = idIn(draft, one.subject);
     const id = own === null ? null : (cardOfDistractor(draft, one.subject)?.id ?? own);
-    if (id !== null) counts.set(id, (counts.get(id) ?? 0) + 1);
+    if (id !== null) found.set(id, [...(found.get(id) ?? []), one]);
   }
-  return counts;
+  return found;
 }
 
 /** Where a draft's editors show what a problem is about: a screen, and the field there it opens at. */

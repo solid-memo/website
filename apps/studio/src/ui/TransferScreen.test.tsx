@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
 import type { DeckFile } from "@solid-memo/domain/deckFile";
+import { ActivityLog } from "./shell/activity";
 import { TransferScreen } from "./TransferScreen";
 import { screenCommands, WithCommands } from "../test/commands";
 import { instanceA, makeCard, makeDeck } from "../test/fixtures";
@@ -34,8 +35,8 @@ const file: DeckFile = {
 
 type Props = Parameters<typeof TransferScreen>[0];
 
-function renderScreen(overrides: Partial<Props> = {}) {
-  const props: Props = {
+function propsOf(overrides: Partial<Props> = {}): Props {
+  return {
     instance: instanceA,
     decks: [kanji, verbs],
     chosen: [],
@@ -57,6 +58,10 @@ function renderScreen(overrides: Partial<Props> = {}) {
     cardsHref: (deck) => `#/cards?deck=${deck.id}`,
     ...overrides,
   };
+}
+
+function renderScreen(overrides: Partial<Props> = {}) {
+  const props = propsOf(overrides);
   render(
     <WithCommands>
       <TransferScreen {...props} />
@@ -66,6 +71,19 @@ function renderScreen(overrides: Partial<Props> = {}) {
 }
 
 describe("TransferScreen", () => {
+  it("tells the Studio's activity of each export and import done, not of one done before it opened", () => {
+    const log = vi.fn();
+    const shown = (overrides: Partial<Props>) => (
+      <ActivityLog.Provider value={log}>
+        <TransferScreen {...propsOf(overrides)} />
+      </ActivityLog.Provider>
+    );
+    const view = render(shown({ exported: 1 }));
+    view.rerender(shown({ exported: 2 }));
+    view.rerender(shown({ exported: 2, imported: kanji }));
+    expect(log.mock.calls).toEqual([[expect.stringMatching(/^Handed 2 decks/)], ["Imported Kanji N5."]]);
+  });
+
   it("ticks the decks to export, and exports them in the format chosen, with progress when asked", () => {
     const props = renderScreen({ chosen: [verbs.url] });
     expect(screen.getByRole("heading", { name: "Import and export decks of Deck set A" })).toBeInTheDocument();

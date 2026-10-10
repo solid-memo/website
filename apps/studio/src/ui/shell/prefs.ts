@@ -1,15 +1,32 @@
+import { ASIDE_WIDTH, clampSize, DOCK_HEIGHT, type PaneSize } from "./splitter";
+
 /** How tightly the Studio's rows and controls are packed: compact (about 28px), or comfortable (44px, for touch). */
 export type Density = "compact" | "comfortable";
 
 export const DENSITIES: readonly Density[] = ["compact", "comfortable"];
 
-/** How the Studio is laid out on this device: its density, and whether the sidebar is shown on a wide screen. */
+/**
+ * How the Studio is laid out on this device: its density, whether the
+ * sidebar and the aside are shown on a wide screen, and the aside's
+ * width; whether the dock is shown, and its height (in CSS pixels).
+ */
 export interface StudioPrefs {
   density: Density;
   sidebar: boolean;
+  aside: boolean;
+  asideWidth: number;
+  dock: boolean;
+  dockHeight: number;
 }
 
-export const DEFAULT_PREFS: StudioPrefs = { density: "compact", sidebar: true };
+export const DEFAULT_PREFS: StudioPrefs = {
+  density: "compact",
+  sidebar: true,
+  aside: true,
+  asideWidth: ASIDE_WIDTH.initial,
+  dock: false,
+  dockHeight: DOCK_HEIGHT.initial,
+};
 
 /** Versioned: a later shape of the preferences gets a key of its own, and starts from the defaults. */
 const PREFS_KEY = "solid-memo:studioLayout.v1";
@@ -27,10 +44,18 @@ export function studioPrefs(storage: () => Storage = () => globalThis.localStora
   } catch {
     return DEFAULT_PREFS;
   }
-  const { density, sidebar } = typeof stored === "object" && stored !== null ? (stored as Record<string, unknown>) : {};
+  const { density, sidebar, aside, asideWidth, dock, dockHeight } =
+    typeof stored === "object" && stored !== null ? (stored as Record<string, unknown>) : {};
+  const shown = (value: unknown, fallback: boolean) => (typeof value === "boolean" ? value : fallback);
+  // A size out of its bounds is brought within them: the bounds may have changed since.
+  const sized = (value: unknown, size: PaneSize) => (typeof value === "number" && Number.isFinite(value) ? clampSize(value, size) : size.initial);
   return {
     density: DENSITIES.includes(density as Density) ? (density as Density) : DEFAULT_PREFS.density,
-    sidebar: typeof sidebar === "boolean" ? sidebar : DEFAULT_PREFS.sidebar,
+    sidebar: shown(sidebar, DEFAULT_PREFS.sidebar),
+    aside: shown(aside, DEFAULT_PREFS.aside),
+    asideWidth: sized(asideWidth, ASIDE_WIDTH),
+    dock: shown(dock, DEFAULT_PREFS.dock),
+    dockHeight: sized(dockHeight, DOCK_HEIGHT),
   };
 }
 

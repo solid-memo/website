@@ -4,6 +4,7 @@ import { draftUrlOf } from "@solid-memo/domain/release/draftLayout";
 import { GUEST_INSTANCE_URL } from "@solid-memo/domain/guest";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { ReleasePublishScreen } from "./ReleasePublishScreen";
+import { ActivityLog } from "./shell/activity";
 import { courseDraft, instanceA } from "../test/fixtures";
 
 const TARGET = `${instanceA.url}releases/solid/v1.ttl`;
@@ -13,8 +14,8 @@ type Props = Parameters<typeof ReleasePublishScreen>[0];
 
 const idle = () => ({ pending: false, error: null, run: vi.fn() });
 
-function renderScreen(overrides: Partial<Props> = {}) {
-  const props: Props = {
+function propsOf(overrides: Partial<Props> = {}): Props {
+  return {
     draft: courseDraft(),
     hold: null,
     saving: false,
@@ -28,6 +29,10 @@ function renderScreen(overrides: Partial<Props> = {}) {
     downloaded: null,
     ...overrides,
   };
+}
+
+function renderScreen(overrides: Partial<Props> = {}) {
+  const props = propsOf(overrides);
   render(<ReleasePublishScreen {...props} />);
   return props;
 }
@@ -35,6 +40,19 @@ function renderScreen(overrides: Partial<Props> = {}) {
 const released = (draft: ReleaseDraft = courseDraft()): ReleaseDraft => ({ ...draft, root: { ...draft.root, releasedAs: TARGET } });
 
 describe("ReleasePublishScreen", () => {
+  it("tells the Studio's activity of the release published and of each file saved", () => {
+    const log = vi.fn();
+    const shown = (overrides: Partial<Props>) => (
+      <ActivityLog.Provider value={log}>
+        <ReleasePublishScreen {...propsOf(overrides)} />
+      </ActivityLog.Provider>
+    );
+    const view = render(shown({}));
+    view.rerender(shown({ draft: released() }));
+    view.rerender(shown({ draft: released(), downloaded: { name: "v1.ttl", url: "blob:v1" } }));
+    expect(log.mock.calls).toEqual([[`This draft was released at ${TARGET}.`], [expect.stringContaining("v1.ttl")]]);
+  });
+
   it("publishes in the instance's releases folder only once the user says it will be public", () => {
     const { publish } = renderScreen();
     expect(screen.getByRole("heading", { level: 3, name: "Publish" })).toBeInTheDocument();

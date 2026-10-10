@@ -9,6 +9,7 @@ import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n, type ErrorText } from "@solid-memo/ui/i18n";
 import { CopyLink } from "./CopyLink";
 import { ReadOnlyNotice } from "./ReadOnly";
+import { useActivity } from "./shell/activity";
 
 /** What the publishing part of the release screen links to. */
 export interface ReleasePublishLinks {
@@ -79,6 +80,8 @@ export function ReleasePublishScreen({
   // A draft's screens are routed only at a draft's URL.
   const place = draftPlaceOf(draft.url)!;
   const released = draft.root.releasedAs;
+  useActivity(released, () => t("studio.publish.releasedAt", { url: released! }));
+  useActivity(downloaded, () => t("studio.publish.downloaded", { file: downloaded!.name, url: downloaded!.url }));
   return (
     <>
       <section aria-labelledby="release-publish-heading">

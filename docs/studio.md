@@ -102,34 +102,57 @@ It takes the whole window, and the window does not scroll:
   Ctrl+B, hides it, and the main content takes its room; the device
   remembers. On a narrow screen it is a drawer over the page, closed
   until its button opens it, and closed again by a link followed in it,
-  a press outside it, or Escape.
+  a press outside it, Escape, or its own **Close**, since the drawer
+  covers the button that opened it.
 - **The main content**, beside it, scrolls on its own: the trail, the
   tabs of the deck or draft shown, then the screen. A table's header
   row stays in sight as it scrolls, and a table too wide for it scrolls
   it sideways; on a narrow screen such a table scrolls sideways in its
   own box.
+- **The aside**, right of the main content, a complementary region
+  named for what it shows: on a course draft's screens, its
+  [outline](#the-outline), but on the overview, which shows the outline
+  itself to arrange. Its button at the header's end, its own **Hide**,
+  or Ctrl+\ hides it, and the main content takes its room; its
+  splitter, on its left edge, sets its width (with the pointer, or the
+  arrow keys, Home and End once it has the focus). The device remembers
+  both. On a screen 64rem wide or less it is a drawer over the page, at
+  its right, closed until its button opens it, and closed again as the
+  sidebar's drawer is.
+- **The dock**, under the main content and the aside, a region named
+  Panel: hidden until its button in the status bar, or Ctrl+J, shows
+  it; the device remembers that, and its height, which its splitter on
+  its top edge sets. It has two tabs ([below](#the-dock)): Problems
+  and Activity.
 - **The status bar**, at the foot, beside the site's footer, names the
   open instance, says on a draft's screens whether the draft is saved
   ("Saving the draft…", then "Draft saved", or "Last change not saved"
   when its write failed or the draft refused it;
-  [below](#how-edits-are-saved)), switches the density, and shows the
-  keys (**? Keys**).
+  [below](#how-edits-are-saved)), counts the problems of the deck or
+  the draft shown (a button that opens the dock at them), shows or
+  hides the dock (**Panel**), switches the density, and shows the keys
+  (**? Keys**).
 
 **Tabs.** A deck's screens have the deck's tabs, under the trail
 ([`shell/ContextTabs.tsx`](../apps/studio/src/ui/shell/ContextTabs.tsx),
 a navigation named Deck): Cards (a card in the inspector among them),
 Schedule, Health, About, and Export, which opens import and export with
 the deck ticked. A draft's screens have the draft's (named Draft):
-Overview (its chapters and steps among them), Cards (its questions among
-them), Check, Preview, Trial, Changes (only for a draft that follows a
-release) and Release. The one shown is marked (`aria-current`). Which
+Overview (its chapters and steps under it), Cards (its questions under
+them), Check, which counts the problems the release check finds ("Check
+3", heard as "Check 3 problems"), Preview, Trial, Changes (only for a
+draft that follows a release) and Release. The one shown is marked
+`aria-current="page"`; on a page under a tab (a card, a chapter, a step
+or a question), that tab is marked `aria-current="true"`, so only the
+page's own tab is the page. Which
 tabs a route has, and which is shown, is worked out from the route
 alone ([`shell/workspaceLayout.ts`](../apps/studio/src/ui/shell/workspaceLayout.ts)).
 The card inspector's tabs and the release check's policies are tabs of
 the same kind.
 
 The sidebar and the tabs are links: each is a Back stop. Hiding the
-sidebar, or opening the drawer, is not.
+sidebar, the aside or the dock, opening a drawer, or sizing a pane, is
+not.
 
 Its look is calm: headings in the body's type, sections flat with a
 thin border, and no tilt, stamp or pop as a screen comes in. Its
@@ -142,7 +165,9 @@ status bar's Comfortable makes them 44px; Compact goes back. The choice
 is kept on the device, never in the pod
 ([`shell/prefs.ts`](../apps/studio/src/ui/shell/prefs.ts), key
 `solid-memo:studioLayout.v1`; storage that is missing or refuses gives
-compact), and changes no history entry.
+compact), and changes no history entry. So are whether the sidebar,
+the aside and the dock are shown, and the aside's width and the dock's
+height (each kept within its bounds).
 
 **Keys.** The Studio has one listener of keys, in its shell
 ([`shell/useShortcuts.ts`](../apps/studio/src/ui/shell/useShortcuts.ts)),
@@ -154,10 +179,13 @@ and its keymap is data
 | Ctrl+K, Cmd+K | anywhere, a field too | search, go to or run a command, in the palette ([below](#quick-open-and-commands)); **Search or run…** in the header does too |
 | `?` | anywhere | list every key, in a dialog; **? Keys** in the status bar does too |
 | `/` | anywhere | go to the screen's search or filter: Home's, the workbench's, a draft's cards' |
-| F6, Shift+F6 | anywhere, a field too | go to the next region, or the one before: the header, the sidebar (while it is shown), the main content, the status bar |
+| F6, Shift+F6 | anywhere, a field too | go to the next region, or the one before: the header, the sidebar, the main content, the aside, the dock (each while it is shown), the status bar |
 | `g d`, `g g`, `g r`, `g p`, `g h`, `g l`, `g t` | with an instance open | go to its decks (Home), groups, drafts, releases, health, library copies, or import and export |
 | `g i` | anywhere | go to the instances |
 | Ctrl+B | with an instance open | show or hide the sidebar; on a narrow screen, open or close the drawer |
+| Ctrl+\ | a course draft's screens but its overview | show or hide the aside, the outline; on a screen not wide, open or close its drawer |
+| Ctrl+J | with an instance open | show or hide the dock |
+| F8, Shift+F8 | a deck's or a draft's screens, a field too | go to the field of the next problem in the dock's list, or the one before, round from either end ([below](#the-dock)) |
 | `]`, `[` | a deck's or a draft's screens | go to the next tab, or the one before, round from either end |
 | `1` … `9` | a deck's or a draft's screens, but the trial | go to the tab of that number; in the trial they are the learner's, a grade or an option |
 | `j`, `k`, `x`, Enter | the card workbench | the next card, the one before, select it, open it ([below](#card-workbench)) |
@@ -166,8 +194,8 @@ A pair such as `g d` is pressed one key after the other, the second
 within 1.5 seconds; a key held down counts once, so a held `g` is not
 `g g`. A `g` chord, and a tab's key, goes where a link would, and is a
 Back stop as a link is, except to the page already shown. While the user types in a field (a text, a search,
-a list to choose from), the field keeps its keys, Ctrl+K, F6 and
-Shift+F6 aside. A key goes first to what has the focus, which may take it (a
+a list to choose from), the field keeps its keys, Ctrl+K, F6,
+Shift+F6, F8 and Shift+F8 aside. A key goes first to what has the focus, which may take it (a
 menu's arrows, say); then to the screen's own keys (`useScreenKeys`),
 then to the Studio's. Keys in a dialog are the dialog's. A field or
 button with a key says so to screen readers (`aria-keyshortcuts`): the
@@ -175,6 +203,49 @@ search or filter `/` goes to is the one marked so. The key help is a
 modal dialog, the browser's own
 ([`shell/Dialog.tsx`](../apps/studio/src/ui/shell/Dialog.tsx)): Escape
 or Close closes it, and the focus goes back where it was.
+
+A splitter ([`shell/Splitter.tsx`](../apps/studio/src/ui/shell/Splitter.tsx))
+is a separator, as screen readers know one, that takes the focus: its
+value is the pane's size in pixels, between its least and its most.
+Left and Right (Up and Down, for the dock's) move it 16 pixels, Home
+and End to either end; the pointer drags it. The sums are in
+[`shell/splitter.ts`](../apps/studio/src/ui/shell/splitter.ts).
+
+### The dock
+
+The dock ([`shell/BottomDock.tsx`](../apps/studio/src/ui/shell/BottomDock.tsx))
+has two tabs, a tablist (Left and Right go from one to the other):
+
+- **Problems**, counted in its tab and in the status bar, on a deck's
+  or a draft's screens ([`WorkspaceProblems.tsx`](../apps/studio/src/ui/WorkspaceProblems.tsx)).
+  A draft's are its [release check](#the-release-check)'s, the shapes
+  left out: for a pod, or, on the check, for the policy it shows. It is
+  the very check the overview and the check make, one query, so it is
+  made once for each version of the draft whichever shows it; they are
+  listed as the check lists them (`ProblemList`), by severity, then by
+  what they are in, each a link to its field. A deck's are what its
+  [health](#health) found, as Home's badges and its health screen check
+  it: the check of its data in one line, a link to the deck's health,
+  then each side whose language is not stated, each group of cards that
+  say the same, and each finding in its Markdown, each a link to its
+  field in the card inspector. A deck's screens do not check it: what
+  is counted is what a badge or its health screen found, and the dock,
+  shown at its problems, checks it if none has. Off a deck's or a
+  draft's screens the tab says where problems are listed.
+- **Activity**: what the Studio's screens said they did since the page
+  was opened, the last first, each after its time, 50 at most: the
+  draft saved (or its last change not), a draft made or deleted, Home's
+  bulk changes, the workbench's bulk edits, undo, moves and copies, an
+  export or an import, a release published or saved as a file. A screen
+  tells it through `ActivityLog` (`useActivity`, in
+  [`shell/activity.ts`](../apps/studio/src/ui/shell/activity.ts)), the
+  line its status says; what a screen shows as it opens is not told.
+
+F8 goes to the field of the next problem in the Problems list, Shift+F8
+to the one before, as a link does, round from either end: from the
+problem gone to last while its page is shown (so two problems in one
+field are each gone to), else from the page shown
+(`stepProblem` in [`shell/workspaceLayout.ts`](../apps/studio/src/ui/shell/workspaceLayout.ts)).
 
 **Its stylesheet** is
 [`studio.css`](../apps/studio/src/ui/studio.css), over the site's
@@ -194,7 +265,7 @@ a dialog named Quick open) opens with Ctrl+K (Cmd+K on a Mac), or
 with **Search or run…** in the header. It finds, as the user types:
 
 - the **commands** of the screen shown, and the Studio's own (show the
-  keys, show or hide the sidebar);
+  keys, show or hide the sidebar, the aside or the dock);
 - the **tabs** of the deck or draft shown, each with its number;
 - the open instance's **sections**, each with its `g` chord, and All
   instances;
@@ -224,13 +295,17 @@ The field is a combobox over the list, as screen readers know it: the
 focus stays in the field, and the entry picked is its
 `aria-activedescendant`. Down and Up pick the next entry or the one
 before, round from either end; Enter, or a click, chooses it; Escape
-closes the palette, and the focus goes back where it was. An entry
+closes the palette, as Ctrl+K (Cmd+K) does again from anywhere in it,
+rather than reach the browser; the focus goes back where it was. An entry
 that goes somewhere goes as a link does, a Back stop, except to the
 page already shown; a command is done once the palette has closed.
 
 A screen adds its commands while it is shown, and only those it can
 do at the moment (`useScreenCommands`, in
 [`shell/useScreenCommands.ts`](../apps/studio/src/ui/shell/useScreenCommands.ts)):
+
+The shell's own commands show the keys, and show or hide the sidebar,
+the aside (where there is one) and the dock. A screen's:
 
 | Screen | Command | What it does |
 | --- | --- | --- |
@@ -1031,7 +1106,10 @@ confirms. Where and how a draft is kept is in
 the private type index alone.
 
 Each draft that can be read links to its [overview](#a-drafts-overview),
-on this screen and in the sidebar.
+on this screen and in the sidebar. A draft made opens at its overview
+at once, the [activity](#the-dock) saying it was made; but a draft of a
+deck copied from a release stays on this screen, which offers to start
+that release's next version instead (below).
 
 A new draft starts from
 
@@ -1206,6 +1284,17 @@ comes to nothing, and says so.
 
 A chapter, step or question the release check finds problems in has a
 badge beside it ("2 problems"), a link to the check.
+
+On a course draft's other screens the outline is in the aside
+([`OutlineAside`](../apps/studio/src/ui/OutlineAside.tsx),
+[above](#layout)), to go from one chapter, step or question to another
+and to arrange them there too. The one the page shown edits is marked
+(`aria-current="page"`; `currentOutlineKey` in
+[`shell/workspaceLayout.ts`](../apps/studio/src/ui/shell/workspaceLayout.ts)),
+and each badge links to where its first problem is fixed, as the
+check's links do (`targetRoute`). The overview keeps the outline in its
+main content, with its new chapter and its retired ones, and has no
+aside: the outline is shown once.
 
 ### A chapter
 

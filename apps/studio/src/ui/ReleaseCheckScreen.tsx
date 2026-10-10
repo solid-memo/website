@@ -1,10 +1,10 @@
 import type { ReleaseProblem } from "@solid-memo/domain/release/problems";
-import { CHECK_POLICIES, groupProblems, isUnread, problemTarget, type CheckPolicy, type ProblemTarget } from "@solid-memo/domain/release/releaseCheck";
+import { CHECK_POLICIES, isUnread, type CheckPolicy, type ProblemTarget } from "@solid-memo/domain/release/releaseCheck";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
-import { problemMessage, subjectName } from "./problemText";
+import { ProblemList } from "./ProblemList";
 import { ContextTabs } from "./shell/ContextTabs";
 
 /** Where the release check links: the check for another policy, and a problem's place in the editors. */
@@ -26,8 +26,9 @@ export interface ShapesState {
 /**
  * A draft's release check (docs/studio.md, The release check): for a
  * pod or for the Solid Memo library (`policy`, a link each), every
- * problem the rules find, by severity and then by what it is in, each
- * subject linking to its editor and each problem to its field there.
+ * problem the rules find (ProblemList), by severity and then by what it
+ * is in, each subject linking to its editor and each problem to its
+ * field there.
  * The shapes and profiles run when asked, their problems among the
  * others; what they found for an older version of the draft says so,
  * with a way to check again. A check a part of which could not be read
@@ -57,15 +58,8 @@ export function ReleaseCheckScreen({
   onCheckShapes: () => void;
   onCheckAgain: () => void;
 }) {
-  const i18n = useI18n();
-  const { t, errorText } = i18n;
+  const { t, errorText } = useI18n();
   const policyLabel = (one: CheckPolicy) => t(one === "pod" ? "studio.check.policyPod" : "studio.check.policyLibrary");
-  const hrefOf = (problem: ReleaseProblem) => links.targetHref(problemTarget(draft, problem));
-  /** The editor of what a problem is in, at none of its fields. */
-  const subjectHref = (problem: ReleaseProblem) => {
-    const { field: _field, ...editor } = problemTarget(draft, problem);
-    return links.targetHref(editor);
-  };
   const incomplete = problems === undefined ? Boolean(error) : problems.some(isUnread);
 
   return (
@@ -76,7 +70,7 @@ export function ReleaseCheckScreen({
       <p class="hint">{t("studio.check.intro")}</p>
       <ContextTabs
         label={t("studio.check.policy")}
-        tabs={CHECK_POLICIES.map((one) => ({ key: one, href: links.policyHref(one), label: policyLabel(one), current: one === policy }))}
+        tabs={CHECK_POLICIES.map((one) => ({ key: one, href: links.policyHref(one), label: policyLabel(one), current: one === policy && "page" }))}
       />
       <p class="hint">{t(policy === "pod" ? "studio.check.policyHintPod" : "studio.check.policyHintLibrary")}</p>
       {problems === undefined ? (
@@ -84,25 +78,7 @@ export function ReleaseCheckScreen({
       ) : (
         <>
           <p role="status">{problems.length === 0 ? t("studio.check.clear") : t("studio.check.summary", { count: problems.length })}</p>
-          {groupProblems(problems).map((group) => (
-            <section key={group.severity} aria-labelledby={`check-${group.severity}`}>
-              <h3 id={`check-${group.severity}`}>{t(group.severity === "error" ? "studio.check.errors" : "studio.check.warnings")}</h3>
-              <ul class="studio-health-list release-problems" aria-labelledby={`check-${group.severity}`}>
-                {group.subjects.map(({ subject, problems: found }) => (
-                  <li key={subject}>
-                    <a href={subjectHref(found[0]!)}>{subjectName(draft, subject, i18n)}</a>
-                    <ul>
-                      {found.map((problem, index) => (
-                        <li key={index}>
-                          <a href={hrefOf(problem)}>{problemMessage(problem, draft, i18n)}</a>
-                        </li>
-                      ))}
-                    </ul>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ))}
+          <ProblemList draft={draft} problems={problems} targetHref={links.targetHref} />
         </>
       )}
       {incomplete && (

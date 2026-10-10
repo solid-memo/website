@@ -2,13 +2,16 @@ import { describe, expect, it } from "vitest";
 import { courseDraft, DRAFT_URL, instanceA, makeDeck } from "../../test/fixtures";
 import type { DraftRoute, StudioRoute } from "../router";
 import {
+  asideOf,
   contextTabsOf,
+  currentOutlineKey,
   deckOf,
   deckTabs,
   draftTabs,
   sectionHome,
   sectionOf,
   SIDEBAR_SECTIONS,
+  stepProblem,
   stepTab,
   type ContextTab,
 } from "./workspaceLayout";
@@ -18,8 +21,8 @@ const deckUrl = makeDeck("deck-1", { en: "Kanji N5" }).url;
 const draftUrl = DRAFT_URL;
 const draft = courseDraft();
 
-/** The tabs as their keys, the current one starred. */
-const keys = (tabs: readonly ContextTab[]) => tabs.map((tab) => (tab.current ? `*${tab.key}` : tab.key));
+/** The tabs as their keys, the one shown starred, the one the page shown is under marked ^. */
+const keys = (tabs: readonly ContextTab[]) => tabs.map((tab) => ({ page: "*", true: "^", false: "" })[`${tab.current}`] + tab.key);
 
 describe("the sidebar's sections", () => {
   it("open where their links go: the decks at Home, each other at its screen", () => {
@@ -81,7 +84,7 @@ describe("deckTabs", () => {
 
   it.each<[StudioRoute, string[]]>([
     [{ screen: "cards", deckUrl }, ["*cards", "schedule", "health", "about", "export"]],
-    [{ screen: "card", deckUrl, cardUrl: `${deckUrl}#water`, tab: "history" }, ["*cards", "schedule", "health", "about", "export"]],
+    [{ screen: "card", deckUrl, cardUrl: `${deckUrl}#water`, tab: "history" }, ["^cards", "schedule", "health", "about", "export"]],
     [{ screen: "schedule", deckUrl }, ["cards", "*schedule", "health", "about", "export"]],
     [{ screen: "health", instanceUrl, deckUrl }, ["cards", "schedule", "*health", "about", "export"]],
     [{ screen: "about", deckUrl }, ["cards", "schedule", "health", "*about", "export"]],
@@ -105,10 +108,10 @@ describe("draftTabs", () => {
 
   it.each<[DraftRoute, string[]]>([
     [{ screen: "draft", draftUrl, field: "title" }, ["*overview", "cards", "check", "preview", "trial", "diff", "release"]],
-    [{ screen: "chapter", draftUrl, chapter: "basics" }, ["*overview", "cards", "check", "preview", "trial", "diff", "release"]],
-    [{ screen: "step", draftUrl, step: "basics-1" }, ["*overview", "cards", "check", "preview", "trial", "diff", "release"]],
+    [{ screen: "chapter", draftUrl, chapter: "basics" }, ["^overview", "cards", "check", "preview", "trial", "diff", "release"]],
+    [{ screen: "step", draftUrl, step: "basics-1" }, ["^overview", "cards", "check", "preview", "trial", "diff", "release"]],
     [{ screen: "draftCards", draftUrl, page: 2 }, ["overview", "*cards", "check", "preview", "trial", "diff", "release"]],
-    [{ screen: "question", draftUrl, card: "q1" }, ["overview", "*cards", "check", "preview", "trial", "diff", "release"]],
+    [{ screen: "question", draftUrl, card: "q1" }, ["overview", "^cards", "check", "preview", "trial", "diff", "release"]],
     [{ screen: "check", draftUrl, policy: "library" }, ["overview", "cards", "*check", "preview", "trial", "diff", "release"]],
     [{ screen: "preview", draftUrl }, ["overview", "cards", "check", "*preview", "trial", "diff", "release"]],
     [{ screen: "trial", draftUrl, chapter: "basics" }, ["overview", "cards", "check", "preview", "*trial", "diff", "release"]],
@@ -161,5 +164,58 @@ describe("stepTab", () => {
     expect(stepTab(none, 1)!.key).toBe("a");
     expect(stepTab(none, -1)!.key).toBe("c");
     expect(stepTab([], 1)).toBeUndefined();
+  });
+});
+
+describe("asideOf", () => {
+  const deck = { ...draft, course: false };
+
+  it.each<[StudioRoute, ReturnType<typeof asideOf>]>([
+    [{ screen: "chapter", draftUrl, chapter: "basics" }, "outline"],
+    [{ screen: "check", draftUrl }, "outline"],
+    [{ screen: "draft", draftUrl }, null],
+  ])("shows a course's outline on %j: %s", (route, aside) => {
+    expect(asideOf(route, draft)).toBe(aside);
+  });
+
+  it("shows nothing for a deck's draft, nor off a draft's screens", () => {
+    expect(asideOf({ screen: "check", draftUrl }, deck)).toBeNull();
+    expect(asideOf({ screen: "cards", deckUrl }, null)).toBeNull();
+  });
+});
+
+describe("currentOutlineKey", () => {
+  it.each<[StudioRoute, string | null]>([
+    [{ screen: "chapter", draftUrl, chapter: "basics" }, "basics"],
+    [{ screen: "step", draftUrl, step: "basics-1" }, "basics-1"],
+    [{ screen: "question", draftUrl, card: "q1", field: "back" }, "q1"],
+    [{ screen: "draft", draftUrl }, null],
+    [{ screen: "cards", deckUrl }, null],
+  ])("marks what %j edits: %s", (route, key) => {
+    expect(currentOutlineKey(route)).toBe(key);
+  });
+});
+
+describe("stepProblem", () => {
+  const hrefs = ["#/a", "#/b", "#/b", "#/c"];
+
+  it("goes from the page shown to the problem after it, or before it, round from either end", () => {
+    expect(stepProblem(hrefs, "#/a", null, 1)).toBe(1);
+    expect(stepProblem(hrefs, "#/a", null, -1)).toBe(3);
+    expect(stepProblem(hrefs, "#/c", null, 1)).toBe(0);
+  });
+
+  it("goes on from the problem gone to last while its page is shown, so two of one page are each gone to", () => {
+    expect(stepProblem(hrefs, "#/b", 1, 1)).toBe(2);
+    expect(stepProblem(hrefs, "#/b", 2, 1)).toBe(3);
+    expect(stepProblem(hrefs, "#/b", 2, -1)).toBe(1);
+    // The page shown is no longer that problem's: from the page's own.
+    expect(stepProblem(hrefs, "#/c", 1, -1)).toBe(2);
+  });
+
+  it("goes from a page without problems to the first or the last, and nowhere without problems", () => {
+    expect(stepProblem(hrefs, "#/elsewhere", null, 1)).toBe(0);
+    expect(stepProblem(hrefs, "#/elsewhere", null, -1)).toBe(3);
+    expect(stepProblem([], "#/a", null, 1)).toBeNull();
   });
 });

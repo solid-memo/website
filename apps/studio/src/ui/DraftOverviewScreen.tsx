@@ -3,7 +3,7 @@ import type { LangText } from "@solid-memo/domain/langText";
 import { chapterIdFor } from "@solid-memo/domain/release/courseIds";
 import { retiredChapters } from "@solid-memo/domain/release/draftOutline";
 import type { ReleaseProblem } from "@solid-memo/domain/release/problems";
-import { problemCounts, type DraftField } from "@solid-memo/domain/release/releaseCheck";
+import { outlineProblems, type DraftField } from "@solid-memo/domain/release/releaseCheck";
 import type { DraftChange, ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
@@ -119,7 +119,7 @@ export function DraftOverviewScreen({
               stepHref={links.stepHref}
               questionHref={links.questionHref}
               checkHref={links.checkHref}
-              problems={problemCounts(draft, check.problems ?? [])}
+              problems={outlineProblems(draft, check.problems ?? [])}
               onEdit={(changes) => onEdit(changes)}
             />
             <NewChapterForm draft={draft} onAdd={(changes) => onEdit(changes) === null} />

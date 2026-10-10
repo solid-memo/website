@@ -12,7 +12,7 @@ import {
   libraryReleaseUrl,
   librarySeriesUrl,
   movedProblems,
-  problemCounts,
+  outlineProblems,
   problemTarget,
   isUnread,
   readWhole,
@@ -118,18 +118,19 @@ describe("grouping", () => {
     expect(groupProblems([])).toEqual([]);
   });
 
-  it("counts each subject of the draft's problems by its id", () => {
-    expect([...problemCounts({ url: DRAFT, cards: [] }, [error(of("a")), error(of("a")), warning(of("b")), error(DRAFT), error("https://other.example/")])]).toEqual([
-      ["a", 2],
-      ["b", 1],
+  it("finds each subject of the draft's problems by its id, its problems in their order", () => {
+    const first = problem(of("a"), { code: "unshaped", params: {} });
+    expect([...outlineProblems({ url: DRAFT, cards: [] }, [first, error(of("a")), warning(of("b")), error(DRAFT), error("https://other.example/")])]).toEqual([
+      ["a", [first, error(of("a"))]],
+      ["b", [warning(of("b"))]],
     ]);
   });
 
-  it("counts a wrong option's problems under the question that has it", () => {
+  it("finds a wrong option's problems under the question that has it", () => {
     const draft = courseDraft();
     const card = draft.cards.find((node) => node.data.distractor.length > 0)!;
     const distractor = card.data.distractor[0]!;
-    expect(problemCounts(draft, [error(distractor), warning(distractor)]).get(card.id)).toBe(2);
+    expect(outlineProblems(draft, [error(distractor), warning(distractor)]).get(card.id)).toEqual([error(distractor), warning(distractor)]);
   });
 });
 

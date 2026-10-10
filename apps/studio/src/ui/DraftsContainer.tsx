@@ -1,5 +1,6 @@
+import { useEffect } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { NewDraft } from "@solid-memo/application/releaseDrafts";
+import type { CreatedDraft, NewDraft } from "@solid-memo/application/releaseDrafts";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { decksOf } from "@solid-memo/domain/deckTree";
 import type { Instance } from "@solid-memo/domain/instance";
@@ -26,7 +27,10 @@ export function draftsKey(instanceUrl: string): readonly unknown[] {
  * data check is done, and while the catalogue is set aside
  * (useDataCheck). A deleted draft's URL is a new draft's when one of
  * its name is made, so what was read at a draft's URL (draftKey) is
- * forgotten when one is deleted, and when one is made.
+ * forgotten when one is deleted, and when one is made. A draft made is
+ * opened (`onCreated`) once the screen has said so, unless it was made of
+ * a copy of a release: the screen then offers to start that release's
+ * next version instead.
  */
 export function DraftsContainer({
   useCases,
@@ -34,12 +38,15 @@ export function DraftsContainer({
   healthHref,
   releasesHref,
   draftHref,
+  onCreated,
 }: {
   useCases: UseCases;
   instance: Instance;
   healthHref: string;
   releasesHref: string;
   draftHref: (draft: ReleaseDraftSummary) => string;
+  /** A draft was made: open it. */
+  onCreated: (created: CreatedDraft) => void;
 }) {
   const { t, errorText } = useI18n();
   const queryClient = useQueryClient();
@@ -75,6 +82,12 @@ export function DraftsContainer({
     onSettled: reread,
   });
 
+  const created = createMutation.data ?? null;
+  // After the screen's own effects, which tell the activity of it.
+  useEffect(() => {
+    if (created !== null && created.basedOn === undefined) onCreated(created);
+  }, [created]);
+
   const error = draftsQuery.error ?? treeQuery.error;
   if (error) return <ErrorMessage error={errorText(error)} />;
   if (draftsQuery.data === undefined || treeQuery.data === undefined) return <Loading label={t("studio.drafts.loading")} />;
@@ -90,7 +103,7 @@ export function DraftsContainer({
       draftHref={draftHref}
       creating={createMutation.isPending}
       // No file picked: nothing was made, and nothing is said.
-      created={createMutation.data ?? null}
+      created={created}
       createError={errorText(createMutation.error)}
       onCreate={(from) => createMutation.mutate(from)}
       deleting={deleteMutation.isPending ? deleteMutation.variables! : null}

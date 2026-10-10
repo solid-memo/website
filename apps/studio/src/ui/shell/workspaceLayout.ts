@@ -57,18 +57,25 @@ export type DeckTab = "cards" | "schedule" | "health" | "about" | "export";
 /** A draft's tabs, in their order. */
 export type DraftTab = "overview" | "cards" | "check" | "preview" | "trial" | "diff" | "release";
 
-/** A context tab: which it is, where it goes, and whether the route is on it. */
+/**
+ * How a link is the page shown (its `aria-current`): the page itself, or
+ * what the page is part of ("true", as a deck's Cards tab is on a card of
+ * it); false for neither.
+ */
+export type Current = "page" | "true" | false;
+
+/** A context tab: which it is, where it goes, and whether the route is on it, or on a page under it. */
 export interface ContextTab<K extends string = string> {
   key: K;
   route: StudioRoute;
-  current: boolean;
+  current: Current;
 }
 
 /** The tabs of the deck or the draft a route is about, and which of the two they are. */
 export type ContextTabs = { of: "deck"; tabs: ContextTab<DeckTab>[] } | { of: "draft"; tabs: ContextTab<DraftTab>[] };
 
 /**
- * The tabs of a deck's screens: its cards (a card of it among them), its
+ * The tabs of a deck's screens: its cards (a card of it under them), its
  * schedule, its health, its about screen, and its export (import and
  * export, the deck ticked), which is a screen of the instance's, so never
  * the current tab.
@@ -78,7 +85,7 @@ export function deckTabs(route: StudioRoute, deckUrl: string): ContextTab<DeckTa
   const tab = (key: DeckTab, to: StudioRoute, ...screens: StudioRoute["screen"][]): ContextTab<DeckTab> => ({
     key,
     route: to,
-    current: screens.includes(route.screen),
+    current: currentOf(route.screen, screens),
   });
   return [
     tab("cards", { screen: "cards", deckUrl }, "cards", "card"),
@@ -91,16 +98,16 @@ export function deckTabs(route: StudioRoute, deckUrl: string): ContextTab<DeckTa
 
 /**
  * The tabs of a draft's screens: its overview (a chapter and a step of
- * it among them), its cards (a question among them), its release check,
+ * it under it), its cards (a question under them), its release check,
  * its listing preview, its trial, its changes (only for a draft that
  * follows a release, `hasPrevious`) and its release.
  */
 export function draftTabs(route: DraftRoute, hasPrevious: boolean): ContextTab<DraftTab>[] {
   const { draftUrl } = route;
-  const tab = (key: DraftTab, to: DraftRoute, ...screens: DraftRoute["screen"][]): ContextTab<DraftTab> => ({
+  const tab = (key: DraftTab, to: DraftRoute, ...under: DraftRoute["screen"][]): ContextTab<DraftTab> => ({
     key,
     route: to,
-    current: [to.screen, ...screens].includes(route.screen),
+    current: currentOf(route.screen, [to.screen, ...under]),
   });
   return [
     tab("overview", { screen: "draft", draftUrl }, "chapter", "step"),
@@ -111,6 +118,12 @@ export function draftTabs(route: DraftRoute, hasPrevious: boolean): ContextTab<D
     ...(hasPrevious ? [tab("diff", { screen: "diff", draftUrl })] : []),
     tab("release", { screen: "release", draftUrl }),
   ];
+}
+
+/** Whether a tab of `screens` (its own first, then those under it) is the screen shown, or what it is part of. */
+function currentOf(shown: StudioRoute["screen"], screens: readonly StudioRoute["screen"][]): Current {
+  const at = screens.indexOf(shown);
+  return at === -1 ? false : at === 0 ? "page" : "true";
 }
 
 /** The context tabs of a route: a deck's on its screens, a draft's (`draft`, as read) on its; null elsewhere. */
@@ -126,7 +139,7 @@ export function contextTabsOf(route: StudioRoute, draft: ReleaseDraft | null): C
  * round from either end; from none, the first or the last. None of no
  * tabs.
  */
-export function stepTab<T extends { current: boolean }>(tabs: readonly T[], step: 1 | -1): T | undefined {
+export function stepTab<T extends { current: unknown }>(tabs: readonly T[], step: 1 | -1): T | undefined {
   const at = tabs.findIndex((tab) => tab.current);
   const from = at === -1 ? (step === 1 ? -1 : 0) : at;
   return tabs[(from + step + tabs.length) % tabs.length];
@@ -134,3 +147,46 @@ export function stepTab<T extends { current: boolean }>(tabs: readonly T[], step
 
 /** Below this width the sidebar is a drawer over the page, closed until asked for (studio.css says the same). */
 export const NARROW = "(max-width: 48rem)";
+
+/** Below this width the aside is a drawer over the page too, at its right, closed until asked for (studio.css says the same). */
+export const MEDIUM = "(max-width: 64rem)";
+
+/** What the aside, right of the main content, shows: a course draft's outline. */
+export type Aside = "outline";
+
+/**
+ * What the aside shows on a route: a course draft's outline (`draft`, as
+ * read) on its screens, but its overview, which shows the outline itself,
+ * to arrange; nothing elsewhere.
+ */
+export function asideOf(route: StudioRoute, draft: ReleaseDraft | null): Aside | null {
+  return isDraftRoute(route) && route.screen !== "draft" && draft!.course ? "outline" : null;
+}
+
+/** The chapter, step or question a route edits, which the outline marks; null for any other route. */
+export function currentOutlineKey(route: StudioRoute): string | null {
+  switch (route.screen) {
+    case "chapter":
+      return route.chapter;
+    case "step":
+      return route.step;
+    case "question":
+      return route.card;
+    default:
+      return null;
+  }
+}
+
+/**
+ * The problem F8 (step 1) or Shift+F8 (step -1) goes to, by its place in
+ * the problems' list (`hrefs`, where each is fixed): the one after the
+ * problem gone to last (`last`), while the page shown is still its;
+ * else after the first problem of the page shown; else, from none, the
+ * first or the last. Null without problems.
+ */
+export function stepProblem(hrefs: readonly string[], shown: string, last: number | null, step: 1 | -1): number | null {
+  if (hrefs.length === 0) return null;
+  const at = last !== null && hrefs[last] === shown ? last : hrefs.indexOf(shown);
+  const from = at === -1 ? (step === 1 ? -1 : 0) : at;
+  return (from + step + hrefs.length) % hrefs.length;
+}

@@ -11,6 +11,7 @@ import { buildCommands, rankCommands, type Command, type ScreenCommand } from ".
 import { Dialog } from "./Dialog";
 import { Keys } from "./KeyHelp";
 import { recentCommands, rememberCommand } from "./prefs";
+import { keyOf, shortcutOf } from "./shortcuts";
 import { deckOf, type ContextTab } from "./workspaceLayout";
 
 /**
@@ -25,7 +26,8 @@ import { deckOf, type ContextTab } from "./workspaceLayout";
  * entry picked its `aria-activedescendant`): Down and Up pick the next
  * entry or the one before, round from either end, Enter (or a click)
  * chooses it (`onChoose`, which the device remembers, prefs.ts), and
- * Escape closes the palette.
+ * Escape closes the palette, as Ctrl+K (Cmd+K) does again, from anywhere
+ * in it, rather than reach the browser.
  */
 export function CommandPalette({
   route,
@@ -104,7 +106,15 @@ export function CommandPalette({
 
   let index = 0;
   return (
-    <Dialog heading={t("studio.palette.heading")} onClose={onClose}>
+    <Dialog
+      heading={t("studio.palette.heading")}
+      onClose={onClose}
+      onKeyDown={(event) => {
+        if (shortcutOf(keyOf(event), "studio") !== "palette") return;
+        event.preventDefault();
+        event.currentTarget.close();
+      }}
+    >
       <input
         type="text"
         role="combobox"

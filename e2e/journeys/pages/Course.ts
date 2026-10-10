@@ -63,7 +63,8 @@ export class Course extends Screen {
     await this.intent(`Play ${chapter} to the end of the course`, async () => {
       await this.page.getByRole("link", { name: this.t("course.start") }).click();
       await expect(this.page.getByRole("heading", { level: 2, name: chapter, exact: true })).toBeVisible();
-      await expect(this.page.getByText(theory, { exact: true })).toBeVisible();
+      // The main content's: in a trial, the Studio's outline beside it shows the theory too.
+      await expect(this.page.getByRole("main").getByText(theory, { exact: true })).toBeVisible();
       const count = Object.keys(answers).length;
       await this.page.getByRole("button", { name: this.tp("chapterPlayer.toQuestions", { count }) }).click();
       for (let asked = 1; asked <= count; asked++) {

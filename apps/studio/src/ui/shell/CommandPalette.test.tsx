@@ -154,6 +154,23 @@ describe("CommandPalette", () => {
     expect(onClose).toHaveBeenCalled();
   });
 
+  it("closes on Ctrl+K or Cmd+K again, from anywhere in it, rather than let the browser have the key", () => {
+    const { onClose, unmount } = renderPalette();
+    type("k");
+    expect(fireEvent.keyDown(field(), { key: "k" })).toBe(true);
+    expect(onClose).not.toHaveBeenCalled();
+    act(() => {
+      expect(fireEvent.keyDown(field(), { key: "k", ctrlKey: true })).toBe(false);
+    });
+    expect(onClose).toHaveBeenCalledTimes(1);
+    unmount();
+    const again = renderPalette();
+    act(() => {
+      fireEvent.keyDown(screen.getByRole("button", { name: "Close" }), { key: "k", metaKey: true });
+    });
+    expect(again.onClose).toHaveBeenCalledTimes(1);
+  });
+
   it("lists what the cache has: no decks, drafts or cards it has not read, and no instance's sections on the instances", () => {
     renderPalette({ queryClient: new QueryClient() });
     expect(within(list()).queryByRole("group", { name: "Decks" })).toBeNull();
