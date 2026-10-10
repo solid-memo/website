@@ -1,5 +1,6 @@
 import { expect, type Locator } from "@playwright/test";
-import { chooseLanguage } from "./languages.ts";
+import { escapeRegExp } from "../harness/strings.ts";
+import { chooseLanguageOf } from "./languages.ts";
 import { Screen } from "./Screen.ts";
 
 /**
@@ -15,9 +16,14 @@ import { Screen } from "./Screen.ts";
  * publishes it in the pod, public.
  */
 export class DraftEditor extends Screen {
-  /** The draft's outline, as the overview shows it. */
+  /** The draft's outline, as the overview shows it: its chapters, each a list of its steps. */
   private get outline(): Locator {
-    return this.page.locator(".draft-outline");
+    return this.page.getByRole("list", { name: this.t("studio.draft.outline"), exact: true });
+  }
+
+  /** The preview of the question open, as the course asks it. */
+  private get preview(): Locator {
+    return this.page.getByRole("region", { name: this.t("studio.question.preview"), exact: true });
   }
 
   /** Waits until every change made is written. */
@@ -76,7 +82,7 @@ export class DraftEditor extends Screen {
       const part = this.page.getByRole("region", { name: this.t("studio.publish.heading"), exact: true });
       await expect(part.getByText(this.t("studio.publish.noErrors"))).toBeVisible({ timeout: 30_000 });
       const [before, after] = this.t("studio.publish.address", { url: "\u0000" }).split("\u0000") as [string, string];
-      const said = (await part.locator("#release-folder-hint").textContent())!;
+      const said = (await part.getByText(new RegExp(`^${escapeRegExp(before)}`)).textContent())!;
       const url = said.slice(before.length, said.length - after.length);
       const publish = part.getByRole("button", { name: this.t("studio.publish.publish") });
       await expect(publish).toBeDisabled();
@@ -190,8 +196,9 @@ export class DraftEditor extends Screen {
   /** Adds a chapter by its title, in English, under the id the assistant suggests: the outline shows it. */
   async addChapter(title: string): Promise<void> {
     await this.intent(`Add the chapter ${title}`, async () => {
-      await this.page.locator("#new-chapter-title").fill(title);
-      await chooseLanguage(this.app, this.page.locator("#new-chapter-title-language-0"), "en");
+      const field = this.page.getByRole("textbox", { name: this.t("studio.draft.chapterTitle"), exact: true });
+      await field.fill(title);
+      await chooseLanguageOf(this.app, field, "en");
       await this.page.getByRole("button", { name: this.t("studio.draft.addChapter") }).click();
       await expect(this.outline.getByRole("link", { name: title, exact: true })).toBeVisible();
       await this.expectSaved();
@@ -219,9 +226,11 @@ export class DraftEditor extends Screen {
   /** Writes the step's theory, in English: the preview shows it as the course player will, and it is saved. */
   async writeTheory(theory: string): Promise<void> {
     await this.intent("Write the step's theory", async () => {
-      await this.page.locator("#step-theory").fill(theory);
-      await chooseLanguage(this.app, this.page.locator("#step-theory-language-0"), "en");
-      await expect(this.page.locator(".prose-preview .course-theory")).toHaveText(theory);
+      const label = this.t("studio.step.theory");
+      const field = this.page.getByRole("textbox", { name: label, exact: true });
+      await field.fill(theory);
+      await chooseLanguageOf(this.app, field, "en");
+      await expect(this.page.getByRole("region", { name: this.t("proseField.preview", { field: label }), exact: true })).toHaveText(theory);
       await this.expectSaved();
     });
   }
@@ -229,10 +238,14 @@ export class DraftEditor extends Screen {
   /** Adds a question to the step open, its front and back in English: the step lists it. */
   async addQuestion(front: string, back: string): Promise<void> {
     await this.intent(`Add the question ${front}`, async () => {
-      await this.page.locator("#step-new-question-front").fill(front);
-      await chooseLanguage(this.app, this.page.locator("#step-new-question-front-language-0"), "en");
-      await this.page.locator("#step-new-question-back").fill(back);
-      await chooseLanguage(this.app, this.page.locator("#step-new-question-back-language-0"), "en");
+      const form = this.page.getByRole("group", { name: this.t("studio.step.newQuestion"), exact: true });
+      const [frontField, backField] = [this.t("cardContentFields.front"), this.t("cardContentFields.back")].map((name) =>
+        form.getByRole("textbox", { name, exact: true }),
+      ) as [Locator, Locator];
+      await frontField.fill(front);
+      await chooseLanguageOf(this.app, frontField, "en");
+      await backField.fill(back);
+      await chooseLanguageOf(this.app, backField, "en");
       await this.page.getByRole("button", { name: this.t("studio.draftEdit.addQuestion") }).click();
       await expect(this.page.getByRole("link", { name: front, exact: true })).toBeVisible();
       await this.expectSaved();
@@ -253,13 +266,15 @@ export class DraftEditor extends Screen {
     await this.intent(`Add the wrong option ${text}`, async () => {
       const options = this.page.getByRole("group", { name: this.t("distractorFields.legend") });
       await options.getByRole("button", { name: this.t("distractorFields.add") }).click();
-      await options.getByLabel(this.t("distractorFields.text"), { exact: true }).fill(text);
-      await chooseLanguage(this.app, this.page.locator("#distractor-text-language-0"), "en");
-      await options.getByLabel(this.t("distractorFields.note"), { exact: true }).fill(note);
-      await chooseLanguage(this.app, this.page.locator("#distractor-note-language-0"), "en");
+      const textField = options.getByLabel(this.t("distractorFields.text"), { exact: true });
+      await textField.fill(text);
+      await chooseLanguageOf(this.app, textField, "en");
+      const noteField = options.getByLabel(this.t("distractorFields.note"), { exact: true });
+      await noteField.fill(note);
+      await chooseLanguageOf(this.app, noteField, "en");
       await options.getByRole("button", { name: this.t("distractorFields.addDone"), exact: true }).click();
       await expect(options.getByRole("listitem").filter({ hasText: text })).toContainText(note);
-      await expect(this.page.locator(".course-player").getByRole("radio", { name: text })).toBeVisible();
+      await expect(this.preview.getByRole("radio", { name: text })).toBeVisible();
       await this.expectSaved();
     });
   }
@@ -267,7 +282,7 @@ export class DraftEditor extends Screen {
   /** Answers the preview of the question open with a wrong option: it says why that is wrong. */
   async answerPreviewWrong(option: string, why: string): Promise<void> {
     await this.intent(`Answer the preview with ${option}`, async () => {
-      const preview = this.page.locator(".course-player");
+      const preview = this.preview;
       await preview.getByRole("radio", { name: option }).check();
       await preview.getByRole("button", { name: this.t("multipleChoice.check") }).click();
       await expect(preview.getByRole("status").filter({ hasText: this.t("courseQuestion.wrong") })).toBeVisible();
@@ -289,17 +304,24 @@ export class DraftEditor extends Screen {
     await this.intent("See the outline", async () => {
       await this.app.chrome.breadcrumbs.getByRole("link", { name: draft, exact: true }).click();
       await expect(this.outline.getByRole("link", { name: chapter, exact: true })).toBeVisible();
-      const row = this.outline.locator(".outline-step").filter({ has: this.page.getByRole("link", { name: step, exact: true }) });
-      // Each question's own link, not the badge counting its problems.
-      await expect(row.locator(".outline-questions > li > a:first-child")).toHaveText(questions);
+      const item = (within: Locator, name: string) =>
+        within.getByRole("listitem").filter({ has: this.page.getByRole("link", { name, exact: true }) });
+      const listed = item(item(this.outline, chapter), step).getByRole("listitem");
+      await expect(listed).toHaveCount(questions.length);
+      // Each question's own link, in order; a badge beside it counts its problems.
+      for (const [i, question] of questions.entries()) {
+        await expect(listed.nth(i).getByRole("link", { name: question, exact: true })).toBeVisible();
+      }
       await expect(this.page.getByText(this.t("studio.draft.cardCount", { count: questions.length }))).toBeVisible();
     });
   }
 
-  /** The release check's list item of what a problem is in, by its name. */
+  /** The release check's list item of what a problem is in, by its name: among the errors or the warnings. */
   private problemsOf(subject: string): Locator {
-    return this.page
-      .locator(".release-problems > li")
+    const list = (severity: string) => this.page.getByRole("list", { name: this.t(`studio.check.${severity}`), exact: true });
+    return list("errors")
+      .or(list("warnings"))
+      .getByRole("listitem")
       .filter({ has: this.page.getByRole("link", { name: subject, exact: true }) });
   }
 
@@ -340,6 +362,7 @@ export class DraftEditor extends Screen {
   async followProblem(subject: string, problem: string): Promise<void> {
     await this.intent(`Follow the problem of ${subject} to its field`, async () => {
       await this.problemsOf(subject).getByRole("link", { name: problem, exact: true }).click();
+      // The app's own mark of where a screen opened at a field is arrived at (useScreenFocus).
       await expect(this.page.locator("[data-arrival]")).toBeFocused();
     });
   }
@@ -347,8 +370,9 @@ export class DraftEditor extends Screen {
   /** Writes the release's description, in English, where the overview was opened at it. */
   async writeDescription(description: string): Promise<void> {
     await this.intent("Write the release's description", async () => {
-      await this.page.locator("#draft-description").fill(description);
-      await chooseLanguage(this.app, this.page.locator("#draft-description-language-0"), "en");
+      const field = this.page.getByRole("textbox", { name: this.t("studio.draft.description"), exact: true });
+      await field.fill(description);
+      await chooseLanguageOf(this.app, field, "en");
       await this.expectSaved();
     });
   }
@@ -368,9 +392,10 @@ export class DraftEditor extends Screen {
     await this.intent("Preview the listing", async () => {
       await this.page.getByRole("link", { name: this.t("studio.check.previewLink") }).click();
       await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.preview.heading") })).toBeVisible();
-      const previews = this.page.locator(".listing-preview");
-      await expect(previews.first().locator(".library-deck-name")).toHaveText(draft);
-      await expect(previews.last().locator("h2")).toHaveText(draft);
+      const row = this.page.getByRole("region", { name: this.t("studio.preview.row"), exact: true });
+      const page = this.page.getByRole("region", { name: this.t("studio.preview.page"), exact: true });
+      await expect(row.getByRole("link", { name: draft, exact: true })).toBeVisible();
+      await expect(page.getByRole("heading", { level: 2, name: draft, exact: true })).toBeVisible();
     });
   }
 }

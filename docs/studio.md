@@ -144,8 +144,10 @@ Step 2 on a step, › *draft* › Cards on its cards, › *draft* › Cards
 › *card* on a question, › *draft* › Release check on its check,
 › *draft* › Listing preview on its preview, › *draft* › Trial on its
 trial, › *draft* › Changes on its comparison, and › *draft* › Release
-on its release metadata. The document title is the trail's
-last step and "Solid Memo Studio". After a move, the screen's heading
+on its release metadata (`crumbsOf`, in
+[`shell/titles.ts`](../apps/studio/src/ui/shell/titles.ts), from the
+route and the deck, card or draft it names). The document title is
+the trail's last step and "Solid Memo Studio". After a move, the screen's heading
 takes the focus (`useScreenFocus`). The header has a link back to
 Solid Memo, at the open instance's decks when there is one, and the
 masthead names the Studio. The landing page and the Pod connection
@@ -1017,8 +1019,9 @@ listing preview and the release's metadata and provenance.
 The outline ([`DraftOutline`](../apps/studio/src/ui/DraftOutline.tsx))
 is a course's chapters in their order, each with its steps ("Step
 1.2"), each step with the questions that check it, in the order of their
-ids. Each links to its editor. Chapters and steps are arranged as the
-deck list's groups and decks are, with the same code in `ui`:
+ids. Each links to its editor. The list is named Outline. Chapters
+and steps are arranged as the deck list's groups and decks are, with
+the same code in `ui`:
 
 - **Drag** (`deckTree/useDragReorder.ts`): a chapter among the chapters,
   a step anywhere in a chapter, or into a chapter by its header. The
@@ -1184,7 +1187,8 @@ author or host: a library is its index, and a policy is data.
 Problems are codes, never text ([problems.ts](../packages/domain/src/release/problems.ts)).
 The screen words each in the reader's language
 (`studio.problem.<code>`, [problemText.ts](../apps/studio/src/ui/problemText.ts)),
-by severity, errors first, then by what it is in. Each subject links
+by severity, errors first, then by what it is in: a list each, named
+Errors and Warnings after its heading. Each subject links
 to its editor, and each problem to its field there (`problemTarget`):
 a wrong option's problem opens its question at it. The editor opens
 with that field focused. The outline's badges count a wrong option's

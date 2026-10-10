@@ -314,7 +314,11 @@ test("a learner's first deck @smoke", async ({ app, account, runId }) => {
   ([harness/strings.ts](../e2e/journeys/harness/strings.ts) reads
   `packages/ui/src/i18n/`), so a journey follows the language it switches
   to. They never use CSS classes; where the app gives no accessible
-  name, the app gets one.
+  name, the app gets one. A table's cell is found by its column's
+  header (`cellOf`, [tables.ts](../e2e/journeys/pages/tables.ts)), not
+  by where it stands, and a text's language picker through its field,
+  which the picker's text describes (`chooseLanguageOf`,
+  [languages.ts](../e2e/journeys/pages/languages.ts)).
 - **Flows** ([flows/](../e2e/journeys/flows/)): the steps many journeys
   share, such as logging in.
 - **Dialogs**: a step that expects a `confirm` names it with

@@ -4,8 +4,7 @@ import { DEFAULT_CARD_QUERY } from "@solid-memo/domain/cardQuery";
 import { DEFAULT_DECK_TABLE_VIEW } from "@solid-memo/domain/deckTable";
 import type { Card } from "@solid-memo/domain/deck";
 import type { WorkspaceProps } from "@solid-memo/ui/App";
-import { Breadcrumbs, type Crumb } from "@solid-memo/ui/Breadcrumbs";
-import { cardName } from "@solid-memo/ui/DataText";
+import { Breadcrumbs } from "@solid-memo/ui/Breadcrumbs";
 import { useDocumentTitle } from "@solid-memo/ui/documentTitle";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
@@ -15,8 +14,8 @@ import { decksHref, deckHref, libraryHref, routeToHash } from "@solid-memo/ui/ro
 import { useScreenFocus } from "@solid-memo/ui/screenFocus";
 import { MAIN_ID } from "@solid-memo/ui/SkipLink";
 import { useInstanceTheme } from "@solid-memo/ui/theme";
-import { chapterOfStep, draftCardOf } from "@solid-memo/domain/release/draftOutline";
-import { liveSteps, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
+import { draftCardOf } from "@solid-memo/domain/release/draftOutline";
+import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { CardInspectorContainer } from "./CardInspectorContainer";
 import { CardWorkbenchContainer } from "./CardWorkbenchContainer";
 import { DeckAboutContainer } from "./DeckAboutContainer";
@@ -41,6 +40,7 @@ import { ReleaseMetadataContainer } from "./ReleaseMetadataContainer";
 import { ReleasesContainer } from "./ReleasesContainer";
 import { StepEditorContainer } from "./StepEditorContainer";
 import { TrialContainer } from "./TrialContainer";
+import { crumbsOf } from "./shell/titles";
 import { instanceOfRoute, isDraftRoute, spotRoute, studioRouteToHash, targetRoute, useStudioRoute, type StudioRoute } from "./router";
 
 /**
@@ -114,102 +114,6 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
     }
   }, [route, instances, decksQuery.data, cardsQuery.data, draftQuery.data]);
 
-  const instancesCrumb: Crumb<StudioRoute> = { label: t("breadcrumbs.instances"), route: { screen: "instances" } };
-  /** The trail to a draft: its instance's drafts, then the draft. */
-  const draftCrumbs = (draftUrl: string): Crumb<StudioRoute>[] => {
-    const title = activeDraft!.root.title ?? {};
-    return [
-      { label: t("studio.drafts.crumb"), route: { screen: "drafts", instanceUrl: instanceOfRoute(route!)! } },
-      { label: Object.keys(title).length === 0 ? t("studio.draft.untitled") : readerText(title), route: { screen: "draft", draftUrl } },
-    ];
-  };
-  const crumbsOf = (route: StudioRoute): Crumb<StudioRoute>[] => {
-    if (route.screen === "instances") return [instancesCrumb];
-    const decks: Crumb<StudioRoute> = { label: t("breadcrumbs.decks"), route: { screen: "home", instanceUrl: instanceOfRoute(route)! } };
-    switch (route.screen) {
-      case "home":
-        return [instancesCrumb, { ...decks, route }];
-      case "groups":
-        return [instancesCrumb, decks, { label: t("breadcrumbs.groups"), route }];
-      case "instance":
-        return [instancesCrumb, decks, { label: t("studio.instance.crumb"), route }];
-      case "library":
-        return [instancesCrumb, decks, { label: t("studio.library.crumb"), route }];
-      case "transfer":
-        return [instancesCrumb, decks, { label: t("studio.transfer.crumb"), route }];
-      case "drafts":
-        return [instancesCrumb, decks, { label: t("studio.drafts.crumb"), route }];
-      case "releases":
-        return [instancesCrumb, decks, { label: t("studio.releases.crumb"), route }];
-      case "health": {
-        const health: Crumb<StudioRoute> = { label: t("studio.health.crumb"), route: { screen: "health", instanceUrl: route.instanceUrl } };
-        return route.deckUrl === undefined
-          ? [instancesCrumb, decks, health]
-          : [instancesCrumb, decks, health, { label: readerText(activeDeck!.title), route }];
-      }
-      case "about":
-        return [instancesCrumb, decks, { label: t("studio.about.crumb", { deck: readerText(activeDeck!.title) }), route }];
-      case "cards":
-        return [instancesCrumb, decks, { label: t("studio.cards.crumb", { deck: readerText(activeDeck!.title) }), route }];
-      case "schedule":
-        return [
-          instancesCrumb,
-          decks,
-          { label: t("studio.cards.crumb", { deck: readerText(activeDeck!.title) }), route: { screen: "cards", deckUrl: route.deckUrl } },
-          { label: t("studio.insight.crumb"), route },
-        ];
-      case "card":
-        return [
-          instancesCrumb,
-          decks,
-          { label: t("studio.cards.crumb", { deck: readerText(activeDeck!.title) }), route: { screen: "cards", deckUrl: route.deckUrl } },
-          { label: cardName(activeCard!, readerText), route },
-        ];
-      case "draft":
-        return [instancesCrumb, decks, ...draftCrumbs(route.draftUrl)];
-      case "draftCards":
-        return [instancesCrumb, decks, ...draftCrumbs(route.draftUrl), { label: t("studio.draftCards.crumb"), route }];
-      case "check":
-        return [instancesCrumb, decks, ...draftCrumbs(route.draftUrl), { label: t("studio.check.crumb"), route }];
-      case "preview":
-        return [instancesCrumb, decks, ...draftCrumbs(route.draftUrl), { label: t("studio.preview.crumb"), route }];
-      case "trial":
-        return [instancesCrumb, decks, ...draftCrumbs(route.draftUrl), { label: t("studio.trial.crumb"), route }];
-      case "diff":
-        return [instancesCrumb, decks, ...draftCrumbs(route.draftUrl), { label: t("studio.diff.crumb"), route }];
-      case "release":
-        return [instancesCrumb, decks, ...draftCrumbs(route.draftUrl), { label: t("studio.release.crumb"), route }];
-      case "chapter":
-        return [instancesCrumb, decks, ...draftCrumbs(route.draftUrl), { label: chapterName(activeDraft!, route.chapter), route }];
-      case "step": {
-        const chapter = chapterOfStep(activeDraft!, route.step);
-        return [
-          instancesCrumb,
-          decks,
-          ...draftCrumbs(route.draftUrl),
-          ...(chapter === null ? [] : [{ label: chapterName(activeDraft!, chapter), route: { screen: "chapter" as const, draftUrl: route.draftUrl, chapter } }]),
-          { label: stepName(activeDraft!, route.step), route },
-        ];
-      }
-      case "question":
-        return [
-          instancesCrumb,
-          decks,
-          ...draftCrumbs(route.draftUrl),
-          { label: t("studio.draftCards.crumb"), route: { screen: "draftCards", draftUrl: route.draftUrl } },
-          { label: cardName({ ...draftCardOf(activeDraft!, route.card)!.content, id: route.card }, readerText), route },
-        ];
-    }
-  };
-  const chapterName = (draft: ReleaseDraft, chapter: string) => {
-    const title = draft.chapters.find((node) => node.id === chapter)!.data.title;
-    return title === undefined ? chapter : readerText(title);
-  };
-  const stepName = (draft: ReleaseDraft, step: string) => {
-    const chapter = chapterOfStep(draft, step);
-    const number = chapter === null ? -1 : liveSteps(draft, chapter).findIndex((node) => node.id === step);
-    return number === -1 ? step : t("studio.chapter.step", { number: number + 1 });
-  };
   const waiting = instancesQuery.error ? (
     <ErrorMessage error={errorText(instancesQuery.error)} />
   ) : deckUrl !== null && decksQuery.error ? (
@@ -226,7 +130,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
     (draftUrl !== null && (activeDraft === null || draftSubject === false)) ? (
     <Loading label={t("workspace.loadingInstances")} />
   ) : null;
-  const crumbs = waiting === null ? crumbsOf(route!) : [];
+  const crumbs = waiting === null ? crumbsOf(route!, { deck: activeDeck, card: activeCard, draft: activeDraft }, { t, readerText }) : [];
   // The page the trail ends at: "Decks – Solid Memo Studio".
   useDocumentTitle(crumbs.slice(-1).map((crumb) => crumb.label));
 
