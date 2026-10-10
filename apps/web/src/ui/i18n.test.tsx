@@ -6,6 +6,7 @@ import { AppError, ERROR_TEMPLATES } from "@solid-memo/domain/appError";
 import { createI18n, I18nProvider, useI18n, type MessageKey } from "./i18n";
 import en from "../i18n/en.json";
 import sv from "../i18n/sv.json";
+import ko from "../i18n/ko.json";
 
 /** Every message's key, and its placeholders, in a message file. */
 function shape(messages: object, prefix = ""): Record<string, string[]> {
@@ -30,8 +31,11 @@ function shape(messages: object, prefix = ""): Record<string, string[]> {
 }
 
 describe("the message files", () => {
-  it("say the same things in Swedish as in English, with the same placeholders", () => {
-    expect(shape(sv)).toEqual(shape(en));
+  it.each([
+    ["sv", sv],
+    ["ko", ko],
+  ])("say the same things in %s as in English, with the same placeholders", (_locale, messages) => {
+    expect(shape(messages)).toEqual(shape(en));
   });
 });
 
@@ -64,11 +68,16 @@ describe("createI18n", () => {
     expect(createI18n("en").t("common.cardCount", { count: 1 })).toBe("1 card");
     expect(createI18n("en").t("common.cardCount", { count: 3 })).toBe("3 cards");
     expect(createI18n("sv").t("common.cardCount", { count: 3 })).toBe("3 kort");
+    expect(createI18n("ko").t("common.cardCount", { count: 1 })).toBe("카드 1장");
     expect(createI18n("en").t("common.cardCount")).toBe("{count} cards");
   });
 
   it("speaks Swedish when asked", () => {
     expect(createI18n("sv").t("language.label")).toBe("Språk");
+  });
+
+  it("speaks Korean when asked", () => {
+    expect(createI18n("ko").t("language.label")).toBe("언어");
   });
 
   it("names a missing message by its key", () => {
@@ -118,6 +127,8 @@ describe("createI18n", () => {
     expect(en.languageParts("ja")).toEqual({ name: "Japanese", autonym: "日本語", code: "ja" });
     expect(createI18n("sv").languageLabel("sv")).toBe("svenska (sv)");
     expect(createI18n("sv").languageLabel("en")).toBe("engelska — English (en)");
+    expect(en.languageLabel("ko")).toBe("Korean — 한국어 (ko)");
+    expect(createI18n("ko").languageLabel("ko")).toBe("한국어 (ko)");
   });
 
   it("names a language Intl has no words in by its name only, and one it cannot name as its code", () => {
@@ -142,6 +153,7 @@ describe("createI18n", () => {
   it("writes out a day in the spoken language", () => {
     expect(createI18n("en").formatDate("2026-09-22T00:00:00.000Z")).toBe("September 22, 2026");
     expect(createI18n("sv").formatDate("2026-09-22T00:00:00.000Z")).toBe("22 september 2026");
+    expect(createI18n("ko").formatDate("2026-09-22T00:00:00.000Z")).toBe("2026년 9월 22일");
   });
 
   it("names every study direction", () => {

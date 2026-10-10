@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
 import { useState } from "preact/hooks";
 import type { LangText } from "@solid-memo/domain/langText";
+import type { Locale } from "@solid-memo/domain/locale";
 import { I18nProvider } from "./i18n";
 import {
   draftOf,
@@ -122,7 +123,7 @@ function Field({
   );
 }
 
-function renderField(props: Parameters<typeof Field>[0], locale: "en" | "sv" = "en") {
+function renderField(props: Parameters<typeof Field>[0], locale: Locale = "en") {
   const onText = vi.fn();
   render(
     <I18nProvider locale={locale} onChoose={() => undefined}>
@@ -206,6 +207,7 @@ describe("LangTextField", () => {
     expect(fireEvent.keyDown(text, { key: "Enter" })).toBe(true);
     expect(fireEvent.keyDown(text, { key: "a", ctrlKey: true })).toBe(true);
     expect(fireEvent.keyDown(text, { key: "Enter", ctrlKey: true, isComposing: true })).toBe(true);
+    expect(fireEvent.keyDown(text, { key: "Enter", ctrlKey: true, keyCode: 229 })).toBe(true);
     expect(onSubmit).not.toHaveBeenCalled();
     expect(fireEvent.keyDown(text, { key: "Enter", ctrlKey: true })).toBe(false);
     expect(fireEvent.keyDown(text, { key: "Enter", metaKey: true })).toBe(false);

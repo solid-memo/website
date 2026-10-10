@@ -1,5 +1,6 @@
 import { createPortal } from "preact";
 import { useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
+import { composing } from "./composing";
 import { useI18n } from "./i18n";
 import { reducedMotion } from "./motion";
 
@@ -160,7 +161,7 @@ export function ZoomableImage({
   useEffect(() => {
     if (!expanded) return;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") shrink();
+      if (event.key === "Escape" && !composing(event)) shrink();
     };
     const onResize = () => {
       const shown = current.current!;

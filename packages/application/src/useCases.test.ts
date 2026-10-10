@@ -35,6 +35,7 @@ import { librarySeriesUrlOf } from "@solid-memo/domain/libraryLayout";
 import { sameDeckState, withDeckChanges, type DeckUpgradeProgress } from "@solid-memo/domain/deckUpgrade";
 import type { LibraryCard } from "@solid-memo/domain/library";
 import type { CourseOutline } from "@solid-memo/domain/course";
+import type { Locale } from "@solid-memo/domain/locale";
 
 const session: Session = { webId: "https://alice.example/profile/card#me" };
 const document: WebIdDocument = {
@@ -224,10 +225,10 @@ function makeDeps() {
 describe("createUseCases", () => {
   describe("language", () => {
     it("speaks the chosen language, and keeps a new choice", () => {
-      let chosen: "en" | "sv" | null = "sv";
+      let chosen: Locale | null = "sv";
       const languagePreference = {
         chosen: () => chosen,
-        choose: vi.fn((locale: "en" | "sv") => {
+        choose: vi.fn((locale: Locale) => {
           chosen = locale;
         }),
       };

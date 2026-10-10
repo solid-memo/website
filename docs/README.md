@@ -29,5 +29,5 @@ and [testing.md](testing.md).
 - [guest-mode.md](guest-mode.md) — trying the app before logging in, in a pod kept in the browser.
 - [srs.md](srs.md) — how cards are scheduled (SM-2), as pure functions in the domain.
 - [routing.md](routing.md) — the URL as the view the user is looking at: bookmarkable, shareable, Back and Forward.
-- [i18n.md](i18n.md) — English and Swedish: how the language is picked, and text in the user's languages.
+- [i18n.md](i18n.md) — English, Swedish and Korean: how the language is picked, and text in the user's languages.
 - [theme.md](theme.md) — light, dark, or as the browser says, and where the choice is kept.

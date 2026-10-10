@@ -8,15 +8,15 @@
 # What decks are about: a SKOS concept scheme used with dcat:theme on
 # decks (next to the EU data theme EDUC) and declared as a theme
 # taxonomy of the catalogues. Every concept has its label and
-# definition in each language the scheme's title is in (English and
-# Swedish, the app's languages). Concepts are only ever added; a
-# concept that should go is deprecated, never removed, since decks
-# point at it. So a topic's IRI never changes and carries no version:
-# each addition bumps owl:versionInfo and adds a change note,
-# and every concept says in its history note when it arrived.
+# definition in each language the scheme's title is in (English,
+# Swedish and Korean, the app's languages). Concepts are only ever
+# added; a concept that should go is deprecated, never removed, since
+# decks point at it. So a topic's IRI never changes and carries no
+# version: each addition bumps owl:versionInfo and adds a change
+# note, and every concept says in its history note when it arrived.
 <>
     a skos:ConceptScheme ;
-    owl:versionInfo "1.7" ;
+    owl:versionInfo "1.8" ;
     skos:changeNote "1.0: languages, swedish, geography, computing, science, chemistry." ,
                     "1.1: art." ,
                     "1.2: labour-market." ,
@@ -24,11 +24,14 @@
                     "1.4: history, literature, music, mythology, mathematics, sports, economics, astronomy, biology, physics, greek, latin, spanish (for the authored decks)." ,
                     "1.5: french, german." ,
                     "1.6: film, finnish, italian, portuguese." ,
-                    "1.7: linked-data." ;
+                    "1.7: linked-data." ,
+                    "1.8: korean; every topic named and defined in Korean as well." ;
     dcterms:title "Solid Memo topics"@en ,
-                  "Solid Memo-ämnen"@sv ;
+                  "Solid Memo-ämnen"@sv ,
+                  "Solid Memo 주제"@ko ;
     skos:definition "What a deck of flashcards is about."@en ,
-                    "Vad en kortlek med flashcards handlar om."@sv ;
+                    "Vad en kortlek med flashcards handlar om."@sv ,
+                    "플래시카드 덱이 다루는 내용."@ko ;
     skos:hasTopConcept topic:languages ,
                        topic:geography ,
                        topic:computing ,
@@ -47,9 +50,11 @@
 topic:languages
     a skos:Concept ;
     skos:prefLabel "Languages"@en ,
-                   "Språk"@sv ;
+                   "Språk"@sv ,
+                   "언어"@ko ;
     skos:definition "Vocabulary and grammar of human languages."@en ,
-                    "Ordförråd och grammatik i mänskliga språk."@sv ;
+                    "Ordförråd och grammatik i mänskliga språk."@sv ,
+                    "인간 언어의 어휘와 문법."@ko ;
     skos:inScheme <> ;
     skos:topConceptOf <> ;
     skos:narrower topic:swedish ,
@@ -60,15 +65,18 @@ topic:languages
                   topic:german ,
                   topic:italian ,
                   topic:finnish ,
-                  topic:portuguese ;
+                  topic:portuguese ,
+                  topic:korean ;
     skos:historyNote "Since 1.0." .
 
 topic:swedish
     a skos:Concept ;
     skos:prefLabel "Swedish"@en ,
-                   "Svenska"@sv ;
+                   "Svenska"@sv ,
+                   "스웨덴어"@ko ;
     skos:definition "The Swedish language."@en ,
-                    "Det svenska språket."@sv ;
+                    "Det svenska språket."@sv ,
+                    "스웨덴어."@ko ;
     skos:inScheme <> ;
     skos:broader topic:languages ;
     skos:historyNote "Since 1.0." .
@@ -76,9 +84,11 @@ topic:swedish
 topic:geography
     a skos:Concept ;
     skos:prefLabel "Geography"@en ,
-                   "Geografi"@sv ;
+                   "Geografi"@sv ,
+                   "지리"@ko ;
     skos:definition "Countries, capitals, flags and the places of the world."@en ,
-                    "Länder, huvudstäder, flaggor och världens platser."@sv ;
+                    "Länder, huvudstäder, flaggor och världens platser."@sv ,
+                    "세계의 나라, 수도, 국기와 장소."@ko ;
     skos:inScheme <> ;
     skos:topConceptOf <> ;
     skos:historyNote "Since 1.0." .
@@ -86,9 +96,11 @@ topic:geography
 topic:computing
     a skos:Concept ;
     skos:prefLabel "Computing"@en ,
-                   "Datorer"@sv ;
+                   "Datorer"@sv ,
+                   "컴퓨팅"@ko ;
     skos:definition "Computers, software and the protocols of the web."@en ,
-                    "Datorer, mjukvara och webbens protokoll."@sv ;
+                    "Datorer, mjukvara och webbens protokoll."@sv ,
+                    "컴퓨터, 소프트웨어와 웹의 프로토콜."@ko ;
     skos:inScheme <> ;
     skos:topConceptOf <> ;
     skos:narrower topic:linked-data ;
@@ -97,9 +109,11 @@ topic:computing
 topic:linked-data
     a skos:Concept ;
     skos:prefLabel "Linked data"@en ,
-                   "Länkade data"@sv ;
+                   "Länkade data"@sv ,
+                   "링크드 데이터"@ko ;
     skos:definition "Data on the web described with RDF and named and linked by IRIs, and the Solid specifications built on it."@en ,
-                    "Data på webben som beskrivs med RDF och namnges och länkas med IRI:er, och Solid-specifikationerna som bygger på det."@sv ;
+                    "Data på webben som beskrivs med RDF och namnges och länkas med IRI:er, och Solid-specifikationerna som bygger på det."@sv ,
+                    "RDF로 기술되고 IRI로 이름 붙여지고 연결되는 웹의 데이터, 그리고 그 위에 세워진 Solid 사양."@ko ;
     skos:inScheme <> ;
     skos:broader topic:computing ;
     skos:historyNote "Since 1.7." .
@@ -107,9 +121,11 @@ topic:linked-data
 topic:science
     a skos:Concept ;
     skos:prefLabel "Science"@en ,
-                   "Naturvetenskap"@sv ;
+                   "Naturvetenskap"@sv ,
+                   "과학"@ko ;
     skos:definition "The natural sciences."@en ,
-                    "Naturvetenskaperna."@sv ;
+                    "Naturvetenskaperna."@sv ,
+                    "자연과학."@ko ;
     skos:inScheme <> ;
     skos:topConceptOf <> ;
     skos:narrower topic:chemistry ,
@@ -121,9 +137,11 @@ topic:science
 topic:chemistry
     a skos:Concept ;
     skos:prefLabel "Chemistry"@en ,
-                   "Kemi"@sv ;
+                   "Kemi"@sv ,
+                   "화학"@ko ;
     skos:definition "Elements, compounds and their reactions."@en ,
-                    "Grundämnen, föreningar och deras reaktioner."@sv ;
+                    "Grundämnen, föreningar och deras reaktioner."@sv ,
+                    "원소, 화합물과 그 반응."@ko ;
     skos:inScheme <> ;
     skos:broader topic:science ;
     skos:historyNote "Since 1.0." .
@@ -131,9 +149,11 @@ topic:chemistry
 topic:art
     a skos:Concept ;
     skos:prefLabel "Art"@en ,
-                   "Konst"@sv ;
+                   "Konst"@sv ,
+                   "미술"@ko ;
     skos:definition "Paintings, artists and the history of art."@en ,
-                    "Målningar, konstnärer och konstens historia."@sv ;
+                    "Målningar, konstnärer och konstens historia."@sv ,
+                    "그림, 화가와 미술의 역사."@ko ;
     skos:inScheme <> ;
     skos:topConceptOf <> ;
     skos:historyNote "Since 1.1." .
@@ -141,9 +161,11 @@ topic:art
 topic:labour-market
     a skos:Concept ;
     skos:prefLabel "Labour market"@en ,
-                   "Arbetsmarknad"@sv ;
+                   "Arbetsmarknad"@sv ,
+                   "노동 시장"@ko ;
     skos:definition "Occupations, work and the labour market."@en ,
-                    "Yrken, arbete och arbetsmarknaden."@sv ;
+                    "Yrken, arbete och arbetsmarknaden."@sv ,
+                    "직업과 일, 그리고 노동 시장."@ko ;
     skos:inScheme <> ;
     skos:topConceptOf <> ;
     skos:historyNote "Since 1.2." .
@@ -151,9 +173,11 @@ topic:labour-market
 topic:spanish
     a skos:Concept ;
     skos:prefLabel "Spanish"@en ,
-                   "Spanska"@sv ;
+                   "Spanska"@sv ,
+                   "스페인어"@ko ;
     skos:definition "The Spanish language."@en ,
-                    "Det spanska språket."@sv ;
+                    "Det spanska språket."@sv ,
+                    "스페인어."@ko ;
     skos:inScheme <> ;
     skos:broader topic:languages ;
     skos:historyNote "Since 1.4." .
@@ -161,9 +185,11 @@ topic:spanish
 topic:latin
     a skos:Concept ;
     skos:prefLabel "Latin"@en ,
-                   "Latin"@sv ;
+                   "Latin"@sv ,
+                   "라틴어"@ko ;
     skos:definition "The Latin language and its phrases."@en ,
-                    "Det latinska språket och dess uttryck."@sv ;
+                    "Det latinska språket och dess uttryck."@sv ,
+                    "라틴어와 그 표현."@ko ;
     skos:inScheme <> ;
     skos:broader topic:languages ;
     skos:historyNote "Since 1.4." .
@@ -171,9 +197,11 @@ topic:latin
 topic:greek
     a skos:Concept ;
     skos:prefLabel "Greek"@en ,
-                   "Grekiska"@sv ;
+                   "Grekiska"@sv ,
+                   "그리스어"@ko ;
     skos:definition "The Greek language and its alphabet."@en ,
-                    "Det grekiska språket och dess alfabet."@sv ;
+                    "Det grekiska språket och dess alfabet."@sv ,
+                    "그리스어와 그 알파벳."@ko ;
     skos:inScheme <> ;
     skos:broader topic:languages ;
     skos:historyNote "Since 1.4." .
@@ -181,9 +209,11 @@ topic:greek
 topic:french
     a skos:Concept ;
     skos:prefLabel "French"@en ,
-                   "Franska"@sv ;
+                   "Franska"@sv ,
+                   "프랑스어"@ko ;
     skos:definition "The French language."@en ,
-                    "Det franska språket."@sv ;
+                    "Det franska språket."@sv ,
+                    "프랑스어."@ko ;
     skos:inScheme <> ;
     skos:broader topic:languages ;
     skos:historyNote "Since 1.5." .
@@ -191,9 +221,11 @@ topic:french
 topic:german
     a skos:Concept ;
     skos:prefLabel "German"@en ,
-                   "Tyska"@sv ;
+                   "Tyska"@sv ,
+                   "독일어"@ko ;
     skos:definition "The German language."@en ,
-                    "Det tyska språket."@sv ;
+                    "Det tyska språket."@sv ,
+                    "독일어."@ko ;
     skos:inScheme <> ;
     skos:broader topic:languages ;
     skos:historyNote "Since 1.5." .
@@ -201,9 +233,11 @@ topic:german
 topic:italian
     a skos:Concept ;
     skos:prefLabel "Italian"@en ,
-                   "Italienska"@sv ;
+                   "Italienska"@sv ,
+                   "이탈리아어"@ko ;
     skos:definition "The Italian language."@en ,
-                    "Det italienska språket."@sv ;
+                    "Det italienska språket."@sv ,
+                    "이탈리아어."@ko ;
     skos:inScheme <> ;
     skos:broader topic:languages ;
     skos:historyNote "Since 1.6." .
@@ -211,9 +245,11 @@ topic:italian
 topic:finnish
     a skos:Concept ;
     skos:prefLabel "Finnish"@en ,
-                   "Finska"@sv ;
+                   "Finska"@sv ,
+                   "핀란드어"@ko ;
     skos:definition "The Finnish language."@en ,
-                    "Det finska språket."@sv ;
+                    "Det finska språket."@sv ,
+                    "핀란드어."@ko ;
     skos:inScheme <> ;
     skos:broader topic:languages ;
     skos:historyNote "Since 1.6." .
@@ -221,19 +257,35 @@ topic:finnish
 topic:portuguese
     a skos:Concept ;
     skos:prefLabel "Portuguese"@en ,
-                   "Portugisiska"@sv ;
+                   "Portugisiska"@sv ,
+                   "포르투갈어"@ko ;
     skos:definition "The Portuguese language."@en ,
-                    "Det portugisiska språket."@sv ;
+                    "Det portugisiska språket."@sv ,
+                    "포르투갈어."@ko ;
     skos:inScheme <> ;
     skos:broader topic:languages ;
     skos:historyNote "Since 1.6." .
 
+topic:korean
+    a skos:Concept ;
+    skos:prefLabel "Korean"@en ,
+                   "Koreanska"@sv ,
+                   "한국어"@ko ;
+    skos:definition "The Korean language."@en ,
+                    "Det koreanska språket."@sv ,
+                    "한국어."@ko ;
+    skos:inScheme <> ;
+    skos:broader topic:languages ;
+    skos:historyNote "Since 1.8." .
+
 topic:physics
     a skos:Concept ;
     skos:prefLabel "Physics"@en ,
-                   "Fysik"@sv ;
+                   "Fysik"@sv ,
+                   "물리학"@ko ;
     skos:definition "Matter, energy, forces and their units."@en ,
-                    "Materia, energi, krafter och deras enheter."@sv ;
+                    "Materia, energi, krafter och deras enheter."@sv ,
+                    "물질, 에너지, 힘과 그 단위."@ko ;
     skos:inScheme <> ;
     skos:broader topic:science ;
     skos:historyNote "Since 1.4." .
@@ -241,9 +293,11 @@ topic:physics
 topic:astronomy
     a skos:Concept ;
     skos:prefLabel "Astronomy"@en ,
-                   "Astronomi"@sv ;
+                   "Astronomi"@sv ,
+                   "천문학"@ko ;
     skos:definition "Stars, planets, constellations and the universe."@en ,
-                    "Stjärnor, planeter, stjärnbilder och universum."@sv ;
+                    "Stjärnor, planeter, stjärnbilder och universum."@sv ,
+                    "별, 행성, 별자리와 우주."@ko ;
     skos:inScheme <> ;
     skos:broader topic:science ;
     skos:historyNote "Since 1.4." .
@@ -251,9 +305,11 @@ topic:astronomy
 topic:biology
     a skos:Concept ;
     skos:prefLabel "Biology"@en ,
-                   "Biologi"@sv ;
+                   "Biologi"@sv ,
+                   "생물학"@ko ;
     skos:definition "Living things: animals, plants and the human body."@en ,
-                    "Levande varelser: djur, växter och människokroppen."@sv ;
+                    "Levande varelser: djur, växter och människokroppen."@sv ,
+                    "생물: 동물, 식물과 인체."@ko ;
     skos:inScheme <> ;
     skos:broader topic:science ;
     skos:historyNote "Since 1.4." .
@@ -261,9 +317,11 @@ topic:biology
 topic:history
     a skos:Concept ;
     skos:prefLabel "History"@en ,
-                   "Historia"@sv ;
+                   "Historia"@sv ,
+                   "역사"@ko ;
     skos:definition "Past events, eras and the people who shaped them."@en ,
-                    "Historiska händelser, epoker och människorna som formade dem."@sv ;
+                    "Historiska händelser, epoker och människorna som formade dem."@sv ,
+                    "지나간 사건과 시대, 그리고 그것을 만든 사람들."@ko ;
     skos:inScheme <> ;
     skos:topConceptOf <> ;
     skos:historyNote "Since 1.4." .
@@ -271,9 +329,11 @@ topic:history
 topic:literature
     a skos:Concept ;
     skos:prefLabel "Literature"@en ,
-                   "Litteratur"@sv ;
+                   "Litteratur"@sv ,
+                   "문학"@ko ;
     skos:definition "Books, authors and literary prizes."@en ,
-                    "Böcker, författare och litterära priser."@sv ;
+                    "Böcker, författare och litterära priser."@sv ,
+                    "책, 작가와 문학상."@ko ;
     skos:inScheme <> ;
     skos:topConceptOf <> ;
     skos:historyNote "Since 1.4." .
@@ -281,9 +341,11 @@ topic:literature
 topic:music
     a skos:Concept ;
     skos:prefLabel "Music"@en ,
-                   "Musik"@sv ;
+                   "Musik"@sv ,
+                   "음악"@ko ;
     skos:definition "Composers, works and the language of music."@en ,
-                    "Tonsättare, verk och musikens språk."@sv ;
+                    "Tonsättare, verk och musikens språk."@sv ,
+                    "작곡가, 작품과 음악의 언어."@ko ;
     skos:inScheme <> ;
     skos:topConceptOf <> ;
     skos:historyNote "Since 1.4." .
@@ -291,9 +353,11 @@ topic:music
 topic:mythology
     a skos:Concept ;
     skos:prefLabel "Mythology"@en ,
-                   "Mytologi"@sv ;
+                   "Mytologi"@sv ,
+                   "신화"@ko ;
     skos:definition "Gods, heroes and the myths of the world."@en ,
-                    "Gudar, hjältar och världens myter."@sv ;
+                    "Gudar, hjältar och världens myter."@sv ,
+                    "세계의 신, 영웅과 신화."@ko ;
     skos:inScheme <> ;
     skos:topConceptOf <> ;
     skos:historyNote "Since 1.4." .
@@ -301,9 +365,11 @@ topic:mythology
 topic:mathematics
     a skos:Concept ;
     skos:prefLabel "Mathematics"@en ,
-                   "Matematik"@sv ;
+                   "Matematik"@sv ,
+                   "수학"@ko ;
     skos:definition "Numbers, formulas and mathematical notation."@en ,
-                    "Tal, formler och matematisk notation."@sv ;
+                    "Tal, formler och matematisk notation."@sv ,
+                    "수, 공식과 수학 기호."@ko ;
     skos:inScheme <> ;
     skos:topConceptOf <> ;
     skos:historyNote "Since 1.4." .
@@ -311,9 +377,11 @@ topic:mathematics
 topic:sports
     a skos:Concept ;
     skos:prefLabel "Sports"@en ,
-                   "Sport"@sv ;
+                   "Sport"@sv ,
+                   "스포츠"@ko ;
     skos:definition "Sports, games and their competitions."@en ,
-                    "Idrotter, spel och deras tävlingar."@sv ;
+                    "Idrotter, spel och deras tävlingar."@sv ,
+                    "스포츠, 경기와 대회."@ko ;
     skos:inScheme <> ;
     skos:topConceptOf <> ;
     skos:historyNote "Since 1.4." .
@@ -321,9 +389,11 @@ topic:sports
 topic:economics
     a skos:Concept ;
     skos:prefLabel "Economics"@en ,
-                   "Ekonomi"@sv ;
+                   "Ekonomi"@sv ,
+                   "경제"@ko ;
     skos:definition "Money, currencies and the economy."@en ,
-                    "Pengar, valutor och ekonomin."@sv ;
+                    "Pengar, valutor och ekonomin."@sv ,
+                    "돈, 통화와 경제."@ko ;
     skos:inScheme <> ;
     skos:topConceptOf <> ;
     skos:historyNote "Since 1.4." .
@@ -331,9 +401,11 @@ topic:economics
 topic:film
     a skos:Concept ;
     skos:prefLabel "Film"@en ,
-                   "Film"@sv ;
+                   "Film"@sv ,
+                   "영화"@ko ;
     skos:definition "Films, film-makers and film awards."@en ,
-                    "Filmer, filmskapare och filmpriser."@sv ;
+                    "Filmer, filmskapare och filmpriser."@sv ,
+                    "영화, 영화 제작자와 영화상."@ko ;
     skos:inScheme <> ;
     skos:topConceptOf <> ;
     skos:historyNote "Since 1.6." .

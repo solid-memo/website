@@ -52,7 +52,7 @@ describe("topicsOf and topicLabels", () => {
   });
 
   it("label a deck's topics, leaving out the EU themes", () => {
-    expect(topicLabels(nouns.themes)).toEqual([{ en: "Swedish", sv: "Svenska" }]);
+    expect(topicLabels(nouns.themes)).toEqual([{ en: "Swedish", ko: "스웨덴어", sv: "Svenska" }]);
     expect(topicLabels([EDUC])).toEqual([]);
   });
 });
@@ -78,5 +78,13 @@ describe("filterLibraryDecks", () => {
 
   it("searches the keywords in every language, not only the reader's", () => {
     expect(filterLibraryDecks(decks, { topics: [], query: "ordförråd" })).toEqual([nouns]);
+  });
+
+  it("finds composed text with a decomposed query, and decomposed text with a composed one", () => {
+    const korean = libraryDeck("korean-nouns", [`${TOPIC}korean`], { keywords: { ko: ["사람"] } });
+    const decomposed = libraryDeck("decomposed", [], { description: { en: "Cafe\u0301 words" } });
+    expect(filterLibraryDecks([...decks, korean], { topics: [], query: "사람".normalize("NFD") })).toEqual([korean]);
+    expect(filterLibraryDecks([...decks, decomposed], { topics: [], query: "CAFÉ" })).toEqual([decomposed]);
+    expect(filterLibraryDecks(decks, { topics: [], query: "ordfo\u0308rra\u030Ad" })).toEqual([nouns]);
   });
 });

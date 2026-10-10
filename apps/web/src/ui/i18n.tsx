@@ -8,8 +8,13 @@ import { NO_LANGUAGE } from "@solid-memo/domain/languageTag";
 import { DEFAULT_LOCALE, type Locale } from "@solid-memo/domain/locale";
 import en from "../i18n/en.json";
 import sv from "../i18n/sv.json";
+import ko from "../i18n/ko.json";
 
-/** A message with a form per plural category: English and Swedish have two. */
+/**
+ * A message with a form per plural category: English and Swedish have
+ * two. Korean has only "other", which it is always said in; its messages
+ * still give both forms, the one form the same as the other.
+ */
 type Plural = { one: string; other: string };
 type Message = string | Plural;
 interface Messages {
@@ -40,7 +45,7 @@ type KeysOf<T, Prefix extends string = ""> = {
 
 export type MessageKey = KeysOf<typeof en>;
 
-const CATALOGS: Record<Locale, Messages> = { en, sv };
+const CATALOGS: Record<Locale, Messages> = { en, sv, ko };
 
 function isPlural(node: Message | Messages): node is Plural {
   return typeof node === "object" && typeof node.other === "string";

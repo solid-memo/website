@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/preact";
 import { parseMarkdown } from "@solid-memo/markdown/parse";
+import type { Locale } from "@solid-memo/domain/locale";
 import { I18nProvider } from "./i18n";
 import { inDataRegion, MarkdownBlocks } from "./Markdown";
 
 /** The Markdown rendered as the app renders it, in a container of its own. */
-function rendered(markdown: string, locale: "en" | "sv" = "en") {
+function rendered(markdown: string, locale: Locale = "en") {
   return render(
     <I18nProvider locale={locale} onChoose={() => undefined}>
       <div class="md">

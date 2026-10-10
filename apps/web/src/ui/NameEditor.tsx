@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
+import { composing } from "./composing";
 import { CheckIcon } from "./icons";
 import { useI18n } from "./i18n";
 
@@ -64,7 +65,7 @@ export function NameEditor({
         maxLength={maxLength}
         onInput={(event) => setDraft(event.currentTarget.value)}
         onKeyDown={(event) => {
-          if (event.key !== "Escape") return;
+          if (event.key !== "Escape" || composing(event)) return;
           event.preventDefault();
           event.stopPropagation();
           finish(null, true);

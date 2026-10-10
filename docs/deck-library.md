@@ -41,8 +41,9 @@ card format 4:
 - **Title and description** are language-tagged, one per language, one
   of them English (the library's curation policy, so that anyone who
   reads English can read every deck). **Keywords** are tagged too,
-  several per language, in English and Swedish; the app shows the
-  reader's. **Topics** are `dcat:theme`s from
+  several per language, in English and Swedish, and in Korean on a deck
+  that adds them; the app shows only the reader's
+  ([i18n.md](i18n.md#which-language)). **Topics** are `dcat:theme`s from
   [`ns/vocab/topics.ttl`](../ns/vocab/topics.ttl), next to the EU data
   theme `EDUC`; **languages** are EU authority-table IRIs described in
   [`ns/vocab/external.ttl`](../ns/vocab/external.ttl).
@@ -241,6 +242,12 @@ what the versions make. Both check:
   name even when there is no such deck, so a typo in `NEWCOMER_COURSE`
   is reported, not dropped;
 - text in Markdown, by the [Markdown rules](#markdown-rules);
+- every literal of a version and of the index in Unicode normalization
+  form C, composed (`normalizationProblems`): "é" not written as "e"
+  and a combining accent, nor "사람" as five jamo, as text copied from a
+  macOS file name or a PDF may be. Such text looks the same but is not
+  the same text; the problem names the first character that composes
+  differently, by its code points;
 - every version and the index against Solid Memo's shapes, DCAT-AP (a
   version with the index beside it) and SKOS, with the reference data.
 
@@ -387,6 +394,10 @@ flowchart LR
   name, a broader topic finding the narrower: "Languages" finds the
   Swedish decks) and by a **search** of names, descriptions and keywords,
   in every language (`filterLibraryDecks` in [domain/library.ts](../packages/domain/src/library.ts)).
+  The search ignores case and Unicode form: query and text are compared
+  composed (NFC), so "사람" or "é" pasted decomposed (NFD), as macOS
+  file names and some PDFs hold text, still finds the deck
+  (`matchesQuery` in [domain/search.ts](../packages/domain/src/search.ts)).
   Clicking a row opens the deck's page: description, topics, keywords
   in the reader's language,
   the release (version, date, notes), authors, licence, dates and

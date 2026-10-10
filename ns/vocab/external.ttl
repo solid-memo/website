@@ -84,6 +84,12 @@
     skos:prefLabel "Portuguese"@en ;
     skos:inScheme <http://publications.europa.eu/resource/authority/language> .
 
+<http://publications.europa.eu/resource/authority/language/KOR>
+    a skos:Concept ,
+      dcterms:LinguisticSystem ;
+    skos:prefLabel "Korean"@en ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/language> .
+
 <http://publications.europa.eu/resource/authority/file-type>
     a skos:ConceptScheme ;
     dcterms:title "File type"@en .
