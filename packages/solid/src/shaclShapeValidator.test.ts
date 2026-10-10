@@ -591,26 +591,28 @@ describe("validateRelease", () => {
     expect(brief(own)).toContainEqual(["error", "shape", of("series"), `${DCTERMS_NS}description`, undefined]);
   }, 60_000);
 
-  it.each(["capitals-of-the-world/v1.ttl", "solid-fundamentals/v1.ttl"])(
+  // A deck and a course, each the latest of its series; small ones, for each is checked whole, five times over.
+  it.each(["greek-alphabet/v1.ttl", "getting-started/v2.ttl"])(
     "finds nothing wrong with the next version of decks/%s, in a pod, where it is published and as published, alone, or for the library: it describes its publisher and series as the index does",
     async (path) => {
       const pod = await draftPod();
       const release = await pod.repository.readRelease(`${DECKS}${path}`);
-      const name = path.split("/")[0]!;
-      const url = draftUrlOf(INSTANCE, name, 2);
+      const [name, file] = path.split("/") as [string, string];
+      const version = Number(file.slice(1, -".ttl".length));
+      const url = draftUrlOf(INSTANCE, name, version + 1);
       // The draft as the Studio makes it, written in the pod and read back, as the pod answers.
       const datasets = await vi.importActual<typeof import("./datasets")>("./datasets");
       vi.mocked(getSolidDatasetOrNull).mockImplementation(datasets.getSolidDatasetOrNull);
       await pod.repository.create(INSTANCE, nextVersionDraft(release, url, await pod.repository.readLinked(release)));
       const { draft } = await pod.repository.read(url);
-      const published = `${INSTANCE}releases/${name}/v2.ttl`;
+      const published = `${INSTANCE}releases/${name}/v${version + 1}.ttl`;
       expect(await pod.validator.validateRelease(draft, draft.url)).toEqual([]);
       expect(await pod.validator.validateRelease(draft, published)).toEqual([]);
-      expect(await pod.validator.validateRelease(draft, `${DECKS}${name}/v2.ttl`, `${DECKS}index.ttl`)).toEqual([]);
+      expect(await pod.validator.validateRelease(draft, `${DECKS}${name}/v${version + 1}.ttl`, `${DECKS}index.ttl`)).toEqual([]);
       // The document published, and downloaded, read back as it is, with nothing of the library's to read beside it.
       const turtle = await pod.repository.assemble(url, published, "2026-10-10T00:00:00Z");
       const quads = await quadsOfTurtle(turtle, published);
-      for (const iri of [`${DECKS}index.ttl#${name}`, `${DECKS}index.ttl#solid-memo`, `${DECKS}${name}/v1.ttl`]) {
+      for (const iri of [`${DECKS}index.ttl#${name}`, `${DECKS}index.ttl#solid-memo`, `${DECKS}${path}`]) {
         expect(quads.some((quad) => quad.subject.value === iri)).toBe(true);
       }
       const offline = (async (input: RequestInfo | URL) =>

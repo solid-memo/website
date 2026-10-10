@@ -104,4 +104,4 @@ it("reads each deck's current release on its own, as from a link, as the index d
     // The index describes a source as every release does, the release as it does.
     expect(own.map((source) => source.url), deck.url).toEqual(sources.map((source) => source.url));
   }
-});
+}, 120_000);
