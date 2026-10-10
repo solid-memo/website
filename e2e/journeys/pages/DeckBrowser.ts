@@ -51,7 +51,8 @@ export class DeckBrowser extends Screen {
       await this.describeButton.click();
       const form = this.page.getByRole("form", { name: this.t("deckAbout.label") });
       const english = form.locator("#deck-description");
-      const swedish = form.locator("#deck-description-1");
+      // The deck's other languages follow the main field in no set order: the Swedish one is found by its language.
+      const swedish = form.locator('textarea[id^="deck-description-"][lang="sv"]');
       await expect(english).toBeVisible();
       await expect(swedish, "the Swedish description: only a deck that has one shows it").toHaveAttribute("lang", "sv");
       await english.fill(text.en);
