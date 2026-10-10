@@ -55,6 +55,9 @@
                  <#imperial-units> ,
                  <#integrals> ,
                  <#italian-basics> ,
+                 <#korean-adjectives> ,
+                 <#korean-nouns> ,
+                 <#korean-verbs> ,
                  <#latin-phrases> ,
                  <#mathematical-symbols> ,
                  <#media-types> ,
@@ -2426,6 +2429,7 @@
     dcterms:title "English Wiktionary (French entries)" ,
                   "English Wiktionary (German entries)" ,
                   "English Wiktionary (Italian entries)" ,
+                  "English Wiktionary (Korean entries, as extracted by Wiktextract on kaikki.org)" ,
                   "Wiktionary, the free dictionary (English edition)" ,
                   "English Wiktionary (Portuguese entries)" ,
                   "English Wiktionary (Spanish entries)" .
@@ -2443,10 +2447,10 @@
     dcterms:title "Folkets lexikon (English–Swedish and Swedish–English)" ;
     dcterms:creator "Viggo Kann and Joachim Hollman (Algoritmica HB) and the contributors of Folkets lexikon; hosted by KTH" ;
     dcterms:license <https://creativecommons.org/licenses/by-sa/2.5/> ;
-    dcterms:title "Folkets lexikon (Swedish–English dictionary, KTH)" ;
-    dcterms:creator "Viggo Kann and Folkets lexikon contributors (KTH Royal Institute of Technology)" ;
     dcterms:title "Folkets lexikon (Swedish–English)" ;
-    dcterms:creator "KTH Royal Institute of Technology and contributors" .
+    dcterms:creator "KTH Royal Institute of Technology and contributors" ;
+    dcterms:title "Folkets lexikon (Swedish–English dictionary, KTH)" ;
+    dcterms:creator "Viggo Kann and Folkets lexikon contributors (KTH Royal Institute of Technology)" .
 
 <https://solid-memo.com/decks/finnish-basics/v1.ttl#turtle>
     a dcat:Distribution ;
@@ -3977,6 +3981,294 @@
     a dcat:Distribution ;
     dcat:accessURL <https://solid-memo.com/decks/italian-basics/v1.ttl> ;
     dcat:downloadURL <https://solid-memo.com/decks/italian-basics/v1.ttl> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
+
+<#korean-adjectives>
+    a dcat:DatasetSeries ,
+      dcat:Dataset ;
+    solid-memo:formatVersion 3 ;
+    dcterms:title "Korean adjectives: the 1000 most common"@en ,
+                  "Koreanska adjektiv: de 1000 vanligaste"@sv ,
+                  "한국어 형용사: 가장 많이 쓰는 1000개"@ko ;
+    dcterms:description "The 1000 most frequent Korean adjectives, ranked by the National Institute of Korean Language's survey of word frequencies in written Korean (2002), adjusted towards everyday speech with film and TV subtitles. English and Swedish on the front, the Korean adjective on the back in its dictionary form ending in -다 (Korean adjectives are descriptive verbs), in Hangul. Meanings from the Basic Korean Dictionary (krdict) and English Wiktionary; the Swedish was written with the help of AI and checked against Korean and English Wiktionary and Folkets lexikon."@en ,
+                        "De 1000 vanligaste koreanska adjektiven, rangordnade efter Nationella institutet för koreanska språkets undersökning av ordfrekvenser i skriven koreanska (2002), justerad mot vardagligt tal med undertexter från film och tv. Engelska och svenska på framsidan, det koreanska adjektivet på baksidan i sin grundform på -다 (koreanska adjektiv böjs som verb), med hangul. Betydelser från Basic Korean Dictionary (krdict) och engelska Wiktionary; svenskan är skriven med hjälp av AI och kontrollerad mot koreanska och engelska Wiktionary samt Folkets lexikon."@sv ,
+                        "국립국어원의 ‘현대 국어 사용 빈도 조사’(2002)로 순위를 매기고 영화·드라마 자막으로 일상 구어 쪽으로 보정한, 가장 많이 쓰는 한국어 형용사 1000개입니다. 앞면에 영어와 스웨덴어, 뒷면에 ‘-다’로 끝나는 기본형 한국어 형용사가 한글로 있습니다. 뜻은 한국어기초사전과 영어 위키낱말사전에서 가져왔고, 스웨덴어는 AI의 도움을 받아 쓴 뒤 한국어·영어 위키낱말사전과 Folkets lexikon으로 확인했습니다."@ko ;
+    dcterms:publisher <#solid-memo> ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:korean ;
+    dcat:keyword "Korean"@en ,
+                 "adjectives"@en ,
+                 "vocabulary"@en ,
+                 "koreanska"@sv ,
+                 "adjektiv"@sv ,
+                 "ordförråd"@sv ,
+                 "한국어"@ko ,
+                 "형용사"@ko ,
+                 "어휘"@ko ;
+    dcat:first <https://solid-memo.com/decks/korean-adjectives/v1.ttl> ;
+    dcat:last <https://solid-memo.com/decks/korean-adjectives/v1.ttl> ;
+    dcat:hasVersion <https://solid-memo.com/decks/korean-adjectives/v1.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/korean-adjectives/v1.ttl> .
+
+<https://solid-memo.com/decks/korean-adjectives/v1.ttl>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Korean adjectives: the 1000 most common"@en ,
+                  "Koreanska adjektiv: de 1000 vanligaste"@sv ,
+                  "한국어 형용사: 가장 많이 쓰는 1000개"@ko ;
+    dcterms:creator <https://solid-memo.com/decks/korean-adjectives/v1.ttl#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    dcterms:description "The 1000 most frequent Korean adjectives, ranked by the National Institute of Korean Language's survey of word frequencies in written Korean (2002), adjusted towards everyday speech with film and TV subtitles. English and Swedish on the front, the Korean adjective on the back in its dictionary form ending in -다 (Korean adjectives are descriptive verbs), in Hangul. Meanings from the Basic Korean Dictionary (krdict) and English Wiktionary; the Swedish was written with the help of AI and checked against Korean and English Wiktionary and Folkets lexikon."@en ,
+                        "De 1000 vanligaste koreanska adjektiven, rangordnade efter Nationella institutet för koreanska språkets undersökning av ordfrekvenser i skriven koreanska (2002), justerad mot vardagligt tal med undertexter från film och tv. Engelska och svenska på framsidan, det koreanska adjektivet på baksidan i sin grundform på -다 (koreanska adjektiv böjs som verb), med hangul. Betydelser från Basic Korean Dictionary (krdict) och engelska Wiktionary; svenskan är skriven med hjälp av AI och kontrollerad mot koreanska och engelska Wiktionary samt Folkets lexikon."@sv ,
+                        "국립국어원의 ‘현대 국어 사용 빈도 조사’(2002)로 순위를 매기고 영화·드라마 자막으로 일상 구어 쪽으로 보정한, 가장 많이 쓰는 한국어 형용사 1000개입니다. 앞면에 영어와 스웨덴어, 뒷면에 ‘-다’로 끝나는 기본형 한국어 형용사가 한글로 있습니다. 뜻은 한국어기초사전과 영어 위키낱말사전에서 가져왔고, 스웨덴어는 AI의 도움을 받아 쓴 뒤 한국어·영어 위키낱말사전과 Folkets lexikon으로 확인했습니다."@ko ;
+    prov:wasDerivedFrom <https://www.korean.go.kr/front_eng/down/down_02V.do?etc_seq=61> ,
+                        <https://github.com/hermitdave/FrequencyWords> ,
+                        <https://krdict.korean.go.kr/> ,
+                        <https://en.wiktionary.org/> ,
+                        <https://ko.wiktionary.org/> ,
+                        <https://folkets-lexikon.csc.kth.se/folkets/> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/korean-adjectives/v1.ttl#compilation> ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:korean ;
+    dcat:keyword "Korean"@en ,
+                 "adjectives"@en ,
+                 "vocabulary"@en ,
+                 "koreanska"@sv ,
+                 "adjektiv"@sv ,
+                 "ordförråd"@sv ,
+                 "한국어"@ko ,
+                 "형용사"@ko ,
+                 "어휘"@ko ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <#solid-memo> ;
+    dcat:inSeries <#korean-adjectives> ;
+    dcat:isVersionOf <#korean-adjectives> ;
+    dcat:distribution <https://solid-memo.com/decks/korean-adjectives/v1.ttl#turtle> ;
+    solid-memo:cardCount 1000 .
+
+<https://solid-memo.com/decks/korean-adjectives/v1.ttl#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://creativecommons.org/licenses/by-sa/2.0/kr/>
+    a dcterms:LicenseDocument .
+
+<https://www.kogl.or.kr/info/licenseType1.do>
+    a dcterms:LicenseDocument .
+
+<https://solid-memo.com/decks/korean-adjectives/v1.ttl#compilation>
+    a prov:Activity .
+
+<https://github.com/bab2min/kiwipiepy>
+    a prov:SoftwareAgent ;
+    dcterms:title "Kiwi (kiwipiepy 0.24.0), Korean morphological analyser" .
+
+<https://www.korean.go.kr/front_eng/down/down_02V.do?etc_seq=61>
+    dcterms:title "현대 국어 사용 빈도 조사 (Survey of the frequency of use of modern Korean, 2002), word list" ;
+    dcterms:creator "National Institute of Korean Language (국립국어원)" ;
+    dcterms:license <https://www.kogl.or.kr/info/licenseType1.do> .
+
+<https://github.com/hermitdave/FrequencyWords>
+    dcterms:title "FrequencyWords (Korean word frequencies from OpenSubtitles 2018)" ;
+    dcterms:creator "Hermit Dave" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> .
+
+<https://krdict.korean.go.kr/>
+    dcterms:title "한국어기초사전 (Basic Korean Dictionary)" ;
+    dcterms:creator "National Institute of Korean Language (국립국어원)" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/2.0/kr/> .
+
+<https://ko.wiktionary.org/>
+    dcterms:title "Korean Wiktionary (위키낱말사전), Swedish translations" ;
+    dcterms:creator "Wiktionary contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> .
+
+<https://solid-memo.com/decks/korean-adjectives/v1.ttl#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <https://solid-memo.com/decks/korean-adjectives/v1.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/korean-adjectives/v1.ttl> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
+
+<#korean-nouns>
+    a dcat:DatasetSeries ,
+      dcat:Dataset ;
+    solid-memo:formatVersion 3 ;
+    dcterms:title "Korean nouns: the 1000 most common"@en ,
+                  "Koreanska substantiv: de 1000 vanligaste"@sv ,
+                  "한국어 명사: 가장 많이 쓰는 1000개"@ko ;
+    dcterms:description "The 1000 most frequent Korean nouns, ranked by the National Institute of Korean Language's survey of word frequencies in written Korean (2002), adjusted towards everyday speech with film and TV subtitles. English and Swedish on the front, the Korean noun on the back, in Hangul. Meanings from the Basic Korean Dictionary (krdict) and English Wiktionary; the Swedish was written with the help of AI and checked against Korean and English Wiktionary and Folkets lexikon."@en ,
+                        "De 1000 vanligaste koreanska substantiven, rangordnade efter Nationella institutet för koreanska språkets undersökning av ordfrekvenser i skriven koreanska (2002), justerad mot vardagligt tal med undertexter från film och tv. Engelska och svenska på framsidan, det koreanska substantivet på baksidan, med hangul. Betydelser från Basic Korean Dictionary (krdict) och engelska Wiktionary; svenskan är skriven med hjälp av AI och kontrollerad mot koreanska och engelska Wiktionary samt Folkets lexikon."@sv ,
+                        "국립국어원의 ‘현대 국어 사용 빈도 조사’(2002)로 순위를 매기고 영화·드라마 자막으로 일상 구어 쪽으로 보정한, 가장 많이 쓰는 한국어 명사 1000개입니다. 앞면에 영어와 스웨덴어, 뒷면에 한국어 명사가 한글로 있습니다. 뜻은 한국어기초사전과 영어 위키낱말사전에서 가져왔고, 스웨덴어는 AI의 도움을 받아 쓴 뒤 한국어·영어 위키낱말사전과 Folkets lexikon으로 확인했습니다."@ko ;
+    dcterms:publisher <#solid-memo> ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:korean ;
+    dcat:keyword "Korean"@en ,
+                 "nouns"@en ,
+                 "vocabulary"@en ,
+                 "koreanska"@sv ,
+                 "substantiv"@sv ,
+                 "ordförråd"@sv ,
+                 "한국어"@ko ,
+                 "명사"@ko ,
+                 "어휘"@ko ;
+    dcat:first <https://solid-memo.com/decks/korean-nouns/v1.ttl> ;
+    dcat:last <https://solid-memo.com/decks/korean-nouns/v1.ttl> ;
+    dcat:hasVersion <https://solid-memo.com/decks/korean-nouns/v1.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/korean-nouns/v1.ttl> .
+
+<https://solid-memo.com/decks/korean-nouns/v1.ttl>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Korean nouns: the 1000 most common"@en ,
+                  "Koreanska substantiv: de 1000 vanligaste"@sv ,
+                  "한국어 명사: 가장 많이 쓰는 1000개"@ko ;
+    dcterms:creator <https://solid-memo.com/decks/korean-nouns/v1.ttl#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    dcterms:description "The 1000 most frequent Korean nouns, ranked by the National Institute of Korean Language's survey of word frequencies in written Korean (2002), adjusted towards everyday speech with film and TV subtitles. English and Swedish on the front, the Korean noun on the back, in Hangul. Meanings from the Basic Korean Dictionary (krdict) and English Wiktionary; the Swedish was written with the help of AI and checked against Korean and English Wiktionary and Folkets lexikon."@en ,
+                        "De 1000 vanligaste koreanska substantiven, rangordnade efter Nationella institutet för koreanska språkets undersökning av ordfrekvenser i skriven koreanska (2002), justerad mot vardagligt tal med undertexter från film och tv. Engelska och svenska på framsidan, det koreanska substantivet på baksidan, med hangul. Betydelser från Basic Korean Dictionary (krdict) och engelska Wiktionary; svenskan är skriven med hjälp av AI och kontrollerad mot koreanska och engelska Wiktionary samt Folkets lexikon."@sv ,
+                        "국립국어원의 ‘현대 국어 사용 빈도 조사’(2002)로 순위를 매기고 영화·드라마 자막으로 일상 구어 쪽으로 보정한, 가장 많이 쓰는 한국어 명사 1000개입니다. 앞면에 영어와 스웨덴어, 뒷면에 한국어 명사가 한글로 있습니다. 뜻은 한국어기초사전과 영어 위키낱말사전에서 가져왔고, 스웨덴어는 AI의 도움을 받아 쓴 뒤 한국어·영어 위키낱말사전과 Folkets lexikon으로 확인했습니다."@ko ;
+    prov:wasDerivedFrom <https://www.korean.go.kr/front_eng/down/down_02V.do?etc_seq=61> ,
+                        <https://github.com/hermitdave/FrequencyWords> ,
+                        <https://krdict.korean.go.kr/> ,
+                        <https://en.wiktionary.org/> ,
+                        <https://ko.wiktionary.org/> ,
+                        <https://folkets-lexikon.csc.kth.se/folkets/> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/korean-nouns/v1.ttl#compilation> ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:korean ;
+    dcat:keyword "Korean"@en ,
+                 "nouns"@en ,
+                 "vocabulary"@en ,
+                 "koreanska"@sv ,
+                 "substantiv"@sv ,
+                 "ordförråd"@sv ,
+                 "한국어"@ko ,
+                 "명사"@ko ,
+                 "어휘"@ko ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <#solid-memo> ;
+    dcat:inSeries <#korean-nouns> ;
+    dcat:isVersionOf <#korean-nouns> ;
+    dcat:distribution <https://solid-memo.com/decks/korean-nouns/v1.ttl#turtle> ;
+    solid-memo:cardCount 1000 .
+
+<https://solid-memo.com/decks/korean-nouns/v1.ttl#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://solid-memo.com/decks/korean-nouns/v1.ttl#compilation>
+    a prov:Activity .
+
+<https://solid-memo.com/decks/korean-nouns/v1.ttl#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <https://solid-memo.com/decks/korean-nouns/v1.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/korean-nouns/v1.ttl> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
+
+<#korean-verbs>
+    a dcat:DatasetSeries ,
+      dcat:Dataset ;
+    solid-memo:formatVersion 3 ;
+    dcterms:title "Korean verbs: the 1000 most common"@en ,
+                  "Koreanska verb: de 1000 vanligaste"@sv ,
+                  "한국어 동사: 가장 많이 쓰는 1000개"@ko ;
+    dcterms:description "The 1000 most frequent Korean verbs, ranked by the National Institute of Korean Language's survey of word frequencies in written Korean (2002), adjusted towards everyday speech with film and TV subtitles. English and Swedish on the front, the Korean verb on the back in its dictionary form ending in -다, in Hangul. Meanings from the Basic Korean Dictionary (krdict) and English Wiktionary; the Swedish was written with the help of AI and checked against Korean and English Wiktionary and Folkets lexikon."@en ,
+                        "De 1000 vanligaste koreanska verben, rangordnade efter Nationella institutet för koreanska språkets undersökning av ordfrekvenser i skriven koreanska (2002), justerad mot vardagligt tal med undertexter från film och tv. Engelska och svenska på framsidan, det koreanska verbet på baksidan i sin grundform på -다, med hangul. Betydelser från Basic Korean Dictionary (krdict) och engelska Wiktionary; svenskan är skriven med hjälp av AI och kontrollerad mot koreanska och engelska Wiktionary samt Folkets lexikon."@sv ,
+                        "국립국어원의 ‘현대 국어 사용 빈도 조사’(2002)로 순위를 매기고 영화·드라마 자막으로 일상 구어 쪽으로 보정한, 가장 많이 쓰는 한국어 동사 1000개입니다. 앞면에 영어와 스웨덴어, 뒷면에 ‘-다’로 끝나는 기본형 한국어 동사가 한글로 있습니다. 뜻은 한국어기초사전과 영어 위키낱말사전에서 가져왔고, 스웨덴어는 AI의 도움을 받아 쓴 뒤 한국어·영어 위키낱말사전과 Folkets lexikon으로 확인했습니다."@ko ;
+    dcterms:publisher <#solid-memo> ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:korean ;
+    dcat:keyword "Korean"@en ,
+                 "verbs"@en ,
+                 "vocabulary"@en ,
+                 "koreanska"@sv ,
+                 "verb"@sv ,
+                 "ordförråd"@sv ,
+                 "한국어"@ko ,
+                 "동사"@ko ,
+                 "어휘"@ko ;
+    dcat:first <https://solid-memo.com/decks/korean-verbs/v1.ttl> ;
+    dcat:last <https://solid-memo.com/decks/korean-verbs/v1.ttl> ;
+    dcat:hasVersion <https://solid-memo.com/decks/korean-verbs/v1.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/korean-verbs/v1.ttl> .
+
+<https://solid-memo.com/decks/korean-verbs/v1.ttl>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    dcterms:title "Korean verbs: the 1000 most common"@en ,
+                  "Koreanska verb: de 1000 vanligaste"@sv ,
+                  "한국어 동사: 가장 많이 쓰는 1000개"@ko ;
+    dcterms:creator <https://solid-memo.com/decks/korean-verbs/v1.ttl#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    dcterms:description "The 1000 most frequent Korean verbs, ranked by the National Institute of Korean Language's survey of word frequencies in written Korean (2002), adjusted towards everyday speech with film and TV subtitles. English and Swedish on the front, the Korean verb on the back in its dictionary form ending in -다, in Hangul. Meanings from the Basic Korean Dictionary (krdict) and English Wiktionary; the Swedish was written with the help of AI and checked against Korean and English Wiktionary and Folkets lexikon."@en ,
+                        "De 1000 vanligaste koreanska verben, rangordnade efter Nationella institutet för koreanska språkets undersökning av ordfrekvenser i skriven koreanska (2002), justerad mot vardagligt tal med undertexter från film och tv. Engelska och svenska på framsidan, det koreanska verbet på baksidan i sin grundform på -다, med hangul. Betydelser från Basic Korean Dictionary (krdict) och engelska Wiktionary; svenskan är skriven med hjälp av AI och kontrollerad mot koreanska och engelska Wiktionary samt Folkets lexikon."@sv ,
+                        "국립국어원의 ‘현대 국어 사용 빈도 조사’(2002)로 순위를 매기고 영화·드라마 자막으로 일상 구어 쪽으로 보정한, 가장 많이 쓰는 한국어 동사 1000개입니다. 앞면에 영어와 스웨덴어, 뒷면에 ‘-다’로 끝나는 기본형 한국어 동사가 한글로 있습니다. 뜻은 한국어기초사전과 영어 위키낱말사전에서 가져왔고, 스웨덴어는 AI의 도움을 받아 쓴 뒤 한국어·영어 위키낱말사전과 Folkets lexikon으로 확인했습니다."@ko ;
+    prov:wasDerivedFrom <https://www.korean.go.kr/front_eng/down/down_02V.do?etc_seq=61> ,
+                        <https://github.com/hermitdave/FrequencyWords> ,
+                        <https://krdict.korean.go.kr/> ,
+                        <https://en.wiktionary.org/> ,
+                        <https://ko.wiktionary.org/> ,
+                        <https://folkets-lexikon.csc.kth.se/folkets/> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/korean-verbs/v1.ttl#compilation> ;
+    dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:korean ;
+    dcat:keyword "Korean"@en ,
+                 "verbs"@en ,
+                 "vocabulary"@en ,
+                 "koreanska"@sv ,
+                 "verb"@sv ,
+                 "ordförråd"@sv ,
+                 "한국어"@ko ,
+                 "동사"@ko ,
+                 "어휘"@ko ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 5 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <#solid-memo> ;
+    dcat:inSeries <#korean-verbs> ;
+    dcat:isVersionOf <#korean-verbs> ;
+    dcat:distribution <https://solid-memo.com/decks/korean-verbs/v1.ttl#turtle> ;
+    solid-memo:cardCount 1000 .
+
+<https://solid-memo.com/decks/korean-verbs/v1.ttl#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" ;
+    foaf:mbox <mailto:antonwiklund91@gmail.com> .
+
+<https://solid-memo.com/decks/korean-verbs/v1.ttl#compilation>
+    a prov:Activity .
+
+<https://solid-memo.com/decks/korean-verbs/v1.ttl#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <https://solid-memo.com/decks/korean-verbs/v1.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/korean-verbs/v1.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
