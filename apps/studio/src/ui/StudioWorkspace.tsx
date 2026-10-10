@@ -37,6 +37,7 @@ import { ListingPreviewContainer } from "./ListingPreviewContainer";
 import { QuestionEditorContainer } from "./QuestionEditorContainer";
 import { ReleaseCheckContainer } from "./ReleaseCheckContainer";
 import { ReleaseDiffContainer } from "./ReleaseDiffContainer";
+import { ReleaseMetadataContainer } from "./ReleaseMetadataContainer";
 import { StepEditorContainer } from "./StepEditorContainer";
 import { TrialContainer } from "./TrialContainer";
 import { instanceOfRoute, isDraftRoute, spotRoute, studioRouteToHash, targetRoute, useStudioRoute, type StudioRoute } from "./router";
@@ -173,6 +174,8 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
         return [instancesCrumb, decks, ...draftCrumbs(route.draftUrl), { label: t("studio.trial.crumb"), route }];
       case "diff":
         return [instancesCrumb, decks, ...draftCrumbs(route.draftUrl), { label: t("studio.diff.crumb"), route }];
+      case "release":
+        return [instancesCrumb, decks, ...draftCrumbs(route.draftUrl), { label: t("studio.release.crumb"), route }];
       case "chapter":
         return [instancesCrumb, decks, ...draftCrumbs(route.draftUrl), { label: chapterName(activeDraft!, route.chapter), route }];
       case "step": {
@@ -236,6 +239,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
     previewHref: studioRouteToHash({ screen: "preview", draftUrl }),
     trialHref: studioRouteToHash({ screen: "trial", draftUrl }),
     diffHref: studioRouteToHash({ screen: "diff", draftUrl }),
+    releaseHref: studioRouteToHash({ screen: "release", draftUrl }),
   });
 
   const screenFor = (route: StudioRoute) => {
@@ -275,6 +279,16 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             useCases={useCases}
             draftUrl={route.draftUrl}
             links={{ targetHref: (target) => studioRouteToHash(targetRoute(route.draftUrl, target)) }}
+          />
+        );
+      case "release":
+        return (
+          <ReleaseMetadataContainer
+            key={route.draftUrl}
+            useCases={useCases}
+            draftUrl={route.draftUrl}
+            links={draftLinks(route.draftUrl)}
+            {...(route.field === undefined ? {} : { field: route.field })}
           />
         );
       case "trial":

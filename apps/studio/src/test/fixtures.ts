@@ -148,4 +148,5 @@ export const draftLinks = {
   previewHref: "#/preview",
   trialHref: "#/trial",
   diffHref: "#/diff",
+  releaseHref: "#/release",
 };

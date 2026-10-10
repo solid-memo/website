@@ -63,6 +63,8 @@ describe("the Studio's routes", () => {
     { screen: "trial", draftUrl: DRAFT, chapter: "ch-pods" },
     { screen: "trial", draftUrl: DRAFT, chapter: "ch-pods", review: true },
     { screen: "diff", draftUrl: DRAFT },
+    { screen: "release", draftUrl: DRAFT },
+    { screen: "release", draftUrl: DRAFT, field: "sources" },
   ];
 
   it("round-trip through the hash", () => {
@@ -152,7 +154,7 @@ describe("the Studio's routes", () => {
   });
 
   it("name the instance a route is in, the deck's for the workbench", () => {
-    expect(routes.map(instanceOfRoute)).toEqual([null, ...Array(34).fill("https://pod.example/solid-memo/a/")]);
+    expect(routes.map(instanceOfRoute)).toEqual([null, ...Array(36).fill("https://pod.example/solid-memo/a/")]);
   });
 
   it("keep a draft and the subject of it shown in their query, and the cards' view, the first page and no filter left out", () => {
@@ -171,6 +173,7 @@ describe("the Studio's routes", () => {
     expect(parseStudioHash(at("check", { policy: "nonsense" }))).toEqual({ screen: "check", draftUrl: DRAFT });
     expect(parseStudioHash(at("step", { step: "s", field: "title" }))).toEqual({ screen: "step", draftUrl: DRAFT, step: "s" });
     expect(parseStudioHash(at("draft", { field: "theory" }))).toEqual({ screen: "draft", draftUrl: DRAFT });
+    expect(parseStudioHash(at("release", { field: "title" }))).toEqual({ screen: "release", draftUrl: DRAFT });
   });
 
   it("keep a trial's chapter in its query, and its review as a part of the chapter", () => {

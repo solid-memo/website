@@ -10,7 +10,8 @@ import { Screen } from "./Screen.ts";
  * status line says when all of them are. Its release check lists the
  * problems of the release it will be, each a link to what it is about;
  * its listing preview shows it as the library will. A next version is
- * compared with the release it follows.
+ * compared with the release it follows. Its release screen says who
+ * compiled it and how, under what licence, and from what sources.
  */
 export class DraftEditor extends Screen {
   /** The draft's outline, as the overview shows it. */
@@ -42,6 +43,84 @@ export class DraftEditor extends Screen {
       await this.page.getByRole("button", { name: this.t("studio.draftEdit.retire"), exact: true }).click();
       await this.expectSaved();
       await expect(this.page.getByRole("button", { name: this.t("studio.draftEdit.restore"), exact: true })).toBeVisible();
+    });
+  }
+
+  /** Opens the release's metadata and provenance from the draft's overview, reached by the trail. */
+  async openRelease(draft: string): Promise<void> {
+    await this.intent("Open the release's metadata and provenance", async () => {
+      await this.app.chrome.breadcrumbs.getByRole("link", { name: draft, exact: true }).click();
+      await this.page.getByRole("link", { name: this.t("studio.draft.releaseLink") }).click();
+      await expect(this.page.getByRole("heading", { level: 2, name: this.t("studio.release.heading") })).toBeVisible();
+      await this.app.chrome.expectBreadcrumbHere("studio.release.crumb");
+    });
+  }
+
+  /** Adds an author on the release screen: its form is named after it. */
+  async addAuthor(name: string): Promise<void> {
+    await this.intent(`Add the author ${name}`, async () => {
+      const form = this.page.getByRole("group", { name: this.t("studio.release.newAuthor") });
+      await form.getByRole("textbox", { name: this.t("studio.release.authorName") }).fill(name);
+      await form.getByRole("button", { name: this.t("studio.release.addAuthor") }).click();
+      await this.expectSaved();
+      await expect(this.page.getByRole("group", { name, exact: true })).toBeVisible();
+    });
+  }
+
+  /** Chooses the attribution that names the authors, with the help of AI: it says who compiled the release, and no more. */
+  async attributeWithAi(names: string): Promise<void> {
+    await this.intent("Attribute the release to its authors, with the help of AI", async () => {
+      const attribution = this.page.getByRole("radio", { name: `Compiled by ${names} with the help of AI.`, exact: true });
+      await attribution.check();
+      await this.expectSaved();
+      await expect(attribution).toBeChecked();
+    });
+  }
+
+  /** Chooses the release's licence, by its name. */
+  async chooseReleaseLicence(licence: string): Promise<void> {
+    await this.intent(`License the release ${licence}`, async () => {
+      await this.page.getByRole("combobox", { name: this.t("studio.license.label") }).selectOption({ label: licence });
+      await this.expectSaved();
+    });
+  }
+
+  /** Adds a source by its address, title and the evidence for its licence, its creator left out. */
+  async addSource(address: string, title: string, evidence: string): Promise<void> {
+    await this.intent(`Add the source ${title}`, async () => {
+      const form = this.page.getByRole("group", { name: this.t("studio.release.newSource") });
+      await form.getByLabel(this.t("studio.release.sourceIri"), { exact: true }).fill(address);
+      await form.getByRole("textbox", { name: this.t("studio.release.sourceTitle"), exact: true }).fill(title);
+      await form.getByRole("textbox", { name: this.t("studio.release.sourceEvidence") }).fill(evidence);
+      await form.getByRole("button", { name: this.t("studio.release.addSource") }).click();
+      await this.expectSaved();
+      await expect(this.page.getByRole("button", { name: this.t("studio.release.editOf", { name: title }) })).toBeVisible();
+    });
+  }
+
+  /** Names a source's creator (the source by its address and title), where the release check's warning led. */
+  async describeSource(address: string, title: string, creator: string): Promise<void> {
+    await this.intent(`Name the creator of ${title}`, async () => {
+      await this.page.getByRole("button", { name: this.t("studio.release.editOf", { name: title }) }).click();
+      const form = this.page.getByRole("group", { name: address, exact: true });
+      await form.getByRole("textbox", { name: this.t("studio.release.sourceCreator") }).fill(creator);
+      await form.getByRole("button", { name: this.t("studio.release.saveSource") }).click();
+      await this.expectSaved();
+      await expect(this.page.getByText(creator, { exact: false })).toBeVisible();
+    });
+  }
+
+  /** Records a check made by AI: the release says it was no human review. */
+  async recordAiCheck(label: string, scope: string, outcome: string): Promise<void> {
+    await this.intent(`Record the AI check ${label}`, async () => {
+      const form = this.page.getByRole("group", { name: this.t("studio.release.newCheck") });
+      await form.getByRole("radio", { name: this.t("studio.release.checkAi") }).check();
+      await form.getByRole("textbox", { name: this.t("studio.release.checkLabel") }).fill(label);
+      await form.getByRole("textbox", { name: this.t("studio.release.checkScope") }).fill(scope);
+      await form.getByRole("textbox", { name: this.t("studio.release.checkOutcome") }).fill(outcome);
+      await form.getByRole("button", { name: this.t("studio.release.addCheck") }).click();
+      await this.expectSaved();
+      await expect(this.page.getByText(`Scope: ${scope}; an AI check, not a human review.`)).toBeVisible();
     });
   }
 

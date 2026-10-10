@@ -32,6 +32,8 @@ export interface DraftLinks {
   trialHref: string;
   /** The draft against the release it follows. */
   diffHref: string;
+  /** What the release says of itself beyond its listing, how it was made and from what. */
+  releaseHref: string;
 }
 
 /** The release check of the draft as the overview counts it: its problems, undefined while it runs, or why it did not. */
@@ -112,6 +114,9 @@ export function DraftOverviewScreen({
             arrival={field === "description"}
             onSave={(text) => onEdit([{ kind: "setMeta", meta: { description: textOrNull(text) } }], { debounce: true })}
           />
+          <p>
+            <a href={links.releaseHref}>{t("studio.draft.releaseLink")}</a>
+          </p>
         </section>
         {draft.course && (
           <section aria-labelledby="draft-outline-heading">

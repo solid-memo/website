@@ -2044,7 +2044,8 @@
       "problemsLink": "See the release check",
       "previewLink": "Preview the listing",
       "trialLink": "Try it out",
-      "diffLink": "Compare with the previous version"
+      "diffLink": "Compare with the previous version",
+      "releaseLink": "Release metadata and provenance"
     },
     "outline": {
       "empty": "No chapters yet.",
@@ -2167,7 +2168,9 @@
         "askedElsewhere": "This card is asked from another place already: move it there instead.",
         "notACourse": "Only a course has chapters, steps and questions.",
         "notFrontToBack": "A course is studied front to back.",
-        "carriedActivity": "How an earlier release was made is not rewritten."
+        "carriedActivity": "How an earlier release was made is not rewritten.",
+        "noAuthors": "Name an author first: the attribution names the release's authors.",
+        "unusedSource": "A source is one the release is derived from or its making used: tick at least one."
       }
     },
     "check": {
@@ -2245,7 +2248,12 @@
       "distractor": "Wrong options",
       "distractorText": "Wrong option",
       "distractorNote": "Why it is wrong",
-      "textFormat": "Text format"
+      "textFormat": "Text format",
+      "versionNotes": "Version notes",
+      "language": "Languages",
+      "creator": "Authors",
+      "comment": "Comment",
+      "wasDerivedFrom": "Sources"
     },
     "problem": {
       "notARelease": "{path} is no place for a release in the library: its name may hold only lower-case letters, digits and dashes.",
@@ -2289,7 +2297,10 @@
       "previousUnread": "The release it follows, {previous}, could not be read, so nothing is checked against it. Check again later.",
       "libraryUnread": "The library's index could not be read, so the draft's place in the library is not checked. Check again later.",
       "shape": "{field}: {message}",
-      "unshaped": "Is of a Solid Memo class that no shape of this app describes."
+      "unshaped": "Is of a Solid Memo class that no shape of this app describes.",
+      "sourceUndescribed": "Does not state {missing}: a source says what it is, whose it is, and on what terms it was used.",
+      "usedNotDerived": "Was used to make the release, which does not say it is derived from it.",
+      "countDisagrees": "Says {stated} {what}, but the release has {counted}."
     },
     "preview": {
       "crumb": "Listing preview",
@@ -2385,6 +2396,96 @@
       "working": "Working…",
       "reset": "Start over",
       "reload": "Reload the draft"
+    },
+    "release": {
+      "crumb": "Release",
+      "heading": "Release metadata and provenance",
+      "intro": "What the release says of itself beyond its listing: who compiled it and how, and what it was made from. Each change is saved as it is made.",
+      "about": "About this version",
+      "versionNotes": "Version notes",
+      "versionNotesHint": "What this version is, or changes, in a few words for learners.",
+      "languages": "Languages",
+      "languagesHint": "The languages its content is in, from the EU's table of languages.",
+      "languageOther": "{iri} (not in the table)",
+      "licenseHint": "Stated as a licence document, as DCAT-AP asks.",
+      "publisher": "Publisher",
+      "publisherNone": "None stated",
+      "publisherHint": "Who publishes the release: one of its authors, or the publisher it already names.",
+      "authors": "Authors",
+      "authorsHint": "The people who compiled the release, kept in the release itself.",
+      "noAuthors": "No authors yet.",
+      "otherAuthors": "Also named, in another document, and kept as they are: {authors}",
+      "authorName": "Name",
+      "authorEmail": "Email (optional)",
+      "saveAuthor": "Save",
+      "newAuthor": "New author",
+      "addAuthor": "Add the author",
+      "authorEmpty": "Write the author's name.",
+      "making": "How it was made",
+      "attribution": "Attribution",
+      "attributionHint": "Says who compiled the release, in English and Swedish. Nothing here says anyone reviewed it.",
+      "attributionNone": "No attribution",
+      "attributionNeedsAuthors": "Name an author first: the attribution names the release's authors.",
+      "makingNotes": "Notes on how it was made",
+      "makingNotesHint": "Each paragraph is kept as a note of the release's making: its sources, structure, selection or licensing, say. A count a note states (chapters, steps, sources, or cards in all) is checked against the release.",
+      "sources": "Sources",
+      "sourcesHint": "What the release was made from. Each says what it is, whose it is, and on what terms it was used: its licence, or the evidence for one. The Studio shows its address, and never opens it.",
+      "noSources": "No sources yet.",
+      "sourceIri": "Address",
+      "sourceTitle": "Title",
+      "sourceCreator": "Creator",
+      "sourceLicense": "Licence (its address)",
+      "sourceEvidence": "Evidence for its licence",
+      "derivedFrom": "The release is derived from it",
+      "used": "This version's making used it",
+      "usedEarlier": "An earlier version's making used it.",
+      "sourceOthers": {
+        "one": "{count} more statement of it is kept as it is.",
+        "other": "{count} more statements of it are kept as they are."
+      },
+      "saveSource": "Save the source",
+      "newSource": "New source",
+      "addSource": "Add the source",
+      "sourceInvalid": "Give the source's web address, starting with https:// or http://.",
+      "sourceExists": "The release names this source already.",
+      "sourceUnused": "Tick at least one: the release is derived from it, or this version's making used it.",
+      "licenseInvalid": "Give the licence's web address, starting with https:// or http://, or leave it empty.",
+      "checks": "Checks",
+      "checksHint": "Checks the release had, by machine (the validators, the release check) or by AI. Each is recorded as not a human review: the Studio records no human review.",
+      "noChecks": "No checks recorded yet.",
+      "checkKind": "Checked by",
+      "checkMachine": "A machine",
+      "checkAi": "AI",
+      "checkLabel": "What it looked at",
+      "checkScope": "Scope",
+      "checkOutcome": "Outcome",
+      "checkEnded": "Ended on",
+      "checkLanguage": "Written in",
+      "checkLanguageEn": "English",
+      "checkLanguageSv": "Swedish",
+      "checkEmpty": "Write what it looked at, its scope and its outcome.",
+      "newCheck": "New check",
+      "addCheck": "Record the check",
+      "saveCheck": "Save the check",
+      "checkOtherwise": "Written otherwise than the Studio writes a check: it can be deleted, not edited.",
+      "carried": "From earlier versions",
+      "carriedHint": "How earlier versions were made. Kept as they are: a release is never rewritten.",
+      "detail": {
+        "title": "its title",
+        "creator": "its creator",
+        "licence": "its licence or the evidence for one"
+      },
+      "counted": {
+        "chapters": "chapters",
+        "steps": "steps",
+        "sources": "sources",
+        "cards": "cards in all"
+      },
+      "edit": "Edit",
+      "cancel": "Cancel",
+      "remove": "Remove",
+      "editOf": "Edit {name}",
+      "removeOf": "Remove {name}"
     }
   },
   "proseField": {

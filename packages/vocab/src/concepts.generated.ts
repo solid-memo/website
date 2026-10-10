@@ -1,4 +1,4 @@
-/* Generated from ns/vocab/v1.ttl, ns/vocab/topics.ttl by `npm run generate`. Do not edit: change the source and regenerate. */
+/* Generated from ns/vocab/v1.ttl, ns/vocab/topics.ttl, ns/vocab/external.ttl by `npm run generate`. Do not edit: change the source and regenerate. */
 
 /** Text by language tag (lower case), one of them English. */
 export type ConceptText = Readonly<Record<string, string>>;
@@ -321,3 +321,25 @@ export const TOPICS = {
     },
   ],
 } as const satisfies ConceptScheme;
+
+/** An entry of an EU authority table Solid Memo data may point at (ns/vocab/external.ttl): its IRI, its code and its English label. */
+export interface ReferenceConcept {
+  readonly iri: string;
+  readonly code: string;
+  readonly label: string;
+}
+
+/** The EU's languages (its authority table) a release may state it is in (dcterms:language): those the reference data describes, so a release's profile check finds them. */
+export const EU_LANGUAGES: readonly ReferenceConcept[] = [
+  { iri: "http://publications.europa.eu/resource/authority/language/ENG", code: "ENG", label: "English" },
+  { iri: "http://publications.europa.eu/resource/authority/language/SWE", code: "SWE", label: "Swedish" },
+  { iri: "http://publications.europa.eu/resource/authority/language/SPA", code: "SPA", label: "Spanish" },
+  { iri: "http://publications.europa.eu/resource/authority/language/LAT", code: "LAT", label: "Latin" },
+  { iri: "http://publications.europa.eu/resource/authority/language/ITA", code: "ITA", label: "Italian" },
+  { iri: "http://publications.europa.eu/resource/authority/language/ELL", code: "ELL", label: "Modern Greek" },
+  { iri: "http://publications.europa.eu/resource/authority/language/FRA", code: "FRA", label: "French" },
+  { iri: "http://publications.europa.eu/resource/authority/language/DEU", code: "DEU", label: "German" },
+  { iri: "http://publications.europa.eu/resource/authority/language/FIN", code: "FIN", label: "Finnish" },
+  { iri: "http://publications.europa.eu/resource/authority/language/POR", code: "POR", label: "Portuguese" },
+  { iri: "http://publications.europa.eu/resource/authority/language/KOR", code: "KOR", label: "Korean" },
+];

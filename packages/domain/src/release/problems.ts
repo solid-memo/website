@@ -105,11 +105,23 @@ export interface MarkdownFinding {
   code: string;
 }
 
-/** The library's curation policy (curationRules). */
+/** The library's curation policy (curationRules), and how a release says it was made (provenanceRules). */
 export type CurationProblem =
   /** No text in a language the policy asks of the title, description or keywords (`field`). */
   | { code: "missingLanguage"; params: { language: string } }
-  | { code: "missingTheme"; params: { theme: string } };
+  | { code: "missingTheme"; params: { theme: string } }
+  /** A source that does not say what it is, whose it is, or on what terms it was used. */
+  | { code: "sourceUndescribed"; params: { missing: SourceDetail[] } }
+  /** A source the making used (`related`: the activities) that the release does not say it is derived from. */
+  | { code: "usedNotDerived"; params: Record<string, never> }
+  /** A making's comment that states a count the release does not have. */
+  | { code: "countDisagrees"; params: { what: CountedThing; stated: number; counted: number } };
+
+/** What a source states of itself: its title, its creator, and its licence or the evidence for one. */
+export type SourceDetail = "title" | "creator" | "licence";
+
+/** What a making's comments count: chapters, steps, sources and cards in use. */
+export type CountedThing = "chapters" | "steps" | "sources" | "cards";
 
 /**
  * What a release needs that a draft may still lack (readinessProblems):

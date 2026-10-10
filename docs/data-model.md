@@ -751,7 +751,13 @@ own pod, as a draft, before publishing it
   published release needs; its cards and distractors as anywhere else
   ([validation.md](validation.md#the-write-check)), every write and the
   instance's check alike. What no shape describes (how the release was
-  made, its sources) is written as it is, and kept through every edit. A
+  made, its sources) is written as it is, and kept through every edit.
+  The Studio's release screen writes these as the library's releases
+  state them ([deck-library.md](deck-library.md#provenance)): the
+  licence typed `dcterms:LicenseDocument`, each source's title, creator
+  and licence or the evidence for one, the making's attribution and
+  notes (`rdfs:comment`), and its checks, never a human review
+  ([studio.md](studio.md#the-releases-metadata-and-provenance)). A
   draft names the release it was published as with `sm:releasedAs`, and
   is then no longer edited.
 - **Writes**, as everywhere ([Write discipline](#write-discipline)):

@@ -23,6 +23,11 @@ describe("draftReleaseModel", () => {
     expect(model.distribution).toEqual([{ kind: "iri", value: of("turtle") }]);
     expect(model.sources).toEqual([{ kind: "iri", value: "https://source.example/" }]);
     expect(model.activities).toEqual([{ iri: of("compilation"), generating: true }]);
+    expect(model.making).toEqual([{ iri: of("compilation"), used: ["https://source.example/"], comments: [], carried: false }]);
+    expect(model.sourceDetails).toEqual([
+      { iri: "https://source.example/", title: [{ kind: "literal", value: "Source", language: "", datatype: `${XSD}string` }], creator: [], licence: [], comments: [] },
+    ]);
+    expect(draftReleaseModel(courseDraft({ ids: {}, activities: ["compilation"] })).making[0]!.carried).toBe(true);
     expect(model.publisher).toEqual([]);
     expect(model.issued).toEqual([]);
     expect(model.chapters[0]).toEqual({

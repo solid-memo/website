@@ -83,7 +83,14 @@ describe("deckToDraft", () => {
     const { draft, basedOn } = deckToDraft(deck, cards, DRAFT, NOW);
     expect(basedOn).toBe("https://solid-memo.com/decks/capitals/v1.ttl");
     expect(draft.root.wasDerivedFrom).toEqual([]);
-    expect(draft.triples).toEqual([]);
+    // Its one statement beyond the records types its licence.
+    expect(draft.triples).toEqual([
+      {
+        subject: "https://creativecommons.org/publicdomain/zero/1.0/",
+        predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+        object: { kind: "iri", value: "http://purl.org/dc/terms/LicenseDocument" },
+      },
+    ]);
   });
 
   it("names no publisher, nothing a deck does not state, and nothing it is based on, for a deck of the user's own", () => {
@@ -93,5 +100,6 @@ describe("deckToDraft", () => {
     expect(result.draft.root).not.toHaveProperty("publisher");
     expect(result.draft.root).not.toHaveProperty("description");
     expect(result.draft.root).toMatchObject({ creator: [], theme: [], keyword: {}, studyDirection: SM.frontToBack });
+    expect(result.draft.triples).toEqual([]);
   });
 });

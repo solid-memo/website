@@ -9,6 +9,7 @@ import {
   type ReleaseTerm,
   type ReleaseText,
 } from "@solid-memo/domain/release/releaseModel";
+import { provenanceOf } from "@solid-memo/domain/release/provenanceRules";
 import { RDF_TYPE, subjectsOfType } from "@solid-memo/turtle/rdf";
 import { SM_NS } from "@solid-memo/vocab/tooling/vocab";
 
@@ -33,6 +34,11 @@ export function termOf(object: Quad_Object): ReleaseTerm {
  * (@solid-memo/domain/release/releaseModel), from its quads: what it
  * states of itself, its cards, chapters, steps and distractors, each
  * retired when it states owl:deprecated true, and how it was made.
+ * A release read alone does not say which of its making an earlier
+ * version's is (a next version moves it to its own address), so none is
+ * `carried`: the provenance rules (provenanceProblems), which hold only
+ * a release's own making to its counts, read a draft's model
+ * (draftModel.ts), never this one.
  */
 export function quadsToReleaseModel(quads: readonly Quad[], url: string): ReleaseModel {
   // Each subject's statements, so a release of thousands of cards is read in one pass.
@@ -91,6 +97,7 @@ export function quadsToReleaseModel(quads: readonly Quad[], url: string): Releas
     }
   }
   const generating = new Set(objectsOf(url, `${PROV}wasGeneratedBy`).map((o) => o.value));
+  const sources = objects(url, `${PROV}wasDerivedFrom`);
 
   return {
     url,
@@ -113,8 +120,9 @@ export function quadsToReleaseModel(quads: readonly Quad[], url: string): Releas
     previousVersion: objects(url, `${DCAT_NS}previousVersion`),
     distribution: objects(url, `${DCAT_NS}distribution`),
     licence: objects(url, `${DCTERMS_NS}license`),
-    sources: objects(url, `${PROV}wasDerivedFrom`),
+    sources,
     activities: typed(`${PROV}Activity`).map((iri) => ({ iri, generating: generating.has(iri) })),
+    ...provenanceOf(objects, [...generating], sources),
     cards,
     chapters: subjectsOfType(quads, sm("Chapter")).map((iri) => ({
       iri,

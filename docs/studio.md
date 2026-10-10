@@ -17,7 +17,8 @@ progress, and the instance's name and catalogue. It keeps the drafts
 of releases a creator writes in the instance: started from nothing,
 from a deck, as the next version of a release or from a release saved
 as a file, written (what a release says of itself, a course's outline,
-its chapters, steps and questions, their wrong options), checked by
+its chapters, steps and questions, their wrong options, how it was made
+and from what), checked by
 every rule a release is held to, previewed as the library will list
 them, played in a sandbox as learners will play them, compared with
 the release they follow, and deleted.
@@ -96,6 +97,7 @@ others.
 | `#/studio/preview?draft=…` | a draft as the library will list it ([below](#the-listing-preview)). |
 | `#/studio/trial?draft=…[&chapter=…&part=review]` | a draft played in a sandbox ([below](#the-trial)): a course's page, with `chapter` (an id) that chapter's steps, and with `part=review` its final review; a deck's study. |
 | `#/studio/diff?draft=…` | a draft against the release it follows ([below](#the-release-diff)): what it changes, and what learners' copies would get. |
+| `#/studio/release?draft=…[&field=…]` | what a draft's release says of itself beyond its listing, how it was made and from what ([below](#the-releases-metadata-and-provenance)). |
 
 `#/studio/` and its query count as `#/studio`. Anything else under
 `#/studio`, `#/studio` itself among them, is the default route: the only
@@ -107,8 +109,10 @@ does not have (one deleted, say) falls back to the draft's overview.
 check links: the overview's `title`, `description` or `outline`; a
 chapter's `title`, `description`, `steps` or `review`; a step's
 `theory` or `questions`; a question's text (`front`, `backNote`…), its
-wrong options (`distractors`) or one of them (`distractor:<id>`). A
-field the screen does not have is left out.
+wrong options (`distractors`) or one of them (`distractor:<id>`); the
+release screen's `versionNotes`, `languages`, `license`, `publisher`,
+`authors`, `making`, `sources` or `checks`. A field the screen does
+not have is left out.
 Like Solid Memo's fallbacks, these replace the history entry.
 
 Changing Home's filter or sort, the workbench's query, the
@@ -130,8 +134,9 @@ drafts. A draft's screens go on from › Drafts: › *draft* on its
 overview, › *draft* › *chapter* on a chapter, › *draft* › *chapter* ›
 Step 2 on a step, › *draft* › Cards on its cards, › *draft* › Cards
 › *card* on a question, › *draft* › Release check on its check,
-› *draft* › Listing preview on its preview, and › *draft* › Trial on its
-trial. The document title is the trail's
+› *draft* › Listing preview on its preview, › *draft* › Trial on its
+trial, › *draft* › Changes on its comparison, and › *draft* › Release
+on its release metadata. The document title is the trail's
 last step and "Solid Memo Studio". After a move, the screen's heading
 takes the focus (`useScreenFocus`). The header has a link back to
 Solid Memo, at the open instance's decks when there is one, and the
@@ -907,13 +912,14 @@ draft's own that generated the release; a next version, generated only
 by activities carried over, is given one when it first needs it,
 `#revision-<N>`. A check is recorded only as a machine's or an AI's,
 in words that say it was no human review ("Scope: …; an AI check, not a
-human review."). A creator names the ids, the way
+human review."). The release screen makes these changes
+([below](#the-releases-metadata-and-provenance)). A creator names the ids, the way
 [courses.md](courses.md#writing-a-course) says.
 
 ## Writing a draft
 
-A draft is written in five screens: its overview, a chapter, a step, a
-question, and its cards. They share the draft as one query, read once
+A draft is written in six screens: its overview, a chapter, a step, a
+question, its cards, and its release metadata and provenance. They share the draft as one query, read once
 (`getReleaseDraft`), and change it by `DraftChange`s
 ([below](#how-edits-are-saved)). Two more read it: its release check
 and its listing preview.
@@ -962,8 +968,8 @@ saved as they are typed. For a course, it shows the outline, adds a
 chapter (its title, and its id), and lists the chapters retired, to
 restore. It counts the draft's cards, with a link to their table; a
 deck's cards are added here. It counts the problems the release check
-finds (for a pod, the shapes left out), and links to the check and the
-listing preview.
+finds (for a pod, the shapes left out), and links to the check, the
+listing preview and the release's metadata and provenance.
 
 ### The outline
 
@@ -1073,7 +1079,9 @@ will be. They are the rules `npm run library:check` runs on `decks/`
   lack (`readinessProblems`: a title and a description with English
   text, a publisher, a version, a series, a distribution, the theme
   EDUC, and each chapter's and step's fields the draft shapes relax),
-  and the policy's curation (`curationProblems`).
+  the policy's curation (`curationProblems`), and how the release says
+  it was made (`provenanceProblems`,
+  [below](#what-the-check-asks-of-a-releases-provenance)).
 - **Library** (the library policy only): the draft's place in the
   library, by its live index (`readLibraryIndex`): its name, its
   version among the deck's others, and its metadata against that place
@@ -1132,10 +1140,12 @@ problems under its question.
 
 Not every problem can be fixed in the Studio yet:
 
-- The overview has no field yet for the publisher, the version, the
-  series (`inSeries`, `isVersionOf`), the distribution or the theme
-  EDUC. A problem about one of them links to the overview. The
-  metadata editor will fix them.
+- No screen has a field yet for the version, the series (`inSeries`,
+  `isVersionOf`), the distribution or the theme EDUC. A problem about
+  one of them links to the overview. A problem about the release's
+  licence, publisher, languages, version notes or authors, a source, an
+  agent or an activity links to the
+  [release screen](#the-releases-metadata-and-provenance), at its part.
 - The library policy places the draft at `decks/<draft name>/v<N>.ttl`
   and reports each link that differs from that place. A draft that
   follows a release in a pod links to that release, its series and its
@@ -1278,6 +1288,102 @@ as libraries are (`draftLibraryContent` in
 nothing is read or written for it. Each version of the draft is
 compared once, as the editor keeps it, changes not yet written
 included.
+
+## The release's metadata and provenance
+
+The release screen
+([`ReleaseMetadataContainer`](../apps/studio/src/ui/ReleaseMetadataContainer.tsx))
+edits what a draft's release says of itself beyond its listing, who
+made it and how, and what it was made from. The draft's overview links
+to it ("Release metadata and provenance"). It writes the release as the
+library's releases are written
+([deck-library.md](deck-library.md#provenance)). Each change is a
+`DraftChange`, saved as the other screens save theirs
+([above](#how-edits-are-saved)). Its parts:
+
+- **About this version**: the version notes (`adms:versionNotes`, one
+  text), the languages (`dcterms:language`), the licence and the
+  publisher. The languages are those of the EU's table that the
+  reference data describes (`EU_LANGUAGES`, generated from
+  [external.ttl](../ns/vocab/external.ttl): [vocab.md](vocab.md)), each
+  named in the reader's language. One the release states outside the
+  table is shown by its IRI, to keep or leave out. The licence is one of
+  `KNOWN_LICENSES` ([license.ts](../packages/domain/src/license.ts)), or
+  the one it has. `setLicense` types it `dcterms:LicenseDocument`, as
+  DCAT-AP asks; the licence it replaces loses that type, unless a source
+  still names it. The publisher is one of the release's agents, or the
+  one it names elsewhere.
+- **Authors**: the release's own agents (`foaf:Agent`, `#<name>`), its
+  `dcterms:creator`s, each with a name and an optional email
+  ([releaseMetadata.ts](../packages/domain/src/release/releaseMetadata.ts)).
+  Removing an author removes its agent too, unless it publishes the
+  release or a statement names it (an earlier version's making may: that
+  is never rewritten). Authors another document describes are named, and
+  kept as they are.
+- **How it was made**: the attribution, and notes. The attribution is
+  "Compiled by <the authors' names>", with or without "with the help of
+  AI", in English and Swedish ("Sammanställd av …"), two `rdfs:comment`s
+  of the release's own making (`setAttribution`). It needs an author to
+  name, and is written again whenever the authors change. Only a comment
+  worded exactly so, for the authors the release names, is read as the
+  attribution: a note that starts "Compiled by hand…" stays a note. Nothing here
+  can say that anyone reviewed the release. The notes are the making's
+  other comments: each paragraph one comment, in its language
+  (`setMakingNotes`). A release that names no making is given one,
+  `#compilation`, when it first needs it; a next version, its own
+  `#revision-<N>`, as for a check.
+- **Sources**: each by its address, shown as text and never opened, with
+  its title, its creator (as text), its licence, and the evidence for
+  that licence (a comment that quotes or describes it). Each says
+  whether the release is derived from it (`prov:wasDerivedFrom`) and
+  whether this version's making used it (`prov:used`). It is at least
+  one of the two: else nothing would name what the draft states of it,
+  and the change is refused (`unusedSource`). Only one an earlier
+  version's making used may be neither. A release that names no making
+  is given `#compilation` for a source it used. What else the
+  draft states of a source is kept as it is. Its licence is an address
+  (`http:` or `https:`), as a source's is, not a name such as "CC BY
+  4.0" (`sourceLicenseValid`); one it states already is kept. A source
+  only an earlier version's making used says so, and cannot be removed:
+  that making still names it. Removing a source takes away this
+  version's mentions of it; what it states stays while an earlier
+  version's making uses it. Only the source being edited has a
+  form, so a release of hundreds of sources stays light. A new source
+  is a web address (`http:` or `https:`) the release does not name yet.
+- **Checks**: each check this version had, by a machine or by AI, with
+  what it looked at, its scope, its outcome, the day it ended and the
+  language it is written in. It is recorded in words that say it was no
+  human review (`checkActivityTriples`). An activity written otherwise
+  can be deleted, not edited (`readCheckActivity` reads only what the
+  Studio writes). Those carried from earlier versions are listed apart,
+  and never changed.
+
+### What the check asks of a release's provenance
+
+The release check warns of what a reader of how the release was made
+would miss (`provenanceProblems` in
+[provenanceRules.ts](../packages/domain/src/release/provenanceRules.ts)).
+Each is a warning, never an error, and links to the release screen:
+
+- **A source that does not describe itself** (`sourceUndescribed`): it
+  states no title, no creator, or neither a licence nor a comment with
+  the evidence for one.
+- **A source used, not derived from** (`usedNotDerived`): this
+  version's own making used it, but the release does not say it is
+  derived from it. What an earlier version's making used is not held to
+  this: that making is never rewritten.
+- **A count that disagrees** (`countDisagrees`): a comment of the
+  release's own making states how many chapters, steps, sources
+  (or documents) or cards it has, in English or Swedish, and the release
+  has another number. Chapters and steps count only in a course, and
+  cards only as a total ("466 cards in all"), as a deck's comments often
+  count a part of them. An earlier version's making counted that
+  version, so it is not held to this one.
+
+The library's command reads a release alone, and cannot tell which of
+its making an earlier version's is, so it does not run these rules: the
+Studio runs them on a draft, which knows
+(`quadsToReleaseModel` marks no making `carried`).
 
 ## Data set aside
 

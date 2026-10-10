@@ -32,10 +32,11 @@ describe("the policies", () => {
 });
 
 describe("ruleProblems", () => {
-  it("names the course's problems, what a release needs, and the policy's curation, each once", () => {
+  it("names the course's problems, what a release needs, the policy's curation and its provenance's, each once", () => {
     const model = draftReleaseModel(courseDraft());
     const pod = ruleProblems(model, "pod").map((p) => `${p.code} ${p.field ?? ""}`);
     expect(pod).toContain("chapterWithoutStep ");
+    expect(pod).toContain("sourceUndescribed ");
     expect(pod).toContain(`required ${DCTERMS}publisher`);
     expect(pod).toContain(`missingTheme ${DCAT}theme`);
     expect(pod).not.toContain(`missingLanguage ${DCAT}keyword`);
@@ -163,6 +164,25 @@ describe("problemTarget", () => {
     expect(target("solid/v2.ttl")).toEqual({ screen: "draft" });
   });
 
+  it("opens the release screen for a source, an agent, an activity, and the release's fields there", () => {
+    expect(target("https://source.example/", { code: "sourceUndescribed" })).toEqual({ screen: "release", field: "sources" });
+    expect(target("https://source.example/", { code: "usedNotDerived" })).toEqual({ screen: "release", field: "sources" });
+    expect(target(DRAFT, { field: `${DCTERMS}license` })).toEqual({ screen: "release", field: "license" });
+    expect(target(DRAFT, { field: `${DCTERMS}publisher` })).toEqual({ screen: "release", field: "publisher" });
+    expect(target(DRAFT, { field: `${DCTERMS}language` })).toEqual({ screen: "release", field: "languages" });
+    expect(target(DRAFT, { field: "http://www.w3.org/ns/adms#versionNotes" })).toEqual({ screen: "release", field: "versionNotes" });
+    expect(target(of("compilation"), { code: "countDisagrees" })).toEqual({ screen: "release", field: "making" });
+    const withAgent = { ...draft, agents: [{ id: "ann", data: { name: "Ann" } }] };
+    expect(problemTarget(withAgent, problem(of("ann"), { code: "required", params: {} }))).toEqual({ screen: "release", field: "authors" });
+    const checked = {
+      ...draft,
+      triples: [...draft.triples, { subject: of("review-1"), predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", object: { kind: "iri" as const, value: "http://www.w3.org/ns/prov#Activity" } }],
+    };
+    expect(problemTarget(checked, problem(of("review-1"), { code: "required", params: {} }))).toEqual({ screen: "release", field: "checks" });
+    const carried = { ...draft, published: { ids: {}, activities: ["compilation"] } };
+    expect(problemTarget(carried, problem(of("compilation"), { code: "required", params: {} }))).toEqual({ screen: "release", field: "checks" });
+  });
+
   it("knows each screen's fields", () => {
     expect(isTargetField("draft", "outline")).toBe(true);
     expect(isTargetField("draft", "theory")).toBe(false);
@@ -172,5 +192,7 @@ describe("problemTarget", () => {
     expect(isTargetField("question", "distractors")).toBe(true);
     expect(isTargetField("question", "distractor:x")).toBe(true);
     expect(isTargetField("question", "distractor:")).toBe(false);
+    expect(isTargetField("release", "sources")).toBe(true);
+    expect(isTargetField("release", "title")).toBe(false);
   });
 });

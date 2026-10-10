@@ -9,6 +9,7 @@ import {
   type ReleaseTerm,
   type ReleaseText,
 } from "./releaseModel.ts";
+import { provenanceOf } from "./provenanceRules.ts";
 import { moved } from "./releaseToDraft.ts";
 
 const LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString";
@@ -47,6 +48,9 @@ export function draftReleaseModel(draft: ReleaseDraft, url: string = draft.url):
   const subjectAt = (node: DraftNode<{ deprecated?: boolean }>) => ({ iri: at(`${draft.url}#${node.id}`), retired: node.data.deprecated === true });
   const { root } = draft;
   const generating = new Set(statements(`${PROV}wasGeneratedBy`).filter(({ subject }) => subject === url).map(({ object }) => object.value));
+  const said = (subject: string, predicate: string) =>
+    triples.filter((triple) => triple.subject === subject && triple.predicate === predicate).map((triple) => triple.object);
+  const sources = iris(root.wasDerivedFrom);
 
   const cards = draft.cards.map((node) => ({
     ...subjectAt(node),
@@ -96,8 +100,9 @@ export function draftReleaseModel(draft: ReleaseDraft, url: string = draft.url):
     previousVersion: one(root.previousVersion),
     distribution: iris(root.distribution),
     licence: one(root.license),
-    sources: iris(root.wasDerivedFrom),
+    sources,
     activities: typed(`${PROV}Activity`).map((activity) => ({ iri: activity, generating: generating.has(activity) })),
+    ...provenanceOf(said, [...generating], sources, new Set(draft.published.activities.map((id) => at(`${draft.url}#${id}`)))),
     cards,
     chapters: draft.chapters.map((node) => ({
       ...subjectAt(node),

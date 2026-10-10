@@ -10,7 +10,7 @@ import type {
 } from "@solid-memo/vocab/types.generated";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { TURTLE_MEDIA_TYPE } from "../dcat.ts";
-import type { ReleaseKind, ReleaseTerm } from "./releaseModel.ts";
+import type { ReleaseKind, ReleaseTerm, ReleaseText } from "./releaseModel.ts";
 
 /**
  * A release's draft (docs/studio.md, Drafts): the release a creator is
@@ -79,6 +79,9 @@ export const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 export const SCHEMA_COURSE = "https://schema.org/Course";
 export const PROV = "http://www.w3.org/ns/prov#";
 const RDFS = "http://www.w3.org/2000/01/rdf-schema#";
+const RDFS_COMMENT = `${RDFS}comment`;
+const LICENSE_DOCUMENT = "http://purl.org/dc/terms/LicenseDocument";
+const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
 const XSD_DATE_TIME = "http://www.w3.org/2001/XMLSchema#dateTime";
 const LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString";
 const RDF_TURTLE = "http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE";
@@ -280,8 +283,25 @@ export type DraftChange =
   | { kind: "restore"; of: DraftKind; id: string }
   /** Delete a subject no earlier release published, with what is part of it. */
   | { kind: "delete"; of: DraftKind; id: string }
-  /** A source, by its IRI: set, or (null) removed with every mention of it. */
+  /**
+   * A source, by its IRI: set, or (null) removed with every mention of it
+   * this version makes. What it states stays while an activity carried
+   * from an earlier release still uses it: that making is not rewritten.
+   * One set is one the release is derived from, or its making used (made,
+   * `#compilation`, for a release that names none), or an activity
+   * carried from an earlier release still uses; else it is refused.
+   */
   | { kind: "setSource"; iri: string; source: DraftSource | null }
+  /** The licence (dcterms:license), typed dcterms:LicenseDocument; null for none. */
+  | { kind: "setLicense"; license: string | null }
+  /**
+   * The attribution of how the release was made: "Compiled by <its
+   * authors>", with or without "with the help of AI", in English and
+   * Swedish; null for none. Never a claim that anyone reviewed it.
+   */
+  | { kind: "setAttribution"; attribution: { ai: boolean } | null }
+  /** What the release's own making says of itself beside its attribution: each paragraph of a language one comment. */
+  | { kind: "setMakingNotes"; notes: LangText }
   | { kind: "addCheckActivity"; id: string; activity: CheckActivity }
   | { kind: "editCheckActivity"; id: string; activity: CheckActivity }
   | { kind: "deleteActivity"; id: string };
@@ -305,7 +325,11 @@ export type DraftRefusal =
   /** A course is studied front to back. */
   | { refused: "notFrontToBack" }
   /** The activity is how an earlier release was made: it is not rewritten. */
-  | { refused: "carriedActivity"; id: string };
+  | { refused: "carriedActivity"; id: string }
+  /** An attribution names the release's authors: it has none. */
+  | { refused: "noAuthors" }
+  /** A source is one the release is derived from or its making used: it would be neither. */
+  | { refused: "unusedSource"; id: string };
 
 export function isRefusal(result: ReleaseDraft | DraftRefusal): result is DraftRefusal {
   return "refused" in result;
@@ -404,6 +428,12 @@ function changedDraft(draft: ReleaseDraft, change: DraftChange): ReleaseDraft | 
       return deleteSubject(draft, change.of, change.id);
     case "setSource":
       return setSource(draft, change.iri, change.source);
+    case "setLicense":
+      return setLicense(draft, change.license);
+    case "setAttribution":
+      return setAttribution(draft, change.attribution);
+    case "setMakingNotes":
+      return setMakingNotes(draft, change.notes);
     case "addCheckActivity":
       return addCheckActivity(draft, change.id, change.activity);
     case "editCheckActivity":
@@ -717,23 +747,33 @@ function renumberedOutline(draft: ReleaseDraft): ReleaseDraft {
 
 function setSource(draft: ReleaseDraft, iri: string, source: DraftSource | null): ReleaseDraft | DraftRefusal {
   const generating = ownGeneratingActivities(draft);
-  const triples = draft.triples.filter(
-    (triple) =>
-      triple.subject !== iri &&
-      !(triple.predicate === `${PROV}used` && generating.includes(triple.subject) && triple.object.kind === "iri" && triple.object.value === iri),
-  );
+  const carried = new Set(draft.published.activities.map((id) => iriIn(draft, id)));
+  const usedBy = (triple: DraftTriple) => triple.predicate === `${PROV}used` && triple.object.kind === "iri" && triple.object.value === iri;
+  // What it states is kept when removed while an earlier version's making still uses it.
+  const described = source === null && draft.triples.some((triple) => usedBy(triple) && carried.has(triple.subject));
+  const triples = draft.triples.filter((triple) => (described || triple.subject !== iri) && !(usedBy(triple) && generating.includes(triple.subject)));
   const derived = draft.root.wasDerivedFrom.filter((one) => one !== iri);
   if (source === null) {
     if (triples.length === draft.triples.length && derived.length === draft.root.wasDerivedFrom.length) return { refused: "missing", id: iri };
     return { ...draft, root: { ...draft.root, wasDerivedFrom: derived }, triples };
   }
-  const making = source.used ? withOwnMaking({ ...draft, triples }) : { draft: { ...draft, triples }, activities: [] };
+  // A source is one the release is derived from or a making used: else nothing would point to what it states.
+  if (!source.derivedFrom && !source.used && !triples.some((triple) => usedBy(triple) && carried.has(triple.subject))) return { refused: "unusedSource", id: iri };
+  const making = source.used ? usingMaking({ ...draft, triples }) : { draft: { ...draft, triples }, activities: [] };
   const used = making.activities.map((activity) => ({ subject: activity, predicate: `${PROV}used`, object: { kind: "iri" as const, value: iri } }));
   return {
     ...draft,
     root: { ...draft.root, wasDerivedFrom: source.derivedFrom ? [...derived, iri] : derived },
     triples: [...making.draft.triples, ...source.statements.map((statement) => ({ subject: iri, ...statement })), ...used],
   };
+}
+
+/** The activities a source is used by: the draft's own making (withOwnMaking), else one made for it (withMaking). */
+function usingMaking(draft: ReleaseDraft): { draft: ReleaseDraft; activities: string[] } {
+  const own = withOwnMaking(draft);
+  if (own.activities.length > 0) return own;
+  const made = withMaking(draft);
+  return { draft: made.draft, activities: [made.making] };
 }
 
 /** The activities the release states it was generated by (prov:wasGeneratedBy), by IRI. */
@@ -816,6 +856,37 @@ export function checkActivityTriples(iri: string, activity: CheckActivity): Draf
   ];
 }
 
+/**
+ * The check an activity of the draft records, read back: null unless its
+ * statements are exactly those checkActivityTriples writes for one, so
+ * an activity written otherwise is never rewritten by an edit.
+ */
+export function readCheckActivity(draft: ReleaseDraft, id: string): CheckActivity | null {
+  const iri = iriIn(draft, id);
+  const said = draft.triples.filter((triple) => triple.subject === iri);
+  const literal = (predicate: string) => said.find((triple) => triple.predicate === predicate && triple.object.kind === "literal")?.object as ReleaseText | undefined;
+  const label = literal(`${RDFS}label`);
+  const endedAt = literal(`${PROV}endedAtTime`);
+  if (label === undefined || endedAt === undefined) return null;
+  const comments = said.flatMap((triple) => (triple.predicate === RDFS_COMMENT && triple.object.kind === "literal" ? [triple.object.value] : []));
+  // What a wording puts around its text: its words before and after.
+  const around = (word: (text: string) => string, text: string) => {
+    const [before, after] = word("\u0000").split("\u0000") as [string, string];
+    return text.startsWith(before) && text.endsWith(after) && text.length >= before.length + after.length ? text.slice(before.length, text.length - after.length) : null;
+  };
+  const language = label.language === "sv" ? "sv" : "en";
+  const wording = CHECK_WORDING[language];
+  for (const check of ["machine", "ai"] as const) {
+    const name = around(wording[check].label, label.value);
+    const scope = comments.map((comment) => around(wording[check].scope, comment)).find((one) => one !== null);
+    const outcome = comments.map((comment) => around(wording.outcome, comment)).find((one) => one !== null);
+    if (name === null || scope === undefined || outcome === undefined) continue;
+    const activity: CheckActivity = { check, label: name, scope: scope!, outcome: outcome!, endedAt: endedAt.value, language: label.language };
+    if (canonical(checkActivityTriples(iri, activity).map(keyOfTriple).sort()) === canonical(said.map(keyOfTriple).sort())) return activity;
+  }
+  return null;
+}
+
 function addCheckActivity(draft: ReleaseDraft, id: string, activity: CheckActivity): ReleaseDraft | DraftRefusal {
   const refusal = refuseId(draft, id);
   if (refusal !== null) return refusal;
@@ -850,6 +921,169 @@ function deleteActivity(draft: ReleaseDraft, id: string): ReleaseDraft | DraftRe
     ...draft,
     triples: draft.triples.filter((triple) => triple.subject !== iri && !(triple.object.kind === "iri" && triple.object.value === iri)),
   };
+}
+
+// --- The licence
+
+/** The statement that types a licence a dcterms:LicenseDocument, as DCAT-AP asks of it. */
+export function licenseType(license: string): DraftTriple {
+  return { subject: license, predicate: RDF_TYPE, object: { kind: "iri", value: LICENSE_DOCUMENT } };
+}
+
+/**
+ * The draft with its licence set, and typed: the licence it had loses
+ * its type when nothing else in the draft names it (a source's licence
+ * may), so the release says nothing of a licence it no longer has.
+ */
+function setLicense(draft: ReleaseDraft, license: string | null): ReleaseDraft {
+  const { license: before, ...root } = draft.root;
+  const typed = (triples: readonly DraftTriple[], iri: string) => triples.some((triple) => keyOfTriple(triple) === keyOfTriple(licenseType(iri)));
+  let triples = [...draft.triples];
+  if (before !== undefined && before !== license && !triples.some((triple) => triple.object.kind === "iri" && triple.object.value === before)) {
+    triples = triples.filter((triple) => keyOfTriple(triple) !== keyOfTriple(licenseType(before)));
+  }
+  if (license !== null && !typed(triples, license)) triples.push(licenseType(license));
+  return { ...draft, root: license === null ? root : { ...root, license }, triples };
+}
+
+// --- The attribution and the notes of the release's making
+
+/** "A", "A and B", "A, B and C", with the language's "and". */
+function namesIn(names: readonly string[], and: string): string {
+  return names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} ${and} ${names.at(-1)}`;
+}
+
+/**
+ * The attribution of a release's making, in English or Swedish (another
+ * language reads as English): "Compiled by <names>", with or without
+ * "with the help of AI". It says who compiled it, never that anyone
+ * reviewed it.
+ */
+export function attributionText(names: readonly string[], ai: boolean, language: string): string {
+  return language === "sv"
+    ? `Sammanställd av ${namesIn(names, "och")}${ai ? " med hjälp av AI" : ""}.`
+    : `Compiled by ${namesIn(names, "and")}${ai ? " with the help of AI" : ""}.`;
+}
+
+/**
+ * The attributions attributionText writes for the draft's authors, in
+ * English and Swedish, by language and text: whether each says AI
+ * helped. A comment is an attribution only when it is one of these, so
+ * a note that only starts as one ("Compiled by hand…") stays a note.
+ */
+function attributionsOf(draft: ReleaseDraft): Map<string, boolean> {
+  const names = authorNames(draft);
+  const texts = new Map<string, boolean>();
+  if (names.length === 0) return texts;
+  for (const language of ["en", "sv"]) for (const ai of [false, true]) texts.set(`${language} ${attributionText(names, ai, language)}`, ai);
+  return texts;
+}
+
+/** Whether a statement of an activity is an attribution comment, of those `attributions` (attributionsOf) has. */
+function isAttribution(attributions: ReadonlyMap<string, boolean>, triple: DraftTriple): boolean {
+  const { object } = triple;
+  return triple.predicate === RDFS_COMMENT && object.kind === "literal" && attributions.has(`${object.language} ${object.value}`);
+}
+
+/** The release's own making: the first activity of the draft's own that generated it; null when it has none. */
+export function ownMakingOf(draft: ReleaseDraft): string | null {
+  return ownGeneratingActivities(draft)[0] ?? null;
+}
+
+/**
+ * The attribution the release's own making states: whether it says AI
+ * helped, and its English text (else its first); null when it states
+ * none.
+ */
+export function attributionOf(draft: ReleaseDraft): { ai: boolean; text: string } | null {
+  const making = ownMakingOf(draft);
+  const attributions = attributionsOf(draft);
+  const said = draft.triples.filter((triple) => triple.subject === making && isAttribution(attributions, triple)).map((triple) => triple.object as ReleaseText);
+  const shown = said.find((text) => text.language === "en") ?? said[0];
+  if (shown === undefined) return null;
+  return { ai: attributions.get(`${shown.language} ${shown.value}`)!, text: shown.value };
+}
+
+/** What the release's own making says beside its attribution: each language's comments, a paragraph each. */
+export function makingNotesOf(draft: ReleaseDraft): LangText {
+  const making = ownMakingOf(draft);
+  const attributions = attributionsOf(draft);
+  const notes: Record<string, string[]> = {};
+  for (const triple of draft.triples) {
+    if (triple.subject !== making || triple.predicate !== RDFS_COMMENT || triple.object.kind !== "literal" || isAttribution(attributions, triple)) continue;
+    (notes[triple.object.language] ??= []).push(triple.object.value);
+  }
+  return Object.fromEntries(Object.entries(notes).map(([language, paragraphs]) => [language, paragraphs.join("\n\n")]));
+}
+
+/**
+ * The draft with a making of its own, which it states generated the
+ * release: the one it has, the one a next version is given
+ * (withOwnMaking), or, for a release that names none, `#compilation`
+ * (or the first such id free).
+ */
+function withMaking(draft: ReleaseDraft): { draft: ReleaseDraft; making: string } {
+  const own = withOwnMaking(draft);
+  if (own.activities.length > 0) return { draft: own.draft, making: own.activities[0]! };
+  const taken = new Set([...idsInUse(draft), ...Object.keys(draft.published.ids), ...draft.published.activities]);
+  let id = "compilation";
+  for (let n = 2; taken.has(id); n++) id = `compilation-${n}`;
+  const iri = iriIn(draft, id);
+  return {
+    draft: {
+      ...draft,
+      triples: [
+        ...draft.triples,
+        { subject: draft.url, predicate: `${PROV}wasGeneratedBy`, object: { kind: "iri", value: iri } },
+        { subject: iri, predicate: RDF_TYPE, object: { kind: "iri", value: `${PROV}Activity` } },
+      ],
+    },
+    making: iri,
+  };
+}
+
+/** The comments of the release's own making that `keep` keeps, then `comments`; made when there are any and it has none. */
+function withMakingComments(draft: ReleaseDraft, keep: (triple: DraftTriple) => boolean, comments: readonly ReleaseText[]): ReleaseDraft {
+  const existing = ownMakingOf(draft);
+  if (existing === null && comments.length === 0) return draft;
+  const made = withMaking(draft);
+  const triples = made.draft.triples.filter((triple) => triple.subject !== made.making || triple.predicate !== RDFS_COMMENT || keep(triple));
+  return { ...made.draft, triples: [...triples, ...comments.map((object) => ({ subject: made.making, predicate: RDFS_COMMENT, object }))] };
+}
+
+function commentIn(value: string, language: string): ReleaseText {
+  return { kind: "literal", value, language, datatype: language === "" ? XSD_STRING : LANG_STRING };
+}
+
+/** The names of the release's authors (dcterms:creator), as its agents name them, in order. */
+export function authorNames(draft: ReleaseDraft): string[] {
+  return draft.root.creator.flatMap((iri) => {
+    const id = idIn(draft, iri);
+    const agent = id === null ? undefined : nodeOf(draft, "agents", id);
+    return agent === undefined ? [] : [agent.data.name];
+  });
+}
+
+function setAttribution(draft: ReleaseDraft, attribution: { ai: boolean } | null): ReleaseDraft | DraftRefusal {
+  const attributions = attributionsOf(draft);
+  const kept = (triple: DraftTriple) => !isAttribution(attributions, triple);
+  if (attribution === null) return withMakingComments(draft, kept, []);
+  const names = authorNames(draft);
+  if (names.length === 0) return { refused: "noAuthors" };
+  const comments = ["en", "sv"].map((language) => commentIn(attributionText(names, attribution.ai, language), language));
+  return withMakingComments(draft, kept, comments);
+}
+
+function setMakingNotes(draft: ReleaseDraft, notes: LangText): ReleaseDraft {
+  const attributions = attributionsOf(draft);
+  const comments = Object.entries(notes).flatMap(([language, text]) =>
+    text
+      .split(/\n\s*\n/u)
+      .map((paragraph) => paragraph.trim())
+      .filter((paragraph) => paragraph !== "")
+      .map((paragraph) => commentIn(paragraph, language)),
+  );
+  return withMakingComments(draft, (triple) => isAttribution(attributions, triple), comments);
 }
 
 // ---------------------------------------------------------------------------

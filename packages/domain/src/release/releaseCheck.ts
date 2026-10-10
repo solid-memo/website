@@ -4,7 +4,8 @@ import { courseProblems, readinessProblems } from "./courseRules.ts";
 import { curationProblems, podPolicy, repoPolicy, type LibraryPolicy } from "./curationRules.ts";
 import { metadataProblems, pathProblems, releasePathOf, versionGapProblems } from "./libraryRules.ts";
 import type { ReleaseProblem, ReleaseSeverity } from "./problems.ts";
-import { idIn, type ReleaseDraft } from "./releaseDraft.ts";
+import { provenanceProblems } from "./provenanceRules.ts";
+import { activitiesOf, generatingActivities, idIn, PROV, type ReleaseDraft } from "./releaseDraft.ts";
 import { DCTERMS_NS, type ReleaseModel } from "./releaseModel.ts";
 import { moved } from "./releaseToDraft.ts";
 
@@ -30,7 +31,7 @@ export function curationOf(policy: CheckPolicy): LibraryPolicy {
 
 /** What the check found, by the rules that found it. */
 export interface ReleaseCheck {
-  /** The course's outline, what a release needs that a draft may lack, and the policy's curation. */
+  /** The course's outline, what a release needs that a draft may lack, the policy's curation, and how it says it was made. */
   rules: ReleaseProblem[];
   /** Its place in the library (the library policy only): its name, its version among the others, its metadata. */
   library: ReleaseProblem[];
@@ -53,9 +54,14 @@ function distinct(problems: readonly ReleaseProblem[]): ReleaseProblem[] {
   });
 }
 
-/** The rules of a release read from its data alone: its course's, its readiness, and the policy's curation. */
+/** The rules of a release read from its data alone: its course's, its readiness, the policy's curation, and its provenance's. */
 export function ruleProblems(model: ReleaseModel, policy: CheckPolicy): ReleaseProblem[] {
-  return distinct([...courseProblems(model), ...readinessProblems(model), ...curationProblems(model, curationOf(policy))]);
+  return distinct([
+    ...courseProblems(model),
+    ...readinessProblems(model),
+    ...curationProblems(model, curationOf(policy)),
+    ...provenanceProblems(model),
+  ]);
 }
 
 /** Where a library publishes a deck's release: `<name>/v<N>.ttl` beside its index. */
@@ -165,12 +171,18 @@ export type ProblemTarget =
   | { screen: "draft"; field?: DraftField }
   | { screen: "chapter"; chapter: string; field?: ChapterField }
   | { screen: "step"; step: string; field?: StepField }
-  | { screen: "question"; card: string; field?: QuestionField };
+  | { screen: "question"; card: string; field?: QuestionField }
+  | { screen: "release"; field?: ReleaseField };
 
 /** The overview's fields: what the release says of itself, and its outline. */
 export type DraftField = "title" | "description" | "outline";
 export type ChapterField = "title" | "description" | "steps" | "review";
 export type StepField = "theory" | "questions";
+/** The release screen's parts: what the release says of itself beyond its listing, who made it and how, and from what. */
+export type ReleaseField = "versionNotes" | "languages" | "license" | "publisher" | "authors" | "making" | "sources" | "checks";
+
+export const RELEASE_FIELDS: readonly ReleaseField[] = ["versionNotes", "languages", "license", "publisher", "authors", "making", "sources", "checks"];
+
 /** A question's text, its wrong options (all), or one of them by its id. */
 export type QuestionField = CardTextPart | "distractors" | `distractor:${string}`;
 
@@ -183,15 +195,27 @@ const CARD_FIELDS: Readonly<Record<string, CardTextPart>> = {
   [SM.frontNote]: "frontNote",
   [SM.backNote]: "backNote",
 };
-/** The problems of a subject's outline, by code, which the outline's part of the screen shows. */
+/** The release screen's part of each field of the release itself, by its predicate. */
+const RELEASE_SCREEN_FIELDS: Readonly<Record<string, ReleaseField>> = {
+  "http://www.w3.org/ns/adms#versionNotes": "versionNotes",
+  [`${DCTERMS_NS}language`]: "languages",
+  [`${DCTERMS_NS}license`]: "license",
+  [`${DCTERMS_NS}publisher`]: "publisher",
+  [`${DCTERMS_NS}creator`]: "authors",
+  [`${PROV}wasDerivedFrom`]: "sources",
+};
+/** The problems of a source, by code, which the release screen's sources show. */
+const SOURCE_CODES: ReadonlySet<string> = new Set(["sourceUndescribed", "usedNotDerived"]);
+/** The problems of the outline, by code, which the outline's part of the screen shows. */
 const OUTLINE_CODES: ReadonlySet<string> = new Set(["courseWithoutChapter", "chapterPositions", "outlineWithoutCourse"]);
 
 /**
  * Where to show a problem of the draft: the editor of the subject it is
  * in, at its field when the editor has one for it; a distractor's,
- * its card's, at it. A problem of the release itself, or of a subject
- * without an editor of its own (an agent, the series, a source), the
- * overview.
+ * its card's, at it. A source's, an agent's or an activity's, the
+ * release screen, at its part; so is one of the release's fields there.
+ * A problem of the release itself otherwise, or of a subject without an
+ * editor of its own (the series), the overview.
  */
 export function problemTarget(draft: ReleaseDraft, problem: ReleaseProblem): ProblemTarget {
   const id = idIn(draft, problem.subject);
@@ -216,7 +240,15 @@ export function problemTarget(draft: ReleaseDraft, problem: ReleaseProblem): Pro
   }
   const card = id === null ? undefined : cardOfDistractor(draft, problem.subject);
   if (card !== undefined) return { screen: "question", card: card.id, field: `distractor:${id}` };
+  if (SOURCE_CODES.has(code)) return { screen: "release", field: "sources" };
+  if (has(draft.agents)) return { screen: "release", field: "authors" };
+  if (id !== null && activitiesOf(draft).includes(id)) {
+    const making = generatingActivities(draft).includes(problem.subject) && !draft.published.activities.includes(id);
+    return { screen: "release", field: making ? "making" : "checks" };
+  }
   if (problem.subject !== draft.url) return { screen: "draft" };
+  const releaseField = field === undefined ? undefined : RELEASE_SCREEN_FIELDS[field];
+  if (releaseField !== undefined) return { screen: "release", field: releaseField };
   const draftField: DraftField | undefined =
     field === DCTERMS_TITLE ? "title" : field === DCTERMS_DESCRIPTION ? "description" : OUTLINE_CODES.has(code) ? "outline" : undefined;
   return { screen: "draft", ...(draftField === undefined ? {} : { field: draftField }) };
@@ -233,5 +265,7 @@ export function isTargetField(screen: ProblemTarget["screen"], field: string): b
       return ["theory", "questions"].includes(field);
     case "question":
       return [...Object.values(CARD_FIELDS), "distractors"].includes(field) || /^distractor:./.test(field);
+    case "release":
+      return (RELEASE_FIELDS as readonly string[]).includes(field);
   }
 }

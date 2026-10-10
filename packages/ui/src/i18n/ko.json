@@ -2044,7 +2044,8 @@
       "problemsLink": "릴리스 검사 보기",
       "previewLink": "목록 미리보기",
       "trialLink": "사용해 보기",
-      "diffLink": "이전 버전과 비교"
+      "diffLink": "이전 버전과 비교",
+      "releaseLink": "릴리스 메타데이터와 출처"
     },
     "outline": {
       "empty": "아직 챕터가 없어요.",
@@ -2167,7 +2168,9 @@
         "askedElsewhere": "이 카드는 이미 다른 곳에서 묻고 있어요. 대신 그곳으로 옮겨 주세요.",
         "notACourse": "챕터, 단계, 질문은 코스에만 있어요.",
         "notFrontToBack": "코스는 앞면 → 뒷면 방향으로 학습해요.",
-        "carriedActivity": "이전 릴리스를 만든 방식은 다시 쓰지 않아요."
+        "carriedActivity": "이전 릴리스를 만든 방식은 다시 쓰지 않아요.",
+        "noAuthors": "먼저 저자를 지정해 주세요. 저작자 표시에는 릴리스의 저자 이름이 들어가요.",
+        "unusedSource": "출처는 릴리스가 바탕으로 삼았거나 릴리스를 만드는 데 쓴 것이에요. 하나 이상 선택해 주세요."
       }
     },
     "check": {
@@ -2245,7 +2248,12 @@
       "distractor": "오답 선택지",
       "distractorText": "오답 선택지",
       "distractorNote": "틀린 이유",
-      "textFormat": "텍스트 형식"
+      "textFormat": "텍스트 형식",
+      "versionNotes": "버전 노트",
+      "language": "언어",
+      "creator": "저자",
+      "comment": "댓글",
+      "wasDerivedFrom": "출처"
     },
     "problem": {
       "notARelease": "{path}은(는) 덱 라이브러리에 릴리스를 둘 수 있는 곳이 아니에요. 이름에는 영문 소문자, 숫자, 대시만 쓸 수 있어요.",
@@ -2292,7 +2300,10 @@
       "previousUnread": "이어받는 이전 릴리스 {previous}을(를) 읽을 수 없어서, 그에 대해서는 아무것도 검사하지 않았어요. 나중에 다시 검사해 주세요.",
       "libraryUnread": "덱 라이브러리 색인을 읽을 수 없어서, 덱 라이브러리에서 초안의 위치는 검사하지 않았어요. 나중에 다시 검사해 주세요.",
       "shape": "{field}: {message}",
-      "unshaped": "이 앱의 어떤 셰이프도 설명하지 않는 Solid Memo 클래스예요."
+      "unshaped": "이 앱의 어떤 셰이프도 설명하지 않는 Solid Memo 클래스예요.",
+      "sourceUndescribed": "{missing}을(를) 밝히지 않았어요. 출처에는 무엇인지, 누구의 것인지, 어떤 조건으로 사용했는지가 있어야 해요.",
+      "usedNotDerived": "릴리스를 만드는 데 쓰였지만, 릴리스는 이것을 바탕으로 했다고 밝히지 않아요.",
+      "countDisagrees": "{what}이(가) {stated}(이)라고 하지만, 릴리스에는 {counted}이(가) 있어요."
     },
     "preview": {
       "crumb": "목록 미리보기",
@@ -2388,6 +2399,96 @@
       "working": "처리하는 중…",
       "reset": "처음부터 다시 하기",
       "reload": "초안 다시 불러오기"
+    },
+    "release": {
+      "crumb": "릴리스",
+      "heading": "릴리스 메타데이터와 출처 정보",
+      "intro": "목록에 나오는 내용 외에 릴리스가 스스로에 대해 밝히는 정보예요. 누가 어떻게 만들었는지, 무엇을 바탕으로 만들었는지를 담아요. 변경할 때마다 바로 저장돼요.",
+      "about": "이 버전에 대하여",
+      "versionNotes": "버전 노트",
+      "versionNotesHint": "이 버전이 무엇인지 또는 무엇이 바뀌었는지, 학습자를 위해 몇 마디로 적어 주세요.",
+      "languages": "언어",
+      "languagesHint": "콘텐츠에 쓰인 언어예요. EU의 언어 표에서 골라요.",
+      "languageOther": "{iri} (표에 없음)",
+      "licenseHint": "DCAT-AP의 요구대로 라이선스 문서로 지정해요.",
+      "publisher": "게시자",
+      "publisherNone": "지정 안 됨",
+      "publisherHint": "릴리스를 게시하는 사람이에요. 저자 중 한 명이거나, 릴리스에 이미 지정된 게시자예요.",
+      "authors": "저자",
+      "authorsHint": "릴리스를 만든 사람들이에요. 릴리스 안에 저장돼요.",
+      "noAuthors": "아직 저자가 없어요.",
+      "otherAuthors": "다른 문서에도 지정되어 있고 그대로 유지되는 저자: {authors}",
+      "authorName": "이름",
+      "authorEmail": "이메일(선택)",
+      "saveAuthor": "저장",
+      "newAuthor": "새 저자",
+      "addAuthor": "저자 추가",
+      "authorEmpty": "저자의 이름을 입력해 주세요.",
+      "making": "만든 방법",
+      "attribution": "저작자 표시",
+      "attributionHint": "누가 릴리스를 만들었는지 영어와 스웨덴어로 밝혀요. 누군가 검토했다는 내용은 담지 않아요.",
+      "attributionNone": "저작자 표시 없음",
+      "attributionNeedsAuthors": "먼저 저자를 지정해 주세요. 저작자 표시에는 릴리스의 저자 이름이 들어가요.",
+      "makingNotes": "만든 방법에 대한 노트",
+      "makingNotesHint": "각 문단은 릴리스를 만든 과정에 대한 노트로 저장돼요. 예를 들어 출처, 구성, 선별, 라이선스 등이에요. 노트에 적힌 개수(챕터, 단계, 출처, 전체 카드 수)는 릴리스와 대조해 확인해요.",
+      "sources": "출처",
+      "sourcesHint": "릴리스를 만드는 데 바탕이 된 자료예요. 각 출처에는 무엇인지, 누구의 것인지, 어떤 조건으로 사용했는지(라이선스 또는 그 근거)를 적어요. Studio는 주소를 보여 줄 뿐 열지는 않아요.",
+      "noSources": "아직 출처가 없어요.",
+      "sourceIri": "주소",
+      "sourceTitle": "제목",
+      "sourceCreator": "만든 사람",
+      "sourceLicense": "라이선스(주소)",
+      "sourceEvidence": "라이선스 근거",
+      "derivedFrom": "릴리스가 이 출처에서 파생됨",
+      "used": "이 버전을 만들 때 사용함",
+      "usedEarlier": "이전 버전을 만들 때 사용했어요.",
+      "sourceOthers": {
+        "one": "이 출처에 대한 다른 진술 {count}개는 그대로 유지돼요.",
+        "other": "이 출처에 대한 다른 진술 {count}개는 그대로 유지돼요."
+      },
+      "saveSource": "출처 저장",
+      "newSource": "새 출처",
+      "addSource": "출처 추가",
+      "sourceInvalid": "https:// 또는 http://로 시작하는 출처의 웹 주소를 입력해 주세요.",
+      "sourceExists": "릴리스에 이미 이 출처가 있어요.",
+      "sourceUnused": "하나 이상 선택해 주세요. 릴리스가 이 출처에서 파생되었거나, 이 버전을 만들 때 사용했어야 해요.",
+      "licenseInvalid": "https:// 또는 http://로 시작하는 라이선스의 웹 주소를 입력하거나, 비워 두세요.",
+      "checks": "검사",
+      "checksHint": "릴리스가 받은 검사예요. 기계(검증기, 릴리스 검사)나 AI가 한 검사이고, 각각 사람의 검토가 아닌 것으로 기록돼요. Studio는 사람의 검토를 기록하지 않아요.",
+      "noChecks": "아직 기록된 검사가 없어요.",
+      "checkKind": "검사 주체",
+      "checkMachine": "기계",
+      "checkAi": "AI",
+      "checkLabel": "검사한 대상",
+      "checkScope": "범위",
+      "checkOutcome": "결과",
+      "checkEnded": "종료 날짜",
+      "checkLanguage": "작성 언어",
+      "checkLanguageEn": "영어",
+      "checkLanguageSv": "스웨덴어",
+      "checkEmpty": "검사한 대상, 범위, 결과를 입력해 주세요.",
+      "newCheck": "새 검사",
+      "addCheck": "검사 기록",
+      "saveCheck": "검사 저장",
+      "checkOtherwise": "Studio가 검사를 기록하는 방식과 다르게 작성되어 있어서, 삭제할 수는 있지만 편집할 수는 없어요.",
+      "carried": "이전 버전에서",
+      "carriedHint": "이전 버전을 만든 방법이에요. 릴리스는 절대 다시 쓰이지 않으므로 그대로 유지돼요.",
+      "detail": {
+        "title": "제목",
+        "creator": "만든 사람",
+        "licence": "라이선스 또는 그 근거"
+      },
+      "counted": {
+        "chapters": "챕터",
+        "steps": "단계",
+        "sources": "출처",
+        "cards": "전체 카드"
+      },
+      "edit": "편집",
+      "cancel": "취소",
+      "remove": "제거",
+      "editOf": "{name} 편집",
+      "removeOf": "{name} 제거"
     }
   },
   "proseField": {
