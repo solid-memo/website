@@ -1,0 +1,8 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix schema:     <https://schema.org/> .
+
+# A step just added to a draft: no theory, questions, chapter or place yet.
+<#st-new>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 .

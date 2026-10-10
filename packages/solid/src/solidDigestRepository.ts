@@ -50,7 +50,7 @@ export function createSolidDigestRepository({
       const next = changes.reduce<InstanceDigest | null>((digest, change) => change(digest), stored)!;
       const { updated, subjects } = withDigest(instanceUrl, dataset ?? createSolidDataset(), stored, next);
       if (subjects.length === 0) return;
-      await checkWrite(updated, subjects);
+      await checkWrite(updated, subjects, "pod");
       try {
         await saveDataset(url, updated, fetch);
         return;

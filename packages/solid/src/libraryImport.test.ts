@@ -129,7 +129,7 @@ async function app() {
 describe("a deck imported from the library", () => {
   it("is written at deck format 6 and card format 5 from a format-4 release, its text exactly the release's", { timeout: 30_000 }, async () => {
     // Releases are frozen: a format-4 release is read as it was published.
-    expect(LATEST_VERSION.libraryDeck).toBe(5);
+    expect(LATEST_VERSION.libraryDeck).toBe(6);
     const { useCases, store } = await app();
     const instance = await useCases.createInstance(ALICE, { containerUrl: `${POD}solid-memo/`, name: "Main", registrationTarget: "private" });
 

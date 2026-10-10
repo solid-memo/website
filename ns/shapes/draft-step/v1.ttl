@@ -1,0 +1,93 @@
+@base <https://solid-memo.com/ns/shapes/draft-step/v1.ttl> .
+
+@prefix sh:         <http://www.w3.org/ns/shacl#> .
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl:        <http://www.w3.org/2002/07/owl#> .
+@prefix schema:     <https://schema.org/> .
+
+# A step of a draft course's chapter, format 1: step format 1
+# (shapes/step/v1.ttl) while its author writes it, in a draft
+# (shapes/draft-deck/v1.ttl). The property shapes are step format 1's,
+# but its theory (in any language, none required), the cards that check
+# it, its chapter and its place are not asked yet: the release check asks
+# them of the release the draft will be.
+<#inDraft>
+    a sh:NodeShape ;
+    sh:name "DraftStepV1" ;
+    rdfs:comment "Draft step format 1: a step of a course being written in a pod, step format 1's properties with its theory, the cards that check it, its chapter and place not yet required." ;
+    sh:nodeKind sh:IRI ;
+    sh:class solid-memo:Step ;
+    sh:property <#formatVersion> ,
+                <#learningResource> ,
+                <#theory> ,
+                <#checkedBy> ,
+                <#chapter> ,
+                <#position> ,
+                <#deprecated> ,
+                <#textFormat> .
+
+<#formatVersion>
+    a sh:PropertyShape ;
+    sh:path solid-memo:formatVersion ;
+    sh:datatype xsd:integer ;
+    sh:maxCount 1 ;
+    sh:in ( 1 ) .
+
+<#learningResource>
+    a sh:PropertyShape ;
+    sh:path rdf:type ;
+    sh:hasValue schema:LearningResource ;
+    sh:message "A step is a schema:LearningResource."@en ,
+               "Ett steg är en schema:LearningResource."@sv .
+
+<#theory>
+    a sh:PropertyShape ;
+    sh:path solid-memo:theory ;
+    sh:datatype rdf:langString ;
+    sh:uniqueLang true ;
+    sh:message "A step's theory is language-tagged text in any language, one per language (\"…\"@sv)."@en ,
+               "Ett stegs teori är språktaggad text på valfritt språk, en per språk (\"…\"@sv)."@sv .
+
+<#checkedBy>
+    a sh:PropertyShape ;
+    sh:path solid-memo:checkedBy ;
+    sh:nodeKind sh:IRI ;
+    sh:message "The cards a step is checked by are IRIs (<#…>)."@en ,
+               "Korten som kontrollerar ett steg är IRI:er (<#…>)."@sv .
+
+<#chapter>
+    a sh:PropertyShape ;
+    sh:path schema:isPartOf ;
+    sh:name "chapter" ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+    sh:message "A step is part of at most one chapter (schema:isPartOf <#…>)."@en ,
+               "Ett steg är del av högst ett kapitel (schema:isPartOf <#…>)."@sv .
+
+<#position>
+    a sh:PropertyShape ;
+    sh:path schema:position ;
+    sh:datatype xsd:integer ;
+    sh:minInclusive 0 ;
+    sh:maxCount 1 ;
+    sh:message "A step's place among its chapter's steps is one whole number, 0 or more, 0 first."@en ,
+               "Ett stegs plats bland kapitlets steg är ett heltal, 0 eller mer, 0 först."@sv .
+
+<#deprecated>
+    a sh:PropertyShape ;
+    sh:path owl:deprecated ;
+    sh:datatype xsd:boolean ;
+    sh:maxCount 1 ;
+    sh:message "A retired step states owl:deprecated true, a boolean."@en ,
+               "Ett steg som tagits ur bruk anger owl:deprecated true, ett booleskt värde."@sv .
+
+<#textFormat>
+    a sh:PropertyShape ;
+    sh:path solid-memo:textFormat ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+    sh:message "A step's text format is at most one IRI, a concept of solid-memo:TextFormats."@en ,
+               "Ett stegs textformat är högst en IRI, ett begrepp i solid-memo:TextFormats."@sv .

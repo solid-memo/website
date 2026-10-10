@@ -372,7 +372,7 @@ describe("createShaclShapeValidator", () => {
       ),
       buildThing(createThing({ url: `${DOC}#other` })).addStringNoLocale(DCTERMS.title, "x").build(),
     );
-    await expect(validator.checkSubjects(dataset, [`${DOC}#deck-1`])).rejects.toThrow(
+    await expect(validator.checkSubjects(dataset, [`${DOC}#deck-1`], "pod")).rejects.toThrow(
       `Solid Memo did not save this: it is not in the format Solid Memo expects. Nothing was changed. Reload the page and try again.\nproblems: <${DOC}#deck-1>: Each side needs text or a picture.`,
     );
   });
@@ -401,12 +401,12 @@ describe("createShaclShapeValidator", () => {
 
     it("lets a write through when what it touches conforms", async () => {
       await expect(
-        validator.checkSubjects(deck((t) => t.addStringNoLocale(DCTERMS.description, "Capitals.")), [`${DOC}#deck-1`, `${DOC}#gone`]),
+        validator.checkSubjects(deck((t) => t.addStringNoLocale(DCTERMS.description, "Capitals.")), [`${DOC}#deck-1`, `${DOC}#gone`], "pod"),
       ).resolves.toBeUndefined();
     });
 
     it("refuses a write that breaks a shape or DCAT-AP, naming every problem", async () => {
-      await expect(validator.checkSubjects(deck((t) => t), [`${DOC}#deck-1`])).rejects.toThrow(
+      await expect(validator.checkSubjects(deck((t) => t), [`${DOC}#deck-1`], "pod")).rejects.toThrow(
         [
           "Solid Memo did not save this: it is not in the format Solid Memo expects. Nothing was changed. Reload the page and try again.",
           `problems: <${DOC}#deck-1> (${DCTERMS.description}): A format-3 deck has a description, as DCAT-AP asks of every dataset.`,
@@ -424,26 +424,44 @@ describe("createShaclShapeValidator", () => {
       const listing = (member: string) =>
         setThing(written, buildThing(getThing(written, `${DOC}#catalog`)!).addIri(DCAT.dataset, member).build());
       await expect(
-        validator.checkSubjects(listing("https://pod.example/recipes/index.ttl#cookbook"), [`${DOC}#catalog`]),
+        validator.checkSubjects(listing("https://pod.example/recipes/index.ttl#cookbook"), [`${DOC}#catalog`], "pod"),
       ).resolves.toBeUndefined();
       // Another app's members of this document: one it described with a class of its own, and a blank node.
       const theirs = setThing(
         listing(`${DOC}#recipes`),
         buildThing(createThing({ url: `${DOC}#recipes` })).addIri(RDF.type, "https://schema.org/Dataset").build(),
       );
-      await expect(validator.checkSubjects(theirs, [`${DOC}#catalog`])).resolves.toBeUndefined();
-      await expect(validator.checkSubjects(withBlankMember(written, `${DOC}#catalog`, "theirs"), [`${DOC}#catalog`])).resolves.toBeUndefined();
-      await expect(validator.checkSubjects(listing(`${DOC}#deck-gone`), [`${DOC}#catalog`])).rejects.toThrow(
+      await expect(validator.checkSubjects(theirs, [`${DOC}#catalog`], "pod")).resolves.toBeUndefined();
+      await expect(validator.checkSubjects(withBlankMember(written, `${DOC}#catalog`, "theirs"), [`${DOC}#catalog`], "pod")).resolves.toBeUndefined();
+      await expect(validator.checkSubjects(listing(`${DOC}#deck-gone`), [`${DOC}#catalog`], "pod")).rejects.toThrow(
         `<${DOC}#catalog> (${DCAT.dataset}): DCAT-AP:`,
       );
     }, 30_000);
+
+    it("holds a draft to the draft shapes and not yet to DCAT-AP, and an instance's deck to the pod's", async () => {
+      const draft = setThing(
+        mockSolidDatasetFrom(DOC),
+        buildThing(createThing({ url: DOC }))
+          .addIri(RDF.type, SM.Deck)
+          .addIri(RDF.type, "http://www.w3.org/ns/dcat#Dataset")
+          .addInteger(SM.formatVersion, 1)
+          .addIri(SM.studyDirection, SM.frontToBack)
+          .build(),
+      );
+      await expect(validator.checkSubjects(draft, [DOC], "draft")).resolves.toBeUndefined();
+      await expect(validator.checkSubjects(draft, [DOC], "pod")).rejects.toThrow(`<${DOC}> (${DCTERMS.title}):`);
+      const released = setThing(draft, buildThing(getThing(draft, DOC)!).addStringNoLocale(SM.releasedAs, "v1.ttl").build());
+      await expect(validator.checkSubjects(released, [DOC], "draft")).rejects.toThrow(
+        `<${DOC}> (${SM.releasedAs}): A released draft names the one release it was published as, an IRI.`,
+      );
+    });
 
     it("checks only the subjects a write touches, leaving untyped and newer ones alone", async () => {
       const dataset = setThing(
         setThing(deck((t) => t), buildThing(createThing({ url: `${DOC}#note` })).addStringNoLocale(DCTERMS.title, "x").build()),
         buildThing(createThing({ url: `${DOC}#future` })).addIri(RDF.type, SM.Deck).addInteger(SM.formatVersion, 9).build(),
       );
-      await expect(validator.checkSubjects(dataset, [`${DOC}#note`, `${DOC}#future`])).resolves.toBeUndefined();
+      await expect(validator.checkSubjects(dataset, [`${DOC}#note`, `${DOC}#future`], "pod")).resolves.toBeUndefined();
     });
   });
 });

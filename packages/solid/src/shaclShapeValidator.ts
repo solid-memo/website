@@ -12,7 +12,7 @@ import type { DocumentReport, SubjectReport, Violation } from "@solid-memo/domai
 import { getSolidDatasetOrNull } from "./datasets";
 import { readSince } from "./readSince";
 import { storedVersionOf } from "./records";
-import type { WriteCheck } from "./writeCheck";
+import type { WriteCheck, WriteContext } from "./writeCheck";
 import { foreignSubjects } from "./ownership";
 import { RDF } from "./vocab";
 import type { ShapeEngine } from "@solid-memo/shacl/engine";
@@ -166,8 +166,13 @@ export function createShaclShapeValidator({
     return bySubject;
   }
 
-  /** Every result about a subject: its own shape's, and DCAT-AP's for a profiled document. */
-  async function subjectViolations(dataset: SolidDataset, subjects: readonly string[]): Promise<string[]> {
+  /**
+   * Every result about a subject: its own shape's, picked for where the
+   * write goes, and DCAT-AP's for a profiled document in an instance. A
+   * draft is not held to DCAT-AP yet: it may lack what a published
+   * dataset needs (a description), which the release check asks of it.
+   */
+  async function subjectViolations(dataset: SolidDataset, subjects: readonly string[], context: WriteContext): Promise<string[]> {
     const data = toRdfJsDataset(dataset);
     const quads = [...(data as Iterable<Quad>)];
     const foreign = foreignSubjects(dataset);
@@ -179,14 +184,14 @@ export function createShaclShapeValidator({
     for (const subject of subjects) {
       const thing = getThing(dataset, subject);
       if (thing === null) continue;
-      const pick = pickShape(getUrlAll(thing, RDF.type), storedVersionOf(thing), "pod");
+      const pick = pickShape(getUrlAll(thing, RDF.type), storedVersionOf(thing), context);
       if (pick.kind !== "shape") continue;
       const engine = await engineFor(pick.descriptor);
       for (const v of await engine.validateNode(data, subject, pick.descriptor.shapeIri)) {
         if (counts(subject, v)) problems.push(describe(subject, v));
       }
     }
-    const profiled = subjects.some((subject) => {
+    const profiled = context === "pod" && subjects.some((subject) => {
       const thing = getThing(dataset, subject);
       return thing !== null && getUrlAll(thing, RDF.type).some((type) => PROFILED_CLASSES.includes(type));
     });
@@ -258,8 +263,8 @@ export function createShaclShapeValidator({
   }
 
   return {
-    async checkSubjects(dataset, subjects) {
-      const problems = await subjectViolations(dataset, subjects);
+    async checkSubjects(dataset, subjects, context) {
+      const problems = await subjectViolations(dataset, subjects, context);
       if (problems.length > 0) {
         throw new AppError("dataNotConforming", { problems: problems.join("\n  ") });
       }

@@ -1,0 +1,9 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix schema:     <https://schema.org/> .
+
+<#st-1>
+    a solid-memo:Step ,
+      schema:LearningResource ;
+    solid-memo:formatVersion 1 ;
+    schema:isPartOf <#ch-1> ,
+                    <#ch-2> .

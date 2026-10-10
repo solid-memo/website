@@ -35,8 +35,11 @@ flowchart LR
 
 A version is one `sm:Deck` (also a `dcat:Dataset`), the document
 itself (`<>`), in library deck format 5 (`LibraryDeckV5`,
-[shapes.md](shapes.md)), with its cards as hash-fragment subjects in
-card format 4:
+[shapes.md](shapes.md)) or, from vocabulary 1.18, format 6
+(`LibraryDeckV6`, the same properties), with its cards as hash-fragment
+subjects in card format 4 or 5. A version stays at the format it was
+published in; a new one is written at format 6, its series and
+publisher still in the index:
 
 - **Title and description** are language-tagged, one per language, one
   of them English (the library's curation policy, so that anyone who
@@ -275,7 +278,7 @@ words each problem in English
 ([`releaseMessages.ts`](../packages/shacl/node/releaseMessages.ts)), and
 checks itself what only the text or the shapes can: `@base`, Turtle
 syntax, the shapes and the profiles. It does not run the curation
-rules: `LibraryDeckV5` states English and `EDUC` for this library. Nor
+rules: `LibraryDeckV5` and `LibraryDeckV6` state English and `EDUC` for this library. Nor
 does it name a version that is not the one before it plus one
 (`versionNotNext`): here the path fixes each version, and the metadata
 check names one other than its path says. A golden test
@@ -390,9 +393,33 @@ another index at build time:
 VITE_LIBRARY_INDEX_URL=https://example.org/decks/index.ttl npm run dev
 ```
 
-The library conforms to the same shapes the app reads it with
-([shapes.md](shapes.md): `CatalogV1`, `LibraryDeckSeriesV3`,
-`LibraryDeckV5`, older formats migrated in memory).
+The library conforms to the shapes in [shapes.md](shapes.md):
+`CatalogV1`, `LibraryDeckSeriesV3`, and `LibraryDeckV5` or
+`LibraryDeckV6`, each release against its own format's shape. The app
+migrates a format-5 release to format 6 in memory.
+
+## A release outside the library
+
+A release need not be in `decks/`: from library deck format 6, one
+Turtle document anywhere (a release published in a pod) is whole
+without an index. Beside the release and its cards, the document then
+describes:
+
+- its **series**, the subject `dcat:inSeries` and `dcat:isVersionOf`
+  name: a `dcat:DatasetSeries` and `dcat:Dataset` in library deck series
+  format 3, with its title, description, publisher, first, last,
+  current and every version, as the index describes a deck;
+- its **publisher**, the `dcterms:publisher` of the release and the
+  series: a `foaf:Agent` with its name;
+- each **earlier version** the series lists, as a `dcat:Dataset` with
+  its title, description and version, so DCAT-AP finds every version
+  described.
+
+The same shapes check it (`LibraryDeckV6`, `LibraryDeckSeriesV3`,
+`AgentV1`), and DCAT-AP accepts it with only the reference data beside
+it ([`library-deck/v6/valid`](../packages/vocab/fixtures/library-deck/v6/valid/)
+is an example, which `npm run crosscheck` checks too). Nothing in the
+data says who may publish one, and the app reads its content as any release's (`toLibraryDeckContent`).
 
 ## In the app
 
@@ -412,7 +439,7 @@ flowchart LR
 
 - `toLibraryDecks` ([libraryMapper.ts](../packages/solid/src/mappers/libraryMapper.ts))
   reads the catalogue's datasets, each series' current release (through
-  the `LibraryDeckSeriesV3` and `LibraryDeckV5` shapes, older formats
+  the `LibraryDeckSeriesV3` and `LibraryDeckV6` shapes, older formats
   migrated in memory) and its releases, showing the English title and
   description and keeping the other languages, which an import copies
   as they are (every tag, nothing guessed or added), and names creators

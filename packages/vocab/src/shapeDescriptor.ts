@@ -48,8 +48,12 @@ export interface FieldDescriptor {
   values?: readonly string[];
 }
 
-/** Where a subject of the shape's class lives; "any" fits both. */
-export type ShapeContext = "pod" | "library" | "any";
+/**
+ * Where a subject of the shape's class lives: an instance in a pod, a
+ * published release (the deck library, or one published in a pod), or
+ * a release's draft being written in a pod; "any" fits all three.
+ */
+export type ShapeContext = "pod" | "library" | "draft" | "any";
 
 export interface ShapeDescriptor<T = unknown> {
   shape: ShapeName;

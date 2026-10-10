@@ -11,7 +11,7 @@ the site at `https://solid-memo.com/ns/shapes/`
 ```
 instance/v1.ttl, v2.ttl       https://solid-memo.com/ns/shapes/instance/v1.ttl#shape
 deck/v1.ttl … v6.ttl          …/deck/v2.ttl#inPod  and  …/deck/v2.ttl#inLibrary
-library-deck/v5.ttl           …/library-deck/v5.ttl#inLibrary  (library deck 5 on)
+library-deck/v5.ttl, v6.ttl   …/library-deck/v5.ttl#inLibrary  (library deck 5 on)
 deck-series/v1.ttl … v3.ttl
 card/v1.ttl … v5.ttl
 review-state/v1.ttl, v2.ttl
@@ -20,6 +20,8 @@ document-receipt/v1.ttl, deck-schedule/v1.ttl   (the digest)
 deck-group/v1.ttl             …/deck-group/v1.ttl#inPod  (the arranged deck list)
 chapter/v1.ttl, step/v1.ttl   …/chapter/v1.ttl#inLibrary  (a course's outline)
 distractor/v1.ttl             …/distractor/v1.ttl#shape  (a wrong option, in a pod or the library)
+draft-deck/v1.ttl, draft-chapter/v1.ttl, draft-step/v1.ttl
+                              …/draft-deck/v1.ttl#inDraft  (a release's draft)
 ```
 
 Each file's address is its IRI and its `@base`. The IRIs keep `.ttl` on
@@ -33,14 +35,21 @@ library](deck-library.md) document, which has no pod documents and may
 list its sources). Up to format 4 both share one document and its named
 property shapes; library deck 5, a version the pod's deck does not
 share, has a self-contained file of its own (`library-deck/v5.ttl`),
-since a shape's `sh:name` version must match its file's.
+since a shape's `sh:name` version must match its file's, and so has
+library deck 6. A third place is a release's **draft**, while its author
+writes it in a pod: `<#inDraft>` shapes its deck, chapters and steps
+(`DraftDeckV1`, `DraftChapterV1`, `DraftStepV1`), each in a file of its
+own. Their property shapes are copies of the release's (library deck 6,
+chapter 1, step 1), with only what a release needs once it is published
+relaxed; a draft's cards, distractors, agents and distributions are
+checked by the shapes every place shares (`<#shape>`).
 
 ## Conventions
 
 - **No `sh:targetClass`.** Format 1 and format 2 of a class target the
   same class, so targeting would make every subject fail one of them.
   The shape is chosen by `(rdf:type, sm:formatVersion)` — absent = 1 —
-  and the context (pod or library) by `pickShape` in
+  and the context (pod, library or draft) by `pickShape` in
   [registry.ts](../packages/shacl/src/registry.ts), the same way
   at build time, in tests and in the browser. Every node shape carries
   `sh:class` and `sh:nodeKind sh:IRI` instead. The class is Solid
@@ -101,6 +110,10 @@ since a shape's `sh:name` version must match its file's.
 | Deck 5 | Deck 4 in a pod (`<#inPod>`, `DeckV5` only), but `dcterms:title` and `dcterms:description` are language-tagged text in any language: one or more values, at most one per language (`sh:uniqueLang`), English no longer required. A deck titled only in Swedish or Japanese is a whole deck. A library release stays library deck 4 (`LibraryDeckV4`, English required): English first is the library's curation policy, not a rule of the data. The app edits each language's text under the tag the user states and no longer writes an identical English copy; a title deck 4 tagged English though it is in another language stays so until the user retags it, and one saved the same in English and another language is accepted as text in each language and left untouched. The step from deck 4 changes nothing: every format-4 deck is a format-5 deck |
 | Deck 6 | Deck 5 in a pod (`DeckV6` only), but `dcat:keyword` 0..n is language-tagged text in any language, several values per language (no `sh:uniqueLang`). Untagged keywords (`sh:or` of `xsd:string` and `rdf:langString`), their language unknown, are accepted only as kept from older formats: the app writes every keyword under the language the user states. The app shows the keywords in the reader's language (any tag with its primary subtag) and those in no stated language (untagged and `zxx`), with no fallback to another language. The step from deck 5 keeps the keywords untagged |
 | Library deck 5 | Library deck 4 (`LibraryDeckV5`, in `library-deck/v5.ttl`), but `dcat:keyword` 0..n is language-tagged text, several values per language; untagged keywords are invalid. The step from library deck 4 keeps a frozen release's keywords untagged |
+| Library deck 6 | Library deck 5 (`LibraryDeckV6`, in `library-deck/v6.ttl`), its property shapes unchanged, but the release document may also describe the release's series (`dcat:inSeries`, a `dcat:DatasetSeries` checked as library deck series 3) and its publisher (`dcterms:publisher`, a `foaf:Agent` checked as agent 1), so a release published in a pod is whole without an index ([deck-library.md](deck-library.md#a-release-outside-the-library)). The step from library deck 5 changes nothing in the data |
+| Draft deck 1 | In a draft (`DraftDeckV1`, `<#inDraft>`): a release being written in a pod, a `sm:Deck` and a `dcat:Dataset`, with library deck 6's properties but `dcterms:title` and `dcterms:description` 0..n language-tagged text in any language, one per language; `dcterms:publisher`, `dcat:version` (1, 2, …), `dcat:inSeries`, `dcat:isVersionOf`, `dcterms:issued` and `adms:versionNotes` 0..1; `dcat:theme` and `dcat:distribution` 0..n, EDUC not required. `sm:studyDirection` stays 1..1. `sm:releasedAs` 0..1 IRI, the release it was published as: a draft that states it is released, and is no longer edited. No document links, `dcterms:source` or study caps, as in a release |
+| Draft chapter 1 | In a draft (`DraftChapterV1`): chapter 1, but `dcterms:title` 0..n language-tagged text in any language, one per language, and `schema:isPartOf` and `schema:position` 0..1 |
+| Draft step 1 | In a draft (`DraftStepV1`): step 1, but `sm:theory` 0..n language-tagged text in any language, one per language, `sm:checkedBy` 0..n, and `schema:isPartOf` and `schema:position` 0..1 |
 | Preferences 3 | Preferences 2 + `sm:invalidDataPolicy` 1..1, a concept of `sm:InvalidDataPolicies` |
 | Preferences 4 | Preferences 3 + `sm:theme` 1..1, a concept of `sm:Themes` (see [theme.md](theme.md)) |
 | Library deck series 1 | The deck across its releases in the library index: a `dcat:DatasetSeries` and `dcat:Dataset`; title, description, publisher 1..1; `dcat:first`, `dcat:last`, `dcat:hasCurrentVersion` 1..1; `dcat:hasVersion` 1..n; themes and keywords 0..n |
@@ -203,6 +216,8 @@ proves it for every version and every migration step.
   conformance test above. Nothing needs the network.
 - **The deck library**: every version and the index, by `npm run
   library:check` ([deck-library.md](deck-library.md#checks)).
+- **pySHACL**: a release published in a pod and the drafts, by `npm run
+  crosscheck` ([validation.md](validation.md#the-ci-cross-check)).
 - **Browser**: the developer tool described in [validation.md](validation.md).
 
 ## Adding a version

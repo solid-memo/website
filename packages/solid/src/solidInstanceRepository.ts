@@ -175,7 +175,7 @@ export function createSolidInstanceRepository({
         throw new AppError("noMetaToUpdate", { url: instanceUrl });
       }
       const updated = setThing(dataset, toInstanceMetaThing(url, meta, existing));
-      await checkWrite(updated, [url]);
+      await checkWrite(updated, [url], "pod");
       // If-Match the read above.
       await saveDataset(metaUrl, updated, fetch);
     },
@@ -189,7 +189,7 @@ export function createSolidInstanceRepository({
       const meta = existing === null ? null : toInstanceMeta(existing);
       if (meta === null || !isInstanceOutdated(meta)) return false;
       const updated = setThing(dataset!, toInstanceMetaThing(url, meta, existing));
-      await checkWrite(updated, [url]);
+      await checkWrite(updated, [url], "pod");
       // If-Match the read above.
       await saveDataset(metaUrl, updated, fetch);
       return true;
@@ -308,7 +308,7 @@ async function saveMetaDocument(
     createSolidDataset(),
     toInstanceMetaThing(`${metaUrl}#it`, meta, null),
   );
-  await checkWrite(dataset, [`${metaUrl}#it`]);
+  await checkWrite(dataset, [`${metaUrl}#it`], "pod");
   await saveDataset(metaUrl, dataset, fetch);
 }
 

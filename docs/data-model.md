@@ -697,6 +697,26 @@ type-index entries:
     solid-memo:completedChapter <https://solid-memo.com/decks/solid-fundamentals/v1.ttl#ch-why-solid> .
 ```
 
+## Drafts and releases
+
+Vocabulary 1.18 and its shapes prepare a creator's releases in the pod
+([vocab.md](vocab.md#drafts-and-releases)). Nothing in the app writes
+them yet:
+
+- **Links on the catalogue.** `sm:releaseDraft` names a draft's release
+  document, `sm:publishedRelease` a release published from the
+  instance. Like `sm:newcomerCourse` on the library's, they belong to no
+  shape, so `CatalogV1` keeps them through every write of the catalogue.
+- **A draft is checked as a draft.** Its deck, chapters and steps are
+  checked against the draft shapes, which do not yet ask what only a
+  published release needs; its cards and distractors as anywhere else
+  ([validation.md](validation.md#the-write-check)). A draft names the
+  release it was published as with `sm:releasedAs`, and is then no
+  longer edited.
+- **A release is frozen.** It is written once, at library deck format 6,
+  and describes its series and publisher itself
+  ([deck-library.md](deck-library.md#a-release-outside-the-library)).
+
 ## The answer log
 
 Every grade given in study is kept, so statistics can be computed

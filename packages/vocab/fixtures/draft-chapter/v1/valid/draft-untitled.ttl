@@ -1,0 +1,8 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix schema:     <https://schema.org/> .
+
+# A chapter just added to a draft: no title, course or place yet.
+<#ch-new>
+    a solid-memo:Chapter ,
+      schema:Syllabus ;
+    solid-memo:formatVersion 1 .

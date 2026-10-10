@@ -133,7 +133,7 @@ describe("createSolidAnswerLog", () => {
     const log = createSolidAnswerLog({ fetch: fake.fetch, checkWrite });
     const given = answer("2026-09-21");
     await expect(log.append(INSTANCE, given)).rejects.toThrow("does not conform");
-    expect(checkWrite).toHaveBeenCalledWith(expect.anything(), [`${SEPTEMBER}#${given.id}`]);
+    expect(checkWrite).toHaveBeenCalledWith(expect.anything(), [`${SEPTEMBER}#${given.id}`], "pod");
     expect(fake.requests).toEqual([]);
   });
 
@@ -157,7 +157,7 @@ describe("createSolidAnswerLog", () => {
       ["PATCH", SEPTEMBER, null],
       ["PATCH", `${HISTORY}2026-10.ttl`, null],
     ]);
-    expect(checkWrite).toHaveBeenCalledWith(expect.anything(), september.map((given) => `${SEPTEMBER}#${given.id}`));
+    expect(checkWrite).toHaveBeenCalledWith(expect.anything(), september.map((given) => `${SEPTEMBER}#${given.id}`), "pod");
     await log.appendAll(INSTANCE, september);
     await expect(log.readMonth(INSTANCE, "2026-09")).resolves.toEqual(expect.arrayContaining(september));
     expect(await log.readMonth(INSTANCE, "2026-09")).toHaveLength(2);

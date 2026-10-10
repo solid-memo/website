@@ -1,0 +1,88 @@
+@base <https://alice.example/solid-memo/main/releases/capitals/v2.ttl> .
+
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+@prefix foaf:       <http://xmlns.com/foaf/0.1/> .
+@prefix adms:       <http://www.w3.org/ns/adms#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+
+# A release published in a pod: library deck format 6, its series and its
+# publisher described in the release itself, and the release before it
+# described as the dataset it is, so it needs no index.
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    solid-memo:formatVersion 6 ;
+    dcterms:title "Capitals"@en ,
+                  "Huvudstäder"@sv ;
+    dcterms:description "Capitals of the world."@en ,
+                        "Världens huvudstäder."@sv ;
+    dcterms:creator <#alice> ;
+    dcterms:publisher <#alice> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:issued "2026-10-10T10:00:00Z"^^xsd:dateTime ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               <https://solid-memo.com/ns/vocab/topics.ttl#geography> ;
+    dcat:keyword "capitals"@en ,
+                 "huvudstäder"@sv ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/SWE> ;
+    dcat:version "2" ;
+    adms:versionNotes "Added Norway." ;
+    dcat:inSeries <https://alice.example/solid-memo/main/releases/capitals/v1.ttl#series> ;
+    dcat:isVersionOf <https://alice.example/solid-memo/main/releases/capitals/v1.ttl#series> ;
+    dcat:prev <https://alice.example/solid-memo/main/releases/capitals/v1.ttl> ;
+    dcat:previousVersion <https://alice.example/solid-memo/main/releases/capitals/v1.ttl> ;
+    dcat:distribution <#turtle> .
+
+<https://alice.example/solid-memo/main/releases/capitals/v1.ttl#series>
+    a dcat:DatasetSeries ,
+      dcat:Dataset ;
+    solid-memo:formatVersion 3 ;
+    dcterms:title "Capitals"@en ,
+                  "Huvudstäder"@sv ;
+    dcterms:description "Capitals of the world."@en ,
+                        "Världens huvudstäder."@sv ;
+    dcterms:publisher <#alice> ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               <https://solid-memo.com/ns/vocab/topics.ttl#geography> ;
+    dcat:keyword "capitals"@en ,
+                 "huvudstäder"@sv ;
+    dcat:first <https://alice.example/solid-memo/main/releases/capitals/v1.ttl> ;
+    dcat:last <> ;
+    dcat:hasVersion <https://alice.example/solid-memo/main/releases/capitals/v1.ttl> ,
+                    <> ;
+    dcat:hasCurrentVersion <> .
+
+<https://alice.example/solid-memo/main/releases/capitals/v1.ttl>
+    a dcat:Dataset ;
+    dcterms:title "Capitals"@en ;
+    dcterms:description "Capitals of the world."@en ;
+    dcat:version "1" .
+
+<#alice>
+    a foaf:Agent ;
+    foaf:name "Alice" .
+
+<#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <> ;
+    dcat:downloadURL <> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+<#se>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    solid-memo:front "Sweden"@en ;
+    solid-memo:back "Stockholm"@en .
+
+<#no>
+    a solid-memo:Card ;
+    solid-memo:formatVersion 5 ;
+    solid-memo:front "Norway"@en ;
+    solid-memo:back "Oslo"@en .

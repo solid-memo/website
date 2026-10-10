@@ -44,6 +44,7 @@ ${V1_VERSION}
 const THING_V2 = `${HEAD}
 <#inPod> a sh:NodeShape ; sh:name "ThingV2" ; sh:class sm:Thing ; sh:property <#formatVersion>, <#title> .
 <#inLibrary> a sh:NodeShape ; sh:name "LibraryThingV2" ; sh:class sm:Thing ; sh:property <#formatVersion> .
+<#inDraft> a sh:NodeShape ; sh:name "DraftThingV2" ; sh:class sm:Thing ; sh:property <#formatVersion> .
 ${V2_VERSION}
 <#title> a sh:PropertyShape ; sh:path dcterms:title ; sh:datatype xsd:string ; sh:minCount 1 ; sh:maxCount 1 .
 `;
@@ -98,9 +99,10 @@ describe("parseShapes", () => {
     expect(model.additionalTypes).toEqual([]);
   });
 
-  it("tells pod and library shapes apart and sorts by kind then version", () => {
+  it("tells pod, library and draft shapes apart and sorts by kind then version", () => {
     const models = parseShapes(files(["thing/v2.ttl", THING_V2], ["thing/v1.ttl", THING_V1]));
     expect(models.map((m) => [m.name, m.shape, m.version, m.context, m.comment])).toEqual([
+      ["DraftThingV2", "draftThing", 2, "draft", ""],
       ["LibraryThingV2", "libraryThing", 2, "library", ""],
       ["ThingV1", "thing", 1, "any", "Thing one."],
       ["ThingV2", "thing", 2, "pod", ""],
@@ -250,7 +252,7 @@ describe("parseShapes", () => {
   it("requires versions to run without gaps when rendering", () => {
     const models = parseShapes(files(["thing/v2.ttl", THING_V2]));
     expect(() => renderDomainTypes(models)).toThrow(
-      'shapes: "libraryThing" versions must run 1, 2, … without gaps; found 2.',
+      'shapes: "draftThing" versions must run 1, 2, … without gaps; found 2.',
     );
     expect(() => renderDescriptors(models)).toThrow("without gaps");
   });

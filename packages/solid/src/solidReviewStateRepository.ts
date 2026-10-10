@@ -49,13 +49,13 @@ export function createSolidReviewStateRepository({
     async saveReviewState(deck, state): Promise<void> {
       const dataset = (await getSolidDatasetOrNull(deck.reviewsDocumentUrl, fetch)) ?? createSolidDataset();
       const written = withReviewStates(dataset, deck, [state], randomId);
-      await checkWrite(written.dataset, written.subjects);
+      await checkWrite(written.dataset, written.subjects, "pod");
       await saveDataset(deck.reviewsDocumentUrl, written.dataset, fetch);
     },
 
     async createReviewStates(deck, states): Promise<void> {
       const written = withReviewStates(createSolidDataset(), deck, states, randomId);
-      await checkWrite(written.dataset, written.subjects);
+      await checkWrite(written.dataset, written.subjects, "pod");
       // A new dataset: saved only if nothing is there yet (If-None-Match: *).
       await saveDataset(deck.reviewsDocumentUrl, written.dataset, fetch);
     },
@@ -67,7 +67,7 @@ export function createSolidReviewStateRepository({
       const dataset = read ?? createSolidDataset();
       const without = every ? withoutReviewStates : withoutReadReviewStates;
       const written = withReviewStates(without(dataset, deck, remove), deck, save, randomId);
-      await checkWrite(written.dataset, written.subjects);
+      await checkWrite(written.dataset, written.subjects, "pod");
       await saveDataset(deck.reviewsDocumentUrl, written.dataset, fetch);
     },
 
@@ -78,7 +78,7 @@ export function createSolidReviewStateRepository({
       const outdated = toReviewStates(dataset, deck).filter(isReviewStateOutdated);
       if (outdated.length === 0) return false;
       const written = withReviewStates(dataset, deck, outdated.map(upgradeReviewState), randomId);
-      await checkWrite(written.dataset, written.subjects);
+      await checkWrite(written.dataset, written.subjects, "pod");
       // If-Match the read above.
       await saveDataset(deck.reviewsDocumentUrl, written.dataset, fetch);
       return true;

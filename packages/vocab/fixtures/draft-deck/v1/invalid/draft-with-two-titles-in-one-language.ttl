@@ -1,0 +1,11 @@
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix dcat:       <http://www.w3.org/ns/dcat#> .
+
+<>
+    a solid-memo:Deck ,
+      dcat:Dataset ;
+    solid-memo:formatVersion 1 ;
+    dcterms:title "Huvudstäder"@sv ,
+                  "Städer"@sv ;
+    solid-memo:studyDirection solid-memo:frontToBack .

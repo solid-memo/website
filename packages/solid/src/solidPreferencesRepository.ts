@@ -42,7 +42,7 @@ export function createSolidPreferencesRepository({
         dataset,
         toPreferencesThing(url, preferences, getThing(dataset, url)),
       );
-      await checkWrite(updated, [url]);
+      await checkWrite(updated, [url], "pod");
       await saveDataset(documentUrl, updated, fetch);
     },
 
@@ -55,7 +55,7 @@ export function createSolidPreferencesRepository({
       const stored = existing === null ? null : toPreferences(existing);
       if (stored === null || !isPreferencesOutdated(stored)) return false;
       const updated = setThing(dataset!, toPreferencesThing(url, stored.preferences, existing));
-      await checkWrite(updated, [url]);
+      await checkWrite(updated, [url], "pod");
       // If-Match the read above.
       await saveDataset(documentUrl, updated, fetch);
       return true;

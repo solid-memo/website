@@ -117,23 +117,23 @@ describe("checked writes", () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
     const authored = { ...deck, authors: ["Anton"] };
     await repository.saveDeck(authored);
-    expect(checkWrite).toHaveBeenLastCalledWith(expect.anything(), [deck.url, `${deck.url}-cards`, `${CATALOG}#agent-anton`]);
+    expect(checkWrite).toHaveBeenLastCalledWith(expect.anything(), [deck.url, `${deck.url}-cards`, `${CATALOG}#agent-anton`], "pod");
     await repository.saveCatalog(INSTANCE, {
       title: "Main",
       description: "Mine.",
       publisher: { webId: "https://alice.example/profile/card#me", name: "Alice" },
     });
-    expect(checkWrite).toHaveBeenLastCalledWith(expect.anything(), [`${CATALOG}#catalog`, "https://alice.example/profile/card#me"]);
+    expect(checkWrite).toHaveBeenLastCalledWith(expect.anything(), [`${CATALOG}#catalog`, "https://alice.example/profile/card#me"], "pod");
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
     await repository.createDeck(INSTANCE, { en: "New" });
-    expect(checkWrite).toHaveBeenLastCalledWith(expect.anything(), [`${CATALOG}#deck-fixed`, `${CATALOG}#deck-fixed-cards`]);
+    expect(checkWrite).toHaveBeenLastCalledWith(expect.anything(), [`${CATALOG}#deck-fixed`, `${CATALOG}#deck-fixed-cards`], "pod");
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
       setThing(mockSolidDatasetFrom(deck.cardsDocumentUrl), buildThing(createThing({ url: card.url })).addIri(RDF.type, SM.Card).build()),
     );
     await repository.addCard(deck, { front: { "": "a" }, back: { "": "b" } });
-    expect(checkWrite).toHaveBeenLastCalledWith(expect.anything(), [`${deck.cardsDocumentUrl}#card-fixed`]);
+    expect(checkWrite).toHaveBeenLastCalledWith(expect.anything(), [`${deck.cardsDocumentUrl}#card-fixed`], "pod");
     await repository.updateCard(deck, card, { front: { "": "a" }, back: { "": "b" } });
-    expect(checkWrite).toHaveBeenLastCalledWith(expect.anything(), [card.url]);
+    expect(checkWrite).toHaveBeenLastCalledWith(expect.anything(), [card.url], "pod");
   });
 
   it("save nothing when the check refuses", async () => {
@@ -289,7 +289,7 @@ describe("addDeck", () => {
     const checkWrite = vi.fn(async () => undefined);
     const written = await makeRepository(checkWrite).addDeck(added);
     expect(written).toEqual({ ...added, formatVersion: 6 });
-    expect(checkWrite).toHaveBeenCalledWith(expect.anything(), [added.url, `${added.url}-cards`]);
+    expect(checkWrite).toHaveBeenCalledWith(expect.anything(), [added.url, `${added.url}-cards`], "pod");
     const [saveUrl, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0]!;
     expect(saveUrl).toBe(CATALOG);
     const thing = getThing(saved as SolidDataset, added.url)!;
@@ -586,7 +586,7 @@ describe("importDeck", () => {
     });
 
     const doc = imported.cardsDocumentUrl;
-    expect(checkWrite).toHaveBeenNthCalledWith(1, expect.anything(), [`${doc}#q`, `${doc}#q-d1`]);
+    expect(checkWrite).toHaveBeenNthCalledWith(1, expect.anything(), [`${doc}#q`, `${doc}#q-d1`], "pod");
     const cards = vi.mocked(saveSolidDatasetAt).mock.calls[0][1] as SolidDataset;
     expect(getUrlAll(getThing(cards, `${doc}#q`)!, SM.distractor)).toEqual([`${doc}#q-d1`]);
     const distractor = getThing(cards, `${doc}#q-d1`)!;
@@ -1171,7 +1171,7 @@ describe("upgradeCards", () => {
     expect(getStringNoLocale(upgraded, SM.front)).toBe("水");
     expect(getStringNoLocale(upgraded, SM.back)).toBe("water");
     expect(getStringNoLocale(upgraded, "https://other.example/vocab#note")).toBe("kept");
-    expect(checkWrite).toHaveBeenCalledWith(saved, [card.url]);
+    expect(checkWrite).toHaveBeenCalledWith(saved, [card.url], "pod");
   });
 
   it("writes nothing when no card is outdated, or there is no cards document", async () => {
@@ -1220,7 +1220,7 @@ describe("stateCardLanguages", () => {
     expect(saveSolidDatasetAt).toHaveBeenCalledTimes(1);
     const [saveUrl, saved] = vi.mocked(saveSolidDatasetAt).mock.calls[0];
     expect(saveUrl).toBe(deck.cardsDocumentUrl);
-    expect(checkWrite).toHaveBeenCalledWith(expect.anything(), [urlOf("card-1"), urlOf("card-2")]);
+    expect(checkWrite).toHaveBeenCalledWith(expect.anything(), [urlOf("card-1"), urlOf("card-2")], "pod");
     const first = getThing(saved as SolidDataset, urlOf("card-1"))!;
     expect(getStringWithLocale(first, SM.front, "ja")).toBe("水");
     expect(getStringWithLocale(first, SM.back, "en")).toBe("water");

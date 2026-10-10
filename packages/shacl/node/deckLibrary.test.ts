@@ -45,9 +45,11 @@ interface Fixture {
   release?: string;
   /** A course's outline, cards and distractors, in Turtle: the release is then a schema:Course too. */
   course?: string;
+  /** The library deck format the release is in, 5 unless stated. */
+  format?: 5 | 6;
 }
 
-/** A release of `deck` in library deck format 5, as decks/<deck>/v<version>.ttl holds it. */
+/** A release of `deck` in library deck format 5 (or `format`), as decks/<deck>/v<version>.ttl holds it. */
 function releaseText(deck: string, version: number, fixture: Fixture = {}): string {
   const {
     cards = { se: ["Sweden", "Stockholm"] },
@@ -80,7 +82,7 @@ function releaseText(deck: string, version: number, fixture: Fixture = {}): stri
 <>
     a solid-memo:Deck ,
       dcat:Dataset${fixture.course === undefined ? "" : " ,\n      schema:Course"} ;
-    solid-memo:formatVersion 5 ;
+    solid-memo:formatVersion ${fixture.format ?? 5} ;
     dcterms:title "${title}"@en ;
     dcterms:description "${title} of the world."@en ;
     dcterms:creator <#anton> ;
@@ -450,6 +452,11 @@ describe("metadataProblems", () => {
 describe("validateLibrary", () => {
   it("accepts releases and an index that conform to the shapes and to the profiles", async () => {
     await expect(validateLibrary(LIBRARY, buildIndex(LIBRARY), validators)).resolves.toEqual([]);
+  });
+
+  it("accepts a release in library deck format 6 after one in format 5, each checked against its own format", async () => {
+    const mixed = [CAPITALS[0], release("capitals", 2, { ...NORWAY, format: 6 })];
+    await expect(validateLibrary(mixed, buildIndex(mixed), validators)).resolves.toEqual([]);
   });
 
   it("names a release that drops a card of the version before it, and accepts one that retires it", async () => {

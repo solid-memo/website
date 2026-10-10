@@ -1,4 +1,6 @@
+import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
+import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
 import {
   buildThing,
   createThing,
@@ -337,14 +339,30 @@ describe("toLibraryDeckContent", () => {
     });
   });
 
+  it("reads a library deck 6 release that describes its series and publisher itself, as a format-5 one", async () => {
+    const url = "https://alice.example/solid-memo/main/releases/capitals/v2.ttl";
+    const turtle = await readFile(`${VOCAB_ROOT}fixtures/library-deck/v6/valid/library-standalone-release.ttl`, "utf8");
+    const content = toLibraryDeckContent(url, await datasetOf(turtle, url));
+    expect(content).toMatchObject({
+      url,
+      formatVersion: 6,
+      title: { en: "Capitals", sv: "Huvudstäder" },
+      authors: ["Alice"],
+      version: "2",
+      seriesUrl: "https://alice.example/solid-memo/main/releases/capitals/v1.ttl#series",
+      keywords: { en: ["capitals"], sv: ["huvudstäder"] },
+    });
+    expect(content.cards.map((card) => card.id)).toEqual(["se", "no"]);
+  });
+
   it("refuses a deck in a newer format than it writes", () => {
     const dataset = deckDocument(
       thing(DOC, (t) =>
-        t.addIri(RDF.type, SM.Deck).addInteger(SM.formatVersion, 6),
+        t.addIri(RDF.type, SM.Deck).addInteger(SM.formatVersion, 7),
       ),
     );
     expect(() => toLibraryDeckContent(DOC, dataset)).toThrow(
-      `This deck is in a newer format than this version of Solid Memo can read. Reload the page to get the latest version.\nurl: ${DOC}\nversion: 6\nlatest: 5`,
+      `This deck is in a newer format than this version of Solid Memo can read. Reload the page to get the latest version.\nurl: ${DOC}\nversion: 7\nlatest: 6`,
     );
   });
 
