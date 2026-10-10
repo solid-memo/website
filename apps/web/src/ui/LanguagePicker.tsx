@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
 import { AppError } from "@solid-memo/domain/appError";
 import { canonicalTag, NO_LANGUAGE } from "@solid-memo/domain/languageTag";
+import { composing } from "./composing";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type MessageKey } from "./i18n";
 import { recentLanguages, RECENT_LANGUAGES, type RecentLanguageKind } from "./remembered";
@@ -208,6 +209,7 @@ function LanguageChoices({
   }
 
   function onKeyDown(event: KeyboardEvent) {
+    if (composing(event)) return;
     if (event.key === "Escape") {
       event.preventDefault();
       // The group closes, not the dialog or screen around it.

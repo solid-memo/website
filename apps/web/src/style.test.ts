@@ -5,11 +5,15 @@ import { afterEach, beforeAll, describe, expect, it } from "vitest";
 /*
  * The focus indicators in style.css, checked through the cascade itself,
  * since a later or more specific rule can silently take a ring away. The
- * font imports are left out: the test DOM has no packages to fetch.
+ * font imports are left out: the test DOM has no packages to fetch. Nor
+ * does it know :lang(), so it reads an element marked lang="ko" itself
+ * (of the same specificity) for it.
  */
 beforeAll(() => {
   const style = document.createElement("style");
-  style.textContent = readFileSync(join(import.meta.dirname, "style.css"), "utf8").replace(/^@import .*$/gm, "");
+  style.textContent = readFileSync(join(import.meta.dirname, "style.css"), "utf8")
+    .replace(/^@import .*$/gm, "")
+    .replaceAll(":lang(ko)", '[lang|="ko"]');
   document.head.append(style);
 });
 
@@ -573,6 +577,70 @@ describe("the course for newcomers", () => {
   it("leaves out the fan on a narrow screen", () => {
     const [narrow] = rules(".newcomer-course-fan", "(max-width: 26rem)");
     expect(narrow!.style.getPropertyValue("display")).toBe("none");
+  });
+});
+
+/*
+ * Korean (lang="ko", on the page or on a card's text): Korean fonts, lines
+ * broken between words, display text bold and nothing tracked apart.
+ */
+describe("Korean", () => {
+  /** Puts `html` in the page and returns the computed style of `selector`. */
+  function styled(html: string, selector: string): CSSStyleDeclaration {
+    document.body.innerHTML = html;
+    return getComputedStyle(document.querySelector(selector)!);
+  }
+
+  /** Where `font` comes in `family`, a font stack. */
+  const place = (family: string, font: string) => family.indexOf(font);
+
+  it("puts the Korean fonts after Fredoka and before the Japanese ones, and breaks between words", () => {
+    const style = styled(`<p lang="ko">사람</p>`, "p");
+    expect(style.fontFamily).toMatch(/^"Fredoka Variable", "Apple SD Gothic Neo"/);
+    expect(place(style.fontFamily, "Noto Sans CJK KR")).toBeLessThan(place(style.fontFamily, "Noto Sans CJK JP"));
+    expect(style.wordBreak).toBe("keep-all");
+    expect(styled(`<p>x</p>`, "p").wordBreak).not.toBe("keep-all");
+  });
+
+  it("still breaks a Korean word too long for its card", () => {
+    expect(styled(`<div class="card-face"><p lang="ko">사람</p></div>`, "p").overflowWrap).toBe("anywhere");
+  });
+
+  it.each([
+    ["a Korean heading", `<h1 lang="ko">사람</h1>`, "h1"],
+    ["Korean text in a heading", `<h2><span lang="ko">사람</span></h2>`, "span"],
+    ["the newcomer card's title", `<div class="newcomer-course-body"><p class="newcomer-course-title" lang="ko">사람</p></div>`, "p"],
+  ])("draws %s in Bangers, then a Korean font, bold and untracked", (_, html, selector) => {
+    const style = styled(html, selector);
+    expect(style.fontFamily).toMatch(/^"?Bangers"?, "Fredoka Variable", "Apple SD Gothic Neo"/);
+    expect(style.fontWeight).toBe("700");
+    expect(style.letterSpacing).toBe("0px");
+  });
+
+  it.each([
+    ["a code span", `<p lang="ko"><code class="md-inline-code">x</code></p>`],
+    ["the Markdown help's samples", `<div class="markdown-help"><pre><code lang="ko">**굵게**</code></pre></div>`],
+    ["code no rule of ours styles", `<p><code lang="ko">x</code></p>`],
+  ])("keeps %s in a monospace font", (_, html) => {
+    expect(styled(html, "code").fontFamily).toMatch(/^ui-monospace/);
+  });
+
+  it.each([
+    ["a fact's label", `<dl class="facts"><dt lang="ko">사람</dt></dl>`, "dt"],
+    ["the account's label", `<dl class="account"><dt lang="ko">사람</dt></dl>`, "dt"],
+    ["a legend", `<fieldset><legend lang="ko">사람</legend></fieldset>`, "legend"],
+    ["a table header", `<table><tr><th lang="ko">사람</th></tr></table>`, "th"],
+    ["Korean text in a table header", `<table><tr><th><span lang="ko">사람</span></th></tr></table>`, "span"],
+    ["the newcomer card's eyebrow", `<div class="newcomer-course-body"><p class="newcomer-course-eyebrow" lang="ko">사람</p></div>`, "p"],
+  ])("does not track %s apart", (_, html, selector) => {
+    expect(styled(html, selector).letterSpacing).toBe("0px");
+  });
+
+  it("keeps the tracking and the display weight in other languages", () => {
+    expect(styled(`<table><tr><th>x</th></tr></table>`, "th").letterSpacing).not.toBe("0px");
+    const heading = styled(`<h1>x</h1>`, "h1");
+    expect(heading.letterSpacing).not.toBe("0px");
+    expect(heading.fontWeight).toBe("400");
   });
 });
 

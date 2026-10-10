@@ -3,6 +3,7 @@ import type { CardContent, Deck, DeckDirection } from "./deck";
 import { allKeywords, type LangTexts } from "./keywords";
 import type { LangText } from "./langText";
 import { librarySeriesUrlOf } from "./libraryLayout";
+import { matchesQuery } from "./search";
 
 /**
  * A ready-made deck the app offers for import, as the deck library's
@@ -158,20 +159,17 @@ function isAbout(deck: LibraryDeck, topic: string): boolean {
 
 /**
  * The decks about every chosen topic whose title, description or
- * keywords, in any language, contain the query (case-insensitively); all
- * of them when nothing is chosen or typed.
+ * keywords, in any language, contain the query (case-insensitively,
+ * whatever its Unicode form: see search.ts); all of them when nothing is
+ * chosen or typed.
  */
 export function filterLibraryDecks(
   decks: readonly LibraryDeck[],
   { topics, query }: { topics: readonly string[]; query: string },
 ): LibraryDeck[] {
-  const needle = query.trim().toLocaleLowerCase();
   return decks.filter(
     (deck) =>
       topics.every((topic) => isAbout(deck, topic)) &&
-      (needle === "" ||
-        [...Object.values(deck.title), ...Object.values(deck.description ?? {}), ...allKeywords(deck.keywords)].some((text) =>
-          text.toLocaleLowerCase().includes(needle),
-        )),
+      matchesQuery([...Object.values(deck.title), ...Object.values(deck.description ?? {}), ...allKeywords(deck.keywords)], query),
   );
 }

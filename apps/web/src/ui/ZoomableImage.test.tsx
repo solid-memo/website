@@ -212,6 +212,9 @@ describe("ZoomableImage", () => {
     expect(layer()).toBeNull();
     fireEvent.click(button);
     fireEvent.keyDown(document, { key: "Enter" });
+    // An input method's Escape, in a field elsewhere on the page, is its own.
+    fireEvent.keyDown(document, { key: "Escape", isComposing: true });
+    fireEvent.keyDown(document, { key: "Escape", keyCode: 229 });
     expect(button).toHaveAttribute("aria-expanded", "true");
     fireEvent.keyDown(button, { key: "Escape" });
     expect(button).toHaveAttribute("aria-expanded", "false");

@@ -1,5 +1,5 @@
 /** The languages the app's own text comes in. */
-export const LOCALES = ["en", "sv"] as const;
+export const LOCALES = ["en", "sv", "ko"] as const;
 
 export type Locale = (typeof LOCALES)[number];
 

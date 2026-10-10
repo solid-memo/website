@@ -15,13 +15,14 @@ import {
   metadataProblems,
   NEWCOMER_COURSE,
   newcomerProblems,
+  normalizationProblems,
   releasesOf,
   run,
   validateLibrary,
   type DeckRelease,
   type LibraryIo,
 } from "./deckLibrary.ts";
-import { DataFactory, type Quad_Object } from "n3";
+import { DataFactory, type Quad_Object, type Quad_Subject } from "n3";
 import { formatTurtle } from "@solid-memo/turtle/formatTurtle";
 import { parseTurtle, RDF_TYPE } from "@solid-memo/turtle/rdf";
 import { SM_NS as SM } from "@solid-memo/vocab/tooling/vocab";
@@ -511,6 +512,17 @@ describe("validateLibrary", () => {
     await expect(validateLibrary(retired, buildIndex(retired), validators)).resolves.toEqual([]);
   });
 
+  it("names a literal of a release or of the index that is not in Unicode NFC", async () => {
+    const card = [release("capitals", 1, { cards: { kr: ["South Korea", "서울".normalize("NFD")] } })];
+    expect(await validateLibrary(card, buildIndex(card), validators)).toEqual([
+      `decks/capitals/v1.ttl: <#kr> <${SM}back> is not in Unicode NFC: its character 1, U+1109 U+1165, is U+C11C composed. Write text composed, as keyboards type it.`,
+    ]);
+    const title = [release("capitals", 1, { title: "Cafe\u0301" })];
+    expect(await validateLibrary(title, buildIndex(title), validators)).toContain(
+      `decks/index.ttl: <#capitals> <${DCTERMS}title>@en is not in Unicode NFC: its character 4, U+0065 U+0301, is U+00E9 composed. Write text composed, as keyboards type it.`,
+    );
+  });
+
   it("names a release whose metadata is not what its path says", async () => {
     const moved = { ...CAPITALS[0], version: 2, quads: parseTurtle(CAPITALS[0].turtle, `${DECKS}capitals/v2.ttl`) };
     expect(await validateLibrary([moved], buildIndex([moved]), validators)).toContain(
@@ -575,6 +587,31 @@ describe("newcomerProblems", () => {
     expect(newcomerProblems([...index, naming(literal("solid"))])).toEqual([
       "decks/index.ttl: names 2 courses for newcomers by solid-memo:newcomerCourse: at most one.",
       'decks/index.ttl: names "solid" by solid-memo:newcomerCourse, which is no IRI.',
+    ]);
+  });
+});
+
+describe("normalizationProblems", () => {
+  const { blankNode, literal, namedNode, quad } = DataFactory;
+  const URL = `${DECKS}capitals/v1.ttl`;
+  const text = (subject: Quad_Subject, value: string) => quad(subject, namedNode(`${SM}front`), literal(value));
+
+  it("accepts composed text, Hangul included, and finds nothing in a library that is composed", () => {
+    expect(normalizationProblems("L", URL, [text(namedNode(`${URL}#a`), "사람, café, Ångström")])).toEqual([]);
+    for (const r of LIBRARY) expect(normalizationProblems("L", `${DECKS}${r.deck}/v${r.version}.ttl`, r.quads)).toEqual([]);
+  });
+
+  it("names the first character that composes differently, and its subject in the document or out of it", () => {
+    expect(
+      normalizationProblems("L", URL, [
+        text(namedNode(`${URL}#a`), `사${"람".normalize("NFD")}`),
+        text(namedNode(`${DECKS}rivers/v1.ttl`), "\u212B and A\u030A"),
+        text(blankNode(), "e\u0301"),
+      ]),
+    ).toEqual([
+      `L: <#a> <${SM}front> is not in Unicode NFC: its character 2, U+1105 U+1161 U+11B7, is U+B78C composed. Write text composed, as keyboards type it.`,
+      `L: <${DECKS}rivers/v1.ttl> <${SM}front> is not in Unicode NFC: its character 1, U+212B, is U+00C5 composed. Write text composed, as keyboards type it.`,
+      `L: a blank node's <${SM}front> is not in Unicode NFC: its character 1, U+0065 U+0301, is U+00E9 composed. Write text composed, as keyboards type it.`,
     ]);
   });
 });

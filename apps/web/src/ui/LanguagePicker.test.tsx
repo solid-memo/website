@@ -198,6 +198,10 @@ describe("LanguagePicker", () => {
     );
     const button = open();
     fireEvent.click(screen.getByRole("radio", { name: "English (en)" }));
+    // An input method's Escape is its own.
+    expect(fireEvent.keyDown(screen.getByRole("radio", { name: "English (en)" }), { key: "Escape", isComposing: true })).toBe(true);
+    expect(screen.getByRole("group")).toBeInTheDocument();
+    outer.mockClear();
     fireEvent.keyDown(screen.getByRole("radio", { name: "English (en)" }), { key: "Escape" });
     expect(screen.queryByRole("group")).toBeNull();
     expect(button).toHaveFocus();
@@ -248,6 +252,10 @@ describe("LanguagePicker", () => {
     fireEvent.input(code, { target: { value: "PT-br" } });
     expect(screen.getByRole("status")).toHaveTextContent("Brazilian Portuguese — português (Brasil) (pt-BR)");
     expect(code).toHaveAccessibleDescription("Brazilian Portuguese — português (Brasil) (pt-BR)");
+    // The Enter that ends an input method's composition does not take the code yet.
+    expect(fireEvent.keyDown(code, { key: "Enter", isComposing: true })).toBe(true);
+    expect(fireEvent.keyDown(code, { key: "Enter", keyCode: 229 })).toBe(true);
+    expect(onChange).not.toHaveBeenCalled();
     expect(fireEvent.keyDown(code, { key: "Enter" })).toBe(false);
     expect(onChange).toHaveBeenCalledWith("pt-br");
     expect(screen.queryByRole("group")).toBeNull();

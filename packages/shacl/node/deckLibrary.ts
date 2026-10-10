@@ -38,7 +38,8 @@ import {
  * index and the releases, each deck's versions numbered 1, 2, …), each
  * release's metadata against its path, Solid Memo's shapes, DCAT-AP and
  * SKOS with the reference data, a course's outline (courseProblems), its
- * text written in Markdown (markdownProblems), and that no version drops
+ * text written in Markdown (markdownProblems), every literal in Unicode
+ * NFC (normalizationProblems), and that no version drops
  * a card, chapter, step or distractor of the one before it. With
  * `--base <git ref>`, a version published at that ref must be there
  * still, byte for byte: a published version is never edited or removed,
@@ -652,6 +653,39 @@ export function markdownProblems(release: DeckRelease): string[] {
   return problems;
 }
 
+/** A code point as Unicode writes it: U+00E9. */
+function codePoints(text: string): string {
+  return [...text].map((c) => `U+${c.codePointAt(0)!.toString(16).toUpperCase().padStart(4, "0")}`).join(" ");
+}
+
+/**
+ * Every literal of a document (`label`, at `url`) that is not in Unicode
+ * normalization form C, composed: "é" written as "e" and a combining
+ * accent, or "사람" as five jamo, as text copied from a macOS file name
+ * or a PDF may be. It looks the same, but is not the same text: written
+ * composed, as keyboards type it, it compares, sorts and counts as what
+ * a reader types does. Each names the first character (grapheme) that
+ * composes differently.
+ */
+export function normalizationProblems(label: string, url: string, quads: readonly Quad[]): string[] {
+  const shown = (subject: Quad["subject"]) =>
+    subject.termType === "BlankNode" ? "a blank node's" : subject.value.startsWith(`${url}#`) ? `<${subject.value.slice(url.length)}>` : `<${subject.value}>`;
+  const graphemes = new Intl.Segmenter("und", { granularity: "grapheme" });
+  const problems: string[] = [];
+  for (const q of quads) {
+    if (q.object.termType !== "Literal") continue;
+    const characters = [...graphemes.segment(q.object.value)].map((s) => s.segment);
+    const at = characters.findIndex((c) => c !== c.normalize("NFC"));
+    if (at === -1) continue;
+    const c = characters[at];
+    const field = `<${q.predicate.value}>${q.object.language === "" ? "" : `@${q.object.language}`}`;
+    problems.push(
+      `${label}: ${shown(q.subject)} ${field} is not in Unicode NFC: its character ${at + 1}, ${codePoints(c)}, is ${codePoints(c.normalize("NFC"))} composed. Write text composed, as keyboards type it.`,
+    );
+  }
+  return problems;
+}
+
 /**
  * What the shapes cannot say about the course the index offers to
  * newcomers (solid-memo:newcomerCourse on its catalogue, which no shape
@@ -694,11 +728,12 @@ async function problemsOf(check: Promise<void>): Promise<string[]> {
  * against the version before it (one the deck no longer uses is retired,
  * owl:deprecated true, never removed, so the copies that have it keep it
  * and its review history), its course outline (courseProblems), its
- * text written in Markdown (markdownProblems), and Solid Memo's shapes,
+ * text written in Markdown (markdownProblems), its literals in Unicode
+ * NFC (normalizationProblems), and Solid Memo's shapes,
  * DCAT-AP (a release with the index beside it, where its series and
  * publisher are described) and SKOS, with the reference data; then the
- * index's course for newcomers (newcomerProblems), and the index to the
- * shapes and the profiles too.
+ * index's course for newcomers (newcomerProblems), its literals in NFC,
+ * and the index to the shapes and the profiles too.
  */
 export async function validateLibrary(
   releases: readonly DeckRelease[],
@@ -730,6 +765,7 @@ export async function validateLibrary(
       }
     }
     problems.push(...courseProblems(release), ...markdownProblems(release));
+    problems.push(...normalizationProblems(label, releaseUrlOf(release.deck, release.version), release.quads));
     problems.push(
       ...(await problemsOf(validateTurtleDocument(label, release.quads, validators.shapes, "library"))),
       ...(await problemsOf(validateProfile(label, release.quads, validators.dcatAp, [...validators.reference, ...indexQuads]))),
@@ -737,7 +773,7 @@ export async function validateLibrary(
     );
   }
   const label = `decks/${INDEX_FILE}`;
-  problems.push(...newcomerProblems(indexQuads));
+  problems.push(...newcomerProblems(indexQuads), ...normalizationProblems(label, INDEX_URL, indexQuads));
   problems.push(
     ...(await problemsOf(validateTurtleDocument(label, indexQuads, validators.shapes, "library"))),
     ...(await problemsOf(validateProfile(label, indexQuads, validators.dcatAp, validators.reference))),

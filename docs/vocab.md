@@ -57,8 +57,8 @@ string, so other applications can look up what it means:
 
 - Every scheme has a `dcterms:title` and a `skos:definition`; every
   concept a `skos:prefLabel` and `skos:definition` in each language the
-  scheme's title is in (English always; the topics in English and
-  Swedish, the app's languages) and its `skos:inScheme`. The generator
+  scheme's title is in (English always; the topics in English,
+  Swedish and Korean, the app's languages) and its `skos:inScheme`. The generator
   refuses a concept that misses one. Top concepts say `skos:topConceptOf`, narrower ones
   `skos:broader`. The files are held to SKOS, SkoHub's best practice
   included (see [validation.md](validation.md#profiles-dcat-ap-and-skos)).

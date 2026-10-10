@@ -5,6 +5,7 @@ describe("text", () => {
   it("is the app's message at a dotted key, in the language asked", () => {
     expect(text("en", "app.logOut")).toBe("Log out");
     expect(text("sv", "app.logOut")).toBe("Logga ut");
+    expect(text("ko", "language.label")).toBe("언어");
   });
 
   it("fills placeholders", () => {
@@ -14,6 +15,13 @@ describe("text", () => {
   it("picks a plural form by count", () => {
     expect(text("en", "guestOffer.body", { name: "S", count: 1 })).toContain("1 deck.");
     expect(text("en", "guestOffer.body", { name: "S", count: 2 })).toContain("2 decks.");
+    expect(text("en", "common.cardCount")).toBe("{count} cards");
+  });
+
+  it("picks the plural form by the language's own rules, a count read from the page as text too", () => {
+    expect(text("en", "common.cardCount", { count: "1" })).toBe("1 card");
+    expect(text("en", "common.cardCount", { count: 0 })).toBe("0 cards");
+    expect(text("ko", "common.cardCount", { count: 1 })).toBe("카드 1장");
   });
 
   it("leaves a placeholder it has no value for", () => {

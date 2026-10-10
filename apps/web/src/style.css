@@ -122,6 +122,64 @@
   --shine: rgb(255 255 255 / 0.08);
 }
 
+/*
+ * Korean, on a Korean page or in text marked lang="ko" on another: Korean
+ * fonts before the pan-CJK Japanese ones (which hold Hangul too, but with
+ * Japanese shapes and metrics), Fredoka still first for the Latin letters,
+ * and lines broken between words, not syllables; overflow-wrap still breaks
+ * a word too long for its line. :where() puts it below every other rule, so
+ * headings and code keep their own fonts; code-like elements styled by no
+ * rule of ours get back the monospace this rule takes from the browser's.
+ */
+:where(:lang(ko)) {
+  --font-display:
+    "Bangers", "Fredoka Variable", "Apple SD Gothic Neo", "Malgun Gothic",
+    "Noto Sans KR", "Noto Sans CJK KR", "Source Han Sans K", ui-rounded,
+    "Hiragino Maru Gothic ProN", "Arial Rounded MT Bold", system-ui,
+    "Hiragino Sans", "Noto Sans CJK JP", "Noto Sans JP", "Yu Gothic",
+    sans-serif;
+
+  font-family:
+    "Fredoka Variable", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR",
+    "Noto Sans CJK KR", "Source Han Sans K", ui-rounded,
+    "Hiragino Maru Gothic ProN", "Arial Rounded MT Bold", system-ui,
+    -apple-system, "Segoe UI", Roboto, "Hiragino Sans", "Noto Sans CJK JP",
+    "Noto Sans JP", "Yu Gothic", sans-serif;
+  word-break: keep-all;
+}
+
+:where(:lang(ko)):where(code, kbd, samp, pre) {
+  font-family: var(--font-mono);
+}
+
+/* Korean text inside a heading on another language's page. */
+:where(h1, h2, .newcomer-course-title) :where(:lang(ko)) {
+  font-family: var(--font-display);
+}
+
+/*
+ * Bangers has no Hangul and a single weight: Korean display text is drawn
+ * bold in the Korean font, with no faked bold for Bangers' Latin letters.
+ * Tracking spreads Hangul apart, there and in the uppercase labels, where
+ * uppercase does nothing to it.
+ */
+h1:lang(ko),
+h2:lang(ko),
+.newcomer-course-body .newcomer-course-title:lang(ko),
+:is(h1, h2, .newcomer-course-title) :lang(ko) {
+  font-weight: 700;
+  font-synthesis-weight: none;
+  letter-spacing: 0;
+}
+
+:is(dl.account, dl.facts) dt:lang(ko),
+legend:lang(ko),
+th:lang(ko),
+.newcomer-course-body .newcomer-course-eyebrow:lang(ko),
+:is(dt, legend, th, .newcomer-course-eyebrow) :lang(ko) {
+  letter-spacing: 0;
+}
+
 *,
 *::before,
 *::after {

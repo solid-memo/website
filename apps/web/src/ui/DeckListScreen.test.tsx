@@ -555,6 +555,16 @@ describe("DeckListScreen", () => {
     expect(screen.getByRole("button", { name: "Actions for Kanji N5" })).toHaveFocus();
   });
 
+  it("keeps the name field open on an input method's Escape", () => {
+    renderScreen(flat);
+    openMenu("Kana");
+    fireEvent.click(screen.getByRole("menuitem", { name: "Group with the one above" }));
+    const field = screen.getByRole("textbox", { name: "Group name" });
+    expect(fireEvent.keyDown(field, { key: "Escape", isComposing: true })).toBe(true);
+    expect(fireEvent.keyDown(field, { key: "Escape", keyCode: 229 })).toBe(true);
+    expect(field).toBeInTheDocument();
+  });
+
   it("leaves a name already given alone when the new group could not be made", async () => {
     const { onEdit } = renderScreen(flat, { fails: (edit) => edit.kind === "combine" });
     openMenu("Kana");

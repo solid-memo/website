@@ -7,6 +7,8 @@ describe("localeOf", () => {
     ["sv", "sv"],
     ["sv-SE", "sv"],
     ["EN-gb", "en"],
+    ["ko", "ko"],
+    ["ko-KR", "ko"],
   ])("names %s as %s", (tag, locale) => {
     expect(localeOf(tag)).toBe(locale);
   });
@@ -23,6 +25,7 @@ describe("pickLocale", () => {
 
   it("else speaks the first preferred language it can", () => {
     expect(pickLocale(null, ["de", "sv-SE", "en"])).toBe("sv");
+    expect(pickLocale(null, ["de", "ko-KR", "en"])).toBe("ko");
   });
 
   it("else speaks English", () => {

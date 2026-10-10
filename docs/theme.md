@@ -40,3 +40,16 @@ script in `apps/web/index.html` sets the attribute from the device's
 choice, else the browser's, before the first paint, so a page never
 flashes in the other theme; `ui/theme.tsx` takes over from there and also
 sets the `theme-color` meta tags for the browser's own chrome.
+
+## Korean text
+
+Korean, on a Korean page or in card text marked `lang="ko"` on another,
+has its own `:lang(ko)` rules in `style.css`: Korean fonts (Apple SD
+Gothic Neo, Malgun Gothic, Noto Sans KR) ahead of the Japanese ones,
+which hold Hangul too but draw it with Japanese shapes and metrics;
+Fredoka and Bangers stay first for the Latin letters. Lines break between
+words, not syllables (`word-break: keep-all`). Headings, which Bangers
+cannot draw in Korean, are bold, and neither they nor the uppercase
+labels are tracked apart. Code, `kbd`, `samp` and `pre` keep the
+monospace font (`--font-mono`), which the Korean font rule would
+otherwise take from them.

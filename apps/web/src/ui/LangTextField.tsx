@@ -2,6 +2,7 @@ import type { ComponentChildren } from "preact";
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
 import { AppError } from "@solid-memo/domain/appError";
 import { shownTag, type LangText } from "@solid-memo/domain/langText";
+import { composing } from "./composing";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n } from "./i18n";
 import { LanguagePicker, languageTextId, type LanguageRole } from "./LanguagePicker";
@@ -80,11 +81,10 @@ export function rememberLanguages(
 
 /**
  * Submits a textarea's form on Ctrl+Enter or ⌘+Enter: Enter itself starts
- * a new line. Not while an input method composes text (Japanese, say),
- * whose keys are its own.
+ * a new line. Not while an input method composes text (`composing`).
  */
 function submitOnCtrlEnter(event: KeyboardEvent) {
-  if (event.key !== "Enter" || !(event.ctrlKey || event.metaKey) || event.isComposing) return;
+  if (event.key !== "Enter" || !(event.ctrlKey || event.metaKey) || composing(event)) return;
   event.preventDefault();
   (event.currentTarget as HTMLTextAreaElement).form?.requestSubmit();
 }

@@ -3,6 +3,7 @@ import { act, fireEvent, render, screen } from "@testing-library/preact";
 import { LibraryScreen } from "./LibraryScreen";
 import { I18nProvider } from "./i18n";
 import type { LibraryDeck } from "@solid-memo/domain/library";
+import type { Locale } from "@solid-memo/domain/locale";
 import { firstRelease } from "@solid-memo/domain/testing/libraryDeck";
 import { statusTexts } from "../test/liveRegions";
 
@@ -32,7 +33,7 @@ let renders = 0;
 
 function renderScreen(
   overrides: Partial<Parameters<typeof LibraryScreen>[0]> = {},
-  locale: "en" | "sv" = "en",
+  locale: Locale = "en",
 ) {
   const props = {
     decks: [capitals, rivers],

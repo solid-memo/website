@@ -69,7 +69,7 @@ export class Chrome extends Screen {
    * ("Language", "Språk"), so the button is found by its name alone.
    */
   async switchLanguage(locale: Locale): Promise<void> {
-    const name = { en: "English", sv: "Svenska" }[locale];
+    const name = { en: "English", sv: "Svenska", ko: "한국어" }[locale];
     await this.intent(`Switch the language to ${name}`, async () => {
       await this.page.getByRole("banner").getByRole("button", { name, exact: true }).click();
       this.app.locale = locale;
