@@ -157,7 +157,10 @@ new type-index entries ([data-model.md](data-model.md#courses)):
    any release of the course gets that copy back: a course is started
    once. A course added from a link is started the same way; its own
    release says it is a course, so the deck list offers to continue it
-   as it does a library course (`useCopies`).
+   as it does a library course (`useCopies`). Until every chapter is
+   completed, the course is offered above the deck list, with its
+   chapters done and a button to go on where the learner left off; a
+   course deck's menu leads to its page too.
 2. **A step.** A step comes in two phases. First the learner reads the
    theory, with no question shown. Theory in chunks is read one chunk
    at a time, starting at the first: "Part 2 of 3" says where the

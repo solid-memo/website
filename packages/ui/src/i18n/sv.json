@@ -397,6 +397,10 @@
     "link": "Ange språken"
   },
   "deckList": {
+    "courses": "Dina kurser",
+    "continueCourseNamed": "Fortsätt {course}",
+    "startCourseNamed": "Börja kursen {course}",
+    "courseProgress": "Avklarade kapitel",
     "loading": "Läser in kortlekar…",
     "setAside": "Lagd åt sidan: dess data behöver repareras",
     "heading": "Kortlekar",

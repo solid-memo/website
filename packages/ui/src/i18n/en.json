@@ -397,6 +397,10 @@
     "link": "Set the languages"
   },
   "deckList": {
+    "courses": "Your courses",
+    "continueCourseNamed": "Continue {course}",
+    "startCourseNamed": "Start the course {course}",
+    "courseProgress": "Chapters done",
     "loading": "Loading decks…",
     "setAside": "Set aside: its data needs repair",
     "heading": "Decks",
