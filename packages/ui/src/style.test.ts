@@ -646,15 +646,23 @@ describe("Korean", () => {
 
 describe("a course's celebrations", () => {
   it("throws confetti over the viewport, clipped to it and out of the pointer's way, gone when it rests", () => {
-    document.body.innerHTML = `<div class="confetti" aria-hidden="true"><span></span><span></span></div>`;
+    document.body.innerHTML = `<div class="confetti" aria-hidden="true">
+      <div class="confetti-shooter"><span></span><span></span></div></div>`;
     const confetti = getComputedStyle(document.querySelector(".confetti")!);
     expect(confetti.position).toBe("fixed");
     expect(confetti.overflow).toBe("hidden");
     expect(confetti.pointerEvents).toBe("none");
-    for (const piece of document.querySelectorAll(".confetti>span")) {
-      // With motion reduced, every animation stops: a piece at rest shows nothing.
+    const shooter = getComputedStyle(document.querySelector(".confetti-shooter")!);
+    expect(shooter.position).toBe("absolute");
+    expect(shooter.bottom).toBe("0px");
+    for (const piece of document.querySelectorAll(".confetti-shooter>span")) {
+      // With motion reduced, every animation stops: a piece at rest shows nothing,
+      // and it shows nothing either while it waits for its shooter to pop.
       expect(getComputedStyle(piece).opacity).toBe("0");
-      expect(lastMatching(piece, "animation")).toMatch(/^confetti-fall 2\.2s .* var\(--delay\) backwards$/);
+      // Its flight and its flutter run as two animations, so a sway never stops its fall.
+      expect(lastMatching(piece, "animation")?.replace(/\s+/g, " ")).toBe(
+        "confetti-shoot var(--time) calc(var(--delay) + var(--jitter)), confetti-flutter var(--time) linear calc(var(--delay) + var(--jitter))",
+      );
     }
   });
 
