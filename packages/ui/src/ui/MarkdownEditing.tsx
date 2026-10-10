@@ -125,7 +125,7 @@ export function MarkdownHelp() {
 }
 
 /** The text of a draft the preview shows: its main entry, in its language (none yet: untagged), when it has words. */
-function previewText(draft: LangTextDraft): LangText | undefined {
+export function previewText(draft: LangTextDraft): LangText | undefined {
   const { value, tag } = draft[0]!;
   return value.trim() === "" ? undefined : { [tag ?? ""]: value };
 }

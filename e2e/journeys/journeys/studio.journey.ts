@@ -32,7 +32,10 @@ import { BRIGHTEST_STARS } from "../pages/Library.ts";
  * export one of them as a Turtle file, with their progress, delete it,
  * once the user confirms, and import it again from the file, its card
  * due as before. They draft a release of a deck and a blank course,
- * which Home lists, and delete the course's draft, confirming. They rename the instance
+ * which Home lists, and delete the course's draft, confirming. They
+ * write a course in a blank draft: a chapter, a step with its theory,
+ * and two questions with two wrong options each, saved as they go,
+ * trying one question as the course would ask it. They rename the instance
  * and describe its catalogue, under a licence, then pick it, by its new
  * name, from the picker. Among its library copies, the library deck is
  * up to date. They go back to Solid Memo, still logged in, which lists
@@ -45,6 +48,7 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
   const group = `Pair ${runId}`;
   const renamed = `Renamed ${runId}`;
   const course = `Course ${runId}`;
+  const authored = `Authored ${runId}`;
 
   await app.step("01 · Visit the Studio's old address: the Studio's landing page", () => app.studio.visitOldAddress());
   await app.step("02 · Log in from the Studio's landing page: back in the Studio", async () => {
@@ -226,23 +230,45 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     await app.studio.expectHomeDrafts([{ name: alpha, kind: "deck" }]);
   });
 
-  await app.step("25 · Rename the instance and describe its catalogue", async () => {
+  await app.step("25 · Write a course: a chapter, a step, and two questions with two wrong options each", async () => {
+    await app.studio.openDrafts(instance);
+    await app.studio.draftCourse(instance, authored);
+    await app.draftEditor.openDraft(authored);
+    await app.draftEditor.addChapter("Pods");
+    await app.draftEditor.openChapter("Pods");
+    await app.draftEditor.addStep();
+    await app.draftEditor.writeTheory("A pod is where your data lives.");
+    await app.draftEditor.addQuestion("Where does your data live?", "In a pod");
+    await app.draftEditor.addQuestion("Who chooses the app?", "You do");
+    await app.draftEditor.openQuestion("Where does your data live?");
+    await app.draftEditor.addWrongOption("In the app", "Apps only read it.");
+    await app.draftEditor.addWrongOption("On a server of the app's", "The pod is yours.");
+    await app.draftEditor.answerPreviewWrong("In the app", "Apps only read it.");
+    await app.draftEditor.backToStep(authored, "Step 1.1");
+    await app.draftEditor.openQuestion("Who chooses the app?");
+    await app.draftEditor.addWrongOption("The pod", "A pod holds data.");
+    await app.draftEditor.addWrongOption("Its maker", "The user chooses.");
+    await app.draftEditor.expectOutline(authored, "Pods", "Step 1.1", ["Where does your data live?", "Who chooses the app?"]);
+    await app.chrome.breadcrumb("breadcrumbs.decks");
+  });
+
+  await app.step("26 · Rename the instance and describe its catalogue", async () => {
     await app.studio.openInstance(instance);
     await app.studio.renameInstance(renamed);
     await app.studio.describeCatalog("Decks for the Studio journey.", "CC0 1.0");
   });
 
-  await app.step("26 · Pick the instance, by its new name, from the instance picker", async () => {
+  await app.step("27 · Pick the instance, by its new name, from the instance picker", async () => {
     await app.studio.pickInstance(renamed);
     await app.studio.expectDeck(renamed, alpha, { cards: 1, due: 0 });
   });
 
-  await app.step("27 · See the library deck among the library copies, up to date", async () => {
+  await app.step("28 · See the library deck among the library copies, up to date", async () => {
     await app.studio.openLibraryCopies(renamed, BRIGHTEST_STARS.en);
     await app.chrome.breadcrumb("breadcrumbs.decks");
   });
 
-  await app.step("28 · Go back to Solid Memo, still logged in", async () => {
+  await app.step("29 · Go back to Solid Memo, still logged in", async () => {
     await app.studio.backToApp();
     await app.chrome.expectLoggedInAs(account.webId);
     await app.decks.expectDeck(alpha);

@@ -3,7 +3,9 @@ import { act, renderHook } from "@testing-library/preact";
 import { isStudioHash, studioHref } from "@solid-memo/ui/router";
 import { DEFAULT_CARD_QUERY } from "@solid-memo/domain/cardQuery";
 import type { Card } from "@solid-memo/domain/deck";
-import { instanceOfRoute, parseStudioHash, spotRoute, studioRouteToHash, useStudioRoute, type StudioRoute } from "./router";
+import { instanceOfRoute, isDraftRoute, parseStudioHash, spotRoute, studioRouteToHash, useStudioRoute, type StudioRoute } from "./router";
+
+const DRAFT = "https://pod.example/solid-memo/a/drafts/solid/v1/release.ttl";
 
 describe("the Studio's routes", () => {
   const routes: StudioRoute[] = [
@@ -44,6 +46,12 @@ describe("the Studio's routes", () => {
       deckUrls: ["https://pod.example/solid-memo/a/catalog.ttl#deck-1", "https://pod.example/solid-memo/a/catalog.ttl#deck-2"],
     },
     { screen: "drafts", instanceUrl: "https://pod.example/solid-memo/a/" },
+    { screen: "draft", draftUrl: DRAFT },
+    { screen: "chapter", draftUrl: DRAFT, chapter: "ch-pods" },
+    { screen: "step", draftUrl: DRAFT, step: "ch-pods-1" },
+    { screen: "question", draftUrl: DRAFT, card: "q-pods-1a" },
+    { screen: "draftCards", draftUrl: DRAFT },
+    { screen: "draftCards", draftUrl: DRAFT, filter: "unasked", language: "sv", page: 3 },
   ];
 
   it("round-trip through the hash", () => {
@@ -133,7 +141,26 @@ describe("the Studio's routes", () => {
   });
 
   it("name the instance a route is in, the deck's for the workbench", () => {
-    expect(routes.map(instanceOfRoute)).toEqual([null, ...Array(17).fill("https://pod.example/solid-memo/a/")]);
+    expect(routes.map(instanceOfRoute)).toEqual([null, ...Array(23).fill("https://pod.example/solid-memo/a/")]);
+  });
+
+  it("keep a draft and the subject of it shown in their query, and the cards' view, the first page and no filter left out", () => {
+    const at = (path: string, params: Record<string, string>) => `#/studio/${path}?${new URLSearchParams({ draft: DRAFT, ...params }).toString()}`;
+    expect(studioRouteToHash({ screen: "chapter", draftUrl: DRAFT, chapter: "ch-pods" })).toBe(at("chapter", { chapter: "ch-pods" }));
+    expect(studioRouteToHash({ screen: "draftCards", draftUrl: DRAFT, page: 1 })).toBe(at("draft-cards", {}));
+    expect(parseStudioHash(at("draft-cards", { filter: "nonsense", lang: "", page: "0" }))).toEqual({ screen: "draftCards", draftUrl: DRAFT });
+    expect(parseStudioHash(at("draft-cards", { page: "1.5" }))).toEqual({ screen: "draftCards", draftUrl: DRAFT });
+    expect(isDraftRoute({ screen: "draft", draftUrl: DRAFT })).toBe(true);
+    expect(isDraftRoute({ screen: "drafts", instanceUrl: "https://pod.example/solid-memo/a/" })).toBe(false);
+  });
+
+  it("leave a draft's route without its draft, or the subject it names, to the default route", () => {
+    expect(parseStudioHash("#/studio/draft")).toBeNull();
+    expect(parseStudioHash("#/studio/draft?draft=https%3A%2F%2Fpod.example%2Fnot-a-draft.ttl")).toBeNull();
+    const draft = `draft=${encodeURIComponent(DRAFT)}`;
+    expect(parseStudioHash(`#/studio/chapter?${draft}`)).toBeNull();
+    expect(parseStudioHash(`#/studio/step?${draft}`)).toBeNull();
+    expect(parseStudioHash(`#/studio/question?${draft}`)).toBeNull();
   });
 
   it("leave the root without an instance, and anything unknown, to the default route", () => {

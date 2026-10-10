@@ -16,7 +16,8 @@ a deck says of itself (its authors and licence among it), a course's
 progress, and the instance's name and catalogue. It keeps the drafts
 of releases a creator writes in the instance: started from nothing,
 from a deck, as the next version of a release or from a release saved
-as a file, and deleted.
+as a file, written (what a release says of itself, a course's outline,
+its chapters, steps and questions, their wrong options), and deleted.
 
 ## What it shares with Solid Memo
 
@@ -83,16 +84,23 @@ others.
 | `#/studio/library?instance=…` | the instance's copies of library releases, the newer releases and what upgrading would change ([below](#library-copies)). |
 | `#/studio/transfer?instance=…[&deck=…&deck=…]` | import and export: the instance's decks to save as files, those of each `deck` ticked, and a file to make a deck of ([below](#import-and-export)). |
 | `#/studio/drafts?instance=…` | the instance's drafts of releases, and a new one to start ([below](#drafts)). |
+| `#/studio/draft?draft=…` | a draft's overview: what the release says of itself and, for a course, its outline ([below](#a-drafts-overview)). `draft` is the draft's release document, which names the instance. |
+| `#/studio/chapter?draft=…&chapter=…` | a chapter of a course draft, by its id ([below](#a-chapter)). |
+| `#/studio/step?draft=…&step=…` | a step of a course draft, by its id ([below](#a-step)). |
+| `#/studio/question?draft=…&card=…` | a card of a draft, by its id: a course's question, or a deck's card ([below](#a-question)). |
+| `#/studio/draft-cards?draft=…[&filter=…&lang=…&page=…]` | a draft's cards as a table ([below](#a-drafts-cards)): `filter` is `unasked`, `askedTwice`, `fewDistractors` or `retired`, `lang` a language. |
 
 `#/studio/` and its query count as `#/studio`. Anything else under
 `#/studio`, `#/studio` itself among them, is the default route: the only
 instance's Home, or else the picker. An unknown instance falls back to
 the picker, an unknown deck to its instance's Home, and an unknown card
-(one removed, say) to its deck's cards. Like Solid Memo's fallbacks,
-these replace the history entry.
+(one removed, say) to its deck's cards. A chapter, step or card a draft
+does not have (one deleted, say) falls back to the draft's overview.
+Like Solid Memo's fallbacks, these replace the history entry.
 
 Changing Home's filter or sort, the workbench's query, the
-inspector's tab, or the decks ticked to export, replaces the history entry: it is the same screen,
+inspector's tab, the decks ticked to export, or the view of a draft's
+cards, replaces the history entry: it is the same screen,
 looked at another way, so Back leaves it.
 
 Solid Memo links to Home as `#/studio?instance=…` ("Open in Studio",
@@ -105,7 +113,10 @@ inspector, › Cards of *deck* › Schedule on a deck's schedule, › About *dec
 catalogue on the instance's screen, › Health on the instance's health,
 › Health › *deck* on a deck's, › Library copies on the library
 copies, › Import and export on import and export, and › Drafts on the
-drafts. The document title is the trail's
+drafts. A draft's screens go on from › Drafts: › *draft* on its
+overview, › *draft* › *chapter* on a chapter, › *draft* › *chapter* ›
+Step 2 on a step, › *draft* › Cards on its cards, and › *draft* › Cards
+› *card* on a question. The document title is the trail's
 last step and "Solid Memo Studio". After a move, the screen's heading
 takes the focus (`useScreenFocus`). The header has a link back to
 Solid Memo, at the open instance's decks when there is one, and the
@@ -807,6 +818,9 @@ confirms. Where and how a draft is kept is in
 [data-model.md](data-model.md#drafts-and-releases); it is private, in
 the private type index alone.
 
+Each draft that can be read links to its [overview](#a-drafts-overview),
+on this screen and on Home.
+
 A new draft starts from
 
 - **a blank deck or a blank course**, by its name in a language the
@@ -856,7 +870,9 @@ published is read from that release (`dcat:prev`), once, since a
 release never changes; while it cannot be read, everything the draft
 has counts as published, so nothing is deleted that might have been. Making or deleting a draft
 changes the catalogue, so both are held until the data check is done,
-and while the catalogue is set aside ([below](#data-set-aside)).
+and while the catalogue is set aside ([below](#data-set-aside)). A
+draft made with a deleted draft's name has its URL, so what the screens
+read of a draft is forgotten when one is deleted or made.
 
 A draft changes by `DraftChange`s
 ([releaseDraft.ts](../packages/domain/src/release/releaseDraft.ts),
@@ -878,6 +894,148 @@ by activities carried over, is given one when it first needs it,
 in words that say it was no human review ("Scope: …; an AI check, not a
 human review."). A creator names the ids, the way
 [courses.md](courses.md#writing-a-course) says.
+
+## Writing a draft
+
+A draft is written in five screens: its overview, a chapter, a step, a
+question, and its cards. They share the draft as one query, read once
+(`getReleaseDraft`), and change it by `DraftChange`s
+([below](#how-edits-are-saved)).
+
+### How edits are saved
+
+Every edit is made at once on the screen, then written in the pod
+(`editReleaseDraft`), by the editor's hook
+([draftEditor.ts](../apps/studio/src/ui/draftEditor.ts),
+`useDraftEditor`):
+
+- **Optimistic.** The draft on screen is the draft with the change
+  made. A change the draft refuses (an id taken, say) is not made, and
+  the screen says why.
+- **Debounced.** Text is written once its document has been still for
+  0.8 seconds (`DEBOUNCE_MS`). The changes typed in that time are
+  written together. Leaving the screen, or an edit that is not typing,
+  writes what waits first.
+- **Debounced per document.** Typing in one document of the draft
+  (`changedDocuments` in
+  [draftLayout.ts](../packages/domain/src/release/draftLayout.ts)) waits
+  on its own. A change of several documents (a move, say) is written at
+  once.
+- **Queued per draft.** The writes of a draft wait for one another, in
+  one mutation scope, whatever their documents and whichever screen
+  made them. Each write reads the draft after the writes before it, so
+  the draft the last one returns holds them all. Only that one is put
+  on the screen: an earlier one's would undo changes not yet written.
+- **Said.** A status line says "Saving…" while a change waits or is
+  written, then "All changes saved." A write that fails, or that the
+  draft as it now is refuses, says why. Once the writes after it are
+  done, the draft is read afresh: the screens then show what the pod
+  has.
+
+A draft released is frozen: every screen shows it, and changes nothing
+in it. Its next version is started from the drafts. While the
+instance's data check is under way, or blocks the instance, nothing is
+changed either ([below](#data-set-aside)).
+
+### A draft's overview
+
+The overview
+([`DraftOverviewContainer`](../apps/studio/src/ui/DraftOverviewContainer.tsx))
+names the draft, its kind and version. Its title and description are
+saved as they are typed. For a course, it shows the outline, adds a
+chapter (its title, and its id), and lists the chapters retired, to
+restore. It counts the draft's cards, with a link to their table; a
+deck's cards are added here. The release check is not in the Studio
+yet: a line says so where it will count the draft's problems.
+
+### The outline
+
+The outline ([`DraftOutline`](../apps/studio/src/ui/DraftOutline.tsx))
+is a course's chapters in their order, each with its steps ("Step
+1.2"), each step with the questions that check it, in the order of their
+ids. Each links to its editor. Chapters and steps are arranged as the
+deck list's groups and decks are, with the same code in `ui`:
+
+- **Drag** (`deckTree/useDragReorder.ts`): a chapter among the chapters,
+  a step anywhere in a chapter, or into a chapter by its header. The
+  outline's rules (`OUTLINE_RULES`, `DropRules` in
+  `deckTree/dropZones.ts`) keep a chapter at the top and a step in a
+  chapter, and make no new group of two.
+- **The row's menu** (`MoveItems`), for the keyboard and screen readers:
+  up, down, and, for a step, to another chapter. It also retires the
+  chapter or step, or deletes one no release published, once the user
+  confirms.
+
+Each move is a `moveChapter` or `moveStep` change (`outlineMove` in
+[draftOutline.ts](../packages/domain/src/release/draftOutline.ts)). A
+drop the draft no longer has a place for (it changed under the drag)
+comes to nothing, and says so.
+
+### A chapter
+
+A chapter's screen
+([`ChapterEditorContainer`](../apps/studio/src/ui/ChapterEditorContainer.tsx))
+edits its title, always plain text, and its description, with "Format
+with Markdown" (`sm:textFormat` of the chapter) and a preview as the
+course's screen shows it. It orders the chapter's steps, up or down,
+adds one, and restores one retired. It lists the questions asked only
+in the chapter's final review, and adds one.
+
+### A step
+
+A step's screen
+([`StepEditorContainer`](../apps/studio/src/ui/StepEditorContainer.tsx))
+edits its theory, in each language it has, with "Format with Markdown"
+(`sm:textFormat` of the step). In Markdown, each text is hinted at where
+it would not show as meant, by the rules of prose (`PROSE`,
+[markdown.md](markdown.md)). Under it, a preview shows the theory as the
+course player does (`ProseField` in `ui`, with the player's
+`DataProse`). The screen lists the questions that check the step, and
+adds one: its front and back, and its id.
+
+### A question
+
+A question's screen
+([`QuestionEditorContainer`](../apps/studio/src/ui/QuestionEditorContainer.tsx))
+says where the card is asked: a step, a chapter's final review, or
+nowhere yet. Choosing another moves it there (`moveQuestion`). Its
+content is Solid Memo's card editor (`CardContentFields`), saved by
+Save. Its wrong options are the inspector's own (`DistractorFields`),
+each change saved as it is made (`distractorChanges`). A preview asks
+the card as the course will (`CourseQuestion`, with `MultipleChoice`),
+as typed: it can be answered, and asked again.
+
+### A draft's cards
+
+A draft's cards
+([`DraftCardsContainer`](../apps/studio/src/ui/DraftCardsContainer.tsx))
+are a table, a row each, by id: its front (a link to its editor), its
+back, where it is asked, its wrong options in use, and its id. The URL
+holds the view ([above](#routes)). The filters keep the cards asked
+nowhere (in a course), asked from two places, with fewer than two wrong
+options in use, or retired; the language keeps those with text in it on
+their front or back. A page holds 50. A new card is added under the
+table, asked nowhere yet.
+
+### Ids
+
+The id assistant
+([courseIds.ts](../packages/domain/src/release/courseIds.ts)) suggests
+each new subject's id, the way [courses.md](courses.md#writing-a-course)
+names them: `ch-<title>` for a chapter, `<chapter>-<n>` for a step,
+`q-<topic>-<n><letter>` for a step's question, sorting after its last,
+and `q-<topic>-r<nn>` for a review question. The user may write another.
+The field says at once when an id is none a subject can have, or one
+the draft or a release before it has. A step asks its questions in the
+order of their ids, and a published id is never renamed, so a new
+question's id sorts after the step's last. Past `z`, it is the last's id
+with a number after it. `idBetween` finds an id that sorts between two
+others: a number after the first when one fits, else one made code unit
+by code unit. A seeded property test checks that it keeps the order.
+
+Nothing an earlier release published is deleted: a learner's progress
+may name it. Its Delete is held, and the screen offers to retire it
+instead. A wrong option it published is likewise only retired.
 
 ## Data set aside
 
@@ -906,6 +1064,8 @@ and again after a repair. A deck checked again on its own (its
 - **Under "block the instance"**, invalid data holds every deck and the
   instance, as a set-aside deck is held.
 - **What another app wrote** only warns: it sets nothing aside.
+- **A draft** is held while the check is under way, or blocks the
+  instance. Drafts are not set aside one by one.
 
 A held form is a disabled `fieldset` (`ReadOnlyScope`), so no control
 in it can be used, while links still lead on; what is typed in it stays.

@@ -15,6 +15,8 @@ import { decksHref, deckHref, libraryHref, routeToHash } from "@solid-memo/ui/ro
 import { useScreenFocus } from "@solid-memo/ui/screenFocus";
 import { MAIN_ID } from "@solid-memo/ui/SkipLink";
 import { useInstanceTheme } from "@solid-memo/ui/theme";
+import { chapterOfStep, draftCardOf } from "@solid-memo/domain/release/draftOutline";
+import { liveSteps, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { CardInspectorContainer } from "./CardInspectorContainer";
 import { CardWorkbenchContainer } from "./CardWorkbenchContainer";
 import { DeckAboutContainer } from "./DeckAboutContainer";
@@ -26,7 +28,14 @@ import { HealthContainer } from "./HealthContainer";
 import { InstanceAboutContainer } from "./InstanceAboutContainer";
 import { LibraryCopiesContainer } from "./LibraryCopiesContainer";
 import { TransferContainer } from "./TransferContainer";
-import { instanceOfRoute, spotRoute, studioRouteToHash, useStudioRoute, type StudioRoute } from "./router";
+import { ChapterEditorContainer } from "./ChapterEditorContainer";
+import { DraftCardsContainer } from "./DraftCardsContainer";
+import { draftKey } from "./draftEditor";
+import { DraftOverviewContainer } from "./DraftOverviewContainer";
+import type { DraftLinks } from "./DraftOverviewScreen";
+import { QuestionEditorContainer } from "./QuestionEditorContainer";
+import { StepEditorContainer } from "./StepEditorContainer";
+import { instanceOfRoute, isDraftRoute, spotRoute, studioRouteToHash, useStudioRoute, type StudioRoute } from "./router";
 
 /**
  * The signed-in Studio: the site header, with a way back to Solid Memo,
@@ -66,6 +75,16 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
     enabled: cardUrl !== null && activeDeck !== null,
   });
   const activeCard = cardUrl === null ? null : (cardsQuery.data?.find((card) => card.url === cardUrl) ?? null);
+  const draftUrl = route !== null && isDraftRoute(route) ? route.draftUrl : null;
+  // The draft's editors share this query (useDraftEditor): it is read once, and changed as they edit it.
+  const draftQuery = useQuery({
+    queryKey: draftKey(draftUrl ?? ""),
+    queryFn: () => useCases.getReleaseDraft(draftUrl!),
+    enabled: draftUrl !== null && activeInstance !== null,
+    staleTime: Infinity,
+  });
+  const activeDraft = draftUrl === null ? null : (draftQuery.data ?? null);
+  const draftSubject = activeDraft === null ? null : subjectOf(activeDraft, route!);
 
   useInstanceTheme(useCases, activeInstance?.url ?? null);
 
@@ -83,10 +102,21 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
     } else if (cardUrl !== null && cardsQuery.data !== undefined && activeCard === null) {
       // A card the deck does not have (removed, perhaps): the deck's cards.
       replace({ screen: "cards", deckUrl: deckUrl! });
+    } else if (activeDraft !== null && draftSubject === false) {
+      // A chapter, step or card the draft does not have (deleted, perhaps): the draft's overview.
+      replace({ screen: "draft", draftUrl: draftUrl! });
     }
-  }, [route, instances, decksQuery.data, cardsQuery.data]);
+  }, [route, instances, decksQuery.data, cardsQuery.data, draftQuery.data]);
 
   const instancesCrumb: Crumb<StudioRoute> = { label: t("breadcrumbs.instances"), route: { screen: "instances" } };
+  /** The trail to a draft: its instance's drafts, then the draft. */
+  const draftCrumbs = (draftUrl: string): Crumb<StudioRoute>[] => {
+    const title = activeDraft!.root.title ?? {};
+    return [
+      { label: t("studio.drafts.crumb"), route: { screen: "drafts", instanceUrl: instanceOfRoute(route!)! } },
+      { label: Object.keys(title).length === 0 ? t("studio.draft.untitled") : readerText(title), route: { screen: "draft", draftUrl } },
+    ];
+  };
   const crumbsOf = (route: StudioRoute): Crumb<StudioRoute>[] => {
     if (route.screen === "instances") return [instancesCrumb];
     const decks: Crumb<StudioRoute> = { label: t("breadcrumbs.decks"), route: { screen: "home", instanceUrl: instanceOfRoute(route)! } };
@@ -127,7 +157,40 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
           { label: t("studio.cards.crumb", { deck: readerText(activeDeck!.title) }), route: { screen: "cards", deckUrl: route.deckUrl } },
           { label: cardName(activeCard!, readerText), route },
         ];
+      case "draft":
+        return [instancesCrumb, decks, ...draftCrumbs(route.draftUrl)];
+      case "draftCards":
+        return [instancesCrumb, decks, ...draftCrumbs(route.draftUrl), { label: t("studio.draftCards.crumb"), route }];
+      case "chapter":
+        return [instancesCrumb, decks, ...draftCrumbs(route.draftUrl), { label: chapterName(activeDraft!, route.chapter), route }];
+      case "step": {
+        const chapter = chapterOfStep(activeDraft!, route.step);
+        return [
+          instancesCrumb,
+          decks,
+          ...draftCrumbs(route.draftUrl),
+          ...(chapter === null ? [] : [{ label: chapterName(activeDraft!, chapter), route: { screen: "chapter" as const, draftUrl: route.draftUrl, chapter } }]),
+          { label: stepName(activeDraft!, route.step), route },
+        ];
+      }
+      case "question":
+        return [
+          instancesCrumb,
+          decks,
+          ...draftCrumbs(route.draftUrl),
+          { label: t("studio.draftCards.crumb"), route: { screen: "draftCards", draftUrl: route.draftUrl } },
+          { label: cardName({ ...draftCardOf(activeDraft!, route.card)!.content, id: route.card }, readerText), route },
+        ];
     }
+  };
+  const chapterName = (draft: ReleaseDraft, chapter: string) => {
+    const title = draft.chapters.find((node) => node.id === chapter)!.data.title;
+    return title === undefined ? chapter : readerText(title);
+  };
+  const stepName = (draft: ReleaseDraft, step: string) => {
+    const chapter = chapterOfStep(draft, step);
+    const number = chapter === null ? -1 : liveSteps(draft, chapter).findIndex((node) => node.id === step);
+    return number === -1 ? step : t("studio.chapter.step", { number: number + 1 });
   };
   const waiting = instancesQuery.error ? (
     <ErrorMessage error={errorText(instancesQuery.error)} />
@@ -135,19 +198,80 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
     <ErrorMessage error={errorText(decksQuery.error)} />
   ) : cardUrl !== null && cardsQuery.error ? (
     <ErrorMessage error={errorText(cardsQuery.error)} />
+  ) : draftUrl !== null && activeDraft === null && draftQuery.error ? (
+    <ErrorMessage error={errorText(draftQuery.error)} />
   ) : route === null ||
     instances === undefined ||
     (instanceUrl !== null && activeInstance === null) ||
     (deckUrl !== null && activeDeck === null) ||
-    (cardUrl !== null && activeCard === null) ? (
+    (cardUrl !== null && activeCard === null) ||
+    (draftUrl !== null && (activeDraft === null || draftSubject === false)) ? (
     <Loading label={t("workspace.loadingInstances")} />
   ) : null;
   const crumbs = waiting === null ? crumbsOf(route!) : [];
   // The page the trail ends at: "Decks – Solid Memo Studio".
   useDocumentTitle(crumbs.slice(-1).map((crumb) => crumb.label));
 
+  const draftLinks = (draftUrl: string): DraftLinks => ({
+    draftsHref: studioRouteToHash({ screen: "drafts", instanceUrl: instanceOfRoute(route!)! }),
+    healthHref: studioRouteToHash({ screen: "health", instanceUrl: instanceOfRoute(route!)! }),
+    overviewHref: studioRouteToHash({ screen: "draft", draftUrl }),
+    cardsHref: studioRouteToHash({ screen: "draftCards", draftUrl }),
+    chapterHref: (chapter) => studioRouteToHash({ screen: "chapter", draftUrl, chapter }),
+    stepHref: (step) => studioRouteToHash({ screen: "step", draftUrl, step }),
+    questionHref: (card) => studioRouteToHash({ screen: "question", draftUrl, card }),
+  });
+
   const screenFor = (route: StudioRoute) => {
     switch (route.screen) {
+      case "draft":
+        return <DraftOverviewContainer key={route.draftUrl} useCases={useCases} draftUrl={route.draftUrl} links={draftLinks(route.draftUrl)} />;
+      case "chapter":
+        return (
+          <ChapterEditorContainer
+            // Another chapter: its fields start afresh.
+            key={`${route.draftUrl} ${route.chapter}`}
+            useCases={useCases}
+            draftUrl={route.draftUrl}
+            chapter={route.chapter}
+            links={draftLinks(route.draftUrl)}
+            onDeleted={() => replace({ screen: "draft", draftUrl: route.draftUrl })}
+          />
+        );
+      case "step":
+        return (
+          <StepEditorContainer
+            key={`${route.draftUrl} ${route.step}`}
+            useCases={useCases}
+            draftUrl={route.draftUrl}
+            step={route.step}
+            links={draftLinks(route.draftUrl)}
+            onDeleted={() => replace({ screen: "draft", draftUrl: route.draftUrl })}
+          />
+        );
+      case "question":
+        return (
+          <QuestionEditorContainer
+            key={`${route.draftUrl} ${route.card}`}
+            useCases={useCases}
+            draftUrl={route.draftUrl}
+            card={route.card}
+            links={draftLinks(route.draftUrl)}
+            onDeleted={() => replace({ screen: "draftCards", draftUrl: route.draftUrl })}
+          />
+        );
+      case "draftCards":
+        return (
+          <DraftCardsContainer
+            key={route.draftUrl}
+            useCases={useCases}
+            draftUrl={route.draftUrl}
+            view={route}
+            links={draftLinks(route.draftUrl)}
+            // Like the workbench's query, the view is no Back stop.
+            onView={(view) => replace({ screen: "draftCards", draftUrl: route.draftUrl, ...view })}
+          />
+        );
       case "instances":
         return (
           <InstancePickerContainer
@@ -184,6 +308,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
               useCases={useCases}
               instance={activeInstance!}
               draftsHref={studioRouteToHash({ screen: "drafts", instanceUrl: route.instanceUrl })}
+              draftHref={(draft) => studioRouteToHash({ screen: "draft", draftUrl: draft.url })}
             />
           </>
         );
@@ -195,6 +320,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             useCases={useCases}
             instance={activeInstance!}
             healthHref={studioRouteToHash({ screen: "health", instanceUrl: route.instanceUrl })}
+            draftHref={(draft) => studioRouteToHash({ screen: "draft", draftUrl: draft.url })}
           />
         );
       case "groups":
@@ -337,4 +463,22 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
       </main>
     </>
   );
+}
+
+/**
+ * Whether the subject a draft's route names is there to show: a chapter,
+ * a step or a card it has (a card it can read); null for a route of the
+ * draft as a whole, which is always there.
+ */
+function subjectOf(draft: ReleaseDraft, route: StudioRoute): boolean | null {
+  switch (route.screen) {
+    case "chapter":
+      return draft.chapters.some((node) => node.id === route.chapter);
+    case "step":
+      return draft.steps.some((node) => node.id === route.step);
+    case "question":
+      return draftCardOf(draft, route.card) !== null;
+    default:
+      return null;
+  }
 }

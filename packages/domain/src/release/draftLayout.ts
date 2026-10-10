@@ -1,6 +1,6 @@
 import { ensureTrailingSlash } from "../instanceLayout.ts";
 import type { LangText } from "../langText.ts";
-import { idIn, iriIn, type ReleaseDraft } from "./releaseDraft.ts";
+import { canonical, idIn, iriIn, type ReleaseDraft } from "./releaseDraft.ts";
 
 /**
  * Where a draft keeps its documents (docs/data-model.md, Drafts): the
@@ -169,21 +169,60 @@ export function draftDocuments(draft: ReleaseDraft): Map<string, DraftDocument> 
   return places;
 }
 
+/** What each document of the draft holds, by its URL, as strings to compare by: the records and statements draftDocuments puts there. */
+function documentContents(draft: ReleaseDraft): Map<string, string[]> {
+  const places = draftDocuments(draft);
+  const contents = new Map<string, string[]>();
+  const put = (place: DraftDocument, value: unknown) => {
+    const url = draftDocumentUrl(draft.url, place);
+    contents.set(url, [...(contents.get(url) ?? []), canonical(value)]);
+  };
+  const release: DraftDocument = { kind: "release" };
+  put(release, [draft.course, draft.root]);
+  for (const node of draft.agents) put(release, ["agents", node.id, node.data]);
+  for (const node of draft.distributions) put(release, ["distributions", node.id, node.data]);
+  for (const list of ["chapters", "steps", "cards", "distractors"] as const) {
+    for (const node of draft[list] as readonly { id: string; data: unknown }[]) put(places.get(iriIn(draft, node.id))!, [list, node.id, node.data]);
+  }
+  for (const triple of draft.triples) put(places.get(triple.subject)!, triple);
+  return contents;
+}
+
 /**
- * A name for a draft, from its title: lower-case letters, digits and
- * dashes, accents dropped, then `-2`, `-3`… until it is none of `taken`;
- * "draft" when nothing of the title is left.
+ * The documents a change of the draft writes, from `before` to `after`,
+ * by URL: those whose records or statements differ, a document made or
+ * emptied among them. A change of a chapter's text writes its document
+ * alone; a move of chapters writes each it numbers again.
+ */
+export function changedDocuments(before: ReleaseDraft, after: ReleaseDraft): string[] {
+  const was = documentContents(before);
+  const now = documentContents(after);
+  const same = (a: string[] | undefined, b: string[] | undefined) => JSON.stringify(a?.sort()) === JSON.stringify(b?.sort());
+  return [...new Set([...was.keys(), ...now.keys()])].filter((url) => !same(was.get(url), now.get(url)));
+}
+
+/**
+ * A text as a name of a file or a fragment id: lower-case letters,
+ * digits and dashes, accents dropped, at most 60 characters; "" when
+ * nothing of it is left.
+ */
+export function slugOf(text: string): string {
+  return text
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .slice(0, 60)
+    .replace(/^-+|-+$/g, "");
+}
+
+/**
+ * A name for a draft, from its title (slugOf), then `-2`, `-3`… until
+ * it is none of `taken`; "draft" when nothing of the title is left.
  */
 export function draftNameFor(title: string, taken: Iterable<string>): string {
   const used = new Set(taken);
-  const slug =
-    title
-      .normalize("NFKD")
-      .replace(/[̀-ͯ]/g, "")
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .slice(0, 60)
-      .replace(/^-+|-+$/g, "") || "draft";
+  const slug = slugOf(title) || "draft";
   let name = slug;
   for (let n = 2; used.has(name); n++) name = `${slug}-${n}`;
   return name;

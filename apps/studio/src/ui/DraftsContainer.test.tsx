@@ -7,7 +7,8 @@ import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import type { ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { DraftsContainer, draftsKey, HomeDraftsContainer } from "./DraftsContainer";
-import { instanceA, invalidReport, makeDeck } from "../test/fixtures";
+import { draftKey } from "./draftEditor";
+import { courseDraft, instanceA, invalidReport, makeDeck } from "../test/fixtures";
 
 const kanji = makeDeck("deck-1", { en: "Kanji N5" });
 const solid: ReleaseDraftSummary = {
@@ -20,12 +21,11 @@ const solid: ReleaseDraftSummary = {
   course: true,
 };
 
-function renderContainer(useCases: UseCases) {
-  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+function renderContainer(useCases: UseCases, queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })) {
   const invalidate = vi.spyOn(queryClient, "invalidateQueries");
   render(
     <QueryClientProvider client={queryClient}>
-      <DraftsContainer useCases={useCases} instance={instanceA} healthHref="#/health" />
+      <DraftsContainer useCases={useCases} instance={instanceA} healthHref="#/health" draftHref={(draft) => `#/draft/${draft.name}`} />
     </QueryClientProvider>,
   );
   return { invalidate };
@@ -73,6 +73,27 @@ describe("DraftsContainer", () => {
     expect(await screen.findByText(/Solid Memo cannot read a release at https:\/\/x.example\//)).toBeInTheDocument();
   });
 
+  it("forgets what was read of a draft deleted, so a new draft at its URL is read afresh", async () => {
+    vi.stubGlobal("confirm", () => true);
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const useCases = makeUseCasesFake({
+      listDecks: vi.fn(async () => [kanji]),
+      listReleaseDrafts: vi.fn(async () => [solid]),
+      createReleaseDraft: vi.fn(async () => ({ draft: solid })),
+    });
+    queryClient.setQueryData(draftKey(solid.url), courseDraft());
+    renderContainer(useCases, queryClient);
+    fireEvent.click(await screen.findByRole("button", { name: "Delete the draft Solid, version 1" }));
+    expect(await screen.findByText("Deleted the draft Solid, version 1.")).toBeInTheDocument();
+    expect(queryClient.getQueryData(draftKey(solid.url))).toBeUndefined();
+    // Read in another tab meanwhile, say: a new draft at the URL is not that one.
+    queryClient.setQueryData(draftKey(solid.url), courseDraft());
+    fireEvent.click(screen.getByRole("radio", { name: "A deck of this instance" }));
+    fireEvent.click(screen.getByRole("button", { name: "Create the draft" }));
+    expect(await screen.findByText("Created the draft Solid, version 1.")).toBeInTheDocument();
+    expect(queryClient.getQueryData(draftKey(solid.url))).toBeUndefined();
+  });
+
   it("says which draft it is deleting while it does", async () => {
     vi.stubGlobal("confirm", () => true);
     let finish: () => void = () => undefined;
@@ -114,7 +135,7 @@ describe("HomeDraftsContainer", () => {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(
       <QueryClientProvider client={queryClient}>
-        <HomeDraftsContainer useCases={useCases} instance={instanceA} draftsHref="#/drafts" />
+        <HomeDraftsContainer useCases={useCases} instance={instanceA} draftsHref="#/drafts" draftHref={(draft) => `#/draft/${draft.name}`} />
       </QueryClientProvider>,
     );
   }
@@ -126,7 +147,8 @@ describe("HomeDraftsContainer", () => {
       }),
     );
     expect(await screen.findByText("Course, version 1")).toBeInTheDocument();
-    expect(screen.getByText("Untitled (deck)")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Solid" })).toHaveAttribute("href", "#/draft/solid");
+    expect(screen.getByRole("link", { name: "Untitled (deck)" })).toHaveAttribute("href", "#/draft/deck");
     expect(screen.getByText("Deck, version 3")).toBeInTheDocument();
     expect(screen.getByText("Cannot be read, version 1")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Drafts of releases" })).toHaveAttribute("href", "#/drafts");

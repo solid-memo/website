@@ -4,6 +4,8 @@ import type { LibraryDeck } from "@solid-memo/domain/library";
 import type { LibraryUpgradePlan } from "@solid-memo/domain/libraryUpgrade";
 import type { Session } from "@solid-memo/domain/session";
 import type { ValidationReport } from "@solid-memo/domain/validation";
+import { applyDraftChanges, blankDraft, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
+import { SM } from "@solid-memo/vocab/vocab.generated";
 
 /** What the Studio's tests share: a user, two instances, and decks and cards in the first. */
 export const session: Session = { webId: "https://alice.example/profile/card#me" };
@@ -108,3 +110,38 @@ export function invalidReport(decks: readonly Deck[], { catalogue = false } = {}
     ],
   };
 }
+
+/** A draft of a course in instance A. */
+export const DRAFT_URL = `${instanceA.url}drafts/solid/v1/release.ttl`;
+
+/**
+ * A course draft: chapter `ch-pods` (step `ch-pods-1`, its theory plain
+ * and asking `q-pods-1a`, which has one wrong option; step `ch-pods-2`,
+ * its theory in Markdown, asking none; review question `q-pods-r01`) and
+ * chapter `ch-apps`, with no steps.
+ */
+export function courseDraft(): ReleaseDraft {
+  const blank = blankDraft({ url: DRAFT_URL, course: true, title: { en: "Solid" }, now: "2026-10-10T10:00:00.000Z" });
+  return applyDraftChanges(blank, [
+    { kind: "addChapter", id: "ch-pods", text: { title: { en: "Pods" } } },
+    { kind: "addChapter", id: "ch-apps", text: { title: { en: "Apps" } } },
+    { kind: "addStep", id: "ch-pods-1", chapter: "ch-pods", text: { theory: { en: "A pod holds data." } } },
+    { kind: "addStep", id: "ch-pods-2", chapter: "ch-pods", text: { theory: { en: "## Two\n\nMore." }, textFormat: SM.markdown } },
+    { kind: "addCard", id: "q-pods-1a", card: { front: { en: "What holds data?" }, back: { en: "A pod" }, created: "2026-10-10T10:00:00.000Z" } },
+    { kind: "addQuestion", card: "q-pods-1a", place: { kind: "step", step: "ch-pods-1" } },
+    { kind: "addDistractor", card: "q-pods-1a", id: "q-pods-1a-d1", distractor: { text: { en: "An app" }, note: { en: "Apps use data." } } },
+    { kind: "addCard", id: "q-pods-r01", card: { front: { en: "Who owns a pod?" }, back: { en: "Its user" } } },
+    { kind: "addQuestion", card: "q-pods-r01", place: { kind: "review", chapter: "ch-pods" } },
+  ]) as ReleaseDraft;
+}
+
+/** What a draft's screens link to, in their tests. */
+export const draftLinks = {
+  draftsHref: "#/drafts",
+  healthHref: "#/health",
+  overviewHref: "#/draft",
+  cardsHref: "#/draft-cards",
+  chapterHref: (chapter: string) => `#/chapter/${chapter}`,
+  stepHref: (step: string) => `#/step/${step}`,
+  questionHref: (card: string) => `#/question/${card}`,
+};

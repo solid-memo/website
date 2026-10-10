@@ -7,6 +7,8 @@ import {
 import { isDefaultQuery, queryFromParams, queryToParams, type CardQuery } from "@solid-memo/domain/cardQuery";
 import type { CardSpot } from "@solid-memo/domain/deckHealth";
 import { instanceUrlOfDeck } from "@solid-memo/domain/instanceLayout";
+import { draftPlaceOf } from "@solid-memo/domain/release/draftLayout";
+import { DRAFT_CARD_FILTERS, type DraftCardFilter } from "@solid-memo/domain/release/draftOutline";
 import { STUDIO_PATH } from "@solid-memo/ui/router";
 import { hashParams, useHashRouter } from "@solid-memo/ui/routerCore";
 
@@ -49,7 +51,25 @@ export type StudioRoute =
   /** Decks to and from files: the instance's decks to export (those of `deckUrls` chosen, none when absent), and a file to import. */
   | { screen: "transfer"; instanceUrl: string; deckUrls?: readonly string[] }
   /** The drafts of releases the instance holds, and a new one to start. */
-  | { screen: "drafts"; instanceUrl: string };
+  | { screen: "drafts"; instanceUrl: string }
+  /** A draft (by its release document): what it says of itself, and its outline. */
+  | { screen: "draft"; draftUrl: string }
+  /** A chapter of a draft, by its id. */
+  | { screen: "chapter"; draftUrl: string; chapter: string }
+  /** A step of a draft, by its id. */
+  | { screen: "step"; draftUrl: string; step: string }
+  /** A card of a draft (a course's question), by its id. */
+  | { screen: "question"; draftUrl: string; card: string }
+  /** A draft's cards as a table: those `filter` keeps, with text in `language`, on `page` (all, the first, when absent). */
+  | { screen: "draftCards"; draftUrl: string; filter?: DraftCardFilter; language?: string; page?: number };
+
+/** The routes of a draft's screens. */
+export type DraftRoute = Extract<StudioRoute, { draftUrl: string }>;
+
+/** Whether a route is one of a draft's screens. */
+export function isDraftRoute(route: StudioRoute): route is DraftRoute {
+  return "draftUrl" in route;
+}
 
 /** What the card inspector shows: the card's content, its wrong options, its review state in each direction, or its answers. */
 export type CardTab = "content" | "distractors" | "schedule" | "history";
@@ -73,6 +93,13 @@ export function instanceOfRoute(route: StudioRoute): string | null {
     case "about":
     case "schedule":
       return instanceUrlOfDeck(route.deckUrl);
+    case "draft":
+    case "chapter":
+    case "step":
+    case "question":
+    case "draftCards":
+      // A draft's route is parsed only with a draft's URL.
+      return draftPlaceOf(route.draftUrl)!.instanceUrl;
     default:
       return route.instanceUrl;
   }
@@ -107,6 +134,21 @@ export function studioRouteToHash(route: StudioRoute): string {
       return `#${STUDIO_PATH}/library${hashParams({ instance: route.instanceUrl })}`;
     case "drafts":
       return `#${STUDIO_PATH}/drafts${hashParams({ instance: route.instanceUrl })}`;
+    case "draft":
+      return `#${STUDIO_PATH}/draft${hashParams({ draft: route.draftUrl })}`;
+    case "chapter":
+      return `#${STUDIO_PATH}/chapter${hashParams({ draft: route.draftUrl, chapter: route.chapter })}`;
+    case "step":
+      return `#${STUDIO_PATH}/step${hashParams({ draft: route.draftUrl, step: route.step })}`;
+    case "question":
+      return `#${STUDIO_PATH}/question${hashParams({ draft: route.draftUrl, card: route.card })}`;
+    case "draftCards":
+      return `#${STUDIO_PATH}/draft-cards${hashParams({
+        draft: route.draftUrl,
+        ...(route.filter === undefined ? {} : { filter: route.filter }),
+        ...(route.language === undefined ? {} : { lang: route.language }),
+        ...(route.page === undefined || route.page === 1 ? {} : { page: String(route.page) }),
+      })}`;
     case "transfer":
       // A `deck` each: hashParams takes one value a name.
       return `#${STUDIO_PATH}/transfer?${new URLSearchParams([
@@ -148,6 +190,12 @@ export function parseStudioHash(hash: string): StudioRoute | null {
       return instanceUrl === null ? null : { screen: "library", instanceUrl };
     case "/drafts":
       return instanceUrl === null ? null : { screen: "drafts", instanceUrl };
+    case "/draft":
+    case "/chapter":
+    case "/step":
+    case "/question":
+    case "/draft-cards":
+      return draftRouteOf(path!.slice(STUDIO_PATH.length), query);
     case "/transfer": {
       if (instanceUrl === null) return null;
       const deckUrls = query.getAll("deck");
@@ -188,6 +236,37 @@ export function parseStudioHash(hash: string): StudioRoute | null {
     }
     default:
       return null;
+  }
+}
+
+/** A draft's route, from its path and query; null without a draft's URL, or the subject it names. */
+function draftRouteOf(path: string, query: URLSearchParams): DraftRoute | null {
+  const draftUrl = query.get("draft");
+  if (draftUrl === null || draftPlaceOf(draftUrl) === null) return null;
+  const chapter = query.get("chapter");
+  const step = query.get("step");
+  const card = query.get("card");
+  switch (path) {
+    case "/draft":
+      return { screen: "draft", draftUrl };
+    case "/chapter":
+      return chapter === null ? null : { screen: "chapter", draftUrl, chapter };
+    case "/step":
+      return step === null ? null : { screen: "step", draftUrl, step };
+    case "/question":
+      return card === null ? null : { screen: "question", draftUrl, card };
+    default: {
+      const filter = DRAFT_CARD_FILTERS.find((known) => known === query.get("filter"));
+      const language = query.get("lang");
+      const page = Number(query.get("page"));
+      return {
+        screen: "draftCards",
+        draftUrl,
+        ...(filter === undefined ? {} : { filter }),
+        ...(language === null || language === "" ? {} : { language }),
+        ...(Number.isInteger(page) && page > 1 ? { page } : {}),
+      };
+    }
   }
 }
 

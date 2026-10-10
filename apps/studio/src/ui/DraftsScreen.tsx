@@ -8,7 +8,6 @@ import type { ReadOnlyReason } from "@solid-memo/ui/dataCheck";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n, type ErrorText } from "@solid-memo/ui/i18n";
 import { draftOf, LangTextField, rememberLanguages, textOfDraft, useMissingLanguage } from "@solid-memo/ui/LangTextField";
-import { ReaderText } from "@solid-memo/ui/ReaderText";
 import { recentLanguages } from "@solid-memo/ui/remembered";
 import { ReadOnlyScope } from "./ReadOnly";
 
@@ -19,7 +18,8 @@ const STARTS: readonly Start[] = ["blankDeck", "blankCourse", "fromDeck", "nextV
 
 /**
  * The drafts of releases an instance holds (docs/studio.md, Drafts):
- * each with its kind, version and whether it was released, to delete;
+ * each with its kind, version and whether it was released, a link to it
+ * (one that can be read), to delete;
  * and a new one, started from nothing (a deck or a course, by its name
  * in a language the user states), from a deck of the instance, as the
  * next version of a release (by its address), or from a release saved as
@@ -34,6 +34,7 @@ export function DraftsScreen({
   decks,
   readOnly,
   healthHref,
+  draftHref,
   creating,
   created,
   createError,
@@ -51,6 +52,8 @@ export function DraftsScreen({
   readOnly: ReadOnlyReason | null;
   /** The instance's health, where data set aside is repaired. */
   healthHref: string;
+  /** A draft's overview, where it is written. */
+  draftHref: (draft: ReleaseDraftSummary) => string;
   creating: boolean;
   /** The draft the last start made; null before one did. */
   created: CreatedDraft | null;
@@ -223,7 +226,10 @@ export function DraftsScreen({
                 <tbody>
                   {drafts.map((draft) => (
                     <tr key={draft.url}>
-                      <th scope="row">{Object.keys(draft.title).length === 0 ? nameOf(draft) : <ReaderText text={draft.title} />}</th>
+                      <th scope="row">
+                        {/* One that cannot be read cannot be opened. */}
+                        {draft.readable ? <a href={draftHref(draft)}>{nameOf(draft)}</a> : nameOf(draft)}
+                      </th>
                       <td>{draft.readable ? t(`studio.drafts.kind.${draft.course ? "course" : "deck"}`) : ""}</td>
                       <td class="number">{draft.version}</td>
                       <td>{t(`studio.drafts.state.${!draft.readable ? "unreadable" : draft.releasedAs === undefined ? "writing" : "released"}`)}</td>

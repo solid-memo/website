@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { DeckTree, TreeNode } from "@solid-memo/domain/deckTree";
-import { hitTest, scrollStep, type Hit, type Layout } from "./dropZones";
-import { flatten } from "./rows";
+import { hitTest, scrollStep, type DropRules, type Hit, type Layout } from "./dropZones";
+import { flatten, flattenOutline, type OutlineNode, type VisibleRow } from "./rows";
 
 const deck = (url: string): TreeNode => {
   const value: Deck = {
@@ -27,10 +27,19 @@ const treeOf = (...children: TreeNode[]): DeckTree => ({ readOnly: false, childr
  * and what it holds set apart as the hole it leaves.
  */
 function hit(tree: DeckTree, source: string, y: number, collapsed: string[] = []): Hit {
-  const rows = flatten(tree, new Set(collapsed)).map((row, index) => ({ ...row, top: index * 48, bottom: index * 48 + 40 }));
+  return hitRows(flatten(tree, new Set(collapsed)), source, y);
+}
+
+/** What a drop of `source` does at `y` among `shown`, measured as `hit` measures them, under `rules`. */
+function hitRows(shown: VisibleRow[], source: string, y: number, rules?: DropRules): Hit {
+  const rows = shown.map((row, index) => ({ ...row, top: index * 48, bottom: index * 48 + 40 }));
   const lifted = (row: (typeof rows)[number]) => row.key === source || row.ancestors.includes(source);
   const hole = rows.filter(lifted);
-  const layout: Layout = { rows: rows.filter((row) => !lifted(row)), hole: { top: hole[0]!.top, bottom: hole.at(-1)!.bottom } };
+  const layout: Layout = {
+    rows: rows.filter((row) => !lifted(row)),
+    hole: { top: hole[0]!.top, bottom: hole.at(-1)!.bottom },
+    ...(rules === undefined ? {} : { rules }),
+  };
   return hitTest(layout, y, rows.find((row) => row.key === source)!);
 }
 
@@ -150,6 +159,45 @@ describe("hitTest: what cannot move anywhere", () => {
     // H and C dragged: rows A; G; B 96-136; (hole 144-232); D 240-280; S.
     expect(hit(middle, "H", 200)).toEqual(noop);
     expect(hit(middle, "H", 245)).toEqual(gap(null, "G", 0, 188, afterGroup("G")));
+  });
+});
+
+describe("hitTest: a course's outline", () => {
+  /** Chapters at the top, steps in a chapter, and no new groups. */
+  const OUTLINE: DropRules = { combine: false, depths: (source) => (source.kind === "group" ? { min: 0, max: 0 } : { min: 1, max: 1 }) };
+  const step = (key: string): OutlineNode => ({ key, title: { en: key } });
+  const chapter = (key: string, steps: OutlineNode[]): OutlineNode => ({ key, title: { en: key }, children: steps });
+  /** Rows: A 0-40; a1 48-88; a2 96-136; B 144-184; b1 192-232; C 240-280; its slot 288-328. */
+  const rows = flattenOutline([chapter("A", [step("a1"), step("a2")]), chapter("B", [step("b1")]), chapter("C", [])], new Set());
+  const at = (source: string, y: number) => hitRows(rows, source, y, OUTLINE);
+
+  it("keeps a step in a chapter: never at the top", () => {
+    // Under a2, before B's header: the end of A, however far down.
+    expect(at("a1", 128)).toEqual(gap("A", "a2", 1, 140, inGroup("A")));
+    expect(at("a1", 140)).toEqual(gap("A", "a2", 1, 140, inGroup("A")));
+    // Above the first chapter there is no place for it.
+    expect(at("a2", 2)).toEqual(noop);
+    // Past the list's end: still in the last chapter, the empty C.
+    expect(at("a1", 400)).toEqual(gap("C", null, 1, 332, inGroup("C")));
+  });
+
+  it("puts a step into a chapter by its header, and makes no group of two steps", () => {
+    expect(at("a1", 164)).toEqual({ kind: "into", group: "B", to: { parent: "B", after: "b1" } });
+    expect(at("a2", 212)).toEqual(gap("B", "b1", 1, 236, inGroup("B")));
+  });
+
+  it("keeps a chapter at the top: never among steps, nor in another chapter", () => {
+    // A dragged with its steps: B 144-184 … C 240-280. Over C's header, the gap above it: after B.
+    expect(at("A", 255)).toEqual(gap(null, "B", 0, 236, afterGroup("B")));
+    // Between two steps there is no place for B.
+    expect(at("B", 68)).toEqual(noop);
+    // On the header of an empty chapter: under it is C's first place, which is no chapter's.
+    expect(at("B", 262)).toEqual(noop);
+  });
+
+  it("goes into a group only at a depth the rules allow", () => {
+    const flat: DropRules = { combine: true, depths: () => ({ min: 0, max: 0 }) };
+    expect(hitRows(rows, "a1", 164, flat)).toEqual({ kind: "combine", target: "B", fallback: noop });
   });
 });
 

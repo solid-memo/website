@@ -4,11 +4,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { DEFAULT_CARD_QUERY } from "@solid-memo/domain/cardQuery";
 import { SM } from "@solid-memo/vocab/vocab.generated";
+import { AppError } from "@solid-memo/domain/appError";
 import { AppName } from "@solid-memo/ui/documentTitle";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { parseStudioHash, studioRouteToHash } from "./router";
 import { StudioWorkspace } from "./StudioWorkspace";
-import { instanceA, instanceB, makeCard, makeDeck, session } from "../test/fixtures";
+import { choose } from "../test/choose";
+import { applyDraftChanges, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
+import { courseDraft, DRAFT_URL, instanceA, instanceB, makeCard, makeDeck, session } from "../test/fixtures";
 
 const kanji = makeDeck("deck-1", { en: "Kanji N5" });
 const verbs = makeDeck("deck-2", { en: "Verbs" });
@@ -482,5 +485,103 @@ describe("StudioWorkspace", () => {
     );
     expect(await screen.findByRole("alert")).toHaveTextContent("Pod unreachable");
     expect(screen.queryByRole("navigation", { name: "Breadcrumb" })).toBeNull();
+  });
+
+  describe("a draft", () => {
+    const trailOf = () => within(screen.getByRole("navigation", { name: "Breadcrumb" })).getAllByRole("link").map((link) => link.textContent);
+    const draftUseCases = (draft: ReleaseDraft = courseDraft()) =>
+      makeUseCasesFake({
+        listInstances: vi.fn(async () => [instanceA]),
+        getReleaseDraft: vi.fn(async () => draft),
+        editReleaseDraft: vi.fn(async (_url, changes) => ({ ok: true as const, draft: applyDraftChanges(draft, changes) as ReleaseDraft })),
+        listReleaseDrafts: vi.fn(async () => [
+          { url: DRAFT_URL, instanceUrl: instanceA.url, name: "solid", version: 1, readable: true, title: { en: "Solid" }, course: true },
+        ]),
+      });
+
+    it("opens from the drafts, with its trail, and its chapters, steps and questions from its outline", async () => {
+      window.history.replaceState(null, "", studioRouteToHash({ screen: "drafts", instanceUrl: instanceA.url }));
+      const useCases = draftUseCases();
+      renderWorkspace(useCases);
+      fireEvent.click(await screen.findByRole("link", { name: "Solid" }));
+      expect(await screen.findByRole("heading", { level: 2, name: "Solid" })).toBeInTheDocument();
+      expect(parseStudioHash(window.location.hash)).toEqual({ screen: "draft", draftUrl: DRAFT_URL });
+      expect(trailOf()).toEqual(["Instances", "Decks", "Drafts", "Solid"]);
+      await waitFor(() => expect(document.title).toBe("Solid – Solid Memo Studio"));
+      fireEvent.click(screen.getByRole("link", { name: "Pods" }));
+      expect(await screen.findByRole("heading", { level: 2, name: "Pods" })).toBeInTheDocument();
+      expect(trailOf()).toEqual(["Instances", "Decks", "Drafts", "Solid", "Pods"]);
+      fireEvent.click(screen.getByRole("link", { name: "Step 1" }));
+      expect(await screen.findByRole("heading", { level: 2, name: "Step 1" })).toBeInTheDocument();
+      expect(trailOf()).toEqual(["Instances", "Decks", "Drafts", "Solid", "Pods", "Step 1"]);
+      fireEvent.click(screen.getByRole("link", { name: "What holds data?" }));
+      expect(await screen.findByRole("heading", { level: 2, name: "What holds data?" })).toBeInTheDocument();
+      expect(trailOf()).toEqual(["Instances", "Decks", "Drafts", "Solid", "Cards", "What holds data?"]);
+      fireEvent.click(screen.getByRole("link", { name: "All cards" }));
+      expect(await screen.findByRole("heading", { level: 2, name: "Questions of Solid" })).toBeInTheDocument();
+      expect(trailOf()).toEqual(["Instances", "Decks", "Drafts", "Solid", "Cards"]);
+      // Read once: its screens share it.
+      expect(useCases.getReleaseDraft).toHaveBeenCalledTimes(1);
+    });
+
+    it("keeps the cards' view in the URL, replacing the entry", async () => {
+      window.history.replaceState(null, "", studioRouteToHash({ screen: "draftCards", draftUrl: DRAFT_URL, filter: "retired", language: "en", page: 2 }));
+      renderWorkspace(draftUseCases());
+      expect(await screen.findByText("0 cards")).toBeInTheDocument();
+      const length = window.history.length;
+      choose("Show", "unasked");
+      await waitFor(() => expect(parseStudioHash(window.location.hash)).toEqual({ screen: "draftCards", draftUrl: DRAFT_URL, filter: "unasked", language: "en" }));
+      choose("Language", "");
+      await waitFor(() => expect(parseStudioHash(window.location.hash)).toEqual({ screen: "draftCards", draftUrl: DRAFT_URL, filter: "unasked" }));
+      expect(window.history.length).toBe(length);
+    });
+
+    it("leaves a chapter, step or question once it is deleted, and falls back from one the draft has not", async () => {
+      vi.stubGlobal("confirm", vi.fn(() => true));
+      const useCases = draftUseCases();
+      window.history.replaceState(null, "", studioRouteToHash({ screen: "chapter", draftUrl: DRAFT_URL, chapter: "ch-apps" }));
+      renderWorkspace(useCases);
+      fireEvent.click(await screen.findByRole("button", { name: "Delete" }));
+      await waitFor(() => expect(parseStudioHash(window.location.hash)).toEqual({ screen: "draft", draftUrl: DRAFT_URL }));
+      expect(await screen.findByRole("heading", { name: "Outline" })).toBeInTheDocument();
+      window.location.hash = studioRouteToHash({ screen: "step", draftUrl: DRAFT_URL, step: "ch-pods-2" });
+      fireEvent.click(await screen.findByRole("button", { name: "Delete" }));
+      await waitFor(() => expect(parseStudioHash(window.location.hash)).toEqual({ screen: "draft", draftUrl: DRAFT_URL }));
+      window.location.hash = studioRouteToHash({ screen: "question", draftUrl: DRAFT_URL, card: "q-pods-r01" });
+      fireEvent.click(await screen.findByRole("button", { name: "Delete" }));
+      await waitFor(() => expect(parseStudioHash(window.location.hash)).toEqual({ screen: "draftCards", draftUrl: DRAFT_URL }));
+      window.location.hash = studioRouteToHash({ screen: "chapter", draftUrl: DRAFT_URL, chapter: "ch-gone" });
+      await waitFor(() => expect(parseStudioHash(window.location.hash)).toEqual({ screen: "draft", draftUrl: DRAFT_URL }));
+      vi.unstubAllGlobals();
+    });
+
+    it("names a step of no chapter, and a draft of no title, in its trail", async () => {
+      const draft = courseDraft();
+      window.history.replaceState(null, "", studioRouteToHash({ screen: "step", draftUrl: DRAFT_URL, step: "loose" }));
+      renderWorkspace(draftUseCases({ ...draft, root: { ...draft.root, title: undefined }, steps: [...draft.steps, { id: "loose", data: { checkedBy: [] } }] }));
+      expect(await screen.findByRole("heading", { level: 2, name: "loose" })).toBeInTheDocument();
+      expect(trailOf()).toEqual(["Instances", "Decks", "Drafts", "Untitled draft", "loose"]);
+    });
+
+    it("names a chapter of no title by its id in the trail", async () => {
+      const draft = courseDraft();
+      window.history.replaceState(null, "", studioRouteToHash({ screen: "chapter", draftUrl: DRAFT_URL, chapter: "ch-pods" }));
+      renderWorkspace(draftUseCases({ ...draft, chapters: draft.chapters.map((node) => ({ ...node, data: { ...node.data, title: undefined } })) }));
+      expect(await screen.findByRole("heading", { level: 2, name: "Chapter ch-pods" })).toBeInTheDocument();
+      expect(trailOf().at(-1)).toBe("ch-pods");
+    });
+
+    it("says why a draft could not be read", async () => {
+      window.history.replaceState(null, "", studioRouteToHash({ screen: "draft", draftUrl: DRAFT_URL }));
+      renderWorkspace(
+        makeUseCasesFake({
+          listInstances: vi.fn(async () => [instanceA]),
+          getReleaseDraft: vi.fn(async () => {
+            throw new AppError("draftGone");
+          }),
+        }),
+      );
+      expect(await screen.findByRole("alert")).toHaveTextContent("That draft no longer exists.");
+    });
   });
 });

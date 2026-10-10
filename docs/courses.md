@@ -301,7 +301,9 @@ The tests that hold this against a real server are in
 
 A course is written as any library deck is
 ([deck-library.md](deck-library.md#publishing-a-new-version)), with
-these additions:
+these additions. The Studio writes a course in a draft in the pod the
+same way, and suggests its ids so
+([studio.md](studio.md#writing-a-draft)).
 
 1. Type the release `schema:Course` too, and set
    `sm:studyDirection sm:frontToBack`.

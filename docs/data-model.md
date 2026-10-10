@@ -990,7 +990,9 @@ in Solid Memo; the [Studio](studio.md) closes the gaps one by one.
   card's wrong options, edits of many cards at once, a card's review
   state (forgotten, or given a due day), the deck a card is in
   (moved or copied to another), several library copies upgraded at
-  once, and a deck exported to a file or imported from one.
+  once, a deck exported to a file or imported from one, and a draft of
+  a release: what it says of itself, a course's chapters, steps and
+  questions and their order, and its cards' wrong options.
 - **Shown only**: the answer log, as statistics, and in the Studio as a
   card's history, the wrong options chosen, lapses and leeches; the
   schedule in the digest, as counts, and in the Studio as a forecast;
