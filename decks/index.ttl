@@ -14,7 +14,7 @@
     dcterms:title "Solid Memo deck library" ;
     dcterms:description "Ready-made flashcard decks to import into your own Solid pod." ;
     dcterms:publisher <#solid-memo> ;
-    dcterms:modified "2026-10-09T00:00:00Z"^^xsd:dateTime ;
+    dcterms:modified "2026-10-10T00:00:00Z"^^xsd:dateTime ;
     dcat:themeTaxonomy <http://publications.europa.eu/resource/authority/data-theme> ,
                        <https://solid-memo.com/ns/vocab/topics.ttl> ;
     dcat:dataset <#academy-award-best-picture> ,
@@ -2855,23 +2855,34 @@
                  "Solid"@sv ,
                  "pod"@sv ;
     dcat:first <https://solid-memo.com/decks/getting-started/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/getting-started/v1.ttl> ;
-    dcat:hasVersion <https://solid-memo.com/decks/getting-started/v1.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/getting-started/v1.ttl> .
+    dcat:last <https://solid-memo.com/decks/getting-started/v2.ttl> ;
+    dcat:hasVersion <https://solid-memo.com/decks/getting-started/v1.ttl> ,
+                    <https://solid-memo.com/decks/getting-started/v2.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/getting-started/v2.ttl> .
 
 <https://solid-memo.com/decks/getting-started/v1.ttl>
+    a dcat:Dataset ;
+    dcterms:title "Getting started with Solid Memo"@en ,
+                  "Kom igång med Solid Memo"@sv ;
+    dcterms:description "A short course for people new to Solid Memo, guests trying it out included: how studying works and how to grade yourself honestly, where your decks and study are kept (in your own Solid Pod, or only in this browser as a guest) and how to keep what you studied as a guest, ready-made decks and courses from the deck library, making your own decks and cards, and setting a daily pace and following your progress. 5 chapters of short steps, each a piece of theory followed by multiple-choice questions; each chapter ends with a review, and every question you answer becomes a card in your deck. Take about one chapter a day, since every answer comes back as a card on the next study day. The facts come from the Solid Memo app and its documentation, as of October 2026."@en ,
+                        "En kort kurs för dig som är ny i Solid Memo, även om du bara provar som gäst: hur studierna går till och hur du betygsätter dig själv ärligt, var dina kortlekar och studier sparas (i din egen Solid Pod, eller bara i den här webbläsaren som gäst) och hur du behåller det du studerat som gäst, färdiga kortlekar och kurser från kortleksbiblioteket, att göra egna kortlekar och kort, och att sätta en takt för varje dag och följa dina framsteg. 5 kapitel med korta steg av teori följda av flervalsfrågor; varje kapitel avslutas med en repetition, och varje fråga du besvarar blir ett kort i din kortlek. Ta ungefär ett kapitel om dagen, eftersom varje svar kommer tillbaka som ett kort nästa studiedag. Fakta kommer från appen Solid Memo och dess dokumentation, så som de var i oktober 2026."@sv ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-09T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." .
+
+<https://solid-memo.com/decks/getting-started/v2.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ,
       <https://schema.org/Course> ;
     dcterms:title "Getting started with Solid Memo"@en ,
                   "Kom igång med Solid Memo"@sv ;
-    dcterms:creator <https://solid-memo.com/decks/getting-started/v1.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/getting-started/v2.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
     dcterms:description "A short course for people new to Solid Memo, guests trying it out included: how studying works and how to grade yourself honestly, where your decks and study are kept (in your own Solid Pod, or only in this browser as a guest) and how to keep what you studied as a guest, ready-made decks and courses from the deck library, making your own decks and cards, and setting a daily pace and following your progress. 5 chapters of short steps, each a piece of theory followed by multiple-choice questions; each chapter ends with a review, and every question you answer becomes a card in your deck. Take about one chapter a day, since every answer comes back as a card on the next study day. The facts come from the Solid Memo app and its documentation, as of October 2026."@en ,
                         "En kort kurs för dig som är ny i Solid Memo, även om du bara provar som gäst: hur studierna går till och hur du betygsätter dig själv ärligt, var dina kortlekar och studier sparas (i din egen Solid Pod, eller bara i den här webbläsaren som gäst) och hur du behåller det du studerat som gäst, färdiga kortlekar och kurser från kortleksbiblioteket, att göra egna kortlekar och kort, och att sätta en takt för varje dag och följa dina framsteg. 5 kapitel med korta steg av teori följda av flervalsfrågor; varje kapitel avslutas med en repetition, och varje fråga du besvarar blir ett kort i din kortlek. Ta ungefär ett kapitel om dagen, eftersom varje svar kommer tillbaka som ett kort nästa studiedag. Fakta kommer från appen Solid Memo och dess dokumentation, så som de var i oktober 2026."@sv ;
     prov:wasDerivedFrom <https://github.com/solid-memo/website> ,
                         <https://solid-memo.com/> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/getting-started/v1.ttl#compilation> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/getting-started/v2.ttl#compilation> ;
     dcterms:created "2026-10-09T00:00:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ;
     dcat:keyword "Solid Memo"@en ,
@@ -2892,21 +2903,23 @@
                      <http://publications.europa.eu/resource/authority/language/SWE> ;
     solid-memo:studyDirection solid-memo:frontToBack ;
     solid-memo:formatVersion 5 ;
-    dcat:version "1" ;
-    dcterms:issued "2026-10-09T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "First release." ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/getting-started/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/getting-started/v1.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Each step's theory is read in two chunks, one at a time, split where its topic turns, at the same place in English and Swedish; no text was changed." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#getting-started> ;
     dcat:isVersionOf <#getting-started> ;
-    dcat:distribution <https://solid-memo.com/decks/getting-started/v1.ttl#turtle> ;
+    dcat:distribution <https://solid-memo.com/decks/getting-started/v2.ttl#turtle> ;
     solid-memo:cardCount 26 .
 
-<https://solid-memo.com/decks/getting-started/v1.ttl#anton-wiklund>
+<https://solid-memo.com/decks/getting-started/v2.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" ;
     foaf:mbox <mailto:antonwiklund91@gmail.com> .
 
-<https://solid-memo.com/decks/getting-started/v1.ttl#compilation>
+<https://solid-memo.com/decks/getting-started/v2.ttl#compilation>
     a prov:Activity .
 
 <https://github.com/solid-memo/website>
@@ -2925,10 +2938,10 @@
     dcterms:title "Anki Manual: Studying" ;
     dcterms:creator "Ankitects" .
 
-<https://solid-memo.com/decks/getting-started/v1.ttl#turtle>
+<https://solid-memo.com/decks/getting-started/v2.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/getting-started/v1.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/getting-started/v1.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/getting-started/v2.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/getting-started/v2.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
@@ -6704,17 +6717,28 @@
                  "JSON-LD"@sv ,
                  "Linked Web Storage"@sv ;
     dcat:first <https://solid-memo.com/decks/solid-fundamentals/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/solid-fundamentals/v1.ttl> ;
-    dcat:hasVersion <https://solid-memo.com/decks/solid-fundamentals/v1.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/solid-fundamentals/v1.ttl> .
+    dcat:last <https://solid-memo.com/decks/solid-fundamentals/v2.ttl> ;
+    dcat:hasVersion <https://solid-memo.com/decks/solid-fundamentals/v1.ttl> ,
+                    <https://solid-memo.com/decks/solid-fundamentals/v2.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/solid-fundamentals/v2.ttl> .
 
 <https://solid-memo.com/decks/solid-fundamentals/v1.ttl>
+    a dcat:Dataset ;
+    dcterms:title "Solid fundamentals"@en ,
+                  "Grunderna i Solid"@sv ;
+    dcterms:description "A course on Solid for people who want to build apps with it: why Solid exists, the linked data and RDF it is built on, vocabularies, pods and containers, reading and writing resources, identity and login, access control and sharing, notifications, designing an app's data, building, securing and publishing an app, a minimal app and Solid Memo itself read piece by piece, Solid's open problems, and the Linked Web Storage drafts that may succeed it. 17 chapters of short steps, each a piece of theory, with code and tables where they help, followed by multiple-choice questions; each chapter ends with a review, and every question you answer becomes a card in your deck. The facts come from the Solid specifications, the W3C standards around RDF, the servers' and libraries' documentation and code, and requests recorded on Community Solid Server 7.2, as of October 2026."@en ,
+                        "En kurs om Solid för dig som vill bygga appar med det: varför Solid finns, länkade data och RDF som det bygger på, vokabulärer, poddar och behållare, att läsa och skriva resurser, identitet och inloggning, åtkomstkontroll och delning, notiser, hur en app lägger upp sina data, att bygga, säkra och publicera en app, en minimal app och Solid Memo självt lästa bit för bit, Solids öppna problem och Linked Web Storage, som kan efterträda det. 17 kapitel med korta steg av teori följda av flervalsfrågor; varje fråga du besvarar blir ett kort i din kortlek. Kursen finns bara på engelska."@sv ;
+    dcat:version "1" ;
+    dcterms:issued "2026-10-08T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." .
+
+<https://solid-memo.com/decks/solid-fundamentals/v2.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ,
       <https://schema.org/Course> ;
     dcterms:title "Solid fundamentals"@en ,
                   "Grunderna i Solid"@sv ;
-    dcterms:creator <https://solid-memo.com/decks/solid-fundamentals/v1.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/solid-fundamentals/v2.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
     dcterms:description "A course on Solid for people who want to build apps with it: why Solid exists, the linked data and RDF it is built on, vocabularies, pods and containers, reading and writing resources, identity and login, access control and sharing, notifications, designing an app's data, building, securing and publishing an app, a minimal app and Solid Memo itself read piece by piece, Solid's open problems, and the Linked Web Storage drafts that may succeed it. 17 chapters of short steps, each a piece of theory, with code and tables where they help, followed by multiple-choice questions; each chapter ends with a review, and every question you answer becomes a card in your deck. The facts come from the Solid specifications, the W3C standards around RDF, the servers' and libraries' documentation and code, and requests recorded on Community Solid Server 7.2, as of October 2026."@en ,
                         "En kurs om Solid för dig som vill bygga appar med det: varför Solid finns, länkade data och RDF som det bygger på, vokabulärer, poddar och behållare, att läsa och skriva resurser, identitet och inloggning, åtkomstkontroll och delning, notiser, hur en app lägger upp sina data, att bygga, säkra och publicera en app, en minimal app och Solid Memo självt lästa bit för bit, Solids öppna problem och Linked Web Storage, som kan efterträda det. 17 kapitel med korta steg av teori följda av flervalsfrågor; varje fråga du besvarar blir ett kort i din kortlek. Kursen finns bara på engelska."@sv ;
@@ -6966,7 +6990,7 @@
                         <https://www.w3.org/standards/history/lws10-core/> ,
                         <https://www.w3.org/standards/history/rdf12-concepts/> ,
                         <https://zenodo.org/records/7641620> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/solid-fundamentals/v1.ttl#compilation> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/solid-fundamentals/v2.ttl#compilation> ;
     dcterms:created "2026-10-07T00:00:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:computing ,
@@ -7002,21 +7026,23 @@
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ;
     solid-memo:studyDirection solid-memo:frontToBack ;
     solid-memo:formatVersion 5 ;
-    dcat:version "1" ;
-    dcterms:issued "2026-10-08T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "First release." ;
+    dcat:version "2" ;
+    dcat:prev <https://solid-memo.com/decks/solid-fundamentals/v1.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/solid-fundamentals/v1.ttl> ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "The longer steps' theory is read in chunks, one at a time, split where its topic turns; no text was changed." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#solid-fundamentals> ;
     dcat:isVersionOf <#solid-fundamentals> ;
-    dcat:distribution <https://solid-memo.com/decks/solid-fundamentals/v1.ttl#turtle> ;
+    dcat:distribution <https://solid-memo.com/decks/solid-fundamentals/v2.ttl#turtle> ;
     solid-memo:cardCount 466 .
 
-<https://solid-memo.com/decks/solid-fundamentals/v1.ttl#anton-wiklund>
+<https://solid-memo.com/decks/solid-fundamentals/v2.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" ;
     foaf:mbox <mailto:antonwiklund91@gmail.com> .
 
-<https://solid-memo.com/decks/solid-fundamentals/v1.ttl#compilation>
+<https://solid-memo.com/decks/solid-fundamentals/v2.ttl#compilation>
     a prov:Activity .
 
 <http://xmlns.com/foaf/spec/>
@@ -8015,10 +8041,10 @@
     dcterms:title "node-solid-server v6.0.0" ;
     dcterms:creator "node-solid-server project" .
 
-<https://solid-memo.com/decks/solid-fundamentals/v1.ttl#turtle>
+<https://solid-memo.com/decks/solid-fundamentals/v2.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/solid-fundamentals/v1.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/solid-fundamentals/v1.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/solid-fundamentals/v2.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/solid-fundamentals/v2.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
