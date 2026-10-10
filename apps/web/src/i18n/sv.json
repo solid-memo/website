@@ -192,6 +192,10 @@
     "start": "Börja kursen",
     "continue": "Fortsätt",
     "finished": "Du har gått klart kursen. Dess kort finns i din kortlek, att studera som alla andra.",
+    "backToDecks": "Tillbaka till kortlekarna",
+    "chapterCompleted": "Bra jobbat! Du är klar med {chapter}.",
+    "courseCompleted": "Grattis! Det var sista kapitlet: du har gått klart hela kursen.",
+    "continueOrStop": "Fortsätt med nästa kapitel när du är redo, eller sluta här så länge: det du har gjort sparas.",
     "chapterNumber": "Kapitel {number}:",
     "locked": "Låst",
     "open": "Öppet",
@@ -219,14 +223,14 @@
   },
   "chapterReview": {
     "heading": "Slutrepetition: {chapter}",
-    "intro": "Kapitlets alla frågor en gång till. En fråga du svarar fel på kommer tillbaka tills du svarar rätt.",
+    "cheer": "Bra jobbat: du har tagit dig igenom alla steg i kapitlet!",
+    "about": "Nu kommer slutrepetitionen: kapitlets alla frågor en gång till, i blandad ordning och utan teorin. En fråga du svarar fel på kommer tillbaka tills du svarar rätt. Klarar du den är kapitlet klart.",
+    "start": "Börja slutrepetitionen",
+    "backToCourse": "Tillbaka till kapitlen",
     "position": "Fråga {position} av {total}",
     "next": "Nästa",
     "completing": "Avslutar kapitlet…",
-    "retry": "Försök igen",
-    "chapterDone": "Kapitlet är klart. Nästa kapitel är öppet.",
-    "courseDone": "Kapitlet är klart. Du har gått klart kursen.",
-    "nextChapter": "Nästa kapitel: {chapter}"
+    "retry": "Försök igen"
   },
   "courseQuestion": {
     "right": "Rätt!",

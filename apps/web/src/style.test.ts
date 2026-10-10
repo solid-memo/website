@@ -575,3 +575,28 @@ describe("the course for newcomers", () => {
     expect(narrow!.style.getPropertyValue("display")).toBe("none");
   });
 });
+
+describe("a course's celebrations", () => {
+  it("throws confetti over the viewport, clipped to it and out of the pointer's way, gone when it rests", () => {
+    document.body.innerHTML = `<div class="confetti" aria-hidden="true"><span></span><span></span></div>`;
+    const confetti = getComputedStyle(document.querySelector(".confetti")!);
+    expect(confetti.position).toBe("fixed");
+    expect(confetti.overflow).toBe("hidden");
+    expect(confetti.pointerEvents).toBe("none");
+    for (const piece of document.querySelectorAll(".confetti>span")) {
+      // With motion reduced, every animation stops: a piece at rest shows nothing.
+      expect(getComputedStyle(piece).opacity).toBe("0");
+      expect(lastMatching(piece, "animation")).toMatch(/^confetti-fall 2\.2s .* var\(--delay\) backwards$/);
+    }
+  });
+
+  it("bursts sparkles from a chapter just completed, out of the pointer's way, gone when they rest", () => {
+    document.body.innerHTML = `<ol class="course-chapters"><li class="course-chapter done just-completed">
+      <span class="course-state done">Done<span class="course-sparkles" aria-hidden="true"><span></span></span></span></li></ol>`;
+    expect(getComputedStyle(document.querySelector(".course-state")!).position).toBe("relative");
+    const sparkles = getComputedStyle(document.querySelector(".course-sparkles")!);
+    expect(sparkles.position).toBe("absolute");
+    expect(sparkles.pointerEvents).toBe("none");
+    expect(getComputedStyle(document.querySelector(".course-sparkles>span")!).opacity).toBe("0");
+  });
+});

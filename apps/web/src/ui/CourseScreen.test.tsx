@@ -23,6 +23,7 @@ describe("CourseScreen", () => {
         started={false}
         chapterHref={(chapter) => `#/${chapter.id}`}
         continueHref="#/go"
+        decksHref="#/decks"
       />,
     );
     const [marked, plain] = container.querySelectorAll(".course-chapter");

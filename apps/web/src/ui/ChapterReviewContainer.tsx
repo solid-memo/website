@@ -8,33 +8,38 @@ import { ChapterReviewScreen, type Completion } from "./ChapterReviewScreen";
 import { courseKey } from "./CourseContainer";
 import type { CheckedAnswer } from "./CourseQuestion";
 import { useI18n } from "./i18n";
-import { routeToHash } from "./router";
+import { courseHref } from "./router";
 
 /**
- * Owns one final review of a chapter: its queue is drawn once, as the
- * review starts (finalReviewQueue), and walked in order; a question
- * answered wrongly is put back at its end. After the last question is
- * answered right, the chapter is completed (UseCases.completeChapter),
- * and the course is read afresh before the end is shown, so the next
- * chapter it links to is open by then.
+ * Owns one final review of a chapter: it starts when the learner says
+ * so, past the word before it; its queue is drawn once, as the screen
+ * opens (finalReviewQueue), and walked in order; a question answered
+ * wrongly is put back at its end. After the last question is answered
+ * right, the chapter is completed (UseCases.completeChapter), and the
+ * course is read afresh before `onCompleted`, so the course's page the
+ * learner is taken to shows it done and the next chapter open.
  */
 export function ChapterReviewContainer({
   useCases,
   instance,
   course,
   chapter,
+  onCompleted,
   random = Math.random,
 }: {
   useCases: UseCases;
   instance: Instance;
   course: Course;
   chapter: CourseChapter;
+  /** The chapter is completed; `finishedCourse` when that completed the course too. */
+  onCompleted: (finishedCourse: boolean) => void;
   /** Uniform [0, 1) source the queue and options are shuffled by. */
   random?: () => number;
 }) {
   const { errorText } = useI18n();
   const queryClient = useQueryClient();
   const deck = course.deck;
+  const [started, setStarted] = useState(false);
   const [queue, setQueue] = useState(() => finalReviewQueue(chapter, random));
   const [position, setPosition] = useState(0);
   const [answer, setAnswer] = useState<CheckedAnswer | null>(null);
@@ -47,13 +52,22 @@ export function ChapterReviewContainer({
     if (!checked.choice.correct) setQueue((current) => [...current, cardId!]);
   });
 
+  // Read before the course is read afresh: whether this chapter is the
+  // last one left, so that completing it completes the course.
+  const finishesCourse =
+    !course.progress.done &&
+    course.progress.chapters.every((entry) => entry.url === chapter.url || entry.state === "done");
   const completeMutation = useMutation({
-    mutationFn: () => useCases.completeChapter(deck, chapter.url),
-    onSuccess: async () => {
+    mutationFn: async () => {
+      await useCases.completeChapter(deck, chapter.url);
+      return finishesCourse;
+    },
+    onSuccess: async (finishedCourse) => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: courseKey(deck.url) }),
         queryClient.invalidateQueries({ queryKey: ["decks", instance.url] }),
       ]);
+      onCompleted(finishedCourse);
     },
   });
 
@@ -64,35 +78,18 @@ export function ChapterReviewContainer({
     if (position + 1 === queue.length) completeMutation.mutate();
   }
 
-  const index = course.outline.chapters.findIndex((entry) => entry.url === chapter.url);
-  const following = course.outline.chapters[index + 1];
   const completion: Completion | null =
     card !== null
       ? null
-      : completeMutation.isSuccess
-        ? {
-            state: "done",
-            ...(following === undefined
-              ? {}
-              : {
-                  nextChapter: {
-                    title: following.title,
-                    href: routeToHash({
-                      screen: "courseChapter",
-                      instanceUrl: instance.url,
-                      deckUrl: deck.url,
-                      chapterUrl: following.url,
-                    }),
-                  },
-                }),
-          }
-        : completeMutation.isError
-          ? { state: "failed", error: errorText(completeMutation.error) }
-          : { state: "saving" };
+      : completeMutation.isError
+        ? { state: "failed", error: errorText(completeMutation.error) }
+        : { state: "saving" };
 
   return (
     <ChapterReviewScreen
       chapterTitle={chapter.title}
+      started={started}
+      courseHref={courseHref(instance.url, deck.url)}
       position={position + 1}
       total={queue.length}
       card={card}
@@ -101,6 +98,7 @@ export function ChapterReviewContainer({
       busy={answerMutation.isPending}
       error={errorText(answerMutation.error)}
       completion={completion}
+      onStart={() => setStarted(true)}
       onCheck={(choice) => answerMutation.mutate({ card: card!, choice })}
       onNext={next}
       onRetry={() => completeMutation.mutate()}

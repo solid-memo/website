@@ -1,30 +1,37 @@
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/preact";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import { ChapterReviewContainer } from "./ChapterReviewContainer";
-import { routeToHash } from "./router";
+import { courseHref } from "./router";
 import { makeUseCasesFake } from "../test/useCasesFake";
 import { CH1, CH2, courseInstance, makeCourse, noShuffle } from "../test/course";
 
 const course = makeCourse(["q-1", "q-2", "q-3"]);
 
-function renderReview(useCases: UseCases, chapterIndex = 0) {
+function renderReview(useCases: UseCases, chapterIndex = 0, reviewed = course) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const invalidate = vi.spyOn(queryClient, "invalidateQueries");
+  const onCompleted = vi.fn();
   render(
     <QueryClientProvider client={queryClient}>
       <ChapterReviewContainer
         useCases={useCases}
         instance={courseInstance}
-        course={course}
-        chapter={course.outline.chapters[chapterIndex]!}
+        course={reviewed}
+        chapter={reviewed.outline.chapters[chapterIndex]!}
+        onCompleted={onCompleted}
         random={noShuffle}
       />
     </QueryClientProvider>,
   );
-  return { invalidate };
+  return { invalidate, onCompleted };
+}
+
+/** Starts the review, past the word before it. */
+function start() {
+  fireEvent.click(screen.getByRole("button", { name: "Start the final review" }));
 }
 
 /** Answers the question shown, then goes on. */
@@ -38,19 +45,39 @@ const rightAnswers = (useCases: UseCases) =>
   vi.mocked(useCases.answerCourseQuestion).mockImplementation(async () => ({ effect: "review", state: null }));
 
 describe("ChapterReviewContainer", () => {
+  it("opens on a word before the review, with the way on to it and back to the chapters", () => {
+    const useCases = makeUseCasesFake();
+    renderReview(useCases);
+    expect(screen.getByRole("heading", { level: 2, name: "Final review: Linked data" })).toBeInTheDocument();
+    expect(screen.getByText("Well done: you have worked through every step of this chapter!")).toBeInTheDocument();
+    expect(screen.getByText(/^Now the final review: every question of the chapter once more, shuffled/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Back to the chapters" })).toHaveAttribute(
+      "href",
+      courseHref(courseInstance.url, course.deck.url),
+    );
+    // No question yet, nor how many there are.
+    expect(screen.queryByRole("radio")).toBeNull();
+    expect(screen.queryByText(/^Question/)).toBeNull();
+
+    start();
+    expect(screen.queryByRole("link", { name: "Back to the chapters" })).toBeNull();
+    expect(screen.getByText("Question 1 of 4")).toBeInTheDocument();
+    // The button is gone: the first question takes the focus, as each after it does.
+    expect(screen.getByText("What names a thing?").closest(".study-face")).toHaveFocus();
+  });
+
   it("asks every question of the chapter, again until answered right, then completes it", async () => {
     let complete!: (deck: Deck) => void;
     const completeChapter = vi.fn(() => new Promise<Deck>((resolve) => (complete = resolve)));
     const useCases = makeUseCasesFake({ completeChapter });
     rightAnswers(useCases);
-    const { invalidate } = renderReview(useCases);
+    const { invalidate, onCompleted } = renderReview(useCases);
+    start();
 
-    expect(screen.getByRole("heading", { level: 2, name: "Final review: Linked data" })).toBeInTheDocument();
     expect(screen.getByText("Question 1 of 4")).toBeInTheDocument();
     // Like a step's questions, the review's are asked without the theory.
     expect(document.querySelector(".course-theory")).toBeNull();
     expect(screen.queryByText("Things are named by IRIs.")).toBeNull();
-    expect(screen.getByText("What names a thing?").closest(".study-face")).not.toHaveFocus();
     await answer("Hardly An IRI");
     expect(screen.getByText("Question 2 of 5")).toBeInTheDocument();
     expect(screen.getByText("What is a triple?").closest(".study-face")).toHaveFocus();
@@ -62,29 +89,30 @@ describe("ChapterReviewContainer", () => {
     await answer("An IRI");
 
     expect(completeChapter).toHaveBeenCalledWith(course.deck, CH1);
-    expect(screen.getByText("Completing the chapter…")).toBeInTheDocument();
+    expect(screen.getByText("Completing the chapter…").closest(".course-review-end")).toHaveFocus();
+    expect(screen.queryByText(/^Question/)).toBeNull();
+    expect(onCompleted).not.toHaveBeenCalled();
     complete({ ...course.deck, completedChapters: [CH1] });
-    expect(await screen.findByText("Chapter complete. The next one is open.")).toBeInTheDocument();
+    // The course is read afresh first, so the course's page shows the chapter done.
+    await waitFor(() => expect(onCompleted).toHaveBeenCalledWith(false));
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["course", course.deck.url] });
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["decks", courseInstance.url] });
-    expect(screen.getByText("Chapter complete. The next one is open.").closest(".course-review-end")).toHaveFocus();
-    expect(screen.getByRole("link", { name: "Next chapter: Pods" })).toHaveAttribute(
-      "href",
-      routeToHash({ screen: "courseChapter", instanceUrl: courseInstance.url, deckUrl: course.deck.url, chapterUrl: CH2 }),
-    );
-    // The way back to the course is its breadcrumb: no "Back to …" link.
-    expect(screen.queryByRole("link", { name: /^Back/ })).toBeNull();
-    expect(screen.queryByText(/^Question/)).toBeNull();
   });
 
-  it("says the course is finished after its last chapter", async () => {
+  it("says the course is finished by its last chapter left, and not by one retaken", async () => {
     const useCases = makeUseCasesFake();
     rightAnswers(useCases);
-    renderReview(useCases, 1);
+    const { onCompleted } = renderReview(useCases, 1, makeCourse(["q-1", "q-2", "q-3", "r-1"], [CH1]));
+    start();
     await answer("A store");
-    expect(await screen.findByText("Chapter complete. You have finished the course.")).toBeInTheDocument();
-    expect(useCases.completeChapter).toHaveBeenCalledWith(course.deck, CH2);
-    expect(screen.queryByRole("link", { name: /^Next chapter/ })).toBeNull();
+    await waitFor(() => expect(onCompleted).toHaveBeenCalledWith(true));
+    expect(useCases.completeChapter).toHaveBeenCalledWith(expect.anything(), CH2);
+    cleanup();
+
+    const retaken = renderReview(useCases, 1, makeCourse(["q-1", "q-2", "q-3", "r-1", "q-4"], [CH1, CH2]));
+    start();
+    await answer("A store");
+    await waitFor(() => expect(retaken.onCompleted).toHaveBeenCalledWith(false));
   });
 
   it("says why the chapter could not be completed, and tries again", async () => {
@@ -94,11 +122,13 @@ describe("ChapterReviewContainer", () => {
       .mockImplementation(async (deck) => deck);
     const useCases = makeUseCasesFake({ completeChapter });
     rightAnswers(useCases);
-    renderReview(useCases, 1);
+    const { onCompleted } = renderReview(useCases, 1);
+    start();
     await answer("A store");
-    expect((await screen.findByText("pod refused")).closest(".error")).toBeInTheDocument();
+    expect((await screen.findByText("pod refused")).closest(".course-review-end")).toHaveFocus();
+    expect(onCompleted).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
     await waitFor(() => expect(completeChapter).toHaveBeenCalledTimes(2));
-    expect(await screen.findByText("Chapter complete. You have finished the course.")).toBeInTheDocument();
+    await waitFor(() => expect(onCompleted).toHaveBeenCalled());
   });
 });
