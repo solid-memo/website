@@ -654,18 +654,24 @@ While the deck is held (set aside, or the instance blocked:
 does not send the user there. Every place is named, not linked, and a
 line says why. The repairs and removals stay:
 they are the way out. A problem no repair covers is then removed here,
-or corrected in the pod by other means. The deck's "Check again" then
-makes the instance's check again too, so a deck mended that way is let
-go without a reload.
+or corrected in the pod by other means. What the deck's check finds
+(as its screen opens, after a repair, or on "Check again") takes the
+place of what the instance's check found of that deck
+(`withDeckReport`), in the same place in its list, and that is what
+holds it. So a deck mended either way is let go without a reload, and
+without the whole instance being checked again. A check overtaken by
+another, such as one still running when a repair is made, is dropped:
+it read the pod before the repair.
 
 The instance's health is the check made when it is opened
 (`checkInstance`, the same query as Home's), with its repairs, then
 every deck with its badge, a link to its own health. A result about a
 deck (its entry, its distribution, a subject of its documents) links
 to that deck's health. A badge checks its deck once: a repair or a
-removal reads every check of the instance afresh (their queries are
-under its key), and the deck's health is read afresh each time its
-screen opens. The
+removal here reads every check of the instance afresh (their queries
+are under its key); on a deck's health, only the deck's. The deck's
+health is read afresh each time its screen opens. What a badge's check
+finds holds its deck too, as above. The
 end-to-end tests hold `checkDeck` against real servers, the documents
 it checks again and a removal that clears it included
 ([deckHealth.integration.test.ts](../e2e/pod/src/deckHealth.integration.test.ts)).
@@ -788,7 +794,8 @@ Every Studio screen holds to the check Solid Memo makes when an
 instance is opened, and to the user's invalid data policy
 ([validation.md](validation.md)). `useDataCheck` in `ui` reads both, with
 the same queries as Solid Memo's workspace, so the check is made once
-and again after a repair:
+and again after a repair. A deck checked again on its own (its
+[health](#health)) puts what that check found in its place:
 
 - **Until the check is done**, nothing can be changed, under any policy
   but "only warn": a deck set aside is not known yet. The screens are

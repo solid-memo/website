@@ -25,10 +25,12 @@ export function repairLabels(t: I18n["t"]): Record<RepairKind, string> {
 /**
  * Applies repairs (UseCases.applyRepairs), then reads afresh what they
  * may have changed: the decks, cards, reviews and preferences, the
- * format update's plan, and every check of the instance (its own, and
- * its decks' health in the Studio, under the same key).
+ * format update's plan, and the checks under `checkKey`: by default
+ * every check of the instance (its own, and its decks' health in the
+ * Studio, under the same key); a deck's health alone where what it
+ * finds is put in the instance's check.
  */
-export function useRepairMutation(useCases: UseCases, instanceUrl: string) {
+export function useRepairMutation(useCases: UseCases, instanceUrl: string, checkKey: readonly unknown[] = ["validation", instanceUrl]) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (repairs: Parameters<UseCases["applyRepairs"]>[0]) => useCases.applyRepairs(repairs),
@@ -36,7 +38,7 @@ export function useRepairMutation(useCases: UseCases, instanceUrl: string) {
       for (const key of ["decks", "cards", "reviews", "preferences", "migration"]) {
         await queryClient.invalidateQueries({ queryKey: [key] });
       }
-      await queryClient.invalidateQueries({ queryKey: ["validation", instanceUrl] });
+      await queryClient.invalidateQueries({ queryKey: checkKey });
     },
   });
 }

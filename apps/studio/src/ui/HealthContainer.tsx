@@ -21,11 +21,13 @@ import { DeckHealthScreen, InstanceHealthScreen, type RepairActions } from "./He
  * Repairs are Solid Memo's own (planRepair, applyRepairs), of what the
  * check shown found: a deck's only, on a deck's health. A removal is
  * made once the user confirms it. After either, every check of the
- * instance is read afresh. A deck held by the instance's check (set
- * aside, or the whole instance blocked: useDataCheck) has its problems
- * named, not linked to its forms, which change nothing until then; a
- * deck's "Check again" makes the instance's check again too, so a deck
- * mended in the pod by other means is let go.
+ * instance is read afresh; on a deck's health, only the deck's. A deck
+ * held by the instance's check (set aside, or the whole instance
+ * blocked: useDataCheck) has its problems named, not linked to its
+ * forms, which change nothing until then. What the deck's check finds
+ * (as the screen opens, after a repair, or on "Check again") is put in
+ * the instance's check (deckHealthQuery), so a deck mended, here or in
+ * the pod by other means, is let go.
  */
 export function HealthContainer({
   useCases,
@@ -53,10 +55,14 @@ export function HealthContainer({
   );
 }
 
-/** The repairs of what a check found (`report`), the removal of a subject once the user confirms it. */
-function useRepairs(useCases: UseCases, instance: Instance): (report: ValidationReport) => RepairActions {
+/**
+ * The repairs of what a check found (`report`), the removal of a subject
+ * once the user confirms it; after either, the checks under `checkKey`
+ * are read afresh.
+ */
+function useRepairs(useCases: UseCases, instance: Instance, checkKey: readonly unknown[]): (report: ValidationReport) => RepairActions {
   const { t, errorText } = useI18n();
-  const repairMutation = useRepairMutation(useCases, instance.url);
+  const repairMutation = useRepairMutation(useCases, instance.url, checkKey);
   return (report) => {
     const plan = useCases.planRepair(report);
     return {
@@ -88,10 +94,11 @@ function DeckHealthContainer({
 }) {
   const { t, errorText } = useI18n();
   const queryClient = useQueryClient();
-  const repairs = useRepairs(useCases, instance);
+  const health = deckHealthQuery(useCases, queryClient, instance.url, deck);
+  const repairs = useRepairs(useCases, instance, health.queryKey);
   const reason = useDataCheck(useCases, instance.url).readOnly(deck);
   // Read afresh each time the screen opens, as a card edited since may have mended (or made) a problem.
-  const healthQuery = useQuery({ ...deckHealthQuery(useCases, instance.url, deck), refetchOnMount: "always" });
+  const healthQuery = useQuery({ ...health, refetchOnMount: "always" });
   const cardsQuery = useQuery({
     queryKey: ["cards", deck.cardsDocumentUrl],
     queryFn: () => useCases.listCards(deck),
@@ -105,8 +112,8 @@ function DeckHealthContainer({
       health={healthQuery.data}
       cards={cardsQuery.data}
       checking={healthQuery.isFetching}
-      // Every check of the instance (by prefix): the deck's, and the one that holds it.
-      onCheck={() => void queryClient.invalidateQueries({ queryKey: ["validation", instance.url] })}
+      // The deck's check alone: what it finds is put in the one that holds it.
+      onCheck={() => void queryClient.invalidateQueries({ queryKey: health.queryKey })}
       repairs={repairs(healthQuery.data.report)}
       spotHref={(spot) => spotHref(deck, spot)}
       aboutHref={aboutHref(deck)}
@@ -126,7 +133,7 @@ function InstanceHealthContainer({
   deckHref: (deck: Deck) => string;
 }) {
   const { t, errorText } = useI18n();
-  const repairs = useRepairs(useCases, instance);
+  const repairs = useRepairs(useCases, instance, ["validation", instance.url]);
   const reportQuery = useQuery({
     queryKey: ["validation", instance.url],
     queryFn: () => useCases.checkInstance(instance.url),
