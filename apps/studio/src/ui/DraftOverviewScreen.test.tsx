@@ -53,8 +53,6 @@ describe("DraftOverviewScreen", () => {
     expect(screen.getByText("2 cards in all.")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "All cards" })).toHaveAttribute("href", "#/draft-cards");
     expect(screen.getByText("The release check finds no problems.")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "See the release check" })).toHaveAttribute("href", "#/check");
-    expect(screen.getByRole("link", { name: "Preview the listing" })).toHaveAttribute("href", "#/preview");
     fireEvent.click(screen.getByRole("button", { name: "Actions for Pods" }));
     fireEvent.click(screen.getByRole("menuitem", { name: "Move down" }));
     expect(onEdit).toHaveBeenCalledWith([{ kind: "moveChapter", id: "ch-pods", to: 1 }]);

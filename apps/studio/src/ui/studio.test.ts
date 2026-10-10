@@ -85,4 +85,20 @@ describe("the Studio's stylesheet", () => {
     expect(styleOf(PAGE, "button").minHeight).toBe("44px");
     expect(styleOf(PAGE, "td").height).toBe("44px");
   });
+
+  it("puts the sidebar beside the main content, scrolling on its own, the item shown marked, and hides it as asked", () => {
+    root.setAttribute("data-surface", "studio");
+    const page = (hidden: string) => `
+      <div id="app">
+        <header class="site-header"></header>
+        <nav class="studio-sidebar"${hidden}><ul><li><a href="#" aria-current="page">Decks</a></li><li><a href="#">Groups</a></li></ul></nav>
+        <main class="workspace"></main>
+      </div>`;
+    expect(styleOf(page(""), ".studio-sidebar").overflow).toBe("auto");
+    expect(styleOf(page(""), ".studio-sidebar").width).toBe("240px");
+    expect(styleOf(page(""), ".studio-sidebar ul").listStyle).toContain("none");
+    expect(styleOf(page(""), "a[aria-current]").fontWeight).toBe("600");
+    expect(styleOf(page(""), "a:not([aria-current])").fontWeight).not.toBe("600");
+    expect(styleOf(page(" hidden"), ".studio-sidebar").display).toBe("none");
+  });
 });

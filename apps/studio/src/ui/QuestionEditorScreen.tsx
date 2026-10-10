@@ -104,7 +104,7 @@ export function QuestionEditorScreen({
         <h2>{name}</h2>
         <p class="hint">
           {saved.retired && `${t("studio.question.retired")} · `}
-          <code>{card}</code> · <a href={links.cardsHref}>{t("studio.draft.allCards")}</a>
+          <code>{card}</code>
         </p>
       </header>
       <DraftStatus editor={status} />

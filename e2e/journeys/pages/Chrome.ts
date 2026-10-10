@@ -5,7 +5,8 @@ import { Screen } from "./Screen.ts";
 /**
  * What is around every screen: the masthead (who is logged in, log out,
  * the language), the breadcrumbs, the instance's own links (statistics,
- * preferences) and, in developer mode, the developer tools.
+ * preferences) and, in developer mode, the developer tools; in the
+ * Studio, its sidebar and the tabs of the deck or draft it shows.
  */
 export class Chrome extends Screen {
   get breadcrumbs(): Locator {
@@ -18,6 +19,28 @@ export class Chrome extends Screen {
 
   get developerTools(): Locator {
     return this.page.getByRole("navigation", { name: this.t("workspace.developerTools") });
+  }
+
+  /** Solid Memo Studio's sidebar: the open instance's sections, its decks and its drafts. */
+  get studioSidebar(): Locator {
+    return this.page.getByRole("navigation", { name: this.t("studio.shell.nav"), exact: true });
+  }
+
+  /** The tabs of the deck or the draft the Studio shows. */
+  studioTabs(of: "deck" | "draft"): Locator {
+    return this.page.getByRole("navigation", { name: this.t(`studio.tabs.${of}`), exact: true });
+  }
+
+  /** Follows a section of the Studio's sidebar, by its key ("groups"). */
+  async studioSection(section: string): Promise<void> {
+    await this.studioSidebar.getByRole("link", { name: this.t(`studio.shell.section.${section}`), exact: true }).click();
+  }
+
+  /** Follows a tab of the deck or the draft the Studio shows, by its key ("schedule"), which is then the current one. */
+  async studioTab(of: "deck" | "draft", tab: string): Promise<void> {
+    const link = this.studioTabs(of).getByRole("link", { name: this.t(`studio.tabs.${tab}`), exact: true });
+    await link.click();
+    await expect(link).toHaveAttribute("aria-current", "page");
   }
 
   /** The language list above the masthead, not the choice in Preferences. */

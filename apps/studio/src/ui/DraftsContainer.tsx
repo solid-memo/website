@@ -9,11 +9,10 @@ import { catalogScope, deckTreeKey } from "@solid-memo/ui/deckTreeEditor";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
-import { ReaderText } from "@solid-memo/ui/ReaderText";
 import { draftKey } from "./draftEditor";
 import { DraftsScreen } from "./DraftsScreen";
 
-/** The query of an instance's drafts: Home's panel and the drafts screen share it. */
+/** The query of an instance's drafts: the sidebar and the drafts screen share it. */
 export function draftsKey(instanceUrl: string): readonly unknown[] {
   return ["releaseDrafts", instanceUrl];
 }
@@ -99,67 +98,5 @@ export function DraftsContainer({
       deleteError={errorText(deleteMutation.error)}
       onDelete={(draft) => deleteMutation.mutate(draft)}
     />
-  );
-}
-
-/**
- * Home's drafts: a line for each of the instance's drafts, a link to it
- * (one that can be read), its kind and version, and a link to the drafts
- * screen, where they are made and
- * deleted, and to the releases the instance published. Quiet while they
- * are read; an error says they could not be.
- */
-export function HomeDraftsContainer({
-  useCases,
-  instance,
-  draftsHref,
-  releasesHref,
-  draftHref,
-}: {
-  useCases: UseCases;
-  instance: Instance;
-  draftsHref: string;
-  releasesHref: string;
-  draftHref: (draft: ReleaseDraftSummary) => string;
-}) {
-  const { t, errorText } = useI18n();
-  const draftsQuery = useQuery({
-    queryKey: draftsKey(instance.url),
-    queryFn: () => useCases.listReleaseDrafts(instance.url),
-  });
-  const drafts = draftsQuery.data;
-  return (
-    <section aria-labelledby="home-drafts-heading">
-      <h3 id="home-drafts-heading">{t("studio.drafts.list")}</h3>
-      <ErrorMessage error={errorText(draftsQuery.error)} />
-      {drafts !== undefined &&
-        (drafts.length === 0 ? (
-          <p class="hint">{t("studio.drafts.none")}</p>
-        ) : (
-          <ul>
-            {drafts.map((draft) => (
-              <li key={draft.url}>
-                {draft.readable ? (
-                  <a href={draftHref(draft)}>{Object.keys(draft.title).length === 0 ? t("studio.drafts.untitled", { name: draft.name }) : <ReaderText text={draft.title} />}</a>
-                ) : (
-                  t("studio.drafts.untitled", { name: draft.name })
-                )}{" "}
-                <span class="hint">
-                  {t("studio.drafts.summary", {
-                    kind: draft.readable ? t(`studio.drafts.kind.${draft.course ? "course" : "deck"}`) : t("studio.drafts.state.unreadable"),
-                    version: draft.version,
-                  })}
-                </span>
-              </li>
-            ))}
-          </ul>
-        ))}
-      <p>
-        <a href={draftsHref}>{t("studio.drafts.manage")}</a>
-      </p>
-      <p>
-        <a href={releasesHref}>{t("studio.releases.link")}</a>
-      </p>
-    </section>
   );
 }

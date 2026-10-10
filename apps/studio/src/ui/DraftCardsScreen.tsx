@@ -78,9 +78,6 @@ export function DraftCardsScreen({
         <h2>{t(draft.course ? "studio.draftCards.headingCourse" : "studio.draftCards.heading", {
             draft: draft.root.title === undefined ? t("studio.draft.untitled") : readerText(draft.root.title),
           })}</h2>
-        <p class="hint">
-          <a href={links.overviewHref}>{t("studio.draftCards.overview")}</a>
-        </p>
       </header>
       <DraftStatus editor={status} />
       <div class="studio-filters">

@@ -47,7 +47,7 @@ const COURSE = {
  * export one of them as a Turtle file, with their progress, delete it,
  * once the user confirms, and import it again from the file, its card
  * due as before. They draft a release of a deck and a blank course,
- * which Home lists, and delete the course's draft, confirming. They
+ * which the sidebar lists, and delete the course's draft, confirming. They
  * write a course in a blank draft: a chapter, a step with its theory,
  * and two questions, the first with two wrong options, saved as they
  * go, trying one question as the course would ask it. Its release check
@@ -243,19 +243,13 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     await app.studio.expectDeck(instance, beta, { cards: 1, due: 1 });
   });
 
-  await app.step("24 · Draft a release of a deck and a blank course; Home lists both; delete one", async () => {
+  await app.step("24 · Draft a release of a deck and a blank course; the sidebar lists both; delete one", async () => {
     await app.studio.openDrafts(instance);
     await app.studio.draftDeck(instance, alpha);
     await app.studio.draftCourse(instance, course);
-    await app.chrome.breadcrumb("breadcrumbs.decks");
-    await app.studio.expectHomeDrafts([
-      { name: alpha, kind: "deck" },
-      { name: course, kind: "course" },
-    ]);
-    await app.studio.openDrafts(instance);
+    await app.studio.expectSidebarDrafts([alpha, course]);
     await app.studio.deleteDraft(instance, course);
-    await app.chrome.breadcrumb("breadcrumbs.decks");
-    await app.studio.expectHomeDrafts([{ name: alpha, kind: "deck" }]);
+    await app.studio.expectSidebarDrafts([alpha]);
   });
 
   await app.step("25 · Write a course: a chapter, a step, and two questions with two wrong options each", async () => {
@@ -280,17 +274,17 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     const fewOptions = app.t("studio.problem.fewDistractors", { count: 0, least: 2 });
     const noDescription = app.t("studio.problem.required", { field: app.t("studio.field.description") });
     const release = app.t("studio.check.release");
-    await app.draftEditor.openCheck(authored);
+    await app.draftEditor.openCheck();
     await app.draftEditor.expectProblem("Who chooses the app?", fewOptions);
     await app.draftEditor.expectProblem(release, noDescription);
     await app.draftEditor.followProblem("Who chooses the app?", fewOptions);
     await app.draftEditor.addWrongOption("The pod", "A pod holds data.");
     await app.draftEditor.addWrongOption("Its maker", "The user chooses.");
-    await app.draftEditor.openCheck(authored);
+    await app.draftEditor.openCheck();
     await app.draftEditor.expectNoProblem("Who chooses the app?", fewOptions);
     await app.draftEditor.followProblem(release, noDescription);
     await app.draftEditor.writeDescription("What a pod is, and who holds the data in it.");
-    await app.draftEditor.openCheck(authored);
+    await app.draftEditor.openCheck();
     await app.draftEditor.expectNoProblem(release, noDescription);
     await app.draftEditor.checkShapes();
     await app.draftEditor.openPreview(authored);
@@ -347,7 +341,7 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     await app.studio.draftNextVersion(release, BRIGHTEST_STARS.en, 2);
     await app.draftEditor.openDraft(BRIGHTEST_STARS.en, { course: false });
     await app.draftEditor.retireCard("Sirius");
-    await app.draftEditor.openDiff(BRIGHTEST_STARS.en);
+    await app.draftEditor.openDiff();
     await app.draftEditor.expectDiff(
       { Sirius: app.t("studio.diff.status.retired") },
       app.t("studio.diff.upgrade", { previous: "1", changes: app.t("libraryUpgradeNotice.retires", { count: 1 }) }),
@@ -360,22 +354,22 @@ test("open the Studio from Solid Memo and manage an instance's decks @studio", a
     await app.chrome.breadcrumb("breadcrumbs.decks");
     await app.studio.openDrafts(renamed);
     await app.draftEditor.openDraft(authored);
-    await app.draftEditor.openRelease(authored);
+    await app.draftEditor.openRelease();
     await app.draftEditor.addAuthor("Journey Author");
     await app.draftEditor.attributeWithAi("Journey Author");
     await app.draftEditor.chooseReleaseLicence("CC0 1.0");
     await app.draftEditor.addSource(source, "Pods explained", "The page's footer: CC0.");
     await app.draftEditor.recordAiCheck("Facts", "every question", "none wrong");
-    await app.draftEditor.openCheck(authored);
+    await app.draftEditor.openCheck();
     await app.draftEditor.expectProblem(source, undescribed);
     await app.draftEditor.followProblem(source, undescribed);
     await app.draftEditor.describeSource(source, "Pods explained", "Example authors");
-    await app.draftEditor.openCheck(authored);
+    await app.draftEditor.openCheck();
     await app.draftEditor.expectNoProblem(source, undescribed);
   });
 
   await app.step("35 · Publish the course to the pod, public: anyone can read it, and the releases list it", async () => {
-    await app.draftEditor.openRelease(authored);
+    await app.draftEditor.openRelease();
     await app.draftEditor.choosePublisher("Journey Author");
     const url = await app.draftEditor.publish();
     // Someone with no login reads it.

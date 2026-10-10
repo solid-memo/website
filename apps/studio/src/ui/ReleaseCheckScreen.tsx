@@ -5,13 +5,12 @@ import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { problemMessage, subjectName } from "./problemText";
+import { ContextTabs } from "./shell/ContextTabs";
 
-/** Where the release check links: the check for another policy, a problem's place in the editors, the listing preview, the trial. */
+/** Where the release check links: the check for another policy, and a problem's place in the editors. */
 export interface ReleaseCheckLinks {
   policyHref: (policy: CheckPolicy) => string;
   targetHref: (target: ProblemTarget) => string;
-  previewHref: string;
-  trialHref: string;
 }
 
 /** The shapes' part of the check: asked or not, running, for an older version of the draft, and what they found. */
@@ -75,17 +74,10 @@ export function ReleaseCheckScreen({
         <h2>{t("studio.check.heading")}</h2>
       </header>
       <p class="hint">{t("studio.check.intro")}</p>
-      <nav aria-label={t("studio.check.policy")} class="studio-tabs">
-        <ul>
-          {CHECK_POLICIES.map((one) => (
-            <li key={one}>
-              <a href={links.policyHref(one)} aria-current={one === policy ? "page" : undefined}>
-                {policyLabel(one)}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
+      <ContextTabs
+        label={t("studio.check.policy")}
+        tabs={CHECK_POLICIES.map((one) => ({ key: one, href: links.policyHref(one), label: policyLabel(one), current: one === policy }))}
+      />
       <p class="hint">{t(policy === "pod" ? "studio.check.policyHintPod" : "studio.check.policyHintLibrary")}</p>
       {problems === undefined ? (
         error ? <ErrorMessage error={errorText(error)} /> : <Loading label={t("studio.check.checking")} />
@@ -142,9 +134,6 @@ export function ReleaseCheckScreen({
           </>
         )}
       </section>
-      <p>
-        <a href={links.previewHref}>{t("studio.check.previewLink")}</a> · <a href={links.trialHref}>{t("studio.check.trialLink")}</a>
-      </p>
     </section>
   );
 }

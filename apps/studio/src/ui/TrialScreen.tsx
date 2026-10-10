@@ -1,18 +1,24 @@
 import type { ComponentChildren } from "preact";
 import type { ReleaseProblem } from "@solid-memo/domain/release/problems";
-import { problemTarget, type ProblemTarget } from "@solid-memo/domain/release/releaseCheck";
+import {
+  problemTarget,
+  type ProblemTarget,
+} from "@solid-memo/domain/release/releaseCheck";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { problemMessage, subjectName } from "./problemText";
+import { useScreenKeys } from "./shell/useShortcuts";
 
 /**
  * A draft's trial (docs/studio.md, The trial): what it is, the way to
  * start it over or to play the draft as it is now, then the trial being
  * set up, why it could not be (`error`), the problems that keep the
  * draft from being played (each a link to its field), or the trial
- * itself (`children`).
+ * itself (`children`). The digits are the trial's, as they are a
+ * learner's (a grade, an option), never the draft's tabs: a digit the
+ * trial has no use for just then does nothing.
  */
 export function TrialScreen({
   draft,
@@ -39,6 +45,9 @@ export function TrialScreen({
 }) {
   const i18n = useI18n();
   const { t, errorText } = i18n;
+  useScreenKeys((event, key) => {
+    if (/^[1-9]$/.test(key)) event.preventDefault();
+  });
   return (
     <section>
       <header>
@@ -63,7 +72,10 @@ export function TrialScreen({
           <ul class="studio-health-list release-problems">
             {problems.map((problem, index) => (
               <li key={index}>
-                {subjectName(draft, problem.subject, i18n)}: <a href={targetHref(problemTarget(draft, problem))}>{problemMessage(problem, draft, i18n)}</a>
+                {subjectName(draft, problem.subject, i18n)}:{" "}
+                <a href={targetHref(problemTarget(draft, problem))}>
+                  {problemMessage(problem, draft, i18n)}
+                </a>
               </li>
             ))}
           </ul>

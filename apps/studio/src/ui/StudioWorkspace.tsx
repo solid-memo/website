@@ -20,7 +20,7 @@ import { CardWorkbenchContainer } from "./CardWorkbenchContainer";
 import { DeckAboutContainer } from "./DeckAboutContainer";
 import { DeckInsightContainer } from "./DeckInsightContainer";
 import { DeckTableContainer } from "./DeckTableContainer";
-import { DraftsContainer, HomeDraftsContainer } from "./DraftsContainer";
+import { DraftsContainer } from "./DraftsContainer";
 import { GroupsContainer } from "./GroupsContainer";
 import { HealthContainer } from "./HealthContainer";
 import { InstanceAboutContainer } from "./InstanceAboutContainer";
@@ -39,15 +39,21 @@ import { ReleaseMetadataContainer } from "./ReleaseMetadataContainer";
 import { ReleasesContainer } from "./ReleasesContainer";
 import { StepEditorContainer } from "./StepEditorContainer";
 import { TrialContainer } from "./TrialContainer";
+import { ContextTabs } from "./shell/ContextTabs";
+import { InstanceSwitcher } from "./shell/InstanceSwitcher";
 import { StudioShell } from "./shell/StudioShell";
+import { StudioSidebar } from "./shell/StudioSidebar";
 import { crumbsOf } from "./shell/titles";
+import { contextTabsOf } from "./shell/workspaceLayout";
 import { instanceOfRoute, isDraftRoute, spotRoute, studioRouteToHash, targetRoute, useStudioRoute, type StudioRoute } from "./router";
 
 /**
- * The signed-in Studio: in its shell (StudioShell), the main content,
- * from the breadcrumbs to the screen the route names, once the
- * instances it needs are read (and, for a deck's screen, the instance's
- * decks; for a card's, the deck's cards).
+ * The signed-in Studio: in its shell (StudioShell), with the open
+ * instance's sidebar and a switch to the user's other instances, the
+ * main content, from the breadcrumbs and the deck's or draft's tabs to
+ * the screen the route names, once the instances it needs are read
+ * (and, for a deck's screen, the instance's decks; for a card's, the
+ * deck's cards).
  */
 export function StudioWorkspace({ useCases, session, banner, children }: WorkspaceProps) {
   const { t, errorText, readerText } = useI18n();
@@ -133,20 +139,16 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
   const crumbs = waiting === null ? crumbsOf(route!, { deck: activeDeck, card: activeCard, draft: activeDraft }, { t, readerText }) : [];
   // The page the trail ends at: "Decks – Solid Memo Studio".
   useDocumentTitle(crumbs.slice(-1).map((crumb) => crumb.label));
+  const tabs = waiting === null ? contextTabsOf(route!, activeDraft) : null;
 
   const draftLinks = (draftUrl: string): DraftLinks => ({
     draftsHref: studioRouteToHash({ screen: "drafts", instanceUrl: instanceOfRoute(route!)! }),
     healthHref: studioRouteToHash({ screen: "health", instanceUrl: instanceOfRoute(route!)! }),
-    overviewHref: studioRouteToHash({ screen: "draft", draftUrl }),
     cardsHref: studioRouteToHash({ screen: "draftCards", draftUrl }),
     chapterHref: (chapter) => studioRouteToHash({ screen: "chapter", draftUrl, chapter }),
     stepHref: (step) => studioRouteToHash({ screen: "step", draftUrl, step }),
     questionHref: (card) => studioRouteToHash({ screen: "question", draftUrl, card }),
     checkHref: studioRouteToHash({ screen: "check", draftUrl }),
-    previewHref: studioRouteToHash({ screen: "preview", draftUrl }),
-    trialHref: studioRouteToHash({ screen: "trial", draftUrl }),
-    diffHref: studioRouteToHash({ screen: "diff", draftUrl }),
-    releaseHref: studioRouteToHash({ screen: "release", draftUrl }),
   });
 
   const screenFor = (route: StudioRoute) => {
@@ -172,8 +174,6 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             links={{
               policyHref: (policy) => studioRouteToHash({ screen: "check", draftUrl: route.draftUrl, policy }),
               targetHref: (target) => studioRouteToHash(targetRoute(route.draftUrl, target)),
-              previewHref: studioRouteToHash({ screen: "preview", draftUrl: route.draftUrl }),
-              trialHref: studioRouteToHash({ screen: "trial", draftUrl: route.draftUrl }),
             }}
           />
         );
@@ -286,33 +286,21 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
         );
       case "home":
         return (
-          <>
-            <DeckTableContainer
-              useCases={useCases}
-              instance={activeInstance!}
-              view={route.view ?? DEFAULT_DECK_TABLE_VIEW}
-              // How the table is looked at is no Back stop: the screen stays the same.
-              onView={(view) => replace({ ...route, view })}
-              appHref={decksHref(route.instanceUrl)}
-              groupsHref={studioRouteToHash({ screen: "groups", instanceUrl: route.instanceUrl })}
-              instanceHref={studioRouteToHash({ screen: "instance", instanceUrl: route.instanceUrl })}
-              healthHref={(deck) => studioRouteToHash({ screen: "health", instanceUrl: route.instanceUrl, ...(deck === undefined ? {} : { deckUrl: deck.url }) })}
-              libraryHref={studioRouteToHash({ screen: "library", instanceUrl: route.instanceUrl })}
-              transferHref={(decks) =>
-                studioRouteToHash({ screen: "transfer", instanceUrl: route.instanceUrl, deckUrls: decks.map((deck) => deck.url) })
-              }
-              deckHref={(deck) => studioRouteToHash({ screen: "about", deckUrl: deck.url })}
-              cardsHref={(deck) => studioRouteToHash({ screen: "cards", deckUrl: deck.url })}
-              draftsHref={studioRouteToHash({ screen: "drafts", instanceUrl: route.instanceUrl })}
-            />
-            <HomeDraftsContainer
-              useCases={useCases}
-              instance={activeInstance!}
-              draftsHref={studioRouteToHash({ screen: "drafts", instanceUrl: route.instanceUrl })}
-              releasesHref={studioRouteToHash({ screen: "releases", instanceUrl: route.instanceUrl })}
-              draftHref={(draft) => studioRouteToHash({ screen: "draft", draftUrl: draft.url })}
-            />
-          </>
+          <DeckTableContainer
+            useCases={useCases}
+            instance={activeInstance!}
+            view={route.view ?? DEFAULT_DECK_TABLE_VIEW}
+            // How the table is looked at is no Back stop: the screen stays the same.
+            onView={(view) => replace({ ...route, view })}
+            appHref={decksHref(route.instanceUrl)}
+            healthHref={(deck) => studioRouteToHash({ screen: "health", instanceUrl: route.instanceUrl, ...(deck === undefined ? {} : { deckUrl: deck.url }) })}
+            libraryHref={studioRouteToHash({ screen: "library", instanceUrl: route.instanceUrl })}
+            transferHref={(decks) =>
+              studioRouteToHash({ screen: "transfer", instanceUrl: route.instanceUrl, deckUrls: decks.map((deck) => deck.url) })
+            }
+            deckHref={(deck) => studioRouteToHash({ screen: "about", deckUrl: deck.url })}
+            cardsHref={(deck) => studioRouteToHash({ screen: "cards", deckUrl: deck.url })}
+          />
         );
       case "drafts":
         return (
@@ -418,9 +406,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             onQuery={(query) => replace({ ...route, query })}
             cardHref={(card) => studioRouteToHash(inspector(card))}
             onOpen={(card) => navigate(inspector(card))}
-            scheduleHref={studioRouteToHash({ screen: "schedule", deckUrl: route.deckUrl })}
             healthHref={studioRouteToHash({ screen: "health", instanceUrl: activeInstance!.url, deckUrl: route.deckUrl })}
-            exportHref={studioRouteToHash({ screen: "transfer", instanceUrl: activeInstance!.url, deckUrls: [route.deckUrl] })}
           />
         );
       }
@@ -465,11 +451,20 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
       banner={banner}
       backHref={instanceUrl === null ? "#/" : decksHref(instanceUrl)}
       instance={activeInstance}
+      switcher={activeInstance !== null && <InstanceSwitcher instances={instances!} instance={activeInstance} />}
+      sidebar={activeInstance === null ? null : <StudioSidebar useCases={useCases} instance={activeInstance} route={route!} />}
+      tabs={tabs?.tabs ?? []}
       draftUrl={draftUrl}
       onGo={navigate}
     >
       {children}
       {waiting === null && <Breadcrumbs crumbs={crumbs} toHash={studioRouteToHash} />}
+      {tabs !== null && (
+        <ContextTabs
+          label={t(`studio.tabs.${tabs.of}`)}
+          tabs={tabs.tabs.map((tab) => ({ key: tab.key, href: studioRouteToHash(tab.route), label: t(`studio.tabs.${tab.key}`), current: tab.current }))}
+        />
+      )}
       <div ref={screenRef} class="screen">
         {waiting ?? screenFor(route!)}
       </div>

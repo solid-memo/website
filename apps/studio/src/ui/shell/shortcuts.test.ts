@@ -43,6 +43,17 @@ describe("the Studio's keymap", () => {
     expect(shortcutOf("Ctrl+j", "cards")).toBeNull();
   });
 
+  it("toggles the sidebar with Ctrl+B, and changes the context tab with [ and ] or by its number", () => {
+    expect(pressKey(null, press("b", { ctrlKey: true }), 0, STUDIO).shortcut).toBe("toggleSidebar");
+    expect(pressKey(null, "[", 0, STUDIO).shortcut).toBe("previousTab");
+    expect(pressKey(null, "]", 0, STUDIO).shortcut).toBe("nextTab");
+    expect(pressKey(null, "1", 0, STUDIO).shortcut).toBe("tab.1");
+    expect(pressKey(null, "9", 0, STUDIO).shortcut).toBe("tab.9");
+    expect(pressKey(null, "0", 0, STUDIO).shortcut).toBeNull();
+    // The key help lists the nine as one.
+    expect(STUDIO.filter((shortcut) => shortcut.id.startsWith("tab.")).map((shortcut) => shortcut.help)).toEqual(["1–9", ...Array(8).fill(null)]);
+  });
+
   it("does a single key's shortcut at once, and ignores a key that is none", () => {
     expect(pressKey(null, "?", 0, STUDIO)).toEqual({ chord: null, shortcut: "help" });
     expect(pressKey(null, "q", 0, STUDIO)).toEqual({ chord: null, shortcut: null });

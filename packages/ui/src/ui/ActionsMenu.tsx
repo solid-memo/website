@@ -49,9 +49,13 @@ const Choose = createContext<((action?: () => void) => void) | null>(null);
  * and follows its button as the page scrolls or resizes, closing once
  * the button is out of sight. Whether it is open is the owner's: one menu of a
  * list at a time.
+ *
+ * Its button is an icon, or with `text` that text, which its name
+ * (`label`) then holds too.
  */
 export function ActionsMenu({
   label,
+  text,
   buttonClass,
   open,
   onOpen,
@@ -60,6 +64,8 @@ export function ActionsMenu({
 }: {
   /** The button's name, which names the menu too. */
   label: string;
+  /** What the button shows in place of its icon. */
+  text?: string;
   buttonClass: string;
   open: boolean;
   onOpen: () => void;
@@ -173,7 +179,7 @@ export function ActionsMenu({
         ref={buttonRef}
         type="button"
         id={buttonId}
-        class={`icon ${buttonClass}`}
+        class={text === undefined ? `icon ${buttonClass}` : buttonClass}
         aria-label={label}
         title={label}
         aria-haspopup="menu"
@@ -186,7 +192,7 @@ export function ActionsMenu({
           opening(event.key === "ArrowUp" ? "last" : "first");
         }}
       >
-        <MoreIcon />
+        {text ?? <MoreIcon />}
       </button>
       {open &&
         createPortal(

@@ -54,9 +54,7 @@ export function CardWorkbenchContainer({
   onQuery,
   cardHref,
   onOpen,
-  scheduleHref,
   healthHref,
-  exportHref,
 }: {
   useCases: UseCases;
   instance: Instance;
@@ -68,12 +66,8 @@ export function CardWorkbenchContainer({
   /** A card's editor in Solid Memo. */
   cardHref: (card: Card) => string;
   onOpen: (card: Card) => void;
-  /** The deck's schedule screen. */
-  scheduleHref: string;
-  /** The deck's health. */
+  /** The deck's health, where data set aside is repaired. */
   healthHref: string;
-  /** The deck, ticked to export as a file. */
-  exportHref: string;
 }) {
   const { t, errorText, locale } = useI18n();
   const queryClient = useQueryClient();
@@ -193,9 +187,7 @@ export function CardWorkbenchContainer({
       languages={cardLanguages(cards!)}
       lapses={lapses}
       lapsesFailed={answersQuery.error !== null}
-      scheduleHref={scheduleHref}
       healthHref={healthHref}
-      exportHref={exportHref}
       query={query}
       onQuery={onQuery}
       cardHref={cardHref}
